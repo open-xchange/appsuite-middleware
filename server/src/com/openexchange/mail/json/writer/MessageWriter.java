@@ -112,12 +112,11 @@ public final class MessageWriter {
      * @param accountId The mail's account ID
      * @param mail The mail to write
      * @param maxSize The allowed max. size
-     * @param prepare <code>true</code> to return a prepared version; otherwise <code>false</code>
      * @return The structure as a JSON object
      * @throws MailException If writing structure fails
      */
-    public static JSONObject writeStructure(final int accountId, final MailMessage mail, final long maxSize, final boolean prepare) throws MailException {
-        final MIMEStructureHandler handler = new MIMEStructureHandler(maxSize).setPrepare(prepare);
+    public static JSONObject writeStructure(final int accountId, final MailMessage mail, final long maxSize) throws MailException {
+        final MIMEStructureHandler handler = new MIMEStructureHandler(maxSize);
         new StructureMailMessageParser().parseMailMessage(mail, handler);
         return handler.getJSONMailObject();
     }

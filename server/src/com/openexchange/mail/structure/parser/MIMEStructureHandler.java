@@ -122,15 +122,19 @@ public final class MIMEStructureHandler implements StructureHandler {
      * #####################################################################################
      */
 
+    private static final String KEY_ID = MailListField.ID.getKey();
+
+    private static final String KEY_HEADERS = MailJSONField.HEADERS.getKey();
+
     private static final String BODY = "body";
 
     private static final String DATA = "data";
 
-    private static final String CONTENT_TRANSFER_ENCODING = "Content-Transfer-Encoding";
+    private static final String CONTENT_TRANSFER_ENCODING = "content-transfer-encoding";
 
-    private static final String CONTENT_DISPOSITION = "Content-Disposition";
+    private static final String CONTENT_DISPOSITION = "content-disposition";
 
-    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String CONTENT_TYPE = "content-type";
 
     private final LinkedList<JSONObject> mailJsonObjectQueue;
 
@@ -146,10 +150,6 @@ public final class MIMEStructureHandler implements StructureHandler {
 
     private JSONArray userFlags;
 
-    private InlineDetector inlineDetector;
-
-    private boolean prepare;
-
     /**
      * Initializes a new {@link MIMEStructureHandler}.
      * 
@@ -160,30 +160,6 @@ public final class MIMEStructureHandler implements StructureHandler {
         mailJsonObjectQueue = new LinkedList<JSONObject>();
         mailJsonObjectQueue.addLast((currentMailObject = new JSONObject()));
         this.maxSize = maxSize;
-        inlineDetector = LENIENT_DETECTOR;
-        // prepare = true;
-    }
-
-    /**
-     * Switches the INLINE detector behavior.
-     * 
-     * @param strict <code>true</code> to perform strict INLINE detector behavior; otherwise <code>false</code>
-     * @return This handler with new behavior applied
-     */
-    public MIMEStructureHandler setInlineDetectorBehavior(final boolean strict) {
-        inlineDetector = strict ? STRICT_DETECTOR : LENIENT_DETECTOR;
-        return this;
-    }
-
-    /**
-     * Set the prepare flag.
-     * 
-     * @param prepare The prepare flag
-     * @return This handler with new prepare flag applied
-     */
-    public MIMEStructureHandler setPrepare(final boolean prepare) {
-        this.prepare = prepare;
-        return this;
     }
 
     /**
@@ -265,8 +241,8 @@ public final class MIMEStructureHandler implements StructureHandler {
         try {
             contentType = MIMEType2ExtMap.getContentType(new File(filename.toLowerCase()).getName()).toLowerCase();
         } catch (final Exception e) {
-            final Throwable t =
-                new Throwable(new StringBuilder("Unable to fetch content-type for '").append(filename).append("': ").append(e).toString());
+            final Throwable t = new Throwable(
+                new StringBuilder("Unable to fetch content-type for '").append(filename).append("': ").append(e).toString());
             LOG.warn(t.getMessage(), t);
         }
         /*
@@ -292,7 +268,7 @@ public final class MIMEStructureHandler implements StructureHandler {
             public InputStream getInputStream() throws IOException {
                 return part.getInputStream();
             }
-        }, new ContentType(contentType), false, id, headers.entrySet().iterator());
+        }, new ContentType(contentType), id, headers.entrySet().iterator());
         return true;
     }
 
@@ -303,7 +279,6 @@ public final class MIMEStructureHandler implements StructureHandler {
         final Map<String, String> headers = new HashMap<String, String>(4);
         headers.put(CONTENT_TYPE, "text/plain; charset=UTF-8");
         headers.put(CONTENT_DISPOSITION, Part.INLINE);
-        headers.put(CONTENT_TRANSFER_ENCODING, "7bit");
         /*
          * Add body part
          */
@@ -312,7 +287,7 @@ public final class MIMEStructureHandler implements StructureHandler {
             public InputStream getInputStream() throws IOException {
                 return ByteBuffers.newUnsynchronizedInputStream(Charsets.UTF_8.encode(decodedTextContent));
             }
-        }, contentType, true, id, headers.entrySet().iterator());
+        }, contentType, id, headers.entrySet().iterator());
         return true;
     }
 
@@ -358,8 +333,9 @@ public final class MIMEStructureHandler implements StructureHandler {
                 nestedMail = (MailMessage) content;
             } else if (content instanceof InputStream) {
                 try {
-                    nestedMail =
-                        MIMEMessageConverter.convertMessage(new MimeMessage(MIMEDefaultSession.getDefaultSession(), (InputStream) content));
+                    nestedMail = MIMEMessageConverter.convertMessage(new MimeMessage(
+                        MIMEDefaultSession.getDefaultSession(),
+                        (InputStream) content));
                 } catch (final MessagingException e) {
                     throw MIMEMailException.handleMessagingException(e);
                 }
@@ -374,7 +350,7 @@ public final class MIMEStructureHandler implements StructureHandler {
             /*
              * Inner parser
              */
-            final MIMEStructureHandler inner = new MIMEStructureHandler(maxSize).setPrepare(prepare);
+            final MIMEStructureHandler inner = new MIMEStructureHandler(maxSize);
             new StructureMailMessageParser().parseMailMessage(nestedMail, inner, id);
             /*
              * Apply to this
@@ -385,7 +361,7 @@ public final class MIMEStructureHandler implements StructureHandler {
                 generateHeadersObject(mailPart.getHeadersIterator(), bodyObject);
                 // Put body
                 final JSONObject jsonMailObject = inner.getJSONMailObject();
-                jsonMailObject.put(MailListField.ID.getKey(), mailPart.containsSequenceId() ? mailPart.getSequenceId() : id);
+                jsonMailObject.put(KEY_ID, mailPart.containsSequenceId() ? mailPart.getSequenceId() : id);
                 bodyObject.put(BODY, jsonMailObject);
             }
             add2BodyJsonObject(bodyObject);
@@ -397,9 +373,16 @@ public final class MIMEStructureHandler implements StructureHandler {
 
     public boolean handleReceivedDate(final Date receivedDate) throws MailException {
         try {
-            currentMailObject.put(
-                MailJSONField.RECEIVED_DATE.getKey(),
-                receivedDate == null ? JSONObject.NULL : Long.valueOf(receivedDate.getTime()));
+            if (receivedDate == null) {
+                currentMailObject.put(MailJSONField.RECEIVED_DATE.getKey(), JSONObject.NULL);
+            } else {
+                final JSONObject dateObject = new JSONObject();
+                dateObject.put("utc", receivedDate.getTime());
+                synchronized (MAIL_DATE_FORMAT) {
+                    dateObject.put("date", MAIL_DATE_FORMAT.format(receivedDate));
+                }
+                currentMailObject.put(MailJSONField.RECEIVED_DATE.getKey(), dateObject);
+            }
             return true;
         } catch (final JSONException e) {
             throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
@@ -408,11 +391,12 @@ public final class MIMEStructureHandler implements StructureHandler {
 
     public boolean handleSystemFlags(final int flags) throws MailException {
         try {
-            if (currentMailObject.hasAndNotNull(MailJSONField.FLAGS.getKey())) {
-                final int prevFlags = currentMailObject.getInt(MailJSONField.FLAGS.getKey());
-                currentMailObject.put(MailJSONField.FLAGS.getKey(), prevFlags | flags);
+            final String key = MailJSONField.FLAGS.getKey();
+            if (currentMailObject.hasAndNotNull(key)) {
+                final int prevFlags = currentMailObject.getInt(key);
+                currentMailObject.put(key, prevFlags | flags);
             } else {
-                currentMailObject.put(MailJSONField.FLAGS.getKey(), flags);
+                currentMailObject.put(key, flags);
             }
             return true;
         } catch (final JSONException e) {
@@ -435,18 +419,16 @@ public final class MIMEStructureHandler implements StructureHandler {
     private void addBodyPart(final MailPart part, final String id) throws MailException {
         try {
             final JSONObject bodyObject = new JSONObject();
-            final String disposition = part.containsContentDisposition() ? part.getContentDisposition().getDisposition() : null;
-            final boolean isInline = inlineDetector.isInline(disposition, part.getFileName());
             if (multipartCount > 0) {
                 // Put headers
-                generateHeadersObject(part.getHeadersIterator(), bodyObject);
+                final JSONObject headersObject = generateHeadersObject(part.getHeadersIterator(), bodyObject);
                 // Put body
                 final JSONObject body = new JSONObject();
-                fillBodyPart(body, part, isInline, id);
+                fillBodyPart(body, part, headersObject, id);
                 bodyObject.put(BODY, body);
             } else {
                 // Put direct
-                fillBodyPart(bodyObject, part, isInline, id);
+                fillBodyPart(bodyObject, part, currentMailObject.getJSONObject(KEY_HEADERS), id);
             }
             add2BodyJsonObject(bodyObject);
         } catch (final JSONException e) {
@@ -454,19 +436,19 @@ public final class MIMEStructureHandler implements StructureHandler {
         }
     }
 
-    private void addBodyPart(final long size, final InputStreamProvider isp, final ContentType contentType, final boolean inline, final String id, final Iterator<Entry<String, String>> iter) throws MailException {
+    private void addBodyPart(final long size, final InputStreamProvider isp, final ContentType contentType, final String id, final Iterator<Entry<String, String>> iter) throws MailException {
         try {
             final JSONObject bodyObject = new JSONObject();
             if (multipartCount > 0) {
                 // Put headers
-                generateHeadersObject(iter, bodyObject);
+                final JSONObject headersObject = generateHeadersObject(iter, bodyObject);
                 // Put body
                 final JSONObject body = new JSONObject();
-                fillBodyPart(body, size, isp, contentType, inline, id);
+                fillBodyPart(body, size, isp, contentType, headersObject, id);
                 bodyObject.put(BODY, body);
             } else {
                 // Put direct
-                fillBodyPart(bodyObject, size, isp, contentType, inline, id);
+                fillBodyPart(bodyObject, size, isp, contentType, currentMailObject.getJSONObject(KEY_HEADERS), id);
             }
             add2BodyJsonObject(bodyObject);
         } catch (final JSONException e) {
@@ -476,17 +458,26 @@ public final class MIMEStructureHandler implements StructureHandler {
 
     private static final String PRIMARY_TEXT = "text/";
 
-    private void fillBodyPart(final JSONObject bodyObject, final MailPart part, final boolean inline, final String id) throws MailException {
+    private void fillBodyPart(final JSONObject bodyObject, final MailPart part, final JSONObject headerObject, final String id) throws MailException {
         try {
-            bodyObject.put(MailListField.ID.getKey(), id);
+            bodyObject.put(KEY_ID, id);
             final long size = part.getSize();
             if (maxSize > 0 && size > maxSize) {
                 bodyObject.put(DATA, JSONObject.NULL);
             } else {
-                if (prepare && inline && part.getContentType().startsWith(PRIMARY_TEXT)) {
-                    bodyObject.put(DATA, readContent(part, part.getContentType()));
+                final ContentType contentType = part.getContentType();
+                if (contentType.startsWith(PRIMARY_TEXT)) {
+                    // Set UTF-8 text
+                    bodyObject.put(DATA, readContent(part, contentType));
+                    // Set header according to UTF-8 content without transfer-encoding
+                    headerObject.remove(CONTENT_TRANSFER_ENCODING);
+                    contentType.setCharsetParameter("UTF-8");
+                    headerObject.put(CONTENT_TYPE, generateParameterizedHeader(contentType, contentType.getBaseType().toLowerCase(
+                        Locale.ENGLISH)));
                 } else {
                     fillBase64JSONString(part.getInputStream(), bodyObject, true);
+                    // Set Transfer-Encoding to base64
+                    headerObject.put(CONTENT_TRANSFER_ENCODING, "base64");
                 }
             }
         } catch (final JSONException e) {
@@ -496,16 +487,24 @@ public final class MIMEStructureHandler implements StructureHandler {
         }
     }
 
-    private void fillBodyPart(final JSONObject bodyObject, final long size, final InputStreamProvider isp, final ContentType contentType, final boolean inline, final String id) throws MailException {
+    private void fillBodyPart(final JSONObject bodyObject, final long size, final InputStreamProvider isp, final ContentType contentType, final JSONObject headerObject, final String id) throws MailException {
         try {
-            bodyObject.put(MailListField.ID.getKey(), id);
+            bodyObject.put(KEY_ID, id);
             if (maxSize > 0 && size > maxSize) {
                 bodyObject.put(DATA, JSONObject.NULL);
             } else {
-                if (prepare && inline && contentType.startsWith(PRIMARY_TEXT)) {
+                if (contentType.startsWith(PRIMARY_TEXT)) {
+                    // Set UTF-8 text
                     bodyObject.put(DATA, readContent(isp, contentType));
+                    // Set header according to utf-8 content without transfer-encoding
+                    headerObject.remove(CONTENT_TRANSFER_ENCODING);
+                    contentType.setCharsetParameter("UTF-8");
+                    headerObject.put(CONTENT_TYPE, generateParameterizedHeader(contentType, contentType.getBaseType().toLowerCase(
+                        Locale.ENGLISH)));
                 } else {
                     fillBase64JSONString(isp.getInputStream(), bodyObject, true);
+                    // Set Transfer-Encoding to base64
+                    headerObject.put(CONTENT_TRANSFER_ENCODING, "base64");
                 }
             }
         } catch (final JSONException e) {
@@ -554,122 +553,55 @@ public final class MIMEStructureHandler implements StructureHandler {
 
     private static final HeaderName HN_CONTENT_TYPE = HeaderName.valueOf(CONTENT_TYPE);
 
-    private static final Set<HeaderName> PARAMETERIZED_HEADERS =
-        new HashSet<HeaderName>(Arrays.asList(HN_CONTENT_TYPE, HeaderName.valueOf(CONTENT_DISPOSITION)));
+    private static final HeaderName HN_DATE = HeaderName.valueOf("date");
 
-    private static final Set<HeaderName> ADDRESS_HEADERS =
-        new HashSet<HeaderName>(Arrays.asList(
-            HeaderName.valueOf("From"),
-            HeaderName.valueOf("To"),
-            HeaderName.valueOf("Cc"),
-            HeaderName.valueOf("Bcc"),
-            HeaderName.valueOf("Reply-To"),
-            HeaderName.valueOf("Sender"),
-            HeaderName.valueOf("Errors-To"),
-            HeaderName.valueOf("Resent-Bcc"),
-            HeaderName.valueOf("Resent-Cc"),
-            HeaderName.valueOf("Resent-From"),
-            HeaderName.valueOf("Resent-To"),
-            HeaderName.valueOf("Resent-Sender")));
+    private static final Set<HeaderName> PARAMETERIZED_HEADERS = new HashSet<HeaderName>(Arrays.asList(
+        HN_CONTENT_TYPE,
+        HeaderName.valueOf(CONTENT_DISPOSITION)));
+
+    private static final Set<HeaderName> ADDRESS_HEADERS = new HashSet<HeaderName>(Arrays.asList(
+        HeaderName.valueOf("From"),
+        HeaderName.valueOf("To"),
+        HeaderName.valueOf("Cc"),
+        HeaderName.valueOf("Bcc"),
+        HeaderName.valueOf("Reply-To"),
+        HeaderName.valueOf("Sender"),
+        HeaderName.valueOf("Errors-To"),
+        HeaderName.valueOf("Resent-Bcc"),
+        HeaderName.valueOf("Resent-Cc"),
+        HeaderName.valueOf("Resent-From"),
+        HeaderName.valueOf("Resent-To"),
+        HeaderName.valueOf("Resent-Sender")));
 
     private static final MailDateFormat MAIL_DATE_FORMAT = new MailDateFormat();
 
-    private void generateHeadersObject(final Iterator<Entry<String, String>> iter, final JSONObject parent) throws MailException {
+    private JSONObject generateHeadersObject(final Iterator<Entry<String, String>> iter, final JSONObject parent) throws MailException {
         try {
             final JSONObject hdrObject = new JSONObject();
-            if (prepare) {
-                while (iter.hasNext()) {
-                    final Entry<String, String> entry = iter.next();
-                    final String name = entry.getKey().toLowerCase(Locale.ENGLISH);
-                    final HeaderName headerName = HeaderName.valueOf(name);
-                    if (ADDRESS_HEADERS.contains(headerName)) {
-                        final InternetAddress[] internetAddresses = getAddressHeader(entry.getValue());
-                        final JSONArray ja;
-                        if (hdrObject.has(name)) {
-                            ja = hdrObject.getJSONArray(name);
-                        } else {
-                            ja = new JSONArray();
-                            hdrObject.put(name, ja);
-                        }
-                        for (final InternetAddress internetAddress : internetAddresses) {
-                            final JSONObject addressJsonObject = new JSONObject();
-                            final String personal = internetAddress.getPersonal();
-                            if (null != personal) {
-                                addressJsonObject.put("personal", personal);
-                            }
-                            addressJsonObject.put("address", internetAddress.getAddress());
-                            ja.put(addressJsonObject);
-                        }
-                    } else if (PARAMETERIZED_HEADERS.contains(headerName)) {
-                        final JSONObject parameterJsonObject = new JSONObject();
-                        {
-                            final ParameterizedHeader parameterizedHeader;
-                            if (HN_CONTENT_TYPE.equals(headerName)) {
-                                final ContentType ct = new ContentType(entry.getValue());
-                                parameterJsonObject.put("type", ct.getBaseType().toLowerCase(Locale.ENGLISH));
-                                parameterizedHeader = ct;
-                            } else {
-                                final ContentDisposition cd = new ContentDisposition(entry.getValue());
-                                parameterJsonObject.put("type", cd.getDisposition().toLowerCase(Locale.ENGLISH));
-                                parameterizedHeader = cd;
-                            }
-                            final JSONObject paramListJsonObject = new JSONObject();
-                            for (final Iterator<String> pi = parameterizedHeader.getParameterNames(); pi.hasNext();) {
-                                final String paramName = pi.next();
-                                if ("read-date".equalsIgnoreCase(paramName)) {
-                                    final String paramVal = parameterizedHeader.getParameter(paramName);
-                                    synchronized (MAIL_DATE_FORMAT) {
-                                        try {
-                                            paramListJsonObject.put(
-                                                paramName.toLowerCase(Locale.ENGLISH),
-                                                MAIL_DATE_FORMAT.parse(paramVal).getTime());
-                                        } catch (final ParseException pex) {
-                                            paramListJsonObject.put(paramName.toLowerCase(Locale.ENGLISH), paramVal);
-                                        }
-                                    }
-                                } else {
-                                    paramListJsonObject.put(
-                                        paramName.toLowerCase(Locale.ENGLISH),
-                                        parameterizedHeader.getParameter(paramName));
-                                }
-                            }
-                            parameterJsonObject.put("params", paramListJsonObject);
-                        }
-                        if (hdrObject.has(name)) {
-                            final Object previous = hdrObject.get(name);
-                            final JSONArray ja;
-                            if (previous instanceof JSONArray) {
-                                ja = (JSONArray) previous;
-                            } else {
-                                ja = new JSONArray();
-                                hdrObject.put(name, ja);
-                                ja.put(previous);
-                            }
-                            ja.put(parameterJsonObject);
-                        } else {
-                            hdrObject.put(name, parameterJsonObject);
-                        }
+            while (iter.hasNext()) {
+                final Entry<String, String> entry = iter.next();
+                final String name = entry.getKey().toLowerCase(Locale.ENGLISH);
+                final HeaderName headerName = HeaderName.valueOf(name);
+                if (ADDRESS_HEADERS.contains(headerName)) {
+                    final InternetAddress[] internetAddresses = getAddressHeader(entry.getValue());
+                    final JSONArray ja;
+                    if (hdrObject.has(name)) {
+                        ja = hdrObject.getJSONArray(name);
                     } else {
-                        if (hdrObject.has(name)) {
-                            final Object previous = hdrObject.get(name);
-                            final JSONArray ja;
-                            if (previous instanceof JSONArray) {
-                                ja = (JSONArray) previous;
-                            } else {
-                                ja = new JSONArray();
-                                hdrObject.put(name, ja);
-                                ja.put(previous);
-                            }
-                            ja.put(MIMEMessageUtility.decodeMultiEncodedHeader(entry.getValue()));
-                        } else {
-                            hdrObject.put(name, MIMEMessageUtility.decodeMultiEncodedHeader(entry.getValue()));
-                        }
+                        ja = new JSONArray();
+                        hdrObject.put(name, ja);
                     }
-                }
-            } else {
-                while (iter.hasNext()) {
-                    final Entry<String, String> entry = iter.next();
-                    final String name = entry.getKey();
+                    for (final InternetAddress internetAddress : internetAddresses) {
+                        final JSONObject addressJsonObject = new JSONObject();
+                        final String personal = internetAddress.getPersonal();
+                        if (null != personal) {
+                            addressJsonObject.put("personal", personal);
+                        }
+                        addressJsonObject.put("address", internetAddress.getAddress());
+                        ja.put(addressJsonObject);
+                    }
+                } else if (PARAMETERIZED_HEADERS.contains(headerName)) {
+                    final JSONObject parameterJsonObject = generateParameterizedHeader(entry.getValue(), headerName);
                     if (hdrObject.has(name)) {
                         final Object previous = hdrObject.get(name);
                         final JSONArray ja;
@@ -680,16 +612,74 @@ public final class MIMEStructureHandler implements StructureHandler {
                             hdrObject.put(name, ja);
                             ja.put(previous);
                         }
-                        ja.put(entry.getValue());
+                        ja.put(parameterJsonObject);
                     } else {
-                        hdrObject.put(name, entry.getValue());
+                        hdrObject.put(name, parameterJsonObject);
+                    }
+                } else if (HN_DATE.equals(headerName)) {
+                    hdrObject.put(name, generateDateObject(entry.getValue()));
+                } else {
+                    if (hdrObject.has(name)) {
+                        final Object previous = hdrObject.get(name);
+                        final JSONArray ja;
+                        if (previous instanceof JSONArray) {
+                            ja = (JSONArray) previous;
+                        } else {
+                            ja = new JSONArray();
+                            hdrObject.put(name, ja);
+                            ja.put(previous);
+                        }
+                        ja.put(MIMEMessageUtility.decodeMultiEncodedHeader(entry.getValue()));
+                    } else {
+                        hdrObject.put(name, MIMEMessageUtility.decodeMultiEncodedHeader(entry.getValue()));
                     }
                 }
             }
-            parent.put(MailJSONField.HEADERS.getKey(), hdrObject.length() > 0 ? hdrObject : JSONObject.NULL);
+            parent.put(KEY_HEADERS, hdrObject.length() > 0 ? hdrObject : JSONObject.NULL);
+            return hdrObject;
         } catch (final JSONException e) {
             throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
         }
+    }
+
+    private JSONObject generateParameterizedHeader(final String value, final HeaderName headerName) throws MailException, JSONException {
+        if (HN_CONTENT_TYPE.equals(headerName)) {
+            final ContentType ct = new ContentType(value);
+            return generateParameterizedHeader(ct, ct.getBaseType().toLowerCase(Locale.ENGLISH));
+        }
+        final ContentDisposition cd = new ContentDisposition(value);
+        return generateParameterizedHeader(cd, cd.getDisposition().toLowerCase(Locale.ENGLISH));
+    }
+
+    private JSONObject generateParameterizedHeader(final ParameterizedHeader parameterizedHeader, final String type) throws JSONException {
+        final JSONObject parameterJsonObject = new JSONObject();
+        parameterJsonObject.put("type", type);
+        final JSONObject paramListJsonObject = new JSONObject();
+        for (final Iterator<String> pi = parameterizedHeader.getParameterNames(); pi.hasNext();) {
+            final String paramName = pi.next();
+            if ("read-date".equalsIgnoreCase(paramName)) {
+                paramListJsonObject.put(
+                    paramName.toLowerCase(Locale.ENGLISH),
+                    generateDateObject(parameterizedHeader.getParameter(paramName)));
+            } else {
+                paramListJsonObject.put(paramName.toLowerCase(Locale.ENGLISH), parameterizedHeader.getParameter(paramName));
+            }
+        }
+        parameterJsonObject.put("params", paramListJsonObject);
+        return parameterJsonObject;
+    }
+
+    private JSONObject generateDateObject(final String date) throws JSONException {
+        final JSONObject dateObject = new JSONObject();
+        synchronized (MAIL_DATE_FORMAT) {
+            try {
+                dateObject.put("utc", MAIL_DATE_FORMAT.parse(date).getTime());
+            } catch (final ParseException pex) {
+                LOG.warn("Date string could not be parsed: " + date);
+            }
+        }
+        dateObject.put("date", date);
+        return dateObject;
     }
 
     /**
@@ -772,7 +762,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         return charset;
     }
 
-    private static String readContent(final InputStreamProvider isp, final ContentType contentType) throws MailException, IOException {
+    private static String readContent(final InputStreamProvider isp, final ContentType contentType) throws IOException {
         final String charset = getCharset(isp, contentType);
         try {
             return MessageUtility.readStream(isp.getInputStream(), charset);
@@ -801,32 +791,5 @@ public final class MIMEStructureHandler implements StructureHandler {
 
         InputStream getInputStream() throws IOException;
     }
-
-    private static interface InlineDetector {
-
-        public boolean isInline(String disposition, String fileName);
-    }
-
-    /**
-     * If disposition equals ignore-case <code>"INLINE"</code>, then it is treated as inline in any case.<br>
-     * Only if disposition is <code>null</code> the file name is examined.
-     */
-    private static final InlineDetector LENIENT_DETECTOR = new InlineDetector() {
-
-        public boolean isInline(final String disposition, final String fileName) {
-            return Part.INLINE.equalsIgnoreCase(disposition) || ((disposition == null) && (fileName == null));
-        }
-    };
-
-    /**
-     * Considered as inline if disposition equals ignore-case <code>"INLINE"</code> OR is <code>null</code>, but in any case the file name
-     * must be <code>null</code>.
-     */
-    private static final InlineDetector STRICT_DETECTOR = new InlineDetector() {
-
-        public boolean isInline(final String disposition, final String fileName) {
-            return (Part.INLINE.equalsIgnoreCase(disposition) || (disposition == null)) && (fileName == null);
-        }
-    };
 
 }

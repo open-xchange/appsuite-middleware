@@ -1017,12 +1017,6 @@ public class Mail extends PermissionServlet implements UploadListener {
                     maxSize = l;
                 }
             }
-            final boolean prepare;
-            {
-                final String tmp = paramContainer.getStringParam(PARAMETER_PREPARE);
-                prepare = (STR_1.equals(tmp) || Boolean.parseBoolean(tmp));
-            }
-
             MailServletInterface mailInterface = mailInterfaceArg;
             boolean closeMailInterface = false;
             try {
@@ -1059,7 +1053,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     final int unreadMsgs = mail.getUnreadMessages();
                     mail.setUnreadMessages(unreadMsgs < 0 ? 0 : unreadMsgs + 1);
                 }
-                data = MessageWriter.writeStructure(mailInterface.getAccountID(), mail, maxSize, prepare);
+                data = MessageWriter.writeStructure(mailInterface.getAccountID(), mail, maxSize);
                 if (doUnseen) {
                     /*
                      * Leave mail as unseen
