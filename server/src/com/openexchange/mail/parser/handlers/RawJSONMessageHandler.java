@@ -100,9 +100,9 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(RawJSONMessageHandler.class);
 
     /**
-     * The max. allowed body size of 4KB.
+     * The max. allowed body size of 16 KB.
      */
-    private static final int MAX_BODY_SIZE = 4 * 1024;
+    private static final int MAX_BODY_SIZE = 0x4000;
 
     private final int accountId;
 
