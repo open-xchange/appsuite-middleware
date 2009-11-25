@@ -101,7 +101,11 @@ public final class ImageRegistry {
 
     private final ConcurrentMap<String, ConcurrentMap<String, ImageData>> sessionBoundImagesMap;
 
+    private final Object sessionLock;
+
     private final ConcurrentMap<Integer, ConcurrentMap<String, ImageData>> contextBoundImagesMap;
+
+    private final Object contextLock;
 
     private ScheduledTimerTask[] tasks;
 
@@ -111,7 +115,9 @@ public final class ImageRegistry {
     private ImageRegistry() {
         super();
         sessionBoundImagesMap = new ConcurrentHashMap<String, ConcurrentMap<String, ImageData>>();
+        sessionLock = new Object();
         contextBoundImagesMap = new ConcurrentHashMap<Integer, ConcurrentMap<String, ImageData>>();
+        contextLock = new Object();
     }
 
     /**
@@ -282,7 +288,7 @@ public final class ImageRegistry {
         final Integer cid = Integer.valueOf(contextId);
         ConcurrentMap<String, ImageData> m = contextBoundImagesMap.get(cid);
         if (m == null) {
-            synchronized (contextBoundImagesMap) {
+            synchronized (contextLock) {
                 m = contextBoundImagesMap.get(cid);
                 if (m == null) {
                     m = new ConcurrentHashMap<String, ImageData>();
@@ -303,7 +309,7 @@ public final class ImageRegistry {
         final String sessionId = session.getSessionID();
         ConcurrentMap<String, ImageData> m = sessionBoundImagesMap.get(sessionId);
         if (m == null) {
-            synchronized (sessionBoundImagesMap) {
+            synchronized (sessionLock) {
                 m = sessionBoundImagesMap.get(sessionId);
                 if (m == null) {
                     m = new ConcurrentHashMap<String, ImageData>();
