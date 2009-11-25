@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 3
+%define		ox_release 4
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -459,6 +459,10 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed Nov 25 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14938: Fixed display of mails with no text body from cached JSON representation
+* Mon Nov 23 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14944: Fixed NPE in mail prefetcher
 * Fri Nov 20 2009 - thorben.betten@open-xchange.com
  - Bugfix #14940: Fixed NPE when unregistering from unknown servlet path
 * Wed Nov 18 2009 - marcus.klein@open-xchange.com

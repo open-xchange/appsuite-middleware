@@ -38,7 +38,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 3
+%define		ox_release 4
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -108,6 +108,8 @@ fi
 %attr(640,root,open-xchange) /opt/open-xchange/etc/groupware/contacts-ldap/*/*.example
 
 %changelog
+* Wed Nov 25 2009 - choeger@open-xchange.com
+ - Bugfix #14479 -  Contacts LDAP bundles does not start (SLES11, IBM JAVA)
 * Tue Nov 10 2009 - dennis.sieben@open-xchange.com
  - Fix for UNAVAIL_EXTENSION error
  - Reduced fetching of attributes for the distributionlist members to needed ones only
