@@ -53,7 +53,10 @@ import java.sql.Connection;
 import com.openexchange.groupware.AbstractOXException;
 
 /**
- * {@link CreateTableService}
+ * If your bundle needs to create database tables for working properly this service must be implemented. Its method are called if a new
+ * schema for contexts is created. The order of executing {@link CreateTableService} instances is calculated by the string arrays given from
+ * the methods {@link #requiredTables()} and {@link #tablesToCreate()}. The {@link #perform(Connection)} method should then create the
+ * tables needed for your bundle.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
