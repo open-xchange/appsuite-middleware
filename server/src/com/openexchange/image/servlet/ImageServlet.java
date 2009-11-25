@@ -81,164 +81,157 @@ import com.openexchange.tools.servlet.http.Tools;
  * {@link ImageServlet} - The servlet serving requests to <i>ajax/image</i>
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public final class ImageServlet extends HttpServlet {
 
-	private static final long serialVersionUID = -3357383590134182460L;
+    /**
+     * The serial versuion UID.
+     */
+    private static final long serialVersionUID = -3357383590134182460L;
 
-	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(ImageServlet.class);
+    /**
+     * The image servlet's alias
+     */
+    public static final String ALIAS = "ajax/image";
 
-	/**
-	 * The image servlet's alias
-	 */
-	public static final String ALIAS = "ajax/image";
+    /**
+     * The <code>"uid"</code> parameter
+     */
+    public static final String PARAMETER_UID = "uid";
 
-	/**
-	 * The <code>"uid"</code> parameter
-	 */
-	public static final String PARAMETER_UID = "uid";
+    /**
+     * Initializes a new {@link ImageServlet}
+     */
+    public ImageServlet() {
+        super();
+    }
 
-	/**
-	 * Initializes a new {@link ImageServlet}
-	 */
-	public ImageServlet() {
-		super();
-	}
+    @Override
+    protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        Tools.disableCaching(resp);
+        super.service(req, resp);
+    }
 
-	@Override
-	protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
-			IOException {
-		Tools.disableCaching(resp);
-		super.service(req, resp);
-	}
+    @Override
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        try {
+            final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+            if (sessiondService == null) {
+                throw new SessiondException(
+                    new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, SessiondService.class.getName()));
+            }
+            final String uid = req.getParameter(PARAMETER_UID);
+            if (uid == null) {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing URL parameter " + PARAMETER_UID);
+            }
+            final Session[] sessions = getSessions(req, sessiondService);
+            for (final Session session : sessions) {
+                final ImageService imageService = ServerServiceRegistry.getInstance().getService(ImageService.class);
+                ImageData imageData = imageService.getImageData(session, uid);
+                if (imageData == null) {
+                    imageData = imageService.getImageData(session.getContextId(), uid);
+                }
+                if (imageData != null) {
+                    /*
+                     * Output to client
+                     */
+                    outputImageData(imageData, session, resp);
+                    return;
+                }
+            }
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Image not found");
+        } catch (final SessiondException e) {
+            org.apache.commons.logging.LogFactory.getLog(ImageServlet.class).error(e.getMessage(), e);
+            resp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+        } catch (final ContextException e) {
+            org.apache.commons.logging.LogFactory.getLog(ImageServlet.class).error(e.getMessage(), e);
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        } catch (final LdapException e) {
+            org.apache.commons.logging.LogFactory.getLog(ImageServlet.class).error(e.getMessage(), e);
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        } catch (final DataException e) {
+            org.apache.commons.logging.LogFactory.getLog(ImageServlet.class).error(e.getMessage(), e);
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
+    }
 
-	@Override
-	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
-			IOException {
-		try {
-			final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(
-					SessiondService.class);
-			if (sessiondService == null) {
-				throw new SessiondException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE,
-						SessiondService.class.getName()));
-			}
-			final String uid = req.getParameter(PARAMETER_UID);
-			if (uid == null) {
-				resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing URL parameter " + PARAMETER_UID);
-			}
-			final Session[] sessions = getSessions(req, sessiondService);
-			for (final Session session : sessions) {
-			    final ImageService imageService = ServerServiceRegistry.getInstance().getService(ImageService.class);
-				ImageData imageData = imageService.getImageData(session, uid);
-				if (imageData == null) {
-					imageData = imageService.getImageData(session.getContextId(), uid);
-				}
-				if (imageData != null) {
-					/*
-					 * Output to client
-					 */
-					outputImageData(imageData, session, resp);
-					return;
-				}
-			}
-			resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Image not found");
-		} catch (final SessiondException e) {
-			LOG.error(e.getMessage(), e);
-			resp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
-		} catch (final ContextException e) {
-			LOG.error(e.getMessage(), e);
-			resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-		} catch (final LdapException e) {
-			LOG.error(e.getMessage(), e);
-			resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-		} catch (final DataException e) {
-			LOG.error(e.getMessage(), e);
-			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-		}
-	}
+    private static void outputImageData(final ImageData imageData, final Session session, final HttpServletResponse resp) throws DataException, IOException {
+        final Data<InputStream> data = imageData.getImageData(session);
+        final String ct;
+        final String fileName;
+        {
+            final DataProperties dataProperties = data.getDataProperties();
+            ct = dataProperties.get(DataProperties.PROPERTY_CONTENT_TYPE);
+            fileName = dataProperties.get(DataProperties.PROPERTY_NAME);
+        }
+        /*
+         * Set header Content-Disposition
+         */
+        {
+            final String inline = "inline";
+            if (fileName != null && fileName.length() > 0) {
+                final StringBuilder builder = new StringBuilder(inline);
+                builder.append("; filename=").append('"').append(fileName).append('"');
+                resp.setHeader("Content-Disposition", builder.toString());
+            } else {
+                resp.setHeader("Content-Disposition", inline);
+            }
+        }
+        /*
+         * Set header Content-Type
+         */
+        resp.setContentType(ct);
+        /*
+         * Reset response header values since we are going to directly write into servlet's output stream and then some browsers do not
+         * allow header "Pragma"
+         */
+        Tools.removeCachingHeader(resp);
+        /*
+         * Select response's output stream
+         */
+        final OutputStream out = resp.getOutputStream();
+        /*
+         * Write from content's input stream to response output stream
+         */
+        final InputStream in = data.getData();
+        try {
+            final byte[] buffer = new byte[0xFFFF];
+            for (int len; (len = in.read(buffer, 0, buffer.length)) != -1;) {
+                out.write(buffer, 0, len);
+            }
+            out.flush();
+        } finally {
+            in.close();
+        }
+    }
 
-	private static void outputImageData(final ImageData imageData, final Session session, final HttpServletResponse resp)
-			throws DataException, IOException {
-		final Data<InputStream> data = imageData.getImageData(session);
-		final String ct;
-		final String fileName;
-		{
-			final DataProperties dataProperties = data.getDataProperties();
-			ct = dataProperties.get(DataProperties.PROPERTY_CONTENT_TYPE);
-			fileName = dataProperties.get(DataProperties.PROPERTY_NAME);
-		}
-		/*
-		 * Set header Content-Disposition
-		 */
-		{
-			final String inline = "inline";
-			if (fileName != null && fileName.length() > 0) {
-				final StringBuilder builder = new StringBuilder(inline);
-				builder.append("; filename=").append('"').append(fileName).append('"');
-				resp.setHeader("Content-Disposition", builder.toString());
-			} else {
-				resp.setHeader("Content-Disposition", inline);
-			}
-		}
-		/*
-		 * Set header Content-Type
-		 */
-		resp.setContentType(ct);
-		/*
-		 * Reset response header values since we are going to directly write
-		 * into servlet's output stream and then some browsers do not allow
-		 * header "Pragma"
-		 */
-		Tools.removeCachingHeader(resp);
-		/*
-		 * Select response's output stream
-		 */
-		final OutputStream out = resp.getOutputStream();
-		/*
-		 * Write from content's input stream to response output stream
-		 */
-		final InputStream in = data.getData();
-		try {
-			final byte[] buffer = new byte[0xFFFF];
-			for (int len; (len = in.read(buffer, 0, buffer.length)) != -1;) {
-				out.write(buffer, 0, len);
-			}
-			out.flush();
-		} finally {
-			in.close();
-		}
-	}
+    private static Session[] getSessions(final HttpServletRequest req, final SessiondService sessiondService) throws ContextException, LdapException {
+        final String[] sessionIds = getSessionIds(req);
+        final List<Session> sessions = new ArrayList<Session>(4);
+        for (int i = 0; i < sessionIds.length; i++) {
+            final Session session = sessiondService.getSession(sessionIds[i]);
+            if (null != session) {
+                final Context ctx = ContextStorage.getStorageContext(session.getContextId());
+                if (ctx.isEnabled() && UserStorage.getInstance().getUser(session.getUserId(), ctx).isMailEnabled()) {
+                    sessions.add(session);
+                }
+            }
+        }
+        return sessions.toArray(new Session[sessions.size()]);
+    }
 
-	private static Session[] getSessions(final HttpServletRequest req, final SessiondService sessiondService)
-			throws ContextException, LdapException {
-		final String[] sessionIds = getSessionIds(req);
-		final List<Session> sessions = new ArrayList<Session>(4);
-		for (int i = 0; i < sessionIds.length; i++) {
-			final Session session = sessiondService.getSession(sessionIds[i]);
-			if (null != session) {
-				final Context ctx = ContextStorage.getStorageContext(session.getContextId());
-				if (ctx.isEnabled() && UserStorage.getInstance().getUser(session.getUserId(), ctx).isMailEnabled()) {
-					sessions.add(session);
-				}
-			}
-		}
-		return sessions.toArray(new Session[sessions.size()]);
-	}
-
-	private static String[] getSessionIds(final HttpServletRequest req) {
-		final Cookie[] cookies = req.getCookies();
-		final List<String> sessionIds = new ArrayList<String>(4);
-		if (cookies != null) {
-			for (final Cookie cookie : cookies) {
-				final String name = cookie.getName();
-				if (name != null && name.startsWith(Login.COOKIE_PREFIX, 0)) {
-					sessionIds.add(cookie.getValue());
-					break;
-				}
-			}
-		}
-		return sessionIds.toArray(new String[sessionIds.size()]);
-	}
+    private static String[] getSessionIds(final HttpServletRequest req) {
+        final Cookie[] cookies = req.getCookies();
+        final List<String> sessionIds = new ArrayList<String>(4);
+        if (cookies != null) {
+            for (final Cookie cookie : cookies) {
+                final String name = cookie.getName();
+                if (name != null && name.startsWith(Login.COOKIE_PREFIX, 0)) {
+                    sessionIds.add(cookie.getValue());
+                    break;
+                }
+            }
+        }
+        return sessionIds.toArray(new String[sessionIds.size()]);
+    }
 }
