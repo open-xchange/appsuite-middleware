@@ -195,7 +195,7 @@ public final class SetFollowMeAction extends AbstractVoipNowSOAPAction<Extension
                 final DelCallRulesInResponse delCallRulesInResponse = stub.DelCallRulesIn(delRequest, userCredentials);
                 final DelObject delObject = delCallRulesInResponse.getDelCallRulesInResponse();
                 final String success = delObject.getResult().getValue();
-                if ("success".equalsIgnoreCase(success)) {
+                if (!"success".equalsIgnoreCase(success)) {
                     throw VoipNowExceptionCodes.SOAP_FAULT.create("DelCallRulesInRequest failed with: " + success);
                 }
             }
@@ -258,7 +258,7 @@ public final class SetFollowMeAction extends AbstractVoipNowSOAPAction<Extension
                 final AddCallRulesInResponse addCallRulesInResponse = stub.AddCallRulesIn(addCallRulesInRequest, userCredentials);
                 final UpdateObject callRulesInResponse = addCallRulesInResponse.getAddCallRulesInResponse();
                 final String success = callRulesInResponse.getResult().getValue();
-                if ("success".equalsIgnoreCase(success)) {
+                if (!"success".equalsIgnoreCase(success)) {
                     throw VoipNowExceptionCodes.SOAP_FAULT.create("AddCallRulesInRequest failed with: " + success);
                 }
                 id = Integer.valueOf(callRulesInResponse.getID()[0].getPositiveInteger().intValue());

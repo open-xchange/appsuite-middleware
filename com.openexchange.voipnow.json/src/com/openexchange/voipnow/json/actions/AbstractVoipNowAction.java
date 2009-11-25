@@ -215,20 +215,20 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
     protected static String[] checkEitherOfStringParameter(final AJAXRequestData request, final String... parameterNames) throws AjaxException {
         final int length = parameterNames.length;
         final String[] retval = new String[length];
-        boolean found = false;
+        String foundName = null;
         for (int i = 0; i < length; i++) {
             final String name = parameterNames[i];
             final String parameter = request.getParameter(name);
             if (null != parameter) {
-                if (found) {
+                if (null != foundName) {
                     // There was already one of specified choices
-                    throw new AjaxException(AjaxException.Code.InvalidParameter, name);
+                    throw new AjaxException(AjaxException.Code.EitherParameterConflict, name, foundName);
                 }
-                found = true;
+                foundName = name;
             }
             retval[i] = parameter;
         }
-        if (!found) {
+        if (null == foundName) {
             throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, parameterNames[0]);
         }
         return retval;
@@ -245,7 +245,10 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
         return request.getParameter(parameterName);
     }
 
-    private static final Pattern PAT = Pattern.compile(" *, *");
+    /**
+     * The pattern to split a comma-separated string.
+     */
+    protected static final Pattern PAT = Pattern.compile(" *, *");
 
     /**
      * Parses specified parameter into an array of <code>int</code>.
