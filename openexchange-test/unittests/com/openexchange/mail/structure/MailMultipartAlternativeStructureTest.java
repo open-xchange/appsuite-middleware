@@ -162,11 +162,11 @@ public class MailMultipartAlternativeStructureTest extends AbstractMailTest {
 
             for (int i = 0; i < length; i++) {
                 final JSONObject bodyPartObject = bodyArray.getJSONObject(i);
-                final String contentType = bodyPartObject.getJSONObject("headers").getString("Content-Type");
+                final JSONObject contentType = bodyPartObject.getJSONObject("headers").getJSONObject("content-type");
                 if (0 == i) {
-                    assertTrue("First body part is not plain text.", contentType.startsWith("text/plain"));
+                    assertTrue("First body part is not plain text.", contentType.getString("type").startsWith("text/plain"));
                 } else {
-                    assertTrue("Second body part is not HTML.", contentType.startsWith("text/htm"));
+                    assertTrue("Second body part is not HTML.", contentType.getString("type").startsWith("text/htm"));
                 }
             }
 
