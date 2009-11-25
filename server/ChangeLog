@@ -1,3 +1,7 @@
+* 2009-11-25 - martin.herfurth@open-xchange.com
+
+ - Bugfix #14984: SQL-Syntax error with special folder rights fixed.
+
 * 2009-11-25 - thorben.betten@open-xchange.com
 
  - Bugfix #14741: Removed usage of javax.swing.text.BadLocationException

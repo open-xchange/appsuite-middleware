@@ -1140,7 +1140,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                         sb.append(PD_CREATED_FROM_IS);
                     }
                     sb.append(uid);
-                    sb.append(" AND (pdm.pfid IN ");
+                    sb.append(" AND pdm.pfid IN ");
                     sb.append(StringCollection.getSqlInString(private_read_own));
                     private_query = true;
                 }
