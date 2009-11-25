@@ -50,7 +50,7 @@
 package com.openexchange.image.internal;
 
 import com.openexchange.conversion.DataArguments;
-import com.openexchange.conversion.DataSource;
+import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.ImageService;
 import com.openexchange.session.Session;
 
@@ -68,19 +68,19 @@ public final class ImageServiceImpl implements ImageService {
         super();
     }
 
-    public ImageData addImageData(final Session session, final DataSource imageSource, final DataArguments imageArguments, final int timeToLive) {
+    public ImageData addImageData(final Session session, final ImageDataSource imageSource, final DataArguments imageArguments, final int timeToLive) {
         return ImageRegistry.getInstance().addImageData(session, imageSource, imageArguments, timeToLive);
     }
 
-    public ImageData addImageData(final int contextId, final DataSource imageSource, final DataArguments imageArguments, final int timeToLive) {
+    public ImageData addImageData(final int contextId, final ImageDataSource imageSource, final DataArguments imageArguments, final int timeToLive) {
         return ImageRegistry.getInstance().addImageData(contextId, imageSource, imageArguments, timeToLive);
     }
 
-    public ImageData addImageData(final Session session, final DataSource imageSource, final DataArguments imageArguments) {
+    public ImageData addImageData(final Session session, final ImageDataSource imageSource, final DataArguments imageArguments) {
         return ImageRegistry.getInstance().addImageData(session, imageSource, imageArguments);
     }
 
-    public ImageData addImageData(final int contextId, final DataSource imageSource, final DataArguments imageArguments) {
+    public ImageData addImageData(final int contextId, final ImageDataSource imageSource, final DataArguments imageArguments) {
         return ImageRegistry.getInstance().addImageData(contextId, imageSource, imageArguments);
     }
 

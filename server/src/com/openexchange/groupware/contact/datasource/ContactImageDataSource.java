@@ -56,11 +56,11 @@ import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataException;
 import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.DataProperties;
-import com.openexchange.conversion.DataSource;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.image.ImageDataSource;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
@@ -70,7 +70,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ContactImageDataSource implements DataSource {
+public final class ContactImageDataSource implements ImageDataSource {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ContactImageDataSource.class);
 
@@ -160,6 +160,12 @@ public final class ContactImageDataSource implements DataSource {
 
     public Class<?>[] getTypes() {
         return new Class<?>[] { InputStream.class };
+    }
+
+    private static final String REGISTRATION_NAME = "com.openexchange.contact.image";
+
+    public String getRegistrationName() {
+        return REGISTRATION_NAME;
     }
 
 }

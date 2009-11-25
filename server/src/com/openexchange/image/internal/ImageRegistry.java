@@ -51,8 +51,9 @@ package com.openexchange.image.internal;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.DataArguments;
-import com.openexchange.conversion.DataSource;
+import com.openexchange.image.ImageDataSource;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -185,7 +186,7 @@ public final class ImageRegistry {
      * @param imageArguments The image arguments
      * @return Either the new image data from specified data source and data arguments or the existing one if already contained in registry.
      */
-    public ImageData addImageData(final Session session, final DataSource imageSource, final DataArguments imageArguments) {
+    public ImageData addImageData(final Session session, final ImageDataSource imageSource, final DataArguments imageArguments) {
         return addImageData(session, imageSource, imageArguments, ImageData.DEFAULT_TTL);
     }
 
@@ -199,7 +200,7 @@ public final class ImageRegistry {
      * @param timeToLive The time-to-live for the new image data
      * @return Either the new image data from specified data source and data arguments or the existing one if already contained in registry.
      */
-    public ImageData addImageData(final Session session, final DataSource imageSource, final DataArguments imageArguments, final int timeToLive) {
+    public ImageData addImageData(final Session session, final ImageDataSource imageSource, final DataArguments imageArguments, final int timeToLive) {
         final String sessionId = session.getSessionID();
         ConcurrentMap<String, ImageData> m = sessionBoundImagesMap.get(sessionId);
         boolean check = true;
@@ -212,7 +213,7 @@ public final class ImageRegistry {
             }
         }
         ImageData imageData;
-        final String id = imageArguments.getID();
+        final String id = ImageIDGenerator.generateId(imageSource, imageArguments);
         if (check && (imageData = m.get(id)) != null) {
             if (DEBUG) {
                 LOG.debug("Image data fetched from registry for UID: " + id);
@@ -236,7 +237,7 @@ public final class ImageRegistry {
      * @param imageArguments The image arguments
      * @return Either the new image data from specified data source and data arguments or the existing one if already contained in registry.
      */
-    public ImageData addImageData(final int contextId, final DataSource imageSource, final DataArguments imageArguments) {
+    public ImageData addImageData(final int contextId, final ImageDataSource imageSource, final DataArguments imageArguments) {
         return addImageData(contextId, imageSource, imageArguments, ImageData.DEFAULT_TTL);
     }
 
@@ -250,7 +251,7 @@ public final class ImageRegistry {
      * @param timeToLive The time-to-live for the new image data
      * @return Either the new image data from specified data source and data arguments or the existing one if already contained in registry.
      */
-    public ImageData addImageData(final int contextId, final DataSource imageSource, final DataArguments imageArguments, final int timeToLive) {
+    public ImageData addImageData(final int contextId, final ImageDataSource imageSource, final DataArguments imageArguments, final int timeToLive) {
         final Integer cid = Integer.valueOf(contextId);
         ConcurrentMap<String, ImageData> m = contextBoundImagesMap.get(cid);
         boolean check = true;
@@ -263,7 +264,7 @@ public final class ImageRegistry {
             }
         }
         ImageData imageData;
-        final String id = imageArguments.getID();
+        final String id = ImageIDGenerator.generateId(imageSource, imageArguments);
         if (check && (imageData = m.get(id)) != null) {
             if (DEBUG) {
                 LOG.debug("Image data fetched from registry for UID: " + id);
@@ -401,13 +402,25 @@ public final class ImageRegistry {
     public ImageData getImageData(final Session session, final String uniqueId) {
         final ConcurrentMap<String, ImageData> m = sessionBoundImagesMap.get(session.getSessionID());
         if (m == null) {
-            return null;
+            return onMissingImageData(session, uniqueId);
         }
         final ImageData imageData = m.get(uniqueId);
         if (imageData == null) {
-            return null;
+            return onMissingImageData(session, uniqueId);
         }
         return imageData.touch();
+    }
+
+    private ImageData onMissingImageData(final Session session, final String uniqueId) {
+        final ConversionService service = ServerServiceRegistry.getInstance().getService(ConversionService.class);
+        if (null == service) {
+            return null;
+        }
+        final Object[] objects = ImageIDGenerator.parseId(uniqueId, service);
+        if (null == objects) {
+            return null;
+        }
+        return addImageData(session, (ImageDataSource) objects[0], (DataArguments) objects[1]);
     }
 
     /**
@@ -420,13 +433,25 @@ public final class ImageRegistry {
     public ImageData getImageData(final int contextId, final String uniqueId) {
         final ConcurrentMap<String, ImageData> m = contextBoundImagesMap.get(Integer.valueOf(contextId));
         if (m == null) {
-            return null;
+            return onMissingImageData(contextId, uniqueId);
         }
         final ImageData imageData = m.get(uniqueId);
         if (imageData == null) {
-            return null;
+            return onMissingImageData(contextId, uniqueId);
         }
         return imageData.touch();
+    }
+
+    private ImageData onMissingImageData(final int contextId, final String uniqueId) {
+        final ConversionService service = ServerServiceRegistry.getInstance().getService(ConversionService.class);
+        if (null == service) {
+            return null;
+        }
+        final Object[] objects = ImageIDGenerator.parseId(uniqueId, service);
+        if (null == objects) {
+            return null;
+        }
+        return addImageData(contextId, (ImageDataSource) objects[0], (DataArguments) objects[1]);
     }
 
     /**
@@ -436,5 +461,5 @@ public final class ImageRegistry {
         sessionBoundImagesMap.clear();
         contextBoundImagesMap.clear();
     }
-    
+
 }

@@ -50,7 +50,6 @@
 package com.openexchange.image;
 
 import com.openexchange.conversion.DataArguments;
-import com.openexchange.conversion.DataSource;
 import com.openexchange.image.internal.ImageData;
 import com.openexchange.session.Session;
 
@@ -89,7 +88,7 @@ public interface ImageService {
      * @param timeToLive The time-to-live for the new image data
      * @return Either the new image data from specified data source and data arguments or the existing one if already contained in registry.
      */
-    public ImageData addImageData(Session session, DataSource imageSource, DataArguments imageArguments, int timeToLive);
+    public ImageData addImageData(Session session, ImageDataSource imageSource, DataArguments imageArguments, int timeToLive);
 
     /**
      * Adds specified data source and data arguments as image data to this registry if no matching image data is already contained in
@@ -101,7 +100,7 @@ public interface ImageService {
      * @param timeToLive The time-to-live for the new image data
      * @return Either the new image data from specified data source and data arguments or the existing one if already contained in registry.
      */
-    public ImageData addImageData(int contextId, DataSource imageSource, DataArguments imageArguments, int timeToLive);
+    public ImageData addImageData(int contextId, ImageDataSource imageSource, DataArguments imageArguments, int timeToLive);
 
     /**
      * Adds specified data source and data arguments as image data to this registry if no matching image data is already contained in
@@ -112,7 +111,7 @@ public interface ImageService {
      * @param imageArguments The image arguments
      * @return Either the new image data from specified data source and data arguments or the existing one if already contained in registry.
      */
-    public ImageData addImageData(Session session, DataSource imageSource, DataArguments imageArguments);
+    public ImageData addImageData(Session session, ImageDataSource imageSource, DataArguments imageArguments);
 
     /**
      * Adds specified data source and data arguments as image data to this registry if no matching image data is already contained in
@@ -123,7 +122,7 @@ public interface ImageService {
      * @param imageArguments The image arguments
      * @return Either the new image data from specified data source and data arguments or the existing one if already contained in registry.
      */
-    public ImageData addImageData(int contextId, DataSource imageSource, DataArguments imageArguments);
+    public ImageData addImageData(int contextId, ImageDataSource imageSource, DataArguments imageArguments);
 
     /**
      * Adds specified image data to this registry.

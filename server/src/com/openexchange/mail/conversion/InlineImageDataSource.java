@@ -58,6 +58,7 @@ import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.DataSource;
 import com.openexchange.conversion.SimpleData;
+import com.openexchange.image.ImageDataSource;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailAccess;
@@ -71,7 +72,7 @@ import com.openexchange.session.Session;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class InlineImageDataSource implements DataSource {
+public final class InlineImageDataSource implements ImageDataSource {
 
     /**
      * Common required arguments for uniquely determining a mail part:
@@ -160,5 +161,11 @@ public final class InlineImageDataSource implements DataSource {
                 throw new DataException(e);
             }
         }
+    }
+
+    private static final String REGISTRATION_NAME = "com.openexchange.mail.image";
+
+    public String getRegistrationName() {
+        return REGISTRATION_NAME;
     }
 }

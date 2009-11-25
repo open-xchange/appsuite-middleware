@@ -50,10 +50,13 @@
 package com.openexchange.image.internal;
 
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataException;
 import com.openexchange.conversion.DataSource;
+import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.servlet.ImageServlet;
 import com.openexchange.session.Session;
 
@@ -86,7 +89,7 @@ public final class ImageData {
      * @param imageSource The image data source
      * @param imageArguments The image arguments
      */
-    ImageData(final DataSource imageSource, final DataArguments imageArguments) {
+    ImageData(final ImageDataSource imageSource, final DataArguments imageArguments) {
         this(imageSource, imageArguments, DEFAULT_TTL);
     }
 
@@ -97,20 +100,39 @@ public final class ImageData {
      * @param imageArguments The image arguments
      * @param timeToLive The time-to-live in milliseconds; a value less than or equal to zero is an infinite time-to-live
      */
-    ImageData(final DataSource imageSource, final DataArguments imageArguments, final int timeToLive) {
+    ImageData(final ImageDataSource imageSource, final DataArguments imageArguments, final int timeToLive) {
         super();
         if (imageArguments == null) {
             throw new IllegalArgumentException("image arguments are null");
         }
-        uniqueId = imageArguments.getID();
+        uniqueId = ImageIDGenerator.generateId(imageSource, imageArguments);
+        // uniqueId = imageArguments.getID();
         this.imageArguments = imageArguments;
         this.imageSource = imageSource;
         this.hash = hashCode0();
         url =
             new StringBuilder(64).append('/').append(ImageServlet.ALIAS).append('?').append(ImageServlet.PARAMETER_UID).append('=').append(
-                uniqueId).toString();
+                urlEncodeSafe(uniqueId, "UTF-8")).toString();
         this.timeToLive = timeToLive;
         lastAccessed = System.currentTimeMillis();
+    }
+
+    /**
+     * Translates specified string into application/x-www-form-urlencoded format using a specific encoding scheme. This method uses the
+     * supplied encoding scheme to obtain the bytes for unsafe characters.
+     * 
+     * @param text The string to be translated.
+     * @param charset The character encoding to use; should be <code>UTF-8</code> according to W3C
+     * @return The translated string or the string itself if any error occurred
+     */
+    private static String urlEncodeSafe(final String text, final String charset) {
+        try {
+            return URLEncoder.encode(text, charset);
+        } catch (final UnsupportedEncodingException e) {
+            // Cannot occur
+            org.apache.commons.logging.LogFactory.getLog(ImageData.class).error(e.getMessage(), e);
+            return text;
+        }
     }
 
     /**

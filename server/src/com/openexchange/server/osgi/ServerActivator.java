@@ -113,6 +113,7 @@ import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.contact.ContactInterfaceProvider;
 import com.openexchange.groupware.contact.datahandler.ContactInsertDataHandler;
 import com.openexchange.groupware.contact.datasource.ContactDataSource;
+import com.openexchange.groupware.contact.datasource.ContactImageDataSource;
 import com.openexchange.groupware.contact.internal.ContactInterfaceDiscoveryServiceImpl;
 import com.openexchange.groupware.datahandler.ICalInsertDataHandler;
 import com.openexchange.groupware.datahandler.ICalJSONDataHandler;
@@ -134,6 +135,7 @@ import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.cache.MailAccessCacheEventListener;
 import com.openexchange.mail.cache.MailSessionEventHandler;
 import com.openexchange.mail.conversion.ICalMailPartDataSource;
+import com.openexchange.mail.conversion.InlineImageDataSource;
 import com.openexchange.mail.conversion.VCardAttachMailDataHandler;
 import com.openexchange.mail.conversion.VCardMailPartDataSource;
 import com.openexchange.mail.loginhandler.MailLoginHandler;
@@ -529,6 +531,18 @@ public final class ServerActivator extends DeferredActivator {
             final Dictionary<Object, Object> props = new Hashtable<Object, Object>();
             props.put(STR_IDENTIFIER, "com.openexchange.contact");
             registrationList.add(context.registerService(DataSource.class.getName(), new ContactDataSource(), props));
+        }
+        {
+            final InlineImageDataSource dataSource = new InlineImageDataSource();
+            final Dictionary<Object, Object> props = new Hashtable<Object, Object>();
+            props.put(STR_IDENTIFIER, dataSource.getRegistrationName());
+            registrationList.add(context.registerService(DataSource.class.getName(), dataSource, props));
+        }
+        {
+            final ContactImageDataSource dataSource = new ContactImageDataSource();
+            final Dictionary<Object, Object> props = new Hashtable<Object, Object>();
+            props.put(STR_IDENTIFIER, dataSource.getRegistrationName());
+            registrationList.add(context.registerService(DataSource.class.getName(), dataSource, props));
         }
         /*
          * Register data handlers

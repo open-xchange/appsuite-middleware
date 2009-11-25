@@ -6,6 +6,7 @@
 
  - Bugfix #14741: Removed usage of javax.swing.text.BadLocationException
  - Bugfix #14938: Fixed display of mails with no text body from cached JSON representation
+ - Bugfix #14948: Building a self-describing URL for image look-up if no longer in image cache
 
 * 2009-11-24 - thorben.betten@open-xchange.com
 
