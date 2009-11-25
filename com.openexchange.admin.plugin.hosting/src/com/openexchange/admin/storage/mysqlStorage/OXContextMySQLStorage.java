@@ -1036,7 +1036,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         if (null == adminUser) {
             throw new StorageException("Context administrator is not defined.");
         }
-        OXUser.checkAndSetLanguage(adminUser);
 
         // Find filestore for context.
         ctx.setFilestore_name(ctx.getIdAsString() + "_ctx_store");
@@ -1094,9 +1093,13 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
 
             // create group users for context
+            OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
+            adminUser.setContextadmin(true);
+            tool.checkCreateUserData(ctx, adminUser);
             String groupName = translateGroupName(adminUser);
             contextCommon.createStandardGroupForContext(contextId, oxCon, groupName, groupId, gidNumber);
-            contextCommon.createAdminForContext(ctx, adminUser, oxCon, adminId, contactId, uidNumber, access);
+            OXUserStorageInterface oxs = OXUserStorageInterface.getInstance();
+            oxs.create(ctx, adminUser, access, oxCon, adminId, contactId, uidNumber);
 
             // create system folder for context
             // get lang and displayname of admin

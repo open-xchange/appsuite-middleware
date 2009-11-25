@@ -1,3 +1,7 @@
+* 2009-11-25 - marcus.klein@open-xchange.com
+
+ - Bugfix #13634: Using same generic use checks as for creating normal users.
+
 * 2009-11-12 - thomas.schweiger@open-xchange.com
 
  - API change: Due to SoftwareChange_Request-170 the "oxreport" call in "oxsysreport"
