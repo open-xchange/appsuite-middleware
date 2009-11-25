@@ -218,10 +218,11 @@ public final class UserAttributeAccess {
          * Save modification
          */
         final UserImpl userImpl = new UserImpl();
+        userImpl.setId(user.getId());
         // userImpl.setTimeZone(user.getTimeZone());
         // userImpl.setPreferredLanguage(user.getPreferredLanguage());
         userImpl.setAttributes(newAttributes);
-        userStorage.updateUser(user, context);
+        userStorage.updateUser(userImpl, context);
     }
 
 }
