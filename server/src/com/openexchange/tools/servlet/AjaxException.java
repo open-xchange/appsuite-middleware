@@ -145,7 +145,11 @@ public class AjaxException extends AbstractOXException {
         /**
          * Unexpected error: %1$s
          */
-        UnexpectedError("Unexpected error: %1$s", Category.CODE_ERROR, 11);
+        UnexpectedError("Unexpected error: %1$s", Category.CODE_ERROR, 11),
+        /**
+         * A parameter conflict occurred.
+         */
+        ParameterConflict("A parameter conflict occurred.", Category.CODE_ERROR, 12);
 
         /**
          * Message of the exception.
