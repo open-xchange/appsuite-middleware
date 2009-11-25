@@ -95,7 +95,7 @@ public class TestsForChangingFromOneRecurrenceTypeToAnother extends ManagedAppoi
     }
 
     
-    public void testShouldChangeFromMonthly2ToMonthly1() throws Exception{
+    public void testShouldChangeFromMonthly2ToMonthly1With127() throws Exception{
         Appointment app = AbstractAssertion.generateDefaultAppointment(calendarManager.getPrivateFolder());
         app.set(Appointment.RECURRENCE_TYPE, Appointment.MONTHLY);
         app.set(Appointment.INTERVAL, 1);
@@ -104,11 +104,30 @@ public class TestsForChangingFromOneRecurrenceTypeToAnother extends ManagedAppoi
         
         Changes changes = new Changes();
         changes.put(Appointment.RECURRENCE_TYPE, Appointment.MONTHLY);
-        changes.put(Appointment.DAYS, 127);
+        changes.put(Appointment.DAYS, 127); //DUH!
         changes.put(Appointment.INTERVAL, 1);
         changes.put(Appointment.DAY_IN_MONTH, 1);
         
         Expectations expectations = new Expectations(changes);
+        
+        positiveAssertion.check(app, changes, expectations);
+    }
+    
+    public void testShouldChangeFromMonthly2ToMonthly1WithNull() throws Exception{
+        Appointment app = AbstractAssertion.generateDefaultAppointment(calendarManager.getPrivateFolder());
+        app.set(Appointment.RECURRENCE_TYPE, Appointment.MONTHLY);
+        app.set(Appointment.INTERVAL, 1);
+        app.set(Appointment.DAY_IN_MONTH, 1);
+        app.set(Appointment.DAYS, Appointment.MONDAY);
+        
+        Changes changes = new Changes();
+        changes.put(Appointment.RECURRENCE_TYPE, Appointment.MONTHLY);
+        changes.put(Appointment.DAYS, null);
+        changes.put(Appointment.INTERVAL, 1);
+        changes.put(Appointment.DAY_IN_MONTH, 1);
+        
+        Expectations expectations = new Expectations(changes);
+        expectations.put(Appointment.DAYS, 127);
         
         positiveAssertion.check(app, changes, expectations);
     }
