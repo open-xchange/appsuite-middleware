@@ -61,46 +61,6 @@ import com.openexchange.groupware.AbstractOXException;
 public interface SearchIterator<T> {
 
     /**
-     * @deprecated use {@link SearchIteratorAdapter#createEmptyIterator()}.
-     */
-    @Deprecated
-    SearchIterator<?> EMPTY_ITERATOR = new SearchIterator<Object>() {
-
-        public boolean hasNext() {
-            return false;
-        }
-
-        public Object next() throws SearchIteratorException, OXException {
-            return null;
-        }
-
-        public void close() throws SearchIteratorException {
-            // Not applicable
-        }
-
-        public int size() {
-            return 0;
-        }
-
-        public boolean hasSize() {
-            return true;
-        }
-
-        public void addWarning(final AbstractOXException warning) {
-            // Not applicable
-        }
-
-        public AbstractOXException[] getWarnings() {
-            return null;
-        }
-
-        public boolean hasWarnings() {
-            return false;
-        }
-
-    };
-
-    /**
      * Returns <code>true</code> if the iteration has more elements. (In other words, returns <code>true</code> if {@link #next()} would
      * return an element.)
      * 
