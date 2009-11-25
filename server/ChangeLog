@@ -1,3 +1,7 @@
+* 2009-11-25 - thorben.betten@open-xchange.com
+
+ - Bugfix #14938: Fixed display of mails with no text body from cached JSON representation
+
 * 2009-11-23 - thorben.betten@open-xchange.com
 
  - Bugfix #14944: Fixed NPE in mail prefetcher

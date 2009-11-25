@@ -241,7 +241,16 @@ public final class JSONObjectConverter {
             /*
              * Handle body (non-file-attachments)
              */
-            final JSONArray bodyArr = rawJSONMailObject.getJSONArray("body");
+            final JSONArray bodyArr;
+            {
+                final JSONArray opt = rawJSONMailObject.optJSONArray("body");
+                if (null == opt || 0 == opt.length()) {
+                    bodyArr = new JSONArray();
+                    bodyArr.put(dummyObject());
+                } else {
+                    bodyArr = opt;
+                }
+            }
             final int bodyLen = bodyArr.length();
 
             // final boolean alternative = rawJSONMailObject.optBoolean("alternative");
