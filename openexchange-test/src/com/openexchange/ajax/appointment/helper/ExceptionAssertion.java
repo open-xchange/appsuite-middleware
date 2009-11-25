@@ -58,26 +58,34 @@ import com.openexchange.test.CalendarTestManager;
  */
 public class ExceptionAssertion extends AbstractAssertion {
 
-    public ExceptionAssertion(Changes changes, OXError expectedError, CalendarTestManager manager) {
+    public ExceptionAssertion(CalendarTestManager manager, int folderToWorkIn) {
         super();
         this.manager = manager;
         manager.setFailOnError(false);
+        this.folder = folderToWorkIn;
+    }
 
+    public void check(Changes changes, OXError expectedError){
         try {
             createAndCheck(changes, expectedError);
+        } finally {
+            manager.cleanUp();
+        }
+        try {
             updateAndCheck(changes, expectedError);
         } finally {
             manager.cleanUp();
         }
+        
     }
-
     private void updateAndCheck(Changes changes, OXError expectedError) {
+        approachUsedForTest = "Create and update";
         Appointment app;
         try {
             app = generateDefaultAppointment();
-            app.setParentFolderID(getPrivateAppointmentFolder());
+            app.setParentFolderID(folder);
         } catch (Exception e) {
-            fail("Could not generate default appointment: " + e);
+            fail2("Could not generate default appointment: " + e);
             return;
         }
 
@@ -88,12 +96,13 @@ public class ExceptionAssertion extends AbstractAssertion {
     }
 
     private void createAndCheck(Changes changes, OXError expectedError) {
+        approachUsedForTest = "Create directly";
         Appointment app = null;
         try {
             app = generateDefaultAppointment();
-            app.setParentFolderID(getPrivateAppointmentFolder());
+            app.setParentFolderID(folder);
         } catch (Exception e) {
-            fail("Could not generate default appointment: " + e);
+            fail2("Could not generate default appointment: " + e);
             return;
         }
 
@@ -104,14 +113,15 @@ public class ExceptionAssertion extends AbstractAssertion {
     }
 
     private void checkForError(OXError expectedError) {
-        assertTrue("Expecting exception, did not get one", manager.hasLastException());
+        methodUsedForTest = "Check lastException field";
+        assertTrue(state() + " Expecting exception, did not get one", manager.hasLastException());
         try {
             AbstractOXException lastException = (AbstractOXException) manager.getLastException();
             assertTrue(
-                "Given error " + lastException.getErrorCode() + " does not match expected error " + expectedError,
+                state() + " Expected error: " + expectedError + ", actual error: " + lastException.getErrorCode(),
                 expectedError.matches(lastException));
         } catch (ClassCastException e) {
-            fail("Should have an OXException, but could not cast it into one");
+            fail2("Should have an OXException, but could not cast it into one");
         }
     }
 }

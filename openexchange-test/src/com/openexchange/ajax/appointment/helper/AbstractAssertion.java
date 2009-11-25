@@ -49,15 +49,11 @@
 
 package com.openexchange.ajax.appointment.helper;
 
-import java.io.IOException;
 import java.util.Calendar;
 import java.util.List;
-import org.json.JSONException;
-import org.xml.sax.SAXException;
+import junit.framework.Assert;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.test.CalendarTestManager;
-import com.openexchange.tools.servlet.AjaxException;
-import junit.framework.Assert;
 
 /**
  * {@link AbstractAssertion}
@@ -66,26 +62,40 @@ import junit.framework.Assert;
  */
 public class AbstractAssertion extends Assert {
 
+    protected String approachUsedForTest; // for example "create and update" or only "create"
+
+    protected String methodUsedForTest; // for example "list" or "get"
+
+    protected int folder;
+
     protected CalendarTestManager manager;
 
     public AbstractAssertion() {
         super();
     }
 
-    protected Appointment find(List<Appointment> appointments, int folder, int id) {
+    protected String state() {
+        return "[" + approachUsedForTest + " | " + methodUsedForTest + "]";
+    }
+
+    protected void fail2(String message) {
+        Assert.fail(state() + message);
+    }
+
+    protected Appointment find(List<Appointment> appointments, int folderToSearch, int id) {
         for (Appointment app : appointments)
-            if (app.getParentFolderID() == folder && app.getObjectID() == id)
+            if (app.getParentFolderID() == folderToSearch && app.getObjectID() == id)
                 return app;
         return null;
     }
 
-    protected static Appointment generateDefaultAppointment(int folder) {
+    public static Appointment generateDefaultAppointment(int folder) {
         Appointment app = generateDefaultAppointment();
         app.setParentFolderID(folder);
         return app;
     }
 
-    protected static Appointment generateDefaultAppointment() {
+    public static Appointment generateDefaultAppointment() {
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.YEAR, -1);
         cal.set(Calendar.DAY_OF_YEAR, 1);
@@ -101,7 +111,11 @@ public class AbstractAssertion extends Assert {
     }
 
     protected Appointment create(Appointment app) {
-        return manager.insertAppointmentOnServer(app);
+        app = manager.insertAppointmentOnServer(app);
+        assertFalse(
+            state() + " Should not fail during creation of appointment with error: " + manager.getLastException(),
+            manager.hasLastException());
+        return app;
     }
 
     protected void update(Appointment app, Changes changes) {
@@ -113,9 +127,4 @@ public class AbstractAssertion extends Assert {
         changes.update(update);
         manager.updateAppointmentOnServer(update);
     }
-
-    protected int getPrivateAppointmentFolder() throws AjaxException, IOException, SAXException, JSONException {
-        return manager.getClient().getValues().getPrivateAppointmentFolder();
-    }
-
 }

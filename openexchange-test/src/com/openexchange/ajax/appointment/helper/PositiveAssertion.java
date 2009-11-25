@@ -63,67 +63,79 @@ import com.openexchange.tools.servlet.AjaxException;
  */
 public class PositiveAssertion extends AbstractAssertion{
 
-    public PositiveAssertion(Changes changes, Expectations expectations, CalendarTestManager manager) throws AjaxException, IOException, SAXException, JSONException {
-        this(generateDefaultAppointment(), changes, expectations, manager);
-    }
 
-    public PositiveAssertion(Appointment startAppointment, Changes changes, Expectations expectations, CalendarTestManager manager) throws AjaxException, IOException, SAXException, JSONException {
+    public PositiveAssertion(CalendarTestManager manager, int folder) throws AjaxException, IOException, SAXException, JSONException {
         this.manager = manager;
-        
+        this.folder = folder;
+    }
+    
+    public void check(Changes changes, Expectations expectations) throws AjaxException, IOException, SAXException, JSONException {
+        check(generateDefaultAppointment(), changes, expectations);
+    }
+    
+    public void check(Appointment startAppointment, Changes changes, Expectations expectations) throws AjaxException, IOException, SAXException, JSONException{        
         if(!startAppointment.containsParentFolderID())
-            startAppointment.setParentFolderID(getPrivateAppointmentFolder());
+            startAppointment.setParentFolderID(folder);
         
         Appointment startAppointmentCopy = (Appointment) startAppointment.clone();
-        
         try {
             createAndCheck(startAppointment, changes, expectations);
+        } finally {
+            manager.cleanUp();
+        }
+        try {
             updateAndCheck(startAppointmentCopy, changes, expectations);
         } finally {
             manager.cleanUp();
         }
+
     }
     
     protected void updateAndCheck(Appointment startAppointment, Changes changes, Expectations expectations) {
+        approachUsedForTest = "Create, then update";
         create(startAppointment);
         update(startAppointment, changes);
         checkViaGet(startAppointment.getParentFolderID(), startAppointment.getObjectID(), expectations);
         checkViaList(startAppointment.getParentFolderID(), startAppointment.getObjectID(), expectations);
     }
 
-    protected void createAndCheck(Appointment startAppointment, Changes changes, Expectations expectations) {       
+    protected void createAndCheck(Appointment startAppointment, Changes changes, Expectations expectations) {
+        approachUsedForTest = "Create directly";
         changes.update(startAppointment);
         create(startAppointment);
         if(manager.hasLastException())
-            fail("Could not create appointment, error: " + manager.getLastException());
+            fail2("Could not create appointment, error: " + manager.getLastException());
         checkViaGet(startAppointment.getParentFolderID(), startAppointment.getObjectID(), expectations);
         checkViaList(startAppointment.getParentFolderID(), startAppointment.getObjectID(), expectations);
     }
 
     protected void checkViaList(int folder, int id, Expectations expectations){
+        methodUsedForTest = "List";
         try {
             List<Appointment> appointments = manager.list(new ListIDs(folder, id), expectations.getKeys());
             Appointment actual = find(appointments, folder, id);
             if(manager.hasLastException())
-                fail("Exception occured: " + manager.getLastException());
-            expectations.verify(actual);
+                fail2("Exception occured: " + manager.getLastException());
+            expectations.verify(state(),actual);
         } catch (Exception e) {
-            fail("Exception occurred: " + e);
+            fail2("Exception occurred: " + e);
             return;
         }
         
     }
 
     protected void checkViaGet(int folder, int id, Expectations expectations) {
+        methodUsedForTest = "Get";
         Appointment actual;
         try {
             actual = manager.getAppointmentFromServer(folder, id);
             if(manager.hasLastException())
-                fail("Exception occured: " + manager.getLastException());
+                fail2("Exception occured: " + manager.getLastException());
         } catch (Exception e) {
-            fail("Exception occurred: " + e);
+            fail2("Exception occurred: " + e);
             return;
         }
-        expectations.verify(actual);
+        expectations.verify( state(), actual);
     }
 
 }
