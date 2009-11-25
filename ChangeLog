@@ -1,3 +1,7 @@
+* 2009-11-25 - marcus.klein@open-xchange.com
+
+ - Bugfix #13634: Using same generic use checks as for creating normal users.
+
 * 2009-11-24 - marcus.klein@open-xchange.com
 
  - Bugfix #14935: Fixed CLI parser to deal with trailing empty string
