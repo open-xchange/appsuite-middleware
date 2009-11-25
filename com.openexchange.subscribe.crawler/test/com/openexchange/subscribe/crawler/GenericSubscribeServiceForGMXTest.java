@@ -82,7 +82,7 @@ public class GenericSubscribeServiceForGMXTest extends GenericSubscribeServiceTe
             "p",
             "https://service.gmx.net",        
             ""));
-        steps.add(new PageByLinkRegexStep("Click on the addressbook link in the menu to the left.", "http:\\/\\/service\\.gmx\\.net\\/de\\/cgi\\/g\\.fcgi/addressbook.*"));
+        steps.add(new PageByLinkRegexStep("Click on the addressbook link in the menu to the left.", ".*service\\.gmx\\.net\\/de\\/cgi\\/g\\.fcgi/addressbook.*"));
         steps.add(new PageByFrameNumberStep("Get the first iframe", 1));
         steps.add(new PageByLinkRegexStep("Click on the manage-Addressbook-Link in the upper right ","categories.*"));
         steps.add(new PageByLinkRegexStep("Click on the Export-link to the left","exportcontacts.*"));
@@ -127,7 +127,7 @@ public class GenericSubscribeServiceForGMXTest extends GenericSubscribeServiceTe
         Workflow workflow = new Workflow(steps);
         crawler.setWorkflowString(Yaml.dump(workflow));
 
-        //findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
+        // findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
         // uncomment this if the if the crawler description was updated to get the new config-files
         dumpThis(crawler, crawler.getDisplayName());
     }
