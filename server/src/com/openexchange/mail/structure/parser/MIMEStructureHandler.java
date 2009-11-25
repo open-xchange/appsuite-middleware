@@ -565,7 +565,12 @@ public final class MIMEStructureHandler implements StructureHandler {
             HeaderName.valueOf("Bcc"),
             HeaderName.valueOf("Reply-To"),
             HeaderName.valueOf("Sender"),
-            HeaderName.valueOf("Errors-To")));
+            HeaderName.valueOf("Errors-To"),
+            HeaderName.valueOf("Resent-Bcc"),
+            HeaderName.valueOf("Resent-Cc"),
+            HeaderName.valueOf("Resent-From"),
+            HeaderName.valueOf("Resent-To"),
+            HeaderName.valueOf("Resent-Sender")));
 
     private static final MailDateFormat MAIL_DATE_FORMAT = new MailDateFormat();
 
