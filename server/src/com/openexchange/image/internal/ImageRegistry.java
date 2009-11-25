@@ -436,4 +436,5 @@ public final class ImageRegistry {
         sessionBoundImagesMap.clear();
         contextBoundImagesMap.clear();
     }
+    
 }
