@@ -158,7 +158,7 @@ public final class UpdateTaskCollectionInit implements Initialization {
         }
     }
 
-    public void start() throws AbstractOXException {
+    public void start() {
         if (!started.compareAndSet(false, true)) {
             LOG.error("UpdateTaskCollection has already been started", new Throwable());
         }

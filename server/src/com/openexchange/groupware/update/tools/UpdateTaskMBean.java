@@ -66,8 +66,8 @@ import javax.management.MBeanParameterInfo;
 import javax.management.ReflectionException;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateProcess;
-import com.openexchange.groupware.update.exception.SchemaException;
 import com.openexchange.groupware.update.exception.UpdateException;
+import com.openexchange.groupware.update.internal.SchemaException;
 
 /**
  * {@link UpdateTaskMBean} - MBean for update task toolkit.

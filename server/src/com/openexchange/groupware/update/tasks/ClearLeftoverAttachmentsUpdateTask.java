@@ -72,8 +72,8 @@ import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.SchemaException;
-import com.openexchange.groupware.update.exception.SchemaExceptionFactory;
+import com.openexchange.groupware.update.exception.UpdateException;
+import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 import com.openexchange.tools.file.FileStorageException;
 import com.openexchange.tools.file.LocalFileStorage;
 
@@ -86,8 +86,7 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
     private final ThreadLocal<Map<Integer,LocalFileStorage>> filestorages = new ThreadLocal<Map<Integer,LocalFileStorage>>();
 
     private static final Log LOG = LogFactory.getLog(ClearLeftoverAttachmentsUpdateTask.class);
-    private static final SchemaExceptionFactory EXCEPTIONS =
-        new SchemaExceptionFactory(ClearLeftoverAttachmentsUpdateTask.class);
+    private static final UpdateExceptionFactory EXCEPTIONS = new UpdateExceptionFactory(ClearLeftoverAttachmentsUpdateTask.class);
 
     public int addedWithVersion() {
         return 11;
@@ -97,7 +96,12 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
         return UpdateTaskPriority.NORMAL.priority;
     }
 
-    @OXThrowsMultiple(category = { AbstractOXException.Category.CODE_ERROR,AbstractOXException.Category.SETUP_ERROR }, desc = { "" }, exceptionId = { 1,2 }, msg = { "An SQL error occurred while performing task ClearLeftoverAttachmentsUpdateTask: %1$s.", "Can't resolve filestore." })
+    @OXThrowsMultiple(
+        category = { AbstractOXException.Category.CODE_ERROR,AbstractOXException.Category.SETUP_ERROR },
+        desc = { "" },
+        exceptionId = { 1,2 },
+        msg = { "An SQL error occurred while performing task ClearLeftoverAttachmentsUpdateTask: %1$s.", "Can't resolve filestore." }
+    )
     public void perform(final Schema schema, final int contextId) throws AbstractOXException {
         try {
             filestorages.set(new HashMap<Integer,LocalFileStorage>());
@@ -122,49 +126,49 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
 
     private void update(final int contextId, final String sql, final Object...args) throws DBPoolingException, SQLException {
         Connection writeCon = null;
-		PreparedStatement stmt = null;
+        PreparedStatement stmt = null;
 
-		try {
-			writeCon = Database.get(contextId, true);
-			writeCon.setAutoCommit(false);
-			stmt = writeCon.prepareStatement(sql);
-			for(int i = 0; i < args.length; i++) {
+        try {
+            writeCon = Database.get(contextId, true);
+            writeCon.setAutoCommit(false);
+            stmt = writeCon.prepareStatement(sql);
+            for(int i = 0; i < args.length; i++) {
                 stmt.setObject(i+1, args[i]);
             }
             stmt.executeUpdate();
 
 
-		} catch (final SQLException x) {
-			try {
-				writeCon.rollback();
-			} catch (final SQLException x2) {
-				LOG.error("Can't execute rollback.", x2);
-			}
-			throw x;
-		} finally {
-			if(stmt != null) {
-				try {
-					stmt.close();
-				} catch (final SQLException x) {
-					LOG.warn("Couldn't close statement", x);
-				}
-			}
+        } catch (final SQLException x) {
+            try {
+                writeCon.rollback();
+            } catch (final SQLException x2) {
+                LOG.error("Can't execute rollback.", x2);
+            }
+            throw x;
+        } finally {
+            if(stmt != null) {
+                try {
+                    stmt.close();
+                } catch (final SQLException x) {
+                    LOG.warn("Couldn't close statement", x);
+                }
+            }
 
-			if(writeCon != null) {
-				try {
-					writeCon.setAutoCommit(true);
-				} catch (final SQLException x){
-					LOG.warn("Can't reset auto commit", x);
-				}
+            if(writeCon != null) {
+                try {
+                    writeCon.setAutoCommit(true);
+                } catch (final SQLException x){
+                    LOG.warn("Can't reset auto commit", x);
+                }
 
-				if(writeCon != null) {
-					Database.back(contextId, true, writeCon);
-				}
-			}   
+                if(writeCon != null) {
+                    Database.back(contextId, true, writeCon);
+                }
+            }   
         }
     }
 
-    private void removeFile(final String fileId,final int ctx_id) throws SQLException, DBPoolingException, FileStorageException, SchemaException {
+    private void removeFile(final String fileId,final int ctx_id) throws SQLException, DBPoolingException, FileStorageException, UpdateException {
         // We have to use the local file storage to bypass quota handling, which must remain
         // unaffected by these operations
 
@@ -190,11 +194,11 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
         // We can't use the API, because the ContextStorage will throw exceptions
         // when we try to load a Context during the update process;
         Connection readCon = null;
-		PreparedStatement stmt = null;
+        PreparedStatement stmt = null;
         ResultSet rs = null;
 
         try {
-			readCon = Database.get(false);
+            readCon = Database.get(false);
             stmt = readCon.prepareStatement("SELECT filestore_id, filestore_name FROM context WHERE cid = ?");
             stmt.setInt(1, ctx_id);
 
@@ -233,13 +237,13 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
             LOG.error(e);
             return null;
         } finally {
-			if(stmt != null) {
-				try {
-					stmt.close();
-				} catch (final SQLException x) {
-					LOG.warn("Couldn't close statement", x);
-				}
-			}
+            if(stmt != null) {
+                try {
+                    stmt.close();
+                } catch (final SQLException x) {
+                    LOG.warn("Couldn't close statement", x);
+                }
+            }
 
             if(rs != null) {
                 try {
@@ -250,10 +254,10 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
             }
 
             if(readCon != null) {
-				if(readCon != null) {
-					Database.back(false, readCon);
-				}
-			}
+                if(readCon != null) {
+                    Database.back(false, readCon);
+                }
+            }
         }
     }
 
@@ -265,11 +269,11 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
         final List<LeftoverAttachment> attachments = new ArrayList<LeftoverAttachment>();
         
         Connection readCon = null;
-		PreparedStatement stmt = null;
+        PreparedStatement stmt = null;
         ResultSet rs = null;
 
         try {
-			readCon = Database.get(contextId, false);
+            readCon = Database.get(contextId, false);
             stmt = readCon.prepareStatement(query);
             rs = stmt.executeQuery();
             while(rs.next()) {
@@ -278,13 +282,13 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
 
             return attachments;
         } finally {
-			if(stmt != null) {
-				try {
-					stmt.close();
-				} catch (final SQLException x) {
-					LOG.warn("Couldn't close statement", x);
-				}
-			}
+            if(stmt != null) {
+                try {
+                    stmt.close();
+                } catch (final SQLException x) {
+                    LOG.warn("Couldn't close statement", x);
+                }
+            }
 
             if(rs != null) {
                 try {
@@ -295,10 +299,10 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
             }
 
             if(readCon != null) {
-				if(readCon != null) {
-					Database.back(contextId, false, readCon);
-				}
-			}
+                if(readCon != null) {
+                    Database.back(contextId, false, readCon);
+                }
+            }
         }
     }
 

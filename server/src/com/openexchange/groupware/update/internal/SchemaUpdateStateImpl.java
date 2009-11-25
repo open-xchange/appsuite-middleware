@@ -47,67 +47,28 @@
  *
  */
 
-package com.openexchange.groupware.update.exception;
+package com.openexchange.groupware.update.internal;
 
-import com.openexchange.groupware.AbstractOXExceptionFactory;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.AbstractOXException.Category;
+import java.util.HashSet;
+import java.util.Set;
+import com.openexchange.groupware.update.SchemaImpl;
+import com.openexchange.groupware.update.SchemaUpdateState;
 
 /**
- * Factory for creating exception in the schema updater.
- * 
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
- * @deprecated remove this.
+ * {@link SchemaUpdateStateImpl}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-@Deprecated
-public class UpdateExceptionFactory extends AbstractOXExceptionFactory<UpdateException> {
+public class SchemaUpdateStateImpl extends SchemaImpl implements SchemaUpdateState {
 
-    /**
-     * Default constructor.
-     * 
-     * @param clazz The class to read exception information from.
-     */
-    public UpdateExceptionFactory(final Class<?> clazz) {
-        super(clazz);
+    private final Set<String> executedTasks = new HashSet<String>();
+
+    public SchemaUpdateStateImpl() {
+        super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected UpdateException buildException(final EnumComponent component, final Category category, final int number,
-            final String message, final Throwable cause, final Object... msgArgs) {
-        return new UpdateException(component, category, number, message, cause, msgArgs);
+    public void addExecutedTask(String taskName) {
+        executedTasks.add(taskName);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected int getClassId() {
-        return Classes.UPDATE_EXCEPTION_FACTORY;
-    }
-
-    /**
-     * Creates an UpdateException.
-     * 
-     * @param number annotation identifier of the exception.
-     * @param msgArgs arguments for the message.
-     * @return the created UpdateException.
-     */
-    public UpdateException create(final int number, final Object... msgArgs) {
-        return create(number, null, msgArgs);
-    }
-
-    /**
-     * Creates an UpdateException.
-     * 
-     * @param number annotation identifier of the exception.
-     * @param cause nested cause.
-     * @param msgArgs arguments for the message.
-     * @return the created UpdateException.
-     */
-    public UpdateException create(final int number, final Throwable cause, final Object... msgArgs) {
-        return createException(number, cause, msgArgs);
-    }
 }

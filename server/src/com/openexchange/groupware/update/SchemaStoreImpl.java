@@ -49,15 +49,15 @@
 
 package com.openexchange.groupware.update;
 
+import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.tools.sql.DBUtils.rollback;
 
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -69,8 +69,11 @@ import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.SchemaException;
-import com.openexchange.groupware.update.exception.SchemaExceptionFactory;
+import com.openexchange.groupware.update.exception.SchemaExceptionFactoryOld;
+import com.openexchange.groupware.update.internal.SchemaException;
+import com.openexchange.groupware.update.internal.SchemaExceptionCodes;
+import com.openexchange.groupware.update.internal.SchemaUpdateStateImpl;
+import com.openexchange.tools.update.Tools;
 
 /**
  * Implements loading and storing the schema version information.
@@ -83,119 +86,79 @@ public class SchemaStoreImpl extends SchemaStore {
 
     private static final Log LOG = LogFactory.getLog(SchemaStoreImpl.class);
 
-    private final AtomicBoolean tableCreated;
+    private static final String TABLE_NAME = "updateTask";
+
+    private static final String LOCKED = "LOCKED";
 
     /**
      * SQL command for selecting the version from the schema.
      */
-    private static final String SELECT = "SELECT version,locked,gw_compatible,"
-            + "admin_compatible,server FROM version FOR UPDATE";
+    private static final String SELECT = "SELECT version,locked,gw_compatible,admin_compatible,server FROM version FOR UPDATE";
 
     /**
      * For creating exceptions.
      */
-    private static final SchemaExceptionFactory EXCEPTION = new SchemaExceptionFactory(SchemaStoreImpl.class);
+    private static final SchemaExceptionFactoryOld EXCEPTION = new SchemaExceptionFactoryOld(SchemaStoreImpl.class);
 
-    /**
-     * Default constructor.
-     */
     public SchemaStoreImpl() {
         super();
-        tableCreated = new AtomicBoolean();
+    }
+
+    @Override
+    public SchemaUpdateState getSchema(int poolId, String schemaName) throws SchemaException {
+        Connection con;
+        try {
+            con = Database.get(poolId, schemaName);
+        } catch (DBPoolingException e) {
+            throw SchemaExceptionCodes.DATABASE_DOWN.create(e);
+        }
+        final SchemaUpdateState retval;
+        try {
+            con.setAutoCommit(false);
+            checkForTable(con);
+            long start = System.currentTimeMillis();
+            retval = loadSchemaStatus(con);
+            LOG.info("Load schema: " + (System.currentTimeMillis() - start));
+            con.commit();
+        } catch (SQLException e) {
+            rollback(con);
+            throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (SchemaException e) {
+            rollback(con);
+            throw e;
+        } finally {
+            autocommit(con);
+            Database.back(poolId, con);
+        }
+        return retval;
     }
 
     /**
-     * {@inheritDoc}
+     * @param con connection to master in transaction mode.
+     * @return <code>true</code> if the table has been created.
      */
-    @Override
-    public Schema getSchema(int poolId, String schema) throws SchemaException {
-        if (!tableCreated.get()) {
-            synchronized(tableCreated) {
-                if (!tableCreated.get()) {
-                    if (!existsTable(poolId, schema)) {
-                        createVersionTable(poolId, schema);
-                        insertInitialEntry(poolId, schema);
-                    } else if (!hasEntry(poolId, schema)) {
-                        insertInitialEntry(poolId, schema);
-                    }
-                    tableCreated.set(true);
-                }
-            }
+    private static void checkForTable(Connection con) throws SQLException {
+        if (!Tools.tableExists(con, TABLE_NAME)) {
+            createTable(con);
         }
-        return loadSchema(poolId, schema);
     }
 
-    @OXThrowsMultiple(
-        category = { Category.CODE_ERROR },
-        desc = { "" },
-        exceptionId = { 14 },
-        msg = { "A SQL error occurred while creating table 'version': %1$s." })
-    private static final void createVersionTable(int poolId, String schema) throws SchemaException {
-        Connection con;
+    private static void createTable(Connection con) throws SQLException {
+        String sql = "CREATE TABLE " + TABLE_NAME + " (cid INT4 UNSIGNED NOT NULL,taskName VARCHAR(1024) NOT NULL,"
+            + "PRIMARY KEY(cid,taskName(255))) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+        Statement stmt = null;
         try {
-            con = Database.get(poolId, schema);
-        } catch (final DBPoolingException e) {
-            throw new SchemaException(e);
-        }
-        PreparedStatement stmt = null;
-        try {
-            stmt = con.prepareStatement(CREATE);
-            stmt.executeUpdate();
-        } catch (final SQLException e) {
-            throw EXCEPTION.create(14, e, e.getMessage());
+            stmt = con.createStatement();
+            stmt.executeUpdate(sql);
         } finally {
-            closeSQLStuff(null, stmt);
-            Database.back(poolId, con);
+            closeSQLStuff(stmt);
         }
     }
-
-    @OXThrowsMultiple(
-        category = { Category.CODE_ERROR, Category.CODE_ERROR },
-        desc = { "", "" },
-        exceptionId = { 30, 31 },
-        msg = { "A SQL error occurred while creating table 'version': %1$s.",
-            "A database error occurred while creating table 'version': %1$s." })
-    private static final void insertInitialEntry(int poolId, String schema) throws SchemaException {
-        Connection con;
-        try {
-            con = Database.get(poolId, schema);
-        } catch (final DBPoolingException e) {
-            throw new SchemaException(e);
-        }
-        PreparedStatement stmt = null;
-        try {
-            stmt = con.prepareStatement(INSERT);
-            stmt.setInt(1, SchemaImpl.FIRST.getDBVersion());
-            stmt.setBoolean(2, SchemaImpl.FIRST.isLocked());
-            stmt.setBoolean(3, SchemaImpl.FIRST.isGroupwareCompatible());
-            stmt.setBoolean(4, SchemaImpl.FIRST.isAdminCompatible());
-            stmt.setString(5, Server.getServerName());
-            stmt.executeUpdate();
-        } catch (final SQLException e) {
-            throw EXCEPTION.create(14, e, e.getMessage());
-        } catch (final DBPoolingException e) {
-            throw EXCEPTION.create(15, e, e.getMessage());
-        } finally {
-            closeSQLStuff(null, stmt);
-            Database.back(poolId, con);
-        }
-    }
-
-    private static final String CREATE = "CREATE TABLE version (" + "version INT4 UNSIGNED NOT NULL,"
-            + "locked BOOLEAN NOT NULL," + "gw_compatible BOOLEAN NOT NULL," + "admin_compatible BOOLEAN NOT NULL,"
-            + "server VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL)" + " ENGINE = InnoDB";
-
-    private static final String INSERT = "INSERT INTO version VALUES (?, ?, ?, ?, ?)";
 
     private static final String SQL_SELECT_LOCKED_FOR_UPDATE = "SELECT locked FROM version FOR UPDATE";
 
     private static final String SQL_UPDATE_LOCKED = "UPDATE version SET locked = ?";
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.SchemaStore#lockSchema(com.openexchange.groupware.update.Schema)
-     */
     @OXThrowsMultiple(category = { Category.CODE_ERROR, Category.INTERNAL_ERROR, Category.PERMISSION,
             Category.INTERNAL_ERROR }, desc = { "", "", "", "" }, exceptionId = { 6, 7, 8, 9 }, msg = {
             "A SQL error occurred while reading schema version information: %1$s.",
@@ -281,11 +244,6 @@ public class SchemaStoreImpl extends SchemaStore {
 
     private static final String SQL_UPDATE_VERSION = "UPDATE version SET version = ?, locked = ?, gw_compatible = ?, admin_compatible = ?";
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.SchemaStore#unlockSchema(com.openexchange.groupware.update.Schema)
-     */
     @OXThrowsMultiple(category = { Category.CODE_ERROR, Category.INTERNAL_ERROR, Category.PERMISSION,
             Category.INTERNAL_ERROR }, desc = { "", "", "", "" }, exceptionId = { 10, 11, 12, 13 }, msg = {
             "A SQL error occurred while reading schema version information: %1$s.",
@@ -372,106 +330,85 @@ public class SchemaStoreImpl extends SchemaStore {
     }
 
     /**
-     * Loads the schema version information from the database.
-     * @param poolId identifier of the database pool.
-     * @param schema schema name.
-     * @return the schema version information.
-     * @throws SchemaException
-     *             if loading fails.
+     * Loads the old schema version information from the database.
+     * @param con connection to the master in transaction state.
+     * @param schema schema object to put the information to.
+     * @throws SchemaException if loading fails.
      */
-    @OXThrowsMultiple(
-        category = { Category.CODE_ERROR, Category.SETUP_ERROR, Category.SETUP_ERROR },
-        desc = { "", "", "" },
-        exceptionId = { 1, 2, 4 },
-        msg = {
-            "A SQL error occurred while reading schema version information: " + "%1$s.",
-            "No row found in table update.",
-            "Multiple rows found."
-        })
-    private Schema loadSchema(int poolId, String schemaName) throws SchemaException {
-        Connection con;
-        try {
-            con = Database.get(poolId, schemaName);
-        } catch (final DBPoolingException e) {
-            throw new SchemaException(e);
-        }
-        SchemaImpl schema = null;
+    private static void loadOldVersionTable(Connection con, SchemaImpl schema) throws SchemaException {
+        String sql = "SELECT version,locked,gw_compatible,admin_compatible,server FROM version FOR UPDATE";
         Statement stmt = null;
         ResultSet result = null;
         try {
             stmt = con.createStatement();
-            result = stmt.executeQuery(SELECT);
+            result = stmt.executeQuery(sql);
             if (result.next()) {
-                schema = new SchemaImpl();
                 int pos = 1;
                 schema.setDBVersion(result.getInt(pos++));
                 schema.setLocked(result.getBoolean(pos++));
                 schema.setGroupwareCompatible(result.getBoolean(pos++));
                 schema.setAdminCompatible(result.getBoolean(pos++));
                 schema.setServer(result.getString(pos++));
-                schema.setSchema(schemaName);
+                schema.setSchema(con.getCatalog());
             } else {
-                throw EXCEPTION.create(2);
+                throw SchemaExceptionCodes.MISSING_VERSION_ENTRY.create();
             }
             if (result.next()) {
-                throw EXCEPTION.create(4);
+                throw SchemaExceptionCodes.MULTIPLE_VERSION_ENTRY.create();
             }
-        } catch (final SQLException e) {
-            throw EXCEPTION.create(1, e, e.getMessage());
+        } catch (SQLException e) {
+            throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
-            Database.back(poolId, con);
         }
-        return schema;
     }
 
-    @OXThrowsMultiple(
-        category = { Category.CODE_ERROR },
-        desc = { "Checking if a table exist failed." },
-        exceptionId = { 3 },
-        msg = { "A SQL exception occurred while checking for schema version table: %1$s." })
-    private static final boolean existsTable(int poolId, String schema) throws SchemaException {
-        Connection con;
-        try {
-            con = Database.get(poolId, schema);
-        } catch (final DBPoolingException e) {
-            throw new SchemaException(e);
-        }
-        boolean retval = false;
-        ResultSet result = null;
-        try {
-            final DatabaseMetaData meta = con.getMetaData();
-            result = meta.getTables(schema, null, "version", new String[] { "TABLE" });
-            if (result.next()) {
-                retval = true;
+    /**
+     * @param con connection to the master in transaction mode.
+     */
+    private static final SchemaUpdateState loadSchemaStatus(Connection con) throws SchemaException, SQLException {
+        final SchemaUpdateStateImpl retval = new SchemaUpdateStateImpl();
+        long start = System.currentTimeMillis();
+        loadUpdateTasks(con, retval);
+        LOG.info("Load update tasks: " + (System.currentTimeMillis() - start));
+        start = System.currentTimeMillis();
+        if (Tools.tableExists(con, "version")) {
+            loadOldVersionTable(con, retval);
+        } else {
+            retval.setDBVersion(0);
+            retval.setLocked(false);
+            retval.setGroupwareCompatible(true);
+            retval.setAdminCompatible(true);
+            try {
+                retval.setServer(Server.getServerName());
+            } catch (DBPoolingException e) {
+                throw new SchemaException(e);
             }
-        } catch (final SQLException e) {
-            throw EXCEPTION.create(3, e, e.getMessage());
-        } finally {
-            closeSQLStuff(result);
-            Database.back(poolId, con);
+            retval.setSchema(con.getCatalog());
         }
+        LOG.info("Load old version table: " + (System.currentTimeMillis() - start));
         return retval;
     }
 
-    private static final boolean hasEntry(int poolId, String schema) throws SchemaException {
-        Connection con;
-        try {
-            con = Database.get(poolId, schema);
-        } catch (final DBPoolingException e) {
-            throw new SchemaException(e);
-        }
+    private static void loadUpdateTasks(Connection con, SchemaUpdateStateImpl state) throws SchemaException {
+        String sql = "SELECT taskName FROM updateTask WHERE cid=0 FOR UPDATE";
         Statement stmt = null;
         ResultSet result = null;
         try {
             stmt = con.createStatement();
-            result = stmt.executeQuery(SELECT);
-            return result.next();
-        } catch (final SQLException e) {
-            throw EXCEPTION.create(1, e, e.getMessage());
+            result = stmt.executeQuery(sql);
+            while (result.next()) {
+                String taskName = result.getString(1);
+                if (LOCKED.equals(taskName)) {
+                    state.setLocked(true);
+                } else {
+                    state.addExecutedTask(taskName);
+                }
+            }
+        } catch (SQLException e) {
+            throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
-            Database.back(poolId, con);
         }
     }
 }

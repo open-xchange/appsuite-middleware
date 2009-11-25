@@ -47,44 +47,85 @@
  *
  */
 
-package com.openexchange.groupware.update.exception;
+package com.openexchange.groupware.update.internal;
 
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
+import com.openexchange.exceptions.OXErrorMessage;
+import com.openexchange.groupware.AbstractOXException.Category;
 
 /**
- * Exception for reading or writing schema information from/to the database
- * fails.
- * @author <a href="mailto:marcus.klein@open-xchange.org">Marcus Klein</a>
+ * Exception codes for the {@link SchemaException}.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class SchemaException extends AbstractOXException {
+public enum SchemaExceptionCodes implements OXErrorMessage {
 
     /**
-     * Serialization.
+     * No row found in table version.
      */
-    private static final long serialVersionUID = 1309805080707994273L;
+    MISSING_VERSION_ENTRY(SchemaExceptionMessages.MISSING_VERSION_ENTRY_MSG, Category.SETUP_ERROR, 2),
+    /**
+     * Multiple rows found in table version.
+     */
+    MULTIPLE_VERSION_ENTRY(SchemaExceptionMessages.MULTIPLE_VERSION_ENTRY_MSG, Category.SETUP_ERROR, 4),
+    /**
+     * A SQL problem occurred: %1$s.
+     */
+    SQL_PROBLEM(SchemaExceptionMessages.SQL_PROBLEM_MSG, Category.CODE_ERROR, 14),
+    /**
+     * Cannot get database connection.
+     */
+    DATABASE_DOWN(SchemaExceptionMessages.DATABASE_DOWN_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 15);
 
     /**
-     * Nesting constructor.
-     * @param cause Nested cause.
+     * Message of the exception.
      */
-    public SchemaException(final AbstractOXException cause) {
-        super(cause);
+    final String message;
+
+    /**
+     * Category of the exception.
+     */
+    final Category category;
+
+    /**
+     * Detail number of the exception.
+     */
+    final int number;
+
+    /**
+     * Default constructor.
+     * 
+     * @param message message.
+     * @param category category.
+     * @param number detail number.
+     */
+    private SchemaExceptionCodes(String message, Category category, int number) {
+        this.message = message;
+        this.category = category;
+        this.number = number;
     }
 
-    /**
-     * Constructor with all parameters.
-     * @param component Component.
-     * @param category Category.
-     * @param number detail number.
-     * @param message message of the exception.
-     * @param cause the cause.
-     * @param messageArgs arguments for the exception message.
-     */
-    public SchemaException(final EnumComponent component, final Category category,
-        final int detailNumber, final String message, final Throwable cause,
-        final Object... messageArgs) {
-        super(component, category, detailNumber, message, cause);
-        setMessageArgs(messageArgs);
+    public Category getCategory() {
+        return category;
+    }
+
+    public int getDetailNumber() {
+        return number;
+    }
+
+    public String getHelp() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public SchemaException create(Object... messageArgs) {
+        return SchemaExceptionFactory.getInstance().create(this, messageArgs);
+    }
+
+    public SchemaException create(final Throwable cause, final Object... messageArgs) {
+        return SchemaExceptionFactory.getInstance().create(this, cause, messageArgs);
     }
 }

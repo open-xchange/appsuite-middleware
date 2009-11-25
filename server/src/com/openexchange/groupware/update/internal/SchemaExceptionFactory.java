@@ -47,67 +47,35 @@
  *
  */
 
-package com.openexchange.groupware.update.exception;
+package com.openexchange.groupware.update.internal;
 
-import com.openexchange.groupware.AbstractOXExceptionFactory;
+import com.openexchange.exceptions.ErrorMessage;
+import com.openexchange.exceptions.Exceptions;
 import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.AbstractOXException.Category;
 
 /**
  * Creates schema exceptions.
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class SchemaExceptionFactory extends
-    AbstractOXExceptionFactory<SchemaException> {
+public class SchemaExceptionFactory extends Exceptions<SchemaException>  {
 
-    /**
-     * Default constructor.
-     * @param clazz For this class exceptions should be created.
-     */
-    public SchemaExceptionFactory(final Class clazz) {
-        super(clazz);
+    private static final SchemaExceptionFactory SINGLETON = new SchemaExceptionFactory();
+
+    private SchemaExceptionFactory() {
+        super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    public static SchemaExceptionFactory getInstance() {
+        return SINGLETON;
+    }
+
     @Override
-    protected SchemaException buildException(final EnumComponent component,
-        final Category category, final int number, final String message,
-        final Throwable cause, final Object... msgArgs) {
-        return new SchemaException(component, category, number, message, cause,
-            msgArgs);
+    protected SchemaException createException(ErrorMessage message, Throwable cause, Object... args) {
+        return new SchemaException(EnumComponent.UPDATE, message.getCategory(), message.getDetailNumber(), message.getMessage(), cause, args);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    protected int getClassId() {
-        return Classes.SCHEMA_EXCEPTION_FACTORY;
-    }
-
-    /**
-     * Creates a schema exception.
-     * @param identifier exception identifier.
-     * @param cause nested cause.
-     * @param msgArgs arguments for the message.
-     * @return the created exception.
-     */
-    public SchemaException create(final int identifier, final Throwable cause,
-        final Object... msgArgs) {
-        return createException(identifier, cause,
-            msgArgs);
-    }
-
-    /**
-     * Creates a schema exception.
-     * @param identifier exception identifier.
-     * @param msgArgs arguments for the message.
-     * @return the created exception.
-     */
-    public SchemaException create(final int identifier,
-        final Object... msgArgs) {
-        return create(identifier, null, msgArgs);
+    protected void knownExceptions() {
+        declareAll(SchemaExceptionCodes.values());
     }
 }

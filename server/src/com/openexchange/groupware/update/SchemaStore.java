@@ -51,14 +51,8 @@ package com.openexchange.groupware.update;
 
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.SchemaException;
-import com.openexchange.groupware.update.exception.SchemaExceptionFactory;
+import com.openexchange.groupware.update.internal.SchemaException;
 
 /**
  * Abstract class defining the interface for reading the schema version
@@ -66,18 +60,7 @@ import com.openexchange.groupware.update.exception.SchemaExceptionFactory;
  * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-@OXExceptionSource(classId = Classes.SCHEMA_STORE, component = EnumComponent.UPDATE)
 public abstract class SchemaStore {
-
-    /**
-     * For creating exceptions.
-     */
-    private static final SchemaExceptionFactory EXCEPTION = new SchemaExceptionFactory(SchemaStore.class);
-
-    /**
-     * Class implementing this abstract interface.
-     */
-    private static Class<? extends SchemaStore> implementingClass;
 
     /**
      * Default constructor.
@@ -89,30 +72,13 @@ public abstract class SchemaStore {
     /**
      * Factory method.
      * 
-     * @param className
-     *            Class name of the implementation.
      * @return an implementation for this interface.
      */
-    @OXThrowsMultiple(category = { Category.SETUP_ERROR, Category.SETUP_ERROR }, desc = { "", "" }, exceptionId = { 1,
-            2 }, msg = { "Class %1$s can not be loaded.", "Cannot instantiate class %1$s." })
-    public static SchemaStore getInstance(final String className) throws SchemaException {
-        try {
-            synchronized (SchemaStore.class) {
-                if (null == implementingClass) {
-                    implementingClass = Class.forName(className).asSubclass(SchemaStore.class);
-                }
-            }
-            return implementingClass.newInstance();
-        } catch (final InstantiationException e) {
-            throw EXCEPTION.create(2, e, className);
-        } catch (final IllegalAccessException e) {
-            throw EXCEPTION.create(2, e, className);
-        } catch (final ClassNotFoundException e) {
-            throw EXCEPTION.create(1, e, className);
-        }
+    public static SchemaStore getInstance() throws SchemaException {
+        return new SchemaStoreImpl();
     }
 
-    public abstract Schema getSchema(int poolId, String schema) throws SchemaException;
+    public abstract SchemaUpdateState getSchema(int poolId, String schemaName) throws SchemaException;
 
     /**
      * Marks given schema as locked due to a start of an update process
@@ -136,11 +102,11 @@ public abstract class SchemaStore {
      */
     public abstract void unlockSchema(final Schema schema, int contextId) throws SchemaException;
 
-    public Schema getSchema(Context ctx) throws SchemaException {
+    public final Schema getSchema(Context ctx) throws SchemaException {
         return getSchema(ctx.getContextId());
     }
 
-    public Schema getSchema(int contextId) throws SchemaException {
+    public final SchemaUpdateState getSchema(int contextId) throws SchemaException {
         try {
             return getSchema(Database.resolvePool(contextId, true), Database.getSchema(contextId));
         } catch (DBPoolingException e) {

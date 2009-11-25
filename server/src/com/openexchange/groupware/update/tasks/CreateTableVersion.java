@@ -57,36 +57,36 @@ import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.SchemaExceptionFactory;
+import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
+import com.openexchange.groupware.update.internal.SchemaExceptionFactory;
 
 /**
  * Creates the table version and inserts a single line.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 @OXExceptionSource(
-	    classId = Classes.UPDATE_TASK,
-	    component = EnumComponent.UPDATE
-	)
+        classId = Classes.UPDATE_TASK,
+        component = EnumComponent.UPDATE
+    )
 public final class CreateTableVersion implements UpdateTask {
-	
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(CreateTableVersion.class);
-	
-	/**
+    
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+            .getLog(CreateTableVersion.class);
+    
+    /**
      * For creating exceptions.
      */
-    private static final SchemaExceptionFactory EXCEPTION =
-        new SchemaExceptionFactory(CreateTableVersion.class);
-	
-//	private static final String CREATE = "CREATE TABLE foobar (" +
-//			"version INT4 UNSIGNED NOT NULL," +
-//			"boolfield01 BOOLEAN NOT NULL," +
-//			"boolfield02 BOOLEAN NOT NULL," +
-//			"boolfield03 BOOLEAN NOT NULL," +
-//			"server VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL)" +
-//			" ENGINE = InnoDB";
-//	
-//	private static final String INSERT = "INSERT INTO foobar VALUES (?, ?, ?, ?, ?)";
+    private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(CreateTableVersion.class);
+    
+//    private static final String CREATE = "CREATE TABLE foobar (" +
+//            "version INT4 UNSIGNED NOT NULL," +
+//            "boolfield01 BOOLEAN NOT NULL," +
+//            "boolfield02 BOOLEAN NOT NULL," +
+//            "boolfield03 BOOLEAN NOT NULL," +
+//            "server VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL)" +
+//            " ENGINE = InnoDB";
+//    
+//    private static final String INSERT = "INSERT INTO foobar VALUES (?, ?, ?, ?, ?)";
 
     /**
      * Default constructor.
@@ -106,45 +106,45 @@ public final class CreateTableVersion implements UpdateTask {
      * {@inheritDoc}
      */
     @OXThrowsMultiple(
-			category = { Category.CODE_ERROR },
-			desc = { "" },
-			exceptionId = { 1 },
-			msg = { "An SQL error occurred while performing task CreateTableVersion: %1$s." }
-	)
+            category = { Category.CODE_ERROR },
+            desc = { "" },
+            exceptionId = { 1 },
+            msg = { "An SQL error occurred while performing task CreateTableVersion: %1$s." }
+    )
     public void perform(final Schema schema, final int contextId) throws AbstractOXException {
-    	if (LOG.isInfoEnabled()) {
-			LOG.info("UpdateTask 'CreateTableVersion' performed!");
-		}
-//    	Connection writeCon = null;
-//    	PreparedStatement stmt = null;
+        if (LOG.isInfoEnabled()) {
+            LOG.info("UpdateTask 'CreateTableVersion' performed!");
+        }
+//        Connection writeCon = null;
+//        PreparedStatement stmt = null;
 //        try {
 //            writeCon = Database.get(contextId, true);
 //            try {
-//				stmt = writeCon.prepareStatement(CREATE);
-//				stmt.executeUpdate();
-//				stmt.close();
-//				stmt = writeCon.prepareStatement(INSERT);
-//				stmt.setInt(1, SchemaImpl.FIRST.getDBVersion());
-//				stmt.setBoolean(2, true);
-//				stmt.setBoolean(3, SchemaImpl.FIRST.isGroupwareCompatible());
-//				stmt.setBoolean(4, SchemaImpl.FIRST.isAdminCompatible());
-//				stmt.setString(5, Server.getServerName());
-//				stmt.executeUpdate();
-//			} catch (SQLException e) {
-//				throw EXCEPTION.create(1, e, e.getMessage());
-//			}
+//                stmt = writeCon.prepareStatement(CREATE);
+//                stmt.executeUpdate();
+//                stmt.close();
+//                stmt = writeCon.prepareStatement(INSERT);
+//                stmt.setInt(1, SchemaImpl.FIRST.getDBVersion());
+//                stmt.setBoolean(2, true);
+//                stmt.setBoolean(3, SchemaImpl.FIRST.isGroupwareCompatible());
+//                stmt.setBoolean(4, SchemaImpl.FIRST.isAdminCompatible());
+//                stmt.setString(5, Server.getServerName());
+//                stmt.executeUpdate();
+//            } catch (SQLException e) {
+//                throw EXCEPTION.create(1, e, e.getMessage());
+//            }
 //        } finally {
-//        	closeSQLStuff(null, stmt);
-//        	if (writeCon != null) {
-//        		Database.back(contextId, true, writeCon);
-//        	}
+//            closeSQLStuff(null, stmt);
+//            if (writeCon != null) {
+//                Database.back(contextId, true, writeCon);
+//            }
 //        }
     }
     
     /**
      * {@inheritDoc}
      */
-	public int getPriority() {
-		return UpdateTaskPriority.HIGH.priority;
-	}
+    public int getPriority() {
+        return UpdateTaskPriority.HIGH.priority;
+    }
 }

@@ -65,16 +65,16 @@ import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.SchemaExceptionFactory;
+import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
+
 @OXExceptionSource(
-	    classId = Classes.UPDATE_TASK,
-	    component = EnumComponent.UPDATE
-	)
+        classId = Classes.UPDATE_TASK,
+        component = EnumComponent.UPDATE
+    )
 public class InfostoreLongerURLFieldTask  implements UpdateTask {
 
     private final Log LOG = LogFactory.getLog(InfostoreLongerURLFieldTask.class);
-    private static final SchemaExceptionFactory EXCEPTIONS =
-        new SchemaExceptionFactory(InfostoreLongerURLFieldTask.class);
+    private static final UpdateExceptionFactory EXCEPTIONS = new UpdateExceptionFactory(InfostoreLongerURLFieldTask.class);
 
     public int addedWithVersion() {
         return 12;

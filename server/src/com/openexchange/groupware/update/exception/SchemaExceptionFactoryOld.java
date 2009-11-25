@@ -52,22 +52,22 @@ package com.openexchange.groupware.update.exception;
 import com.openexchange.groupware.AbstractOXExceptionFactory;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.update.internal.SchemaException;
 
 /**
- * Factory for creating exception in the schema updater.
- * 
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
- * @deprecated remove this.
+ * Creates schema exceptions.
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @deprecated
  */
 @Deprecated
-public class UpdateExceptionFactory extends AbstractOXExceptionFactory<UpdateException> {
+public class SchemaExceptionFactoryOld extends
+    AbstractOXExceptionFactory<SchemaException> {
 
     /**
      * Default constructor.
-     * 
-     * @param clazz The class to read exception information from.
+     * @param clazz For this class exceptions should be created.
      */
-    public UpdateExceptionFactory(final Class<?> clazz) {
+    public SchemaExceptionFactoryOld(final Class clazz) {
         super(clazz);
     }
 
@@ -75,9 +75,11 @@ public class UpdateExceptionFactory extends AbstractOXExceptionFactory<UpdateExc
      * {@inheritDoc}
      */
     @Override
-    protected UpdateException buildException(final EnumComponent component, final Category category, final int number,
-            final String message, final Throwable cause, final Object... msgArgs) {
-        return new UpdateException(component, category, number, message, cause, msgArgs);
+    protected SchemaException buildException(final EnumComponent component,
+        final Category category, final int number, final String message,
+        final Throwable cause, final Object... msgArgs) {
+        return new SchemaException(component, category, number, message, cause,
+            msgArgs);
     }
 
     /**
@@ -85,29 +87,30 @@ public class UpdateExceptionFactory extends AbstractOXExceptionFactory<UpdateExc
      */
     @Override
     protected int getClassId() {
-        return Classes.UPDATE_EXCEPTION_FACTORY;
+        return Classes.SCHEMA_EXCEPTION_FACTORY;
     }
 
     /**
-     * Creates an UpdateException.
-     * 
-     * @param number annotation identifier of the exception.
-     * @param msgArgs arguments for the message.
-     * @return the created UpdateException.
-     */
-    public UpdateException create(final int number, final Object... msgArgs) {
-        return create(number, null, msgArgs);
-    }
-
-    /**
-     * Creates an UpdateException.
-     * 
-     * @param number annotation identifier of the exception.
+     * Creates a schema exception.
+     * @param identifier exception identifier.
      * @param cause nested cause.
      * @param msgArgs arguments for the message.
-     * @return the created UpdateException.
+     * @return the created exception.
      */
-    public UpdateException create(final int number, final Throwable cause, final Object... msgArgs) {
-        return createException(number, cause, msgArgs);
+    public SchemaException create(final int identifier, final Throwable cause,
+        final Object... msgArgs) {
+        return createException(identifier, cause,
+            msgArgs);
+    }
+
+    /**
+     * Creates a schema exception.
+     * @param identifier exception identifier.
+     * @param msgArgs arguments for the message.
+     * @return the created exception.
+     */
+    public SchemaException create(final int identifier,
+        final Object... msgArgs) {
+        return create(identifier, null, msgArgs);
     }
 }

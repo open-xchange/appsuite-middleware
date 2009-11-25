@@ -54,15 +54,16 @@ import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.SchemaException;
 import com.openexchange.groupware.update.exception.UpdateException;
 import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
+import com.openexchange.groupware.update.internal.SchemaException;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.TimerService;
 
 /**
  * Implementation for the updater interface.
+ * TODO Move this implementation to internal package.
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
@@ -118,10 +119,10 @@ public class UpdaterImpl extends Updater {
         return (UpdateTaskCollection.getHighestVersion() > schema.getDBVersion());
     }
 
-    private Schema getSchema(int contextId) throws UpdateException {
-        final Schema schema;
+    private SchemaUpdateState getSchema(int contextId) throws UpdateException {
+        final SchemaUpdateState schema;
         try {
-            final SchemaStore store = SchemaStore.getInstance(SchemaStoreImpl.class.getName());
+            final SchemaStore store = SchemaStore.getInstance();
             schema = store.getSchema(contextId);
         } catch (final SchemaException e) {
             throw new UpdateException(e);
@@ -132,7 +133,7 @@ public class UpdaterImpl extends Updater {
     private Schema getSchema(int poolId, String schemaName) throws UpdateException {
         final Schema schema;
         try {
-            final SchemaStore store = SchemaStore.getInstance(SchemaStoreImpl.class.getName());
+            final SchemaStore store = SchemaStore.getInstance();
             schema = store.getSchema(poolId, schemaName);
         } catch (final SchemaException e) {
             throw new UpdateException(e);

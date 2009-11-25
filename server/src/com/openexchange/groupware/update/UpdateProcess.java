@@ -61,9 +61,9 @@ import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.update.exception.SchemaException;
 import com.openexchange.groupware.update.internal.PerformParametersImpl;
 import com.openexchange.groupware.update.internal.ProgressStatusImpl;
+import com.openexchange.groupware.update.internal.SchemaException;
 
 /**
  * The {@link #run()} method of this class is started in a separate thread for
@@ -84,7 +84,7 @@ public class UpdateProcess implements Runnable {
 
     public UpdateProcess(int contextId) throws SchemaException {
         super();
-        schemaStore = SchemaStore.getInstance(SchemaStoreImpl.class.getCanonicalName());
+        schemaStore = SchemaStore.getInstance();
         this.contextId = contextId;
         this.updateLock = new ReentrantLock();
     }

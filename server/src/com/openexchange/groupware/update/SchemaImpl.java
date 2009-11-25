@@ -49,10 +49,10 @@
 
 package com.openexchange.groupware.update;
 
-
 /**
- * This class is a data container for the update information of a database
- * schema.
+ * This class is a data container for the update information of a database schema.
+ * TODO Move this implementation to the internal package.
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -101,7 +101,7 @@ public class SchemaImpl implements Schema {
     /**
      * Default constructor.
      */
-    SchemaImpl() {
+    public SchemaImpl() {
         super();
     }
 

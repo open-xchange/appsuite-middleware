@@ -73,8 +73,7 @@ public abstract class Updater {
     /**
      * Factory for creating exceptions from annotations.
      */
-    private static final UpdateExceptionFactory EXCEPTION =
-        new UpdateExceptionFactory(Updater.class);
+    private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(Updater.class);
 
     /**
      * Default constructor.
@@ -88,25 +87,8 @@ public abstract class Updater {
      * @return the updater.
      * @throws UpdateException if instantiating the implementation fails.
      */
-    @OXThrows(
-        category = Category.SETUP_ERROR,
-        desc = "",
-        exceptionId = 1,
-        msg = "Cannot instantiate updater implementation %1$s."
-    )
     public static Updater getInstance() throws UpdateException {
-        try {
-            synchronized (Updater.class) {
-                if (null == implementingClass) {
-                    implementingClass = UpdaterImpl.class;
-                }
-            }
-            return implementingClass.newInstance();
-        } catch (final InstantiationException e) {
-            throw EXCEPTION.create(1, e, implementingClass.getName());
-        } catch (final IllegalAccessException e) {
-            throw EXCEPTION.create(1, e, implementingClass.getName());
-        }
+        return new UpdaterImpl();
     }
 
     /**

@@ -54,13 +54,16 @@ import com.openexchange.groupware.update.SchemaStoreImpl;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.Updater;
 import com.openexchange.groupware.update.UpdaterImpl;
+import com.openexchange.groupware.update.internal.SchemaExceptionFactory;
 import com.openexchange.groupware.update.tasks.NewAdminExtensionsUpdateTask;
 import com.openexchange.groupware.update.tasks.TaskReminderFolderZero;
 
 /**
  * Class identifier for component update exceptions.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @deprecated remove this.
  */
+@Deprecated
 public final class Classes {
 
     /**
@@ -72,11 +75,6 @@ public final class Classes {
      * {@link SchemaExceptionFactory}.
      */
     public static final int SCHEMA_EXCEPTION_FACTORY = 2;
-
-    /**
-     * {@link SchemaStore}.
-     */
-    public static final int SCHEMA_STORE = 3;
 
     /**
      * {@link UpdateExceptionFactory}.
