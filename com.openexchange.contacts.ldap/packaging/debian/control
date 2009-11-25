@@ -8,5 +8,5 @@ Standards-Version: 3.6.1
 
 Package: open-xchange-contacts-ldap
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, adduser, j2re1.5|sun-java5-jre|sun-java6-jre, open-xchange-common (>= @OXVERSION@), open-xchange-global (>=@OXVERSION@), open-xchange-configread (>=@OXVERSION@)
+Depends: ${shlibs:Depends}, ${misc:Depends}, adduser, j2re1.5|sun-java5-jre|sun-java6-jre, open-xchange-common (>= @OXVERSION@), open-xchange-global (>=@OXVERSION@), open-xchange-configread (>=@OXVERSION@), open-xchange (>= @OXVERSION@)
 Description: This bundle provides a global LDAP address book

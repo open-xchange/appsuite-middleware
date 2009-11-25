@@ -1,3 +1,7 @@
+* 2009-11-25 - choeger@open-xchange.com
+
+ - Bugfix #14479 -  Contacts LDAP bundles does not start (SLES11, IBM JAVA)
+
 * 2009-11-10 - dennis.sieben@open-xchange.com
 
  - Fix for UNAVAIL_EXTENSION error
