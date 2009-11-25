@@ -77,11 +77,6 @@ public class NegativeAssertionOnUpdate extends AbstractNegativeAssertion {
     @Override
     public void check(Appointment startWith, Changes changes, OXError expectedError) {
         try {
-            createAndCheck(startWith, changes, expectedError);
-        } finally {
-            manager.cleanUp();
-        }
-        try {
             updateAndCheck(startWith, changes, expectedError);
         } finally {
             manager.cleanUp();
