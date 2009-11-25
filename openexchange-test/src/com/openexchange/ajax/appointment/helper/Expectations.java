@@ -59,16 +59,17 @@ import com.openexchange.groupware.container.CommonObject;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class Expectations extends KeyValueHolder {
-    public Expectations(){
-        
-    }
     
     public Expectations(Changes changes){
         setMap(changes.getMap());
     }
     
     public void verify(CommonObject actual){
+        verify("", actual);
+    }
+    
+    public void verify(String message, CommonObject actual){
         for(Integer key: getMap().keySet())
-            assertEquals("Field "+key+" does not match expectation", getMap().get(key), actual.get(key.intValue()));
+            assertEquals(message + " Field "+key+" does not match expectation", getMap().get(key), actual.get(key.intValue()));
     }
 }
