@@ -55,7 +55,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.regex.Matcher;
 import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.Document;
 import javax.swing.text.Element;
@@ -404,7 +403,7 @@ public final class RTF2HTMLConverter {
         } catch (final IOException e) {
             LOG.error(e.getMessage(), e);
             return;
-        } catch (final BadLocationException e) {
+        } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             return;
         }
@@ -445,7 +444,7 @@ public final class RTF2HTMLConverter {
                 s = hsm.performFirstLineIndent(s);
                 sb.append(s);
             }
-        } catch (final BadLocationException e) {
+        } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             return;
         }
