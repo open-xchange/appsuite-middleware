@@ -51,10 +51,8 @@ package com.openexchange.ajax.appointment.recurrence;
 
 import java.util.Calendar;
 import com.openexchange.ajax.appointment.helper.Changes;
-import com.openexchange.ajax.appointment.helper.ExceptionAssertion;
 import com.openexchange.ajax.appointment.helper.Expectations;
 import com.openexchange.ajax.appointment.helper.OXError;
-import com.openexchange.ajax.appointment.helper.PositiveAssertion;
 import com.openexchange.groupware.container.Appointment;
 
 /**
@@ -68,7 +66,7 @@ public class TestsToCreateMinimalAppointmentSeries extends ManagedAppointmentTes
         super(name);
     }
 
-    public void testSendingUnneccessaryDayInformation() throws Exception {
+    public void testShouldFailWhenSendingUnneccessaryDayInformationForDailyAppointment() throws Exception {
         Changes changes = new Changes();
         changes.put(Appointment.RECURRENCE_TYPE, Appointment.DAILY);
         changes.put(Appointment.RECURRENCE_COUNT, 7);
@@ -76,156 +74,138 @@ public class TestsToCreateMinimalAppointmentSeries extends ManagedAppointmentTes
         changes.put(Appointment.DAYS, 127);
 
         // TODO: Needs to throw exception
-        new ExceptionAssertion(changes, new OXError("APP", 999), calendarManager);
+        exceptionAssertion.check(changes, new OXError("APP", 999));
     }
-    
+
     public void testShouldCreateDailyIntervalWithMinimalData() throws Exception {
         Changes changes = new Changes();
         changes.put(Appointment.RECURRENCE_TYPE, Appointment.DAILY);
-        changes.put(Appointment.RECURRENCE_COUNT, 7);
         changes.put(Appointment.INTERVAL, 1);
 
         Expectations expectations = new Expectations(changes);
 
-        new PositiveAssertion(changes, expectations, calendarManager);
+        positiveAssertion.check(changes, expectations);
     }
 
     public void testShouldCreateWeeklyIntervalWithMinimalData() throws Exception {
         Changes changes = new Changes();
         changes.put(Appointment.RECURRENCE_TYPE, Appointment.WEEKLY);
-        changes.put(Appointment.RECURRENCE_COUNT, 7);
         changes.put(Appointment.INTERVAL, 1);
 
         Expectations expectations = new Expectations(changes);
         expectations.put(Appointment.DAYS, 127); // Should default to 127 as per HTTP API
 
-        new PositiveAssertion(changes, expectations, calendarManager);
+        positiveAssertion.check(changes, expectations);
     }
 
     public void testShouldCreateWeeklyIntervalWithDaysFieldDifferentThan127() throws Exception {
         Changes changes = new Changes();
         changes.put(Appointment.RECURRENCE_TYPE, Appointment.WEEKLY);
-        changes.put(Appointment.RECURRENCE_COUNT, 7);
         changes.put(Appointment.INTERVAL, 1);
         changes.put(Appointment.DAYS, Appointment.MONDAY + Appointment.TUESDAY);
 
         Expectations expectations = new Expectations(changes);
 
-        new PositiveAssertion(changes, expectations, calendarManager);
+        positiveAssertion.check(changes, expectations);
     }
 
     public void testShouldFailCreatingMonthlyIntervalWithoutDayInMonthInfo() throws Exception {
         Changes changes = new Changes();
         changes.put(Appointment.RECURRENCE_TYPE, Appointment.MONTHLY);
-        changes.put(Appointment.RECURRENCE_COUNT, 7);
         changes.put(Appointment.INTERVAL, 1);
 
-        new ExceptionAssertion(changes, new OXError("APP", 42), calendarManager);
+        exceptionAssertion.check(changes, new OXError("APP", 42));
     }
-    
+
     public void testShouldFailCreatingMonthly2IntervalWithoutDayInMonthInfo() throws Exception {
         Changes changes = new Changes();
         changes.put(Appointment.RECURRENCE_TYPE, Appointment.MONTHLY);
-        changes.put(Appointment.RECURRENCE_COUNT, 7);
         changes.put(Appointment.INTERVAL, 1);
         changes.put(Appointment.DAYS, Appointment.MONDAY);
 
-        new ExceptionAssertion(changes, new OXError("APP", 45), calendarManager);
+        exceptionAssertion.check(changes, new OXError("APP", 45));
     }
 
     // first day every month
     public void testShouldCreateMonthlyIntervalWithMinimalData() throws Exception {
         Changes changes = new Changes();
         changes.put(Appointment.RECURRENCE_TYPE, Appointment.MONTHLY);
-        changes.put(Appointment.RECURRENCE_COUNT, 7);
         changes.put(Appointment.INTERVAL, 1);
         changes.put(Appointment.DAY_IN_MONTH, 1);
 
         Expectations expectations = new Expectations(changes);
 
-        new PositiveAssertion(changes, expectations, calendarManager);
+        positiveAssertion.check(changes, expectations);
     }
-    
-    //first monday every month
+
+    // first monday every month
     public void testShouldCreateMonthly2IntervalWithMinimalData() throws Exception {
         Changes changes = new Changes();
         changes.put(Appointment.RECURRENCE_TYPE, Appointment.MONTHLY);
-        changes.put(Appointment.RECURRENCE_COUNT, 7);
         changes.put(Appointment.INTERVAL, 1);
         changes.put(Appointment.DAY_IN_MONTH, 1);
         changes.put(Appointment.DAYS, Appointment.MONDAY);
 
         Expectations expectations = new Expectations(changes);
 
-        new PositiveAssertion(changes, expectations, calendarManager);
+        positiveAssertion.check(changes, expectations);
     }
 
     public void testShouldFailCreatingYearlyIntervalWithoutDayInMonthInfo() throws Exception {
         Changes changes = new Changes();
         changes.put(Appointment.RECURRENCE_TYPE, Appointment.YEARLY);
-        changes.put(Appointment.RECURRENCE_COUNT, 7);
         changes.put(Appointment.INTERVAL, 1);
 
-        new ExceptionAssertion(changes, new OXError("APP", 46), calendarManager);
+        exceptionAssertion.check(changes, new OXError("APP", 46));
     }
 
     public void testShouldFailCreatingYearly2IntervalWithoutDayInMonthInfo() throws Exception {
         Changes changes = new Changes();
         changes.put(Appointment.RECURRENCE_TYPE, Appointment.YEARLY);
-        changes.put(Appointment.RECURRENCE_COUNT, 7);
         changes.put(Appointment.INTERVAL, 1);
         changes.put(Appointment.DAYS, Appointment.MONDAY);
 
-        new ExceptionAssertion(changes, new OXError("APP", 48), calendarManager);
+        exceptionAssertion.check(changes, new OXError("APP", 48));
     }
-
 
     public void testShouldFailCreatingYearlyIntervalWithoutMonth() throws Exception {
         Changes changes = new Changes();
         changes.put(Appointment.RECURRENCE_TYPE, Appointment.YEARLY);
-        changes.put(Appointment.RECURRENCE_COUNT, 7);
         changes.put(Appointment.INTERVAL, 1);
         changes.put(Appointment.DAY_IN_MONTH, 1);
-        //currently, this is app-0080, but this is not actually too complex, it is just missing a the "month" field
-        new ExceptionAssertion(changes, new OXError("APP", 999), calendarManager); 
+        // currently, this is app-0080, but this is not actually too complex, it is just missing a the "month" field
+        exceptionAssertion.check(changes, new OXError("APP", 999));
     }
-    
+
     public void testShouldCreateYearlyIntervalWithMinimalData() throws Exception {
         Changes changes = new Changes();
         changes.put(Appointment.RECURRENCE_TYPE, Appointment.YEARLY);
-        changes.put(Appointment.RECURRENCE_COUNT, 7);
         changes.put(Appointment.INTERVAL, 1);
         changes.put(Appointment.DAY_IN_MONTH, 1);
         changes.put(Appointment.MONTH, Calendar.JANUARY);
 
         Expectations expectations = new Expectations(changes);
 
-        new PositiveAssertion(changes, expectations, calendarManager);
+        positiveAssertion.check(changes, expectations);
     }
-    
+
     public void testShouldCreateYearly2IntervalWithMinimalData() throws Exception {
         Changes changes = new Changes();
         changes.put(Appointment.RECURRENCE_TYPE, Appointment.YEARLY);
-        changes.put(Appointment.RECURRENCE_COUNT, 7);
         changes.put(Appointment.INTERVAL, 1);
         changes.put(Appointment.DAY_IN_MONTH, 1);
         changes.put(Appointment.DAYS, Appointment.MONDAY);
 
         Expectations expectations = new Expectations(changes);
 
-        new PositiveAssertion(changes, expectations, calendarManager);
+        positiveAssertion.check(changes, expectations);
     }
 
-    public void testCreatingIntervalWithoutIntervalInformation() throws Exception {
+    public void testShouldFailCreatingIntervalWithoutIntervalInformation() throws Exception {
         Changes changes = new Changes();
         changes.put(Appointment.RECURRENCE_TYPE, Appointment.DAILY);
-        changes.put(Appointment.RECURRENCE_COUNT, 7);
 
-        Expectations expectations = new Expectations(changes);
-
-        // TODO: Needs to throw exception
-        new PositiveAssertion(changes, expectations, calendarManager);
+        exceptionAssertion.check(changes, new OXError("APP", 999));
     }
-
 
 }

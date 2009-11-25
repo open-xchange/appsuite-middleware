@@ -50,7 +50,13 @@
 package com.openexchange.ajax.appointment.recurrence;
 
 import com.openexchange.ajax.AppointmentTest;
+import com.openexchange.ajax.appointment.helper.ExceptionAssertion;
+import com.openexchange.ajax.appointment.helper.PositiveAssertion;
+import com.openexchange.ajax.framework.UserValues;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.modules.Module;
 import com.openexchange.test.CalendarTestManager;
+import com.openexchange.test.FolderTestManager;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
@@ -58,6 +64,14 @@ import com.openexchange.test.CalendarTestManager;
 public class ManagedAppointmentTest extends AppointmentTest {
 
     protected CalendarTestManager calendarManager;
+
+    protected FolderTestManager folderManager;
+
+    protected FolderObject folder;
+
+    protected ExceptionAssertion exceptionAssertion;
+
+    protected PositiveAssertion positiveAssertion;
 
     public ManagedAppointmentTest(String name) {
         super(name);
@@ -67,6 +81,25 @@ public class ManagedAppointmentTest extends AppointmentTest {
     protected void setUp() throws Exception {
         super.setUp();
         calendarManager = new CalendarTestManager(getClient());
+        folderManager = new FolderTestManager(getClient());
+        UserValues values = getClient().getValues();
+        this.folder = folderManager.generateFolder(
+            "ManagedAppointmentTests",
+            Module.CALENDAR.getFolderConstant(),
+            values.getPrivateAppointmentFolder(),
+            values.getUserId());
+        folder = folderManager.insertFolderOnServer(folder);
+
+        this.exceptionAssertion = new ExceptionAssertion(calendarManager, folder.getObjectID());
+        this.positiveAssertion = new PositiveAssertion(calendarManager, folder.getObjectID());
+
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        calendarManager.cleanUp();
+        folderManager.cleanUp();
+        super.tearDown();
     }
 
 }

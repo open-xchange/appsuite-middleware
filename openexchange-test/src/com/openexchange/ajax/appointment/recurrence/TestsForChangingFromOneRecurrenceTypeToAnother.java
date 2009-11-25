@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment.recurrence;
 
+import com.openexchange.ajax.appointment.helper.AbstractAssertion;
 import com.openexchange.ajax.appointment.helper.Changes;
 import com.openexchange.ajax.appointment.helper.Expectations;
 import com.openexchange.ajax.appointment.helper.PositiveAssertion;
@@ -65,15 +66,35 @@ public class TestsForChangingFromOneRecurrenceTypeToAnother extends ManagedAppoi
     }
     
     public void testShouldChangeFromMonthly1ToMonthly2() throws Exception{
-        Appointment app = new Appointment();
+        Appointment app = AbstractAssertion.generateDefaultAppointment(calendarManager.getPrivateFolder());
+        app.set(Appointment.RECURRENCE_TYPE, Appointment.MONTHLY);
+        app.set(Appointment.INTERVAL, 1);
+        app.set(Appointment.RECURRENCE_COUNT, 7);
+        app.set(Appointment.DAY_IN_MONTH, 1);
+        
         Changes changes = new Changes();
+        changes.put(Appointment.DAYS, Appointment.MONDAY);
         
         Expectations expectations = new Expectations(changes);
         
-        new PositiveAssertion(app, changes, expectations, calendarManager);
+        positiveAssertion.check(app, changes, expectations);
     }
 
-    public void testShouldChangeFromLimitedMonthly1ToMonthly2WithoutLosingLimit(){
-        fail("Implement me!");
+    
+    public void testShouldChangeFromMonthly2ToMonthly1() throws Exception{
+        Appointment app = AbstractAssertion.generateDefaultAppointment(calendarManager.getPrivateFolder());
+        app.set(Appointment.RECURRENCE_TYPE, Appointment.MONTHLY);
+        app.set(Appointment.INTERVAL, 1);
+        app.set(Appointment.RECURRENCE_COUNT, 7);
+        app.set(Appointment.DAY_IN_MONTH, 1);
+        app.set(Appointment.DAYS, Appointment.MONDAY);
+        
+        Changes changes = new Changes();
+        changes.put(Appointment.DAYS, 127);
+        
+        Expectations expectations = new Expectations(changes);
+        
+        positiveAssertion.check(app, changes, expectations);
     }
+
 }
