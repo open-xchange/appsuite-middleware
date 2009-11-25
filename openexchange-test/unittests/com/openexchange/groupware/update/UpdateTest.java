@@ -38,7 +38,7 @@ public class UpdateTest extends TestCase {
         existing_ctx_id = ContextStorage.getInstance().getContextId("defaultcontext");
         ctx = ContextStorage.getInstance().getContext(existing_ctx_id);
 
-        schema = SchemaStore.getInstance(SchemaStoreImpl.class.getName()).getSchema(ctx);
+        schema = SchemaStore.getInstance().getSchema(ctx);
      
         user_id = ctx.getMailadmin();
         user = UserStorage.getInstance().getUser(user_id, ctx);
