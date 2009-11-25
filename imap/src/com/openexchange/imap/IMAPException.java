@@ -871,8 +871,11 @@ public final class IMAPException extends MIMEMailException {
      */
     public static IMAPException create(final Code code, final IMAPConfig imapConfig, final Session session, final Throwable cause, final Object... messageArgs) {
         final IMAPCode imapCode = code.getImapCode();
-        final IMAPCode extendedCode = IMAPCode.getExtendedCode(imapCode);
-        if (null != imapConfig && null != session && null != extendedCode) {
+        if (null != imapConfig && null != session) {
+            final IMAPCode extendedCode = IMAPCode.getExtendedCode(imapCode);
+            if (null == extendedCode) {
+                return new IMAPException(imapCode.getCategory(), imapCode.getNumber(), imapCode.getMessage(), cause, messageArgs);
+            }
             final Object[] newArgs;
             int k;
             if (null == messageArgs) {
