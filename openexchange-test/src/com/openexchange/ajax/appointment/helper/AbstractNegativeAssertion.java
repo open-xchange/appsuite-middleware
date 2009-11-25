@@ -56,58 +56,33 @@ import com.openexchange.test.CalendarTestManager;
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class ExceptionAssertion extends AbstractAssertion {
+public abstract class AbstractNegativeAssertion extends AbstractAssertion {
 
-    public ExceptionAssertion(CalendarTestManager manager, int folderToWorkIn) {
+    public AbstractNegativeAssertion(CalendarTestManager manager, int folderToWorkIn) {
         super();
         this.manager = manager;
         manager.setFailOnError(false);
         this.folder = folderToWorkIn;
     }
 
-    public void check(Changes changes, OXError expectedError){
-        try {
-            createAndCheck(changes, expectedError);
-        } finally {
-            manager.cleanUp();
-        }
-        try {
-            updateAndCheck(changes, expectedError);
-        } finally {
-            manager.cleanUp();
-        }
-        
-    }
-    private void updateAndCheck(Changes changes, OXError expectedError) {
-        approachUsedForTest = "Create and update";
-        Appointment app;
-        try {
-            app = generateDefaultAppointment();
-            app.setParentFolderID(folder);
-        } catch (Exception e) {
-            fail2("Could not generate default appointment: " + e);
-            return;
-        }
+    public abstract void check(Changes changes, OXError expectedError);
 
-        create(app);
-        update(app, changes);
+    public abstract void check(Appointment startWith, Changes changes, OXError expectedError);
+
+    protected void createAndCheck(Appointment startWith, Changes changes, OXError expectedError) {
+        approachUsedForTest = "Create directly";
+
+        changes.update(startWith);
+        create(startWith);
 
         checkForError(expectedError);
     }
 
-    private void createAndCheck(Changes changes, OXError expectedError) {
-        approachUsedForTest = "Create directly";
-        Appointment app = null;
-        try {
-            app = generateDefaultAppointment();
-            app.setParentFolderID(folder);
-        } catch (Exception e) {
-            fail2("Could not generate default appointment: " + e);
-            return;
-        }
+    protected void updateAndCheck(Appointment startWith, Changes changes, OXError expectedError) {
+        approachUsedForTest = "Create and update";
 
-        changes.update(app);
-        create(app);
+        create(startWith);
+        update(startWith, changes);
 
         checkForError(expectedError);
     }

@@ -47,63 +47,44 @@
  *
  */
 
-package com.openexchange.ajax.appointment.recurrence;
+package com.openexchange.ajax.appointment.helper;
 
-import com.openexchange.ajax.AppointmentTest;
-import com.openexchange.ajax.appointment.helper.NegativeAssertionOnCreate;
-import com.openexchange.ajax.appointment.helper.NegativeAssertionOnUpdate;
-import com.openexchange.ajax.appointment.helper.PositiveAssertion;
-import com.openexchange.ajax.framework.UserValues;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.modules.Module;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.test.CalendarTestManager;
-import com.openexchange.test.FolderTestManager;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class ManagedAppointmentTest extends AppointmentTest {
+public class NegativeAssertionOnUpdate extends AbstractNegativeAssertion {
 
-    protected CalendarTestManager calendarManager;
-
-    protected FolderTestManager folderManager;
-
-    protected FolderObject folder;
-
-    protected NegativeAssertionOnUpdate negativeAssertionOnUpdate;
-
-    protected NegativeAssertionOnCreate negativeAssertionOnCreate;
-    
-    protected PositiveAssertion positiveAssertion;
-
-    public ManagedAppointmentTest(String name) {
-        super(name);
+    public NegativeAssertionOnUpdate(CalendarTestManager manager, int folderToWorkIn) {
+        super(manager, folderToWorkIn);
     }
 
     @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        calendarManager = new CalendarTestManager(getClient());
-        folderManager = new FolderTestManager(getClient());
-        UserValues values = getClient().getValues();
-        this.folder = folderManager.generateFolder(
-            "ManagedAppointmentTests",
-            Module.CALENDAR.getFolderConstant(),
-            values.getPrivateAppointmentFolder(),
-            values.getUserId());
-        folder = folderManager.insertFolderOnServer(folder);
-
-        this.negativeAssertionOnUpdate = new NegativeAssertionOnUpdate(calendarManager, folder.getObjectID());
-        this.negativeAssertionOnCreate = new NegativeAssertionOnCreate(calendarManager, folder.getObjectID());
-        this.positiveAssertion = new PositiveAssertion(calendarManager, folder.getObjectID());
-
+    public void check(Changes changes, OXError expectedError) {
+        Appointment app = null;
+        try {
+            app = generateDefaultAppointment();
+            app.setParentFolderID(folder);
+        } catch (Exception e) {
+            fail2("Could not generate default appointment: " + e);
+            return;
+        }
+        check(app, changes, expectedError);
     }
 
     @Override
-    protected void tearDown() throws Exception {
-        calendarManager.cleanUp();
-        folderManager.cleanUp();
-        super.tearDown();
+    public void check(Appointment startWith, Changes changes, OXError expectedError) {
+        try {
+            createAndCheck(startWith, changes, expectedError);
+        } finally {
+            manager.cleanUp();
+        }
+        try {
+            updateAndCheck(startWith, changes, expectedError);
+        } finally {
+            manager.cleanUp();
+        }
     }
-
 }

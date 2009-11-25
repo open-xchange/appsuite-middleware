@@ -52,7 +52,7 @@ package com.openexchange.ajax.appointment.recurrence;
 import com.openexchange.ajax.appointment.helper.AbstractAssertion;
 import com.openexchange.ajax.appointment.helper.Changes;
 import com.openexchange.ajax.appointment.helper.Expectations;
-import com.openexchange.ajax.appointment.helper.PositiveAssertion;
+import com.openexchange.ajax.appointment.helper.OXError;
 import com.openexchange.groupware.container.Appointment;
 
 
@@ -69,15 +69,29 @@ public class TestsForChangingFromOneRecurrenceTypeToAnother extends ManagedAppoi
         Appointment app = AbstractAssertion.generateDefaultAppointment(calendarManager.getPrivateFolder());
         app.set(Appointment.RECURRENCE_TYPE, Appointment.MONTHLY);
         app.set(Appointment.INTERVAL, 1);
-        app.set(Appointment.RECURRENCE_COUNT, 7);
         app.set(Appointment.DAY_IN_MONTH, 1);
         
         Changes changes = new Changes();
-        changes.put(Appointment.DAYS, Appointment.MONDAY);
+        changes.put(Appointment.RECURRENCE_TYPE, Appointment.MONTHLY);
+        changes.put(Appointment.INTERVAL, 1);
+        changes.put(Appointment.DAY_IN_MONTH, 1);
+        changes.put(Appointment.DAYS, Appointment.MONDAY); //this is the actual change
         
         Expectations expectations = new Expectations(changes);
         
         positiveAssertion.check(app, changes, expectations);
+    }
+    
+    public void testShouldFailChangingFromMonthly1ToMonthly2UsingOnlyAdditionalData() throws Exception{
+        Appointment app = AbstractAssertion.generateDefaultAppointment(calendarManager.getPrivateFolder());
+        app.set(Appointment.RECURRENCE_TYPE, Appointment.MONTHLY);
+        app.set(Appointment.INTERVAL, 1);
+        app.set(Appointment.DAY_IN_MONTH, 1);
+        
+        Changes changes = new Changes();
+        changes.put(Appointment.DAYS, Appointment.MONDAY);
+               
+        negativeAssertionOnUpdate.check(app, changes, new OXError("APP",999));
     }
 
     
@@ -85,16 +99,32 @@ public class TestsForChangingFromOneRecurrenceTypeToAnother extends ManagedAppoi
         Appointment app = AbstractAssertion.generateDefaultAppointment(calendarManager.getPrivateFolder());
         app.set(Appointment.RECURRENCE_TYPE, Appointment.MONTHLY);
         app.set(Appointment.INTERVAL, 1);
-        app.set(Appointment.RECURRENCE_COUNT, 7);
+        app.set(Appointment.DAY_IN_MONTH, 1);
+        app.set(Appointment.DAYS, Appointment.MONDAY);
+        
+        Changes changes = new Changes();
+        changes.put(Appointment.RECURRENCE_TYPE, Appointment.MONTHLY);
+        changes.put(Appointment.DAYS, 127);
+        changes.put(Appointment.INTERVAL, 1);
+        changes.put(Appointment.DAY_IN_MONTH, 1);
+        
+        Expectations expectations = new Expectations(changes);
+        
+        positiveAssertion.check(app, changes, expectations);
+    }
+    
+    
+    public void testShouldFailChangingFromMonthly2ToMonthly1UsingOnlyAdditionalData() throws Exception{
+        Appointment app = AbstractAssertion.generateDefaultAppointment(calendarManager.getPrivateFolder());
+        app.set(Appointment.RECURRENCE_TYPE, Appointment.MONTHLY);
+        app.set(Appointment.INTERVAL, 1);
         app.set(Appointment.DAY_IN_MONTH, 1);
         app.set(Appointment.DAYS, Appointment.MONDAY);
         
         Changes changes = new Changes();
         changes.put(Appointment.DAYS, 127);
-        
-        Expectations expectations = new Expectations(changes);
-        
-        positiveAssertion.check(app, changes, expectations);
+                
+        negativeAssertionOnUpdate.check(app, changes, new OXError("APP",999));
     }
 
 }

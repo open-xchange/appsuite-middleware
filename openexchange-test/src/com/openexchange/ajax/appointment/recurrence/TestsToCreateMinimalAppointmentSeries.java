@@ -74,7 +74,7 @@ public class TestsToCreateMinimalAppointmentSeries extends ManagedAppointmentTes
         changes.put(Appointment.DAYS, 127);
 
         // TODO: Needs to throw exception
-        exceptionAssertion.check(changes, new OXError("APP", 999));
+        negativeAssertionOnUpdate.check(changes, new OXError("APP", 999));
     }
 
     public void testShouldCreateDailyIntervalWithMinimalData() throws Exception {
@@ -114,7 +114,7 @@ public class TestsToCreateMinimalAppointmentSeries extends ManagedAppointmentTes
         changes.put(Appointment.RECURRENCE_TYPE, Appointment.MONTHLY);
         changes.put(Appointment.INTERVAL, 1);
 
-        exceptionAssertion.check(changes, new OXError("APP", 42));
+        negativeAssertionOnUpdate.check(changes, new OXError("APP", 42));
     }
 
     public void testShouldFailCreatingMonthly2IntervalWithoutDayInMonthInfo() throws Exception {
@@ -123,7 +123,7 @@ public class TestsToCreateMinimalAppointmentSeries extends ManagedAppointmentTes
         changes.put(Appointment.INTERVAL, 1);
         changes.put(Appointment.DAYS, Appointment.MONDAY);
 
-        exceptionAssertion.check(changes, new OXError("APP", 45));
+        negativeAssertionOnUpdate.check(changes, new OXError("APP", 45));
     }
 
     // first day every month
@@ -156,7 +156,7 @@ public class TestsToCreateMinimalAppointmentSeries extends ManagedAppointmentTes
         changes.put(Appointment.RECURRENCE_TYPE, Appointment.YEARLY);
         changes.put(Appointment.INTERVAL, 1);
 
-        exceptionAssertion.check(changes, new OXError("APP", 46));
+        negativeAssertionOnUpdate.check(changes, new OXError("APP", 46));
     }
 
     public void testShouldFailCreatingYearly2IntervalWithoutDayInMonthInfo() throws Exception {
@@ -165,7 +165,7 @@ public class TestsToCreateMinimalAppointmentSeries extends ManagedAppointmentTes
         changes.put(Appointment.INTERVAL, 1);
         changes.put(Appointment.DAYS, Appointment.MONDAY);
 
-        exceptionAssertion.check(changes, new OXError("APP", 48));
+        negativeAssertionOnUpdate.check(changes, new OXError("APP", 48));
     }
 
     public void testShouldFailCreatingYearlyIntervalWithoutMonth() throws Exception {
@@ -174,7 +174,7 @@ public class TestsToCreateMinimalAppointmentSeries extends ManagedAppointmentTes
         changes.put(Appointment.INTERVAL, 1);
         changes.put(Appointment.DAY_IN_MONTH, 1);
         // currently, this is app-0080, but this is not actually too complex, it is just missing a the "month" field
-        exceptionAssertion.check(changes, new OXError("APP", 999));
+        negativeAssertionOnUpdate.check(changes, new OXError("APP", 999));
     }
 
     public void testShouldCreateYearlyIntervalWithMinimalData() throws Exception {
@@ -205,7 +205,7 @@ public class TestsToCreateMinimalAppointmentSeries extends ManagedAppointmentTes
         Changes changes = new Changes();
         changes.put(Appointment.RECURRENCE_TYPE, Appointment.DAILY);
 
-        exceptionAssertion.check(changes, new OXError("APP", 999));
+        negativeAssertionOnUpdate.check(changes, new OXError("APP", 999));
     }
 
 }
