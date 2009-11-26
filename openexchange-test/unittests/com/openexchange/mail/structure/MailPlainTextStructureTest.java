@@ -135,7 +135,7 @@ public class MailPlainTextStructureTest extends AbstractMailTest {
             final JSONObject contentTypeJsonObject = jsonMailObject.getJSONObject("headers").getJSONObject("content-type");
             assertNotNull("Missing Content-Type header.", contentTypeJsonObject);
             
-            assertEquals("Unexpected Content-Type.", "text/plain", contentTypeJsonObject.getString("type"));
+            assertEquals("Unexpected Content-Type.", "text/plain", contentTypeJsonObject.getString("type").toLowerCase());
             
             final JSONObject parameterJsonObject = contentTypeJsonObject.getJSONObject("params");
             assertEquals("Unexpected charset.", "utf-8", parameterJsonObject.getString("charset").toLowerCase());
