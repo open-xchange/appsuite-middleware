@@ -111,11 +111,7 @@ public class AbstractAssertion extends Assert {
     }
 
     protected Appointment create(Appointment app) {
-        app = manager.insertAppointmentOnServer(app);
-        assertFalse(
-            state() + " Should not fail during creation of appointment with error: " + manager.getLastException(),
-            manager.hasLastException());
-        return app;
+        return manager.insertAppointmentOnServer(app);
     }
 
     protected void update(Appointment app, Changes changes) {
