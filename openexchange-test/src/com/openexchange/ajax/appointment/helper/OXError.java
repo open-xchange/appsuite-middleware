@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment.helper;
 
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 
 /**
