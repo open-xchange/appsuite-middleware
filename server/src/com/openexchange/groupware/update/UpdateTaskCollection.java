@@ -88,7 +88,7 @@ public class UpdateTaskCollection {
         if (null != staticTasks) {
             staticUpdateTaskList = new ArrayList<UpdateTask>();
             unmodifiable = true;
-            for (UpdateTask task : staticTasks) {
+            for (final UpdateTask task : staticTasks) {
                 staticUpdateTaskList.add(task);
             }
             updateTaskQueue = new LinkedBlockingQueue<UpdateTask>(staticUpdateTaskList);
@@ -188,7 +188,10 @@ public class UpdateTaskCollection {
                     final Iterator<UpdateTask> iter = tasks.iterator();
                     int vers = 0;
                     for (int i = 0; i < size; i++) {
-                        vers = Math.max(vers, iter.next().addedWithVersion());
+                        final UpdateTask updateTask = iter.next();
+                        if (null != updateTask) {
+                            vers = Math.max(vers, updateTask.addedWithVersion());
+                        }
                     }
                     version = tmp = vers;
                 }
