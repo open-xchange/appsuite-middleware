@@ -52,8 +52,6 @@ package com.openexchange.groupware.update;
 import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DBPoolingException;
@@ -78,25 +76,18 @@ public class UpdateProcess implements Runnable {
 
     private final int contextId;
 
-    private final Lock updateLock;
-
     private final SchemaStore schemaStore;
 
     public UpdateProcess(int contextId) throws SchemaException {
         super();
         schemaStore = SchemaStore.getInstance();
         this.contextId = contextId;
-        this.updateLock = new ReentrantLock();
     }
 
     /**
      * {@inheritDoc}
      */
     public void run() {
-        /*
-         * Obtain lock
-         */
-        updateLock.lock();
         try {
             boolean unlock = false;
             /*
@@ -166,8 +157,6 @@ public class UpdateProcess implements Runnable {
             LOG.error(e.getMessage(), e);
         } catch (Throwable t) {
             LOG.error(t.getMessage(), t);
-        } finally {
-            updateLock.unlock();
         }
     }
 
