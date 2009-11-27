@@ -326,7 +326,7 @@ public class CalendarDataObject extends Appointment {
     }
 
     @Override
-    public Object clone() {
+    public CalendarDataObject clone() {
         final CalendarDataObject clone = (CalendarDataObject) super.clone();
         clone.setContext(getContext());
         if (containsObjectID()) {
