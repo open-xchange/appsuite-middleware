@@ -141,4 +141,8 @@ public class UpdateTaskCollection {
         }
         return retval;
     }
+
+    public void dirtyVersion() {
+        versionDirty.set(true);
+    }
 }

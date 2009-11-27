@@ -56,6 +56,7 @@ import java.util.concurrent.ConcurrentMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.groupware.update.UpdateTaskCollection;
 
 /**
  * {@link DynamicList} - Registry for {@link UpdateTask update tasks}.
@@ -80,8 +81,10 @@ public final class DynamicList implements UpdateTaskList {
 
     public boolean addUpdateTask(UpdateTask updateTask) {
         boolean added = (null == taskList.putIfAbsent(updateTask.getClass(), updateTask));
-        if (added) {
+        if (!added) {
             LOG.error("Update task \"" + updateTask.getClass().getName() + "\" is already registered.");
+        } else {
+            UpdateTaskCollection.getInstance().dirtyVersion();
         }
         return added;
     }
@@ -95,6 +98,8 @@ public final class DynamicList implements UpdateTaskList {
         UpdateTask removed = taskList.remove(updateTask.getClass());
         if (null == removed) {
             LOG.error("Update task \"" + updateTask.getClass().getName() + "\" is unknown and could not be deregistered.");
+        } else {
+            UpdateTaskCollection.getInstance().dirtyVersion();
         }
     }
 
