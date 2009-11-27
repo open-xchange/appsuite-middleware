@@ -49,92 +49,35 @@
 
 package com.openexchange.groupware.update.internal;
 
-import static com.openexchange.groupware.update.internal.SchemaExceptionMessages.*;
-import com.openexchange.exceptions.OXErrorMessage;
-import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.exceptions.ErrorMessage;
+import com.openexchange.exceptions.Exceptions;
+import com.openexchange.groupware.EnumComponent;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.exception.UpdateException;
 
 /**
- * Exception codes for the {@link SchemaException}.
- *
+ * Creates schema exceptions.
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public enum SchemaExceptionCodes implements OXErrorMessage {
+public class UpdateExceptionFactory extends Exceptions<UpdateException>  {
 
-    /**
-     * No row found in table version.
-     */
-    MISSING_VERSION_ENTRY(MISSING_VERSION_ENTRY_MSG, Category.SETUP_ERROR, 2),
-    /**
-     * Multiple rows found in table version.
-     */
-    MULTIPLE_VERSION_ENTRY(MULTIPLE_VERSION_ENTRY_MSG, Category.SETUP_ERROR, 4),
-    /**
-     * Update conflict detected. Another process is currently updating schema %1$s.
-     */
-    ALREADY_LOCKED(ALREADY_LOCKED_MSG, Category.PERMISSION, 8),
-    /**
-     * Locking schema %1$s failed. Lock information could not be written to database.
-     */
-    LOCK_FAILED(LOCK_FAILED_MSG, Category.INTERNAL_ERROR, 9),
-    /**
-     * A SQL problem occurred: %1$s.
-     */
-    SQL_PROBLEM(SQL_PROBLEM_MSG, Category.CODE_ERROR, 14),
-    /**
-     * Cannot get database connection.
-     */
-    DATABASE_DOWN(DATABASE_DOWN_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 15);
+    private static final UpdateExceptionFactory SINGLETON = new UpdateExceptionFactory();
 
-    /**
-     * Message of the exception.
-     */
-    final String message;
-
-    /**
-     * Category of the exception.
-     */
-    final Category category;
-
-    /**
-     * Detail number of the exception.
-     */
-    final int number;
-
-    /**
-     * Default constructor.
-     * 
-     * @param message message.
-     * @param category category.
-     * @param number detail number.
-     */
-    private SchemaExceptionCodes(String message, Category category, int number) {
-        this.message = message;
-        this.category = category;
-        this.number = number;
+    private UpdateExceptionFactory() {
+        super();
     }
 
-    public Category getCategory() {
-        return category;
+    public static UpdateExceptionFactory getInstance() {
+        return SINGLETON;
     }
 
-    public int getDetailNumber() {
-        return number;
+    @Override
+    protected UpdateException createException(ErrorMessage message, Throwable cause, Object... args) {
+        return new UpdateException(EnumComponent.UPDATE, message.getCategory(), message.getDetailNumber(), message.getMessage(), cause, args);
     }
 
-    public String getHelp() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public SchemaException create(Object... messageArgs) {
-        return SchemaExceptionFactory.getInstance().create(this, messageArgs);
-    }
-
-    public SchemaException create(final Throwable cause, final Object... messageArgs) {
-        return SchemaExceptionFactory.getInstance().create(this, cause, messageArgs);
+    @Override
+    protected void knownExceptions() {
+        declareAll(UpdateExceptionCodes.values());
     }
 }

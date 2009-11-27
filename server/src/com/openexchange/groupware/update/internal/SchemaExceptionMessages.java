@@ -62,6 +62,10 @@ public final class SchemaExceptionMessages implements LocalizableStrings {
 
     public static final String MULTIPLE_VERSION_ENTRY_MSG = "Multiple rows found in table version.";
 
+    public static final String ALREADY_LOCKED_MSG = "Update conflict detected. Another process is currently updating schema %1$s.";
+
+    public static final String LOCK_FAILED_MSG = "Table update failed. Schema %1$s could not be locked.";
+
     public static final String SQL_PROBLEM_MSG = "A SQL problem occurred: %1$s.";
 
     public static final String DATABASE_DOWN_MSG = "Cannot get database connection.";

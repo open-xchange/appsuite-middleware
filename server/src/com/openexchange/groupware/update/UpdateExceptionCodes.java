@@ -47,78 +47,28 @@
  *
  */
 
-package com.openexchange.groupware.update.internal;
+package com.openexchange.groupware.update;
 
-import static com.openexchange.groupware.update.internal.SchemaExceptionMessages.*;
 import com.openexchange.exceptions.OXErrorMessage;
 import com.openexchange.groupware.AbstractOXException.Category;
 
+
 /**
- * Exception codes for the {@link SchemaException}.
+ * {@link UpdateExceptionCodes}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public enum SchemaExceptionCodes implements OXErrorMessage {
-
-    /**
-     * No row found in table version.
-     */
-    MISSING_VERSION_ENTRY(MISSING_VERSION_ENTRY_MSG, Category.SETUP_ERROR, 2),
-    /**
-     * Multiple rows found in table version.
-     */
-    MULTIPLE_VERSION_ENTRY(MULTIPLE_VERSION_ENTRY_MSG, Category.SETUP_ERROR, 4),
-    /**
-     * Update conflict detected. Another process is currently updating schema %1$s.
-     */
-    ALREADY_LOCKED(ALREADY_LOCKED_MSG, Category.PERMISSION, 8),
-    /**
-     * Locking schema %1$s failed. Lock information could not be written to database.
-     */
-    LOCK_FAILED(LOCK_FAILED_MSG, Category.INTERNAL_ERROR, 9),
-    /**
-     * A SQL problem occurred: %1$s.
-     */
-    SQL_PROBLEM(SQL_PROBLEM_MSG, Category.CODE_ERROR, 14),
-    /**
-     * Cannot get database connection.
-     */
-    DATABASE_DOWN(DATABASE_DOWN_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 15);
-
-    /**
-     * Message of the exception.
-     */
-    final String message;
-
-    /**
-     * Category of the exception.
-     */
-    final Category category;
-
-    /**
-     * Detail number of the exception.
-     */
-    final int number;
-
-    /**
-     * Default constructor.
-     * 
-     * @param message message.
-     * @param category category.
-     * @param number detail number.
-     */
-    private SchemaExceptionCodes(String message, Category category, int number) {
-        this.message = message;
-        this.category = category;
-        this.number = number;
-    }
+public enum UpdateExceptionCodes implements OXErrorMessage {
+    ;
 
     public Category getCategory() {
-        return category;
+        // TODO Auto-generated method stub
+        return null;
     }
 
     public int getDetailNumber() {
-        return number;
+        // TODO Auto-generated method stub
+        return 0;
     }
 
     public String getHelp() {
@@ -127,14 +77,8 @@ public enum SchemaExceptionCodes implements OXErrorMessage {
     }
 
     public String getMessage() {
-        return message;
+        // TODO Auto-generated method stub
+        return null;
     }
 
-    public SchemaException create(Object... messageArgs) {
-        return SchemaExceptionFactory.getInstance().create(this, messageArgs);
-    }
-
-    public SchemaException create(final Throwable cause, final Object... messageArgs) {
-        return SchemaExceptionFactory.getInstance().create(this, cause, messageArgs);
-    }
 }

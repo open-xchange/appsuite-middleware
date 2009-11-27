@@ -54,8 +54,12 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.exceptions.osgi.ComponentRegistration;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.update.Initialization;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
+import com.openexchange.groupware.update.internal.SchemaExceptionFactory;
 
 /**
  * This {@link Activator} currently is only used to initialize some structures within the database update component. Lateron this may used
@@ -65,13 +69,19 @@ import com.openexchange.groupware.update.UpdateTaskProviderService;
  */
 public class Activator implements BundleActivator {
 
+    private static final String APPLICATION_ID = "com.openexchange.groupware.update";
+
     private final Stack<ServiceTracker> trackers = new Stack<ServiceTracker>();
+
+    private final Stack<ComponentRegistration> exceptions = new Stack<ComponentRegistration>();
 
     public Activator() {
         super();
     }
 
     public void start(BundleContext context) throws Exception {
+        exceptions.push(new ComponentRegistration(context, EnumComponent.UPDATE, APPLICATION_ID, SchemaExceptionFactory.getInstance()));
+//        exceptions.push(new ComponentRegistration(context, EnumComponent.UPDATE, APPLICATION_ID, UpdateExceptionFactory.getInstance()));
         trackers.push(new ServiceTracker(context, ConfigurationService.class.getName(), new ConfigurationCustomizer(context)));
         trackers.push(new ServiceTracker(context, UpdateTaskProviderService.class.getName(), new UpdateTaskCustomizer(context)));
         Initialization.getInstance().start();
@@ -87,5 +97,8 @@ public class Activator implements BundleActivator {
         }
         Initialization.getInstance().stop();
         // TODO Auto-generated method stub
+        while (!exceptions.isEmpty()) {
+            exceptions.pop().unregister();
+        }
     }
 }
