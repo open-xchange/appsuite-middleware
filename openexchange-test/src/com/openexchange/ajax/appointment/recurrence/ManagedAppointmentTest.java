@@ -50,10 +50,14 @@
 package com.openexchange.ajax.appointment.recurrence;
 
 import com.openexchange.ajax.AppointmentTest;
+import com.openexchange.ajax.appointment.helper.AbstractAssertion;
 import com.openexchange.ajax.appointment.helper.NegativeAssertionOnCreate;
 import com.openexchange.ajax.appointment.helper.NegativeAssertionOnUpdate;
-import com.openexchange.ajax.appointment.helper.PositiveAssertion;
+import com.openexchange.ajax.appointment.helper.AbstractPositiveAssertion;
+import com.openexchange.ajax.appointment.helper.PositiveAssertionOnCreate;
+import com.openexchange.ajax.appointment.helper.PositiveAssertionOnUpdate;
 import com.openexchange.ajax.framework.UserValues;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.test.CalendarTestManager;
@@ -73,8 +77,10 @@ public class ManagedAppointmentTest extends AppointmentTest {
     protected NegativeAssertionOnUpdate negativeAssertionOnUpdate;
 
     protected NegativeAssertionOnCreate negativeAssertionOnCreate;
-    
-    protected PositiveAssertion positiveAssertion;
+
+    protected AbstractPositiveAssertion positiveAssertionOnCreate;
+
+    protected PositiveAssertionOnUpdate positiveAssertionOnUpdate;
 
     public ManagedAppointmentTest(String name) {
         super(name);
@@ -95,15 +101,40 @@ public class ManagedAppointmentTest extends AppointmentTest {
 
         this.negativeAssertionOnUpdate = new NegativeAssertionOnUpdate(calendarManager, folder.getObjectID());
         this.negativeAssertionOnCreate = new NegativeAssertionOnCreate(calendarManager, folder.getObjectID());
-        this.positiveAssertion = new PositiveAssertion(calendarManager, folder.getObjectID());
+        this.positiveAssertionOnUpdate = new PositiveAssertionOnUpdate(calendarManager, folder.getObjectID());
+        this.positiveAssertionOnCreate = new PositiveAssertionOnCreate(calendarManager, folder.getObjectID());
 
     }
 
     @Override
     protected void tearDown() throws Exception {
-        calendarManager.cleanUp();
-        folderManager.cleanUp();
-        super.tearDown();
+        try {
+            calendarManager.cleanUp();
+        } finally {
+            try {
+                folderManager.cleanUp();
+            } finally {
+                super.tearDown();
+            }
+        }
+    }
+
+    protected Appointment generateMonthlyAppointment() {
+        Appointment app = AbstractAssertion.generateDefaultAppointment(folder.getObjectID());
+        app.set(Appointment.RECURRENCE_TYPE, Appointment.MONTHLY);
+        app.set(Appointment.INTERVAL, 1);
+        app.set(Appointment.DAY_IN_MONTH, 1);
+        app.set(Appointment.DAYS, Appointment.MONDAY);
+        return app;
+    }
+
+    protected Appointment generateYearlyAppointment() {
+        Appointment app = AbstractAssertion.generateDefaultAppointment(folder.getObjectID());
+        app.set(Appointment.RECURRENCE_TYPE, Appointment.YEARLY);
+        app.set(Appointment.INTERVAL, 1);
+        app.set(Appointment.DAY_IN_MONTH, 1);
+        app.set(Appointment.MONTH, 1);
+        return app;
     }
 
 }

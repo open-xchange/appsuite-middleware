@@ -49,15 +49,10 @@
 
 package com.openexchange.ajax.appointment.recurrence;
 
-import java.io.IOException;
-import org.json.JSONException;
-import org.xml.sax.SAXException;
-import com.openexchange.ajax.appointment.helper.AbstractAssertion;
 import com.openexchange.ajax.appointment.helper.Changes;
 import com.openexchange.ajax.appointment.helper.Expectations;
 import com.openexchange.ajax.appointment.helper.OXError;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
@@ -66,15 +61,6 @@ public class TestsForChangingAmongYearlyRecurrences extends ManagedAppointmentTe
 
     public TestsForChangingAmongYearlyRecurrences(String name) {
         super(name);
-    }
-
-    private Appointment generateYearlyAppointment() throws AjaxException, IOException, SAXException, JSONException {
-        Appointment app = AbstractAssertion.generateDefaultAppointment(calendarManager.getPrivateFolder());
-        app.set(Appointment.RECURRENCE_TYPE, Appointment.YEARLY);
-        app.set(Appointment.INTERVAL, 1);
-        app.set(Appointment.DAY_IN_MONTH, 1);
-        app.set(Appointment.MONTH, 1);
-        return app;
     }
 
     public void testShouldChangeFromYearly1ToYearly2() throws Exception {
@@ -89,7 +75,7 @@ public class TestsForChangingAmongYearlyRecurrences extends ManagedAppointmentTe
 
         Expectations expectations = new Expectations(changes);
 
-        positiveAssertion.check(app, changes, expectations);
+        positiveAssertionOnCreate.check(app, changes, expectations);
     }
 
     public void testShouldFailChangingFromYearly1ToYearly2UsingOnlyAdditionalData() throws Exception {
@@ -113,7 +99,7 @@ public class TestsForChangingAmongYearlyRecurrences extends ManagedAppointmentTe
 
         Expectations expectations = new Expectations(changes);
 
-        positiveAssertion.check(app, changes, expectations);
+        positiveAssertionOnCreate.check(app, changes, expectations);
     }
 
     public void testShouldChangeFromYearly2ToYearly1WithNull() throws Exception {
@@ -129,7 +115,7 @@ public class TestsForChangingAmongYearlyRecurrences extends ManagedAppointmentTe
         Expectations expectations = new Expectations(changes);
         expectations.put(Appointment.DAYS, 127);
 
-        positiveAssertion.check(app, changes, expectations);
+        positiveAssertionOnCreate.check(app, changes, expectations);
     }
 
     public void testShouldFailChangingFromYearly2ToYearly1WhileMissingMonth() throws Exception {

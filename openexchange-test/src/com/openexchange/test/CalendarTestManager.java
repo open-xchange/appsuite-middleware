@@ -208,21 +208,21 @@ public class CalendarTestManager {
         return appointment;
     }
 
-    public Appointment getAppointmentFromServer(int parentFolderID, int objectID) throws OXException, JSONException {
+    public Appointment getAppointmentFromServer(int parentFolderID, int objectID) throws OXException {
         GetRequest get = new GetRequest(parentFolderID, objectID, getFailOnError());
         GetResponse response = execute(get);
         extractInfo(response);
         return response.getAppointment(timezone);
     }
 
-    public Appointment getAppointmentFromServer(Appointment appointment) throws OXException, JSONException {
+    public Appointment getAppointmentFromServer(Appointment appointment) throws OXException {
         GetRequest get = new GetRequest(appointment, getFailOnError());
         GetResponse response = execute(get);
         extractInfo(response);
         return response.getAppointment(timezone);
     }
 
-    public Appointment getAppointmentFromServer(int parentFolderID, int objectID, boolean pleaseFailOnError) throws OXException, JSONException {
+    public Appointment getAppointmentFromServer(int parentFolderID, int objectID, boolean pleaseFailOnError) throws OXException {
         try {
             GetRequest get = new GetRequest(parentFolderID, objectID, pleaseFailOnError);
             GetResponse response = execute(get);
@@ -336,6 +336,15 @@ public class CalendarTestManager {
         appointment.setLastModified(new Date(Long.MAX_VALUE));
         DeleteRequest deleteRequest = new DeleteRequest(appointment);
         extractInfo(execute(deleteRequest));
+    }
+    
+    public void createDeleteException(int folder, int seriesId, int recurrencePos){
+        DeleteRequest deleteRequest = new DeleteRequest(seriesId, folder, recurrencePos, new Date(Long.MAX_VALUE));
+        extractInfo(execute(deleteRequest));
+    }
+    
+    public void createDeleteException(Appointment master, int recurrencePos){
+        createDeleteException(master.getParentFolderID(), master.getObjectID(), recurrencePos);
     }
 
     /*

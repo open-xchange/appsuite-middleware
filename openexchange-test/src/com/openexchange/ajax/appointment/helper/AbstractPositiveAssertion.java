@@ -49,71 +49,53 @@
 
 package com.openexchange.ajax.appointment.helper;
 
-import java.io.IOException;
 import java.util.List;
-import org.json.JSONException;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.test.CalendarTestManager;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class PositiveAssertion extends AbstractAssertion{
+public abstract class AbstractPositiveAssertion extends AbstractAssertion{
 
 
-    public PositiveAssertion(CalendarTestManager manager, int folder) throws AjaxException, IOException, SAXException, JSONException {
+    public AbstractPositiveAssertion(CalendarTestManager manager, int folder) {
         this.manager = manager;
         this.folder = folder;
     }
     
-    public void check(Changes changes, Expectations expectations) throws AjaxException, IOException, SAXException, JSONException {
+    public void check(Changes changes, Expectations expectations){
         check(generateDefaultAppointment(), changes, expectations);
     }
     
-    public void check(Appointment startAppointment, Changes changes, Expectations expectations) throws AjaxException, IOException, SAXException, JSONException{        
-        if(!startAppointment.containsParentFolderID())
-            startAppointment.setParentFolderID(folder);
-        
-        Appointment startAppointmentCopy = (Appointment) startAppointment.clone();
-        try {
-            createAndCheck(startAppointment, changes, expectations);
-        } finally {
-            manager.cleanUp();
-        }
-        try {
-            updateAndCheck(startAppointmentCopy, changes, expectations);
-        } finally {
-            manager.cleanUp();
-        }
-
-    }
+    public abstract void check(Appointment startAppointment, Changes changes, Expectations expectations);
     
     protected void updateAndCheck(Appointment startAppointment, Changes changes, Expectations expectations) {
+        Appointment copy = startAppointment.clone();
         approachUsedForTest = "Create, then update";
-        create(startAppointment);
-        update(startAppointment, changes);
-        checkViaGet(startAppointment.getParentFolderID(), startAppointment.getObjectID(), expectations);
-        checkViaList(startAppointment.getParentFolderID(), startAppointment.getObjectID(), expectations);
+        create(copy);
+        update(copy, changes);
+        checkViaGet(copy.getParentFolderID(), copy.getObjectID(), expectations);
+        checkViaList(copy.getParentFolderID(), copy.getObjectID(), expectations);
     }
 
     protected void createAndCheck(Appointment startAppointment, Changes changes, Expectations expectations) {
+        Appointment copy = startAppointment.clone();
         approachUsedForTest = "Create directly";
-        changes.update(startAppointment);
-        create(startAppointment);
+        changes.update(copy);
+        create(copy);
         if(manager.hasLastException())
             fail2("Could not create appointment, error: " + manager.getLastException());
-        checkViaGet(startAppointment.getParentFolderID(), startAppointment.getObjectID(), expectations);
-        checkViaList(startAppointment.getParentFolderID(), startAppointment.getObjectID(), expectations);
+        checkViaGet(copy.getParentFolderID(), copy.getObjectID(), expectations);
+        checkViaList(copy.getParentFolderID(), copy.getObjectID(), expectations);
     }
 
-    protected void checkViaList(int folder, int id, Expectations expectations){
+    protected void checkViaList(int folderId, int appointmentId, Expectations expectations){
         methodUsedForTest = "List";
         try {
-            List<Appointment> appointments = manager.list(new ListIDs(folder, id), expectations.getKeys());
-            Appointment actual = find(appointments, folder, id);
+            List<Appointment> appointments = manager.list(new ListIDs(folderId, appointmentId), expectations.getKeys());
+            Appointment actual = find(appointments, folderId, appointmentId);
             if(manager.hasLastException())
                 fail2("Exception occured: " + manager.getLastException());
             expectations.verify(state(),actual);
@@ -124,11 +106,11 @@ public class PositiveAssertion extends AbstractAssertion{
         
     }
 
-    protected void checkViaGet(int folder, int id, Expectations expectations) {
+    protected void checkViaGet(int folderId, int appointmentId, Expectations expectations) {
         methodUsedForTest = "Get";
         Appointment actual;
         try {
-            actual = manager.getAppointmentFromServer(folder, id);
+            actual = manager.getAppointmentFromServer(folderId, appointmentId);
             if(manager.hasLastException())
                 fail2("Exception occured: " + manager.getLastException());
         } catch (Exception e) {

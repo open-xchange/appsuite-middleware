@@ -49,15 +49,10 @@
 
 package com.openexchange.ajax.appointment.recurrence;
 
-import java.io.IOException;
-import org.json.JSONException;
-import org.xml.sax.SAXException;
-import com.openexchange.ajax.appointment.helper.AbstractAssertion;
 import com.openexchange.ajax.appointment.helper.Changes;
 import com.openexchange.ajax.appointment.helper.Expectations;
 import com.openexchange.ajax.appointment.helper.OXError;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
@@ -66,15 +61,6 @@ public class TestsForChangingAmongMonthlyRecurrences extends ManagedAppointmentT
 
     public TestsForChangingAmongMonthlyRecurrences(String name) {
         super(name);
-    }
-
-    private Appointment generateMonthlyAppointment() throws AjaxException, IOException, SAXException, JSONException {
-        Appointment app = AbstractAssertion.generateDefaultAppointment(calendarManager.getPrivateFolder());
-        app.set(Appointment.RECURRENCE_TYPE, Appointment.MONTHLY);
-        app.set(Appointment.INTERVAL, 1);
-        app.set(Appointment.DAY_IN_MONTH, 1);
-        app.set(Appointment.DAYS, Appointment.MONDAY);
-        return app;
     }
 
     public void testShouldChangeFromMonthly1ToMonthly2() throws Exception {
@@ -88,7 +74,8 @@ public class TestsForChangingAmongMonthlyRecurrences extends ManagedAppointmentT
 
         Expectations expectations = new Expectations(changes);
 
-        positiveAssertion.check(app, changes, expectations);
+        positiveAssertionOnCreate.check(app, changes, expectations);
+        positiveAssertionOnUpdate.check(app, changes, expectations);
     }
 
     public void testShouldFailChangingFromMonthly1ToMonthly2UsingOnlyAdditionalData() throws Exception {
@@ -97,6 +84,7 @@ public class TestsForChangingAmongMonthlyRecurrences extends ManagedAppointmentT
         Changes changes = new Changes();
         changes.put(Appointment.DAYS, Appointment.MONDAY);
 
+        positiveAssertionOnCreate.check(app, changes, new Expectations(changes));
         negativeAssertionOnUpdate.check(app, changes, new OXError("APP", 999));
     }
 
@@ -111,7 +99,8 @@ public class TestsForChangingAmongMonthlyRecurrences extends ManagedAppointmentT
 
         Expectations expectations = new Expectations(changes);
 
-        positiveAssertion.check(app, changes, expectations);
+        positiveAssertionOnCreate.check(app, changes, expectations);
+        positiveAssertionOnUpdate.check(app, changes, expectations);
     }
 
     public void testShouldChangeFromMonthly2ToMonthly1WithNull() throws Exception {
@@ -126,7 +115,8 @@ public class TestsForChangingAmongMonthlyRecurrences extends ManagedAppointmentT
         Expectations expectations = new Expectations(changes);
         expectations.put(Appointment.DAYS, 127);
 
-        positiveAssertion.check(app, changes, expectations);
+        positiveAssertionOnCreate.check(app, changes, expectations);
+        positiveAssertionOnUpdate.check(app, changes, expectations);
     }
 
     public void testShouldFailChangingFromMonthly2ToMonthly1UsingOnlyAdditionalData() throws Exception {
@@ -135,6 +125,7 @@ public class TestsForChangingAmongMonthlyRecurrences extends ManagedAppointmentT
         Changes changes = new Changes();
         changes.put(Appointment.DAYS, 127);
 
+        positiveAssertionOnCreate.check(app, changes, new Expectations(changes));
         negativeAssertionOnUpdate.check(app, changes, new OXError("APP", 999));
     }
 
