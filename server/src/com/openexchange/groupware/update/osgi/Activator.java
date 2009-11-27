@@ -53,6 +53,8 @@ import java.util.Stack;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.groupware.update.Initialization;
 
 /**
  * This {@link Activator} currently is only used to initialize some structures within the database update component. Lateron this may used
@@ -69,12 +71,19 @@ public class Activator implements BundleActivator {
     }
 
     public void start(BundleContext context) throws Exception {
+        trackers.push(new ServiceTracker(context, ConfigurationService.class.getName(), new ConfigurationCustomizer(context)));
+        Initialization.getInstance().start();
         // TODO Auto-generated method stub
-
+        for (final ServiceTracker tracker : trackers) {
+            tracker.open();
+        }
     }
 
     public void stop(BundleContext context) throws Exception {
+        while (!trackers.isEmpty()) {
+            trackers.pop().close();
+        }
+        Initialization.getInstance().stop();
         // TODO Auto-generated method stub
-
     }
 }

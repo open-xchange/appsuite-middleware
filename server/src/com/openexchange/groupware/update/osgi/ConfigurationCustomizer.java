@@ -47,31 +47,40 @@
  *
  */
 
-package com.openexchange.server.osgi;
+package com.openexchange.groupware.update.osgi;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.groupware.update.ConfiguredUpdateTasks;
 
 /**
- * {@link Activator} combines several activators in the server bundle that have been prepared to split up the server bundle into several
- * bundles. Currently this is not done to keep number of packages low.
+ * {@link ConfigurationCustomizer}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Activator extends CompositeBundleActivator {
+public class ConfigurationCustomizer implements ServiceTrackerCustomizer {
 
-    private final BundleActivator[] activators = {
-        new com.openexchange.database.osgi.Activator(),
-        new com.openexchange.server.osgi.ServerActivator(),
-        new com.openexchange.groupware.update.osgi.Activator()
-    };
+    private final BundleContext context;
 
-    public Activator() {
+    public ConfigurationCustomizer(BundleContext context) {
         super();
+        this.context = context;
     }
 
-    @Override
-    protected BundleActivator[] getActivators() {
-        return activators;
+    public Object addingService(ServiceReference reference) {
+        ConfigurationService configService = (ConfigurationService) context.getService(reference);
+        ConfiguredUpdateTasks.getInstance().loadConfiguration(configService);
+        return configService;
+    }
+
+    public void modifiedService(ServiceReference reference, Object service) {
+        // Nothing to do.
+    }
+
+    public void removedService(ServiceReference reference, Object service) {
+        ConfiguredUpdateTasks.getInstance().setConfigured(false);
+        context.ungetService(reference);
     }
 }

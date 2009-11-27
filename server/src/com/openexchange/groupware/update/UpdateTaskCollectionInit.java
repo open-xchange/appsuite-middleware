@@ -75,6 +75,7 @@ public final class UpdateTaskCollectionInit implements Initialization {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(UpdateTaskCollectionInit.class);
 
+    @Deprecated
     private static final String PROPERTYNAME = "UPDATETASKSCFG";
 
     /**
@@ -96,6 +97,7 @@ public final class UpdateTaskCollectionInit implements Initialization {
         started = new AtomicBoolean();
     }
 
+    @Deprecated
     private List<UpdateTask> getStaticUpdateTasks() {
         final String propStr;
         if ((propStr = SystemConfig.getProperty(PROPERTYNAME)) == null) {

@@ -49,6 +49,20 @@
 
 package com.openexchange.groupware.update;
 
+import static com.openexchange.tools.io.IOUtils.closeReaderStuff;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.tools.encoding.Charsets;
+
 /**
  * This class contains the list of configured update tasks. The configuration can be done by the configuration file updatetasks.cfg.
  *
@@ -58,9 +72,87 @@ public class ConfiguredUpdateTasks {
 
     private static final ConfiguredUpdateTasks SINGLETON = new ConfiguredUpdateTasks();
 
+    private static final Log LOG = LogFactory.getLog(ConfiguredUpdateTasks.class);
+
+    private static final String PROPERTYNAME = "UPDATETASKSCFG";
+
+    private boolean configured = false;
+
+    private List<UpdateTask> taskList = new ArrayList<UpdateTask>();
+
     private ConfiguredUpdateTasks() {
         super();
     }
 
-    
+    public static ConfiguredUpdateTasks getInstance() {
+        return SINGLETON;
+    }
+
+    public void loadConfiguration(ConfigurationService configService) {
+        File updateTasks = getUpdateTaskFile(configService);
+        if (null == updateTasks) {
+            configured = false;
+            return;
+        }
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(new InputStreamReader(new FileInputStream(updateTasks), Charsets.UTF_8));
+            String line = null;
+            while ((line = reader.readLine()) != null) {
+                final String l = line.trim();
+                if ((l.length() == 0) || (l.charAt(0) == '#')) {
+                    continue;
+                }
+                try {
+                    taskList.add(Class.forName(l).asSubclass(UpdateTask.class).newInstance());
+                } catch (ClassNotFoundException e) {
+                    LOG.error(e.getMessage(), e);
+                    continue;
+                } catch (IllegalArgumentException e) {
+                    LOG.error(e.getMessage(), e);
+                    continue;
+                } catch (SecurityException e) {
+                    LOG.error(e.getMessage(), e);
+                    continue;
+                } catch (InstantiationException e) {
+                    LOG.error(e.getMessage(), e);
+                    continue;
+                } catch (IllegalAccessException e) {
+                    LOG.error(e.getMessage(), e);
+                    continue;
+                }
+            }
+            configured = true;
+        } catch (FileNotFoundException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (IOException e) {
+            LOG.error(e.getMessage(), e);
+        } finally {
+            closeReaderStuff(reader);
+        }
+    }
+
+    private File getUpdateTaskFile(ConfigurationService configService) {
+        String fileName = configService.getProperty(PROPERTYNAME);
+        if (null == fileName) {
+            return null;
+        }
+        File retval = new File(fileName);
+        if (!retval.exists() || !retval.isFile()) {
+            return null;
+        }
+        return retval;
+    }
+
+    public void setConfigured(boolean configured) {
+        this.configured = configured;
+    }
+
+    public boolean isConfigured() {
+        return configured;
+    }
+
+    public UpdateTask[] getTaskList() {
+        return taskList.toArray(new UpdateTask[taskList.size()]);
+    }
 }

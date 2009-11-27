@@ -78,12 +78,15 @@ public final class Initialization {
 
     public void start() {
         if (!started.compareAndSet(false, true)) {
-            LOG.error("UpdateTaskCollection has already been started", new Throwable());
+            LOG.error("Database update component has already been started.", new Throwable());
         }
-
+        // TODO Auto-generated method stub
     }
 
     public void stop() {
-        
+        if (!started.compareAndSet(true, false)) {
+            LOG.error("Database update component cannot be stopped since it has not been started before.", new Throwable());
+        }
+        // TODO Auto-generated method stub
     }
 }
