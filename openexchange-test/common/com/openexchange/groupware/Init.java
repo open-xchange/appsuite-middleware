@@ -176,10 +176,6 @@ public final class Init {
          */
         com.openexchange.configuration.SystemConfig.getInstance(),
         /**
-         * Read in update tasks
-         */
-        com.openexchange.groupware.update.UpdateTaskCollectionInit.getInstance(),
-        /**
          * Reads the calendar.properties.
          */
         com.openexchange.groupware.calendar.CalendarConfig.getInstance(),
@@ -293,6 +289,7 @@ public final class Init {
         startAndInjectServerConfiguration();
         startAndInjectNotification();
         startAndInjectDatabaseBundle();
+        startAndInjectDatabaseUpdate();
         startAndInjectCache();
         startAndInjectI18NBundle();
         startAndInjectMonitoringBundle();
@@ -373,7 +370,7 @@ public final class Init {
     private static final AbstractOXException getWrappingOXException(final Exception cause) {
         final String message = cause.getMessage();
         final Component c = new Component() {
-
+            private static final long serialVersionUID = 2411378382745647554L;
             public String getAbbreviation() {
                 return "TEST";
             }
@@ -441,6 +438,11 @@ public final class Init {
         com.openexchange.database.internal.Initialization.getInstance().getTimer().setTimerService(timerService);
         final DatabaseService dbService = com.openexchange.database.internal.Initialization.getInstance().start(configurationService);
         Database.setDatabaseService(dbService);
+    }
+
+    public static void startAndInjectDatabaseUpdate() {
+        // Not configuring configured update task list.
+        com.openexchange.groupware.update.Initialization.getInstance().start();
     }
 
     private static void startAndInjectMonitoringBundle() {
