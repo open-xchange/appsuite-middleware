@@ -49,12 +49,12 @@
 
 package com.openexchange.groupware.tasks;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.TaskException.Code;
 
@@ -226,6 +226,7 @@ public final class SQL {
             if (null == mapper) {
                 switch (i) {
                 case Task.PARTICIPANTS:
+                case Task.USERS:
                 case Task.ALARM:
                     break;
                 case Task.FOLDER_ID:
@@ -234,7 +235,7 @@ public final class SQL {
                     }
                     break;
                 default:
-                    throw new TaskException(Code.UNKNOWN_ATTRIBUTE, Integer.valueOf(i));
+                    throw new TaskException(Code.UNKNOWN_ATTRIBUTE, I(i));
                 }
             } else {
                 sql.append(mapper.getDBColumnName());

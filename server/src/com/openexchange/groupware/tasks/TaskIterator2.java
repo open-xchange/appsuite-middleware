@@ -290,11 +290,9 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
         for (int i = 0; i < tasks.size(); i++) {
             ids[i] = tasks.get(i).getObjectID();
         }
-        final Map<Integer, Set<TaskParticipant>> parts = partStor
-            .selectParticipants(ctx, ids, type);
+        final Map<Integer, Set<TaskParticipant>> parts = partStor.selectParticipants(ctx, ids, type);
         for (final Task task : tasks) {
-            final Set<TaskParticipant> participants = parts.get(Integer
-                .valueOf(task.getObjectID()));
+            final Set<TaskParticipant> participants = parts.get(Integer.valueOf(task.getObjectID()));
             if (null != participants) {
                 task.setParticipants(TaskLogic.createParticipants(participants));
                 task.setUsers(TaskLogic.createUserParticipants(participants));
