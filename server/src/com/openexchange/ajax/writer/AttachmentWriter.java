@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.ajax.writer;
 
 import java.util.Date;
@@ -64,53 +62,53 @@ import com.openexchange.tools.iterator.SearchIteratorException;
 
 
 public class AttachmentWriter extends TimedWriter {
-	
-	public AttachmentWriter(final JSONWriter writer) {
-		super(writer);
-	}
+    
+    public AttachmentWriter(final JSONWriter writer) {
+        super(writer);
+    }
 
-	public void writeAttachments(final SearchIterator iterator, final AttachmentField[] columns, final TimeZone tz) throws JSONException, SearchIteratorException, OXException {
-		jsonWriter.array();
-		fillArray(iterator,columns,tz);
-		jsonWriter.endArray();
-	}
+    public void writeAttachments(final SearchIterator iterator, final AttachmentField[] columns, final TimeZone tz) throws JSONException, SearchIteratorException, OXException {
+        jsonWriter.array();
+        fillArray(iterator,columns,tz);
+        jsonWriter.endArray();
+    }
 
-	@Override
-	protected void fillArray(final SearchIterator iterator, final Object[] columns, final TimeZone tz) throws SearchIteratorException, OXException, JSONException {
-		while(iterator.hasNext()) {
-			jsonWriter.array();
-			final AttachmentMetadata attachment = (AttachmentMetadata) iterator.next();
-			final GetSwitch get = new GetSwitch(attachment);
-			for(final AttachmentField column : (AttachmentField[])columns) {
-				Object o = column.doSwitch(get);
-				o = jsonCompat(o,column,tz);
-				jsonWriter.value(o);
-			}
-			jsonWriter.endArray();
-		}
-	}
+    @Override
+    protected void fillArray(final SearchIterator iterator, final Object[] columns, final TimeZone tz) throws SearchIteratorException, OXException, JSONException {
+        while(iterator.hasNext()) {
+            jsonWriter.array();
+            final AttachmentMetadata attachment = (AttachmentMetadata) iterator.next();
+            final GetSwitch get = new GetSwitch(attachment);
+            for(final AttachmentField column : (AttachmentField[])columns) {
+                Object o = column.doSwitch(get);
+                o = jsonCompat(o,column,tz);
+                jsonWriter.value(o);
+            }
+            jsonWriter.endArray();
+        }
+    }
 
-	private Object jsonCompat(final Object o, final AttachmentField column, final TimeZone tz) {
-		if(column.getId() == AttachmentField.CREATION_DATE) {
-			final long time = ((Date)o).getTime();
-			final int offset = tz.getOffset(time);
-			return Long.valueOf(time + offset);
-		} 
-		return o;
-	}
+    private Object jsonCompat(final Object o, final AttachmentField column, final TimeZone tz) {
+        if(column.getId() == AttachmentField.CREATION_DATE) {
+            final long time = ((Date)o).getTime();
+            final int offset = tz.getOffset(time);
+            return Long.valueOf(time + offset);
+        } 
+        return o;
+    }
 
-	public void write(final AttachmentMetadata attachment, final TimeZone tz) throws JSONException {
-		jsonWriter.object();
-		final GetSwitch get = new GetSwitch(attachment);
-		for(final AttachmentField column : AttachmentField.VALUES) {
-			jsonWriter.key(column.getName());
-			jsonWriter.value(jsonCompat(column.doSwitch(get),column, tz));
-		}
-		jsonWriter.endObject();
-	}
+    public void write(final AttachmentMetadata attachment, final TimeZone tz) throws JSONException {
+        jsonWriter.object();
+        final GetSwitch get = new GetSwitch(attachment);
+        for(final AttachmentField column : AttachmentField.VALUES) {
+            jsonWriter.key(column.getName());
+            jsonWriter.value(jsonCompat(column.doSwitch(get),column, tz));
+        }
+        jsonWriter.endObject();
+    }
 
-	@Override
-	protected int getId(final Object object) {
-		return ((AttachmentMetadata)object).getId();
-	}
+    @Override
+    protected int getId(final Object object) {
+        return ((AttachmentMetadata)object).getId();
+    }
 }
