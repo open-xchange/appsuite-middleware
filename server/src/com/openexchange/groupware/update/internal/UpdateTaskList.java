@@ -47,40 +47,18 @@
  *
  */
 
-package com.openexchange.groupware.update.osgi;
+package com.openexchange.groupware.update.internal;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.groupware.update.internal.ConfiguredUpdateTaskList;
+import java.util.List;
+import com.openexchange.groupware.update.UpdateTask;
 
 /**
- * {@link ConfigurationCustomizer}
+ * {@link UpdateTaskList}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class ConfigurationCustomizer implements ServiceTrackerCustomizer {
+public interface UpdateTaskList {
 
-    private final BundleContext context;
+    List<UpdateTask> getTaskList();
 
-    public ConfigurationCustomizer(BundleContext context) {
-        super();
-        this.context = context;
-    }
-
-    public Object addingService(ServiceReference reference) {
-        ConfigurationService configService = (ConfigurationService) context.getService(reference);
-        ConfiguredUpdateTaskList.getInstance().loadConfiguration(configService);
-        return configService;
-    }
-
-    public void modifiedService(ServiceReference reference, Object service) {
-        // Nothing to do.
-    }
-
-    public void removedService(ServiceReference reference, Object service) {
-        ConfiguredUpdateTaskList.getInstance().setConfigured(false);
-        context.ungetService(reference);
-    }
 }

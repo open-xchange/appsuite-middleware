@@ -58,7 +58,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.groupware.update.DynamicUpdateTaskList;
+import com.openexchange.groupware.update.internal.DynamicUpdateTaskList;
 
 /**
  * {@link UpdateTaskCustomizer} - The {@link ServiceTrackerCustomizer service tracker customizer} for update tasks.

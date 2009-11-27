@@ -47,60 +47,46 @@
  *
  */
 
-package com.openexchange.groupware.update;
+package com.openexchange.groupware.update.internal;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.groupware.update.UpdateTaskCollection;
 
 /**
  * {@link DynamicUpdateTaskList} - Registry for {@link UpdateTask update tasks}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DynamicUpdateTaskList {
+public final class DynamicUpdateTaskList implements UpdateTaskList {
 
     private static final Log LOG = LogFactory.getLog(DynamicUpdateTaskList.class);
 
     private static final DynamicUpdateTaskList SINGLETON = new DynamicUpdateTaskList();
 
-    private final ConcurrentMap<Class<? extends UpdateTask>, UpdateTask> registry = new ConcurrentHashMap<Class<? extends UpdateTask>, UpdateTask>();
+    private final ConcurrentMap<Class<? extends UpdateTask>, UpdateTask> taskList = new ConcurrentHashMap<Class<? extends UpdateTask>, UpdateTask>();
 
-    /**
-     * Initializes a new {@link DynamicUpdateTaskList}.
-     */
     public DynamicUpdateTaskList() {
         super();
     }
 
-    /**
-     * Gets the {@link DynamicUpdateTaskList} instance.
-     * 
-     * @return The {@link DynamicUpdateTaskList} instance
-     */
     public static DynamicUpdateTaskList getInstance() {
         return SINGLETON;
     }
 
-    /*
-     * Member section
-     */
-
-    /**
-     * Adds specified update task to this registry.
-     * 
-     * @param updateTask The update task
-     */
-    public boolean addUpdateTask(final UpdateTask updateTask) {
-        final boolean added = (null == registry.putIfAbsent(updateTask.getClass(), updateTask));
+    public boolean addUpdateTask(UpdateTask updateTask) {
+        final boolean added = (null == taskList.putIfAbsent(updateTask.getClass(), updateTask));
         if (added && !UpdateTaskCollection.addDiscoveredUpdateTask(updateTask)) {
-            LOG.info(new StringBuilder(64).append("Update task \"").append(updateTask.getClass().getName()).append(
-                "\" could not be added either due to static update task setup or because update process has already ran."));
+            LOG.info("Update task \"" + updateTask.getClass().getName() + "\" could not be added either due to static update task setup or because update process has already ran.");
         }
         return added;
     }
@@ -111,7 +97,7 @@ public final class DynamicUpdateTaskList {
      * @param updateTask The update task
      */
     public void removeUpdateTask(final UpdateTask updateTask) {
-        final UpdateTask removed = registry.remove(updateTask.getClass());
+        final UpdateTask removed = taskList.remove(updateTask.getClass());
         if (null != removed) {
             UpdateTaskCollection.removeDiscoveredUpdateTask(removed);
         }
@@ -121,7 +107,7 @@ public final class DynamicUpdateTaskList {
      * Clears this registry.
      */
     public void clear() {
-        registry.clear();
+        taskList.clear();
     }
 
     /**
@@ -130,7 +116,7 @@ public final class DynamicUpdateTaskList {
      * @return This registry's update tasks
      */
     public Iterator<UpdateTask> getUpdateTasks() {
-        return unmodifiableIterator(registry.values().iterator());
+        return unmodifiableIterator(taskList.values().iterator());
     }
 
     /**
@@ -139,10 +125,16 @@ public final class DynamicUpdateTaskList {
      * @return A {@link Set set} containing this registry's update tasks.
      */
     public Set<UpdateTask> asSet() {
-        if (registry.isEmpty()) {
+        if (taskList.isEmpty()) {
             return Collections.emptySet();
         }
-        return new HashSet<UpdateTask>(registry.values());
+        return new HashSet<UpdateTask>(taskList.values());
+    }
+
+    public List<UpdateTask> getTaskList() {
+        List<UpdateTask> retval = new ArrayList<UpdateTask>(taskList.size());
+        retval.addAll(taskList.values());
+        return retval;
     }
 
     /**

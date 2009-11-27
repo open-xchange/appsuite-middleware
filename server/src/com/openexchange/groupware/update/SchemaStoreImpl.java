@@ -286,10 +286,10 @@ public class SchemaStoreImpl extends SchemaStore {
                  * Update & unlock schema
                  */
                 stmt = writeCon.prepareStatement(SQL_UPDATE_VERSION);
-                stmt.setInt(1, SchemaImpl.ACTUAL.getDBVersion());
+                stmt.setInt(1, UpdateTaskCollection.getInstance().getHighestVersion());
                 stmt.setBoolean(2, false);
-                stmt.setBoolean(3, SchemaImpl.ACTUAL.isGroupwareCompatible());
-                stmt.setBoolean(4, SchemaImpl.ACTUAL.isAdminCompatible());
+                stmt.setBoolean(3, true);
+                stmt.setBoolean(4, true);
                 if (stmt.executeUpdate() == 0) {
                     /*
                      * Schema could not be unlocked

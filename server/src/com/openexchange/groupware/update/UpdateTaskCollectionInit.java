@@ -49,9 +49,12 @@
 
 package com.openexchange.groupware.update;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.groupware.update.internal.ConfiguredUpdateTaskList;
+import com.openexchange.groupware.update.internal.DynamicUpdateTaskList;
 import com.openexchange.server.Initialization;
 
 /**
@@ -89,7 +92,7 @@ public final class UpdateTaskCollectionInit implements Initialization {
             LOG.error("UpdateTaskCollection has already been started", new Throwable());
         }
         // Get static update tasks from configuration file
-        UpdateTask[] staticTasks = ConfiguredUpdateTaskList.getInstance().getTaskList();
+        List<UpdateTask> staticTasks = ConfiguredUpdateTaskList.getInstance().getTaskList();
 
         if (ConfiguredUpdateTaskList.getInstance().isConfigured()) {
             UpdateTaskCollection.initialize(staticTasks);

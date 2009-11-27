@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.groupware.update;
+package com.openexchange.groupware.update.internal;
 
 import static com.openexchange.tools.io.IOUtils.closeReaderStuff;
 import java.io.BufferedReader;
@@ -61,6 +61,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.tools.encoding.Charsets;
 
 /**
@@ -68,7 +69,7 @@ import com.openexchange.tools.encoding.Charsets;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class ConfiguredUpdateTaskList {
+public class ConfiguredUpdateTaskList implements UpdateTaskList {
 
     private static final ConfiguredUpdateTaskList SINGLETON = new ConfiguredUpdateTaskList();
 
@@ -152,7 +153,7 @@ public class ConfiguredUpdateTaskList {
         return configured;
     }
 
-    public UpdateTask[] getTaskList() {
-        return taskList.toArray(new UpdateTask[taskList.size()]);
+    public List<UpdateTask> getTaskList() {
+        return taskList;
     }
 }

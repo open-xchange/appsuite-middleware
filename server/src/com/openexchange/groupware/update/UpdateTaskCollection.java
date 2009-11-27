@@ -56,7 +56,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import com.openexchange.groupware.update.internal.ConfiguredUpdateTaskList;
+import com.openexchange.groupware.update.internal.DynamicUpdateTaskList;
+import com.openexchange.groupware.update.internal.UpdateTaskList;
 
 /**
  * {@link UpdateTaskCollection} - Collection for update tasks.
@@ -65,13 +68,11 @@ import java.util.concurrent.TimeUnit;
  */
 public class UpdateTaskCollection {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(UpdateTaskCollection.class);
+    private static final UpdateTaskCollection SINGLETON = new UpdateTaskCollection();
 
-    private UpdateTaskCollection() {
-        super();
-    }
+    private int version;
 
-    private static volatile int version = -1;
+    private AtomicBoolean versionDirty = new AtomicBoolean(true);
 
     private static List<UpdateTask> staticUpdateTaskList;
 
@@ -79,16 +80,24 @@ public class UpdateTaskCollection {
 
     private static volatile boolean unmodifiable;
 
+    private UpdateTaskCollection() {
+        super();
+    }
+
+    public static UpdateTaskCollection getInstance() {
+        return SINGLETON;
+    }
+
     /**
      * Sets statically loaded update tasks and initializes working queue.
      * 
      * @param staticTasks The statically loaded update tasks; may be <code>null</code> to indicate no static update tasks
      */
-    static void initialize(final UpdateTask[] staticTasks) {
+    static void initialize(List<UpdateTask> staticTasks) {
         if (null != staticTasks) {
             staticUpdateTaskList = new ArrayList<UpdateTask>();
             unmodifiable = true;
-            for (final UpdateTask task : staticTasks) {
+            for (UpdateTask task : staticTasks) {
                 staticUpdateTaskList.add(task);
             }
             updateTaskQueue = new LinkedBlockingQueue<UpdateTask>(staticUpdateTaskList);
@@ -112,7 +121,7 @@ public class UpdateTaskCollection {
      * @param updateTask The update task to add
      * @return <code>true</code> if update task was successfully added to initial working queue; otherwise <code>false</code>
      */
-    static boolean addDiscoveredUpdateTask(final UpdateTask updateTask) {
+    public static boolean addDiscoveredUpdateTask(final UpdateTask updateTask) {
         if (unmodifiable) {
             // Was statically initialized, no dynamic update tasks allowed
             return false;
@@ -130,7 +139,7 @@ public class UpdateTaskCollection {
      * 
      * @param updateTask The update task to remove
      */
-    static void removeDiscoveredUpdateTask(final UpdateTask updateTask) {
+    public static void removeDiscoveredUpdateTask(final UpdateTask updateTask) {
         if (unmodifiable) {
             // Was statically initialized, no dynamic update tasks allowed
             return;
@@ -174,69 +183,28 @@ public class UpdateTaskCollection {
      * 
      * @return The highest version number
      */
-    public static final int getHighestVersion() {
-        int tmp = version;
-        if (tmp == -1) {
-            synchronized (UpdateTaskCollection.class) {
-                /*
-                 * Check again
-                 */
-                tmp = version;
-                if (tmp == -1) {
-                    final List<UpdateTask> tasks = generateList();
-                    final int size = tasks.size();
-                    final Iterator<UpdateTask> iter = tasks.iterator();
-                    int vers = 0;
-                    for (int i = 0; i < size; i++) {
-                        final UpdateTask updateTask = iter.next();
-                        if (null != updateTask) {
-                            vers = Math.max(vers, updateTask.addedWithVersion());
-                        }
-                    }
-                    version = tmp = vers;
-                }
+    public final int getHighestVersion() {
+        if (versionDirty.get()) {
+            List<UpdateTask> tasks = generateList();
+            int vers = 0;
+            for (UpdateTask task : tasks) {
+                vers = Math.max(vers, task.addedWithVersion());
             }
+            version = vers;
+            versionDirty.set(true);
         }
-        return tmp;
+        return version;
     }
 
     private static List<UpdateTask> generateList() {
-        BlockingQueue<UpdateTask> queue = updateTaskQueue;
-        if (null != queue) {
-            synchronized (UpdateTaskCollection.class) {
-                queue = updateTaskQueue;
-                if (null != queue) {
-                    UpdateTask task = queue.poll();
-                    /*
-                     * First touch, wait for proper initialization
-                     */
-                    final List<UpdateTask> retval = new ArrayList<UpdateTask>();
-                    try {
-                        do {
-                            retval.add(task);
-                            // Wait for 2sec for possibly appearing update task
-                        } while ((task = queue.poll(2000L, TimeUnit.MILLISECONDS)) != null);
-                        // The specified waiting time elapses before an element was present
-                    } catch (final InterruptedException e) {
-                        // Keep interrupted status
-                        LOG.error(e.getMessage(), e);
-                        Thread.currentThread().interrupt();
-                    } finally {
-                        updateTaskQueue = null;
-                    }
-                    return retval;
-                }
-            }
+        List<UpdateTask> retval = new ArrayList<UpdateTask>();
+        UpdateTaskList configured = ConfiguredUpdateTaskList.getInstance();
+        if (ConfiguredUpdateTaskList.getInstance().isConfigured()) {
+            retval.addAll(configured.getTaskList());
+        } else {
+            retval.addAll(DynamicUpdateTaskList.getInstance().getTaskList());
         }
-        /*
-         * Working queue already processed; return dependent on static/dynamic initialization
-         */
-        if (unmodifiable) {
-            // Static initialization
-            return new ArrayList<UpdateTask>(staticUpdateTaskList);
-        }
-        // Dynamic initialization
-        return new ArrayList<UpdateTask>(DynamicUpdateTaskList.getInstance().asSet());
+        return retval;
     }
 
     /**

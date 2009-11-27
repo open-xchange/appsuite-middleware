@@ -59,16 +59,6 @@ package com.openexchange.groupware.update;
 public class SchemaImpl implements Schema {
 
     /**
-     * First schema version.
-     */
-    public static final SchemaImpl FIRST = new SchemaImpl(false, 0, true, true);
-
-    /**
-     * Actual schema after all updates are applied.
-     */
-    public static final SchemaImpl ACTUAL = new SchemaImpl(false, UpdateTaskCollection.getHighestVersion(), true, true);
-
-    /**
      * Currently locked?
      */
     private boolean locked;

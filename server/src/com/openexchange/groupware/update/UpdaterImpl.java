@@ -116,7 +116,7 @@ public class UpdaterImpl extends Updater {
     }
 
     private static final boolean toUpdateInternal(final Schema schema) {
-        return (UpdateTaskCollection.getHighestVersion() > schema.getDBVersion());
+        return (UpdateTaskCollection.getInstance().getHighestVersion() > schema.getDBVersion());
     }
 
     private SchemaUpdateState getSchema(int contextId) throws UpdateException {

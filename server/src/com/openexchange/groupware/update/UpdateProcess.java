@@ -103,7 +103,7 @@ public class UpdateProcess implements Runnable {
              * Load schema
              */
             final Schema schema = schemaStore.getSchema(contextId);
-            if (schema.getDBVersion() >= UpdateTaskCollection.getHighestVersion()) {
+            if (schema.getDBVersion() >= UpdateTaskCollection.getInstance().getHighestVersion()) {
                 /*
                  * Already been updated before by previous thread
                  */
