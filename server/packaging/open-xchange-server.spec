@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 4
+%define		ox_release 5
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -459,6 +459,9 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Fri Nov 27 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14947: Checking for i18n strings when looking for a duplicate folder
+ - Bugfix #14949: Checking changed permissions for system folders
 * Wed Nov 25 2009 - thorben.betten@open-xchange.com
  - Bugfix #14938: Fixed display of mails with no text body from cached JSON representation
 * Mon Nov 23 2009 - thorben.betten@open-xchange.com
