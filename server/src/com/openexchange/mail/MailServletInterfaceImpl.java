@@ -156,6 +156,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailServletInterfaceImpl.class);
 
+    private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
+
     /*-
      * ++++++++++++++ Fields ++++++++++++++
      */
@@ -917,20 +919,24 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
     private void prefetchJSONMessages(final String fullname, final String[] mailIds) {
         /*
-         * Pre-Fetch messages' JSON representations
+         * Pre-Fetch messages' JSON representations for external mail accounts
          */
-        try {
-            final String[] prefetchIds;
-            if (mailIds.length > MAX_NUMBER_OF_MESSAGES_2_CACHE) {
-                prefetchIds = new String[MAX_NUMBER_OF_MESSAGES_2_CACHE];
-                System.arraycopy(mailIds, 0, prefetchIds, 0, MAX_NUMBER_OF_MESSAGES_2_CACHE);
-            } else {
-                prefetchIds = mailIds;
+        if (accountId != MailAccount.DEFAULT_ID) {
+            try {
+                final String[] prefetchIds;
+                if (mailIds.length > MAX_NUMBER_OF_MESSAGES_2_CACHE) {
+                    prefetchIds = new String[MAX_NUMBER_OF_MESSAGES_2_CACHE];
+                    System.arraycopy(mailIds, 0, prefetchIds, 0, MAX_NUMBER_OF_MESSAGES_2_CACHE);
+                } else {
+                    prefetchIds = mailIds;
+                }
+                final ThreadPoolService threadPool = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
+                threadPool.submit(ThreadPools.task(new MailPrefetcherCallable(session, accountId, fullname, prefetchIds, false, threadPool)));
+            } catch (final ServiceException e) {
+                LOG.error(e.getMessage(), e);
             }
-            final ThreadPoolService threadPool = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
-            threadPool.submit(ThreadPools.task(new MailPrefetcherCallable(session, accountId, fullname, prefetchIds, false, threadPool)));
-        } catch (final ServiceException e) {
-            LOG.error(e.getMessage(), e);
+        } else if (DEBUG_ENABLED) {
+            LOG.debug("No message prefetch for primary mail account.");
         }
     }
 
@@ -1791,7 +1797,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 mailAccess.getMessageStorage().updateMessageFlags(sentFullname, uidArr, MailMessage.FLAG_SEEN, true);
             }
             final MailPath retval = new MailPath(mailAccess.getAccountId(), sentFullname, uidArr[0]);
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG_ENABLED) {
                 LOG.debug(new StringBuilder(128).append("Mail copy (").append(retval.toString()).append(") appended in ").append(
                     System.currentTimeMillis() - start).append("msec").toString());
             }

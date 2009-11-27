@@ -1132,7 +1132,6 @@ public class Mail extends PermissionServlet implements UploadListener {
     }
 
     private final Response actionGetMessage(final ServerSession session, final ParamContainer paramContainer, final MailServletInterface mailInterfaceArg) {
-        final long s = DEBUG ? System.currentTimeMillis() : 0L;
         /*
          * Some variables
          */
@@ -1163,7 +1162,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             /*
              * Get message
              */
-
+            final long s = DEBUG ? System.currentTimeMillis() : 0L;
             MailServletInterface mailInterface = mailInterfaceArg;
             boolean closeMailInterface = false;
             try {
@@ -1428,6 +1427,11 @@ public class Mail extends PermissionServlet implements UploadListener {
                             }
                         }
                     }
+                    if (DEBUG) {
+                        final long d = System.currentTimeMillis() - s;
+                        LOG.debug(new StringBuilder(32).append("/ajax/mail?action=get performed in ").append(d).append(
+                            "msec served from message ").append(fetchFromStorage ? "storage" : "cache"));
+                    }
                 }
             } finally {
                 if (closeMailInterface && mailInterface != null) {
@@ -1450,10 +1454,6 @@ public class Mail extends PermissionServlet implements UploadListener {
          */
         response.setData(data);
         response.setTimestamp(null);
-        if (DEBUG) {
-            final long d = System.currentTimeMillis() - s;
-            LOG.debug(new StringBuilder(32).append("/ajax/mail?action=get performed in ").append(d).append("msec"));
-        }
         return response;
     }
 

@@ -150,7 +150,7 @@ public final class MessageWriter {
      * 
      * @param accountId The account ID
      * @param mail The mail to write
-     * @return The written JSON object
+     * @return The written JSON object or <code>null</code> if message's text body parts exceed max. size
      * @throws MailException If writing message fails
      */
     public static JSONObject writeRawMailMessage(final int accountId, final MailMessage mail) throws MailException {

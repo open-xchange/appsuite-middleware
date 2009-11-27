@@ -99,11 +99,18 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(RawJSONMessageHandler.class);
 
+    /**
+     * The max. allowed body size of 16 KB.
+     */
+    private static final int MAX_BODY_SIZE = 0x4000;
+
     private final int accountId;
 
     private final MailPath mailPath;
 
-    private final JSONObject jsonObject;
+    private JSONObject jsonObject;
+
+    private long totalConsumedBodySize;
 
     private JSONArray bodyArr;
 
@@ -164,6 +171,18 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
         } catch (final JSONException e) {
             throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
         }
+    }
+
+    private long addConsumedBodySize(final long consumedBodySize) {
+        this.totalConsumedBodySize += consumedBodySize;
+        return totalConsumedBodySize;
+    }
+
+    private void discardJSONObject() {
+        bodyArr = null;
+        attachmentsArr = null;
+        nestedMsgsArr = null;
+        jsonObject = null;
     }
 
     private JSONArray getAttachmentsArr() throws JSONException {
@@ -391,6 +410,13 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
         if (containsContent("text/htm")) {
             asAttachment(id, contentType.getBaseType(), size, fileName);
         } else {
+            /*
+             * Check size
+             */
+            if (addConsumedBodySize(size > 0 ? size : htmlContent.length()) > MAX_BODY_SIZE) {
+                discardJSONObject();
+                return false;
+            }
             asRawContent(id, contentType.getBaseType(), htmlContent, fileName);
         }
         return true;
@@ -403,12 +429,26 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
          */
         if (containsContent(contentType.getBaseType())) {
             if (textWasEmpty) {
+                /*
+                 * Check size
+                 */
+                if (addConsumedBodySize(size > 0 ? size : plainTextContentArg.length()) > MAX_BODY_SIZE) {
+                    discardJSONObject();
+                    return false;
+                }
                 replaceEmptyContent(id, contentType.getBaseType(), plainTextContentArg);
                 textWasEmpty = (null == plainTextContentArg || 0 == plainTextContentArg.length());
             } else {
                 asAttachment(id, contentType.getBaseType(), size, fileName);
             }
         } else {
+            /*
+             * Check size
+             */
+            if (addConsumedBodySize(size > 0 ? size : plainTextContentArg.length()) > MAX_BODY_SIZE) {
+                discardJSONObject();
+                return false;
+            }
             asRawContent(id, contentType.getBaseType(), plainTextContentArg, fileName);
             textWasEmpty = (null == plainTextContentArg || 0 == plainTextContentArg.length());
         }
@@ -438,10 +478,18 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
              * Content-type indicates mime type text/
              */
             if (contentType.startsWith("text/")) {
+                final String content = part.getPart().toString();
+                /*
+                 * Check size
+                 */
+                if (addConsumedBodySize(content.length()) > MAX_BODY_SIZE) {
+                    discardJSONObject();
+                    return false;
+                }
                 /*
                  * Attach link-object with text content
                  */
-                jsonObject.put(MailJSONField.CONTENT.getKey(), part.getPart().toString());
+                jsonObject.put(MailJSONField.CONTENT.getKey(), content);
             } else {
                 /*
                  * Attach link-object.
@@ -464,14 +512,16 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
          * Since we obviously touched message's content, mark its corresponding message object as seen
          */
         mail.setFlags(mail.getFlags() | MailMessage.FLAG_SEEN);
-        try {
-            jsonObject.put("alternative", isAlternative);
-            if (null != mailPath) {
-                jsonObject.put(MailJSONField.MSGREF.getKey(), mailPath.toString());
+        if (null != jsonObject) {
+            try {
+                jsonObject.put("alternative", isAlternative);
+                if (null != mailPath) {
+                    jsonObject.put(MailJSONField.MSGREF.getKey(), mailPath.toString());
+                }
+            } catch (final JSONException e) {
+                // Cannot occur
+                LOG.error(e.getMessage(), e);
             }
-        } catch (final JSONException e) {
-            // Cannot occur
-            LOG.error(e.getMessage(), e);
         }
     }
 
@@ -513,7 +563,12 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
                 return true;
             }
             final RawJSONMessageHandler msgHandler = new RawJSONMessageHandler(accountId, null, null);
+            msgHandler.totalConsumedBodySize = totalConsumedBodySize;
             new MailMessageParser().parseMailMessage(nestedMail, msgHandler, id);
+            if ((totalConsumedBodySize = msgHandler.totalConsumedBodySize) > MAX_BODY_SIZE) {
+                discardJSONObject();
+                return false;
+            }
             final JSONObject nestedObject = msgHandler.getJSONObject();
             /*
              * Sequence ID
