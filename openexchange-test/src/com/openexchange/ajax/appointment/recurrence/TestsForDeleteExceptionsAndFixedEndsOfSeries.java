@@ -49,15 +49,14 @@
 
 package com.openexchange.ajax.appointment.recurrence;
 
+import com.openexchange.ajax.appointment.helper.Changes;
+import com.openexchange.ajax.appointment.helper.Expectations;
 import com.openexchange.groupware.container.Appointment;
 
-
 /**
- * There are two ways to limit an apointment series: One is by date, one is by 
- * number of occurrences. There is supposed to be a difference handling deletes: 
- * In the occurrence case, the amount should be decreased. The limiting date 
- * ("until"), however, should not be changed.
- *  
+ * There are two ways to limit an apointment series: One is by date, one is by number of occurrences. There is supposed to be a difference
+ * handling deletes: In the occurrence case, the amount should be decreased. The limiting date ("until"), however, should not be changed.
+ * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class TestsForDeleteExceptionsAndFixedEndsOfSeries extends ManagedAppointmentTest {
@@ -66,23 +65,33 @@ public class TestsForDeleteExceptionsAndFixedEndsOfSeries extends ManagedAppoint
         super(name);
     }
 
-    public void testShouldNotReduceNumberOfOccurrencesWhenDeletingOneInYearlySeries() throws Exception{
-        calendarManager.setFailOnError(false);
+
+    public void testShouldNotReduceNumberOfOccurrencesWhenDeletingOneInYearlySeries() throws Exception {
         Appointment app = generateYearlyAppointment();
         app.setOccurrence(5);
-        calendarManager.insertAppointmentOnServer(app);
-        assertFalse("Should not fail during creation of series", calendarManager.hasLastException());
         
-        Appointment actual = calendarManager.getAppointmentFromServer(app);
-        assertFalse("Should not fail during first retrieval of series", calendarManager.hasLastException());
-        assertEquals("Should have set amount of occurences" , 5 , actual.getOccurrence());
+        Changes changes = new Changes();
+        changes.put(Appointment.RECURRENCE_POSITION, 5);
 
-        calendarManager.createDeleteException(app, 5);
-        assertFalse("Should not fail during creation of delete exception", calendarManager.hasLastException());
-        
-        actual = calendarManager.getAppointmentFromServer(app);
-        assertFalse("Should not fail during second retrieval of series", calendarManager.hasLastException());
-        assertEquals("Should have one less occurrence after delete exception" , 5 , actual.getOccurrence());
-        assertFalse("Should not have an until value, only an occurrence value", actual.containsUntil());
+        Expectations expectations = new Expectations();
+        expectations.put(Appointment.RECURRENCE_COUNT, 5);
+        expectations.put(Appointment.UNTIL, null);
+
+        positiveAssertionOnDeleteException.check(app, changes, expectations);
     }
+    
+    public void testShouldNotReduceNumberOfOccurrencesWhenDeletingOneInMonthlySeries() throws Exception {
+        Appointment app = generateMonthlyAppointment();
+        app.setOccurrence(6);
+        
+        Changes changes = new Changes();
+        changes.put(Appointment.RECURRENCE_POSITION, 6);
+
+        Expectations expectations = new Expectations();
+        expectations.put(Appointment.RECURRENCE_COUNT, 6);
+        expectations.put(Appointment.UNTIL, null);
+
+        positiveAssertionOnDeleteException.check(app, changes, expectations);
+    }
+
 }
