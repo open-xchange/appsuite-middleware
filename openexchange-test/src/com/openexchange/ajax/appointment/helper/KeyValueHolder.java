@@ -77,7 +77,7 @@ public class KeyValueHolder {
     }
 
     public void put(int key, Object value) {
-        getMap().put(Integer.valueOf(key), value);
+        getMap().put(key, value);
     }
 
     public JSONObject toJSON() throws JSONException {
@@ -89,6 +89,10 @@ public class KeyValueHolder {
 
     public int[] getKeys() {
         return I2i(getMap().keySet());
+    }
+    
+    public Object get(int key){
+        return getMap().get(key);
     }
 
 
