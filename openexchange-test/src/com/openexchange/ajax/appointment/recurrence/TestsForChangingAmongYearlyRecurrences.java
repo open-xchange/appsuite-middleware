@@ -76,6 +76,7 @@ public class TestsForChangingAmongYearlyRecurrences extends ManagedAppointmentTe
         Expectations expectations = new Expectations(changes);
 
         positiveAssertionOnCreate.check(app, changes, expectations);
+        positiveAssertionOnUpdate.check(app, changes, expectations);
     }
 
     public void testShouldFailChangingFromYearly1ToYearly2UsingOnlyAdditionalData() throws Exception {
@@ -84,6 +85,7 @@ public class TestsForChangingAmongYearlyRecurrences extends ManagedAppointmentTe
         Changes changes = new Changes();
         changes.put(Appointment.DAYS, Appointment.MONDAY);
 
+        positiveAssertionOnCreate.check(app, changes, new Expectations(changes));
         negativeAssertionOnUpdate.check(app, changes, new OXError("APP", 999));
     }
 
@@ -100,6 +102,7 @@ public class TestsForChangingAmongYearlyRecurrences extends ManagedAppointmentTe
         Expectations expectations = new Expectations(changes);
 
         positiveAssertionOnCreate.check(app, changes, expectations);
+        positiveAssertionOnUpdate.check(app, changes, expectations);
     }
 
     public void testShouldChangeFromYearly2ToYearly1WithNull() throws Exception {
@@ -116,6 +119,7 @@ public class TestsForChangingAmongYearlyRecurrences extends ManagedAppointmentTe
         expectations.put(Appointment.DAYS, 127);
 
         positiveAssertionOnCreate.check(app, changes, expectations);
+        positiveAssertionOnUpdate.check(app, changes, expectations);
     }
 
     public void testShouldFailChangingFromYearly2ToYearly1WhileMissingMonth() throws Exception {
@@ -127,6 +131,7 @@ public class TestsForChangingAmongYearlyRecurrences extends ManagedAppointmentTe
         changes.put(Appointment.INTERVAL, 1);
         changes.put(Appointment.DAY_IN_MONTH, 1);
 
+        positiveAssertionOnCreate.check(app, changes, new Expectations(changes));
         negativeAssertionOnUpdate.check(app, changes, new OXError("APP",91));
     }
     
@@ -136,6 +141,7 @@ public class TestsForChangingAmongYearlyRecurrences extends ManagedAppointmentTe
         Changes changes = new Changes();
         changes.put(Appointment.DAYS, 127);
 
+        positiveAssertionOnCreate.check(app, changes, new Expectations(changes));
         negativeAssertionOnUpdate.check(app, changes, new OXError("APP", 999));
     }
 
