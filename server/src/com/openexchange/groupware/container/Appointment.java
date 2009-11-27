@@ -306,7 +306,7 @@ public class Appointment extends CalendarObject implements Cloneable {
     }
 
     @Override
-    public Object clone() {
+    public Appointment clone() {
         try {
             final Appointment appointmentobject = (Appointment) super.clone();/* new AppointmentObject(); */
 
@@ -341,6 +341,7 @@ public class Appointment extends CalendarObject implements Cloneable {
         }
     }
 
+    @Override
     public Set<Integer> findDifferingFields(DataObject dataObject) {
         Set<Integer> differingFields = super.findDifferingFields(dataObject);
 
