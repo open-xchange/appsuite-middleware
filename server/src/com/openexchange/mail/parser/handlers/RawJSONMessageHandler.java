@@ -118,6 +118,8 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
 
     private JSONArray nestedMsgsArr;
 
+    private boolean bodyAdded;
+
     private boolean textWasEmpty;
 
     private boolean isAlternative;
@@ -407,8 +409,23 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
         /*
          * Append HTML content as-is
          */
-        if (containsContent("text/htm")) {
-            asAttachment(id, contentType.getBaseType(), size, fileName);
+        if (bodyAdded) {
+            if (isAlternative) {
+                if (containsContent("text/htm")) {
+                    asAttachment(id, contentType.getBaseType(), size, fileName);
+                } else {
+                    /*
+                     * Check size
+                     */
+                    if (addConsumedBodySize(htmlContent.length()) > MAX_BODY_SIZE) {
+                        discardJSONObject();
+                        return false;
+                    }
+                    asRawContent(id, contentType.getBaseType(), htmlContent, fileName);
+                }
+            } else {
+                asAttachment(id, contentType.getBaseType(), size, fileName);
+            }
         } else {
             /*
              * Check size
@@ -418,28 +435,56 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
                 return false;
             }
             asRawContent(id, contentType.getBaseType(), htmlContent, fileName);
+            bodyAdded = true;
         }
         return true;
-
     }
 
     public boolean handleInlinePlainText(final String plainTextContentArg, final ContentType contentType, final long size, final String fileName, final String id) throws MailException {
         /*
          * Append plain-text content as-is
          */
-        if (containsContent(contentType.getBaseType())) {
-            if (textWasEmpty) {
-                /*
-                 * Check size
-                 */
-                if (addConsumedBodySize(null == plainTextContentArg ? 0 : plainTextContentArg.length()) > MAX_BODY_SIZE) {
-                    discardJSONObject();
-                    return false;
+        if (bodyAdded) {
+            if (isAlternative) {
+                if (containsContent(contentType.getBaseType())) {
+                    if (textWasEmpty) {
+                        /*
+                         * Check size
+                         */
+                        if (addConsumedBodySize(null == plainTextContentArg ? 0 : plainTextContentArg.length()) > MAX_BODY_SIZE) {
+                            discardJSONObject();
+                            return false;
+                        }
+                        replaceEmptyContent(id, contentType.getBaseType(), plainTextContentArg);
+                        textWasEmpty = (null == plainTextContentArg || 0 == plainTextContentArg.length());
+                    } else {
+                        asAttachment(id, contentType.getBaseType(), size, fileName);
+                    }
+                } else {
+                    /*
+                     * Check size
+                     */
+                    if (addConsumedBodySize(null == plainTextContentArg ? 0 : plainTextContentArg.length()) > MAX_BODY_SIZE) {
+                        discardJSONObject();
+                        return false;
+                    }
+                    asRawContent(id, contentType.getBaseType(), plainTextContentArg, fileName);
+                    textWasEmpty = (null == plainTextContentArg || 0 == plainTextContentArg.length());
                 }
-                replaceEmptyContent(id, contentType.getBaseType(), plainTextContentArg);
-                textWasEmpty = (null == plainTextContentArg || 0 == plainTextContentArg.length());
             } else {
-                asAttachment(id, contentType.getBaseType(), size, fileName);
+                if (textWasEmpty) {
+                    /*
+                     * Check size
+                     */
+                    if (addConsumedBodySize(null == plainTextContentArg ? 0 : plainTextContentArg.length()) > MAX_BODY_SIZE) {
+                        discardJSONObject();
+                        return false;
+                    }
+                    replaceEmptyContent(id, contentType.getBaseType(), plainTextContentArg);
+                    textWasEmpty = (null == plainTextContentArg || 0 == plainTextContentArg.length());
+                } else {
+                    asAttachment(id, contentType.getBaseType(), size, fileName);
+                }
             }
         } else {
             /*
@@ -451,6 +496,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
             }
             asRawContent(id, contentType.getBaseType(), plainTextContentArg, fileName);
             textWasEmpty = (null == plainTextContentArg || 0 == plainTextContentArg.length());
+            bodyAdded = true;
         }
         return true;
     }
