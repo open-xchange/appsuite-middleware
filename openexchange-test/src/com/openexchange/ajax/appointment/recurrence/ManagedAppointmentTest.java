@@ -55,6 +55,7 @@ import com.openexchange.ajax.appointment.helper.NegativeAssertionOnCreate;
 import com.openexchange.ajax.appointment.helper.NegativeAssertionOnUpdate;
 import com.openexchange.ajax.appointment.helper.AbstractPositiveAssertion;
 import com.openexchange.ajax.appointment.helper.PositiveAssertionOnCreate;
+import com.openexchange.ajax.appointment.helper.PositiveAssertionOnDeleteException;
 import com.openexchange.ajax.appointment.helper.PositiveAssertionOnUpdate;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.groupware.container.Appointment;
@@ -81,6 +82,8 @@ public class ManagedAppointmentTest extends AppointmentTest {
     protected AbstractPositiveAssertion positiveAssertionOnCreate;
 
     protected PositiveAssertionOnUpdate positiveAssertionOnUpdate;
+    
+    protected PositiveAssertionOnDeleteException positiveAssertionOnDeleteException;
 
     public ManagedAppointmentTest(String name) {
         super(name);
@@ -103,6 +106,7 @@ public class ManagedAppointmentTest extends AppointmentTest {
         this.negativeAssertionOnCreate = new NegativeAssertionOnCreate(calendarManager, folder.getObjectID());
         this.positiveAssertionOnUpdate = new PositiveAssertionOnUpdate(calendarManager, folder.getObjectID());
         this.positiveAssertionOnCreate = new PositiveAssertionOnCreate(calendarManager, folder.getObjectID());
+        this.positiveAssertionOnDeleteException = new PositiveAssertionOnDeleteException(calendarManager, folder.getObjectID());
 
     }
 
