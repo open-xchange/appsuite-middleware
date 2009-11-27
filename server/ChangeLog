@@ -1,3 +1,8 @@
+* 2009-11-27 - marcus.klein@open-xchange.com
+
+ - Bugfix #14624: Using a faster initialization of update task list that does not wait for a timeout of 2 seconds when creating the update
+   task list.
+
 * 2009-11-27 - thorben.betten@open-xchange.com
 
  - Bugfix #14890: Fixed display of a mail containing multiple inline text/* parts
