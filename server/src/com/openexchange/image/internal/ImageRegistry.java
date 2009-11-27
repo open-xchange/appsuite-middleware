@@ -220,7 +220,7 @@ public final class ImageRegistry {
             }
             return imageData.touch();
         }
-        imageData = new ImageData(imageSource, imageArguments, timeToLive);
+        imageData = new ImageData(imageSource, imageArguments, timeToLive, id);
         m.put(id, imageData);
         if (DEBUG) {
             LOG.debug("Image data put into registry with UID: " + id);
@@ -271,7 +271,7 @@ public final class ImageRegistry {
             }
             return imageData.touch();
         }
-        imageData = new ImageData(imageSource, imageArguments, timeToLive);
+        imageData = new ImageData(imageSource, imageArguments, timeToLive, id);
         m.put(id, imageData);
         if (DEBUG) {
             LOG.debug("Image data put into registry with UID: " + id);

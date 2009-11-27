@@ -49,7 +49,9 @@
 
 package com.openexchange.image.internal;
 
+import java.io.UnsupportedEncodingException;
 import java.util.regex.Pattern;
+import org.apache.commons.codec.binary.Base64;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.image.ImageDataSource;
@@ -87,7 +89,13 @@ final class ImageIDGenerator {
         for (int i = 0; i < requiredArguments.length; i++) {
             sb.append(DELIM).append(imageArguments.get(requiredArguments[i]));
         }
-        return sb.toString();
+        try {
+            final byte[] base64 = Base64.encodeBase64(sb.toString().getBytes("UTF-8"), false);
+            return new String(base64, "US-ASCII");
+        } catch (final UnsupportedEncodingException e) {
+            org.apache.commons.logging.LogFactory.getLog(ImageIDGenerator.class).error("Unsupported encoding: " + e.getMessage(), e);
+            return sb.toString();
+        }
     }
 
     private static final Pattern SPLIT = Pattern.compile(Pattern.quote(ImageIDGenerator.DELIM));
@@ -100,7 +108,15 @@ final class ImageIDGenerator {
      * @return The data source and data arguments wrapped (in this order) in an array or <code>null</code>
      */
     static Object[] parseId(final String uniqueId, final ConversionService service) {
-        final String[] args = SPLIT.split(uniqueId, 0);
+        String toSplit = null;
+        try {
+            final byte[] plain = Base64.decodeBase64(uniqueId.getBytes("US-ASCII"));
+            toSplit = new String(plain, "UTF-8");
+        } catch (final UnsupportedEncodingException e) {
+            org.apache.commons.logging.LogFactory.getLog(ImageIDGenerator.class).error("Unsupported encoding: " + e.getMessage(), e);
+            toSplit = uniqueId;
+        }
+        final String[] args = SPLIT.split(toSplit, 0);
         /*
          * Get data source from conversion service
          */

@@ -90,7 +90,7 @@ public final class ImageData {
      * @param imageArguments The image arguments
      */
     ImageData(final ImageDataSource imageSource, final DataArguments imageArguments) {
-        this(imageSource, imageArguments, DEFAULT_TTL);
+        this(imageSource, imageArguments, DEFAULT_TTL, null);
     }
 
     /**
@@ -99,13 +99,14 @@ public final class ImageData {
      * @param imageSource The image data source
      * @param imageArguments The image arguments
      * @param timeToLive The time-to-live in milliseconds; a value less than or equal to zero is an infinite time-to-live
+     * @param uniqueId This image data's unique ID; may be <code>null</code> to generate a new one
      */
-    ImageData(final ImageDataSource imageSource, final DataArguments imageArguments, final int timeToLive) {
+    ImageData(final ImageDataSource imageSource, final DataArguments imageArguments, final int timeToLive, final String uniqueId) {
         super();
         if (imageArguments == null) {
             throw new IllegalArgumentException("image arguments are null");
         }
-        uniqueId = ImageIDGenerator.generateId(imageSource, imageArguments);
+        this.uniqueId = null == uniqueId ? ImageIDGenerator.generateId(imageSource, imageArguments) : uniqueId;
         // uniqueId = imageArguments.getID();
         this.imageArguments = imageArguments;
         this.imageSource = imageSource;
