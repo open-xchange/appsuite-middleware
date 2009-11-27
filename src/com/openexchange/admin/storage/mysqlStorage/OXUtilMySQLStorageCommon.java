@@ -230,7 +230,7 @@ public class OXUtilMySQLStorageCommon {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("INSERT INTO version (version,locked,gw_compatible,admin_compatible,server) VALUES(?,?,?,?,?);");
-            stmt.setInt(1, UpdateTaskCollection.getHighestVersion());
+            stmt.setInt(1, UpdateTaskCollection.getInstance().getHighestVersion());
             stmt.setInt(2, 0);
             stmt.setInt(3, 1);
             stmt.setInt(4, 1);
