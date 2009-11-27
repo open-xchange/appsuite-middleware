@@ -69,11 +69,11 @@ import com.openexchange.tools.encoding.Charsets;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class ConfiguredUpdateTaskList implements UpdateTaskList {
+public class ConfiguredList implements UpdateTaskList {
 
-    private static final ConfiguredUpdateTaskList SINGLETON = new ConfiguredUpdateTaskList();
+    private static final ConfiguredList SINGLETON = new ConfiguredList();
 
-    private static final Log LOG = LogFactory.getLog(ConfiguredUpdateTaskList.class);
+    private static final Log LOG = LogFactory.getLog(ConfiguredList.class);
 
     private static final String PROPERTYNAME = "UPDATETASKSCFG";
 
@@ -81,11 +81,11 @@ public class ConfiguredUpdateTaskList implements UpdateTaskList {
 
     private List<UpdateTask> taskList = new ArrayList<UpdateTask>();
 
-    private ConfiguredUpdateTaskList() {
+    private ConfiguredList() {
         super();
     }
 
-    public static ConfiguredUpdateTaskList getInstance() {
+    public static ConfiguredList getInstance() {
         return SINGLETON;
     }
 
@@ -124,6 +124,7 @@ public class ConfiguredUpdateTaskList implements UpdateTaskList {
                 }
             }
             configured = true;
+            LOG.info("Using statically configured update task list.");
         } catch (FileNotFoundException e) {
             LOG.error(e.getMessage(), e);
         } catch (IOException e) {

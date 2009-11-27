@@ -47,49 +47,32 @@
  *
  */
 
-package com.openexchange.groupware.update;
+package com.openexchange.groupware.update.internal;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import com.openexchange.groupware.update.internal.InternalList;
+import java.util.Comparator;
+import com.openexchange.groupware.update.UpdateTask;
 
 /**
- * {@link Initialization} starts all internal structures especially the list of update tasks.
+ * {@link UpdateTaskComparator}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class Initialization {
+public final class UpdateTaskComparator implements Comparator<UpdateTask> {
 
-    private static final Initialization SINGLETON = new Initialization();
-
-    private static final Log LOG = LogFactory.getLog(Initialization.class);
-
-    private final AtomicBoolean started;
-
-    private Initialization() {
+    public UpdateTaskComparator() {
         super();
-        started = new AtomicBoolean();
     }
 
-    public static Initialization getInstance() {
-        return SINGLETON;
-    }
-
-    public void start() {
-        if (!started.compareAndSet(false, true)) {
-            LOG.error("Database update component has already been started.", new Throwable());
+    public int compare(UpdateTask task1, UpdateTask task2) {
+        if (task1.addedWithVersion() > task2.addedWithVersion()) {
+            return 1;
+        } else if (task1.addedWithVersion() < task2.addedWithVersion()) {
+            return -1;
+        } else if (task1.getPriority() > task2.getPriority()) {
+            return 1;
+        } else if (task1.getPriority() < task2.getPriority()) {
+            return -1;
         }
-        InternalList.getInstance().start();
-        // TODO Auto-generated method stub
-    }
-
-    public void stop() {
-        if (!started.compareAndSet(true, false)) {
-            LOG.error("Database update component cannot be stopped since it has not been started before.", new Throwable());
-        }
-        UpdateTaskCollection.getInstance().dispose();
-        InternalList.getInstance().stop();
-        // TODO Auto-generated method stub
+        return 0;
     }
 }

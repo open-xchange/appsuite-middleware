@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.update.tools;
 
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -228,14 +227,4 @@ public final class Utility {
         }
         sb.append('\n');
     }
-
-    private static int getMaxLen(final Collection<? extends Object> c, final int startLen) {
-        int max = startLen;
-        for (final Object obj : c) {
-            final int b = obj.toString().length();
-            max = (max >= b) ? max : b;
-        }
-        return max;
-    }
-
 }

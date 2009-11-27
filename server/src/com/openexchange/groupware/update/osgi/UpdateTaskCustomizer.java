@@ -58,7 +58,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.groupware.update.internal.DynamicUpdateTaskList;
+import com.openexchange.groupware.update.internal.DynamicList;
 
 /**
  * {@link UpdateTaskCustomizer} - The {@link ServiceTrackerCustomizer service tracker customizer} for update tasks.
@@ -78,7 +78,7 @@ public final class UpdateTaskCustomizer implements ServiceTrackerCustomizer {
 
     public Object addingService(final ServiceReference reference) {
         UpdateTaskProviderService providerService = (UpdateTaskProviderService) context.getService(reference);
-        DynamicUpdateTaskList registry = DynamicUpdateTaskList.getInstance();
+        DynamicList registry = DynamicList.getInstance();
         if (null != registry) {
             // Get provider's collection
             final Collection<UpdateTask> collection = providerService.getUpdateTasks();
@@ -114,7 +114,7 @@ public final class UpdateTaskCustomizer implements ServiceTrackerCustomizer {
     public void removedService(final ServiceReference reference, final Object service) {
         if (null != service) {
             try {
-                final DynamicUpdateTaskList registry = DynamicUpdateTaskList.getInstance();
+                final DynamicList registry = DynamicList.getInstance();
                 if (null != registry) {
                     final UpdateTaskProviderService providerService = (UpdateTaskProviderService) service;
                     final Collection<UpdateTask> collection = providerService.getUpdateTasks();

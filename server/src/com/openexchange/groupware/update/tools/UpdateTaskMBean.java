@@ -58,7 +58,6 @@ import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.AttributeNotFoundException;
 import javax.management.DynamicMBean;
-import javax.management.InvalidAttributeValueException;
 import javax.management.MBeanException;
 import javax.management.MBeanInfo;
 import javax.management.MBeanOperationInfo;
@@ -154,7 +153,7 @@ public final class UpdateTaskMBean implements DynamicMBean {
         return new MBeanInfo(UpdateTaskMBean.class.getName(), "Update task toolkit", null, null, operations, null);
     }
 
-    public Object getAttribute(final String attribute) throws AttributeNotFoundException, MBeanException, ReflectionException {
+    public Object getAttribute(final String attribute) throws AttributeNotFoundException {
         throw new AttributeNotFoundException("No attribute can be obtained in this MBean");
     }
 
@@ -264,7 +263,7 @@ public final class UpdateTaskMBean implements DynamicMBean {
         throw new ReflectionException(new NoSuchMethodException(actionName));
     }
 
-    public void setAttribute(final Attribute attribute) throws AttributeNotFoundException, InvalidAttributeValueException, MBeanException, ReflectionException {
+    public void setAttribute(final Attribute attribute) throws AttributeNotFoundException {
         throw new AttributeNotFoundException("No attribute can be set in this MBean");
     }
 

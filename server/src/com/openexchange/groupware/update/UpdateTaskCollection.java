@@ -51,14 +51,12 @@ package com.openexchange.groupware.update;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
-import com.openexchange.groupware.update.internal.ConfiguredUpdateTaskList;
-import com.openexchange.groupware.update.internal.DynamicUpdateTaskList;
+import com.openexchange.groupware.update.internal.ConfiguredList;
+import com.openexchange.groupware.update.internal.DynamicList;
+import com.openexchange.groupware.update.internal.UpdateTaskComparator;
 import com.openexchange.groupware.update.internal.UpdateTaskList;
 
 /**
@@ -74,12 +72,6 @@ public class UpdateTaskCollection {
 
     private AtomicBoolean versionDirty = new AtomicBoolean(true);
 
-    private static List<UpdateTask> staticUpdateTaskList;
-
-    private static volatile BlockingQueue<UpdateTask> updateTaskQueue;
-
-    private static volatile boolean unmodifiable;
-
     private UpdateTaskCollection() {
         super();
     }
@@ -89,66 +81,10 @@ public class UpdateTaskCollection {
     }
 
     /**
-     * Sets statically loaded update tasks and initializes working queue.
-     * 
-     * @param staticTasks The statically loaded update tasks; may be <code>null</code> to indicate no static update tasks
-     */
-    static void initialize(List<UpdateTask> staticTasks) {
-        if (null != staticTasks) {
-            staticUpdateTaskList = new ArrayList<UpdateTask>();
-            unmodifiable = true;
-            for (UpdateTask task : staticTasks) {
-                staticUpdateTaskList.add(task);
-            }
-            updateTaskQueue = new LinkedBlockingQueue<UpdateTask>(staticUpdateTaskList);
-        } else {
-            updateTaskQueue = new LinkedBlockingQueue<UpdateTask>();
-        }
-    }
-
-    /**
      * Drops statically loaded update tasks and working queue as well.
      */
-    static void dispose() {
-        staticUpdateTaskList = null;
-        updateTaskQueue = null;
-        unmodifiable = false;
-    }
-
-    /**
-     * Adds specified update task to initial working queue.
-     * 
-     * @param updateTask The update task to add
-     * @return <code>true</code> if update task was successfully added to initial working queue; otherwise <code>false</code>
-     */
-    public static boolean addDiscoveredUpdateTask(final UpdateTask updateTask) {
-        if (unmodifiable) {
-            // Was statically initialized, no dynamic update tasks allowed
-            return false;
-        }
-        final BlockingQueue<UpdateTask> queue = updateTaskQueue;
-        if (null == queue) {
-            // Update process already performed
-            return false;
-        }
-        return queue.offer(updateTask);
-    }
-
-    /**
-     * Removes specified update task from initial working queue.
-     * 
-     * @param updateTask The update task to remove
-     */
-    public static void removeDiscoveredUpdateTask(final UpdateTask updateTask) {
-        if (unmodifiable) {
-            // Was statically initialized, no dynamic update tasks allowed
-            return;
-        }
-        final BlockingQueue<UpdateTask> queue = updateTaskQueue;
-        if (null == queue) {
-            return;
-        }
-        queue.remove(updateTask);
+    void dispose() {
+        versionDirty.set(true);
     }
 
     /**
@@ -157,23 +93,22 @@ public class UpdateTaskCollection {
      * @param dbVersion - current database version
      * @return list of <code>UpdateTask</code> instances
      */
-    public static final List<UpdateTask> getFilteredAndSortedUpdateTasks(final int dbVersion) {
+    public static final List<UpdateTask> getFilteredAndSortedUpdateTasks(int dbVersion) {
         final List<UpdateTask> retval = generateList();
         /*
          * Filter
          */
-        final int size = retval.size();
-        final Iterator<UpdateTask> iter = retval.iterator();
-        for (int i = 0; i < size; i++) {
-            final UpdateTask ut = iter.next();
-            if (ut.addedWithVersion() <= dbVersion) {
+        Iterator<UpdateTask> iter = retval.iterator();
+        while (iter.hasNext()) {
+            UpdateTask task = iter.next();
+            if (task.addedWithVersion() <= dbVersion) {
                 iter.remove();
             }
         }
         /*
          * Sort
          */
-        Collections.sort(retval, UPDATE_TASK_COMPARATOR);
+        Collections.sort(retval, new UpdateTaskComparator());
         return retval;
     }
 
@@ -198,31 +133,12 @@ public class UpdateTaskCollection {
 
     private static List<UpdateTask> generateList() {
         List<UpdateTask> retval = new ArrayList<UpdateTask>();
-        UpdateTaskList configured = ConfiguredUpdateTaskList.getInstance();
-        if (ConfiguredUpdateTaskList.getInstance().isConfigured()) {
+        UpdateTaskList configured = ConfiguredList.getInstance();
+        if (ConfiguredList.getInstance().isConfigured()) {
             retval.addAll(configured.getTaskList());
         } else {
-            retval.addAll(DynamicUpdateTaskList.getInstance().getTaskList());
+            retval.addAll(DynamicList.getInstance().getTaskList());
         }
         return retval;
     }
-
-    /**
-     * Sorts instances of <code>UpdateTask</code> by their version in first order and by their priority in second order
-     */
-    private static final Comparator<UpdateTask> UPDATE_TASK_COMPARATOR = new Comparator<UpdateTask>() {
-
-        public int compare(final UpdateTask o1, final UpdateTask o2) {
-            if (o1.addedWithVersion() > o2.addedWithVersion()) {
-                return 1;
-            } else if (o1.addedWithVersion() < o2.addedWithVersion()) {
-                return -1;
-            } else if (o1.getPriority() > o2.getPriority()) {
-                return 1;
-            } else if (o1.getPriority() < o2.getPriority()) {
-                return -1;
-            }
-            return 0;
-        }
-    };
 }
