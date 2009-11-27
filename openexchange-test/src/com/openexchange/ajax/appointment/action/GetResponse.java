@@ -50,10 +50,8 @@
 package com.openexchange.ajax.appointment.action;
 
 import java.util.TimeZone;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.parser.AppointmentParser;
@@ -61,7 +59,6 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.Appointment;
 
 /**
- * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 public class GetResponse extends AbstractAJAXResponse {
@@ -78,10 +75,9 @@ public class GetResponse extends AbstractAJAXResponse {
     /**
      * @return the appointment
      * @throws OXException parsing the appointment out of the response fails.
-     * @throws JSONException if parsing of some extra values fails. 
+     * @throws JSONException if parsing of some extra values fails.
      */
-    public Appointment getAppointment(final TimeZone timeZone)
-        throws OXException, JSONException {
+    public Appointment getAppointment(final TimeZone timeZone) throws OXException {
         if (null == appointmentObj) {
             this.appointmentObj = new Appointment();
             final JSONObject json = (JSONObject) getResponse().getData();
