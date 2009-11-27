@@ -50,6 +50,7 @@
 package com.openexchange.ajax.appointment.helper;
 
 import static org.junit.Assert.assertEquals;
+import java.util.HashMap;
 import com.openexchange.groupware.container.CommonObject;
 
 
@@ -62,6 +63,10 @@ public class Expectations extends KeyValueHolder {
     
     public Expectations(Changes changes){
         setMap(changes.getMap());
+    }
+    
+    public Expectations(){
+        setMap(new HashMap<Integer, Object>());
     }
     
     public void verify(CommonObject actual){
