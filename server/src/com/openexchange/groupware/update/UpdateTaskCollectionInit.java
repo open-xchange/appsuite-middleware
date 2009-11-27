@@ -95,11 +95,6 @@ public final class UpdateTaskCollectionInit implements Initialization {
             UpdateTaskCollection.initialize(staticTasks);
         } else {
             UpdateTaskCollection.initialize(null);
-        }
-
-        // Fill static update tasks programmatically if retrieval from configuration file returned null
-
-        if (null == staticTasks) {
             // Version 1
             final DynamicUpdateTaskList registry = DynamicUpdateTaskList.getInstance();
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.CreateTableVersion());
