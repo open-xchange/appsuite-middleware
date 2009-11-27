@@ -89,20 +89,19 @@ public final class UpdateTaskCollectionInit implements Initialization {
             LOG.error("UpdateTaskCollection has already been started", new Throwable());
         }
         // Get static update tasks from configuration file
-        UpdateTask[] staticTasks = ConfiguredUpdateTasks.getInstance().getTaskList();
+        UpdateTask[] staticTasks = ConfiguredUpdateTaskList.getInstance().getTaskList();
 
-        if (ConfiguredUpdateTasks.getInstance().isConfigured()) {
+        if (ConfiguredUpdateTaskList.getInstance().isConfigured()) {
             UpdateTaskCollection.initialize(staticTasks);
         } else {
             UpdateTaskCollection.initialize(null);
         }
-        UpdateTaskRegistry.initInstance();
 
         // Fill static update tasks programmatically if retrieval from configuration file returned null
 
         if (null == staticTasks) {
             // Version 1
-            final UpdateTaskRegistry registry = UpdateTaskRegistry.getInstance();
+            final DynamicUpdateTaskList registry = DynamicUpdateTaskList.getInstance();
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.CreateTableVersion());
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.SpamUpdateTask());
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.PasswordMechUpdateTask());
@@ -316,7 +315,6 @@ public final class UpdateTaskCollectionInit implements Initialization {
         if (!started.compareAndSet(true, false)) {
             LOG.error("UpdateTaskCollection cannot be stopped since it has not been started before", new Throwable());
         }
-        UpdateTaskRegistry.releaseInstance();
         UpdateTaskCollection.dispose();
         if (LOG.isInfoEnabled()) {
             LOG.info("UpdateTaskCollection successfully stopped");

@@ -47,41 +47,41 @@
  *
  */
 
-package com.openexchange.groupware.update;
+package com.openexchange.groupware.update.osgi;
 
 import java.util.Collection;
 import java.util.Iterator;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.groupware.update.DynamicUpdateTaskList;
 
 /**
- * {@link UpdateTaskServiceTrackerCustomizer} - The {@link ServiceTrackerCustomizer service tracker customizer} for update tasks.
+ * {@link UpdateTaskCustomizer} - The {@link ServiceTrackerCustomizer service tracker customizer} for update tasks.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UpdateTaskServiceTrackerCustomizer implements ServiceTrackerCustomizer {
+public final class UpdateTaskCustomizer implements ServiceTrackerCustomizer {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(UpdateTaskServiceTrackerCustomizer.class);
+    private static final Log LOG = LogFactory.getLog(UpdateTaskCustomizer.class);
 
     private final BundleContext context;
 
-    /**
-     * Initializes a new {@link UpdateTaskServiceTrackerCustomizer}.
-     * 
-     * @param context The bundle context
-     */
-    public UpdateTaskServiceTrackerCustomizer(final BundleContext context) {
+    public UpdateTaskCustomizer(final BundleContext context) {
         super();
         this.context = context;
     }
 
     public Object addingService(final ServiceReference reference) {
-        final Object addedService = context.getService(reference);
-        final UpdateTaskRegistry registry = UpdateTaskRegistry.getInstance();
+        UpdateTaskProviderService providerService = (UpdateTaskProviderService) context.getService(reference);
+        DynamicUpdateTaskList registry = DynamicUpdateTaskList.getInstance();
         if (null != registry) {
             // Get provider's collection
-            final Collection<UpdateTask> collection = ((UpdateTaskProviderService) addedService).getUpdateTasks();
+            final Collection<UpdateTask> collection = providerService.getUpdateTasks();
             boolean error = false;
             final int size = collection.size();
             final Iterator<UpdateTask> iter = collection.iterator();
@@ -95,7 +95,7 @@ public final class UpdateTaskServiceTrackerCustomizer implements ServiceTrackerC
             }
             if (!error) {
                 // Everything worked fine
-                return addedService;
+                return providerService;
             }
             // Rollback
             for (final UpdateTask task : collection) {
@@ -114,7 +114,7 @@ public final class UpdateTaskServiceTrackerCustomizer implements ServiceTrackerC
     public void removedService(final ServiceReference reference, final Object service) {
         if (null != service) {
             try {
-                final UpdateTaskRegistry registry = UpdateTaskRegistry.getInstance();
+                final DynamicUpdateTaskList registry = DynamicUpdateTaskList.getInstance();
                 if (null != registry) {
                     final UpdateTaskProviderService providerService = (UpdateTaskProviderService) service;
                     final Collection<UpdateTask> collection = providerService.getUpdateTasks();

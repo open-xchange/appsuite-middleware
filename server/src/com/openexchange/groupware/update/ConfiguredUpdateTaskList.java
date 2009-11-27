@@ -68,11 +68,11 @@ import com.openexchange.tools.encoding.Charsets;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class ConfiguredUpdateTasks {
+public class ConfiguredUpdateTaskList {
 
-    private static final ConfiguredUpdateTasks SINGLETON = new ConfiguredUpdateTasks();
+    private static final ConfiguredUpdateTaskList SINGLETON = new ConfiguredUpdateTaskList();
 
-    private static final Log LOG = LogFactory.getLog(ConfiguredUpdateTasks.class);
+    private static final Log LOG = LogFactory.getLog(ConfiguredUpdateTaskList.class);
 
     private static final String PROPERTYNAME = "UPDATETASKSCFG";
 
@@ -80,11 +80,11 @@ public class ConfiguredUpdateTasks {
 
     private List<UpdateTask> taskList = new ArrayList<UpdateTask>();
 
-    private ConfiguredUpdateTasks() {
+    private ConfiguredUpdateTaskList() {
         super();
     }
 
-    public static ConfiguredUpdateTasks getInstance() {
+    public static ConfiguredUpdateTaskList getInstance() {
         return SINGLETON;
     }
 

@@ -53,7 +53,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.groupware.update.ConfiguredUpdateTasks;
+import com.openexchange.groupware.update.ConfiguredUpdateTaskList;
 
 /**
  * {@link ConfigurationCustomizer}
@@ -71,7 +71,7 @@ public class ConfigurationCustomizer implements ServiceTrackerCustomizer {
 
     public Object addingService(ServiceReference reference) {
         ConfigurationService configService = (ConfigurationService) context.getService(reference);
-        ConfiguredUpdateTasks.getInstance().loadConfiguration(configService);
+        ConfiguredUpdateTaskList.getInstance().loadConfiguration(configService);
         return configService;
     }
 
@@ -80,7 +80,7 @@ public class ConfigurationCustomizer implements ServiceTrackerCustomizer {
     }
 
     public void removedService(ServiceReference reference, Object service) {
-        ConfiguredUpdateTasks.getInstance().setConfigured(false);
+        ConfiguredUpdateTaskList.getInstance().setConfigured(false);
         context.ungetService(reference);
     }
 }

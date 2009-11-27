@@ -55,54 +55,41 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
- * {@link UpdateTaskRegistry} - Registry for {@link UpdateTask update tasks}.
+ * {@link DynamicUpdateTaskList} - Registry for {@link UpdateTask update tasks}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UpdateTaskRegistry {
+public final class DynamicUpdateTaskList {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(UpdateTaskRegistry.class);
+    private static final Log LOG = LogFactory.getLog(DynamicUpdateTaskList.class);
 
-    private static UpdateTaskRegistry instance;
+    private static final DynamicUpdateTaskList SINGLETON = new DynamicUpdateTaskList();
+
+    private final ConcurrentMap<Class<? extends UpdateTask>, UpdateTask> registry = new ConcurrentHashMap<Class<? extends UpdateTask>, UpdateTask>();
 
     /**
-     * Initializes the {@link UpdateTaskRegistry} instance.
+     * Initializes a new {@link DynamicUpdateTaskList}.
      */
-    static void initInstance() {
-        instance = new UpdateTaskRegistry();
+    public DynamicUpdateTaskList() {
+        super();
     }
 
     /**
-     * Releases the {@link UpdateTaskRegistry} instance.
-     */
-    static void releaseInstance() {
-        instance = null;
-    }
-
-    /**
-     * Gets the {@link UpdateTaskRegistry} instance.
+     * Gets the {@link DynamicUpdateTaskList} instance.
      * 
-     * @return The {@link UpdateTaskRegistry} instance
+     * @return The {@link DynamicUpdateTaskList} instance
      */
-    public static UpdateTaskRegistry getInstance() {
-        return instance;
+    public static DynamicUpdateTaskList getInstance() {
+        return SINGLETON;
     }
 
     /*
      * Member section
      */
-
-    private final ConcurrentMap<Class<? extends UpdateTask>, UpdateTask> registry;
-
-    /**
-     * Initializes a new {@link UpdateTaskRegistry}.
-     */
-    public UpdateTaskRegistry() {
-        super();
-        registry = new ConcurrentHashMap<Class<? extends UpdateTask>, UpdateTask>();
-    }
 
     /**
      * Adds specified update task to this registry.

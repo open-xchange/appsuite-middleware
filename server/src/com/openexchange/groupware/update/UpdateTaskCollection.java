@@ -233,7 +233,7 @@ public class UpdateTaskCollection {
             return new ArrayList<UpdateTask>(staticUpdateTaskList);
         }
         // Dynamic initialization
-        return new ArrayList<UpdateTask>(UpdateTaskRegistry.getInstance().asSet());
+        return new ArrayList<UpdateTask>(DynamicUpdateTaskList.getInstance().asSet());
     }
 
     /**
