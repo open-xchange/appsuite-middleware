@@ -62,8 +62,8 @@ public class Activator extends CompositeBundleActivator {
 
     private final BundleActivator[] activators = {
         new com.openexchange.database.osgi.Activator(),
-        new com.openexchange.server.osgi.ServerActivator(),
-        new com.openexchange.groupware.update.osgi.Activator()
+        new com.openexchange.groupware.update.osgi.Activator(),
+        new com.openexchange.server.osgi.ServerActivator()
     };
 
     public Activator() {

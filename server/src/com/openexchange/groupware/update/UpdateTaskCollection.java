@@ -84,10 +84,17 @@ public class UpdateTaskCollection {
      * 
      * @param staticTasks The statically loaded update tasks; may be <code>null</code> to indicate no static update tasks
      */
-    static void initialize(final List<UpdateTask> staticTasks) {
-        staticUpdateTaskList = staticTasks;
-        unmodifiable = (null != staticUpdateTaskList);
-        updateTaskQueue = unmodifiable ? new LinkedBlockingQueue<UpdateTask>(staticUpdateTaskList) : new LinkedBlockingQueue<UpdateTask>();
+    static void initialize(final UpdateTask[] staticTasks) {
+        if (null != staticTasks) {
+            staticUpdateTaskList = new ArrayList<UpdateTask>();
+            unmodifiable = true;
+            for (UpdateTask task : staticTasks) {
+                staticUpdateTaskList.add(task);
+            }
+            updateTaskQueue = new LinkedBlockingQueue<UpdateTask>(staticUpdateTaskList);
+        } else {
+            updateTaskQueue = new LinkedBlockingQueue<UpdateTask>();
+        }
     }
 
     /**
@@ -247,5 +254,4 @@ public class UpdateTaskCollection {
             return 0;
         }
     };
-
 }

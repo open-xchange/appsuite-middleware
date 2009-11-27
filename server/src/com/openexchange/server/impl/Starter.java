@@ -81,10 +81,6 @@ public class Starter implements Initialization {
      */
     com.openexchange.cache.registry.CacheAvailabilityRegistryInit.getInstance(),
     /**
-     * Read in update tasks
-     */
-    com.openexchange.groupware.update.UpdateTaskCollectionInit.getInstance(),
-    /**
      * Initialization for ContactInterfaceDiscovery
      */
     new com.openexchange.groupware.contact.internal.ContactInterfaceDiscoveryInitialization(),
@@ -213,10 +209,6 @@ public class Starter implements Initialization {
      * Cache availability registry start-up
      */
     com.openexchange.cache.registry.CacheAvailabilityRegistryInit.getInstance(),
-    /**
-     * Read in update tasks
-     */
-    com.openexchange.groupware.update.UpdateTaskCollectionInit.getInstance(),
     /**
      * Initialization for ContactInterfaceDiscovery
      */
