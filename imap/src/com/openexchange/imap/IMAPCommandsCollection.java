@@ -77,7 +77,6 @@ import com.openexchange.imap.command.FlagsIMAPCommand;
 import com.openexchange.imap.command.IMAPNumArgSplitter;
 import com.openexchange.imap.dataobjects.ExtendedIMAPFolder;
 import com.openexchange.imap.util.IMAPUpdateableData;
-import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailServletInterface;
@@ -2098,7 +2097,7 @@ public final class IMAPCommandsCollection {
                         }
                         return retval;
                     }
-                } catch (final MailException e) {
+                } catch (final Exception e) {
                     throw wrapException(e, null);
                 } finally {
                     // p.notifyResponseHandlers(r);
