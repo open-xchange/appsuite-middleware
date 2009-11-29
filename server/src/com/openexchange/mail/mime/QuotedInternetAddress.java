@@ -404,6 +404,7 @@ public final class QuotedInternetAddress extends InternetAddress {
 
                 // otherwise, parsing a header; treat semicolon like comma
                 // fall through to comma case...
+                //$FALL-THROUGH$
 
             case ',': // end of an address, probably
                 if (start == -1) {
