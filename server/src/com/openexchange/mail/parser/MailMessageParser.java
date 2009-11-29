@@ -270,7 +270,31 @@ public final class MailMessageParser {
          * final boolean isInline = ((disposition == null
          *     || disposition.equalsIgnoreCase(Part.INLINE)) && mailPart.getFileName() == null);
          */
-        if (isText(lcct)) {
+        if (isMultipart(lcct)) {
+            final int count = mailPart.getEnclosedCount();
+            if (count == -1) {
+                throw new MailException(MailException.Code.INVALID_MULTIPART_CONTENT);
+            }
+            final String mpId = null == prefix && !multipartDetected ? "" : getSequenceId(prefix, partCount);
+            if (!mailPart.containsSequenceId()) {
+                mailPart.setSequenceId(mpId);
+            }
+            if (!handler.handleMultipart(mailPart, count, mpId)) {
+                stop = true;
+                return;
+            }
+            final String mpPrefix;
+            if (multipartDetected) {
+                mpPrefix = mpId;
+            } else {
+                mpPrefix = prefix;
+                multipartDetected = true;
+            }
+            for (int i = 0; i < count; i++) {
+                final MailPart enclosedContent = mailPart.getEnclosedMailPart(i);
+                parseMailContent(enclosedContent, handler, mpPrefix, i + 1);
+            }
+        } else if (isText(lcct)) {
             if (isInline) {
                 final String content = readContent(mailPart, contentType);
                 final UUEncodedMultiPart uuencodedMP = new UUEncodedMultiPart(content);
@@ -340,30 +364,6 @@ public final class MailMessageParser {
                     stop = true;
                     return;
                 }
-            }
-        } else if (isMultipart(lcct)) {
-            final int count = mailPart.getEnclosedCount();
-            if (count == -1) {
-                throw new MailException(MailException.Code.INVALID_MULTIPART_CONTENT);
-            }
-            final String mpId = null == prefix && !multipartDetected ? "" : getSequenceId(prefix, partCount);
-            if (!mailPart.containsSequenceId()) {
-                mailPart.setSequenceId(mpId);
-            }
-            if (!handler.handleMultipart(mailPart, count, mpId)) {
-                stop = true;
-                return;
-            }
-            final String mpPrefix;
-            if (multipartDetected) {
-                mpPrefix = mpId;
-            } else {
-                mpPrefix = prefix;
-                multipartDetected = true;
-            }
-            for (int i = 0; i < count; i++) {
-                final MailPart enclosedContent = mailPart.getEnclosedMailPart(i);
-                parseMailContent(enclosedContent, handler, mpPrefix, i + 1);
             }
         } else if (isImage(lcct)) {
             if (!mailPart.containsSequenceId()) {
