@@ -127,7 +127,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
     private String altId;
 
     /**
-     * Initializes a new {@link RawJSONMessageHandler}
+     * Initializes a new {@link RawJSONMessageHandler}.
      * 
      * @param accountId The account ID
      * @param mailPath The unique mail path
@@ -141,7 +141,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
     }
 
     /**
-     * Initializes a new {@link RawJSONMessageHandler} for internal usage
+     * Initializes a new {@link RawJSONMessageHandler}.
      * 
      * @param accountId The account ID
      * @param mailPath The unique mail path
