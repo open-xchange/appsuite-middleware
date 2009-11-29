@@ -326,7 +326,7 @@ public class MIMEMailException extends MailException {
     }
 
     protected MIMEMailException(final Code code, final Throwable cause, final Object... messageArgs) {
-        super(EnumComponent.MAIL, code.category, code.detailNumber, code.message, cause);
+        super(EnumComponent.MAIL, code.getCategory(), code.getNumber(), code.getMessage(), cause);
         super.setMessageArgs(messageArgs);
     }
 

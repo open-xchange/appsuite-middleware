@@ -909,9 +909,8 @@ public class MIMEMessageFiller {
      * @return An appropriate "multipart/alternative" object.
      * @throws MailException If a mail error occurs
      * @throws MessagingException If a messaging error occurs
-     * @throws IOException If an I/O error occurs
      */
-    protected final Multipart createMultipartAlternative(final ComposedMailMessage mail, final String mailBody, final boolean embeddedImages) throws MailException, MessagingException, IOException {
+    protected final Multipart createMultipartAlternative(final ComposedMailMessage mail, final String mailBody, final boolean embeddedImages) throws MailException, MessagingException {
         /*
          * Create an "alternative" multipart
          */
@@ -1151,9 +1150,8 @@ public class MIMEMessageFiller {
      * @param htmlContent The HTML content
      * @return A body part of type <code>text/plain</code> from given HTML content
      * @throws MessagingException If a messaging error occurs
-     * @throws IOException If an I/O error occurs
      */
-    protected final BodyPart createTextBodyPart(final String htmlContent) throws MessagingException, IOException {
+    protected final BodyPart createTextBodyPart(final String htmlContent) throws MessagingException {
         /*
          * Convert html content to regular text. First: Create a body part for text content
          */

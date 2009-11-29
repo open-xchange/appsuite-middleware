@@ -516,9 +516,8 @@ public final class MimeForward {
      * @param msg The original message
      * @param html <code>true</code> if given text is html content; otherwise <code>false</code>
      * @return The forward text
-     * @throws MessagingException
      */
-    private static String generateForwardText(final String firstSeenText, final Locale locale, final MailMessage msg, final boolean html) throws MessagingException {
+    private static String generateForwardText(final String firstSeenText, final Locale locale, final MailMessage msg, final boolean html) {
         final StringHelper strHelper = new StringHelper(locale);
         String forwardPrefix = strHelper.getString(MailStrings.FORWARD_PREFIX);
         {

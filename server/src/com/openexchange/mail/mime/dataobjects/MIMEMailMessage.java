@@ -82,10 +82,8 @@ public final class MIMEMailMessage extends MailMessage {
 
     /**
      * Constructor - Only applies specified message, but does not set any attributes
-     * 
-     * @throws MailException If message's content cannot be applied
      */
-    public MIMEMailMessage(final MimeMessage msg) throws MailException {
+    public MIMEMailMessage(final MimeMessage msg) {
         super();
         // TODO: this.mailPart = MIMEMessageConverter.convertPart(msg);
         mailPart = new MIMEMailPart(msg);
@@ -97,9 +95,8 @@ public final class MIMEMailMessage extends MailMessage {
      * Through providing a <code>null</code> reference the body is cleared from this mail.
      * 
      * @param msg The MIME message or <code>null</code> to clear any body references
-     * @throws MailException If parsing MIME message fails
      */
-    public void setContent(final MimeMessage msg) throws MailException {
+    public void setContent(final MimeMessage msg) {
         // TODO: this.mailPart = msg == null ? new MIMEMailPart(null) : MIMEMessageConverter.convertPart(msg);
         mailPart = msg == null ? new MIMEMailPart(null) : new MIMEMailPart(msg);
     }

@@ -258,9 +258,8 @@ public final class MimeProcessingUtility {
      * @param contentType Current text's content type
      * @param text The text content
      * @param textBuilder The text builder to append to
-     * @throws IOException
      */
-    static void appendRightVersion(final ContentType rootType, final ContentType contentType, final String text, final StringBuilder textBuilder) throws IOException {
+    static void appendRightVersion(final ContentType rootType, final ContentType contentType, final String text, final StringBuilder textBuilder) {
         if (rootType.getBaseType().equalsIgnoreCase(contentType.getBaseType())) {
             textBuilder.append(text);
         } else if (rootType.startsWith(CT_TEXT_HTM)) {
