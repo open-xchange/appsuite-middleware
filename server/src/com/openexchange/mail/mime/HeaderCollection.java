@@ -63,6 +63,7 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
+import org.apache.commons.logging.Log;
 import com.openexchange.mail.MailException;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -77,9 +78,6 @@ public class HeaderCollection implements Serializable {
     private static final String ERR_HEADER_NAME_IS_INVALID = "Header name is invalid";
 
     private static final long serialVersionUID = 6939560514144351286L;
-
-    private static final transient org.apache.commons.logging.Log LOG =
-        org.apache.commons.logging.LogFactory.getLog(HeaderCollection.class);
 
     /**
      * Read-only constant for an empty header collection
@@ -827,6 +825,7 @@ public class HeaderCollection implements Serializable {
      * Simple test method
      */
     public static final void test() {
+        final Log log2 = org.apache.commons.logging.LogFactory.getLog(HeaderCollection.class);
         try {
             final HeaderCollection hc = new HeaderCollection();
 
@@ -844,37 +843,37 @@ public class HeaderCollection implements Serializable {
             final Iterator<Map.Entry<String, String>> iter = hc.getAllHeaders();
             while (iter.hasNext()) {
                 final Map.Entry<String, String> e = iter.next();
-                LOG.info(e.getKey() + ": " + e.getValue());
+                log2.info(e.getKey() + ": " + e.getValue());
                 if ("Faust".equals(e.getKey())) {
                     iter.remove();
                 }
             }
 
-            LOG.info("\n\nAfter removal through iterator");
+            log2.info("\n\nAfter removal through iterator");
 
             final Iterator<Map.Entry<String, String>> iter2 = hc.getAllHeaders();
             while (iter2.hasNext()) {
                 final Map.Entry<String, String> e = iter2.next();
-                LOG.info(e.getKey() + ": " + e.getValue());
+                log2.info(e.getKey() + ": " + e.getValue());
             }
 
-            LOG.info("\n\nNon-Matching");
+            log2.info("\n\nNon-Matching");
 
             final Iterator<Map.Entry<String, String>> iter3 = hc.getNonMatchingHeaders(new String[] { "To", "From" });
             while (iter3.hasNext()) {
                 final Map.Entry<String, String> e = iter3.next();
-                LOG.info(e.getKey() + ": " + e.getValue());
+                log2.info(e.getKey() + ": " + e.getValue());
             }
 
-            LOG.info("\n\nMatching");
+            log2.info("\n\nMatching");
 
             final Iterator<Map.Entry<String, String>> iter4 = hc.getMatchingHeaders(new String[] { "To", "From" });
             while (iter4.hasNext()) {
                 final Map.Entry<String, String> e = iter4.next();
-                LOG.info(e.getKey() + ": " + e.getValue());
+                log2.info(e.getKey() + ": " + e.getValue());
             }
 
-            LOG.info("\n\nEquals");
+            log2.info("\n\nEquals");
 
             final HeaderCollection hc2 = new HeaderCollection();
 
@@ -889,10 +888,10 @@ public class HeaderCollection implements Serializable {
             hc2.addHeader("Subject", "The simple subject");
             hc2.addHeader("Aaa", "dummy header here");
 
-            LOG.info(Boolean.valueOf(hc.equals(hc2)));
+            log2.info(Boolean.valueOf(hc.equals(hc2)));
 
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            log2.error(e.getMessage(), e);
         }
     }
 }
