@@ -126,9 +126,8 @@ public class HeaderCollection implements Serializable {
      * href="http://www.ietf.org/rfc/rfc822.txt">RFC822</a></b></small> source
      * 
      * @param headerSrc The headers' <small><b><a href="http://www.ietf.org/rfc/rfc822.txt" >RFC822</a></b></small> source
-     * @throws MailException If parsing the header source fails
      */
-    public HeaderCollection(final String headerSrc) throws MailException {
+    public HeaderCollection(final String headerSrc) {
         this();
         load(headerSrc);
     }
@@ -204,9 +203,8 @@ public class HeaderCollection implements Serializable {
      * the existing list of headers, in order.
      * 
      * @param headerSrc The headers' <small><b><a href="http://www.ietf.org/rfc/rfc822.txt" >RFC822</a></b></small> source
-     * @throws MailException If reading from headers' source fails
      */
-    public void load(final String headerSrc) throws MailException {
+    public void load(final String headerSrc) {
         if ((null == headerSrc) || (0 == headerSrc.length())) {
             // Nothing to load
             return;
