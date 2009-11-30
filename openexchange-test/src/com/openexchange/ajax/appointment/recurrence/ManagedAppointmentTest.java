@@ -79,10 +79,14 @@ public class ManagedAppointmentTest extends AppointmentTest {
 
     protected NegativeAssertionOnCreate negativeAssertionOnCreate;
 
+    protected NegativeAssertionOnChangeException negativeAssertionOnChangeException;
+
     protected AbstractPositiveAssertion positiveAssertionOnCreate;
 
     protected PositiveAssertionOnUpdate positiveAssertionOnUpdate;
-    
+
+    protected PositiveAssertionOnChangeException positiveAssertionOnChangeException;
+
     protected PositiveAssertionOnDeleteException positiveAssertionOnDeleteException;
 
     public ManagedAppointmentTest(String name) {
@@ -104,8 +108,10 @@ public class ManagedAppointmentTest extends AppointmentTest {
 
         this.negativeAssertionOnUpdate = new NegativeAssertionOnUpdate(calendarManager, folder.getObjectID());
         this.negativeAssertionOnCreate = new NegativeAssertionOnCreate(calendarManager, folder.getObjectID());
+        this.negativeAssertionOnChangeException = new NegativeAssertionOnChangeException(calendarManager, folder.getObjectID());
         this.positiveAssertionOnUpdate = new PositiveAssertionOnUpdate(calendarManager, folder.getObjectID());
         this.positiveAssertionOnCreate = new PositiveAssertionOnCreate(calendarManager, folder.getObjectID());
+        this.positiveAssertionOnChangeException = new PositiveAssertionOnChangeException(calendarManager, folder.getObjectID());
         this.positiveAssertionOnDeleteException = new PositiveAssertionOnDeleteException(calendarManager, folder.getObjectID());
 
     }
@@ -123,6 +129,13 @@ public class ManagedAppointmentTest extends AppointmentTest {
         }
     }
 
+    protected Appointment generateDailyAppointment() {
+        Appointment app = AbstractAssertion.generateDefaultAppointment(folder.getObjectID());
+        app.set(Appointment.RECURRENCE_TYPE, Appointment.DAILY);
+        app.set(Appointment.INTERVAL, 1);
+        return app;
+    }
+    
     protected Appointment generateMonthlyAppointment() {
         Appointment app = AbstractAssertion.generateDefaultAppointment(folder.getObjectID());
         app.set(Appointment.RECURRENCE_TYPE, Appointment.MONTHLY);
