@@ -51,16 +51,12 @@ package com.openexchange.ajax.appointment.action;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.json.JSONException;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.groupware.container.Appointment;
 
 /**
- * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 public class GetRequest extends AbstractAppointmentRequest<GetResponse> {
@@ -74,13 +70,13 @@ public class GetRequest extends AbstractAppointmentRequest<GetResponse> {
      * Unique identifier of the appointment.
      */
     private final int objectId;
-	
-	/**
-	 * Recurrence position 
-	 */
-	private final int recurrencePosition; 
 
-	private final boolean failOnError;
+    /**
+     * Recurrence position
+     */
+    private final int recurrencePosition;
+
+    private final boolean failOnError;
 
     /**
      * Default constructor.
@@ -97,28 +93,27 @@ public class GetRequest extends AbstractAppointmentRequest<GetResponse> {
         this(folderId, objectId, recurrencePosition, true);
     }
 
-    public GetRequest(final int folderId, final int objectId,
-        final int recurrencePosition, final boolean failOnError) {
+    public GetRequest(final int folderId, final int objectId, final int recurrencePosition, final boolean failOnError) {
         super();
         this.folderId = folderId;
         this.objectId = objectId;
-		this.recurrencePosition = recurrencePosition;
-		this.failOnError = failOnError;
+        this.recurrencePosition = recurrencePosition;
+        this.failOnError = failOnError;
     }
 
     public GetRequest(final int folderId, final CommonInsertResponse insert) {
         this(folderId, insert.getId());
     }
 
-    public GetRequest(Appointment appointment){
-    	this(appointment.getParentFolderID(), appointment.getObjectID());
+    public GetRequest(Appointment appointment) {
+        this(appointment.getParentFolderID(), appointment.getObjectID());
     }
 
-    public GetRequest(Appointment appointment, final boolean failOnError){
+    public GetRequest(Appointment appointment, final boolean failOnError) {
         this(appointment.getParentFolderID(), appointment.getObjectID(), failOnError);
     }
-    
-    public Object getBody() throws JSONException {
+
+    public Object getBody() {
         return null;
     }
 
@@ -133,14 +128,14 @@ public class GetRequest extends AbstractAppointmentRequest<GetResponse> {
      * {@inheritDoc}
      */
     public Parameter[] getParameters() {
-		final List<Parameter> parameterList = new ArrayList<Parameter>(4);
-		parameterList.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET));
+        final List<Parameter> parameterList = new ArrayList<Parameter>(4);
+        parameterList.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET));
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_INFOLDER, String.valueOf(folderId)));
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_ID, String.valueOf(objectId)));
-		if (recurrencePosition > 0) {
-			parameterList.add(new Parameter(CalendarFields.RECURRENCE_POSITION, String.valueOf(recurrencePosition)));
-		}
-		return parameterList.toArray(new Parameter[parameterList.size()]);
+        if (recurrencePosition > 0) {
+            parameterList.add(new Parameter(CalendarFields.RECURRENCE_POSITION, String.valueOf(recurrencePosition)));
+        }
+        return parameterList.toArray(new Parameter[parameterList.size()]);
     }
 
     /**
