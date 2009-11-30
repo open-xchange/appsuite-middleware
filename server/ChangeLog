@@ -1,3 +1,7 @@
+* 2009-11-30 - thorben.betten@open-xchange.com
+
+ - Bugfix #14937: MAL poll uses DB storage for remembered mail IDs
+
 * 2009-11-27 - marcus.klein@open-xchange.com
 
  - Bugfix #14624: Using a faster initialization of update task list that does not wait for a timeout of 2 seconds when creating the update

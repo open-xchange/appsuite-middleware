@@ -69,15 +69,15 @@ public final class InternalList {
     }
 
     public void start() {
-        DynamicList registry = DynamicList.getInstance();
-        for (UpdateTask task : TASKS) {
+        final DynamicList registry = DynamicList.getInstance();
+        for (final UpdateTask task : TASKS) {
             registry.addUpdateTask(task);
         }
     }
 
     public void stop() {
-        DynamicList registry = DynamicList.getInstance();
-        for (UpdateTask task : TASKS) {
+        final DynamicList registry = DynamicList.getInstance();
+        for (final UpdateTask task : TASKS) {
             registry.removeUpdateTask(task);
         }
     }
@@ -280,7 +280,10 @@ public final class InternalList {
         new com.openexchange.groupware.update.tasks.DuplicateContactCollectFolderRemoverTask(),
         // Version 100
         // Adds necessary indexes to improve shared folder search for a user
-        new com.openexchange.groupware.update.tasks.FolderAddIndex4SharedFolderSearch()
+        new com.openexchange.groupware.update.tasks.FolderAddIndex4SharedFolderSearch(),
+        // Version 102
+        // Adds necessary tables to support MAL-based poll
+        new com.openexchange.groupware.update.tasks.MALPollCreateTableTask()
 
         // TODO: Enable virtual folder tree update task when needed
         // Version XY

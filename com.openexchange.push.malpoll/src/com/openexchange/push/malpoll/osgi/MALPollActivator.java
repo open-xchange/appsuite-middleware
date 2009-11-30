@@ -51,14 +51,21 @@ package com.openexchange.push.malpoll.osgi;
 
 import static com.openexchange.push.malpoll.services.MALPollServiceRegistry.getServiceRegistry;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.Executor;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.mail.service.MailService;
+import com.openexchange.mailaccount.MailAccountDeleteListener;
 import com.openexchange.push.PushException;
 import com.openexchange.push.PushManagerService;
+import com.openexchange.push.malpoll.MALPollDeleteListener;
+import com.openexchange.push.malpoll.MALPollMailAccountDeleteListener;
 import com.openexchange.push.malpoll.MALPollPushListener;
 import com.openexchange.push.malpoll.MALPollPushListenerRegistry;
 import com.openexchange.push.malpoll.MALPollPushListenerRunnable;
@@ -69,7 +76,7 @@ import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
 /**
- * {@link MALPollActivator} - The MAL poll activator.
+ * {@link MALPollActivator} - The MAL Poll activator.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -77,7 +84,7 @@ public final class MALPollActivator extends DeferredActivator {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MALPollActivator.class);
 
-    private ServiceRegistration serviceRegistration;
+    private List<ServiceRegistration> serviceRegistrations;
 
     private ScheduledTimerTask scheduledTimerTask;
 
@@ -98,7 +105,7 @@ public final class MALPollActivator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { MailService.class, EventAdmin.class, TimerService.class, ConfigurationService.class };
+        return new Class<?>[] { MailService.class, EventAdmin.class, TimerService.class, ConfigurationService.class, DatabaseService.class };
     }
 
     @Override
@@ -196,7 +203,13 @@ public final class MALPollActivator extends DeferredActivator {
             /*
              * Register push manager
              */
-            serviceRegistration = context.registerService(PushManagerService.class.getName(), new MALPollPushManagerService(), null);
+            serviceRegistrations = new ArrayList<ServiceRegistration>(4);
+            serviceRegistrations.add(context.registerService(PushManagerService.class.getName(), new MALPollPushManagerService(), null));
+            serviceRegistrations.add(context.registerService(
+                MailAccountDeleteListener.class.getName(),
+                new MALPollMailAccountDeleteListener(),
+                null));
+            serviceRegistrations.add(context.registerService(DeleteListener.class.getName(), new MALPollDeleteListener(), null));
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
@@ -209,9 +222,11 @@ public final class MALPollActivator extends DeferredActivator {
             /*
              * Unregister push manager
              */
-            if (null != serviceRegistration) {
-                serviceRegistration.unregister();
-                serviceRegistration = null;
+            if (null != serviceRegistrations) {
+                while (!serviceRegistrations.isEmpty()) {
+                    serviceRegistrations.remove(0).unregister();
+                }
+                serviceRegistrations = null;
             }
             /*
              * Shut down

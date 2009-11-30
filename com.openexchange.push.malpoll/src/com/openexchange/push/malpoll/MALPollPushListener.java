@@ -53,6 +53,7 @@ import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.mail.MailException;
@@ -81,6 +82,8 @@ public final class MALPollPushListener implements PushListener {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MALPollPushListener.class);
 
+    private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
+
     private static final MailField[] FIELDS = new MailField[] { MailField.ID };
 
     /**
@@ -93,12 +96,30 @@ public final class MALPollPushListener implements PushListener {
     private static volatile long periodMillis;
 
     /**
+     * Gets the account ID constant.
+     * 
+     * @return The account ID constant
+     */
+    public static int getAccountId() {
+        return ACCOUNT_ID;
+    }
+
+    /**
      * Sets static folder fullname.
      * 
      * @param folder The folder fullname
      */
     public static void setFolder(final String folder) {
         MALPollPushListener.folder = folder;
+    }
+
+    /**
+     * Gets static folder fullname.
+     * 
+     * @return The folder fullname
+     */
+    public static String getFolder() {
+        return folder;
     }
 
     /**
@@ -125,6 +146,8 @@ public final class MALPollPushListener implements PushListener {
      * Member section
      */
 
+    private final AtomicBoolean running;
+
     private final Session session;
 
     private final int userId;
@@ -135,7 +158,7 @@ public final class MALPollPushListener implements PushListener {
 
     private volatile ScheduledTimerTask timerTask;
 
-    private volatile Set<String> uids;
+    private volatile boolean started;
 
     /**
      * Initializes a new {@link MALPollPushListener}.
@@ -145,6 +168,7 @@ public final class MALPollPushListener implements PushListener {
      */
     private MALPollPushListener(final Session session, final boolean ignoreOnGlobal) {
         super();
+        running = new AtomicBoolean();
         this.session = session;
         this.ignoreOnGlobal = ignoreOnGlobal;
         this.userId = session.getUserId();
@@ -215,31 +239,84 @@ public final class MALPollPushListener implements PushListener {
      * @throws PushException If check for new mails fails
      */
     public void checkNewMail() throws PushException {
-        final MailService mailService;
-        try {
-            mailService = MALPollServiceRegistry.getServiceRegistry().getService(MailService.class, true);
-        } catch (final ServiceException e) {
-            throw new PushException(e);
+        if (!running.compareAndSet(false, true)) {
+            /*
+             * Still in process...
+             */
+            if (DEBUG_ENABLED) {
+                LOG.debug(new StringBuilder(64).append("Listener still in process for user ").append(userId).append(" in context ").append(
+                    contextId).append(". Return immediately.").toString());
+            }
+            return;
         }
         try {
-            if (null == uids) {
-                // First run
-                uids = gatherUIDs(mailService);
+            final MailService mailService = MALPollServiceRegistry.getServiceRegistry().getService(MailService.class, true);
+            if (started) {
+                subsequentRun(mailService);
             } else {
-                // Subsequent run
-                final Set<String> uidSet = gatherUIDs(mailService);
-                /*
-                 * Clone set, remove all UIDs from previous run, and check if non-empty to notify new mails
-                 */
-                final Set<String> mod = new HashSet<String>(uidSet);
-                mod.removeAll(uids);
-                if (!mod.isEmpty()) {
-                    notifyNewMail();
-                }
-                uids = uidSet;
+                firstRun(mailService);
+                started = true;
             }
+        } catch (final ServiceException e) {
+            throw new PushException(e);
         } catch (final MailException e) {
             throw new PushException(e);
+        } finally {
+            running.set(false);
+        }
+    }
+
+    private void firstRun(final MailService mailService) throws PushException, MailException {
+        final long s = DEBUG_ENABLED ? System.currentTimeMillis() : 0L;
+        /*
+         * First run
+         */
+        final String fullname = folder;
+        MALPollDBUtility.dropMailIDs(contextId, userId, ACCOUNT_ID, fullname);
+        final Set<String> uids = gatherUIDs(mailService);
+        /*
+         * Insert
+         */
+        final String insertedHash = MALPollDBUtility.insertHash(contextId, userId, ACCOUNT_ID, fullname);
+        MALPollDBUtility.insertMailIDs(insertedHash, uids, contextId);
+        if (DEBUG_ENABLED) {
+            final long d = System.currentTimeMillis() - s;
+            LOG.debug("First run took " + d + "msec");
+        }
+    }
+
+    private void subsequentRun(final MailService mailService) throws PushException, MailException {
+        final long s = DEBUG_ENABLED ? System.currentTimeMillis() : 0L;
+        /*
+         * Subsequent run
+         */
+        final String hash = MALPollDBUtility.getHash(contextId, userId, ACCOUNT_ID, folder);
+        if (null == hash) {
+            return;
+        }
+        final Set<String> newUids = gatherUIDs(mailService);
+        final Set<String> oldUids = MALPollDBUtility.getMailIDs(hash, contextId);
+        final boolean notified;
+        {
+            /*
+             * Clone set, remove all UIDs from previous run, and check if non-empty to notify new mails
+             */
+            final Set<String> mod = new HashSet<String>(newUids);
+            mod.removeAll(oldUids); // Old UIDs loaded from DB
+            notified = (!mod.isEmpty());
+            if (notified) {
+                notifyNewMail();
+            }
+        }
+        /*
+         * Write UIDs
+         */
+        if (notified || !newUids.equals(oldUids)) {
+            MALPollDBUtility.replaceMailIDs(hash, newUids, contextId);
+        }
+        if (DEBUG_ENABLED) {
+            final long d = System.currentTimeMillis() - s;
+            LOG.debug("Subsequent run took " + d + "msec");
         }
     }
 
@@ -283,7 +360,7 @@ public final class MALPollPushListener implements PushListener {
          * Finally post it
          */
         eventAdmin.postEvent(event);
-        if (LOG.isDebugEnabled()) {
+        if (DEBUG_ENABLED) {
             LOG.debug(new StringBuilder(64).append("Notified new mails in folder \"").append(folder).append("\" for user ").append(userId).append(
                 " in context ").append(contextId).toString());
         }
@@ -295,7 +372,7 @@ public final class MALPollPushListener implements PushListener {
      * @return <code>true</code> if this listener has been started; otherwise <code>false</code>
      */
     public boolean isStarted() {
-        return (null != uids);
+        return started;
     }
 
 }
