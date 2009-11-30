@@ -79,11 +79,6 @@ public final class ExtensionDetailsAction extends AbstractVoipNowSOAPAction<Exte
     private static final String SOAP_PATH = "/soap2/extension_agent.php";
 
     /**
-     * The HTTPS identifier constant.
-     */
-    private static final String HTTPS = "https";
-
-    /**
      * The <tt>extensiondetails</tt> action string.
      */
     public static final String ACTION = "extensiondetails";
