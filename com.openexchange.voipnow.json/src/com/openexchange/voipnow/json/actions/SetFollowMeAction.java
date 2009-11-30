@@ -176,7 +176,7 @@ public final class SetFollowMeAction extends AbstractVoipNowSOAPAction<Extension
             /*
              * Delete existing follow-me rules
              */
-            if (followMeRulesIDs.isEmpty()) {
+            if (!followMeRulesIDs.isEmpty()) {
                 final int size = followMeRulesIDs.size();
                 final PositiveInteger[] ids = new PositiveInteger[size];
                 for (int i = 0; i < size; i++) {
