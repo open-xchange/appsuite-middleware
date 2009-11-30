@@ -73,8 +73,9 @@ public class FolderDeleteStep extends NeedExistingStep<FolderObject> {
     public void perform(AJAXClient client) throws Exception {
         assumeIdentity(entry);
         FolderTestManager manager = new FolderTestManager(client);
+        manager.setFailOnError(false);
         Assert.assertNotNull("Should have found folder before deletion" , manager.getFolderFromServer(this.entry , false) );        
-        manager.deleteFolderOnServer(this.entry, false);
+        manager.deleteFolderOnServer(this.entry);
         Assert.assertNull("Should not have found folder after deletion" , manager.getFolderFromServer(this.entry , false) );
         forgetIdentity(entry);
     }
