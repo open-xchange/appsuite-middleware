@@ -184,7 +184,7 @@ public final class JCSCacheServiceInit {
 
     private void initializeCompositeCacheManager(final boolean obtainMutex) {
         if (obtainMutex) {
-            synchronized (started) {
+            synchronized (this) {
                 if (null == ccmInstance) {
                     ccmInstance = CompositeCacheManager.getUnconfiguredInstance();
                 }
