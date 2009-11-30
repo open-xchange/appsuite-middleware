@@ -112,7 +112,7 @@ public class TestsForDeleteExceptionsAndFixedEndsOfSeries extends ManagedAppoint
         int numberOfOccurences = 3;
         app.setOccurrence(numberOfOccurences );
         
-        calendarManager.insertAppointmentOnServer(app);
+        calendarManager.insert(app);
         
         for(int i = 0; i < numberOfOccurences; i++){
             calendarManager.createDeleteException(app, i+1);

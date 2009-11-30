@@ -82,13 +82,13 @@ public class UpdateWithRecurrenceIdTest extends AppointmentTest {
 
         app.setFullTime(true);
 
-        cMgr.insertAppointmentOnServer(app);
+        cMgr.insert(app);
 
         app.setTitle("Changed title");
         app.setRecurrenceID(0);
         
         assertFalse("Precondition: No exceptions occurred", cMgr.hasLastException());
-        cMgr.updateAppointmentOnServer(app);
+        cMgr.update(app);
         assertTrue("Should throw exception when trying to perform update on normal appointment with pointless recurrence_id", cMgr.hasLastException());
     }
 }

@@ -119,7 +119,7 @@ public class CalendarTestManagerTest extends AbstractAJAXSession {
         Appointment appointment = generateAppointment();
         appointment.setIgnoreConflicts(true);
 
-        calendarMgr.insertAppointmentOnServer(appointment);
+        calendarMgr.insert(appointment);
 
         assertNotNull(appointment.getLastModified());
         assertExists(appointment);
@@ -129,11 +129,11 @@ public class CalendarTestManagerTest extends AbstractAJAXSession {
         Appointment appointment = generateAppointment();
         appointment.setIgnoreConflicts(true);
 
-        calendarMgr.insertAppointmentOnServer(appointment);
+        calendarMgr.insert(appointment);
 
         assertExists(appointment);
 
-        calendarMgr.deleteAppointmentOnServer(appointment);
+        calendarMgr.delete(appointment);
 
         assertDoesNotExist(appointment);
     }
@@ -142,14 +142,14 @@ public class CalendarTestManagerTest extends AbstractAJAXSession {
         Appointment appointment = generateAppointment();
         appointment.setIgnoreConflicts(true);
 
-        calendarMgr.insertAppointmentOnServer(appointment);
+        calendarMgr.insert(appointment);
 
-        Appointment reload = calendarMgr.getAppointmentFromServer(appointment.getParentFolderID(), appointment.getObjectID());
+        Appointment reload = calendarMgr.get(appointment.getParentFolderID(), appointment.getObjectID());
 
         assertEquals(appointment.getObjectID(), reload.getObjectID());
         assertEquals(appointment.getTitle(), reload.getTitle());
 
-        reload = calendarMgr.getAppointmentFromServer(appointment);
+        reload = calendarMgr.get(appointment);
 
         assertEquals(appointment.getObjectID(), reload.getObjectID());
         assertEquals(appointment.getTitle(), reload.getTitle());
@@ -159,7 +159,7 @@ public class CalendarTestManagerTest extends AbstractAJAXSession {
         Appointment appointment = generateAppointment();
         appointment.setIgnoreConflicts(true);
 
-        calendarMgr.insertAppointmentOnServer(appointment);
+        calendarMgr.insert(appointment);
 
         Appointment update = calendarMgr.createIdentifyingCopy(appointment);
 
@@ -172,9 +172,9 @@ public class CalendarTestManagerTest extends AbstractAJAXSession {
         update.setEndDate(new Date(25000));
         update.setIgnoreConflicts(true);
 
-        calendarMgr.updateAppointmentOnServer(update);
+        calendarMgr.update(update);
 
-        Appointment reload = calendarMgr.getAppointmentFromServer(appointment);
+        Appointment reload = calendarMgr.get(appointment);
 
         assertEquals(23000, reload.getStartDate().getTime());
         assertEquals(25000, reload.getEndDate().getTime());
@@ -184,7 +184,7 @@ public class CalendarTestManagerTest extends AbstractAJAXSession {
         Appointment appointment = generateAppointment();
         appointment.setIgnoreConflicts(true);
 
-        calendarMgr.insertAppointmentOnServer(appointment);
+        calendarMgr.insert(appointment);
 
         Date beforeUpdate = appointment.getLastModified(); // TODO use global timestamp from ALL request
         Appointment update = calendarMgr.createIdentifyingCopy(appointment);
@@ -197,9 +197,9 @@ public class CalendarTestManagerTest extends AbstractAJAXSession {
         assertEquals(update.getLastModified(), appointment.getLastModified());
         assertNotSame(appointment, update);
 
-        calendarMgr.updateAppointmentOnServer(update);
+        calendarMgr.update(update);
 
-        List<Appointment> updates = calendarMgr.getUpdates(appointment.getParentFolderID(), beforeUpdate, true);
+        List<Appointment> updates = calendarMgr.updates(appointment.getParentFolderID(), beforeUpdate, true);
 
         assertEquals("Should have one new update", 1, updates.size());
         assertEquals("Should contain the updated title", updatedTitle, updates.get(0).getTitle());
@@ -213,9 +213,9 @@ public class CalendarTestManagerTest extends AbstractAJAXSession {
         appointment.setEndDate(D("12/02/1999 12:00"));
         appointment.setIgnoreConflicts(true);
 
-        calendarMgr.insertAppointmentOnServer(appointment);
+        calendarMgr.insert(appointment);
 
-        Appointment[] appointments = calendarMgr.getAllAppointmentsOnServer(
+        Appointment[] appointments = calendarMgr.all(
             appointment.getParentFolderID(),
             D("01/01/1999 00:00"),
             D("01/03/1999 00:00"));

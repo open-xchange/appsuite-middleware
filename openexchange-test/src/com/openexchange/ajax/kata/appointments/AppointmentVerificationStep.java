@@ -145,7 +145,7 @@ public class AppointmentVerificationStep extends NeedExistingStep<Appointment> {
     }
 
     private void checkViaGet(Appointment appointment) throws OXException, JSONException {
-        Appointment loaded = manager.getAppointmentFromServer(expectedFolderId, appointment.getObjectID());
+        Appointment loaded = manager.get(expectedFolderId, appointment.getObjectID());
         compare(appointment, loaded);
     }
 

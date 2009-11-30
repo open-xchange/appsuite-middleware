@@ -89,7 +89,7 @@ public class DeleteExceptionTimestampTest extends AbstractAJAXSession {
         appointment.setInterval(1);
         appointment.setOccurrence(5);
         appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
-        manager.insertAppointmentOnServer(appointment);
+        manager.insert(appointment);
     }
     
     @Override

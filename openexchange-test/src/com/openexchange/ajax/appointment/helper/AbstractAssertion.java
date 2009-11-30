@@ -111,7 +111,7 @@ public class AbstractAssertion extends Assert {
     }
 
     protected Appointment create(Appointment app) {
-        return manager.insertAppointmentOnServer(app);
+        return manager.insert(app);
     }
 
     protected void update(Appointment app, Changes changes) {
@@ -121,6 +121,6 @@ public class AbstractAssertion extends Assert {
         update.setLastModified(app.getLastModified());
 
         changes.update(update);
-        manager.updateAppointmentOnServer(update);
+        manager.update(update);
     }
 }

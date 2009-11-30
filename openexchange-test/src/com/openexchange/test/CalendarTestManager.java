@@ -172,7 +172,7 @@ public class CalendarTestManager {
         boolean old = getFailOnError();
         setFailOnError(false); //switching off, because there are other ways to delete an appointment, for example creating enough delete exceptions
         for (Appointment appointment : new ArrayList<Appointment>(createdEntities)) {
-            deleteAppointmentOnServer(appointment);
+            delete(appointment);
         }
         setFailOnError(old);
     }
@@ -203,7 +203,7 @@ public class CalendarTestManager {
     /*
      * Requests
      */
-    public Appointment insertAppointmentOnServer(Appointment appointment) {
+    public Appointment insert(Appointment appointment) {
         InsertRequest insertRequest = new InsertRequest(appointment, timezone, getFailOnError());
         AppointmentInsertResponse insertResponse = execute(insertRequest);
         extractInfo(insertResponse);
@@ -213,21 +213,21 @@ public class CalendarTestManager {
         return appointment;
     }
 
-    public Appointment getAppointmentFromServer(int parentFolderID, int objectID) throws OXException {
+    public Appointment get(int parentFolderID, int objectID) throws OXException {
         GetRequest get = new GetRequest(parentFolderID, objectID, getFailOnError());
         GetResponse response = execute(get);
         extractInfo(response);
         return response.getAppointment(timezone);
     }
 
-    public Appointment getAppointmentFromServer(Appointment appointment) throws OXException {
+    public Appointment get(Appointment appointment) throws OXException {
         GetRequest get = new GetRequest(appointment, getFailOnError());
         GetResponse response = execute(get);
         extractInfo(response);
         return response.getAppointment(timezone);
     }
 
-    public Appointment getAppointmentFromServer(int parentFolderID, int objectID, boolean pleaseFailOnError) throws OXException {
+    public Appointment get(int parentFolderID, int objectID, boolean pleaseFailOnError) throws OXException {
         try {
             GetRequest get = new GetRequest(parentFolderID, objectID, pleaseFailOnError);
             GetResponse response = execute(get);
@@ -240,11 +240,11 @@ public class CalendarTestManager {
         }
     }
 
-    public List<Appointment> getUpdates(final int folderId, final Date timestamp, final boolean recurrenceMaster) {
-        return getUpdates(folderId, Appointment.ALL_COLUMNS, timestamp, recurrenceMaster);
+    public List<Appointment> updates(final int folderId, final Date timestamp, final boolean recurrenceMaster) {
+        return updates(folderId, Appointment.ALL_COLUMNS, timestamp, recurrenceMaster);
     }
 
-    public List<Appointment> getUpdates(final int folderId, final int[] columns, final Date timestamp, final boolean recurrenceMaster) {
+    public List<Appointment> updates(final int folderId, final int[] columns, final Date timestamp, final boolean recurrenceMaster) {
         UpdatesRequest req = new UpdatesRequest(folderId, columns, timestamp, recurrenceMaster);
         UpdatesResponse resp = execute(req);
         extractInfo(resp);
@@ -256,7 +256,7 @@ public class CalendarTestManager {
         }
     }
 
-    public void updateAppointmentOnServer(Appointment updatedAppointment) {
+    public void update(Appointment updatedAppointment) {
         UpdateRequest updateRequest = new UpdateRequest(updatedAppointment, timezone, getFailOnError());
         UpdateResponse updateResponse = execute(updateRequest);
         extractInfo(updateResponse);
@@ -295,7 +295,7 @@ public class CalendarTestManager {
         return I2i(cols);
     }
 
-    public Appointment[] getAllAppointmentsOnServer(int parentFolderID, Date start, Date end) {
+    public Appointment[] all(int parentFolderID, Date start, Date end) {
         AllRequest request = new AllRequest(parentFolderID, Appointment.ALL_COLUMNS, start, end, timezone);
         CommonAllResponse response = execute(request);
         extractInfo(response);
@@ -326,7 +326,7 @@ public class CalendarTestManager {
         return appointments.toArray(new Appointment[appointments.size()]);
     }
 
-    public void deleteAppointmentOnServer(Appointment appointment, boolean failOnErrorOverride) {
+    public void delete(Appointment appointment, boolean failOnErrorOverride) {
         createdEntities.remove(appointment);
         DeleteRequest deleteRequest = new DeleteRequest(
             appointment.getObjectID(),
@@ -336,7 +336,7 @@ public class CalendarTestManager {
         extractInfo(execute(deleteRequest));
     }
 
-    public void deleteAppointmentOnServer(Appointment appointment) {
+    public void delete(Appointment appointment) {
         createdEntities.remove(appointment); // TODO: Does this remove the right object or does equals() suck?
         appointment.setLastModified(new Date(Long.MAX_VALUE));
         DeleteRequest deleteRequest = new DeleteRequest( appointment, getFailOnError() );
@@ -382,8 +382,8 @@ public class CalendarTestManager {
     }
 
     public void clearFolder(int folderId, Date start, Date end) {
-        for (Appointment app : getAllAppointmentsOnServer(folderId, start, end)) {
-            deleteAppointmentOnServer(app);
+        for (Appointment app : all(folderId, start, end)) {
+            delete(app);
         }
     }
 

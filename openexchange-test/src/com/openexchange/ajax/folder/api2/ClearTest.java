@@ -163,7 +163,7 @@ public class ClearTest extends AbstractAJAXSession {
             }
 
             final CalendarTestManager calendarTestManager = new CalendarTestManager(client);
-            final Appointment[] appointments = calendarTestManager.getAllAppointmentsOnServer(Integer.parseInt(newId), new Date(
+            final Appointment[] appointments = calendarTestManager.all(Integer.parseInt(newId), new Date(
                 s - Constants.MILLI_WEEK), new Date(s + Constants.MILLI_WEEK));
 
             assertTrue("Appointments were not created.", null != appointments && appointments.length == 2);
@@ -176,7 +176,7 @@ public class ClearTest extends AbstractAJAXSession {
 
             assertEquals("Folder could not be cleared.", 0, nonClearedIDs.length());
 
-            final Appointment[] emptyAppointments = calendarTestManager.getAllAppointmentsOnServer(Integer.parseInt(newId), new Date(
+            final Appointment[] emptyAppointments = calendarTestManager.all(Integer.parseInt(newId), new Date(
                 s - Constants.MILLI_WEEK), new Date(s + Constants.MILLI_WEEK));
 
             assertTrue("Appointments were not cleared.", null == emptyAppointments || emptyAppointments.length == 0);

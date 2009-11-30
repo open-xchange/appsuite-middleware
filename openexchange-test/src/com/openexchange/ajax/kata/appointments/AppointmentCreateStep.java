@@ -86,7 +86,7 @@ public class AppointmentCreateStep extends AbstractStep implements IdentitySourc
         if(!inserted) {
             return;
         }
-        manager.deleteAppointmentOnServer(entry, false);
+        manager.delete(entry, false);
     }
 
     public void perform(AJAXClient client) throws Exception {

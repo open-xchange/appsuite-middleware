@@ -110,7 +110,7 @@ public abstract class AbstractPositiveAssertion extends AbstractAssertion{
         methodUsedForTest = "Get";
         Appointment actual;
         try {
-            actual = manager.getAppointmentFromServer(folderId, appointmentId);
+            actual = manager.get(folderId, appointmentId);
             if(manager.hasLastException())
                 fail2("Exception occured: " + manager.getLastException());
         } catch (Exception e) {
