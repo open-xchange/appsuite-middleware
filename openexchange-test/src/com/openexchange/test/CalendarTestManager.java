@@ -49,8 +49,10 @@
 
 package com.openexchange.test;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.I2i;
+import static com.openexchange.java.Autoboxing.i2I;
 import static junit.framework.Assert.fail;
-import static com.openexchange.java.Autoboxing.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -167,9 +169,12 @@ public class CalendarTestManager {
     }
 
     public void cleanUp() {
+        boolean old = getFailOnError();
+        setFailOnError(false); //switching off, because there are other ways to delete an appointment, for example creating enough delete exceptions
         for (Appointment appointment : new ArrayList<Appointment>(createdEntities)) {
             deleteAppointmentOnServer(appointment);
         }
+        setFailOnError(old);
     }
 
     private <T extends AbstractAJAXResponse> T execute(final AJAXRequest<T> request) {
@@ -334,7 +339,7 @@ public class CalendarTestManager {
     public void deleteAppointmentOnServer(Appointment appointment) {
         createdEntities.remove(appointment); // TODO: Does this remove the right object or does equals() suck?
         appointment.setLastModified(new Date(Long.MAX_VALUE));
-        DeleteRequest deleteRequest = new DeleteRequest(appointment);
+        DeleteRequest deleteRequest = new DeleteRequest( appointment, getFailOnError() );
         extractInfo(execute(deleteRequest));
     }
     
