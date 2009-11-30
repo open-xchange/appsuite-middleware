@@ -58,6 +58,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.api2.ContactInterfaceFactory;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.settings.PreferencesItemService;
@@ -106,7 +107,10 @@ public class Activator implements BundleActivator {
              * Register user multiple service
              */
             serviceRegistrations = new ArrayList<ServiceRegistration>(4);
-            serviceRegistrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new VoipNowMultipleHandlerFactory(), null));
+            serviceRegistrations.add(context.registerService(
+                MultipleHandlerFactoryService.class.getName(),
+                new VoipNowMultipleHandlerFactory(),
+                null));
             serviceRegistrations.add(context.registerService(PreferencesItemService.class.getName(), new VoipNowEnabled(), null));
             serviceRegistrations.add(context.registerService(PreferencesItemService.class.getName(), new VoipNowFaxAddress(), null));
             /*
@@ -117,6 +121,13 @@ public class Activator implements BundleActivator {
                 context,
                 ServiceRegistry.getInstance(),
                 UserService.class)));
+            trackers.push(new ServiceTracker(
+                context,
+                ConfigurationService.class.getName(),
+                new RegistryServiceTrackerCustomizer<ConfigurationService>(
+                    context,
+                    ServiceRegistry.getInstance(),
+                    ConfigurationService.class)));
             /*
              * Contact interface factory tracker
              */
