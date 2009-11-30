@@ -120,4 +120,17 @@ public abstract class AbstractPositiveAssertion extends AbstractAssertion{
         expectations.verify( state(), actual);
     }
 
+    protected void checkViaGet(int folderId, int appointmentId, int recurrencePos, Expectations expectations) {
+        methodUsedForTest = "Get recurrence";
+        Appointment actual;
+        try {
+            actual = manager.get(folderId, appointmentId, recurrencePos);
+            if(manager.hasLastException())
+                fail2("Exception occured: " + manager.getLastException());
+        } catch (Exception e) {
+            fail2("Exception occurred: " + e);
+            return;
+        }
+        expectations.verify( state(), actual);
+    }
 }
