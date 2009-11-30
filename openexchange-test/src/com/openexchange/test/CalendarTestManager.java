@@ -240,6 +240,18 @@ public class CalendarTestManager implements TestManager {
         }
     }
 
+    public Appointment get(int parentFolderID, int objectID, int recurrencePos) throws OXException {
+        try {
+            GetRequest get = new GetRequest(parentFolderID, objectID, recurrencePos, getFailOnError());
+            GetResponse response = execute(get);
+            extractInfo(response);
+            return response.getAppointment(timezone);
+        } catch (OXException e) {
+            if (failOnError)
+                throw e;
+            return null;
+        }
+    }
     public List<Appointment> updates(final int folderId, final Date timestamp, final boolean recurrenceMaster) {
         return updates(folderId, Appointment.ALL_COLUMNS, timestamp, recurrenceMaster);
     }
