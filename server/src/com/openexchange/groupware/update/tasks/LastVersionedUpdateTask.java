@@ -47,37 +47,33 @@
  *
  */
 
-package com.openexchange.groupware.update.internal;
+package com.openexchange.groupware.update.tasks;
 
-import com.openexchange.exceptions.LocalizableStrings;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
 
 /**
- * Exception message texts for the {@link SchemaException}.
- *
+ * {@link LastVersionedUpdateTask} is the last update task defining a database schema version number. After this task every task should use
+ * the new UpdateTask interface.
+ * TODO link the new update task interface.
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class SchemaExceptionMessages implements LocalizableStrings {
+public class LastVersionedUpdateTask extends UpdateTaskAdapter {
 
-    public static final String MISSING_VERSION_ENTRY_MSG = "No row found in table version in schema %1$s.";
-
-    public static final String MULTIPLE_VERSION_ENTRY_MSG = "Multiple rows found in table version in schema %1$s.";
-
-    public static final String ALREADY_LOCKED_MSG = "Update conflict detected. Another process is currently updating schema %1$s.";
-
-    public static final String LOCK_FAILED_MSG = "Table update failed. Schema %1$s could not be locked.";
-
-    public static final String UPDATE_CONFLICT_MSG = "Update conflict detected. Schema %1$s is not marked as locked.";
-
-    public static final String UNLOCK_FAILED_MSG = "Schema %1$s could not be unlocked. Lock information could no be removed from database.";
-
-    public static final String SQL_PROBLEM_MSG = "A SQL problem occurred: %1$s.";
-
-    public static final String DATABASE_DOWN_MSG = "Cannot get database connection.";
-
-    /**
-     * Prevent instantiation.
-     */
-    private SchemaExceptionMessages() {
+    public LastVersionedUpdateTask() {
         super();
+    }
+
+    public void perform(PerformParameters params) throws AbstractOXException {
+        // TODO Migrate versioned update tasks to updateTask table.
+    }
+
+    public int addedWithVersion() {
+        return 200;
+    }
+
+    public int getPriority() {
+        return UpdateTaskPriority.NORMAL.priority;
     }
 }

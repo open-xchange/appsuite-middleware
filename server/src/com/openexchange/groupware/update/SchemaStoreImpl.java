@@ -52,7 +52,6 @@ package com.openexchange.groupware.update;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -60,18 +59,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.internal.Server;
 import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.SchemaExceptionFactoryOld;
 import com.openexchange.groupware.update.internal.SchemaException;
 import com.openexchange.groupware.update.internal.SchemaExceptionCodes;
 import com.openexchange.groupware.update.internal.SchemaUpdateStateImpl;
@@ -83,19 +73,11 @@ import com.openexchange.tools.update.Tools;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@OXExceptionSource(classId = Classes.SCHEMA_STORE_IMPL, component = EnumComponent.UPDATE)
 public class SchemaStoreImpl extends SchemaStore {
-
-    private static final Log LOG = LogFactory.getLog(SchemaStoreImpl.class);
 
     private static final String TABLE_NAME = "updateTask";
 
     private static final String LOCKED = "LOCKED";
-
-    /**
-     * For creating exceptions.
-     */
-    private static final SchemaExceptionFactoryOld EXCEPTION = new SchemaExceptionFactoryOld(SchemaStoreImpl.class);
 
     public SchemaStoreImpl() {
         super();
@@ -113,9 +95,7 @@ public class SchemaStoreImpl extends SchemaStore {
         try {
             con.setAutoCommit(false);
             checkForTable(con);
-            long start = System.currentTimeMillis();
             retval = loadSchemaStatus(con);
-            LOG.info("Load schema: " + (System.currentTimeMillis() - start));
             con.commit();
         } catch (SQLException e) {
             rollback(con);
@@ -142,7 +122,7 @@ public class SchemaStoreImpl extends SchemaStore {
 
     private static void createTable(Connection con) throws SQLException {
         String sql = "CREATE TABLE " + TABLE_NAME + " (cid INT4 UNSIGNED NOT NULL,taskName VARCHAR(1024) NOT NULL,"
-            + "PRIMARY KEY(cid,taskName(255))) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+            + "INDEX full (cid,taskName(255))) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
         Statement stmt = null;
         try {
             stmt = con.createStatement();
@@ -152,8 +132,6 @@ public class SchemaStoreImpl extends SchemaStore {
         }
     }
 
-    private static final String SQL_SELECT_LOCKED_FOR_UPDATE = "SELECT locked FROM version FOR UPDATE";
-
     @Override
     public void lockSchema(Schema schema, int contextId) throws SchemaException {
         final Connection con;
@@ -162,11 +140,11 @@ public class SchemaStoreImpl extends SchemaStore {
         } catch (DBPoolingException e) {
             throw new SchemaException(e);
         }
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
         try {
             con.setAutoCommit(false); // BEGIN
-            // FIXME create new lock
+            // Insert LOCKED
+            insertLock(con, schema);
+            // Setting old version table to locked
             if (Tools.tableExists(con, "version")) {
                 lockOldVersionTable(con, schema);
             }
@@ -179,13 +157,43 @@ public class SchemaStoreImpl extends SchemaStore {
             rollback(con);
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(rs, stmt);
             autocommit(con);
             Database.back(contextId, true, con);
         }
     }
 
+    private static final int MYSQL_DEADLOCK = 1213;
+
+    private static final int MYSQL_DUPLICATE = 1062;
+
+    private static void insertLock(Connection con, Schema schema) throws SchemaException {
+        // Check for existing lock exclusively
+        String[] tasks = readUpdateTasks(con);
+        for (String task : tasks) {
+            if (LOCKED.equals(task)) {
+                throw SchemaExceptionCodes.ALREADY_LOCKED.create(schema.getSchema());
+            }
+        }
+        // Insert lock
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("INSERT INTO updateTask (cid,taskName) VALUES (0,?)");
+            stmt.setString(1, LOCKED);
+            if (stmt.executeUpdate() == 0) {
+                throw SchemaExceptionCodes.LOCK_FAILED.create(schema.getSchema());
+            }
+        } catch (SQLException e) {
+            if (MYSQL_DEADLOCK == e.getErrorCode() || MYSQL_DUPLICATE == e.getErrorCode()) {
+                throw SchemaExceptionCodes.ALREADY_LOCKED.create(e, schema.getSchema());
+            }
+            throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
     private static void lockOldVersionTable(Connection con, Schema schema) throws SchemaException {
+        // Check for existing lock
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
@@ -193,7 +201,7 @@ public class SchemaStoreImpl extends SchemaStore {
             stmt = con.prepareStatement("SELECT locked FROM version FOR UPDATE");
             result = stmt.executeQuery();
             if (!result.next()) {
-                throw SchemaExceptionCodes.MISSING_VERSION_ENTRY.create();
+                throw SchemaExceptionCodes.MISSING_VERSION_ENTRY.create(schema.getSchema());
             } else if (result.getBoolean(1)) {
                 // Schema is already locked by another update process
                 throw SchemaExceptionCodes.ALREADY_LOCKED.create(schema.getSchema());
@@ -203,8 +211,8 @@ public class SchemaStoreImpl extends SchemaStore {
         } finally {
             closeSQLStuff(result, stmt);
         }
+        // Lock schema
         try {
-            // Lock schema
             stmt = con.prepareStatement("UPDATE version SET locked=?");
             stmt.setBoolean(1, true);
             if (stmt.executeUpdate() == 0) {
@@ -219,90 +227,99 @@ public class SchemaStoreImpl extends SchemaStore {
         }
     }
 
-    private static final String SQL_UPDATE_VERSION = "UPDATE version SET version = ?, locked = ?, gw_compatible = ?, admin_compatible = ?";
-
-    @OXThrowsMultiple(category = { Category.CODE_ERROR, Category.INTERNAL_ERROR, Category.PERMISSION,
-            Category.INTERNAL_ERROR }, desc = { "", "", "", "" }, exceptionId = { 10, 11, 12, 13 }, msg = {
-            "A SQL error occurred while reading schema version information: %1$s.",
-            "Though expected, SQL query returned no result.",
-            "Update conflict detected. Schema %1$s is not marked as LOCKED.",
-            "Table update failed. Schema %1$s could not be unlocked." })
     @Override
     public void unlockSchema(final Schema schema, final int contextId) throws SchemaException {
-        /*
-         * End of update process, so unlock schema
-         */
+        final Connection con;
         try {
-            boolean error = false;
-            Connection writeCon = null;
-            PreparedStatement stmt = null;
-            ResultSet rs = null;
-            try {
-                /*
-                 * Try to obtain exclusive lock on table 'version'
-                 */
-                writeCon = Database.get(contextId, true);
-                writeCon.setAutoCommit(false); // BEGIN
-                stmt = writeCon.prepareStatement(SQL_SELECT_LOCKED_FOR_UPDATE);
-                rs = stmt.executeQuery();
-                if (!rs.next()) {
-                    error = true;
-                    throw EXCEPTION.create(11);
-                } else if (!rs.getBoolean(1)) {
-                    /*
-                     * Schema is NOT locked by update process
-                     */
-                    error = true;
-                    throw EXCEPTION.create(12, schema.getSchema());
-                }
-                rs.close();
-                rs = null;
-                stmt.close();
-                stmt = null;
-                /*
-                 * Update & unlock schema
-                 */
-                stmt = writeCon.prepareStatement(SQL_UPDATE_VERSION);
-                stmt.setInt(1, UpdateTaskCollection.getInstance().getHighestVersion());
-                stmt.setBoolean(2, false);
-                stmt.setBoolean(3, true);
-                stmt.setBoolean(4, true);
-                if (stmt.executeUpdate() == 0) {
-                    /*
-                     * Schema could not be unlocked
-                     */
-                    error = true;
-                    throw EXCEPTION.create(13, schema.getSchema());
-                }
-                /*
-                 * Everything went fine. Schema is marked as unlocked
-                 */
-                writeCon.commit(); // COMMIT
-            } finally {
-                closeSQLStuff(rs, stmt);
-                if (writeCon != null) {
-                    if (error) {
-                        try {
-                            writeCon.rollback();
-                        } catch (final SQLException e) {
-                            LOG.error(e.getMessage(), e);
-                        }
-                    }
-                    if (!writeCon.getAutoCommit()) {
-                        try {
-                            writeCon.setAutoCommit(true);
-                        } catch (final SQLException e) {
-                            LOG.error(e.getMessage(), e);
-                        }
-                    }
-                    Database.back(contextId, true, writeCon);
-                }
-            }
-        } catch (final DBPoolingException e) {
-            LOG.error(e.getMessage(), e);
+            con = Database.get(contextId, true);
+        } catch (DBPoolingException e) {
             throw new SchemaException(e);
-        } catch (final SQLException e) {
-            throw EXCEPTION.create(10, e, e.getMessage());
+        }
+        // End of update process, so unlock schema
+        try {
+            con.setAutoCommit(false); // BEGIN
+            // Delete LOCKED
+            deleteLock(con, schema);
+            // Unlock old version table
+            if (Tools.tableExists(con, "version")) {
+                unlockOldVersionTable(con, schema);
+            }
+            // Everything went fine. Schema is marked as unlocked
+            con.commit(); // COMMIT
+        } catch (SQLException e) {
+            rollback(con);
+            throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (SchemaException e) {
+            rollback(con);
+            throw e;
+        } finally {
+            autocommit(con);
+            Database.back(contextId, true, con);
+        }
+    }
+
+    private static void deleteLock(Connection con, Schema schema) throws SchemaException {
+        // Check for existing lock exclusively
+        String[] tasks = readUpdateTasks(con);
+        boolean found = false;
+        for (String task : tasks) {
+            if (LOCKED.equals(task)) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            throw SchemaExceptionCodes.UPDATE_CONFLICT.create(schema.getSchema());
+        }
+        // Delete lock
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("DELETE FROM updateTask WHERE cid=0 AND taskName=?");
+            stmt.setString(1, LOCKED);
+            if (stmt.executeUpdate() == 0) {
+                throw SchemaExceptionCodes.UNLOCK_FAILED.create(schema.getSchema());
+            }
+        } catch (SQLException e) {
+            if (MYSQL_DEADLOCK == e.getErrorCode() || MYSQL_DUPLICATE == e.getErrorCode()) {
+                throw SchemaExceptionCodes.UNLOCK_FAILED.create(e, schema.getSchema());
+            }
+            throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
+    private static void unlockOldVersionTable(Connection con, Schema schema) throws SchemaException {
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            // Try to obtain exclusive lock on table 'version'
+            stmt = con.prepareStatement("SELECT locked FROM version FOR UPDATE");
+            result = stmt.executeQuery();
+            if (!result.next()) {
+                throw SchemaExceptionCodes.MISSING_VERSION_ENTRY.create(schema.getSchema());
+            } else if (!result.getBoolean(1)) {
+                // Schema is NOT locked by update process
+                throw SchemaExceptionCodes.UPDATE_CONFLICT.create(schema.getSchema());
+            }
+        } catch (SQLException e) {
+            throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(result, stmt);
+        }
+        try {
+            // Update & unlock schema
+            stmt = con.prepareStatement("UPDATE version SET version=?,locked=?");
+            stmt.setInt(1, UpdateTaskCollection.getInstance().getHighestVersion());
+            stmt.setBoolean(2, false);
+            if (stmt.executeUpdate() == 0) {
+                // Schema could not be unlocked
+                throw SchemaExceptionCodes.UNLOCK_FAILED.create(schema.getSchema());
+            }
+        } catch (SQLException e) {
+            throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(result, stmt);
         }
     }
 
@@ -322,16 +339,19 @@ public class SchemaStoreImpl extends SchemaStore {
             if (result.next()) {
                 int pos = 1;
                 schema.setDBVersion(result.getInt(pos++));
-                schema.setLocked(result.getBoolean(pos++));
+                // Use locked information from updateTask before using locked information from version table
+                if (!schema.isLocked()) {
+                    schema.setLocked(result.getBoolean(pos++));
+                }
                 schema.setGroupwareCompatible(result.getBoolean(pos++));
                 schema.setAdminCompatible(result.getBoolean(pos++));
                 schema.setServer(result.getString(pos++));
                 schema.setSchema(con.getCatalog());
             } else {
-                throw SchemaExceptionCodes.MISSING_VERSION_ENTRY.create();
+                throw SchemaExceptionCodes.MISSING_VERSION_ENTRY.create(schema.getSchema());
             }
             if (result.next()) {
-                throw SchemaExceptionCodes.MULTIPLE_VERSION_ENTRY.create();
+                throw SchemaExceptionCodes.MULTIPLE_VERSION_ENTRY.create(schema.getSchema());
             }
         } catch (SQLException e) {
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
@@ -343,12 +363,9 @@ public class SchemaStoreImpl extends SchemaStore {
     /**
      * @param con connection to the master in transaction mode.
      */
-    private static final SchemaUpdateState loadSchemaStatus(Connection con) throws SchemaException, SQLException {
+    private static SchemaUpdateState loadSchemaStatus(Connection con) throws SchemaException, SQLException {
         final SchemaUpdateStateImpl retval = new SchemaUpdateStateImpl();
-        long start = System.currentTimeMillis();
         loadUpdateTasks(con, retval);
-        LOG.info("Load update tasks: " + (System.currentTimeMillis() - start));
-        start = System.currentTimeMillis();
         if (Tools.tableExists(con, "version")) {
             loadOldVersionTable(con, retval);
         } else {
@@ -363,7 +380,6 @@ public class SchemaStoreImpl extends SchemaStore {
             }
             retval.setSchema(con.getCatalog());
         }
-        LOG.info("Load old version table: " + (System.currentTimeMillis() - start));
         return retval;
     }
 

@@ -61,11 +61,11 @@ import com.openexchange.groupware.AbstractOXException.Category;
 public enum SchemaExceptionCodes implements OXErrorMessage {
 
     /**
-     * No row found in table version.
+     * No row found in table version in schema %1$s.
      */
     MISSING_VERSION_ENTRY(MISSING_VERSION_ENTRY_MSG, Category.SETUP_ERROR, 2),
     /**
-     * Multiple rows found in table version.
+     * Multiple rows found in table version in schema %1$s.
      */
     MULTIPLE_VERSION_ENTRY(MULTIPLE_VERSION_ENTRY_MSG, Category.SETUP_ERROR, 4),
     /**
@@ -76,6 +76,14 @@ public enum SchemaExceptionCodes implements OXErrorMessage {
      * Locking schema %1$s failed. Lock information could not be written to database.
      */
     LOCK_FAILED(LOCK_FAILED_MSG, Category.INTERNAL_ERROR, 9),
+    /**
+     * Update conflict detected. Schema %1$s is not marked as locked.
+     */
+    UPDATE_CONFLICT(UPDATE_CONFLICT_MSG, Category.INTERNAL_ERROR, 12),
+    /**
+     * Schema %1$s could not be unlocked. Lock information could no be removed from database.
+     */
+    UNLOCK_FAILED(UNLOCK_FAILED_MSG, Category.INTERNAL_ERROR, 13),
     /**
      * A SQL problem occurred: %1$s.
      */
