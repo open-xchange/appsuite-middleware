@@ -77,7 +77,7 @@ public class TestsForDeleteExceptionsAndFixedEndsOfSeries extends ManagedAppoint
 
         Expectations expectations = new Expectations();
         expectations.put(Appointment.RECURRENCE_COUNT, 5);
-        expectations.put(Appointment.UNTIL, null);
+        expectations.put(Appointment.UNTIL, null); //tricky decision whether this should be set or not
 
         positiveAssertionOnDeleteException.check(app, changes, expectations);
     }
@@ -102,7 +102,6 @@ public class TestsForDeleteExceptionsAndFixedEndsOfSeries extends ManagedAppoint
 
         Expectations expectations = new Expectations();
         expectations.put(Appointment.RECURRENCE_COUNT, 6);
-        expectations.put(Appointment.UNTIL, null);
 
         positiveAssertionOnDeleteException.check(app, changes, expectations);
     }
