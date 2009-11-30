@@ -90,7 +90,7 @@ import com.openexchange.tools.servlet.OXJSONException;
  * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class TaskTestManager {
+public class TaskTestManager implements TestManager{
 
     protected List<Task> createdEntities;
 
@@ -104,6 +104,8 @@ public class TaskTestManager {
 
     private AbstractAJAXResponse lastResponse;
 
+    private Throwable lastException;
+
     public TaskTestManager(AJAXClient client) {
         setFailOnError(true);
         this.setClient(client);
@@ -116,9 +118,13 @@ public class TaskTestManager {
         try {
             timezone = client.getValues().getTimeZone();
         } catch (AjaxException e) {
+            //no matter, fix it in finally block
         } catch (IOException e) {
+            //no matter, fix it in finally block
         } catch (SAXException e) {
+            //no matter, fix it in finally block
         } catch (JSONException e) {
+            //no matter, fix it in finally block
         } finally {
             if (timezone == null) {
                 timezone = TimeZone.getDefault();
@@ -169,10 +175,10 @@ public class TaskTestManager {
         try {
             response = getClient().execute(request);
             setLastResponse(response);
+            taskToMove.setLastModified(response.getTimestamp());
         } catch (Exception e) {
             doHandleExeption(e, "MoveRequest");
         }
-        taskToMove.setLastModified(response.getTimestamp());
         return taskToMove;
     }
 
@@ -180,8 +186,8 @@ public class TaskTestManager {
         deleteTaskOnServer(taskToDelete, true);
     }
 
-    public void deleteTaskOnServer(Task taskToDelete, boolean failOnError) {
-        DeleteRequest request = new DeleteRequest(taskToDelete, failOnError);
+    public void deleteTaskOnServer(Task taskToDelete, boolean failOnErrorOverride) {
+        DeleteRequest request = new DeleteRequest(taskToDelete, failOnErrorOverride);
         try {
             setLastResponse(getClient().execute(request));
         } catch (Exception e) {
@@ -391,6 +397,7 @@ public class TaskTestManager {
 
     private void doHandleExeption(Exception exc, String action) {
         try {
+            lastException = exc;
             throw exc;
         } catch (AjaxException e) {
             if (getFailOnError())
@@ -436,5 +443,17 @@ public class TaskTestManager {
 
     public boolean getFailOnError() {
         return failOnError;
+    }
+
+    public boolean doesFailOnError() {
+        return getFailOnError();
+    }
+
+    public Throwable getLastException() {
+        return this.lastException;
+    }
+
+    public boolean hasLastException() {
+        return this.lastException != null;
     }
 }

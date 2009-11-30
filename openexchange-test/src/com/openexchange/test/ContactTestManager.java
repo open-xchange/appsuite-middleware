@@ -76,6 +76,7 @@ import com.openexchange.ajax.contact.action.UpdateRequest;
 import com.openexchange.ajax.contact.action.UpdatesRequest;
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.CommonUpdatesResponse;
@@ -88,13 +89,14 @@ import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
 
 /**
- * This class and ContactObject should be all that is needed to write contact-related tests. If multiple users are needed use multiple
- * instances of this class. Examples of tests using this class can be found in ExemplaryContactTestManagerTest.java
+ * This class and ContactObject should be all that is needed to write contact-related 
+ * tests. If multiple users are needed use multiple instances of this class. Examples 
+ * of tests using this class can be found in ExemplaryContactTestManagerTest.java
  * 
  * @author <a href="mailto:karsten.will@open-xchange.org">Karsten Will</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - refactoring a bit.
  */
-public class ContactTestManager {
+public class ContactTestManager implements TestManager{
 
     private boolean failOnError;
 
@@ -105,6 +107,10 @@ public class ContactTestManager {
     private ContactParser contactParser;
     
     private TimeZone timeZone;
+
+    private Throwable lastException;
+
+    private AbstractAJAXResponse lastResponse;
 
     public void setFailOnError(boolean failOnError) {
         this.failOnError = failOnError;
@@ -162,10 +168,11 @@ public class ContactTestManager {
         InsertResponse response = null;
         try {
             response = getClient().execute(request);
+            response.fillObject(contactToCreate);
+            lastResponse = response;
         } catch (Exception e) {
             doExceptionHandling(e, "NewRequest");
         }
-        response.fillObject(contactToCreate);
         getCreatedEntities().add(contactToCreate);
         return contactToCreate;
     }
@@ -185,7 +192,7 @@ public class ContactTestManager {
     public Contact updateAction(Contact contact) {
         UpdateRequest request = new UpdateRequest(contact);
         try {
-            getClient().execute(request);
+            lastResponse = getClient().execute(request);
             remember(contact);
         } catch (Exception e) {
             doExceptionHandling(e, "UpdateRequest for folder " + contact.getParentFolderID() + " and object " + contact.getObjectID());
@@ -202,7 +209,7 @@ public class ContactTestManager {
         try {
             contactToDelete.setLastModified(new Date(Long.MAX_VALUE));
             DeleteRequest request = new DeleteRequest(contactToDelete, getFailOnError());
-            getClient().execute(request);
+            lastResponse = getClient().execute(request);
         } catch (Exception e) {
             doExceptionHandling(
                 e,
@@ -229,6 +236,7 @@ public class ContactTestManager {
         GetResponse response = null;
         try {
             response = getClient().execute(request);
+            lastResponse = response;
             if(response.hasError() && getFailOnError()) 
                 throw response.getException();
             returnedContact = response.getContact();
@@ -256,6 +264,7 @@ public class ContactTestManager {
         AllRequest request = new AllRequest(folderId, columns);
         try {
             CommonAllResponse response = getClient().execute(request);
+            lastResponse = response;
             final JSONArray data = (JSONArray) response.getResponse().getData();
             for (int i = 0; i < data.length(); i++) {
                 JSONArray temp = data.optJSONArray(i);
@@ -288,6 +297,7 @@ public class ContactTestManager {
         ListRequest request = new ListRequest(ListIDs.l(folderAndObjectIds), Contact.ALL_COLUMNS, true);
         try {
             CommonListResponse response = getClient().execute(request);
+            lastResponse = response;
             final JSONArray data = (JSONArray) response.getResponse().getData();
             this.convertJSONArray2Vector(data, allContacts);
         } catch (Exception e) {
@@ -306,6 +316,7 @@ public class ContactTestManager {
         SearchRequest request = new SearchRequest(pattern, folderId, Contact.ALL_COLUMNS, true);
         try {
             SearchResponse response = getClient().execute(request);
+            lastResponse = response;
             final JSONArray data = (JSONArray) response.getResponse().getData();
             this.convertJSONArray2Vector(data, allContacts);
         } catch (Exception e) {
@@ -326,6 +337,7 @@ public class ContactTestManager {
         UpdatesRequest request = new UpdatesRequest(folderId, Contact.ALL_COLUMNS, -1, null, lastModified);
         try {
             CommonUpdatesResponse response = getClient().execute(request);
+            lastResponse = response;
             final JSONArray data = (JSONArray) response.getResponse().getData();
             this.convertJSONArray2Vector(data, allContacts);
         } catch (Exception e) {
@@ -338,6 +350,7 @@ public class ContactTestManager {
 
     private void doExceptionHandling(Exception exception, String action) {
         try {
+            lastException = exception;
             throw exception;
         } catch (AjaxException e) {
             if (getFailOnError())
@@ -386,6 +399,22 @@ public class ContactTestManager {
             getContactParser().parse(contactObject, jsonObject);
             allContacts.add(contactObject);
         }
+    }
+
+    public boolean doesFailOnError() {
+        return getFailOnError();
+    }
+
+    public Throwable getLastException() {
+        return this.lastException;
+    }
+
+    public AbstractAJAXResponse getLastResponse() {
+        return this.lastResponse;
+    }
+
+    public boolean hasLastException() {
+        return lastException != null;
     }
 
 }

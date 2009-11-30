@@ -49,6 +49,7 @@
 
 package com.openexchange.test;
 
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -56,7 +57,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
-import junit.framework.TestCase;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
@@ -88,7 +88,7 @@ import com.openexchange.tools.servlet.AjaxException;
  * @author <a href="mailto:karsten.will@open-xchange.org">Karsten Will</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - refactoring
  */
-public class FolderTestManager extends TestCase {
+public class FolderTestManager implements TestManager{
 
     private AbstractAJAXResponse lastResponse;
     
@@ -96,9 +96,11 @@ public class FolderTestManager extends TestCase {
 
     private AJAXClient client;
 
-    private boolean failOnError;
+    private boolean failOnError = true;
 
     private boolean ignoreMailFolders = true;
+
+    private Throwable lastException;
 
     public void setFailOnError(boolean failOnError) {
         this.failOnError = failOnError;
@@ -139,11 +141,11 @@ public class FolderTestManager extends TestCase {
         CommonInsertResponse response = null;
         try {
             response = client.execute(request);
+            setLastResponse(response);
+            response.fillObject(folderToCreate);
         } catch (Exception e) {
             doExceptionHandling(e, "NewRequest");
         }
-        setLastResponse(response);
-        response.fillObject(folderToCreate);
         createdItems.add(folderToCreate);
         return folderToCreate;
     }
@@ -210,41 +212,29 @@ public class FolderTestManager extends TestCase {
         }
     }
 
-    public void deleteFolderOnServer(FolderObject folderToDelete, boolean failOnError) {
-        try {
-            deleteFolderOnServer(folderToDelete);
-        } catch (Exception e) {
-            doExceptionHandling(e, "DeleteRequest for folder with ID " + folderToDelete.getObjectID());
-        }
-    }
-
     /**
      * Get a folder via HTTP-API with an existing FolderObject
      */
     public FolderObject getFolderFromServer(FolderObject folder) {
-        if (folder.getObjectID() == 0) {
-            return getFolderFromServer(folder.getFullName(), true);
-        } else {
-            return getFolderFromServer(folder.getObjectID(), true);
-        }
+        if (folder.getObjectID() == 0)
+            return getFolderFromServer(folder.getFullName(), getFailOnError());
+        return getFolderFromServer(folder.getObjectID(), getFailOnError());
     }
 
-    public FolderObject getFolderFromServer(FolderObject folder, boolean failOnError) {
-        if (folder.getObjectID() == 0) {
-            return getFolderFromServer(folder.getFullName(), failOnError);
-        } else {
-            return getFolderFromServer(folder.getObjectID(), failOnError);
-        }
+    public FolderObject getFolderFromServer(FolderObject folder, boolean failOnErrorOverride) {
+        if (folder.getObjectID() == 0)
+            return getFolderFromServer(folder.getFullName(), failOnErrorOverride);
+        return getFolderFromServer(folder.getObjectID(), failOnErrorOverride);
     }
     
-    public FolderObject getFolderFromServer(int folderID, boolean failOnError, int[] additionalColumns) {
+    public FolderObject getFolderFromServer(int folderID, boolean failOnErrorOverride, int[] additionalColumns) {
         boolean oldValue = getFailOnError();
-        setFailOnError(failOnError);
+        setFailOnError(failOnErrorOverride);
         FolderObject returnedFolder = null;
         GetRequest request = new GetRequest(folderID, Arrays.addUniquely(FolderObject.ALL_COLUMNS,additionalColumns));
         GetResponse response = null;
         try {
-            response = (GetResponse) client.execute(request);
+            response = client.execute(request);
             setLastResponse(response);
             returnedFolder = response.getFolder();
             setFailOnError(oldValue);
@@ -255,18 +245,18 @@ public class FolderTestManager extends TestCase {
     }
 
     public FolderObject getFolderFromServer(String name) {
-        return getFolderFromServer(name, true);
+        return getFolderFromServer(name, getFailOnError());
     }
 
     /**
      * Get a folder via HTTP-API with no existing FolderObject and the folders name as identifier
      */
-    public FolderObject getFolderFromServer(String name, boolean failOnError) {
+    public FolderObject getFolderFromServer(String name, boolean failOnErrorOverride) {
         FolderObject returnedFolder = null;
-        GetRequest request = new GetRequest(name, failOnError);
+        GetRequest request = new GetRequest(name, failOnErrorOverride);
         GetResponse response = null;
         try {
-            response = (GetResponse) client.execute(request);
+            response = client.execute(request);
             setLastResponse(response);
             returnedFolder = response.getFolder();
         } catch (Exception e) {
@@ -278,14 +268,14 @@ public class FolderTestManager extends TestCase {
     /**
      * Get a folder via HTTP-API with no existing FolderObject and the folders id as identifier
      */
-    public FolderObject getFolderFromServer(final int folderId, boolean failOnError) {
+    public FolderObject getFolderFromServer(final int folderId, boolean failOnErrorOverride) {
         boolean oldValue = getFailOnError();
-        setFailOnError(failOnError);
+        setFailOnError(failOnErrorOverride);
         FolderObject returnedFolder = null;
         GetRequest request = new GetRequest(folderId, FolderObject.ALL_COLUMNS);
         GetResponse response = null;
         try {
-            response = (GetResponse) client.execute(request);
+            response = client.execute(request);
             setLastResponse(response);
             returnedFolder = response.getFolder();
             setFailOnError(oldValue);
@@ -296,7 +286,7 @@ public class FolderTestManager extends TestCase {
     }
 
     public FolderObject getFolderFromServer(final int folderId) {
-        return getFolderFromServer(folderId, true);
+        return getFolderFromServer(folderId, getFailOnError());
     }
 
     /**
@@ -325,7 +315,7 @@ public class FolderTestManager extends TestCase {
 
     public FolderObject[] listFoldersOnServer(int parentFolderId, int[] additionalFields) {
         Vector<FolderObject> allFolders = new Vector<FolderObject>();
-        ListRequest request = new ListRequest(Integer.toString(parentFolderId), Arrays.addUniquely(new int[] { FolderObject.OBJECT_ID },additionalFields), true);
+        ListRequest request = new ListRequest(Integer.toString(parentFolderId), Arrays.addUniquely(new int[] { FolderObject.OBJECT_ID },additionalFields), getFailOnError());
         try {
             ListResponse response = client.execute(request);
             Iterator<FolderObject> iterator = response.getFolder();
@@ -351,7 +341,7 @@ public class FolderTestManager extends TestCase {
         }
         Vector<FolderObject> allFolders = new Vector<FolderObject>();
         // FolderObject parentFolder = this.getFolderFromServer(parentFolderId);
-        ListRequest request = new ListRequest(folder.getFullName(), new int[] { FolderObject.OBJECT_ID }, true);
+        ListRequest request = new ListRequest(folder.getFullName(), new int[] { FolderObject.OBJECT_ID }, getFailOnError());
         try {
             ListResponse response = client.execute(request);
             setLastResponse(response);
@@ -399,13 +389,13 @@ public class FolderTestManager extends TestCase {
         Vector<FolderObject> allFolders = new Vector<FolderObject>();
         UpdatesRequest request = new UpdatesRequest(folderId, Arrays.addUniquely(new int[] { FolderObject.OBJECT_ID }, additionalFields), -1, null, lastModified);
         try {
-            CommonUpdatesResponse response = (CommonUpdatesResponse) client.execute(request);
+            CommonUpdatesResponse response = client.execute(request);
             int idPos = findIDPosition(response.getColumns());
             final JSONArray data = (JSONArray) response.getResponse().getData();
             FolderObject fo = new FolderObject();
             for (int i = 0; i < data.length(); i++) {
                 JSONArray tempArray = data.getJSONArray(i);
-                fo = this.getFolderFromServer(tempArray.getInt(idPos), true);
+                fo = this.getFolderFromServer(tempArray.getInt(idPos), getFailOnError());
                 allFolders.add(fo);
             }
             setLastResponse(response);
@@ -446,12 +436,12 @@ public class FolderTestManager extends TestCase {
     // GetRequests
     public FolderObject[] getAllFoldersOnServer(int folderId) {
         Vector<FolderObject> allFolders = new Vector<FolderObject>();
-        CommonAllRequest request = new CommonAllRequest("/ajax/folders", folderId, new int[] { FolderObject.OBJECT_ID }, 0, null, true);
+        CommonAllRequest request = new CommonAllRequest("/ajax/folders", folderId, new int[] { FolderObject.OBJECT_ID }, 0, null, getFailOnError());
         try {
             CommonAllResponse response = client.execute(request);
             final JSONArray data = (JSONArray) response.getResponse().getData();
             for (int i = 0; i < data.length(); i++) {
-                JSONArray temp = (JSONArray) data.optJSONArray(i);
+                JSONArray temp = data.optJSONArray(i);
                 int tempFolderId = temp.getInt(0);
                 FolderObject tempFolder = getFolderFromServer(tempFolderId);
                 allFolders.add(tempFolder);
@@ -467,6 +457,7 @@ public class FolderTestManager extends TestCase {
 
     protected void doExceptionHandling(Exception exception, String action) {
         try {
+            lastException = exception;
             throw exception;
         } catch (AjaxException e) {
             if (getFailOnError())
@@ -517,5 +508,17 @@ public class FolderTestManager extends TestCase {
         }
         folder.setPermissions(allPermissions);
         return folder;
+    }
+
+    public boolean doesFailOnError() {
+        return getFailOnError();
+    }
+
+    public Throwable getLastException() {
+        return this.lastException;
+    }
+
+    public boolean hasLastException() {
+        return this.lastException != null;
     }
 }

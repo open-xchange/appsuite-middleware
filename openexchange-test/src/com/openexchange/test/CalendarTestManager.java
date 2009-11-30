@@ -90,7 +90,7 @@ import com.openexchange.tools.servlet.AjaxException;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a> - basic design
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - extension
  */
-public class CalendarTestManager {
+public class CalendarTestManager implements TestManager {
 
     private AJAXClient client;
 
