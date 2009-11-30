@@ -101,6 +101,15 @@ public class OXError {
         return matches(new OXError(exception.getComponent().getAbbreviation(), exception.getDetailNumber()));
     }
 
+    public boolean matches(Throwable t) {
+        try {
+            AbstractOXException exception = (AbstractOXException) t;
+            return matches(new OXError(exception.getComponent().getAbbreviation(), exception.getDetailNumber()));
+        } catch (ClassCastException e) {
+            return false;
+        }
+    }
+
     @Override
     public String toString() {
         return String.format("%3s-%04d", category, number);
