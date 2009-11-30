@@ -65,8 +65,10 @@ public abstract class AbstractNegativeAssertion extends AbstractAssertion {
         this.folder = folderToWorkIn;
     }
 
-    public abstract void check(Changes changes, OXError expectedError);
-
+    public void check(Changes changes, OXError expectedError){
+        check(generateDefaultAppointment(), changes, expectedError);
+    }
+    
     public abstract void check(Appointment startWith, Changes changes, OXError expectedError);
 
     protected void createAndCheck(Appointment startWith, Changes changes, OXError expectedError) {
