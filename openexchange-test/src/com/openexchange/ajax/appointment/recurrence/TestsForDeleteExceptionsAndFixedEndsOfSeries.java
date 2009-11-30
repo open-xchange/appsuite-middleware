@@ -51,11 +51,13 @@ package com.openexchange.ajax.appointment.recurrence;
 
 import com.openexchange.ajax.appointment.helper.Changes;
 import com.openexchange.ajax.appointment.helper.Expectations;
+import com.openexchange.ajax.appointment.helper.OXError;
 import com.openexchange.groupware.container.Appointment;
 
 /**
- * There are two ways to limit an apointment series: One is by date, one is by number of occurrences. There is supposed to be a difference
- * handling deletes: In the occurrence case, the amount should be decreased. The limiting date ("until"), however, should not be changed.
+ * There are two ways to limit an apointment series: One is by date, one is by number of 
+ * occurrences. Currently, removal of an occurrence by creating a delete exception does 
+ * not reduce the number of occurrences, also called "recurrence_count".
  * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
@@ -80,6 +82,17 @@ public class TestsForDeleteExceptionsAndFixedEndsOfSeries extends ManagedAppoint
         positiveAssertionOnDeleteException.check(app, changes, expectations);
     }
     
+    public void testShouldFailWhenDeletingBeyondScopeOfSeriesInYearlySeries() throws Exception {
+        Appointment app = generateYearlyAppointment();
+        app.setOccurrence(5);
+        
+        Changes changes = new Changes();
+        changes.put(Appointment.RECURRENCE_POSITION, 6);
+
+        negativeAssertionOnCreate.check(app, changes, new OXError("APP",999));
+        negativeAssertionOnUpdate.check(app, changes, new OXError("APP",999));
+    }
+    
     public void testShouldNotReduceNumberOfOccurrencesWhenDeletingOneInMonthlySeries() throws Exception {
         Appointment app = generateMonthlyAppointment();
         app.setOccurrence(6);
@@ -92,6 +105,19 @@ public class TestsForDeleteExceptionsAndFixedEndsOfSeries extends ManagedAppoint
         expectations.put(Appointment.UNTIL, null);
 
         positiveAssertionOnDeleteException.check(app, changes, expectations);
+    }
+    
+    public void testShouldRemoveWholeSeriesIfEverySingleOccurrenceIsDeleted(){
+        Appointment app = generateMonthlyAppointment();
+        int numberOfOccurences = 3;
+        app.setOccurrence(numberOfOccurences );
+        
+        calendarManager.insertAppointmentOnServer(app);
+        
+        for(int i = 0; i < numberOfOccurences; i++){
+            calendarManager.createDeleteException(app, i+1);
+            assertFalse("Should not fail while creating delete exception #"+i, calendarManager.hasLastException());
+        }
     }
 
 }
