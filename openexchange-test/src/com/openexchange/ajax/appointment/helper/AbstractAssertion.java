@@ -100,6 +100,7 @@ public class AbstractAssertion extends Assert {
         cal.add(Calendar.YEAR, -1);
         cal.set(Calendar.DAY_OF_YEAR, 1);
         cal.set(Calendar.HOUR_OF_DAY, 1);
+        cal.set(Calendar.MINUTE, 0);
 
         Appointment app = new Appointment();
         app.setTitle("Generic recurrence test appointment");
