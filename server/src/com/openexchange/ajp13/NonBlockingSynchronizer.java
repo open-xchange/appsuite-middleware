@@ -94,7 +94,7 @@ public final class NonBlockingSynchronizer implements Synchronizer, Runnable {
         running = new AtomicInteger();
         runLock = new ReentrantLock();
         this.runnable = runnable;
-        this.reentrant = new ConcurrentHashMap<Thread, Object>();
+        this.reentrant = new ConcurrentHashMap<Thread, Object>(2);
     }
 
     /**
@@ -130,9 +130,8 @@ public final class NonBlockingSynchronizer implements Synchronizer, Runnable {
             }
             writeCounter.getAndIncrement();
             try {
-                int i = running.get();
-                while (i > 0) {
-                    i = running.get();
+                while (running.get() > 0) {
+                    // Nothing to do
                 }
                 obtainLock = synchronize;
             } finally {
@@ -147,21 +146,19 @@ public final class NonBlockingSynchronizer implements Synchronizer, Runnable {
             // Reentrant thread
             return null;
         }
-        int state = writeCounter.get();
-        while ((state & 1) == 1) {
-            /*
-             * Synchronized access in progress
-             */
-            state = writeCounter.get();
-        }
+        int save = 0;
+        Lock lock = null;
+        do {
+            while (((save = writeCounter.get()) & 1) == 1) {
+                ;
+            }
+            lock = obtainLock ? runLock : null;
+        } while (save != writeCounter.get());
         running.incrementAndGet();
         reentrant.put(Thread.currentThread(), PRESENT);
-        final Lock lock;
-        if (!obtainLock) {
-            return null;
+        if (null != lock) {
+            lock.lock();
         }
-        lock = runLock;
-        lock.lock();
         return lock;
     }
 
@@ -179,20 +176,17 @@ public final class NonBlockingSynchronizer implements Synchronizer, Runnable {
      * This method does nothing if runnable is <code>null</code>.
      */
     public void run() {
-        int state = writeCounter.get();
-        while ((state & 1) == 1) {
-            /*
-             * Write access in progress
-             */
-            state = writeCounter.get();
-        }
+        int save = 0;
+        Lock lock = null;
+        do {
+            while (((save = writeCounter.get()) & 1) == 1) {
+                ;
+            }
+            lock = obtainLock ? runLock : null;
+        } while (save != writeCounter.get());
         running.incrementAndGet();
-        final Lock lock;
-        if (obtainLock) {
-            lock = runLock;
+        if (null != lock) {
             lock.lock();
-        } else {
-            lock = null;
         }
         try {
             if (null != runnable) {
