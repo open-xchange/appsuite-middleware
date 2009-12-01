@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment.recurrence;
 
+import java.util.TimeZone;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.helper.AbstractAssertion;
 import com.openexchange.ajax.appointment.helper.NegativeAssertionOnCreate;
@@ -74,6 +75,8 @@ public class ManagedAppointmentTest extends AppointmentTest {
     protected FolderTestManager folderManager;
 
     protected FolderObject folder;
+
+    protected TimeZone utc = TimeZone.getTimeZone("UTC");
 
     protected NegativeAssertionOnUpdate negativeAssertionOnUpdate;
 
