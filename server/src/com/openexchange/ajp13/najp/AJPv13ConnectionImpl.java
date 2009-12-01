@@ -156,10 +156,9 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
      * <p>
      * Moreover this connection's state is switched to <tt>ASSIGNED</tt> if it is <tt>IDLE</tt>.
      * 
-     * @throws IOException If AJP socket is closed
      * @throws AJPv13Exception If an AJP error occurs
      */
-    void processRequest() throws IOException, AJPv13Exception {
+    void processRequest() throws AJPv13Exception {
         // if (task.getSocket().isClosed()) {
         // throw new IOException("Socket is closed");
         // }
