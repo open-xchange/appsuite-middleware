@@ -74,6 +74,8 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.mail.api.MailConfig.LoginSource;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -221,7 +223,7 @@ public class IMAPAuthentication implements AuthenticationService {
                         throw INVALID_CREDENTIALS.create();
                     }
                     // final User user2 = userService.getUser(userId, ctx);
-
+                    
                     /*
                      * Load primary account and check its protocol to be IMAP
                      */
@@ -232,6 +234,17 @@ public class IMAPAuthentication implements AuthenticationService {
                         throw UNKNOWN.create(new StringBuilder(128).append(
                             "IMAP authentication failed: Primary account's protocol is not IMAP but ").append(mailProtocol).append(
                             " for user ").append(userId).append(" in context ").append(ctxId).toString());
+                    }
+
+                    /*
+                     * Set user according to configured login source if different from LoginSource.USER_NAME
+                     */
+                    final LoginSource loginSource = MailProperties.getInstance().getLoginSource();
+                    if (LoginSource.USER_IMAPLOGIN.equals(loginSource)) {
+                        user = defaultMailAccount.getLogin();
+                    }
+                    if (LoginSource.PRIMARY_EMAIL.equals(loginSource)) {
+                        user = defaultMailAccount.getPrimaryAddress();
                     }
 
                     /*
