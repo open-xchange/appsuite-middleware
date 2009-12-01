@@ -72,7 +72,7 @@ public final class Constants {
     /**
      * The list for additional folder fields.
      */
-    public static AdditionalFolderFieldList ADDITIONAL_FOLDER_FIELD_LIST = new AdditionalFolderFieldList();
+    public static final AdditionalFolderFieldList ADDITIONAL_FOLDER_FIELD_LIST = new AdditionalFolderFieldList();
 
     /**
      * No instantiation.
