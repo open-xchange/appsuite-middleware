@@ -425,8 +425,6 @@ public abstract class OXToolStorageInterface {
 
     public abstract void primaryMailExists(Context ctx, String mail) throws StorageException, InvalidDataException;
 
-    public abstract void primaryMailExists(Connection con, Context ctx, String mail) throws StorageException, InvalidDataException;
-
     public final boolean checkAndUpdateSchemaIfRequired(Context ctx) throws StorageException {
         return checkAndUpdateSchemaIfRequired(ctx.getId().intValue());
     }

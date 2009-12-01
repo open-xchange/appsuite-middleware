@@ -1446,8 +1446,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         }
     }
 
-    @Override
-    public void primaryMailExists(Connection con, Context ctx, String mail) throws StorageException, InvalidDataException {
+    private void primaryMailExists(Connection con, Context ctx, String mail) throws StorageException, InvalidDataException {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
