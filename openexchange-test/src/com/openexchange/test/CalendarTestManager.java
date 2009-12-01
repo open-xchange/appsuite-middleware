@@ -170,7 +170,8 @@ public class CalendarTestManager implements TestManager {
 
     public void cleanUp() {
         boolean old = getFailOnError();
-        setFailOnError(false); //switching off, because there are other ways to delete an appointment, for example creating enough delete exceptions
+        setFailOnError(false); // switching off, because there are other ways to delete an appointment, for example creating enough delete
+                               // exceptions
         for (Appointment appointment : new ArrayList<Appointment>(createdEntities)) {
             delete(appointment);
         }
@@ -252,6 +253,7 @@ public class CalendarTestManager implements TestManager {
             return null;
         }
     }
+
     public List<Appointment> updates(final int folderId, final Date timestamp, final boolean recurrenceMaster) {
         return updates(folderId, Appointment.ALL_COLUMNS, timestamp, recurrenceMaster);
     }
@@ -273,6 +275,8 @@ public class CalendarTestManager implements TestManager {
         UpdateResponse updateResponse = execute(updateRequest);
         extractInfo(updateResponse);
         updatedAppointment.setLastModified(updateResponse.getTimestamp());
+        if (updateResponse.getId() != 0)
+            updatedAppointment.setObjectID(updateResponse.getId());
         for (Appointment createdAppoinment : createdEntities) {
             if (createdAppoinment.getObjectID() == updatedAppointment.getObjectID()) {
                 createdAppoinment.setLastModified(updatedAppointment.getLastModified());
@@ -292,10 +296,23 @@ public class CalendarTestManager implements TestManager {
             Appointment temp = new Appointment();
             list.add(temp);
             for (int i = 0; i < cols.length; i++)
-                temp.set(cols[i], values[i]);
+                temp.set(cols[i], conv(cols[i], values[i]));
         }
         return list;
 
+    }
+
+    private Object conv(int i, Object object) {
+        Object value = object;
+        switch (i) {
+        case Appointment.START_DATE:
+        case Appointment.END_DATE:
+            if (!(object instanceof Date))
+                value = new Date((Long) object);
+            int offset = timezone.getOffset( ((Date)value).getTime());
+            value = new Date(((Date)value).getTime() - offset);
+        }
+        return value;
     }
 
     private int[] addNecessaryColumns(int[] columns) {
@@ -351,16 +368,16 @@ public class CalendarTestManager implements TestManager {
     public void delete(Appointment appointment) {
         createdEntities.remove(appointment); // TODO: Does this remove the right object or does equals() suck?
         appointment.setLastModified(new Date(Long.MAX_VALUE));
-        DeleteRequest deleteRequest = new DeleteRequest( appointment, getFailOnError() );
+        DeleteRequest deleteRequest = new DeleteRequest(appointment, getFailOnError());
         extractInfo(execute(deleteRequest));
     }
-    
-    public void createDeleteException(int folder, int seriesId, int recurrencePos){
+
+    public void createDeleteException(int folder, int seriesId, int recurrencePos) {
         DeleteRequest deleteRequest = new DeleteRequest(seriesId, folder, recurrencePos, new Date(Long.MAX_VALUE));
         extractInfo(execute(deleteRequest));
     }
-    
-    public void createDeleteException(Appointment master, int recurrencePos){
+
+    public void createDeleteException(Appointment master, int recurrencePos) {
         createDeleteException(master.getParentFolderID(), master.getObjectID(), recurrencePos);
     }
 
