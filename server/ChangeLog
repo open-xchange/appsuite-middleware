@@ -1,3 +1,7 @@
+* 2009-12-01 - choeger@open-xchange.com
+
+ - Bugfix #15007: dependency missing on package open-xchange-user-json
+
 * 2009-11-27 - thorben.betten@open-xchange.com
 
  - Bugfix #14947: Checking for i18n strings when looking for a duplicate folder
