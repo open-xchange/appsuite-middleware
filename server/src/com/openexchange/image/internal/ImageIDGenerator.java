@@ -66,7 +66,7 @@ final class ImageIDGenerator {
     /**
      * The delimiter.
      */
-    static final String DELIM = "?==?";
+    private static final String DELIM = "?==?";
 
     /**
      * Initializes a new {@link ImageIDGenerator}.
