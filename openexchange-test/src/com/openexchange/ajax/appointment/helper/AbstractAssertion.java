@@ -49,8 +49,9 @@
 
 package com.openexchange.ajax.appointment.helper;
 
-import java.util.Calendar;
+import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.List;
+import java.util.TimeZone;
 import junit.framework.Assert;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.test.CalendarTestManager;
@@ -96,18 +97,11 @@ public class AbstractAssertion extends Assert {
     }
 
     public static Appointment generateDefaultAppointment() {
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.YEAR, -1);
-        cal.set(Calendar.DAY_OF_YEAR, 1);
-        cal.set(Calendar.HOUR_OF_DAY, 1);
-        cal.set(Calendar.MINUTE, 0);
-
         Appointment app = new Appointment();
         app.setTitle("Generic recurrence test appointment");
-        app.setStartDate(cal.getTime());
-        cal.add(Calendar.HOUR, 1);
-        app.setEndDate(cal.getTime());
-
+        TimeZone utc = TimeZone.getTimeZone("UTC");
+        app.setStartDate(D("1/1/2008 1:00",utc));
+        app.setEndDate(D("1/1/2008 2:00", utc));
         return app;
     }
 
