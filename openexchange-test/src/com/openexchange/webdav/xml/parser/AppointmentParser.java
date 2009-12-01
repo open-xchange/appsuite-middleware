@@ -59,10 +59,6 @@ import com.openexchange.webdav.xml.fields.AppointmentFields;
 
 public class AppointmentParser extends CalendarParser {
 	
-	public AppointmentParser() {
-		
-	}
-	
 	protected void parse(final Appointment appointmentObj, final Element eProp) throws OXConflictException {
 		if (hasElement(eProp.getChild(AppointmentFields.SHOW_AS, XmlServlet.NS))) {
 			appointmentObj.setShownAs(getValueAsInt(eProp.getChild(AppointmentFields.SHOW_AS, XmlServlet.NS)));
