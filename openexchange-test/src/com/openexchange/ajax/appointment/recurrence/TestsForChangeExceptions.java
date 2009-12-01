@@ -49,14 +49,14 @@
 
 package com.openexchange.ajax.appointment.recurrence;
 
-import java.util.Calendar;
+import static com.openexchange.groupware.calendar.TimeTools.D;
 import com.openexchange.ajax.appointment.helper.Changes;
 import com.openexchange.ajax.appointment.helper.Expectations;
-import com.openexchange.ajax.appointment.helper.OXError;
 import com.openexchange.groupware.container.Appointment;
 
-
 /**
+ * These tests use the recurrence_position field to access change exceptions.
+ * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class TestsForChangeExceptions extends ManagedAppointmentTest {
@@ -64,84 +64,67 @@ public class TestsForChangeExceptions extends ManagedAppointmentTest {
     public TestsForChangeExceptions(String name) {
         super(name);
     }
-    
-    public void testShouldFailIfTryingToMoveExceptionBehindEndOfSeries(){
-        Appointment app = generateMonthlyAppointment(); //starts last year in January
-        app.setOccurrence(3); //this should end last year in March
-        
+
+    public void testShouldAllowMovingAnExceptionBehindEndOfSeries() {
+        Appointment app = generateMonthlyAppointment(); // starts last year in January
+        app.setOccurrence(3); // this should end last year in March
+
         Changes changes = new Changes();
-        changes.put(Appointment.RECURRENCE_POSITION, 2); //this should be the appointment in February
-        
-        Calendar cal = Calendar.getInstance();
-        
-        cal.setTime(app.getStartDate());
-        cal.set(Calendar.MONTH, Calendar.MAY);
-        changes.put(Appointment.START_DATE, cal.getTime());
-        
-        cal.setTime(app.getEndDate());
-        cal.set(Calendar.MONTH, Calendar.MAY);
-        changes.put(Appointment.END_DATE, cal.getTime());
-        
-        negativeAssertionOnChangeException.check(app, changes, new OXError("APP",999));
+        changes.put(Appointment.RECURRENCE_POSITION, 2); // this should be the appointment in February
+        changes.put(Appointment.START_DATE, D("1/5/2008 1:00"));
+        changes.put(Appointment.END_DATE, D("1/5/2008 2:00"));
+
+        positiveAssertionOnChangeException.check(app, changes, new Expectations(changes));
     }
-    
-    public void testShouldAllowMovingTheFirstAppointmentTo2359TheSameDay(){
+
+    public void testShouldAllowMovingTheFirstAppointmentTo2359TheSameDay() {
         Appointment app = generateDailyAppointment();
         app.setOccurrence(3);
-        
+
         Changes changes = new Changes();
         changes.put(Appointment.RECURRENCE_POSITION, 1);
-        
-        Calendar cal = Calendar.getInstance();
-        
-        cal.setTime(app.getStartDate());
-        cal.set(Calendar.HOUR_OF_DAY, 23);
-        changes.put(Appointment.START_DATE, cal.getTime());
-        
-        cal.set(Calendar.MINUTE, 59);
-        changes.put(Appointment.END_DATE, cal.getTime());
-        
+        changes.put(Appointment.START_DATE, D("1/1/2008 23:00", utc));
+        changes.put(Appointment.END_DATE, D("1/1/2008 23:59", utc));
+
         Expectations expectations = new Expectations(changes);
         positiveAssertionOnChangeException.check(app, changes, expectations);
     }
-    
-    public void testShouldAllowMovingTheSecondAppointmentTo2359TheDayBefore(){
+
+    public void testShouldAllowMovingTheSecondAppointmentTo2359TheDayBefore() {
         Appointment app = generateDailyAppointment();
         app.setOccurrence(3);
-        
+
         Changes changes = new Changes();
         changes.put(Appointment.RECURRENCE_POSITION, 2);
-        
-        Calendar cal = Calendar.getInstance();
-        
-        cal.setTime(app.getStartDate()); //note that this is the date of the first appointment
-        cal.set(Calendar.HOUR_OF_DAY, 23);
-        changes.put(Appointment.START_DATE, cal.getTime());
-        
-        cal.set(Calendar.MINUTE, 59);
-        changes.put(Appointment.END_DATE, cal.getTime());
-        
+        changes.put(Appointment.START_DATE, D("1/1/2008 23:00", utc));
+        changes.put(Appointment.END_DATE, D("1/1/2008 23:59", utc));
+
         Expectations expectations = new Expectations(changes);
         positiveAssertionOnChangeException.check(app, changes, expectations);
     }
-    
-    public void testShouldAllowMovingTheSecondAppointmentTo2359OnTheSameDay(){
+
+    public void testShouldAllowMovingTheSecondAppointmentTo2359OnTheSameDay() {
         Appointment app = generateDailyAppointment();
         app.setOccurrence(3);
-        
+
         Changes changes = new Changes();
         changes.put(Appointment.RECURRENCE_POSITION, 2);
-        
-        Calendar cal = Calendar.getInstance();
-        
-        cal.setTime(app.getStartDate()); //note that this is the date of the first appointment
-        cal.add(Calendar.DAY_OF_MONTH, 1);
-        cal.set(Calendar.HOUR_OF_DAY, 23);
-        changes.put(Appointment.START_DATE, cal.getTime());
-        
-        cal.set(Calendar.MINUTE, 59);
-        changes.put(Appointment.END_DATE, cal.getTime());
-        
+        changes.put(Appointment.START_DATE, D("2/1/2008 1:00", utc));
+        changes.put(Appointment.END_DATE, D("2/1/2008 2:00", utc));
+
+        Expectations expectations = new Expectations(changes);
+        positiveAssertionOnChangeException.check(app, changes, expectations);
+    }
+
+    public void testShouldAllowMovingTheSecondAppointmentToTheSamePlaceAsTheThirdOne() {
+        Appointment app = generateDailyAppointment();
+        app.setOccurrence(3);
+
+        Changes changes = new Changes();
+        changes.put(Appointment.RECURRENCE_POSITION, 2);
+        changes.put(Appointment.START_DATE, D("3/1/2008 1:00", utc));
+        changes.put(Appointment.END_DATE, D("3/1/2008 2:00", utc));
+
         Expectations expectations = new Expectations(changes);
         positiveAssertionOnChangeException.check(app, changes, expectations);
     }
