@@ -114,7 +114,7 @@ public final class TimeTools {
         calendar.set(Calendar.MILLISECOND, 0);
         return calendar;
     }
-    
+
     public static Date D(final String value, TimeZone timeZone) {
         for (String fallbackPattern : patterns) {
             try {
@@ -124,21 +124,20 @@ public final class TimeTools {
                 }
                 return sdf.parse(value);
             } catch (ParseException e) {
-
+                // let Chronic have a try then
             }
         }
-        
+
         Date date = null;
         final Span span = Chronic.parse(value);
-        if (null == span) {
+        if (null == span)
             return null;
-        } else {
-           date = span.getBeginCalendar().getTime();
-        }
+
+        date = span.getBeginCalendar().getTime();
 
         if (null != timeZone) {
             date = applyTimeZone(timeZone, date);
-       }
+        }
 
         return date;
 
@@ -159,7 +158,7 @@ public final class TimeTools {
         }
     }
 
-    public static Date removeMilliseconds(final Date roundme){
+    public static Date removeMilliseconds(final Date roundme) {
         long timestamp = roundme.getTime();
         timestamp /= 1000;
         timestamp *= 1000;
