@@ -128,12 +128,26 @@ final class ImageIDGenerator {
             return null;
         }
         if (null == dataSource) {
+            /*
+             * No data source
+             */
+            org.apache.commons.logging.LogFactory.getLog(ImageIDGenerator.class).warn(
+                new StringBuilder(64).append("Image not found: No data source found for identifier: ").append(args[0]).toString());
             return null;
         }
         /*
          * Return data source and appropriate data arguments
          */
         final String[] requiredArguments = dataSource.getRequiredArguments();
+        if (requiredArguments.length == (args.length - 1)) {
+            /*
+             * Argument mismatch
+             */
+            org.apache.commons.logging.LogFactory.getLog(ImageIDGenerator.class).warn(
+                new StringBuilder(64).append("Image not found: Argument mismatch. Expected ").append(requiredArguments.length).append(
+                    " argument(s), but was ").append((args.length - 1)).toString());
+            return null;
+        }
         final DataArguments dataArguments = new DataArguments();
         for (int i = 0; i < requiredArguments.length; i++) {
             dataArguments.put(requiredArguments[i], args[i + 1]);

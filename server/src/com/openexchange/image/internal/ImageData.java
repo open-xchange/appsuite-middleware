@@ -113,7 +113,7 @@ public final class ImageData {
         this.hash = hashCode0();
         url =
             new StringBuilder(64).append('/').append(ImageServlet.ALIAS).append('?').append(ImageServlet.PARAMETER_UID).append('=').append(
-                urlEncodeSafe(uniqueId, "UTF-8")).toString();
+                urlEncodeSafe(this.uniqueId, "UTF-8")).toString();
         this.timeToLive = timeToLive;
         lastAccessed = System.currentTimeMillis();
     }
