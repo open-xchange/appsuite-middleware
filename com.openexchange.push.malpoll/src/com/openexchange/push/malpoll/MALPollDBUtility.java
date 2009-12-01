@@ -293,7 +293,7 @@ public final class MALPollDBUtility {
         }
         final Connection writableConnection;
         try {
-            writableConnection = databaseService.getWritable(cid);
+            writableConnection = databaseService.getForUpdateTask(cid);
             writableConnection.setAutoCommit(false); // BEGIN
         } catch (final DBPoolingException e) {
             throw new PushException(e);
