@@ -381,10 +381,12 @@ public class IMAPAuthentication implements AuthenticationService {
                         com.openexchange.configuration.ConfigurationException.Code.NOT_READABLE,
                         file.getAbsolutePath());
                 } finally {
-                    try {
-                        fis.close();
-                    } catch (final IOException e) {
-                        LOG.error("Error closing file inputstream for file " + IMAP_AUTH_PROPERTY_FILE + " ", e);
+                    if (null != fis) {
+                        try {
+                            fis.close();
+                        } catch (final IOException e) {
+                            LOG.error("Error closing file inputstream for file " + IMAP_AUTH_PROPERTY_FILE + " ", e);
+                        }
                     }
                 }
             }
@@ -396,9 +398,8 @@ public class IMAPAuthentication implements AuthenticationService {
      * 
      * @param loginInfo combined information separated by an @ sign.
      * @return a string array with context and user name (in this order).
-     * @throws LoginException if no separator is found.
      */
-    private String[] split(final String loginInfo) throws LoginException {
+    private String[] split(final String loginInfo) {
         return split(loginInfo, '@');
     }
 

@@ -67,11 +67,11 @@ public final class AppointmentIteratorAdapter implements SearchIterator<Appointm
 
     private final SearchIterator<CalendarDataObject> delegate;
 
-    public AppointmentIteratorAdapter(SearchIterator<CalendarDataObject> retval) {
+    public AppointmentIteratorAdapter(final SearchIterator<CalendarDataObject> retval) {
         this.delegate = retval;
     }
 
-    public void addWarning(AbstractOXException warning) {
+    public void addWarning(final AbstractOXException warning) {
         delegate.addWarning(warning);
     }
 
@@ -80,7 +80,7 @@ public final class AppointmentIteratorAdapter implements SearchIterator<Appointm
     }
 
     public AbstractOXException[] getWarnings() {
-        return getWarnings();
+        return delegate.getWarnings();
     }
 
     public boolean hasNext() {
