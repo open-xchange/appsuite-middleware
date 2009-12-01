@@ -49,7 +49,6 @@
 
 package com.openexchange.ajp13;
 
-import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -549,15 +548,15 @@ public class AJPv13Response {
         return retval;
     }
 
-    private static void writeHeader(final String name, final String value, final ByteArrayOutputStream byteArray) throws AJPv13Exception {
-        if (HEADER_MAP.containsKey(name)) {
-            final int code = (0xA0 << 8) + (HEADER_MAP.get(name)).intValue();
-            writeInt(code, byteArray);
-        } else {
-            writeString(name, byteArray);
-        }
-        writeString(value, byteArray);
-    }
+//    private static void writeHeader(final String name, final String value, final ByteArrayOutputStream byteArray) throws AJPv13Exception {
+//        if (HEADER_MAP.containsKey(name)) {
+//            final int code = (0xA0 << 8) + (HEADER_MAP.get(name)).intValue();
+//            writeInt(code, byteArray);
+//        } else {
+//            writeString(name, byteArray);
+//        }
+//        writeString(value, byteArray);
+//    }
 
     private static int writeHeader(final String name, final String value, final byte[] byteArray, final int count) throws AJPv13Exception {
         int c = count;
@@ -571,22 +570,22 @@ public class AJPv13Response {
         return c;
     }
 
-    /**
-     * Writes the first 5 bytes of an AJP response:
-     * <ol>
-     * <li>Two bytes signaling a package from container to web server: <tt>A</tt> <tt>B</tt></li>
-     * <li>The data length as an integer (takes two bytes)</li>
-     * <li>The response's prefix code</li>
-     * </ol>
-     * 
-     * @throws AJPv13Exception If starting bytes cannot be written
-     */
-    private static final void fillStartBytes(final int prefixCode, final int dataLength, final ByteArrayOutputStream byteArray) throws AJPv13Exception {
-        writeByte(PACKAGE_FROM_CONTAINER_TO_SERVER[0], byteArray);
-        writeByte(PACKAGE_FROM_CONTAINER_TO_SERVER[1], byteArray);
-        writeInt(dataLength, byteArray);
-        writeByte(prefixCode, byteArray);
-    }
+//    /**
+//     * Writes the first 5 bytes of an AJP response:
+//     * <ol>
+//     * <li>Two bytes signaling a package from container to web server: <tt>A</tt> <tt>B</tt></li>
+//     * <li>The data length as an integer (takes two bytes)</li>
+//     * <li>The response's prefix code</li>
+//     * </ol>
+//     * 
+//     * @throws AJPv13Exception If starting bytes cannot be written
+//     */
+//    private static final void fillStartBytes(final int prefixCode, final int dataLength, final ByteArrayOutputStream byteArray) throws AJPv13Exception {
+//        writeByte(PACKAGE_FROM_CONTAINER_TO_SERVER[0], byteArray);
+//        writeByte(PACKAGE_FROM_CONTAINER_TO_SERVER[1], byteArray);
+//        writeInt(dataLength, byteArray);
+//        writeByte(prefixCode, byteArray);
+//    }
 
     /**
      * Writes the first 5 bytes of an AJP response:
@@ -606,18 +605,18 @@ public class AJPv13Response {
         return c;
     }
 
-    private static final void writeByte(final int byteValue, final ByteArrayOutputStream byteArray) {
-        byteArray.write(byteValue);
-    }
+//    private static final void writeByte(final int byteValue, final ByteArrayOutputStream byteArray) {
+//        byteArray.write(byteValue);
+//    }
 
     private static final int writeByte(final int byteValue, final byte[] byteArray, final int count) {
         byteArray[count] = (byte) byteValue;
         return count + 1;
     }
 
-    private static final void writeByteArray(final byte[] bytes, final ByteArrayOutputStream byteArray) {
-        byteArray.write(bytes, 0, bytes.length);
-    }
+//    private static final void writeByteArray(final byte[] bytes, final ByteArrayOutputStream byteArray) {
+//        byteArray.write(bytes, 0, bytes.length);
+//    }
 
     private static final int writeByteArray(final byte[] bytes, final byte[] byteArray, final int count) {
         System.arraycopy(bytes, 0, byteArray, count, bytes.length);
@@ -629,13 +628,13 @@ public class AJPv13Response {
         return count + len;
     }
 
-    private static final void writeInt(final int intValue, final ByteArrayOutputStream byteArray) throws AJPv13Exception {
-        if (intValue > MAX_INT_VALUE) {
-            throw new AJPv13Exception(AJPCode.INTEGER_VALUE_TOO_BIG, true, Integer.valueOf(intValue));
-        }
-        byteArray.write((intValue >> 8)); // high
-        byteArray.write((intValue & (255))); // low
-    }
+//    private static final void writeInt(final int intValue, final ByteArrayOutputStream byteArray) throws AJPv13Exception {
+//        if (intValue > MAX_INT_VALUE) {
+//            throw new AJPv13Exception(AJPCode.INTEGER_VALUE_TOO_BIG, true, Integer.valueOf(intValue));
+//        }
+//        byteArray.write((intValue >> 8)); // high
+//        byteArray.write((intValue & (255))); // low
+//    }
 
     private static final int writeInt(final int intValue, final byte[] byteArray, final int count) throws AJPv13Exception {
         if (intValue > MAX_INT_VALUE) {
@@ -646,31 +645,31 @@ public class AJPv13Response {
         return count + 2;
     }
 
-    private static final void writeBoolean(final boolean boolValue, final ByteArrayOutputStream byteArray) {
-        byteArray.write(boolValue ? 1 : 0);
-    }
+//    private static final void writeBoolean(final boolean boolValue, final ByteArrayOutputStream byteArray) {
+//        byteArray.write(boolValue ? 1 : 0);
+//    }
 
     private static final int writeBoolean(final boolean boolValue, final byte[] byteArray, final int count) {
         byteArray[count] = (byte) (boolValue ? 1 : 0);
         return count + 1;
     }
 
-    private static final void writeString(final String strValue, final ByteArrayOutputStream byteArray) throws AJPv13Exception {
-        final int strLength = strValue.length();
-        writeInt(strLength, byteArray);
-        /*
-         * Write string content and terminating '0'
-         */
-        if (strLength > 0) {
-            final char[] chars = strValue.toCharArray();
-            final byte[] bytes = new byte[strLength];
-            for (int i = 0; i < strLength; i++) {
-                bytes[i] = (byte) chars[i];
-            }
-            byteArray.write(bytes, 0, strLength);
-        }
-        byteArray.write(0);
-    }
+//    private static final void writeString(final String strValue, final ByteArrayOutputStream byteArray) throws AJPv13Exception {
+//        final int strLength = strValue.length();
+//        writeInt(strLength, byteArray);
+//        /*
+//         * Write string content and terminating '0'
+//         */
+//        if (strLength > 0) {
+//            final char[] chars = strValue.toCharArray();
+//            final byte[] bytes = new byte[strLength];
+//            for (int i = 0; i < strLength; i++) {
+//                bytes[i] = (byte) chars[i];
+//            }
+//            byteArray.write(bytes, 0, strLength);
+//        }
+//        byteArray.write(0);
+//    }
 
     private static final int writeString(final String strValue, final byte[] byteArray, final int count) throws AJPv13Exception {
         final int strLength = strValue.length();
