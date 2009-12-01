@@ -108,6 +108,7 @@ import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.contact.datahandler.ContactInsertDataHandler;
 import com.openexchange.groupware.contact.internal.ContactInterfaceDiscoveryInitialization;
 import com.openexchange.groupware.contact.internal.ContactInterfaceDiscoveryServiceImpl;
+import com.openexchange.groupware.update.internal.SchemaExceptionFactory;
 import com.openexchange.i18n.impl.I18nImpl;
 import com.openexchange.i18n.impl.POTranslationsDiscoverer;
 import com.openexchange.i18n.impl.ResourceBundleDiscoverer;
@@ -288,9 +289,9 @@ public final class Init {
         startAndInjectExceptionFramework();
         startAndInjectServerConfiguration();
         startAndInjectNotification();
+        startAndInjectCache();
         startAndInjectDatabaseBundle();
         startAndInjectDatabaseUpdate();
-        startAndInjectCache();
         startAndInjectI18NBundle();
         startAndInjectMonitoringBundle();
         startAndInjectSessiondBundle();
@@ -435,12 +436,16 @@ public final class Init {
         registry.registerComponent(EnumComponent.DB_POOLING, "com.openexchange.database", DBPoolingExceptionFactory.getInstance());
         final ConfigurationService configurationService = (ConfigurationService) services.get(ConfigurationService.class);
         final TimerService timerService = (TimerService) services.get(TimerService.class);
+        CacheService cacheService = (CacheService) services.get(CacheService.class);
         com.openexchange.database.internal.Initialization.getInstance().getTimer().setTimerService(timerService);
         final DatabaseService dbService = com.openexchange.database.internal.Initialization.getInstance().start(configurationService);
+        com.openexchange.database.internal.Initialization.getInstance().setCacheService(cacheService);
         Database.setDatabaseService(dbService);
     }
 
-    public static void startAndInjectDatabaseUpdate() {
+    public static void startAndInjectDatabaseUpdate() throws ComponentAlreadyRegisteredException {
+        final ComponentRegistry registry = (ComponentRegistry) services.get(ComponentRegistry.class);
+        registry.registerComponent(EnumComponent.UPDATE, "com.openexchange.groupware.update", SchemaExceptionFactory.getInstance());
         // Not configuring configured update task list.
         com.openexchange.groupware.update.Initialization.getInstance().start();
     }
