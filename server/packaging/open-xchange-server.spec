@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 5
+%define		ox_release 6
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -459,6 +459,8 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Tue Dec 01 2009 - choeger@open-xchange.com
+ - Bugfix #15007: dependency missing on package open-xchange-user-json
 * Fri Nov 27 2009 - thorben.betten@open-xchange.com
  - Bugfix #14947: Checking for i18n strings when looking for a duplicate folder
  - Bugfix #14949: Checking changed permissions for system folders
