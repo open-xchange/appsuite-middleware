@@ -108,15 +108,18 @@ final class ImageIDGenerator {
      * @return The data source and data arguments wrapped (in this order) in an array or <code>null</code>
      */
     static Object[] parseId(final String uniqueId, final ConversionService service) {
-        String toSplit = null;
-        try {
-            final byte[] plain = Base64.decodeBase64(uniqueId.getBytes("US-ASCII"));
-            toSplit = new String(plain, "UTF-8");
-        } catch (final UnsupportedEncodingException e) {
-            org.apache.commons.logging.LogFactory.getLog(ImageIDGenerator.class).error("Unsupported encoding: " + e.getMessage(), e);
-            toSplit = uniqueId;
+        final String[] args;
+        {
+            String toSplit = null;
+            try {
+                final byte[] plain = Base64.decodeBase64(uniqueId.getBytes("US-ASCII"));
+                toSplit = new String(plain, "UTF-8");
+            } catch (final UnsupportedEncodingException e) {
+                org.apache.commons.logging.LogFactory.getLog(ImageIDGenerator.class).error("Unsupported encoding: " + e.getMessage(), e);
+                toSplit = uniqueId;
+            }
+            args = SPLIT.split(toSplit, 0);
         }
-        final String[] args = SPLIT.split(toSplit, 0);
         /*
          * Get data source from conversion service
          */
