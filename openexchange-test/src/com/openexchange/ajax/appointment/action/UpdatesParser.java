@@ -1,14 +1,11 @@
-package com.openexchange.ajax.appointment.action;
 
-import org.json.JSONException;
+package com.openexchange.ajax.appointment.action;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * 
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
- *
  */
 public class UpdatesParser extends AbstractAJAXParser<UpdatesResponse> {
 
@@ -20,7 +17,7 @@ public class UpdatesParser extends AbstractAJAXParser<UpdatesResponse> {
     }
 
     @Override
-    protected UpdatesResponse createResponse(Response response) throws JSONException {
+    protected UpdatesResponse createResponse(Response response) {
         return new UpdatesResponse(response, columns);
     }
 
