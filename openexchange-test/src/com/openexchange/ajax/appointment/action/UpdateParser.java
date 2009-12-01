@@ -51,33 +51,23 @@ package com.openexchange.ajax.appointment.action;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
-
 import static com.openexchange.ajax.appointment.action.AppointmentParserTools.parseConflicts;
 
 /**
- * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 public class UpdateParser extends AbstractAJAXParser<UpdateResponse> {
 
     /**
-     * Remembers if this parser fails out with an error.
-     */
-    private final boolean failOnError;
-	
-    /**
      * Default constructor.
      */
     UpdateParser(final boolean failOnError) {
         super(failOnError);
-        this.failOnError = failOnError;
     }
 
-	
     /**
      * {@inheritDoc}
      */
@@ -86,11 +76,9 @@ public class UpdateParser extends AbstractAJAXParser<UpdateResponse> {
         final UpdateResponse retval = new UpdateResponse(response);
         final JSONObject data = (JSONObject) response.getData();
         if (data != null) {
-            if (failOnError) {
-                if (data.has(DataFields.ID)) {
-    				final int objectId = data.getInt(DataFields.ID);
-                    retval.setId(objectId);
-                }
+            if (data.has(DataFields.ID)) {
+                final int objectId = data.getInt(DataFields.ID);
+                retval.setId(objectId);
             }
             parseConflicts(data, retval);
         }
