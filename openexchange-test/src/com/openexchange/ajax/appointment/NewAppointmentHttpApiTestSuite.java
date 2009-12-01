@@ -78,6 +78,7 @@ public class NewAppointmentHttpApiTestSuite extends TestSuite{
         tests.addTestSuite(TestsForChangingAmongYearlyRecurrences.class);
         tests.addTestSuite(TestsForDeleteExceptionsAndFixedEndsOfSeries.class);
         tests.addTestSuite(TestsForChangeExceptions.class);
+        tests.addTestSuite(TestsForChangeExceptions.class);
         tests.addTestSuite(UpdateWithRecurrenceIdTest.class);
         return tests;
     }
