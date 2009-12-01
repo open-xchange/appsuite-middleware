@@ -80,6 +80,16 @@ public interface FolderStorage {
     public static final String PRIVATE_ID = "1";
 
     /**
+     * The reserved identifier for public folder: <code>"2"</code>.
+     */
+    public static final String PUBLIC_ID = "2";
+
+    /**
+     * The reserved identifier for shared folder: <code>"3"</code>.
+     */
+    public static final String SHARED_ID = "3";
+
+    /**
      * Gets the content types supported by this folder storage.
      * <p>
      * A zero length array means this folder storage supports all content types for a certain tree identifier.
