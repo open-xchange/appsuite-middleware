@@ -469,7 +469,9 @@ public final class MessageParser {
             final Iterator<String> iter = obj.keys();
             for (int i = 0; i < size; i++) {
                 final String key = iter.next();
-                headers.addHeader(key, obj.getString(key));
+                if (isCustomHeader(key)) {
+                    headers.addHeader(key, obj.getString(key));
+                }
             }
             mail.addHeaders(headers);
         }
@@ -568,6 +570,20 @@ public final class MessageParser {
         }
     }
 
+    /**
+     * Checks if specified header name is a custom header that is it starts ignore-case with <code>"X-"</code>.
+     * 
+     * @param headerName The header name to check
+     * @return <code>true</code> if specified header name is a custom header; otherwise <code>false</code>
+     */
+    private static boolean isCustomHeader(final String headerName) {
+        if (null == headerName || headerName.length() < 2) {
+            return false;
+        }
+        final char first = headerName.charAt(0);
+        return (('X' == first) || ('x' == first)) && ('-' == headerName.charAt(1));
+    }
+
     private static final String ROOT = "0";
 
     private static final String FILE_PREFIX = "file://";
@@ -607,7 +623,8 @@ public final class MessageParser {
                          * UI delivers HTML content in any case. Generate well-formed HTML for further processing dependent on given content
                          * type.
                          */
-                        final String validHtml = HTMLProcessing.getConformHTML(attachment.getString(MailJSONField.CONTENT.getKey()), "US-ASCII");
+                        final String validHtml =
+                            HTMLProcessing.getConformHTML(attachment.getString(MailJSONField.CONTENT.getKey()), "US-ASCII");
                         if (MIMETypes.MIME_TEXT_PLAIN.equals(contentType)) {
                             final HTML2TextHandler html2textHandler = new HTML2TextHandler(4096, true);
                             HTMLParser.parse(validHtml, html2textHandler);
