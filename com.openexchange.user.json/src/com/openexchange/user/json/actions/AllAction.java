@@ -51,9 +51,13 @@ package com.openexchange.user.json.actions;
 
 import static com.openexchange.user.json.Utility.checkForRequiredField;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.json.JSONArray;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -95,6 +99,17 @@ public final class AllAction extends AbstractUserAction {
         super();
     }
 
+    private static final Set<String> EXPECTED_NAMES =
+        Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
+            AJAXServlet.PARAMETER_COLUMNS,
+            AJAXServlet.PARAMETER_SORT,
+            AJAXServlet.PARAMETER_ORDER,
+            AJAXServlet.LEFT_HAND_LIMIT,
+            AJAXServlet.RIGHT_HAND_LIMIT,
+            AJAXServlet.PARAMETER_TIMEZONE,
+            AJAXServlet.PARAMETER_SESSION,
+            AJAXServlet.PARAMETER_ACTION)));
+
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
         try {
             /*
@@ -108,6 +123,10 @@ public final class AllAction extends AbstractUserAction {
             final int rightHandLimit = parseIntParameter(AJAXServlet.RIGHT_HAND_LIMIT, request);
 
             final String timeZoneId = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
+            /*
+             * Get remaining parameters
+             */
+            final Map<String, List<String>> attributeParameters = getAttributeParameters(EXPECTED_NAMES, request);
             /*
              * Get services
              */
@@ -239,7 +258,7 @@ public final class AllAction extends AbstractUserAction {
             /*
              * Write users as JSON arrays to JSON array
              */
-            final JSONArray jsonArray = UserWriter.writeMultiple2Array(columns, users, contacts, timeZoneId);
+            final JSONArray jsonArray = UserWriter.writeMultiple2Array(columns, attributeParameters, users, contacts, timeZoneId);
             /*
              * Return appropriate result
              */
@@ -248,5 +267,4 @@ public final class AllAction extends AbstractUserAction {
             throw new AjaxException(e);
         }
     }
-
 }

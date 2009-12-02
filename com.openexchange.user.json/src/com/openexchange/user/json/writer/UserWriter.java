@@ -49,11 +49,16 @@
 
 package com.openexchange.user.json.writer;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.Map.Entry;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -142,6 +147,35 @@ public final class UserWriter {
     private static interface UserFieldWriter {
 
         void writeField(JSONValuePutter jsonValue, User user, Contact contact) throws JSONException;
+    }
+
+    private static final class AttributeUserFieldWriter implements UserFieldWriter {
+
+        private final String attributeName;
+
+        AttributeUserFieldWriter(final String attributeName) {
+            super();
+            this.attributeName = attributeName;
+        }
+
+        public void writeField(final JSONValuePutter jsonValue, final User user, final Contact contact) throws JSONException {
+            jsonValue.put(attributeName, toJSONValue(user.getAttributes().get(attributeName)));
+        }
+
+        private static Object toJSONValue(final Set<String> values) {
+            if (null == values || values.isEmpty()) {
+                return JSONObject.NULL;
+            }
+            if (values.size() > 1) {
+                final JSONArray ja = new JSONArray();
+                for (final String value : values) {
+                    ja.put(value);
+                }
+                return ja;
+            }
+            return values.iterator().next();
+        }
+        
     }
 
     private static final UserFieldWriter UNKNOWN_FIELD_FFW = new UserFieldWriter() {
@@ -1071,20 +1105,45 @@ public final class UserWriter {
         return STATIC_WRITERS_MAP.get(Integer.valueOf(field));
     }
 
+    private static void addAttributeWriters(final Map<String, List<String>> attributeParameters, final int aSize, final List<UserFieldWriter> ufws) {
+        if (null == attributeParameters || attributeParameters.isEmpty()) {
+            return;
+        }
+        final Iterator<Entry<String, List<String>>> iter = attributeParameters.entrySet().iterator();
+        final StringBuilder sb = new StringBuilder(32);
+        for (int i = 0; i < aSize; i++) {
+            final Entry<String, List<String>> entry = iter.next();
+            final List<String> list = entry.getValue();
+            if (!list.isEmpty()) {
+                final String prefix = entry.getKey();
+                final int pLen = prefix.length() + 1;
+                sb.setLength(0);
+                sb.append(prefix).append('/');
+                for (final String appendix : list) {
+                    sb.setLength(pLen);
+                    sb.append(appendix);
+                    ufws.add(new AttributeUserFieldWriter(sb.toString()));
+                }
+            }
+        }
+    }
+
     /**
      * Writes requested fields of given user into a JSON array.
      * 
      * @param fields The fields to write or <code>null</code> to write all
+     * @param attributeParameters The user attributes to write
      * @param user The user
      * @param contact The user's contact
      * @param timeZoneId The optional time zone ID
      * @return The JSON array carrying requested fields of given user
      * @throws AjaxException If writing JSON array fails
      */
-    public static JSONArray writeSingle2Array(final int[] fields, final User user, final Contact contact, final String timeZoneId) throws AjaxException {
+    public static JSONArray writeSingle2Array(final int[] fields, final Map<String, List<String>> attributeParameters, final User user, final Contact contact, final String timeZoneId) throws AjaxException {
         final int[] cols = null == fields ? ALL_FIELDS : fields;
-        final UserFieldWriter[] ufws = new UserFieldWriter[cols.length];
-        for (int i = 0; i < ufws.length; i++) {
+        final int aSize = attributeParameters.size();
+        final List<UserFieldWriter> ufws = new ArrayList<UserFieldWriter>(cols.length + aSize);
+        for (int i = 0; i < cols.length; i++) {
             UserFieldWriter ufw = getUserFieldWriter(cols[i], timeZoneId);
             if (null == ufw) {
                 if (WARN) {
@@ -1092,8 +1151,9 @@ public final class UserWriter {
                 }
                 ufw = UNKNOWN_FIELD_FFW;
             }
-            ufws[i] = ufw;
+            ufws.add(ufw);
         }
+        addAttributeWriters(attributeParameters, aSize, ufws);
         try {
             final JSONArray jsonArray = new JSONArray();
             final JSONValuePutter jsonPutter = new JSONArrayPutter(jsonArray);
@@ -1110,16 +1170,18 @@ public final class UserWriter {
      * Writes requested fields of given folders into a JSON array consisting of JSON arrays.
      * 
      * @param fields The fields to write to each JSON array or <code>null</code> to write all
+     * @param attributeParameters The user attributes to write
      * @param users The users
      * @param contacts The users' contacts
      * @param timeZoneId The optional time zone ID
      * @return The JSON array carrying JSON arrays of given users
      * @throws AjaxException If writing JSON array fails
      */
-    public static JSONArray writeMultiple2Array(final int[] fields, final User[] users, final Contact[] contacts, final String timeZoneId) throws AjaxException {
+    public static JSONArray writeMultiple2Array(final int[] fields, final Map<String, List<String>> attributeParameters, final User[] users, final Contact[] contacts, final String timeZoneId) throws AjaxException {
         final int[] cols = null == fields ? ALL_FIELDS : fields;
-        final UserFieldWriter[] ufws = new UserFieldWriter[cols.length];
-        for (int i = 0; i < ufws.length; i++) {
+        final int aSize = attributeParameters.size();
+        final List<UserFieldWriter> ufws = new ArrayList<UserFieldWriter>(cols.length + aSize);
+        for (int i = 0; i < cols.length; i++) {
             UserFieldWriter ufw = getUserFieldWriter(cols[i], timeZoneId);
             if (null == ufw) {
                 if (WARN) {
@@ -1127,8 +1189,9 @@ public final class UserWriter {
                 }
                 ufw = UNKNOWN_FIELD_FFW;
             }
-            ufws[i] = ufw;
+            ufws.add(ufw);
         }
+        addAttributeWriters(attributeParameters, aSize, ufws);
         try {
             final JSONArray jsonArray = new JSONArray();
             final JSONArrayPutter jsonPutter = new JSONArrayPutter();
@@ -1150,16 +1213,18 @@ public final class UserWriter {
      * Writes requested fields of given user into a JSON object.
      * 
      * @param fields The fields to write or <code>null</code> to write all
+     * @param attributeParameters The user attributes to write
      * @param user The user
      * @param contact The user's contact
      * @param timeZoneId The optional time zone ID
      * @return The JSON object carrying requested fields of given user
      * @throws AjaxException If writing JSON object fails
      */
-    public static JSONObject writeSingle2Object(final int[] fields, final User user, final Contact contact, final String timeZoneId) throws AjaxException {
+    public static JSONObject writeSingle2Object(final int[] fields, final Map<String, List<String>> attributeParameters, final User user, final Contact contact, final String timeZoneId) throws AjaxException {
         final int[] cols = null == fields ? ALL_FIELDS : fields;
-        final UserFieldWriter[] ufws = new UserFieldWriter[cols.length];
-        for (int i = 0; i < ufws.length; i++) {
+        final int aSize = attributeParameters.size();
+        final List<UserFieldWriter> ufws = new ArrayList<UserFieldWriter>(cols.length + aSize);
+        for (int i = 0; i < cols.length; i++) {
             UserFieldWriter ufw = getUserFieldWriter(cols[i], timeZoneId);
             if (null == ufw) {
                 if (WARN) {
@@ -1167,8 +1232,9 @@ public final class UserWriter {
                 }
                 ufw = UNKNOWN_FIELD_FFW;
             }
-            ufws[i] = ufw;
+            ufws.add(ufw);
         }
+        addAttributeWriters(attributeParameters, aSize, ufws);
         try {
             final JSONObject jsonObject = new JSONObject();
             final JSONValuePutter jsonPutter = new JSONObjectPutter(jsonObject);
@@ -1185,16 +1251,18 @@ public final class UserWriter {
      * Writes requested fields of given folders into a JSON array consisting of JSON objects.
      * 
      * @param fields The fields to write to each JSON object or <code>null</code> to write all
+     * @param attributeParameters The user attributes to write
      * @param users The users
      * @param contacts The users' contacts
      * @param timeZoneId The optional time zone ID
      * @return The JSON array carrying JSON objects of given folders
      * @throws AjaxException If writing JSON array fails
      */
-    public static JSONArray writeMultiple2Object(final int[] fields, final User[] users, final Contact[] contacts, final String timeZoneId) throws AjaxException {
+    public static JSONArray writeMultiple2Object(final int[] fields, final Map<String, List<String>> attributeParameters, final User[] users, final Contact[] contacts, final String timeZoneId) throws AjaxException {
         final int[] cols = null == fields ? ALL_FIELDS : fields;
-        final UserFieldWriter[] ufws = new UserFieldWriter[cols.length];
-        for (int i = 0; i < ufws.length; i++) {
+        final int aSize = attributeParameters.size();
+        final List<UserFieldWriter> ufws = new ArrayList<UserFieldWriter>(cols.length + aSize);
+        for (int i = 0; i < cols.length; i++) {
             UserFieldWriter ufw = getUserFieldWriter(cols[i], timeZoneId);
             if (null == ufw) {
                 if (WARN) {
@@ -1202,8 +1270,9 @@ public final class UserWriter {
                 }
                 ufw = UNKNOWN_FIELD_FFW;
             }
-            ufws[i] = ufw;
+            ufws.add(ufw);
         }
+        addAttributeWriters(attributeParameters, aSize, ufws);
         try {
             final JSONArray jsonArray = new JSONArray();
             final JSONObjectPutter jsonPutter = new JSONObjectPutter();

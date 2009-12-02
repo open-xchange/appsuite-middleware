@@ -49,6 +49,14 @@
 
 package com.openexchange.user.json.actions;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -66,6 +74,40 @@ public abstract class AbstractUserAction implements AJAXActionService {
      */
     protected AbstractUserAction() {
         super();
+    }
+
+    /**
+     * Split a comma-separated string.
+     */
+    private static final Pattern SPLIT = Pattern.compile(" *, *");
+
+    /**
+     * Gets the attribute parameters.
+     * 
+     * @param expectedParameterNames The expected parameter names
+     * @param request The request
+     * @return The attribute parameters
+     */
+    protected static Map<String, List<String>> getAttributeParameters(final Set<String> expectedParameterNames, final AJAXRequestData request) {
+        final Iterator<Entry<String, String>> nonMatchingParameters = request.getNonMatchingParameters(expectedParameterNames);
+        if (!nonMatchingParameters.hasNext()) {
+            return Collections.emptyMap();
+        }
+        final Map<String, List<String>> attributeParameters = new LinkedHashMap<String, List<String>>();
+        do {
+            final Entry<String, String> entry = nonMatchingParameters.next();
+            final String key = entry.getKey();
+            List<String> list = attributeParameters.get(key);
+            if (null == list) {
+                list = new ArrayList<String>(4);
+                attributeParameters.put(key, list);
+            }
+            final String[] strings = SPLIT.split(entry.getValue(), 0);
+            for (final String string : strings) {
+                list.add(string);
+            }
+        } while (nonMatchingParameters.hasNext());
+        return attributeParameters;
     }
 
     /**
