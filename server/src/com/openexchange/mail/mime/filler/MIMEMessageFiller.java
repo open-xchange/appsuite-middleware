@@ -302,7 +302,7 @@ public class MIMEMessageFiller {
     private static final String[] SUPPRESS_HEADERS =
         {
             MessageHeaders.HDR_X_OX_VCARD, MessageHeaders.HDR_X_OXMSGREF, MessageHeaders.HDR_X_OX_MARKER,
-            MessageHeaders.HDR_X_OX_NOTIFICATION };
+            MessageHeaders.HDR_X_OX_NOTIFICATION, MessageHeaders.HDR_X_PRIORITY };
 
     /**
      * Sets necessary headers in specified MIME message: <code>From</code>/ <code>Sender</code>, <code>To</code>, <code>Cc</code>,
