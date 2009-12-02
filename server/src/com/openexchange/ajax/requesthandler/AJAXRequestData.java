@@ -50,9 +50,11 @@
 package com.openexchange.ajax.requesthandler;
 
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.RequestConstants;
 import com.openexchange.ajax.parser.DataParser;
@@ -132,6 +134,30 @@ public class AJAXRequestData {
      */
     public Iterator<String> getParameterNames() {
         return params.keySet().iterator();
+    }
+
+    /**
+     * Gets an {@link Iterator iterator} for those parameters not matching given parameter names.
+     * 
+     * @param nonMatchingParameterNames The non-matching parameter names
+     * @return An {@link Iterator iterator} for non-matching parameters
+     */
+    public Iterator<Entry<String, String>> getNonMatchingParameters(final Collection<String> nonMatchingParameterNames) {
+        final Map<String, String> clone = new HashMap<String, String>(params);
+        clone.keySet().removeAll(nonMatchingParameterNames);
+        return clone.entrySet().iterator();
+    }
+
+    /**
+     * Gets an {@link Iterator iterator} for those parameters matching given parameter names.
+     * 
+     * @param matchingParameterNames The matching parameter names
+     * @return An {@link Iterator iterator} for matching parameters
+     */
+    public Iterator<Entry<String, String>> getMatchingParameters(final Collection<String> matchingParameterNames) {
+        final Map<String, String> clone = new HashMap<String, String>(params);
+        clone.keySet().retainAll(matchingParameterNames);
+        return clone.entrySet().iterator();
     }
 
     /**
