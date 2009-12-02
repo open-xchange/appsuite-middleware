@@ -47,44 +47,62 @@
  *
  */
 
-package com.openexchange.ajax.appointment;
+package com.openexchange.ajax.appointment.recurrence;
 
-import com.openexchange.ajax.appointment.recurrence.TestsForCreatingChangeExceptions;
-import com.openexchange.ajax.appointment.recurrence.TestsForChangingAmongMonthlyRecurrences;
-import com.openexchange.ajax.appointment.recurrence.TestsForChangingAmongYearlyRecurrences;
-import com.openexchange.ajax.appointment.recurrence.TestsForDeleteExceptionsAndFixedEndsOfSeries;
-import com.openexchange.ajax.appointment.recurrence.TestsForDifferentWaysOfEndingASeries;
-import com.openexchange.ajax.appointment.recurrence.TestsForModifyingChangeExceptions;
-import com.openexchange.ajax.appointment.recurrence.TestsForUsingRecurrencePositionToGetChangeExceptions;
-import com.openexchange.ajax.appointment.recurrence.TestsToCreateMinimalAppointmentSeries;
-import com.openexchange.ajax.appointment.test.UpdateWithRecurrenceIdTest;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import static com.openexchange.groupware.calendar.TimeTools.D;
+import com.openexchange.ajax.appointment.helper.Changes;
+import com.openexchange.ajax.appointment.helper.Expectations;
+import com.openexchange.ajax.appointment.helper.OXError;
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.container.Appointment;
 
 
 /**
- * Suite for systematic tests to check the expected behaviour 
- * of the HTTP API for the calendar.
- * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class NewAppointmentHttpApiTestSuite extends TestSuite{
+public class TestsForModifyingChangeExceptions extends ManagedAppointmentTest {
 
-    private NewAppointmentHttpApiTestSuite() {
-        super();
+    private Changes changes;
+    private Appointment update;
+    private Appointment app;
+
+    public TestsForModifyingChangeExceptions(String name) {
+        super(name);
     }
+    
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        app = generateDailyAppointment();
+        app.setOccurrence(3);
 
-    public static Test suite(){
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(TestsToCreateMinimalAppointmentSeries.class);
-        tests.addTestSuite(TestsForChangingAmongMonthlyRecurrences.class);
-        tests.addTestSuite(TestsForChangingAmongYearlyRecurrences.class);
-        tests.addTestSuite(TestsForDeleteExceptionsAndFixedEndsOfSeries.class);
-        tests.addTestSuite(TestsForCreatingChangeExceptions.class);
-        tests.addTestSuite(TestsForUsingRecurrencePositionToGetChangeExceptions.class);
-        tests.addTestSuite(TestsForDifferentWaysOfEndingASeries.class);
-        tests.addTestSuite(TestsForModifyingChangeExceptions.class);
-        tests.addTestSuite(UpdateWithRecurrenceIdTest.class);
-        return tests;
+        calendarManager.insert(app);
+        
+        changes = new Changes();
+        changes.put(Appointment.RECURRENCE_POSITION, 2);
+        changes.put(Appointment.START_DATE, D("2/1/2008 1:00", utc));
+        changes.put(Appointment.END_DATE, D("2/1/2008 2:00", utc));
+        
+        update = app.clone();
+        changes.update(update);
+        calendarManager.update(update);
+        
+    }
+    
+    public void testShouldNotAllowTurningAChangeExceptionIntoASeries(){
+        Changes secondChange = new Changes();
+        secondChange.put(Appointment.RECURRENCE_TYPE, Appointment.DAILY);
+        secondChange.put(Appointment.INTERVAL, 1);
+
+        Appointment secondUpdate = new Appointment();
+        secondUpdate.setParentFolderID(update.getParentFolderID());
+        secondUpdate.setObjectID(update.getObjectID());
+        secondUpdate.setLastModified(update.getLastModified());
+        secondChange.update(secondUpdate);
+        
+        calendarManager.update(secondUpdate);
+        
+        assertTrue("Should get exception when trying to make a change exception a series", calendarManager.hasLastException());
+        assertTrue("Should have correct exception", new OXError("APP",999).matches(calendarManager.getLastException()));
     }
 }
