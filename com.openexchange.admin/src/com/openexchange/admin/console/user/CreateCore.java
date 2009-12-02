@@ -52,6 +52,7 @@ import java.net.MalformedURLException;
 import java.rmi.ConnectException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.util.Map;
 
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.rmi.OXUserInterface;
@@ -79,6 +80,8 @@ public abstract class CreateCore extends UserAbstraction {
         setOptionalOptions(parser);
         
         setFurtherOptions(parser);
+        
+        parser.allowDynamicOptions();
     }
 
     protected abstract void setFurtherOptions(final AdminParser parser);
@@ -112,6 +115,8 @@ public abstract class CreateCore extends UserAbstraction {
             parseAndSetOptionalOptionsinUser(parser, usr);
 
             applyExtendedOptionsToUser(parser, usr);
+            
+            applyDynamicOptionsToUser(parser, usr);
 
             maincall(parser, oxusr, ctx, usr, auth);
             
@@ -120,6 +125,7 @@ public abstract class CreateCore extends UserAbstraction {
             printErrors(null, ctxid, e, parser);
         }
     }
+
 
     protected abstract void maincall(final AdminParser parser, final OXUserInterface oxusr, final Context ctx, final User usr, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, DuplicateExtensionException, MalformedURLException, NotBoundException, ConnectException;
 }

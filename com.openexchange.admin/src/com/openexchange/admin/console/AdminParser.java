@@ -49,8 +49,11 @@
 package com.openexchange.admin.console;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
 import com.openexchange.admin.rmi.exceptions.MissingOptionException;
 
 /**
@@ -93,6 +96,10 @@ public class AdminParser extends CLIParser {
     private CLIOption extendedoption;
     
     private final CLIOption noNewlineOption;
+
+    private boolean allowDynamic;
+    
+    private Map<String, Map<String, String>> dynamicMaps = new HashMap<String, Map<String, String>>();
     
     private class OptionInfo {
         public NeededQuadState needed = NeededQuadState.notneeded;
@@ -354,9 +361,12 @@ public class AdminParser extends CLIParser {
 
     // As parse is declared final in CmdLineParser we cannot override it so we use another
     // function name here
-    public final void ownparse(final String[] args) throws CLIParseException, CLIIllegalOptionValueException, CLIUnknownOptionException, MissingOptionException {
+    public final void ownparse(String[] args) throws CLIParseException, CLIIllegalOptionValueException, CLIUnknownOptionException, MissingOptionException {
         // First parse the whole args then get through the list an check is options that are needed
         // aren't set. By this we implement the missing feature of mandatory options
+        if(allowDynamic) {
+            args = extractDynamic(args);
+        }
         parse(args);
         if (null != this.getOptionValue(this.checkuniquenessoption)) {
             checkOptionUniqueness();
@@ -389,6 +399,63 @@ public class AdminParser extends CLIParser {
             throw new MissingOptionException("Option(s) \"" + sb.toString() + "\" missing");
         }
     }
+
+    private String[] extractDynamic(String[] args) {
+        List<String> staticArgs = new ArrayList<String>(args.length);
+        for(String arg : args) {
+            if(isExtendedOption(arg) && isDynamicOption(arg)) {
+                parseDynamicOption(arg); 
+            } else {
+                staticArgs.add(arg);
+            }
+        }
+        return staticArgs.toArray(new String[staticArgs.size()]);
+    }
+
+    private void parseDynamicOption(String arg) {
+        // TODO Auto-generated method stub
+        int slashPos = arg.indexOf('/');
+        int equalPos = arg.indexOf('=');
+        
+        if(slashPos == -1) {
+            return;
+        }
+        
+        if(equalPos == -1) {
+            return;
+        }
+        
+        String namespace = arg.substring(2,slashPos);
+        String name = arg.substring(slashPos+1, equalPos);
+        String value = arg.substring(equalPos+1);
+        
+        getDynamicMap(namespace).put(name, value);
+    }
+
+
+    private Map<String, String> getDynamicMap(String namespace) {
+        Map<String, String> namespacedMap = dynamicMaps.get(namespace);
+        if(namespacedMap == null) {
+            namespacedMap = new HashMap<String, String>();
+            dynamicMaps.put(namespace, namespacedMap);
+        }
+        return namespacedMap;
+    }
+
+
+    private boolean isDynamicOption(String arg) {
+        int slashPos = arg.indexOf('/');
+        if(slashPos == -1) {
+            return false;
+        }
+        return slashPos < arg.indexOf('=');
+    }
+
+
+    private boolean isExtendedOption(String arg) {
+        return arg.startsWith("--");
+    }
+
 
     public final void setExtendedOptions() {
         this.extendedoption = addOption(OPT_EXTENDED_LONG, OPT_EXTENDED_LONG, "Set this if you want to see all options, use this instead of help option", false,false);
@@ -521,5 +588,19 @@ public class AdminParser extends CLIParser {
         } else {
             return " ";
         }
+    }
+
+
+    public void allowDynamicOptions() {
+        allowDynamic=true;
+    }
+    
+    public void forbidDynamicOptions() {
+        allowDynamic=false;
+    }
+    
+    
+    public Map<String, Map<String, String>> getDynamicArguments() {
+        return dynamicMaps;
     }
 }

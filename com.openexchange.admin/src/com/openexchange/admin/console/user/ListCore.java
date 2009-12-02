@@ -78,6 +78,8 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public abstract class ListCore extends UserAbstraction {
 
+    private static final Object USER_ATTRIBUTES = "UserAttributes";
+
     protected final void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptions(parser);
 
@@ -307,7 +309,11 @@ public abstract class ListCore extends UserAbstraction {
                 } else if (returntype.equals(JAVA_UTIL_HASH_SET)) {
                     datarow.add(hashtostring((HashSet<?>)methodandnames.getMethod().invoke(user, (Object[]) null)));
                 } else if (returntype.equals(JAVA_UTIL_MAP)) {
-                    datarow.add(maptostring((HashMap<?,?>)methodandnames.getMethod().invoke(user, (Object[]) null)));
+                    if(methodandnames.getName().equals(USER_ATTRIBUTES)) {
+                        datarow.add(userattributestostring((Map<String, Map<String, String>>)methodandnames.getMethod().invoke(user, (Object[]) null)));
+                    } else {
+                        datarow.add(maptostring((HashMap<?,?>)methodandnames.getMethod().invoke(user, (Object[]) null)));
+                    }
                 } else if (returntype.equals(JAVA_UTIL_TIME_ZONE)) {
                     datarow.add(timezonetostring((TimeZone)methodandnames.getMethod().invoke(user, (Object[]) null)));
                 } else if (returntype.equals(JAVA_UTIL_LOCALE)) {
@@ -354,6 +360,18 @@ public abstract class ListCore extends UserAbstraction {
             printExtensionsError(user);
         }
         doCSVOutput(columnnames, data);
+    }
+
+    private String userattributestostring(Map<String, Map<String, String>> dynamicAttributes) {
+        if(dynamicAttributes.size() == 0) {
+            return "";
+        }
+        StringBuilder builder = new StringBuilder(128);
+        for(Map.Entry<String, Map<String, String>> namespaced : dynamicAttributes.entrySet()) {
+            builder.append(namespaced.getKey()).append("=[").append(maptostring(namespaced.getValue())).append("],");
+        }
+        builder.deleteCharAt(builder.length()-1);
+        return builder.toString();
     }
 
     protected abstract ArrayList<String> getDataOfAllExtensions(final User user) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException;

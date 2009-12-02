@@ -436,6 +436,10 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         final ArrayList<MethodAndNames> retlist = new ArrayList<MethodAndNames>();
         // First we get all the getters of the user data class
         for (final Method method : theMethods) {
+            // Getters shouldn't need parameters
+            if(method.getParameterTypes().length > 0) {
+                continue;
+            }
             final String methodname = method.getName();
     
             if (methodname.startsWith("get")) {
@@ -487,6 +491,10 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         
         // First we get all the getters of the user data class
         for (final Method method : theMethods) {
+            // Setters have only one parameter
+            if(method.getParameterTypes().length != 1) {
+                continue;
+            }
             final String methodname = method.getName();
             
             if (methodname.startsWith("set")) {
@@ -976,6 +984,20 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             }
         }
     }
+    
+    protected void applyDynamicOptionsToUser(AdminParser parser, User usr) {
+        Map<String, Map<String, String>> dynamicArguments = parser.getDynamicArguments();
+        for(Map.Entry<String, Map<String, String>> namespaced : dynamicArguments.entrySet()) {
+            String namespace = namespaced.getKey();
+            for(Map.Entry<String, String> pair : namespaced.getValue().entrySet()) {
+                String name = pair.getKey();
+                String value = pair.getValue();
+                
+                usr.setUserAttribute(namespace, name, value);
+            }
+        }
+    }
+
 
     protected final OXUserInterface getUserInterface() throws NotBoundException, MalformedURLException, RemoteException {
         return (OXUserInterface) Naming.lookup(RMI_HOSTNAME + OXUserInterface.RMI_NAME);

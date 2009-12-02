@@ -549,6 +549,10 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     private SOAPStringMap guiPreferencesForSoap;
 
     private boolean guiPreferencesset = false;
+
+    private Map<String, Map<String, String>> userAttributes = new HashMap<String, Map<String, String>>();
+
+    private boolean userAttribtuesset;
     
     /**
      * Instantiates a new empty user object
@@ -4071,6 +4075,12 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         if( this.aliases != null ) {
             object.aliases = new HashSet<String>(this.aliases);
         }
+        if(this.userAttributes != null) {
+            object.userAttributes = new HashMap<String, Map<String, String>>();
+            for(Map.Entry<String, Map<String, String>> map : userAttributes.entrySet()) {
+                object.userAttributes.put(map.getKey(), new HashMap<String, String>(map.getValue()));
+            }
+        }
         if (null != this.birthday) {
             object.birthday = (Date) this.birthday.clone();
         }
@@ -4079,6 +4089,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         }
         return object;
     }
+
 
     private void init() {
         initExtendable();
@@ -4457,11 +4468,47 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     }
 
     /**
+     * Sets a generic user attribute
+     */
+    public void setUserAttribute(String namespace, String name, String value) {
+        getNamespace(namespace).put(name, value);
+        userAttribtuesset = true;
+    }
+    
+    /**
+     * Read a generic user attribute
+     */
+    public String getUserAttribute(String namespace, String name) {
+        return getNamespace(namespace).get(name);
+    }
+    
+    public Map<String, Map<String, String>> getUserAttributes() {
+        return userAttributes;
+    }
+    
+    public Map<String, String> getNamespace(String namespace) {
+        Map<String, String> ns = userAttributes.get(namespace);
+        if(ns == null) {
+            ns = new HashMap<String, String>();
+            userAttributes.put(namespace, ns);
+        }
+        return ns;
+    }
+    
+    /**
+     * Used to check if the user attributes have been modified
+     */
+    public boolean isUserAttributesset() {
+        return userAttribtuesset;
+    }
+    
+    /**
      * @return true if set; false if not
      */
     public final boolean isGuiPreferencesset() {
         return guiPreferencesset;
     }
+    
     
     /**
      * @return the guiPreferences
@@ -5604,4 +5651,5 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
             return false;
         return true;
     }
+
 }
