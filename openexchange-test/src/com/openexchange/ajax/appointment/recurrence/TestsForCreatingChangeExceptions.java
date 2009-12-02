@@ -59,9 +59,9 @@ import com.openexchange.groupware.container.Appointment;
  * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class TestsForChangeExceptions extends ManagedAppointmentTest {
+public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
 
-    public TestsForChangeExceptions(String name) {
+    public TestsForCreatingChangeExceptions(String name) {
         super(name);
     }
 
@@ -85,6 +85,19 @@ public class TestsForChangeExceptions extends ManagedAppointmentTest {
         changes.put(Appointment.RECURRENCE_POSITION, 1);
         changes.put(Appointment.START_DATE, D("1/1/2008 23:00", utc));
         changes.put(Appointment.END_DATE, D("1/1/2008 23:59", utc));
+
+        Expectations expectations = new Expectations(changes);
+        positiveAssertionOnChangeException.check(app, changes, expectations);
+    }
+    
+    public void testShouldAllowMovingTheSecondAppointmentBeforeTheFirst() {
+        Appointment app = generateDailyAppointment();
+        app.setOccurrence(3);
+
+        Changes changes = new Changes();
+        changes.put(Appointment.RECURRENCE_POSITION, 2);
+        changes.put(Appointment.START_DATE, D("31/12/2008 1:00", utc));
+        changes.put(Appointment.END_DATE, D("31/12/2008 2:00", utc));
 
         Expectations expectations = new Expectations(changes);
         positiveAssertionOnChangeException.check(app, changes, expectations);
