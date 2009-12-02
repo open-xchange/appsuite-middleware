@@ -167,7 +167,12 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
             /*
              * Pass request's stream
              */
-            retval.setUploadStream(req.getInputStream());
+            retval.setUploadStreamProvider(new AJAXRequestData.InputStreamProvider() {
+                
+                public InputStream getInputStream() throws IOException {
+                    return req.getInputStream();
+                }
+            });
         } else {
             /*
              * Guess an appropriate body object

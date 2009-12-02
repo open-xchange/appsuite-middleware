@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.requesthandler;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.HashMap;
@@ -68,11 +69,22 @@ import com.openexchange.tools.servlet.AjaxException;
  */
 public class AJAXRequestData {
 
+    public static interface InputStreamProvider {
+
+        /**
+         * Gets this provider's input stream.
+         * 
+         * @return The input stream
+         * @throws IOException If an I/O error occurs
+         */
+        InputStream getInputStream() throws IOException;
+    }
+
     private final Map<String, String> params;
 
     private Object data;
 
-    private InputStream uploadStream;
+    private InputStreamProvider uploadStreamProvider;
 
     /**
      * Initializes a new {@link AJAXRequestData}.
@@ -182,18 +194,19 @@ public class AJAXRequestData {
      * Gets the upload stream. Retrieves the body of the request as binary data as an {@link InputStream}.
      * 
      * @return The upload stream or <code>null</code> if not available
+     * @throws IOException If an I/O error occurs
      */
-    public InputStream getUploadStream() {
-        return uploadStream;
+    public InputStream getUploadStream() throws IOException {
+        return uploadStreamProvider.getInputStream();
     }
 
     /**
-     * Sets the upload stream
+     * Sets the upload stream provider
      * 
-     * @param uploadStream The upload stream to set
+     * @param uploadStream The upload stream provider to set
      */
-    public void setUploadStream(final InputStream uploadStream) {
-        this.uploadStream = uploadStream;
+    public void setUploadStreamProvider(final InputStreamProvider uploadStreamProvider) {
+        this.uploadStreamProvider = uploadStreamProvider;
     }
 
 }
