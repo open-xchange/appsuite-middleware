@@ -49,7 +49,13 @@
 
 package com.openexchange.subscribe.crawler;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.HashMap;
+
+import org.ho.yaml.Yaml;
+
 import com.openexchange.config.SimConfigurationService;
 import com.openexchange.subscribe.crawler.osgi.Activator;
 
@@ -62,40 +68,48 @@ public class ActivatorTest extends GenericSubscribeServiceTestHelpers {
      * Get all yml-files in the config directory and create crawlers out of them. Use each crawler with a specified testuser.
      */
     public void testActivator() {
-        // credentials for LinkedIn
-        String linkedInUsername = "roxyexchanger@ox.io";
-        String linkedInPassword = "secret";
-        // credentials for Xing
-        String xingUsername = "";
-        String xingPassword = "";
-        // credentials for Facebook
-        String facebookUsername = "";
-        String facebookPassword = "";
-        // credentials for GoogleMail
-        String googleMailUsername = "";
-        String googleMailPassword = "";
-
+        
+        HashMap<String, String> map = null;
+        try {
+            map = (HashMap<String, String>) Yaml.load(getSecretsFile());
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        
         SimConfigurationService config = new SimConfigurationService();
         // test with the real crawlers
-        config.stringProperties.put("com.openexchange.subscribe.crawler.path", "conf/crawlers/");
+        config.stringProperties.put("com.openexchange.subscribe.crawler.path", System.getProperty("crawlersConf"));
         Activator activator = new Activator();
         ArrayList<CrawlerDescription> crawlers = activator.getCrawlersFromFilesystem(config);
         for (CrawlerDescription crawler : crawlers) {
-            if (crawler.getDisplayName().equals("LinkedIn")) {
-                System.out.println("***** Testing : " + crawler.getDisplayName());
-                findOutIfThereAreContactsForThisConfiguration(linkedInUsername, linkedInPassword, crawler);
-            } else if (crawler.getDisplayName().equals("XING")) {
-                System.out.println("***** Testing : " + crawler.getDisplayName());
-                findOutIfThereAreContactsForThisConfiguration(xingUsername, xingPassword, crawler);
-            } else if (crawler.getDisplayName().equals("Facebook")) {
-                System.out.println("***** Testing : " + crawler.getDisplayName());
-                findOutIfThereAreContactsForThisConfiguration(facebookUsername, facebookPassword, crawler);
-            } else if (crawler.getDisplayName().equals("GoogleMail")) {
-                System.out.println("***** Testing : " + crawler.getDisplayName());
-                findOutIfThereAreContactsForThisConfiguration(googleMailUsername, googleMailPassword, crawler);
+            String crawlerName = crawler.getDisplayName();
+            if (map.containsKey(crawlerName+"_user") && map.containsKey(crawlerName+"_password")){
+                String username = map.get(crawlerName+"_user");
+                String password = map.get(crawlerName+"_password");
+                System.out.println("***** Testing crawler : " + crawlerName);
+                findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
+            } else {
+                fail("***** No credentials for crawler : " + crawlerName);
             }
         }
 
     }
 
+    private File getSecretsFile() {
+        String value = System.getProperty("secretFile");
+        if (null == value) {
+            fail("File for crawler credentials is not defined.");
+        }
+        File secrets = new File(value);
+        if (!secrets.exists()) {
+            fail("File for crawler credentials does not exist.");
+        }
+        if (!secrets.isFile()) {
+            fail("File for crawler credentials is not a file.");
+        }
+        if (!secrets.canRead()) {
+            fail("File for crawler credentials can not be read.");
+        }
+        return secrets;
+    }
 }
