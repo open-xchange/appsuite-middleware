@@ -162,6 +162,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
     private static final String DEFAULT_IMAP_SERVER_CREATE = "imap://localhost";
 
+    private static final String ALIAS = "alias";
+
     public OXUserMySQLStorage() {
         super();
     }
@@ -178,6 +180,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
         PreparedStatement stmt = null;
         PreparedStatement folder_update = null;
+        
+        PreparedStatement stmtupdateattribute = null;
+        PreparedStatement stmtinsertattribute = null;
+        PreparedStatement stmtdelattribute = null;
+        
+        
         final int userId = usrdata.getId().intValue();
         try {
 
@@ -341,7 +349,45 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.executeUpdate();
                 stmt.close();
             }
-
+            
+            if(usrdata.isUserAttributesset()) {
+                
+                stmtupdateattribute = con.prepareStatement("UPDATE user_attribute SET value = ? WHERE cid=? AND id=? AND name=?");
+                stmtupdateattribute.setInt(2, contextId);
+                stmtupdateattribute.setInt(3, userId);
+                
+                stmtinsertattribute = con.prepareStatement("INSERT INTO user_attribute (value, cid, id, name) VALUES (?, ?, ?, ?)");
+                stmtinsertattribute.setInt(2, contextId);
+                stmtinsertattribute.setInt(3, userId);
+                
+                stmtdelattribute = con.prepareStatement("DELETE FROM user_attribute WHERE cid=? AND id=? AND name=?");
+                stmtdelattribute.setInt(1, contextId);
+                stmtdelattribute.setInt(2, userId);
+                
+                for(Map.Entry<String, Map<String, String>> ns : usrdata.getUserAttributes().entrySet()) {
+                    String namespace = ns.getKey();
+                    for(Map.Entry<String, String> pair : ns.getValue().entrySet()) {
+                        String name = namespace+"/"+pair.getKey();
+                        String value = pair.getValue();
+                        if(value != null) {
+                            stmtupdateattribute.setString(1, value);
+                            stmtupdateattribute.setString(4, name);
+                            
+                            int changedRows = stmtupdateattribute.executeUpdate();
+                            if(changedRows == 0) {
+                                stmtinsertattribute.setString(1, value);
+                                stmtinsertattribute.setString(4, name);
+                                stmtinsertattribute.executeUpdate();
+                            }
+                        } else {
+                            stmtdelattribute.setString(3, name);
+                            stmtdelattribute.executeUpdate();
+                        }
+                    }
+                }
+                
+            }
+ 
             // update prg_contacts ONLY if needed ( see
             // "prg_contacts_update_needed")
             final Class<? extends User> c = usrdata.getClass();
@@ -690,7 +736,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             } catch (final SQLException e) {
                 log.error("SQL Error closing statement", e);
             }
-
+            closePreparedStatement(stmtupdateattribute);
+            closePreparedStatement(stmtinsertattribute);
+            closePreparedStatement(stmtdelattribute);
+            
             try {
                 if (con != null) {
                     cache.pushConnectionForContext(contextId, con);
@@ -1048,6 +1097,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         }
                     }
                 }
+                
+                // Fill in dynamic attributes
+                insertDynamicAttributes(write_ox_con, ctx.getId(), internal_user_id, usrdata.getUserAttributes());
+                
 
                 // add user to login2user table with the internal id
                 stmt = write_ox_con.prepareStatement("INSERT INTO login2user (cid,id,uid) VALUES (?,?,?)");
@@ -1182,6 +1235,29 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             throw e;
         } finally {
             closePreparedStatement(ps);
+        }
+    }
+
+    private void insertDynamicAttributes(Connection write_ox_con, int cid, int userId, Map<String, Map<String, String>> dynamicValues) throws SQLException {
+        PreparedStatement stmt = null;
+        
+        try {
+            stmt = write_ox_con.prepareStatement("INSERT INTO user_attribute (cid, id, name, value) VALUES (?, ?, ?, ?)");
+            stmt.setInt(1, cid);
+            stmt.setInt(2, userId);
+            for(Map.Entry<String, Map<String, String>> namespaced : dynamicValues.entrySet()) {
+                String namespace = namespaced.getKey();
+                for(Map.Entry<String, String> pair : namespaced.getValue().entrySet()) {
+                    String name = namespace + "/" + pair.getKey();
+                    String value = pair.getValue();
+                    stmt.setString(3, name);
+                    stmt.setString(4, value);
+                    stmt.executeUpdate();
+                }
+            }
+            
+        } finally {
+            closePreparedStatement(stmt);
         }
     }
 
@@ -1530,7 +1606,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         PreparedStatement stmt = null;
         PreparedStatement stmt2 = null;
         PreparedStatement stmtusername = null;
-        PreparedStatement stmtalias = null;
+        PreparedStatement stmtuserattributes = null;
         PreparedStatement stmtstd = null;
         final ArrayList<User> userlist = new ArrayList<User>();
         try {
@@ -1543,9 +1619,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             stmt2 = read_ox_con.prepareStatement(query.toString());
             stmtusername = read_ox_con.prepareStatement("SELECT id FROM login2user WHERE cid = ? AND uid = ?");
             stmtusername.setInt(1, context_id);
-            stmtalias = read_ox_con.prepareStatement("SELECT value FROM user_attribute WHERE cid=? and id=? AND name=?");
-            stmtalias.setInt(1, context_id);
-            stmtalias.setString(3, "alias");
+            stmtuserattributes = read_ox_con.prepareStatement("SELECT name, value FROM user_attribute WHERE cid=? and id=?");
+            stmtuserattributes.setInt(1, context_id);
             stmtstd = read_ox_con.prepareStatement("SELECT std_trash,std_sent,std_drafts,std_spam,confirmed_spam,confirmed_ham,bits,send_addr,upload_quota,upload_quota_per_file FROM user_setting_mail WHERE cid = ? and user = ?");
             stmtstd.setInt(1, context_id);
             ResultSet rs = null;
@@ -1631,10 +1706,18 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 }
                 rs.close();
 
-                stmtalias.setInt(2, user_id);
-                rs = stmtalias.executeQuery();
+                stmtuserattributes.setInt(2, user_id);
+                rs = stmtuserattributes.executeQuery();
                 while (rs.next()) {
-                    newuser.addAlias(rs.getString("value"));
+                    String name = rs.getString("name");
+                    String value = rs.getString("value");
+
+                    if(ALIAS.equals(name)) {
+                        newuser.addAlias(value);
+                    } else if (isDynamicAttribute(name)) {
+                        String[] namespaced = parseDynamicAttribute(name);
+                        newuser.setUserAttribute(namespaced[0], namespaced[1], value);
+                    }
                 }
                 rs.close();
 
@@ -1692,7 +1775,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             closePreparedStatement(stmt);
             closePreparedStatement(stmt2);
             closePreparedStatement(stmtusername);
-            closePreparedStatement(stmtalias);
+            closePreparedStatement(stmtuserattributes);
             closePreparedStatement(stmtstd);
             try {
                 if (read_ox_con != null) {
@@ -1702,6 +1785,26 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 log.error("Pool Error pushing ox read connection to pool!", exp);
             }
         }
+    }
+
+    /**
+     * Parses a dynamic attribute from the user_attribute table
+     * Returns a String[] with retval[0] being the namespace and retval[1] being the name
+     * @throws StorageException 
+     */
+    private String[] parseDynamicAttribute(String name) throws StorageException {
+        int pos = name.indexOf('/');
+        if(pos == -1) {
+            throw new StorageException("Could not parse dynamic attribute name: "+name);
+        }
+        String[] parsed = new String[2];
+        parsed[0] = name.substring(0, pos);
+        parsed[1] = name.substring(pos+1);
+        return parsed;
+    }
+
+    private boolean isDynamicAttribute(String name) {
+        return name.indexOf('/') >= 0;
     }
 
     private void closePreparedStatement(final PreparedStatement stmt) {

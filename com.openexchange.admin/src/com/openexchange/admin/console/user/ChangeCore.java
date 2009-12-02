@@ -84,6 +84,8 @@ public abstract class ChangeCore extends UserAbstraction {
         setOptionalOptions(parser);
         
         setFurtherOptions(parser);
+        
+        parser.allowDynamicOptions();
     }
 
     protected abstract void setFurtherOptions(final AdminParser parser);
@@ -130,7 +132,10 @@ public abstract class ChangeCore extends UserAbstraction {
             
             // apply changes in module access on server
             oxusr.changeModuleAccess(ctx, usr, access, auth);
-
+            
+            // Dynamic Options
+            applyDynamicOptionsToUser(parser, usr);
+            
             // finally do change call last (must be done last because else we cannot
             // change admin password
             maincall(parser, oxusr, ctx, usr, access, auth);

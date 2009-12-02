@@ -51,11 +51,12 @@ package com.openexchange.admin.console;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import junit.framework.TestCase;
 
 import org.junit.After;
 import org.junit.Before;
 
-public abstract class AbstractTest {
+public abstract class AbstractTest extends TestCase {
 
     protected  static String TEST_DOMAIN = "example.org";
     protected  static String CHANGE_SUFFIX = "_changed";
@@ -77,8 +78,7 @@ public abstract class AbstractTest {
     protected PrintStream errConsole;
     protected PrintStream outConsole;
     
-    @Before
-    public void setup() {
+    public void grabStreams() {
         errBytes = new ByteArrayOutputStream();
         outBytes = new ByteArrayOutputStream();
         
@@ -102,7 +102,9 @@ public abstract class AbstractTest {
     
     @After
     public void tearDown() {
-        
+        if(errConsole == null) {
+            return;
+        }
         System.setErr(errConsole);
         System.setOut(outConsole);
         
