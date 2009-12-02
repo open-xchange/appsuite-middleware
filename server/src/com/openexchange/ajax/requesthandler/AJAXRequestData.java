@@ -51,6 +51,7 @@ package com.openexchange.ajax.requesthandler;
 
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.RequestConstants;
@@ -122,6 +123,15 @@ public class AJAXRequestData {
             throw new NullPointerException("name is null");
         }
         return params.get(name);
+    }
+
+    /**
+     * Gets all available parameter names wrapped by an {@link Iterator iterator}.
+     * 
+     * @return The {@link Iterator iterator} for available parameter names
+     */
+    public Iterator<String> getParameterNames() {
+        return params.keySet().iterator();
     }
 
     /**
