@@ -484,7 +484,10 @@ public class MIMEMessageFiller {
          */
         for (final Iterator<Map.Entry<String, String>> iter = mail.getNonMatchingHeaders(SUPPRESS_HEADERS); iter.hasNext();) {
             final Map.Entry<String, String> entry = iter.next();
-            mimeMessage.addHeader(entry.getKey(), entry.getValue());
+            final String name = entry.getKey();
+            if (name.toLowerCase(Locale.ENGLISH).startsWith("x-")) {
+                mimeMessage.addHeader(name, entry.getValue());
+            }
         }
     }
 
