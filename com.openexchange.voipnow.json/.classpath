@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry exported="true" kind="lib" path="lib/jacksum.jar" sourcepath="lib/jacksum-src.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/voipnow-soap-service.jar" sourcepath="lib/voipnow-soap-service.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/httpcore-4.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/axis2-transport-http-1.5.1.jar" sourcepath="source/axis2-1.5.1-src.zip"/>
