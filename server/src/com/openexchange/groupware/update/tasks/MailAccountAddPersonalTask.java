@@ -119,10 +119,10 @@ public final class MailAccountAddPersonalTask implements UpdateTask {
         }
     }
 
-    @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 1 }, msg = { "A SQL error occurred while performing task MailAccountAddPersonalTask: %1$s." })
+    @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 1 }, msg = { "A SQL error occurred while performing task %1$s: %2$s." })
     private static UpdateException createSQLError(final SQLException e) {
         final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(MailAccountAddPersonalTask.class);
-        return EXCEPTION.create(1, e, e.getMessage());
+        return EXCEPTION.create(1, e, MailAccountAddPersonalTask.class.getSimpleName(), e.getMessage());
     }
 
 }
