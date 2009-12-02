@@ -283,7 +283,10 @@ public final class InternalList {
         new com.openexchange.groupware.update.tasks.FolderAddIndex4SharedFolderSearch(),
         // Version 102
         // Adds necessary tables to support MAL-based poll
-        new com.openexchange.groupware.update.tasks.MALPollCreateTableTask()
+        new com.openexchange.groupware.update.tasks.MALPollCreateTableTask(),
+        // Version 104
+        // Renames "Unified INBOX" to "Unified Mail"
+        new com.openexchange.groupware.update.tasks.UnifiedINBOXRenamerTask()
 
         // TODO: Enable virtual folder tree update task when needed
         // Version XY

@@ -66,7 +66,7 @@ public interface UnifiedINBOXManagement {
     /**
      * The Unified INBOX name.
      */
-    public static final String NAME_UNIFIED_INBOX = "Unified INBOX";
+    public static final String NAME_UNIFIED_INBOX = "Unified Mail";
 
     /**
      * Creates the Unified INBOX account for given user in specified context.
