@@ -49,6 +49,7 @@
 
 package com.openexchange.voipnow.json.preferences;
 
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
@@ -57,7 +58,9 @@ import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
+import com.openexchange.voipnow.json.services.ServiceRegistry;
 
 /**
  * {@link VoipNowFaxAddress} - The setting to deliver mail-2-fax address.
@@ -83,8 +86,12 @@ public class VoipNowFaxAddress implements PreferencesItemService {
         return new ReadOnlyValue() {
 
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws SettingException {
-                // TODO: Set proper mail-2-fax address
-                setting.setSingleValue("fax@voip.open-xchange.com");
+                try {
+                    setting.setSingleValue(ServiceRegistry.getInstance().getService(ConfigurationService.class, true).getProperty(
+                        "com.4psa.voipnow.faxaddress"));
+                } catch (final ServiceException e) {
+                    throw new SettingException(e);
+                }
             }
 
             /**

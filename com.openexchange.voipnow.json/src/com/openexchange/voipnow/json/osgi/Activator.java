@@ -117,16 +117,17 @@ public class Activator implements BundleActivator {
              * User service tracker
              */
             trackers = new Stack<ServiceTracker>();
+            final ServiceRegistry serviceRegistry = ServiceRegistry.getInstance();
             trackers.push(new ServiceTracker(context, UserService.class.getName(), new RegistryServiceTrackerCustomizer<UserService>(
                 context,
-                ServiceRegistry.getInstance(),
+                serviceRegistry,
                 UserService.class)));
             trackers.push(new ServiceTracker(
                 context,
                 ConfigurationService.class.getName(),
                 new RegistryServiceTrackerCustomizer<ConfigurationService>(
                     context,
-                    ServiceRegistry.getInstance(),
+                    serviceRegistry,
                     ConfigurationService.class)));
             /*
              * Contact interface factory tracker
@@ -136,7 +137,7 @@ public class Activator implements BundleActivator {
                 ContactInterfaceFactory.class.getName(),
                 new RegistryServiceTrackerCustomizer<ContactInterfaceFactory>(
                     context,
-                    ServiceRegistry.getInstance(),
+                    serviceRegistry,
                     ContactInterfaceFactory.class)));
             /*
              * HTTP service tracker
@@ -147,7 +148,7 @@ public class Activator implements BundleActivator {
                 ContactInterfaceDiscoveryService.class.getName(),
                 new RegistryServiceTrackerCustomizer<ContactInterfaceDiscoveryService>(
                     context,
-                    ServiceRegistry.getInstance(),
+                    serviceRegistry,
                     ContactInterfaceDiscoveryService.class)));
             for (final ServiceTracker tracker : trackers) {
                 tracker.open();
