@@ -49,10 +49,11 @@
 
 package com.openexchange.ajax.appointment;
 
-import com.openexchange.ajax.appointment.recurrence.TestsForChangeExceptions;
+import com.openexchange.ajax.appointment.recurrence.TestsForCreatingChangeExceptions;
 import com.openexchange.ajax.appointment.recurrence.TestsForChangingAmongMonthlyRecurrences;
 import com.openexchange.ajax.appointment.recurrence.TestsForChangingAmongYearlyRecurrences;
 import com.openexchange.ajax.appointment.recurrence.TestsForDeleteExceptionsAndFixedEndsOfSeries;
+import com.openexchange.ajax.appointment.recurrence.TestsForUsingRecurrencePositionToGetChangeExceptions;
 import com.openexchange.ajax.appointment.recurrence.TestsToCreateMinimalAppointmentSeries;
 import com.openexchange.ajax.appointment.test.UpdateWithRecurrenceIdTest;
 import junit.framework.Test;
@@ -77,8 +78,9 @@ public class NewAppointmentHttpApiTestSuite extends TestSuite{
         tests.addTestSuite(TestsForChangingAmongMonthlyRecurrences.class);
         tests.addTestSuite(TestsForChangingAmongYearlyRecurrences.class);
         tests.addTestSuite(TestsForDeleteExceptionsAndFixedEndsOfSeries.class);
-        tests.addTestSuite(TestsForChangeExceptions.class);
-        tests.addTestSuite(TestsForChangeExceptions.class);
+        tests.addTestSuite(TestsForCreatingChangeExceptions.class);
+        tests.addTestSuite(TestsForCreatingChangeExceptions.class);
+        tests.addTestSuite(TestsForUsingRecurrencePositionToGetChangeExceptions.class);
         tests.addTestSuite(UpdateWithRecurrenceIdTest.class);
         return tests;
     }
