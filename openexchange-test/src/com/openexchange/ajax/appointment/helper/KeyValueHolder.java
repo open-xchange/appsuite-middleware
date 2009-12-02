@@ -56,19 +56,17 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * {@link KeyValueHolder}
- *
- * @author <a href="mailto:firstname.lastname@open-xchange.com">Firstname Lastname</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class KeyValueHolder {
 
-    private Map<Integer,Object> map = new HashMap<Integer,Object>();
+    private Map<Integer, Object> map = new HashMap<Integer, Object>();
 
-    public void setMap(Map<Integer,Object> map) {
+    public void setMap(Map<Integer, Object> map) {
         this.map = map;
     }
-    
-    public Map<Integer,Object> getMap() {
+
+    public Map<Integer, Object> getMap() {
         return map;
     }
 
@@ -80,9 +78,13 @@ public class KeyValueHolder {
         getMap().put(key, value);
     }
 
+    public void remove(int key) {
+        getMap().remove(key);
+    }
+
     public JSONObject toJSON() throws JSONException {
         JSONObject json = new JSONObject();
-        for(Integer key: getMap().keySet())
+        for (Integer key : getMap().keySet())
             json.append(key.toString(), getMap().get(key));
         return json;
     }
@@ -90,10 +92,9 @@ public class KeyValueHolder {
     public int[] getKeys() {
         return I2i(getMap().keySet());
     }
-    
-    public Object get(int key){
+
+    public Object get(int key) {
         return getMap().get(key);
     }
-
 
 }
