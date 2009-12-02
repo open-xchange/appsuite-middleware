@@ -125,6 +125,8 @@ import com.openexchange.mail.text.parser.HTMLParser;
 import com.openexchange.mail.text.parser.handler.HTML2TextHandler;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.mailaccount.MailAccountException;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.Version;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -268,15 +270,18 @@ public class MIMEMessageFiller {
              * Get context's admin contact object
              */
             try {
-                final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
-                    ContactInterfaceDiscoveryService.class).newContactInterface(FolderObject.SYSTEM_LDAP_FOLDER_ID, session);
+                final ContactInterface contactInterface =
+                    ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
+                        FolderObject.SYSTEM_LDAP_FOLDER_ID,
+                        session);
 
                 final Contact c = contactInterface.getUserById(ctx.getMailadmin(), false);
                 if (null != c && c.getCompany() != null && c.getCompany().length() > 0) {
-                    final String encoded = MimeUtility.fold(14, MimeUtility.encodeText(
-                        c.getCompany(),
-                        MailProperties.getInstance().getDefaultMimeCharset(),
-                        null));
+                    final String encoded =
+                        MimeUtility.fold(14, MimeUtility.encodeText(
+                            c.getCompany(),
+                            MailProperties.getInstance().getDefaultMimeCharset(),
+                            null));
                     session.setParameter(MailSessionParameterNames.PARAM_ORGANIZATION_HDR, encoded);
                     mimeMessage.setHeader(MessageHeaders.HDR_ORGANIZATION, encoded);
                 } else {
@@ -294,8 +299,10 @@ public class MIMEMessageFiller {
         }
     }
 
-    private static final String[] SUPPRESS_HEADERS = {
-        MessageHeaders.HDR_X_OX_VCARD, MessageHeaders.HDR_X_OXMSGREF, MessageHeaders.HDR_X_OX_MARKER, MessageHeaders.HDR_X_OX_NOTIFICATION };
+    private static final String[] SUPPRESS_HEADERS =
+        {
+            MessageHeaders.HDR_X_OX_VCARD, MessageHeaders.HDR_X_OXMSGREF, MessageHeaders.HDR_X_OX_MARKER,
+            MessageHeaders.HDR_X_OX_NOTIFICATION };
 
     /**
      * Sets necessary headers in specified MIME message: <code>From</code>/ <code>Sender</code>, <code>To</code>, <code>Cc</code>,
@@ -311,17 +318,41 @@ public class MIMEMessageFiller {
          * Set from/sender
          */
         if (mail.containsFrom()) {
-            InternetAddress sender = null;
-            final String sendAddr = usm.getSendAddr();
-            if (sendAddr != null && sendAddr.length() > 0) {
-                try {
-                    sender = new QuotedInternetAddress(sendAddr, true);
-                } catch (final AddressException e) {
-                    LOG.error("Default send address cannot be parsed", e);
-                }
-            }
+            /*
+             * Get from
+             */
             final InternetAddress from = mail.getFrom()[0];
             mimeMessage.setFrom(from);
+            /*
+             * Determine sender
+             */
+            InternetAddress sender = null;
+            final MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
+            if (null != mass) {
+                try {
+                    final int userId = session.getUserId();
+                    final int contextId = session.getContextId();
+                    final int id = mass.getByPrimaryAddress(from.getAddress(), userId, contextId);
+                    if (id < 0) {
+                        /*
+                         * No appropriate mail account found which matches from address
+                         */
+                        final String sendAddr = usm.getSendAddr();
+                        if (sendAddr != null && sendAddr.length() > 0) {
+                            try {
+                                sender = new QuotedInternetAddress(sendAddr, true);
+                            } catch (final AddressException e) {
+                                LOG.error("Default send address cannot be parsed", e);
+                            }
+                        }
+                    }
+                } catch (final MailAccountException e) {
+                    /*
+                     * Conflict during look-up
+                     */
+                    LOG.debug(e.getMessage(), e);
+                }
+            }
             /*
              * Taken from RFC 822 section 4.4.2: In particular, the "Sender" field MUST be present if it is NOT the same as the "From"
              * Field.
@@ -585,9 +616,10 @@ public class MIMEMessageFiller {
             /*
              * A non-inline forward message
              */
-            isAttachmentForward = ((ComposeType.FORWARD.equals(type)) && (usm.isForwardAsAttachment() || (size > 1 && hasOnlyReferencedMailAttachments(
-                mail,
-                size))));
+            isAttachmentForward =
+                ((ComposeType.FORWARD.equals(type)) && (usm.isForwardAsAttachment() || (size > 1 && hasOnlyReferencedMailAttachments(
+                    mail,
+                    size))));
         }
         /*
          * Initialize primary multipart
@@ -696,11 +728,12 @@ public class MIMEMessageFiller {
              * Append VCard
              */
             AppendVCard: if (mail.isAppendVCard()) {
-                final String fileName = MimeUtility.encodeText(
-                    new StringBuilder(UserStorage.getStorageUser(session.getUserId(), ctx).getDisplayName().replaceAll(" +", "")).append(
-                        ".vcf").toString(),
-                    MailProperties.getInstance().getDefaultMimeCharset(),
-                    "Q");
+                final String fileName =
+                    MimeUtility.encodeText(
+                        new StringBuilder(UserStorage.getStorageUser(session.getUserId(), ctx).getDisplayName().replaceAll(" +", "")).append(
+                            ".vcf").toString(),
+                        MailProperties.getInstance().getDefaultMimeCharset(),
+                        "Q");
                 for (int i = 0; i < size; i++) {
                     final MailPart part = mail.getEnclosedMailPart(i);
                     if (fileName.equalsIgnoreCase(part.getFileName())) {
@@ -733,7 +766,9 @@ public class MIMEMessageFiller {
                     if (fileName != null) {
                         final ContentDisposition cd = new ContentDisposition(Part.ATTACHMENT);
                         cd.setFilenameParameter(fileName);
-                        vcardPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MIMEMessageUtility.foldContentDisposition(cd.toString()));
+                        vcardPart.setHeader(
+                            MessageHeaders.HDR_CONTENT_DISPOSITION,
+                            MIMEMessageUtility.foldContentDisposition(cd.toString()));
                     }
                     /*
                      * Append body part
@@ -827,7 +862,9 @@ public class MIMEMessageFiller {
             } else {
                 final ContentDisposition contentDisposition = new ContentDisposition(disposition);
                 contentDisposition.setDisposition(Part.INLINE);
-                msgBodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MIMEMessageUtility.foldContentDisposition(contentDisposition.toString()));
+                msgBodyPart.setHeader(
+                    MessageHeaders.HDR_CONTENT_DISPOSITION,
+                    MIMEMessageUtility.foldContentDisposition(contentDisposition.toString()));
             }
             mp.addBodyPart(msgBodyPart);
             addMessageBodyPart(mp, mail, true);
@@ -863,13 +900,14 @@ public class MIMEMessageFiller {
                 readCon = DBPool.pickup(ctx);
                 Contact contactObj = null;
                 try {
-                    contactObj = Contacts.getContactById(
-                        userObj.getContactId(),
-                        userObj.getId(),
-                        userObj.getGroups(),
-                        ctx,
-                        UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx),
-                        readCon);
+                    contactObj =
+                        Contacts.getContactById(
+                            userObj.getContactId(),
+                            userObj.getId(),
+                            userObj.getGroups(),
+                            ctx,
+                            UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx),
+                            readCon);
                 } catch (final OXException oxExc) {
                     throw new MailException(oxExc);
                 } catch (final Exception e) {
@@ -909,9 +947,8 @@ public class MIMEMessageFiller {
      * @return An appropriate "multipart/alternative" object.
      * @throws MailException If a mail error occurs
      * @throws MessagingException If a messaging error occurs
-     * @throws IOException If an I/O error occurs
      */
-    protected final Multipart createMultipartAlternative(final ComposedMailMessage mail, final String mailBody, final boolean embeddedImages) throws MailException, MessagingException, IOException {
+    protected final Multipart createMultipartAlternative(final ComposedMailMessage mail, final String mailBody, final boolean embeddedImages) throws MailException, MessagingException {
         /*
          * Create an "alternative" multipart
          */
@@ -1058,8 +1095,9 @@ public class MIMEMessageFiller {
          * Content-ID
          */
         if (part.getContentId() != null) {
-            final String cid = part.getContentId().charAt(0) == '<' ? part.getContentId() : new StringBuilder(
-                part.getContentId().length() + 2).append('<').append(part.getContentId()).append('>').toString();
+            final String cid =
+                part.getContentId().charAt(0) == '<' ? part.getContentId() : new StringBuilder(part.getContentId().length() + 2).append('<').append(
+                    part.getContentId()).append('>').toString();
             messageBodyPart.setContentID(cid);
         }
         /*
@@ -1085,9 +1123,8 @@ public class MIMEMessageFiller {
         out.reset();
         final String fn;
         if (null == mailPart.getFileName()) {
-            String subject = new InternetHeaders(new UnsynchronizedByteArrayInputStream(rfcBytes)).getHeader(
-                MessageHeaders.HDR_SUBJECT,
-                null);
+            String subject =
+                new InternetHeaders(new UnsynchronizedByteArrayInputStream(rfcBytes)).getHeader(MessageHeaders.HDR_SUBJECT, null);
             if (null == subject || subject.length() == 0) {
                 fn = sb.append(PREFIX_PART).append(EXT_EML).toString();
             } else {
@@ -1191,9 +1228,8 @@ public class MIMEMessageFiller {
      * @throws MailException If an I/O error occurs
      */
     protected final static BodyPart createHtmlBodyPart(final String htmlContent) throws MessagingException, MailException {
-        final ContentType htmlCT = new ContentType(PAT_HTML_CT.replaceFirst(
-            REPLACE_CS,
-            MailProperties.getInstance().getDefaultMimeCharset()));
+        final ContentType htmlCT =
+            new ContentType(PAT_HTML_CT.replaceFirst(REPLACE_CS, MailProperties.getInstance().getDefaultMimeCharset()));
         final MimeBodyPart html = new MimeBodyPart();
         if (htmlContent == null || htmlContent.length() == 0) {
             html.setContent(getConformHTML(HTML_SPACE, htmlCT).replaceFirst(HTML_SPACE, ""), htmlCT.toString());
@@ -1358,7 +1394,9 @@ public class MIMEMessageFiller {
             if (fileName != null) {
                 contentDisposition.setFilenameParameter(fileName);
             }
-            imgBodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MIMEMessageUtility.foldContentDisposition(contentDisposition.toString()));
+            imgBodyPart.setHeader(
+                MessageHeaders.HDR_CONTENT_DISPOSITION,
+                MIMEMessageUtility.foldContentDisposition(contentDisposition.toString()));
             final ContentType ct = new ContentType(imageProvider.getContentType());
             if (fileName != null && !ct.containsNameParameter()) {
                 ct.setNameParameter(fileName);
