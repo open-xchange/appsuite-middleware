@@ -478,6 +478,7 @@ public final class MIMEMessageConverter {
         new EnumMap<MailField, MailMessageFieldFiller>(MailField.class);
 
     static {
+        final org.apache.commons.logging.Log logger = LOG;
         FILLER_MAP_EXT.put(MailField.HEADERS, new MailMessageFieldFiller() {
 
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
@@ -588,7 +589,11 @@ public final class MIMEMessageConverter {
                  */
                 for (final Enumeration<?> e = extMimeMessage.getNonMatchingHeaders(NON_MATCHING_HEADERS); e.hasMoreElements();) {
                     final Header h = (Header) e.nextElement();
-                    mailMessage.addHeader(h.getName(), h.getValue());
+                    try {
+                        mailMessage.addHeader(h.getName(), h.getValue());
+                    } catch (final Exception exc) {
+                        logger.warn(exc.getMessage(), exc);
+                    }
                 }
             }
         });
@@ -754,6 +759,7 @@ public final class MIMEMessageConverter {
         new EnumMap<MailField, MailMessageFieldFiller>(MailField.class);
 
     static {
+        final org.apache.commons.logging.Log logger = LOG;
         FILLER_MAP.put(MailField.HEADERS, new MailMessageFieldFiller() {
 
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
@@ -870,7 +876,11 @@ public final class MIMEMessageConverter {
                  */
                 for (final Enumeration<?> e = msg.getNonMatchingHeaders(NON_MATCHING_HEADERS); e.hasMoreElements();) {
                     final Header h = (Header) e.nextElement();
-                    mailMessage.addHeader(h.getName(), h.getValue());
+                    try {
+                        mailMessage.addHeader(h.getName(), h.getValue());
+                    } catch (final Exception exc) {
+                        logger.warn(exc.getMessage(), exc);
+                    }
                 }
             }
         });
@@ -918,14 +928,14 @@ public final class MIMEMessageConverter {
                             "Message's Content-Type indicates to be multipart/* but its content is not an instance of javax.mail.Multipart but ").append(
                             e.getMessage()).append(
                             ".\nIn case if IMAP it is due to a wrong BODYSTRUCTURE returned by IMAP server.\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString());
-                        mailMessage.setHasAttachment(ct.isMimeType(MIMETypes.MIME_MULTIPART_MIXED));
+                        mailMessage.setHasAttachment(ct.startsWith(MIMETypes.MIME_MULTIPART_MIXED));
                     } catch (final MessagingException e) {
                         // A messaging error occurred
                         LOG1.warn(new StringBuilder(256).append(
                             "Parsing message's multipart/* content to check for file attachments caused a messaging error: ").append(
                             e.getMessage()).append(
                             ".\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString());
-                        mailMessage.setHasAttachment(ct.isMimeType(MIMETypes.MIME_MULTIPART_MIXED));
+                        mailMessage.setHasAttachment(ct.startsWith(MIMETypes.MIME_MULTIPART_MIXED));
                     } catch (final IOException e) {
                         throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
                     }
