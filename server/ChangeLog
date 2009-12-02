@@ -1,3 +1,7 @@
+* 2009-12-02 - thorben.betten@open-xchange.com
+
+ - Bugfix #14993: Checking for default auxiliary on cache start-up
+
 * 2009-12-01 - thorben.betten@open-xchange.com
 
  - Bugfix #15009: Fixed exception on image retrieval

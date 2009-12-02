@@ -74,6 +74,8 @@ public final class JCSCacheServiceInit {
 
     private static final String PROP_CACHE_CONF_FILE = "com.openexchange.caching.configfile";
 
+    private final static String DEFAULT_REGION = "jcs.default";
+
     private static JCSCacheServiceInit SINGLETON;
 
     /**
@@ -265,8 +267,25 @@ public final class JCSCacheServiceInit {
             return;
         }
         initializeCompositeCacheManager(obtainMutex);
-        configure(loadProperties(cacheConfigFile.trim()));
+        final Properties properties = loadProperties(cacheConfigFile.trim());
+        configure(properties);
+        checkDefaultAuxiliary();
         defaultCacheRegions = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(ccmInstance.getCacheNames())));
+    }
+
+    /**
+     * Checks presence of default auxiliary
+     * 
+     * @throws CacheException If default auxiliary is missing
+     */
+    private void checkDefaultAuxiliary() throws CacheException {
+        /*
+         * Ensure an auxiliary cache is present
+         */
+        final String value = props.getProperty(DEFAULT_REGION);
+        if (null == value) {
+            throw new CacheException(CacheException.Code.MISSING_DEFAULT_AUX);
+        }
     }
 
     /**
@@ -301,4 +320,5 @@ public final class JCSCacheServiceInit {
     public boolean isDefaultCacheRegion(final String regionName) {
         return defaultCacheRegions.contains(regionName);
     }
+
 }

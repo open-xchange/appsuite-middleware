@@ -101,11 +101,15 @@ public final class CacheException extends AbstractOXException {
         /**
          * The default element attributes could not be assigned.
          */
-        FAILED_ATTRIBUTE_ASSIGNMENT("The default element attributes could not be assigned.", Category.CODE_ERROR, 5),
+        FAILED_ATTRIBUTE_ASSIGNMENT("The default element attributes could not be assigned.", Category.CODE_ERROR, 9),
         /**
          * No cache found for region name: %1$s
          */
-        MISSING_CACHE_REGION("No cache found for region name: %1$s", Category.SETUP_ERROR, 6);
+        MISSING_CACHE_REGION("No cache found for region name: %1$s", Category.SETUP_ERROR, 10),
+        /**
+         * Missing default auxiliary defined by property: jcs.default=<aux-name>
+         */
+        MISSING_DEFAULT_AUX("Missing default auxiliary defined by property: jcs.default=<aux-name>", Category.SETUP_ERROR, 11);
 
         private final String message;
 
