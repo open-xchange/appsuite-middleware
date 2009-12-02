@@ -80,8 +80,8 @@ public class PositiveAssertionOnChangeException extends AbstractPositiveAssertio
         changes.update(update);
         
         manager.update(update);
-        
-        checkViaGet(update.getParentFolderID(), update.getObjectID(), update.getRecurrencePosition(), expectations);
+        checkViaGet(update.getParentFolderID(), update.getObjectID(), expectations);
+        checkViaList(update.getParentFolderID(), update.getObjectID(), expectations);
     }
 
 }
