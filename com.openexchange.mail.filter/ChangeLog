@@ -1,0 +1,5 @@
+* 2009-12-02 - dennis.sieben@open-xchange.com
+
+  - Bugfix #14655: [L3] Sieve capability wrong if TLS is used
+    - Fixed regex once again to include all Cyrus versions including 2.3.9 to 
+      the implementations which aren't working correct 
