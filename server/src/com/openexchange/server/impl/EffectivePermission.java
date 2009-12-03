@@ -181,18 +181,19 @@ public class EffectivePermission extends OCLPermission {
 
 	@Override
 	public int getFolderPermission() {
-		if (validateUserConfig()) {
+		final int superFolderPermission = super.getFolderPermission();
+        if (validateUserConfig()) {
 			if (!hasModuleAccess(folderModule)) {
 				return NO_PERMISSIONS;
 			} else if (folderType == FolderObject.PUBLIC || getFuid() == FolderObject.SYSTEM_PUBLIC_FOLDER_ID) {
 				if (folderModule != FolderObject.INFOSTORE && !userConfig.hasFullPublicFolderAccess()) {
-					return super.getFolderPermission() > READ_FOLDER ? READ_FOLDER : super.getFolderPermission();
+					return superFolderPermission > READ_FOLDER ? READ_FOLDER : superFolderPermission;
 				}
 			} else if (!userConfig.hasFullSharedFolderAccess() && folderType == FolderObject.SHARED) {
 				return NO_PERMISSIONS;
 			}
 		}
-		return super.getFolderPermission();
+		return superFolderPermission;
 	}
 
 	@Override
@@ -203,18 +204,19 @@ public class EffectivePermission extends OCLPermission {
 
 	@Override
 	public int getReadPermission() {
-		if (validateUserConfig()) {
+		final int superReadPermission = super.getReadPermission();
+        if (validateUserConfig()) {
 			if (!hasModuleAccess(folderModule)) {
 				return NO_PERMISSIONS;
 			} else if (folderType == FolderObject.PUBLIC || getFuid() == FolderObject.SYSTEM_PUBLIC_FOLDER_ID) {
 				if (folderModule != FolderObject.INFOSTORE && !userConfig.hasFullPublicFolderAccess()) {
-					return super.getReadPermission() > READ_ALL_OBJECTS ? READ_ALL_OBJECTS : super.getReadPermission();
+					return superReadPermission > READ_ALL_OBJECTS ? READ_ALL_OBJECTS : superReadPermission;
 				}
 			} else if (!userConfig.hasFullSharedFolderAccess() && folderType == FolderObject.SHARED) {
 				return NO_PERMISSIONS;
 			}
 		}
-		return super.getReadPermission();
+		return superReadPermission;
 	}
 
 	@Override
@@ -298,19 +300,20 @@ public class EffectivePermission extends OCLPermission {
 			return userConfigIsValid;
 		}
 		try {
-			if (getFuid() <= 0) {
+			final int fuid = getFuid();
+            if (fuid <= 0) {
 				return userConfigIsValid;
 			}
 			OXFolderAccess folderAccess = null;
 			if (folderType <= 0) {
-				folderType = (folderAccess = new OXFolderAccess(userConfig.getContext())).getFolderType(getFuid(),
+				folderType = (folderAccess = new OXFolderAccess(userConfig.getContext())).getFolderType(fuid,
 						userConfig.getUserId());
 			}
 			if (folderModule <= 0) {
 				if (folderAccess == null) {
 					folderAccess = new OXFolderAccess(userConfig.getContext());
 				}
-				folderModule = folderAccess.getFolderModule(getFuid());
+				folderModule = folderAccess.getFolderModule(fuid);
 			}
 		} catch (final OXException e) {
 			LOG.error(e.getMessage(), e);
