@@ -294,25 +294,36 @@ public final class MALPollPushListener implements PushListener {
         if (null == hash) {
             return;
         }
-        final Set<String> newUids = gatherUIDs(mailService);
-        final Set<String> oldUids = MALPollDBUtility.getMailIDs(hash, contextId);
-        final boolean notified;
+        final Set<String> newIds;
+        final Set<String> delIds;
         {
+            final Set<String> fetchedUids = gatherUIDs(mailService);
+            final Set<String> dbUids = MALPollDBUtility.getMailIDs(hash, contextId);
             /*
-             * Clone set, remove all UIDs from previous run, and check if non-empty to notify new mails
+             * Check for new mails
              */
-            final Set<String> mod = new HashSet<String>(newUids);
-            mod.removeAll(oldUids); // Old UIDs loaded from DB
-            notified = (!mod.isEmpty());
-            if (notified) {
-                notifyNewMail();
-            }
+            newIds = new HashSet<String>(fetchedUids);
+            newIds.removeAll(dbUids);
+            /*
+             * Check for deleted mails
+             */
+            delIds = new HashSet<String>(dbUids);
+            delIds.removeAll(fetchedUids);
         }
         /*
-         * Write UIDs
+         * Notify (if necessary) and update DB
          */
-        if (notified || !newUids.equals(oldUids)) {
-            MALPollDBUtility.replaceMailIDs(hash, newUids, contextId);
+        if (!newIds.isEmpty()) {
+            /*
+             * New IDs available, so notify & update DB
+             */
+            notifyNewMail();
+            MALPollDBUtility.replaceMailIDs(hash, newIds, delIds, contextId);
+        } else if (!delIds.isEmpty()) {
+            /*
+             * Deleted IDs detected, so update DB
+             */
+            MALPollDBUtility.replaceMailIDs(hash, newIds, delIds, contextId);
         }
         if (DEBUG_ENABLED) {
             final long d = System.currentTimeMillis() - s;

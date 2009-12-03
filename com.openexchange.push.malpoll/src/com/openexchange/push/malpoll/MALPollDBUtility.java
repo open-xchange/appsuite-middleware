@@ -212,15 +212,42 @@ public final class MALPollDBUtility {
         }
     }
 
+    private static final String SQL_DELETE = "DELETE FROM malPollUid WHERE hash = ? AND uid = ?";
+
+    private static void deletet0(final String hash, final Set<String> mailIds, final int chunkSize, final Connection writableConnection) throws SQLException {
+        if (mailIds.isEmpty()) {
+            return;
+        }
+        final int isize = mailIds.size() + 1;
+        final Iterator<String> iter = mailIds.iterator();
+        for (int k = 1; k < isize;) {
+            final PreparedStatement stmt = writableConnection.prepareStatement(SQL_DELETE);
+            try {
+                int j = k;
+                k += chunkSize;
+                final int limit = Math.min(k, isize);
+                for (; j < limit; j++) {
+                    stmt.setString(1, hash);
+                    stmt.setString(2, iter.next());
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+            } finally {
+                MALPollDBUtility.closeSQLStuff(stmt);
+            }
+        }
+    }
+
     /**
      * Replaces the mail IDs associated with specified hash.
      * 
      * @param hash The hash
-     * @param mailIds The new mail IDs
+     * @param newIds The new mail IDs
+     * @param delIds The deleted mail IDs
      * @param cid The context ID
      * @throws PushException If a database resource could not be acquired
      */
-    public static void replaceMailIDs(final String hash, final Set<String> mailIds, final int cid) throws PushException {
+    public static void replaceMailIDs(final String hash, final Set<String> newIds, final Set<String> delIds, final int cid) throws PushException {
         final DatabaseService databaseService;
         try {
             databaseService = MALPollServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
@@ -237,25 +264,17 @@ public final class MALPollDBUtility {
             throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
         try {
-            PreparedStatement stmt = null;
-            try {
-                stmt = writableConnection.prepareStatement("DELETE FROM malPollUid WHERE hash = ?");
-                stmt.setString(1, hash);
-                stmt.executeUpdate();
-                MALPollDBUtility.closeSQLStuff(stmt);
+            deletet0(hash, delIds, CHUNK_SIZE, writableConnection);
 
-                insert0(hash, mailIds, CHUNK_SIZE, writableConnection);
+            insert0(hash, newIds, CHUNK_SIZE, writableConnection);
 
-                writableConnection.commit(); // COMMIT
-            } catch (final SQLException e) {
-                rollback(writableConnection);
-                throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            } catch (final Exception e) {
-                rollback(writableConnection);
-                throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            } finally {
-                MALPollDBUtility.closeSQLStuff(stmt);
-            }
+            writableConnection.commit(); // COMMIT
+        } catch (final SQLException e) {
+            rollback(writableConnection);
+            throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (final Exception e) {
+            rollback(writableConnection);
+            throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             autocommit(writableConnection);
             databaseService.backWritable(cid, writableConnection);
