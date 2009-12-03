@@ -1,6 +1,7 @@
 * 2009-12-03 - thorben.betten@open-xchange.com
 
  - Bugfix #15020: Fixed NPE when writing JSON user data
+ - Bugfix #15005: Fixed display of public folder if it contains no subfolders
 
 * 2009-12-02 - thorben.betten@open-xchange.com
 
