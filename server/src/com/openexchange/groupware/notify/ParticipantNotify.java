@@ -55,6 +55,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -517,6 +518,8 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         return state.onlyIrrelevantFieldsChanged(oldObj, newObj);
     }
 
+    private static final EnumSet<State.Type> SECONDARY_TYPES = EnumSet.of(State.Type.ACCEPTED, State.Type.DECLINED, State.Type.TENTATIVELY_ACCEPTED);
+
     private List<MailMessage> createMessageList(final CalendarObject oldObj, final CalendarObject newObj, final State state, final boolean forceNotifyOthers, final boolean isUpdate, final ServerSession session, final Map<Locale, List<EmailableParticipant>> receivers, final String title, final RenderMap renderMap) {
         final OXFolderAccess access = new OXFolderAccess(session.getContext());
         final StringBuilder b = new StringBuilder(2048);
@@ -558,7 +561,13 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                         LL.log(e);
                     }
                 } else {
-                    sendMail = !p.ignoreNotification && (!newObj.containsNotification() || newObj.getNotification()) || (newObj.getModifiedBy() != p.id && forceNotifyOthers);
+                    final boolean isSecondaryEvent = SECONDARY_TYPES.contains(state.getType());
+                    if (isSecondaryEvent && NotificationConfig.getPropertyAsBoolean(NotificationProperty.NOTIFY_EXTERNAL_PARTICIPANTS_ON_SECONDARY_EVENT, false)) {
+                        sendMail = false;
+                    } else {
+                        sendMail =
+                            !p.ignoreNotification && (!newObj.containsNotification() || newObj.getNotification()) || (newObj.getModifiedBy() != p.id && forceNotifyOthers);
+                    }
                     if (p.timeZone != null) {
                         tz = p.timeZone;
                     }
