@@ -1408,11 +1408,9 @@ public class Folder extends SessionServlet {
             iter = updatedQueue.iterator();
             for (int i = 0; i < size; i++) {
                 final FolderObject fo = iter.next();
-                {
-                    final Date modified = fo.getLastModified();
-                    if (null != modified) {
-                        lastModified = Math.max(modified.getTime(), lastModified);
-                    }
+                final Date modified = fo.getLastModified();
+                if (null != modified) {
+                    lastModified = Math.max(modified.getTime(), lastModified);
                 }
                 jsonWriter.array();
                 try {
