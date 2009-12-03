@@ -349,7 +349,7 @@ public final class IMAPFolderConverter {
                     mailFolder.setUnreadMessageCount(imapFolder.getUnreadMessageCount());
                 } catch (final MessagingException e) {
                     final Exception nested = e.getNextException();
-                    if (null != nested && nested.getMessage().indexOf("STATUS") != -1) {
+                    if (nested instanceof ParsingException && nested.getMessage().indexOf("STATUS") != -1) {
                         /*
                          * Parsing of STATUS response failed
                          */
