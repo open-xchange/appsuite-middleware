@@ -300,9 +300,24 @@ public class CalendarTestManager implements TestManager {
                     temp.set(cols[i], conv(cols[i], values[i]));
                 else
                     temp.remove(cols[i]);
+            fixDates(temp);
         }
         return list;
 
+    }
+
+    private void fixDates(Appointment temp) {
+        if(temp.getFullTime())
+            return;        
+        if(temp.containsStartDate())
+            temp.setStartDate(moveOffset(temp.getStartDate()));
+        if(temp.containsEndDate())
+            temp.setEndDate(moveOffset(temp.getEndDate()));
+    }
+
+    private Date moveOffset(Date value) {
+        int offset = timezone.getOffset(value.getTime());
+        return new Date(value.getTime() - offset);
     }
 
     private Object conv(int i, Object object) {
@@ -313,8 +328,6 @@ public class CalendarTestManager implements TestManager {
         case Appointment.UNTIL:
             if (!(object instanceof Date))
                 value = new Date((Long) object);
-            int offset = timezone.getOffset( ((Date)value).getTime());
-            value = new Date(((Date)value).getTime() - offset);
         }
         return value;
     }
