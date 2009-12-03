@@ -90,8 +90,7 @@ final class ImageIDGenerator {
             sb.append(DELIM).append(imageArguments.get(requiredArguments[i]));
         }
         try {
-            final byte[] base64 = Base64.encodeBase64(sb.toString().getBytes("UTF-8"), false);
-            return new String(base64, "US-ASCII");
+            return new String(Base64.encodeBase64(sb.toString().getBytes("UTF-8"), false), "US-ASCII");
         } catch (final UnsupportedEncodingException e) {
             org.apache.commons.logging.LogFactory.getLog(ImageIDGenerator.class).error("Unsupported encoding: " + e.getMessage(), e);
             return sb.toString();
