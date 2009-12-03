@@ -775,6 +775,8 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
         return hasVisibleSubfolders(user.getId(), user.getGroups(), userConfig, ctx);
     }
 
+    private static final int[] MODULES = { TASK, CALENDAR, CONTACT };
+
     /**
      * Checks if this folder has subfolders visible to specified user
      * 
@@ -792,22 +794,15 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
                 return true;
             } else if (objectId == SYSTEM_PUBLIC_FOLDER_ID) {
                 /*
-                 * At least 'internal users' folder is located beneath system public folder if user has contact module access
-                 */
-                if (userConfig.hasContact()) {
-                    return true;
-                }
-                /*
                  * Search for visible subfolders
                  */
-                final int[] modules = { TASK, CALENDAR, CONTACT };
                 return (iter =
                     OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfType(
                         userId,
                         groups,
                         userConfig.getAccessibleModules(),
                         FolderObject.PUBLIC,
-                        modules,
+                        MODULES,
                         SYSTEM_PUBLIC_FOLDER_ID,
                         ctx)).hasNext();
             } else if (objectId == SYSTEM_INFOSTORE_FOLDER_ID) {
