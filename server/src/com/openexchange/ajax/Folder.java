@@ -65,6 +65,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -1300,61 +1301,91 @@ public class Folder extends SessionServlet {
             final OXFolderAccess access = new OXFolderAccess(ctx);
             final Queue<FolderObject> updatedQueue = new LinkedList<FolderObject>();
             final Queue<FolderObject> deletedQueue = ignoreDeleted ? null : new LinkedList<FolderObject>();
-            final UserConfiguration userConf = session.getUserConfiguration();
+            final Map<String, Integer> displayNames = new HashMap<String, Integer>();
             boolean addSystemSharedFolder = false;
             boolean checkVirtualListFolders = false;
             int size = q.size();
             Iterator<FolderObject> iter = q.iterator();
-            for (int i = 0; i < size; i++) {
-                final FolderObject fo = iter.next();
-                if (fo.isVisible(session.getUserId(), userConf)) {
-                    if (fo.isShared(session.getUserId())) {
-                        addSystemSharedFolder = true;
-                    } else if (FolderObject.PUBLIC == fo.getType()) {
-                        if (access.getFolderPermission(fo.getParentFolderID(), session.getUserId(), userConf).isFolderVisible()) {
-                            /*
-                             * Parent is already visible: Add real parent
-                             */
-                            updatedQueue.add(access.getFolderObject(fo.getParentFolderID()));
-                        } else {
-                            /*
-                             * Parent is not visible: Update superior system folder to let the newly visible folder appear underneath
-                             * virtual "Other XYZ folders"
-                             */
-                            updatedQueue.add(fo.getModule() == FolderObject.INFOSTORE ? access.getFolderObject(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) : access.getFolderObject(FolderObject.SYSTEM_PUBLIC_FOLDER_ID));
+            {
+                final UserConfiguration userConf = session.getUserConfiguration();
+                final UserStorage us = UserStorage.getInstance();
+                final StringHelper strHelper = new StringHelper(session.getUser().getLocale());
+                final boolean sharedFolderAccess = userConf.hasFullSharedFolderAccess();
+                for (int i = 0; i < size; i++) {
+                    final FolderObject fo = iter.next();
+                    if (fo.isVisible(session.getUserId(), userConf)) {
+                        if (fo.isShared(session.getUserId())) {
+                            if (sharedFolderAccess) {
+                                /*
+                                 * Add display name of shared folder owner
+                                 */
+                                String creatorDisplayName;
+                                try {
+                                    creatorDisplayName = us.getUser(fo.getCreatedBy(), ctx).getDisplayName();
+                                } catch (final LdapException e) {
+                                    if (fo.getCreatedBy() != OCLPermission.ALL_GROUPS_AND_USERS) {
+                                        throw new AbstractOXException(e);
+                                    }
+                                    creatorDisplayName = strHelper.getString(Groups.ALL_USERS);
+                                }
+                                if (!displayNames.containsKey(creatorDisplayName)) {
+                                    displayNames.put(creatorDisplayName, Integer.valueOf(fo.getCreatedBy()));
+                                }
+                                /*
+                                 * Remember to include system shared folder
+                                 */
+                                addSystemSharedFolder = true;
+                            } else {
+                                if (!ignoreDeleted) {
+                                    deletedQueue.add(fo);
+                                }
+                            }
+                        } else if (FolderObject.PUBLIC == fo.getType()) {
+                            if (access.getFolderPermission(fo.getParentFolderID(), session.getUserId(), userConf).isFolderVisible()) {
+                                /*
+                                 * Parent is already visible: Add real parent
+                                 */
+                                updatedQueue.add(access.getFolderObject(fo.getParentFolderID()));
+                            } else {
+                                /*
+                                 * Parent is not visible: Update superior system folder to let the newly visible folder appear underneath
+                                 * virtual "Other XYZ folders"
+                                 */
+                                updatedQueue.add(fo.getModule() == FolderObject.INFOSTORE ? access.getFolderObject(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) : access.getFolderObject(FolderObject.SYSTEM_PUBLIC_FOLDER_ID));
+                            }
+                        }
+                        updatedQueue.add(fo);
+                    } else {
+                        checkVirtualListFolders |= (FolderObject.PUBLIC == fo.getType());
+                        if (!ignoreDeleted) {
+                            deletedQueue.add(fo);
                         }
                     }
-                    updatedQueue.add(fo);
-                } else {
-                    checkVirtualListFolders |= (FolderObject.PUBLIC == fo.getType());
-                    if (!ignoreDeleted) {
-                        deletedQueue.add(fo);
+                }
+                /*
+                 * Check virtual list folders
+                 */
+                if (checkVirtualListFolders && !ignoreDeleted) {
+                    if (userConf.hasTask() && !foldersqlinterface.getNonTreeVisiblePublicTaskFolders().hasNext()) {
+                        final FolderObject virtualTasks = new FolderObject(FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID);
+                        virtualTasks.setLastModified(DATE_0);
+                        deletedQueue.add(virtualTasks);
                     }
-                }
-            }
-            /*
-             * Check virtual list folders
-             */
-            if (checkVirtualListFolders && !ignoreDeleted) {
-                if (userConf.hasTask() && !foldersqlinterface.getNonTreeVisiblePublicTaskFolders().hasNext()) {
-                    final FolderObject virtualTasks = new FolderObject(FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID);
-                    virtualTasks.setLastModified(DATE_0);
-                    deletedQueue.add(virtualTasks);
-                }
-                if (userConf.hasCalendar() && !foldersqlinterface.getNonTreeVisiblePublicCalendarFolders().hasNext()) {
-                    final FolderObject virtualCalendar = new FolderObject(FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID);
-                    virtualCalendar.setLastModified(DATE_0);
-                    deletedQueue.add(virtualCalendar);
-                }
-                if (userConf.hasContact() && !foldersqlinterface.getNonTreeVisiblePublicContactFolders().hasNext()) {
-                    final FolderObject virtualContact = new FolderObject(FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID);
-                    virtualContact.setLastModified(DATE_0);
-                    deletedQueue.add(virtualContact);
-                }
-                if (userConf.hasInfostore() && !foldersqlinterface.getNonTreeVisiblePublicInfostoreFolders().hasNext()) {
-                    final FolderObject virtualInfostore = new FolderObject(FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID);
-                    virtualInfostore.setLastModified(DATE_0);
-                    deletedQueue.add(virtualInfostore);
+                    if (userConf.hasCalendar() && !foldersqlinterface.getNonTreeVisiblePublicCalendarFolders().hasNext()) {
+                        final FolderObject virtualCalendar = new FolderObject(FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID);
+                        virtualCalendar.setLastModified(DATE_0);
+                        deletedQueue.add(virtualCalendar);
+                    }
+                    if (userConf.hasContact() && !foldersqlinterface.getNonTreeVisiblePublicContactFolders().hasNext()) {
+                        final FolderObject virtualContact = new FolderObject(FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID);
+                        virtualContact.setLastModified(DATE_0);
+                        deletedQueue.add(virtualContact);
+                    }
+                    if (userConf.hasInfostore() && !foldersqlinterface.getNonTreeVisiblePublicInfostoreFolders().hasNext()) {
+                        final FolderObject virtualInfostore = new FolderObject(FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID);
+                        virtualInfostore.setLastModified(DATE_0);
+                        deletedQueue.add(virtualInfostore);
+                    }
                 }
             }
             /*
@@ -1364,6 +1395,11 @@ public class Folder extends SessionServlet {
                 final FolderObject sharedFolder = access.getFolderObject(FolderObject.SYSTEM_SHARED_FOLDER_ID);
                 sharedFolder.setFolderName(FolderObject.getFolderString(FolderObject.SYSTEM_SHARED_FOLDER_ID, session.getUser().getLocale()));
                 updatedQueue.add(sharedFolder);
+                if (!displayNames.isEmpty()) {
+                    for (final Entry<String, Integer> entry : displayNames.entrySet()) {
+                        updatedQueue.add(FolderObject.createVirtualSharedFolderObject(entry.getValue().intValue(), entry.getKey()));
+                    }
+                }
             }
             /*
              * Output updated folders
@@ -1372,7 +1408,12 @@ public class Folder extends SessionServlet {
             iter = updatedQueue.iterator();
             for (int i = 0; i < size; i++) {
                 final FolderObject fo = iter.next();
-                lastModified = Math.max(fo.getLastModified().getTime(), lastModified);
+                {
+                    final Date modified = fo.getLastModified();
+                    if (null != modified) {
+                        lastModified = Math.max(modified.getTime(), lastModified);
+                    }
+                }
                 jsonWriter.array();
                 try {
                     for (final FolderFieldWriter ffw : writers) {

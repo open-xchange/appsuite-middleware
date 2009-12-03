@@ -192,6 +192,7 @@ public final class Updates extends AbstractUserizedFolderAction {
 
             final List<Folder> updatedList = new ArrayList<Folder>();
             final List<Folder> deletedList = ignoreDeleted ? null : new ArrayList<Folder>();
+            final Set<String> virtualSharedIDs = new HashSet<String>();
             boolean addSystemSharedFolder;
             boolean checkVirtualListFolders;
             {
@@ -216,6 +217,7 @@ public final class Updates extends AbstractUserizedFolderAction {
                 }
                 addSystemSharedFolder = false;
                 checkVirtualListFolders = false;
+                final boolean sharedFolderAccess = userConfiguration.hasFullSharedFolderAccess();
                 final int size = modifiedFolders.size();
                 final Iterator<Folder> iter = modifiedFolders.iterator();
                 for (int i = 0; i < size; i++) {
@@ -223,10 +225,22 @@ public final class Updates extends AbstractUserizedFolderAction {
                     final Permission effectivePerm = getEffectivePermission(f);
                     if (effectivePerm.getFolderPermission() >= Permission.READ_FOLDER) {
                         if (isShared(f, getUser().getId())) {
-                            /*
-                             * Shared
-                             */
-                            addSystemSharedFolder = true;
+                            if (sharedFolderAccess) {
+                                /*
+                                 * Add display name of shared folder owner
+                                 */
+                                virtualSharedIDs.add(new StringBuilder(8).append(FolderObject.SHARED_PREFIX).append(f.getCreatedBy()).toString());
+                                /*
+                                 * Remember to include system shared folder
+                                 */
+                                addSystemSharedFolder = true;
+                            } else {
+                                if (deletedList != null) {
+                                    if (treeChecker.containsVirtualFolder(f.getID(), treeId, StorageType.WORKING)) {
+                                        deletedList.add(f);
+                                    }
+                                }
+                            }
                         } else if (isPublic(f)) {
                             /*
                              * Public
@@ -317,6 +331,11 @@ public final class Updates extends AbstractUserizedFolderAction {
                 final String sharedId = String.valueOf(FolderObject.SYSTEM_SHARED_FOLDER_ID);
                 if (treeChecker.containsVirtualFolder(sharedId, treeId, StorageType.WORKING)) {
                     updatedList.add(getFolder(FolderStorage.REAL_TREE_ID, sharedId, realFolderStorages));
+                }
+                if (!virtualSharedIDs.isEmpty()) {
+                    for (final String virtualSharedID : virtualSharedIDs) {
+                        updatedList.add(getFolder(FolderStorage.REAL_TREE_ID, virtualSharedID, realFolderStorages));
+                    }
                 }
             }
             /*
