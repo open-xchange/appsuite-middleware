@@ -296,7 +296,10 @@ public class CalendarTestManager implements TestManager {
             Appointment temp = new Appointment();
             list.add(temp);
             for (int i = 0; i < cols.length; i++)
-                temp.set(cols[i], conv(cols[i], values[i]));
+                if(values[i] != null)
+                    temp.set(cols[i], conv(cols[i], values[i]));
+                else
+                    temp.remove(cols[i]);
         }
         return list;
 
@@ -307,6 +310,7 @@ public class CalendarTestManager implements TestManager {
         switch (i) {
         case Appointment.START_DATE:
         case Appointment.END_DATE:
+        case Appointment.UNTIL:
             if (!(object instanceof Date))
                 value = new Date((Long) object);
             int offset = timezone.getOffset( ((Date)value).getTime());
