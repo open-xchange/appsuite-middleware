@@ -76,8 +76,8 @@ import com.openexchange.imap.entity2acl.Entity2ACLArgs;
 import com.openexchange.imap.entity2acl.Entity2ACLException;
 import com.openexchange.imap.entity2acl.IMAPServer;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.MailSessionCache;
+import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolder.DefaultFolderType;
@@ -349,7 +349,7 @@ public final class IMAPFolderConverter {
                     mailFolder.setUnreadMessageCount(imapFolder.getUnreadMessageCount());
                 } catch (final MessagingException e) {
                     final Exception nested = e.getNextException();
-                    if (nested instanceof ParsingException && nested.getMessage().indexOf("STATUS") != -1) {
+                    if (null != nested && nested.getMessage().indexOf("STATUS") != -1) {
                         /*
                          * Parsing of STATUS response failed
                          */
