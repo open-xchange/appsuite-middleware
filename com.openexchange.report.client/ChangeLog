@@ -1,0 +1,4 @@
+* 2009-12-03 - dennis.sieben@open-xchange.com
+
+  - Bugfix #15016: Open-Xchange6 report client fails with java exception
+    - Added missing jar for common-cli 
