@@ -1105,13 +1105,14 @@ public final class UserWriter {
         return STATIC_WRITERS_MAP.get(Integer.valueOf(field));
     }
 
-    private static void addAttributeWriters(final Map<String, List<String>> attributeParameters, final int aSize, final List<UserFieldWriter> ufws) {
+    private static void addAttributeWriters(final Map<String, List<String>> attributeParameters, final List<UserFieldWriter> ufws) {
         if (null == attributeParameters || attributeParameters.isEmpty()) {
             return;
         }
+        final int size = attributeParameters.size();
         final Iterator<Entry<String, List<String>>> iter = attributeParameters.entrySet().iterator();
         final StringBuilder sb = new StringBuilder(32);
-        for (int i = 0; i < aSize; i++) {
+        for (int i = 0; i < size; i++) {
             final Entry<String, List<String>> entry = iter.next();
             final List<String> list = entry.getValue();
             if (!list.isEmpty()) {
@@ -1128,6 +1129,8 @@ public final class UserWriter {
         }
     }
 
+    private static final int AVERAGE_ATTR_PARAMS_SIZE = 4;
+
     /**
      * Writes requested fields of given user into a JSON array.
      * 
@@ -1141,8 +1144,7 @@ public final class UserWriter {
      */
     public static JSONArray writeSingle2Array(final int[] fields, final Map<String, List<String>> attributeParameters, final User user, final Contact contact, final String timeZoneId) throws AjaxException {
         final int[] cols = null == fields ? ALL_FIELDS : fields;
-        final int aSize = attributeParameters.size();
-        final List<UserFieldWriter> ufws = new ArrayList<UserFieldWriter>(cols.length + aSize);
+        final List<UserFieldWriter> ufws = new ArrayList<UserFieldWriter>(cols.length + AVERAGE_ATTR_PARAMS_SIZE);
         for (int i = 0; i < cols.length; i++) {
             UserFieldWriter ufw = getUserFieldWriter(cols[i], timeZoneId);
             if (null == ufw) {
@@ -1153,7 +1155,7 @@ public final class UserWriter {
             }
             ufws.add(ufw);
         }
-        addAttributeWriters(attributeParameters, aSize, ufws);
+        addAttributeWriters(attributeParameters, ufws);
         try {
             final JSONArray jsonArray = new JSONArray();
             final JSONValuePutter jsonPutter = new JSONArrayPutter(jsonArray);
@@ -1179,8 +1181,7 @@ public final class UserWriter {
      */
     public static JSONArray writeMultiple2Array(final int[] fields, final Map<String, List<String>> attributeParameters, final User[] users, final Contact[] contacts, final String timeZoneId) throws AjaxException {
         final int[] cols = null == fields ? ALL_FIELDS : fields;
-        final int aSize = attributeParameters.size();
-        final List<UserFieldWriter> ufws = new ArrayList<UserFieldWriter>(cols.length + aSize);
+        final List<UserFieldWriter> ufws = new ArrayList<UserFieldWriter>(cols.length + AVERAGE_ATTR_PARAMS_SIZE);
         for (int i = 0; i < cols.length; i++) {
             UserFieldWriter ufw = getUserFieldWriter(cols[i], timeZoneId);
             if (null == ufw) {
@@ -1191,7 +1192,7 @@ public final class UserWriter {
             }
             ufws.add(ufw);
         }
-        addAttributeWriters(attributeParameters, aSize, ufws);
+        addAttributeWriters(attributeParameters, ufws);
         try {
             final JSONArray jsonArray = new JSONArray();
             final JSONArrayPutter jsonPutter = new JSONArrayPutter();
@@ -1222,8 +1223,7 @@ public final class UserWriter {
      */
     public static JSONObject writeSingle2Object(final int[] fields, final Map<String, List<String>> attributeParameters, final User user, final Contact contact, final String timeZoneId) throws AjaxException {
         final int[] cols = null == fields ? ALL_FIELDS : fields;
-        final int aSize = attributeParameters.size();
-        final List<UserFieldWriter> ufws = new ArrayList<UserFieldWriter>(cols.length + aSize);
+        final List<UserFieldWriter> ufws = new ArrayList<UserFieldWriter>(cols.length + AVERAGE_ATTR_PARAMS_SIZE);
         for (int i = 0; i < cols.length; i++) {
             UserFieldWriter ufw = getUserFieldWriter(cols[i], timeZoneId);
             if (null == ufw) {
@@ -1234,7 +1234,7 @@ public final class UserWriter {
             }
             ufws.add(ufw);
         }
-        addAttributeWriters(attributeParameters, aSize, ufws);
+        addAttributeWriters(attributeParameters, ufws);
         try {
             final JSONObject jsonObject = new JSONObject();
             final JSONValuePutter jsonPutter = new JSONObjectPutter(jsonObject);
@@ -1260,8 +1260,7 @@ public final class UserWriter {
      */
     public static JSONArray writeMultiple2Object(final int[] fields, final Map<String, List<String>> attributeParameters, final User[] users, final Contact[] contacts, final String timeZoneId) throws AjaxException {
         final int[] cols = null == fields ? ALL_FIELDS : fields;
-        final int aSize = attributeParameters.size();
-        final List<UserFieldWriter> ufws = new ArrayList<UserFieldWriter>(cols.length + aSize);
+        final List<UserFieldWriter> ufws = new ArrayList<UserFieldWriter>(cols.length + AVERAGE_ATTR_PARAMS_SIZE);
         for (int i = 0; i < cols.length; i++) {
             UserFieldWriter ufw = getUserFieldWriter(cols[i], timeZoneId);
             if (null == ufw) {
@@ -1272,7 +1271,7 @@ public final class UserWriter {
             }
             ufws.add(ufw);
         }
-        addAttributeWriters(attributeParameters, aSize, ufws);
+        addAttributeWriters(attributeParameters, ufws);
         try {
             final JSONArray jsonArray = new JSONArray();
             final JSONObjectPutter jsonPutter = new JSONObjectPutter();
