@@ -284,6 +284,9 @@ public final class InternalList {
         // Version 102
         // Adds necessary tables to support MAL-based poll
         new com.openexchange.groupware.update.tasks.MALPollCreateTableTask(),
+
+        // +++++++++++++++++++++++++++++++++ Version 6.16 starts here. +++++++++++++++++++++++++++++++++
+
         // Version 104
         // Renames "Unified INBOX" to "Unified Mail"
         new com.openexchange.groupware.update.tasks.UnifiedINBOXRenamerTask()
