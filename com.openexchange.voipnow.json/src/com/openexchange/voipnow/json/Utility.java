@@ -60,6 +60,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import jonelo.jacksum.JacksumAPI;
 import jonelo.jacksum.algorithm.AbstractChecksum;
+import jonelo.jacksum.algorithm.MD;
+import jonelo.jacksum.algorithm.MDgnu;
+import jonelo.sugar.util.GeneralProgram;
 
 /**
  * {@link Utility} - Utility class for user JSON interface bundle.
@@ -78,18 +81,29 @@ public final class Utility {
     /**
      * Gets the SHA-256 hash of specified string.
      * 
-     * @param string The string
+     * @param string The string to hash
      * @param encoding The encoding; e.g <code>base64</code>, <code>hex</code>, <code>dec</code>, etc.
      * @return The SHA-256 hash
      */
     public static String getSha256(final String string, final String encoding) {
-        return getHash(string, "sha256", encoding);
+        try {
+            final AbstractChecksum checksum =
+                GeneralProgram.isSupportFor("1.4.2") ? new MD("SHA-256") : new MDgnu(jonelo.jacksum.adapt.gnu.crypto.Registry.SHA256_HASH);
+            checksum.setEncoding(encoding);
+            checksum.update(string.getBytes("UTF-8"));
+            return checksum.getFormattedValue();
+        } catch (final NoSuchAlgorithmException e) {
+            org.apache.commons.logging.LogFactory.getLog(Utility.class).error(e.getMessage(), e);
+        } catch (final UnsupportedEncodingException e) {
+            org.apache.commons.logging.LogFactory.getLog(Utility.class).error(e.getMessage(), e);
+        }
+        return null;
     }
 
     /**
      * Gets the SHA-256 hash of specified string.
      * 
-     * @param string The string
+     * @param string The string to hash
      * @param algorithm The hash algorithm to use; e.g. <code>sha-1</code>, <code>sha-256</code>, <code>md5</code>, <code>crc32</code>,
      *            <code>adler32</code>, ...
      * @param encoding The encoding; e.g <code>base64</code>, <code>hex</code>, <code>dec</code>, etc.
