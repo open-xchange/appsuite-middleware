@@ -68,7 +68,7 @@ public class TestsForDifferentWaysOfEndingASeries extends ManagedAppointmentTest
         super(name);
     }
 
-    public void testShouldNotSetUntilIfOccurrencesIsUsed() {
+    public void testShouldNotSetUntilIfOccurrencesIsUsed() throws Exception {
         Changes changes = new Changes();
         changes.put(Appointment.RECURRENCE_COUNT, 7);
 
@@ -79,7 +79,7 @@ public class TestsForDifferentWaysOfEndingASeries extends ManagedAppointmentTest
         positiveAssertionOnUpdate.check(generateDailyAppointment(), changes, expectations);
     }
 
-    public void testShouldNotSetOccurrencesIfUntilIsUsed() {
+    public void testShouldNotSetOccurrencesIfUntilIsUsed() throws Exception {
         Changes changes = new Changes();
         changes.put(Appointment.UNTIL, D("7/1/2008 12:00"));
 
@@ -91,7 +91,7 @@ public class TestsForDifferentWaysOfEndingASeries extends ManagedAppointmentTest
     }
 
 
-    public void testShouldNotSetOccurrencesIfNothingIsSet() {
+    public void testShouldNotSetOccurrencesIfNothingIsSet() throws Exception {
         Changes changes = new Changes();
 
         Expectations expectations = new Expectations(changes);

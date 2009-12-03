@@ -65,11 +65,11 @@ public abstract class AbstractPositiveAssertion extends AbstractAssertion{
         this.folder = folder;
     }
     
-    public void check(Changes changes, Expectations expectations){
+    public void check(Changes changes, Expectations expectations) throws Exception{
         check(generateDefaultAppointment(), changes, expectations);
     }
     
-    public abstract void check(Appointment startAppointment, Changes changes, Expectations expectations);
+    public abstract void check(Appointment startAppointment, Changes changes, Expectations expectations) throws Exception;
     
     protected void updateAndCheck(Appointment startAppointment, Changes changes, Expectations expectations) {
         Appointment copy = startAppointment.clone();

@@ -52,36 +52,56 @@ package com.openexchange.ajax.appointment.recurrence;
 import com.openexchange.ajax.appointment.helper.AbstractPositiveAssertion;
 import com.openexchange.ajax.appointment.helper.Changes;
 import com.openexchange.ajax.appointment.helper.Expectations;
+import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.test.CalendarTestManager;
-
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class PositiveAssertionOnChangeException extends AbstractPositiveAssertion {
 
+    private Appointment series, changeException;
+
+    public Appointment getSeries() {
+        return series;
+    }
+
+    public void setSeries(Appointment series) {
+        this.series = series;
+    }
+
+    public Appointment getChangeException() {
+        return changeException;
+    }
+
+    public void setChangeException(Appointment exception) {
+        this.changeException = exception;
+    }
+
     public PositiveAssertionOnChangeException(CalendarTestManager manager, int folder) {
         super(manager, folder);
     }
 
     @Override
-    public void check(Appointment startAppointment, Changes changes, Expectations expectations) {
+    public void check(Appointment startAppointment, Changes changes, Expectations expectations) throws OXException {
         approachUsedForTest = "Create change exception";
         Appointment copy = startAppointment.clone();
-        
         manager.insert(copy);
-        
+
         Appointment update = new Appointment();
         update.setLastModified(copy.getLastModified());
         update.setParentFolderID(copy.getParentFolderID());
         update.setObjectID(copy.getObjectID());
-        
+
         changes.update(update);
-        
+
         manager.update(update);
         checkViaGet(update.getParentFolderID(), update.getObjectID(), expectations);
         checkViaList(update.getParentFolderID(), update.getObjectID(), expectations);
+        
+        setChangeException(manager.get(update));
+        setSeries(manager.get(copy));
     }
 
 }

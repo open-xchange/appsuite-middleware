@@ -52,6 +52,7 @@ package com.openexchange.ajax.appointment.recurrence;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import com.openexchange.ajax.appointment.helper.Changes;
 import com.openexchange.ajax.appointment.helper.Expectations;
+import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.Appointment;
 
 /**
@@ -65,7 +66,7 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
         super(name);
     }
 
-    public void testShouldAllowMovingAnExceptionBehindEndOfSeries() {
+    public void testShouldAllowMovingAnExceptionBehindEndOfSeries() throws OXException {
         Appointment app = generateMonthlyAppointment(); // starts last year in January
         app.setOccurrence(3); // this should end last year in March
 
@@ -77,7 +78,7 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
         positiveAssertionOnChangeException.check(app, changes, new Expectations(changes));
     }
 
-    public void testShouldAllowMovingTheFirstAppointmentTo2359TheSameDay() {
+    public void testShouldAllowMovingTheFirstAppointmentTo2359TheSameDay() throws OXException {
         Appointment app = generateDailyAppointment();
         app.setOccurrence(3);
 
@@ -90,7 +91,7 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
         positiveAssertionOnChangeException.check(app, changes, expectations);
     }
     
-    public void testShouldAllowMovingTheSecondAppointmentBeforeTheFirst() {
+    public void testShouldAllowMovingTheSecondAppointmentBeforeTheFirst() throws OXException {
         Appointment app = generateDailyAppointment();
         app.setOccurrence(3);
 
@@ -103,7 +104,7 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
         positiveAssertionOnChangeException.check(app, changes, expectations);
     }
 
-    public void testShouldAllowMovingTheSecondAppointmentTo2359TheDayBefore() {
+    public void testShouldAllowMovingTheSecondAppointmentTo2359TheDayBefore() throws OXException {
         Appointment app = generateDailyAppointment();
         app.setOccurrence(3);
 
@@ -116,7 +117,7 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
         positiveAssertionOnChangeException.check(app, changes, expectations);
     }
 
-    public void testShouldAllowMovingTheSecondAppointmentTo2359OnTheSameDay() {
+    public void testShouldAllowMovingTheSecondAppointmentTo2359OnTheSameDay() throws OXException {
         Appointment app = generateDailyAppointment();
         app.setOccurrence(3);
 
@@ -129,7 +130,7 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
         positiveAssertionOnChangeException.check(app, changes, expectations);
     }
 
-    public void testShouldAllowMovingTheSecondAppointmentToTheSamePlaceAsTheThirdOne() {
+    public void testShouldAllowMovingTheSecondAppointmentToTheSamePlaceAsTheThirdOne() throws OXException {
         Appointment app = generateDailyAppointment();
         app.setOccurrence(3);
 
@@ -140,5 +141,22 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
 
         Expectations expectations = new Expectations(changes);
         positiveAssertionOnChangeException.check(app, changes, expectations);
+    }
+    
+    public void testShouldNotMixUpWholeDayChangeExceptionAndNormalSeries() throws OXException {
+        Appointment app = generateDailyAppointment();
+        app.setOccurrence(3);
+
+        Changes changes = new Changes();
+        changes.put(Appointment.RECURRENCE_POSITION, 2);
+        changes.put(Appointment.FULL_TIME, true);
+        changes.put(Appointment.START_DATE, D("3/1/2008 0:00", utc));
+        changes.put(Appointment.END_DATE, D("3/1/2008 24:00", utc));
+
+        Expectations expectations = new Expectations(changes);
+        positiveAssertionOnChangeException.check(app, changes, expectations);
+        
+        Appointment series = positiveAssertionOnChangeException.getSeries();
+        assertFalse("Series should not become full time if exception does" , series.getFullTime());
     }
 }
