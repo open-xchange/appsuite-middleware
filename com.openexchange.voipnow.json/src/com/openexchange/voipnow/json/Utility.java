@@ -79,7 +79,7 @@ public final class Utility {
     }
 
     /**
-     * Gets the SHA-256 hash of specified string.
+     * Gets the SHA-256 hash of specified string using <a href="http://www.jonelo.de/java/jacksum/index.html">Jacksum 1.7.0</a>.
      * 
      * @param string The string to hash
      * @param encoding The encoding; e.g <code>base64</code>, <code>hex</code>, <code>dec</code>, etc.
@@ -101,7 +101,16 @@ public final class Utility {
     }
 
     /**
-     * Gets the SHA-256 hash of specified string.
+     * Gets the SHA-256 hash of specified string using <a href="http://www.jonelo.de/java/jacksum/index.html">Jacksum 1.7.0</a>.
+     * <p>
+     * Supported algorithms:<br>
+     * 
+     * <pre>
+     * Adler32, BSD sum, Bzip2's CRC-32, POSIX cksum, CRC-8, CRC-16, CRC-24, CRC-32 (FCS-32), CRC-64, ELF-32, eMule/eDonkey, FCS-16, GOST R
+     * 34.11-94, HAS-160, HAVAL (3/4/5 passes, 128/160/192/224/256 bits), MD2, MD4, MD5, MPEG-2's CRC-32, RIPEMD-128, RIPEMD-160,
+     * RIPEMD-256, RIPEMD-320, SHA-0, SHA-1, SHA-224, SHA-256, SHA-384, SHA-512, Tiger-128, Tiger-160, Tiger, Tiger2, Tiger Tree Hash,
+     * Tiger2 Tree Hash, Unix System V sum, sum8, sum16, sum24, sum32, Whirlpool-0, Whirlpool-1, Whirlpool, and xor8
+     * </pre>.
      * 
      * @param string The string to hash
      * @param algorithm The hash algorithm to use; e.g. <code>sha-1</code>, <code>sha-256</code>, <code>md5</code>, <code>crc32</code>,
