@@ -97,10 +97,10 @@ public abstract class AbstractPositiveAssertion extends AbstractAssertion{
             List<Appointment> appointments = manager.list(new ListIDs(folderId, appointmentId), expectations.getKeys());
             Appointment actual = find(appointments, folderId, appointmentId);
             if(manager.hasLastException())
-                fail2("Exception occured: " + manager.getLastException());
+                fail2("Exception occured: " + manager.getLastException(), manager.getLastException());
             expectations.verify(state(),actual);
         } catch (Exception e) {
-            fail2("Exception occurred: " + e);
+            fail2("Exception occurred: ", e);
             return;
         }
         

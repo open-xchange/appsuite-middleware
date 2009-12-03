@@ -83,6 +83,12 @@ public class AbstractAssertion extends Assert {
         Assert.fail(state() + message);
     }
 
+
+    protected void fail2(String message, Throwable t) {
+        t.printStackTrace();
+        Assert.fail(state() + message);
+    }
+    
     protected Appointment find(List<Appointment> appointments, int folderToSearch, int id) {
         for (Appointment app : appointments)
             if (app.getParentFolderID() == folderToSearch && app.getObjectID() == id)
