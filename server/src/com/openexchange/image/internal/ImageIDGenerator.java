@@ -142,7 +142,7 @@ final class ImageIDGenerator {
          * Return data source and appropriate data arguments
          */
         final String[] requiredArguments = dataSource.getRequiredArguments();
-        if (requiredArguments.length == (args.length - 1)) {
+        if (requiredArguments.length != (args.length - 1)) {
             /*
              * Argument mismatch
              */
