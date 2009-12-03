@@ -562,7 +562,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                     }
                 } else {
                     final boolean isSecondaryEvent = SECONDARY_TYPES.contains(state.getType());
-                    if (isSecondaryEvent && NotificationConfig.getPropertyAsBoolean(NotificationProperty.NOTIFY_EXTERNAL_PARTICIPANTS_ON_SECONDARY_EVENT, false)) {
+                    if (NotificationConfig.getPropertyAsBoolean(NotificationProperty.NOTIFY_EXTERNAL_PARTICIPANTS_ON_SECONDARY_EVENT, false) && isSecondaryEvent) {
                         sendMail = false;
                     } else {
                         sendMail =
