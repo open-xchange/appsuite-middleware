@@ -57,7 +57,7 @@ import java.util.Set;
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
 
-public abstract class CommonObject extends FolderChildObject {
+public abstract class CommonObject extends FolderChildObject implements Cloneable{
 
     public static final int LABEL_NONE = 0;
 
@@ -363,4 +363,5 @@ public abstract class CommonObject extends FolderChildObject {
         }
 
     }
+    
 }
