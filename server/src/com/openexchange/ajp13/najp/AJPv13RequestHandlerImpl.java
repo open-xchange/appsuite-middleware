@@ -52,6 +52,7 @@ package com.openexchange.ajp13.najp;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import com.openexchange.ajp13.AJPv13CPingRequest;
@@ -110,7 +111,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
 
     private long totalRequestedContentLength;
 
-    private boolean headersSent;
+    private final AtomicBoolean headersSent;
 
     private boolean serviceMethodCalled;
 
@@ -135,6 +136,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
         super();
         state = State.IDLE;
         servletId = new StringBuilder(16);
+        headersSent = new AtomicBoolean();
     }
 
     /**
@@ -370,7 +372,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
         contentLength = 0;
         bContentLength = false;
         totalRequestedContentLength = 0;
-        headersSent = false;
+        headersSent.set(false);
         serviceMethodCalled = false;
         endResponseSent = false;
         isFormData = false;
@@ -481,11 +483,10 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
      * @throws IOException If an I/O error occurs
      */
     public void doWriteHeaders(final OutputStream out) throws AJPv13Exception, IOException {
-        if (!headersSent) {
+        if (headersSent.compareAndSet(false, true)) {
             out.write(AJPv13Response.getSendHeadersBytes(response));
             out.flush();
             response.setCommitted(true);
-            headersSent = true;
         }
     }
 
