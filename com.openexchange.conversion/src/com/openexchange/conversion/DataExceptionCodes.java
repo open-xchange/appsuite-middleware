@@ -77,7 +77,7 @@ public enum DataExceptionCodes implements OXErrorMessage {
      */
     MISSING_ARGUMENT(MISSING_ARGUMENT_MSG, Category.CODE_ERROR, 2),
     /**
-     * Invalid value for argument %1$s: %2$s
+     * Invalid value for argument %1$s: ``%2$s''
      */
     INVALID_ARGUMENT(INVALID_ARGUMENT_MSG, Category.CODE_ERROR, 3),
     /**

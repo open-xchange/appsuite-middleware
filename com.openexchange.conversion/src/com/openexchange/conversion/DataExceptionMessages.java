@@ -62,7 +62,7 @@ public final class DataExceptionMessages implements LocalizableStrings {
 
     public static final String MISSING_ARGUMENT_MSG = "Missing argument %1$s";
 
-    public static final String INVALID_ARGUMENT_MSG = "Invalid value for argument %1$s: %2$s";
+    public static final String INVALID_ARGUMENT_MSG = "Invalid value for argument %1$s: ``%2$s''";
 
     public static final String UNKNOWN_DATA_SOURCE_MSG = "Unknown data source identifier: %1$s";
 
