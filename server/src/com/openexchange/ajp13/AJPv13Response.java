@@ -271,7 +271,7 @@ public class AJPv13Response {
      * @throws AJPv13Exception If code>SEND_BODY_CHUNK</code> response bytes cannot be created.
      */
     public static final byte[] getSendBodyChunkBytes(final byte[] responseDataChunk, final int off, final int len) throws AJPv13Exception {
-        if (len == 0) {
+        if (len < 0) {
             throw new AJPv13Exception(AJPCode.NO_EMPTY_SENT_BODY_CHUNK, true);
         }
         /*
