@@ -1249,6 +1249,7 @@ public class CalendarTest extends TestCase {
         cdao.setTitle("testHasAppointmentsBetween - Normal app");
         cdao.setParentFolderID(fid);
         cdao.setIgnoreConflicts(true);
+        cdao.setIgnoreConflicts(true);
         fillDatesInDao(cdao);
         
         final CalendarSql csql = new CalendarSql(so);        
@@ -1265,7 +1266,8 @@ public class CalendarTest extends TestCase {
         cdao2.setTitle("testHasAppointmentsBetween - Rec app");
         cdao2.setRecurrenceType(CalendarDataObject.WEEKLY);
         cdao2.setInterval(1);        
-        cdao2.setDays(Appointment.FRIDAY);        
+        cdao2.setDays(Appointment.FRIDAY);
+        cdao2.setIgnoreConflicts(true);
         
         csql.insertAppointmentObject(cdao2);
         final int object_id2 = cdao2.getObjectID();
