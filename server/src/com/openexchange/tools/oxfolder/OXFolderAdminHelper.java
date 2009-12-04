@@ -861,8 +861,9 @@ public final class OXFolderAdminHelper {
             createSystemInfostoreFolder(cid, mailAdmin, writeCon, creatingTime);
         } else if (FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID == folderId) {
             createSystemPublicInfostoreFolder(cid, mailAdmin, writeCon, creatingTime);
+        } else {
+            throw new IllegalArgumentException("Specified folder ID is not a public folder ID: " + folderId);
         }
-        throw new IllegalArgumentException("Specified folder ID is not a public folder ID: " + folderId);
     }
 
     /**
