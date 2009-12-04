@@ -356,7 +356,7 @@ public class AJPv13TaskWatcher {
                  * Send "keep-alive" package
                  */
                 try {
-                    keepAlive(task.getAJPConnection());
+                    keepAlive(task.getAJPConnection(), true);
                 } catch (final AJPv13Exception e) {
                     log.error("AJP KEEP-ALIVE failed.", e);
                 } catch (final IOException e) {
@@ -365,7 +365,18 @@ public class AJPv13TaskWatcher {
             }
         }
 
-        private void keepAlive(final AJPv13ConnectionImpl ajpConnection) throws IOException, AJPv13Exception {
+        private static final byte[] EMPTY = new byte[0];
+
+        /**
+         * Performs AJP-style keep-alive poll to web server to avoid connection timeout.
+         * 
+         * @param ajpConnection The AJP connection for communication with web server
+         * @param emptyChunkResponse <code>true</code> to poll by sending an empty SEND_RESPONSE_CHUNK; otherwise <code>false</code> to poll
+         *            by requesting a (presumably empty) body chunk from web server by sending a GET_BODY_CHUNK response
+         * @throws IOException If an I/O error occurs
+         * @throws AJPv13Exception If an AJP error occurs
+         */
+        private void keepAlive(final AJPv13ConnectionImpl ajpConnection, final boolean emptyChunkResponse) throws IOException, AJPv13Exception {
             /*
              * Send "keep-alive" package; first poll connection by sending outstanding data
              */
@@ -397,29 +408,46 @@ public class AJPv13TaskWatcher {
                             "\" to initiate a KEEP-ALIVE poll."));
                     }
                 } else {
-                    /*
-                     * No outstanding data; poll connection through requesting an empty data chunk.
-                     */
-                    ajpConnection.blockInputStream(true);
-                    try {
-                        out.write(AJPv13Response.getGetBodyChunkBytes(0));
-                        out.flush();
-                        if (info) {
-                            log.info(new StringBuilder().append("Flushed empty GET-BODY request to socket \"").append(remoteAddress).append(
-                                "\" to initiate a KEEP-ALIVE poll."));
-                        }
+                    if (emptyChunkResponse) {
                         /*
-                         * Swallow expected empty body chunk
+                         * No outstanding data; poll connection through sending an empty data chunk.
                          */
-                        final int bodyRequestDataLength = ajpConnection.readInitialBytes(true, false);
-                        if (bodyRequestDataLength > 0 && parseInt(ajpConnection.getPayloadData(bodyRequestDataLength, true)) > 0) {
-                            log.warn("Got a non-empty data chunk from web server although an empty one was requested");
-                        } else if (info) {
-                            log.info(new StringBuilder().append("Swallowed empty REQUEST-BODY from socket \"").append(remoteAddress).append(
-                                "\" initiated by former KEEP-ALIVE poll."));
+                        ajpConnection.blockInputStream(true);
+                        try {
+                            out.write(AJPv13Response.getSendBodyChunkBytes(EMPTY));
+                            out.flush();
+                            if (info) {
+                                log.info(new StringBuilder().append("Flushed empty SEND-BODY-CHUNK response to socket \"").append(
+                                    remoteAddress).append("\" to initiate a KEEP-ALIVE poll."));
+                            }
+                        } finally {
+                            ajpConnection.blockInputStream(false);
                         }
-                    } finally {
-                        ajpConnection.blockInputStream(false);
+                    } else {
+                        /*
+                         * No outstanding data; poll connection through requesting an empty data chunk.
+                         */
+                        ajpConnection.blockInputStream(true);
+                        try {
+                            out.write(AJPv13Response.getGetBodyChunkBytes(0));
+                            out.flush();
+                            if (info) {
+                                log.info(new StringBuilder().append("Flushed empty GET-BODY request to socket \"").append(remoteAddress).append(
+                                    "\" to initiate a KEEP-ALIVE poll."));
+                            }
+                            /*
+                             * Swallow expected empty body chunk
+                             */
+                            final int bodyRequestDataLength = ajpConnection.readInitialBytes(true, false);
+                            if (bodyRequestDataLength > 0 && parseInt(ajpConnection.getPayloadData(bodyRequestDataLength, true)) > 0) {
+                                log.warn("Got a non-empty data chunk from web server although an empty one was requested");
+                            } else if (info) {
+                                log.info(new StringBuilder().append("Swallowed empty REQUEST-BODY from socket \"").append(remoteAddress).append(
+                                    "\" initiated by former KEEP-ALIVE poll."));
+                            }
+                        } finally {
+                            ajpConnection.blockInputStream(false);
+                        }
                     }
                 }
             } finally {
