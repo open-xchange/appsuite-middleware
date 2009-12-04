@@ -199,6 +199,7 @@ public class Bug12264Test extends AbstractAJAXSession {
             //Steps 6,7
             //Change until to "null", that will be done via Special Request.
             appointment.removeOccurrence();
+            appointment.setIgnoreConflicts(true);
             UpdateRequest updateRequest = new UntilNullAppointmentUpdateRequest(appointment, tz);
             UpdateResponse updateResponse = client.execute(updateRequest);
             appointment.setLastModified(updateResponse.getTimestamp());
@@ -218,12 +219,14 @@ public class Bug12264Test extends AbstractAJAXSession {
        
        try {
            insertAppointment();
+           int tempOccurrence = appointment.getOccurrence();
+           appointment.removeOccurrence();
            appointment.setUntil(new Date(0));
            UpdateResponse response = updateAppointment(false);
            assertTrue(response.hasError());
            AbstractOXException exception = response.getException();
            assertEquals("Wrong exception thrown.", OXCalendarException.Code.UNTIL_BEFORE_START_DATE.getDetailNumber(), exception.getDetailNumber());
-           assertFalse("No occurrence left.", appointment.getOccurrence() == 0);
+           assertFalse("No occurrence left.", tempOccurrence == 0);
        } finally {
            cleanUp();
        }

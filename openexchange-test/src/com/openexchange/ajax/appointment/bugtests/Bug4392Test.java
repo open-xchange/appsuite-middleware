@@ -70,11 +70,11 @@ public class Bug4392Test extends AppointmentTest {
 		final Appointment appointmentObj = createAppointmentObject("testBug4392");
 		appointmentObj.setRecurrenceType(Appointment.DAILY);
 		appointmentObj.setInterval(1);
-		appointmentObj.setOccurrence(4);
+		//appointmentObj.setOccurrence(4);
+        appointmentObj.setUntil(until);
 		appointmentObj.setIgnoreConflicts(true);
 		final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
 		appointmentObj.setObjectID(objectId);
-		appointmentObj.setUntil(until);
 		
 		final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, getHostName(), getSessionId());
 		try {
