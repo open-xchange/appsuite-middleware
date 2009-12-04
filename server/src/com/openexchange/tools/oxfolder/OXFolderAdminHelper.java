@@ -854,7 +854,7 @@ public final class OXFolderAdminHelper {
      * @param creatingTime The creation date
      * @throws SQLException If a SQL error occurs
      */
-    private void createPublicFolder(final int folderId, final int cid, final int mailAdmin, final Connection writeCon, final long creatingTime) throws SQLException {
+    private static void createPublicFolder(final int folderId, final int cid, final int mailAdmin, final Connection writeCon, final long creatingTime) throws SQLException {
         if (FolderObject.SYSTEM_PUBLIC_FOLDER_ID == folderId) {
             createSystemPublicFolder(cid, mailAdmin, writeCon, creatingTime);
         } else if (FolderObject.SYSTEM_INFOSTORE_FOLDER_ID == folderId) {
@@ -874,7 +874,7 @@ public final class OXFolderAdminHelper {
      * @param creatingTime The creation date
      * @throws SQLException If a SQL error occurs
      */
-    private void createSystemPublicFolder(final int cid, final int mailAdmin, final Connection writeCon, final long creatingTime) throws SQLException {
+    private static void createSystemPublicFolder(final int cid, final int mailAdmin, final Connection writeCon, final long creatingTime) throws SQLException {
         final OCLPermission systemPermission = new OCLPermission();
         systemPermission.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
         systemPermission.setAllPermission(
@@ -906,7 +906,7 @@ public final class OXFolderAdminHelper {
      * @param creatingTime The creation date
      * @throws SQLException If a SQL error occurs
      */
-    private void createSystemInfostoreFolder(final int cid, final int mailAdmin, final Connection writeCon, final long creatingTime) throws SQLException {
+    private static void createSystemInfostoreFolder(final int cid, final int mailAdmin, final Connection writeCon, final long creatingTime) throws SQLException {
         final OCLPermission systemPermission = new OCLPermission();
         systemPermission.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
         systemPermission.setGroupPermission(true);
@@ -939,7 +939,7 @@ public final class OXFolderAdminHelper {
      * @param creatingTime The creation date
      * @throws SQLException If a SQL error occurs
      */
-    private void createSystemPublicInfostoreFolder(final int cid, final int mailAdmin, final Connection writeCon, final long creatingTime) throws SQLException {
+    private static void createSystemPublicInfostoreFolder(final int cid, final int mailAdmin, final Connection writeCon, final long creatingTime) throws SQLException {
         final OCLPermission systemPermission = new OCLPermission();
         systemPermission.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
         systemPermission.setGroupPermission(true);
@@ -1086,7 +1086,7 @@ public final class OXFolderAdminHelper {
 
     private static final String SQL_INSERT_SPECIAL_FOLDER = "INSERT INTO oxfolder_specialfolders " + "(tag, cid, fuid) VALUES (?,?,?)";
 
-    private void createSystemFolder(final int systemFolderId, final String systemFolderName, final OCLPermission systemPermission, final int parentId, final int module, final boolean insertIntoSpecialFolders, final long creatingTime, final int mailAdminId, final boolean isPublic, final int cid, final Connection writeCon) throws SQLException {
+    private static void createSystemFolder(final int systemFolderId, final String systemFolderName, final OCLPermission systemPermission, final int parentId, final int module, final boolean insertIntoSpecialFolders, final long creatingTime, final int mailAdminId, final boolean isPublic, final int cid, final Connection writeCon) throws SQLException {
         PreparedStatement stmt = null;
         try {
             stmt = writeCon.prepareStatement(SQL_INSERT_SYSTEM_FOLDER);
