@@ -77,6 +77,8 @@ public class ManagedAppointmentTest extends AppointmentTest {
     protected FolderObject folder;
 
     protected TimeZone utc = TimeZone.getTimeZone("UTC");
+    
+    protected TimeZone userTimeZone;
 
     protected NegativeAssertionOnUpdate negativeAssertionOnUpdate;
 
@@ -102,6 +104,7 @@ public class ManagedAppointmentTest extends AppointmentTest {
         calendarManager = new CalendarTestManager(getClient());
         folderManager = new FolderTestManager(getClient());
         UserValues values = getClient().getValues();
+        userTimeZone = values.getTimeZone();
         this.folder = folderManager.generateFolder(
             "ManagedAppointmentTests",
             Module.CALENDAR.getFolderConstant(),
