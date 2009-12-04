@@ -498,7 +498,11 @@ public class OXFolderException extends OXException {
         /**
          * Only individual user permissions, but no group permissions are allowed for folder %1$s in context %2$s.
          */
-        NO_GROUP_PERMISSION("Only individual user permissions, but no group permissions are allowed for folder %1$s in context %2$s.", Category.PERMISSION, 82);
+        NO_GROUP_PERMISSION("Only individual user permissions, but no group permissions are allowed for folder %1$s in context %2$s.", Category.PERMISSION, 82),
+        /**
+         * No individual user permissions are allowed for folder %1$s in context %2$s.
+         */
+        NO_INDIVIDUAL_PERMISSION("No individual user permissions are allowed for folder %1$s in context %2$s.", Category.PERMISSION, 83);
 
         /**
          * Message of the exception.

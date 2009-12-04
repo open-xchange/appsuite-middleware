@@ -543,10 +543,12 @@ final class OXFolderManagerImpl extends OXFolderManager {
                 }
                 if (FolderCacheManager.isEnabled()) {
                     fo.fill(FolderCacheManager.getInstance().getFolderObject(fo.getObjectID(), false, ctx, wc));
-                    /*
-                     * Update parent, too
-                     */
-                    FolderCacheManager.getInstance().loadFolderObject(fo.getParentFolderID(), ctx, wc);
+                    if (fo.getParentFolderID() > 0) {
+                        /*
+                         * Update parent, too
+                         */
+                        FolderCacheManager.getInstance().loadFolderObject(fo.getParentFolderID(), ctx, wc);
+                    }
                 } else {
                     fo.fill(FolderObject.loadFolderObjectFromDB(fo.getObjectID(), ctx, wc));
                 }
@@ -556,15 +558,17 @@ final class OXFolderManagerImpl extends OXFolderManager {
                 if (CalendarCache.isInitialized()) {
                     CalendarCache.getInstance().invalidateGroup(ctx.getContextId());
                 }
-                try {
-                    new EventClient(session).modify(storageVersion, fo, FolderObject.loadFolderObjectFromDB(
-                        fo.getParentFolderID(),
-                        ctx,
-                        wc,
-                        true,
-                        false));
-                } catch (final EventException e) {
-                    LOG.warn("Update event could not be enqueued", e);
+                if (FolderObject.SYSTEM_MODULE != fo.getModule()) {
+                    try {
+                        new EventClient(session).modify(storageVersion, fo, FolderObject.loadFolderObjectFromDB(
+                            fo.getParentFolderID(),
+                            ctx,
+                            wc,
+                            true,
+                            false));
+                    } catch (final EventException e) {
+                        LOG.warn("Update event could not be enqueued", e);
+                    }
                 }
                 return fo;
             } finally {
@@ -628,7 +632,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
         /*
          * Check if folder module is supposed to be updated
          */
-        if (folderObj.containsModule() && folderObj.getModule() != storageObj.getModule()) {
+        if (folderObj.containsModule() && folderObj.getModule() != storageObj.getModule() && FolderObject.SYSTEM_MODULE != storageObj.getModule()) {
             /*
              * Module update only allowed if known and folder is empty
              */
@@ -841,6 +845,8 @@ final class OXFolderManagerImpl extends OXFolderManager {
         } else if (module == FolderObject.INFOSTORE) {
             final InfostoreFacade db = new InfostoreFacadeImpl(readCon == null ? new DBPoolProvider() : new StaticDBPoolProvider(readCon));
             return db.isFolderEmpty(folderId, ctx);
+        } else if (module == FolderObject.SYSTEM_MODULE) {
+            return true;
         } else {
             throw new OXFolderException(
                 FolderCode.UNKNOWN_MODULE,

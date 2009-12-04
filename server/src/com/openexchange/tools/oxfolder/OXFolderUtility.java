@@ -329,27 +329,50 @@ public final class OXFolderUtility {
             return;
         }
         final int[] allowedObjectPermissions = maxAllowedObjectPermissions(folderId);
+        final int allowedFolderPermission = maxAllowedFolderPermission(folderId);
         final int admin = ctx.getMailadmin();
-        for (int i = 0; i < newPerms.length; i++) {
-            final OCLPermission newPerm = newPerms[i];
-            if (newPerm.isGroupPermission()) {
-                final String i18nName = FolderObject.getFolderString(folderId, user.getLocale());
-                throw new OXFolderException(OXFolderException.FolderCode.NO_GROUP_PERMISSION, null == i18nName ? getFolderName(
-                    folderId,
-                    ctx) : i18nName, Integer.valueOf(ctx.getContextId()));
+        if (FolderObject.SYSTEM_LDAP_FOLDER_ID == folderId) {
+            for (int i = 0; i < newPerms.length; i++) {
+                final OCLPermission newPerm = newPerms[i];
+                if (newPerm.isGroupPermission()) {
+                    final String i18nName = FolderObject.getFolderString(folderId, user.getLocale());
+                    throw new OXFolderException(OXFolderException.FolderCode.NO_GROUP_PERMISSION, null == i18nName ? getFolderName(
+                        folderId,
+                        ctx) : i18nName, Integer.valueOf(ctx.getContextId()));
+                }
+                /*
+                 * Only context admin may hold administer right and folder visibility change only
+                 */
+                checkSystemFolderObjectPermissions(folderId, newPerm, admin, allowedObjectPermissions, allowedFolderPermission, user, ctx);
             }
-            /*
-             * Only context admin may hold administer right and folder visibility change only
-             */
-            if ((newPerm.getEntity() == admin ? !newPerm.isFolderAdmin() : newPerm.isFolderAdmin()) || !checkObjectPermissions(
-                newPerm,
-                allowedObjectPermissions) || newPerm.getFolderPermission() > OCLPermission.READ_FOLDER) {
-                final String i18nName = FolderObject.getFolderString(folderId, user.getLocale());
-                throw new OXFolderException(
-                    OXFolderException.FolderCode.FOLDER_VISIBILITY_PERMISSION_ONLY,
-                    null == i18nName ? getFolderName(folderId, ctx) : i18nName,
-                    Integer.valueOf(ctx.getContextId()));
+        } else {
+            for (int i = 0; i < newPerms.length; i++) {
+                final OCLPermission newPerm = newPerms[i];
+                if (!newPerm.isGroupPermission() && newPerm.getEntity() != admin) {
+                    final String i18nName = FolderObject.getFolderString(folderId, user.getLocale());
+                    throw new OXFolderException(OXFolderException.FolderCode.NO_INDIVIDUAL_PERMISSION, null == i18nName ? getFolderName(
+                        folderId,
+                        ctx) : i18nName, Integer.valueOf(ctx.getContextId()));
+                }
+                /*
+                 * Only context admin may hold administer right and folder visibility change only
+                 */
+                checkSystemFolderObjectPermissions(folderId, newPerm, admin, allowedObjectPermissions, allowedFolderPermission, user, ctx);
             }
+        }
+    }
+
+    private static void checkSystemFolderObjectPermissions(final int folderId, final OCLPermission toCheck, final int admin, final int[] allowedObjectPermissions, final int maxAllowedFolderPermission, final User user, final Context ctx) throws OXFolderException {
+        /*
+         * Only context admin may hold administer right and folder visibility change only
+         */
+        if ((toCheck.getEntity() == admin ? !toCheck.isFolderAdmin() : toCheck.isFolderAdmin()) || !checkObjectPermissions(
+            toCheck,
+            allowedObjectPermissions) || toCheck.getFolderPermission() > maxAllowedFolderPermission) {
+            final String i18nName = FolderObject.getFolderString(folderId, user.getLocale());
+            throw new OXFolderException(OXFolderException.FolderCode.FOLDER_VISIBILITY_PERMISSION_ONLY, null == i18nName ? getFolderName(
+                folderId,
+                ctx) : i18nName, Integer.valueOf(ctx.getContextId()));
         }
     }
 
@@ -370,6 +393,20 @@ public final class OXFolderUtility {
             return NO_OBJECT_PERMISSIONS;
         } else {
             return NO_OBJECT_PERMISSIONS;
+        }
+    }
+
+    private static int maxAllowedFolderPermission(final int folderId) {
+        if (FolderObject.SYSTEM_LDAP_FOLDER_ID == folderId) {
+            return OCLPermission.READ_FOLDER;
+        } else if (FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID == folderId) {
+            return OCLPermission.CREATE_SUB_FOLDERS;
+        } else if (FolderObject.SYSTEM_PUBLIC_FOLDER_ID == folderId) {
+            return OCLPermission.CREATE_SUB_FOLDERS;
+        } else if (FolderObject.SYSTEM_INFOSTORE_FOLDER_ID == folderId) {
+            return OCLPermission.READ_FOLDER;
+        } else {
+            return OCLPermission.NO_PERMISSIONS;
         }
     }
 
