@@ -86,8 +86,10 @@ import com.openexchange.tools.servlet.http.Tools;
  */
 public final class ImageServlet extends HttpServlet {
 
+    private static final int BUFLEN = 0xFFFF;
+
     /**
-     * The serial versuion UID.
+     * The serial version UID.
      */
     private static final long serialVersionUID = -3357383590134182460L;
 
@@ -233,7 +235,7 @@ public final class ImageServlet extends HttpServlet {
             /*
              * Write from content's input stream to response output stream
              */
-            final byte[] buffer = new byte[0xFFFF];
+            final byte[] buffer = new byte[BUFLEN];
             for (int len; (len = in.read(buffer, 0, buffer.length)) != -1;) {
                 out.write(buffer, 0, len);
             }
