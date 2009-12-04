@@ -339,8 +339,8 @@ public class Folder extends SessionServlet {
                      */
                     hasSubfolder = 0;
                 }
-                lastModified =
-                    rootFolder.getLastModified() == null ? lastModified : Math.max(lastModified, rootFolder.getLastModified().getTime());
+                final Date modified = rootFolder.getLastModified();
+                lastModified = modified == null ? lastModified : Math.max(lastModified, modified.getTime());
                 jsonWriter.array();
                 try {
                     for (final FolderFieldWriter ffw : writers) {
@@ -1408,9 +1408,11 @@ public class Folder extends SessionServlet {
             iter = updatedQueue.iterator();
             for (int i = 0; i < size; i++) {
                 final FolderObject fo = iter.next();
-                final Date modified = fo.getLastModified();
-                if (null != modified) {
-                    lastModified = Math.max(modified.getTime(), lastModified);
+                {
+                    final Date modified = fo.getLastModified();
+                    if (null != modified) {
+                        lastModified = Math.max(modified.getTime(), lastModified);
+                    }
                 }
                 jsonWriter.array();
                 try {
