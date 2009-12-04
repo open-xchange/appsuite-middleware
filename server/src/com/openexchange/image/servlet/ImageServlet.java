@@ -129,8 +129,8 @@ public final class ImageServlet extends HttpServlet {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing URL parameter " + PARAMETER_UID);
             }
             final Session[] sessions = getSessions(req, sessiondService);
+            final ImageService imageService = ServerServiceRegistry.getInstance().getService(ImageService.class, true);
             for (final Session session : sessions) {
-                final ImageService imageService = ServerServiceRegistry.getInstance().getService(ImageService.class);
                 ImageData imageData = imageService.getImageData(session, uid);
                 if (imageData == null) {
                     imageData = imageService.getImageData(session.getContextId(), uid);
@@ -156,6 +156,9 @@ public final class ImageServlet extends HttpServlet {
         } catch (final DataException e) {
             org.apache.commons.logging.LogFactory.getLog(ImageServlet.class).error(e.getMessage(), e);
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        } catch (final ServiceException e) {
+            org.apache.commons.logging.LogFactory.getLog(ImageServlet.class).error(e.getMessage(), e);
+            resp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
         }
     }
 
