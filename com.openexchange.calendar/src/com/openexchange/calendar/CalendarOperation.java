@@ -812,7 +812,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             if (cdao.getObjectID() == cdao.getRecurrenceID()) {
                 if (cdao.containsOccurrence() && !cdao.containsUntil()) {
                     // INFO: Somebody needs this value, have to check for side effects
-                    cdao.setUntil(new Date(recColl.normalizeLong((cdao.getStartDate().getTime() + (Constants.MILLI_DAY * cdao.getRecurrenceCalculator())))));
+                    //cdao.setUntil(new Date(recColl.normalizeLong((cdao.getStartDate().getTime() + (Constants.MILLI_DAY * cdao.getRecurrenceCalculator())))));
                 }
             } else {
                 // Recurring type on a change exception must be removed.
@@ -1342,7 +1342,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             cdao.setEndDate(calculateRealRecurringEndDate(untilDate, edao.getEndDate(), edao.getFullTime()));
             pattern_change = true;
         }
-        if (cdao.containsUntil() && edao.containsUntil() && recColl.check(cdao.getUntil(), edao.getUntil())) {
+        if (cdao.containsUntil() && recColl.check(cdao.getUntil(), edao.getUntil())) {
             if (!completenessChecked) {
                 recColl.checkRecurringCompleteness(cdao, !edao.containsUntil() && !edao.containsOccurrence());
                 completenessChecked = true;

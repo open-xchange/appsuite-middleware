@@ -168,7 +168,7 @@ public abstract class CalendarWriter extends CommonWriter {
             writeParameter(CalendarFields.INTERVAL, calendarObject.getInterval(), jsonObj);
         }
 
-        if (calendarObject.containsUntil()) {
+        if (calendarObject.containsUntil() && !calendarObject.containsOccurrence()) {
             writeParameter(CalendarFields.UNTIL, calendarObject.getUntil(), jsonObj);
         }
 

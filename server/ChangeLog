@@ -1,3 +1,7 @@
+* 2009-12-04 - martin.herfurth@open-xchange.com
+
+ - Bugfix #14929: Setting until.
+
 * 2009-12-03 - thorben.betten@open-xchange.com
 
  - Bugfix #15020: Fixed NPE when writing JSON user data

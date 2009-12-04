@@ -411,7 +411,10 @@ public class AppointmentWriter extends CalendarWriter {
 
         m.put(Integer.valueOf(Appointment.UNTIL), new AppointmentFieldWriter() {
             public void write(final Appointment appointmentObject, final JSONArray jsonArray) {
-                writeValue(appointmentObject.getUntil(), jsonArray);
+                if (appointmentObject.containsOccurrence())
+                    jsonArray.put(JSONObject.NULL);
+                else
+                    writeValue(appointmentObject.getUntil(), jsonArray);
             }
         });
 
