@@ -60,6 +60,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.Login;
+import com.openexchange.ajax.helper.CombinedInputStream;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataException;
 import com.openexchange.conversion.DataProperties;
@@ -75,6 +76,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.exception.SessiondException;
+import com.openexchange.tools.ImageTypeDetector;
 import com.openexchange.tools.servlet.http.Tools;
 
 /**
@@ -180,28 +182,75 @@ public final class ImageServlet extends HttpServlet {
         /*
          * Set header Content-Type
          */
-        resp.setContentType(ct);
-        /*
-         * Reset response header values since we are going to directly write into servlet's output stream and then some browsers do not
-         * allow header "Pragma"
-         */
-        Tools.removeCachingHeader(resp);
-        /*
-         * Select response's output stream
-         */
-        final OutputStream out = resp.getOutputStream();
-        /*
-         * Write from content's input stream to response output stream
-         */
-        final InputStream in = data.getData();
+        final InputStream in;
+        if (null == ct) {
+            /*
+             * Get starting byte sequence from image data's input stream
+             */
+            byte[] sequence = new byte[16];
+            final InputStream remainee = data.getData();
+            try {
+                final int nRead = remainee.read(sequence, 0, sequence.length);
+                if (nRead < sequence.length) {
+                    final byte[] tmp = sequence;
+                    sequence = new byte[nRead];
+                    System.arraycopy(tmp, 0, sequence, 0, nRead);
+                }
+            } catch (final IOException e) {
+                closeStream(remainee);
+                throw e;
+            } catch (final Throwable t) {
+                closeStream(remainee);
+                if (t instanceof RuntimeException) {
+                    throw (RuntimeException) t;
+                }
+                if (t instanceof Error) {
+                    throw (Error) t;
+                }
+                final IOException ioe = new IOException(t.getMessage());
+                ioe.initCause(t);
+                throw ioe;
+            }
+            /*
+             * Detect image content type by starting byte sequence
+             */
+            in = new CombinedInputStream(sequence, remainee);
+            resp.setContentType(ImageTypeDetector.getMimeType(sequence));
+        } else {
+            in = data.getData();
+            resp.setContentType(ct);
+        }
         try {
+            /*
+             * Reset response header values since we are going to directly write into servlet's output stream and then some browsers do not
+             * allow header "Pragma"
+             */
+            Tools.removeCachingHeader(resp);
+            /*
+             * Select response's output stream
+             */
+            final OutputStream out = resp.getOutputStream();
+            /*
+             * Write from content's input stream to response output stream
+             */
             final byte[] buffer = new byte[0xFFFF];
             for (int len; (len = in.read(buffer, 0, buffer.length)) != -1;) {
                 out.write(buffer, 0, len);
             }
             out.flush();
         } finally {
+            closeStream(in);
+        }
+    }
+
+    private static void closeStream(final InputStream in) {
+        if (null == in) {
+            return;
+        }
+        try {
             in.close();
+        } catch (final IOException e) {
+            org.apache.commons.logging.LogFactory.getLog(ImageServlet.class).error(e.getMessage(), e);
         }
     }
 
