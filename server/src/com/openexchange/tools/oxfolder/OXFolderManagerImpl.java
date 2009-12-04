@@ -1396,13 +1396,6 @@ final class OXFolderManagerImpl extends OXFolderManager {
                     false,
                     "del_oxfolder_tree",
                     "del_oxfolder_permissions"));
-                try {
-                    new EventClient(session).delete(fo);
-                } catch (final EventException e) {
-                    LOG.warn("Delete event could not be enqueued", e);
-                } catch (final ContextException e) {
-                    LOG.warn("Delete event could not be enqueued", e);
-                }
                 return fo;
             } finally {
                 if (create && wc != null) {
@@ -1521,16 +1514,30 @@ final class OXFolderManagerImpl extends OXFolderManager {
             }
         }
         try {
-            Links.deleteAllFolderLinks(folderID, ctx.getContextId(), wc);
+            try {
+                Links.deleteAllFolderLinks(folderID, ctx.getContextId(), wc);
 
-            final ServerUserSetting sus = ServerUserSetting.getInstance(wc);
-            final Integer collectFolder = sus.getIContactCollectionFolder(ctx.getContextId(), user.getId());
-            if (null != collectFolder && folderID == collectFolder.intValue()) {
-                sus.setIContactColletion(ctx.getContextId(), user.getId(), false);
-                sus.setIContactCollectionFolder(ctx.getContextId(), user.getId(), null);
+                final ServerUserSetting sus = ServerUserSetting.getInstance(wc);
+                final Integer collectFolder = sus.getIContactCollectionFolder(ctx.getContextId(), user.getId());
+                if (null != collectFolder && folderID == collectFolder.intValue()) {
+                    sus.setIContactColletion(ctx.getContextId(), user.getId(), false);
+                    sus.setIContactCollectionFolder(ctx.getContextId(), user.getId(), null);
+                }
+            } catch (final SettingException e) {
+                throw new OXFolderException(e);
             }
-        } catch (final SettingException e) {
-            throw new OXFolderException(e);
+            /*
+             * Propagate
+             */
+            final FolderObject fo =
+                FolderObject.loadFolderObjectFromDB(folderID, ctx, wc, true, false, "del_oxfolder_tree", "del_oxfolder_permissions");
+            try {
+                new EventClient(session).delete(fo);
+            } catch (final EventException e) {
+                LOG.warn("Delete event could not be enqueued", e);
+            } catch (final ContextException e) {
+                LOG.warn("Delete event could not be enqueued", e);
+            }
         } finally {
             if (closeWriter) {
                 DBPool.closeWriterSilent(ctx, wc);
