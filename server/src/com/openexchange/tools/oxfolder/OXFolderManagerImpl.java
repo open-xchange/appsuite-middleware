@@ -352,31 +352,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
                     OXFolderUtility.getFolderName(parentFolder),
                     Integer.valueOf(ctx.getContextId()));
             }
-            /*
-             * Check i18n strings, too
-             */
-            if (FolderObject.SYSTEM_PUBLIC_FOLDER_ID == parentFolderID) {
-                if (FolderObject.getFolderString(FolderObject.SYSTEM_LDAP_FOLDER_ID, user.getLocale()).equalsIgnoreCase(folderName)) {
-                    final String parentFolderName =
-                        new StringBuilder(FolderObject.getFolderString(parentFolderID, user.getLocale())).append(" (").append(
-                            parentFolderID).append(')').toString();
-                    /*
-                     * A duplicate folder exists
-                     */
-                    throw new OXFolderException(FolderCode.NO_DUPLICATE_FOLDER, parentFolderName, Integer.valueOf(ctx.getContextId()));
-                }
-                if (!OXFolderProperties.isIgnoreSharedAddressbook() && FolderObject.getFolderString(
-                    FolderObject.SYSTEM_GLOBAL_FOLDER_ID,
-                    user.getLocale()).equalsIgnoreCase(folderName)) {
-                    final String parentFolderName =
-                        new StringBuilder(FolderObject.getFolderString(parentFolderID, user.getLocale())).append(" (").append(
-                            parentFolderID).append(')').toString();
-                    /*
-                     * A duplicate folder exists
-                     */
-                    throw new OXFolderException(FolderCode.NO_DUPLICATE_FOLDER, parentFolderName, Integer.valueOf(ctx.getContextId()));
-                }
-            }
+            OXFolderUtility.checki18nString(parentFolderID, folderName, user.getLocale(), ctx);
         } catch (final SQLException e) {
             throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
         } catch (final DBPoolingException e) {
@@ -728,11 +704,12 @@ final class OXFolderManagerImpl extends OXFolderManager {
              * Rename: Check if duplicate folder exists
              */
             try {
+                final String folderName = folderObj.getFolderName();
                 final int folderId =
                     OXFolderSQL.lookUpFolderOnUpdate(
                         folderObj.getObjectID(),
                         storageObj.getParentFolderID(),
-                        folderObj.getFolderName(),
+                        folderName,
                         folderObj.getModule(),
                         readCon,
                         ctx);
@@ -744,6 +721,11 @@ final class OXFolderManagerImpl extends OXFolderManager {
                         readCon,
                         ctx).getFolderObject(storageObj.getParentFolderID())), Integer.valueOf(ctx.getContextId()));
                 }
+                /*
+                 * Check i18n strings, too
+                 */
+                final int parentFolderId = storageObj.getParentFolderID();
+                OXFolderUtility.checki18nString(parentFolderId, folderName, user.getLocale(), ctx);
             } catch (final SQLException e) {
                 throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
             } catch (final DBPoolingException e) {
@@ -897,11 +879,12 @@ final class OXFolderManagerImpl extends OXFolderManager {
          * Check for duplicate folder
          */
         try {
+            final String folderName = folderObj.getFolderName();
             final int folderId =
                 OXFolderSQL.lookUpFolderOnUpdate(
                     folderObj.getObjectID(),
                     storageObj.getParentFolderID(),
-                    folderObj.getFolderName(),
+                    folderName,
                     storageObj.getModule(),
                     readCon,
                     ctx);
@@ -914,6 +897,11 @@ final class OXFolderManagerImpl extends OXFolderManager {
                     OXFolderUtility.getFolderName(new OXFolderAccess(readCon, ctx).getFolderObject(storageObj.getParentFolderID())),
                     Integer.valueOf(ctx.getContextId()));
             }
+            /*
+             * Check i18n strings, too
+             */
+            final int parentFolderId = storageObj.getParentFolderID();
+            OXFolderUtility.checki18nString(parentFolderId, folderName, user.getLocale(), ctx);
         } catch (final DBPoolingException e) {
             throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
         } catch (final SQLException e) {
@@ -999,12 +987,17 @@ final class OXFolderManagerImpl extends OXFolderManager {
          * Check for a duplicate folder in target folder
          */
         try {
-            if (OXFolderSQL.lookUpFolder(targetFolderId, storageSrc.getFolderName(), storageSrc.getModule(), readCon, ctx) != -1) {
+            final String folderName = storageSrc.getFolderName();
+            if (OXFolderSQL.lookUpFolder(targetFolderId, folderName, storageSrc.getModule(), readCon, ctx) != -1) {
                 throw new OXFolderException(
                     FolderCode.TARGET_FOLDER_CONTAINS_DUPLICATE,
                     OXFolderUtility.getFolderName(storageDest),
                     Integer.valueOf(ctx.getContextId()));
             }
+            /*
+             * Check i18n strings, too
+             */
+            OXFolderUtility.checki18nString(targetFolderId, folderName, user.getLocale(), ctx);
         } catch (final SQLException e) {
             throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
         } catch (final DBPoolingException e) {

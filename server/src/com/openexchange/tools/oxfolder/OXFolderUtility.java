@@ -56,6 +56,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import com.openexchange.api2.OXException;
 import com.openexchange.database.DBPoolingException;
@@ -90,6 +91,44 @@ public final class OXFolderUtility {
      */
     private OXFolderUtility() {
         super();
+    }
+
+    /**
+     * Checks for duplicate folder name considering locale-sensitive folder names.
+     * 
+     * @param parentFolderId The parent folder ID
+     * @param folderName The folder name to check
+     * @param locale The user's locale
+     * @param ctx The context
+     * @throws OXFolderException If a duplicate folder exists
+     */
+    public static void checki18nString(final int parentFolderId, final String folderName, final Locale locale, final Context ctx) throws OXFolderException {
+        if (FolderObject.SYSTEM_PUBLIC_FOLDER_ID == parentFolderId) {
+            if (FolderObject.getFolderString(FolderObject.SYSTEM_LDAP_FOLDER_ID, locale).equalsIgnoreCase(folderName)) {
+                final String parentFolderName =
+                    new StringBuilder(FolderObject.getFolderString(parentFolderId, locale)).append(" (").append(parentFolderId).append(')').toString();
+                /*
+                 * A duplicate folder exists
+                 */
+                throw new OXFolderException(
+                    OXFolderException.FolderCode.NO_DUPLICATE_FOLDER,
+                    parentFolderName,
+                    Integer.valueOf(ctx.getContextId()));
+            }
+            if (!OXFolderProperties.isIgnoreSharedAddressbook() && FolderObject.getFolderString(
+                FolderObject.SYSTEM_GLOBAL_FOLDER_ID,
+                locale).equalsIgnoreCase(folderName)) {
+                final String parentFolderName =
+                    new StringBuilder(FolderObject.getFolderString(parentFolderId, locale)).append(" (").append(parentFolderId).append(')').toString();
+                /*
+                 * A duplicate folder exists
+                 */
+                throw new OXFolderException(
+                    OXFolderException.FolderCode.NO_DUPLICATE_FOLDER,
+                    parentFolderName,
+                    Integer.valueOf(ctx.getContextId()));
+            }
+        }
     }
 
     /**
@@ -306,9 +345,10 @@ public final class OXFolderUtility {
                 newPerm,
                 allowedObjectPermissions) || newPerm.getFolderPermission() > OCLPermission.READ_FOLDER) {
                 final String i18nName = FolderObject.getFolderString(folderId, user.getLocale());
-                throw new OXFolderException(OXFolderException.FolderCode.FOLDER_VISIBILITY_PERMISSION_ONLY, null == i18nName ? getFolderName(
-                    folderId,
-                    ctx) : i18nName, Integer.valueOf(ctx.getContextId()));
+                throw new OXFolderException(
+                    OXFolderException.FolderCode.FOLDER_VISIBILITY_PERMISSION_ONLY,
+                    null == i18nName ? getFolderName(folderId, ctx) : i18nName,
+                    Integer.valueOf(ctx.getContextId()));
             }
         }
     }
