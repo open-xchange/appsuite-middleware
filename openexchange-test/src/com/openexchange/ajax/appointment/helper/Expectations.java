@@ -77,7 +77,10 @@ public class Expectations extends KeyValueHolder {
         for(Integer key: getMap().keySet()){
             Object expectedValue = getMap().get(key);
             Object actualValue = actual.get(key.intValue());
-            assertEquals(message + " Field "+key+" does not match expectation", expectedValue, actualValue);
+            if (actual.contains(key.intValue()))
+                assertEquals(message + " Field "+key+" does not match expectation", expectedValue, actualValue);
+            else
+                assertEquals(message + " Field "+key+" does not match expectation", expectedValue, null);
         }
     }
 }
