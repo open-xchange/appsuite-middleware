@@ -71,10 +71,17 @@ public final class CombinedInputStream extends InputStream {
      * 
      * @param consumed The bytes already consumed from <code>remaining</code> input stream
      * @param remaining The remaining stream
+     * @throws IllegalArgumentException If passed byte array or {@link InputStream} instance is <code>null</code>
      */
     public CombinedInputStream(final byte[] consumed, final InputStream remaining) {
         super();
-        this.consumed = consumed;
+        if (null == consumed) {
+            throw new IllegalArgumentException("Byte array is null.");
+        } else if (null == remaining) {
+            throw new IllegalArgumentException("Input stream array is null.");
+        }
+        this.consumed = new byte[consumed.length];
+        System.arraycopy(consumed, 0, this.consumed, 0, consumed.length);
         this.remaining = remaining;
         count = 0;
     }
