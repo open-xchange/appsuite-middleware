@@ -47,47 +47,50 @@
  *
  */
 
-package com.openexchange.ajp13;
+package com.openexchange.concurrent;
 
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
- * {@link ConcurrentBlocker} - A concurrent blocker.
+ * {@link Synchronizer} - Methods to synchronize/unsynchronize access to implementing object.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ConcurrentBlocker implements Blocker {
-
-    private final Lock rl;
-
-    private final Lock wl;
+public interface Synchronizer extends Synchronizable {
 
     /**
-     * Initializes a new {@link ConcurrentBlocker}.
+     * Acquires the invoking resource.
+     * <p>
+     * <code>
+     * &nbsp;final Lock lock = <b>acquire();</b><br>
+     * &nbsp;try {<br>
+     * &nbsp;&nbsp;...<br>
+     * &nbsp;} finally {<br>
+     * &nbsp;&nbsp;release(lock);<br>
+     * &nbsp;}<br>
+     * </code>
+     * 
+     * @return A lock if synchronized access was enabled via {@link #synchronize()}; otherwise <code>null</code>
      */
-    public ConcurrentBlocker() {
-        super();
-        final ReadWriteLock rwl = new ReentrantReadWriteLock();
-        rl = rwl.readLock();
-        wl = rwl.writeLock();
-    }
+    public Lock acquire();
 
-    public void acquire() {
-        rl.lock();
-    }
-
-    public void release() {
-        rl.unlock();
-    }
-
-    public void block() {
-        wl.lock();
-    }
-
-    public void unblock() {
-        wl.unlock();
-    }
-
+    /**
+     * Releases the invoking resource.
+     * <p>
+     * This method properly deals with the possibility that previously called {@link #acquire()} returned <code>null</code>. Thus it is safe
+     * to just pass the reference to this method as it is.
+     * <p>
+     * <code>
+     * &nbsp;final Lock lock = acquire();<br>
+     * &nbsp;try {<br>
+     * &nbsp;&nbsp;...<br>
+     * &nbsp;} finally {<br>
+     * &nbsp;&nbsp;<b>// May be null</b><br>
+     * &nbsp;&nbsp;<b>release(lock);</b><br>
+     * &nbsp;}<br>
+     * </code>
+     * 
+     * @param lock The lock previously obtained by {@link #acquire()}.
+     */
+    public void release(Lock lock);
 }

@@ -47,110 +47,158 @@
  *
  */
 
-package com.openexchange.ajp13;
+package com.openexchange.concurrent;
 
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * {@link NonBlockingBlocker} - Non-blocking reentrant blocker; also useful to wrap an existing {@link Runnable runnable}.
+ * {@link NonBlockingSynchronizer} - Non-blocking reentrant synchronizer; also useful to wrap an existing {@link Runnable runnable}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class NonBlockingBlocker implements Blocker, Runnable {
+public final class NonBlockingSynchronizer implements Synchronizer, Runnable {
+
+    private static final Object PRESENT = new Object();
 
     private volatile Runnable runnable;
+
+    private volatile boolean obtainLock;
 
     private final AtomicInteger running;
 
     private final AtomicInteger writeCounter;
 
-    private volatile Thread owner;
+    private final Lock runLock;
+
+    private final ConcurrentMap<Thread, Object> reentrant;
 
     /**
-     * Initializes a new {@link NonBlockingBlocker}.
+     * Initializes a new {@link NonBlockingSynchronizer}.
      */
-    public NonBlockingBlocker() {
+    public NonBlockingSynchronizer() {
         this(null);
     }
 
     /**
-     * Initializes a new {@link NonBlockingBlocker} wrapping given {@link Runnable runnable}.
+     * Initializes a new {@link NonBlockingSynchronizer} wrapping given {@link Runnable runnable}.
      * 
-     * @param runnable The runnable to block
+     * @param runnable The runnable to synchronize
      */
-    public NonBlockingBlocker(final Runnable runnable) {
+    public NonBlockingSynchronizer(final Runnable runnable) {
         super();
         writeCounter = new AtomicInteger();
         running = new AtomicInteger();
+        runLock = new ReentrantLock();
+        this.runnable = runnable;
+        this.reentrant = new ConcurrentHashMap<Thread, Object>(2);
+    }
+
+    /**
+     * Gets the runnable.
+     * 
+     * @return The runnable
+     */
+    public Runnable getRunnable() {
+        return runnable;
+    }
+
+    /**
+     * Sets the runnable.
+     * 
+     * @param runnable The runnable to set
+     */
+    public void setRunnable(final Runnable runnable) {
         this.runnable = runnable;
     }
 
     /*-
-     * In opposite to NonBlockingSynchronizer enabling the 1 bit and disabling the 1 bit take place in
-     * different methods. blocks() sets the 1 bit. While set, no other thread is able to acquire().
-     * The unblock() methods disables the 1 bit, then allowing other threads to acquire.
+     * In opposite to NonBlockingBlocker enabling the 1 bit and disabling the 1 bit take place 
+     * in same setSynchronized() method. The setSynchronized() method just switches whether a
+     * thread which invokes acquire() must obtain a mutual-exclusive lock or not.
      */
 
-    public void block() {
-        final Thread cur = Thread.currentThread();
-        if (cur == owner) {
-            // This thread already blocks
-            return;
+    /**
+     * Sets whether to synchronize access or not.
+     * <p>
+     * Must not be called from a thread which already acquired this synchronizer.
+     * 
+     * @param synchronize <code>true</code> to synchronize access; otherwise <code>false</code>
+     * @return This non-blocking synchronizer with new synchronize policy applied
+     */
+    public Runnable setSynchronized(final boolean synchronize) {
+        if (reentrant.containsKey(Thread.currentThread())) {
+            throw new IllegalStateException("Current thread acquired synchronizer, but wants to alter sync mode");
         }
-        // Set blocked: Atomically increment by 1 by CAS operation. Wait for an even value if CAS operation fails.
+
         int value = writeCounter.get();
         while (!writeCounter.compareAndSet(value, value + 1)) {
             while (((value = writeCounter.get()) & 1) == 1) {
                 ;
             }
         }
-        owner = cur;
-        // Wait for other threads leaving
         while (running.get() > 0) {
             // Nothing to do
         }
-    }
-
-    public void unblock() {
-        if (null == owner || Thread.currentThread() != owner) {
-            throw new IllegalMonitorStateException("Thread " + Thread.currentThread().getName() + " does not own this blocker");
-        }
-        // Set unblocked
+        obtainLock = synchronize;
         writeCounter.getAndIncrement();
-        owner = null;
+        return this;
     }
 
-    public void acquire() {
-        if (owner != null && Thread.currentThread() == owner) {
-            // Owning thread!
-            return;
+    public Lock acquire() {
+        if (reentrant.containsKey(Thread.currentThread())) {
+            // Reentrant thread
+            return null;
         }
         int save = 0;
+        Lock lock = null;
         do {
             while (((save = writeCounter.get()) & 1) == 1) {
                 ;
             }
+            lock = obtainLock ? runLock : null;
         } while (save != writeCounter.get());
         running.incrementAndGet();
+        reentrant.put(Thread.currentThread(), PRESENT);
+        if (null != lock) {
+            lock.lock();
+        }
+        return lock;
     }
 
-    public void release() {
-        if (owner != null && Thread.currentThread() == owner) {
-            // Owning thread!
-            return;
+    public void release(final Lock lock) {
+        if (null != lock) {
+            lock.unlock();
         }
+        reentrant.remove(Thread.currentThread());
         running.decrementAndGet();
     }
 
+    /**
+     * Executes wrapped {@link Runnable runnable} according to applied synchronization policy.
+     * <p>
+     * This method does nothing if runnable is <code>null</code>.
+     */
     public void run() {
-        acquire();
+        final Lock lock = acquire();
         try {
-            if (runnable != null) {
+            if (null != runnable) {
                 runnable.run();
             }
         } finally {
-            release();
+            release(lock);
         }
+    }
+
+    public void synchronize() {
+        setSynchronized(true);
+    }
+
+    public void unsynchronize() {
+        setSynchronized(false);
     }
 
 }

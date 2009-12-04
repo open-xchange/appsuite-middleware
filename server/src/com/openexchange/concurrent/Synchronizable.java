@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajp13;
+package com.openexchange.concurrent;
 
 /**
  * {@link Synchronizable} - Simple interface to synchronize/unsynchronize access to implementing object through its {@link #synchronize()}

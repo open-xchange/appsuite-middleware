@@ -53,6 +53,9 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
+import com.openexchange.concurrent.Blocker;
+import com.openexchange.concurrent.ConcurrentBlocker;
+import com.openexchange.concurrent.NonBlockingBlocker;
 
 /**
  * {@link BlockableBufferedInputStream} - A blockable version of {@link BufferedInputStream}.

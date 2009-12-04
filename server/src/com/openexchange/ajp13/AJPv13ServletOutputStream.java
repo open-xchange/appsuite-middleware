@@ -54,6 +54,9 @@ import java.io.OutputStream;
 import java.net.SocketException;
 import java.util.concurrent.locks.Lock;
 import javax.servlet.ServletOutputStream;
+import com.openexchange.concurrent.NonBlockingSynchronizer;
+import com.openexchange.concurrent.Synchronizable;
+import com.openexchange.concurrent.Synchronizer;
 
 /**
  * {@link AJPv13ServletOutputStream} - The AJP's servlet output stream.

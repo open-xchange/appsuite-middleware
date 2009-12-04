@@ -53,6 +53,9 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.concurrent.locks.Lock;
+import com.openexchange.concurrent.NonBlockingSynchronizer;
+import com.openexchange.concurrent.Synchronizable;
+import com.openexchange.concurrent.Synchronizer;
 
 /**
  * {@link SynchronizableBufferedOutputStream} - A synchronizable version of {@link BufferedOutputStream}.

@@ -47,40 +47,47 @@
  *
  */
 
-package com.openexchange.ajp13;
+package com.openexchange.concurrent;
+
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
- * {@link Blocker} - Methods to block/unblock access to implementing object.
+ * {@link ConcurrentBlocker} - A concurrent blocker.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Blocker extends Blockable {
+public final class ConcurrentBlocker implements Blocker {
+
+    private final Lock rl;
+
+    private final Lock wl;
 
     /**
-     * Acquires the invoking resource and blocks if object's access is blocked.
-     * <p>
-     * <code>
-     * &nbsp;<b>blocker.acquire();</b><br>
-     * &nbsp;try {<br>
-     * &nbsp;&nbsp;...<br>
-     * &nbsp;} finally {<br>
-     * &nbsp;&nbsp;blocker.release(lock);<br>
-     * &nbsp;}<br>
-     * </code>
+     * Initializes a new {@link ConcurrentBlocker}.
      */
-    public void acquire();
+    public ConcurrentBlocker() {
+        super();
+        final ReadWriteLock rwl = new ReentrantReadWriteLock();
+        rl = rwl.readLock();
+        wl = rwl.writeLock();
+    }
 
-    /**
-     * Releases the invoking resource.
-     * <p>
-     * <code>
-     * &nbsp;blocker.acquire();<br>
-     * &nbsp;try {<br>
-     * &nbsp;&nbsp;...<br>
-     * &nbsp;} finally {<br>
-     * &nbsp;&nbsp;<b>blocker.release(lock);</b><br>
-     * &nbsp;}<br>
-     * </code>
-     */
-    public void release();
+    public void acquire() {
+        rl.lock();
+    }
+
+    public void release() {
+        rl.unlock();
+    }
+
+    public void block() {
+        wl.lock();
+    }
+
+    public void unblock() {
+        wl.unlock();
+    }
+
 }
