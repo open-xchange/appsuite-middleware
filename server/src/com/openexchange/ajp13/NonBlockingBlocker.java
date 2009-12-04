@@ -60,8 +60,6 @@ public final class NonBlockingBlocker implements Blocker, Runnable {
 
     private volatile Runnable runnable;
 
-    private final Object lock;
-
     private final AtomicInteger running;
 
     private final AtomicInteger writeCounter;
@@ -82,58 +80,44 @@ public final class NonBlockingBlocker implements Blocker, Runnable {
      */
     public NonBlockingBlocker(final Runnable runnable) {
         super();
-        lock = new Object();
         writeCounter = new AtomicInteger();
         running = new AtomicInteger();
         this.runnable = runnable;
     }
 
-    public void block() {
-        synchronized (lock) {
-            final Thread cur = Thread.currentThread();
-            if (cur == owner) {
-                // This thread already blocks
-                return;
-            }
-            while (null != owner) {
-                // Another thread already blocks, wait for being unblocked
-                try {
-                    lock.wait();
-                } catch (final InterruptedException e) {
-                    cur.interrupt();
-                    throw new IllegalMonitorStateException("Thread " + cur.getName() + " was interrupted.");
-                }
+    /*-
+     * In opposite to NonBlockingSynchronizer enabling the 1 bit and disabling the 1 bit take place in
+     * different methods. blocks() sets the 1 bit. While set, no other thread is able to acquire().
+     * The unblock() methods disables the 1 bit, then allowing other threads to acquire.
+     */
 
+    public void block() {
+        final Thread cur = Thread.currentThread();
+        if (cur == owner) {
+            // This thread already blocks
+            return;
+        }
+        // Set blocked: Atomically increment by 1 by CAS operation. Wait for an even value if CAS operation fails.
+        int value = writeCounter.get();
+        while (!writeCounter.compareAndSet(value, value + 1)) {
+            while (((value = writeCounter.get()) & 1) == 1) {
+                ;
             }
-            // Check if another thread still holds the block
-            int state = writeCounter.get();
-            while ((state & 1) == 1) {
-                /*
-                 * Blocked access in progress
-                 */
-                state = writeCounter.get();
-            }
-            // Set blocked
-            writeCounter.getAndIncrement();
-            owner = cur;
-            // Wait for other threads leaving
-            int i = running.get();
-            while (i > 0) {
-                i = running.get();
-            }
+        }
+        owner = cur;
+        // Wait for other threads leaving
+        while (running.get() > 0) {
+            // Nothing to do
         }
     }
 
     public void unblock() {
-        synchronized (lock) {
-            if (null == owner || Thread.currentThread() != owner) {
-                throw new IllegalMonitorStateException("Thread " + Thread.currentThread().getName() + " does not own this blocker");
-            }
-            // Set unblocked
-            writeCounter.getAndIncrement();
-            owner = null;
-            lock.notifyAll();
+        if (null == owner || Thread.currentThread() != owner) {
+            throw new IllegalMonitorStateException("Thread " + Thread.currentThread().getName() + " does not own this blocker");
         }
+        // Set unblocked
+        writeCounter.getAndIncrement();
+        owner = null;
     }
 
     public void acquire() {
@@ -141,13 +125,12 @@ public final class NonBlockingBlocker implements Blocker, Runnable {
             // Owning thread!
             return;
         }
-        int state = writeCounter.get();
-        while ((state & 1) == 1) {
-            /*
-             * Blocked access in progress
-             */
-            state = writeCounter.get();
-        }
+        int save = 0;
+        do {
+            while (((save = writeCounter.get()) & 1) == 1) {
+                ;
+            }
+        } while (save != writeCounter.get());
         running.incrementAndGet();
     }
 

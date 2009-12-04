@@ -115,6 +115,12 @@ public final class NonBlockingSynchronizer implements Synchronizer, Runnable {
         this.runnable = runnable;
     }
 
+    /*-
+     * In opposite to NonBlockingBlocker enabling the 1 bit and disabling the 1 bit take place 
+     * in same setSynchronized() method. The setSynchronized() method just switches whether a
+     * thread which invokes acquire() must obtain a mutual-exclusive lock or not.
+     */
+
     /**
      * Sets whether to synchronize access or not.
      * <p>
@@ -124,21 +130,22 @@ public final class NonBlockingSynchronizer implements Synchronizer, Runnable {
      * @return This non-blocking synchronizer with new synchronize policy applied
      */
     public Runnable setSynchronized(final boolean synchronize) {
-        synchronized (this) {
-            if (reentrant.containsKey(Thread.currentThread())) {
-                throw new IllegalStateException("Current thread acquired synchronizer, but wants to alter sync mode");
-            }
-            writeCounter.getAndIncrement();
-            try {
-                while (running.get() > 0) {
-                    // Nothing to do
-                }
-                obtainLock = synchronize;
-            } finally {
-                writeCounter.getAndIncrement();
-            }
-            return this;
+        if (reentrant.containsKey(Thread.currentThread())) {
+            throw new IllegalStateException("Current thread acquired synchronizer, but wants to alter sync mode");
         }
+
+        int value = writeCounter.get();
+        while (!writeCounter.compareAndSet(value, value + 1)) {
+            while (((value = writeCounter.get()) & 1) == 1) {
+                ;
+            }
+        }
+        while (running.get() > 0) {
+            // Nothing to do
+        }
+        obtainLock = synchronize;
+        writeCounter.getAndIncrement();
+        return this;
     }
 
     public Lock acquire() {
@@ -176,27 +183,13 @@ public final class NonBlockingSynchronizer implements Synchronizer, Runnable {
      * This method does nothing if runnable is <code>null</code>.
      */
     public void run() {
-        int save = 0;
-        Lock lock = null;
-        do {
-            while (((save = writeCounter.get()) & 1) == 1) {
-                ;
-            }
-            lock = obtainLock ? runLock : null;
-        } while (save != writeCounter.get());
-        running.incrementAndGet();
-        if (null != lock) {
-            lock.lock();
-        }
+        final Lock lock = acquire();
         try {
             if (null != runnable) {
                 runnable.run();
             }
         } finally {
-            if (null != lock) {
-                lock.unlock();
-            }
-            running.decrementAndGet();
+            release(lock);
         }
     }
 
