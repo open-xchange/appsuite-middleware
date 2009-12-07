@@ -268,6 +268,7 @@
         <chmod perm="755" file="${bin.install.copy.dir}/checkconfigconsistency"/>
         <chmod perm="755" file="${bin.install.copy.dir}/oxreport"/>
     	<chmod perm="755" file="${bin.install.copy.dir}/resetversion"/>
+    	<chmod perm="755" file="${bin.install.copy.dir}/runupdate"/>
     	<chmod perm="755" file="${bin.install.copy.dir}/schemasandversions"/>
     	<chmod perm="755" file="${bin.install.copy.dir}/forceupdatetask"/>
     	<chmod perm="755" file="${bin.install.copy.dir}/restoregabdefaults"/>
@@ -374,10 +375,11 @@
         <move tofile="${patch.bin.dir}/open-xchange-groupware" file="${patch.bin.dir}/open-xchange-groupware.in" overwrite="true"/>
         <move tofile="${patch.bin.dir}/oxreport" file="${patch.bin.dir}/oxreport.in" overwrite="true"/>
     	<move tofile="${patch.bin.dir}/resetversion" file="${patch.bin.dir}/resetversion.in" overwrite="true"/>
+    	<move tofile="${patch.bin.dir}/runupdate" file="${patch.bin.dir}/runupdate.in" overwrite="true"/>
     	<move tofile="${patch.bin.dir}/schemasandversions" file="${patch.bin.dir}/schemasandversions.in" overwrite="true"/>
     	<move tofile="${patch.bin.dir}/forceupdatetask" file="${patch.bin.dir}/forceupdatetask.in" overwrite="true"/>
     	<move tofile="${patch.bin.dir}/restoregabdefaults" file="${patch.bin.dir}/restoregabdefaults.in" overwrite="true"/>
-        <replace dir="${patch.bin.dir}" includes="checkconsistency checkconfigconsistency open-xchange-groupware oxreport resetversion schemasandversions forceupdatetask restoregabdefaults">
+        <replace dir="${patch.bin.dir}" includes="checkconsistency checkconfigconsistency open-xchange-groupware oxreport resetversion runupdate schemasandversions forceupdatetask restoregabdefaults">
             <replacefilter token="@oxfunctions@" value="${common.conf.install.dir}/oxfunctions.sh"/>
             <replacefilter token="@oxscriptconf@" value="${conf.subst.patch}/ox-scriptconf.sh"/>
             <replacefilter token="@prefix@" value="${prefix}"/>
