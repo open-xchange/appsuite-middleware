@@ -65,6 +65,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.mail.MessagingException;
 import javax.mail.Part;
 import javax.mail.internet.AddressException;
@@ -104,6 +106,7 @@ import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedPart;
 import com.openexchange.tools.ByteBuffers;
 import com.openexchange.tools.encoding.Charsets;
+import com.openexchange.tools.regex.MatcherReplacer;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
@@ -241,8 +244,8 @@ public final class MIMEStructureHandler implements StructureHandler {
         try {
             contentType = MIMEType2ExtMap.getContentType(new File(filename.toLowerCase()).getName()).toLowerCase();
         } catch (final Exception e) {
-            final Throwable t = new Throwable(
-                new StringBuilder("Unable to fetch content-type for '").append(filename).append("': ").append(e).toString());
+            final Throwable t =
+                new Throwable(new StringBuilder("Unable to fetch content-type for '").append(filename).append("': ").append(e).toString());
             LOG.warn(t.getMessage(), t);
         }
         /*
@@ -333,9 +336,8 @@ public final class MIMEStructureHandler implements StructureHandler {
                 nestedMail = (MailMessage) content;
             } else if (content instanceof InputStream) {
                 try {
-                    nestedMail = MIMEMessageConverter.convertMessage(new MimeMessage(
-                        MIMEDefaultSession.getDefaultSession(),
-                        (InputStream) content));
+                    nestedMail =
+                        MIMEMessageConverter.convertMessage(new MimeMessage(MIMEDefaultSession.getDefaultSession(), (InputStream) content));
                 } catch (final MessagingException e) {
                     throw MIMEMailException.handleMessagingException(e);
                 }
@@ -458,6 +460,10 @@ public final class MIMEStructureHandler implements StructureHandler {
 
     private static final String PRIMARY_TEXT = "text/";
 
+    private static final String TEXT_HTML = "text/htm";
+
+    private static final Pattern PAT_META_CT = Pattern.compile("<meta[^>]*?http-equiv=\"?content-type\"?[^>]*?>", Pattern.CASE_INSENSITIVE);
+
     private void fillBodyPart(final JSONObject bodyObject, final MailPart part, final JSONObject headerObject, final String id) throws MailException {
         try {
             bodyObject.put(KEY_ID, id);
@@ -468,7 +474,23 @@ public final class MIMEStructureHandler implements StructureHandler {
                 final ContentType contentType = part.getContentType();
                 if (contentType.startsWith(PRIMARY_TEXT)) {
                     // Set UTF-8 text
-                    bodyObject.put(DATA, readContent(part, contentType));
+                    if (contentType.startsWith(TEXT_HTML)) {
+                        final String html = readContent(part, contentType);
+                        final Matcher m = PAT_META_CT.matcher(html);
+                        final MatcherReplacer mr = new MatcherReplacer(m, html);
+                        final StringBuilder replaceBuffer = new StringBuilder(html.length());
+                        if (m.find()) {
+                            replaceBuffer.append("<meta content=\"").append(contentType.getBaseType().toLowerCase(Locale.ENGLISH));
+                            replaceBuffer.append("; charset=UTF-8\" http-equiv=\"Content-Type\" />");
+                            final String replacement = replaceBuffer.toString();
+                            replaceBuffer.setLength(0);
+                            mr.appendLiteralReplacement(replaceBuffer, replacement);
+                        }
+                        mr.appendTail(replaceBuffer);
+                        bodyObject.put(DATA, replaceBuffer.toString());
+                    } else {
+                        bodyObject.put(DATA, readContent(part, contentType));
+                    }
                     // Set header according to UTF-8 content without transfer-encoding
                     headerObject.remove(CONTENT_TRANSFER_ENCODING);
                     contentType.setCharsetParameter("UTF-8");
@@ -555,23 +577,23 @@ public final class MIMEStructureHandler implements StructureHandler {
 
     private static final HeaderName HN_DATE = HeaderName.valueOf("date");
 
-    private static final Set<HeaderName> PARAMETERIZED_HEADERS = new HashSet<HeaderName>(Arrays.asList(
-        HN_CONTENT_TYPE,
-        HeaderName.valueOf(CONTENT_DISPOSITION)));
+    private static final Set<HeaderName> PARAMETERIZED_HEADERS =
+        new HashSet<HeaderName>(Arrays.asList(HN_CONTENT_TYPE, HeaderName.valueOf(CONTENT_DISPOSITION)));
 
-    private static final Set<HeaderName> ADDRESS_HEADERS = new HashSet<HeaderName>(Arrays.asList(
-        HeaderName.valueOf("From"),
-        HeaderName.valueOf("To"),
-        HeaderName.valueOf("Cc"),
-        HeaderName.valueOf("Bcc"),
-        HeaderName.valueOf("Reply-To"),
-        HeaderName.valueOf("Sender"),
-        HeaderName.valueOf("Errors-To"),
-        HeaderName.valueOf("Resent-Bcc"),
-        HeaderName.valueOf("Resent-Cc"),
-        HeaderName.valueOf("Resent-From"),
-        HeaderName.valueOf("Resent-To"),
-        HeaderName.valueOf("Resent-Sender")));
+    private static final Set<HeaderName> ADDRESS_HEADERS =
+        new HashSet<HeaderName>(Arrays.asList(
+            HeaderName.valueOf("From"),
+            HeaderName.valueOf("To"),
+            HeaderName.valueOf("Cc"),
+            HeaderName.valueOf("Bcc"),
+            HeaderName.valueOf("Reply-To"),
+            HeaderName.valueOf("Sender"),
+            HeaderName.valueOf("Errors-To"),
+            HeaderName.valueOf("Resent-Bcc"),
+            HeaderName.valueOf("Resent-Cc"),
+            HeaderName.valueOf("Resent-From"),
+            HeaderName.valueOf("Resent-To"),
+            HeaderName.valueOf("Resent-Sender")));
 
     private static final MailDateFormat MAIL_DATE_FORMAT = new MailDateFormat();
 
