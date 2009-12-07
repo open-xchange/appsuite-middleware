@@ -550,7 +550,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
 
     private boolean guiPreferencesset = false;
 
-    private Map<String, Map<String, String>> userAttributes = new HashMap<String, Map<String, String>>();
+    private Map<String, Map<String, String>> userAttributes = null;
 
     private boolean userAttribtuesset;
     
@@ -4203,6 +4203,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         this.userfield20 = null;
         this.defaultSenderAddress = null;
         this.guiPreferences = null;
+        this.userAttributes = new HashMap<String, Map<String, String>>();
     }
 
     /**
@@ -4483,6 +4484,9 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     }
     
     public Map<String, Map<String, String>> getUserAttributes() {
+        if(userAttributes == null) {
+            userAttributes = new HashMap<String, Map<String, String>>();
+        }
         return userAttributes;
     }
     
@@ -4492,6 +4496,9 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     }
     
     public Map<String, String> getNamespace(String namespace) {
+        if(userAttributes == null) {
+            userAttributes = new HashMap<String, Map<String, String>>();
+        }
         Map<String, String> ns = userAttributes.get(namespace);
         if(ns == null) {
             ns = new HashMap<String, String>();
