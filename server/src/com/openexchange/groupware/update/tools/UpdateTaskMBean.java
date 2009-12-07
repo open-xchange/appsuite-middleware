@@ -172,9 +172,11 @@ public final class UpdateTaskMBean implements DynamicMBean {
                 if (param instanceof Integer) {
                     new UpdateProcess(((Integer) param).intValue()).run();
                 } else {
-                    try {
-                        new UpdateProcess(Integer.parseInt(param.toString())).run();
-                    } catch (final NumberFormatException e) {
+                    final String sParam = param.toString();
+                    final int parsed = parsePositiveInt(sParam);
+                    if (parsed >= 0) {
+                        new UpdateProcess(parsed).run();
+                    } else {
                         new UpdateProcess(UpdateTaskToolkit.getContextIdBySchema(param.toString())).run();
                     }
                 }
