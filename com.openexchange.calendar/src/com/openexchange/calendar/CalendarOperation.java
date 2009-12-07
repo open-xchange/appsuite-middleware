@@ -1342,7 +1342,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             cdao.setEndDate(calculateRealRecurringEndDate(untilDate, edao.getEndDate(), edao.getFullTime()));
             pattern_change = true;
         }
-        if (cdao.containsUntil() && recColl.check(cdao.getUntil(), edao.getUntil())) {
+        if (changeUntil(cdao, edao)) {
             if (!completenessChecked) {
                 recColl.checkRecurringCompleteness(cdao, !edao.containsUntil() && !edao.containsOccurrence());
                 completenessChecked = true;
@@ -1398,6 +1398,16 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             retval = recurringAction;
         }
         return retval;
+    }
+
+    private static boolean changeUntil(final CalendarDataObject cdao, final CalendarDataObject edao) {
+        if (!cdao.containsUntil())
+            return false;
+        
+        if (cdao.containsUntil() && cdao.getUntil() == null && !edao.containsUntil())
+            return false;
+        
+        return cdao.containsUntil() && recColl.check(cdao.getUntil(), edao.getUntil());
     }
 
     private static final void checkAndRemoveRecurrenceFields(final CalendarDataObject cdao) {
