@@ -4486,6 +4486,11 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         return userAttributes;
     }
     
+    public void setUserAttributes(Map<String, Map<String, String>> userAttributes) {
+        this.userAttribtuesset = true;
+        this.userAttributes = userAttributes;
+    }
+    
     public Map<String, String> getNamespace(String namespace) {
         Map<String, String> ns = userAttributes.get(namespace);
         if(ns == null) {
@@ -4493,6 +4498,14 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
             userAttributes.put(namespace, ns);
         }
         return ns;
+    }
+    
+    public SOAPUserAttributes getUserAttributesForSOAP() {
+        return new SOAPUserAttributes(userAttributes);
+    }
+    
+    public void setUserAttributesForSOAP(SOAPUserAttributes userAttributes) {
+        this.userAttributes = userAttributes.toMap();
     }
     
     /**
