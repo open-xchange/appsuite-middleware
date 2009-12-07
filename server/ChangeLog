@@ -1,3 +1,7 @@
+* 2009-12-07 - marcus.klein@open-xchange.com
+
+ - Bugfix #14655: Correctly handling SIEVE with TLS on several broken Cyrus versions.
+
 * 2009-12-01 - choeger@open-xchange.com
 
  - Bugfix #15007: dependency missing on package open-xchange-user-json
