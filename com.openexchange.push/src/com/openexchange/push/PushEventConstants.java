@@ -69,6 +69,12 @@ public final class PushEventConstants {
     public static final String TOPIC = "com/openexchange/push";
 
     /**
+     * Whether the content or the folder itself has changed. Default is <code>true</code>; meaning if not present the folder content has
+     * changed, but not the folder itself. Property value is of type <code>java.lang.Boolean</code>.
+     */
+    public static final String PROPERTY_CONTENT_RELATED = "com.openexchange.push.content-related";
+
+    /**
      * The context ID property of a push event. Property value is of type <code>java.lang.Integer</code>.
      */
     public static final String PROPERTY_CONTEXT = "com.openexchange.push.context";
