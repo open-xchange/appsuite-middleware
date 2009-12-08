@@ -88,11 +88,6 @@ public final class UUIDSessionIdGenerator extends SessionIdGenerator {
      * @return A UUID string
      */
     private static String randomUUID() {
-        final StringBuilder s = new StringBuilder(36).append(UUID.randomUUID());
-        s.deleteCharAt(23);
-        s.deleteCharAt(18);
-        s.deleteCharAt(13);
-        s.deleteCharAt(8);
-        return s.toString();
+        return UUIDs.getUnformattedString(UUID.randomUUID());
     }
 }
