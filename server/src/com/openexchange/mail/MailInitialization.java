@@ -60,6 +60,7 @@ import com.openexchange.mail.cache.MailAccessCache;
 import com.openexchange.mail.cache.MailCacheConfiguration;
 import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.config.MailPropertiesInit;
+import com.openexchange.mail.event.EventPool;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.text.HTMLProcessingInit;
 import com.openexchange.mail.text.parser.handler.HTMLFilterHandler;
@@ -150,6 +151,16 @@ public final class MailInitialization implements Initialization, CacheAvailabili
                     JSONMessageCache.releaseInstance();
                 }
             }, startedStack);
+            startUp(new Initialization() {
+
+                public void start() throws AbstractOXException {
+                    EventPool.initInstance();
+                }
+
+                public void stop() {
+                    EventPool.releaseInstance();
+                }
+            }, startedStack);
             /*
              * Add to cache availability registry
              */
@@ -197,6 +208,7 @@ public final class MailInitialization implements Initialization, CacheAvailabili
         /*
          * Stop global mail system
          */
+        EventPool.releaseInstance();
         JSONMessageCache.releaseInstance();
         JSONMessageCacheConfiguration.releaseInstance();
         MIMEType2ExtMap.reset();

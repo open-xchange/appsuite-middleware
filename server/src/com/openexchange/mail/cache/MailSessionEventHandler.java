@@ -55,8 +55,10 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.cache.OXCachingException;
 import com.openexchange.mail.MailSessionCache;
+import com.openexchange.mail.event.EventPool;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
@@ -182,6 +184,20 @@ public final class MailSessionEventHandler implements EventHandler {
             }
             if (DEBUG) {
                 LOG.debug(new StringBuilder("All session-related caches cleared for removed session ").append(session.getSessionID()).toString());
+            }
+            /*
+             * Pooled events: Last session removed?
+             */
+            final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+            if (null != sessiondService && 0 == sessiondService.getUserSessions(userId, contextId)) {
+                final EventPool eventPool = EventPool.getInstance();
+                if (null != eventPool) {
+                    eventPool.removeByUser(userId, contextId);
+                    if (DEBUG) {
+                        LOG.debug(new StringBuilder("Removed all pooled mail events for user ").append(userId).append(" in context ").append(
+                            contextId).toString());
+                    }
+                }
             }
         }
 

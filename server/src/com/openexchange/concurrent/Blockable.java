@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajp13;
+package com.openexchange.concurrent;
 
 /**
  * {@link Blockable} - Simple interface to block/unblock access to implementing object through its {@link #block()} and {@link #unblock()}

@@ -49,7 +49,6 @@
 
 package com.openexchange.concurrent;
 
-import com.openexchange.ajp13.Blockable;
 
 /**
  * {@link Blocker} - Methods to block/unblock access to implementing object.

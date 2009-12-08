@@ -52,6 +52,7 @@ package com.openexchange.ajp13;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import com.openexchange.concurrent.Blockable;
 import com.openexchange.concurrent.Blocker;
 import com.openexchange.concurrent.ConcurrentBlocker;
 import com.openexchange.concurrent.NonBlockingBlocker;
