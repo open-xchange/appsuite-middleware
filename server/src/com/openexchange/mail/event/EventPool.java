@@ -289,7 +289,7 @@ public final class EventPool implements Runnable {
         eventAdmin.postEvent(event);
         if (DEBUG_ENABLED) {
             LOG.debug(new StringBuilder(64).append("Notified ").append(pooledEvent.isContentRelated() ? "content-related" : "hierarchical").append(
-                " changed folder \"").append(pooledEvent.getFullname()).append("\" in account ").append(pooledEvent.getAccountId()).append(
+                "-wise changed folder \"").append(pooledEvent.getFullname()).append("\" in account ").append(pooledEvent.getAccountId()).append(
                 " of user ").append(pooledEvent.getUserId()).append(" in context ").append(pooledEvent.getContextId()).toString());
         }
     }
