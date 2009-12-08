@@ -55,6 +55,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import com.openexchange.database.AbstractCreateTableImpl;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
@@ -69,56 +70,62 @@ import com.openexchange.groupware.update.exception.UpdateException;
 import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 
 /**
- * {@link POP3CreateTableTask} - Inserts necessary tables to support missing POP3 features.
+ * {@link MALPollCreateTableTask} - Inserts necessary tables to support MAL Poll bundle features.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @OXExceptionSource(classId = Classes.UPDATE_TASK, component = EnumComponent.UPDATE)
-public class POP3CreateTableTask implements UpdateTask {
+public final class MALPollCreateTableTask extends AbstractCreateTableImpl implements UpdateTask {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(POP3CreateTableTask.class);
-
-    private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(POP3CreateTableTask.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MALPollCreateTableTask.class);
 
     public int addedWithVersion() {
-        return 42;
+        return 102;
     }
 
     public int getPriority() {
         return UpdateTaskPriority.HIGHEST.priority;
     }
 
-    private static final String getCreatePOP3IDsMapping() {
-        return "CREATE TABLE pop3_storage_ids (" + 
-        		"cid INT4 unsigned NOT NULL," + 
-        		"user INT4 unsigned NOT NULL," + 
-        		"id INT4 unsigned NOT NULL," + 
-        		"uidl VARCHAR(70) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
-        		"fullname VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
-        		"uid VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
-        		"PRIMARY KEY (cid, user, id, uidl)," + 
-        		"FOREIGN KEY (cid, user) REFERENCES user (cid, id)," + 
-        		"FOREIGN KEY (cid, user, id) REFERENCES user_mail_account (cid, user, id)" + 
-        		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+    private static String getCreateHashTable() {
+        return "CREATE TABLE malPollHash (" + 
+        " cid INT4 unsigned NOT NULL," + 
+        " user INT4 unsigned NOT NULL," + 
+        " id INT4 unsigned NOT NULL," + 
+        " fullname VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
+        " hash VARCHAR(33) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
+        " PRIMARY KEY (cid, user, id, fullname)," + 
+        " FOREIGN KEY (cid, user) REFERENCES user (cid, id)," + 
+        " FOREIGN KEY (cid, user, id) REFERENCES user_mail_account (cid, user, id)" + 
+        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
     }
 
-    private static final String getCreatePOP3DeletedContainer() {
-        return "CREATE TABLE pop3_storage_deleted (" + 
-        		"cid INT4 unsigned NOT NULL," + 
-        		"user INT4 unsigned NOT NULL," + 
-        		"id INT4 unsigned NOT NULL," + 
-        		"uidl VARCHAR(70) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
-        		"PRIMARY KEY (cid, user, id, uidl)," + 
-        		"FOREIGN KEY (cid, user) REFERENCES user (cid, id)," + 
-        		"FOREIGN KEY (cid, user, id) REFERENCES user_mail_account (cid, user, id)" + 
-        		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+    private static final String getCreateUIDsTable() {
+        return "CREATE TABLE malPollUid (" + 
+        " hash VARCHAR(33) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
+        " uid VARCHAR(70) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
+        " PRIMARY KEY (hash, uid(64))" + 
+        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+    }
+
+    @Override
+    public String[] getCreateStatements() {
+        return new String[] { getCreateHashTable(), getCreateUIDsTable() };
+    }
+
+    public String[] requiredTables() {
+        return new String[] { "user", "user_mail_account" };
+    }
+
+    public String[] tablesToCreate() {
+        return new String[] { "malPollHash", "malPollUid" };
     }
 
     public void perform(final Schema schema, final int contextId) throws AbstractOXException {
-        createTable("pop3_storage_ids", getCreatePOP3IDsMapping(), contextId);
-        createTable("pop3_storage_deleted", getCreatePOP3DeletedContainer(), contextId);
+        createTable("malPollHash", getCreateHashTable(), contextId);
+        createTable("malPollUid", getCreateUIDsTable(), contextId);
         if (LOG.isInfoEnabled()) {
-            LOG.info("UpdateTask 'POP3CreateTableTask' successfully performed!");
+            LOG.info("UpdateTask 'MALPollCreateTableTask' successfully performed!");
         }
     }
 
@@ -147,11 +154,6 @@ public class POP3CreateTableTask implements UpdateTask {
     }
 
     /**
-     * The object type "TABLE"
-     */
-    private static final String[] types = { "TABLE" };
-
-    /**
      * Check a table's existence
      * 
      * @param tableName The table name to check
@@ -162,7 +164,7 @@ public class POP3CreateTableTask implements UpdateTask {
     private static boolean tableExists(final String tableName, final DatabaseMetaData dbmd) throws SQLException {
         ResultSet resultSet = null;
         try {
-            resultSet = dbmd.getTables(null, null, tableName, types);
+            resultSet = dbmd.getTables(null, null, tableName, new String[] { "TABLE" });
             return resultSet.next();
         } finally {
             closeSQLStuff(resultSet, null);
@@ -171,6 +173,11 @@ public class POP3CreateTableTask implements UpdateTask {
 
     @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 1 }, msg = { "A SQL error occurred while performing task %1$s: %2$s." })
     private static UpdateException createSQLError(final SQLException e) {
-        return EXCEPTION.create(1, e, POP3CreateTableTask.class.getSimpleName(), e.getMessage());
+        return new UpdateExceptionFactory(MALPollCreateTableTask.class).create(
+            1,
+            e,
+            MALPollCreateTableTask.class.getSimpleName(),
+            e.getMessage());
     }
+
 }

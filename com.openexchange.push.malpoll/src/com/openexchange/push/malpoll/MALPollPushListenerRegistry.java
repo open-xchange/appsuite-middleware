@@ -160,7 +160,8 @@ public final class MALPollPushListenerRegistry {
     }
 
     /**
-     * Removes corresponding push listener.
+     * Removes specified session identifier associated with given user-context-pair and the push listener as well, if no more
+     * user-associated session identifiers are present.
      * 
      * @param contextId The context identifier
      * @param userId The user identifier
@@ -186,10 +187,31 @@ public final class MALPollPushListenerRegistry {
         return removeListener(key);
     }
 
+    /**
+     * Purges specified user's push listener and all of user-associated session identifiers from this registry.
+     * 
+     * @param contextId The context identifier
+     * @param userId The user identifier
+     * @return <code>true</code> if a push listener for given user-context-pair was found and purged; otherwise <code>false</code>
+     */
+    public boolean purgeUserPushListener(final int contextId, final int userId) {
+        final SimpleKey key = SimpleKey.valueOf(contextId, userId);
+        sessionIds.remove(key);
+        return removeListener(key);
+    }
+
     private boolean removeListener(final SimpleKey key) {
         final MALPollPushListener listener = map.remove(key);
         if (null != listener) {
             listener.close();
+            try {
+                MALPollDBUtility.dropMailIDs(key.cid, key.user, MALPollPushListener.getAccountId(), MALPollPushListener.getFolder());
+            } catch (final PushException e) {
+                org.apache.commons.logging.LogFactory.getLog(MALPollPushListenerRegistry.class).error(
+                    new StringBuilder("DB tables could not be cleansed for removed push listener. User=").append(key.user).append(
+                        ", context=").append(key.cid).toString(),
+                    e);
+            }
             return true;
         }
         return false;
@@ -242,9 +264,9 @@ public final class MALPollPushListenerRegistry {
             return new SimpleKey(cid, user);
         }
 
-        private final int cid;
+        final int cid;
 
-        private final int user;
+        final int user;
 
         private final int hash;
 

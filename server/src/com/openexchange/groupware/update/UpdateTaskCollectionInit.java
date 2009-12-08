@@ -371,6 +371,9 @@ public final class UpdateTaskCollectionInit implements Initialization {
             // Version 100
             // Adds necessary indexes to improve shared folder search for a user
             registry.addUpdateTask(new com.openexchange.groupware.update.tasks.FolderAddIndex4SharedFolderSearch());
+            // Version 102
+            // Adds necessary tables to support MAL-based poll
+            registry.addUpdateTask(new com.openexchange.groupware.update.tasks.MALPollCreateTableTask());
 
             // TODO: Enable virtual folder tree update task when needed
             // Version XY
