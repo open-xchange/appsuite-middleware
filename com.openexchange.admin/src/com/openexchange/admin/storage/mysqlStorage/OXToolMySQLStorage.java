@@ -1450,7 +1450,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement("SELECT mail FROM user WHERE cid = ? AND mail = ?");
+            stmt = con.prepareStatement("SELECT mail FROM user WHERE cid=? AND mail=?");
             stmt.setInt(1, ctx.getId().intValue());
             stmt.setString(2, mail);
             result = stmt.executeQuery();
@@ -1461,7 +1461,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             log.error("SQL Error", e);
             throw new StorageException(e);
         } finally {
-            com.openexchange.tools.sql.DBUtils.closeSQLStuff(result, stmt);
+            closeSQLStuff(result, stmt);
         }
     }
 
