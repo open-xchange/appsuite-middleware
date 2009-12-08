@@ -71,6 +71,7 @@
     <property name="xmlbundlejar" value="com.openexchange.xml.jar"/>
     <property name="threadpooljar" value="com.openexchange.threadpool.jar"/>
     <property name="publishjar" value="com.openexchange.publish.jar"/>
+	<property name="pushjar" value="com.openexchange.push.jar"/>
 
     <property name="activationjar" value="activation-1.1.1.jar"/>
     <property name="chardetjar" value="chardet-1.0.jar"/>
@@ -112,6 +113,7 @@
         <pathelement location="${bundlesdir}/${xmlBundle}/${xmlbundlejar}"/>
         <pathelement location="${bundlesdir}/${threadpooljar}"/>
         <pathelement location="${bundlesdir}/${publishjar}"/>
+    	<pathelement location="${bundlesdir}/${pushjar}"/>
 
         <pathelement location="${bundlesdir}/javax.activation/lib/${activationjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${commonscodecjar}"/>
