@@ -66,23 +66,37 @@ public abstract class AbstractPositiveAssertion extends AbstractAssertion{
     }
     
     public void check(Changes changes, Expectations expectations) throws Exception{
+        approachUsedForTest = null;
         check(generateDefaultAppointment(), changes, expectations);
     }
     
     public abstract void check(Appointment startAppointment, Changes changes, Expectations expectations) throws Exception;
     
-    protected void updateAndCheck(Appointment startAppointment, Changes changes, Expectations expectations) {
-        Appointment copy = startAppointment.clone();
+    protected void createAndUpdateAndCheck(Appointment startAppointment, Changes changes, Expectations expectations) {
         approachUsedForTest = "Create, then update";
-        create(copy);
+        Appointment copy = startAppointment.clone();
+        create(copy); //TODO replace remaining code with updateAndCheck(copy,changes,expectations); and test that
         update(copy, changes);
         checkViaGet(copy.getParentFolderID(), copy.getObjectID(), expectations);
         checkViaList(copy.getParentFolderID(), copy.getObjectID(), expectations);
     }
 
+    protected void updateAndCheck(Appointment startAppointment, Changes changes, Expectations expectations) {
+        if(null == approachUsedForTest)
+            approachUsedForTest = "Update existing";
+        Appointment base = new Appointment();
+        base.setLastModified(startAppointment.getLastModified());
+        base.setObjectID(startAppointment.getObjectID());
+        base.setParentFolderID(startAppointment.getParentFolderID());
+        
+        update(base, changes);
+        checkViaGet(base.getParentFolderID(), base.getObjectID(), expectations);
+        checkViaList(base.getParentFolderID(), base.getObjectID(), expectations);
+    }
+
     protected void createAndCheck(Appointment startAppointment, Changes changes, Expectations expectations) {
-        Appointment copy = startAppointment.clone();
         approachUsedForTest = "Create directly";
+        Appointment copy = startAppointment.clone();
         changes.update(copy);
         create(copy);
         if(manager.hasLastException())

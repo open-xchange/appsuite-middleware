@@ -55,22 +55,21 @@ import com.openexchange.test.CalendarTestManager;
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class PositiveAssertionOnUpdate extends AbstractPositiveAssertion {
+public class PositiveAssertionOnUpdateOnly extends AbstractPositiveAssertion {
 
-    public PositiveAssertionOnUpdate(CalendarTestManager manager, int folder){
+    public PositiveAssertionOnUpdateOnly(CalendarTestManager manager, int folder) {
         super(manager, folder);
     }
 
     @Override
-    public void check(Appointment startAppointment, Changes changes, Expectations expectations) {
+    public void check(Appointment startAppointment, Changes changes, Expectations expectations) throws Exception {
         if (!startAppointment.containsParentFolderID())
-            startAppointment.setParentFolderID(folder);
-
-        try {
-            updateAndCheck(startAppointment, changes, expectations);
-        } finally {
-            manager.cleanUp();
-        }
+            fail2("Cannot work with appointment lacking parent folder");
+        if (!startAppointment.containsObjectID())
+            fail2("Cannot work with appointment lacking ID");
+        if (!startAppointment.containsLastModified())
+            fail2("Cannot work with appointment lacking last_modified information");
+        updateAndCheck(startAppointment, changes, expectations);
     }
 
 }

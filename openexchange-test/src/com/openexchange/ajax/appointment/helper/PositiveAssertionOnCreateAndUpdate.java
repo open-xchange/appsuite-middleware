@@ -55,9 +55,9 @@ import com.openexchange.test.CalendarTestManager;
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class PositiveAssertionOnCreate extends AbstractPositiveAssertion {
+public class PositiveAssertionOnCreateAndUpdate extends AbstractPositiveAssertion {
 
-    public PositiveAssertionOnCreate(CalendarTestManager manager, int folder) {
+    public PositiveAssertionOnCreateAndUpdate(CalendarTestManager manager, int folder) {
         super(manager, folder);
     }
 
@@ -66,8 +66,7 @@ public class PositiveAssertionOnCreate extends AbstractPositiveAssertion {
         if (!startAppointment.containsParentFolderID())
             startAppointment.setParentFolderID(folder);
 
-        createAndCheck(startAppointment, changes, expectations);
-
+        createAndUpdateAndCheck(startAppointment, changes, expectations);
     }
 
 }
