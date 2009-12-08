@@ -241,70 +241,26 @@ public final class NotificationPool {
         public void run() {
             taskWriteLock.lock();
             try {
-                StringBuilder b = null;
                 /*
                  * Poll the head of the queue until it is null; meaning the queue has no more elements with an unexpired delay.
                  */
-                PooledNotification cur;
-                while ((cur = taskQueue.poll()) != null) {
-                    if (b == null) {
-                        b = new StringBuilder(2048);
-                    }
-                    /*
-                     * An expired pooled notification
-                     */
-                    taskMap.remove(cur);
-                    final EmailableParticipant p = cur.getParticipant();
-                    if (logger.isDebugEnabled()) {
-                        logger.debug(b.append("Found elapsed pooled notification for receiver ").append(p.email).toString());
-                        b.setLength(0);
-                    }
-                    final RenderMap renderMap = cur.getRenderMap();
-                    renderMap.applyLocale(cur.getLocale());
-                    renderMap.applyTimeZone(p.timeZone == null ? TimeZone.getDefault() : p.timeZone);
-                    /*
-                     * Check start/end if message is still allowed to be sent
-                     */
-                    final State state = cur.getState();
-                    final CalendarObject calendarObject = cur.getCalendarObject();
-                    if (ParticipantNotify.checkStartAndEndDate(calendarObject, state.getModule())) {
+                PooledNotification cur = taskQueue.poll();
+                if (null != cur) {
+                    final StringBuilder b = new StringBuilder(2048);
+                    do {
                         /*
-                         * Create message
+                         * An expired pooled notification
                          */
-                        final MailMessage mmsg;
-                        if (Participant.USER == p.type) {
-                            mmsg = ParticipantNotify.createUserMessage(
-                                p,
-                                (ParticipantNotify.userCanReadObject(p, calendarObject, cur.getSession())),
-                                cur.getTitle(),
-                                cur.getState().getAction(),
-                                state,
-                                cur.getLocale(),
-                                cur.getRenderMap(),
-                                true,
-                                b);
-                        } else {
-                            mmsg = ParticipantNotify.createParticipantMessage(
-                                p,
-                                cur.getTitle(),
-                                cur.getState().getAction(),
-                                state,
-                                cur.getLocale(),
-                                cur.getRenderMap(),
-                                true,
-                                b);
-                        }
-                        if (logger.isDebugEnabled()) {
-                            logger.debug(b.append("Pooled ").append((Types.APPOINTMENT == state.getModule() ? "Appointment" : "Task")).append(
-                                " (id = ").append(calendarObject.getObjectID()).append(") notification message generated for receiver ").append(
-                                p.email).toString());
-                            b.setLength(0);
-                        }
+                        taskMap.remove(cur);
                         /*
-                         * Send notification
+                         * Handle pooled notification
                          */
-                        ParticipantNotify.sendMessage(mmsg, cur.getSession(), calendarObject, state);
-                    }
+                        handlePooledNotification(cur, b);
+                        /*
+                         * Poll next
+                         */
+                        cur = taskQueue.poll();
+                    } while (null != cur);
                 }
             } catch (final Throwable t) {
                 logger.error(t.getMessage(), t);
@@ -312,6 +268,63 @@ public final class NotificationPool {
                 taskWriteLock.unlock();
             }
         }
-    }
+
+        private void handlePooledNotification(final PooledNotification cur, final StringBuilder b) {
+            final EmailableParticipant p = cur.getParticipant();
+            if (logger.isDebugEnabled()) {
+                logger.debug(b.append("Found elapsed pooled notification for receiver ").append(p.email).toString());
+                b.setLength(0);
+            }
+            final RenderMap renderMap = cur.getRenderMap();
+            renderMap.applyLocale(cur.getLocale());
+            renderMap.applyTimeZone(p.timeZone == null ? TimeZone.getDefault() : p.timeZone);
+            /*
+             * Check start/end if message is still allowed to be sent
+             */
+            final State state = cur.getState();
+            final CalendarObject calendarObject = cur.getCalendarObject();
+            if (ParticipantNotify.checkStartAndEndDate(calendarObject, state.getModule())) {
+                /*
+                 * Create message
+                 */
+                final MailMessage mmsg;
+                if (Participant.USER == p.type) {
+                    mmsg =
+                        ParticipantNotify.createUserMessage(
+                            p,
+                            (ParticipantNotify.userCanReadObject(p, calendarObject, cur.getSession())),
+                            cur.getTitle(),
+                            cur.getState().getAction(),
+                            state,
+                            cur.getLocale(),
+                            cur.getRenderMap(),
+                            true,
+                            b);
+                } else {
+                    mmsg =
+                        ParticipantNotify.createParticipantMessage(
+                            p,
+                            cur.getTitle(),
+                            cur.getState().getAction(),
+                            state,
+                            cur.getLocale(),
+                            cur.getRenderMap(),
+                            true,
+                            b);
+                }
+                if (logger.isDebugEnabled()) {
+                    logger.debug(b.append("Pooled ").append((Types.APPOINTMENT == state.getModule() ? "Appointment" : "Task")).append(
+                        " (id = ").append(calendarObject.getObjectID()).append(") notification message generated for receiver ").append(
+                        p.email).toString());
+                    b.setLength(0);
+                }
+                /*
+                 * Send notification
+                 */
+                ParticipantNotify.sendMessage(mmsg, cur.getSession(), calendarObject, state);
+            }
+        }
+
+    } // End of NotificationPoolTimerTask
 
 }
