@@ -163,6 +163,17 @@ public final class SessionHandler {
     }
 
     /**
+     * Gets all sessions associated with given user in specified context
+     * 
+     * @param userId The user ID
+     * @param contextId The context ID
+     * @return The wrapper objects for sessions
+     */
+    public static SessionControl[] getUserSessions(final int userId, final int contextId) {
+        return sessionData.getUserSessions(userId, contextId);
+    }
+
+    /**
      * Adds a new session containing given attributes to session container(s)
      * 
      * @param userId The user ID

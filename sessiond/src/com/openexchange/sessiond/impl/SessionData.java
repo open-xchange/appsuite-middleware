@@ -86,7 +86,7 @@ final class SessionData {
     /**
 	 * Default constructor.
 	 */
-	SessionData(int containerCount, int maxSessions) {
+	SessionData(final int containerCount, final int maxSessions) {
 		super();
 		this.maxSessions = maxSessions;
         for (int i = 0; i < containerCount; i++) {
@@ -134,7 +134,7 @@ final class SessionData {
     boolean isUserActive(final int userId, final Context context) {
         lock.lock();
         try {
-            for (SessionContainer container : sessionList) {
+            for (final SessionContainer container : sessionList) {
                 if (container.containsUser(userId, context.getContextId())) {
                     return true;
                 }
@@ -148,8 +148,8 @@ final class SessionData {
     SessionControl[] removeUserSessions(final int userId, final int contextId) {
         lock.lock();
         try {
-            List<SessionControl> retval = new ArrayList<SessionControl>();
-            for (SessionContainer container : sessionList) {
+            final List<SessionControl> retval = new ArrayList<SessionControl>();
+            for (final SessionContainer container : sessionList) {
                 retval.addAll(Arrays.asList(container.removeSessionsByUser(userId, contextId)));
             }
             return retval.toArray(new SessionControl[retval.size()]);
@@ -158,11 +158,24 @@ final class SessionData {
         }
     }
 
-    int getNumOfUserSessions(int userId, Context context) {
+    SessionControl[] getUserSessions(final int userId, final int contextId) {
+        lock.lock();
+        try {
+            final List<SessionControl> retval = new ArrayList<SessionControl>();
+            for (final SessionContainer container : sessionList) {
+                retval.addAll(Arrays.asList(container.getSessionsByUser(userId, contextId)));
+            }
+            return retval.toArray(new SessionControl[retval.size()]);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    int getNumOfUserSessions(final int userId, final Context context) {
         int count = 0;
         lock.lock();
         try {
-            for (SessionContainer container : sessionList) {
+            for (final SessionContainer container : sessionList) {
                 count += container.numOfUserSessions(userId, context.getContextId());
             }
         } finally {
@@ -171,13 +184,13 @@ final class SessionData {
         return count;
     }
 
-    SessionControl addSession(final Session session, int lifeTime, boolean noLimit) throws SessiondException {
+    SessionControl addSession(final Session session, final int lifeTime, final boolean noLimit) throws SessiondException {
         if (!noLimit && countSessions() > maxSessions) {
             throw new SessiondException(Code.MAX_SESSION_EXCEPTION);
         }
         lock.lock();
         try {
-            SessionControl control = sessionList.getFirst().put(session, lifeTime);
+            final SessionControl control = sessionList.getFirst().put(session, lifeTime);
             userList.getFirst().put(session.getLoginName(), session.getSessionID());
             randomList.getFirst().put(session.getRandomToken(), session.getSessionID());
             return control;
@@ -190,7 +203,7 @@ final class SessionData {
         lock.lock();
         try {
             int count = 0;
-            for (SessionContainer container : sessionList) {
+            for (final SessionContainer container : sessionList) {
                 count += container.size();
             }
             return count;
@@ -203,10 +216,10 @@ final class SessionData {
         lock.lock();
         try {
             for (int i = 0; i < sessionList.size(); i++) {
-                SessionContainer container = sessionList.get(i);
+                final SessionContainer container = sessionList.get(i);
                 if (container.containsSessionId(sessionId)) {
-                    SessionControl sessionControl = container.getSessionById(sessionId);
-                    Session session = sessionControl.getSession();
+                    final SessionControl sessionControl = container.getSessionById(sessionId);
+                    final Session session = sessionControl.getSession();
                     if (sessionControl.isValid()) {
                         sessionControl.updateTimestamp();
                         if (i > 0) {
@@ -237,14 +250,14 @@ final class SessionData {
         return null;
     }
 
-    SessionControl getSessionByRandomToken(String randomToken, long randomTimeout, String localIp) {
+    SessionControl getSessionByRandomToken(final String randomToken, final long randomTimeout, final String localIp) {
         lock.lock();
         try {
             for (int i = 0; i < randomList.size(); i++) {
-                Map<String, String> random = randomList.get(i);
+                final Map<String, String> random = randomList.get(i);
                 if (random.containsKey(randomToken)) {
                     final String sessionId = random.get(randomToken);
-                    SessionControl sessionControl = sessionList.get(i).getSessionById(sessionId);
+                    final SessionControl sessionControl = sessionList.get(i).getSessionById(sessionId);
                     if (sessionControl.getCreationTime() + randomTimeout >= System.currentTimeMillis()) {
                         final Session session = sessionControl.getSession();
                         session.removeRandomToken();
@@ -267,10 +280,10 @@ final class SessionData {
         lock.lock();
         try {
             for (int i = 0; i < sessionList.size(); i++) {
-                SessionContainer container = sessionList.get(i);
+                final SessionContainer container = sessionList.get(i);
                 if (container.containsSessionId(sessionId)) {
-                    SessionControl sessionControl = container.removeSessionById(sessionId);
-                    Session session = sessionControl.getSession();
+                    final SessionControl sessionControl = container.removeSessionById(sessionId);
+                    final Session session = sessionControl.getSession();
                     userList.get(i).remove(session.getLoginName());
                     randomList.get(i).remove(session.getRandomToken());
                     return sessionControl;
@@ -286,7 +299,7 @@ final class SessionData {
         lock.lock();
         try {
             final List<SessionControl> retval = new ArrayList<SessionControl>();
-            for (SessionContainer container : sessionList) {
+            for (final SessionContainer container : sessionList) {
                 retval.addAll(container.getSessionControls());
             }
             return retval;

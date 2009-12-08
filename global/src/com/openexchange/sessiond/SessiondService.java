@@ -62,7 +62,7 @@ import com.openexchange.sessiond.exception.SessiondException;
 public interface SessiondService {
 
     /**
-     * Creates a new session object in the sessiond storage with the given session parameters
+     * Creates a new session object in the sessiond storage with the given session parameters.
      * 
      * @param userId - The User ID
      * @param loginName - The login name of the user (e.g. <code>test</code> extracted from login <code>test@foo</code>)
@@ -85,7 +85,7 @@ public interface SessiondService {
     public void changeSessionPassword(String sessionId, String newPassword) throws SessiondException;
 
     /**
-     * Refreshes the timestamp of the session with the given session ID
+     * Refreshes the timestamp of the session with the given session ID.
      * 
      * @param sessionId - The Session ID
      * @return <code>true</code> if the session timestamp was updated or <code>false</code> if the session ID was invalid or expired
@@ -93,7 +93,7 @@ public interface SessiondService {
     public boolean refreshSession(final String sessionId);
 
     /**
-     * Removes the session with the given session ID
+     * Removes the session with the given session ID.
      * 
      * @param sessionId - The Session ID
      * @return <code>true</code> if the session was removed or <code>false</code> if the session ID doesn't exist
@@ -101,7 +101,7 @@ public interface SessiondService {
     public boolean removeSession(final String sessionId);
 
     /**
-     * Removes all sessions belonging to given user in specified context
+     * Removes all sessions belonging to given user in specified context.
      * 
      * @param userId The user ID
      * @param ctx The context
@@ -110,7 +110,16 @@ public interface SessiondService {
     public int removeUserSessions(final int userId, final Context ctx);
 
     /**
-     * Get the session object related to the given session ID
+     * Gets the number of active sessions belonging to given user in specified context.
+     * 
+     * @param userId The user ID
+     * @param contextId The context ID
+     * @return The number of active sessions belonging to given user in specified context
+     */
+    public int getUserSessions(final int userId, final int contextId);
+
+    /**
+     * Get the session object related to the given session ID.
      * 
      * @param sessionId - The Session ID
      * @return Return the session object or null if no session exists for the given ID or if the session is expired
@@ -118,7 +127,7 @@ public interface SessiondService {
     public Session getSession(final String sessionId);
 
     /**
-     * Get the session object related to the given random token
+     * Get the session object related to the given random token.
      * 
      * @param randomToken - The random token of the session
      * @param localIp - The new local IP to apply to session
@@ -138,7 +147,7 @@ public interface SessiondService {
     public Session getCachedSession(final String secret, final String localIP);
 
     /**
-     * The number of active sessions
+     * The number of active sessions.
      * 
      * @return Return the number of active sessions
      */

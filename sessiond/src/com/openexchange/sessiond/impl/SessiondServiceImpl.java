@@ -91,6 +91,10 @@ public class SessiondServiceImpl implements SessiondService {
         return SessionHandler.removeUserSessions(userId, ctx.getContextId(), true).length;
     }
 
+    public int getUserSessions(final int userId, final int contextId) {
+        return SessionHandler.getUserSessions(userId, contextId).length;
+    }
+
     public Session getSession(final String sessionId) {
         final SessionControl sessionControl = SessionHandler.getSession(sessionId);
         if (sessionControl != null) {
