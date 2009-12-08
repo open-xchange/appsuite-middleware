@@ -76,7 +76,7 @@ public class TestsForChangingAmongYearlyRecurrences extends ManagedAppointmentTe
         Expectations expectations = new Expectations(changes);
 
         positiveAssertionOnCreate.check(app, changes, expectations);
-        positiveAssertionOnUpdate.check(app, changes, expectations);
+        positiveAssertionOnCreateAndUpdate.check(app, changes, expectations);
     }
 
     public void testShouldFailChangingFromYearly1ToYearly2UsingOnlyAdditionalData() throws Exception {
@@ -102,7 +102,7 @@ public class TestsForChangingAmongYearlyRecurrences extends ManagedAppointmentTe
         Expectations expectations = new Expectations(changes);
 
         positiveAssertionOnCreate.check(app, changes, expectations);
-        positiveAssertionOnUpdate.check(app, changes, expectations);
+        positiveAssertionOnCreateAndUpdate.check(app, changes, expectations);
     }
 
     public void testShouldChangeFromYearly2ToYearly1WithNull() throws Exception {
@@ -119,7 +119,7 @@ public class TestsForChangingAmongYearlyRecurrences extends ManagedAppointmentTe
         expectations.put(Appointment.DAYS, 127);
 
         positiveAssertionOnCreate.check(app, changes, expectations);
-        positiveAssertionOnUpdate.check(app, changes, expectations);
+        positiveAssertionOnCreateAndUpdate.check(app, changes, expectations);
     }
 
     public void testShouldFailChangingFromYearly2ToYearly1WhileMissingMonth() throws Exception {

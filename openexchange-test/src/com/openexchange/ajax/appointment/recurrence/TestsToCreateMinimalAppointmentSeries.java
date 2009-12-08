@@ -85,7 +85,7 @@ public class TestsToCreateMinimalAppointmentSeries extends ManagedAppointmentTes
         Expectations expectations = new Expectations(changes);
 
         positiveAssertionOnCreate.check(changes, expectations);
-        positiveAssertionOnUpdate.check(changes, new Expectations(changes));
+        positiveAssertionOnCreateAndUpdate.check(changes, new Expectations(changes));
     }
 
     public void testShouldCreateWeeklyIntervalWithMinimalData() throws Exception {
@@ -97,7 +97,7 @@ public class TestsToCreateMinimalAppointmentSeries extends ManagedAppointmentTes
         expectations.put(Appointment.DAYS, 127); // Should default to 127 as per HTTP API
 
         positiveAssertionOnCreate.check(changes, expectations);
-        positiveAssertionOnUpdate.check(changes, new Expectations(changes));
+        positiveAssertionOnCreateAndUpdate.check(changes, new Expectations(changes));
     }
 
     public void testShouldCreateWeeklyIntervalWithDaysFieldDifferentThan127() throws Exception {
@@ -109,7 +109,7 @@ public class TestsToCreateMinimalAppointmentSeries extends ManagedAppointmentTes
         Expectations expectations = new Expectations(changes);
 
         positiveAssertionOnCreate.check(changes, expectations);
-        positiveAssertionOnUpdate.check(changes, new Expectations(changes));
+        positiveAssertionOnCreateAndUpdate.check(changes, new Expectations(changes));
     }
 
     public void testShouldFailCreatingMonthlyIntervalWithoutDayInMonthInfo() throws Exception {
@@ -141,7 +141,7 @@ public class TestsToCreateMinimalAppointmentSeries extends ManagedAppointmentTes
         Expectations expectations = new Expectations(changes);
 
         positiveAssertionOnCreate.check(changes, expectations);
-        positiveAssertionOnUpdate.check(changes, new Expectations(changes));
+        positiveAssertionOnCreateAndUpdate.check(changes, new Expectations(changes));
     }
 
     // first monday every month
@@ -155,7 +155,7 @@ public class TestsToCreateMinimalAppointmentSeries extends ManagedAppointmentTes
         Expectations expectations = new Expectations(changes);
 
         positiveAssertionOnCreate.check(changes, expectations);
-        positiveAssertionOnUpdate.check(changes, new Expectations(changes));
+        positiveAssertionOnCreateAndUpdate.check(changes, new Expectations(changes));
     }
 
     public void testShouldFailCreatingYearlyIntervalWithoutDayInMonthInfo() throws Exception {
@@ -198,7 +198,7 @@ public class TestsToCreateMinimalAppointmentSeries extends ManagedAppointmentTes
         Expectations expectations = new Expectations(changes);
 
         positiveAssertionOnCreate.check(changes, expectations);
-        positiveAssertionOnUpdate.check(changes, new Expectations(changes));
+        positiveAssertionOnCreateAndUpdate.check(changes, new Expectations(changes));
     }
 
     public void testShouldCreateYearly2IntervalWithMinimalData() throws Exception {
@@ -211,7 +211,7 @@ public class TestsToCreateMinimalAppointmentSeries extends ManagedAppointmentTes
         Expectations expectations = new Expectations(changes);
 
         positiveAssertionOnCreate.check(changes, expectations);
-        positiveAssertionOnUpdate.check(changes, new Expectations(changes));
+        positiveAssertionOnCreateAndUpdate.check(changes, new Expectations(changes));
     }
 
     public void testShouldFailCreatingIntervalWithoutIntervalInformation() throws Exception {

@@ -50,10 +50,19 @@
 package com.openexchange.ajax.appointment.recurrence;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import org.json.JSONException;
 import com.openexchange.ajax.appointment.helper.Changes;
 import com.openexchange.ajax.appointment.helper.Expectations;
+import com.openexchange.ajax.appointment.helper.OXError;
+import com.openexchange.ajax.user.UserResolver;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.container.ResourceParticipant;
+import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.resource.Resource;
+import com.openexchange.tools.Arrays;
 
 /**
  * These tests use the recurrence_position field to access change exceptions.
@@ -61,6 +70,14 @@ import com.openexchange.groupware.container.Appointment;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
+
+    private Changes generateDefaultChangeException() {
+        Changes changes = new Changes();
+        changes.put(Appointment.RECURRENCE_POSITION, 2);
+        changes.put(Appointment.START_DATE, D("31/12/2008 1:00", utc));
+        changes.put(Appointment.END_DATE, D("31/12/2008 2:00", utc));
+        return changes;
+    }
 
     public TestsForCreatingChangeExceptions(String name) {
         super(name);
@@ -90,15 +107,12 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
         Expectations expectations = new Expectations(changes);
         positiveAssertionOnChangeException.check(app, changes, expectations);
     }
-    
+
     public void testShouldAllowMovingTheSecondAppointmentBeforeTheFirst() throws OXException {
         Appointment app = generateDailyAppointment();
         app.setOccurrence(3);
 
-        Changes changes = new Changes();
-        changes.put(Appointment.RECURRENCE_POSITION, 2);
-        changes.put(Appointment.START_DATE, D("31/12/2008 1:00", utc));
-        changes.put(Appointment.END_DATE, D("31/12/2008 2:00", utc));
+        Changes changes = generateDefaultChangeException();
 
         Expectations expectations = new Expectations(changes);
         positiveAssertionOnChangeException.check(app, changes, expectations);
@@ -142,21 +156,164 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
         Expectations expectations = new Expectations(changes);
         positiveAssertionOnChangeException.check(app, changes, expectations);
     }
-    
+
     public void testShouldNotMixUpWholeDayChangeExceptionAndNormalSeries() throws OXException {
         Appointment app = generateDailyAppointment();
         app.setOccurrence(3);
+        app.setFullTime(true);
 
-        Changes changes = new Changes();
-        changes.put(Appointment.RECURRENCE_POSITION, 2);
+        Changes changes = generateDefaultChangeException();
+        changes.put(Appointment.FULL_TIME, false);
+
+        Expectations expectations = new Expectations(changes);
+        positiveAssertionOnChangeException.check(app, changes, expectations);
+
+        Appointment series = positiveAssertionOnChangeException.getSeries();
+        assertTrue("Series should stay full time even if exception does not", series.getFullTime());
+    }
+
+    public void testShouldKeepChangeInConfirmationLimitedToException() throws OXException {
+        Appointment app = generateDailyAppointment();
+        app.setOccurrence(3);
+
+        Changes changes = generateDefaultChangeException();
+
+        Expectations expectations = new Expectations(changes);
+        positiveAssertionOnChangeException.check(app, changes, expectations);
+
+        Appointment exception = positiveAssertionOnChangeException.getChangeException();
+        Appointment series = positiveAssertionOnChangeException.getSeries();
+        calendarManager.confirm(exception, Appointment.TENTATIVE, "Changing change exception only");
+
+        exception = calendarManager.get(exception);
+        series = calendarManager.get(series);
+
+        int actualConfirmationForException = exception.getUsers()[0].getConfirm();
+        int actualConfirmationForSeries = series.getUsers()[0].getConfirm();
+        assertEquals("Should change confirmation status for exception", Appointment.TENTATIVE, actualConfirmationForException);
+        assertTrue("Should not change confirmation status for series", Appointment.TENTATIVE != actualConfirmationForSeries);
+    }
+
+    public void testShouldKeepChangeToFulltimeLimitedToException() throws Exception {
+        Appointment app = generateDailyAppointment();
+        app.setOccurrence(3);
+
+        Changes changes = generateDefaultChangeException();
+        changes.put(Appointment.FULL_TIME, false);
+
+        Expectations expectations = new Expectations(changes);
+        positiveAssertionOnChangeException.check(app, changes, expectations);
+        app = positiveAssertionOnChangeException.getSeries(); // update app with object ID, folder ID and lastModified
+
+        Appointment exception = positiveAssertionOnChangeException.getChangeException();
+        changes = new Changes();
         changes.put(Appointment.FULL_TIME, true);
-        changes.put(Appointment.START_DATE, D("3/1/2008 0:00", utc));
-        changes.put(Appointment.END_DATE, D("3/1/2008 24:00", utc));
+
+        positiveAssertionOnUpdate.check(exception, changes, new Expectations(changes));
+
+        Appointment actual = calendarManager.get(app);
+        assertFalse("Making an exception a whole-day-appointment should not make the series that, too", actual.getFullTime());
+    }
+
+    public void testShouldKeepChangeInResourcesLimitedToException() throws Exception {
+        Appointment app = generateDailyAppointment();
+        app.setOccurrence(3);
+
+        Changes changes = generateDefaultChangeException();
 
         Expectations expectations = new Expectations(changes);
         positiveAssertionOnChangeException.check(app, changes, expectations);
         
         Appointment series = positiveAssertionOnChangeException.getSeries();
-        assertFalse("Series should not become full time if exception does" , series.getFullTime());
+        Appointment exception = positiveAssertionOnChangeException.getChangeException();
+        
+        changes = new Changes();
+        
+        Resource res = resourceManager.search("*").get(0);
+        
+        ResourceParticipant resParticipant = new ResourceParticipant(res);
+        Participant[] participants = new ResourceParticipant[]{resParticipant };
+        changes.put(Appointment.PARTICIPANTS, participants );
+        
+        positiveAssertionOnUpdate.check(exception, changes, new Expectations()); //yepp doing this only to perform update, not to compare fields at all
+        
+        exception = calendarManager.get(exception); //update exception from server
+        series = calendarManager.get(series); //update series from server
+        assertTrue("Should contain the resource in the change exception" , java.util.Arrays.asList(exception.getParticipants()).contains(resParticipant));
+        assertFalse("Should not contain the resource in the whole series" , java.util.Arrays.asList(series.getParticipants()).contains(resParticipant));
     }
+
+    @SuppressWarnings("deprecation")
+    public void testShouldKeepChangeInParticipantsLimitedToException() throws Exception {
+        Appointment app = generateDailyAppointment();
+        app.setOccurrence(3);
+
+        Changes changes = generateDefaultChangeException();
+
+        Expectations expectations = new Expectations(changes);
+        positiveAssertionOnChangeException.check(app, changes, expectations);
+        
+        Appointment series = positiveAssertionOnChangeException.getSeries();
+        Appointment exception = positiveAssertionOnChangeException.getChangeException();
+        
+        changes = new Changes();
+                
+        UserResolver resolver = new UserResolver(getClient());
+        User[] resolveUser = resolver.resolveUser(getSeconduser());
+        assertTrue("Precondition: Cannot start without having another user ready", resolveUser.length > 0);
+        UserParticipant userParticipant = new UserParticipant(resolveUser[0].getId());
+        Participant[] participants = new UserParticipant[]{userParticipant };
+        changes.put(Appointment.PARTICIPANTS, participants );
+        
+        positiveAssertionOnUpdate.check(exception, changes, new Expectations());
+        
+        exception = calendarManager.get(exception); //update exception from server
+        series = calendarManager.get(series); //update series from server
+        assertTrue("Should contain the participant in the change exception" , java.util.Arrays.asList(exception.getParticipants()).contains(userParticipant));
+        assertFalse("Should not contain the participant in the whole series" , java.util.Arrays.asList(series.getParticipants()).contains(userParticipant));
+     }
+
+    public void testShouldFailIfTryingToCreateADeleteExceptionOnTopOfAChangeException() throws OXException {
+        Appointment app = generateDailyAppointment();
+        app.setOccurrence(3);
+
+        int recurrencePos = 2;
+        Changes changes = new Changes();
+        changes.put(Appointment.RECURRENCE_POSITION, recurrencePos);
+        changes.put(Appointment.START_DATE, D("3/1/2008 0:00", utc));
+        changes.put(Appointment.END_DATE, D("3/1/2008 24:00", utc));
+
+        Expectations expectations = new Expectations(changes);
+        positiveAssertionOnChangeException.check(app, changes, expectations);
+
+        Appointment series = positiveAssertionOnChangeException.getSeries().clone();
+
+        calendarManager.createDeleteException(folder.getObjectID(), series.getObjectID(), recurrencePos);
+        assertTrue(
+            "Should get exception when trying to get create delete exception on top of change exception",
+            calendarManager.hasLastException());
+
+        OXError expected = new OXError("APP", 11);
+        Exception actual = calendarManager.getLastException();
+        assertTrue("Expecting " + expected + ", but got " + actual, expected.matches(actual));
+    }
+
+    public void testShouldCreateChangeExceptionIfCreatingOneOnADeleteException() throws OXException {
+        Appointment app = generateDailyAppointment();
+        app.setOccurrence(3);
+
+        calendarManager.insert(app);
+
+        int recurrencePos = 2;
+        calendarManager.createDeleteException(app, recurrencePos);
+
+        Changes changes = new Changes();
+        changes.put(Appointment.RECURRENCE_POSITION, recurrencePos);
+        changes.put(Appointment.START_DATE, D("3/1/2008 0:00", utc));
+        changes.put(Appointment.END_DATE, D("3/1/2008 24:00", utc));
+
+        Expectations expectations = new Expectations(changes);
+        positiveAssertionOnChangeException.check(app, changes, expectations);
+    }
+
 }

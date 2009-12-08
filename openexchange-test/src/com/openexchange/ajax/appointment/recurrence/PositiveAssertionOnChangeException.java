@@ -87,7 +87,9 @@ public class PositiveAssertionOnChangeException extends AbstractPositiveAssertio
     public void check(Appointment startAppointment, Changes changes, Expectations expectations) throws OXException {
         approachUsedForTest = "Create change exception";
         Appointment copy = startAppointment.clone();
-        manager.insert(copy);
+        
+        if(! startAppointment.containsObjectID())
+            manager.insert(copy);
 
         Appointment update = new Appointment();
         update.setLastModified(copy.getLastModified());
