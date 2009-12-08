@@ -56,6 +56,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
@@ -473,6 +474,18 @@ public final class OXFolderIteratorSQL {
         if (!userConfig.hasInfostore()) {
             condBuilder.append(" AND (ot.fuid != ").append(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID).append(')');
         }
+        {
+            final SQLStuff sqlStuff = getVisiblePublicFolders0(userId, memberInGroups, userConfig.getAccessibleModules(), ctx, null, null);
+            try {
+                if (!sqlStuff.rs.next()) {
+                    condBuilder.append(" AND (ot.fuid != ").append(FolderObject.SYSTEM_PUBLIC_FOLDER_ID).append(')');
+                }
+            } catch (final SQLException e) {
+                throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
+            } finally {
+                closeResources(sqlStuff.rs, sqlStuff.stmt, sqlStuff.closeCon ? sqlStuff.readCon : null, true, ctx);
+            }
+        }
         final String sqlSelectStr =
             getSQLUserVisibleFolders(
                 FolderObjectIterator.getFieldsForSQL(STR_OT),
@@ -643,6 +656,14 @@ public final class OXFolderIteratorSQL {
      * Returns an <code>SearchIterator</code> of <code>FolderObject</code> instances which are located beneath system's public folder.
      */
     private static SearchIterator<FolderObject> getVisiblePublicFolders(final int userId, final int[] groups, final int[] accessibleModules, final Context ctx, final Timestamp since, final Connection con) throws OXException, SearchIteratorException {
+        final SQLStuff sqlStuff = getVisiblePublicFolders0(userId, groups, accessibleModules, ctx, since, con);
+        return new FolderObjectIterator(sqlStuff.rs, sqlStuff.stmt, false, ctx, sqlStuff.readCon, sqlStuff.closeCon);
+    }
+
+    /**
+     * Returns the <code>SQLStuff</code> for subfolders which are located beneath system's public folder.
+     */
+    private static SQLStuff getVisiblePublicFolders0(final int userId, final int[] groups, final int[] accessibleModules, final Context ctx, final Timestamp since, final Connection con) throws OXException {
         final StringBuilder condBuilder =
             new StringBuilder(32).append("AND (ot.type = ").append(FolderObject.PUBLIC).append(") AND (ot.parent = ").append(
                 FolderObject.SYSTEM_PUBLIC_FOLDER_ID).append(')');
@@ -682,6 +703,7 @@ public final class OXFolderIteratorSQL {
             }
 
             rs = stmt.executeQuery();
+            return new SQLStuff(stmt, rs, readCon, closeCon);
         } catch (final SQLException e) {
             closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
             throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
@@ -692,9 +714,8 @@ public final class OXFolderIteratorSQL {
             closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
             throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, Integer.valueOf(contextId));
         }
-        return new FolderObjectIterator(rs, stmt, false, ctx, readCon, closeCon);
     }
-
+    
     /**
      * Returns an <code>SearchIterator</code> of <code>FolderObject</code> instances which offer a share right for given user and therefore
      * should appear right beneath system's shared folder in displayed folder tree.
@@ -1511,6 +1532,20 @@ public final class OXFolderIteratorSQL {
             throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, Integer.valueOf(contextId));
         }
         return new FolderObjectIterator(rs, stmt, false, ctx, readCon, closeCon);
+    }
+
+    private static final class SQLStuff {
+        final ResultSet rs;
+        final Statement stmt;
+        final Connection readCon;
+        final boolean closeCon;
+        SQLStuff(final Statement stmt, final ResultSet rs, final Connection readCon, final boolean closeCon) {
+            super();
+            this.stmt = stmt;
+            this.rs = rs;
+            this.closeCon = closeCon;
+            this.readCon = readCon;
+        }
     }
 
 }
