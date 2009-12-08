@@ -1,3 +1,7 @@
+* 2009-12-08 - choeger@open-xchange.com
+
+ - Bugfix #15045 -  missing common shell functions file
+
 * 2009-11-25 - marcus.klein@open-xchange.com
 
  - Bugfix #13634: Using same generic use checks as for creating normal users.

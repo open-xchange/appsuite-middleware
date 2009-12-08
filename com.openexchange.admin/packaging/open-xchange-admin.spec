@@ -60,6 +60,7 @@ Requires:  mysql >= 5.0.0
 %package -n	open-xchange-admin-client
 Group:          Applications/Productivity
 Summary:	The Open Xchange Admin Daemon RMI client library
+Requires:       open-xchange-admin >= @OXVERSION@
 
 
 %description -n open-xchange-admin-client

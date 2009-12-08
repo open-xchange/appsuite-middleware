@@ -16,7 +16,7 @@ Description: Open Xchange Admin Daemon containing commandline tools and provisio
 Package: open-xchange-admin-client
 Architecture: all
 Section: libs
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, open-xchange-admin (>= @OXVERSION@)
 Description: The Open Xchange Admin Daemon RMI client library
 
 Package: open-xchange-admin-lib
