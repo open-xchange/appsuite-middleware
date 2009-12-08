@@ -75,7 +75,6 @@ public class TestsForChangingAmongYearlyRecurrences extends ManagedAppointmentTe
 
         Expectations expectations = new Expectations(changes);
 
-        positiveAssertionOnCreate.check(app, changes, expectations);
         positiveAssertionOnCreateAndUpdate.check(app, changes, expectations);
     }
 
@@ -85,7 +84,6 @@ public class TestsForChangingAmongYearlyRecurrences extends ManagedAppointmentTe
         Changes changes = new Changes();
         changes.put(Appointment.DAYS, Appointment.MONDAY);
 
-        positiveAssertionOnCreate.check(app, changes, new Expectations(changes));
         negativeAssertionOnUpdate.check(app, changes, new OXError("APP", 999));
     }
 
@@ -101,7 +99,6 @@ public class TestsForChangingAmongYearlyRecurrences extends ManagedAppointmentTe
 
         Expectations expectations = new Expectations(changes);
 
-        positiveAssertionOnCreate.check(app, changes, expectations);
         positiveAssertionOnCreateAndUpdate.check(app, changes, expectations);
     }
 
@@ -118,7 +115,6 @@ public class TestsForChangingAmongYearlyRecurrences extends ManagedAppointmentTe
         Expectations expectations = new Expectations(changes);
         expectations.put(Appointment.DAYS, 127);
 
-        positiveAssertionOnCreate.check(app, changes, expectations);
         positiveAssertionOnCreateAndUpdate.check(app, changes, expectations);
     }
 
@@ -131,7 +127,6 @@ public class TestsForChangingAmongYearlyRecurrences extends ManagedAppointmentTe
         changes.put(Appointment.INTERVAL, 1);
         changes.put(Appointment.DAY_IN_MONTH, 1);
 
-        positiveAssertionOnCreate.check(app, changes, new Expectations(changes));
         negativeAssertionOnUpdate.check(app, changes, new OXError("APP",91));
     }
     
@@ -141,7 +136,6 @@ public class TestsForChangingAmongYearlyRecurrences extends ManagedAppointmentTe
         Changes changes = new Changes();
         changes.put(Appointment.DAYS, 127);
 
-        positiveAssertionOnCreate.check(app, changes, new Expectations(changes));
         negativeAssertionOnUpdate.check(app, changes, new OXError("APP", 999));
     }
 

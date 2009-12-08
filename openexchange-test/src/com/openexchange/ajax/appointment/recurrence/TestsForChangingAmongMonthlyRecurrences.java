@@ -63,20 +63,46 @@ public class TestsForChangingAmongMonthlyRecurrences extends ManagedAppointmentT
         super(name);
     }
 
-    public void testShouldChangeFromMonthly1ToMonthly2() throws Exception {
-        Appointment app = generateMonthlyAppointment();
-
+    private Changes generateMonthlyChanges() {
         Changes changes = new Changes();
         changes.put(Appointment.RECURRENCE_TYPE, Appointment.MONTHLY);
         changes.put(Appointment.INTERVAL, 1);
         changes.put(Appointment.DAY_IN_MONTH, 1);
+        return changes;
+    }
+
+    public void testShouldChangeFromMonthly1ToMonthly2WhenCreating() throws Exception {
+        Appointment app = generateMonthlyAppointment();
+
+        Changes changes = generateMonthlyChanges();
         changes.put(Appointment.DAYS, Appointment.MONDAY); // this is the actual change
 
         Expectations expectations = new Expectations(changes);
 
-        positiveAssertionOnCreate.check(app, changes, expectations);
         positiveAssertionOnCreateAndUpdate.check(app, changes, expectations);
     }
+
+
+    public void testShouldChangeFromMonthly1ToMonthly2WhenUpdating() throws Exception {
+        Appointment app = generateMonthlyAppointment();
+
+        Changes changes = generateMonthlyChanges();
+        changes.put(Appointment.DAYS, Appointment.MONDAY); // this is the actual change
+
+        Expectations expectations = new Expectations(changes);
+
+        positiveAssertionOnCreateAndUpdate.check(app, changes, expectations);
+    }
+
+    public void testShouldNotFailChangingFromMonthly1ToMonthly2() throws Exception {
+        Appointment app = generateMonthlyAppointment();
+
+        Changes changes = new Changes();
+        changes.put(Appointment.DAYS, Appointment.MONDAY);
+
+        positiveAssertionOnCreate.check(app, changes, new Expectations(changes));
+    }
+    
 
     public void testShouldFailChangingFromMonthly1ToMonthly2UsingOnlyAdditionalData() throws Exception {
         Appointment app = generateMonthlyAppointment();
@@ -84,11 +110,10 @@ public class TestsForChangingAmongMonthlyRecurrences extends ManagedAppointmentT
         Changes changes = new Changes();
         changes.put(Appointment.DAYS, Appointment.MONDAY);
 
-        positiveAssertionOnCreate.check(app, changes, new Expectations(changes));
         negativeAssertionOnUpdate.check(app, changes, new OXError("APP", 999));
     }
 
-    public void testShouldChangeFromMonthly2ToMonthly1With127() throws Exception {
+    public void testShouldChangeFromMonthly2ToMonthly1With127DuringCreation() throws Exception {
         Appointment app = generateMonthlyAppointment();
 
         Changes changes = new Changes();
@@ -100,10 +125,23 @@ public class TestsForChangingAmongMonthlyRecurrences extends ManagedAppointmentT
         Expectations expectations = new Expectations(changes);
 
         positiveAssertionOnCreate.check(app, changes, expectations);
-        positiveAssertionOnCreateAndUpdate.check(app, changes, expectations);
     }
 
-    public void testShouldChangeFromMonthly2ToMonthly1WithNull() throws Exception {
+    public void testShouldChangeFromMonthly2ToMonthly1With127WhenUpdating() throws Exception {
+        Appointment app = generateMonthlyAppointment();
+
+        Changes changes = new Changes();
+        changes.put(Appointment.RECURRENCE_TYPE, Appointment.MONTHLY);
+        changes.put(Appointment.DAYS, 127); // DUH!
+        changes.put(Appointment.INTERVAL, 1);
+        changes.put(Appointment.DAY_IN_MONTH, 1);
+
+        Expectations expectations = new Expectations(changes);
+
+        positiveAssertionOnCreateAndUpdate.check(app, changes, expectations);
+    }
+    
+    public void testShouldChangeFromMonthly2ToMonthly1WithNullDuringCreation() throws Exception {
         Appointment app = generateMonthlyAppointment();
 
         Changes changes = new Changes();
@@ -116,6 +154,20 @@ public class TestsForChangingAmongMonthlyRecurrences extends ManagedAppointmentT
         expectations.put(Appointment.DAYS, 127);
 
         positiveAssertionOnCreate.check(app, changes, expectations);
+    }    
+    
+    public void testShouldChangeFromMonthly2ToMonthly1WithNullWhenUpdating() throws Exception {
+        Appointment app = generateMonthlyAppointment();
+
+        Changes changes = new Changes();
+        changes.put(Appointment.RECURRENCE_TYPE, Appointment.MONTHLY);
+        changes.put(Appointment.DAYS, null);
+        changes.put(Appointment.INTERVAL, 1);
+        changes.put(Appointment.DAY_IN_MONTH, 1);
+
+        Expectations expectations = new Expectations(changes);
+        expectations.put(Appointment.DAYS, 127);
+
         positiveAssertionOnCreateAndUpdate.check(app, changes, expectations);
     }
 
@@ -125,7 +177,6 @@ public class TestsForChangingAmongMonthlyRecurrences extends ManagedAppointmentT
         Changes changes = new Changes();
         changes.put(Appointment.DAYS, 127);
 
-        positiveAssertionOnCreate.check(app, changes, new Expectations(changes));
         negativeAssertionOnUpdate.check(app, changes, new OXError("APP", 999));
     }
 
