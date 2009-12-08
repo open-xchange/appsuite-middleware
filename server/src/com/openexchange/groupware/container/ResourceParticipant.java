@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.container;
 
+import com.openexchange.resource.Resource;
+
 /**
  * {@link ResourceParticipant} - Represents a resource participant.
  * 
@@ -72,6 +74,17 @@ public class ResourceParticipant implements Participant, Comparable<Participant>
     public ResourceParticipant(final int id) {
         super();
         this.id = id;
+    }
+    
+    /**
+     * Constructor that takes values of from a given resource
+     * 
+     * @param res - a resource to be used as base
+     */
+    public ResourceParticipant(Resource res){
+        this(res.getIdentifier());
+        setDisplayName(res.getDisplayName());
+        setEmailAddress(res.getMail());
     }
 
     /**
