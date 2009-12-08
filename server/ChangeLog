@@ -1,3 +1,7 @@
+* 2009-12-08 - dennis.sieben@open-xchange.com
+
+ - Bugfix #15016: Added missing Apache Commons CLI library to CLT startup.
+
 * 2009-12-08 - thorben.betten@open-xchange.com
 
  - Bugfix #14937: MAL poll uses DB storage for remembered mail IDs.
