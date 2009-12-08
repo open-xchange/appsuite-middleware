@@ -57,13 +57,15 @@ import com.openexchange.ajax.appointment.helper.NegativeAssertionOnUpdate;
 import com.openexchange.ajax.appointment.helper.AbstractPositiveAssertion;
 import com.openexchange.ajax.appointment.helper.PositiveAssertionOnCreate;
 import com.openexchange.ajax.appointment.helper.PositiveAssertionOnDeleteException;
-import com.openexchange.ajax.appointment.helper.PositiveAssertionOnUpdate;
+import com.openexchange.ajax.appointment.helper.PositiveAssertionOnCreateAndUpdate;
+import com.openexchange.ajax.appointment.helper.PositiveAssertionOnUpdateOnly;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.test.CalendarTestManager;
 import com.openexchange.test.FolderTestManager;
+import com.openexchange.test.ResourceTestManager;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
@@ -74,10 +76,12 @@ public class ManagedAppointmentTest extends AppointmentTest {
 
     protected FolderTestManager folderManager;
 
+    protected ResourceTestManager resourceManager;
+
     protected FolderObject folder;
 
     protected TimeZone utc = TimeZone.getTimeZone("UTC");
-    
+
     protected TimeZone userTimeZone;
 
     protected NegativeAssertionOnUpdate negativeAssertionOnUpdate;
@@ -88,7 +92,9 @@ public class ManagedAppointmentTest extends AppointmentTest {
 
     protected AbstractPositiveAssertion positiveAssertionOnCreate;
 
-    protected PositiveAssertionOnUpdate positiveAssertionOnUpdate;
+    protected PositiveAssertionOnCreateAndUpdate positiveAssertionOnCreateAndUpdate;
+
+    protected PositiveAssertionOnUpdateOnly positiveAssertionOnUpdate;
 
     protected PositiveAssertionOnChangeException positiveAssertionOnChangeException;
 
@@ -103,6 +109,7 @@ public class ManagedAppointmentTest extends AppointmentTest {
         super.setUp();
         calendarManager = new CalendarTestManager(getClient());
         folderManager = new FolderTestManager(getClient());
+        resourceManager = new ResourceTestManager(getClient());
         UserValues values = getClient().getValues();
         userTimeZone = values.getTimeZone();
         this.folder = folderManager.generateFolder(
@@ -115,8 +122,9 @@ public class ManagedAppointmentTest extends AppointmentTest {
         this.negativeAssertionOnUpdate = new NegativeAssertionOnUpdate(calendarManager, folder.getObjectID());
         this.negativeAssertionOnCreate = new NegativeAssertionOnCreate(calendarManager, folder.getObjectID());
         this.negativeAssertionOnChangeException = new NegativeAssertionOnChangeException(calendarManager, folder.getObjectID());
-        this.positiveAssertionOnUpdate = new PositiveAssertionOnUpdate(calendarManager, folder.getObjectID());
+        this.positiveAssertionOnCreateAndUpdate = new PositiveAssertionOnCreateAndUpdate(calendarManager, folder.getObjectID());
         this.positiveAssertionOnCreate = new PositiveAssertionOnCreate(calendarManager, folder.getObjectID());
+        this.positiveAssertionOnUpdate = new PositiveAssertionOnUpdateOnly(calendarManager, folder.getObjectID());
         this.positiveAssertionOnChangeException = new PositiveAssertionOnChangeException(calendarManager, folder.getObjectID());
         this.positiveAssertionOnDeleteException = new PositiveAssertionOnDeleteException(calendarManager, folder.getObjectID());
 
@@ -130,7 +138,7 @@ public class ManagedAppointmentTest extends AppointmentTest {
             try {
                 folderManager.cleanUp();
             } finally {
-                super.tearDown();
+                resourceManager.cleanUp();
             }
         }
     }
@@ -141,7 +149,7 @@ public class ManagedAppointmentTest extends AppointmentTest {
         app.set(Appointment.INTERVAL, 1);
         return app;
     }
-    
+
     protected Appointment generateMonthlyAppointment() {
         Appointment app = AbstractAssertion.generateDefaultAppointment(folder.getObjectID());
         app.set(Appointment.RECURRENCE_TYPE, Appointment.MONTHLY);
