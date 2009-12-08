@@ -64,6 +64,8 @@ import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
+import com.openexchange.ajax.appointment.action.ConfirmRequest;
+import com.openexchange.ajax.appointment.action.ConfirmResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
@@ -103,6 +105,8 @@ public class CalendarTestManager implements TestManager {
     private boolean failOnError;
 
     private Exception lastException;
+    
+    private Date lastModification;
 
     public CalendarTestManager(AJAXClient client) {
         this.setClient(client);
@@ -153,6 +157,7 @@ public class CalendarTestManager implements TestManager {
     }
 
     public void setLastException(Exception lastException) {
+        lastException.printStackTrace();
         this.lastException = lastException;
     }
 
@@ -162,6 +167,14 @@ public class CalendarTestManager implements TestManager {
 
     public boolean hasLastException() {
         return lastException != null;
+    }
+
+    public void setLastModification(Date lastModification) {
+        this.lastModification = lastModification;
+    }
+
+    public Date getLastModification() {
+        return lastModification;
     }
 
     public int getPrivateFolder() throws AjaxException, IOException, SAXException, JSONException {
@@ -252,6 +265,13 @@ public class CalendarTestManager implements TestManager {
                 throw e;
             return null;
         }
+    }
+    
+    public void confirm(Appointment app, int status, String message){
+        ConfirmRequest confirmRequest = new ConfirmRequest(app.getParentFolderID(), app.getObjectID(), status, message, getFailOnError());
+        ConfirmResponse resp = execute(confirmRequest);
+        setLastResponse(resp);
+        setLastModification(resp.getTimestamp());
     }
 
     public List<Appointment> updates(final int folderId, final Date timestamp, final boolean recurrenceMaster) {
@@ -390,12 +410,13 @@ public class CalendarTestManager implements TestManager {
     }
 
     public void createDeleteException(int folder, int seriesId, int recurrencePos) {
-        DeleteRequest deleteRequest = new DeleteRequest(seriesId, folder, recurrencePos, new Date(Long.MAX_VALUE));
+        DeleteRequest deleteRequest = new DeleteRequest(seriesId, folder, recurrencePos, new Date(Long.MAX_VALUE), getFailOnError());
         extractInfo(execute(deleteRequest));
     }
 
     public void createDeleteException(Appointment master, int recurrencePos) {
         createDeleteException(master.getParentFolderID(), master.getObjectID(), recurrencePos);
+        master.setLastModified( getLastModification());
     }
 
     /*
@@ -435,6 +456,7 @@ public class CalendarTestManager implements TestManager {
 
     protected void extractInfo(AbstractAJAXResponse response) {
         setLastResponse(response);
+        setLastModification(response.getTimestamp());
         if (response.hasError())
             setLastException(response.getException());
     }
