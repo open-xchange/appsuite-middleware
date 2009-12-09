@@ -178,6 +178,39 @@ public final class UserWriter {
         
     }
 
+    private static final class WildcardAttributeUserFieldWriter implements UserFieldWriter {
+
+        private final String attributePrefix;
+
+        WildcardAttributeUserFieldWriter(final String attributePrefix) {
+            super();
+            this.attributePrefix = attributePrefix;
+        }
+
+        public void writeField(final JSONValuePutter jsonValue, final User user, final Contact contact) throws JSONException {
+            jsonValue.put(attributePrefix, toJSONValue(user.getAttributes()));
+        }
+
+        private Object toJSONValue(final Map<String, Set<String>> attributes) {
+            if (null == attributes || attributes.isEmpty()) {
+                return JSONObject.NULL;
+            }
+            final JSONArray ja = new JSONArray();
+            final int size = attributes.size();
+            final Iterator<Entry<String, Set<String>>> iter = attributes.entrySet().iterator();
+            for (int i = 0; i < size; i++) {
+                final Entry<String, Set<String>> entry = iter.next();
+                if (entry.getKey().startsWith(attributePrefix)) {
+                    for (final String attr : entry.getValue()) {
+                        ja.put(attr);
+                    }
+                }
+            }
+            return ja;
+        }
+        
+    }
+
     private static final UserFieldWriter UNKNOWN_FIELD_FFW = new UserFieldWriter() {
 
         public void writeField(final JSONValuePutter jsonValue, final User user, final Contact contact) throws JSONException {
@@ -1105,6 +1138,8 @@ public final class UserWriter {
         return STATIC_WRITERS_MAP.get(Integer.valueOf(field));
     }
 
+    private static final String ALL = "*";
+
     private static void addAttributeWriters(final Map<String, List<String>> attributeParameters, final List<UserFieldWriter> ufws) {
         if (null == attributeParameters || attributeParameters.isEmpty()) {
             return;
@@ -1116,14 +1151,24 @@ public final class UserWriter {
             final Entry<String, List<String>> entry = iter.next();
             final List<String> list = entry.getValue();
             if (!list.isEmpty()) {
-                final String prefix = entry.getKey();
-                final int pLen = prefix.length() + 1;
-                sb.setLength(0);
-                sb.append(prefix).append('/');
-                for (final String appendix : list) {
-                    sb.setLength(pLen);
-                    sb.append(appendix);
-                    ufws.add(new AttributeUserFieldWriter(sb.toString()));
+                if (1 == list.size() && ALL.equals(list.get(0))) {
+                    /*
+                     * Wildcard
+                     */
+                    ufws.add(new WildcardAttributeUserFieldWriter(entry.getKey()));
+                } else {
+                    /*
+                     * Non wildcard
+                     */
+                    final String prefix = entry.getKey();
+                    final int pLen = prefix.length() + 1;
+                    sb.setLength(0);
+                    sb.append(prefix).append('/');
+                    for (final String appendix : list) {
+                        sb.setLength(pLen);
+                        sb.append(appendix);
+                        ufws.add(new AttributeUserFieldWriter(sb.toString()));
+                    }
                 }
             }
         }

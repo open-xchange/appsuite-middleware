@@ -69,6 +69,8 @@ import com.openexchange.tools.servlet.AjaxException;
  */
 public abstract class AbstractUserAction implements AJAXActionService {
 
+    private static final String ALL = "*";
+
     /**
      * Initializes a new {@link AbstractUserAction}.
      */
@@ -87,8 +89,9 @@ public abstract class AbstractUserAction implements AJAXActionService {
      * @param expectedParameterNames The expected parameter names
      * @param request The request
      * @return The attribute parameters
+     * @throws AjaxException If parsing attribute parameters fails
      */
-    protected static Map<String, List<String>> getAttributeParameters(final Set<String> expectedParameterNames, final AJAXRequestData request) {
+    protected static Map<String, List<String>> getAttributeParameters(final Set<String> expectedParameterNames, final AJAXRequestData request) throws AjaxException {
         final Iterator<Entry<String, String>> nonMatchingParameters = request.getNonMatchingParameters(expectedParameterNames);
         if (!nonMatchingParameters.hasNext()) {
             return Collections.emptyMap();
@@ -102,9 +105,18 @@ public abstract class AbstractUserAction implements AJAXActionService {
                 list = new ArrayList<String>(4);
                 attributeParameters.put(key, list);
             }
-            final String[] strings = SPLIT.split(entry.getValue(), 0);
-            for (final String string : strings) {
-                list.add(string);
+            final String value = entry.getValue();
+            final int pos = value.indexOf('*');
+            if (pos < 0) {
+                final String[] strings = SPLIT.split(value, 0);
+                for (final String string : strings) {
+                    list.add(string);
+                }
+            } else {
+                if (value.length() > 1) {
+                    throw new AjaxException(AjaxException.Code.InvalidParameterValue, key, value);
+                }
+                list.add(ALL);
             }
         } while (nonMatchingParameters.hasNext());
         return attributeParameters;
