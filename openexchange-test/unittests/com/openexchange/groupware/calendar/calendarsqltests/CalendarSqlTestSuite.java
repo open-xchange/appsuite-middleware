@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
+import com.openexchange.groupware.calendar.calendarsqltests.untiltests.UntilTestSuite;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -105,6 +106,8 @@ public class CalendarSqlTestSuite {
         tests.addTestSuite(Bug14625Test.class);
         
         tests.addTestSuite(UserStory1906Test.class);
+        
+        tests.addTest(UntilTestSuite.suite());
         
         return tests;
     }
