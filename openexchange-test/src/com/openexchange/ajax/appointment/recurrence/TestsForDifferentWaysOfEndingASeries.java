@@ -50,9 +50,9 @@
 package com.openexchange.ajax.appointment.recurrence;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
-import com.openexchange.ajax.appointment.helper.Changes;
-import com.openexchange.ajax.appointment.helper.Expectations;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.Changes;
+import com.openexchange.groupware.container.Expectations;
 
 /**
  * OX uses different ways of limiting/ending a series: You can use an ending date or you can define a number of occurrences. This

@@ -50,10 +50,10 @@
 package com.openexchange.ajax.appointment.recurrence;
 
 import com.openexchange.ajax.appointment.helper.AbstractPositiveAssertion;
-import com.openexchange.ajax.appointment.helper.Changes;
-import com.openexchange.ajax.appointment.helper.Expectations;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.Changes;
+import com.openexchange.groupware.container.Expectations;
 import com.openexchange.test.CalendarTestManager;
 
 /**

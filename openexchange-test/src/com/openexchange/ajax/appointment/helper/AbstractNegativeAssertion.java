@@ -51,6 +51,7 @@ package com.openexchange.ajax.appointment.helper;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.Changes;
 import com.openexchange.test.CalendarTestManager;
 
 /**

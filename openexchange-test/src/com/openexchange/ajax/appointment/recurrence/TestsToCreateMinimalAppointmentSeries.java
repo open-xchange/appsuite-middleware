@@ -50,10 +50,10 @@
 package com.openexchange.ajax.appointment.recurrence;
 
 import java.util.Calendar;
-import com.openexchange.ajax.appointment.helper.Changes;
-import com.openexchange.ajax.appointment.helper.Expectations;
 import com.openexchange.ajax.appointment.helper.OXError;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.Changes;
+import com.openexchange.groupware.container.Expectations;
 
 /**
  * Find out which parameters are needed to create an appointment and which are not enough.
