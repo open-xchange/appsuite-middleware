@@ -191,9 +191,9 @@ public final class EventPool implements Runnable {
         blocker.acquire();
         try {
             for (final Iterator<PooledEvent> queueIter = queue.iterator(); queueIter.hasNext();) {
-                final PooledEvent pn = queueIter.next();
-                if (pn.equalsByUser(userId, contextId)) {
-                    map.remove(pn);
+                final PooledEvent pooledEvent = queueIter.next();
+                if (pooledEvent.equalsByUser(userId, contextId)) {
+                    map.remove(pooledEvent);
                     queueIter.remove();
                 }
             }
