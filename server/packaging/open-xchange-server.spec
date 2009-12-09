@@ -459,6 +459,8 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed Dec 09 2009 - dennis.sieben@open-xchange.com
+ - Bugfix #15049: Fixed folder display
 * Tue Dec 08 2009 - thorben.betten@open-xchange.com
  - Bugfix #14937: MAL poll uses DB storage for remembered mail IDs.
  - Bugfix #15005: Fixed display of public folder if it contains no subfolders.
