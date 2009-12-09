@@ -74,7 +74,7 @@ public abstract class AbstractCreateTableImpl implements CreateTableService {
                 stmt.execute(create);
             }
         } catch (SQLException e) {
-            DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
         }
