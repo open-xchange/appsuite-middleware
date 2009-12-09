@@ -56,6 +56,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import com.openexchange.api2.OXException;
 import com.openexchange.database.DBPoolingException;
@@ -90,6 +91,44 @@ public final class OXFolderUtility {
      */
     private OXFolderUtility() {
         super();
+    }
+
+    /**
+     * Checks for duplicate folder name considering locale-sensitive folder names.
+     * 
+     * @param parentFolderId The parent folder ID
+     * @param folderName The folder name to check
+     * @param locale The user's locale
+     * @param ctx The context
+     * @throws OXFolderException If a duplicate folder exists
+     */
+    public static void checki18nString(final int parentFolderId, final String folderName, final Locale locale, final Context ctx) throws OXFolderException {
+        if (FolderObject.SYSTEM_PUBLIC_FOLDER_ID == parentFolderId) {
+            if (FolderObject.getFolderString(FolderObject.SYSTEM_LDAP_FOLDER_ID, locale).equalsIgnoreCase(folderName)) {
+                final String parentFolderName =
+                    new StringBuilder(FolderObject.getFolderString(parentFolderId, locale)).append(" (").append(parentFolderId).append(')').toString();
+                /*
+                 * A duplicate folder exists
+                 */
+                throw new OXFolderException(
+                    OXFolderException.FolderCode.NO_DUPLICATE_FOLDER,
+                    parentFolderName,
+                    Integer.valueOf(ctx.getContextId()));
+            }
+            if (!OXFolderProperties.isIgnoreSharedAddressbook() && FolderObject.getFolderString(
+                FolderObject.SYSTEM_GLOBAL_FOLDER_ID,
+                locale).equalsIgnoreCase(folderName)) {
+                final String parentFolderName =
+                    new StringBuilder(FolderObject.getFolderString(parentFolderId, locale)).append(" (").append(parentFolderId).append(')').toString();
+                /*
+                 * A duplicate folder exists
+                 */
+                throw new OXFolderException(
+                    OXFolderException.FolderCode.NO_DUPLICATE_FOLDER,
+                    parentFolderName,
+                    Integer.valueOf(ctx.getContextId()));
+            }
+        }
     }
 
     /**
@@ -278,6 +317,100 @@ public final class OXFolderUtility {
     }
 
     /**
+     * Checks system folder permissions.
+     * 
+     * @param folderId The folder ID
+     * @param newPerms The update-operation permissions
+     * @param ctx The context
+     * @throws OXFolderException If changing system folder's permission is denied
+     */
+    public static void checkSystemFolderPermissions(final int folderId, final OCLPermission[] newPerms, final User user, final Context ctx) throws OXFolderException {
+        if (folderId >= FolderObject.MIN_FOLDER_ID) {
+            return;
+        }
+        final int[] allowedObjectPermissions = maxAllowedObjectPermissions(folderId);
+        final int allowedFolderPermission = maxAllowedFolderPermission(folderId);
+        final int admin = ctx.getMailadmin();
+        if (FolderObject.SYSTEM_LDAP_FOLDER_ID == folderId) {
+            for (int i = 0; i < newPerms.length; i++) {
+                final OCLPermission newPerm = newPerms[i];
+                if (newPerm.isGroupPermission()) {
+                    final String i18nName = FolderObject.getFolderString(folderId, user.getLocale());
+                    throw new OXFolderException(OXFolderException.FolderCode.NO_GROUP_PERMISSION, null == i18nName ? getFolderName(
+                        folderId,
+                        ctx) : i18nName, Integer.valueOf(ctx.getContextId()));
+                }
+                /*
+                 * Only context admin may hold administer right and folder visibility change only
+                 */
+                checkSystemFolderObjectPermissions(folderId, newPerm, admin, allowedObjectPermissions, allowedFolderPermission, user, ctx);
+            }
+        } else {
+            for (int i = 0; i < newPerms.length; i++) {
+                final OCLPermission newPerm = newPerms[i];
+                if (!newPerm.isGroupPermission() && newPerm.getEntity() != admin) {
+                    final String i18nName = FolderObject.getFolderString(folderId, user.getLocale());
+                    throw new OXFolderException(OXFolderException.FolderCode.NO_INDIVIDUAL_PERMISSION, null == i18nName ? getFolderName(
+                        folderId,
+                        ctx) : i18nName, Integer.valueOf(ctx.getContextId()));
+                }
+                /*
+                 * Only context admin may hold administer right and folder visibility change only
+                 */
+                checkSystemFolderObjectPermissions(folderId, newPerm, admin, allowedObjectPermissions, allowedFolderPermission, user, ctx);
+            }
+        }
+    }
+
+    private static void checkSystemFolderObjectPermissions(final int folderId, final OCLPermission toCheck, final int admin, final int[] allowedObjectPermissions, final int maxAllowedFolderPermission, final User user, final Context ctx) throws OXFolderException {
+        /*
+         * Only context admin may hold administer right and folder visibility change only
+         */
+        if ((toCheck.getEntity() == admin ? !toCheck.isFolderAdmin() : toCheck.isFolderAdmin()) || !checkObjectPermissions(
+            toCheck,
+            allowedObjectPermissions) || toCheck.getFolderPermission() > maxAllowedFolderPermission) {
+            final String i18nName = FolderObject.getFolderString(folderId, user.getLocale());
+            throw new OXFolderException(OXFolderException.FolderCode.FOLDER_VISIBILITY_PERMISSION_ONLY, null == i18nName ? getFolderName(
+                folderId,
+                ctx) : i18nName, Integer.valueOf(ctx.getContextId()));
+        }
+    }
+
+    private static boolean checkObjectPermissions(final OCLPermission p, final int[] allowedObjectPermissions) {
+        return (p.getReadPermission() == allowedObjectPermissions[0]) && (p.getWritePermission() == allowedObjectPermissions[1]) && (p.getDeletePermission() == allowedObjectPermissions[2]);
+    }
+
+    private static final int[] NO_OBJECT_PERMISSIONS =
+        { OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS };
+
+    private static int[] maxAllowedObjectPermissions(final int folderId) {
+        if (FolderObject.SYSTEM_LDAP_FOLDER_ID == folderId) {
+            return new int[] {
+                OCLPermission.READ_ALL_OBJECTS,
+                OXFolderProperties.isEnableInternalUsersEdit() ? OCLPermission.WRITE_OWN_OBJECTS : OCLPermission.NO_PERMISSIONS,
+                OCLPermission.NO_PERMISSIONS };
+        } else if (FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID == folderId) {
+            return NO_OBJECT_PERMISSIONS;
+        } else {
+            return NO_OBJECT_PERMISSIONS;
+        }
+    }
+
+    private static int maxAllowedFolderPermission(final int folderId) {
+        if (FolderObject.SYSTEM_LDAP_FOLDER_ID == folderId) {
+            return OCLPermission.READ_FOLDER;
+        } else if (FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID == folderId) {
+            return OCLPermission.CREATE_SUB_FOLDERS;
+        } else if (FolderObject.SYSTEM_PUBLIC_FOLDER_ID == folderId) {
+            return OCLPermission.CREATE_SUB_FOLDERS;
+        } else if (FolderObject.SYSTEM_INFOSTORE_FOLDER_ID == folderId) {
+            return OCLPermission.READ_FOLDER;
+        } else {
+            return OCLPermission.NO_PERMISSIONS;
+        }
+    }
+
+    /**
      * Gets the permissions without folder access by comparing specified storage-version permissions with update-operation permissions
      * 
      * @param newPerms The update-operation permissions
@@ -333,9 +466,8 @@ public final class OXFolderUtility {
         for (int i = 0; i < size; i++) {
             final OCLPermission assignedPerm = iter.next();
             if (!assignedPerm.isGroupPermission()) {
-                final OCLPermission maxApplicablePerm = getMaxApplicablePermission(folderObj, userConfigStorage.getUserConfiguration(
-                    assignedPerm.getEntity(),
-                    ctx));
+                final OCLPermission maxApplicablePerm =
+                    getMaxApplicablePermission(folderObj, userConfigStorage.getUserConfiguration(assignedPerm.getEntity(), ctx));
                 if (!isApplicable(maxApplicablePerm, assignedPerm)) {
                     throw new OXFolderException(
                         OXFolderException.FolderCode.UNAPPLICABLE_FOLDER_PERM,
@@ -348,12 +480,13 @@ public final class OXFolderUtility {
     }
 
     private static OCLPermission getMaxApplicablePermission(final FolderObject folderObj, final UserConfiguration userConfig) {
-        final EffectivePermission retval = new EffectivePermission(
-            userConfig.getUserId(),
-            folderObj.getObjectID(),
-            folderObj.getType(userConfig.getUserId()),
-            folderObj.getModule(),
-            userConfig);
+        final EffectivePermission retval =
+            new EffectivePermission(
+                userConfig.getUserId(),
+                folderObj.getObjectID(),
+                folderObj.getType(userConfig.getUserId()),
+                folderObj.getModule(),
+                userConfig);
         retval.setFolderAdmin(true);
         retval.setAllPermission(
             OCLPermission.ADMIN_PERMISSION,
@@ -427,7 +560,8 @@ public final class OXFolderUtility {
         folderObj.setPermissions(ocls);
     }
 
-    private static final int[] SORTED_STD_MODULES = { FolderObject.TASK, FolderObject.CALENDAR, FolderObject.CONTACT, FolderObject.UNBOUND };
+    private static final int[] SORTED_STD_MODULES =
+        { FolderObject.TASK, FolderObject.CALENDAR, FolderObject.CONTACT, FolderObject.UNBOUND };
 
     /**
      * Checks specified new folder module against parent folder

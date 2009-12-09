@@ -77,6 +77,7 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.OXCloneable;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
@@ -775,6 +776,8 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
         return hasVisibleSubfolders(user.getId(), user.getGroups(), userConfig, ctx);
     }
 
+    private static final int[] MODULES = { TASK, CALENDAR, CONTACT };
+
     /**
      * Checks if this folder has subfolders visible to specified user
      * 
@@ -788,29 +791,25 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
     public final boolean hasVisibleSubfolders(final int userId, final int[] groups, final UserConfiguration userConfig, final Context ctx) throws OXException {
         SearchIterator<FolderObject> iter = null;
         try {
-            if (objectId == SYSTEM_ROOT_FOLDER_ID) {
+            if (SYSTEM_ROOT_FOLDER_ID == objectId) {
                 return true;
-            } else if (objectId == SYSTEM_PUBLIC_FOLDER_ID) {
-                /*
-                 * At least 'internal users' folder is located beneath system public folder if user has contact module access
-                 */
-                if (userConfig.hasContact()) {
-                    return true;
-                }
+            } else if (SYSTEM_PUBLIC_FOLDER_ID == objectId) {
                 /*
                  * Search for visible subfolders
                  */
-                final int[] modules = { TASK, CALENDAR, CONTACT };
+                if (new OXFolderAccess(ctx).getFolderPermission(SYSTEM_LDAP_FOLDER_ID, userId, userConfig).isFolderVisible()) {
+                    return true;
+                }
                 return (iter =
                     OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfType(
                         userId,
                         groups,
                         userConfig.getAccessibleModules(),
                         FolderObject.PUBLIC,
-                        modules,
+                        MODULES,
                         SYSTEM_PUBLIC_FOLDER_ID,
                         ctx)).hasNext();
-            } else if (objectId == SYSTEM_INFOSTORE_FOLDER_ID) {
+            } else if (SYSTEM_INFOSTORE_FOLDER_ID == objectId) {
                 return userConfig.hasInfostore();
                 // return (iter =
                 // OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfType

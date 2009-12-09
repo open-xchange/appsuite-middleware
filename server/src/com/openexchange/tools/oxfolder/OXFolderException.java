@@ -490,7 +490,19 @@ public class OXFolderException extends OXException {
         /**
          * Duplicate permission defined for group %1$s. Only one permission per group is allowed.
          */
-        DUPLICATE_GROUP_PERMISSION("Duplicate permission defined for group %1$s. Only one permission per group is allowed.", Category.USER_INPUT, 80);
+        DUPLICATE_GROUP_PERMISSION("Duplicate permission defined for group %1$s. Only one permission per group is allowed.", Category.USER_INPUT, 80),
+        /**
+         * Only the folder visibility permission is allowed to be changed for folder %1$s in context %2$s.
+         */
+        FOLDER_VISIBILITY_PERMISSION_ONLY("Only the folder visibility permission is allowed to be changed for folder %1$s in context %2$s.", Category.PERMISSION, 81),
+        /**
+         * Only individual user permissions, but no group permissions are allowed for folder %1$s in context %2$s.
+         */
+        NO_GROUP_PERMISSION("Only individual user permissions, but no group permissions are allowed for folder %1$s in context %2$s.", Category.PERMISSION, 82),
+        /**
+         * No individual user permissions are allowed for folder %1$s in context %2$s.
+         */
+        NO_INDIVIDUAL_PERMISSION("No individual user permissions are allowed for folder %1$s in context %2$s.", Category.PERMISSION, 83);
 
         /**
          * Message of the exception.

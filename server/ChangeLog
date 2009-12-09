@@ -1,3 +1,7 @@
+* 2009-12-09 - dennis.sieben@open-xchange.com
+
+ - Bugfix #15049: Fixed folder display
+
 * 2009-12-08 - dennis.sieben@open-xchange.com
 
  - Bugfix #15016: Added missing Apache Commons CLI library to CLT startup.
