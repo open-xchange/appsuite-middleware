@@ -138,9 +138,14 @@ public class ManagedAppointmentTest extends AppointmentTest {
             try {
                 folderManager.cleanUp();
             } finally {
-                resourceManager.cleanUp();
+                try {
+                    resourceManager.cleanUp();
+                } finally {
+                    super.tearDown();
+                }
             }
         }
+        
     }
 
     protected Appointment generateDailyAppointment() {
