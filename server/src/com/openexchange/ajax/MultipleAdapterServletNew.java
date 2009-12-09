@@ -124,7 +124,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
      *            HTTP POST method); otherwise <code>false</code> to generate an appropriate {@link Object} from request's body
      * @throws IOException If an I/O error occurs
      */
-    protected void handle(final HttpServletRequest req, final HttpServletResponse resp, final boolean preferStream) throws IOException {
+    protected final void handle(final HttpServletRequest req, final HttpServletResponse resp, final boolean preferStream) throws IOException {
         final Response response = new Response();
         try {
             final String action = req.getParameter(PARAMETER_ACTION);
