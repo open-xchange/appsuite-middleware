@@ -61,16 +61,19 @@ import java.util.Locale;
 import java.util.Properties;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import javax.activation.DataHandler;
 import javax.mail.Address;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.NoSuchProviderException;
+import javax.mail.Part;
 import javax.mail.Transport;
 import javax.mail.Message.RecipientType;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
+import javax.mail.internet.ParseException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -311,7 +314,8 @@ public final class SMTPTransport extends MailTransport {
         return smtpConfig;
     }
 
-    private static final String ACK_TEXT = "Reporting-UA: OPEN-XCHANGE - WebMail\r\nFinal-Recipient: rfc822; #FROM#\r\n" + "Original-Message-ID: #MSG ID#\r\nDisposition: manual-action/MDN-sent-manually; displayed\r\n";
+    private static final String ACK_TEXT =
+        "Reporting-UA: OPEN-XCHANGE - WebMail\r\nFinal-Recipient: rfc822; #FROM#\r\n" + "Original-Message-ID: #MSG ID#\r\nDisposition: manual-action/MDN-sent-manually; displayed\r\n";
 
     private static final String CT_TEXT_PLAIN = "text/plain; charset=#CS#";
 
@@ -434,7 +438,7 @@ public final class SMTPTransport extends MailTransport {
                 transport.connect();
             }
             try {
-                smtpMessage.saveChanges();
+                saveChangesSafe(smtpMessage);
                 transport.sendMessage(smtpMessage, smtpMessage.getAllRecipients());
                 mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
             } finally {
@@ -467,7 +471,7 @@ public final class SMTPTransport extends MailTransport {
                     transport.connect();
                 }
                 try {
-                    smtpMessage.saveChanges();
+                    saveChangesSafe(smtpMessage);
                     transport.sendMessage(smtpMessage, recipients);
                     mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                 } finally {
@@ -529,7 +533,7 @@ public final class SMTPTransport extends MailTransport {
                     transport.connect();
                 }
                 try {
-                    smtpMessage.saveChanges();
+                    saveChangesSafe(smtpMessage);
                     /*
                      * TODO: Do encryption here
                      */
@@ -625,14 +629,86 @@ public final class SMTPTransport extends MailTransport {
     @Override
     protected ITransportProperties createNewMailProperties() throws MailException {
         try {
-            final MailAccountStorageService storageService = SMTPServiceRegistry.getServiceRegistry().getService(
-                MailAccountStorageService.class,
-                true);
+            final MailAccountStorageService storageService =
+                SMTPServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
             return new MailAccountSMTPProperties(storageService.getMailAccount(accountId, session.getUserId(), session.getContextId()));
         } catch (final ServiceException e) {
             throw new MailException(e);
         } catch (final MailAccountException e) {
             throw new MailException(e);
+        }
+    }
+
+    private static void saveChangesSafe(final SMTPMessage smtpMessage) throws MailException {
+        try {
+            try {
+                smtpMessage.saveChanges();
+            } catch (final javax.mail.internet.ParseException e) {
+                /*
+                 * Try to sanitize parameter list headers
+                 */
+                sanitizeContentTypeHeaders(smtpMessage, new ContentType());
+                /*
+                 * ... and retry
+                 */
+                smtpMessage.saveChanges();
+            }
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e);
+        }
+    }
+
+    private static void sanitizeContentTypeHeaders(final Part part, final ContentType sanitizer) throws MailException {
+        final DataHandler dh;
+        try {
+            dh = part.getDataHandler();
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e);
+        }
+        if (dh == null) {
+            return;
+        }
+        try {
+            final String type = dh.getContentType();
+            sanitizer.setContentType(type);
+            try {
+                /*
+                 * Try to parse with JavaMail Content-Type implementation
+                 */
+                new javax.mail.internet.ContentType(type);
+            } catch (final ParseException e) {
+                /*
+                 * Sanitize Content-Type header
+                 */
+                final String cts = sanitizer.toString();
+                try {
+                    new javax.mail.internet.ContentType(cts);
+                } catch (final ParseException pe) {
+                    /*
+                     * Still not parseable
+                     */
+                    throw new MailException(MailException.Code.INVALID_CONTENT_TYPE, e, type);
+                }
+                part.setDataHandler(new DataHandlerWrapper(dh, cts));
+                part.setHeader("Content-Type", cts);
+            }
+            /*
+             * Check for recursive invocation
+             */
+            if (sanitizer.startsWith("multipart/")) {
+                final Object o = dh.getContent();
+                if (o instanceof MimeMultipart) {
+                    final MimeMultipart mm = (MimeMultipart) o;
+                    final int count = mm.getCount();
+                    for (int i = 0; i < count; i++) {
+                        sanitizeContentTypeHeaders(mm.getBodyPart(i), sanitizer);
+                    }
+                }
+            }
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e);
+        } catch (final IOException e) {
+            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
         }
     }
 
