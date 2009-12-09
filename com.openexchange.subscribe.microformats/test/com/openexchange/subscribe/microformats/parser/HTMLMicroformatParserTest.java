@@ -55,12 +55,12 @@ import com.openexchange.subscribe.SubscriptionException;
 
 
 /**
- * {@link HTMLMicrofomatParserTest}
+ * {@link HTMLMicroformatParserTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class HTMLMicrofomatParserTest extends ParserTest {
+public class HTMLMicroformatParserTest extends ParserTest {
     public void testIncorrectXML() throws SubscriptionException {
         String text = "<html><head><meta attr=\"value\"></head><body><div class=\"ox_contact\"><span class=\"ox_givenName\">Bla</span>&</div>";
         List<Map<String, String>> result = parse(text);

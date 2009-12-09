@@ -49,7 +49,7 @@
 
 package com.openexchange.subscribe.microformats;
 
-import com.openexchange.subscribe.microformats.parser.HTMLMicrofomatParserTest;
+import com.openexchange.subscribe.microformats.parser.HTMLMicroformatParserTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -66,7 +66,7 @@ public final class UnitTests {
 
     public static final Test suite() {
         final TestSuite tests = new TestSuite();
-        tests.addTestSuite(HTMLMicrofomatParserTest.class);
+        tests.addTestSuite(HTMLMicroformatParserTest.class);
         tests.addTestSuite(MicroformatSubscribeServiceTest.class);
         return tests;
     }
