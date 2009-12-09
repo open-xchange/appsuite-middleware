@@ -236,6 +236,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         final boolean backup =
             (!UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx).isHardDeleteMsgs() && !(fullname.startsWith(mailAccess.getFolderStorage().getTrashFolder())));
         mailAccess.getFolderStorage().clearFolder(fullname, !backup);
+        postEvent(accountId, fullname, true);
+        final String trashFullname = prepareMailFolderParam(getTrashFolder(accountId)).getFullname();
+        if (backup) {
+            postEvent(accountId, trashFullname, true);
+        }
         try {
             /*
              * Update JSON cache
@@ -251,15 +256,14 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         } catch (final OXCachingException e) {
             LOG.error(e.getMessage(), e);
         }
-        final String trashFullname = prepareMailFolderParam(getTrashFolder(accountId)).getFullname();
         if (fullname.startsWith(trashFullname)) {
             // Special handling
             final MailFolder[] subf = mailAccess.getFolderStorage().getSubfolders(fullname, true);
             for (int i = 0; i < subf.length; i++) {
                 mailAccess.getFolderStorage().deleteFolder(subf[i].getFullname(), true);
             }
+            postEvent(accountId, trashFullname, false);
         }
-        postEvent(accountId, fullname, true);
         return true;
     }
 
