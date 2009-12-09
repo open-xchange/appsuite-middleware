@@ -80,6 +80,19 @@ import com.openexchange.tools.servlet.http.Tools;
  */
 public abstract class MultipleAdapterServletNew extends PermissionServlet {
 
+    private static final class HTTPRequestInputStreamProvider implements AJAXRequestData.InputStreamProvider {
+
+        private final HttpServletRequest req;
+
+        HTTPRequestInputStreamProvider(final HttpServletRequest req) {
+            this.req = req;
+        }
+
+        public InputStream getInputStream() throws IOException {
+            return req.getInputStream();
+        }
+    }
+
     private static final long serialVersionUID = -8060034833311074781L;
 
     private static final Log LOG = LogFactory.getLog(MultipleAdapterServletNew.class);
@@ -167,12 +180,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
             /*
              * Pass request's stream
              */
-            retval.setUploadStreamProvider(new AJAXRequestData.InputStreamProvider() {
-                
-                public InputStream getInputStream() throws IOException {
-                    return req.getInputStream();
-                }
-            });
+            retval.setUploadStreamProvider(new HTTPRequestInputStreamProvider(req));
         } else {
             /*
              * Guess an appropriate body object
