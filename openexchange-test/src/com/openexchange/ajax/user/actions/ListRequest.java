@@ -49,13 +49,21 @@
 
 package com.openexchange.ajax.user.actions;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Map.Entry;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 
 /**
  * {@link ListRequest}
- *
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class ListRequest extends AbstractUserRequest<ListResponse> {
@@ -64,10 +72,27 @@ public class ListRequest extends AbstractUserRequest<ListResponse> {
 
     private final int[] columns;
 
+    private Map<String, Set<String>> attributeParameters;
+
     public ListRequest(final int[] userIds, final int[] columns) {
         super();
         this.userIds = userIds;
         this.columns = columns;
+    }
+
+    /**
+     * Adds an attribute parameter; e.g prefix="com.custom.tpl",name="address" would be attribute "com.custom.tpl/address".
+     * 
+     * @param prefix The prefix
+     * @param name The name
+     */
+    public void putAttributeParameter(final String prefix, final String name) {
+        Set<String> set = attributeParameters.get(prefix);
+        if (null == set) {
+            set = new HashSet<String>(4);
+            attributeParameters.put(prefix, set);
+        }
+        set.add(name);
     }
 
     public Object getBody() throws JSONException {
@@ -83,10 +108,28 @@ public class ListRequest extends AbstractUserRequest<ListResponse> {
     }
 
     public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST),
-            new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns)
-        };
+        final List<Parameter> l = new ArrayList<Parameter>(6);
+        l.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST));
+        l.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
+        if (!attributeParameters.isEmpty()) {
+            for (final Entry<String, Set<String>> entry : attributeParameters.entrySet()) {
+                l.add(new Parameter(entry.getKey(), toCSV(entry.getValue())));
+            }
+        }
+        return l.toArray(new Parameter[l.size()]);
+    }
+
+    private static String toCSV(final Collection<String> c) {
+        final Iterator<String> iterator = c.iterator();
+        if (iterator.hasNext()) {
+            final StringBuilder sb = new StringBuilder(32);
+            sb.append(iterator.next());
+            while (iterator.hasNext()) {
+                sb.append(',').append(iterator.next());
+            }
+            return sb.toString();
+        }
+        return "";
     }
 
     public ListParser getParser() {
