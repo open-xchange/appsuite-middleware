@@ -21,3 +21,4 @@ Import-Package: com.openexchange.ajax,
  org.osgi.framework;version="1.3.0",
  org.osgi.service.http,
  org.osgi.util.tracker;version="1.3.3"
+Bundle-Activator: com.openexchange.sso.osgi.SSOActivator
