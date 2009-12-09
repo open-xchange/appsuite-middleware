@@ -1,3 +1,9 @@
+open-xchange-activation (1.1.1-18) unstable; urgency=low
+
+  * Public PTF 2009-12-11
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed,  9 Dec 2009 09:08:02 +0100
+
 open-xchange-activation (1.1.1-17) unstable; urgency=low
 
   * Public PTF 2009-12-02

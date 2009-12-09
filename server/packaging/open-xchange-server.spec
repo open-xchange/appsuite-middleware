@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 6
+%define		ox_release 7
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -459,6 +459,13 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Tue Dec 08 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14937: MAL poll uses DB storage for remembered mail IDs.
+ - Bugfix #15005: Fixed display of public folder if it contains no subfolders.
+* Tue Dec 08 2009 - dennis.sieben@open-xchange.com
+ - Bugfix #15016: Added missing Apache Commons CLI library to CLT startup.
+* Mon Dec 07 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14655: Correctly handling SIEVE with TLS on several broken Cyrus versions.
 * Tue Dec 01 2009 - choeger@open-xchange.com
  - Bugfix #15007: dependency missing on package open-xchange-user-json
 * Fri Nov 27 2009 - thorben.betten@open-xchange.com
