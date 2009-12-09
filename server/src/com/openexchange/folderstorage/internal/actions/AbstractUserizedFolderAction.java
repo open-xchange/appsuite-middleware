@@ -212,11 +212,12 @@ public abstract class AbstractUserizedFolderAction extends AbstractAction {
             final String id = folder.getID();
             final FolderStorage folderStorage = getOpenedStorage(id, treeId, storageParameters, openedStorages);
             final ContentType contentType = folder.getContentType();
-            final boolean isDefault = id.equals(folderStorage.getDefaultFolderID(getUser(), treeId, contentType, storageParameters));
-            if (isDefault) {
+            if (id.equals(folderStorage.getDefaultFolderID(getUser(), treeId, contentType, storageParameters))) {
+                // Default folder of current user
                 userizedFolder.setDefault(true);
                 userizedFolder.setDefaultType(contentType.getModule());
             } else {
+                // Not a default folder
                 userizedFolder.setDefault(false);
                 userizedFolder.setDefaultType(0);
             }

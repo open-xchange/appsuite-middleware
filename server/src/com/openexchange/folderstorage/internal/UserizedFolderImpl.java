@@ -74,6 +74,10 @@ public final class UserizedFolderImpl implements UserizedFolder {
 
     private Locale locale;
 
+    private Boolean deefault;
+
+    private Integer defaultType;
+
     /**
      * Initializes a new {@link UserizedFolderImpl} from specified folder.
      * 
@@ -260,7 +264,7 @@ public final class UserizedFolderImpl implements UserizedFolder {
     }
 
     public boolean isDefault() {
-        return folder.isDefault();
+        return null == deefault ? folder.isDefault() : deefault.booleanValue();
     }
 
     public void setCapabilities(final int capabilities) {
@@ -268,7 +272,7 @@ public final class UserizedFolderImpl implements UserizedFolder {
     }
 
     public void setDefault(final boolean deefault) {
-        folder.setDefault(deefault);
+        this.deefault = Boolean.valueOf(deefault);
     }
 
     public void setDeleted(final int deleted) {
@@ -276,11 +280,11 @@ public final class UserizedFolderImpl implements UserizedFolder {
     }
 
     public void setDefaultType(final int defaultType) {
-        folder.setDefaultType(defaultType);
+        this.defaultType = Integer.valueOf(defaultType);
     }
 
     public int getDefaultType() {
-        return folder.getDefaultType();
+        return null == defaultType ? folder.getDefaultType() : defaultType.intValue();
     }
 
     public void setNew(final int nu) {
