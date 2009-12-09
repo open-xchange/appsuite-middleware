@@ -260,7 +260,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             // Special handling
             final MailFolder[] subf = mailAccess.getFolderStorage().getSubfolders(fullname, true);
             for (int i = 0; i < subf.length; i++) {
-                mailAccess.getFolderStorage().deleteFolder(subf[i].getFullname(), true);
+                final String subFullname = subf[i].getFullname();
+                mailAccess.getFolderStorage().deleteFolder(subFullname, true);
+                postEvent(accountId, subFullname, false);
             }
             postEvent(accountId, trashFullname, false);
         }
