@@ -51,6 +51,7 @@ package com.openexchange.ajax.user.actions;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -72,12 +73,13 @@ public class ListRequest extends AbstractUserRequest<ListResponse> {
 
     private final int[] columns;
 
-    private Map<String, Set<String>> attributeParameters;
+    private final Map<String, Set<String>> attributeParameters;
 
     public ListRequest(final int[] userIds, final int[] columns) {
         super();
         this.userIds = userIds;
         this.columns = columns;
+        attributeParameters = new HashMap<String, Set<String>>(4);
     }
 
     /**
