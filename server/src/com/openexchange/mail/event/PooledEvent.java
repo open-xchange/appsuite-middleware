@@ -102,6 +102,7 @@ public final class PooledEvent implements Delayed {
         result = prime * result + contextId;
         result = prime * result + ((fullname == null) ? 0 : fullname.hashCode());
         result = prime * result + userId;
+        result = prime * result + (contentRelated ? 1 : 0);
         hash = result;
     }
 
@@ -170,6 +171,9 @@ public final class PooledEvent implements Delayed {
             return false;
         }
         if (userId != other.userId) {
+            return false;
+        }
+        if (contentRelated != other.contentRelated) {
             return false;
         }
         return true;
