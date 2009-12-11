@@ -55,7 +55,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
@@ -66,54 +67,64 @@ import com.openexchange.sessiond.exception.SessiondException.Code;
 
 /**
  * {@link SessionData}
- *
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 final class SessionData {
 
     private static final Log LOG = LogFactory.getLog(SessionData.class);
 
-	private final LinkedList<SessionContainer> sessionList;
+    private final LinkedList<SessionContainer> sessionList;
 
     private final LinkedList<Map<String, String>> userList;
 
     private final LinkedList<Map<String, String>> randomList;
 
-    private final Lock lock;
+    private final Lock rlock;
+
+    private final Lock wlock;
 
     private final int maxSessions;
 
     /**
-	 * Default constructor.
-	 */
-	SessionData(final int containerCount, final int maxSessions) {
-		super();
-		sessionList = new LinkedList<SessionContainer>();
-		userList = new LinkedList<Map<String, String>>();
-		randomList = new LinkedList<Map<String, String>>();
-		lock = new ReentrantLock();
-		this.maxSessions = maxSessions;
+     * Default constructor.
+     */
+    SessionData(final int containerCount, final int maxSessions) {
+        super();
+        sessionList = new LinkedList<SessionContainer>();
+        userList = new LinkedList<Map<String, String>>();
+        randomList = new LinkedList<Map<String, String>>();
+        final ReadWriteLock rwlock = new ReentrantReadWriteLock();
+        rlock = rwlock.readLock();
+        wlock = rwlock.writeLock();
+        this.maxSessions = maxSessions;
         for (int i = 0; i < containerCount; i++) {
             sessionList.add(0, new SessionContainer(maxSessions));
             userList.add(0, new NonBlockingHashMap<String, String>(maxSessions));
             randomList.add(0, new NonBlockingHashMap<String, String>(maxSessions));
         }
 
-	}
+    }
 
-	void clear() {
-	    lock.lock();
-	    try {
-	        sessionList.clear();
-	        userList.clear();
-	        randomList.clear();
-	    } finally {
-	        lock.unlock();
-	    }
-	}
+    void clear() {
+        /*
+         * A write access to lists
+         */
+        wlock.lock();
+        try {
+            sessionList.clear();
+            userList.clear();
+            randomList.clear();
+        } finally {
+            wlock.unlock();
+        }
+    }
 
     List<SessionControl> rotate() {
-        lock.lock();
+        /*
+         * A write access to lists
+         */
+        wlock.lock();
         try {
             sessionList.addFirst(new SessionContainer(maxSessions));
             userList.addFirst(new NonBlockingHashMap<String, String>(maxSessions));
@@ -124,7 +135,7 @@ final class SessionData {
             retval.addAll(sessionList.removeLast().getSessionControls());
             return retval;
         } finally {
-            lock.unlock();
+            wlock.unlock();
         }
     }
 
@@ -136,7 +147,10 @@ final class SessionData {
      * @return <code>true</code> if given user in specified context has an active session; otherwise <code>false</code>
      */
     boolean isUserActive(final int userId, final Context context) {
-        lock.lock();
+        /*
+         * A read-only access to session list
+         */
+        rlock.lock();
         try {
             for (final SessionContainer container : sessionList) {
                 if (container.containsUser(userId, context.getContextId())) {
@@ -144,13 +158,16 @@ final class SessionData {
                 }
             }
         } finally {
-            lock.unlock();
+            rlock.unlock();
         }
         return false;
     }
 
     SessionControl[] removeUserSessions(final int userId, final int contextId) {
-        lock.lock();
+        /*
+         * Only iterating session list, no write access
+         */
+        rlock.lock();
         try {
             final List<SessionControl> retval = new ArrayList<SessionControl>();
             for (final SessionContainer container : sessionList) {
@@ -158,12 +175,15 @@ final class SessionData {
             }
             return retval.toArray(new SessionControl[retval.size()]);
         } finally {
-            lock.unlock();
+            rlock.unlock();
         }
     }
 
     SessionControl[] getUserSessions(final int userId, final int contextId) {
-        lock.lock();
+        /*
+         * A read-only access to session list
+         */
+        rlock.lock();
         try {
             final List<SessionControl> retval = new ArrayList<SessionControl>();
             for (final SessionContainer container : sessionList) {
@@ -171,19 +191,22 @@ final class SessionData {
             }
             return retval.toArray(new SessionControl[retval.size()]);
         } finally {
-            lock.unlock();
+            rlock.unlock();
         }
     }
 
     int getNumOfUserSessions(final int userId, final Context context) {
+        /*
+         * A read-only access to session list
+         */
         int count = 0;
-        lock.lock();
+        rlock.lock();
         try {
             for (final SessionContainer container : sessionList) {
                 count += container.numOfUserSessions(userId, context.getContextId());
             }
         } finally {
-            lock.unlock();
+            rlock.unlock();
         }
         return count;
     }
@@ -192,19 +215,25 @@ final class SessionData {
         if (!noLimit && countSessions() > maxSessions) {
             throw new SessiondException(Code.MAX_SESSION_EXCEPTION);
         }
-        lock.lock();
+        /*
+         * A read-only access to lists
+         */
+        rlock.lock();
         try {
             final SessionControl control = sessionList.getFirst().put(session, lifeTime);
             userList.getFirst().put(session.getLoginName(), session.getSessionID());
             randomList.getFirst().put(session.getRandomToken(), session.getSessionID());
             return control;
         } finally {
-            lock.unlock();
+            rlock.unlock();
         }
     }
 
     int countSessions() {
-        lock.lock();
+        /*
+         * A read-only access to session list
+         */
+        rlock.lock();
         try {
             int count = 0;
             for (final SessionContainer container : sessionList) {
@@ -212,12 +241,15 @@ final class SessionData {
             }
             return count;
         } finally {
-            lock.unlock();
+            rlock.unlock();
         }
     }
 
     SessionControl getSession(final String sessionId) {
-        lock.lock();
+        /*
+         * Read-only access
+         */
+        rlock.lock();
         try {
             for (int i = 0; i < sessionList.size(); i++) {
                 final SessionContainer container = sessionList.get(i);
@@ -248,14 +280,17 @@ final class SessionData {
                 }
             }
         } finally {
-            lock.unlock();
+            rlock.unlock();
         }
         LOG.info("Session not found. ID: " + sessionId);
         return null;
     }
 
     SessionControl getSessionByRandomToken(final String randomToken, final long randomTimeout, final String localIp) {
-        lock.lock();
+        /*
+         * A read-only access to session & random list
+         */
+        rlock.lock();
         try {
             for (int i = 0; i < randomList.size(); i++) {
                 final Map<String, String> random = randomList.get(i);
@@ -275,13 +310,16 @@ final class SessionData {
                 }
             }
         } finally {
-            lock.unlock();
+            rlock.unlock();
         }
         return null;
     }
 
     SessionControl clearSession(final String sessionId) {
-        lock.lock();
+        /*
+         * A write access
+         */
+        wlock.lock();
         try {
             for (int i = 0; i < sessionList.size(); i++) {
                 final SessionContainer container = sessionList.get(i);
@@ -294,13 +332,16 @@ final class SessionData {
                 }
             }
         } finally {
-            lock.unlock();
+            wlock.unlock();
         }
         return null;
     }
 
     List<SessionControl> getSessions() {
-        lock.lock();
+        /*
+         * A read.only access
+         */
+        rlock.lock();
         try {
             final List<SessionControl> retval = new ArrayList<SessionControl>();
             for (final SessionContainer container : sessionList) {
@@ -308,7 +349,7 @@ final class SessionData {
             }
             return retval;
         } finally {
-            lock.unlock();
+            rlock.unlock();
         }
     }
 }
