@@ -94,6 +94,8 @@ public final class SessionHandler {
 
     private static final Log LOG = LogFactory.getLog(SessionHandler.class);
 
+    private static final boolean INFO = LOG.isInfoEnabled();
+
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
     private static ScheduledTimerTask sessiondTimer;
@@ -155,7 +157,7 @@ public final class SessionHandler {
                 }
             }
         }
-        if (LOG.isInfoEnabled()) {
+        if (INFO) {
             LOG.info(new StringBuilder(64).append(propagate ? "Remote" : "Local").append(" removal of user sessions: User=").append(userId).append(
                 ", Context=").append(contextId).toString());
         }
@@ -193,20 +195,25 @@ public final class SessionHandler {
                 throw new SessiondException(Code.MAX_SESSION_PER_USER_EXCEPTION, null, I(userId), I(context.getContextId()));
             }
         }
-
         final String sessionId = sessionIdGenerator.createSessionId(loginName, clientHost);
-        final String secret = sessionIdGenerator.createSecretId(loginName, String.valueOf(System.currentTimeMillis()));
-        final String randomToken = sessionIdGenerator.createRandomId();
-
         final Session session =
-            new SessionImpl(userId, loginName, password, context.getContextId(), sessionId, secret, randomToken, clientHost, login);
-
-        LOG.info("Session created. ID: " + sessionId + ", Context: " + context.getContextId() + ", User: " + userId);
-
+            new SessionImpl(userId, loginName, password, context.getContextId(), sessionId, sessionIdGenerator.createSecretId(
+                loginName,
+                String.valueOf(System.currentTimeMillis())), sessionIdGenerator.createRandomId(), clientHost, login);
+        if (INFO) {
+            LOG.info("Session created. ID: " + sessionId + ", Context: " + context.getContextId() + ", User: " + userId);
+        }
+        /*
+         * Add session
+         */
         sessionData.addSession(session, config.getLifeTime(), noLimit);
-
+        /*
+         * Post event for created session
+         */
         postSessionCreation(session);
-
+        /*
+         * Return session ID
+         */
         return sessionId;
     }
 
@@ -356,7 +363,7 @@ public final class SessionHandler {
             LOG.debug("session cleanup");
         }
         final List<SessionControl> sessionControls = sessionData.rotate();
-        if (LOG.isInfoEnabled()) {
+        if (INFO) {
             for (final SessionControl sessionControl : sessionControls) {
                 LOG.info("Session timed out. ID: " + sessionControl.getSession().getSessionID());
             }
