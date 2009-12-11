@@ -53,11 +53,11 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.acl.ACLExtensionFactory;
 import com.openexchange.imap.config.IMAPConfig;
@@ -85,7 +85,7 @@ public final class Entity2ACLAutoDetector {
      * Initializes the auto-detector
      */
     static void initEntity2ACLMappings() {
-        map = new ConcurrentHashMap<InetSocketAddress, Future<Entity2ACL>>();
+        map = new NonBlockingHashMap<InetSocketAddress, Future<Entity2ACL>>();
     }
 
     /**

@@ -53,14 +53,16 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
+import org.cliffc.high_scale_lib.NonBlockingHashSet;
 
 /**
  * {@link ServiceHolder} - Provides convenient access to a bundle service formerly applied with {@link #setService(Object)}. The service may
@@ -82,10 +84,10 @@ public abstract class ServiceHolder<S> {
                 if (usingThreads.isEmpty()) {
                     return;
                 }
-                for (final Iterator<Map.Entry<Thread, Map<ServiceProxy, Object>>> iter = usingThreads.entrySet().iterator(); iter.hasNext();) {
-                    final Map.Entry<Thread, Map<ServiceProxy, Object>> e = iter.next();
-                    final Map<ServiceProxy, Object> q = e.getValue();
-                    for (final Iterator<ServiceProxy> proxyIter = q.keySet().iterator(); proxyIter.hasNext();) {
+                for (final Iterator<Map.Entry<Thread, Set<ServiceProxy>>> iter = usingThreads.entrySet().iterator(); iter.hasNext();) {
+                    final Map.Entry<Thread, Set<ServiceProxy>> e = iter.next();
+                    final Set<ServiceProxy> q = e.getValue();
+                    for (final Iterator<ServiceProxy> proxyIter = q.iterator(); proxyIter.hasNext();) {
                         final ServiceProxy proxy = proxyIter.next();
                         if (proxy.isExceeded()) {
                             LOG.error("Forced unget: Found non-ungetted service after " + serviceUsageTimeout + "msec that was acquired at:\n" + printStackTrace(proxy.trace));
@@ -187,8 +189,6 @@ public abstract class ServiceHolder<S> {
 
     private static Timer serviceHolderTimer;
 
-    private static final Object DUMMY = new Object();
-
     private static final Log LOG = LogFactory.getLog(ServiceHolder.class);
 
     private static final String printStackTrace(final StackTraceElement[] trace) {
@@ -203,7 +203,7 @@ public abstract class ServiceHolder<S> {
 
     private final Map<String, ServiceHolderListener<S>> listeners;
 
-    private final Map<Thread, Map<ServiceProxy, Object>> usingThreads = new ConcurrentHashMap<Thread, Map<ServiceProxy, Object>>();
+    private final Map<Thread, Set<ServiceProxy>> usingThreads;
 
     private final AtomicBoolean waiting;
 
@@ -214,9 +214,10 @@ public abstract class ServiceHolder<S> {
      */
     protected ServiceHolder() {
         super();
+        usingThreads = new NonBlockingHashMap<Thread, Set<ServiceProxy>>();
         countActive = new AtomicInteger();
         waiting = new AtomicBoolean();
-        listeners = new ConcurrentHashMap<String, ServiceHolderListener<S>>();
+        listeners = new NonBlockingHashMap<String, ServiceHolderListener<S>>();
         serviceReference = new AtomicReference<S>();
         if (serviceUsageInspection) {
             /*
@@ -269,13 +270,16 @@ public abstract class ServiceHolder<S> {
                 LOG.warn("Found thread using two (or more) services without ungetting service.", new Throwable());
             }
             final Thread thread = Thread.currentThread();
-            Map<ServiceProxy, Object> proxySet = usingThreads.get(thread);
+            Set<ServiceProxy> proxySet = usingThreads.get(thread);
             if (null == proxySet) {
-                proxySet = new ConcurrentHashMap<ServiceProxy, Object>(4);
-                usingThreads.put(thread, proxySet);
+                final Set<ServiceProxy> newProxySet = new NonBlockingHashSet<ServiceProxy>();
+                proxySet = usingThreads.put(thread, newProxySet);
+                if (null == proxySet) {
+                    proxySet = newProxySet;
+                }
             }
             final ServiceProxy proxy = new ServiceProxy(serviceReference.get(), thread.getStackTrace());
-            proxySet.put(proxy, DUMMY);
+            proxySet.add(proxy);
             return proxy.newProxyInstance();
         }
         return serviceReference.get();
@@ -398,9 +402,9 @@ public abstract class ServiceHolder<S> {
         }
         if (serviceUsageInspection) {
             final Thread thread = Thread.currentThread();
-            final Map<ServiceProxy, Object> proxySet = usingThreads.get(thread);
+            final Set<ServiceProxy> proxySet = usingThreads.get(thread);
             if (null != proxySet) {
-                for (final Iterator<ServiceProxy> iter = proxySet.keySet().iterator(); iter.hasNext();) {
+                for (final Iterator<ServiceProxy> iter = proxySet.iterator(); iter.hasNext();) {
                     final ServiceProxy proxy = iter.next();
                     if (proxy.proxyService == service) {
                         iter.remove();

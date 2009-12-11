@@ -54,9 +54,9 @@ import java.net.SocketTimeoutException;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.imap.acl.ACLExtension;
 import com.openexchange.imap.acl.ACLExtensionFactory;
@@ -587,10 +587,10 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     private static synchronized void initMaps() {
         if (null == timedOutServers) {
-            timedOutServers = new ConcurrentHashMap<HostAndPort, Long>();
+            timedOutServers = new NonBlockingHashMap<HostAndPort, Long>();
         }
         if (null == failedAuths) {
-            failedAuths = new ConcurrentHashMap<LoginAndPass, Long>();
+            failedAuths = new NonBlockingHashMap<LoginAndPass, Long>();
         }
     }
 

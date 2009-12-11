@@ -53,13 +53,13 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.imap.config.IIMAPProperties;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.ping.IMAPCapabilityAndGreetingCache;
@@ -86,7 +86,7 @@ final class ACLExtensionAutoDetector {
      * Initializes the auto-detector
      */
     static void initACLExtensionMappings() {
-        map = new ConcurrentHashMap<InetSocketAddress, Future<ACLExtension>>();
+        map = new NonBlockingHashMap<InetSocketAddress, Future<ACLExtension>>();
     }
 
     /**
