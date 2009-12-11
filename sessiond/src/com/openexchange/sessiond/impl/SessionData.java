@@ -59,6 +59,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.exception.SessiondException;
@@ -95,8 +96,8 @@ final class SessionData {
 		this.maxSessions = maxSessions;
         for (int i = 0; i < containerCount; i++) {
             sessionList.add(0, new SessionContainer(maxSessions));
-            userList.add(0, new ConcurrentHashMap<String, String>(maxSessions));
-            randomList.add(0, new ConcurrentHashMap<String, String>(maxSessions));
+            userList.add(0, new NonBlockingHashMap<String, String>(maxSessions));
+            randomList.add(0, new NonBlockingHashMap<String, String>(maxSessions));
         }
 
 	}

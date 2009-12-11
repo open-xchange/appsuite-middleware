@@ -32,6 +32,7 @@
 	<property name="cachejar" value="com.openexchange.caching.jar"/>
 	<property name="managementjar" value="com.openexchange.management.jar"/>
 	<property name="threadpooljar" value="com.openexchange.threadpool.jar"/>
+	<property name="highscalejar" value="high-scale-lib-1.1.2.jar"/>
 
     <!-- Classpath -->
     <path id="project.classpath">
@@ -39,6 +40,7 @@
         <pathelement location="${bundlesdir}/${osgiservicesjar}"/>
 		<pathelement location="${bundlesdir}/${commonsloggingjar}" />
         <pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
+    	<pathelement location="${bundlesdir}/${commonBundle}/lib/${highscalejar}"/>
         <pathelement location="${bundlesdir}/${globaljar}"/>
 		<pathelement location="${bundlesdir}/${configjar}"/>
     	<pathelement location="${bundlesdir}/${cachejar}"/>
