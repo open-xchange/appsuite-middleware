@@ -63,7 +63,7 @@ import org.cliffc.high_scale_lib.NonBlockingHashSet;
 import com.openexchange.session.Session;
 
 /**
- * {@link SessionContainer} - A container for {@link Session} objects wrapped by a {@link SessionControl} object.
+ * {@link SessionContainer} - A thread-safe container for {@link Session} objects wrapped by a {@link SessionControl} object.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
