@@ -188,13 +188,7 @@ public final class SessionHandler {
      * @throws SessiondException If creating a new session fails
      */
     protected static String addSession(final int userId, final String loginName, final String password, final Context context, final String clientHost, final String login) throws SessiondException {
-        final int maxSessPerUser = config.getMaxSessionsPerUser();
-        if (maxSessPerUser > 0) {
-            final int count = sessionData.getNumOfUserSessions(userId, context);
-            if (count >= maxSessPerUser) {
-                throw new SessiondException(Code.MAX_SESSION_PER_USER_EXCEPTION, null, I(userId), I(context.getContextId()));
-            }
-        }
+        checkMaxSessPerUser(userId, context);
         final String sessionId = sessionIdGenerator.createSessionId(loginName, clientHost);
         final Session session =
             new SessionImpl(userId, loginName, password, context.getContextId(), sessionId, sessionIdGenerator.createSecretId(
@@ -215,6 +209,16 @@ public final class SessionHandler {
          * Return session ID
          */
         return sessionId;
+    }
+
+    private static void checkMaxSessPerUser(final int userId, final Context context) throws SessiondException {
+        final int maxSessPerUser = config.getMaxSessionsPerUser();
+        if (maxSessPerUser > 0) {
+            final int count = sessionData.getNumOfUserSessions(userId, context);
+            if (count >= maxSessPerUser) {
+                throw new SessiondException(Code.MAX_SESSION_PER_USER_EXCEPTION, null, I(userId), I(context.getContextId()));
+            }
+        }
     }
 
     /**
