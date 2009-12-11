@@ -73,13 +73,13 @@ final class SessionData {
 
     private static final Log LOG = LogFactory.getLog(SessionData.class);
 
-	private final LinkedList<SessionContainer> sessionList = new LinkedList<SessionContainer>();
+	private final LinkedList<SessionContainer> sessionList;
 
-    private final LinkedList<Map<String, String>> userList = new LinkedList<Map<String, String>>();
+    private final LinkedList<Map<String, String>> userList;
 
-    private final LinkedList<Map<String, String>> randomList = new LinkedList<Map<String, String>>();
+    private final LinkedList<Map<String, String>> randomList;
 
-    private final Lock lock = new ReentrantLock();
+    private final Lock lock;
 
     private final int maxSessions;
 
@@ -88,6 +88,10 @@ final class SessionData {
 	 */
 	SessionData(final int containerCount, final int maxSessions) {
 		super();
+		sessionList = new LinkedList<SessionContainer>();
+		userList = new LinkedList<Map<String, String>>();
+		randomList = new LinkedList<Map<String, String>>();
+		lock = new ReentrantLock();
 		this.maxSessions = maxSessions;
         for (int i = 0; i < containerCount; i++) {
             sessionList.add(0, new SessionContainer(maxSessions));
