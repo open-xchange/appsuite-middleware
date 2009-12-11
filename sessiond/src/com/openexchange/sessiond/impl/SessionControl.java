@@ -54,18 +54,30 @@ import com.openexchange.session.Session;
 /**
  * {@link SessionControl} - Holds a {@link Session} instance and remembers life-cycle timestamps such as last-accessed, creation-time, etc.
  * 
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SessionControl {
 
-    private final long creationTime;
+    /**
+     * Time stamp when this session control was created.
+     */
+    private long creationTime;
 
-    private long timestamp;
+    /**
+     * The last-accessed time stamp.
+     */
+    private long lastAccessed;
 
-    private final Session session;
+    /**
+     * The associated session.
+     */
+    private Session session;
 
-    private final int lifetime;
+    /**
+     * The life time of this session control.
+     */
+    private int lifetime;
 
     /**
      * Initializes a new {@link SessionControl}
@@ -74,12 +86,33 @@ public class SessionControl {
      * @param lifetime The session's life time
      */
     public SessionControl(final Session session, final int lifetime) {
+        super();
+        renew0(session, lifetime);
+    }
+
+    /**
+     * (Atomically) Renews this session control:
+     * <ul>
+     * <li>Applies specified session</li>
+     * <li>Sets specified life time</li>
+     * <li>Sets creation time stamp to current time millis</li>
+     * <li>Sets last-accessed time stamp to current time millis</li>
+     * </ul>
+     * 
+     * @param lifetime The (new) life time to set
+     */
+    public void renew(final Session session, final int lifetime) {
+        synchronized (this) {
+            renew0(session, lifetime);
+        }
+    }
+
+    private void renew0(final Session session, final int lifetime) {
         this.session = session;
         this.lifetime = lifetime;
-
         final long now = System.currentTimeMillis();
         creationTime = now;
-        timestamp = now;
+        lastAccessed = now;
     }
 
     /**
@@ -101,12 +134,12 @@ public class SessionControl {
     }
 
     /**
-     * Gets the last-accessed timestamp
+     * Gets the last-accessed timestamp.
      * 
      * @return The last-accessed timestamp
      */
-    public long getTimestamp() {
-        return timestamp;
+    public long getLastAccessed() {
+        return lastAccessed;
     }
 
     /**
@@ -119,10 +152,10 @@ public class SessionControl {
     }
 
     /**
-     * Updates session's last-accessed timestamp
+     * Updates session's last-accessed timestamp.
      */
-    public void updateTimestamp() {
-        timestamp = System.currentTimeMillis();
+    public void updateLastAccessed() {
+        lastAccessed = System.currentTimeMillis();
     }
 
     /**
@@ -132,6 +165,7 @@ public class SessionControl {
      * @return <code>true</code> if the session is still valid.
      */
     public boolean isValid() {
-        return ((timestamp + lifetime) >= System.currentTimeMillis());
+        return ((lastAccessed + lifetime) >= System.currentTimeMillis());
     }
+
 }

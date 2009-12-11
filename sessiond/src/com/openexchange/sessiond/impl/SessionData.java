@@ -225,7 +225,7 @@ final class SessionData {
                     final SessionControl sessionControl = container.getSessionById(sessionId);
                     final Session session = sessionControl.getSession();
                     if (sessionControl.isValid()) {
-                        sessionControl.updateTimestamp();
+                        sessionControl.updateLastAccessed();
                         if (i > 0) {
                             /*
                              * Put into first container and remove from latter one
@@ -240,7 +240,7 @@ final class SessionData {
                         return sessionControl;
                     }
                     LOG.info("Session timed out. ID: " + sessionId);
-                    LOG.info("Session timestamp " + sessionControl.getTimestamp() + ", lifeTime: " + sessionControl.getLifetime());
+                    LOG.info("Session timestamp " + sessionControl.getLastAccessed() + ", lifeTime: " + sessionControl.getLifetime());
                     container.removeSessionById(sessionId);
                     userList.get(i).remove(session.getLoginName());
                     randomList.get(i).remove(session.getRandomToken());

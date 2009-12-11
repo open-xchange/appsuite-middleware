@@ -56,8 +56,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import com.openexchange.session.Session;
 
 /**
@@ -71,11 +71,11 @@ final class SessionContainer {
 
     private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
 
-    private static final Integer DUMMY = Integer.valueOf(1);
+    private static final Object PRESENT = new Object();
 
-    private final Map<String, SessionControl> sessionIdMap;
+    private final ConcurrentMap<String, SessionControl> sessionIdMap;
 
-    private final Map<UserKey, Map<String, Integer>> userSessions;
+    private final ConcurrentMap<UserKey, Map<String, Object>> userSessions;
 
     /**
      * Initializes a new {@link SessionContainer session container}.
@@ -85,7 +85,7 @@ final class SessionContainer {
     SessionContainer(final int maxSessions) {
         super();
         sessionIdMap = new ConcurrentHashMap<String, SessionControl>(maxSessions);
-        userSessions = new ConcurrentHashMap<UserKey, Map<String, Integer>>(maxSessions);
+        userSessions = new ConcurrentHashMap<UserKey, Map<String, Object>>(maxSessions);
     }
 
     /**
@@ -126,11 +126,8 @@ final class SessionContainer {
      * @return The number of sessions bound to specified user in specified context
      */
     int numOfUserSessions(final int userId, final int contextId) {
-        final Map<String, Integer> sessionIds = userSessions.get(new UserKey(userId, contextId));
-        if (sessionIds == null) {
-            return 0;
-        }
-        return sessionIds.size();
+        final Map<String, Object> sessionIds = userSessions.get(new UserKey(userId, contextId));
+        return null == sessionIds ? 0 : sessionIds.size();
     }
 
     /**
@@ -151,11 +148,8 @@ final class SessionContainer {
      * @return The sessions bound to specified user ID and context ID
      */
     SessionControl[] getSessionsByUser(final int userId, final int contextId) {
-        final Map<String, Integer> sessionIds = userSessions.get(new UserKey(userId, contextId));
-        if (sessionIds == null) {
-            return new SessionControl[0];
-        }
-        return sessionIds.keySet().toArray(new SessionControl[sessionIds.size()]);
+        final Map<String, Object> sessionIds = userSessions.get(new UserKey(userId, contextId));
+        return null == sessionIds ? new SessionControl[0] : sessionIds.keySet().toArray(new SessionControl[sessionIds.size()]);
     }
 
     /**
@@ -167,18 +161,35 @@ final class SessionContainer {
      */
     SessionControl put(final Session session, final int timeToLive) {
         final String sessionId = session.getSessionID();
-        final SessionControl sessionControl = new SessionControl(session, timeToLive);
-        if (DEBUG_ENABLED && sessionIdMap.containsKey(sessionId)) {
-            LOG.debug(new StringBuilder("session REBORN sessionid=").append(sessionId));
+        /*
+         * Add session
+         */
+        SessionControl sessionControl = sessionIdMap.get(sessionId);
+        if (null == sessionControl) {
+            final SessionControl newSessionControl = new SessionControl(session, timeToLive);
+            sessionControl = sessionIdMap.putIfAbsent(sessionId, newSessionControl);
+            if (null == sessionControl) {
+                sessionControl = newSessionControl;
+            } else {
+                sessionControl.renew(session, timeToLive);
+                if (DEBUG_ENABLED) {
+                    LOG.debug(new StringBuilder("session REBORN sessionid=").append(sessionId));
+                }
+            }
         }
-        sessionIdMap.put(sessionId, sessionControl);
+        /*
+         * Add session ID to user-sessions-map
+         */
         final UserKey key = new UserKey(session.getUserId(), session.getContextId());
-        Map<String, Integer> sessionIds = userSessions.get(key);
+        Map<String, Object> sessionIds = userSessions.get(key);
         if (sessionIds == null) {
-            sessionIds = new ConcurrentHashMap<String, Integer>();
-            userSessions.put(key, sessionIds);
+            final Map<String, Object> newMap = new ConcurrentHashMap<String, Object>();
+            sessionIds = userSessions.putIfAbsent(key, newMap);
+            if (null == sessionIds) {
+                sessionIds = newMap;
+            }
         }
-        sessionIds.put(sessionId, DUMMY);
+        sessionIds.put(sessionId, PRESENT);
         return sessionControl;
     }
 
@@ -192,12 +203,15 @@ final class SessionContainer {
         final String sessionId = session.getSessionID();
         sessionIdMap.put(sessionId, sessionControl);
         final UserKey key = new UserKey(session.getUserId(), session.getContextId());
-        Map<String, Integer> sessionIds = userSessions.get(key);
+        Map<String, Object> sessionIds = userSessions.get(key);
         if (sessionIds == null) {
-            sessionIds = new ConcurrentHashMap<String, Integer>();
-            userSessions.put(key, sessionIds);
+            final Map<String, Object> newMap = new ConcurrentHashMap<String, Object>();
+            sessionIds = userSessions.putIfAbsent(key, newMap);
+            if (null == sessionIds) {
+                sessionIds = newMap;
+            }
         }
-        sessionIds.put(sessionId, DUMMY);
+        sessionIds.put(sessionId, PRESENT);
     }
 
     /**
@@ -211,7 +225,7 @@ final class SessionContainer {
         if (sessionControl != null) {
             final Session session = sessionControl.getSession();
             final UserKey key = new UserKey(session.getUserId(), session.getContextId());
-            final Map<String, Integer> sessionIds = userSessions.get(key);
+            final Map<String, Object> sessionIds = userSessions.get(key);
             sessionIds.remove(sessionId);
             if (sessionIds.isEmpty()) {
                 userSessions.remove(key);
@@ -229,13 +243,12 @@ final class SessionContainer {
      */
     SessionControl[] removeSessionsByUser(final int userId, final int contextId) {
         final UserKey key = new UserKey(userId, contextId);
-        final Map<String, Integer> sessionIds = userSessions.remove(key);
+        final Map<String, Object> sessionIds = userSessions.remove(key);
         if (sessionIds == null) {
             return new SessionControl[0];
         }
         final List<SessionControl> l = new ArrayList<SessionControl>(sessionIds.size());
-        final Set<String> ids = sessionIds.keySet();
-        for (final String sessionId : ids) {
+        for (final String sessionId : sessionIds.keySet()) {
             final SessionControl sc = sessionIdMap.remove(sessionId);
             if (sc != null) {
                 l.add(sc);
@@ -282,6 +295,9 @@ final class SessionContainer {
         return new ArrayList<SessionControl>(sessionIdMap.values());
     }
 
+    /**
+     * Simple key class for user ID and context ID.
+     */
     private static final class UserKey {
 
         private final int userId;
@@ -294,7 +310,11 @@ final class SessionContainer {
             super();
             this.userId = userId;
             this.cid = cid;
-            hash = userId ^ cid;
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + cid;
+            result = prime * result + userId;
+            hash = result;
         }
 
         @Override
@@ -307,10 +327,7 @@ final class SessionContainer {
             if (this == obj) {
                 return true;
             }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
+            if (!(obj instanceof UserKey)) {
                 return false;
             }
             final UserKey other = (UserKey) obj;
@@ -323,5 +340,6 @@ final class SessionContainer {
             return true;
         }
 
-    }
+    } // End of UserKey
+
 }
