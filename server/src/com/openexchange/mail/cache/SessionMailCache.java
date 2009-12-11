@@ -50,10 +50,10 @@
 package com.openexchange.mail.cache;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.caching.CacheKey;
-import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.MailSessionCache;
+import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.session.Session;
 
 /**
@@ -104,7 +104,7 @@ public final class SessionMailCache {
      */
     private SessionMailCache() {
         super();
-        cache = new ConcurrentHashMap<CacheKey, Object>();
+        cache = new NonBlockingHashMap<CacheKey, Object>();
     }
 
     /**

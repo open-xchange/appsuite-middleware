@@ -49,8 +49,8 @@
 
 package com.openexchange.mail;
 
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.session.Session;
 
 /**
@@ -130,7 +130,7 @@ public final class MailSessionCache {
      */
     private MailSessionCache() {
         super();
-        map = new ConcurrentHashMap<Integer, ConcurrentMap<String, Object>>();
+        map = new NonBlockingHashMap<Integer, ConcurrentMap<String, Object>>();
     }
 
     /*-
@@ -195,7 +195,7 @@ public final class MailSessionCache {
         final Integer ik = Integer.valueOf(accountId);
         ConcurrentMap<String, Object> accountMap = map.get(ik);
         if (null == accountMap) {
-            final ConcurrentMap<String, Object> newInst = new ConcurrentHashMap<String, Object>();
+            final ConcurrentMap<String, Object> newInst = new NonBlockingHashMap<String, Object>();
             accountMap = map.putIfAbsent(ik, newInst);
             if (null == accountMap) {
                 accountMap = newInst;
@@ -221,7 +221,7 @@ public final class MailSessionCache {
         final Integer ik = Integer.valueOf(accountId);
         ConcurrentMap<String, Object> accountMap = map.get(ik);
         if (null == accountMap) {
-            final ConcurrentMap<String, Object> newInst = new ConcurrentHashMap<String, Object>();
+            final ConcurrentMap<String, Object> newInst = new NonBlockingHashMap<String, Object>();
             accountMap = map.putIfAbsent(ik, newInst);
             if (null == accountMap) {
                 accountMap = newInst;

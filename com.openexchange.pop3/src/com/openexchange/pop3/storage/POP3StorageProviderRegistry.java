@@ -49,8 +49,8 @@
 
 package com.openexchange.pop3.storage;
 
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 
 /**
  * {@link POP3StorageProviderRegistry} - The registry for {@link POP3StorageProvider POP3 storage providers}.
@@ -81,7 +81,7 @@ public final class POP3StorageProviderRegistry {
      */
     private POP3StorageProviderRegistry() {
         super();
-        registryMap = new ConcurrentHashMap<String, POP3StorageProvider>();
+        registryMap = new NonBlockingHashMap<String, POP3StorageProvider>();
     }
 
     /**

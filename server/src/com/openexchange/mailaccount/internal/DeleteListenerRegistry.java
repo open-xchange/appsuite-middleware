@@ -51,8 +51,8 @@ package com.openexchange.mailaccount.internal;
 
 import java.sql.Connection;
 import java.util.Iterator;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
 import com.openexchange.mailaccount.MailAccountException;
 
@@ -99,7 +99,7 @@ public final class DeleteListenerRegistry {
      */
     public DeleteListenerRegistry() {
         super();
-        registry = new ConcurrentHashMap<Class<? extends MailAccountDeleteListener>, MailAccountDeleteListener>();
+        registry = new NonBlockingHashMap<Class<? extends MailAccountDeleteListener>, MailAccountDeleteListener>();
     }
 
     /**

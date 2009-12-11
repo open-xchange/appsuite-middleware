@@ -53,11 +53,11 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.api2.OXException;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
@@ -75,7 +75,7 @@ import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
  */
 public final class FolderQueryCacheManager {
 
-    private static final ConcurrentMap<Integer, ReadWriteLock> contextLocks = new ConcurrentHashMap<Integer, ReadWriteLock>();
+    private static final ConcurrentMap<Integer, ReadWriteLock> contextLocks = new NonBlockingHashMap<Integer, ReadWriteLock>();
 
     private static final String REGION_NAME = "OXFolderQueryCache";
 

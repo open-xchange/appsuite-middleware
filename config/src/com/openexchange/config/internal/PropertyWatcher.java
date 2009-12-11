@@ -58,6 +58,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.config.PropertyEvent;
 import com.openexchange.config.PropertyListener;
 import com.openexchange.config.internal.filewatcher.FileListener;
@@ -71,7 +72,7 @@ public final class PropertyWatcher implements FileListener {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(PropertyWatcher.class);
 
-    private static final ConcurrentMap<String, PropertyWatcher> watchers = new ConcurrentHashMap<String, PropertyWatcher>();
+    private static final ConcurrentMap<String, PropertyWatcher> watchers = new NonBlockingHashMap<String, PropertyWatcher>();
 
     /**
      * Gets an existing property watcher bound to given property name

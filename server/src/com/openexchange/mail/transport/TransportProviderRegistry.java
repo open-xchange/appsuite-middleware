@@ -52,10 +52,10 @@ package com.openexchange.mail.transport;
 import static com.openexchange.mail.utils.ProviderUtility.extractProtocol;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.MailSessionCache;
+import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.Protocol;
 import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.mail.transport.config.TransportProperties;
@@ -73,7 +73,7 @@ public final class TransportProviderRegistry {
     /**
      * Concurrent map used as set for transport providers
      */
-    private static final Map<Protocol, TransportProvider> providers = new ConcurrentHashMap<Protocol, TransportProvider>();
+    private static final Map<Protocol, TransportProvider> providers = new NonBlockingHashMap<Protocol, TransportProvider>();
 
     /**
      * Initializes a new {@link TransportProviderRegistry}

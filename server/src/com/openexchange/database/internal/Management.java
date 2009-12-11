@@ -51,11 +51,11 @@ package com.openexchange.database.internal;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.management.ManagementException;
 import com.openexchange.management.ManagementService;
 
@@ -68,7 +68,7 @@ public final class Management {
 
     private static final Log LOG = LogFactory.getLog(Management.class);
 
-    private final Map<Integer, ConnectionPool> pools = new ConcurrentHashMap<Integer, ConnectionPool>();
+    private final Map<Integer, ConnectionPool> pools = new NonBlockingHashMap<Integer, ConnectionPool>();
 
     private ManagementService managementService;
 
@@ -83,7 +83,7 @@ public final class Management {
         this.managementService = null;
     }
 
-    public void setManagementService(ManagementService service) {
+    public void setManagementService(final ManagementService service) {
         this.managementService = service;
         registerMBeans();
     }
@@ -96,7 +96,7 @@ public final class Management {
     private void registerPool(final String name, final ConnectionPool pool) {
         try {
             if (null != managementService) {
-                ObjectName objName = new ObjectName(ConnectionPoolMBean.DOMAIN, "name", name);
+                final ObjectName objName = new ObjectName(ConnectionPoolMBean.DOMAIN, "name", name);
                 managementService.registerMBean(objName, pool);
             }
         } catch (final MalformedObjectNameException e) {
@@ -120,11 +120,11 @@ public final class Management {
             if (null != overview) {
                 managementService.registerMBean(new ObjectName(ConnectionPoolMBean.DOMAIN, "name", "Overview"), overview);
             }
-        } catch (ManagementException e) {
+        } catch (final ManagementException e) {
             LOG.error(e.getMessage(), e);
-        } catch (MalformedObjectNameException e) {
+        } catch (final MalformedObjectNameException e) {
             LOG.error(e.getMessage(), e);
-        } catch (NullPointerException e) {
+        } catch (final NullPointerException e) {
             LOG.error(e.getMessage(), e);
         }
     }
@@ -154,11 +154,11 @@ public final class Management {
         }
         try {
             managementService.unregisterMBean(new ObjectName(ConnectionPoolMBean.DOMAIN, "name", "Overview"));
-        } catch (MalformedObjectNameException e) {
+        } catch (final MalformedObjectNameException e) {
             LOG.error(e.getMessage(), e);
-        } catch (ManagementException e) {
+        } catch (final ManagementException e) {
             LOG.error(e.getMessage(), e);
-        } catch (NullPointerException e) {
+        } catch (final NullPointerException e) {
             LOG.error(e.getMessage(), e);
         }
     }
@@ -167,7 +167,7 @@ public final class Management {
      * @param poolId identifier of the pool.
      * @return the name of the mbean for the pool.
      */
-    private static String createMBeanName(int poolId) {
+    private static String createMBeanName(final int poolId) {
         switch (poolId) {
         case Constants.CONFIGDB_READ_ID:
             return "ConfigDB Read";
@@ -178,21 +178,21 @@ public final class Management {
         }
     }
 
-    public void addPool(int poolId, ConnectionPool pool) {
+    public void addPool(final int poolId, final ConnectionPool pool) {
         pools.put(I(poolId), pool);
         if (null != managementService) {
             registerPool(createMBeanName(poolId), pool);
         }
     }
 
-    public void removePool(int poolId) {
+    public void removePool(final int poolId) {
         pools.remove(I(poolId));
         if (null != managementService) {
             unregisterMBean(createMBeanName(poolId));
         }
     }
 
-    public void addOverview(Overview overview) {
+    public void addOverview(final Overview overview) {
         this.overview = overview;
         if (null != managementService) {
             registerOverview();

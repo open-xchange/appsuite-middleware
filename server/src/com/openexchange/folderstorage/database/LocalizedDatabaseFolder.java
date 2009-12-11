@@ -52,11 +52,11 @@ package com.openexchange.folderstorage.database;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.i18n.tools.StringHelper;
 
@@ -80,7 +80,7 @@ public class LocalizedDatabaseFolder extends DatabaseFolder {
      */
     public LocalizedDatabaseFolder(final boolean cacheable) {
         super(cacheable);
-        localizedNames = new ConcurrentHashMap<Locale, Future<String>>();
+        localizedNames = new NonBlockingHashMap<Locale, Future<String>>();
     }
 
     /**
@@ -106,7 +106,7 @@ public class LocalizedDatabaseFolder extends DatabaseFolder {
      */
     public LocalizedDatabaseFolder(final FolderObject folderObject, final boolean cacheable) {
         super(folderObject, cacheable);
-        localizedNames = new ConcurrentHashMap<Locale, Future<String>>();
+        localizedNames = new NonBlockingHashMap<Locale, Future<String>>();
     }
 
     @Override
@@ -117,7 +117,7 @@ public class LocalizedDatabaseFolder extends DatabaseFolder {
         if (null == localizedNames) {
             clone.localizedNames = null;
         } else {
-            final ConcurrentMap<Locale, Future<String>> cloneMap = new ConcurrentHashMap<Locale, Future<String>>(thisMap.size());
+            final ConcurrentMap<Locale, Future<String>> cloneMap = new NonBlockingHashMap<Locale, Future<String>>(thisMap.size());
             for (final Map.Entry<Locale, Future<String>> entry : thisMap.entrySet()) {
                 cloneMap.put(entry.getKey(), entry.getValue());
             }

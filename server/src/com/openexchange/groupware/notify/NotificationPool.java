@@ -54,12 +54,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Participant;
@@ -109,7 +109,7 @@ public final class NotificationPool {
     private NotificationPool() {
         super();
         started = new AtomicBoolean();
-        map = new ConcurrentHashMap<PooledNotification, PooledNotification>(1024);
+        map = new NonBlockingHashMap<PooledNotification, PooledNotification>(1024);
         queue = new DelayQueue<PooledNotification>();
         lock = new ReentrantReadWriteLock();
         readLock = lock.readLock();

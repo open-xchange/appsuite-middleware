@@ -59,8 +59,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 
 /**
  * {@link CustomCharsetProvider} - A custom charset provider which maps unknown charset names to supported charsets.
@@ -91,8 +91,8 @@ public final class CustomCharsetProvider extends CharsetProvider {
         if (name2charset == null) {
             synchronized (CustomCharsetProvider.class) {
                 if (name2charset == null) {
-                    name2charset = new ConcurrentHashMap<String, Charset>(8);
-                    startsWith2charset = new ConcurrentHashMap<String, Charset>(8);
+                    name2charset = new NonBlockingHashMap<String, Charset>(8);
+                    startsWith2charset = new NonBlockingHashMap<String, Charset>(8);
                 }
             }
         }

@@ -52,8 +52,8 @@ package com.openexchange.tools.servlet.http;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.http.HttpSession;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
@@ -77,7 +77,7 @@ public final class HttpSessionManagement {
     static void init() {
         synchronized (HttpSessionManagement.class) {
             if (null == sessions) {
-                sessions = new ConcurrentHashMap<String, HttpSessionWrapper>();
+                sessions = new NonBlockingHashMap<String, HttpSessionWrapper>();
                 final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
                 if (null != timer) {
                     sessionRemover = timer.scheduleWithFixedDelay(new SessionRemover(), 100, 3600000);

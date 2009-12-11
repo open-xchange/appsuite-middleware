@@ -51,8 +51,8 @@ package com.openexchange.sessiond.impl;
 
 import java.util.Date;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import javax.mail.Session;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.groupware.ldap.Credentials;
 
 /**
@@ -101,7 +101,7 @@ public class SessionObject implements com.openexchange.session.Session {
 
     public SessionObject(final String sessionid) {
         this.sessionid = sessionid;
-        parameters = new ConcurrentHashMap<String, Object>();
+        parameters = new NonBlockingHashMap<String, Object>();
     }
 
     public void setUsername(final String username) {

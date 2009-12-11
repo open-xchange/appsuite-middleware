@@ -60,11 +60,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
 import javax.mail.MessagingException;
 import javax.servlet.http.Cookie;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
 import com.openexchange.configuration.ServerConfig;
@@ -101,7 +101,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
     /**
      * A "set" to keep track of known JSESSIONIDs
      */
-    static final ConcurrentMap<String, Long> jsessionids = new ConcurrentHashMap<String, Long>();
+    static final ConcurrentMap<String, Long> jsessionids = new NonBlockingHashMap<String, Long>();
 
     private static final String DEFAULT_ENCODING = ServerConfig.getProperty(Property.DefaultEncoding);
 

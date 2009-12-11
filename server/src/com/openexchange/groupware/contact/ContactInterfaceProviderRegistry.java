@@ -53,8 +53,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 
 /**
  * {@link ContactInterfaceProviderRegistry} - A registry for {@link ContactInterfaceProvider} instances.
@@ -83,7 +83,7 @@ public class ContactInterfaceProviderRegistry {
 
     private ContactInterfaceProviderRegistry() {
         super();
-        services = new ConcurrentHashMap<Key, ContactInterfaceProvider>();
+        services = new NonBlockingHashMap<Key, ContactInterfaceProvider>();
     }
 
     /**
@@ -148,10 +148,10 @@ public class ContactInterfaceProviderRegistry {
         return services.get(new Key(folderId, contextId));
     }
     
-    public List<ContactInterfaceProviderRegistration> getRegistrations(int contextId) {
-        Set<Entry<Key,ContactInterfaceProvider>> entrySet = services.entrySet();
-        List<ContactInterfaceProviderRegistration> registrations = new LinkedList<ContactInterfaceProviderRegistration>();
-        for (Entry<Key, ContactInterfaceProvider> entry : entrySet) {
+    public List<ContactInterfaceProviderRegistration> getRegistrations(final int contextId) {
+        final Set<Entry<Key,ContactInterfaceProvider>> entrySet = services.entrySet();
+        final List<ContactInterfaceProviderRegistration> registrations = new LinkedList<ContactInterfaceProviderRegistration>();
+        for (final Entry<Key, ContactInterfaceProvider> entry : entrySet) {
             if(entry.getKey().contextId == contextId) {
                 registrations.add(new ContactInterfaceProviderRegistration(entry.getKey().folderId, entry.getValue()));
             }

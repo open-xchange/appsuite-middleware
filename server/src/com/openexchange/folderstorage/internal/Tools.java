@@ -52,11 +52,11 @@ package com.openexchange.folderstorage.internal;
 import java.util.TimeZone;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 
 /**
  * {@link Tools} - A utility class for folder storage processing.
@@ -72,7 +72,7 @@ public final class Tools {
         super();
     }
 
-    private static final ConcurrentMap<String, Future<TimeZone>> TZ_MAP = new ConcurrentHashMap<String, Future<TimeZone>>();
+    private static final ConcurrentMap<String, Future<TimeZone>> TZ_MAP = new NonBlockingHashMap<String, Future<TimeZone>>();
 
     /**
      * Gets the <code>TimeZone</code> for the given ID.

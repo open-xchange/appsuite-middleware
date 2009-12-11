@@ -57,9 +57,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
@@ -305,7 +305,7 @@ public final class IDGenerator {
         }
 
         static {
-            final Map<Integer, String> tmp = new ConcurrentHashMap<Integer, String>();
+            final Map<Integer, String> tmp = new NonBlockingHashMap<Integer, String>();
             tmp.put(I(-1), "{call get_configdb_id()}");
             tmp.put(I(Types.APPOINTMENT), "{call get_calendar_id(?)}");
             tmp.put(I(Types.CONTACT), "{call get_contact_id(?)}");
@@ -378,7 +378,7 @@ public final class IDGenerator {
         }
 
         static {
-            final Map<Integer, String> tmp = new ConcurrentHashMap<Integer, String>();
+            final Map<Integer, String> tmp = new NonBlockingHashMap<Integer, String>();
             tmp.put(I(-1), "CALL get_configdb_id()");
             tmp.put(I(Types.APPOINTMENT), "CALL get_calendar_id(?)");
             tmp.put(I(Types.CONTACT), "CALL get_contact_id(?)");
@@ -510,7 +510,7 @@ public final class IDGenerator {
         }
 
         static {
-            final Map<Integer, String> tmp = new ConcurrentHashMap<Integer, String>();
+            final Map<Integer, String> tmp = new NonBlockingHashMap<Integer, String>();
             tmp.put(I(-1), "configdb_sequence");
             tmp.put(I(Types.APPOINTMENT), "sequence_calendar");
             tmp.put(I(Types.CONTACT), "sequence_contact");

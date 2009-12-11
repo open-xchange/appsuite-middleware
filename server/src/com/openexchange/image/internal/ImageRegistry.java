@@ -49,8 +49,8 @@
 
 package com.openexchange.image.internal;
 
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.image.ImageDataSource;
@@ -115,9 +115,9 @@ public final class ImageRegistry {
      */
     private ImageRegistry() {
         super();
-        sessionBoundImagesMap = new ConcurrentHashMap<String, ConcurrentMap<String, ImageData>>();
+        sessionBoundImagesMap = new NonBlockingHashMap<String, ConcurrentMap<String, ImageData>>();
         sessionLock = new Object();
-        contextBoundImagesMap = new ConcurrentHashMap<Integer, ConcurrentMap<String, ImageData>>();
+        contextBoundImagesMap = new NonBlockingHashMap<Integer, ConcurrentMap<String, ImageData>>();
         contextLock = new Object();
     }
 
@@ -205,7 +205,7 @@ public final class ImageRegistry {
         ConcurrentMap<String, ImageData> m = sessionBoundImagesMap.get(sessionId);
         boolean check = true;
         if (m == null) {
-            final ConcurrentMap<String, ImageData> newInst = new ConcurrentHashMap<String, ImageData>();
+            final ConcurrentMap<String, ImageData> newInst = new NonBlockingHashMap<String, ImageData>();
             m = sessionBoundImagesMap.putIfAbsent(sessionId, newInst);
             if (null == m) {
                 m = newInst;
@@ -256,7 +256,7 @@ public final class ImageRegistry {
         ConcurrentMap<String, ImageData> m = contextBoundImagesMap.get(cid);
         boolean check = true;
         if (m == null) {
-            final ConcurrentMap<String, ImageData> newInst = new ConcurrentHashMap<String, ImageData>();
+            final ConcurrentMap<String, ImageData> newInst = new NonBlockingHashMap<String, ImageData>();
             m = contextBoundImagesMap.putIfAbsent(cid, newInst);
             if (null == m) {
                 m = newInst;
@@ -292,7 +292,7 @@ public final class ImageRegistry {
             synchronized (contextLock) {
                 m = contextBoundImagesMap.get(cid);
                 if (m == null) {
-                    m = new ConcurrentHashMap<String, ImageData>();
+                    m = new NonBlockingHashMap<String, ImageData>();
                     contextBoundImagesMap.put(cid, m);
                 }
             }
@@ -313,7 +313,7 @@ public final class ImageRegistry {
             synchronized (sessionLock) {
                 m = sessionBoundImagesMap.get(sessionId);
                 if (m == null) {
-                    m = new ConcurrentHashMap<String, ImageData>();
+                    m = new NonBlockingHashMap<String, ImageData>();
                     sessionBoundImagesMap.put(sessionId, m);
                 }
             }

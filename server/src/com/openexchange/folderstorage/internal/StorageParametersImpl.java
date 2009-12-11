@@ -51,8 +51,8 @@ package com.openexchange.folderstorage.internal;
 
 import java.util.Date;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.StorageParameters;
@@ -90,7 +90,7 @@ public final class StorageParametersImpl implements StorageParameters {
         this.session = session;
         user = session.getUser();
         context = session.getContext();
-        parameters = new ConcurrentHashMap<FolderType, ConcurrentMap<String, Object>>();
+        parameters = new NonBlockingHashMap<FolderType, ConcurrentMap<String, Object>>();
     }
 
     /**
@@ -104,13 +104,13 @@ public final class StorageParametersImpl implements StorageParameters {
         session = null;
         this.user = user;
         this.context = context;
-        parameters = new ConcurrentHashMap<FolderType, ConcurrentMap<String, Object>>();
+        parameters = new NonBlockingHashMap<FolderType, ConcurrentMap<String, Object>>();
     };
 
     private ConcurrentMap<String, Object> getFolderTypeMap(final FolderType folderType, final boolean createIfAbsent) {
         ConcurrentMap<String, Object> m = parameters.get(folderType);
         if (createIfAbsent && null == m) {
-            final ConcurrentMap<String, Object> inst = new ConcurrentHashMap<String, Object>();
+            final ConcurrentMap<String, Object> inst = new NonBlockingHashMap<String, Object>();
             m = parameters.putIfAbsent(folderType, inst);
             if (null == m) {
                 m = inst;

@@ -53,10 +53,10 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.mail.api.MailAccess;
 
 /**
@@ -94,7 +94,7 @@ public class MailInterfaceMonitor implements MailInterfaceMonitorMBean {
     public MailInterfaceMonitor() {
         super();
         avgUseTimeArr = new long[USE_TIME_COUNT];
-        unsupportedEnc = new ConcurrentHashMap<String, Integer>();
+        unsupportedEnc = new NonBlockingHashMap<String, Integer>();
     }
 
     public int getNumActive() {

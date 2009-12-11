@@ -55,10 +55,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 
 /**
  * {@link FileWatcher}
@@ -142,7 +142,7 @@ public final class FileWatcher {
     private FileWatcher(final File file) {
         super();
         started = new AtomicBoolean();
-        listeners = new ConcurrentHashMap<Class<? extends FileListener>, FileListener>();
+        listeners = new NonBlockingHashMap<Class<? extends FileListener>, FileListener>();
         this.file = file;
         timeStamp = file.lastModified();
     }

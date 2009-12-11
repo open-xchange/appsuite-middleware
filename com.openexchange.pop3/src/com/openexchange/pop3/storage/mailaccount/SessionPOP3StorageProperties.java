@@ -50,10 +50,10 @@
 package com.openexchange.pop3.storage.mailaccount;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.mail.MailException;
 import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.services.POP3ServiceRegistry;
@@ -114,7 +114,7 @@ public final class SessionPOP3StorageProperties implements POP3StorageProperties
         rwLock = new ReentrantReadWriteLock();
         invalid = new boolean[] { false };
         this.delegatee = delegatee;
-        map = new ConcurrentHashMap<String, String>();
+        map = new NonBlockingHashMap<String, String>();
         final CleanMapRunnable cmr = new CleanMapRunnable(session, key, map, rwLock, invalid);
         final ScheduledTimerTask timerTask = POP3ServiceRegistry.getServiceRegistry().getService(TimerService.class).scheduleWithFixedDelay(
             cmr,

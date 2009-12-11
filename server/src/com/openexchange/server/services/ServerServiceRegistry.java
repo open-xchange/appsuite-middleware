@@ -51,7 +51,7 @@ package com.openexchange.server.services;
 
 import java.util.Iterator;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.server.ServiceException;
 
 /**
@@ -79,7 +79,7 @@ public final class ServerServiceRegistry {
      */
     private ServerServiceRegistry() {
         super();
-        services = new ConcurrentHashMap<Class<?>, Object>();
+        services = new NonBlockingHashMap<Class<?>, Object>();
     }
 
     /**

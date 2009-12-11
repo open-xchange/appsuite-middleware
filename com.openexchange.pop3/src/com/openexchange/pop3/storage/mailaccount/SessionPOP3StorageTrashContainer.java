@@ -53,10 +53,10 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.mail.MailException;
 import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.services.POP3ServiceRegistry;
@@ -115,7 +115,7 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
         super();
         rwLock = new ReentrantReadWriteLock();
         this.delegatee = delegatee;
-        set = new ConcurrentHashMap<String, Object>();
+        set = new NonBlockingHashMap<String, Object>();
         mode = new int[] { 1 };
         final CleanSetRunnable csr = new CleanSetRunnable(session, key, set, rwLock, mode);
         final ScheduledTimerTask timerTask = POP3ServiceRegistry.getServiceRegistry().getService(TimerService.class).scheduleWithFixedDelay(

@@ -55,9 +55,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.FolderStorage;
@@ -91,7 +91,7 @@ public final class ContentTypeRegistry implements ContentTypeDiscoveryService {
 
         public Element() {
             super();
-            concreteStorages = new ConcurrentHashMap<ContentType, FolderStorage>();
+            concreteStorages = new NonBlockingHashMap<ContentType, FolderStorage>();
             generalStorages = new CopyOnWriteArrayList<FolderStorage>();
         }
 
@@ -125,7 +125,7 @@ public final class ContentTypeRegistry implements ContentTypeDiscoveryService {
      */
     private ContentTypeRegistry() {
         super();
-        registry = new ConcurrentHashMap<String, Element>();
+        registry = new NonBlockingHashMap<String, Element>();
     }
 
     private Element getElementForTreeId(final String treeId) {

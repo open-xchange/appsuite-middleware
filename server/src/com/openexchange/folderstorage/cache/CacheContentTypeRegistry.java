@@ -52,9 +52,9 @@ package com.openexchange.folderstorage.cache;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageComparator;
@@ -87,7 +87,7 @@ public final class CacheContentTypeRegistry {
 
         public Element() {
             super();
-            concreteStorages = new ConcurrentHashMap<ContentType, FolderStorage>();
+            concreteStorages = new NonBlockingHashMap<ContentType, FolderStorage>();
             generalStorages = new CopyOnWriteArrayList<FolderStorage>();
         }
 
@@ -116,7 +116,7 @@ public final class CacheContentTypeRegistry {
      */
     private CacheContentTypeRegistry() {
         super();
-        registry = new ConcurrentHashMap<String, Element>();
+        registry = new NonBlockingHashMap<String, Element>();
     }
 
     private Element getElementForTreeId(final String treeId) {

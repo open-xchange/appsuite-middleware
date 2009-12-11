@@ -49,9 +49,9 @@
 
 package com.openexchange.pop3.storage.mailaccount;
 
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.mail.MailException;
 import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.storage.CASPOP3StorageProperties;
@@ -102,7 +102,7 @@ public final class CASSessionPOP3StorageProperties implements CASPOP3StorageProp
     private CASSessionPOP3StorageProperties(final POP3StorageProperties delegatee) {
         super();
         this.delegatee = delegatee;
-        map = new ConcurrentHashMap<String, AtomicReference<String>>();
+        map = new NonBlockingHashMap<String, AtomicReference<String>>();
     }
 
     public void addProperty(final String propertyName, final String propertyValue) throws MailException {

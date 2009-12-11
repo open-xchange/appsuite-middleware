@@ -53,8 +53,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
 
 /**
@@ -83,7 +82,7 @@ public final class ServerRequestHandlerRegistry {
      */
     private ServerRequestHandlerRegistry() {
         super();
-        requestHandlers = new ConcurrentHashMap<String, Map<String, AJAXRequestHandler>>();
+        requestHandlers = new NonBlockingHashMap<String, Map<String, AJAXRequestHandler>>();
     }
 
     /**
@@ -127,7 +126,7 @@ public final class ServerRequestHandlerRegistry {
         if (actionHandlers == null) {
             synchronized (this) {
                 if ((actionHandlers = requestHandlers.get(requestHandler.getModule())) == null) {
-                    actionHandlers = new ConcurrentHashMap<String, AJAXRequestHandler>();
+                    actionHandlers = new NonBlockingHashMap<String, AJAXRequestHandler>();
                     requestHandlers.put(requestHandler.getModule(), actionHandlers);
                 }
             }

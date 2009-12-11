@@ -59,9 +59,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DBPoolingExceptionCodes;
@@ -85,9 +85,9 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
 
     private final ConnectionPool.Config defaultPoolConfig;
 
-    private final Map<Integer, ConnectionPool> pools = new ConcurrentHashMap<Integer, ConnectionPool>();
+    private final Map<Integer, ConnectionPool> pools = new NonBlockingHashMap<Integer, ConnectionPool>();
 
-    public ContextDatabaseLifeCycle(Configuration configuration, Management management, Timer timer, ConfigDatabaseService configDatabaseService) {
+    public ContextDatabaseLifeCycle(final Configuration configuration, final Management management, final Timer timer, final ConfigDatabaseService configDatabaseService) {
         super();
         this.management = management;
         this.timer = timer;
@@ -95,22 +95,22 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
         this.defaultPoolConfig = configuration.getPoolConfig();
     }
 
-    public ConnectionPool create(int poolId) throws DBPoolingException {
-        ConnectionData data = loadPoolData(poolId);
+    public ConnectionPool create(final int poolId) throws DBPoolingException {
+        final ConnectionData data = loadPoolData(poolId);
         try {
             Class.forName(data.driverClass);
-        } catch (ClassNotFoundException e) {
+        } catch (final ClassNotFoundException e) {
             throw DBPoolingExceptionCodes.NO_DRIVER.create(e, data.driverClass);
         }
-        ConnectionPool retval = new ConnectionPool(data.url, data.props, getConfig(data));
+        final ConnectionPool retval = new ConnectionPool(data.url, data.props, getConfig(data));
         pools.put(I(poolId), retval);
         timer.addTask(retval.getCleanerTask());
         management.addPool(poolId, retval);
         return retval;
     }
 
-    public boolean destroy(int poolId) {
-        ConnectionPool toDestroy = pools.remove(I(poolId));
+    public boolean destroy(final int poolId) {
+        final ConnectionPool toDestroy = pools.remove(I(poolId));
         if (null == toDestroy) {
             return false;
         }
@@ -151,7 +151,7 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
         }
     }
 
-    ConnectionData loadPoolData(int poolId) throws DBPoolingException {
+    ConnectionData loadPoolData(final int poolId) throws DBPoolingException {
         ConnectionData retval = null;
         final Connection con = configDatabaseService.getReadOnly();
         PreparedStatement stmt = null;

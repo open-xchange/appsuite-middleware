@@ -50,8 +50,8 @@
 package com.openexchange.tools;
 
 import java.util.TimeZone;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 
 /**
  * {@link TimeZoneUtils} - Utility class for time zone.
@@ -67,7 +67,7 @@ public final class TimeZoneUtils {
         super();
     }
 
-    private static final ConcurrentMap<String, TimeZone> ZONE_CACHE = new ConcurrentHashMap<String, TimeZone>();
+    private static final ConcurrentMap<String, TimeZone> ZONE_CACHE = new NonBlockingHashMap<String, TimeZone>();
 
     /**
      * Gets the <code>TimeZone</code> for the given ID.

@@ -52,8 +52,8 @@ package com.openexchange.concurrent;
 import static com.openexchange.server.services.ServerServiceRegistry.getInstance;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.server.ServiceException;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
@@ -100,7 +100,7 @@ public final class TimeoutConcurrentMap<K, V> {
     public TimeoutConcurrentMap(final int shrinkerIntervalSeconds, final boolean forceTimeout) throws ServiceException {
         super();
         this.forceTimeout = forceTimeout;
-        map = new ConcurrentHashMap<K, ValueWrapper<V>>();
+        map = new NonBlockingHashMap<K, ValueWrapper<V>>();
         final TimerService timer = getInstance().getService(TimerService.class, true);
         timeoutTask = timer.scheduleWithFixedDelay(new TimedRunnable<K, V>(map), 1000, shrinkerIntervalSeconds * 1000);
     }

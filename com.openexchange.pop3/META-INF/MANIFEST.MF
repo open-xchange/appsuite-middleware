@@ -43,6 +43,7 @@ Import-Package: com.openexchange.api2,
  javax.net,
  javax.net.ssl,
  org.apache.commons.logging;version="1.0.4",
+ org.cliffc.high_scale_lib,
  org.osgi.framework;version="1.3.0",
  org.osgi.util.tracker;version="1.3.3"
 Bundle-RequiredExecutionEnvironment: J2SE-1.5

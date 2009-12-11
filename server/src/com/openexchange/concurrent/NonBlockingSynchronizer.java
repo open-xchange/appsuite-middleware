@@ -49,11 +49,11 @@
 
 package com.openexchange.concurrent;
 
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 
 /**
  * {@link NonBlockingSynchronizer} - Non-blocking reentrant synchronizer; also useful to wrap an existing {@link Runnable runnable}.
@@ -94,7 +94,7 @@ public final class NonBlockingSynchronizer implements Synchronizer, Runnable {
         running = new AtomicInteger();
         runLock = new ReentrantLock();
         this.runnable = runnable;
-        this.reentrant = new ConcurrentHashMap<Thread, Object>(2);
+        this.reentrant = new NonBlockingHashMap<Thread, Object>(2);
     }
 
     /**

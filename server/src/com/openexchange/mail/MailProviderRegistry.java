@@ -52,7 +52,7 @@ package com.openexchange.mail;
 import static com.openexchange.mail.utils.ProviderUtility.extractProtocol;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.config.MailProperties;
@@ -70,7 +70,7 @@ public final class MailProviderRegistry {
     /**
      * Concurrent map used as set for mail providers
      */
-    private static final Map<Protocol, MailProvider> providers = new ConcurrentHashMap<Protocol, MailProvider>();
+    private static final Map<Protocol, MailProvider> providers = new NonBlockingHashMap<Protocol, MailProvider>();
 
     /**
      * Initializes a new {@link MailProviderRegistry}

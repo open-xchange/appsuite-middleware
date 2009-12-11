@@ -60,7 +60,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -78,6 +77,7 @@ import javax.mail.internet.ParseException;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.net.QuotedPrintableCodec;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -122,7 +122,7 @@ public final class MIMEMessageUtility {
         ENCODINGS = java.util.Collections.unmodifiableSet(tmp);
     }
 
-    private static final ConcurrentMap<String, Future<MailDateFormat>> MDF_MAP = new ConcurrentHashMap<String, Future<MailDateFormat>>();
+    private static final ConcurrentMap<String, Future<MailDateFormat>> MDF_MAP = new NonBlockingHashMap<String, Future<MailDateFormat>>();
 
     /**
      * No instantiation
