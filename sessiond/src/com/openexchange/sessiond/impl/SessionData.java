@@ -54,7 +54,6 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
@@ -117,8 +116,8 @@ final class SessionData {
         lock.lock();
         try {
             sessionList.addFirst(new SessionContainer(maxSessions));
-            userList.addFirst(new ConcurrentHashMap<String, String>(maxSessions));
-            randomList.addFirst(new ConcurrentHashMap<String, String>(maxSessions));
+            userList.addFirst(new NonBlockingHashMap<String, String>(maxSessions));
+            randomList.addFirst(new NonBlockingHashMap<String, String>(maxSessions));
             userList.removeLast();
             randomList.removeLast();
             final List<SessionControl> retval = new ArrayList<SessionControl>(maxSessions);
