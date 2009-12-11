@@ -132,6 +132,6 @@ public class SessionControl {
      * @return <code>true</code> if the session is still valid.
      */
     public boolean isValid() {
-        return ((getTimestamp() + getLifetime()) >= System.currentTimeMillis());
+        return ((timestamp + lifetime) >= System.currentTimeMillis());
     }
 }
