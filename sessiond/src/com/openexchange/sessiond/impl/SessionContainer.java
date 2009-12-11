@@ -69,6 +69,8 @@ final class SessionContainer {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(SessionContainer.class);
 
+    private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
+
     private static final Integer DUMMY = Integer.valueOf(1);
 
     private final Map<String, SessionControl> sessionIdMap;
@@ -166,7 +168,7 @@ final class SessionContainer {
     SessionControl put(final Session session, final int timeToLive) {
         final String sessionId = session.getSessionID();
         final SessionControl sessionControl = new SessionControl(session, timeToLive);
-        if (sessionIdMap.containsKey(sessionId) && LOG.isDebugEnabled()) {
+        if (DEBUG_ENABLED && sessionIdMap.containsKey(sessionId)) {
             LOG.debug(new StringBuilder("session REBORN sessionid=").append(sessionId));
         }
         sessionIdMap.put(sessionId, sessionControl);

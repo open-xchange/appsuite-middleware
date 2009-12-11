@@ -120,7 +120,7 @@ final class SessionData {
             randomList.addFirst(new ConcurrentHashMap<String, String>(maxSessions));
             userList.removeLast();
             randomList.removeLast();
-            final List<SessionControl> retval = new ArrayList<SessionControl>();
+            final List<SessionControl> retval = new ArrayList<SessionControl>(maxSessions);
             retval.addAll(sessionList.removeLast().getSessionControls());
             return retval;
         } finally {
