@@ -2913,15 +2913,21 @@ public class Mail extends PermissionServlet implements UploadListener {
     }
 
     private static final void fillMapByArray(final Map<String, List<String>> idMap, final JSONArray idArray, final int length) throws JSONException, MailException {
+        final String parameterFolderId = PARAMETER_FOLDERID;
+        final String parameterId = PARAMETER_ID;
         String folder = null;
         List<String> list = null;
-        for (int i = 0; i < length; i++) {
+        {
+            final JSONObject idObject = idArray.getJSONObject(0);
+            folder = ensureString(parameterFolderId, idObject);
+            list = new ArrayList<String>(length);
+            idMap.put(folder, list);
+            list.add(ensureString(parameterId, idObject));
+        }
+        for (int i = 1; i < length; i++) {
             final JSONObject idObject = idArray.getJSONObject(i);
-            final String fld = idObject.optString(PARAMETER_FOLDERID);
-            if (null == fld) {
-                throw new MailException(MailException.Code.MISSING_PARAMETER, PARAMETER_FOLDERID);
-            }
-            if (folder == null || !folder.equals(fld)) {
+            final String fld = ensureString(parameterFolderId, idObject);
+            if (!folder.equals(fld)) {
                 folder = fld;
                 final List<String> tmp = idMap.get(folder);
                 if (tmp == null) {
@@ -2931,12 +2937,19 @@ public class Mail extends PermissionServlet implements UploadListener {
                     list = tmp;
                 }
             }
-            final String id = idObject.optString(PARAMETER_ID);
-            if (null == id) {
-                throw new MailException(MailException.Code.MISSING_PARAMETER, PARAMETER_ID);
-            }
-            list.add(id);
+            list.add(ensureString(parameterId, idObject));
         }
+    }
+
+    private static String ensureString(final String key, final JSONObject jo) throws MailException {
+        final String value = jo.optString(key);
+        if (0 == value.length()) {
+            /*
+             * JSONObject.optString() returns an empty string if there is no such key.
+             */
+            throw new MailException(MailException.Code.MISSING_PARAMETER, key);
+        }
+        return value;
     }
 
     public void actionPutDeleteMails(final ServerSession session, final JSONWriter writer, final JSONObject jsonObj, final MailServletInterface mi) throws JSONException {
