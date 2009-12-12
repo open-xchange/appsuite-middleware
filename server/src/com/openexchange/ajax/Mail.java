@@ -2813,37 +2813,17 @@ public class Mail extends PermissionServlet implements UploadListener {
             /*
              * Get map
              */
-            final Map<String, List<String>> idMap = newHashMap(4);
-            final int size;
-            {
-                final JSONArray jsonIDs = new JSONArray(body);
-                final int length = jsonIDs.length();
-                if (length <= 0) {
-                    /*
-                     * Request body is an empty JSON array
-                     */
-                    if (LOG.isWarnEnabled()) {
-                        LOG.warn("Empty JSON array detected in request body.", new Throwable());
-                    }
-                    final Response r = new Response();
-                    r.setData(EMPTY_JSON_ARR);
-                    return r;
+            final Map<String, List<String>> idMap = fillMapByArray(new JSONArray(body));
+            if (idMap.isEmpty()) {
+                /*
+                 * Request body is an empty JSON array
+                 */
+                if (LOG.isWarnEnabled()) {
+                    LOG.warn("Empty JSON array detected in request body.", new Throwable());
                 }
-                fillMapByArray(idMap, jsonIDs, length);
-                size = idMap.size();
-                if (size == 0) {
-                    /*
-                     * Must not be zero since JSON array's length is greater than zero.
-                     */
-                    if (LOG.isWarnEnabled()) {
-                        final String jsonIDsStr = jsonIDs.toString();
-                        LOG.warn(new StringBuilder(jsonIDsStr.length() + 64).append("Parsing of folder-and-ID-pairs failed:\n").append(
-                            jsonIDsStr).toString(), new Throwable());
-                    }
-                    final Response r = new Response();
-                    r.setData(EMPTY_JSON_ARR);
-                    return r;
-                }
+                final Response r = new Response();
+                r.setData(EMPTY_JSON_ARR);
+                return r;
             }
             /*
              * Proceed
@@ -2855,6 +2835,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     mailInterface = MailServletInterface.getInstance(session);
                     closeMailInterface = true;
                 }
+                final int size = idMap.size();
                 final Iterator<Map.Entry<String, List<String>>> iter = idMap.entrySet().iterator();
                 final int userId = session.getUserId();
                 final int contextId = session.getContextId();
@@ -2912,7 +2893,12 @@ public class Mail extends PermissionServlet implements UploadListener {
         return response;
     }
 
-    private static final void fillMapByArray(final Map<String, List<String>> idMap, final JSONArray idArray, final int length) throws JSONException, MailException {
+    private static final Map<String, List<String>> fillMapByArray(final JSONArray idArray) throws JSONException, MailException {
+        final int length = idArray.length();
+        if (length <= 0) {
+            return Collections.emptyMap();
+        }
+        final Map<String, List<String>> idMap = newHashMap(4);
         final String parameterFolderId = PARAMETER_FOLDERID;
         final String parameterId = PARAMETER_ID;
         String folder;
@@ -2939,6 +2925,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             }
             list.add(ensureString(parameterId, idObject));
         }
+        return idMap;
     }
 
     private static String ensureString(final String key, final JSONObject jo) throws MailException {
