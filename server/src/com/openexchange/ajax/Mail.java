@@ -3877,7 +3877,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 null,
                 paramName);
         }
-        return tmp.split(" *, *");
+        return SPLIT.split(tmp, 0);
     }
 
     /*
