@@ -71,7 +71,7 @@ public final class PropertyWatcher implements FileListener {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(PropertyWatcher.class);
 
-    private static final ConcurrentMap<String, PropertyWatcher> watchers = new NonBlockingHashMap<String, PropertyWatcher>();
+    private static final ConcurrentMap<String, PropertyWatcher> WATCHER_MAP = new NonBlockingHashMap<String, PropertyWatcher>();
 
     /**
      * Gets an existing property watcher bound to given property name
@@ -80,7 +80,7 @@ public final class PropertyWatcher implements FileListener {
      * @return The corresponding property watcher or <code>null</code> if none bound to given property name
      */
     public static PropertyWatcher getPropertyWatcher(final String name) {
-        return watchers.get(name);
+        return WATCHER_MAP.get(name);
     }
 
     /**
@@ -89,7 +89,7 @@ public final class PropertyWatcher implements FileListener {
      * @param name The property name
      */
     public static void removePropertWatcher(final String name) {
-        watchers.remove(name);
+        WATCHER_MAP.remove(name);
     }
 
     /**
@@ -102,12 +102,15 @@ public final class PropertyWatcher implements FileListener {
      * @return The either newly created or existing property watcher bound to given property name
      */
     public static PropertyWatcher addPropertyWatcher(final String name, final String value, final boolean caseInsensitive) {
-        if (watchers.containsKey(name)) {
-            return watchers.get(name);
+        PropertyWatcher watcher = WATCHER_MAP.get(name);
+        if (null == watcher) {
+            final PropertyWatcher newWatcher = new PropertyWatcher(name, value, caseInsensitive);
+            watcher = WATCHER_MAP.putIfAbsent(name, newWatcher);
+            if (null == watcher) {
+                watcher = newWatcher;
+            }
         }
-        final PropertyWatcher watcher = new PropertyWatcher(name, value, caseInsensitive);
-        final PropertyWatcher prev = watchers.putIfAbsent(name, watcher);
-        return null == prev ? watcher : prev;
+        return watcher;
     }
 
     private final Map<Class<? extends PropertyListener>, PropertyListener> listeners;
@@ -165,14 +168,22 @@ public final class PropertyWatcher implements FileListener {
         return listeners.isEmpty();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.config.internal.filewatcher.FileListener#onChange(java .io.File)
-     */
     public void onChange(final File file) {
-        FileInputStream fis = null;
+        final FileInputStream fis;
         try {
             fis = new FileInputStream(file);
+        } catch (final FileNotFoundException e) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(e.getMessage(), e);
+            }
+            /*
+             * Obviously file does no more exist
+             */
+            value = null;
+            notifyListeners(true);
+            return;
+        }
+        try {
             final Properties properties = new Properties();
             properties.load(fis);
             final String newValue = properties.getProperty(name);
@@ -185,32 +196,17 @@ public final class PropertyWatcher implements FileListener {
                 value = newValue;
                 notifyListeners(false);
             }
-        } catch (final FileNotFoundException e) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(e.getMessage(), e);
-            }
-            /*
-             * Obviously file does no more exist
-             */
-            value = null;
-            notifyListeners(true);
         } catch (final IOException e) {
             LOG.error(e.getMessage(), e);
         } finally {
-            if (null != fis) {
-                try {
-                    fis.close();
-                } catch (final IOException e) {
-                    LOG.error(e.getMessage(), e);
-                }
+            try {
+                fis.close();
+            } catch (final IOException e) {
+                LOG.error(e.getMessage(), e);
             }
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.config.internal.filewatcher.FileListener#onDelete()
-     */
     public void onDelete() {
         value = null;
         notifyListeners(true);
@@ -222,4 +218,5 @@ public final class PropertyWatcher implements FileListener {
             iter.next().onPropertyChange(event);
         }
     }
+
 }

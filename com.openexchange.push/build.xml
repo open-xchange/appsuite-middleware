@@ -21,6 +21,9 @@
     <property name="gwbundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
     <property name="adbundle.d" value="${prefix}/etc/admindaemon/osgi/bundle.d"/>
 
+	<!-- Bundle dependencies -->
+	<property name="commonBundle" value="com.openexchange.common" />
+
     <!-- JAR names for classpath -->
     <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar"/>
 	<property name="osgiservicesjar" value="org.eclipse.osgi.services_3.1.200.v20070605.jar"/>
@@ -28,6 +31,8 @@
     <property name="globaljar" value="com.openexchange.global.jar"/>
 	<property name="threadpooljar" value="com.openexchange.threadpool.jar"/>
     <property name="sessiondjar" value="com.openexchange.sessiond.jar"/>
+
+	<property name="highscalejar" value="high-scale-lib-1.1.2.jar" />
 
     <!-- Third party libs 
     <fileset dir="${basedir}" id="3rdpartyjars">
@@ -43,6 +48,7 @@
         <pathelement location="${bundlesdir}/${globaljar}"/>
     	<pathelement location="${bundlesdir}/${threadpooljar}"/>
         <pathelement location="${bundlesdir}/${sessiondjar}"/>
+    	<pathelement location="${bundlesdir}/${commonBundle}/lib/${highscalejar}"/>
     	<!-- <fileset refid="3rdpartyjars"/> -->
     </path>
 

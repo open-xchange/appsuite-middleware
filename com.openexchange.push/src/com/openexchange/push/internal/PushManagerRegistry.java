@@ -50,8 +50,8 @@
 package com.openexchange.push.internal;
 
 import java.util.Iterator;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.push.PushManagerService;
 
 /**
@@ -109,7 +109,7 @@ public final class PushManagerRegistry {
      */
     private PushManagerRegistry() {
         super();
-        map = new ConcurrentHashMap<Class<? extends PushManagerService>, PushManagerService>();
+        map = new NonBlockingHashMap<Class<? extends PushManagerService>, PushManagerService>();
     }
 
     /**
