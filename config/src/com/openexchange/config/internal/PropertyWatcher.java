@@ -56,7 +56,6 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.config.PropertyEvent;
@@ -111,7 +110,7 @@ public final class PropertyWatcher implements FileListener {
         return null == prev ? watcher : prev;
     }
 
-    private final Map<Class<? extends PropertyListener>, PropertyListener> listeners = new ConcurrentHashMap<Class<? extends PropertyListener>, PropertyListener>();
+    private final Map<Class<? extends PropertyListener>, PropertyListener> listeners;
 
     private final boolean caseInsensitive;
 
@@ -128,6 +127,7 @@ public final class PropertyWatcher implements FileListener {
      */
     private PropertyWatcher(final String name, final String value, final boolean caseInsensitive) {
         super();
+        listeners = new NonBlockingHashMap<Class<? extends PropertyListener>, PropertyListener>();
         this.name = name;
         this.value = value;
         this.caseInsensitive = caseInsensitive;
