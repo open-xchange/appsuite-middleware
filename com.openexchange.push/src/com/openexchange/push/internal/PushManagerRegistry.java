@@ -158,7 +158,8 @@ public final class PushManagerRegistry {
      */
     private static <T> Iterator<T> unmodifiableIterator(final Iterator<T> iterator) {
         if (iterator == null) {
-            throw new NullPointerException();
+            @SuppressWarnings("unchecked") final Iterator<T> empty = EMPTY_ITER;
+            return empty;
         }
 
         return new Iterator<T>() {
@@ -176,5 +177,21 @@ public final class PushManagerRegistry {
             }
         };
     }
+
+    @SuppressWarnings("unchecked")
+    private static Iterator EMPTY_ITER = new Iterator() {
+
+        public boolean hasNext() {
+            return false;
+        }
+
+        public Object next() {
+            return null;
+        }
+
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+    };
 
 }
