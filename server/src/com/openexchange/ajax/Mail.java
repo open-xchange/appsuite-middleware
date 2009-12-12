@@ -2884,9 +2884,8 @@ public class Mail extends PermissionServlet implements UploadListener {
         return response;
     }
 
-    @SuppressWarnings("unchecked")
-    private static <T> T[] toArray(final Collection<T> c) {
-        return (T[]) c.toArray(new Object[c.size()]);
+    private static String[] toArray(final Collection<String> c) {
+        return c.toArray(new String[c.size()]);
     }
 
     private static final Map<String, List<String>> fillMapByArray(final JSONArray idArray) throws JSONException, MailException {
