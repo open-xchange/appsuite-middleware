@@ -282,7 +282,7 @@ public final class IMAPException extends MIMEMailException {
          */
         PROTOCOL_ERROR(IMAPCode.PROTOCOL_ERROR),
         /**
-         * Mail folder could not be found: %1$s.
+         * Mail folder "%1$s" could not be found.
          */
         FOLDER_NOT_FOUND(IMAPCode.FOLDER_NOT_FOUND),
         /**
