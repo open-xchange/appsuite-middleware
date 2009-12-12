@@ -52,7 +52,7 @@ package com.openexchange.sessiond.impl;
 import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.caching.objects.CachedSession;
 import com.openexchange.session.Session;
 
@@ -106,7 +106,7 @@ public final class SessionImpl implements Session {
         this.localIp = localIp;
         this.contextId = contextId;
         this.login = login;
-        parameters = new ConcurrentHashMap<String, Object>();
+        parameters = new NonBlockingHashMap<String, Object>();
     }
 
     /**
@@ -127,7 +127,7 @@ public final class SessionImpl implements Session {
         login = cachedSession.getLogin();
         localIp = localIP;
         final Map<String, Serializable> params = cachedSession.getParameters();
-        parameters = new ConcurrentHashMap<String, Object>(params.size());
+        parameters = new NonBlockingHashMap<String, Object>(params.size());
         for (final Iterator<Map.Entry<String, Serializable>> iter = params.entrySet().iterator(); iter.hasNext();) {
             final Map.Entry<String, Serializable> entry = iter.next();
             parameters.put(entry.getKey(), entry.getValue());
