@@ -64,9 +64,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * This class defines the interface to the file storage for persistantly keeping files like documents, attachments and so on. All methods
- * preimplemented for the file storage rely on a depth of subdirectories and a number of entries each directory can store. If you do not
- * want to use the preimplemented methods you have to overwrite them.
+ * This class defines the interface to the file storage for persistently keeping files like documents, attachments and so on. All methods
+ * pre-implemented for the file storage rely on a depth of sub-directories and a number of entries each directory can store. If you do not
+ * want to use the pre-implemented methods you have to overwrite them.
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
@@ -316,7 +316,7 @@ public abstract class FileStorage {
      * @return true if the file has been deleted successfully.
      * @throws FileStorageException if an error occurs.
      */
-    public boolean deleteFile(String identifier) throws FileStorageException {
+    public boolean deleteFile(final String identifier) throws FileStorageException {
         final boolean retval = delete(new String[] { identifier }).isEmpty();
         if (retval) {
             lock(LOCK_TIMEOUT);
@@ -337,13 +337,13 @@ public abstract class FileStorage {
      * @return a set of identifiers that could not be deleted.
      * @throws FileStorageException if an error occurs.
      */
-    public Set<String> deleteFile(String[] identifiers) throws FileStorageException {
-        Set<String> notDeleted = delete(identifiers);
+    public Set<String> deleteFile(final String[] identifiers) throws FileStorageException {
+        final Set<String> notDeleted = delete(identifiers);
         if (notDeleted.size() < identifiers.length) {
             lock(LOCK_TIMEOUT);
             try {
                 final State state = loadState();
-                for (String identifier : identifiers) {
+                for (final String identifier : identifiers) {
                     if (!notDeleted.contains(identifier)) {
                         state.addUnused(identifier);
                     }
