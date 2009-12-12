@@ -181,6 +181,47 @@ public final class MessageWriter {
         public void writeField(JSONValue jsonContainer, MailMessage mail, int level, boolean withKey, int accountId, int user, int cid) throws MailException;
     }
 
+    private static final class HeaderFieldWriter implements MailFieldWriter {
+
+        private final String headerName;
+
+        HeaderFieldWriter(final String headerName) {
+            super();
+            this.headerName = headerName;
+        }
+
+        public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid) throws MailException {
+            final Object value = getHeaderValue(mail);
+            if (withKey) {
+                if (null != value) {
+                    try {
+                        ((JSONObject) jsonContainer).put(headerName, value);
+                    } catch (final JSONException e) {
+                        throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+                    }
+                }
+            } else {
+                ((JSONArray) jsonContainer).put(null == value ? JSONObject.NULL : value);
+            }
+        }
+
+        private Object getHeaderValue(final MailMessage mail) {
+            final String[] headerValues = mail.getHeader(headerName);
+            if (null == headerValues || 0 == headerValues.length) {
+                return null;
+            }
+            if (1 == headerValues.length) {
+                return headerValues[0];
+            }
+            final JSONArray ja = new JSONArray();
+            for (int j = 0; j < headerValues.length; j++) {
+                ja.put(headerValues[j]);
+            }
+            return ja;
+        }
+
+    }
+
     private static final EnumMap<MailListField, MailFieldWriter> WRITERS = new EnumMap<MailListField, MailFieldWriter>(MailListField.class);
 
     static {
@@ -590,38 +631,7 @@ public final class MessageWriter {
         }
         final MailFieldWriter[] retval = new MailFieldWriter[headers.length];
         for (int i = 0; i < headers.length; i++) {
-            final String headerName = headers[i];
-            retval[i] = new MailFieldWriter() {
-
-                public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid) throws MailException {
-                    final Object value;
-                    {
-                        final String[] headerValues = mail.getHeader(headerName);
-                        if (null == headerValues || 0 == headerValues.length) {
-                            value = null;
-                        } else if (1 == headerValues.length) {
-                            value = headerValues[0];
-                        } else {
-                            final JSONArray ja = new JSONArray();
-                            for (int j = 0; j < headerValues.length; j++) {
-                                ja.put(headerValues[j]);
-                            }
-                            value = ja;
-                        }
-                    }
-                    if (withKey) {
-                        if (null != value) {
-                            try {
-                                ((JSONObject) jsonContainer).put(headerName, value);
-                            } catch (final JSONException e) {
-                                throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
-                            }
-                        }
-                    } else {
-                        ((JSONArray) jsonContainer).put(null == value ? JSONObject.NULL : value);
-                    }
-                }
-            };
+            retval[i] = new HeaderFieldWriter(headers[i]);
         }
         return retval;
     }
