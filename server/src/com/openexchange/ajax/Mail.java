@@ -2841,16 +2841,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 final int contextId = session.getContextId();
                 for (int k = 0; k < size; k++) {
                     final Map.Entry<String, List<String>> entry = iter.next();
-                    /*
-                     * Get message list
-                     */
-                    final List<String> list = entry.getValue();
-                    final String folder = entry.getKey();
-                    if (null == folder) {
-                        throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, PARAMETER_FOLDERID);
-                    }
-                    final MailMessage[] mails =
-                        mailInterface.getMessageList(folder, list.toArray(new String[list.size()]), columns, headers);
+                    final MailMessage[] mails = mailInterface.getMessageList(entry.getKey(), toArray(entry.getValue()), columns, headers);
                     final int accountID = mailInterface.getAccountID();
                     for (int i = 0; i < mails.length; i++) {
                         final MailMessage mail = mails[i];
@@ -2891,6 +2882,11 @@ public class Mail extends PermissionServlet implements UploadListener {
         response.setData(jsonWriter.getObject());
         response.setTimestamp(null);
         return response;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> T[] toArray(final Collection<T> c) {
+        return (T[]) c.toArray(new Object[c.size()]);
     }
 
     private static final Map<String, List<String>> fillMapByArray(final JSONArray idArray) throws JSONException, MailException {
