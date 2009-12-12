@@ -2915,8 +2915,8 @@ public class Mail extends PermissionServlet implements UploadListener {
     private static final void fillMapByArray(final Map<String, List<String>> idMap, final JSONArray idArray, final int length) throws JSONException, MailException {
         final String parameterFolderId = PARAMETER_FOLDERID;
         final String parameterId = PARAMETER_ID;
-        String folder = null;
-        List<String> list = null;
+        String folder;
+        List<String> list;
         {
             final JSONObject idObject = idArray.getJSONObject(0);
             folder = ensureString(parameterFolderId, idObject);
