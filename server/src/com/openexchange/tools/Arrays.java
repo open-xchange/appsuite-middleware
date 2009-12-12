@@ -50,6 +50,7 @@
 package com.openexchange.tools;
 
 import static com.openexchange.java.Autoboxing.I;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -86,8 +87,9 @@ public final class Arrays {
     }
 
     public static int[] addUniquely(final int[] toExtend, final int... other) {
-        if(other == null)
+        if (other == null) {
             return toExtend;
+        }
         final Set<Integer> tmp = new HashSet<Integer>();
         for (final int i : toExtend) {
             tmp.add(I(i));
@@ -102,4 +104,16 @@ public final class Arrays {
         }
         return retval;
     }
+
+    /**
+     * Gets a newly allocated array containing all of the elements in specified collection.
+     * 
+     * @param c The collection whose elements shall be contained in returned array.
+     * @return A newly allocated array containing all elements
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T[] toArray(final Collection<T> c) {
+        return (T[]) c.toArray(new Object[c.size()]);
+    }
+
 }
