@@ -49,9 +49,20 @@
 
 package com.openexchange.subscribe.crawler.osgi;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Stack;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ho.yaml.Yaml;
@@ -61,7 +72,11 @@ import org.osgi.framework.ServiceRegistration;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.crawler.CrawlerDescription;
+import com.openexchange.subscribe.crawler.CrawlerUpdateTask;
 import com.openexchange.subscribe.crawler.GenericSubscribeService;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
+import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * {@link Activator}
@@ -76,28 +91,44 @@ public class Activator implements BundleActivator {
 
     public static final String PATH_PROPERTY = "com.openexchange.subscribe.crawler.path";
 
-    public void start(final BundleContext context) throws Exception {
-        services = new ArrayList<ServiceRegistration>();
-        final ConfigurationService config = (ConfigurationService) context.getService(context.getServiceReference(ConfigurationService.class.getName()));
-        if (config != null) {
-            final ArrayList<CrawlerDescription> crawlers = getCrawlersFromFilesystem(config);
-            for (final CrawlerDescription crawler : crawlers) {
-                final GenericSubscribeService subscribeService = new GenericSubscribeService(
-                    crawler.getDisplayName(),
-                    crawler.getId(),
-                    crawler.getWorkflowString(), 
-                    crawler.getPriority());
-                final ServiceRegistration serviceRegistration = context.registerService(SubscribeService.class.getName(), subscribeService, null);
-                services.add(serviceRegistration);
-            }
-        } else {
+    public static final String UPDATE_INTERVAL = "com.openexchange.subscribe.crawler.updateinterval";
 
+    private ScheduledTimerTask scheduledTimerTask;
+
+    private BundleContext bundleContext;
+
+    private final Stack<ServiceTracker> trackers = new Stack<ServiceTracker>();
+
+    public static final int CRAWLER_API_VERSION = 614;
+
+    // This assures that every time the server/bundle is restarted it will check for updates
+    private Long LAST_TIME_CHECKED = new Long("0");
+
+    public void start(final BundleContext context) throws Exception {
+
+        bundleContext = context;
+        services = new ArrayList<ServiceRegistration>();
+        final ConfigurationService configurationService = (ConfigurationService) bundleContext.getService(bundleContext.getServiceReference(ConfigurationService.class.getName()));
+        registerServices(configurationService);
+        // Insert daily TimerTask to look for updates
+        final TimerService timerService = (TimerService) bundleContext.getService(bundleContext.getServiceReference(TimerService.class.getName()));
+        if (timerService != null && configurationService != null) {
+            final long updateInterval = Integer.parseInt(configurationService.getProperty(UPDATE_INTERVAL));
+            CrawlerUpdateTask crawlerUpdateTask = new CrawlerUpdateTask(configurationService, this);
+            // Start the job after ten seconds this and repeat it as often as configured (default:daily)
+            scheduledTimerTask = timerService.scheduleWithFixedDelay(crawlerUpdateTask, 60 * 1000, updateInterval);
+        }
+        // Track if TimerService is going down removing the ScheduledTimerTask if that happens
+        trackers.push(new ServiceTracker(context, TimerService.class.getName(), new ConfigurationCustomizer(context, scheduledTimerTask)));
+        for (final ServiceTracker tracker : trackers) {
+            tracker.open();
         }
     }
 
     public void stop(final BundleContext context) throws Exception {
-        for (final ServiceRegistration serviceRegistration : services) {
-            serviceRegistration.unregister();
+        unregisterServices();
+        while (!trackers.isEmpty()) {
+            trackers.pop().close();
         }
     }
 
@@ -124,5 +155,57 @@ public class Activator implements BundleActivator {
         }
         return crawlers;
     }
+
+    public void registerServices(ConfigurationService config) {
+        if (config != null) {
+            final ArrayList<CrawlerDescription> crawlers = getCrawlersFromFilesystem(config);
+            for (final CrawlerDescription crawler : crawlers) {
+                final GenericSubscribeService subscribeService = new GenericSubscribeService(
+                    crawler.getDisplayName(),
+                    crawler.getId(),
+                    crawler.getWorkflowString(),
+                    crawler.getPriority());
+                final ServiceRegistration serviceRegistration = bundleContext.registerService(
+                    SubscribeService.class.getName(),
+                    subscribeService,
+                    null);
+                services.add(serviceRegistration);
+            }
+        }
+    }
+
+    public void unregisterServices() {
+        for (final ServiceRegistration serviceRegistration : services) {
+            serviceRegistration.unregister();
+        }
+    }
+
+    
+    public Long getLAST_TIME_CHECKED() {
+        return LAST_TIME_CHECKED;
+    }
+
+    
+    public void setLAST_TIME_CHECKED(Long last_time_checked) {
+        LAST_TIME_CHECKED = last_time_checked;
+    }
+
+    
+    public static int getCRAWLER_API_VERSION() {
+        return CRAWLER_API_VERSION;
+    }
+
+    // THESE METHODS SHOULD ONLY BE USED FOR TESTING
+    public ArrayList<ServiceRegistration> getServices() {
+        return services;
+    }
+    public void setServices(ArrayList<ServiceRegistration> services) {
+        this.services = services;
+    }
+    public void setBundleContext(BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
+    }
+    // THESE METHODS SHOULD ONLY BE USED FOR TESTING   
+    
 
 }

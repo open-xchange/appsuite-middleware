@@ -47,69 +47,45 @@
  *
  */
 
-package com.openexchange.subscribe.crawler;
+package com.openexchange.subscribe.crawler.osgi;
 
-import com.openexchange.subscribe.crawler.osgi.Activator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.timer.ScheduledTimerTask;
 
 /**
+ * {@link ConfigurationCustomizer}
+ * This class is meant to close the TimerTask scheduled to check for daily updates to the crawler-configurations.
+ * It is needed because otherwise the TimerTask would be saved and a new one would be created each time the crawler-bundle is
+ * restarted, resulting in multiple Tasks where only one is needed.
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class CrawlerDescription {
+public class ConfigurationCustomizer implements ServiceTrackerCustomizer {
 
-    private String displayName, id, workflowString;
-    
-    private int priority = 0;
-    
-    private int crawlerApiVersion = 614;
+    private final BundleContext context;
 
-    public CrawlerDescription() {
+    private final ScheduledTimerTask scheduledTimerTask;
 
+    public ConfigurationCustomizer(BundleContext context, ScheduledTimerTask scheduledTimerTask) {
+        super();
+        this.context = context;
+        this.scheduledTimerTask = scheduledTimerTask;
     }
 
-    public String getDisplayName() {
-        return displayName;
+    public Object addingService(ServiceReference reference) {
+        ConfigurationService configService = (ConfigurationService) context.getService(reference);
+        return configService;
     }
 
-    public void setDisplayName(final String displayName) {
-        this.displayName = displayName;
+    public void modifiedService(ServiceReference reference, Object service) {
+        // Nothing to do.
     }
 
-    public String getId() {
-        return id;
+    public void removedService(ServiceReference reference, Object service) {
+        // cancel the TimerTask before either service (crawler or TimerService) is going down
+        scheduledTimerTask.cancel();
+        context.ungetService(reference);
     }
-
-    public void setId(final String id) {
-        this.id = id;
-    }
-
-    public String getWorkflowString() {
-        return workflowString;
-    }
-
-    public void setWorkflowString(final String workflowString) {
-        this.workflowString = workflowString;
-    }
-
-    
-    public int getPriority() {
-        return priority;
-    }
-
-    
-    public void setPriority(final int priority) {
-        this.priority = priority;
-    }
-
-    
-    public int getCrawlerApiVersion() {
-        return crawlerApiVersion;
-    }
-
-    
-    public void setCrawlerApiVersion(int crawlerApiVersion) {
-        this.crawlerApiVersion = crawlerApiVersion;
-    }
-
-    
-    
 }

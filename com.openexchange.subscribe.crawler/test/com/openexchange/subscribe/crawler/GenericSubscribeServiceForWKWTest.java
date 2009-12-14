@@ -49,67 +49,51 @@
 
 package com.openexchange.subscribe.crawler;
 
-import com.openexchange.subscribe.crawler.osgi.Activator;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import org.ho.yaml.Yaml;
+
 
 /**
+ * {@link GenericSubscribeServiceForWKWTest}
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class CrawlerDescription {
-
-    private String displayName, id, workflowString;
+public class GenericSubscribeServiceForWKWTest extends GenericSubscribeServiceTestHelpers {
     
-    private int priority = 0;
-    
-    private int crawlerApiVersion = 614;
+    public void testWKW() {
+        // insert valid credentials here
+        final String username = "karsten.will@gmx.de";
+        final String password = "CRAWLER_101";
 
-    public CrawlerDescription() {
+        // create a CrawlerDescription
+        final CrawlerDescription crawler = new CrawlerDescription();
+        crawler.setDisplayName("wer-kennt-wen.de");
+        crawler.setId("com.openexchange.subscribe.crawler.wkw");
+        final List<Step> steps = new LinkedList<Step>();
+        
+        // #####################################################################        
+        //TODO: insert steps
+        steps.add(new LoginPageByFormActionStep("", "http://www.wer-kennt-wen.de", username, password, "start.php", "loginName", "pass", "\\/people\\/friends", 0, ""));
+        
+//        final ArrayList<PagePart> pageParts = new ArrayList<PagePart>();
+//        final PagePartSequence sequence = new PagePartSequence(pageParts, "");
+//        steps.add(new ContactObjectsByHTMLAnchorsAndPagePartSequenceStep(
+//            "Get the info-bits from the contact-page.",
+//            sequence));
+        // #####################################################################
+        
+        
+        final Workflow workflow = new Workflow(steps);
+        
+        final String yamlString = Yaml.dump(workflow);
+        crawler.setWorkflowString(yamlString);
+
+        findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
+        // uncomment this if the if the crawler description was updated to get the new config-files
+        //dumpThis(crawler, crawler.getDisplayName());
 
     }
 
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    public void setDisplayName(final String displayName) {
-        this.displayName = displayName;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(final String id) {
-        this.id = id;
-    }
-
-    public String getWorkflowString() {
-        return workflowString;
-    }
-
-    public void setWorkflowString(final String workflowString) {
-        this.workflowString = workflowString;
-    }
-
-    
-    public int getPriority() {
-        return priority;
-    }
-
-    
-    public void setPriority(final int priority) {
-        this.priority = priority;
-    }
-
-    
-    public int getCrawlerApiVersion() {
-        return crawlerApiVersion;
-    }
-
-    
-    public void setCrawlerApiVersion(int crawlerApiVersion) {
-        this.crawlerApiVersion = crawlerApiVersion;
-    }
-
-    
-    
 }
