@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.storage.mysqlStorage;
 
+import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
@@ -60,10 +61,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.properties.AdminProperties;
@@ -73,6 +72,9 @@ import com.openexchange.admin.storage.sqlStorage.CreateTableRegistry;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.update.SchemaException;
+import com.openexchange.groupware.update.SchemaStore;
+import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskCollection;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -114,14 +116,18 @@ public class OXUtilMySQLStorageCommon {
             pumpData2DatabaseOld(con, createTableStatements);
             pumpData2DatabaseNew(con, CreateTableRegistry.getInstance().getList());
             initVersionTable(con);
+            initUpdateTaskTable(con);
             con.commit();
         } catch (SQLException e) {
-            DBUtils.rollback(con);
+            rollback(con);
+            deleteDatabase(con, db);
             throw new StorageException(e.toString());
         } catch (StorageException e) {
-            DBUtils.rollback(con);
+            rollback(con);
+            deleteDatabase(con, db);
             throw e;
         } finally {
+            autocommit(con);
             cache.closeSimpleConnection(con);
         }
     }
@@ -173,7 +179,7 @@ public class OXUtilMySQLStorageCommon {
 
     private void pumpData2DatabaseNew(Connection con, List<CreateTableService> createTables) throws StorageException {
         Set<String> existingTables = new HashSet<String>();
-        for (String table : fromScripts) {
+        for (String table : FROM_SCRIPTS) {
             existingTables.add(table);
         }
         List<CreateTableService> toCreate = new ArrayList<CreateTableService>(createTables.size());
@@ -243,6 +249,18 @@ public class OXUtilMySQLStorageCommon {
         }
     }
 
+    private void initUpdateTaskTable(Connection con) throws StorageException {
+        List<UpdateTask> tasks = UpdateTaskCollection.getInstance().generateList();
+        SchemaStore store = SchemaStore.getInstance();
+        try {
+            for (UpdateTask task : tasks) {
+                store.addExecutedTask(con, task.getClass().getName(), true);
+            }
+        } catch (SchemaException e) {
+            throw new StorageException(e.getMessage(), e);
+        }
+    }
+
     public void deleteDatabase(Database db) throws StorageException {
         final Connection con;
         try {
@@ -254,6 +272,14 @@ public class OXUtilMySQLStorageCommon {
             LOG.error("Driver not found to create database ", e);
             throw new StorageException(e);
         }
+        try {
+            deleteDatabase(con, db);
+        } finally {
+            cache.closeSimpleConnection(con);
+        }
+    }
+
+    private void deleteDatabase(final Connection con, Database db) throws StorageException {
         Statement stmt = null;
         try {
             con.setAutoCommit(false);
@@ -261,22 +287,19 @@ public class OXUtilMySQLStorageCommon {
             stmt.executeUpdate("DROP DATABASE IF EXISTS `" + db.getScheme() + "`");
             con.commit();
         } catch (SQLException e) {
-            LOG.error("SQL Error", e);
             rollback(con);
             throw new StorageException(e.getMessage(), e);
         } finally {
             closeSQLStuff(stmt);
-            cache.closeSimpleConnection(con);
         }
     }
 
-    private static final String[] fromScripts = {
+    private static final String[] FROM_SCRIPTS = {
         "sequence_id", "sequence_principal", "sequence_resource", "sequence_resource_group", "sequence_folder", "sequence_calendar",
         "sequence_contact", "sequence_task", "sequence_project", "sequence_infostore", "sequence_forum", "sequence_pinboard",
         "sequence_attachment", "sequence_gui_setting", "sequence_reminder", "sequence_ical", "sequence_webdav", "sequence_uid_number",
         "sequence_gid_number", "sequence_mail_service", "groups", "del_groups", "user", "del_user", "groups_member", "login2user",
-        "user_attribute", "resource", "del_resource", "user_mail_account", "user_mail_account_properties", "user_transport_account",
-        "user_transport_account_properties", "pop3_storage_ids", "pop3_storage_deleted", "oxfolder_tree", "oxfolder_permissions",
+        "user_attribute", "resource", "del_resource", "oxfolder_tree", "oxfolder_permissions",
         "oxfolder_specialfolders", "oxfolder_userfolders", "oxfolder_userfolders_standardfolders", "del_oxfolder_tree",
         "del_oxfolder_permissions", "oxfolder_lock", "oxfolder_property", "user_configuration", "user_setting_mail",
         "user_setting_mail_signature", "user_setting_spellcheck", "user_setting_admin", "user_setting", "user_setting_server", "prg_dates",
