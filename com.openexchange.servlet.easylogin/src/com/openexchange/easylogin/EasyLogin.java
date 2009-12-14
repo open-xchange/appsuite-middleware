@@ -64,6 +64,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.configuration.ConfigurationException;
+import com.openexchange.tools.servlet.http.Tools;
 
 
 
@@ -470,14 +471,21 @@ public class EasyLogin extends HttpServlet {
             LOG.error("Error processing easylogin configuration" + EASYLOGIN_PROPERTY_FILE + " ", e);
         }
 		
+		LOG.info("EasyLogin from IP=" + req.getRemoteAddr() + ", Hostname=" + req.getRemoteHost()
+		    +", URI=" + req.getRequestURI() + ", Scheme=" + req.getScheme());
+
+		Tools.disableCaching(resp);
 		resp.setContentType("text/html");
+		if( ! req.isSecure() ) {
+		    resp.sendError(HttpServletResponse.SC_FORBIDDEN, "EasyLogin: Only secure transmission allowed");
+		    return;
+		}
 		PrintWriter out = resp.getWriter();
 		
 		String login = null;
 		String password = null;
 		
 		
-				
 		if (req.getParameter(passwordPara)==null || req.getParameter(passwordPara).trim().length()==0){
 			resp.sendError( HttpServletResponse.SC_BAD_REQUEST , "parameter " + passwordPara + " missing");
 			LOG.error("Got request without password");
@@ -488,6 +496,8 @@ public class EasyLogin extends HttpServlet {
 			
 			password = req.getParameter(passwordPara);
 			login = req.getParameter(loginPara).trim().toLowerCase();
+
+			LOG.info("EasyLogin Login=" + login);
 			
 			out.print(RESPONSE1);
 			out.print(AJAX_ROOT);
@@ -502,7 +512,7 @@ public class EasyLogin extends HttpServlet {
 						out.println(getJsBaseRedirect(true));
 					}else{
 						// custom redirect url was requested, send this URL in javascript to redirect
-						out.print(getJsCustomRedirect(req.getParameter(redirPara).toString(),true));
+                        out.print(getJsCustomRedirect(req.getParameter(redirPara).toString(),false));                       
 					}
 				}else{				
 					// if via referrer
