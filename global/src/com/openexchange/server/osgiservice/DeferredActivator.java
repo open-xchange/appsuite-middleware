@@ -52,8 +52,8 @@ package com.openexchange.server.osgiservice;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -198,7 +198,7 @@ public abstract class DeferredActivator implements BundleActivator {
         if (len > 0 && new HashSet<Class<?>>(Arrays.asList(classes)).size() != len) {
             throw new IllegalArgumentException("Duplicate class/interface provided through getNeededServices()");
         }
-        services = new NonBlockingHashMap<Class<?>, Object>(len);
+        services = new ConcurrentHashMap<Class<?>, Object>(len);
         serviceTrackers = new ServiceTracker[len];
         availability = 0;
         allAvailable = (1 << len) - 1;

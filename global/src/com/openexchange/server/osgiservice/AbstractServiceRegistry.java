@@ -51,7 +51,7 @@ package com.openexchange.server.osgiservice;
 
 import java.util.Iterator;
 import java.util.Map;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.server.ServiceException;
 
 /**
@@ -68,7 +68,7 @@ public class AbstractServiceRegistry {
      */
     protected AbstractServiceRegistry() {
         super();
-        services = new NonBlockingHashMap<Class<?>, Object>();
+        services = new ConcurrentHashMap<Class<?>, Object>();
     }
 
     /**
