@@ -482,6 +482,13 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         return uri;
     }
 
+    /**
+     * Gets the action parameter ({@link #PARAMETER_ACTION}) from specified servlet request.
+     * 
+     * @param req The servlet request
+     * @return The action parameter's value
+     * @throws OXConflictException If action parameter is missing in specified servlet request
+     */
     protected static String getAction(final HttpServletRequest req) throws OXConflictException {
         final String action = req.getParameter(PARAMETER_ACTION);
         if (action == null) {
