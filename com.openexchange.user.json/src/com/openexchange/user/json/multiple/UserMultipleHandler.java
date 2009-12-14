@@ -86,10 +86,11 @@ public final class UserMultipleHandler implements MultipleHandler {
         final AJAXRequestData request = new AJAXRequestData();
         request.setSecure(secure);
         for (final Entry<String, Object> entry : jsonObject.entrySet()) {
-            if (DATA.equals(entry.getKey())) {
+            final String key = entry.getKey();
+            if (DATA.equals(key)) {
                 request.setData(entry.getValue());
             } else {
-                request.putParameter(entry.getKey(), entry.getValue().toString());
+                request.putParameter(key, entry.getValue().toString());
             }
         }
         result = actionService.perform(null, session);
