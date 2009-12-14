@@ -9,4 +9,4 @@ Standards-Version: 3.6.1
 Package: open-xchange-sso
 Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre|sun-java6-jre, open-xchange-common (>= @OXVERSION@), open-xchange-global (>= @OXVERSION@), open-xchange-server (>= @OXVERSION@)
-Description: The Open-Xchange folder JSON interface bundle
+Description: The Open-Xchange single sign on implementation
