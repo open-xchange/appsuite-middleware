@@ -403,6 +403,16 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     }
 
     /**
+     * 8K buffer
+     */
+    private static final int BUF_SIZE = 0x2000;
+
+    /**
+     * Initialize with 16K
+     */
+    private static final int SB_SIZE = 0x4000;
+
+    /**
      * Returns the complete body as a string. Be careful when getting big request bodies.
      * 
      * @param req The HTTP servlet request.
@@ -419,10 +429,10 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                         req.getInputStream(),
                         null == characterEncoding ? ServerConfig.getProperty(Property.DefaultEncoding) : characterEncoding);
             }
-            final char[] c = new char[8192]; // 8K buffer
+            final char[] c = new char[BUF_SIZE];
             int count = 0;
             if ((count = isr.read(c)) > 0) {
-                final StringBuilder sb = new StringBuilder(16384); // Initialize with 16K
+                final StringBuilder sb = new StringBuilder(SB_SIZE);
                 do {
                     sb.append(c, 0, count);
                 } while ((count = isr.read(c)) > 0);
