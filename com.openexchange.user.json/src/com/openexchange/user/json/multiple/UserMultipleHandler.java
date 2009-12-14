@@ -50,12 +50,15 @@
 package com.openexchange.user.json.multiple;
 
 import java.util.Date;
+import java.util.Map.Entry;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.multiple.MultipleHandler;
+import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.json.actions.UserActionFactory;
 
@@ -65,8 +68,6 @@ import com.openexchange.user.json.actions.UserActionFactory;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UserMultipleHandler implements MultipleHandler {
-
-    private AJAXActionService actionService;
 
     private AJAXRequestResult result;
 
@@ -78,7 +79,19 @@ public final class UserMultipleHandler implements MultipleHandler {
     }
 
     public Object performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws AbstractOXException, JSONException {
-        actionService = UserActionFactory.getInstance().createActionService(action);
+        final AJAXActionService actionService = UserActionFactory.getInstance().createActionService(action);
+        if (null == actionService) {
+            throw new AjaxException(AjaxException.Code.UnknownAction, action);
+        }
+        final AJAXRequestData request = new AJAXRequestData();
+        request.setSecure(secure);
+        for (final Entry<String, Object> entry : jsonObject.entrySet()) {
+            if (DATA.equals(entry.getKey())) {
+                request.setData(entry.getValue());
+            } else {
+                request.putParameter(entry.getKey(), entry.getValue().toString());
+            }
+        }
         result = actionService.perform(null, session);
         return result.getResultObject();
     }
@@ -88,7 +101,6 @@ public final class UserMultipleHandler implements MultipleHandler {
     }
 
     public void close() {
-        actionService = null;
         result = null;
     }
 

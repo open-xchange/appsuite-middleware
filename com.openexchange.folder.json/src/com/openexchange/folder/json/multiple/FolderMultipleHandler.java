@@ -50,29 +50,43 @@
 package com.openexchange.folder.json.multiple;
 
 import java.util.Date;
+import java.util.Map.Entry;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.folder.json.actions.FolderActionFactory;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.multiple.MultipleHandler;
+import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link FolderMultipleHandler}
+ * {@link FolderMultipleHandler} - The multiple handler for folder module.
  * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderMultipleHandler implements MultipleHandler {
-
-    private AJAXActionService actionService;
 
     private AJAXRequestResult result;
 
     public Object performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws AbstractOXException, JSONException {
-        actionService = FolderActionFactory.getInstance().createActionService(action);
-        result = actionService.perform(null, session);
+        final AJAXActionService actionService = FolderActionFactory.getInstance().createActionService(action);
+        if (null == actionService) {
+            throw new AjaxException(AjaxException.Code.UnknownAction, action);
+        }
+        final AJAXRequestData request = new AJAXRequestData();
+        request.setSecure(secure);
+        for (final Entry<String, Object> entry : jsonObject.entrySet()) {
+            if (DATA.equals(entry.getKey())) {
+                request.setData(entry.getValue());
+            } else {
+                request.putParameter(entry.getKey(), entry.getValue().toString());
+            }
+        }
+        result = actionService.perform(request, session);
         return result.getResultObject();
     }
 
@@ -81,7 +95,7 @@ public final class FolderMultipleHandler implements MultipleHandler {
     }
 
     public void close() {
-        actionService = null;
         result = null;
     }
+
 }
