@@ -639,7 +639,9 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             }
             final List<FileItem> items;
             try {
-                items = upload.parseRequest(req);
+                @SuppressWarnings("unchecked")
+                final List<FileItem> tmp = upload.parseRequest(req);
+                items = tmp;
             } catch (final FileUploadException e) {
                 throw new UploadException(UploadCode.UPLOAD_FAILED, action, e);
             }
