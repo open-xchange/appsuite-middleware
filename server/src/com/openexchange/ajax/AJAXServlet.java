@@ -359,7 +359,6 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * Error message if writing the response fails.
      */
     protected static final String RESPONSE_ERROR = "Error while writing response object.";
-    
 
     /**
      * The service method of HttpServlet is extended to catch bad exceptions and keep the AJP socket alive. Otherwise apache things in a
@@ -413,10 +412,13 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     public static String getBody(final HttpServletRequest req) throws IOException {
         InputStreamReader isr = null;
         try {
-            isr =
-                new InputStreamReader(
-                    req.getInputStream(),
-                    null == req.getCharacterEncoding() ? ServerConfig.getProperty(Property.DefaultEncoding) : req.getCharacterEncoding());
+            {
+                final String characterEncoding = req.getCharacterEncoding();
+                isr =
+                    new InputStreamReader(
+                        req.getInputStream(),
+                        null == characterEncoding ? ServerConfig.getProperty(Property.DefaultEncoding) : characterEncoding);
+            }
             final char[] c = new char[8192]; // 8K buffer
             int count = 0;
             if ((count = isr.read(c)) > 0) {
