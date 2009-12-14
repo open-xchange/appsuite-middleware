@@ -56,6 +56,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.sso.SSOConstants;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
 
@@ -78,21 +79,14 @@ public final class GetAction implements AJAXActionService {
         super();
     }
 
-    /**
-     * The split pattern.
-     */
-    // private static final Pattern SPLIT = Pattern.compile(Pattern.quote("@"));
-
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
         try {
             /*
-             * Determine login
+             * Ensure a secure connection to not transfer sensitive data in plain text
              */
-            // final String login;
-            // {
-            // final String[] tmp = SPLIT.split(session.getLogin(), 0);
-            // login = tmp[0];
-            // }
+            if (!request.isSecure()) {
+                throw new AjaxException(AjaxException.Code.NonSecureDenied, ACTION, SSOConstants.SERVLET_PATH);
+            }
             /*
              * Create & fill JSON object
              */
