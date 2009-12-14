@@ -631,13 +631,13 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
              * Set overall request size constraint
              */
             upload.setSizeMax(-1);
-            List<FileItem> items;
-            String action;
+            final String action;
             try {
                 action = getAction(req);
             } catch (final OXConflictException e) {
                 throw new UploadException(UploadCode.UPLOAD_FAILED, null, e);
             }
+            final List<FileItem> items;
             try {
                 items = upload.parseRequest(req);
             } catch (final FileUploadException e) {
