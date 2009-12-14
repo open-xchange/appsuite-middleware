@@ -77,7 +77,7 @@ public final class VoipNowMultipleHandler implements MultipleHandler {
         super();
     }
 
-    public Object performRequest(final String action, final JSONObject jsonObject, final ServerSession session) throws AbstractOXException, JSONException {
+    public Object performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws AbstractOXException, JSONException {
         actionService = VoipNowActionFactory.getInstance().createActionService(action);
         result = actionService.perform(null, session);
         return result.getResultObject();

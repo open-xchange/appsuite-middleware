@@ -113,7 +113,7 @@ public class PublicationMultipleHandler implements MultipleHandler {
     }};
 
 
-    public Object performRequest(String action, JSONObject request, ServerSession session) throws AbstractOXException, JSONException {
+    public Object performRequest(String action, JSONObject request, ServerSession session, boolean secure) throws AbstractOXException, JSONException {
         try {
             if (null == action) {
                 throw MISSING_PARAMETER.create("action");

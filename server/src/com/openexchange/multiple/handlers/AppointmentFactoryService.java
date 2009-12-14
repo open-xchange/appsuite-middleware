@@ -97,7 +97,7 @@ public final class AppointmentFactoryService implements MultipleHandlerFactorySe
             return timestamp;
         }
 
-        public JSONValue performRequest(final String action, final JSONObject jsonObject, final ServerSession session) throws AbstractOXException, JSONException {
+        public JSONValue performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws AbstractOXException, JSONException {
             final AppointmentRequest appointmentRequest = new AppointmentRequest(session);
             final JSONValue retval = appointmentRequest.action(action, jsonObject);
             timestamp = appointmentRequest.getTimestamp();

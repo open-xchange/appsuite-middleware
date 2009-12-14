@@ -83,6 +83,8 @@ public class AJAXRequestData {
 
     private final Map<String, String> params;
 
+    private boolean secure;
+
     private Object data;
 
     private InputStreamProvider uploadStreamProvider;
@@ -189,6 +191,24 @@ public class AJAXRequestData {
      */
     public void setData(final Object data) {
         this.data = data;
+    }
+
+    /**
+     * Whether this request has a secure connection.
+     * 
+     * @return <code>true</code> if this request has a secure connection; otherwise <code>false</code>
+     */
+    public boolean isSecure() {
+        return secure;
+    }
+
+    /**
+     * Sets whether this request has a secure connection.
+     * 
+     * @param secure <code>true</code> if this request has a secure connection; otherwise <code>false</code>
+     */
+    public void setSecure(final boolean secure) {
+        this.secure = secure;
     }
 
     /**

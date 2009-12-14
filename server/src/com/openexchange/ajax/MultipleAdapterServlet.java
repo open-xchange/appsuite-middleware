@@ -82,100 +82,100 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
     
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         handle(req, resp);
     }
     
     @Override
-    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         handle(req, resp);
     }
     
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         handle(req, resp);
     }
     
     
-    protected void handle(HttpServletRequest req, HttpServletResponse resp) {
+    protected void handle(final HttpServletRequest req, final HttpServletResponse resp) {
         if(handleOverride(req, resp)) {
             return;
         }
         try {
-            String action = req.getParameter(PARAMETER_ACTION);
-            JSONObject request = toJSON(req, action);
-            MultipleHandler handler = createMultipleHandler();
+            final String action = req.getParameter(PARAMETER_ACTION);
+            final JSONObject request = toJSON(req, action);
+            final MultipleHandler handler = createMultipleHandler();
 
             if(action == null) {
                 throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, PARAMETER_ACTION);
             }
-            Object response = handler.performRequest(action, request, getSessionObject(req));
-            Date timestamp = handler.getTimestamp();
+            final Object response = handler.performRequest(action, request, getSessionObject(req), req.isSecure());
+            final Date timestamp = handler.getTimestamp();
             writeResponseSafely(response, timestamp, resp);       
-        } catch (AbstractOXException x) {
+        } catch (final AbstractOXException x) {
             writeException(x, resp);
-        } catch (Throwable t) {
+        } catch (final Throwable t) {
             writeException(wrap(t), resp);
         }
     }
 
-    private AbstractOXException wrap(Throwable t) {
-        AbstractOXException x = new AbstractOXException(EnumComponent.NONE, Category.INTERNAL_ERROR, 1, "Caught Exception: %s", t);
+    private AbstractOXException wrap(final Throwable t) {
+        final AbstractOXException x = new AbstractOXException(EnumComponent.NONE, Category.INTERNAL_ERROR, 1, "Caught Exception: %s", t);
         x.setMessageArgs(t.getMessage());
         return x;
     }
 
-    protected boolean handleOverride(HttpServletRequest req, HttpServletResponse resp) {
+    protected boolean handleOverride(final HttpServletRequest req, final HttpServletResponse resp) {
         return false;
     }
 
-    private void writeResponseSafely(Object data, Date timestamp, HttpServletResponse resp) {
-        Response response = new Response();
+    private void writeResponseSafely(final Object data, final Date timestamp, final HttpServletResponse resp) {
+        final Response response = new Response();
         response.setData(data);
         if(null != timestamp) {
             response.setTimestamp(timestamp);
         }
         try {
             writeResponse(response, resp);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             LOG.error(e.getMessage(), e);
         }
     }
     
-    private void writeException(AbstractOXException x, HttpServletResponse resp) {
+    private void writeException(final AbstractOXException x, final HttpServletResponse resp) {
         LL.log(x);
-        Response response = new Response();
+        final Response response = new Response();
         response.setException(x);
         try {
             writeResponse(response, resp);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             LOG.error(e.getMessage(), e);
         }
     }
 
-    private JSONObject toJSON(HttpServletRequest req, String action) throws JSONException, IOException {
-        JSONObject request = new JSONObject();
-        Enumeration parameterNames = req.getParameterNames();
+    private JSONObject toJSON(final HttpServletRequest req, final String action) throws JSONException, IOException {
+        final JSONObject request = new JSONObject();
+        final Enumeration parameterNames = req.getParameterNames();
         while(parameterNames.hasMoreElements()) {
-            String parameterName = (String) parameterNames.nextElement();
-            String parameter = req.getParameter(parameterName);
+            final String parameterName = (String) parameterNames.nextElement();
+            final String parameter = req.getParameter(parameterName);
             request.put(parameterName, parameter);
         }
         if(requiresBody(action)) {
-            String body = getBody(req);
+            final String body = getBody(req);
             if(body != null && ! body.equals("")) {
-                Object value = toJSONConformantValue(body);
+                final Object value = toJSONConformantValue(body);
                 request.put(ResponseFields.DATA, value);
             }
         }
         return modify(req, action, request);
     }
 
-    protected JSONObject modify(HttpServletRequest req, String action, JSONObject request) throws JSONException {
+    protected JSONObject modify(final HttpServletRequest req, final String action, final JSONObject request) throws JSONException {
         return request;
     }
 
-    private Object toJSONConformantValue(String body) throws JSONException {
+    private Object toJSONConformantValue(final String body) throws JSONException {
         return new JSONObject("{ body : "+ body+" }").get("body");
     }
 

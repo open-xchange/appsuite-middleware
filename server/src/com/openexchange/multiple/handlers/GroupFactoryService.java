@@ -96,7 +96,7 @@ public final class GroupFactoryService implements MultipleHandlerFactoryService 
             return timestamp;
         }
 
-        public Object performRequest(final String action, final JSONObject jsonObject, final ServerSession session) throws AbstractOXException, JSONException {
+        public Object performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws AbstractOXException, JSONException {
             final GroupRequest request = new GroupRequest(session);
             final Object retval = request.action(action, jsonObject);
             timestamp = request.getTimestamp();

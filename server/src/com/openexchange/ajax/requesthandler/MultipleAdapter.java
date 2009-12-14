@@ -61,7 +61,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link MultipleAdapter} maps the {@link MultipleHandler} to several {@link AJAXActionService}s. This class is not thread safe because it
- * has to remember the {@link AJAXRequestResult} between calling {@link #performRequest(String, JSONObject, ServerSession)} and
+ * has to remember the {@link AJAXRequestResult} between calling {@link #performRequest(String, JSONObject, ServerSession, boolean)} and
  * {@link #getTimestamp()} methods.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
@@ -72,18 +72,19 @@ public class MultipleAdapter implements MultipleHandler {
 
     private AJAXRequestResult result;
   
-    public MultipleAdapter(AJAXActionServiceFactory factory) {
+    public MultipleAdapter(final AJAXActionServiceFactory factory) {
         super();
         this.factory = factory;
     }
 
-    public Object performRequest(String action, JSONObject jsonObject, ServerSession session) throws AbstractOXException, JSONException {
-        AJAXActionService actionService = factory.createActionService(action);
+    public Object performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws AbstractOXException, JSONException {
+        final AJAXActionService actionService = factory.createActionService(action);
         if (null == actionService) {
             throw new AjaxException(AjaxException.Code.UnknownAction, action);
         }
-        AJAXRequestData request = new AJAXRequestData();
-        for (Entry<String, Object> entry : jsonObject.entrySet()) {
+        final AJAXRequestData request = new AJAXRequestData();
+        request.setSecure(secure);
+        for (final Entry<String, Object> entry : jsonObject.entrySet()) {
             if (RequestConstants.DATA.equals(entry.getKey())) {
                 request.setData(entry.getValue());
             } else {

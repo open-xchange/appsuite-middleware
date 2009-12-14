@@ -108,7 +108,7 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
         return null;
     }
 
-    public Object performRequest(String action, JSONObject request, ServerSession session) throws AbstractOXException, JSONException {
+    public Object performRequest(String action, JSONObject request, ServerSession session, boolean secure) throws AbstractOXException, JSONException {
         try {
             if (null == action) {
                 MISSING_PARAMETER.throwException("action");

@@ -167,6 +167,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
 
     private AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream) throws IOException {
         final AJAXRequestData retval = new AJAXRequestData();
+        retval.setSecure(req.isSecure());
         /*
          * Pass all parameters to AJAX request object
          */

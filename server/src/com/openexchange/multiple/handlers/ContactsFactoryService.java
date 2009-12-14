@@ -97,7 +97,7 @@ public final class ContactsFactoryService implements MultipleHandlerFactoryServi
             return timestamp;
         }
 
-        public JSONValue performRequest(final String action, final JSONObject jsonObject, final ServerSession session) throws AbstractOXException, JSONException {
+        public JSONValue performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws AbstractOXException, JSONException {
             try {
                 final ContactRequest request = new ContactRequest(session);
                 final JSONValue retval = request.action(action, jsonObject);

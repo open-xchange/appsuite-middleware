@@ -97,7 +97,7 @@ public final class ReminderFactoryService implements MultipleHandlerFactoryServi
             return timestamp;
         }
 
-        public JSONValue performRequest(final String action, final JSONObject jsonObject, final ServerSession session) throws AbstractOXException, JSONException {
+        public JSONValue performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws AbstractOXException, JSONException {
             final ReminderRequest request = new ReminderRequest(session);
             final JSONValue retval = request.action(action, jsonObject);
             timestamp = request.getTimestamp();

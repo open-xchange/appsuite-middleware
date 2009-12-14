@@ -69,11 +69,12 @@ public interface MultipleHandler {
      * @param action The action string denoting the request to perform
      * @param jsonObject The JSON object providing request parameters and/or body
      * @param session The session providing needed user data
+     * @param secure <code>true</code> for a secure connection such as HTTPS; otherwise <code>false</code>
      * @return A {@link JSONValue} as a result of the performed request
      * @throws AbstractOXException If performing the request fails
      * @throws JSONException If a JSON error occurs
      */
-    public Object performRequest(String action, JSONObject jsonObject, ServerSession session) throws AbstractOXException, JSONException;
+    public Object performRequest(String action, JSONObject jsonObject, ServerSession session, boolean secure) throws AbstractOXException, JSONException;
 
     /**
      * Gets the time stamp when {@link #performRequest()} has been called.

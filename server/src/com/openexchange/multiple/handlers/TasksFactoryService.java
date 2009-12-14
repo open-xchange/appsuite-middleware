@@ -97,7 +97,7 @@ public final class TasksFactoryService implements MultipleHandlerFactoryService 
             return timestamp;
         }
 
-        public JSONValue performRequest(final String action, final JSONObject jsonObject, final ServerSession session) throws AbstractOXException, JSONException {
+        public JSONValue performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws AbstractOXException, JSONException {
             final TaskRequest request = new TaskRequest(session);
             final JSONValue retval = request.action(action, jsonObject);
             timestamp = request.getTimestamp();

@@ -70,7 +70,7 @@ public final class FolderMultipleHandler implements MultipleHandler {
 
     private AJAXRequestResult result;
 
-    public Object performRequest(String action, JSONObject jsonObject, ServerSession session) throws AbstractOXException, JSONException {
+    public Object performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws AbstractOXException, JSONException {
         actionService = FolderActionFactory.getInstance().createActionService(action);
         result = actionService.perform(null, session);
         return result.getResultObject();
