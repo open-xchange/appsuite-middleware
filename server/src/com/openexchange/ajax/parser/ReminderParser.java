@@ -50,10 +50,8 @@
 package com.openexchange.ajax.parser;
 
 import java.util.TimeZone;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.ReminderFields;
 import com.openexchange.groupware.reminder.ReminderObject;

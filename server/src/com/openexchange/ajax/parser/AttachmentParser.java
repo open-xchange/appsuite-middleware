@@ -52,7 +52,6 @@
 package com.openexchange.ajax.parser;
 
 import org.json.JSONException;
-
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 

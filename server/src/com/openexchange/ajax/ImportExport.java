@@ -52,7 +52,6 @@ package com.openexchange.ajax;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.BeanFactory;
-
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.importexport.ImporterExporter;
 import com.openexchange.server.services.ServerServiceRegistry;

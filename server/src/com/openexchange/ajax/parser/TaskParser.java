@@ -51,12 +51,9 @@ package com.openexchange.ajax.parser;
 
 import static com.openexchange.ajax.fields.TaskFields.ACTUAL_DURATION;
 import static com.openexchange.ajax.fields.TaskFields.TARGET_DURATION;
-
 import java.util.TimeZone;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.api.OXConflictException;

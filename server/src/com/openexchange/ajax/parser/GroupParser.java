@@ -52,7 +52,6 @@ package com.openexchange.ajax.parser;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.fields.GroupFields;
 import com.openexchange.group.Group;
 import com.openexchange.tools.servlet.OXJSONException;

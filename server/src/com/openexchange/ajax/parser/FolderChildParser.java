@@ -52,10 +52,8 @@
 package com.openexchange.ajax.parser;
 
 import java.util.TimeZone;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.tools.servlet.OXJSONException;

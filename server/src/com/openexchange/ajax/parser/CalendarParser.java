@@ -53,11 +53,9 @@ package com.openexchange.ajax.parser;
 
 import java.util.Date;
 import java.util.TimeZone;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.fields.ParticipantsFields;
 import com.openexchange.api.OXConflictException;
