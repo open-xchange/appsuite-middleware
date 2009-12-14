@@ -67,19 +67,19 @@ public class CreateReplicationTable extends AbstractCreateTableImpl {
     }
 
     public String[] tablesToCreate() {
-        return tables;
+        return TABLES;
     }
 
     @Override
     public String[] getCreateStatements() {
-        return creates;
+        return CREATES;
     }
 
-    private static final String[] tables = {
+    private static final String[] TABLES = {
         "replicationMonitor"
     };
 
-    private static final String[] creates = {
+    private static final String[] CREATES = {
         "CREATE TABLE replicationMonitor (" +
             "cid INT4 UNSIGNED NOT NULL," +
             "transaction INT8 NOT NULL," +
