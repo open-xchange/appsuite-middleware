@@ -92,9 +92,7 @@ public final class FileWatcher {
 
     private static final ConcurrentMap<File, FileWatcher> fileWatchers = new ConcurrentHashMap<File, FileWatcher>();
 
-    private static Timer fileWatcherTimer;
-
-    private static final AtomicBoolean timerInitialized = new AtomicBoolean();
+    private static volatile Timer fileWatcherTimer;
 
     /**
      * Gets a file watcher bound to given file. If no file watcher has been bound to specified file, yet, a new one is created and returned.
@@ -115,12 +113,25 @@ public final class FileWatcher {
     }
 
     private static void initTimer() {
-        if (!timerInitialized.get()) {
+        Timer tmp = fileWatcherTimer;
+        if (null == tmp) {
             synchronized (FileWatcher.class) {
-                if (null == fileWatcherTimer) {
-                    fileWatcherTimer = new Timer("FileWatcherTimer");
-                    timerInitialized.set(true);
+                tmp = fileWatcherTimer;
+                if (null == tmp) {
+                    tmp = fileWatcherTimer = new Timer("FileWatcherTimer");
                 }
+            }
+        }
+    }
+
+    /**
+     * Drops the associated timer thread.
+     */
+    public static void dropTimer() {
+        synchronized (FileWatcher.class) {
+            if (null != fileWatcherTimer) {
+                fileWatcherTimer.cancel();
+                fileWatcherTimer = null;
             }
         }
     }

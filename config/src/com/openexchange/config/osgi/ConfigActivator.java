@@ -54,6 +54,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.internal.ConfigurationImpl;
+import com.openexchange.config.internal.filewatcher.FileWatcher;
 
 /**
  * {@link ConfigActivator} - Activator for <code>com.openexchange.config</code> bundle
@@ -64,8 +65,6 @@ public final class ConfigActivator implements BundleActivator {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ConfigActivator.class);
 
-    private ConfigurationService configuration;
-
     private ServiceRegistration registration;
 
     /**
@@ -75,32 +74,24 @@ public final class ConfigActivator implements BundleActivator {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
-     */
     public void start(final BundleContext context) throws Exception {
         LOG.info("starting bundle: com.openexchange.configread");
-
         try {
-            configuration = new ConfigurationImpl();
-            registration = context.registerService(ConfigurationService.class.getName(), configuration, null);
+            registration = context.registerService(ConfigurationService.class.getName(), new ConfigurationImpl(), null);
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
-     */
     public void stop(final BundleContext context) throws Exception {
         LOG.info("stopping bundle: com.openexchange.configread");
-
         try {
-            registration.unregister();
-            configuration = null;
+            if (null != registration) {
+                registration.unregister();
+                registration = null;
+            }
+            FileWatcher.dropTimer();
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
