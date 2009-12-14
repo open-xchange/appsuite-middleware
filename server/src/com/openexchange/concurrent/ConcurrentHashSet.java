@@ -54,7 +54,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import org.cliffc.high_scale_lib.NonBlockingHashSet;
 
 /**
  * {@link ConcurrentHashSet} - This class implements the <tt>Set</tt> interface, backed by a map (actually a <tt>ConcurrentHashMap</tt>

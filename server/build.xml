@@ -87,7 +87,7 @@
     <property name="springbeanjar" value="spring-beans_1.2.7.jar"/>
     <property name="springcorejar" value="spring-core_1.2.7.jar"/>
     <property name="tnefjar" value="tnef-1.5.0.jar"/>
-	<property name="highscalejar" value="high-scale-lib-1.1.2.jar" />
+	<!-- <property name="highscalejar" value="high-scale-lib-1.1.2.jar" /> -->
 
     <!-- Third party libs -->
     <fileset dir="${basedir}" id="3rdpartyjars">
@@ -126,7 +126,7 @@
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${mailjar}"/>
     	<pathelement location="${bundlesdir}/${commonBundle}/lib/${libidnjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${tnefjar}"/>
-    	<pathelement location="${bundlesdir}/${commonBundle}/lib/${highscalejar}" />
+    	<!-- <pathelement location="${bundlesdir}/${commonBundle}/lib/${highscalejar}" /> -->
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${chardetjar}"/>
         <pathelement location="${bundlesdir}/${xmlBundle}/lib/${jdomjar}"/>
         <pathelement location="${bundlesdir}/${xmlBundle}/lib/${springbeanjar}"/>

@@ -61,11 +61,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
 import javax.mail.MessagingException;
 import javax.servlet.http.Cookie;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import org.xsocket.connection.INonBlockingConnection;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13RequestHandler;
@@ -107,7 +107,7 @@ public final class XAJPv13ForwardRequest extends XAJPv13Request {
     /**
      * A "set" to keep track of known JSESSIONIDs
      */
-    static final ConcurrentMap<String, Long> jsessionids = new NonBlockingHashMap<String, Long>();
+    static final ConcurrentMap<String, Long> jsessionids = new ConcurrentHashMap<String, Long>();
 
     private static final String DEFAULT_ENCODING = ServerConfig.getProperty(Property.DefaultEncoding);
 

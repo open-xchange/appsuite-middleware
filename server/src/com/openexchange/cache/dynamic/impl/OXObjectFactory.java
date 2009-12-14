@@ -51,7 +51,6 @@ package com.openexchange.cache.dynamic.impl;
 
 import java.io.Serializable;
 import java.util.concurrent.locks.Lock;
-
 import com.openexchange.groupware.AbstractOXException;
 
 /**

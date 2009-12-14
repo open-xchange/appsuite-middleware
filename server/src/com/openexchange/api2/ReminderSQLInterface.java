@@ -51,7 +51,6 @@ package com.openexchange.api2;
 
 import java.sql.Connection;
 import java.util.Date;
-
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.groupware.reminder.ReminderDeleteInterface;

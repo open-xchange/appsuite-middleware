@@ -52,10 +52,8 @@
 package com.openexchange.api2;
 
 import java.sql.Connection;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.container.LinkObject;

@@ -50,7 +50,6 @@
 package com.openexchange.api2;
 
 import java.util.Date;
-
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.groupware.contact.ContactInterface;

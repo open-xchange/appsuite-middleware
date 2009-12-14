@@ -50,7 +50,6 @@
 package com.openexchange.api2;
 
 import java.util.Date;
-
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.tools.iterator.SearchIterator;

@@ -51,8 +51,8 @@ package com.openexchange.ajp13.stable;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -70,7 +70,7 @@ final class AJPv13Watcher {
 
     private static ScheduledTimerTask task;
 
-    private static final ConcurrentMap<Integer, AJPv13Listener> listeners = new NonBlockingHashMap<Integer, AJPv13Listener>();
+    private static final ConcurrentMap<Integer, AJPv13Listener> listeners = new ConcurrentHashMap<Integer, AJPv13Listener>();
 
     static void initializeAJPv13Watcher() {
         if (AJPv13Config.getAJPWatcherEnabled()) {

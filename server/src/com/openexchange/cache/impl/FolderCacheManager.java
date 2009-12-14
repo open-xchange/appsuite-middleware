@@ -50,11 +50,11 @@
 package com.openexchange.cache.impl;
 
 import java.sql.Connection;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.api2.OXException;
 import com.openexchange.caching.Cache;
@@ -97,7 +97,7 @@ public final class FolderCacheManager {
      */
     private FolderCacheManager() throws OXException {
         super();
-        contextLocks = new NonBlockingHashMap<Integer, ReadWriteLock>();
+        contextLocks = new ConcurrentHashMap<Integer, ReadWriteLock>();
         initCache();
     }
 

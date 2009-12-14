@@ -52,7 +52,6 @@
 package com.openexchange.cache.dynamic.impl;
 
 import java.lang.reflect.Proxy;
-
 import com.openexchange.groupware.AbstractOXException;
 
 /**
