@@ -87,7 +87,6 @@ public final class MALPollPushManagerService implements PushManagerService {
         if (MALPollPushListenerRegistry.getInstance().addPushListener(
             session.getContextId(),
             session.getUserId(),
-            session.getSessionID(),
             pushListener)) {
             pushListener.open();
             return pushListener;
@@ -98,8 +97,7 @@ public final class MALPollPushManagerService implements PushManagerService {
     public boolean stopListener(final Session session) {
         return MALPollPushListenerRegistry.getInstance().removePushListener(
             session.getContextId(),
-            session.getUserId(),
-            session.getSessionID());
+            session.getUserId());
     }
 
     @Override
