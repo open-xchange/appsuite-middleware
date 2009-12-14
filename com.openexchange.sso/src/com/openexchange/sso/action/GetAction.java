@@ -49,7 +49,6 @@
 
 package com.openexchange.sso.action;
 
-import java.util.regex.Pattern;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -82,23 +81,24 @@ public final class GetAction implements AJAXActionService {
     /**
      * The split pattern.
      */
-    private static final Pattern SPLIT = Pattern.compile(Pattern.quote("@"));
+    // private static final Pattern SPLIT = Pattern.compile(Pattern.quote("@"));
 
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
         try {
             /*
              * Determine login
              */
-            final String login;
-            {
-                final String[] tmp = SPLIT.split(session.getLogin(), 0);
-                login = tmp[0];
-            }
+            // final String login;
+            // {
+            // final String[] tmp = SPLIT.split(session.getLogin(), 0);
+            // login = tmp[0];
+            // }
             /*
              * Create & fill JSON object
              */
             final JSONObject obj = new JSONObject();
-            obj.put("login", login);
+            obj.put("login", session.getLogin());
+            obj.put("username", session.getUser().getLoginInfo());
             obj.put("password", session.getPassword());
             obj.put("context_id", session.getContextId());
             obj.put("context_name", session.getContext().getName());
