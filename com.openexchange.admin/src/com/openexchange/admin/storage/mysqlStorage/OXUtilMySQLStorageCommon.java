@@ -49,7 +49,6 @@
 
 package com.openexchange.admin.storage.mysqlStorage;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
@@ -61,8 +60,10 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.properties.AdminProperties;
@@ -72,9 +73,6 @@ import com.openexchange.admin.storage.sqlStorage.CreateTableRegistry;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.update.SchemaException;
-import com.openexchange.groupware.update.SchemaStore;
-import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskCollection;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -116,18 +114,14 @@ public class OXUtilMySQLStorageCommon {
             pumpData2DatabaseOld(con, createTableStatements);
             pumpData2DatabaseNew(con, CreateTableRegistry.getInstance().getList());
             initVersionTable(con);
-            initUpdateTaskTable(con);
             con.commit();
         } catch (SQLException e) {
-            rollback(con);
-            deleteDatabase(con, db);
+            DBUtils.rollback(con);
             throw new StorageException(e.toString());
         } catch (StorageException e) {
-            rollback(con);
-            deleteDatabase(con, db);
+            DBUtils.rollback(con);
             throw e;
         } finally {
-            autocommit(con);
             cache.closeSimpleConnection(con);
         }
     }
@@ -249,18 +243,6 @@ public class OXUtilMySQLStorageCommon {
         }
     }
 
-    private void initUpdateTaskTable(Connection con) throws StorageException {
-        List<UpdateTask> tasks = UpdateTaskCollection.getInstance().generateList();
-        SchemaStore store = SchemaStore.getInstance();
-        try {
-            for (UpdateTask task : tasks) {
-                store.addExecutedTask(con, task.getClass().getName(), true);
-            }
-        } catch (SchemaException e) {
-            throw new StorageException(e.getMessage(), e);
-        }
-    }
-
     public void deleteDatabase(Database db) throws StorageException {
         final Connection con;
         try {
@@ -272,14 +254,6 @@ public class OXUtilMySQLStorageCommon {
             LOG.error("Driver not found to create database ", e);
             throw new StorageException(e);
         }
-        try {
-            deleteDatabase(con, db);
-        } finally {
-            cache.closeSimpleConnection(con);
-        }
-    }
-
-    private void deleteDatabase(final Connection con, Database db) throws StorageException {
         Statement stmt = null;
         try {
             con.setAutoCommit(false);
@@ -287,10 +261,12 @@ public class OXUtilMySQLStorageCommon {
             stmt.executeUpdate("DROP DATABASE IF EXISTS `" + db.getScheme() + "`");
             con.commit();
         } catch (SQLException e) {
+            LOG.error("SQL Error", e);
             rollback(con);
             throw new StorageException(e.getMessage(), e);
         } finally {
             closeSQLStuff(stmt);
+            cache.closeSimpleConnection(con);
         }
     }
 
