@@ -132,7 +132,7 @@ public final class FileWatcher {
 
     private TimerTask timerTask;
 
-    long timeStamp;
+    volatile long timeStamp;
 
     /**
      * Initializes a new file watcher
