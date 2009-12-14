@@ -1,3 +1,7 @@
+* 2009-12-14 - marcus.klein@open-xchange.com
+
+ - Bugfix #15066: Removed mail account tables from list of created tables by sql scripts.
+
 * 2009-12-08 - marcus.klein@open-xchange.com
 
  - Bugfix #14289: Toggling boolean value check to get it the correct way around when primary email is unchangeable.
