@@ -610,12 +610,36 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     /* --------------------- STUFF FOR UPLOAD --------------------- */
 
+    /**
+     * Processes specified request's upload provided that request is of content type <code>multipart/*</code>.
+     * 
+     * @param req The request whose upload shall be processed
+     * @return The processed instance of {@link UploadEvent}
+     * @throws UploadException Id processing the upload fails
+     */
     public UploadEvent processUpload(final HttpServletRequest req) throws UploadException {
         return processUploadStatic(req);
     }
 
-    private static final Set<String> UPLOAD_ACTIONS =
-        new HashSet<String>(Arrays.asList(ACTION_NEW, ACTION_UPLOAD, ACTION_APPEND, ACTION_UPDATE, ACTION_ATTACH, ACTION_COPY));
+    private static volatile ServletFileUpload servletFileUpload;
+
+    /**
+     * Gets the {@link ServletFileUpload} instance.
+     * 
+     * @return The {@link ServletFileUpload} instance
+     */
+    private static ServletFileUpload getFileUploadBase() {
+        ServletFileUpload tmp = servletFileUpload;
+        if (null == tmp) {
+            synchronized (AJAXServlet.class) {
+                tmp = servletFileUpload;
+                if (null == tmp) {
+                    tmp = servletFileUpload = newFileUploadBase();
+                }
+            }
+        }
+        return tmp;
+    }
 
     /**
      * 1MB threshold.
@@ -623,7 +647,36 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     private static final int SIZE_THRESHOLD = 1048576;
 
     /**
-     * Processes specified request's upload provided that request is of content type <code>multipart/*</code>.
+     * Creates a new {@link ServletFileUpload} instance.
+     * 
+     * @return A new {@link ServletFileUpload} instance
+     */
+    private static ServletFileUpload newFileUploadBase() {
+        /*
+         * Create the upload event
+         */
+        final DiskFileItemFactory factory = new DiskFileItemFactory();
+        /*
+         * Set factory constraints; threshold for single files
+         */
+        factory.setSizeThreshold(SIZE_THRESHOLD);
+        factory.setRepository(new File(ServerConfig.getProperty(Property.UploadDirectory)));
+        /*
+         * Create a new file upload handler
+         */
+        final ServletFileUpload sfu = new ServletFileUpload(factory);
+        /*
+         * Set overall request size constraint
+         */
+        sfu.setSizeMax(-1);
+        return sfu;
+    }
+
+    private static final Set<String> UPLOAD_ACTIONS =
+        new HashSet<String>(Arrays.asList(ACTION_NEW, ACTION_UPLOAD, ACTION_APPEND, ACTION_UPDATE, ACTION_ATTACH, ACTION_COPY));
+
+    /**
+     * (Statically) Processes specified request's upload provided that request is of content type <code>multipart/*</code>.
      * 
      * @param req The request whose upload shall be processed
      * @return The processed instance of {@link UploadEvent}
@@ -635,24 +688,6 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             throw new UploadException(UploadCode.NO_MULTIPART_CONTENT, null);
         }
         /*
-         * Create the upload event
-         */
-        final UploadEvent uploadEvent = new UploadEvent();
-        final DiskFileItemFactory factory = new DiskFileItemFactory();
-        /*
-         * Set factory constraints; threshold for single files
-         */
-        factory.setSizeThreshold(SIZE_THRESHOLD);
-        factory.setRepository(new File(ServerConfig.getProperty(Property.UploadDirectory)));
-        /*
-         * Create a new file upload handler
-         */
-        final ServletFileUpload upload = new ServletFileUpload(factory);
-        /*
-         * Set overall request size constraint
-         */
-        upload.setSizeMax(-1);
-        /*
          * Check action parameter existence
          */
         final String action;
@@ -661,12 +696,20 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         } catch (final OXConflictException e) {
             throw new UploadException(UploadCode.UPLOAD_FAILED, null, e);
         }
-        /*
+        /*-
          * Check proper action value
+         * 
+         * ###########################################################################################################
+         * ######################### ENSURE YOUR ACTION IS CONTAINED IN UPLOAD_ACTIONS ! ! ! #########################
+         * ###########################################################################################################
          */
         if (!UPLOAD_ACTIONS.contains(action) && !com.openexchange.groupware.importexport.Format.containsConstantName(action)) {
             throw new UploadException(UploadCode.UNKNOWN_ACTION_VALUE, null, action);
         }
+        /*
+         * Create file upload base
+         */
+        final ServletFileUpload upload = getFileUploadBase();
         final List<FileItem> items;
         try {
             @SuppressWarnings("unchecked") final List<FileItem> tmp = upload.parseRequest(req);
@@ -674,6 +717,10 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         } catch (final FileUploadException e) {
             throw new UploadException(UploadCode.UPLOAD_FAILED, action, e);
         }
+        /*
+         * Create the upload event
+         */
+        final UploadEvent uploadEvent = new UploadEvent();
         uploadEvent.setAction(action);
         /*
          * Set affiliation to mail upload
