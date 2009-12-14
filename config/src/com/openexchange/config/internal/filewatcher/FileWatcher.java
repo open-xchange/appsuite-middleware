@@ -50,8 +50,6 @@
 package com.openexchange.config.internal.filewatcher;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
@@ -92,7 +90,7 @@ public final class FileWatcher {
         }
     }
 
-    private static final Map<File, FileWatcher> fileWatchers = new HashMap<File, FileWatcher>();
+    private static final ConcurrentMap<File, FileWatcher> fileWatchers = new ConcurrentHashMap<File, FileWatcher>();
 
     private static Timer fileWatcherTimer;
 
@@ -105,11 +103,14 @@ public final class FileWatcher {
      * @return The file watcher
      */
     public static FileWatcher getFileWatcher(final File file) {
-        if (fileWatchers.containsKey(file)) {
-            return fileWatchers.get(file);
+        FileWatcher fw = fileWatchers.get(file);
+        if (null == fw) {
+            final FileWatcher newfw = new FileWatcher(file);
+            fw = fileWatchers.putIfAbsent(file, newfw);
+            if (null == fw) {
+                fw = newfw;
+            }
         }
-        final FileWatcher fw = new FileWatcher(file);
-        fileWatchers.put(file, fw);
         return fw;
     }
 
