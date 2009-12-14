@@ -51,7 +51,6 @@ package com.openexchange.config.internal.filewatcher;
 
 import java.io.File;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -159,12 +158,12 @@ public final class FileWatcher {
 
     private void notifyListeners(final boolean onDelete) {
         if (onDelete) {
-            for (final Iterator<FileListener> iter = listeners.values().iterator(); iter.hasNext();) {
-                iter.next().onDelete();
+            for (final FileListener fileListener : listeners.values()) {
+                fileListener.onDelete();
             }
         } else {
-            for (final Iterator<FileListener> iter = listeners.values().iterator(); iter.hasNext();) {
-                iter.next().onChange(file);
+            for (final FileListener fileListener : listeners.values()) {
+                fileListener.onChange(file);
             }
         }
     }
