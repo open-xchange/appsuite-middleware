@@ -465,15 +465,16 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     protected static String getServletSpecificURI(final HttpServletRequest req) {
         String uri;
         try {
+            final String characterEncoding = req.getCharacterEncoding();
             uri =
                 URLDecoder.decode(
                     req.getRequestURI(),
-                    req.getCharacterEncoding() == null ? ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding) : req.getCharacterEncoding());
+                    characterEncoding == null ? ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding) : characterEncoding);
         } catch (final UnsupportedEncodingException e) {
             LOG.error("Unsupported encoding", e);
             uri = req.getRequestURI();
         }
-        final String path = req.getContextPath() + req.getServletPath();
+        final String path = new StringBuilder(req.getContextPath()).append(req.getServletPath()).toString();
         final int pos = uri.indexOf(path);
         if (pos != -1) {
             uri = uri.substring(pos + path.length());
