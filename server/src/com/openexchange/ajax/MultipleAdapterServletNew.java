@@ -224,8 +224,10 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
             return startingChar == toCheck.charAt(0);
         }
         int i = 0;
-        while (i < len && Character.isWhitespace(toCheck.charAt(i))) {
-            i++;
+        if (Character.isWhitespace(toCheck.charAt(i))) {
+            do {
+                i++;
+            } while (i < len && Character.isWhitespace(toCheck.charAt(i)));
         }
         if (i >= len) {
             return false;
