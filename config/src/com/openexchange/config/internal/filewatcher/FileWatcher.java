@@ -67,14 +67,14 @@ import org.apache.commons.logging.LogFactory;
  */
 public final class FileWatcher {
 
-    private static final Log LOG = LogFactory.getLog(FileWatcher.class);
+    static final Log LOG = LogFactory.getLog(FileWatcher.class);
 
     private final class FileWatcherTimerTask extends TimerTask {
 
-        /*
-         * (non-Javadoc)
-         * @see java.util.TimerTask#run()
-         */
+        FileWatcherTimerTask() {
+            super();
+        }
+
         @Override
         public void run() {
             try {
@@ -124,7 +124,7 @@ public final class FileWatcher {
         }
     }
 
-    private final File file;
+    final File file;
 
     private final ConcurrentMap<Class<? extends FileListener>, FileListener> listeners;
 
@@ -132,7 +132,7 @@ public final class FileWatcher {
 
     private TimerTask timerTask;
 
-    private long timeStamp;
+    long timeStamp;
 
     /**
      * Initializes a new file watcher
@@ -156,7 +156,7 @@ public final class FileWatcher {
         listeners.putIfAbsent(listener.getClass(), listener);
     }
 
-    private void notifyListeners(final boolean onDelete) {
+    void notifyListeners(final boolean onDelete) {
         if (onDelete) {
             for (final FileListener fileListener : listeners.values()) {
                 fileListener.onDelete();
