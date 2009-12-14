@@ -484,11 +484,10 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     protected static String getAction(final HttpServletRequest req) throws OXConflictException {
         final String action = req.getParameter(PARAMETER_ACTION);
-
-        if (action != null) {
-            return action;
+        if (action == null) {
+            throw new OXConflictException(new AjaxException(AjaxException.Code.MISSING_PARAMETER, PARAMETER_ACTION));
         }
-        throw new OXConflictException(new AjaxException(AjaxException.Code.MISSING_PARAMETER, PARAMETER_ACTION));
+        return action;
     }
 
     /**
