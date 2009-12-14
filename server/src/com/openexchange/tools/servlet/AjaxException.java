@@ -153,7 +153,11 @@ public class AjaxException extends AbstractOXException {
         /**
          * Parameter "%1$s" conflicts with parameter "%2$s".
          */
-        EitherParameterConflict("Parameter \"%1$s\" conflicts with parameter \"%2$s\".", Category.CODE_ERROR, 13);
+        EitherParameterConflict("Parameter \"%1$s\" conflicts with parameter \"%2$s\".", Category.CODE_ERROR, 13),
+        /**
+         * Action "%1$s" on request path "%2$s" is not permitted via a non-secure connection.
+         */
+        NonSecureDenied("Action \"%1$s\" on request path \"%2$s\" is not permitted via a non-secure connection.", Category.CODE_ERROR, 14);
 
         /**
          * Message of the exception.
