@@ -64,6 +64,11 @@ import com.openexchange.tools.session.ServerSession;
 public interface MultipleHandler {
 
     /**
+     * The constant for the key to get the data element from passed {@link JSONObject JSON object} instance.
+     */
+    public static final String DATA = "data";
+
+    /**
      * Performs the multiple request identified by specified action string.
      * 
      * @param action The action string denoting the request to perform
