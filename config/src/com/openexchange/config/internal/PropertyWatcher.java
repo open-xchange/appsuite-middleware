@@ -56,8 +56,8 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.config.PropertyEvent;
 import com.openexchange.config.PropertyListener;
 import com.openexchange.config.internal.filewatcher.FileListener;
@@ -71,7 +71,7 @@ public final class PropertyWatcher implements FileListener {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(PropertyWatcher.class);
 
-    private static final ConcurrentMap<String, PropertyWatcher> WATCHER_MAP = new NonBlockingHashMap<String, PropertyWatcher>();
+    private static final ConcurrentMap<String, PropertyWatcher> WATCHER_MAP = new ConcurrentHashMap<String, PropertyWatcher>();
 
     /**
      * Gets an existing property watcher bound to given property name
@@ -130,7 +130,7 @@ public final class PropertyWatcher implements FileListener {
      */
     private PropertyWatcher(final String name, final String value, final boolean caseInsensitive) {
         super();
-        listeners = new NonBlockingHashMap<Class<? extends PropertyListener>, PropertyListener>();
+        listeners = new ConcurrentHashMap<Class<? extends PropertyListener>, PropertyListener>();
         this.name = name;
         this.value = value;
         this.caseInsensitive = caseInsensitive;
