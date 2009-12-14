@@ -54,12 +54,12 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.exception.SessiondException;
@@ -100,8 +100,8 @@ final class SessionData {
         this.maxSessions = maxSessions;
         for (int i = 0; i < containerCount; i++) {
             sessionList.add(0, new SessionContainer(maxSessions));
-            userList.add(0, new NonBlockingHashMap<String, String>(maxSessions));
-            randomList.add(0, new NonBlockingHashMap<String, String>(maxSessions));
+            userList.add(0, new ConcurrentHashMap<String, String>(maxSessions));
+            randomList.add(0, new ConcurrentHashMap<String, String>(maxSessions));
         }
 
     }
@@ -127,8 +127,8 @@ final class SessionData {
         wlock.lock();
         try {
             sessionList.addFirst(new SessionContainer(maxSessions));
-            userList.addFirst(new NonBlockingHashMap<String, String>(maxSessions));
-            randomList.addFirst(new NonBlockingHashMap<String, String>(maxSessions));
+            userList.addFirst(new ConcurrentHashMap<String, String>(maxSessions));
+            randomList.addFirst(new ConcurrentHashMap<String, String>(maxSessions));
             userList.removeLast();
             randomList.removeLast();
             final List<SessionControl> retval = new ArrayList<SessionControl>(maxSessions);

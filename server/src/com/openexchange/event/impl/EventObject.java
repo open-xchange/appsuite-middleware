@@ -52,7 +52,6 @@
 package com.openexchange.event.impl;
 
 import java.util.Date;
-
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Contact;

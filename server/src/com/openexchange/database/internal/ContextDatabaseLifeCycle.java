@@ -59,9 +59,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DBPoolingExceptionCodes;
@@ -85,7 +85,7 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
 
     private final ConnectionPool.Config defaultPoolConfig;
 
-    private final Map<Integer, ConnectionPool> pools = new NonBlockingHashMap<Integer, ConnectionPool>();
+    private final Map<Integer, ConnectionPool> pools = new ConcurrentHashMap<Integer, ConnectionPool>();
 
     public ContextDatabaseLifeCycle(final Configuration configuration, final Management management, final Timer timer, final ConfigDatabaseService configDatabaseService) {
         super();

@@ -52,10 +52,8 @@ package com.openexchange.groupware.tasks;
 import java.sql.Connection;
 import java.util.Date;
 import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;

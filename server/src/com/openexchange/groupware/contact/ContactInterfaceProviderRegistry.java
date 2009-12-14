@@ -53,8 +53,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
 
 /**
  * {@link ContactInterfaceProviderRegistry} - A registry for {@link ContactInterfaceProvider} instances.
@@ -83,7 +83,7 @@ public class ContactInterfaceProviderRegistry {
 
     private ContactInterfaceProviderRegistry() {
         super();
-        services = new NonBlockingHashMap<Key, ContactInterfaceProvider>();
+        services = new ConcurrentHashMap<Key, ContactInterfaceProvider>();
     }
 
     /**

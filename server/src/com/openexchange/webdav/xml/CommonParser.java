@@ -52,7 +52,6 @@
 package com.openexchange.webdav.xml;
 
 import org.xmlpull.v1.XmlPullParser;
-
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.webdav.xml.fields.CommonFields;
 

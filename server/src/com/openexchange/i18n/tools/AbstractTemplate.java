@@ -50,7 +50,6 @@
 package com.openexchange.i18n.tools;
 
 import java.util.Locale;
-
 import com.openexchange.i18n.tools.replacement.StringReplacement;
 
 /**

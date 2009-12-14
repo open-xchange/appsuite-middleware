@@ -52,13 +52,13 @@ package com.openexchange.mail.cache;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -218,7 +218,7 @@ public final class JSONMessageCache {
          */
         ConcurrentMap<String, FutureTask<JSONObject>> objectMap = timeoutConcurrentMap.get(key);
         if (null == objectMap) {
-            final ConcurrentMap<String, FutureTask<JSONObject>> newMap = new NonBlockingHashMap<String, FutureTask<JSONObject>>();
+            final ConcurrentMap<String, FutureTask<JSONObject>> newMap = new ConcurrentHashMap<String, FutureTask<JSONObject>>();
             // A folder map is valid for 5 minutes
             objectMap = timeoutConcurrentMap.putIfAbsent(key, newMap, cacheConfiguration.getTTLFolderMap());
             if (null == objectMap) {

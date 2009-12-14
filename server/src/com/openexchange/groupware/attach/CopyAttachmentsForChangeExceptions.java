@@ -48,21 +48,20 @@
  */
 package com.openexchange.groupware.attach;
 
-import com.openexchange.groupware.calendar.CalendarListener;
+import java.io.InputStream;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.calendar.CalendarListener;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.results.TimedResult;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.tools.iterator.SearchIterator;
-
-import java.io.InputStream;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>

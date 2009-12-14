@@ -50,7 +50,6 @@
 package com.openexchange.groupware.filestore;
 
 import java.sql.Connection;
-
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.ContextDelete;
 import com.openexchange.groupware.delete.DeleteEvent;

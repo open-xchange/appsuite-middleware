@@ -21,8 +21,11 @@
 
 package org.kxml2.io;
 
-import java.io.*;
-import org.xmlpull.v1.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import org.xmlpull.v1.XmlSerializer;
 
 public class KXmlSerializer implements XmlSerializer {
 

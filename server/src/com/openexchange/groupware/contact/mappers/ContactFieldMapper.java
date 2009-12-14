@@ -50,7 +50,6 @@
 package com.openexchange.groupware.contact.mappers;
 
 import java.util.Collection;
-
 import com.openexchange.groupware.contact.helpers.ContactField;
 
 public interface ContactFieldMapper {

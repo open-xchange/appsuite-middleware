@@ -50,7 +50,6 @@
 package com.openexchange.groupware.attach.util;
 
 import java.util.Date;
-
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 

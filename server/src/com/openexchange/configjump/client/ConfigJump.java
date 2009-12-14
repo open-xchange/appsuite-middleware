@@ -50,7 +50,6 @@
 package com.openexchange.configjump.client;
 
 import java.net.URL;
-
 import com.openexchange.configjump.ConfigJumpException;
 import com.openexchange.configjump.ConfigJumpService;
 import com.openexchange.configjump.Replacements;

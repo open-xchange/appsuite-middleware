@@ -52,7 +52,6 @@ package com.openexchange.groupware.infostore.utils;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
 import com.openexchange.groupware.attach.AttachmentField;
 
 public class Metadata {

@@ -55,10 +55,10 @@ import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.groupware.attach.impl.AttachmentContextDelete;
 import com.openexchange.groupware.attach.impl.AttachmentDelDelete;
 import com.openexchange.groupware.calendar.CalendarAdministrationService;
@@ -142,7 +142,7 @@ public final class DeleteRegistry {
      */
     private DeleteRegistry() {
         super();
-        classes = new NonBlockingHashMap<Class<? extends DeleteListener>, Object>();
+        classes = new ConcurrentHashMap<Class<? extends DeleteListener>, Object>();
         final DeleteListener[] staticListeners = getStaticListeners();
         for (final DeleteListener deleteListener : staticListeners) {
             classes.put(deleteListener.getClass(), PRESENT);

@@ -50,10 +50,8 @@
 package com.openexchange.groupware.contexts.impl;
 
 import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException.Code;
 import com.openexchange.session.Session;

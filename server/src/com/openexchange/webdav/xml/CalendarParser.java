@@ -50,7 +50,6 @@
 package com.openexchange.webdav.xml;
 
 import org.xmlpull.v1.XmlPullParser;
-
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.CalendarObject;

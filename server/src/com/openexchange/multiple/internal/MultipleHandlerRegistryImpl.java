@@ -49,8 +49,8 @@
 
 package com.openexchange.multiple.internal;
 
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 
 /**
@@ -71,7 +71,7 @@ public final class MultipleHandlerRegistryImpl implements com.openexchange.multi
      */
     MultipleHandlerRegistryImpl() {
         super();
-        registry = new NonBlockingHashMap<String, MultipleHandlerFactoryService>();
+        registry = new ConcurrentHashMap<String, MultipleHandlerFactoryService>();
     }
 
     public boolean addFactoryService(final MultipleHandlerFactoryService factoryService) {

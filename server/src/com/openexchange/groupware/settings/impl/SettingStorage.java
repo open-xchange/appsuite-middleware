@@ -50,7 +50,6 @@
 package com.openexchange.groupware.settings.impl;
 
 import java.sql.Connection;
-
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.Setting;

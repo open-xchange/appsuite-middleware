@@ -50,7 +50,6 @@
 package com.openexchange.group;
 
 import java.util.Date;
-
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 

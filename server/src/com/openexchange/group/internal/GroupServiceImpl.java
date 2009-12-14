@@ -50,7 +50,6 @@
 package com.openexchange.group.internal;
 
 import java.util.Date;
-
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupException;
 import com.openexchange.group.GroupService;

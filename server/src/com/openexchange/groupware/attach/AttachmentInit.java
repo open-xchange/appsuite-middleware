@@ -48,9 +48,9 @@
  */
 package com.openexchange.groupware.attach;
 
-import com.openexchange.server.Initialization;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.CalendarCallbacks;
+import com.openexchange.server.Initialization;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>

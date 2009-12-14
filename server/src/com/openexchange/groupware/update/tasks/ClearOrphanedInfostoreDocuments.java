@@ -48,27 +48,25 @@
  */
 package com.openexchange.groupware.update.tasks;
 
-import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.groupware.update.Schema;
-import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.databaseold.Database;
-import com.openexchange.tools.update.Tools;
-import com.openexchange.tools.update.ForeignKeyOld;
-import com.openexchange.tools.sql.DBUtils;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.databaseold.Database;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.EnumComponent;
+import com.openexchange.groupware.OXExceptionSource;
+import com.openexchange.groupware.OXThrowsMultiple;
+import com.openexchange.groupware.update.Schema;
+import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.groupware.update.exception.Classes;
+import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
+import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.tools.update.ForeignKeyOld;
+import com.openexchange.tools.update.Tools;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>

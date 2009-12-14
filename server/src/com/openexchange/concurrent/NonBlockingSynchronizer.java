@@ -49,11 +49,11 @@
 
 package com.openexchange.concurrent;
 
-import java.util.Set;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import org.cliffc.high_scale_lib.NonBlockingHashSet;
 
 /**
  * {@link NonBlockingSynchronizer} - Non-blocking reentrant synchronizer; also useful to wrap an existing {@link Runnable runnable}.
@@ -61,6 +61,8 @@ import org.cliffc.high_scale_lib.NonBlockingHashSet;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class NonBlockingSynchronizer implements Synchronizer, Runnable {
+
+    private static final Object PRESENT = new Object();
 
     private volatile Runnable runnable;
 
@@ -72,7 +74,7 @@ public final class NonBlockingSynchronizer implements Synchronizer, Runnable {
 
     private final Lock runLock;
 
-    private final Set<Thread> reentrant;
+    private final Map<Thread, Object> reentrant;
 
     /**
      * Initializes a new {@link NonBlockingSynchronizer}.
@@ -92,7 +94,7 @@ public final class NonBlockingSynchronizer implements Synchronizer, Runnable {
         running = new AtomicInteger();
         runLock = new ReentrantLock();
         this.runnable = runnable;
-        this.reentrant = new NonBlockingHashSet<Thread>();
+        this.reentrant = new ConcurrentHashMap<Thread, Object>();
     }
 
     /**
@@ -128,7 +130,7 @@ public final class NonBlockingSynchronizer implements Synchronizer, Runnable {
      * @return This non-blocking synchronizer with new synchronize policy applied
      */
     public Runnable setSynchronized(final boolean synchronize) {
-        if (reentrant.contains(Thread.currentThread())) {
+        if (reentrant.containsKey(Thread.currentThread())) {
             throw new IllegalStateException("Current thread acquired synchronizer, but wants to alter sync mode");
         }
 
@@ -147,7 +149,7 @@ public final class NonBlockingSynchronizer implements Synchronizer, Runnable {
     }
 
     public Lock acquire() {
-        if (reentrant.contains(Thread.currentThread())) {
+        if (reentrant.containsKey(Thread.currentThread())) {
             // Reentrant thread
             return null;
         }
@@ -160,7 +162,7 @@ public final class NonBlockingSynchronizer implements Synchronizer, Runnable {
             lock = obtainLock ? runLock : null;
         } while (save != writeCounter.get());
         running.incrementAndGet();
-        reentrant.add(Thread.currentThread());
+        reentrant.put(Thread.currentThread(), PRESENT);
         if (null != lock) {
             lock.lock();
         }

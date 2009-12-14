@@ -51,7 +51,6 @@ package com.openexchange.groupware.filestore;
 
 import java.io.Serializable;
 import java.net.URI;
-
 import com.openexchange.cache.dynamic.OXNoRefresh;
 
 public interface Filestore extends Serializable {

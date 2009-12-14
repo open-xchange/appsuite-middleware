@@ -52,7 +52,6 @@ package com.openexchange.database.internal;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -61,16 +60,14 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Iterator;
 import java.util.Properties;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.pooling.PoolableLifecycle;
 import com.openexchange.pooling.PooledData;
 import com.openexchange.pooling.PoolingException;
 import com.openexchange.pooling.ReentrantLockPool;
-import com.openexchange.database.DBPoolingExceptionCodes;
-import com.openexchange.database.DBPoolingException;
 
 /**
  * Extends the pool API especially for database connections.

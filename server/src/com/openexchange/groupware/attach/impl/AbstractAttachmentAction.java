@@ -52,7 +52,6 @@ package com.openexchange.groupware.attach.impl;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Date;
-
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.util.GetSwitch;

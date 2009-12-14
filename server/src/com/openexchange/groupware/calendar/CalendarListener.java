@@ -49,9 +49,9 @@
 
 package com.openexchange.groupware.calendar;
 
-import com.openexchange.tools.session.ServerSession;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * A Calendar Listener provides callbacks for certain events in the calendar subsystem.

@@ -51,7 +51,6 @@ package com.openexchange.consistency;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.attach.AttachmentBase;

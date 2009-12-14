@@ -51,10 +51,8 @@ package com.openexchange.group.internal;
 
 import static com.openexchange.group.GroupStorage.StorageType.ACTIVE;
 import static com.openexchange.group.GroupStorage.StorageType.DELETED;
-
 import java.util.EnumMap;
 import java.util.Map;
-
 import com.openexchange.group.GroupStorage.StorageType;
 
 /**

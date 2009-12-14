@@ -52,10 +52,9 @@ package com.openexchange.database.internal;
 import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.DBPoolingExceptionCodes;
 
 /**
  * Contains the settings to connect to the configuration database.

@@ -54,7 +54,6 @@ import javax.servlet.ServletException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.mailaccount.servlet.MailAccountServlet;
 import com.openexchange.server.Initialization;
 import com.openexchange.tools.servlet.http.HttpServletManager;
 

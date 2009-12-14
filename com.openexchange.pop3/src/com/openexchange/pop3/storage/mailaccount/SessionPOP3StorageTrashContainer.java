@@ -51,11 +51,12 @@ package com.openexchange.pop3.storage.mailaccount;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import org.cliffc.high_scale_lib.NonBlockingHashSet;
 import com.openexchange.mail.MailException;
 import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.services.POP3ServiceRegistry;
@@ -70,6 +71,8 @@ import com.openexchange.timer.TimerService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashContainer {
+
+    private static final Object PRESENT = new Object();
 
     /**
      * Gets the trash container bound to specified POP3 access.
@@ -106,13 +109,13 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
 
     private final POP3StorageTrashContainer delegatee;
 
-    private final Set<String> set;
+    private final Map<String, Object> set;
 
     private SessionPOP3StorageTrashContainer(final POP3StorageTrashContainer delegatee, final Session session, final String key) throws MailException {
         super();
         rwLock = new ReentrantReadWriteLock();
         this.delegatee = delegatee;
-        set = new NonBlockingHashSet<String>();
+        set = new ConcurrentHashMap<String, Object>();
         mode = new int[] { 1 };
         final CleanSetRunnable csr = new CleanSetRunnable(session, key, set, rwLock, mode);
         final ScheduledTimerTask timerTask = POP3ServiceRegistry.getServiceRegistry().getService(TimerService.class).scheduleWithFixedDelay(
@@ -126,7 +129,7 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
     private void init() throws MailException {
         final Set<String> tmp = delegatee.getUIDLs();
         for (final String uidl : tmp) {
-            set.add(uidl);
+            set.put(uidl, PRESENT);
         }
         mode[0] = 0;
     }
@@ -163,7 +166,7 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
         readLock.lock();
         try {
             checkInit(readLock);
-            set.add(uidl);
+            set.put(uidl, PRESENT);
             delegatee.addUIDL(uidl);
         } finally {
             readLock.unlock();
@@ -188,7 +191,7 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
         try {
             checkInit(readLock);
             final Set<String> tmp = new HashSet<String>();
-            tmp.addAll(set);
+            tmp.addAll(set.keySet());
             return tmp;
         } finally {
             readLock.unlock();
@@ -213,7 +216,7 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
         try {
             checkInit(readLock);
             for (final String uidl : uidls) {
-                set.add(uidl);
+                set.put(uidl, PRESENT);
             }
             delegatee.addAllUIDL(uidls);
         } finally {
@@ -227,7 +230,7 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
 
         private final String tkey;
 
-        private final Set<String> tset;
+        private final Map<String, Object> tset;
 
         private final ReadWriteLock trwLock;
 
@@ -237,7 +240,7 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
 
         private int countEmptyRuns;
 
-        public CleanSetRunnable(final Session tsession, final String tkey, final Set<String> tset, final ReadWriteLock trwLock, final int[] tmode) {
+        public CleanSetRunnable(final Session tsession, final String tkey, final Map<String, Object> tset, final ReadWriteLock trwLock, final int[] tmode) {
             super();
             this.tsession = tsession;
             this.tkey = tkey;

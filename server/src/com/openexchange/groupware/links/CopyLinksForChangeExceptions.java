@@ -49,15 +49,15 @@
 
 package com.openexchange.groupware.links;
 
-import com.openexchange.groupware.calendar.CalendarListener;
+import com.openexchange.api2.LinkSQLInterface;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.groupware.calendar.CalendarListener;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.LinkObject;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.api2.LinkSQLInterface;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>

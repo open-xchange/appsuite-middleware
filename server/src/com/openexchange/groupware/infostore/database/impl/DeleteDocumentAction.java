@@ -50,9 +50,8 @@
 package com.openexchange.groupware.infostore.database.impl;
 
 import java.sql.SQLException;
-import java.util.List;
 import java.util.ArrayList;
-
+import java.util.List;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;

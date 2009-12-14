@@ -50,7 +50,6 @@
 package com.openexchange.groupware.settings.tree.modules.mail;
 
 import org.json.JSONArray;
-
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;

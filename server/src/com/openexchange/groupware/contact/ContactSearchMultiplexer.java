@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.contact;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -58,8 +59,6 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
-
-import static com.openexchange.java.Autoboxing.I;
 
 /**
  * {@link ContactSearchMultiplexer}

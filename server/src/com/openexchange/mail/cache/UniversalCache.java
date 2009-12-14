@@ -51,11 +51,11 @@ package com.openexchange.mail.cache;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
 
 /**
  * {@link UniversalCache} - A universal cache.
@@ -87,7 +87,7 @@ public class UniversalCache<K, V> {
      */
     public UniversalCache(final ValueYielder<K, V> yielder) {
         super();
-        map = new NonBlockingHashMap<K, Future<V>>();
+        map = new ConcurrentHashMap<K, Future<V>>();
         this.yielder = yielder;
     }
 

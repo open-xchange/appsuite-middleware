@@ -51,7 +51,6 @@ package com.openexchange.groupware.calendar.update;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.CalendarCollectionService;

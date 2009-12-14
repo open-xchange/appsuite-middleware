@@ -60,13 +60,10 @@ import static com.openexchange.tools.update.Tools.dropPrimaryKey;
 import static com.openexchange.tools.update.Tools.existsForeignKey;
 import static com.openexchange.tools.update.Tools.existsIndex;
 import static com.openexchange.tools.update.Tools.existsPrimaryKey;
-
 import java.sql.Connection;
 import java.sql.SQLException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;

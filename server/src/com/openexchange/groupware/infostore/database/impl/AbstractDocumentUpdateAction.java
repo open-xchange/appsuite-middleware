@@ -50,7 +50,6 @@
 package com.openexchange.groupware.infostore.database.impl;
 
 import java.util.List;
-
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.utils.Metadata;
 

@@ -54,7 +54,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
-
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.i18n.tools.TemplateToken;
 import com.openexchange.server.services.ServerServiceRegistry;

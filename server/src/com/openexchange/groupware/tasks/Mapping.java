@@ -65,7 +65,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import com.openexchange.groupware.tasks.mapping.ActualCosts;
 import com.openexchange.groupware.tasks.mapping.ActualDuration;
 import com.openexchange.groupware.tasks.mapping.ObjectID;

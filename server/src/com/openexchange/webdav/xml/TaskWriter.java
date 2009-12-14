@@ -67,17 +67,13 @@ import static com.openexchange.webdav.xml.fields.TaskFields.STATUS;
 import static com.openexchange.webdav.xml.fields.TaskFields.TARGET_COSTS;
 import static com.openexchange.webdav.xml.fields.TaskFields.TARGET_DURATION;
 import static com.openexchange.webdav.xml.fields.TaskFields.TRIP_METER;
-
 import java.io.OutputStream;
 import java.util.Date;
-
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdom.Element;
 import org.jdom.output.XMLOutputter;
-
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.groupware.Types;

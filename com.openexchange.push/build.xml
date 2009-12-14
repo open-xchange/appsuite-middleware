@@ -32,7 +32,7 @@
 	<property name="threadpooljar" value="com.openexchange.threadpool.jar"/>
     <property name="sessiondjar" value="com.openexchange.sessiond.jar"/>
 
-	<property name="highscalejar" value="high-scale-lib-1.1.2.jar" />
+	<!-- <property name="highscalejar" value="high-scale-lib-1.1.2.jar" /> -->
 
     <!-- Third party libs 
     <fileset dir="${basedir}" id="3rdpartyjars">
@@ -48,7 +48,7 @@
         <pathelement location="${bundlesdir}/${globaljar}"/>
     	<pathelement location="${bundlesdir}/${threadpooljar}"/>
         <pathelement location="${bundlesdir}/${sessiondjar}"/>
-    	<pathelement location="${bundlesdir}/${commonBundle}/lib/${highscalejar}"/>
+    	<!-- <pathelement location="${bundlesdir}/${commonBundle}/lib/${highscalejar}"/> -->
     	<!-- <fileset refid="3rdpartyjars"/> -->
     </path>
 

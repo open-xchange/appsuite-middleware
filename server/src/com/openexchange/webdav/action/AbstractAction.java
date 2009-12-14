@@ -50,7 +50,6 @@
 package com.openexchange.webdav.action;
 
 import java.util.List;
-
 import com.openexchange.webdav.loader.BulkLoader;
 import com.openexchange.webdav.loader.LoadingHints;
 import com.openexchange.webdav.protocol.WebdavProtocolException;

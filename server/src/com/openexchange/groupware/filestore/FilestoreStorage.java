@@ -51,7 +51,6 @@ package com.openexchange.groupware.filestore;
 
 import java.net.URI;
 import java.sql.Connection;
-
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.RdbContextStorage;

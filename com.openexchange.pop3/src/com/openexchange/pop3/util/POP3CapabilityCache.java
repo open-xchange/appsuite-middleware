@@ -58,11 +58,11 @@ import java.net.Socket;
 import java.util.Locale;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.pop3.config.IPOP3Properties;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
@@ -89,7 +89,7 @@ public final class POP3CapabilityCache {
      */
     public static void init() {
         if (MAP == null) {
-            MAP = new NonBlockingHashMap<InetSocketAddress, Future<Capability>>();
+            MAP = new ConcurrentHashMap<InetSocketAddress, Future<Capability>>();
             // TODO: Probably pre-load CAPABILITY and greeting from common POP3 servers like GMail, etc.
         }
     }

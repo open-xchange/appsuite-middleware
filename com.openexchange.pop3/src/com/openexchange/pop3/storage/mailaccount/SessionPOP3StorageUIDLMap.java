@@ -53,10 +53,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.mail.MailException;
 import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.services.POP3ServiceRegistry;
@@ -116,8 +116,8 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         super();
         rwLock = new ReentrantReadWriteLock();
         this.delegatee = delegatee;
-        this.pair2uidl = new NonBlockingHashMap<FullnameUIDPair, String>();
-        this.uidl2pair = new NonBlockingHashMap<String, FullnameUIDPair>();
+        this.pair2uidl = new ConcurrentHashMap<FullnameUIDPair, String>();
+        this.uidl2pair = new ConcurrentHashMap<String, FullnameUIDPair>();
         mode = new int[] { 1 };
         final ClearMapsRunnable cmr = new ClearMapsRunnable(session, key, uidl2pair, pair2uidl, rwLock, mode);
         final ScheduledTimerTask timerTask = POP3ServiceRegistry.getServiceRegistry().getService(TimerService.class).scheduleWithFixedDelay(

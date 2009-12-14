@@ -20,9 +20,12 @@
 
 package org.kxml2.kdom;
 
-import java.util.*;
-import java.io.*;
-import org.xmlpull.v1.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 /** A common base class for Document and Element, also used for
     storing XML fragments. */
 

@@ -48,10 +48,9 @@
  */
 package com.openexchange.groupware.infostore.webdav;
 
-import com.openexchange.groupware.infostore.WebdavFolderAliases;
-
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
+import com.openexchange.groupware.infostore.WebdavFolderAliases;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>

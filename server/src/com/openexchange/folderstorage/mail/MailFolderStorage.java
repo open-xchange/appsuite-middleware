@@ -65,8 +65,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.cache.OXCachingException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
@@ -690,7 +690,7 @@ public final class MailFolderStorage implements FolderStorage {
         parameters.putParameterIfAbsent(
             MailFolderType.getInstance(),
             MailParameterConstants.PARAM_MAIL_ACCESS,
-            new NonBlockingHashMap<Integer, MailAccess<?, ?>>());
+            new ConcurrentHashMap<Integer, MailAccess<?, ?>>());
         return parameters;
     }
 

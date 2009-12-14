@@ -53,9 +53,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageComparator;
@@ -94,7 +94,7 @@ public final class FolderStorageRegistry implements FolderStorageDiscoverer {
      */
     private FolderStorageRegistry() {
         super();
-        registry = new NonBlockingHashMap<String, List<FolderStorage>>();
+        registry = new ConcurrentHashMap<String, List<FolderStorage>>();
         genStorages = new CopyOnWriteArrayList<FolderStorage>();
     }
 

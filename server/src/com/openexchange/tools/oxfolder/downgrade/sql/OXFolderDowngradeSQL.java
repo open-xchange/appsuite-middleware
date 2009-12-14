@@ -50,7 +50,6 @@
 package com.openexchange.tools.oxfolder.downgrade.sql;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -61,7 +60,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.tools.Collections.SmartIntArray;
 

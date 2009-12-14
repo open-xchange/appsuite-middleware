@@ -52,7 +52,6 @@ package com.openexchange.groupware.ldap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-
 import com.openexchange.cache.dynamic.impl.OXObjectFactory;
 import com.openexchange.cache.dynamic.impl.Refresher;
 import com.openexchange.caching.CacheException;

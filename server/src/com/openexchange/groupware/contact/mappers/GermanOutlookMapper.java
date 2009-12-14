@@ -51,7 +51,6 @@ package com.openexchange.groupware.contact.mappers;
 
 import java.util.Collection;
 import java.util.HashMap;
-
 import com.openexchange.groupware.contact.helpers.ContactField;
 
 /**

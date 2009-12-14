@@ -34,7 +34,7 @@
 	<property name="pushjar" value="com.openexchange.push.jar" />
 	<property name="serverjar" value="com.openexchange.server.jar" />
 	<property name="configreadjar" value="com.openexchange.configread.jar" />
-	<property name="highscalejar" value="high-scale-lib-1.1.2.jar" />
+	<!-- <property name="highscalejar" value="high-scale-lib-1.1.2.jar" /> -->
 
 	<!-- Third party libs 
     <fileset dir="${basedir}" id="3rdpartyjars">
@@ -52,7 +52,7 @@
 		<pathelement location="${bundlesdir}/${pushjar}" />
 		<pathelement location="${bundlesdir}/${serverjar}" />
 		<pathelement location="${bundlesdir}/${configreadjar}" />
-		<pathelement location="${bundlesdir}/${commonBundle}/lib/${highscalejar}" />
+		<!-- <pathelement location="${bundlesdir}/${commonBundle}/lib/${highscalejar}" /> -->
 		<!-- <fileset refid="3rdpartyjars"/> -->
 	</path>
 

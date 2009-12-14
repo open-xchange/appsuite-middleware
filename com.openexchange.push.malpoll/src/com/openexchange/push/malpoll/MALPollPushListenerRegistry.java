@@ -51,8 +51,8 @@ package com.openexchange.push.malpoll;
 
 import java.text.MessageFormat;
 import java.util.Iterator;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.push.PushException;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.malpoll.services.MALPollServiceRegistry;
@@ -83,7 +83,7 @@ public final class MALPollPushListenerRegistry {
      */
     private MALPollPushListenerRegistry() {
         super();
-        map = new NonBlockingHashMap<SimpleKey, MALPollPushListener>();
+        map = new ConcurrentHashMap<SimpleKey, MALPollPushListener>();
     }
 
     /**

@@ -52,7 +52,7 @@ package com.openexchange.login.internal;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.login.LoginHandlerService;
 
 /**
@@ -104,7 +104,7 @@ public final class LoginHandlerRegistry {
      */
     private LoginHandlerRegistry() {
         super();
-        handlers = new NonBlockingHashMap<Class<? extends LoginHandlerService>, LoginHandlerService>(4);
+        handlers = new ConcurrentHashMap<Class<? extends LoginHandlerService>, LoginHandlerService>(4);
     }
 
     /**

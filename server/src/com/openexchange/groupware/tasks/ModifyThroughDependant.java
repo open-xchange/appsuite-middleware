@@ -50,10 +50,8 @@
 package com.openexchange.groupware.tasks;
 
 import static com.openexchange.groupware.tasks.StorageType.ACTIVE;
-
 import java.sql.Connection;
 import java.util.Date;
-
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.reminder.ReminderDeleteInterface;

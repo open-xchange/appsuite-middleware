@@ -52,7 +52,6 @@ package com.openexchange.i18n.tools.replacement;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
-
 import com.openexchange.groupware.i18n.Notifications;
 import com.openexchange.i18n.tools.TemplateToken;
 

@@ -52,7 +52,6 @@ package com.openexchange.groupware.links;
 
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import com.openexchange.groupware.container.LinkObject;
 
 /**

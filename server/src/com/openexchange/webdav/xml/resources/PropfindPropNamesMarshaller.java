@@ -51,7 +51,6 @@ package com.openexchange.webdav.xml.resources;
 
 import org.jdom.Element;
 import org.jdom.Namespace;
-
 import com.openexchange.webdav.protocol.WebdavProperty;
 
 public class PropfindPropNamesMarshaller extends PropfindAllPropsMarshaller {

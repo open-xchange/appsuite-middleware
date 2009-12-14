@@ -50,8 +50,8 @@
 package com.openexchange.folder.internal;
 
 import java.util.Iterator;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.folder.FolderDeleteListenerService;
 
 /**
@@ -99,7 +99,7 @@ public final class FolderDeleteListenerRegistry {
      */
     private FolderDeleteListenerRegistry() {
         super();
-        map = new NonBlockingHashMap<Class<? extends FolderDeleteListenerService>, FolderDeleteListenerService>();
+        map = new ConcurrentHashMap<Class<? extends FolderDeleteListenerService>, FolderDeleteListenerService>();
     }
 
     /**

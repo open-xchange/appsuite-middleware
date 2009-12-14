@@ -52,7 +52,7 @@ package com.openexchange.pop3.osgi;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -80,7 +80,7 @@ public class POP3StorageProviderServiceTrackerCustomizer implements ServiceTrack
     public POP3StorageProviderServiceTrackerCustomizer(final BundleContext context) {
         super();
         this.context = context;
-        registrationMap = new NonBlockingHashMap<String, List<ServiceRegistration>>();
+        registrationMap = new ConcurrentHashMap<String, List<ServiceRegistration>>();
     }
 
     public Object addingService(final ServiceReference reference) {

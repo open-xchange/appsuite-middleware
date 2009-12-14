@@ -51,9 +51,7 @@ package com.openexchange.webdav.xml.resources;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.jdom.Element;
-
 import com.openexchange.tools.collections.Injector;
 import com.openexchange.tools.collections.OXCollections;
 import com.openexchange.webdav.protocol.WebdavProtocolException;

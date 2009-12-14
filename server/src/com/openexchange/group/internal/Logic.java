@@ -52,7 +52,6 @@ package com.openexchange.group.internal;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupException;
 import com.openexchange.group.GroupStorage;

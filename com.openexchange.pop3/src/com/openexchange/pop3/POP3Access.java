@@ -54,12 +54,12 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.Properties;
 import java.util.concurrent.CancellationException;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import javax.mail.MessagingException;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.api.IMailProperties;
@@ -104,7 +104,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
     private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(POP3Access.class);
 
     private static final ConcurrentMap<InetSocketAddress, Future<Object>> SYNCHRONIZER_MAP =
-        new NonBlockingHashMap<InetSocketAddress, Future<Object>>();
+        new ConcurrentHashMap<InetSocketAddress, Future<Object>>();
 
     /*-
      * Members

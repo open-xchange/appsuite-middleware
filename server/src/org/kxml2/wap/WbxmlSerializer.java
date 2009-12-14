@@ -28,9 +28,7 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
-
 import org.xmlpull.v1.XmlSerializer;
-
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 // TODO: make some of the "direct" WBXML token writing methods public??

@@ -52,17 +52,15 @@ package com.openexchange.webdav.action;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.jdom.Document;
 import org.jdom.JDOMException;
-
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.webdav.action.ifheader.IfHeader;
 import com.openexchange.webdav.action.ifheader.IfHeaderParseException;
 import com.openexchange.webdav.action.ifheader.IfHeaderParser;
 import com.openexchange.webdav.protocol.WebdavCollection;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavFactory;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.xml.jdom.JDOMParser;
 

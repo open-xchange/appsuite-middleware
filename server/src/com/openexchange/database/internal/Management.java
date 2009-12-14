@@ -51,11 +51,11 @@ package com.openexchange.database.internal;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.management.ManagementException;
 import com.openexchange.management.ManagementService;
 
@@ -68,7 +68,7 @@ public final class Management {
 
     private static final Log LOG = LogFactory.getLog(Management.class);
 
-    private final Map<Integer, ConnectionPool> pools = new NonBlockingHashMap<Integer, ConnectionPool>();
+    private final Map<Integer, ConnectionPool> pools = new ConcurrentHashMap<Integer, ConnectionPool>();
 
     private ManagementService managementService;
 

@@ -51,7 +51,6 @@ package com.openexchange.groupware.tasks;
 
 import java.util.Collections;
 import java.util.Set;
-
 import com.openexchange.groupware.container.UserParticipant;
 
 /**

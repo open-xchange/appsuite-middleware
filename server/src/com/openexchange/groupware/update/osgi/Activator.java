@@ -58,7 +58,6 @@ import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.update.Initialization;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 import com.openexchange.groupware.update.internal.SchemaExceptionFactory;
 
 /**

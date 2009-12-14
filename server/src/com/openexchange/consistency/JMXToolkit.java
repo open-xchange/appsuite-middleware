@@ -50,7 +50,6 @@ package com.openexchange.consistency;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

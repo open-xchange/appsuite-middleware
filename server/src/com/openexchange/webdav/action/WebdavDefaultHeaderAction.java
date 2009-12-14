@@ -50,7 +50,6 @@
 package com.openexchange.webdav.action;
 
 import java.util.Date;
-
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.util.Utils;
 

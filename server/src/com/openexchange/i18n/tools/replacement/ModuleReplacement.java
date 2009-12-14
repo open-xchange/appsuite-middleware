@@ -51,7 +51,6 @@ package com.openexchange.i18n.tools.replacement;
 
 import java.util.Locale;
 import java.util.TimeZone;
-
 import com.openexchange.i18n.tools.TemplateReplacement;
 import com.openexchange.i18n.tools.TemplateToken;
 

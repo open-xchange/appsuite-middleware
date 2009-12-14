@@ -57,11 +57,11 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.imap.config.IIMAPProperties;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
@@ -91,7 +91,7 @@ public final class IMAPCapabilityAndGreetingCache {
         if (MAP == null) {
             synchronized (IMAPCapabilityAndGreetingCache.class) {
                 if (MAP == null) {
-                    MAP = new NonBlockingHashMap<InetSocketAddress, Future<CapabilityAndGreeting>>();
+                    MAP = new ConcurrentHashMap<InetSocketAddress, Future<CapabilityAndGreeting>>();
                     // TODO: Probably pre-load CAPABILITY and greeting from common IMAP servers like GMail, etc.
                 }
             }

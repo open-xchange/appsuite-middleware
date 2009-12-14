@@ -51,10 +51,8 @@ package com.openexchange.i18n.tools;
 
 import java.util.Locale;
 import java.util.MissingResourceException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.i18n.I18nService;
 import com.openexchange.server.services.I18nServices;
 

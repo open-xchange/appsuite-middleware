@@ -50,7 +50,6 @@
 package com.openexchange.webdav.action.behaviour;
 
 import java.util.Set;
-
 import com.openexchange.webdav.action.WebdavRequest;
 
 public interface Behaviour {

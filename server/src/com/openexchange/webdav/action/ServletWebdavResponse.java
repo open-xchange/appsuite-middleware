@@ -51,7 +51,6 @@ package com.openexchange.webdav.action;
 
 import java.io.IOException;
 import java.io.OutputStream;
-
 import javax.servlet.http.HttpServletResponse;
 
 public class ServletWebdavResponse implements WebdavResponse {

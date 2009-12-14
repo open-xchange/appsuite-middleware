@@ -52,7 +52,6 @@ package com.openexchange.groupware.ldap;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-
 import com.openexchange.tools.encoding.Base64;
 
 /**

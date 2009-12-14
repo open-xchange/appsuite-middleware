@@ -51,10 +51,10 @@ package com.openexchange.groupware.update.internal;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskCollection;
 
@@ -69,7 +69,7 @@ public final class DynamicList implements UpdateTaskList {
 
     private static final DynamicList SINGLETON = new DynamicList();
 
-    private final ConcurrentMap<Class<? extends UpdateTask>, UpdateTask> taskList = new NonBlockingHashMap<Class<? extends UpdateTask>, UpdateTask>();
+    private final ConcurrentMap<Class<? extends UpdateTask>, UpdateTask> taskList = new ConcurrentHashMap<Class<? extends UpdateTask>, UpdateTask>();
 
     public DynamicList() {
         super();

@@ -54,9 +54,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
@@ -96,9 +96,9 @@ public final class OutlookFolderStorageRegistry implements FolderStorageDiscover
      */
     private OutlookFolderStorageRegistry() {
         super();
-        registry = new NonBlockingHashMap<String, List<FolderStorage>>();
+        registry = new ConcurrentHashMap<String, List<FolderStorage>>();
         genStorages = new CopyOnWriteArrayList<FolderStorage>();
-        contentTypes = new NonBlockingHashMap<ContentType, FolderStorage>();
+        contentTypes = new ConcurrentHashMap<ContentType, FolderStorage>();
     }
 
     /**

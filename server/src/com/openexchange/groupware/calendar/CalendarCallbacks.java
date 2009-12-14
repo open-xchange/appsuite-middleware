@@ -48,20 +48,18 @@
  */
 package com.openexchange.groupware.calendar;
 
-import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.session.Session;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * Multiplexes calendar events

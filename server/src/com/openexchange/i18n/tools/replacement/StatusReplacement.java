@@ -50,7 +50,6 @@
 package com.openexchange.i18n.tools.replacement;
 
 import java.util.Locale;
-
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.i18n.Notifications;
 import com.openexchange.i18n.tools.TemplateToken;

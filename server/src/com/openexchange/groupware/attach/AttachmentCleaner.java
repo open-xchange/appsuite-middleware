@@ -51,7 +51,6 @@ package com.openexchange.groupware.attach;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import com.openexchange.api2.OXException;
 import com.openexchange.event.impl.AppointmentEventInterface;
 import com.openexchange.event.impl.ContactEventInterface;

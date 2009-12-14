@@ -59,10 +59,10 @@ import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 import java.util.Iterator;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.PropertyEvent;
 import com.openexchange.config.PropertyListener;
@@ -197,7 +197,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
      */
     private ManagedFileManagementImpl() {
         super();
-        files = new NonBlockingHashMap<String, ManagedFile>();
+        files = new ConcurrentHashMap<String, ManagedFile>();
         tmpDirReference = new AtomicReference<File>();
         final ServerServiceRegistry registry = ServerServiceRegistry.getInstance();
         // Get configuration service

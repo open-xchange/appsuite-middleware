@@ -38,7 +38,7 @@
 
     <property name="commonjar" value="common.jar"/>
 	<property name="mailjar" value="mail-1.4.2.jar" />
-	<property name="highscalejar" value="high-scale-lib-1.1.2.jar" />
+	<!-- <property name="highscalejar" value="high-scale-lib-1.1.2.jar" /> -->
 	
 	<!-- Third party libs -->
     <fileset dir="${basedir}" id="3rdpartyjars">
@@ -59,7 +59,7 @@
     
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${mailjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
-    	<pathelement location="${bundlesdir}/${commonBundle}/lib/${highscalejar}" />
+		<!-- <pathelement location="${bundlesdir}/${commonBundle}/lib/${highscalejar}" /> -->
 
     	<fileset refid="3rdpartyjars"/>
     </path>

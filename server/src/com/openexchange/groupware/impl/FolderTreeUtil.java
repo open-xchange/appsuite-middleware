@@ -50,7 +50,6 @@
 package com.openexchange.groupware.impl;
 
 import java.util.List;
-
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;

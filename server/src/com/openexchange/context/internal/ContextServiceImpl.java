@@ -50,7 +50,6 @@
 package com.openexchange.context.internal;
 
 import java.util.List;
-
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;

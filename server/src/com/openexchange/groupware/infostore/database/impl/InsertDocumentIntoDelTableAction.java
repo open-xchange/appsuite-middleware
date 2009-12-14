@@ -48,17 +48,16 @@
  */
 package com.openexchange.groupware.infostore.database.impl;
 
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.EnumComponent;
+import com.openexchange.groupware.OXExceptionSource;
+import com.openexchange.groupware.OXThrows;
+import com.openexchange.groupware.infostore.Classes;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
-import com.openexchange.groupware.infostore.Classes;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.OXThrows;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.EnumComponent;
-
-import java.sql.SQLException;
-import java.util.List;
-import java.util.ArrayList;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>

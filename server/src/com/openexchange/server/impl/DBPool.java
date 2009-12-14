@@ -50,7 +50,6 @@
 package com.openexchange.server.impl;
 
 import java.sql.Connection;
-
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.contexts.Context;

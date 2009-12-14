@@ -50,7 +50,6 @@
 package com.openexchange.groupware.tx;
 
 import java.sql.Connection;
-
 import com.openexchange.groupware.contexts.Context;
 
 public class StaticDBPoolProvider implements DBProvider{

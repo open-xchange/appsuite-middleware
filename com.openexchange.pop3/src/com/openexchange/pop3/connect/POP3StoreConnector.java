@@ -58,9 +58,9 @@ import java.net.UnknownHostException;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
@@ -92,8 +92,8 @@ public final class POP3StoreConnector {
      * Start-up.
      */
     public static void startUp() {
-        timedOutServers = new NonBlockingHashMap<HostAndPort, Long>();
-        failedAuths = new NonBlockingHashMap<LoginAndPass, Long>();
+        timedOutServers = new ConcurrentHashMap<HostAndPort, Long>();
+        failedAuths = new ConcurrentHashMap<LoginAndPass, Long>();
     }
 
     /**

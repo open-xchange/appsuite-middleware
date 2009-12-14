@@ -50,7 +50,6 @@
 package com.openexchange.groupware.infostore;
 
 import java.io.InputStream;
-
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;

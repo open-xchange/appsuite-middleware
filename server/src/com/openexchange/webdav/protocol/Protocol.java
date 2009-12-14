@@ -52,9 +52,7 @@ package com.openexchange.webdav.protocol;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
 import org.jdom.Namespace;
-
 import com.openexchange.webdav.protocol.util.PropertySwitch;
 
 public class Protocol {

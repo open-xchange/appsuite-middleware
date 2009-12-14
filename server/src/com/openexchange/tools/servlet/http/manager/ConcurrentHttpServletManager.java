@@ -57,6 +57,7 @@ import java.util.Dictionary;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -65,7 +66,6 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.SingleThreadModel;
 import javax.servlet.http.HttpServlet;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.tools.servlet.ServletConfigLoader;
 import com.openexchange.tools.servlet.http.FiFoServletQueue;
 import com.openexchange.tools.servlet.http.HttpErrorServlet;
@@ -100,7 +100,7 @@ public final class ConcurrentHttpServletManager extends AbstractHttpServletManag
         final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
         readLock = readWriteLock.readLock();
         writeLock = readWriteLock.writeLock();
-        implierCache = new NonBlockingHashMap<String, ServletQueue>();
+        implierCache = new ConcurrentHashMap<String, ServletQueue>();
     }
 
     public void destroyServlet(final String id, final HttpServlet servletObj) {

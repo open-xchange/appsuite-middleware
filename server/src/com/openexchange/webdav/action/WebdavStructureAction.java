@@ -50,12 +50,11 @@
 package com.openexchange.webdav.action;
 
 import javax.servlet.http.HttpServletResponse;
-
 import com.openexchange.webdav.loader.LoadingHints;
 import com.openexchange.webdav.protocol.WebdavCollection;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 public abstract class WebdavStructureAction extends AbstractAction {

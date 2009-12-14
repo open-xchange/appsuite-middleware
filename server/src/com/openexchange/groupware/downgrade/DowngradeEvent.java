@@ -50,7 +50,6 @@
 package com.openexchange.groupware.downgrade;
 
 import java.sql.Connection;
-
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;

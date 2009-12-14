@@ -63,9 +63,7 @@ import java.util.Date;
 import java.util.MissingResourceException;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
-
 import org.w3c.tidy.TidyMessage.Level;
-
 import com.openexchange.mail.text.HTMLProcessing;
 
 
@@ -75,7 +73,7 @@ import com.openexchange.mail.text.HTMLProcessing;
  * @author Dave Raggett <a href="mailto:dsr@w3.org">dsr@w3.org </a>
  * @author Andy Quick <a href="mailto:ac.quick@sympatico.ca">ac.quick@sympatico.ca </a> (translation to Java)
  * @author Fabrizio Giustina
- * @version $Revision: 1.3 $ ($Author: thorben $)
+ * @version $Revision: 1.4 $ ($Author: thorben $)
  */
 public final class Report
 {

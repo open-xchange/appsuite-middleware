@@ -51,7 +51,6 @@ package com.openexchange.groupware.attach;
 
 import java.io.InputStream;
 import java.util.SortedSet;
-
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;

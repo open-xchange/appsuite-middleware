@@ -51,7 +51,6 @@ package com.openexchange.webdav.loader;
 
 import java.util.HashSet;
 import java.util.Set;
-
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
 

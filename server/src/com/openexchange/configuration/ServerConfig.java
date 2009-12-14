@@ -52,10 +52,8 @@ package com.openexchange.configuration;
 import static com.openexchange.java.Autoboxing.I;
 import java.io.File;
 import java.util.Properties;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationException.Code;
 

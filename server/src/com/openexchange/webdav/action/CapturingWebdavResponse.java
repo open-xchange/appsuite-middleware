@@ -53,7 +53,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 public class CapturingWebdavResponse implements WebdavResponse {

@@ -20,10 +20,12 @@
 
 package org.kxml2.kdom;
 
-import java.io.*;
-import java.util.*;
-
-import org.xmlpull.v1.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
 /** 
  * In order to create an element, please use the createElement method

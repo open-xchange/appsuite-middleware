@@ -51,12 +51,9 @@ package com.openexchange.webdav.action;
 
 import java.io.IOException;
 import java.io.InputStream;
-
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.tools.io.SizeAwareInputStream;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;

@@ -51,7 +51,6 @@ package com.openexchange.groupware.attach.impl;
 
 import java.sql.SQLException;
 import java.util.List;
-
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.tx.TransactionException;
 
