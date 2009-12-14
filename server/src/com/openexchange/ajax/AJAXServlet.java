@@ -56,10 +56,13 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URLDecoder;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -295,7 +298,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     public static final String PARAMETER_TIMESTAMP = "timestamp";
 
-    public static final String PARAMETER_TIMEZONE= "timezone";
+    public static final String PARAMETER_TIMEZONE = "timezone";
 
     public static final String PARAMETER_VERSION = "version";
 
@@ -320,6 +323,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     public static final String PARAMETER_USER = "user";
 
     public static final String PARAMETER_TEMPLATE = "template";
+
     /**
      * The content type if the response body contains javascript data. Set it with
      * <code>resp.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT)</code> .
@@ -610,81 +614,104 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         return processUploadStatic(req);
     }
 
+    private static final Set<String> UPLOAD_ACTIONS =
+        new HashSet<String>(Arrays.asList(ACTION_NEW, ACTION_UPLOAD, ACTION_APPEND, ACTION_UPDATE, ACTION_ATTACH, ACTION_COPY));
+
+    /**
+     * 1MB threshold.
+     */
+    private static final int SIZE_THRESHOLD = 1048576;
+
+    /**
+     * Processes specified request's upload provided that request is of content type <code>multipart/*</code>.
+     * 
+     * @param req The request whose upload shall be processed
+     * @return The processed instance of {@link UploadEvent}
+     * @throws UploadException Id processing the upload fails
+     */
     public static final UploadEvent processUploadStatic(final HttpServletRequest req) throws UploadException {
-        final boolean isMultipart = FileUploadBase.isMultipartContent(new ServletRequestContext(req));
-        if (isMultipart) {
-            /*
-             * Create the upload event
-             */
-            final UploadEvent uploadEvent = new UploadEvent();
-            final DiskFileItemFactory factory = new DiskFileItemFactory();
-            /*
-             * Set factory constraints
-             */
-            factory.setSizeThreshold(0);
-            factory.setRepository(new File(ServerConfig.getProperty(Property.UploadDirectory)));
-            /*
-             * Create a new file upload handler
-             */
-            final ServletFileUpload upload = new ServletFileUpload(factory);
-            /*
-             * Set overall request size constraint
-             */
-            upload.setSizeMax(-1);
-            final String action;
-            try {
-                action = getAction(req);
-            } catch (final OXConflictException e) {
-                throw new UploadException(UploadCode.UPLOAD_FAILED, null, e);
-            }
-            final List<FileItem> items;
-            try {
-                @SuppressWarnings("unchecked")
-                final List<FileItem> tmp = upload.parseRequest(req);
-                items = tmp;
-            } catch (final FileUploadException e) {
-                throw new UploadException(UploadCode.UPLOAD_FAILED, action, e);
-            }
-            if (action != null && (action.equals(ACTION_NEW) || action.equals(ACTION_UPLOAD) || action.equals(ACTION_APPEND) || action.equals(ACTION_UPDATE) || action.equals(ACTION_ATTACH) || action.equals(ACTION_COPY) || com.openexchange.groupware.importexport.Format.containsConstantName(action))) {
-                uploadEvent.setAction(action);
-                /*
-                 * Set affiliation to mail upload
-                 */
-                uploadEvent.setAffiliationId(UploadEvent.MAIL_UPLOAD);
-                /*
-                 * Fill upload event instance
-                 */
-                final int size = items.size();
-                final String charEnc =
-                    req.getCharacterEncoding() == null ? ServerConfig.getProperty(Property.DefaultEncoding) : req.getCharacterEncoding();
-                NextFileItem: for (int i = 0; i < size; i++) {
-                    final FileItem fileItem = items.get(i);
-                    if (fileItem.isFormField()) {
-                        final String fieldName = fileItem.getFieldName();
-                        try {
-                            uploadEvent.addFormField(fieldName, fileItem.getString(charEnc));
-                        } catch (final UnsupportedEncodingException e) {
-                            throw new UploadException(UploadCode.UPLOAD_FAILED, action, e);
-                        }
-                    } else {
-                        if (fileItem.getSize() == 0 && (fileItem.getName() == null || fileItem.getName().length() == 0)) {
-                            continue NextFileItem;
-                        }
-                        try {
-                            uploadEvent.addUploadFile(processUploadedFile(fileItem, ServerConfig.getProperty(Property.UploadDirectory)));
-                        } catch (final Exception e) {
-                            throw new UploadException(UploadCode.UPLOAD_FAILED, action, e);
-                        }
-                    }
-                }
-                if (uploadEvent.getAffiliationId() < 0) {
-                    throw new UploadException(UploadCode.MISSING_AFFILIATION_ID, action);
-                }
-                return uploadEvent;
-            }
+        if (!FileUploadBase.isMultipartContent(new ServletRequestContext(req))) {
+            // No multipart content
+            throw new UploadException(UploadCode.NO_MULTIPART_CONTENT, null);
+        }
+        /*
+         * Create the upload event
+         */
+        final UploadEvent uploadEvent = new UploadEvent();
+        final DiskFileItemFactory factory = new DiskFileItemFactory();
+        /*
+         * Set factory constraints; threshold for single files
+         */
+        factory.setSizeThreshold(SIZE_THRESHOLD);
+        factory.setRepository(new File(ServerConfig.getProperty(Property.UploadDirectory)));
+        /*
+         * Create a new file upload handler
+         */
+        final ServletFileUpload upload = new ServletFileUpload(factory);
+        /*
+         * Set overall request size constraint
+         */
+        upload.setSizeMax(-1);
+        /*
+         * Check action parameter existence
+         */
+        final String action;
+        try {
+            action = getAction(req);
+        } catch (final OXConflictException e) {
+            throw new UploadException(UploadCode.UPLOAD_FAILED, null, e);
+        }
+        /*
+         * Check proper action value
+         */
+        if (!UPLOAD_ACTIONS.contains(action) && !com.openexchange.groupware.importexport.Format.containsConstantName(action)) {
             throw new UploadException(UploadCode.UNKNOWN_ACTION_VALUE, null, action);
         }
-        throw new UploadException(UploadCode.NO_MULTIPART_CONTENT, null);
+        final List<FileItem> items;
+        try {
+            @SuppressWarnings("unchecked") final List<FileItem> tmp = upload.parseRequest(req);
+            items = tmp;
+        } catch (final FileUploadException e) {
+            throw new UploadException(UploadCode.UPLOAD_FAILED, action, e);
+        }
+        uploadEvent.setAction(action);
+        /*
+         * Set affiliation to mail upload
+         */
+        uploadEvent.setAffiliationId(UploadEvent.MAIL_UPLOAD);
+        /*
+         * Fill upload event instance
+         */
+        final String charEnc;
+        {
+            final String rce = req.getCharacterEncoding();
+            charEnc = null == rce ? ServerConfig.getProperty(Property.DefaultEncoding) : rce;
+        }
+        for (final FileItem fileItem : items) {
+            if (fileItem.isFormField()) {
+                try {
+                    uploadEvent.addFormField(fileItem.getFieldName(), fileItem.getString(charEnc));
+                } catch (final UnsupportedEncodingException e) {
+                    throw new UploadException(UploadCode.UPLOAD_FAILED, action, e);
+                }
+            } else {
+                if (fileItem.getSize() > 0 || !isEmpty(fileItem.getName())) {
+                    try {
+                        uploadEvent.addUploadFile(processUploadedFile(fileItem, ServerConfig.getProperty(Property.UploadDirectory)));
+                    } catch (final Exception e) {
+                        throw new UploadException(UploadCode.UPLOAD_FAILED, action, e);
+                    }
+                }
+            }
+        }
+        if (uploadEvent.getAffiliationId() < 0) {
+            throw new UploadException(UploadCode.MISSING_AFFILIATION_ID, action);
+        }
+        return uploadEvent;
+    }
+
+    private static final boolean isEmpty(final String str) {
+        return null == str || 0 == str.length();
     }
 
     private static final UploadFile processUploadedFile(final FileItem item, final String uploadDir) throws Exception {
