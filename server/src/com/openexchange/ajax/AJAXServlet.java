@@ -413,12 +413,12 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     public static String getBody(final HttpServletRequest req) throws IOException {
         InputStreamReader isr = null;
         try {
-            int count = 0;
             isr =
                 new InputStreamReader(
                     req.getInputStream(),
                     null == req.getCharacterEncoding() ? ServerConfig.getProperty(Property.DefaultEncoding) : req.getCharacterEncoding());
             final char[] c = new char[8192]; // 8K buffer
+            int count = 0;
             if ((count = isr.read(c)) > 0) {
                 final StringBuilder sb = new StringBuilder(16384); // Initialize with 16K
                 do {
