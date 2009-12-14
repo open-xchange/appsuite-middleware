@@ -56,6 +56,7 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -126,7 +127,7 @@ public final class FileWatcher {
 
     private final File file;
 
-    private final Map<Class<? extends FileListener>, FileListener> listeners;
+    private final ConcurrentMap<Class<? extends FileListener>, FileListener> listeners;
 
     private final AtomicBoolean started;
 
@@ -153,9 +154,7 @@ public final class FileWatcher {
      * @param listener The listener to add
      */
     public void addFileListener(final FileListener listener) {
-        if (!listeners.containsKey(listener.getClass())) {
-            listeners.put(listener.getClass(), listener);
-        }
+        listeners.putIfAbsent(listener.getClass(), listener);
     }
 
     private void notifyListeners(final boolean onDelete) {
