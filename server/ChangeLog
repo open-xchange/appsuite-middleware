@@ -1,3 +1,7 @@
+* 2009-12-14 - marcus.klein@open-xchange.com
+
+ - Bugfix #15070: Corrected category for concurrent modifications exceptions on contacts. 
+
 * 2009-12-04 - martin.herfurth@open-xchange.com
 
  - Bugfix #14929: Setting until.

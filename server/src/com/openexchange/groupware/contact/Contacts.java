@@ -645,7 +645,7 @@ public final class Contacts {
     @OXThrowsMultiple(
         category = {
             Category.PERMISSION, Category.PERMISSION, Category.PERMISSION, Category.PERMISSION, Category.PERMISSION, Category.PERMISSION,
-            Category.CODE_ERROR, Category.PERMISSION, Category.PERMISSION, Category.PERMISSION, Category.PERMISSION, Category.CODE_ERROR,
+            Category.CODE_ERROR, Category.PERMISSION, Category.PERMISSION, Category.PERMISSION, Category.CONCURRENT_MODIFICATION, Category.CODE_ERROR,
             Category.CODE_ERROR, Category.USER_INPUT, Category.CODE_ERROR, Category.CODE_ERROR, Category.CODE_ERROR, Category.USER_INPUT,
             Category.TRY_AGAIN, Category.TRY_AGAIN, Category.USER_INPUT, Category.TRY_AGAIN, Category.PERMISSION, Category.PERMISSION,
             Category.PERMISSION, Category.USER_INPUT, Category.USER_INPUT
