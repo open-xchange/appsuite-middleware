@@ -49,6 +49,7 @@
 package com.openexchange.admin.console;
 
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.util.HashMap;
 import java.util.Set;
 import javax.management.AttributeNotFoundException;
@@ -210,11 +211,11 @@ public class StatisticTools extends AbstractJMXTools {
     }
 
     private void showMemoryPoolData(final MBeanServerConnection mbc) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException {
-        System.out.print(getStats(mbc, "sun.management.MemoryPoolImpl"));
+        System.out.print(getStats(mbc, ManagementFactory.getMemoryPoolMXBeans().get(0).getClass().getName()));
     }
 
     private void showSysThreadingData(final MBeanServerConnection mbc) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException {
-        System.out.print(getStats(mbc, "sun.management.ThreadImpl"));
+        System.out.print(getStats(mbc, ManagementFactory.getThreadMXBean().getClass().getName()));
     }
 
     private void showOXData(final MBeanServerConnection mbc, final boolean admin) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException {
