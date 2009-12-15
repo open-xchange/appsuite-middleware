@@ -67,8 +67,8 @@ public final class VoipNowExceptionMessages implements LocalizableStrings {
     // Invalid property value in property "%1$s": %2$s
     public static final String INVALID_PROPERTY_MSG = "Invalid property value in property \"%1$s\": %2$s";
 
-    // Missing main extension for user %1$s in context %2$s.
-    public static final String MISSING_MAIN_EXTENSION_MSG = "Missing main extension for user %1$s in context %2$s.";
+    // Missing main extension attribute for user %1$s in context %2$s.
+    public static final String MISSING_MAIN_EXTENSION_MSG = "Missing main extension attribute for user %1$s in context %2$s.";
 
     // HTTP request to VoipNow server %1$s failed. Status line: %2$s
     public static final String HTTP_REQUEST_FAILED_MSG = "HTTP request to VoipNow server \"%1$s\" failed. Status line: %2$s";

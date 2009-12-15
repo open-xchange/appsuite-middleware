@@ -73,7 +73,7 @@ public enum VoipNowExceptionCodes implements OXErrorMessage {
      */
     INVALID_PROPERTY(VoipNowExceptionMessages.INVALID_PROPERTY_MSG, Category.CODE_ERROR, 3),
     /**
-     * Missing main extension for user %1$s in context %2$s.
+     * Missing main extension attribute for user %1$s in context %2$s.
      */
     MISSING_MAIN_EXTENSION(VoipNowExceptionMessages.MISSING_MAIN_EXTENSION_MSG, Category.SETUP_ERROR, 4),
     /**
