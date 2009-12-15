@@ -145,8 +145,6 @@ public final class FaxAuthAction extends AbstractVoipNowAction {
             return new AJAXRequestResult(retval);
         } catch (final JSONException e) {
             throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
-        } catch (final Exception e) {
-            throw new AjaxException(AjaxException.Code.UnexpectedError, e, e.getMessage());
         }
     }
 
