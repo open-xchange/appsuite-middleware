@@ -236,7 +236,7 @@ my $count = 0;
 my $back  = 1;
 my $out = "";
 foreach my $line (@LINES) {
-  if ( $line =~ /^$opt[:=]/ ) {
+  if ( $line =~ /^$opt\s*[:=]/ ) {
     $out = $line;
     $out =~ s/^(.*?[:=]).*$/$1$val/;
     while ( $LINES[$count-$back] =~ /^#/ ) {
@@ -251,7 +251,7 @@ $count = 0;
 my $start = 0;
 my $end = 0;
 foreach my $line (@OUTLINES) {
-  if ( $line =~ /^$opt[:=]/ ) {
+  if ( $line =~ /^$opt\s*[:=]/ ) {
     $end=$count;
     while ( $OUTLINES[$count-$back++] =~ /^#/ ) {
     }
@@ -294,7 +294,7 @@ if ( $end > 0 ) {
 	test -n "$val" && val="$(echo $val | sed 's/\&/\\\&/g')"
 	if grep -E "^$prop" $propfile >/dev/null; then
 	    cat<<EOF | sed -f - $propfile > $tmp
-s;\(^$prop[:=]\).*$;\1${val};
+s;\(^$prop *[:=]\).*$;\1${val};
 EOF
 	else
 	    echo "${prop}=$val" >> $tmp
@@ -318,7 +318,7 @@ ox_exists_property() {
     test -z "$propfile" && die "ox_exists_property: missing propfile argument (arg 2)"
     test -e "$propfile" || die "ox_exists_property: $propfile does not exist"
 
-    grep -E "^$prop[:=]" $propfile >/dev/null || return 1
+    grep -E "^$prop *[:=]" $propfile >/dev/null || return 1
 }
 
 # usage:
@@ -331,7 +331,7 @@ ox_read_property() {
     test -z "$propfile" && die "ox_read_property: missing propfile argument (arg 2)"
     test -e "$propfile" || die "ox_read_property: $propfile does not exist"
 
-    sed -n -e "/^$prop/Is/^$prop[:=]\(.*\).*$/\1/p" < $propfile
+    sed -n -e "/^$prop/Is/^$prop *[:=]\(.*\).*$/\1/p" < $propfile
 }
 
 # usage:
@@ -362,7 +362,7 @@ my $back  = 1;
 my $start = 0;
 my $end = 0;
 foreach my $line (@LINES) {
-  if ( $line =~ /^$opt[:=]/ ) {
+  if ( $line =~ /^$opt\s*[:=]/ ) {
     $end=$count;
     while ( $LINES[$count-$back++] =~ /^#/ ) {
     }
