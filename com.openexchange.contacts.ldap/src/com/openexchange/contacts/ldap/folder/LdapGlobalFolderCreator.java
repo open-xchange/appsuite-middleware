@@ -133,11 +133,12 @@ public class LdapGlobalFolderCreator {
      */
     private static int getLdapFolderID(final String globalLdapFolderName2, final Context ctx, final Connection readCon) throws SQLException {
         PreparedStatement ps = null;
+        ResultSet executeQuery = null;
         try {
             ps = readCon.prepareStatement("SELECT fuid from oxfolder_tree WHERE cid=? AND fname=?");
             ps.setInt(1, ctx.getContextId());
             ps.setString(2, globalLdapFolderName2);
-            final ResultSet executeQuery = ps.executeQuery();
+            executeQuery = ps.executeQuery();
             while (executeQuery.next()) {
                 return executeQuery.getInt(1);
             }
@@ -145,12 +146,19 @@ public class LdapGlobalFolderCreator {
         } catch (final SQLException e) {
             throw e;
         } finally {
-            try {
-                if (null != ps) {
-                    ps.close();
+            if (null != executeQuery) {
+                try {
+                    executeQuery.close();
+                } catch (final SQLException e) {
+                    LOG.error(e.getMessage(), e);
                 }
-            } catch (final SQLException e) {
-                e.printStackTrace();
+            }
+            if (null != ps) {
+                try {
+                    ps.close();
+                } catch (final SQLException e) {
+                    LOG.error(e.getMessage(), e);
+                }
             }
         }
     }

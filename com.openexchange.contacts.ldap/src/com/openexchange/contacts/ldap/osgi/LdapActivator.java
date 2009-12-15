@@ -50,6 +50,7 @@
 package com.openexchange.contacts.ldap.osgi;
 
 import java.util.Hashtable;
+import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.config.ConfigurationService;
@@ -146,8 +147,9 @@ public final class LdapActivator extends DeferredActivator {
 
             final PropertyHandler instance = PropertyHandler.getInstance();
             instance.loadProperties();
-            for (final Integer ctx : instance.getContextdetails().keySet()) {
-                final ContextProperties contextProperties = instance.getContextdetails().get(ctx);
+            for (final Entry<Integer, ContextProperties> entry : instance.getContextdetails().entrySet()) {
+                final Integer ctx = entry.getKey();
+                final ContextProperties contextProperties = entry.getValue();
                 for (final FolderProperties folderprop : contextProperties.getFolderproperties()) {
                     final FolderIDAndAdminID createGlobalFolder = LdapGlobalFolderCreator.createGlobalFolder(
                         new ContextImpl(ctx.intValue()),
@@ -174,6 +176,7 @@ public final class LdapActivator extends DeferredActivator {
                 }
             }
         } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
             throw e;
         } finally {
             if (null != registryFolderCreator) {
