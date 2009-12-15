@@ -104,7 +104,7 @@ public final class LdapActivator extends DeferredActivator {
         if (LOG.isWarnEnabled()) {
             LOG.warn("Absent service: " + clazz.getName());
         }
-        ServiceRegistry.getInstance().removeService(clazz);
+        LDAPServiceRegistry.getInstance().removeService(clazz);
     }
 
     @Override
@@ -112,7 +112,7 @@ public final class LdapActivator extends DeferredActivator {
         if (LOG.isInfoEnabled()) {
             LOG.info("Re-available service: " + clazz.getName());
         }
-        ServiceRegistry.getInstance().addService(clazz, getService(clazz));
+        LDAPServiceRegistry.getInstance().addService(clazz, getService(clazz));
     }
 
     @Override
@@ -122,7 +122,7 @@ public final class LdapActivator extends DeferredActivator {
              * (Re-)Initialize service registry with available services
              */
             {
-                final ServiceRegistry registry = ServiceRegistry.getInstance();
+                final LDAPServiceRegistry registry = LDAPServiceRegistry.getInstance();
                 registry.clearRegistry();
                 final Class<?>[] classes = getNeededServices();
                 for (int i = 0; i < classes.length; i++) {
@@ -192,7 +192,7 @@ public final class LdapActivator extends DeferredActivator {
             /*
              * Clear service registry
              */
-            ServiceRegistry.getInstance().clearRegistry();
+            LDAPServiceRegistry.getInstance().clearRegistry();
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;

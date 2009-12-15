@@ -68,7 +68,7 @@ import com.openexchange.contacts.ldap.ldap.LdapGetter;
 import com.openexchange.contacts.ldap.ldap.LdapInterface;
 import com.openexchange.contacts.ldap.ldap.LdapJNDIImpl;
 import com.openexchange.contacts.ldap.ldap.LdapInterface.FillClosure;
-import com.openexchange.contacts.ldap.osgi.ServiceRegistry;
+import com.openexchange.contacts.ldap.osgi.LDAPServiceRegistry;
 import com.openexchange.contacts.ldap.property.FolderProperties;
 import com.openexchange.contacts.ldap.property.Mappings;
 import com.openexchange.contacts.ldap.property.FolderProperties.ContactTypes;
@@ -330,7 +330,7 @@ public class LdapContactInterface implements ContactInterface {
                     this.contactIFace.rwlock_cached_contacts.writeLock().unlock();
                 }
                 // Start thread
-                ServiceRegistry.getInstance().getService(TimerService.class).scheduleWithFixedDelay(new ContactLoaderTask(this.contactIFace, folderId, columns), folderprop.getRefreshinterval(), folderprop.getRefreshinterval());
+                LDAPServiceRegistry.getInstance().getService(TimerService.class).scheduleWithFixedDelay(new ContactLoaderTask(this.contactIFace, folderId, columns), folderprop.getRefreshinterval(), folderprop.getRefreshinterval());
             } else {
                 try {
                     try {

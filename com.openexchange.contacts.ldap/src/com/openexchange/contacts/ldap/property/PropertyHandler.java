@@ -58,7 +58,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.contacts.ldap.exceptions.LdapConfigurationException;
 import com.openexchange.contacts.ldap.exceptions.LdapConfigurationException.Code;
-import com.openexchange.contacts.ldap.osgi.ServiceRegistry;
+import com.openexchange.contacts.ldap.osgi.LDAPServiceRegistry;
 
 /**
  * A class which will deal with all property related actions.
@@ -99,7 +99,7 @@ public class PropertyHandler {
             }
         }
 
-        final ConfigurationService configuration = ServiceRegistry.getInstance().getService(ConfigurationService.class);
+        final ConfigurationService configuration = LDAPServiceRegistry.getInstance().getService(ConfigurationService.class);
         
         logBuilder.append("\nLoading Contacts-LDAP properties...\n");
         for (final File dir : dirs) {
