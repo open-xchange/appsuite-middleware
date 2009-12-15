@@ -191,24 +191,37 @@ public final class UserWriter {
             jsonValue.put(attributePrefix, toJSONValue(user.getAttributes()));
         }
 
-        private Object toJSONValue(final Map<String, Set<String>> attributes) {
+        private Object toJSONValue(final Map<String, Set<String>> attributes) throws JSONException {
             if (null == attributes || attributes.isEmpty()) {
                 return JSONObject.NULL;
             }
-            final JSONArray ja = new JSONArray();
+            final JSONObject jo = new JSONObject();
             final int size = attributes.size();
             final Iterator<Entry<String, Set<String>>> iter = attributes.entrySet().iterator();
             for (int i = 0; i < size; i++) {
                 final Entry<String, Set<String>> entry = iter.next();
-                if (entry.getKey().startsWith(attributePrefix)) {
-                    for (final String attr : entry.getValue()) {
-                        ja.put(attr);
-                    }
+                final String key = entry.getKey();
+                if (key.startsWith(attributePrefix)) {
+                    jo.put(key, set2JSONValue(entry.getValue()));
                 }
             }
-            return ja;
+            return jo;
         }
-        
+
+        private static Object set2JSONValue(final Set<String> values) {
+            if (null == values || values.isEmpty()) {
+                return JSONObject.NULL;
+            }
+            if (values.size() > 1) {
+                final JSONArray ja = new JSONArray();
+                for (final String value : values) {
+                    ja.put(value);
+                }
+                return ja;
+            }
+            return values.iterator().next();
+        }
+
     }
 
     private static final UserFieldWriter UNKNOWN_FIELD_FFW = new UserFieldWriter() {
