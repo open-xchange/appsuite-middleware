@@ -59,7 +59,7 @@ import org.osgi.service.event.EventHandler;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushManagerService;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.event.SessiondEventConstants;
+import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;

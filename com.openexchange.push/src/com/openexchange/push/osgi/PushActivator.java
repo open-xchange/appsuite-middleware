@@ -65,7 +65,7 @@ import com.openexchange.push.internal.PushEventHandler;
 import com.openexchange.push.internal.PushManagerRegistry;
 import com.openexchange.push.internal.ServiceRegistry;
 import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
-import com.openexchange.sessiond.event.SessiondEventConstants;
+import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.threadpool.ThreadPoolService;
 
 /**
