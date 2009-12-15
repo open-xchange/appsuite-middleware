@@ -81,7 +81,7 @@ public final class QuotedInternetAddress extends InternetAddress {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(QuotedInternetAddress.class);
 
-    private static final boolean ignoreBogusGroupName = getBooleanSystemProperty("mail.mime.address.ignorebogusgroupname", true);
+    private static final boolean IGNORE_BOGUS_GROUP_NAME = getBooleanSystemProperty("mail.mime.address.ignorebogusgroupname", true);
 
     private static boolean getBooleanSystemProperty(final String name, final boolean def) {
         return Boolean.parseBoolean(System.getProperty(name, def ? "true" : "false"));
@@ -253,7 +253,7 @@ public final class QuotedInternetAddress extends InternetAddress {
                         index++; // skip both '\' and the escaped char
                         break;
                     case '"':
-                        inquote = !inquote;
+                        inquote ^= true;
                         break;
                     case '>':
                         if (inquote) {
@@ -426,7 +426,7 @@ public final class QuotedInternetAddress extends InternetAddress {
                 String pers = null;
                 if (rfc822 && start_personal >= 0) {
                     pers = unquote(s.substring(start_personal, end_personal).trim());
-                    if (pers.trim().length() == 0) {
+                    if (isEmpty(pers)) {
                         pers = null;
                     }
                 }
@@ -514,7 +514,7 @@ public final class QuotedInternetAddress extends InternetAddress {
                     // ignore bogus "mailto:" prefix in front of an address,
                     // or bogus mail header name included in the address field
                     final String gname = s.substring(start, index);
-                    if (ignoreBogusGroupName && (gname.equalsIgnoreCase("mailto") || gname.equalsIgnoreCase("From") || gname.equalsIgnoreCase("To") || gname.equalsIgnoreCase("Cc") || gname.equalsIgnoreCase("Subject") || gname.equalsIgnoreCase("Re"))) {
+                    if (IGNORE_BOGUS_GROUP_NAME && (gname.equalsIgnoreCase("mailto") || gname.equalsIgnoreCase("From") || gname.equalsIgnoreCase("To") || gname.equalsIgnoreCase("Cc") || gname.equalsIgnoreCase("Subject") || gname.equalsIgnoreCase("Re"))) {
                         start = -1; // we're not really in a group
                     } else {
                         in_group = true;
@@ -552,7 +552,7 @@ public final class QuotedInternetAddress extends InternetAddress {
             String pers = null;
             if (rfc822 && start_personal >= 0) {
                 pers = unquote(s.substring(start_personal, end_personal).trim());
-                if (pers.trim().length() == 0) {
+                if (isEmpty(pers)) {
                     pers = null;
                 }
             }
@@ -668,7 +668,7 @@ public final class QuotedInternetAddress extends InternetAddress {
             if (c <= 040 || c >= 0177) {
                 throw new AddressException("Local address contains control or whitespace", addr);
             }
-            if (specialsNoDot.indexOf(c) >= 0) {
+            if (SPECIALS_NO_DOT.indexOf(c) >= 0) {
                 throw new AddressException("Local address contains illegal character", addr);
             }
         }
@@ -708,7 +708,7 @@ public final class QuotedInternetAddress extends InternetAddress {
             if (c <= 040 || c >= 0177) {
                 throw new AddressException("Domain contains control or whitespace", addr);
             }
-            if (specialsNoDot.indexOf(c) >= 0) {
+            if (SPECIALS_NO_DOT.indexOf(c) >= 0) {
                 throw new AddressException("Domain contains illegal character", addr);
             }
             if (c == '.' && lastc == '.') {
@@ -967,7 +967,7 @@ public final class QuotedInternetAddress extends InternetAddress {
      * Is this a "simple" address? Simple addresses don't contain quotes or any RFC822 special characters other than '@' and '.'.
      */
     private boolean isSimple() {
-        return address == null || indexOfAny(address, specialsNoDotNoAt) < 0;
+        return address == null || indexOfAny(address, SPECIALS_NO_DOT_NO_AT) < 0;
     }
 
     /**
@@ -991,9 +991,9 @@ public final class QuotedInternetAddress extends InternetAddress {
         }
     }
 
-    private static final String specialsNoDotNoAt = "()<>,;:\\\"[]";
+    private static final String SPECIALS_NO_DOT_NO_AT = "()<>,;:\\\"[]";
 
-    private static final String specialsNoDot = "()<>@,;:\\\"[]";
+    private static final String SPECIALS_NO_DOT = "()<>@,;:\\\"[]";
 
     private final static String RFC822 = "()<>@,;:\\\".[]";
 
@@ -1077,6 +1077,9 @@ public final class QuotedInternetAddress extends InternetAddress {
     }
 
     private static String unquote(final String str) {
+        if (isEmpty(str)) {
+            return str;
+        }
         String s = str;
         int length = s.length();
         if ('"' == s.charAt(0) && '"' == s.charAt(length - 1)) {
@@ -1096,6 +1099,18 @@ public final class QuotedInternetAddress extends InternetAddress {
             }
         }
         return s;
+    }
+
+    private static boolean isEmpty(final String str) {
+        if (null == str || 0 == str.length()) {
+            return true;
+        }
+        final int len = str.length();
+        boolean ret = true;
+        for (int i = 0; ret && i < len; i++) {
+            ret = Character.isWhitespace(str.charAt(i));
+        }
+        return ret;
     }
 
 }
