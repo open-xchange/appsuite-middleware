@@ -149,7 +149,14 @@ final class SessionContainer {
      */
     SessionControl[] getSessionsByUser(final int userId, final int contextId) {
         final Map<String, Object> sessionIds = userSessions.get(new UserKey(userId, contextId));
-        return null == sessionIds ? new SessionControl[0] : sessionIds.keySet().toArray(new SessionControl[sessionIds.size()]);
+        if (null == sessionIds) {
+            return new SessionControl[0];
+        }
+        final List<SessionControl> l = new ArrayList<SessionControl>(sessionIds.size());
+        for (final String sessionId : sessionIds.keySet()) {
+            l.add(sessionIdMap.get(sessionId));
+        }
+        return l.toArray(new SessionControl[sessionIds.size()]);
     }
 
     /**
