@@ -70,6 +70,24 @@ ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 %clean
 %{__rm} -rf %{buildroot}
 
+%post
+
+if [ ${1:-0} -eq 2 ]; then
+   # only when updating
+   . /opt/open-xchange/etc/oxfunctions.sh
+
+   # prevent bash from expanding, see bug 13316
+   GLOBIGNORE='*'
+
+   # SoftwareChange_Request-189
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/easylogin.properties
+   if ! ox_exists_property com.openexchange.easylogin.allowInsecureTransmission $pfile; then
+       ox_set_property com.openexchange.easylogin.allowInsecureTransmission false $pfile
+   fi
+
+fi
+
 %files
 %defattr(-,root,root)
 %dir /opt/open-xchange/etc/groupware
