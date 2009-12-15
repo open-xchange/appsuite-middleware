@@ -106,7 +106,7 @@ public final class SessiondEventHandler implements EventHandler {
      */
     public ServiceRegistration registerSessiondEventHandler(final BundleContext context) {
         final Hashtable<Object, Object> properties = new Hashtable<Object, Object>();
-        properties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPICS);
+        properties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
         return context.registerService(EventHandler.class.getName(), this, properties);
 
     }
