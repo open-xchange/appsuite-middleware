@@ -245,16 +245,16 @@ public class LdapContactInterface implements ContactInterface {
     public SearchIterator<Contact> getContactsByExtendedSearch(final ContactSearchObject searchobject, final int orderBy, final String orderDir, final int[] cols) throws OXException {
         final Order valueOf = getOrder(orderDir);
         final Set<Integer> columns = getColumnSet(cols);
-        final int[] folders = searchobject.getFolders();
         final int folderId;
-        if (null != folders) {
-            if (folders.length == 1) {
-                folderId = folders[0];
-            } else {
+        {
+            final int[] folders = searchobject.getFolders();
+            if (null == folders) {
+                throw new LdapException(Code.FOLDERID_OBJECT_NULL);
+            }
+            if (folders.length != 1) {
                 throw new LdapException(Code.TOO_MANY_FOLDERS);
             }
-        } else {
-            throw new LdapException(Code.FOLDERID_OBJECT_NULL);
+            folderId = folders[0];
         }
         final ArrayList<Contact> arrayList;
 
