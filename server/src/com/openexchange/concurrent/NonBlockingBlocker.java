@@ -97,8 +97,12 @@ public final class NonBlockingBlocker implements Blocker, Runnable {
             // This thread already blocks
             return;
         }
-        // Set blocked: Atomically increment by 1 by CAS operation. Wait for an even value if CAS operation fails.
+        // Already blocked?
         int value = writeCounter.get();
+        while ((value & 1) == 1) {
+            value = writeCounter.get();
+        }
+        // Set blocked: Atomically increment by 1 by CAS operation. Wait for an even value if CAS operation fails.
         while (!writeCounter.compareAndSet(value, value + 1)) {
             while (((value = writeCounter.get()) & 1) == 1) {
                 ;

@@ -133,8 +133,10 @@ public final class NonBlockingSynchronizer implements Synchronizer, Runnable {
         if (reentrant.containsKey(Thread.currentThread())) {
             throw new IllegalStateException("Current thread acquired synchronizer, but wants to alter sync mode");
         }
-
         int value = writeCounter.get();
+        while ((value & 1) == 1) {
+            value = writeCounter.get();
+        }
         while (!writeCounter.compareAndSet(value, value + 1)) {
             while (((value = writeCounter.get()) & 1) == 1) {
                 ;
