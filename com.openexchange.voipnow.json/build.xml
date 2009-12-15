@@ -34,6 +34,7 @@
 	<property name="servletjar" value="javax.servlet_2.4.0.v200706111738.jar" />
 	<property name="staxapijar" value="org.dynamicjava.stax-api-1.0.jar" />
 	<property name="jsonjar" value="json.jar"/>
+	<property name="mailjar" value="mail-1.4.2.jar"/>
 
     <property name="globaljar" value="com.openexchange.global.jar"/>
 	<property name="serverjar" value="com.openexchange.server.jar"/>
@@ -53,6 +54,7 @@
         <pathelement location="${bundlesdir}/${commonsloggingjar}"/>
     	<pathelement location="${bundlesdir}/${commonBundle}/lib/${commonshttpclientjar}"/>
     	<pathelement location="${bundlesdir}/${commonBundle}/lib/${jsonjar}"/>
+    	<pathelement location="${bundlesdir}/${commonBundle}/lib/${mailjar}"/>
     	<pathelement location="${bundlesdir}/${xmlBundle}/lib/${staxapijar}"/>
     	<pathelement location="${bundlesdir}/${servletjar}"/>
     	
