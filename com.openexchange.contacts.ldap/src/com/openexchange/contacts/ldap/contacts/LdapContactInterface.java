@@ -125,7 +125,7 @@ public class LdapContactInterface implements ContactInterface {
 
     private static final ArrayIterator<Contact> EMPTY_ARRAY_ITERATOR = new ArrayIterator<Contact>(new Contact[0]);
 
-    public class SortInfo {
+    public static final class SortInfo {
 
         private final int field;
 
