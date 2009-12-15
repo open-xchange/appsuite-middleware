@@ -96,7 +96,7 @@ public final class ExtensionDetailsAction extends AbstractVoipNowSOAPAction<Exte
              * Parse parameters
              */
             final String extensionId = checkStringParameter(request, "id");
-            final String identifier = checkStringParameter(request, "identifier");
+            //final String identifier = checkStringParameter(request, "identifier");
             final VoipNowServerSetting setting = getVoipNowServerSetting(session);
             /*
              * The SOAP stub for VoipNow extension access
