@@ -156,6 +156,8 @@ public final class FaxAuthAction extends AbstractVoipNowAction {
         return mdf.format(new Date(now));
     }
 
+    private static final String TRANS_ENC = "hex";
+
     private String calculateHash(final String subject, final int validity, final VoipNowServerSetting setting, final String mainExtension, final String createdString) {
         final StringBuilder hashMe = new StringBuilder(512);
         hashMe.append(mainExtension).append(setting.getLogin()).append(createdString);
@@ -163,8 +165,8 @@ public final class FaxAuthAction extends AbstractVoipNowAction {
             hashMe.append(validity);
         }
         hashMe.append(subject.trim());
-        hashMe.append(Utility.getSha256(setting.getPassword(), "hex"));
-        return Utility.getSha256(hashMe.toString(), "hex");
+        hashMe.append(Utility.getSha256(setting.getPassword(), TRANS_ENC));
+        return Utility.getSha256(hashMe.toString(), TRANS_ENC);
     }
 
 }
