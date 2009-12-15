@@ -74,7 +74,7 @@ public class LdapGlobalFolderCreator {
          * @param folderid
          * @param adminid
          */
-        private FolderIDAndAdminID(final int folderid, final int adminid) {
+        FolderIDAndAdminID(final int folderid, final int adminid) {
             this.folderid = folderid;
             this.adminid = adminid;
         }
@@ -99,23 +99,25 @@ public class LdapGlobalFolderCreator {
     
     public static FolderIDAndAdminID createGlobalFolder(final Context ctx, final FolderProperties folderprops) throws OXException, SQLException, DBPoolingException {
         // First search for a folder with the name if is doesn't exist create it
-        final Connection readCon = DBPool.pickup(ctx);
         int ldapFolderID;
         final int admin_user_id;
         final String foldername = folderprops.getFoldername();
-        try {
-            admin_user_id = OXFolderSQL.getContextAdminID(ctx, readCon);
-            ldapFolderID = getLdapFolderID(foldername, ctx, readCon);
-        } finally {
-            DBPool.closeReaderSilent(ctx, readCon);
+        {
+            final Connection readCon = DBPool.pickup(ctx);
+            try {
+                admin_user_id = OXFolderSQL.getContextAdminID(ctx, readCon);
+                ldapFolderID = getLdapFolderID(foldername, ctx, readCon);
+            } finally {
+                DBPool.closeReaderSilent(ctx, readCon);
+            }
         }
-
         if (-1 == ldapFolderID) {
             final FolderObject fo = createFolderObject(admin_user_id, foldername);
-            // As we have no possibility right now to access the foldermanager without a session, we have to create
-            // a dummy session object here, which provides the needed information
-            final Session dummysession = getDummySessionObj(admin_user_id, ctx.getContextId());
-            final OXFolderManager instance = OXFolderManager.getInstance(dummysession);
+            /*
+             * As we have no possibility right now to access OXFolderManager without a session, we have to create
+             * a dummy session object here, which provides the needed information
+             */
+            final OXFolderManager instance = OXFolderManager.getInstance(getDummySessionObj(admin_user_id, ctx.getContextId()));
             ldapFolderID = instance.createFolder(fo, true, System.currentTimeMillis()).getObjectID();
             if (LOG.isInfoEnabled()) {
                 LOG.info("LDAP folder successfully created");
@@ -193,7 +195,7 @@ public class LdapGlobalFolderCreator {
     }
 
     private static Session getDummySessionObj(final int admin_user_id, final int contextid) {
-        final Session dummysession = new Session(){
+        return new Session(){
 
             public int getContextId() {
                 return contextid;
@@ -244,12 +246,14 @@ public class LdapGlobalFolderCreator {
             }
 
             public void removeRandomToken() {
+                // Nothing to do
             }
 
             public void setParameter(final String name, final Object value) {
+                // Nothing to do
             }
             
         };
-        return dummysession;
     }
+
 }
