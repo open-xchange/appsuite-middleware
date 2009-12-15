@@ -94,12 +94,12 @@ public final class FaxAuthAction extends AbstractVoipNowAction {
             final int validity;
             {
                 final String tmp = request.getParameter("validity");
-                int val = -1;
+                int val = 3600;
                 if (null != tmp) {
                     try {
                         val = Integer.parseInt(tmp.trim());
                     } catch (final NumberFormatException e) {
-                        val = -1;
+                        val = 3600;
                     }
                 }
                 validity = val;
