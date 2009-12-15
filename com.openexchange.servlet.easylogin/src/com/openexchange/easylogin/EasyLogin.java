@@ -422,9 +422,11 @@ public class EasyLogin extends HttpServlet {
 	private static String loginPara ="login";
 	private static String redirPara ="redirect"; // param for what should be done after error on login
 	private static String directLinkPara ="direct_link";
-	private static  String OX_PATH_RELATIVE = "../";
+	private static String OX_PATH_RELATIVE = "../";
 	private static boolean doGetEnabled = false;
 	private static boolean popUpOnError = true;
+    private static boolean allowInsecure = false;
+	private static String remoteIP = "NONE";
 	
 	/**
 	 * Initializes a new {@link EasyLogin}
@@ -436,6 +438,7 @@ public class EasyLogin extends HttpServlet {
 	protected void doPost (final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
 	IOException {
 		
+        remoteIP = req.getRemoteAddr();
 		processLoginRequest(req,resp);
 		
 	}
@@ -443,13 +446,14 @@ public class EasyLogin extends HttpServlet {
 	@Override
 	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
 			IOException {
-		
-		try {
-			if (props == null) {
+	    remoteIP = req.getRemoteAddr();
+
+	    try {
+	        if (props == null) {
 				initConfig();
 			}
 		}catch (ConfigurationException e) {
-            LOG.error("Error processing easylogin configuration" + EASYLOGIN_PROPERTY_FILE + " ", e);
+            logError("Error processing easylogin configuration" + EASYLOGIN_PROPERTY_FILE + " ", e);
         }
 		
 		if( !doGetEnabled ){
@@ -468,17 +472,23 @@ public class EasyLogin extends HttpServlet {
 				initConfig();
 			}
 		} catch (ConfigurationException e) {
-            LOG.error("Error processing easylogin configuration" + EASYLOGIN_PROPERTY_FILE + " ", e);
+            logError("Error processing easylogin configuration" + EASYLOGIN_PROPERTY_FILE + " ", e);
         }
 		
-		LOG.info("EasyLogin from IP=" + req.getRemoteAddr() + ", Hostname=" + req.getRemoteHost()
-		    +", URI=" + req.getRequestURI() + ", Scheme=" + req.getScheme());
+		
+		logInfo("Hostname=" + req.getRemoteHost() +", URI=" + req.getRequestURI() +
+		    ", Scheme=" + req.getScheme());
 
 		Tools.disableCaching(resp);
 		resp.setContentType("text/html");
-		if( ! req.isSecure() ) {
-		    resp.sendError(HttpServletResponse.SC_FORBIDDEN, "EasyLogin: Only secure transmission allowed");
-		    return;
+		if( allowInsecure || ! req.isSecure() ) {
+		    if( allowInsecure && ! req.isSecure() ) {
+		        logInfo("Using insecure transmission.");
+		    } else {
+                logInfo("Rejecting insecure transmission.");
+                resp.sendError(HttpServletResponse.SC_FORBIDDEN, "EasyLogin: Only secure transmission allowed");
+                return;
+		    }
 		}
 		PrintWriter out = resp.getWriter();
 		
@@ -488,16 +498,16 @@ public class EasyLogin extends HttpServlet {
 		
 		if (req.getParameter(passwordPara)==null || req.getParameter(passwordPara).trim().length()==0){
 			resp.sendError( HttpServletResponse.SC_BAD_REQUEST , "parameter " + passwordPara + " missing");
-			LOG.error("Got request without password");
+			logError("Got request without password");
 		} else if (req.getParameter(loginPara)==null || req.getParameter(loginPara).trim().length()==0){
 			resp.sendError( HttpServletResponse.SC_BAD_REQUEST , "parameter " + loginPara + " missing");
-			LOG.error("Got request without login");
+			logError("Got request without login");
 		} else{
 			
 			password = req.getParameter(passwordPara);
 			login = req.getParameter(loginPara).trim().toLowerCase();
 
-			LOG.info("EasyLogin Login=" + login);
+			logInfo("Login=" + login);
 			
 			out.print(RESPONSE1);
 			out.print(AJAX_ROOT);
@@ -629,13 +639,40 @@ public class EasyLogin extends HttpServlet {
 		
 	}
 	
+	private static void logit(final String msg, final Throwable e, final boolean isError) {
+	    if( isError ) {
+	        if( e != null ) {
+	            LOG.error("EasyLoginIP(" + remoteIP + "): " + msg, e);
+	        } else {
+                LOG.error("EasyLoginIP(" + remoteIP + "): " + msg);
+	        }
+	    } else {
+	        if( e != null ) {
+	            LOG.info("EasyLoginIP(" + remoteIP + "): " + msg, e);
+	        } else {
+                LOG.info("EasyLoginIP(" + remoteIP + "): " + msg);
+	        }
+	    }
+	}
+
+	private static void logError(final String msg) {
+        logit(msg,null,true);
+    }
 	
-	private static void initConfig() throws ConfigurationException {
+    private static void logError(final String msg, final Throwable e) {
+        logit(msg,e,true);
+    }
+
+    private static void logInfo(final String msg) {
+        logit(msg,null,false);
+    }
+
+    private static void initConfig() throws ConfigurationException {
 	    synchronized (EasyLogin.class) {
 	        if (null == props) {
 	            final File file = new File(EASYLOGIN_PROPERTY_FILE);
 	            if (!file.exists()) {
-	            	LOG.error("Error file not found: " + EASYLOGIN_PROPERTY_FILE);
+	            	logError("Error file not found: " + EASYLOGIN_PROPERTY_FILE);
 	            	throw new ConfigurationException(com.openexchange.configuration.ConfigurationException.Code.FILE_NOT_FOUND, file.getAbsolutePath());
 	            }
 	            FileInputStream fis = null;
@@ -646,62 +683,70 @@ public class EasyLogin extends HttpServlet {
 	                
 	                if (props.get("com.openexchange.easylogin.passwordPara") != null) {
 	                	passwordPara  = (String) props.get("com.openexchange.easylogin.passwordPara");
-	                	LOG.info("Set passwordPara to " + passwordPara );
+	                	logInfo("Set passwordPara to " + passwordPara );
 	                } else {
-	                	LOG.error("Could not find passwordPara in " + EASYLOGIN_PROPERTY_FILE + " using default: " + 
+	                	logError("Could not find passwordPara in " + EASYLOGIN_PROPERTY_FILE + " using default: " + 
 	                			passwordPara );
 	                }
 	                
 	                if (props.get("com.openexchange.easylogin.loginPara") != null) {
 	                	loginPara = (String) props.get("com.openexchange.easylogin.loginPara");
-	                	LOG.info("Set loginPara to " +  loginPara);
+	                	logInfo("Set loginPara to " +  loginPara);
 	                } else {
-	                	LOG.error("Could not find loginPara in " + EASYLOGIN_PROPERTY_FILE + " using default: " + 
+	                	logError("Could not find loginPara in " + EASYLOGIN_PROPERTY_FILE + " using default: " + 
 	                			loginPara );
 	                }
 	                
 	                if (props.get("com.openexchange.easylogin.AJAX_ROOT") != null) {
 	                	AJAX_ROOT = (String) props.get("com.openexchange.easylogin.AJAX_ROOT");
-	                	LOG.info("Set AJAX_ROOT to " +  AJAX_ROOT);
+	                	logInfo("Set AJAX_ROOT to " +  AJAX_ROOT);
 	                } else {
-	                	LOG.error("Could not find AJAX_ROOT in " + EASYLOGIN_PROPERTY_FILE + " using default: " + 
+	                	logError("Could not find AJAX_ROOT in " + EASYLOGIN_PROPERTY_FILE + " using default: " + 
 	                			AJAX_ROOT );
 	                }
 	                
 	                if (props.get("com.openexchange.easylogin.OX_PATH_RELATIVE") != null) {
 	                	OX_PATH_RELATIVE = (String) props.get("com.openexchange.easylogin.OX_PATH_RELATIVE");
-	                	LOG.info("Set OX_PATH_RELATIVE to " +  OX_PATH_RELATIVE);
+	                	logInfo("Set OX_PATH_RELATIVE to " +  OX_PATH_RELATIVE);
 	                } else {
-	                	LOG.error("Could not find OX_PATH_RELATIVE in " + EASYLOGIN_PROPERTY_FILE + " using default: " + 
+	                	logError("Could not find OX_PATH_RELATIVE in " + EASYLOGIN_PROPERTY_FILE + " using default: " + 
 	                			OX_PATH_RELATIVE );
 	                }
 	                
 	                if (props.get("com.openexchange.easylogin.doGetEnabled") != null) {
 	                	String property = props.getProperty("com.openexchange.easylogin.doGetEnabled","").trim();
 	                	doGetEnabled = Boolean.parseBoolean(property);
-	                	LOG.info("Set doGetEnabled to " + doGetEnabled );
+	                	logInfo("Set doGetEnabled to " + doGetEnabled );
 	                } else {
-	                	LOG.error("Could not find doGetEnabled in " + EASYLOGIN_PROPERTY_FILE + " using default: " + 
+	                	logError("Could not find doGetEnabled in " + EASYLOGIN_PROPERTY_FILE + " using default: " + 
 	                			doGetEnabled );
 	                }
 	                
 	                if (props.get("com.openexchange.easylogin.popUpOnError") != null) {
 	                	String property = props.getProperty("com.openexchange.easylogin.popUpOnError","").trim();
 	                	popUpOnError = Boolean.parseBoolean(property);
-	                	LOG.info("Set popUpOnError to " +  popUpOnError);
+	                	logInfo("Set popUpOnError to " +  popUpOnError);
 	                } else {
-	                	LOG.error("Could not find popUpOnError in " + EASYLOGIN_PROPERTY_FILE + " using default: " + 
+	                	logError("Could not find popUpOnError in " + EASYLOGIN_PROPERTY_FILE + " using default: " + 
 	                			popUpOnError );
 	                }
+                    if (props.get("com.openexchange.easylogin.allowInsecureTransmission") != null) {
+                        String property = props.getProperty("com.openexchange.easylogin.allowInsecureTransmission","").trim();
+                        allowInsecure = Boolean.parseBoolean(property);
+                        logInfo("Set allowInsecure to " +  allowInsecure);
+                    } else {
+                        logError("Could not find allowInsecure in " + EASYLOGIN_PROPERTY_FILE + " using default: " + 
+                                allowInsecure );
+                    }
 	                
 	            } catch (IOException e) {
-	            	LOG.error("Error can't read file: " + EASYLOGIN_PROPERTY_FILE);
+	            	logError("Error can't read file: " + EASYLOGIN_PROPERTY_FILE);
 	            	throw new ConfigurationException(com.openexchange.configuration.ConfigurationException.Code.NOT_READABLE, file.getAbsolutePath());
 	            } finally {
 	                try {
 	                    fis.close();
 	                } catch (IOException e) {
-	                    LOG.error("Error closing file inputstream for file " + EASYLOGIN_PROPERTY_FILE + 
+	                    logError("Error closing file inputstream for file " + EASYLOGIN_PROPERTY_FILE + 
 	                    		" ", e);
 	                }
 	            }
