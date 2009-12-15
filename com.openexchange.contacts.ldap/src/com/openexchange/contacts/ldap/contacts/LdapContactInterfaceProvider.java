@@ -77,9 +77,9 @@ public final class LdapContactInterfaceProvider implements ContactInterfaceProvi
     public List<Contact> cached_contacts;
     
     // Mapping tables - only used if the folder content is the same for all user (admin dn auth)
-    public Map<Integer, String> keytable;
+    public volatile Map<Integer, String> keytable;
     
-    public Map<String, Integer> valuetable;
+    public volatile Map<String, Integer> valuetable;
     
     public ReentrantReadWriteLock rwlock_cached_contacts = new ReentrantReadWriteLock(true);
 

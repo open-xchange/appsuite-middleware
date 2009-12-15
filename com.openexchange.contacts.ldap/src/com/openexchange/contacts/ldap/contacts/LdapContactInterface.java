@@ -93,7 +93,7 @@ public class LdapContactInterface implements ContactInterface {
 
     private class ContactLoaderTask implements Runnable {
         
-        private final LdapContactInterfaceProvider contactIFace;
+        private final LdapContactInterfaceProvider _contactIFace;
         
         private final Set<Integer> columns;
         
@@ -101,7 +101,7 @@ public class LdapContactInterface implements ContactInterface {
 
         public ContactLoaderTask(final LdapContactInterfaceProvider contactIFace, final int folderId, final Set<Integer> columns) {
             super();
-            this.contactIFace = contactIFace;
+            this._contactIFace = contactIFace;
             this.folderId = folderId;
             this.columns = columns;
         }
@@ -109,11 +109,11 @@ public class LdapContactInterface implements ContactInterface {
         public void run() {
             try {
                 final List<Contact> ldapContacts = getLDAPContacts(folderId, columns, null, null, null, false);
-                this.contactIFace.rwlock_cached_contacts.writeLock().lock();
+                this._contactIFace.rwlock_cached_contacts.writeLock().lock();
                 try {
-                    this.contactIFace.cached_contacts = ldapContacts;
+                    this._contactIFace.cached_contacts = ldapContacts;
                 } finally {
-                    this.contactIFace.rwlock_cached_contacts.writeLock().unlock();
+                    this._contactIFace.rwlock_cached_contacts.writeLock().unlock();
                 }
             } catch (final LdapException e) {
                 LOG.error(e.getMessage(), e);
@@ -306,11 +306,11 @@ public class LdapContactInterface implements ContactInterface {
         
         final Set<Integer> columns = getColumnSet(cols);
         if (0 == orderBy) {
-            columns.add(Contact.SUR_NAME);
-            columns.add(Contact.DISPLAY_NAME);
-            columns.add(Contact.COMPANY);
-            columns.add(Contact.EMAIL1);
-            columns.add(Contact.EMAIL2);
+            columns.add(Integer.valueOf(Contact.SUR_NAME));
+            columns.add(Integer.valueOf(Contact.DISPLAY_NAME));
+            columns.add(Integer.valueOf(Contact.COMPANY));
+            columns.add(Integer.valueOf(Contact.EMAIL1));
+            columns.add(Integer.valueOf(Contact.EMAIL2));
         }
         if (0 != orderBy) {
             columns.addAll(getColumnSet(new int[]{orderBy}));
@@ -523,7 +523,7 @@ public class LdapContactInterface implements ContactInterface {
     }
 
 
-    private ArrayList<Contact> getLDAPContacts(final int folderId, final Set<Integer> columns, final String usersearchfilter, final String distributionsearchfilter, final SortInfo sortField, final boolean deleted) throws LdapException {
+    ArrayList<Contact> getLDAPContacts(final int folderId, final Set<Integer> columns, final String usersearchfilter, final String distributionsearchfilter, final SortInfo sortField, final boolean deleted) throws LdapException {
         final ArrayList<Contact> arrayList = new ArrayList<Contact>();
         final boolean both = ContactTypes.both.equals(folderprop.getContacttypes());
         final boolean distributionlist = both || ContactTypes.distributionlists.equals(folderprop.getContacttypes());
