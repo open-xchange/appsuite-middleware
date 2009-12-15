@@ -117,6 +117,7 @@ public final class VoipNowActionFactory implements AJAXActionServiceFactory {
         tmp.put(ExtensionDetailsAction.ACTION, new ExtensionDetailsAction());
         tmp.put(CallReportAction.ACTION, new CallReportAction());
         tmp.put(SetFollowMeAction.ACTION, new SetFollowMeAction());
+        tmp.put(FaxAuthAction.ACTION, new FaxAuthAction());
         // tmp.put(GetAction.ACTION, new GetAction());
         return Collections.unmodifiableMap(tmp);
     }

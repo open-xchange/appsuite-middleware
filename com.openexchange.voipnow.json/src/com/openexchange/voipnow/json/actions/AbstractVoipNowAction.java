@@ -52,8 +52,11 @@ package com.openexchange.voipnow.json.actions;
 import java.util.regex.Pattern;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.voipnow.json.services.ServiceRegistry;
 
 /**
  * {@link AbstractVoipNowAction} - An abstract VoipNow action.
@@ -79,14 +82,18 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
      * 
      * @param session The session
      * @return The VoipNow setting
+     * @throws AbstractOXException If returning VoipNow setting fails
      */
-    protected static VoipNowServerSetting getVoipNowServerSetting(final ServerSession session) {
+    protected static VoipNowServerSetting getVoipNowServerSetting(final ServerSession session) throws AbstractOXException {
+        final ConfigurationService service = ServiceRegistry.getInstance().getService(ConfigurationService.class, true);
+
         final VoipNowServerSetting retval = new VoipNowServerSetting();
-        retval.setPort(443);
-        retval.setHost("voip.open-xchange.com");
-        retval.setSecure(true);
-        retval.setLogin("admin");
-        retval.setPassword("oxSecure");
+        retval.setPort(service.getIntProperty("com.4psa.voipnow.port", 443));
+        retval.setHost(service.getProperty("com.4psa.voipnow.host", "").trim());
+        retval.setSecure(Boolean.parseBoolean(service.getProperty("com.4psa.voipnow.secure", "true").trim()));
+        retval.setLogin(service.getProperty("com.4psa.voipnow.adminLogin", "").trim());
+        retval.setPassword(service.getProperty("com.4psa.voipnow.adminPassword", "").trim());
+
         return retval;
     }
 

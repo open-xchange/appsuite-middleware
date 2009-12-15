@@ -54,6 +54,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.apache.axis2.AxisFault;
+import org.json.JSONArray;
+import org.json.JSONException;
 import com._4psa.common_xsd._2_0_3.DelObject;
 import com._4psa.common_xsd._2_0_3.PositiveInteger;
 import com._4psa.common_xsd._2_0_3.Rule;
@@ -78,6 +80,7 @@ import com._4psa.voipnowservice._2_0_3.ExtensionPortStub;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.voipnow.json.VoipNowExceptionCodes;
 
@@ -112,8 +115,9 @@ public final class SetFollowMeAction extends AbstractVoipNowSOAPAction<Extension
             /*
              * Parse parameters
              */
-            final String userId = checkStringParameter(request, "id");
-            final String[] transferTo = PAT.split(checkStringParameter(request, "transferTo"), 0);
+            final String idStr = "id";
+            final String userId = checkStringParameter(request, idStr);
+            final String[] transferTo = json2StringArr((JSONArray) request.getData());
             final VoipNowServerSetting setting = getVoipNowServerSetting(session);
             /*
              * Get the interval
@@ -121,7 +125,7 @@ public final class SetFollowMeAction extends AbstractVoipNowSOAPAction<Extension
             final int interval;
             {
                 final AJAXRequestData innerRequest = new AJAXRequestData();
-                innerRequest.putParameter("id", userId);
+                innerRequest.putParameter(idStr, userId);
                 final AJAXRequestResult innerResult = new GetTimeIntervalAction().perform(request, session);
                 interval = ((java.math.BigInteger) innerResult.getResultObject()).intValue();
             }
@@ -153,6 +157,7 @@ public final class SetFollowMeAction extends AbstractVoipNowSOAPAction<Extension
              * Get rule ID
              */
             final List<Integer> followMeRulesIDs;
+            final String followMeStr = "followme";
             {
                 final GetCallRulesInRequest callRulesInRequest = new GetCallRulesInRequest();
                 callRulesInRequest.setUserID(userIdInteger);
@@ -165,7 +170,7 @@ public final class SetFollowMeAction extends AbstractVoipNowSOAPAction<Extension
                     followMeRulesIDs = new ArrayList<Integer>(rules.length);
                     for (int i = 0; i < rules.length; i++) {
                         final Rules_type0 rule = rules[i];
-                        if ("followme".equals(rule.getAction().getValue())) {
+                        if (followMeStr.equals(rule.getAction().getValue())) {
                             followMeRulesIDs.add(Integer.valueOf(rule.getRuleID().getPositiveInteger().intValue()));
                         }
                     }
@@ -176,6 +181,7 @@ public final class SetFollowMeAction extends AbstractVoipNowSOAPAction<Extension
             /*
              * Delete existing follow-me rules
              */
+            final String successStr = "success";
             if (!followMeRulesIDs.isEmpty()) {
                 final int size = followMeRulesIDs.size();
                 final PositiveInteger[] ids = new PositiveInteger[size];
@@ -195,7 +201,7 @@ public final class SetFollowMeAction extends AbstractVoipNowSOAPAction<Extension
                 final DelCallRulesInResponse delCallRulesInResponse = stub.DelCallRulesIn(delRequest, userCredentials);
                 final DelObject delObject = delCallRulesInResponse.getDelCallRulesInResponse();
                 final String success = delObject.getResult().getValue();
-                if (!"success".equalsIgnoreCase(success)) {
+                if (!successStr.equalsIgnoreCase(success)) {
                     throw VoipNowExceptionCodes.SOAP_FAULT.create("DelCallRulesInRequest failed with: " + success);
                 }
             }
@@ -214,7 +220,7 @@ public final class SetFollowMeAction extends AbstractVoipNowSOAPAction<Extension
                 /*
                  * "followme"
                  */
-                final com._4psa.extensiondata_xsd._2_0_3.Action_type3 action = new Action_type3("followme", false) {
+                final com._4psa.extensiondata_xsd._2_0_3.Action_type3 action = new Action_type3(followMeStr, false) {
                     // Nothing to do
                 };
                 callRuleInfo.setAction(action);
@@ -258,7 +264,7 @@ public final class SetFollowMeAction extends AbstractVoipNowSOAPAction<Extension
                 final AddCallRulesInResponse addCallRulesInResponse = stub.AddCallRulesIn(addCallRulesInRequest, userCredentials);
                 final UpdateObject callRulesInResponse = addCallRulesInResponse.getAddCallRulesInResponse();
                 final String success = callRulesInResponse.getResult().getValue();
-                if (!"success".equalsIgnoreCase(success)) {
+                if (!successStr.equalsIgnoreCase(success)) {
                     throw VoipNowExceptionCodes.SOAP_FAULT.create("AddCallRulesInRequest failed with: " + success);
                 }
                 id = Integer.valueOf(callRulesInResponse.getID()[0].getPositiveInteger().intValue());
@@ -271,6 +277,8 @@ public final class SetFollowMeAction extends AbstractVoipNowSOAPAction<Extension
             throw VoipNowExceptionCodes.SOAP_FAULT.create(e, e.getMessage());
         } catch (final RemoteException e) {
             throw VoipNowExceptionCodes.REMOTE_ERROR.create(e, e.getMessage());
+        } catch (final JSONException e) {
+            throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
         }
     }
 
@@ -287,6 +295,15 @@ public final class SetFollowMeAction extends AbstractVoipNowSOAPAction<Extension
     @Override
     protected ExtensionPortStub newSOAPStub() throws AxisFault {
         return new ExtensionPortStub();
+    }
+
+    private static String[] json2StringArr(final JSONArray jsonArray) throws JSONException {
+        final int len = jsonArray.length();
+        final String[] ret = new String[len];
+        for (int i = 0; i < len; i++) {
+            ret[i] = jsonArray.getString(i);
+        }
+        return ret;
     }
 
 }
