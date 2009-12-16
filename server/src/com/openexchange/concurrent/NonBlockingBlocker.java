@@ -124,10 +124,12 @@ public final class NonBlockingBlocker implements Blocker, Runnable {
         lock();
         try {
             // Already blocked?
-            int value = sync.get();
-            while ((value & 1) == 1) {
-                value = sync.get();
-            }
+            int value;
+            do {
+                while (((value = sync.get()) & 1) == 1) {
+                    ;
+                }
+            } while (value != sync.get());
             // Set blocked: Atomically increment by 1 by CAS operation. Wait for an even value if CAS operation fails.
             while (!sync.compareAndSet(value, value + 1)) {
                 while (((value = sync.get()) & 1) == 1) {
