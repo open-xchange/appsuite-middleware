@@ -66,7 +66,9 @@ public final class NonBlockingBlocker implements Blocker, Runnable {
 
     private final Map<Thread, Object> running;
 
-    private final AtomicInteger writeCounter;
+    private final AtomicInteger sync;
+
+    private final AtomicInteger mutex;
 
     private volatile Thread owner;
 
@@ -84,9 +86,27 @@ public final class NonBlockingBlocker implements Blocker, Runnable {
      */
     public NonBlockingBlocker(final Runnable runnable) {
         super();
-        writeCounter = new AtomicInteger();
+        sync = new AtomicInteger();
+        mutex = new AtomicInteger();
         running = new ConcurrentHashMap<Thread, Object>(4);
         this.runnable = runnable;
+    }
+
+    private void lock() {
+        int value;
+        while (((value = mutex.get()) & 1) == 1) {
+            ;
+        }
+        // Set blocked: Atomically increment by 1 by CAS operation. Wait for an even value if CAS operation fails.
+        while (!mutex.compareAndSet(value, value + 1)) {
+            while (((value = mutex.get()) & 1) == 1) {
+                ;
+            }
+        }
+    }
+
+    private void unlock() {
+        mutex.getAndIncrement();
     }
 
     /*-
@@ -101,32 +121,27 @@ public final class NonBlockingBlocker implements Blocker, Runnable {
             // This thread already blocks
             return;
         }
-        // Already blocked?
-        int value = writeCounter.get();
-        while ((value & 1) == 1) {
-            value = writeCounter.get();
-        }
-        // Set blocked: Atomically increment by 1 by CAS operation. Wait for an even value if CAS operation fails.
-        while (!writeCounter.compareAndSet(value, value + 1)) {
-            while (((value = writeCounter.get()) & 1) == 1) {
-                ;
+        lock();
+        try {
+            // Already blocked?
+            int value = sync.get();
+            while ((value & 1) == 1) {
+                value = sync.get();
             }
+            // Set blocked: Atomically increment by 1 by CAS operation. Wait for an even value if CAS operation fails.
+            while (!sync.compareAndSet(value, value + 1)) {
+                while (((value = sync.get()) & 1) == 1) {
+                    ;
+                }
+            }
+            owner = cur;
+            // Wait for other threads leaving
+            while (!running.isEmpty()) {
+                // Nothing to do
+            }
+        } finally {
+            unlock();
         }
-        owner = cur;
-        // Wait for other threads leaving
-        while (!running.isEmpty()) {
-            // Nothing to do
-        }
-    }
-
-    public void unblock() {
-        if (null == owner || Thread.currentThread() != owner) {
-            throw new IllegalMonitorStateException(new StringBuilder(32).append("Thread ").append(Thread.currentThread().getName()).append(
-                " does not own this blocker").toString());
-        }
-        // Set unblocked
-        writeCounter.getAndIncrement();
-        owner = null;
     }
 
     public void acquire() {
@@ -139,13 +154,28 @@ public final class NonBlockingBlocker implements Blocker, Runnable {
             // Reentrant: Already acquired
             return;
         }
-        int save = 0;
-        do {
-            while (((save = writeCounter.get()) & 1) == 1) {
-                ;
-            }
-        } while (save != writeCounter.get());
-        running.put(currentThread, PRESENT);
+        lock();
+        try {
+            int save = 0;
+            do {
+                while (((save = sync.get()) & 1) == 1) {
+                    ;
+                }
+            } while (save != sync.get());
+            running.put(currentThread, PRESENT);
+        } finally {
+            unlock();
+        }
+    }
+
+    public void unblock() {
+        if (null == owner || Thread.currentThread() != owner) {
+            throw new IllegalMonitorStateException(new StringBuilder(32).append("Thread ").append(Thread.currentThread().getName()).append(
+                " does not own this blocker").toString());
+        }
+        // Set unblocked
+        sync.getAndIncrement();
+        owner = null;
     }
 
     public void release() {
