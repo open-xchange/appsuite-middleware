@@ -60,21 +60,21 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
  */
 public class RegistryServiceTrackerCustomizer<T> implements ServiceTrackerCustomizer {
 
-    private final BundleContext context;
+    protected final BundleContext context;
 
-    private final AbstractServiceRegistry registry;
+    protected final AbstractServiceRegistry registry;
 
-    private final Class<T> serviceClass;
+    protected final Class<T> serviceClass;
 
-    public RegistryServiceTrackerCustomizer(BundleContext context, AbstractServiceRegistry registry, Class<T> clazz) {
+    public RegistryServiceTrackerCustomizer(final BundleContext context, final AbstractServiceRegistry registry, final Class<T> clazz) {
         super();
         this.context = context;
         this.registry = registry;
         this.serviceClass = clazz;
     }
 
-    public Object addingService(ServiceReference reference) {
-        Object tmp = context.getService(reference);
+    public Object addingService(final ServiceReference reference) {
+        final Object tmp = context.getService(reference);
         if (serviceClass.isInstance(tmp)) {
             registry.addService(serviceClass, tmp);
         } else {
@@ -83,11 +83,11 @@ public class RegistryServiceTrackerCustomizer<T> implements ServiceTrackerCustom
         return tmp;
     }
 
-    public void modifiedService(ServiceReference reference, Object service) {
+    public void modifiedService(final ServiceReference reference, final Object service) {
         // Nothing to do.
     }
 
-    public void removedService(ServiceReference reference, Object service) {
+    public void removedService(final ServiceReference reference, final Object service) {
         if (registry.removeService(serviceClass) != null) {
             context.ungetService(reference);
         }
