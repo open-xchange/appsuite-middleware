@@ -90,6 +90,9 @@ public class OXHCardParserTest extends TestCase {
             "<div class=\"bday\">1970-1-31</div>\n" +
             "<div class=\"org\">World Class Testers Inc.</div>\n" +
             "<a class=\"email\" href=\"mailto:tester@open-xchange.com\">tester@open-xchange.com</a>\n" +
+            "<a class=\"email\" href=\"mailto:tester2@open-xchange.com\">tester2@open-xchange.com <span class=\"type\">home</span></a>\n" +
+            "<a class=\"email\" href=\"mailto:tester3@open-xchange.com\">tester3@open-xchange.com <span class=\"type\">work</span></a>\n" +
+            "<a class=\"email\" href=\"mailto:ignoreme@open-xchange.com\">ignoreme@open-xchange.com</a>\n" +
             "<div class=\"title\">Test subject</div>\n" +
             "<div class=\"adr\">\n" +
                 "<span class=\"type\">work</span>\n"+
@@ -123,7 +126,9 @@ public class OXHCardParserTest extends TestCase {
         put(Contact.SUR_NAME, "Tester");
         put(Contact.MIDDLE_NAME, "Tiberius");
         put(Contact.COMPANY, "World Class Testers Inc.");
-        put(Contact.EMAIL1, "tester@open-xchange.com");
+        put(Contact.EMAIL3, "tester@open-xchange.com"); //this is the only place left
+        put(Contact.EMAIL2, "tester2@open-xchange.com"); //this is home
+        put(Contact.EMAIL1, "tester3@open-xchange.com"); //this is work
         put(Contact.POSITION, "Test subject");
         
         put(Contact.FAX_HOME, "+666 34 54 74 95");
