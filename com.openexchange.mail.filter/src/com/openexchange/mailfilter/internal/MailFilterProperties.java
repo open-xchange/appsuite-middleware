@@ -67,7 +67,9 @@ public class MailFilterProperties {
         SIEVE_SERVER("SIEVE_SERVER", "localhost"),
         SIEVE_PORT("SIEVE_PORT", "2000"),
         SCRIPT_NAME("SCRIPT_NAME", "Open-Xchange"),
-        SIEVE_AUTH_ENC("SIEVE_AUTH_ENC", "UTF-8");
+        SIEVE_AUTH_ENC("SIEVE_AUTH_ENC", "UTF-8"),
+        NON_RFC_COMPLIANT_TLS_REGEX("NON_RFC_COMPLIANT_TLS_REGEX", "^Cyrus.*v([0-1]\\.[0-9].*|2\\.[0-2].*|2\\.3\\.[0-9]|2\\.3\\.[0-9][^0-9].*)$"),
+        TLS("TLS", "true");
         
         public final String property;
         

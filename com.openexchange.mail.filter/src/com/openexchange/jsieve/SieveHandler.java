@@ -64,8 +64,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.jsieve.exceptions.OXSieveHandlerException;
 import com.openexchange.jsieve.exceptions.OXSieveHandlerInvalidCredentialsException;
+import com.openexchange.mailfilter.internal.MailFilterProperties;
+import com.openexchange.mailfilter.services.MailFilterServletServiceRegistry;
 
 /**
  * This class is used to deal with the communication with sieve. For a description of the communication system to sieve see
@@ -231,7 +234,10 @@ public class SieveHandler {
         List<String> sasl = capa.getSasl();
         measureEnd("capa.getSasl");
 
-        final boolean issueTLS = capa.getStarttls().booleanValue();
+        final ConfigurationService config = MailFilterServletServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+        final boolean tlsenabled = Boolean.parseBoolean(config.getProperty(MailFilterProperties.Values.TLS.property));
+        
+        final boolean issueTLS = tlsenabled && capa.getStarttls().booleanValue();
 
         final StringBuilder commandBuilder = new StringBuilder(64);
 
@@ -279,7 +285,8 @@ public class SieveHandler {
              * directly as response for the STARTTLS command.
              */
             String implementation = capa.getImplementation();
-            if (implementation.matches("^Cyrus.*v([0-1]\\.[0-9].*|2\\.[0-2].*|2\\.3\\.[0-9]|2\\.3\\.[0-9][^0-9].*)$") || implementation.startsWith("NEMESIS")) {
+
+            if (implementation.matches(config.getProperty(MailFilterProperties.Values.NON_RFC_COMPLIANT_TLS_REGEX.property)) || implementation.startsWith("NEMESIS")) {
 	            measureStart();
 	            bos_sieve.write(commandBuilder.append("CAPABILITY").append(CRLF).toString().getBytes("UTF-8"));
 	            bos_sieve.flush();
