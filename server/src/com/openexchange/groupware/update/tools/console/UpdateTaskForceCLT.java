@@ -101,7 +101,7 @@ public final class UpdateTaskForceCLT {
 
     private static void printHelp() {
         final HelpFormatter helpFormatter = new HelpFormatter();
-        helpFormatter.printHelp("force", toolkitOptions);
+        helpFormatter.printHelp("forceupdatetask", toolkitOptions);
     }
 
     /**
