@@ -79,6 +79,16 @@ if [ ${1:-0} -eq 2 ]; then
    # prevent bash from expanding, see bug 13316
    GLOBIGNORE='*'
 
+   # SoftwareChange_Request-191
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/mailfilter.properties
+   if ! ox_exists_property NON_RFC_COMPLIANT_TLS_REGEX $pfile; then
+      ox_set_property NON_RFC_COMPLIANT_TLS_REGEX '^Cyrus.*v([0-1]\\.[0-9].*|2\\.[0-2].*|2\\.3\\.[0-9]|2\\.3\\.[0-9][^0-9].*)$' $pfile
+   fi
+   if ! ox_exists_property TLS $pfile; then
+      ox_set_property TLS "true" $pfile
+   fi
+
    # SoftwareChange_Request-142
    # -----------------------------------------------------------------------
    pfile=/opt/open-xchange/etc/groupware/mailfilter.properties
