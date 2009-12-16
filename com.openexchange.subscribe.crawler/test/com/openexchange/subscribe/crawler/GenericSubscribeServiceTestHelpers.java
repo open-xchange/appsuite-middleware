@@ -51,11 +51,15 @@ package com.openexchange.subscribe.crawler;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import junit.framework.TestCase;
 import org.ho.yaml.Yaml;
+import com.openexchange.config.SimConfigurationService;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.subscribe.crawler.osgi.Activator;
 
 /**
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
@@ -66,6 +70,9 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
     public static final String VALID_NAME = "([a-zA-Z\\s\u00e4\u00f6\u00fc\u00df-]*)";
     public static final String VALID_PHONE_REGEX = "([0-9\\s\\+\\-\\/\\(\\)]*)";
     
+    private HashMap<String, String> map;
+    ArrayList<CrawlerDescription> crawlers;
+    
     public GenericSubscribeServiceTestHelpers() {
         super();
     }
@@ -73,7 +80,24 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
     public GenericSubscribeServiceTestHelpers(final String name) {
         super(name);
     }
-
+    
+    /**
+     * Get all yml-files in the config directory and create crawlers out of them.
+     */
+    public void setUp(){
+        try {
+            map = (HashMap<String, String>) Yaml.load(getSecretsFile());
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        
+        SimConfigurationService config = new SimConfigurationService();
+        //test with the real crawlers
+        config.stringProperties.put("com.openexchange.subscribe.crawler.path", System.getProperty("crawlersConf"));
+        Activator activator = new Activator();
+        crawlers = activator.getCrawlersFromFilesystem(config);
+    }
+    
     protected void findOutIfThereAreContactsForThisConfiguration(final String username, final String password, final CrawlerDescription crawler) {
         findOutIfThereAreContactsForThisConfiguration(username, password, crawler, false);
     }
@@ -143,4 +167,38 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
         }
     }
 
+    protected void checkSingleCrawler(String nameOfCrawlerToCheck) {
+        for (CrawlerDescription crawler : crawlers) {
+            String crawlerName = crawler.getDisplayName();
+            if (crawlerName.equals(nameOfCrawlerToCheck)) {
+                if (map.containsKey(crawlerName+"_user") && map.containsKey(crawlerName+"_password")){
+                    String username = map.get(crawlerName+"_user");
+                    String password = map.get(crawlerName+"_password");
+                    System.out.println("***** Testing crawler : " + crawlerName);
+                    findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
+                } else {
+                    fail("***** No credentials for crawler : " + crawlerName);
+                }
+            }
+        }
+
+    }
+
+    private File getSecretsFile() {
+        String value = System.getProperty("secretFile");
+        if (null == value) {
+            fail("File for crawler credentials is not defined.");
+        }
+        File secrets = new File(value);
+        if (!secrets.exists()) {
+            fail("File for crawler credentials does not exist.");
+        }
+        if (!secrets.isFile()) {
+            fail("File for crawler credentials is not a file.");
+        }
+        if (!secrets.canRead()) {
+            fail("File for crawler credentials can not be read.");
+        }
+        return secrets;
+    }
 }
