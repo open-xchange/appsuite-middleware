@@ -114,6 +114,7 @@ public class OXHCardParserTest extends TestCase {
             "<div class=\"tel\">(<span class=\"type\">fax</span> <span class=\"type\">home</span>) <span class=\"value\">+666 34 54 74 95</span></div>\n" +
             "<div class=\"tel\">(<span class=\"type\">fax</span>) <span class=\"value\">+666 34 54 74 96</span></div>\n" +
             "<div class=\"tel\">(<span class=\"type\">work</span>) <span class=\"value\">+666 34 54 74 97</span></div>\n" +
+            "<div class=\"note\">Nice guy. Tester. Testers are rad.</div>\n" +
             "<p style=\"font-size:smaller;\">This <a href=\"http://microformats.org/wiki/hcard\">hCard</a> created with the <a href=\"http://microformats.org/code/hcard/creator\">hCard creator</a>.</p>\n";
 
     public static final String HCARD_SNIPPET = 
@@ -147,6 +148,7 @@ public class OXHCardParserTest extends TestCase {
         put(Contact.STATE_HOME, "Somestate");
         put(Contact.POSTAL_CODE_HOME, "6666");
         put(Contact.COUNTRY_HOME, "Elbonia");
+        put(Contact.NOTE, "Nice guy. Tester. Testers are rad.");
         try {
         put(Contact.BIRTHDAY, new SimpleDateFormat("yyyy-MM-dd zzz").parse("1970-01-31 UTC"));
         } catch( Exception e){

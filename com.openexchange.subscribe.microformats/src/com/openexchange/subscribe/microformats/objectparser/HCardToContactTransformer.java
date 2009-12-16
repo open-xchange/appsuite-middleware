@@ -85,21 +85,25 @@ public class HCardToContactTransformer {
             return contact;
         
         handleName(hcard, contact);
-        handlePersonalInfo(hcard,contact);
         handleCompany(hcard, contact);
         handleAdresses(hcard, contact);
         handleTelephones(hcard, contact);
         handleEMail(hcard, contact);
         handleImage(hcard, contact);
+        handleAdditionalInfo(hcard,contact);
         handleOXSpecific(hcard,contact);
         return contact;
     }
 
-    private void handlePersonalInfo(HCard hcard, Contact c) {
+    private void handleAdditionalInfo(HCard hcard, Contact c) {
         if(hcard.bday != null)
             c.setBirthday(new Date(hcard.bday));
         if( hcard.titles != null && hcard.titles.size() > 0)
             c.setPosition(hcard.titles.get(0)); 
+//        if( hcard.urls != null && hcard.urls.size() > 0)
+//            c.setURL(hcard.urls.get(0).toString());
+        if( hcard.notes != null && hcard.notes.size() > 0)
+            c.setNote(hcard.notes.get(0));
     }
 
 
