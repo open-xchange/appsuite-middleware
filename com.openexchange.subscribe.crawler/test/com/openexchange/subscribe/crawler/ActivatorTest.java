@@ -61,13 +61,14 @@ import com.openexchange.subscribe.crawler.osgi.Activator;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class ActivatorTest extends GenericSubscribeServiceTestHelpers {
-
+    
+    private HashMap<String, String> map;
+    ArrayList<CrawlerDescription> crawlers;
+    
     /**
-     * Get all yml-files in the config directory and create crawlers out of them. Use each crawler with a specified testuser.
+     * Get all yml-files in the config directory and create crawlers out of them.
      */
-    public void testActivator() {
-        
-        HashMap<String, String> map = null;
+    public void setUp(){
         try {
             map = (HashMap<String, String>) Yaml.load(getSecretsFile());
         } catch (FileNotFoundException e) {
@@ -78,19 +79,55 @@ public class ActivatorTest extends GenericSubscribeServiceTestHelpers {
         //test with the real crawlers
         config.stringProperties.put("com.openexchange.subscribe.crawler.path", System.getProperty("crawlersConf"));
         Activator activator = new Activator();
-        ArrayList<CrawlerDescription> crawlers = activator.getCrawlersFromFilesystem(config);
+        crawlers = activator.getCrawlersFromFilesystem(config);
+    }
+
+    public void testFacebook(){
+        checkSingleCrawler("Facebook");
+    }
+    
+    public void testGMX(){
+        checkSingleCrawler("gmx.de");
+    }
+    
+    public void testGoogleMail(){
+        checkSingleCrawler("GoogleMail");
+    }
+    
+    public void testLinkedIn(){
+        checkSingleCrawler("LinkedIn");
+    }
+    
+    public void testWebDe(){
+        checkSingleCrawler("web.de");
+    }
+    
+    public void testXing(){
+        checkSingleCrawler("XING");
+    }
+    
+    public void testYahooCom(){
+        checkSingleCrawler("yahoo.com");
+    }
+    
+    
+    
+    private void checkSingleCrawler(String nameOfCrawlerToCheck) {
+        
+        
 
         for (CrawlerDescription crawler : crawlers) {
             String crawlerName = crawler.getDisplayName();
-            if (map.containsKey(crawlerName+"_user") && map.containsKey(crawlerName+"_password")){
-                String username = map.get(crawlerName+"_user");
-                String password = map.get(crawlerName+"_password");
-                System.out.println("***** Testing crawler : " + crawlerName);
-                findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
-            } else {
-                fail("***** No credentials for crawler : " + crawlerName);
+            if (crawlerName.equals(nameOfCrawlerToCheck)) {
+                if (map.containsKey(crawlerName+"_user") && map.containsKey(crawlerName+"_password")){
+                    String username = map.get(crawlerName+"_user");
+                    String password = map.get(crawlerName+"_password");
+                    System.out.println("***** Testing crawler : " + crawlerName);
+                    findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
+                } else {
+                    fail("***** No credentials for crawler : " + crawlerName);
+                }
             }
-            
         }
 
     }
