@@ -100,35 +100,38 @@ public class AutoUpdateTest extends GenericSubscribeServiceTestHelpers {
     public void tearDown(){
         clearWorkingDirectory(installedDirectory);
         clearWorkingDirectory(availableUpdatesDirectory);
-
     }    
 
     public void testCrawlersWithAppropriateApiAndHigherPriorityWillBeDownloaded(){
         CrawlerUpdateTask update = new CrawlerUpdateTask(configurationService, activator);
         copyFileFromRepository("Facebook_higherPriority_sameApi.yml", availableUpdatesPath);
         update.run();
-        assertTrue("The file should be present.", thisFileIsPresent("Facebook_higherPriority_sameApi.yml"));
+        assertTrue("The new file should be present.", thisFileIsPresent("Facebook_higherPriority_sameApi.yml"));
+        assertFalse("The old file should have been removed.", thisFileIsPresent("Facebook_standard.yml"));
     }
     
     public void testCrawlersWithHigherPriorityAndLowerApiWillBeDownloaded(){
         CrawlerUpdateTask update = new CrawlerUpdateTask(configurationService, activator);
         copyFileFromRepository("Facebook_higherPriority_lowerApi.yml", availableUpdatesPath);        
         update.run();
-        assertTrue("The file should not be present.", thisFileIsPresent("Facebook_higherPriority_lowerApi.yml"));
+        assertTrue("The new file should be present.", thisFileIsPresent("Facebook_higherPriority_lowerApi.yml"));
+        assertFalse("The old file should have been removed.", thisFileIsPresent("Facebook_standard.yml"));
     }
     
     public void testCrawlersWithLowerPriorityWillNotBeDownloaded(){
         CrawlerUpdateTask update = new CrawlerUpdateTask(configurationService, activator);
         copyFileFromRepository("Facebook_lowerPriority.yml", availableUpdatesPath);
         update.run();
-        assertFalse("The file should not be present.", thisFileIsPresent("Facebook_lowerPriority.yml"));
+        assertFalse("The new file should not be present.", thisFileIsPresent("Facebook_lowerPriority.yml"));
+        assertTrue("The old file should still be there", thisFileIsPresent("Facebook_standard.yml"));
     }
     
     public void testCrawlersWithHigherApiWillNotBeDownloaded(){
         CrawlerUpdateTask update = new CrawlerUpdateTask(configurationService, activator);
         copyFileFromRepository("Facebook_higherPriority_higherApi.yml", availableUpdatesPath);
         update.run();
-        assertFalse("The file should not be present.", thisFileIsPresent("Facebook_higherPriority_higherApi.yml"));
+        assertFalse("The new file should not be present.", thisFileIsPresent("Facebook_higherPriority_higherApi.yml"));
+        assertTrue("The old file should still be there", thisFileIsPresent("Facebook_standard.yml"));
     }
     
     public void testOnlyUpdateIfThereAreNewerUpdates(){
@@ -136,7 +139,15 @@ public class AutoUpdateTest extends GenericSubscribeServiceTestHelpers {
         CrawlerUpdateTask update = new CrawlerUpdateTask(configurationService, activator);
         copyFileFromRepository("Facebook_higherPriority_sameApi.yml", availableUpdatesPath);
         update.run();
-        assertFalse("The file should not be present.", thisFileIsPresent("Facebook_higherPriority_sameApi.yml"));
+        assertFalse("The new file should not be present.", thisFileIsPresent("Facebook_higherPriority_sameApi.yml"));
+        assertTrue("The old file should still be there", thisFileIsPresent("Facebook_standard.yml"));
+    }
+    
+    public void testNewCrawlersWithRightApiWillBeDownloaded(){
+        CrawlerUpdateTask update = new CrawlerUpdateTask(configurationService, activator);
+        copyFileFromRepository("new_service.yml", availableUpdatesPath);
+        update.run();
+        assertTrue("The new file should be present.", thisFileIsPresent("new_service.yml"));
     }
     
     public void testOnlyUpdateWithValidCredentials(){

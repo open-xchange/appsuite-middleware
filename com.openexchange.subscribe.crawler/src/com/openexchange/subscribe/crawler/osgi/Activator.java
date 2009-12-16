@@ -114,9 +114,10 @@ public class Activator implements BundleActivator {
         final TimerService timerService = (TimerService) bundleContext.getService(bundleContext.getServiceReference(TimerService.class.getName()));
         if (timerService != null && configurationService != null) {
             final long updateInterval = Integer.parseInt(configurationService.getProperty(UPDATE_INTERVAL));
+            LOG.info("Crawler Update interval set to : "+updateInterval / 1000 +" seconds");
             CrawlerUpdateTask crawlerUpdateTask = new CrawlerUpdateTask(configurationService, this);
             // Start the job after ten seconds this and repeat it as often as configured (default:daily)
-            scheduledTimerTask = timerService.scheduleWithFixedDelay(crawlerUpdateTask, 60 * 1000, updateInterval);
+            scheduledTimerTask = timerService.scheduleWithFixedDelay(crawlerUpdateTask, 30 * 1000, updateInterval);
         }
         // Track if TimerService is going down removing the ScheduledTimerTask if that happens
         trackers.push(new ServiceTracker(context, TimerService.class.getName(), new ConfigurationCustomizer(context, scheduledTimerTask)));
@@ -154,6 +155,28 @@ public class Activator implements BundleActivator {
             }
         }
         return crawlers;
+    }
+    
+    public boolean removeCrawlerFromFilesystem (final ConfigurationService config, String crawlerIdToDelete){
+        final String path = config.getProperty(PATH_PROPERTY);
+        if (path != null){            
+            final File directory = new File(path);
+            final File[] files = directory.listFiles();
+            if (files != null){                
+                for (final File file : files) {
+                    try {
+                        if (file.isFile() && file.getPath().endsWith(".yml")) {
+                            CrawlerDescription crawler = (CrawlerDescription) Yaml.load(file);
+                            if (crawler.getId().equals(crawlerIdToDelete)){
+                                return file.delete();
+                            }
+                        }
+                    } catch (final FileNotFoundException e) {
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     public void registerServices(ConfigurationService config) {

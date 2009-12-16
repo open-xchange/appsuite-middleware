@@ -50,6 +50,8 @@
 package com.openexchange.subscribe.crawler;
 
 import java.util.List;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.ho.yaml.Yaml;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.ThreadedRefreshHandler;
@@ -76,6 +78,8 @@ public class Workflow {
     private Subscription subscription;
 
     private boolean useThreadedRefreshHandler;
+    
+    private static final Log LOG = LogFactory.getLog(Workflow.class);
 
     public Workflow() {
 
@@ -120,6 +124,7 @@ public class Workflow {
                     currentStep.setInput(previousStep.getOutput());
                 }
                 currentStep.setWorkflow(this);
+                LOG.info("Current Step : " + currentStep.getClass());
                 currentStep.execute(webClient);
                 previousStep = currentStep;
                 if (!currentStep.executedSuccessfully()) {

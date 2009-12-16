@@ -177,13 +177,15 @@ public class CrawlerUpdateTask implements Runnable {
                     if (currentCrawlerDescription != null) {
                         LOG.info("There is an old description that could be replaced");
                         if (possibleNewCrawlerDescription.getPriority() > currentCrawlerDescription.getPriority()) {
-                            LOG.info("The priority is higher than the existing file");
+                            LOG.info("The priority is higher than the existing file so it will be replaced");                            
+                            //removal needs to happen before saving in case of the filename being the same
+                            activator.removeCrawlerFromFilesystem(config, possibleNewCrawlerDescription.getId());
                             Yaml.dump(possibleNewCrawlerDescription, new File(path + ymlFilename));
                             wasUpdated = true;
                         }
                         // it is a description for a completely new crawler
                     } else {
-                        LOG.info("It is a completely new crawler");
+                        LOG.info("It is a completely new crawler and will be saved");
                         Yaml.dump(possibleNewCrawlerDescription, new File(path + ymlFilename));
                         wasUpdated = true;
                     }
