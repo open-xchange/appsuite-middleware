@@ -57,6 +57,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.api2.ContactInterfaceFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
@@ -122,23 +123,30 @@ public class Activator implements BundleActivator {
                 context,
                 serviceRegistry,
                 UserService.class)));
-            trackers.push(new ServiceTracker(
-                context,
-                ConfigurationService.class.getName(),
-                new RegistryServiceTrackerCustomizer<ConfigurationService>(
-                    context,
-                    serviceRegistry,
-                    ConfigurationService.class)));
+            /*
+             * Configuration service tracker
+             */
+            {
+                final ServiceTrackerCustomizer cst =
+                    new InitializingRegistryServiceTrackerCustomizer<ConfigurationService>(
+                        context,
+                        serviceRegistry,
+                        ConfigurationService.class) {
+
+                        @Override
+                        protected void doInit(final ConfigurationService service) {
+                            com._4psa.Version.setVersion(service.getProperty("com.4psa.voipnow.version", "2.0.3"));
+                        }
+                    };
+                trackers.push(new ServiceTracker(context, ConfigurationService.class.getName(), cst));
+            }
             /*
              * Contact interface factory tracker
              */
             trackers.push(new ServiceTracker(
                 context,
                 ContactInterfaceFactory.class.getName(),
-                new RegistryServiceTrackerCustomizer<ContactInterfaceFactory>(
-                    context,
-                    serviceRegistry,
-                    ContactInterfaceFactory.class)));
+                new RegistryServiceTrackerCustomizer<ContactInterfaceFactory>(context, serviceRegistry, ContactInterfaceFactory.class)));
             /*
              * HTTP service tracker
              */
