@@ -181,6 +181,23 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
         }
     }
 
+    /**
+     * Atomically gets and clears current data held in this output stream outstanding for being written to Web Server.
+     * 
+     * @return Current data held in this output stream
+     * @throws IOException If stream is already closed
+     */
+    public byte[] getAndClearData() throws IOException {
+        synchronizer.synchronize();
+        try {
+            final byte[] retval = getData();
+            clearByteBuffer();
+            return retval;
+        } finally {
+            synchronizer.unsynchronize();
+        }
+    }
+
     @Override
     public void write(final byte[] b) throws IOException {
         write(b, 0, b.length);

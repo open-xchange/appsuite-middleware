@@ -49,6 +49,8 @@
 
 package com.openexchange.concurrent;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -58,9 +60,11 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public final class NonBlockingBlocker implements Blocker, Runnable {
 
+    private static final Object PRESENT = new Object();
+
     private volatile Runnable runnable;
 
-    private final AtomicInteger running;
+    private final Map<Thread, Object> running;
 
     private final AtomicInteger writeCounter;
 
@@ -81,7 +85,7 @@ public final class NonBlockingBlocker implements Blocker, Runnable {
     public NonBlockingBlocker(final Runnable runnable) {
         super();
         writeCounter = new AtomicInteger();
-        running = new AtomicInteger();
+        running = new ConcurrentHashMap<Thread, Object>(4);
         this.runnable = runnable;
     }
 
@@ -110,14 +114,15 @@ public final class NonBlockingBlocker implements Blocker, Runnable {
         }
         owner = cur;
         // Wait for other threads leaving
-        while (running.get() > 0) {
+        while (!running.isEmpty()) {
             // Nothing to do
         }
     }
 
     public void unblock() {
         if (null == owner || Thread.currentThread() != owner) {
-            throw new IllegalMonitorStateException("Thread " + Thread.currentThread().getName() + " does not own this blocker");
+            throw new IllegalMonitorStateException(new StringBuilder(32).append("Thread ").append(Thread.currentThread().getName()).append(
+                " does not own this blocker").toString());
         }
         // Set unblocked
         writeCounter.getAndIncrement();
@@ -125,8 +130,13 @@ public final class NonBlockingBlocker implements Blocker, Runnable {
     }
 
     public void acquire() {
-        if (owner != null && Thread.currentThread() == owner) {
+        final Thread currentThread = Thread.currentThread();
+        if (currentThread == owner) {
             // Owning thread!
+            return;
+        }
+        if (running.containsKey(currentThread)) {
+            // Already acquired
             return;
         }
         int save = 0;
@@ -135,15 +145,16 @@ public final class NonBlockingBlocker implements Blocker, Runnable {
                 ;
             }
         } while (save != writeCounter.get());
-        running.incrementAndGet();
+        running.put(currentThread, PRESENT);
     }
 
     public void release() {
-        if (owner != null && Thread.currentThread() == owner) {
+        final Thread currentThread = Thread.currentThread();
+        if (currentThread == owner) {
             // Owning thread!
             return;
         }
-        running.decrementAndGet();
+        running.remove(currentThread);
     }
 
     public void run() {
@@ -155,6 +166,10 @@ public final class NonBlockingBlocker implements Blocker, Runnable {
         } finally {
             release();
         }
+    }
+
+    public boolean holdsBlock() {
+        return (owner == Thread.currentThread());
     }
 
 }
