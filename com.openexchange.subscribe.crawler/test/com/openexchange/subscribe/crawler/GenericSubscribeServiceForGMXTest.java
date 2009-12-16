@@ -72,15 +72,16 @@ public class GenericSubscribeServiceForGMXTest extends GenericSubscribeServiceTe
         crawler.setId("com.openexchange.subscribe.crawler.gmx");
         List<Step> steps = new LinkedList<Step>();
 
-        steps.add(new LoginPageStep(
+        steps.add(new LoginPageByFormActionStep(
             "Log in",
             "https://www.gmx.de",
             "",
             "",
-            "login1",
+            "https://service.gmx.net/de/cgi/login",
             "id",
             "p",
-            "https://service.gmx.net",        
+            ".*/service\\.gmx\\.net\\/de\\/cgi\\/g\\.fcgi/addressbook.*",
+            2,
             ""));
         //new ConditionalStep needed "https://service.gmx.net/de/cgi/g.fcgi/application/navigator"
         steps.add(new PageByLinkRegexStep("Click on the addressbook link in the menu to the left.", ".*/service\\.gmx\\.net\\/de\\/cgi\\/g\\.fcgi/addressbook.*"));

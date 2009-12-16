@@ -63,8 +63,8 @@ public class GenericSubscribeServiceForLinkedInTest extends GenericSubscribeServ
 
     public void testGenericSubscribeServiceForLinkedInTest() {
         // insert valid credentials here
-        String username = "";
-        String password = "";
+        String username = "roxyexchanger@ox.io";
+        String password = "secret";
 
         // create a CrawlerDescription
         CrawlerDescription crawler = new CrawlerDescription();
@@ -131,7 +131,7 @@ public class GenericSubscribeServiceForLinkedInTest extends GenericSubscribeServ
         Workflow workflow = new Workflow(listOfSteps);
         crawler.setWorkflowString(Yaml.dump(workflow));
 
-        //findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
+        findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
         // uncomment this if the crawler description was updated to get the new config-files
         //dumpThis(crawler, crawler.getDisplayName());
     }

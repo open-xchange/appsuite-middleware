@@ -90,10 +90,10 @@ public class GenericSubscribeServiceForYahooComTest extends GenericSubscribeServ
             "Click the \"Export Now\"-Button (underneath \"vCard Single File\")",
             3,
             "submit[action_export_vcard]"));
-        List<String> list = new ArrayList<String>();
-        list.add("BDAY[^\\n]*");
-        list.add("REV[^\\n]*");
-        steps.add(new ContactObjectsByVcardFileStep("Work through the vcard-file", list));
+        List<String> unwantedLines = new ArrayList<String>();
+        unwantedLines.add("BDAY[^\\n]*");
+        unwantedLines.add("REV[^\\n]*");
+        steps.add(new ContactObjectsByVcardFileStep("Work through the vcard-file", unwantedLines));
 
         Workflow workflow = new Workflow(steps);
         workflow.setUseThreadedRefreshHandler(true);

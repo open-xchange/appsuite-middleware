@@ -51,6 +51,8 @@ package com.openexchange.subscribe.crawler;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
@@ -67,6 +69,8 @@ import com.openexchange.subscribe.SubscriptionException;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class LoginPageByFormActionStep extends AbstractStep<HtmlPage, Object> implements LoginStep {
+    
+    private static Log LOG = LogFactory.getLog(LoginPageByFormActionStep.class);
 
     private String url, username, password, actionOfLoginForm, nameOfUserField, nameOfPasswordField, linkAvailableAfterLogin, baseUrl;
 
@@ -98,6 +102,7 @@ public class LoginPageByFormActionStep extends AbstractStep<HtmlPage, Object> im
             HtmlForm loginForm = null;
             int numberOfFormCounter = 1;
             for (final HtmlForm form : loginPage.getForms()) {
+                LOG.debug("Forms action attribute / number is : " + form.getActionAttribute() + " / " + numberOfFormCounter + ", should be " + actionOfLoginForm + " / "+numberOfForm);
                 if (form.getActionAttribute().startsWith(actionOfLoginForm) && numberOfForm == numberOfFormCounter & form.getInputsByName(nameOfUserField) != null) {
                     loginForm = form;
                 }
