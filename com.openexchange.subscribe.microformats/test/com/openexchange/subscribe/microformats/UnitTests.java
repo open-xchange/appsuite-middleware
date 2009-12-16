@@ -49,6 +49,7 @@
 
 package com.openexchange.subscribe.microformats;
 
+import com.openexchange.subscribe.microformats.objectparser.OXHCardParserTest;
 import com.openexchange.subscribe.microformats.parser.HTMLMicroformatParserTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -68,6 +69,7 @@ public final class UnitTests {
         final TestSuite tests = new TestSuite();
         tests.addTestSuite(HTMLMicroformatParserTest.class);
         tests.addTestSuite(MicroformatSubscribeServiceTest.class);
+        tests.addTestSuite(OXHCardParserTest.class);
         return tests;
     }
 }
