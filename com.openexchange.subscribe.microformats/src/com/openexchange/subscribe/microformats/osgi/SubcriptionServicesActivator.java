@@ -69,6 +69,7 @@ import com.openexchange.subscribe.microformats.OXMFParserFactoryService;
 import com.openexchange.subscribe.microformats.OXMFServiceRegistry;
 import com.openexchange.subscribe.microformats.OXMFSubscriptionErrorMessage;
 import com.openexchange.subscribe.microformats.datasources.HTTPOXMFDataSource;
+import com.openexchange.subscribe.microformats.objectparser.OXHCardParser;
 import com.openexchange.subscribe.microformats.parser.CybernekoOXMFFormParser;
 import com.openexchange.subscribe.microformats.parser.HTMLMicroformatParserFactory;
 import com.openexchange.subscribe.microformats.parser.OXMFFormParser;
@@ -120,6 +121,7 @@ public class SubcriptionServicesActivator implements BundleActivator {
         subscribeService.setSource(contactSubscriptionSource);
         subscribeService.addContainerElement("ox_contact");
         subscribeService.addPrefix("ox_");
+        subscribeService.addObjectParser(new OXHCardParser());
 
         contactSubscriptionSource.setSubscribeService(subscribeService);
 
