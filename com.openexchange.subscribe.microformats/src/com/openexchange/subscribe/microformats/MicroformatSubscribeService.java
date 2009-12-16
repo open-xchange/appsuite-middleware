@@ -81,7 +81,7 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
     private List<String> containers = new LinkedList<String>();
     private List<String> prefixes = new LinkedList<String>();
     private SubscriptionSource source;
-    private List<ObjectParser> objectParsers;
+    private List<ObjectParser> objectParsers  = new LinkedList<ObjectParser>();
 
     public Collection getContent(Subscription subscription) throws SubscriptionException {
         Reader htmlData = mfSource.getData(subscription);
