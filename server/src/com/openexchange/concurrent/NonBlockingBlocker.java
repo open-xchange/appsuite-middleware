@@ -136,7 +136,7 @@ public final class NonBlockingBlocker implements Blocker, Runnable {
             return;
         }
         if (running.containsKey(currentThread)) {
-            // Already acquired
+            // Reentrant: Already acquired
             return;
         }
         int save = 0;
