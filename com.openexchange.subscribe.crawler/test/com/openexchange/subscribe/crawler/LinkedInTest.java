@@ -48,29 +48,16 @@
  */
 
 package com.openexchange.subscribe.crawler;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 
 /**
- * {@link AllCrawlersTestSuite}
+ * {@link LinkedInTest}
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class AllCrawlersTestSuite{
-    public AllCrawlersTestSuite() {
-        super();
-    }
+public class LinkedInTest extends GenericSubscribeServiceTestHelpers {
 
-    public static Test suite() {
-        final TestSuite testSuite = new TestSuite();
-        testSuite.addTestSuite(FacebookTest.class);
-        testSuite.addTestSuite(GMXTest.class);
-        testSuite.addTestSuite(GoogleMailTest.class);
-        testSuite.addTestSuite(LinkedInTest.class);
-        testSuite.addTestSuite(WebDeTest.class);              
-        testSuite.addTestSuite(XINGTest.class);
-        testSuite.addTestSuite(YahooComTest.class);
-        return testSuite;
+    public void testLinkedIn(){
+        checkSingleCrawler("LinkedIn");
     }
 }
