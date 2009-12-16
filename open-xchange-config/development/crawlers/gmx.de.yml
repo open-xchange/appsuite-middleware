@@ -4,14 +4,15 @@ id: com.openexchange.subscribe.crawler.gmx
 workflowString: |
   --- !com.openexchange.subscribe.crawler.Workflow
   steps: 
-    - !com.openexchange.subscribe.crawler.LoginPageStep
+    - !com.openexchange.subscribe.crawler.LoginPageByFormActionStep
+      actionOfLoginForm: "https://service.gmx.net/de/cgi/login"
       baseUrl: ""
       description: Log in
-      linkAvailableAfterLogin: "https://service.gmx.net"
-      nameOfLoginForm: login1
+      linkAvailableAfterLogin: ".*/service\\.gmx\\.net\\/de\\/cgi\\/g\\.fcgi/addressbook.*"
       nameOfPasswordField: p
       nameOfUserField: id
-      pageTitleAfterLogin: "https://service.gmx.net"
+      numberOfForm: 2
+      pageTitleAfterLogin: ".*/service\\.gmx\\.net\\/de\\/cgi\\/g\\.fcgi/addressbook.*"
       password: ""
       url: "https://www.gmx.de"
       username: ""
@@ -37,36 +38,36 @@ workflowString: |
     - !com.openexchange.subscribe.crawler.ContactsByCsvFileStep
       description: Map csv fields to Contact-Fields
       fields: 
-        "0": last_name
-        "1": title
-        "2": first_name
-        "5": birthday
-        "6": position
-        "7": department
-        "8": company
-        "9": email1
-        "11": email2
-        "13": email3
         "15": telephone_business1
-        "16": telephone_business2
-        "19": telephone_home1
-        "18": telephone_home1
-        "21": cellular_telephone2
-        "20": cellular_telephone1
-        "23": fax_home
-        "24": fax_business
-        "27": street_business
-        "29": postal_code_business
-        "28": city_business
-        "31": street_home
         "30": country_business
-        "34": country_home
+        "8": company
+        "23": fax_home
+        "16": telephone_business2
+        "31": street_home
         "35": street_other
+        "7": department
+        "34": country_home
         "32": city_home
+        "9": email1
+        "21": cellular_telephone2
         "33": postal_code_home
-        "38": country_other
-        "39": note
+        "6": position
+        "1": title
+        "29": postal_code_business
+        "24": fax_business
         "36": city_other
+        "19": telephone_home1
+        "11": email2
+        "18": telephone_home1
+        "39": note
+        "27": street_business
+        "2": first_name
+        "13": email3
+        "38": country_other
+        "28": city_business
+        "20": cellular_telephone1
         "37": postal_code_other
+        "5": birthday
+        "0": last_name
       ignoreFirstLine: true
   
