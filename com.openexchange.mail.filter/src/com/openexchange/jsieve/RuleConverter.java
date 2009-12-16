@@ -76,7 +76,7 @@ import com.openexchange.jsieve.commands.Rule;
 import com.openexchange.jsieve.commands.TestCommand;
 
 /**
- * This class contains all the method to convert a list of rules into the AST
+ * This class contains all the methods to convert a list of rules into the AST
  * notation
  * 
  * @author d7
