@@ -49,7 +49,11 @@
 
 package com.openexchange.subscribe.microformats;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.Reader;
+import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -59,6 +63,7 @@ import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.microformats.datasources.OXMFDataSource;
+import com.openexchange.subscribe.microformats.parser.ObjectParser;
 import com.openexchange.subscribe.microformats.transformers.MapToObjectTransformer;
 
 
@@ -76,13 +81,56 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
     private List<String> containers = new LinkedList<String>();
     private List<String> prefixes = new LinkedList<String>();
     private SubscriptionSource source;
+    private List<ObjectParser> objectParsers;
 
     public Collection getContent(Subscription subscription) throws SubscriptionException {
         Reader htmlData = mfSource.getData(subscription);
+        String data = null;
+        
+        if(!objectParsers.isEmpty()) {
+            data = read(htmlData);
+            htmlData = new StringReader(data);
+        }
+        
+        
         OXMFParser parser = parserFactory.getParser();
         configureParser(parser);
         List<Map<String, String>> parsed = parser.parse(htmlData);
-        return transformer.transform(parsed);
+        List results = new ArrayList( transformer.transform(parsed) );
+        
+        for (ObjectParser objectParser : objectParsers) {
+            Collection parsedObjects = objectParser.parse(new StringReader(data));
+            results.addAll(parsedObjects);
+        }
+        
+        return results;
+    }
+    
+    public void addObjectParser(ObjectParser parser) {
+        objectParsers.add(parser);
+    }
+
+    private String read(Reader htmlData) throws SubscriptionException {
+        StringBuilder builder = new StringBuilder();
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(htmlData);
+            String line = null;
+            while((line = reader.readLine()) != null) {
+                builder.append(line).append('\n');
+            }
+            return builder.toString();
+
+        } catch (IOException e) {
+            throw OXMFSubscriptionErrorMessage.IOException.create(e);
+        } finally {
+            if(reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                }
+            }
+        }
     }
 
     public SubscriptionSource getSubscriptionSource() {
