@@ -156,7 +156,7 @@ public final class NonBlockingBlocker implements Blocker, Runnable {
         }
         lock();
         try {
-            int save = 0;
+            int save;
             do {
                 while (((save = sync.get()) & 1) == 1) {
                     ;
