@@ -103,7 +103,7 @@ public class MicroformatSubscribeServiceTest extends TestCase {
         Collection content = subscribeService.getContent(subscription);
         
         assertNotNull("Content was null!", content);
-        assertTrue("Expected transformed is returned", content == transformed);
+        assertTrue("Expected transformed is returned", content.equals(transformed));
         assertTrue("Expected output from oxmf parser as input for transformation", parsed == transformer.getInput());
         assertEquals("Expected output from mfSource to be input for oxmf parser", "I would normally be microformatted HTML", parser.getHtml());
         assertTrue("Expected subscription as input to the mfSource", subscription == mfSource.getSubscription());
