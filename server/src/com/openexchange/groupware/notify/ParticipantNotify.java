@@ -93,6 +93,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
+import com.openexchange.groupware.notify.State.Type;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.userconfiguration.RdbUserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -164,10 +165,10 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
      * @param state The state
      */
     protected static void sendMessage(final MailMessage mmsg, final ServerSession session, final CalendarObject obj, final State state) {
-        messageSender.sendMessage(mmsg.title, mmsg.message, mmsg.addresses, session, obj, mmsg.folderId, state, false, mmsg.internal);
+        messageSender.sendMessage(mmsg.title, mmsg.message, mmsg.addresses, session, obj, mmsg.folderId, state, false, mmsg.internal, mmsg.overrideType);
     }
 
-    protected void sendMessage(final String messageTitle, final String message, final List<String> name, final ServerSession session, final CalendarObject obj, final int folderId, final State state, final boolean suppressOXReminderHeader, final boolean internal) {
+    protected void sendMessage(final String messageTitle, final String message, final List<String> name, final ServerSession session, final CalendarObject obj, final int folderId, final State state, final boolean suppressOXReminderHeader, final boolean internal, final Type overrideType) {
         if (DEBUG) {
             LOG.debug(new StringBuilder(message.length() + 64).append("Sending message to: ").append(name).append("\n=====[").append(
                 messageTitle).append("]====\n\n").append(message).append("\n\n"));
@@ -181,8 +182,8 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         if (suppressOXReminderHeader) {
             fuid = MailObject.DONT_SET;
         }
-
-        final MailObject mail = new MailObject(session, obj.getObjectID(), fuid, state.getModule(), state.getType().toString());
+        String type = (overrideType != null) ? overrideType.toString() : state.getType().toString();
+        final MailObject mail = new MailObject(session, obj.getObjectID(), fuid, state.getModule(), type);
         mail.setFromAddr(UserStorage.getStorageUser(session.getUserId(), session.getContext()).getMail());
         mail.setToAddrs(name.toArray(new String[name.size()]));
         mail.setText(message);
@@ -507,7 +508,8 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 mmsg.folderId,
                 state,
                 suppressOXReminderHeader,
-                mmsg.internal);
+                mmsg.internal,
+                mmsg.overrideType);
         }
     }
 
@@ -517,8 +519,6 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         }
         return state.onlyIrrelevantFieldsChanged(oldObj, newObj);
     }
-
-    private static final EnumSet<State.Type> SECONDARY_TYPES = EnumSet.of(State.Type.ACCEPTED, State.Type.DECLINED, State.Type.TENTATIVELY_ACCEPTED);
 
     private List<MailMessage> createMessageList(final CalendarObject oldObj, final CalendarObject newObj, final State state, final boolean forceNotifyOthers, final boolean isUpdate, final ServerSession session, final Map<Locale, List<EmailableParticipant>> receivers, final String title, final RenderMap renderMap) {
         final OXFolderAccess access = new OXFolderAccess(session.getContext());
@@ -561,13 +561,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                         LL.log(e);
                     }
                 } else {
-                    final boolean isSecondaryEvent = SECONDARY_TYPES.contains(state.getType());
-                    if (NotificationConfig.getPropertyAsBoolean(NotificationProperty.NOTIFY_EXTERNAL_PARTICIPANTS_ON_SECONDARY_EVENT, false) && isSecondaryEvent) {
-                        sendMail = false;
-                    } else {
-                        sendMail =
-                            !p.ignoreNotification && (!newObj.containsNotification() || newObj.getNotification()) || (newObj.getModifiedBy() != p.id && forceNotifyOthers);
-                    }
+                    sendMail = !p.ignoreNotification && (!newObj.containsNotification() || newObj.getNotification()) || (newObj.getModifiedBy() != p.id && forceNotifyOthers);
                     if (p.timeZone != null) {
                         tz = p.timeZone;
                     }
@@ -747,6 +741,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 /*
                  * Current participant is removed by caught update event
                  */
+                msg.overrideType = State.Type.DELETED;
                 /*
                  * Get cloned version of render map to apply changed status
                  */
@@ -774,6 +769,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 /*
                  * Current participant is added by caught update event
                  */
+                msg.overrideType = State.Type.NEW;
                 /*
                  * Get cloned version of render map to apply changed status
                  */
@@ -1583,6 +1579,8 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
     }
 
     static final class MailMessage {
+
+        public Type overrideType;
 
         /**
          * Initializes a new MailMessage
