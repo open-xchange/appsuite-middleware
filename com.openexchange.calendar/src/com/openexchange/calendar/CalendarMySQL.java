@@ -3347,6 +3347,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 ret = rs.next();
             } finally {
                 collection.closeResultSet(rs);
+                collection.closePreparedStatement(pst);
             }
         } catch (final DBPoolingException dbpe) {
             throw new OXException(dbpe);

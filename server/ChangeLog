@@ -1,3 +1,7 @@
+* 2009-12-17 - marcus.klein@open-xchange.com
+
+ - Bugfix #15096: Added missing close of prepared statement.
+
 * 2009-12-17 - thorben.betten@open-xchange.com
 
  - Bugfix #15089: Checking for special identifier for all-groups-and-users
