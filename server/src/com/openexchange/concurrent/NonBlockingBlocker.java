@@ -92,21 +92,23 @@ public final class NonBlockingBlocker implements Blocker, Runnable {
         this.runnable = runnable;
     }
 
-    private void lock() {
+    private int lock() {
         int value;
+        // Wait for an even value
         while (((value = mutex.get()) & 1) == 1) {
             ;
         }
         // Set blocked: Atomically increment by 1 by CAS operation. Wait for an even value if CAS operation fails.
-        while (!mutex.compareAndSet(value, value + 1)) {
+        while (!mutex.compareAndSet(value, value | 1)) {
             while (((value = mutex.get()) & 1) == 1) {
                 ;
             }
         }
+        return value | 1;
     }
 
-    private void unlock() {
-        mutex.getAndIncrement();
+    private void unlock(final int value) {
+        mutex.set(value + 1);
     }
 
     /*-
@@ -121,7 +123,7 @@ public final class NonBlockingBlocker implements Blocker, Runnable {
             // This thread already blocks
             return;
         }
-        lock();
+        final int lock = lock();
         try {
             // Already blocked?
             int value;
@@ -142,7 +144,7 @@ public final class NonBlockingBlocker implements Blocker, Runnable {
                 // Nothing to do
             }
         } finally {
-            unlock();
+            unlock(lock);
         }
     }
 
@@ -156,7 +158,7 @@ public final class NonBlockingBlocker implements Blocker, Runnable {
             // Reentrant: Already acquired
             return;
         }
-        lock();
+        final int lock = lock();
         try {
             int save;
             do {
@@ -166,7 +168,7 @@ public final class NonBlockingBlocker implements Blocker, Runnable {
             } while (save != sync.get());
             running.put(currentThread, PRESENT);
         } finally {
-            unlock();
+            unlock(lock);
         }
     }
 
