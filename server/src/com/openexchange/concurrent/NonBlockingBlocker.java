@@ -200,6 +200,11 @@ public final class NonBlockingBlocker implements Blocker, Runnable {
         }
     }
 
+    /**
+     * Checks if current thread holds this blocker.
+     * 
+     * @return <code>true</code> if current thread holds this blocker; otherwise <code>false</code>
+     */
     public boolean holdsBlock() {
         return (owner == Thread.currentThread());
     }
