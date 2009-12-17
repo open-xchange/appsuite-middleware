@@ -54,7 +54,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * {@link NonBlockingBlocker} - Non-blocking reentrant blocker; also useful to wrap an existing {@link Runnable runnable}.
+ * {@link NonBlockingBlocker} - Non-blocking/wait-free reentrant blocker; also useful to wrap an existing {@link Runnable runnable}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
