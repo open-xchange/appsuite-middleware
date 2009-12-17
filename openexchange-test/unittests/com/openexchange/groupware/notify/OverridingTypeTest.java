@@ -49,31 +49,47 @@
 
 package com.openexchange.groupware.notify;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.groupware.tasks.Task;
+
 
 /**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * {@link OverridingTypeTest}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public class NotifyTestSuite {
-
-    public static Test suite() {
-        TestSuite tests = new TestSuite();
-
-        tests.addTestSuite(NoSendTest.class);
-        tests.addTestSuite(ExternalTest.class);
-        tests.addTestSuite(Bug9950Test.class);
-        tests.addTestSuite(Bug9256Test.class);
-        tests.addTestSuite(Bug9204Test.class);
-        tests.addTestSuite(Bug7507Test.class);
-        tests.addTestSuite(Bug6524Test.class);
-        tests.addTestSuite(Bug12985Test.class);
-        tests.addTestSuite(ResourcesTest.class);
-        tests.addTestSuite(SimpleTest.class);
-        tests.addTestSuite(StateTest.class);
-        tests.addTestSuite(Bug13184Test.class);
-        //tests.addTestSuite(Bug14309Test.class); TODO: reactivate, if configuration on test machine can handle templates properly.
-        tests.addTestSuite(OverridingTypeTest.class);
-        return tests;
+public class OverridingTypeTest extends ParticipantNotifyTest {
+    
+    
+    public void testAddingParticipantSetsStateToNew() throws UserException, LdapException {
+        Participant[] participantsBefore = getParticipants(U(1,2,3), G(), S(), R());
+        Participant[] participantsAfter = getParticipants(U(1,2,3,4), G(), S(), R());
+        
+        Task oldTask = getTask(participantsBefore);
+        Task newTask = getTask(participantsAfter);
+        
+        notify.taskModified(oldTask, newTask, session);
+        
+        Message message = notify.getMessageForUser(4);
+    
+        assertEquals(State.Type.NEW, message.overrideType);
+    }
+    
+    public void testRemovingParticipantSetsStateToDeleted() throws LdapException, UserException {
+        Participant[] participantsBefore = getParticipants(U(1,2,3,4), G(), S(), R());
+        Participant[] participantsAfter = getParticipants(U(1,2,3), G(), S(), R());
+        
+        Task oldTask = getTask(participantsBefore);
+        Task newTask = getTask(participantsAfter);
+        
+        notify.taskModified(oldTask, newTask, session);
+    
+        Message message = notify.getMessageForUser(4);
+        
+        assertEquals(State.Type.DELETED, message.overrideType);
+    
     }
 }

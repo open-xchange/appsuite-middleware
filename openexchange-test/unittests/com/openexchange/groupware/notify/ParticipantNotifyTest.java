@@ -35,6 +35,7 @@ import com.openexchange.groupware.ldap.MockUserLookup;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserConfigurationFactory;
 import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.groupware.notify.State.Type;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.i18n.tools.StringTemplate;
@@ -348,13 +349,15 @@ public class ParticipantNotifyTest extends TestCase {
 		public List<String> addresses;
 		public int folderId;
         protected final boolean internal;
+        public Type overrideType;
 
-        public Message(final String messageTitle, final String message, final List<String>addresses, final int folderId, final boolean internal) {
+        public Message(final String messageTitle, final String message, final List<String>addresses, final int folderId, final boolean internal, State.Type overrideType) {
 			this.messageTitle = messageTitle;
 			this.message = message;
 			this.addresses = addresses;
 			this.folderId = folderId;
             this.internal = internal;
+            this.overrideType = overrideType;
         }
 
         /**
@@ -426,13 +429,23 @@ public class ParticipantNotifyTest extends TestCase {
 		}
 
 		@Override
-		protected void sendMessage(final String messageTitle, final String message, final List<String> name, final ServerSession session, final CalendarObject obj, final int folderId, final State state, final boolean suppressOXReminderHeader, final boolean internal) {
-			messageCollector.add(new Message(messageTitle,message,name, folderId, internal));
+		protected void sendMessage(final String messageTitle, final String message, final List<String> name, final ServerSession session, final CalendarObject obj, final int folderId, final State state, final boolean suppressOXReminderHeader, final boolean internal, State.Type overrideType) {
+			messageCollector.add(new Message(messageTitle,message,name, folderId, internal, overrideType));
 		}
 
         @Override
         protected String getFolderName(final int folderId, final Locale locale, final OXFolderAccess access) {
             return "FOLDER";
+        }
+
+        public Message getMessageForUser(int uid) throws UserException {
+            String mailAddress = U(uid)[0].getMail();
+            for (Message message : messageCollector) {
+                if(message.addresses.contains(mailAddress)) {
+                    return message;
+                }
+            }
+            return null;
         }
     }
 
