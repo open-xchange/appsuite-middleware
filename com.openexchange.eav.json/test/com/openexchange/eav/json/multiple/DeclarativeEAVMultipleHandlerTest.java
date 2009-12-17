@@ -122,7 +122,7 @@ public class DeclarativeEAVMultipleHandlerTest extends EAVUnitTest {
         try {
             MockUser user = new MockUser();
             user.setTimeZone(timezone);
-            response = multipleHandler.performRequest(action, request, new ServerSessionAdapter(null, ctx, user));
+            response = multipleHandler.performRequest(action, request, new ServerSessionAdapter(null, ctx, user), false);
             if(expectedException != null) {
                 fail("Expected Exception with detailNumber: "+expectedException);
             }

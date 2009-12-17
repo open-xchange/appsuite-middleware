@@ -119,7 +119,7 @@ public class EAVMultipleHandler implements MultipleHandler {
         return null;
     }
 
-    public Object performRequest(String action, JSONObject jsonObject, ServerSession session) throws AbstractOXException, JSONException {
+    public Object performRequest(String action, JSONObject jsonObject, ServerSession session, boolean secure) throws AbstractOXException, JSONException {
         this.action = action;
         parse(jsonObject, session.getUser());
         
@@ -298,4 +298,5 @@ public class EAVMultipleHandler implements MultipleHandler {
         this.storage = storage;
     }
 
+   
 }
