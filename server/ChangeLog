@@ -1,3 +1,7 @@
+* 2009-12-17 - thorben.betten@open-xchange.com
+
+ - Bugfix #15089: Checking for special identifier for all-groups-and-users
+
 * 2009-12-16 - thorben.betten@open-xchange.com
 
  - Bugfix #15094: Fixed AJP keep-alive mechanism to not mess up AJP communication cycle

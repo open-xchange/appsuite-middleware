@@ -98,9 +98,9 @@ public final class FolderWriter extends DataWriter {
     final UserConfiguration userConfig;
 
     final Context ctx;
-    
+
     final ServerSession session;
-    
+
     private AdditionalFolderFieldList fields = null;
 
     /**
@@ -344,7 +344,7 @@ public final class FolderWriter extends DataWriter {
      * @param ctx The session's context
      * @param timeZone The time zone identifier
      */
-    public FolderWriter(final JSONWriter jw, final Session session, final Context ctx, final String timeZone, AdditionalFolderFieldList fields) {
+    public FolderWriter(final JSONWriter jw, final Session session, final Context ctx, final String timeZone, final AdditionalFolderFieldList fields) {
         super(null == timeZone ? getTimeZoneBySession(session, ctx) : getTimeZone(timeZone), jw);
         this.user = UserStorage.getStorageUser(session.getUserId(), ctx);
         this.userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx);
@@ -629,57 +629,64 @@ public final class FolderWriter extends DataWriter {
                                     throw new OXFolderException(FolderCode.MISSING_PARAMETER, e, FolderFields.PERMISSIONS);
                                 }
                             }
+                            /*
+                             * Create JSON array
+                             */
+                            final JSONArray ja = new JSONArray();
+                            {
+                                final OCLPermission[] perms = fo.getPermissionsAsArray();
+                                final UserConfigurationStorage userConfStorage = UserConfigurationStorage.getInstance();
+                                try {
+                                    for (int k = 0; k < perms.length; k++) {
+                                        final OCLPermission permission = perms[k];
+                                        if (!permission.isSystem()) {
+                                            final int entity = permission.getEntity();
+                                            final OCLPermission effectPerm;
+                                            if (permission.isGroupPermission()) {
+                                                effectPerm = permission;
+                                            } else if (OCLPermission.ALL_GROUPS_AND_USERS == entity) {
+                                                effectPerm = permission;
+                                                effectPerm.setGroupPermission(true);
+                                            } else {
+                                                effectPerm =
+                                                    fo.getEffectiveUserPermission(entity, userConfStorage.getUserConfiguration(entity, ctx));
+                                            }
+                                            final JSONObject jo = new JSONObject();
+                                            jo.put(FolderFields.BITS, createPermissionBits(effectPerm));
+                                            jo.put(FolderFields.ENTITY, entity);
+                                            jo.put(FolderFields.GROUP, effectPerm.isGroupPermission());
+                                            ja.put(jo);
+                                        }
+                                    }
+                                } catch (final DBPoolingException e) {
+                                    throw new OXException(e);
+                                } catch (final SQLException e) {
+                                    throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
+                                }
+                            }
+                            /*
+                             * Write to JSON writer
+                             */
                             if (withKey) {
                                 jsonwriter.key(FolderFields.PERMISSIONS);
-                            }
-                            final JSONArray ja = new JSONArray();
-                            final OCLPermission[] perms = fo.getPermissionsAsArray();
-                            final UserConfigurationStorage userConfStorage = UserConfigurationStorage.getInstance();
-                            try {
-                                NextPerm: for (int k = 0; k < perms.length; k++) {
-                                    if (perms[k].isSystem()) {
-                                        /*
-                                         * Withhold system permissions
-                                         */
-                                        continue NextPerm;
-                                    }
-                                    final OCLPermission perm;
-                                    if (perms[k].isGroupPermission()) {
-                                        perm = perms[k];
-                                    } else {
-                                        perm =
-                                            fo.getEffectiveUserPermission(perms[k].getEntity(), userConfStorage.getUserConfiguration(
-                                                perms[k].getEntity(),
-                                                ctx));
-                                    }
-                                    final JSONObject jo = new JSONObject();
-                                    jo.put(FolderFields.BITS, createPermissionBits(perm));
-                                    jo.put(FolderFields.ENTITY, perm.getEntity());
-                                    jo.put(FolderFields.GROUP, perm.isGroupPermission());
-                                    ja.put(jo);
-                                }
-                            } catch (final DBPoolingException e) {
-                                throw new OXException(e);
-                            } catch (final SQLException e) {
-                                throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
                             }
                             jsonwriter.value(ja);
                         }
                     };
                     break Fields;
                 default:
-                    
+
                     if (!this.fields.knows(field) && LOG.isWarnEnabled()) {
                         LOG.warn("Unknown folder field: " + field);
                     }
-                    
+
                     final AdditionalFolderField folderField = this.fields.get(field);
                     retval[i] = new FolderFieldWriter() {
 
                         @Override
                         public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey, final String name, final int hasSubfolders) throws JSONException {
                             if (withKey) {
-                                if(folderField.getColumnName() == null) {
+                                if (folderField.getColumnName() == null) {
                                     return;
                                 }
                                 jsonwriter.key(folderField.getColumnName());
