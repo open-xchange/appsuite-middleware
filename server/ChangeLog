@@ -1,6 +1,7 @@
 * 2009-12-17 - thorben.betten@open-xchange.com
 
  - Bugfix #15089: Checking for special identifier for all-groups-and-users
+ - Bugfix #15099: Fixed line folding of text mails
 
 * 2009-12-16 - thorben.betten@open-xchange.com
 

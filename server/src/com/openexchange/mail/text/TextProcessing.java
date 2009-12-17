@@ -60,11 +60,85 @@ import com.openexchange.tools.Collections.SmartIntArray;
  */
 public final class TextProcessing {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(TextProcessing.class);
-
     private static final String SPLIT_LINES = "\r?\n";
 
     private static final char CHAR_BREAK = '\n';
+
+    private static String foldLine(final String line, final int linewrap, final String prefix) {
+        int end;
+        char c;
+        /*
+         * Strip trailing spaces and newlines
+         */
+        String s;
+        final int used;
+        {
+            final String foldMe;
+            if (null == prefix) {
+                used = 0;
+                foldMe = line;
+            } else {
+                used = prefix.length();
+                foldMe = line.substring(used);
+            }
+            for (end = foldMe.length() - 1; end >= 0; end--) {
+                c = foldMe.charAt(end);
+                if (c != ' ' && c != '\t' && c != '\r' && c != '\n') {
+                    break;
+                }
+            }
+            if (end != foldMe.length() - 1) {
+                s = foldMe.substring(0, end + 1);
+            } else {
+                s = foldMe;
+            }
+        }
+        /*
+         * Check if the string fits now
+         */
+        if (used + s.length() <= linewrap) {
+            return s;
+        }
+        /*
+         * Fold the string
+         */
+        final StringBuilder sb = new StringBuilder(s.length() + 4);
+        char lastc = 0;
+        while (used + s.length() > linewrap) {
+            int lastspace = -1;
+            for (int i = 0; i < s.length(); i++) {
+                if (lastspace != -1 && used + i > linewrap) {
+                    break;
+                }
+                c = s.charAt(i);
+                if ((c == ' ' || c == '\t') && !(lastc == ' ' || lastc == '\t')) {
+                    lastspace = i;
+                }
+                lastc = c;
+            }
+            if (lastspace == -1) {
+                /*
+                 * No space, use the whole thing
+                 */
+                if (null != prefix) {
+                    sb.append(prefix);
+                }
+                sb.append(s);
+                s = "";
+                break;
+            }
+            if (null != prefix) {
+                sb.append(prefix);
+            }
+            sb.append(s.substring(0, lastspace));
+            sb.append(CHAR_BREAK);
+            lastc = s.charAt(lastspace);
+            // sb.append(lastc);
+            s = s.substring(lastspace + 1);
+        }
+        sb.append(s);
+        return sb.toString();
+    }
 
     /**
      * Performs the line folding after specified number of characters through parameter <code>linewrap</code>. Occurring HTML links are
@@ -83,93 +157,18 @@ public final class TextProcessing {
         final String[] lines = content.split(SPLIT_LINES);
         if (lines.length > 0) {
             final StringBuilder sb = new StringBuilder(content.length() + 128);
-            sb.append(foldTextLine(lines[0], linewrap));
+            {
+                final String foldMe = lines[0];
+                sb.append(foldLine(foldMe, linewrap, getQuotePrefix(foldMe)));
+            }
             for (int i = 1; i < lines.length; i++) {
-                sb.append(CHAR_BREAK).append(foldTextLine(lines[i], linewrap));
+                final String foldMe = lines[i];
+                sb.append(CHAR_BREAK).append(foldLine(foldMe, linewrap, getQuotePrefix(foldMe)));
             }
             return sb.toString();
         }
         return content;
     }
-
-    private static String foldTextLine(final String line, final int linewrap) {
-        return foldTextLineRecursive(line, linewrap, getQuotePrefix(line));
-    }
-
-    private static String foldTextLineRecursive(final String line, final int linewrap, final String quote) {
-        final int length = line.length();
-        if (length <= linewrap) {
-            return line;
-        }
-        final int[] hrefIndices = getHrefIndices(line);
-        final int startPos = quote == null ? 0 : quote.length();
-        final char c = line.charAt(linewrap);
-        final StringBuilder sb = new StringBuilder(length + 5);
-        final StringBuilder sub = new StringBuilder(64);
-        if (Character.isWhitespace(c)) {
-            /*
-             * Find last non-whitespace character before
-             */
-            int i = linewrap - 1;
-            int[] sep = null;
-            while (i >= startPos) {
-                if (!Character.isWhitespace(line.charAt(i))) {
-                    if ((sep = isLineBreakInsideHref(hrefIndices, i)) != null) {
-                        i = sep[0] - 1;
-                        continue;
-                    }
-                    sb.setLength(0);
-                    sub.setLength(0);
-                    return sb.append(line.substring(0, i + 1)).append(CHAR_BREAK).append(
-                        foldTextLineRecursive(quote == null ? line.substring(linewrap + 1) : sub.append(quote).append(
-                            line.substring(linewrap + 1)).toString(), linewrap, quote)).toString();
-                }
-                i--;
-            }
-        } else {
-            /*
-             * Find last whitespace before
-             */
-            int i = linewrap - 1;
-            int[] sep = null;
-            while (i >= startPos) {
-                if (Character.isWhitespace(line.charAt(i))) {
-                    if ((sep = isLineBreakInsideHref(hrefIndices, i)) != null) {
-                        i = sep[0] - 1;
-                        continue;
-                    }
-                    sb.setLength(0);
-                    sub.setLength(0);
-                    return sb.append(line.substring(0, i)).append(CHAR_BREAK).append(
-                        foldTextLineRecursive(
-                            quote == null ? line.substring(i + 1) : sub.append(quote).append(line.substring(i + 1)).toString(),
-                            linewrap,
-                            quote)).toString();
-                }
-                i--;
-            }
-        }
-        final int[] sep = isLineBreakInsideHref(hrefIndices, linewrap);
-        if (sep == null) {
-            return new StringBuilder(line.length() + 1).append(line.substring(0, linewrap)).append(CHAR_BREAK).append(
-                foldTextLineRecursive(quote == null ? line.substring(linewrap) : new StringBuilder().append(quote).append(
-                    line.substring(linewrap)).toString(), linewrap, quote)).toString();
-        } else if (sep[1] == length) {
-            if (sep[0] == startPos) {
-                return line;
-            }
-            return new StringBuilder(line.length() + 1).append(line.substring(0, sep[0])).append(CHAR_BREAK).append(
-                foldTextLineRecursive(quote == null ? line.substring(sep[0]) : new StringBuilder().append(quote).append(
-                    line.substring(sep[0])).toString(), linewrap, quote)).toString();
-        }
-        return new StringBuilder(line.length() + 1).append(line.substring(0, sep[1])).append(CHAR_BREAK).append(
-            foldTextLineRecursive(
-                quote == null ? line.substring(sep[1]) : new StringBuilder().append(quote).append(line.substring(sep[1])).toString(),
-                linewrap,
-                quote)).toString();
-    }
-
-    // private static final Pattern PATTERN_QP = Pattern.compile("((?:\\s?>)+)(\\s?)(.*)");
 
     private static String getQuotePrefix(final String line) {
         if (line.length() == 0) {
@@ -198,8 +197,9 @@ public final class TextProcessing {
         /*
          * Allow only 1 whitespace character after last '>' character
          */
-        if (lastGT + 2 < sb.length()) {
-            sb.delete(lastGT + 2, sb.length());
+        final int len = sb.length();
+        if (lastGT + 2 < len) {
+            sb.delete(lastGT + 2, len);
         }
         return sb.toString();
         // final Matcher m = PATTERN_QP.matcher(line);
@@ -215,7 +215,7 @@ public final class TextProcessing {
                 sia.append(m.end());
             }
         } catch (final StackOverflowError error) {
-            LOG.error(StackOverflowError.class.getName(), error);
+            org.apache.commons.logging.LogFactory.getLog(TextProcessing.class).error(StackOverflowError.class.getName(), error);
         }
         return sia.toArray();
     }
