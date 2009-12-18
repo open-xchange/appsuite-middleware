@@ -127,14 +127,14 @@ public class RecurrenceChecker {
         if (!cdao.containsDayInMonth())
             throw new OXCalendarException(OXCalendarException.Code.INCOMPLETE_REC_INFOS_MONTHDAY);
 
-        if (!cdao.containsDays() || cdao.getDays() == 0)
+        if (!cdao.containsDays())
             checkMonthly1(cdao);
         else
             checkMonthly2(cdao);
     }
 
     private static void checkMonthly1(CalendarObject cdao) throws OXCalendarException {
-        if (cdao.containsDays() && cdao.getDays() > 0)
+        if (cdao.containsDays())
             throw unnecessary("days", "monthly1");
 
         if (cdao.getDayInMonth() < 1 || cdao.getDayInMonth() > 31)
@@ -159,14 +159,14 @@ public class RecurrenceChecker {
         if (!cdao.containsMonth())
             throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_YEARLY_MONTH);
 
-        if (!cdao.containsDays() || cdao.getDays() == 0)
+        if (!cdao.containsDays())
             checkYearly1(cdao);
         else
             checkYearly2(cdao);
     }
 
     private static void checkYearly1(CalendarObject cdao) throws OXCalendarException {
-        if (cdao.containsDays() && cdao.getDays() > 0)
+        if (cdao.containsDays())
             throw unnecessary("days", "yearly1");
 
         if (cdao.getDayInMonth() < 1 || cdao.getDayInMonth() > 31)
