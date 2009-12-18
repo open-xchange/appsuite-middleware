@@ -543,10 +543,6 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajp13.IAJPv13RequestHandler#doWriteHeaders(java.io.OutputStream)
-     */
     public void doWriteHeaders(final OutputStream out) throws AJPv13Exception, IOException {
         if (!headersSent) {
             out.write(AJPv13Response.getSendHeadersBytes(response));
@@ -556,10 +552,10 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajp13.IAJPv13RequestHandler#getAndClearResponseData()
-     */
+    public boolean isHeadersSent() {
+        return headersSent;
+    }
+
     public byte[] getAndClearResponseData() throws IOException {
         if (null == response) {
             return new byte[0];

@@ -47,24 +47,47 @@
  *
  */
 
-package com.openexchange.ajp13;
+package com.openexchange.concurrent;
+
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
- * {@link Synchronizable} - Simple interface to synchronize/unsynchronize access to implementing object through its {@link #synchronize()}
- * and {@link #unsynchronize()} methods.
+ * {@link ConcurrentBlocker} - A concurrent blocker.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Synchronizable {
+public final class ConcurrentBlocker implements Blocker {
+
+    private final Lock rl;
+
+    private final Lock wl;
 
     /**
-     * Atomically synchronizes access
+     * Initializes a new {@link ConcurrentBlocker}.
      */
-    public void synchronize();
+    public ConcurrentBlocker() {
+        super();
+        final ReadWriteLock rwl = new ReentrantReadWriteLock();
+        rl = rwl.readLock();
+        wl = rwl.writeLock();
+    }
 
-    /**
-     * Atomically unsynchronize access
-     */
-    public void unsynchronize();
+    public void acquire() {
+        rl.lock();
+    }
+
+    public void release() {
+        rl.unlock();
+    }
+
+    public void block() {
+        wl.lock();
+    }
+
+    public void unblock() {
+        wl.unlock();
+    }
 
 }

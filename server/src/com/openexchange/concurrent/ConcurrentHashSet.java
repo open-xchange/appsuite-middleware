@@ -58,12 +58,14 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * {@link ConcurrentHashSet} - This class implements the <tt>Set</tt> interface, backed by a map (actually a <tt>ConcurrentHashMap</tt>
  * instance). It makes no guarantees as to the iteration order of the set; in particular, it does not guarantee that the order will remain
- * constant over time. This class permits the <tt>null</tt> element.
+ * constant over time. This class does not permit the <tt>null</tt> element.
  * <p>
  * Moreover it supports full concurrency of retrievals and adjustable expected concurrency for updates.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @deprecated Use {@link NonBlockingHashSet} instead
  */
+@Deprecated
 public final class ConcurrentHashSet<E> implements Set<E>, Serializable {
 
     private static final long serialVersionUID = -2608324279213322648L;

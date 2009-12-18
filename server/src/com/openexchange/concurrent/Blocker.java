@@ -47,7 +47,8 @@
  *
  */
 
-package com.openexchange.ajp13;
+package com.openexchange.concurrent;
+
 
 /**
  * {@link Blocker} - Methods to block/unblock access to implementing object.

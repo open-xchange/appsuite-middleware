@@ -47,23 +47,24 @@
  *
  */
 
-package com.openexchange.ajp13;
+package com.openexchange.concurrent;
 
 /**
- * {@link Blockable} - Simple interface to block/unblock access to implementing object through its {@link #block()} and {@link #unblock()}
- * methods.
+ * {@link Synchronizable} - Simple interface to synchronize/unsynchronize access to implementing object through its {@link #synchronize()}
+ * and {@link #unsynchronize()} methods.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Blockable {
+public interface Synchronizable {
 
     /**
-     * Atomically blocks access
+     * Atomically synchronizes access
      */
-    public void block();
+    public void synchronize();
 
     /**
-     * Atomically unblocks access
+     * Atomically unsynchronize access
      */
-    public void unblock();
+    public void unsynchronize();
+
 }

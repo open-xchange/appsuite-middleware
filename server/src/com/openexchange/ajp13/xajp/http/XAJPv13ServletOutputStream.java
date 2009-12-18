@@ -55,10 +55,10 @@ import java.util.concurrent.locks.Lock;
 import javax.servlet.ServletOutputStream;
 import org.xsocket.connection.INonBlockingConnection;
 import com.openexchange.ajp13.AJPv13Response;
-import com.openexchange.ajp13.NonBlockingSynchronizer;
-import com.openexchange.ajp13.Synchronizable;
-import com.openexchange.ajp13.Synchronizer;
 import com.openexchange.ajp13.xajp.XAJPv13Session;
+import com.openexchange.concurrent.NonBlockingSynchronizer;
+import com.openexchange.concurrent.Synchronizable;
+import com.openexchange.concurrent.Synchronizer;
 
 /**
  * {@link XAJPv13ServletOutputStream} - The AJP's servlet output stream.

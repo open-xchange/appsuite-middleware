@@ -69,6 +69,9 @@ import com.openexchange.ajp13.exception.AJPv13InvalidByteSequenceException;
 import com.openexchange.ajp13.exception.AJPv13InvalidConnectionStateException;
 import com.openexchange.ajp13.exception.AJPv13SocketClosedException;
 import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
+import com.openexchange.concurrent.Blockable;
+import com.openexchange.concurrent.Blocker;
+import com.openexchange.concurrent.NonBlockingBlocker;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
@@ -79,7 +82,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-final class AJPv13ConnectionImpl implements AJPv13Connection {
+final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13ConnectionImpl.class);
 
@@ -93,6 +96,8 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
 
     private final AJPv13Task task;
 
+    private final Blocker blocker;
+
     private AJPv13RequestHandlerImpl ajpRequestHandler;
 
     /**
@@ -104,6 +109,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
         super();
         state = IDLE_STATE;
         packageNumber = 0;
+        blocker = new NonBlockingBlocker();
         this.task = task;
         try {
             final Socket client = task.getSocket();
@@ -114,6 +120,14 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
         }
     }
 
+    public void block() {
+        blocker.block();
+    }
+
+    public void unblock() {
+        blocker.unblock();
+    }
+
     /**
      * Resets this connection instance and prepares it for next upcoming AJP cycle. That is associated request handler will be set to
      * <code>null</code>, its state is set to <code>IDLE</code> and the output stream is going to be flushed.
@@ -121,21 +135,26 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
      * @param releaseRequestHandler
      */
     void resetConnection(final boolean releaseRequestHandler) {
-        if (state == IDLE_STATE) {
-            return;
-        }
-        if (ajpRequestHandler != null) {
-            resetRequestHandler(releaseRequestHandler);
-        }
-        if (outputStream != null) {
-            try {
-                outputStream.flush();
-            } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
+        blocker.acquire();
+        try {
+            if (state == IDLE_STATE) {
+                return;
             }
+            if (ajpRequestHandler != null) {
+                resetRequestHandler(releaseRequestHandler);
+            }
+            if (outputStream != null) {
+                try {
+                    outputStream.flush();
+                } catch (final IOException e) {
+                    LOG.error(e.getMessage(), e);
+                }
+            }
+            state = IDLE_STATE;
+            packageNumber = 0;
+        } finally {
+            blocker.release();
         }
-        state = IDLE_STATE;
-        packageNumber = 0;
     }
 
     private void resetRequestHandler(final boolean release) {
@@ -156,10 +175,9 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
      * <p>
      * Moreover this connection's state is switched to <tt>ASSIGNED</tt> if it is <tt>IDLE</tt>.
      * 
-     * @throws IOException If AJP socket is closed
      * @throws AJPv13Exception If an AJP error occurs
      */
-    void processRequest() throws IOException, AJPv13Exception {
+    void processRequest() throws AJPv13Exception {
         // if (task.getSocket().isClosed()) {
         // throw new IOException("Socket is closed");
         // }
@@ -169,7 +187,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
                 /*
                  * Create a request handler to this newly assigned connection
                  */
-                ajpRequestHandler = new AJPv13RequestHandlerImpl();
+                ajpRequestHandler = new AJPv13RequestHandlerImpl(blocker);
                 ajpRequestHandler.setAJPConnection(this);
             }
         }
@@ -195,7 +213,12 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
      * @return The associated AJP request handler.
      */
     public AJPv13RequestHandler getAjpRequestHandler() {
-        return ajpRequestHandler;
+        blocker.acquire();
+        try {
+            return ajpRequestHandler;
+        } finally {
+            blocker.release();
+        }
     }
 
     /**
@@ -208,7 +231,12 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
         if (inputStream == null) {
             throw new IOException("Input stream not availalbe");
         }
-        return inputStream;
+        blocker.acquire();
+        try {
+            return inputStream;
+        } finally {
+            blocker.release();
+        }
     }
 
     /**
@@ -221,7 +249,12 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
         if (outputStream == null) {
             throw new IOException("Output stream not available");
         }
-        return outputStream;
+        blocker.acquire();
+        try {
+            return outputStream;
+        } finally {
+            blocker.release();
+        }
     }
 
     /**
@@ -231,10 +264,13 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
      * @throws AJPv13Exception If there is an error in the underlying protocol, such as a TCP error.
      */
     public void setSoTimeout(final int millis) throws AJPv13Exception {
+        blocker.acquire();
         try {
             task.getSocket().setSoTimeout(millis);
         } catch (final SocketException e) {
             throw new AJPv13Exception(AJPv13Exception.AJPCode.IO_ERROR, false, e, e.getMessage());
+        } finally {
+            blocker.release();
         }
     }
 
@@ -244,14 +280,24 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
      * @return The number of actual AJP package.
      */
     public int getPackageNumber() {
-        return packageNumber;
+        blocker.acquire();
+        try {
+            return packageNumber;
+        } finally {
+            blocker.release();
+        }
     }
 
     /**
      * Increments package number by one.
      */
     void incrementPackageNumber() {
-        packageNumber++;
+        blocker.acquire();
+        try {
+            packageNumber++;
+        } finally {
+            blocker.release();
+        }
     }
 
     /**
@@ -260,13 +306,23 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
      * @return Current AJP connection's state
      */
     public int getState() {
-        return state;
+        blocker.acquire();
+        try {
+            return state;
+        } finally {
+            blocker.release();
+        }
     }
 
     public void close() {
-        resetConnection(true);
-        discardStreams();
-        task.cancel();
+        blocker.acquire();
+        try {
+            resetConnection(true);
+            discardStreams();
+            task.cancel();
+        } finally {
+            blocker.release();
+        }
     }
 
     /**
@@ -291,40 +347,65 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
 
     @Override
     public String toString() {
-        if (IDLE_STATE == state) {
-            return "State: IDLE";
+        blocker.acquire();
+        try {
+            if (IDLE_STATE == state) {
+                return "State: IDLE";
+            }
+            final StringBuilder sb = new StringBuilder(128);
+            sb.append("State: ASSIGNED").append("; connected to ").append(task.getSocket().getRemoteSocketAddress());
+            return sb.toString();
+        } finally {
+            blocker.release();
         }
-        final StringBuilder sb = new StringBuilder(128);
-        sb.append("State: ASSIGNED").append("; connected to ").append(task.getSocket().getRemoteSocketAddress());
-        return sb.toString();
     }
 
     /**
      * Marks corresponding AJP task as processing
      */
     void markProcessing() {
-        task.markProcessing();
+        blocker.acquire();
+        try {
+            task.markProcessing();
+        } finally {
+            blocker.release();
+        }
     }
 
     /**
      * Marks corresponding AJP task as non-processing
      */
     void markNonProcessing() {
-        task.markNonProcessing();
+        blocker.acquire();
+        try {
+            task.markNonProcessing();
+        } finally {
+            blocker.release();
+        }
     }
 
     /**
      * Increments number of AJP tasks waiting for incoming AJP data.
      */
     void incrementWaiting() {
-        task.incrementWaiting();
+        blocker.acquire();
+        try {
+            task.incrementWaiting();
+        } finally {
+            blocker.release();
+        }
     }
 
     /**
      * Decrements number of AJP tasks waiting for incoming AJP data.
      */
     void decrementWaiting() {
-        task.decrementWaiting();
+        blocker.acquire();
+        try {
+            task.decrementWaiting();
+        } finally {
+            blocker.release();
+        }
     }
 
     /**
@@ -333,22 +414,37 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
      * @param longRunning <code>true</code> if this connection's task is long-running; otherwise <code>false</code>
      */
     void setLongRunning(final boolean longRunning) {
-        task.setLongRunning(longRunning);
+        blocker.acquire();
+        try {
+            task.setLongRunning(longRunning);
+        } finally {
+            blocker.release();
+        }
     }
 
     public void blockInputStream(final boolean block) {
-        if (block) {
-            inputStream.block();
-        } else {
-            inputStream.unblock();
+        blocker.acquire();
+        try {
+            if (block) {
+                inputStream.block();
+            } else {
+                inputStream.unblock();
+            }
+        } finally {
+            blocker.release();
         }
     }
 
     public void blockOutputStream(final boolean block) {
-        if (block) {
-            outputStream.block();
-        } else {
-            outputStream.unblock();
+        blocker.acquire();
+        try {
+            if (block) {
+                outputStream.block();
+            } else {
+                outputStream.unblock();
+            }
+        } finally {
+            blocker.release();
         }
     }
 
@@ -358,7 +454,12 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
      * @return The last write access time stamp.
      */
     public long getLastWriteAccess() {
-        return outputStream.getLastAccessed();
+        blocker.acquire();
+        try {
+            return outputStream.getLastAccessed();
+        } finally {
+            blocker.release();
+        }
     }
 
     /**
@@ -371,38 +472,45 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
      * @throws IOException If an I/O error occurs
      */
     byte[] getPayloadData(final int payloadLength, final boolean strict) throws IOException {
-        final InputStream in = inputStream;
-        byte[] bytes = null;
-        if (strict) {
-            /*
-             * Read only payloadLength bytes
-             */
-            bytes = new byte[payloadLength];
-            int bytesRead = -1;
-            int offset = 0;
-            while ((offset < bytes.length) && ((bytesRead = in.read(bytes, offset, bytes.length - offset)) != -1)) {
-                offset += bytesRead;
-            }
-            if (offset < bytes.length) {
-                Arrays.fill(bytes, offset, bytes.length, ((byte) -1));
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn(new StringBuilder().append("Incomplete payload data in AJP package: Should be ").append(payloadLength).append(
-                        " but was ").append(offset).toString(), new Throwable());
+        blocker.acquire();
+        try {
+            final InputStream in = inputStream;
+            byte[] bytes = null;
+            if (strict) {
+                /*
+                 * Read only payloadLength bytes
+                 */
+                bytes = new byte[payloadLength];
+                int bytesRead = -1;
+                int offset = 0;
+                while ((offset < bytes.length) && ((bytesRead = in.read(bytes, offset, bytes.length - offset)) != -1)) {
+                    offset += bytesRead;
                 }
+                if (offset < bytes.length) {
+                    Arrays.fill(bytes, offset, bytes.length, ((byte) -1));
+                    if (LOG.isWarnEnabled()) {
+                        LOG.warn(
+                            new StringBuilder().append("Incomplete payload data in AJP package: Should be ").append(payloadLength).append(
+                                " but was ").append(offset).toString(),
+                            new Throwable());
+                    }
+                }
+            } else {
+                /*
+                 * Read all available bytes
+                 */
+                int bytesRead = -1;
+                final ByteArrayOutputStream buf = new UnsynchronizedByteArrayOutputStream(8192);
+                final byte[] fillMe = new byte[8192];
+                while ((bytesRead = in.read(fillMe, 0, fillMe.length)) != -1) {
+                    buf.write(fillMe, 0, bytesRead);
+                }
+                bytes = buf.toByteArray();
             }
-        } else {
-            /*
-             * Read all available bytes
-             */
-            int bytesRead = -1;
-            final ByteArrayOutputStream buf = new UnsynchronizedByteArrayOutputStream(8192);
-            final byte[] fillMe = new byte[8192];
-            while ((bytesRead = in.read(fillMe, 0, fillMe.length)) != -1) {
-                buf.write(fillMe, 0, bytesRead);
-            }
-            bytes = buf.toByteArray();
+            return bytes;
+        } finally {
+            blocker.release();
         }
-        return bytes;
     }
 
     /**
@@ -418,64 +526,69 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
      * with its first two bytes and the payload data size in bytes in the following two bytes.
      */
     int readInitialBytes(final boolean enableTimeout, final boolean processingInformation) throws IOException, AJPv13Exception {
-        int dataLength = -1;
-        if (enableTimeout) {
-            setSoTimeout(AJPv13Config.getAJPListenerReadTimeout());
-        }
-        /*
-         * Read a package from Web Server to Servlet Container.
-         */
-        incrementWaiting();
+        blocker.acquire();
         try {
-            final InputStream in = inputStream;
-            long start = 0L;
-            final int[] magic;
-            try {
-                if (processingInformation) {
-                    markNonProcessing();
-                }
-                start = System.currentTimeMillis();
-                /*
-                 * Read first two bytes
-                 */
-                magic = new int[] { in.read(), in.read() };
-            } catch (final SocketException e) {
-                throw new AJPv13SocketClosedException(
-                    AJPCode.SOCKET_CLOSED_BY_WEB_SERVER,
-                    e,
-                    Integer.valueOf(getPackageNumber()),
-                    Long.valueOf((System.currentTimeMillis() - start)));
-            }
-            if (checkMagicBytes(magic)) {
-                dataLength = (in.read() << 8) + in.read();
-            } else if (magic[0] == -1 || magic[1] == -1) {
-                throw new AJPv13SocketClosedException(
-                    AJPCode.EMPTY_INPUT_STREAM,
-                    null,
-                    Integer.valueOf(getPackageNumber()),
-                    Long.valueOf(System.currentTimeMillis() - start));
-            } else {
-                throw new AJPv13InvalidByteSequenceException(getPackageNumber(), magic[0], magic[1], AJPv13Utility.dumpBytes(
-                    (byte) magic[0],
-                    (byte) magic[1],
-                    getPayloadData(-1, false)));
-            }
+            int dataLength = -1;
             if (enableTimeout) {
-                /*
-                 * Set an infinite timeout
-                 */
-                setSoTimeout(0);
+                setSoTimeout(AJPv13Config.getAJPListenerReadTimeout());
             }
             /*
-             * Initial bytes have been read, so processing (re-)starts now
+             * Read a package from Web Server to Servlet Container.
              */
-            if (processingInformation) {
-                markProcessing();
+            incrementWaiting();
+            try {
+                final InputStream in = inputStream;
+                long start = 0L;
+                final int[] magic;
+                try {
+                    if (processingInformation) {
+                        markNonProcessing();
+                    }
+                    start = System.currentTimeMillis();
+                    /*
+                     * Read first two bytes
+                     */
+                    magic = new int[] { in.read(), in.read() };
+                } catch (final SocketException e) {
+                    throw new AJPv13SocketClosedException(
+                        AJPCode.SOCKET_CLOSED_BY_WEB_SERVER,
+                        e,
+                        Integer.valueOf(getPackageNumber()),
+                        Long.valueOf((System.currentTimeMillis() - start)));
+                }
+                if (checkMagicBytes(magic)) {
+                    dataLength = (in.read() << 8) + in.read();
+                } else if (magic[0] == -1 || magic[1] == -1) {
+                    throw new AJPv13SocketClosedException(
+                        AJPCode.EMPTY_INPUT_STREAM,
+                        null,
+                        Integer.valueOf(getPackageNumber()),
+                        Long.valueOf(System.currentTimeMillis() - start));
+                } else {
+                    throw new AJPv13InvalidByteSequenceException(getPackageNumber(), magic[0], magic[1], AJPv13Utility.dumpBytes(
+                        (byte) magic[0],
+                        (byte) magic[1],
+                        getPayloadData(-1, false)));
+                }
+                if (enableTimeout) {
+                    /*
+                     * Set an infinite timeout
+                     */
+                    setSoTimeout(0);
+                }
+                /*
+                 * Initial bytes have been read, so processing (re-)starts now
+                 */
+                if (processingInformation) {
+                    markProcessing();
+                }
+            } finally {
+                decrementWaiting();
             }
+            return dataLength;
         } finally {
-            decrementWaiting();
+            blocker.release();
         }
-        return dataLength;
     }
 
     private static boolean checkMagicBytes(final int[] magic) {

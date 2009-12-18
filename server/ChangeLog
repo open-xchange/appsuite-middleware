@@ -1,3 +1,7 @@
+* 2009-12-16 - thorben.betten@open-xchange.com
+
+ - Bugfix #15094: Fixed AJP keep-alive mechanism to not mess up AJP communication cycle
+
 * 2009-12-09 - dennis.sieben@open-xchange.com
 
  - Bugfix #15049: Fixed folder display

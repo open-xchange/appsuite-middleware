@@ -47,50 +47,23 @@
  *
  */
 
-package com.openexchange.ajp13;
-
-import java.util.concurrent.locks.Lock;
+package com.openexchange.concurrent;
 
 /**
- * {@link Synchronizer} - Methods to synchronize/unsynchronize access to implementing object.
+ * {@link Blockable} - Simple interface to block/unblock access to implementing object through its {@link #block()} and {@link #unblock()}
+ * methods.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Synchronizer extends Synchronizable {
+public interface Blockable {
 
     /**
-     * Acquires the invoking resource.
-     * <p>
-     * <code>
-     * &nbsp;final Lock lock = <b>acquire();</b><br>
-     * &nbsp;try {<br>
-     * &nbsp;&nbsp;...<br>
-     * &nbsp;} finally {<br>
-     * &nbsp;&nbsp;release(lock);<br>
-     * &nbsp;}<br>
-     * </code>
-     * 
-     * @return A lock if synchronized access was enabled via {@link #synchronize()}; otherwise <code>null</code>
+     * Atomically blocks access
      */
-    public Lock acquire();
+    public void block();
 
     /**
-     * Releases the invoking resource.
-     * <p>
-     * This method properly deals with the possibility that previously called {@link #acquire()} returned <code>null</code>. Thus it is safe
-     * to just pass the reference to this method as it is.
-     * <p>
-     * <code>
-     * &nbsp;final Lock lock = acquire();<br>
-     * &nbsp;try {<br>
-     * &nbsp;&nbsp;...<br>
-     * &nbsp;} finally {<br>
-     * &nbsp;&nbsp;<b>// May be null</b><br>
-     * &nbsp;&nbsp;<b>release(lock);</b><br>
-     * &nbsp;}<br>
-     * </code>
-     * 
-     * @param lock The lock previously obtained by {@link #acquire()}.
+     * Atomically unblocks access
      */
-    public void release(Lock lock);
+    public void unblock();
 }

@@ -54,6 +54,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.concurrent.locks.Lock;
+import com.openexchange.concurrent.NonBlockingSynchronizer;
+import com.openexchange.concurrent.Synchronizable;
+import com.openexchange.concurrent.Synchronizer;
 
 /**
  * {@link SynchronizableBufferedInputStream} - A synchronizable version of {@link BufferedInputStream}.

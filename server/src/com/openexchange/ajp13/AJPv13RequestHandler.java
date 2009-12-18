@@ -298,6 +298,13 @@ public interface AJPv13RequestHandler {
     public boolean isHttpSessionJoined();
 
     /**
+     * Checks if headers have been sent already.
+     * 
+     * @return <code>true</code> if headers have been sent; otherwise <code>false</code>
+     */
+    public boolean isHeadersSent();
+
+    /**
      * Gets the servlet path (which is not the request path). The servlet path is defined in servlet mapping configuration.
      * 
      * @return The servlet path

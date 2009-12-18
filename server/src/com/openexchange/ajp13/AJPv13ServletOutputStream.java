@@ -54,6 +54,9 @@ import java.io.OutputStream;
 import java.net.SocketException;
 import java.util.concurrent.locks.Lock;
 import javax.servlet.ServletOutputStream;
+import com.openexchange.concurrent.NonBlockingSynchronizer;
+import com.openexchange.concurrent.Synchronizable;
+import com.openexchange.concurrent.Synchronizer;
 
 /**
  * {@link AJPv13ServletOutputStream} - The AJP's servlet output stream.
@@ -175,6 +178,23 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
             return retval;
         } finally {
             synchronizer.release(l);
+        }
+    }
+
+    /**
+     * Atomically gets and clears current data held in this output stream outstanding for being written to Web Server.
+     * 
+     * @return Current data held in this output stream
+     * @throws IOException If stream is already closed
+     */
+    public byte[] getAndClearData() throws IOException {
+        synchronizer.synchronize();
+        try {
+            final byte[] retval = getData();
+            clearByteBuffer();
+            return retval;
+        } finally {
+            synchronizer.unsynchronize();
         }
     }
 

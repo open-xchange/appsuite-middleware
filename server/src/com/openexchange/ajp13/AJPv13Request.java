@@ -101,13 +101,14 @@ public abstract class AJPv13Request {
      * @throws IOException If an I/O error occurs
      */
     public void response(final AJPv13RequestHandler ajpRequestHandler) throws AJPv13Exception, ServletException, IOException {
+        final AJPv13Connection ajpConnection = ajpRequestHandler.getAJPConnection();
         if (!ajpRequestHandler.isServiceMethodCalled()) {
             /*
              * Ensure completeness in case of form data
              */
             if (ajpRequestHandler.isFormData()) {
                 if (!ajpRequestHandler.isAllDataRead()) {
-                    final OutputStream ajpOut = ajpRequestHandler.getAJPConnection().getOutputStream();
+                    final OutputStream ajpOut = ajpConnection.getOutputStream();
                     do {
                         ajpOut.write(AJPv13Response.getGetBodyChunkBytes(ajpRequestHandler.getNumOfBytesToRequestFor()));
                         ajpOut.flush();
@@ -127,7 +128,7 @@ public abstract class AJPv13Request {
              */
             ajpRequestHandler.doServletService();
         }
-        final OutputStream out = ajpRequestHandler.getAJPConnection().getOutputStream();
+        final OutputStream out = ajpConnection.getOutputStream();
         /*
          * Send response headers first.
          */
@@ -145,19 +146,53 @@ public abstract class AJPv13Request {
             /*
              * Send rest of data cut into MAX_BODY_CHUNK_SIZE pieces
              */
-            int offset = 0;
-            final int maxLen = AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE;
-            while (offset < remainingData.length) {
-                final int curLen = Math.min(maxLen, (remainingData.length - offset));
-                writeResponse(AJPv13Response.getSendBodyChunkBytes(remainingData, offset, curLen), out, true);
-                offset += curLen;
-            }
+            writeChunked(remainingData, out);
         }
+        /*-
+         * 
+        else {
+            writeEmpty(out);
+        }
+         */
         /*
          * Write END_RESPONSE package
          */
         writeResponse(AJPv13Response.getEndResponseBytes(), out, true);
         ajpRequestHandler.setEndResponseSent();
+    }
+
+    /**
+     * Writes specified data chunked as SEND_BODY packages.
+     * 
+     * @param data The data to write
+     * @param out The AJP connection's output stream to write to
+     * @throws IOException If an I/O error occurs
+     * @throws AJPv13Exception If an AJP error occurs
+     */
+    public static void writeChunked(final byte[] data, final OutputStream out) throws IOException, AJPv13Exception {
+        int offset = 0;
+        final int maxLen = AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE;
+        while (offset < data.length) {
+            final int b = (data.length - offset);
+            final int curLen = ((maxLen <= b) ? maxLen : b);
+            out.write(AJPv13Response.getSendBodyChunkBytes(data, offset, curLen));
+            out.flush();
+            offset += curLen;
+        }
+    }
+
+    private static final byte[] EMPTY = new byte[0];
+
+    /**
+     * Writes an empty SEND_BODY package.
+     * 
+     * @param out The AJP connection's output stream to write to
+     * @throws IOException If an I/O error occurs
+     * @throws AJPv13Exception If an AJP error occurs
+     */
+    public static void writeEmpty(final OutputStream out) throws IOException, AJPv13Exception {
+        out.write(AJPv13Response.getSendBodyChunkBytes(EMPTY));
+        out.flush();
     }
 
     /**
