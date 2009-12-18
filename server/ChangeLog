@@ -1,3 +1,7 @@
+* 2009-12-18 - marcus.klein@open-xchange.com
+
+ - Bugfix #15077: Increased default max object count for some user related caches to increase performance in large contexts.
+
 * 2009-12-18 - thorben.betten@open-xchange.com
 
  - Bugfix #15108: Fixed error handling on failing move operation of IMAP folders
