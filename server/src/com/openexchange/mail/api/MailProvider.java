@@ -126,7 +126,7 @@ public abstract class MailProvider {
      * @throws MailException If start-up fails
      */
     public void startUp() throws MailException {
-        getProtocolProperties().loadProperties();
+        getProtocolProps().loadProperties();
         MailAccess.startupImpl(createNewMailAccess(null));
     }
 
@@ -137,7 +137,7 @@ public abstract class MailProvider {
      */
     public void shutDown() throws MailException {
         MailAccess.shutdownImpl(createNewMailAccess(null));
-        getProtocolProperties().resetProperties();
+        getProtocolProps().resetProperties();
     }
 
     /**
@@ -193,6 +193,28 @@ public abstract class MailProvider {
     }
 
     /**
+     * Whether this mail provide is implemented as a singleton.
+     * 
+     * @return <code>true</code> if this mail provide is implemented as a singleton; otherwise <code>false</code>
+     */
+    public boolean isSingleton() {
+        return true;
+    }
+
+    /**
+     * Gets a non-singleton instance.
+     * <p>
+     * If {@link #isSingleton()} returns <code>true</code> this method returns a <code>null</code>.
+     * 
+     * @param session The session providing needed user data; may be <code>null</code> to obtain a dummy instance for initialization purpose
+     * @param accountId The account ID
+     * @return A non-singleton instance
+     */
+    public MailProvider getNonSingletonInstance(final Session session, final int accountId) {
+        return null;
+    }
+
+    /**
      * Gets a newly created {@link MailAccess mail access} with default account ID.
      * 
      * @param session The session providing needed user data; may be <code>null</code> to obtain a dummy instance for initialization purpose
@@ -217,5 +239,14 @@ public abstract class MailProvider {
      * @return The protocol properties
      */
     protected abstract AbstractProtocolProperties getProtocolProperties();
+
+    /**
+     * Gets the protocol properties
+     * 
+     * @return The protocol properties
+     */
+    public AbstractProtocolProperties getProtocolProps() {
+        return getProtocolProperties();
+    }
 
 }
