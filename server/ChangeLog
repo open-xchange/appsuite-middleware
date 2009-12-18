@@ -1,3 +1,7 @@
+* 2009-12-18 - thorben.betten@open-xchange.com
+
+ - Bugfix #15108: Fixed error handling on failing move operation of IMAP folders
+
 * 2009-12-16 - thorben.betten@open-xchange.com
 
  - Bugfix #15094: Fixed AJP keep-alive mechanism to not mess up AJP communication cycle

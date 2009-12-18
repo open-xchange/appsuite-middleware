@@ -806,15 +806,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                             moveMe.getName(),
                             destFolder.getName());
                     }
-                    try {
-                        moveMe = moveFolder(moveMe, destFolder, newName);
-                    } catch (final MailException e) {
-                        deleteTemporaryCreatedFolder(destFolder, newName);
-                        throw e;
-                    } catch (final MessagingException e) {
-                        deleteTemporaryCreatedFolder(destFolder, newName);
-                        throw e;
-                    }
+                    moveMe = moveFolder(moveMe, destFolder, newName);
                 }
                 /*
                  * Is rename operation?
