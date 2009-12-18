@@ -53,6 +53,7 @@ import static com.openexchange.mail.utils.ProviderUtility.extractProtocol;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.config.MailProperties;
@@ -70,7 +71,7 @@ public final class MailProviderRegistry {
     /**
      * Concurrent map used as set for mail providers
      */
-    private static final Map<Protocol, MailProvider> providers = new ConcurrentHashMap<Protocol, MailProvider>();
+    private static final ConcurrentMap<Protocol, MailProvider> providers = new ConcurrentHashMap<Protocol, MailProvider>();
 
     /**
      * Initializes a new {@link MailProviderRegistry}
@@ -177,15 +178,14 @@ public final class MailProviderRegistry {
             return false;
         }
         try {
+            if (null != providers.putIfAbsent(p, provider)) {
+                return false;
+            }
             /*
              * Startup
              */
             provider.startUp();
             provider.setDeprecated(false);
-            /*
-             * Add to registry
-             */
-            providers.put(p, provider);
             return true;
         } catch (final MailException e) {
             throw e;
