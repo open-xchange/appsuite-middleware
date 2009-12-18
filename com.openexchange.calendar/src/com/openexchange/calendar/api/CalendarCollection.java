@@ -81,6 +81,7 @@ import com.openexchange.calendar.CalendarMySQL;
 import com.openexchange.calendar.CalendarOperation;
 import com.openexchange.calendar.CalendarSql;
 import com.openexchange.calendar.CalendarSqlImp;
+import com.openexchange.calendar.RecurrenceChecker;
 import com.openexchange.calendar.RecurringResult;
 import com.openexchange.calendar.Tools;
 import com.openexchange.calendar.recurrence.RecurringCalculation;
@@ -509,6 +510,8 @@ public final class CalendarCollection implements CalendarCollectionService {
                 cdao.setRecurrenceDatePosition(new Date(rr.getNormalized()));
                 return;
             }
+            
+            throw new OXCalendarException(OXCalendarException.Code.UNABLE_TO_CALCULATE_POSITION);
         } else if (cdao.containsRecurrenceDatePosition() && cdao.getRecurrenceDatePosition() != null) {
             /*
              * Determine recurrence position from recurrence date position
@@ -525,8 +528,11 @@ public final class CalendarCollection implements CalendarCollectionService {
                 cdao.setRecurrencePosition(x);
                 return;
             }
+            
+            throw new OXCalendarException(OXCalendarException.Code.UNABLE_TO_CALCULATE_POSITION);
+        } else {
+            throw new OXCalendarException(OXCalendarException.Code.UNABLE_TO_CALCULATE_RECURRING_POSITION_NO_INPUT);
         }
-        throw new OXCalendarException(OXCalendarException.Code.UNABLE_TO_CALCULATE_RECURRING_POSITION_NO_INPUT);
     }
 
     /**
@@ -1223,7 +1229,7 @@ public final class CalendarCollection implements CalendarCollectionService {
                 /*
                  * Weekday needed for monthly2 recurrence
                  */
-                throw new OXCalendarException(OXCalendarException.Code.INCOMPLETE_REC_INFOS_WEEKDAY);
+                throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_MONTLY_DAY);
             }
         } else if (CalendarObject.YEARLY == recType) {
             if (!cdao.containsDayInMonth()) {
@@ -1288,14 +1294,14 @@ public final class CalendarCollection implements CalendarCollectionService {
                 if (cdao.getDayInMonth() < 1 || cdao.getDayInMonth() > 5) {
                     throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_YEARLY_TYPE, Integer.valueOf(cdao.getDayInMonth()));
                 }
-                if (cdao.getMonth() < 0 || cdao.getMonth() > 12) {
-                    throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_YEARLY_INTERVAL_2, Integer.valueOf(cdao.getMonth()));
+                if (!cdao.containsMonth() || cdao.getMonth() < 0 || cdao.getMonth() > 12) {
+                    throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_YEARLY_MONTH, Integer.valueOf(cdao.getMonth()));
                 }
             } else {
                 if (cdao.getDayInMonth() < 1 || cdao.getDayInMonth() > 32) {
                     throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_YEARLY_INTERVAL, Integer.valueOf(cdao.getDayInMonth()));
                 }
-                if (cdao.getMonth() < 0 || cdao.getMonth() > 12) {
+                if (!cdao.containsMonth() || cdao.getMonth() < 0 || cdao.getMonth() > 12) {
                     throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_YEARLY_MONTH, Integer.valueOf(cdao.getMonth()));
                 }
             }

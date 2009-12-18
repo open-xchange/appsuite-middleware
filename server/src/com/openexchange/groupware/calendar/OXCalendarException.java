@@ -160,7 +160,7 @@ public class OXCalendarException extends OXException {
         SEARCH_ITERATOR_NULL("SearchIterator NULL", 53, AbstractOXException.Category.CODE_ERROR),
         NON_CALENDAR_FOLDER("Folder is not of type Calendar", 54, AbstractOXException.Category.USER_INPUT),
         RECURRING_MISSING_OR_WRONG_VALUE_INTERVAL("The required value \"interval\" is missing or wrong", 55, AbstractOXException.Category.USER_INPUT),
-        RECURRING_MISSING_OR_WRONG_VALUE_DAYS("The required  value \"days\" is missing or wrong", 56, AbstractOXException.Category.USER_INPUT),
+        RECURRING_MISSING_OR_WRONG_VALUE_DAYS("The required  value \"days\" is missing or wrong : %d", 56, AbstractOXException.Category.USER_INPUT),
         PRIVATE_MOVE_TO_PUBLIC("Moving appointment to a public folder flaged as private is not allowed!", 57, AbstractOXException.Category.USER_INPUT),
         LOAD_PERMISSION_EXCEPTION_1("You do not have the appropriate permissions to modify this object.", 58, AbstractOXException.Category.PERMISSION),
         LOAD_PERMISSION_EXCEPTION_2("Got the wrong folder identification. You do not have the appropriate permissions to modify this object.", 59, AbstractOXException.Category.PERMISSION),
@@ -267,7 +267,20 @@ public class OXCalendarException extends OXException {
         /**
          * In order to accomplish the search, %1$d or more characters are required.
          */
-        PATTERN_TOO_SHORT("In order to accomplish the search, %1$d or more characters are required.", 94, Category.USER_INPUT);
+        PATTERN_TOO_SHORT("In order to accomplish the search, %1$d or more characters are required.", 94, Category.USER_INPUT),
+        /**
+         * Redundant information.
+         */
+        REDUNDANT_UNTIL_OCCURRENCES("Redundant information for Until and occurrences.", 95, Category.USER_INPUT),
+        /**
+         * Unnecessary recurrence Information for Type "no".
+         */
+        UNNECESSARY_RECURRENCE_INFORMATION_NO("Unnecessary recurrence information for recurrence \"no\".", 96, Category.USER_INPUT),
+        /**
+         * Unnecessary recurrence information.
+         */
+        UNNECESSARY_RECURRENCE_INFORMATION("Unnecessary recurrence information (%1$s) for type %2$s", 97, Category.USER_INPUT),
+        UNABLE_TO_CALCULATE_POSITION("Unable to calculate given position. Seems to be a delete exception or outside range", 98, Category.USER_INPUT);
 
         /**
          * Message of the exception.

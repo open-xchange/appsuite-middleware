@@ -463,6 +463,7 @@ public class CalendarSql implements AppointmentSQLInterface {
     }
 
     public CalendarDataObject[] insertAppointmentObject(final CalendarDataObject cdao) throws OXException, OXPermissionException {
+        RecurrenceChecker.check(cdao);
         if (session == null) {
             throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
         }
@@ -472,6 +473,8 @@ public class CalendarSql implements AppointmentSQLInterface {
         final UserConfiguration userConfig = Tools.getUserConfiguration(ctx, session.getUserId());
         try {
             final CalendarOperation co = new CalendarOperation();
+            if (cdao.containsRecurrenceType())
+                recColl.checkRecurring(cdao);
             if (co.prepareUpdateAction(cdao, null, session.getUserId(), cdao.getParentFolderID(), user.getTimeZone())) {
                 try {
                     final OXFolderAccess ofa = new OXFolderAccess(ctx);
@@ -567,6 +570,7 @@ public class CalendarSql implements AppointmentSQLInterface {
     }
 
     public CalendarDataObject[] updateAppointmentObject(final CalendarDataObject cdao, final int inFolder, final Date clientLastModified) throws OXException {
+        RecurrenceChecker.check(cdao);
         if (session == null) {
             throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
         }
