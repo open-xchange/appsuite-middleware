@@ -1624,13 +1624,15 @@ public final class IMAPFolderStorage extends MailFolderStorage {
 
     private IMAPFolder moveFolder(final IMAPFolder toMove, final IMAPFolder destFolder, final String folderName, final boolean checkForDuplicate) throws MessagingException, MailException {
         final String destFullname = destFolder.getFullName();
-        StringBuilder sb = new StringBuilder();
-        if (destFullname.length() > 0) {
-            sb.append(destFullname).append(destFolder.getSeparator());
+        final IMAPFolder newFolder;
+        {
+            final StringBuilder sb = new StringBuilder();
+            if (destFullname.length() > 0) {
+                sb.append(destFullname).append(destFolder.getSeparator());
+            }
+            sb.append(folderName);
+            newFolder = (IMAPFolder) imapStore.getFolder(sb.toString());
         }
-        sb.append(folderName);
-        final IMAPFolder newFolder = (IMAPFolder) imapStore.getFolder(sb.toString());
-        sb = null;
         return moveFolder(toMove, destFolder, newFolder, checkForDuplicate);
     }
 
