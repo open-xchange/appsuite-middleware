@@ -1,3 +1,7 @@
+* 2009-12-18 - marcus.klein@open-xchange.com
+
+ - Bugfix #15077: Increased default max object count for some user related caches to increase performance in large contexts.
+
 * 2009-12-14 - marcus.klein@open-xchange.com
 
  - Bugfix #15066: Removed mail account tables from list of created tables by sql scripts.
