@@ -53,12 +53,14 @@ import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
 import static com.openexchange.mail.utils.MailFolderUtility.isEmpty;
 import static java.util.regex.Matcher.quoteReplacement;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+
 import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.FolderClosedException;
@@ -68,6 +70,7 @@ import javax.mail.Quota;
 import javax.mail.ReadOnlyFolderException;
 import javax.mail.StoreClosedException;
 import javax.mail.Quota.Resource;
+
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -859,15 +862,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                 if (destFolder.getFullName().startsWith(moveMe.getFullName())) {
                     throw new IMAPException(IMAPException.Code.NO_MOVE_TO_SUBFLD, moveMe.getName(), destFolder.getName());
                 }
-                try {
-                    moveMe = moveFolder(moveMe, destFolder, newName);
-                } catch (final MailException e) {
-                    deleteTemporaryCreatedFolder(destFolder, newName);
-                    throw e;
-                } catch (final MessagingException e) {
-                    deleteTemporaryCreatedFolder(destFolder, newName);
-                    throw e;
-                }
+                moveMe = moveFolder(moveMe, destFolder, newName);
             }
             /*
              * Is rename operation?
