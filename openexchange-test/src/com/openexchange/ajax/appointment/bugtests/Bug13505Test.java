@@ -106,7 +106,7 @@ public class Bug13505Test extends AbstractAJAXSession {
         insertResponse.fillObject(updateAppointment);
         updateAppointment.setParentFolderID(appointment.getParentFolderID());
         updateAppointment.setRecurrenceType(Appointment.MONTHLY);
-        updateAppointment.setDays(0);
+        //updateAppointment.setDays(0);
         updateAppointment.setInterval(1);
         updateAppointment.setDayInMonth(1);
         updateAppointment.setOccurrence(3);
