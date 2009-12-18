@@ -145,6 +145,30 @@ if [ ${1:-0} -eq 2 ]; then
    # prevent bash from expanding, see bug 13316
    GLOBIGNORE='*'
 
+   # SoftwareChange_Request-194
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/cache.ccf
+   val=0$(ox_read_property jcs.region.User.cacheattributes.MaxObjects $pfile)
+   if [ $val -lt 40000 ]; then
+      ox_set_property jcs.region.User.cacheattributes.MaxObjects 40000 $pfile
+   fi
+   val=0$(ox_read_property jcs.region.UserConfiguration.cacheattributes.MaxObjects $pfile)
+   if [ $val -lt 20000 ]; then
+      ox_set_property jcs.region.UserConfiguration.cacheattributes.MaxObjects 20000 $pfile
+   fi
+   val=0$(ox_read_property jcs.region.UserSettingMail.cacheattributes.MaxObjects $pfile)
+   if [ $val -lt 20000 ]; then
+      ox_set_property jcs.region.UserSettingMail.cacheattributes.MaxObjects 20000 $pfile
+   fi
+   val=0$(ox_read_property jcs.region.OXDBPoolCache.cacheattributes.MaxObjects $pfile)
+   if [ $val -lt 20000 ]; then
+      ox_set_property jcs.region.OXDBPoolCache.cacheattributes.MaxObjects 20000 $pfile
+   fi
+   val=0$(ox_read_property jcs.region.MailAccount.cacheattributes.MaxObjects $pfile)
+   if [ $val -lt 100000 ]; then
+      ox_set_property jcs.region.MailAccount.cacheattributes.MaxObjects 100000 $pfile
+   fi
+
    # SoftwareChange_Request-131
    # -----------------------------------------------------------------------
    pfile=/opt/open-xchange/etc/groupware/server.properties
