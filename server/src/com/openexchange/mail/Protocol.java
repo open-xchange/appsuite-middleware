@@ -63,6 +63,11 @@ import com.openexchange.groupware.Component;
 public final class Protocol implements Component, Serializable {
 
     /**
+     * All protocols supported.
+     */
+    public static final String ALL = "*";
+
+    /**
      * For serialization.
      */
     private static final long serialVersionUID = -4384010555880806765L;
@@ -224,6 +229,9 @@ public final class Protocol implements Component, Serializable {
      * @return <code>true</code> if supported; otherwise <code>false</code>
      */
     public boolean isSupported(final String protocolName) {
+        if (ALL.equals(name)) {
+            return true;
+        }
         final String oName = protocolName.toLowerCase(Locale.ENGLISH);
         if (name.equals(oName)) {
             return true;
