@@ -1,3 +1,7 @@
+* 2009-12-18 - thorben.betten@open-xchange.com
+
+ - Bugfix #15108: Fixed error handling on failing move operation of IMAP folders
+
 * 2009-10-30 - marcus.klein@open-xchange.com
 
  - Bugfix #14734: Added information about user module access permission to detail method of reporting JMX interface.
