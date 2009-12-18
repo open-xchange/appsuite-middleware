@@ -2,7 +2,7 @@
 
  - Bugfix #15110: Apply download constraints only to OXMF pages and not attached infostore documents.
 
-* 2009-12-18 - marcus.klein@open-xchange.com
+* 2009-12-18 - thorben.betten@open-xchange.com
 
  - Bugfix #15108: Fixed error handling on failing move operation of IMAP folders
 
@@ -14,6 +14,10 @@
 
  - Bugfix #15089: Checking for special identifier for all-groups-and-users
  - Bugfix #15099: Fixed line folding of text mails
+
+* 2009-12-18 - marcus.klein@open-xchange.com
+
+ - Bugfix #15077: Increased default max object count for some user related caches to increase performance in large contexts.
 
 * 2009-12-16 - thorben.betten@open-xchange.com
 

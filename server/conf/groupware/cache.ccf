@@ -1,5 +1,4 @@
-# DEFAULT CACHE REGION. This region sets the default values if not defined per
-# cache basis.
+# DEFAULT CACHE REGION. This region sets the default values if not defined per cache basis.
 jcs.default=LTCP
 jcs.default.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
 jcs.default.cacheattributes.MaxObjects=1000000
@@ -90,7 +89,7 @@ jcs.region.OXFolderQueryCache.elementattributes.IsLateral=false
 # Pre-defined cache region for User data
 jcs.region.User=LTCP
 jcs.region.User.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
-jcs.region.User.cacheattributes.MaxObjects=1000
+jcs.region.User.cacheattributes.MaxObjects=40000
 jcs.region.User.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
 jcs.region.User.cacheattributes.UseMemoryShrinker=true
 jcs.region.User.cacheattributes.MaxMemoryIdleTimeSeconds=180
@@ -107,7 +106,7 @@ jcs.region.User.elementattributes.IsLateral=false
 # Pre-defined cache for user configuration
 jcs.region.UserConfiguration=LTCP
 jcs.region.UserConfiguration.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
-jcs.region.UserConfiguration.cacheattributes.MaxObjects=1000
+jcs.region.UserConfiguration.cacheattributes.MaxObjects=20000
 jcs.region.UserConfiguration.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
 jcs.region.UserConfiguration.cacheattributes.UseMemoryShrinker=true
 jcs.region.UserConfiguration.cacheattributes.MaxMemoryIdleTimeSeconds=180
@@ -124,7 +123,7 @@ jcs.region.UserConfiguration.elementattributes.IsLateral=false
 # Pre-defined cache for user mail configuration
 jcs.region.UserSettingMail=LTCP
 jcs.region.UserSettingMail.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
-jcs.region.UserSettingMail.cacheattributes.MaxObjects=1000
+jcs.region.UserSettingMail.cacheattributes.MaxObjects=20000
 jcs.region.UserSettingMail.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
 jcs.region.UserSettingMail.cacheattributes.UseMemoryShrinker=true
 jcs.region.UserSettingMail.cacheattributes.MaxMemoryIdleTimeSeconds=180
@@ -172,11 +171,10 @@ jcs.region.Filestore.elementattributes.IsSpool=false
 jcs.region.Filestore.elementattributes.IsRemote=false
 jcs.region.Filestore.elementattributes.IsLateral=false
 
-# Pre-defined region for metadata of database connections to save config db
-# accesses 
+# Pre-defined region for metadata of database connections to save config db accesses 
 jcs.region.OXDBPoolCache=LTCP
 jcs.region.OXDBPoolCache.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
-jcs.region.OXDBPoolCache.cacheattributes.MaxObjects=1000
+jcs.region.OXDBPoolCache.cacheattributes.MaxObjects=20000
 jcs.region.OXDBPoolCache.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
 jcs.region.OXDBPoolCache.cacheattributes.UseMemoryShrinker=true
 jcs.region.OXDBPoolCache.cacheattributes.MaxMemoryIdleTimeSeconds=180
@@ -210,7 +208,7 @@ jcs.region.CalendarCache.elementattributes.IsLateral=false
 # Pre-defined cache region for mail account
 jcs.region.MailAccount=LTCP
 jcs.region.MailAccount.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
-jcs.region.MailAccount.cacheattributes.MaxObjects=1000
+jcs.region.MailAccount.cacheattributes.MaxObjects=100000
 jcs.region.MailAccount.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
 jcs.region.MailAccount.cacheattributes.UseMemoryShrinker=true
 jcs.region.MailAccount.cacheattributes.MaxMemoryIdleTimeSeconds=180
@@ -264,8 +262,7 @@ jcs.region.UserFolderCache.elementattributes.IsSpool=false
 jcs.region.UserFolderCache.elementattributes.IsRemote=false
 jcs.region.UserFolderCache.elementattributes.IsLateral=false
 
-# auxiliary cache configuration for synchronizing caches in a cluster
-# Open-Xchange uses cache invalidation on remote caches.
+# auxiliary cache configuration for synchronizing caches in a cluster Open-Xchange uses cache invalidation on remote caches.
 # TCP Lateral Cache to broadcast PUTS and REMOVALS (and possibly GETS) to other local caches
 jcs.auxiliary.LTCP=org.apache.jcs.auxiliary.lateral.socket.tcp.LateralTCPCacheFactory
 jcs.auxiliary.LTCP.attributes=org.apache.jcs.auxiliary.lateral.socket.tcp.TCPLateralCacheAttributes
