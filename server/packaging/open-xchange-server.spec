@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 8
+%define		ox_release 9
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -483,6 +483,12 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Fri Dec 18 2009 - thorben.betten@open-xchange.com
+ - Bugfix #15108: Fixed error handling on failing move operation of IMAP folders
+* Fri Dec 18 2009 - marcus.klein@open-xchange.com
+ - Bugfix #15077: Increased default max object count for some user related caches to increase performance in large contexts.
+* Wed Dec 16 2009 - thorben.betten@open-xchange.com
+ - Bugfix #15094: Fixed AJP keep-alive mechanism to not mess up AJP communication cycle
 * Wed Dec 09 2009 - dennis.sieben@open-xchange.com
  - Bugfix #15049: Fixed folder display
 * Tue Dec 08 2009 - thorben.betten@open-xchange.com
