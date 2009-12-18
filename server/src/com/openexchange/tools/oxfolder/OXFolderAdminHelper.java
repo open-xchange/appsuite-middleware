@@ -878,6 +878,7 @@ public final class OXFolderAdminHelper {
     private static void createSystemPublicFolder(final int cid, final int mailAdmin, final Connection writeCon, final long creatingTime) throws SQLException {
         final OCLPermission systemPermission = new OCLPermission();
         systemPermission.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
+        systemPermission.setGroupPermission(true);
         systemPermission.setAllPermission(
             OCLPermission.CREATE_SUB_FOLDERS,
             OCLPermission.NO_PERMISSIONS,
