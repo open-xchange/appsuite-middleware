@@ -1,3 +1,7 @@
+* 2009-12-18 - marcus.klein@open-xchange.com
+
+ - Bugfix #15073: Using new AJPv13TaskMonitor for statistics.
+
 * 2009-12-15 - dennis.sieben@open-xchange.com
 
  - Bugfix #15081: showruntimestats -r doesn't work with IBM JAVA

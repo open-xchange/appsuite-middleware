@@ -223,7 +223,7 @@ public class StatisticTools extends AbstractJMXTools {
             System.out.print(getStats(mbc, "com.openexchange.admin.tools.monitoring.Monitor"));
         } else {
             System.out.print(getStats(mbc, "com.openexchange.ajp13.monitoring.AJPv13ServerThreadsMonitor"));
-            System.out.print(getStats(mbc, "com.openexchange.ajp13.najp.AJPv13ListenerMonitor"));
+            System.out.print(getStats(mbc, "com.openexchange.ajp13.najp.AJPv13TaskMonitor"));
             System.out.print(getStats(mbc, "com.openexchange.monitoring.internal.GeneralMonitor"));
             System.out.print(getStats(mbc, "com.openexchange.api2.MailInterfaceMonitor"));
             System.out.print(getStats(mbc, "com.openexchange.database.internal.ConnectionPool"));
