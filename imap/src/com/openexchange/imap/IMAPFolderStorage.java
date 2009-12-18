@@ -755,65 +755,58 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                             throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, newParent);
                         }
                     }
-                    if (!inferiors(destFolder)) {
-                        throw IMAPException.create(
-                            IMAPException.Code.FOLDER_DOES_NOT_HOLD_FOLDERS,
-                            imapConfig,
-                            session,
-                            destFolder.getFullName());
-                    }
-                    if (imapConfig.isSupportsACLs() && isSelectable(destFolder)) {
-                        try {
-                            if (!getACLExtension().canCreate(RightsCache.getCachedRights(destFolder, true, session, accountId))) {
-                                throw IMAPException.create(IMAPException.Code.NO_CREATE_ACCESS, imapConfig, session, newParent);
-                            }
-                        } catch (final MessagingException e) {
-                            /*
-                             * MYRIGHTS command failed for given mailbox
-                             */
-                            if (!imapConfig.getImapCapabilities().hasNamespace() || !NamespaceFoldersCache.containedInPersonalNamespaces(
-                                newParent,
-                                imapStore,
-                                true,
+                    synchronized (destFolder) {
+                        if (!inferiors(destFolder)) {
+                            throw IMAPException.create(
+                                IMAPException.Code.FOLDER_DOES_NOT_HOLD_FOLDERS,
+                                imapConfig,
                                 session,
-                                accountId)) {
+                                destFolder.getFullName());
+                        }
+                        if (imapConfig.isSupportsACLs() && isSelectable(destFolder)) {
+                            try {
+                                if (!getACLExtension().canCreate(RightsCache.getCachedRights(destFolder, true, session, accountId))) {
+                                    throw IMAPException.create(IMAPException.Code.NO_CREATE_ACCESS, imapConfig, session, newParent);
+                                }
+                            } catch (final MessagingException e) {
                                 /*
-                                 * No namespace support or given parent is NOT covered by user's personal namespaces.
+                                 * MYRIGHTS command failed for given mailbox
                                  */
-                                throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, newParent);
-                            }
-                            if (DEBUG) {
-                                LOG.debug("MYRIGHTS command failed on namespace folder", e);
+                                if (!imapConfig.getImapCapabilities().hasNamespace() || !NamespaceFoldersCache.containedInPersonalNamespaces(
+                                    newParent,
+                                    imapStore,
+                                    true,
+                                    session,
+                                    accountId)) {
+                                    /*
+                                     * No namespace support or given parent is NOT covered by user's personal namespaces.
+                                     */
+                                    throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, newParent);
+                                }
+                                if (DEBUG) {
+                                    LOG.debug("MYRIGHTS command failed on namespace folder", e);
+                                }
                             }
                         }
-                    }
-                    final boolean mboxEnabled =
-                        MBoxEnabledCache.isMBoxEnabled(imapConfig.getImapServerSocketAddress(), destFolder, new StringBuilder(
-                            destFolder.getFullName()).append(separator).toString());
-                    if (!checkFolderNameValidity(newName, separator, mboxEnabled)) {
-                        throw IMAPException.create(
-                            IMAPException.Code.INVALID_FOLDER_NAME,
-                            imapConfig,
-                            session,
-                            Character.valueOf(separator));
-                    }
-
-                    if (destFolder.getFullName().startsWith(oldFullname)) {
-                        throw IMAPException.create(
-                            IMAPException.Code.NO_MOVE_TO_SUBFLD,
-                            imapConfig,
-                            session,
-                            moveMe.getName(),
-                            destFolder.getName());
-                    }
-                    try {
+                        final boolean mboxEnabled =
+                            MBoxEnabledCache.isMBoxEnabled(imapConfig.getImapServerSocketAddress(), destFolder, new StringBuilder(
+                                destFolder.getFullName()).append(separator).toString());
+                        if (!checkFolderNameValidity(newName, separator, mboxEnabled)) {
+                            throw IMAPException.create(
+                                IMAPException.Code.INVALID_FOLDER_NAME,
+                                imapConfig,
+                                session,
+                                Character.valueOf(separator));
+                        }
+                        if (destFolder.getFullName().startsWith(oldFullname)) {
+                            throw IMAPException.create(
+                                IMAPException.Code.NO_MOVE_TO_SUBFLD,
+                                imapConfig,
+                                session,
+                                moveMe.getName(),
+                                destFolder.getName());
+                        }
                         moveMe = moveFolder(moveMe, destFolder, newName);
-                    } catch (final MailException e) {
-                        deleteTemporaryCreatedFolder(destFolder, newName);
-                        throw e;
-                    } catch (final MessagingException e) {
-                        deleteTemporaryCreatedFolder(destFolder, newName);
-                        throw e;
                     }
                 }
                 /*
@@ -1037,17 +1030,12 @@ public final class IMAPFolderStorage extends MailFolderStorage {
         }
     }
 
-    private void deleteTemporaryCreatedFolder(final IMAPFolder destFolder, final String name) throws MessagingException {
-        /*
-         * Delete moved folder if operation failed
-         */
-        final IMAPFolder tmp =
-            (IMAPFolder) imapStore.getFolder(new StringBuilder(destFolder.getFullName()).append(destFolder.getSeparator()).append(name).toString());
-        if (tmp.exists()) {
+    private void deleteTemporaryCreatedFolder(final IMAPFolder temporaryFolder) throws MessagingException {
+        if (temporaryFolder.exists()) {
             try {
-                tmp.delete(true);
+                temporaryFolder.delete(true);
             } catch (final MessagingException e1) {
-                LOG.error("Temporary created folder could not be deleted: " + tmp.getFullName(), e1);
+                LOG.error("Temporary created folder could not be deleted: " + temporaryFolder.getFullName(), e1);
             }
         }
     }
@@ -1100,14 +1088,16 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                                 (IMAPFolder) imapStore.getFolder(sb.append(trashFolder.getFullName()).append(deleteMe.getSeparator()).append(
                                     name).append('_').append(++appendix).toString());
                         }
-                        try {
-                            moveFolder(deleteMe, trashFolder, newFolder, false);
-                        } catch (final MailException e) {
-                            deleteTemporaryCreatedFolder(trashFolder, newFolder.getName());
-                            throw e;
-                        } catch (final MessagingException e) {
-                            deleteTemporaryCreatedFolder(trashFolder, newFolder.getName());
-                            throw e;
+                        synchronized (newFolder) {
+                            try {
+                                moveFolder(deleteMe, trashFolder, newFolder, false);
+                            } catch (final MailException e) {
+                                deleteTemporaryCreatedFolder(newFolder);
+                                throw e;
+                            } catch (final MessagingException e) {
+                                deleteTemporaryCreatedFolder(newFolder);
+                                throw e;
+                            }
                         }
                     }
                 }
@@ -1647,8 +1637,9 @@ public final class IMAPFolderStorage extends MailFolderStorage {
     private static final String[] ARGS_ALL = { "1:*" };
 
     private IMAPFolder moveFolder(final IMAPFolder toMove, final IMAPFolder destFolder, final IMAPFolder newFolder, final boolean checkForDuplicate) throws MessagingException, MailException {
+        final String destFullName = destFolder.getFullName();
         if (!inferiors(destFolder)) {
-            throw IMAPException.create(IMAPException.Code.FOLDER_DOES_NOT_HOLD_FOLDERS, imapConfig, session, destFolder.getFullName());
+            throw IMAPException.create(IMAPException.Code.FOLDER_DOES_NOT_HOLD_FOLDERS, imapConfig, session, destFullName);
         }
         final int toMoveType = toMove.getType();
         final String moveFullname = toMove.getFullName();
@@ -1701,7 +1692,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                 imapConfig,
                 session,
                 newFullname,
-                destFolder instanceof DefaultFolder ? DEFAULT_FOLDER_ID : destFolder.getFullName());
+                destFolder instanceof DefaultFolder ? DEFAULT_FOLDER_ID : destFullName);
         }
         /*
          * Apply original subscription status

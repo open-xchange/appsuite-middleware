@@ -1,3 +1,7 @@
+* 2009-12-18 - marcus.klein@open-xchange.com
+
+ - Bugfix #15108: Fixed error handling on failing move operation of IMAP folders
+
 * 2009-12-17 - marcus.klein@open-xchange.com
 
  - Bugfix #15096: Added missing close of prepared statement.
