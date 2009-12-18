@@ -40,6 +40,7 @@ public class Bug12610Test extends AbstractAJAXSession {
             calendar.set(Calendar.HOUR_OF_DAY, 9);
             appointment.setEndDate(calendar.getTime());
             appointment.setRecurrenceType(Appointment.YEARLY);
+            appointment.setInterval(1);
             appointment.setDayInMonth(15);
             appointment.setMonth(Calendar.JUNE);
             final Calendar until = TimeTools.createCalendar(TimeZone.getTimeZone("UTC"));

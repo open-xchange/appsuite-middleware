@@ -69,7 +69,6 @@ public class Bug12496Test extends CalendarSqlTest {
             fulltimeSeries.setFullTime(true);
             fulltimeSeries.setRecurrenceType(CalendarObject.DAILY);
             fulltimeSeries.setInterval(1);
-            fulltimeSeries.setDayInMonth(1);
             fulltimeSeries.setOccurrence(5);
             // Save
             appointments.save(fulltimeSeries);

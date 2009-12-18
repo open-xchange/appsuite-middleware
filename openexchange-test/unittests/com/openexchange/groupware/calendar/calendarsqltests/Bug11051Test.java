@@ -70,7 +70,7 @@ public class Bug11051Test extends CalendarSqlTest {
         update.setStartDate(start);
         update.setEndDate(end);
         update.setRecurrenceType(CalendarDataObject.MONTHLY);
-        update.setMonth(3);
+        update.setDayInMonth(3);
         update.setDays(666);
         update.setInterval(2);
         update.setOccurrence(2);
@@ -79,7 +79,7 @@ public class Bug11051Test extends CalendarSqlTest {
             appointments.save(update);
         } catch (final OXCalendarException x) {
             x.printStackTrace();
-            assertEquals(x.getMessage(), 45, x.getDetailNumber());
+            assertEquals(x.getMessage(), OXCalendarException.Code.RECURRING_MISSING_OR_WRONG_VALUE_DAYS.getDetailNumber(), x.getDetailNumber());
         } catch (final Throwable t) {
             t.printStackTrace();
             fail(t.getMessage());
