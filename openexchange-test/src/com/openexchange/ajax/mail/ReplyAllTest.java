@@ -93,7 +93,7 @@ public class ReplyAllTest extends AbstractReplyTest {
         
         String mail1 = client1.getValues().getSendAddress(); // note: doesn't work the other way around on the dev system, because only the
         String mail2 = client2.getValues().getSendAddress(); // first account is set up correctly.
-        
+
         List<Contact> otherContacts = extract(2, manager.searchAction("*", 6), Arrays.asList(mail1,mail2));
         assertTrue("Precondition: This test needs at least to other contacts in the global address book to work", otherContacts.size() > 1);
         
@@ -110,10 +110,12 @@ public class ReplyAllTest extends AbstractReplyTest {
 
         assertTrue("Should contain indicator that this is a reply in the subject line", myReplyMail.getSubject().startsWith("Re:"));
 
-        List<String> to = myReplyMail.getTo();
-        assertTrue("Sender of original message should become recipient in reply", contains(to, mail2));
-        assertTrue("1st recipient ("+anotherMail+") of original message should still be recipient in reply, but TO field only has these: " + to, contains(to, anotherMail));
-        assertTrue("2nd recipient ("+yetAnotherMail+") of original message should still be recipient in reply, but TO field only has these: " + to, contains(to, yetAnotherMail));
+        List<String> toAndCC = myReplyMail.getTo();
+        toAndCC.addAll(myReplyMail.getCc()); //need to do both because depending on user settings, it might be one of these
+        
+        assertTrue("Sender of original message should become recipient in reply", contains(toAndCC, mail2));
+        assertTrue("1st recipient ("+anotherMail+") of original message should still be recipient in reply, but TO/CC field only has these: " + toAndCC, contains(toAndCC, anotherMail));
+        assertTrue("2nd recipient ("+yetAnotherMail+") of original message should still be recipient in reply, but TO/CC field only has these: " + toAndCC, contains(toAndCC, yetAnotherMail));
     }
     
     
