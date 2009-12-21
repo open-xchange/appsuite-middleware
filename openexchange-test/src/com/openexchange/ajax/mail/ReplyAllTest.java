@@ -72,7 +72,7 @@ public class ReplyAllTest extends AbstractReplyTest {
         super(name);
     }
     
-    public void testShouldReplyToSenderOnly() throws AjaxException, IOException, SAXException, JSONException, ConfigurationException {
+    public void testShouldReplyToSenderAndAllRecipients() throws AjaxException, IOException, SAXException, JSONException, ConfigurationException {
         AJAXClient client1 = new AJAXClient(User.User1);
         AJAXClient client2 = new AJAXClient(User.User2);
         String mail1 = client1.getValues().getSendAddress(); // note: doesn't work the other way around on the dev system, because only the
@@ -92,8 +92,8 @@ public class ReplyAllTest extends AbstractReplyTest {
 
         List<String> to = myReplyMail.getTo();
         assertTrue("Sender of original message should become recipient in reply", contains(to, mail2));
-        assertTrue("Recipient of original message should still be recipient in reply", contains(to, anotherMail));
-        assertTrue("Recipient of original message should still be recipient in reply", contains(to, yetAnotherMail));
+        assertTrue("1st recipient ("+anotherMail+") of original message should still be recipient in reply", contains(to, anotherMail));
+        assertTrue("2nd recipient ("+yetAnotherMail+") of original message should still be recipient in reply", contains(to, yetAnotherMail));
     }
     
     
