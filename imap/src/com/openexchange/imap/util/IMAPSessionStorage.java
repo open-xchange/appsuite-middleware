@@ -98,7 +98,7 @@ final class IMAPSessionStorage {
      * @return <code>true</code> if session storage contains entries for given folder; otherwise <code>false</code>
      */
     public boolean hasSessionStorage(final int accountId, final IMAPFolder imapFolder) {
-        return (null != dataMap.get(new AccAndFN(accountId, imapFolder.getFullName())));
+        return (dataMap.containsKey(new AccAndFN(accountId, imapFolder.getFullName())));
     }
 
     /**
