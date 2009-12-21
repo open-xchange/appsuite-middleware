@@ -123,9 +123,6 @@ public final class IMAPUpdateableData {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
-            return false;
-        }
         if (!(obj instanceof IMAPUpdateableData)) {
             return false;
         }
@@ -155,9 +152,6 @@ public final class IMAPUpdateableData {
     public boolean equalsByUID(final Object obj) {
         if (this == obj) {
             return true;
-        }
-        if (obj == null) {
-            return false;
         }
         if (!(obj instanceof IMAPUpdateableData)) {
             return false;
