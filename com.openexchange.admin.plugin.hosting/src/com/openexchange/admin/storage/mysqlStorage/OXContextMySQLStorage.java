@@ -1032,7 +1032,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     }
 
     @Override
-    public Context create(Context ctx, User adminUser, UserModuleAccess access) throws StorageException, InvalidDataException {
+    public Context create(Context ctx, User adminUser, UserModuleAccess access) throws StorageException {
         if (null == adminUser) {
             throw new StorageException("Context administrator is not defined.");
         }
