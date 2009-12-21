@@ -70,9 +70,10 @@ import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
-import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.RdbUserStorage;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.ProgressState;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
@@ -110,6 +111,7 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
         final int contextId = params.getContextId();
         final Map<Integer, List<Integer>> m = getAllUsers(contextId);
         final ProgressState state = params.getProgressState();
+        state.setTotal(m.size());
         for (final Iterator<Map.Entry<Integer, List<Integer>>> it = m.entrySet().iterator(); it.hasNext();) {
             final Map.Entry<Integer, List<Integer>> me = it.next();
             final int currentContextId = me.getKey().intValue();
@@ -194,7 +196,6 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
         checkAndInsertMailAccountSequence(ctx);
         // Proceed with user data migration to new mail account tables
         try {
-            final RdbUserStorage rdbUserStorage = new RdbUserStorage();
             final StringBuilder sb = new StringBuilder(256);
             for (final Integer userId : users) {
                 // Check for default account
@@ -213,16 +214,45 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
                         ctx.getContextId()));
                 }
                 // Create default account
-                final User user = rdbUserStorage.getUser(userId.intValue(), ctx);
-                final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(userId.intValue(), ctx);
+                final User user = loadUser(ctx, userId.intValue());
+                final UserSettingMail usm = loadUserSettingMail(ctx, userId.intValue());
                 try {
                     handleUser(user, getNameProvderFromUSM(usm), ctx, sb, LOG);
                 } catch (final UpdateException e) {
                     LOG.error("Default mail account for user " + user.getId() + " in context " + contextId + " could not be created", e);
                 }
             }
-        } catch (final LdapException e) {
+        } catch (final UserException e) {
             throw new UpdateException(e);
+        }
+    }
+
+    private static User loadUser(Context ctx, int userId) throws UpdateException, UserException {
+        final Connection con;
+        try {
+            con = Database.get(ctx, true);
+        } catch (DBPoolingException e) {
+            throw new UpdateException(e);
+        }
+        try {
+            final UserStorage userStorage = new RdbUserStorage();
+            return userStorage.getUser(ctx, userId, con);
+        } finally {
+            Database.back(ctx, true, con);
+        }
+    }
+
+    private static UserSettingMail loadUserSettingMail(Context ctx, int userId) throws UpdateException {
+        final Connection con;
+        try {
+            con = Database.get(ctx, true);
+        } catch (DBPoolingException e) {
+            throw new UpdateException(e);
+        }
+        try {
+            return UserSettingMailStorage.getInstance().getUserSettingMail(userId, ctx, con);
+        } finally {
+            Database.back(ctx, true, con);
         }
     }
 

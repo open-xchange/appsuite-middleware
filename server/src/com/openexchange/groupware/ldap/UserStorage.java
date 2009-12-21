@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.ldap;
 
+import java.sql.Connection;
 import java.util.Date;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -185,12 +186,21 @@ public abstract class UserStorage {
     /**
      * Reads the data from a user from the underlying persistent data storage.
      * @param uid User identifier.
+     * @param context The context.
      * @return a user object.
-     *  @param context The context.
-     * @throws LdapException if an error occurs while reading from the
-     * persistent storage or the user doesn't exist.
+     * @throws LdapException if an error occurs while reading from the persistent storage or the user doesn't exist.
      */
     public abstract User getUser(int uid, Context context) throws LdapException;
+
+    /**
+     * Reads the data from a user from the underlying persistent data storage by through using the given database connection.
+     * @param ctx The context.
+     * @param userId User identifier.
+     * @param con a readable database connection.
+     * @return a user object.
+     * @throws LdapException if an error occurs while reading from the persistent storage or the user doesn't exist.
+     */
+    public abstract User getUser(Context ctx, int userId, Connection con) throws UserException;
 
     public abstract User[] getUser(Context ctx, int[] userIds) throws UserException;
 
