@@ -49,6 +49,10 @@
 
 package com.openexchange.groupware.update.tools;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -77,12 +81,14 @@ import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.SchemaException;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 import com.openexchange.groupware.update.internal.PerformParametersImpl;
 import com.openexchange.groupware.update.internal.ProgressStatusImpl;
+import com.openexchange.groupware.update.internal.SchemaExceptionCodes;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -345,7 +351,6 @@ public final class UpdateTaskToolkit {
      * @return A map containing schemas and their contexts.
      * @throws UpdateException If an error occurs
      */
-    @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 14 }, msg = { "A SQL error occurred while reading schema version information: %1$s." })
     private static Map<String, Set<Integer>> getSchemasAndContexts() throws UpdateException {
         try {
             Connection writeCon = null;
@@ -381,17 +386,16 @@ public final class UpdateTaskToolkit {
             LOG.error(e.getMessage(), e);
             throw new UpdateException(e);
         } catch (final SQLException e) {
-            throw EXCEPTION.create(9, e, e.getMessage());
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         }
 
     }
 
-    @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 16 }, msg = { "Unknown schema name: %1$s." })
     public static int getContextIdBySchema(final String schemaName) throws UpdateException {
         final Map<String, Set<Integer>> map = getSchemasAndContexts();
         final Set<Integer> set = map.get(schemaName);
         if (null == set) {
-            throw EXCEPTION.create(16, schemaName);
+            throw UpdateExceptionCodes.UNKNOWN_SCHEMA.create(schemaName);
         }
         return set.iterator().next().intValue();
     }
@@ -425,7 +429,7 @@ public final class UpdateTaskToolkit {
              * Check version number
              */
             if (schema.getDBVersion() <= versionNumber) {
-                throw EXCEPTION.create(13, Integer.valueOf(schema.getDBVersion()), Integer.valueOf(versionNumber));
+                throw UpdateExceptionCodes.ONLY_REDUCE.create(I(schema.getDBVersion()), I(versionNumber));
             }
             /*
              * Lock schema
@@ -463,11 +467,11 @@ public final class UpdateTaskToolkit {
         try {
             return Class.forName(className).asSubclass(UpdateTask.class).newInstance();
         } catch (final InstantiationException e) {
-            throw EXCEPTION.create(15, e, className);
+            throw UpdateExceptionCodes.LOADING_TASK_FAILED.create(e, className);
         } catch (final IllegalAccessException e) {
-            throw EXCEPTION.create(15, e, className);
+            throw UpdateExceptionCodes.LOADING_TASK_FAILED.create(e, className);
         } catch (final ClassNotFoundException e) {
-            throw EXCEPTION.create(15, e, className);
+            throw UpdateExceptionCodes.LOADING_TASK_FAILED.create(e, className);
         }
     }
 
@@ -513,74 +517,58 @@ public final class UpdateTaskToolkit {
         "A SQL error occurred while reading schema version information: %1$s.", "Though expected, SQL query returned no result.",
         "Update conflict detected. Schema %1$s is not marked as LOCKED.", "Table update failed. Schema %1$s could not be updated." })
     private static void setVersionNumber(final int versionNumber, final Schema schema, final int contextId) throws UpdateException {
+        final Connection con;
         try {
-            boolean error = false;
-            Connection writeCon = null;
-            PreparedStatement stmt = null;
-            ResultSet rs = null;
-            try {
-                /*
-                 * Try to obtain exclusive lock on table 'version'
-                 */
-                writeCon = Database.get(contextId, true);
-                writeCon.setAutoCommit(false); // BEGIN
-                stmt = writeCon.prepareStatement(SQL_SELECT_LOCKED_FOR_UPDATE);
-                rs = stmt.executeQuery();
-                if (!rs.next()) {
-                    error = true;
-                    throw EXCEPTION.create(10);
-                } else if (!rs.getBoolean(1)) {
-                    /*
-                     * Schema is NOT locked by update process
-                     */
-                    error = true;
-                    throw EXCEPTION.create(11, schema.getSchema());
-                }
-                rs.close();
-                rs = null;
-                stmt.close();
-                stmt = null;
-                /*
-                 * Update schema
-                 */
-                stmt = writeCon.prepareStatement(SQL_UPDATE_VERSION);
-                stmt.setInt(1, versionNumber);
-                if (stmt.executeUpdate() == 0) {
-                    /*
-                     * Schema could not be unlocked
-                     */
-                    error = true;
-                    throw EXCEPTION.create(12, schema.getSchema());
-                }
-                /*
-                 * Everything went fine. Schema is marked as unlocked
-                 */
-                writeCon.commit(); // COMMIT
-            } finally {
-                DBUtils.closeSQLStuff(rs, stmt);
-                if (writeCon != null) {
-                    if (error) {
-                        try {
-                            writeCon.rollback();
-                        } catch (final SQLException e) {
-                            LOG.error(e.getMessage(), e);
-                        }
-                    }
-                    if (!writeCon.getAutoCommit()) {
-                        try {
-                            writeCon.setAutoCommit(true);
-                        } catch (final SQLException e) {
-                            LOG.error(e.getMessage(), e);
-                        }
-                    }
-                    Database.back(contextId, true, writeCon);
-                }
-            }
+            con = Database.get(contextId, true);
         } catch (final DBPoolingException e) {
             LOG.error(e.getMessage(), e);
             throw new UpdateException(e);
-        } catch (final SQLException e) {
-            throw EXCEPTION.create(9, e, e.getMessage());
+        }
+        try {
+            PreparedStatement stmt = null;
+            ResultSet result = null;
+            try {
+                // Try to obtain exclusive lock on table 'version'
+                con.setAutoCommit(false);
+                stmt = con.prepareStatement(SQL_SELECT_LOCKED_FOR_UPDATE);
+                result = stmt.executeQuery();
+                if (!result.next()) {
+                    throw SchemaExceptionCodes.MISSING_VERSION_ENTRY.create(schema.getSchema());
+                } else if (!result.getBoolean(1)) {
+                    // Schema is NOT locked by update process
+                    throw SchemaExceptionCodes.UPDATE_CONFLICT.create(schema.getSchema());
+                }
+            } catch (SQLException e) {
+                rollback(con);
+                throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+            } catch (SchemaException e) {
+                rollback(con);
+                throw new UpdateException(e);
+            } finally {
+                closeSQLStuff(result, stmt);
+            }
+            try {
+                // Update schema
+                stmt = con.prepareStatement(SQL_UPDATE_VERSION);
+                stmt.setInt(1, versionNumber);
+                if (stmt.executeUpdate() == 0) {
+                    // Schema could not be unlocked
+                    throw SchemaExceptionCodes.WRONG_ROW_COUNT.create(I(1), I(0));
+                }
+                // Everything went fine. Schema is marked as unlocked
+                con.commit();
+            } catch (SQLException e) {
+                rollback(con);
+                throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+            } catch (SchemaException e) {
+                rollback(con);
+                throw new UpdateException(e);
+            } finally {
+                closeSQLStuff(result, stmt);
+            }
+        } finally {
+            autocommit(con);
+            Database.back(contextId, true, con);
         }
     }
 

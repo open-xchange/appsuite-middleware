@@ -124,7 +124,7 @@ public final class ContactsGlobalMoveUpdateTask implements UpdateTask {
      */
 
     public void perform(final Schema schema, final int contextId) throws AbstractOXException {
-    	correctTable("prg_contacts", contextId);   
+        correctTable("prg_contacts", contextId);   
     }
     
     private static final String SQL_QUERY = "SELECT created_from,cid,intfield01 FROM prg_contacts WHERE fid = "+FolderObject.SYSTEM_LDAP_FOLDER_ID+" AND userid is NULL";
@@ -138,56 +138,56 @@ public final class ContactsGlobalMoveUpdateTask implements UpdateTask {
     
     public void correctTable(final String sqltable, final int contextId) throws AbstractOXException {
 
-    	if (LOG.isInfoEnabled()) {
+        if (LOG.isInfoEnabled()) {
             LOG.info(STR_INFO);
         }
-    	
+        
         Connection writeCon = null;
         final PreparedStatement stmt = null;
         Statement st = null;
         ResultSet resultSet = null;
         FolderObject des = null;
         try {
-        	
+            
             writeCon = Database.get(contextId, true);
             try {
                 st = writeCon.createStatement();
 
-            	Context ct = null;
-            	OXFolderAccess oxa = null;
+                Context ct = null;
+                OXFolderAccess oxa = null;
                 resultSet = st.executeQuery(SQL_QUERY);
                 
                 if (LOG.isDebugEnabled()) {
-                	LOG.debug("UPDATING WRONG GLOBAL ADDRESSBOOK CONTACTS: MOVING BACK TO OWNER'S PRIVATE ADDRESSBOOK");
+                    LOG.debug("UPDATING WRONG GLOBAL ADDRESSBOOK CONTACTS: MOVING BACK TO OWNER'S PRIVATE ADDRESSBOOK");
                 }
-                	
+                    
                 while (resultSet.next()) {
-                	final int creator  = resultSet.getInt(1);
+                    final int creator  = resultSet.getInt(1);
                     final int cid = resultSet.getInt(2);
-                	final int id  = resultSet.getInt(3);
-                	
-                	
-                	ct = ContextStorage.getInstance().loadContext(cid);                	
-        			oxa = new OXFolderAccess(writeCon, ct);
-                	des = oxa.getDefaultFolder(creator, FolderObject.CONTACT);
-        		
-                	if (LOG.isWarnEnabled()) {
-                		LOG.warn("UPDATING OPBJECT "+id+" IN CONTEXT "+cid+" MOVING TO "+des.getObjectID());
-                	}
-                		
-                	final StringBuilder sb = new StringBuilder("UPDATE prg_contacts SET fid = ");
-                	sb.append(des.getObjectID());
-                	sb.append(" , changing_date = ");
-                	sb.append(System.currentTimeMillis());    
-                	
-                	sb.append(" , changed_from = ");
-                	sb.append(ct.getMailadmin()); 
-                	
-                	sb.append(" WHERE cid = ");
-                	sb.append(cid);
-                	sb.append(" AND intfield01 = ");
-                	sb.append(id);
-                	st.addBatch(sb.toString());
+                    final int id  = resultSet.getInt(3);
+                    
+                    
+                    ct = ContextStorage.getInstance().loadContext(cid);                    
+                    oxa = new OXFolderAccess(writeCon, ct);
+                    des = oxa.getDefaultFolder(creator, FolderObject.CONTACT);
+                
+                    if (LOG.isWarnEnabled()) {
+                        LOG.warn("UPDATING OPBJECT "+id+" IN CONTEXT "+cid+" MOVING TO "+des.getObjectID());
+                    }
+                        
+                    final StringBuilder sb = new StringBuilder("UPDATE prg_contacts SET fid = ");
+                    sb.append(des.getObjectID());
+                    sb.append(" , changing_date = ");
+                    sb.append(System.currentTimeMillis());    
+                    
+                    sb.append(" , changed_from = ");
+                    sb.append(ct.getMailadmin()); 
+                    
+                    sb.append(" WHERE cid = ");
+                    sb.append(cid);
+                    sb.append(" AND intfield01 = ");
+                    sb.append(id);
+                    st.addBatch(sb.toString());
                 }
                             
                 

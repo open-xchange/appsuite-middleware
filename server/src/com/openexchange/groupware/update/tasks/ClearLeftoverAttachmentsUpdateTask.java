@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.update.tasks;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Connection;
@@ -64,27 +65,19 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 import com.openexchange.tools.file.FileStorageException;
 import com.openexchange.tools.file.LocalFileStorage;
 
-@OXExceptionSource(
-	    classId = Classes.UPDATE_TASK,
-	    component = EnumComponent.UPDATE
-	)
 public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
 
     private final ThreadLocal<Map<Integer,LocalFileStorage>> filestorages = new ThreadLocal<Map<Integer,LocalFileStorage>>();
 
     private static final Log LOG = LogFactory.getLog(ClearLeftoverAttachmentsUpdateTask.class);
-    private static final UpdateExceptionFactory EXCEPTIONS = new UpdateExceptionFactory(ClearLeftoverAttachmentsUpdateTask.class);
 
     public int addedWithVersion() {
         return 11;
@@ -103,23 +96,23 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
     public void perform(final Schema schema, final int contextId) throws AbstractOXException {
         try {
             filestorages.set(new HashMap<Integer,LocalFileStorage>());
-            for(final LeftoverAttachment att : getLeftoverAttachmentsInSchema(contextId, schema)){
+            for(final LeftoverAttachment att : getLeftoverAttachmentsInSchema(contextId)){
                 removeFile(att.getFileId(), att.getContextId()); //FIXME will not work during update
                 try {
                     removeDatabaseEntry(att.getId(),att.getContextId());
-                } catch (final SQLException e) {
-                    throw EXCEPTIONS.create(1, e, e.getMessage());
+                } catch (SQLException e) {
+                    throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
                 }
             }
-        } catch (final SQLException e) {
-            throw EXCEPTIONS.create(1, e, e.getMessage());
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             filestorages.set(null);
         }
     }
 
     private void removeDatabaseEntry(final int id, final int contextId) throws DBPoolingException, SQLException {
-        update(contextId, "DELETE FROM prg_attachment WHERE id = ? and cid = ?", id, contextId);
+        update(contextId, "DELETE FROM prg_attachment WHERE id = ? and cid = ?", I(id), I(contextId));
     }
 
     private void update(final int contextId, final String sql, final Object...args) throws DBPoolingException, SQLException {
@@ -170,15 +163,15 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
         // We have to use the local file storage to bypass quota handling, which must remain
         // unaffected by these operations
 
-        LocalFileStorage fs = filestorages.get().get(ctx_id);
+        LocalFileStorage fs = filestorages.get().get(I(ctx_id));
         if(fs == null) {
             final URI uri = createURI(ctx_id);
-            if(uri == null) {
-                throw EXCEPTIONS.create(2);
+            if (uri == null) {
+                throw UpdateExceptionCodes.OTHER_PROBLEM.create("Can not determine filestore for context " + ctx_id + ".");
             }
 
-            fs = new LocalFileStorage(3,256,uri);  //FIXME: It's very dangerous to just copy these values (3 and 256)!
-            filestorages.get().put(ctx_id, fs);
+            fs = new LocalFileStorage(I(3),I(256),uri);  //FIXME: It's very dangerous to just copy these values (3 and 256)!
+            filestorages.get().put(I(ctx_id), fs);
         }
         try {
             fs.deleteFile(fileId);
@@ -259,7 +252,7 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
         }
     }
 
-    private List<LeftoverAttachment> getLeftoverAttachmentsInSchema(final int contextId, final Schema schema) throws SQLException, DBPoolingException {
+    private List<LeftoverAttachment> getLeftoverAttachmentsInSchema(final int contextId) throws SQLException, DBPoolingException {
 
         final String query = "SELECT prg_attachment.cid, prg_attachment.id, prg_attachment.file_id FROM prg_attachment " +
                 "JOIN sequence_attachment ON prg_attachment.cid = sequence_attachment.cid  WHERE prg_attachment.id > sequence_attachment.id";

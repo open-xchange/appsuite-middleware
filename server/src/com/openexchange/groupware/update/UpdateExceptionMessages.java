@@ -58,7 +58,13 @@ import com.openexchange.exceptions.LocalizableStrings;
  */
 public final class UpdateExceptionMessages implements LocalizableStrings {
 
+    public static final String ONLY_REDUCE_MSG = "Current version number %1$s is already lower than or equal to desired version number %2$s.";
+
     public static final String SQL_PROBLEM_MSG = "A SQL problem occurred: %1$s.";
+
+    public static final String LOADING_TASK_FAILED_MSG = "Error loading update task \"%1$s\".";
+
+    public static final String UNKNOWN_SCHEMA_MSG = "Unknown schema name: %1$s.";
 
     public static final String WRONG_ROW_COUNT_MSG = "Processed a wrong number of rows in database. Expected %1$d rows but worked on %2$d rows.";
 

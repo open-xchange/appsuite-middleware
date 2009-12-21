@@ -62,9 +62,25 @@ import com.openexchange.groupware.update.internal.UpdateExceptionFactory;
 public enum UpdateExceptionCodes implements OXErrorMessage {
 
     /**
+     * Current version number %1$s is already lower than or equal to desired version number %2$s.
+     */
+    ONLY_REDUCE(ONLY_REDUCE_MSG, Category.USER_INPUT, 13),
+    /**
      * A SQL problem occurred: %1$s.
      */
     SQL_PROBLEM(SQL_PROBLEM_MSG, Category.CODE_ERROR, 14),
+    /**
+     * Error loading update task "%1$s".
+     */
+    LOADING_TASK_FAILED(LOADING_TASK_FAILED_MSG, Category.USER_INPUT, 15),
+    /**
+     * Unknown schema name: %1$s.
+     */
+    UNKNOWN_SCHEMA(UNKNOWN_SCHEMA_MSG, Category.USER_INPUT, 16),
+    /**
+     * %1$s.
+     */
+    OTHER_PROBLEM("%1$s", Category.CODE_ERROR, 97),
     /**
      * Processed a wrong number of rows in database. Expected %1$d rows but worked on %2$d rows.
      */
