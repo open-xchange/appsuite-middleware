@@ -290,7 +290,6 @@ public abstract class ListCore extends UserAbstraction {
             columnnames.add(UserAbstraction.OPT_ACCESS_USM);
             columnnames.add(UserAbstraction.OPT_DISABLE_GAB);
             columnnames.add(UserAbstraction.OPT_ACCESS_PUBLIC_FOLDER_EDITABLE);
-            columnnames.add(UserAbstraction.OPT_ACCESS_VOIPNOW);
 
         }
         final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
@@ -355,7 +354,6 @@ public abstract class ListCore extends UserAbstraction {
             datarow.add(String.valueOf(access.isUSM()));
             datarow.add(String.valueOf(access.isGlobalAddressBookDisabled()));
             datarow.add(String.valueOf(access.isPublicFolderEditable()));
-            datarow.add(String.valueOf(access.isVoipNow()));
             data.add(datarow);
             printExtensionsError(user);
         }

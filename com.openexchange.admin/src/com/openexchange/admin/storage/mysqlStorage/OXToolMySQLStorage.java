@@ -77,8 +77,8 @@ import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.GenericChecks;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
+import com.openexchange.groupware.update.UpdateException;
 import com.openexchange.groupware.update.Updater;
-import com.openexchange.groupware.update.exception.UpdateException;
 
 /**
  * @author d7
