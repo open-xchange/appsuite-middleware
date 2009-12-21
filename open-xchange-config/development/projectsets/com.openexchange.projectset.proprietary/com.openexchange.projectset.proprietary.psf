@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <psf version="2.0">
 <provider id="org.eclipse.team.svn.core.svnnature">
 <project reference="1.0.1,https://svn.open-xchange.com/open-xchange-custom/oxio/com.openexchange.authentication.oxio/trunk,com.openexchange.authentication.oxio,b0d50ad748d8001e13e393da6addc4a1;https://svn.open-xchange.com/open-xchange-custom;https://svn.open-xchange.com/open-xchange-custom;branches;tags;trunk;true;99444d4b-0756-4303-bc9a-45fb4895a523;https://svn.open-xchange.com/open-xchange-custom;;false;;;22"/>
@@ -16,5 +16,6 @@
 <project reference="1.0.1,https://svn.open-xchange.com/open-xchange-custom/hostpoint/com.openexchange.configjump.hostpoint/trunk,com.openexchange.configjump.hostpoint,b0d50ad748d8001e13e393da6addc4a1;https://svn.open-xchange.com/open-xchange-custom;https://svn.open-xchange.com/open-xchange-custom;branches;tags;trunk;true;99444d4b-0756-4303-bc9a-45fb4895a523;https://svn.open-xchange.com/open-xchange-custom;;false;;;22"/>
 <project reference="1.0.1,https://svn.open-xchange.com/open-xchange-custom/fhtw-berlin/com.openexchange.authentication.fhtwberlin/trunk,com.openexchange.authentication.fhtwberlin,d05ec2192bdf001e1a6e851cd1b1b247;https:/svn.open-xchange.com/open-xchange-custom/univention/com.openexchange.authentication.ucs;https:/svn.open-xchange.com/open-xchange-custom/univention/com.openexchange.authentication.ucs;branches;tags;trunk;true;99444d4b-0756-4303-bc9a-45fb4895a523;https://svn.open-xchange.com/open-xchange-custom;;false;;;22"/>
 <project reference="1.0.1,https://svn.open-xchange.com/open-xchange-custom/1und1/com.openexchange.servlet.easylogin,com.openexchange.servlet.easylogin,a0d1e37f2edf001e1a6e851cd1b1b247;https://svn.open-xchange.com/open-xchange-custom;Proprietary;branches;tags;trunk;true;99444d4b-0756-4303-bc9a-45fb4895a523;https://svn.open-xchange.com/open-xchange-custom;;false;;;22"/>
+<project reference="1.0.1,https://svn.open-xchange.com/open-xchange-custom/1und1/com.openexchange.nogal4pim/trunk,com.openexchange.nogal4pim,a0d1e37f2edf001e1a6e851cd1b1b247;https://svn.open-xchange.com/open-xchange-custom;Proprietary;branches;tags;trunk;true;99444d4b-0756-4303-bc9a-45fb4895a523;https://svn.open-xchange.com/open-xchange-custom;;false;;;22"/>
 </provider>
 </psf>
