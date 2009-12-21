@@ -128,8 +128,6 @@ public class UserModuleAccess implements Serializable {
 
     private boolean PublicFolderEditable = true;
 
-    private boolean VoipNow = true;
-
     /**
      * Creates a new instance of UserModuleAccess
      */
@@ -171,7 +169,6 @@ public class UserModuleAccess implements Serializable {
         this.USM = true;
         this.GlobalAddressBookDisabled = false;
         this.PublicFolderEditable = true;
-        this.VoipNow = true;
     }
 
     /**
@@ -207,7 +204,6 @@ public class UserModuleAccess implements Serializable {
         this.USM = false;
         this.GlobalAddressBookDisabled = true;
         this.PublicFolderEditable = false;
-        this.VoipNow = false;
     }
 
     public boolean getEditGroup() {
@@ -542,14 +538,6 @@ public class UserModuleAccess implements Serializable {
 
     public void setPublicFolderEditable(final boolean publicFolderEditable) {
         this.PublicFolderEditable = publicFolderEditable;
-    }
-
-    public boolean isVoipNow() {
-        return VoipNow;
-    }
-
-    public void setVoipNow(final boolean voipNow) {
-        this.VoipNow = voipNow;
     }
 
     @Override

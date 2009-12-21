@@ -2114,9 +2114,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             final OXFolderAdminHelper adminHelper = new OXFolderAdminHelper();
             acc.setGlobalAddressBookDisabled(adminHelper.isGlobalAddressBookDisabled(ctx.getId().intValue(), user_id, read_ox_con));
             acc.setPublicFolderEditable(adminHelper.isPublicFolderEditable(ctx.getId().intValue(), user_id, read_ox_con));
-            final RdbUserStorage rdbUserStorage = new RdbUserStorage(read_ox_con);
-            final UserAttributeAccess uaa = new UserAttributeAccess(rdbUserStorage);
-            acc.setVoipNow(uaa.getBooleanAttribute("com.4psa.voipnow", user_id, ctx.getId().intValue(), true));
             return acc;
         } catch (final DBPoolingException dbpol) {
             log.error("DBPooling error", dbpol);
@@ -2440,9 +2437,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             final OXFolderAdminHelper adminHelper = new OXFolderAdminHelper();
             adminHelper.setGlobalAddressBookDisabled(ctx.getId().intValue(), user_id, access.isGlobalAddressBookDisabled(), write_ox_con);
             adminHelper.setPublicFolderEditable(access.isPublicFolderEditable(), ctx.getId().intValue(), user_id, write_ox_con);
-            final RdbUserStorage rdbUserStorage = new RdbUserStorage(write_ox_con);
-            final UserAttributeAccess uaa = new UserAttributeAccess(rdbUserStorage);
-            uaa.setBooleanAttribute("com.4psa.voipnow", access.isVoipNow(), user_id, ctx.getId().intValue());
 
             RdbUserConfigurationStorage.saveUserConfiguration(user, insert_or_update, write_ox_con);
             if (!insert_or_update) {
