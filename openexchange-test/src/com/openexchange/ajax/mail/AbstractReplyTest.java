@@ -66,6 +66,7 @@ import com.openexchange.ajax.mail.actions.ReplyAllRequest;
 import com.openexchange.ajax.mail.actions.ReplyAllResponse;
 import com.openexchange.ajax.mail.actions.ReplyRequest;
 import com.openexchange.ajax.mail.actions.ReplyResponse;
+import com.openexchange.test.ContactTestManager;
 import com.openexchange.tools.servlet.AjaxException;
 
 /**
@@ -75,11 +76,9 @@ import com.openexchange.tools.servlet.AjaxException;
  */
 public abstract class AbstractReplyTest extends AbstractMailTest {
 
-    /**
-     * Initializes a new {@link AbstractReplyTest}.
-     * @param name
-     */
-    public AbstractReplyTest(String name) {
+    protected ContactTestManager manager;
+
+    public AbstractReplyTest(String name){
         super(name);
     }
 
@@ -88,6 +87,7 @@ public abstract class AbstractReplyTest extends AbstractMailTest {
         super.setUp();
         clearFolder(getInboxFolder());
         clearFolder(getSentFolder());
+        this.manager = new ContactTestManager(client);
     }
 
     @Override
