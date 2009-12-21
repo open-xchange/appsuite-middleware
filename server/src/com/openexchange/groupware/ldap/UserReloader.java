@@ -81,8 +81,7 @@ final class UserReloader extends Refresher<User> implements User {
      * @param regionName Name of the cache region that stores the object.
      * @throws AbstractOXException if initially loading the object fails.
      */
-    UserReloader(final OXObjectFactory<User> factory,
-        final String regionName) throws AbstractOXException {
+    UserReloader(final OXObjectFactory<User> factory, final String regionName) throws AbstractOXException {
         super(factory, regionName);
         this.delegate = refresh();
     }

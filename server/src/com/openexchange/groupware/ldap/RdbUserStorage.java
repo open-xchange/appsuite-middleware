@@ -159,6 +159,11 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
+    @Override
+    public User getUser(Context ctx, int userId, Connection con) throws UserException {
+        return getUser(ctx, con, new int[] { userId })[0];
+    }
+
     private User[] getUser(Context ctx, Connection con, int[] userIds) throws UserException {
         if (0 == userIds.length) {
             return new User[0];

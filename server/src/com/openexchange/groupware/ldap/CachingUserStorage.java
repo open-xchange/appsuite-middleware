@@ -52,6 +52,7 @@ package com.openexchange.groupware.ldap;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
 import java.io.Serializable;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -103,32 +104,51 @@ public class CachingUserStorage extends UserStorage {
         this.delegate = delegate;
         cacheLock = new ReentrantLock(true);
     }
-    
+
     @Override
     public User getUser(final int uid, final Context context) throws LdapException {
-       final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        User user = delegate.getUser(uid, context);
         if (cacheService == null) {
-            return delegate.getUser(uid, context);
+            return user;
         }
+        try {
+            return createProxy(context, uid, cacheService, user);
+        } catch (UserException e) {
+            throw new LdapException(e);
+        }
+    }
+
+    private User createProxy(final Context ctx, final int userId, final CacheService cacheService, User user) throws UserException {
         final OXObjectFactory<User> factory = new OXObjectFactory<User>() {
             public Serializable getKey() {
-                return cacheService.newCacheKey(context.getContextId(), uid);
+                return cacheService.newCacheKey(ctx.getContextId(), userId);
             }
             public User load() throws LdapException {
-                return delegate.getUser(uid, context);
+                return delegate.getUser(userId, ctx);
             }
             public Lock getCacheLock() {
                 return cacheLock;
             }
         };
         try {
-            return new UserReloader(factory, REGION_NAME);
+            return new UserReloader(factory, user, REGION_NAME);
         } catch (final AbstractOXException e) {
-            if (e instanceof LdapException) {
-                throw (LdapException) e;
+            if (e instanceof UserException) {
+                throw (UserException) e;
             }
-            throw new LdapException(e);
+            throw new UserException(e);
         }
+    }
+
+    @Override
+    public User getUser(final Context ctx, final int userId, Connection con) throws UserException {
+        final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        User user = delegate.getUser(ctx, userId, con);
+        if (cacheService == null) {
+            return user;
+        }
+        return createProxy(ctx, userId, cacheService, user);
     }
 
     @Override

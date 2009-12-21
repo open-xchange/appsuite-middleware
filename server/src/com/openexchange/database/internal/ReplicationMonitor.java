@@ -237,6 +237,8 @@ public final class ReplicationMonitor {
         return retval;
     }
 
+    private static long lastLogged = 0;
+
     static void increaseTransactionCounter(Assignment assign, Connection con) {
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -257,8 +259,16 @@ public final class ReplicationMonitor {
             con.commit();
         } catch (SQLException e) {
             rollback(con);
-            DBPoolingException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-            LOG.error(e1.getMessage(), e1);
+            if (1146 == e.getErrorCode()) {
+                if (lastLogged + 300000 < System.currentTimeMillis()) {
+                    lastLogged = System.currentTimeMillis();
+                    DBPoolingException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+                    LOG.error(e1.getMessage(), e1);
+                }
+            } else {
+                DBPoolingException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+                LOG.error(e1.getMessage(), e1);
+            }
         } finally {
             autocommit(con);
             closeSQLStuff(result, stmt);

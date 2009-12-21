@@ -1,3 +1,8 @@
+* 2009-12-21 - marcus.klein@open-xchange.com
+
+ - Bugfix #15102: Reduced logging of missing table inside ReplicationMonitor. Improved update tasks to use connection to the database master
+   only.
+
 * 2009-12-18 - marcus.klein@open-xchange.com
 
  - Bugfix #15077: Increased default max object count for some user related caches to increase performance in large contexts.
