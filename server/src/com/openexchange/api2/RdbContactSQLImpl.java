@@ -1019,7 +1019,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
     }
 
     @OXThrowsMultiple(category = {
-        Category.CODE_ERROR, Category.TRY_AGAIN, Category.CODE_ERROR, Category.PERMISSION, Category.PERMISSION, Category.SOCKET_CONNECTION,
+        Category.CODE_ERROR, Category.CONCURRENT_MODIFICATION, Category.CODE_ERROR, Category.PERMISSION, Category.PERMISSION, Category.SOCKET_CONNECTION,
         Category.CODE_ERROR, Category.SOCKET_CONNECTION, Category.PERMISSION, Category.CODE_ERROR }, desc = {
         "39", "40", "41", "42", "58", "43", "44", "45", "46", "56" }, exceptionId = { 39, 40, 41, 42, 58, 43, 44, 45, 46, 56 }, msg = {
         "Unable to delete this contact. Object not found. Context %1$d Folder %2$d User %3$d Object %4$d",
