@@ -94,7 +94,7 @@ public class ReplyAllTest extends AbstractReplyTest {
         String mail1 = client1.getValues().getSendAddress(); // note: doesn't work the other way around on the dev system, because only the
         String mail2 = client2.getValues().getSendAddress(); // first account is set up correctly.
 
-        List<Contact> otherContacts = extract(2, manager.searchAction("*", 6), Arrays.asList(mail1,mail2));
+        List<Contact> otherContacts = extract(2, contactManager.searchAction("*", 6), Arrays.asList(mail1,mail2));
         assertTrue("Precondition: This test needs at least to other contacts in the global address book to work", otherContacts.size() > 1);
         
         this.client = client2;

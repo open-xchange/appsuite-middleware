@@ -52,16 +52,11 @@ package com.openexchange.ajax.mail;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.ajax.framework.CommonAllResponse;
-import com.openexchange.ajax.mail.actions.AllRequest;
 import com.openexchange.ajax.mail.actions.ForwardRequest;
 import com.openexchange.ajax.mail.actions.ForwardResponse;
-import com.openexchange.ajax.mail.actions.GetRequest;
 import com.openexchange.ajax.mail.actions.ReplyAllRequest;
 import com.openexchange.ajax.mail.actions.ReplyAllResponse;
 import com.openexchange.ajax.mail.actions.ReplyRequest;
@@ -76,7 +71,7 @@ import com.openexchange.tools.servlet.AjaxException;
  */
 public abstract class AbstractReplyTest extends AbstractMailTest {
 
-    protected ContactTestManager manager;
+    protected ContactTestManager contactManager;
 
     public AbstractReplyTest(String name){
         super(name);
@@ -87,13 +82,14 @@ public abstract class AbstractReplyTest extends AbstractMailTest {
         super.setUp();
         clearFolder(getInboxFolder());
         clearFolder(getSentFolder());
-        this.manager = new ContactTestManager(client);
+        this.contactManager = new ContactTestManager(client);
     }
 
     @Override
     protected void tearDown() throws Exception {
         clearFolder(getInboxFolder());
         clearFolder(getSentFolder());
+        contactManager.cleanUp();
         super.tearDown();
     }
 
