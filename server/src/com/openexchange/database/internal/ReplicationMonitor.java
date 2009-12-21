@@ -162,7 +162,7 @@ public final class ReplicationMonitor {
             }
         }
         if (!write && assign.isTransactionInitialized() && !isUpToDate(assign.getTransaction(), readTransaction(retval, assign.getContextId()))) {
-            LOG.warn("Slave " + assign.getReadPoolId() + " is not actual. Using master " + assign.getWritePoolId() + " instead.");
+            LOG.debug("Slave " + assign.getReadPoolId() + " is not actual. Using master " + assign.getWritePoolId() + " instead.");
             Connection toReturn = retval;
             try {
                 retval = fetch.get(pools, assign, true, true);
