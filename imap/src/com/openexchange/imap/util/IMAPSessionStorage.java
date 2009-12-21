@@ -109,21 +109,21 @@ final class IMAPSessionStorage {
      * @throws MailException If a mail error occurs
      */
     public void fillSessionStorage(final int accountId, final IMAPFolder imapFolder) throws MailException {
-        synchronized (lock) {
-            final Set<IMAPUpdateableData> currentData = new HashSet<IMAPUpdateableData>();
-            try {
-                currentData.addAll(Arrays.asList(IMAPCommandsCollection.fetchUIDAndFlags(imapFolder)));
-            } catch (final MessagingException e) {
-                throw MIMEMailException.handleMessagingException(e);
-            }
-            final AccAndFN key = new AccAndFN(accountId, imapFolder.getFullName());
-            Set<IMAPUpdateableData> data = dataMap.get(key);
-            if (null == data) {
-                data = currentData;
-                dataMap.put(key, data);
-            } else {
+        final Set<IMAPUpdateableData> currentData;
+        try {
+            currentData = new HashSet<IMAPUpdateableData>(Arrays.asList(IMAPCommandsCollection.fetchUIDAndFlags(imapFolder)));
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e);
+        }
+        final AccAndFN key = new AccAndFN(accountId, imapFolder.getFullName());
+        Set<IMAPUpdateableData> data = dataMap.get(key);
+        if (null == data) {
+            data = dataMap.putIfAbsent(key, currentData);
+            if (null != data) {
                 data.addAll(currentData);
             }
+        } else {
+            data.addAll(currentData);
         }
     }
 
