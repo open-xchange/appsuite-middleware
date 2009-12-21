@@ -47,46 +47,60 @@
  *
  */
 
-package com.openexchange.groupware.update;
+package com.openexchange.groupware.update.internal;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import com.openexchange.groupware.update.internal.InternalList;
+import static com.openexchange.groupware.update.UpdateTaskV2.NO_VERSION;
+import java.util.Comparator;
+import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.groupware.update.UpdateTaskV2;
 
 /**
- * {@link Initialization} starts all internal structures especially the list of update tasks.
+ * {@link DependencyComparator}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class Initialization {
+public class DependencyComparator implements Comparator<UpdateTask> {
 
-    private static final Initialization SINGLETON = new Initialization();
+    private final VersionComparator oldComparator = new VersionComparator();
 
-    private static final Log LOG = LogFactory.getLog(Initialization.class);
-
-    private final AtomicBoolean started;
-
-    private Initialization() {
+    public DependencyComparator() {
         super();
-        started = new AtomicBoolean();
     }
 
-    public static Initialization getInstance() {
-        return SINGLETON;
-    }
-
-    public void start() {
-        if (!started.compareAndSet(false, true)) {
-            LOG.error("Database update component has already been started.", new Throwable());
+    public int compare(UpdateTask task1, UpdateTask task2) {
+        boolean task1IsV2 = task1 instanceof UpdateTaskV2;
+        boolean task2IsV2 = task2 instanceof UpdateTaskV2;
+        if (task1IsV2 && task2IsV2 && NO_VERSION == task1.addedWithVersion() && NO_VERSION == task2.addedWithVersion()) {
+            UpdateTaskV2 taskV2One = (UpdateTaskV2) task1;
+            for (String dependency : taskV2One.getDependencies()) {
+                if (task2.getClass().getName().equals(dependency)) {
+                    return 1;
+                }
+            }
+            UpdateTaskV2 taskV2Two = (UpdateTaskV2) task2;
+            for (String dependency : taskV2Two.getDependencies()) {
+                if (task1.getClass().getName().equals(dependency)) {
+                    return -1;
+                }
+            }
+            return 0;
         }
-        InternalList.getInstance().start();
+        if (task1IsV2 && NO_VERSION == task1.addedWithVersion()) {
+            return 1;
+        }
+        if (task2IsV2 && NO_VERSION == task2.addedWithVersion()) {
+            return -1;
+        }
+        return oldComparator.compare(task1, task2);
     }
 
-    public void stop() {
-        if (!started.compareAndSet(true, false)) {
-            LOG.error("Database update component cannot be stopped since it has not been started before.", new Throwable());
-        }
-        InternalList.getInstance().stop();
+    @Override
+    public boolean equals(Object obj) {
+        return null != obj && obj instanceof DependencyComparator;
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
     }
 }

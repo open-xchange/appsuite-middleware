@@ -47,44 +47,24 @@
  *
  */
 
-package com.openexchange.groupware.update.exception;
+package com.openexchange.groupware.update.internal;
 
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
+import com.openexchange.groupware.update.SchemaUpdateState;
+import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.groupware.update.UpdateTaskV2;
 
 /**
- * Exception class for the updater.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * {@link VersionFilter}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class UpdateException extends AbstractOXException {
+public final class VersionFilter implements Filter {
 
-    /**
-     * For serialization.
-     */
-    private static final long serialVersionUID = 7764336021245161926L;
-
-    /**
-     * Nesting constructor.
-     * @param cause Nested cause.
-     */
-    public UpdateException(final AbstractOXException cause) {
-        super(cause);
+    public VersionFilter() {
+        super();
     }
 
-    /**
-     * Constructor with all parameters.
-     * @param component Component.
-     * @param category Category.
-     * @param number detail number.
-     * @param message message of the exception.
-     * @param cause the cause.
-     * @param msgArgs arguments for the exception message.
-     */
-    public UpdateException(final EnumComponent component, final Category category,
-        final int number, final String message, final Throwable cause,
-        final Object[] msgArgs) {
-        super(component, category, number, message, cause);
-        setMessageArgs(msgArgs);
+    public boolean mustBeExecuted(SchemaUpdateState schema, UpdateTask task) {
+        return task.addedWithVersion() > schema.getDBVersion() || task.addedWithVersion() == UpdateTaskV2.NO_VERSION;
     }
-
 }

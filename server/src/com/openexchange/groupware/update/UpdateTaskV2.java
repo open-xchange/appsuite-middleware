@@ -58,6 +58,22 @@ import com.openexchange.groupware.AbstractOXException;
  */
 public interface UpdateTaskV2 extends UpdateTask {
 
+    static final int NO_VERSION = Schema.NO_VERSION;
+
+    /**
+     * Performs the database schema upgrade.
+     * @param params Interface carrying some useful parameters for performing the update. This is a parameter interface to be extendable for
+     * future requirements without breaking the API.
+     * @throws AbstractOXException should be thrown if the update fails. Then it can be tried to execute this task again.
+     */
     void perform(PerformParameters params) throws AbstractOXException;
 
+    /**
+     * This method is used to determine the order when executing update tasks. Check VERY carefully what update tasks must be run before
+     * your task can run. For all currently existing update task the dependency returns always the previous update task to remain the same
+     * order as with the versions.
+     * @return a string array containing the update tasks that must be run before running this one. You may return an empty array if you can
+     * not discover any dependencies. Never return <code>null</code>.
+     */
+    String[] getDependencies();
 }

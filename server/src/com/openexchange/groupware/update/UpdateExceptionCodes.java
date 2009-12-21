@@ -49,9 +49,10 @@
 
 package com.openexchange.groupware.update;
 
+import static com.openexchange.groupware.update.UpdateExceptionMessages.*;
 import com.openexchange.exceptions.OXErrorMessage;
 import com.openexchange.groupware.AbstractOXException.Category;
-
+import com.openexchange.groupware.update.internal.UpdateExceptionFactory;
 
 /**
  * {@link UpdateExceptionCodes}
@@ -59,16 +60,38 @@ import com.openexchange.groupware.AbstractOXException.Category;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public enum UpdateExceptionCodes implements OXErrorMessage {
-    ;
+
+    /**
+     * A SQL problem occurred: %1$s.
+     */
+    SQL_PROBLEM(SQL_PROBLEM_MSG, Category.CODE_ERROR, 14),
+    /**
+     * Processed a wrong number of rows in database. Expected %1$d rows but worked on %2$d rows.
+     */
+    WRONG_ROW_COUNT(WRONG_ROW_COUNT_MSG, Category.CODE_ERROR, 98),
+    /**
+     * Updating schema %1$s failed. Cause: %2$s.
+     */
+    UPDATE_FAILED(UPDATE_FAILED_MSG, Category.CODE_ERROR, 99);
+
+    final String message;
+
+    final Category category;
+
+    final int number;
+
+    private UpdateExceptionCodes(String message, Category category, int number) {
+        this.message = message;
+        this.category = category;
+        this.number = number;
+    }
 
     public Category getCategory() {
-        // TODO Auto-generated method stub
-        return null;
+        return category;
     }
 
     public int getDetailNumber() {
-        // TODO Auto-generated method stub
-        return 0;
+        return number;
     }
 
     public String getHelp() {
@@ -77,8 +100,14 @@ public enum UpdateExceptionCodes implements OXErrorMessage {
     }
 
     public String getMessage() {
-        // TODO Auto-generated method stub
-        return null;
+        return message;
     }
 
+    public UpdateException create(Object... messageArgs) {
+        return UpdateExceptionFactory.getInstance().create(this, messageArgs);
+    }
+
+    public UpdateException create(Throwable cause, Object... messageArgs) {
+        return UpdateExceptionFactory.getInstance().create(this, cause, messageArgs);
+    }
 }

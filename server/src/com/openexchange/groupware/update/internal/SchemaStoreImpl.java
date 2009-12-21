@@ -47,8 +47,9 @@
  *
  */
 
-package com.openexchange.groupware.update;
+package com.openexchange.groupware.update.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
@@ -62,9 +63,12 @@ import java.util.List;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.internal.Server;
 import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.update.internal.SchemaException;
-import com.openexchange.groupware.update.internal.SchemaExceptionCodes;
-import com.openexchange.groupware.update.internal.SchemaUpdateStateImpl;
+import com.openexchange.groupware.update.Schema;
+import com.openexchange.groupware.update.SchemaException;
+import com.openexchange.groupware.update.SchemaImpl;
+import com.openexchange.groupware.update.SchemaStore;
+import com.openexchange.groupware.update.SchemaUpdateState;
+import com.openexchange.groupware.update.UpdateTaskCollection;
 import com.openexchange.tools.update.Tools;
 
 /**
@@ -121,12 +125,10 @@ public class SchemaStoreImpl extends SchemaStore {
     }
 
     private static void createTable(Connection con) throws SQLException {
-        String sql = "CREATE TABLE " + TABLE_NAME + " (cid INT4 UNSIGNED NOT NULL,taskName VARCHAR(1024) NOT NULL,"
-            + "INDEX full (cid,taskName(255))) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
         Statement stmt = null;
         try {
             stmt = con.createStatement();
-            stmt.executeUpdate(sql);
+            stmt.executeUpdate(CreateUpdateTaskTable.CREATES[0]);
         } finally {
             closeSQLStuff(stmt);
         }
@@ -177,8 +179,9 @@ public class SchemaStoreImpl extends SchemaStore {
         // Insert lock
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("INSERT INTO updateTask (cid,taskName) VALUES (0,?)");
+            stmt = con.prepareStatement("INSERT INTO updateTask (cid,taskName,successful,lastModified) VALUES (0,?,true,?)");
             stmt.setString(1, LOCKED);
+            stmt.setLong(2, System.currentTimeMillis());
             if (stmt.executeUpdate() == 0) {
                 throw SchemaExceptionCodes.LOCK_FAILED.create(schema.getSchema());
             }
@@ -235,9 +238,9 @@ public class SchemaStoreImpl extends SchemaStore {
         } catch (DBPoolingException e) {
             throw new SchemaException(e);
         }
-        // End of update process, so unlock schema
         try {
-            con.setAutoCommit(false); // BEGIN
+            // End of update process, so unlock schema
+            con.setAutoCommit(false);
             // Delete LOCKED
             deleteLock(con, schema);
             // Unlock old version table
@@ -245,7 +248,7 @@ public class SchemaStoreImpl extends SchemaStore {
                 unlockOldVersionTable(con, schema);
             }
             // Everything went fine. Schema is marked as unlocked
-            con.commit(); // COMMIT
+            con.commit();
         } catch (SQLException e) {
             rollback(con);
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
@@ -369,7 +372,7 @@ public class SchemaStoreImpl extends SchemaStore {
         if (Tools.tableExists(con, "version")) {
             loadOldVersionTable(con, retval);
         } else {
-            retval.setDBVersion(0);
+            retval.setDBVersion(UpdateTaskCollection.getInstance().getHighestVersion());
             retval.setLocked(false);
             retval.setGroupwareCompatible(true);
             retval.setAdminCompatible(true);
@@ -410,5 +413,58 @@ public class SchemaStoreImpl extends SchemaStore {
             closeSQLStuff(result, stmt);
         }
         return retval.toArray(new String[retval.size()]);
+    }
+
+    @Override
+    public void addExecutedTask(int contextId, String taskName, boolean success) throws SchemaException {
+        final Connection con;
+        try {
+            con = Database.get(contextId, true);
+        } catch (DBPoolingException e) {
+            throw new SchemaException(e);
+        }
+        try {
+            con.setAutoCommit(false);
+            addExecutedTask(con, taskName, success);
+            con.commit();
+        } catch (SQLException e) {
+            rollback(con);
+            throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (SchemaException e) {
+            rollback(con);
+            throw e;
+        } finally {
+            autocommit(con);
+            Database.back(contextId, true, con);
+        }
+    }
+
+    @Override
+    public void addExecutedTask(Connection con, String taskName, boolean success) throws SchemaException {
+        boolean update = false;
+        for (String executed : readUpdateTasks(con)) {
+            if (taskName.equals(executed)) {
+                update = true;
+                break;
+            }
+        }
+        String insertSQL = "INSERT INTO updateTask (cid,successful,lastModified,taskName) VALUES (0,?,?,?)";
+        String updateSQL = "UPDATE updateTask SET successful=?, lastModified=? WHERE cid=0 AND taskName=?";
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement(update ? updateSQL : insertSQL);
+            int pos = 1;
+            stmt.setBoolean(pos++, success);
+            stmt.setLong(pos++, System.currentTimeMillis());
+            stmt.setString(pos++, taskName);
+            int rows = stmt.executeUpdate();
+            if (1 != rows) {
+                throw SchemaExceptionCodes.WRONG_ROW_COUNT.create(I(1), I(rows));
+            }
+        } catch (SQLException e) {
+            throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+        }
     }
 }

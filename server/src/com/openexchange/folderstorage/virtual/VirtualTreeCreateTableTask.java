@@ -58,32 +58,23 @@ import java.sql.SQLException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.update.Schema;
+import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.UpdateException;
-import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 
 /**
  * {@link VirtualTreeCreateTableTask} - Inserts necessary tables to support virtual folder trees.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@OXExceptionSource(classId = Classes.UPDATE_TASK, component = EnumComponent.UPDATE)
 public class VirtualTreeCreateTableTask implements UpdateTask {
-
-    private final UpdateExceptionFactory exceptionFactory;
 
     /**
      * Initializes a new {@link VirtualTreeCreateTableTask}.
      */
     public VirtualTreeCreateTableTask() {
         super();
-        exceptionFactory = new UpdateExceptionFactory(VirtualTreeCreateTableTask.class);
     }
 
     public int addedWithVersion() {
@@ -223,7 +214,7 @@ public class VirtualTreeCreateTableTask implements UpdateTask {
             stmt = writeCon.prepareStatement(sqlCreate);
             stmt.executeUpdate();
         } catch (final SQLException e) {
-            throw createSQLError(e);
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
             Database.back(contextId, true, writeCon);
@@ -246,10 +237,5 @@ public class VirtualTreeCreateTableTask implements UpdateTask {
         } finally {
             closeSQLStuff(resultSet, null);
         }
-    }
-
-    @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 1 }, msg = { "A SQL error occurred while performing task VirtualTreeCreateTableTask: %1$s." })
-    private UpdateException createSQLError(final SQLException e) {
-        return exceptionFactory.create(1, e, e.getMessage());
     }
 }

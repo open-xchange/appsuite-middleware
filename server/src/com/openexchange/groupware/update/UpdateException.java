@@ -49,44 +49,39 @@
 
 package com.openexchange.groupware.update;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import com.openexchange.groupware.update.internal.InternalList;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.EnumComponent;
 
 /**
- * {@link Initialization} starts all internal structures especially the list of update tasks.
- *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * Exception class for the updater.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class Initialization {
+public class UpdateException extends AbstractOXException {
 
-    private static final Initialization SINGLETON = new Initialization();
+    /**
+     * For serialization.
+     */
+    private static final long serialVersionUID = 7764336021245161926L;
 
-    private static final Log LOG = LogFactory.getLog(Initialization.class);
-
-    private final AtomicBoolean started;
-
-    private Initialization() {
-        super();
-        started = new AtomicBoolean();
+    /**
+     * Nesting constructor.
+     * @param cause Nested cause.
+     */
+    public UpdateException(AbstractOXException cause) {
+        super(cause);
     }
 
-    public static Initialization getInstance() {
-        return SINGLETON;
-    }
-
-    public void start() {
-        if (!started.compareAndSet(false, true)) {
-            LOG.error("Database update component has already been started.", new Throwable());
-        }
-        InternalList.getInstance().start();
-    }
-
-    public void stop() {
-        if (!started.compareAndSet(true, false)) {
-            LOG.error("Database update component cannot be stopped since it has not been started before.", new Throwable());
-        }
-        InternalList.getInstance().stop();
+    /**
+     * Constructor with all parameters.
+     * @param component Component.
+     * @param category Category.
+     * @param number detail number.
+     * @param message message of the exception.
+     * @param cause the cause.
+     * @param msgArgs arguments for the exception message.
+     */
+    public UpdateException(EnumComponent component, Category category, int number, String message, Throwable cause, Object[] msgArgs) {
+        super(component, category, number, message, cause);
+        setMessageArgs(msgArgs);
     }
 }

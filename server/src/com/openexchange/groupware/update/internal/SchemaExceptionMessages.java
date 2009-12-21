@@ -50,6 +50,7 @@
 package com.openexchange.groupware.update.internal;
 
 import com.openexchange.exceptions.LocalizableStrings;
+import com.openexchange.groupware.update.SchemaException;
 
 /**
  * Exception message texts for the {@link SchemaException}.
@@ -73,6 +74,8 @@ public final class SchemaExceptionMessages implements LocalizableStrings {
     public static final String SQL_PROBLEM_MSG = "A SQL problem occurred: %1$s.";
 
     public static final String DATABASE_DOWN_MSG = "Cannot get database connection.";
+
+    public static final String WRONG_ROW_COUNT_MSG = "Processed a wrong number of rows in database. Expected %1$d rows but worked on %2$d rows.";
 
     /**
      * Prevent instantiation.

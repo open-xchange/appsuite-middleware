@@ -71,4 +71,7 @@ public class SchemaUpdateStateImpl extends SchemaImpl implements SchemaUpdateSta
         executedTasks.add(taskName);
     }
 
+    public boolean isExecuted(String taskName) {
+        return executedTasks.contains(taskName);
+    }
 }

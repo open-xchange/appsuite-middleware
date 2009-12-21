@@ -50,6 +50,7 @@
 package com.openexchange.groupware.update.internal;
 
 import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.groupware.update.UpdateTaskV2;
 
 /**
  * {@link InternalList}
@@ -69,20 +70,26 @@ public final class InternalList {
     }
 
     public void start() {
-        final DynamicList registry = DynamicList.getInstance();
-        for (final UpdateTask task : TASKS) {
+        DynamicList registry = DynamicList.getInstance();
+        for (UpdateTask task : OLD_TASKS) {
+            registry.addUpdateTask(task);
+        }
+        for (UpdateTaskV2 task : TASKS) {
             registry.addUpdateTask(task);
         }
     }
 
     public void stop() {
-        final DynamicList registry = DynamicList.getInstance();
-        for (final UpdateTask task : TASKS) {
+        DynamicList registry = DynamicList.getInstance();
+        for (UpdateTaskV2 task : TASKS) {
+            registry.removeUpdateTask(task);
+        }
+        for (UpdateTask task : OLD_TASKS) {
             registry.removeUpdateTask(task);
         }
     }
 
-    private static final UpdateTask[] TASKS = new UpdateTask[] {
+    private static final UpdateTask[] OLD_TASKS = new UpdateTask[] {
         new com.openexchange.groupware.update.tasks.CreateTableVersion(),
         new com.openexchange.groupware.update.tasks.SpamUpdateTask(),
         new com.openexchange.groupware.update.tasks.PasswordMechUpdateTask(),
@@ -287,13 +294,20 @@ public final class InternalList {
 
         // +++++++++++++++++++++++++++++++++ Version 6.16 starts here. +++++++++++++++++++++++++++++++++
 
-        // Version 104
+        // Version 200
+        // This is the last update task with a database schema version. All newer update task must use the new update task interface
+        // UpdateTaskV2.
+        new com.openexchange.groupware.update.tasks.LastVersionedUpdateTask()
+        // All following update tasks must be added to the list below.
+    };
+
+    private static final UpdateTaskV2[] TASKS = new UpdateTaskV2[] {
         // Renames "Unified INBOX" to "Unified Mail"
         new com.openexchange.groupware.update.tasks.UnifiedINBOXRenamerTask()
 
         // TODO: Enable virtual folder tree update task when needed
         // Version XY
         // Migrates existing folder data to new outlook-like folder tree structure
-        // new com.openexchange.folderstorage.virtual.VirtualTreeMigrationTask()
+        // new com.openexchange.folderstorage.virtual.VirtualTreeMigrationTask()        
     };
 }

@@ -50,7 +50,6 @@
 package com.openexchange.groupware.update;
 
 import com.openexchange.exceptions.LocalizableStrings;
-import com.openexchange.groupware.update.exception.UpdateException;
 
 /**
  * Exception message texts for the {@link UpdateException}.
@@ -59,10 +58,13 @@ import com.openexchange.groupware.update.exception.UpdateException;
  */
 public final class UpdateExceptionMessages implements LocalizableStrings {
 
-    /**
-     * Prevent instantiation.
-     */
-    private UpdateExceptionMessages() {
+    public static final String SQL_PROBLEM_MSG = "A SQL problem occurred: %1$s.";
+
+    public static final String WRONG_ROW_COUNT_MSG = "Processed a wrong number of rows in database. Expected %1$d rows but worked on %2$d rows.";
+
+    public static final String UPDATE_FAILED_MSG = "Updating schema %1$s failed. Cause: %2$s.";
+
+    public UpdateExceptionMessages() {
         super();
     }
 }

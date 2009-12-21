@@ -57,8 +57,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.update.Schema;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
 
 /**
@@ -118,7 +118,7 @@ public class ContactCollectOnIncomingAndOutgoingMailUpdateTask implements Update
             con.commit();
         } catch (SQLException e) {
             rollback(con);
-            throw new OXCalendarException(OXCalendarException.Code.UPDATE_EXCEPTION, e.getMessage());
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             autocommit(con);
             Database.backNoTimeout(contextId, true, con);

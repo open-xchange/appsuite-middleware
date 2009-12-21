@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.contexts.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
@@ -146,7 +147,7 @@ public class CachingContextStorage extends ContextStorage {
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         final OXObjectFactory<ContextExtended> factory = new OXObjectFactory<ContextExtended>() {
             public Serializable getKey() {
-                return Integer.valueOf(contextId);
+                return I(contextId);
             }
             public ContextExtended load() throws AbstractOXException {
                 final ContextExtended retval = persistantImpl.loadContext(contextId);

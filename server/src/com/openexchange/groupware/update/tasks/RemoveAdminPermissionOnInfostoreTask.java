@@ -68,9 +68,10 @@ import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.ProgressState;
+import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.UpdateException;
 import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 
 /**
@@ -93,12 +94,20 @@ public class RemoveAdminPermissionOnInfostoreTask extends UpdateTaskAdapter {
         exceptionFactory = new UpdateExceptionFactory(RemoveAdminPermissionOnInfostoreTask.class);
     }
 
+    @Override
     public int addedWithVersion() {
         return 76;
     }
 
+    @Override
     public int getPriority() {
         return UpdateTaskPriority.HIGH.priority;
+    }
+
+    private static final String[] DEPENDENCIES = { "com.openexchange.groupware.update.tasks.ContactsAddIndex4AutoCompleteSearch" };
+
+    public String[] getDependencies() {
+        return DEPENDENCIES;
     }
 
     public void perform(final PerformParameters params) throws AbstractOXException {
@@ -134,7 +143,7 @@ public class RemoveAdminPermissionOnInfostoreTask extends UpdateTaskAdapter {
             con.commit();
         } catch (SQLException e) {
             rollback(con);
-            throw createSQLError(e);
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             autocommit(con);
             Database.backNoTimeout(triggeringContextId, true, con);
@@ -160,15 +169,10 @@ public class RemoveAdminPermissionOnInfostoreTask extends UpdateTaskAdapter {
             stmt.setInt(3, mailAdmin);
             stmt.executeUpdate();
         } catch (final SQLException e) {
-            throw createSQLError(e);
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
         }
-    }
-
-    @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 1 }, msg = { "A SQL error occurred while performing task RemoveAdminPermissionOnInfostoreTask: %1$s." })
-    private UpdateException createSQLError(final SQLException e) {
-        return exceptionFactory.create(1, e, e.getMessage());
     }
 
     @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 2 }, msg = { "Error while performing task RemoveAdminPermissionOnInfostoreTask: No context admin exists for context %1$s." })
@@ -188,7 +192,7 @@ public class RemoveAdminPermissionOnInfostoreTask extends UpdateTaskAdapter {
             }
             return -1;
         } catch (final SQLException e) {
-            throw createSQLError(e);
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
         }

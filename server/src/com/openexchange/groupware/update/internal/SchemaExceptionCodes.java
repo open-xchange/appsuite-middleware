@@ -49,16 +49,10 @@
 
 package com.openexchange.groupware.update.internal;
 
-import static com.openexchange.groupware.update.internal.SchemaExceptionMessages.ALREADY_LOCKED_MSG;
-import static com.openexchange.groupware.update.internal.SchemaExceptionMessages.DATABASE_DOWN_MSG;
-import static com.openexchange.groupware.update.internal.SchemaExceptionMessages.LOCK_FAILED_MSG;
-import static com.openexchange.groupware.update.internal.SchemaExceptionMessages.MISSING_VERSION_ENTRY_MSG;
-import static com.openexchange.groupware.update.internal.SchemaExceptionMessages.MULTIPLE_VERSION_ENTRY_MSG;
-import static com.openexchange.groupware.update.internal.SchemaExceptionMessages.SQL_PROBLEM_MSG;
-import static com.openexchange.groupware.update.internal.SchemaExceptionMessages.UNLOCK_FAILED_MSG;
-import static com.openexchange.groupware.update.internal.SchemaExceptionMessages.UPDATE_CONFLICT_MSG;
+import static com.openexchange.groupware.update.internal.SchemaExceptionMessages.*;
 import com.openexchange.exceptions.OXErrorMessage;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.update.SchemaException;
 
 /**
  * Exception codes for the {@link SchemaException}.
@@ -98,7 +92,11 @@ public enum SchemaExceptionCodes implements OXErrorMessage {
     /**
      * Cannot get database connection.
      */
-    DATABASE_DOWN(DATABASE_DOWN_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 15);
+    DATABASE_DOWN(DATABASE_DOWN_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 15),
+    /**
+     * Processed a wrong number of rows in database. Expected %1$d rows but worked on %2$d rows.
+     */
+    WRONG_ROW_COUNT(WRONG_ROW_COUNT_MSG, Category.CODE_ERROR, 99);
 
     /**
      * Message of the exception.
@@ -149,7 +147,7 @@ public enum SchemaExceptionCodes implements OXErrorMessage {
         return SchemaExceptionFactory.getInstance().create(this, messageArgs);
     }
 
-    public SchemaException create(final Throwable cause, final Object... messageArgs) {
+    public SchemaException create(Throwable cause, Object... messageArgs) {
         return SchemaExceptionFactory.getInstance().create(this, cause, messageArgs);
     }
 }

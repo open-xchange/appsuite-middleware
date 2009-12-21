@@ -49,39 +49,16 @@
 
 package com.openexchange.groupware.update.internal;
 
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
+import com.openexchange.groupware.update.SchemaUpdateState;
+import com.openexchange.groupware.update.UpdateTask;
 
 /**
- * Exception for reading or writing schema information from/to the database fails.
- * @author <a href="mailto:marcus.klein@open-xchange.org">Marcus Klein</a>
+ * {@link Filter}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class SchemaException extends AbstractOXException {
+public interface Filter {
 
-    /**
-     * Serialization.
-     */
-    private static final long serialVersionUID = 1309805080707994273L;
+    boolean mustBeExecuted(SchemaUpdateState schema, UpdateTask task);
 
-    /**
-     * Nesting constructor.
-     * @param cause Nested cause.
-     */
-    public SchemaException(final AbstractOXException cause) {
-        super(cause);
-    }
-
-    /**
-     * Constructor with all parameters.
-     * @param component Component.
-     * @param category Category.
-     * @param number detail number.
-     * @param message message of the exception.
-     * @param cause the cause.
-     * @param messageArgs arguments for the exception message.
-     */
-    public SchemaException(EnumComponent component, Category category, int detailNumber, String message, Throwable cause, Object... messageArgs) {
-        super(component, category, detailNumber, message, cause);
-        setMessageArgs(messageArgs);
-    }
 }

@@ -70,8 +70,6 @@ import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.calendar.CalendarCache;
 import com.openexchange.groupware.contact.Contacts;
@@ -81,10 +79,9 @@ import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.ProgressState;
+import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.UpdateException;
-import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.tools.Collections.SmartIntArray;
@@ -96,22 +93,26 @@ import com.openexchange.tools.oxfolder.OXFolderSQL;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@OXExceptionSource(classId = Classes.UPDATE_TASK, component = EnumComponent.UPDATE)
 public final class DuplicateContactCollectFolderRemoverTask extends UpdateTaskAdapter {
 
-    /**
-     * Initializes a new {@link DuplicateContactCollectFolderRemoverTask}.
-     */
+    private static final String[] DEPENDENCIES = { "com.openexchange.groupware.update.tasks.MailAccountAddPersonalTask" };
+
     public DuplicateContactCollectFolderRemoverTask() {
         super();
     }
 
+    @Override
     public int addedWithVersion() {
         return 98;
     }
 
+    @Override
     public int getPriority() {
         return UpdateTaskPriority.HIGH.priority;
+    }
+
+    public String[] getDependencies() {
+        return DEPENDENCIES;
     }
 
     public void perform(final PerformParameters params) throws AbstractOXException {
@@ -179,7 +180,7 @@ public final class DuplicateContactCollectFolderRemoverTask extends UpdateTaskAd
             } while (rs.next());
             return total;
         } catch (final SQLException e) {
-            throw createSQLError(e);
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
             Database.backNoTimeout(contextId, true, con);
@@ -211,7 +212,7 @@ public final class DuplicateContactCollectFolderRemoverTask extends UpdateTaskAd
                 throw new UpdateException(e);
             } catch (final SQLException e) {
                 // Auto-Commit mode could not be changed
-                throw createSQLError(e);
+                throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
             }
             try {
                 checkDuplicates4User(user, ctx, names, writeCon, log);
@@ -219,7 +220,7 @@ public final class DuplicateContactCollectFolderRemoverTask extends UpdateTaskAd
                 writeCon.commit(); // COMMIT
             } catch (final SQLException e) {
                 rollback(writeCon);
-                throw createSQLError(e);
+                throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
             }
             /*
              * catch (final UpdateException e) { rollback(writeCon); throw e; }
@@ -366,7 +367,7 @@ public final class DuplicateContactCollectFolderRemoverTask extends UpdateTaskAd
                 }
                 return -1;
             } catch (final SQLException e) {
-                throw createSQLError(e);
+                throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
             } finally {
                 closeSQLStuff(rs, stmt);
             }
@@ -515,10 +516,4 @@ public final class DuplicateContactCollectFolderRemoverTask extends UpdateTaskAd
             log.error(e.getMessage(), e);
         }
     }
-
-    @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 1 }, msg = { "A SQL error occurred while performing task DuplicateContactCollectFolderRemoverTask: %1$s." })
-    private static UpdateException createSQLError(final SQLException e) {
-        return new UpdateExceptionFactory(DuplicateContactCollectFolderRemoverTask.class).create(1, e, e.getMessage());
-    }
-
 }

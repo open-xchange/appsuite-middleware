@@ -52,6 +52,7 @@ package com.openexchange.groupware.update.exception;
 import com.openexchange.groupware.AbstractOXExceptionFactory;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.update.UpdateException;
 
 /**
  * Factory for creating exception in the schema updater.

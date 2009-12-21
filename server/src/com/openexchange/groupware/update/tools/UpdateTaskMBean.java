@@ -64,9 +64,8 @@ import javax.management.MBeanOperationInfo;
 import javax.management.MBeanParameterInfo;
 import javax.management.ReflectionException;
 import com.openexchange.groupware.update.Schema;
+import com.openexchange.groupware.update.UpdateException;
 import com.openexchange.groupware.update.UpdateProcess;
-import com.openexchange.groupware.update.exception.UpdateException;
-import com.openexchange.groupware.update.internal.SchemaException;
 
 /**
  * {@link UpdateTaskMBean} - MBean for update task toolkit.
@@ -181,10 +180,6 @@ public final class UpdateTaskMBean implements DynamicMBean {
                     }
                 }
             } catch (final UpdateException e) {
-                LOG.error(e.getMessage(), e);
-                final Exception wrapMe = new Exception(e.getMessage());
-                throw new MBeanException(wrapMe);
-            } catch (final SchemaException e) {
                 LOG.error(e.getMessage(), e);
                 final Exception wrapMe = new Exception(e.getMessage());
                 throw new MBeanException(wrapMe);

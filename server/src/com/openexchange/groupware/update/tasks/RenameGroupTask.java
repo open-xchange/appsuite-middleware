@@ -60,17 +60,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.i18n.Groups;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.ProgressState;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 import com.openexchange.server.services.I18nServices;
 
 /**
@@ -78,12 +73,9 @@ import com.openexchange.server.services.I18nServices;
  * locale of the context administrator.
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-@OXExceptionSource(classId = Classes.UPDATE_TASK, component = EnumComponent.UPDATE)
 public class RenameGroupTask extends UpdateTaskAdapter {
 
     private static final Log LOG = LogFactory.getLog(RenameGroupTask.class);
-
-    private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(CorrectIndexes.class);
 
     /**
      * Initializes a new {@link RenameGroupTask}.
@@ -92,19 +84,22 @@ public class RenameGroupTask extends UpdateTaskAdapter {
         super();
     }
 
+    @Override
     public int addedWithVersion() {
         return 52;
     }
 
+    @Override
     public int getPriority() {
         return UpdateTaskPriority.NORMAL.priority;
     }
 
-    @OXThrowsMultiple(category = { Category.CODE_ERROR },
-        desc = { "" },
-        exceptionId = { 1 },
-        msg = { "An SQL error occurred: %1$s." }
-    )
+    private static final String[] DEPENDENCIES = { "com.openexchange.groupware.update.tasks.ContactsAddUseCountColumnUpdateTask" };
+
+    public String[] getDependencies() {
+        return DEPENDENCIES;
+    }
+
     public void perform(PerformParameters params) throws AbstractOXException {
         int contextId = params.getContextId();
         final Connection con = Database.getNoTimeout(contextId, true);
@@ -120,9 +115,9 @@ public class RenameGroupTask extends UpdateTaskAdapter {
                 state.incrementState();
             }
             con.commit();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             rollback(con);
-            throw EXCEPTION.create(1, e, e.getMessage());
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             autocommit(con);
             Database.backNoTimeout(contextId, true, con);

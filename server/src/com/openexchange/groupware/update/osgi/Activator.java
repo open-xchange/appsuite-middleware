@@ -52,12 +52,16 @@ package com.openexchange.groupware.update.osgi;
 import java.util.Stack;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.database.CreateTableService;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.update.Initialization;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.groupware.update.internal.CreateUpdateTaskTable;
+import com.openexchange.groupware.update.internal.UpdateExceptionFactory;
 import com.openexchange.groupware.update.internal.SchemaExceptionFactory;
 
 /**
@@ -74,17 +78,19 @@ public class Activator implements BundleActivator {
 
     private final Stack<ComponentRegistration> exceptions = new Stack<ComponentRegistration>();
 
+    private ServiceRegistration createTableRegistration;
+
     public Activator() {
         super();
     }
 
     public void start(BundleContext context) throws Exception {
+        createTableRegistration = context.registerService(CreateTableService.class.getName(), new CreateUpdateTaskTable(), null);
         exceptions.push(new ComponentRegistration(context, EnumComponent.UPDATE, APPLICATION_ID, SchemaExceptionFactory.getInstance()));
-//        exceptions.push(new ComponentRegistration(context, EnumComponent.UPDATE, APPLICATION_ID, UpdateExceptionFactory.getInstance()));
+        exceptions.push(new ComponentRegistration(context, EnumComponent.UPDATE, APPLICATION_ID, UpdateExceptionFactory.getInstance()));
         trackers.push(new ServiceTracker(context, ConfigurationService.class.getName(), new ConfigurationCustomizer(context)));
         trackers.push(new ServiceTracker(context, UpdateTaskProviderService.class.getName(), new UpdateTaskCustomizer(context)));
         Initialization.getInstance().start();
-        // TODO Auto-generated method stub
         for (final ServiceTracker tracker : trackers) {
             tracker.open();
         }
@@ -95,9 +101,9 @@ public class Activator implements BundleActivator {
             trackers.pop().close();
         }
         Initialization.getInstance().stop();
-        // TODO Auto-generated method stub
         while (!exceptions.isEmpty()) {
             exceptions.pop().unregister();
         }
+        createTableRegistration.unregister();
     }
 }

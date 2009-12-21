@@ -49,11 +49,8 @@
 
 package com.openexchange.groupware.update.exception;
 
-import com.openexchange.groupware.update.SchemaStoreImpl;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.Updater;
-import com.openexchange.groupware.update.UpdaterImpl;
-import com.openexchange.groupware.update.internal.SchemaExceptionFactory;
 import com.openexchange.groupware.update.tasks.NewAdminExtensionsUpdateTask;
 import com.openexchange.groupware.update.tasks.TaskReminderFolderZero;
 
@@ -66,16 +63,6 @@ import com.openexchange.groupware.update.tasks.TaskReminderFolderZero;
 public final class Classes {
 
     /**
-     * {@link SchemaStoreImpl}.
-     */
-    public static final int SCHEMA_STORE_IMPL = 1;
-
-    /**
-     * {@link SchemaExceptionFactory}.
-     */
-    public static final int SCHEMA_EXCEPTION_FACTORY = 2;
-
-    /**
      * {@link UpdateExceptionFactory}.
      */
     public static final int UPDATE_EXCEPTION_FACTORY = 4;
@@ -84,11 +71,6 @@ public final class Classes {
      * {@link Updater}.
      */
     public static final int UPDATER = 5;
-    
-    /**
-     * {@link UpdaterImpl}.
-     */
-    public static final int UPDATER_IMPL = 6;
     
     /**
      * {@link UpdateTask}.

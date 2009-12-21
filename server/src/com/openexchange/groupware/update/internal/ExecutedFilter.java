@@ -49,30 +49,21 @@
 
 package com.openexchange.groupware.update.internal;
 
-import java.util.Comparator;
+import com.openexchange.groupware.update.SchemaUpdateState;
 import com.openexchange.groupware.update.UpdateTask;
 
 /**
- * {@link UpdateTaskComparator}
+ * {@link ExecutedFilter}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class UpdateTaskComparator implements Comparator<UpdateTask> {
+public class ExecutedFilter implements Filter {
 
-    public UpdateTaskComparator() {
+    public ExecutedFilter() {
         super();
     }
 
-    public int compare(UpdateTask task1, UpdateTask task2) {
-        if (task1.addedWithVersion() > task2.addedWithVersion()) {
-            return 1;
-        } else if (task1.addedWithVersion() < task2.addedWithVersion()) {
-            return -1;
-        } else if (task1.getPriority() > task2.getPriority()) {
-            return 1;
-        } else if (task1.getPriority() < task2.getPriority()) {
-            return -1;
-        }
-        return 0;
+    public boolean mustBeExecuted(SchemaUpdateState state, UpdateTask task) {
+        return !state.isExecuted(task.getClass().getName());
     }
 }

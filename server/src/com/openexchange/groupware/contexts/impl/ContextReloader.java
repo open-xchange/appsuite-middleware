@@ -73,8 +73,7 @@ final class ContextReloader extends Refresher<ContextExtended> implements Contex
      * Default constructor.
      * @throws AbstractOXException if some problem occurs with refreshing.
      */
-    public ContextReloader(final OXObjectFactory<ContextExtended> factory,
-        final String regionName) throws AbstractOXException {
+    public ContextReloader(OXObjectFactory<ContextExtended> factory, String regionName) throws AbstractOXException {
         super(factory, regionName);
         this.delegate = refresh();
     }

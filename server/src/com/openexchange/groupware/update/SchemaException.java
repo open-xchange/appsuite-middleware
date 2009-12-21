@@ -47,70 +47,41 @@
  *
  */
 
-package com.openexchange.groupware.update.exception;
+package com.openexchange.groupware.update;
 
-import com.openexchange.groupware.AbstractOXExceptionFactory;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.update.internal.SchemaException;
 
 /**
- * Creates schema exceptions.
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
- * @deprecated
+ * Exception for reading or writing schema information from/to the database fails.
+ * @author <a href="mailto:marcus.klein@open-xchange.org">Marcus Klein</a>
  */
-@Deprecated
-public class SchemaExceptionFactoryOld extends
-    AbstractOXExceptionFactory<SchemaException> {
+public class SchemaException extends AbstractOXException {
 
     /**
-     * Default constructor.
-     * @param clazz For this class exceptions should be created.
+     * Serialization.
      */
-    public SchemaExceptionFactoryOld(final Class clazz) {
-        super(clazz);
+    private static final long serialVersionUID = 1309805080707994273L;
+
+    /**
+     * Nesting constructor.
+     * @param cause Nested cause.
+     */
+    public SchemaException(final AbstractOXException cause) {
+        super(cause);
     }
 
     /**
-     * {@inheritDoc}
+     * Constructor with all parameters.
+     * @param component Component.
+     * @param category Category.
+     * @param number detail number.
+     * @param message message of the exception.
+     * @param cause the cause.
+     * @param messageArgs arguments for the exception message.
      */
-    @Override
-    protected SchemaException buildException(final EnumComponent component,
-        final Category category, final int number, final String message,
-        final Throwable cause, final Object... msgArgs) {
-        return new SchemaException(component, category, number, message, cause,
-            msgArgs);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected int getClassId() {
-        return Classes.SCHEMA_EXCEPTION_FACTORY;
-    }
-
-    /**
-     * Creates a schema exception.
-     * @param identifier exception identifier.
-     * @param cause nested cause.
-     * @param msgArgs arguments for the message.
-     * @return the created exception.
-     */
-    public SchemaException create(final int identifier, final Throwable cause,
-        final Object... msgArgs) {
-        return createException(identifier, cause,
-            msgArgs);
-    }
-
-    /**
-     * Creates a schema exception.
-     * @param identifier exception identifier.
-     * @param msgArgs arguments for the message.
-     * @return the created exception.
-     */
-    public SchemaException create(final int identifier,
-        final Object... msgArgs) {
-        return create(identifier, null, msgArgs);
+    public SchemaException(EnumComponent component, Category category, int detailNumber, String message, Throwable cause, Object... messageArgs) {
+        super(component, category, detailNumber, message, cause);
+        setMessageArgs(messageArgs);
     }
 }

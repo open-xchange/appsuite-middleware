@@ -52,8 +52,8 @@ package com.openexchange.groupware.update.internal;
 import com.openexchange.exceptions.ErrorMessage;
 import com.openexchange.exceptions.Exceptions;
 import com.openexchange.groupware.EnumComponent;
+import com.openexchange.groupware.update.UpdateException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.exception.UpdateException;
 
 /**
  * Creates schema exceptions.

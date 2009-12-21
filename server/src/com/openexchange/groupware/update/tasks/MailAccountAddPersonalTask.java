@@ -57,15 +57,10 @@ import java.sql.SQLException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.update.Schema;
-import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.UpdateException;
-import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.tools.update.Tools;
 
 /**
@@ -73,22 +68,30 @@ import com.openexchange.tools.update.Tools;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@OXExceptionSource(classId = Classes.UPDATE_TASK, component = EnumComponent.UPDATE)
-public final class MailAccountAddPersonalTask implements UpdateTask {
+public final class MailAccountAddPersonalTask extends UpdateTaskAdapter {
 
     public MailAccountAddPersonalTask() {
         super();
     }
 
+    @Override
     public int addedWithVersion() {
         return 96;
     }
 
+    @Override
     public int getPriority() {
         return UpdateTaskPriority.HIGH.priority;
     }
 
-    public void perform(final Schema schema, final int contextId) throws AbstractOXException {
+    private static final String[] DEPENDENCIES = { "com.openexchange.groupware.update.tasks.GlobalAddressBookPermissionsResolverTask" };
+
+    public String[] getDependencies() {
+        return DEPENDENCIES;
+    }
+
+    public void perform(PerformParameters params) throws AbstractOXException {
+        int contextId = params.getContextId();
         final Connection con;
         try {
             con = Database.getNoTimeout(contextId, true);
@@ -112,17 +115,10 @@ public final class MailAccountAddPersonalTask implements UpdateTask {
                 stmt = null;
             }
         } catch (final SQLException e) {
-            throw createSQLError(e);
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
             Database.backNoTimeout(contextId, true, con);
         }
     }
-
-    @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 1 }, msg = { "A SQL error occurred while performing task %1$s: %2$s." })
-    private static UpdateException createSQLError(final SQLException e) {
-        final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(MailAccountAddPersonalTask.class);
-        return EXCEPTION.create(1, e, MailAccountAddPersonalTask.class.getSimpleName(), e.getMessage());
-    }
-
 }

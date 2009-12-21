@@ -47,46 +47,41 @@
  *
  */
 
-package com.openexchange.groupware.update;
+package com.openexchange.groupware.update.internal;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import com.openexchange.groupware.update.internal.InternalList;
+import com.openexchange.database.AbstractCreateTableImpl;
+import com.openexchange.database.CreateTableService;
 
 /**
- * {@link Initialization} starts all internal structures especially the list of update tasks.
+ * Implements the {@link CreateTableService} for creating the updateTask table.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class Initialization {
+public final class CreateUpdateTaskTable extends AbstractCreateTableImpl {
 
-    private static final Initialization SINGLETON = new Initialization();
+    private static final String[] CREATED_TABLES = { "updateTask" };
 
-    private static final Log LOG = LogFactory.getLog(Initialization.class);
+    static final String[] CREATES = { 
+        // Using full index is not possible to convert to a primary key because two different tasks may have same beginning letters that
+        // fit into the index and causing a collision.
+        "CREATE TABLE updateTask (cid INT4 UNSIGNED NOT NULL,taskName VARCHAR(1024) NOT NULL,successful BOOLEAN NOT NULL," +
+        "lastModified INT8 NOT NULL,INDEX full (cid,taskName(255))) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"
+    };
 
-    private final AtomicBoolean started;
-
-    private Initialization() {
+    public CreateUpdateTaskTable() {
         super();
-        started = new AtomicBoolean();
     }
 
-    public static Initialization getInstance() {
-        return SINGLETON;
+    @Override
+    protected String[] getCreateStatements() {
+        return CREATES.clone();
     }
 
-    public void start() {
-        if (!started.compareAndSet(false, true)) {
-            LOG.error("Database update component has already been started.", new Throwable());
-        }
-        InternalList.getInstance().start();
+    public String[] requiredTables() {
+        return NO_TABLES;
     }
 
-    public void stop() {
-        if (!started.compareAndSet(true, false)) {
-            LOG.error("Database update component cannot be stopped since it has not been started before.", new Throwable());
-        }
-        InternalList.getInstance().stop();
+    public String[] tablesToCreate() {
+        return CREATED_TABLES.clone();
     }
 }

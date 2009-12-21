@@ -74,15 +74,15 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.ProgressState;
 import com.openexchange.groupware.update.Schema;
+import com.openexchange.groupware.update.SchemaException;
 import com.openexchange.groupware.update.SchemaStore;
+import com.openexchange.groupware.update.UpdateException;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.UpdateException;
 import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 import com.openexchange.groupware.update.internal.PerformParametersImpl;
 import com.openexchange.groupware.update.internal.ProgressStatusImpl;
-import com.openexchange.groupware.update.internal.SchemaException;
 import com.openexchange.tools.sql.DBUtils;
 
 /**

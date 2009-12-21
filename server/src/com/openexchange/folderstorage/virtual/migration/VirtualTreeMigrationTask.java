@@ -60,6 +60,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
@@ -69,18 +71,14 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.virtual.VirtualPermission;
 import com.openexchange.folderstorage.virtual.sql.Insert;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.update.Schema;
+import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.UpdateException;
-import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.server.impl.OCLPermission;
@@ -91,12 +89,9 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@OXExceptionSource(classId = Classes.UPDATE_TASK, component = EnumComponent.UPDATE)
 public class VirtualTreeMigrationTask implements UpdateTask {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(VirtualTreeMigrationTask.class);
-
-    private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(VirtualTreeMigrationTask.class);
+    private static final Log LOG = LogFactory.getLog(VirtualTreeMigrationTask.class);
 
     public int addedWithVersion() {
         return 78;
@@ -173,7 +168,7 @@ public class VirtualTreeMigrationTask implements UpdateTask {
             } while (rs.next());
             return m;
         } catch (final SQLException e) {
-            throw createSQLError(e);
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
             Database.back(contextId, false, writeCon);
@@ -188,7 +183,7 @@ public class VirtualTreeMigrationTask implements UpdateTask {
         {
             final int mailAdmin = getMailAdmin(contextId);
             if (-1 == mailAdmin) {
-                throw missingAdminError(contextId);
+                throw new UpdateException(new ContextException(ContextException.Code.NO_MAILADMIN));
             }
             final ContextImpl ctxi = new ContextImpl(contextId);
             ctxi.setMailadmin(mailAdmin);
@@ -293,8 +288,6 @@ public class VirtualTreeMigrationTask implements UpdateTask {
             } catch (final DBPoolingException e) {
                 throw new UpdateException(e);
             }
-            final int mailAdmin = ctx.getMailadmin();
-            final long creatingTime = System.currentTimeMillis();
             try {
                 final Permission systemPermission = new VirtualPermission();
                 systemPermission.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
@@ -352,16 +345,6 @@ public class VirtualTreeMigrationTask implements UpdateTask {
         }
     }
 
-    @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 1 }, msg = { "A SQL error occurred while performing task VirtualTreeMigrationTask: %1$s." })
-    private static UpdateException createSQLError(final SQLException e) {
-        return EXCEPTION.create(1, e, e.getMessage());
-    }
-
-    @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 2 }, msg = { "Error while performing task VirtualTreeMigrationTask: No context admin exists for context %1$s." })
-    private static UpdateException missingAdminError(final int contextId) {
-        return EXCEPTION.create(2, Integer.valueOf(contextId));
-    }
-
     private static int getMailAdmin(final int contextId) throws UpdateException {
         final Connection con;
         try {
@@ -380,7 +363,7 @@ public class VirtualTreeMigrationTask implements UpdateTask {
             }
             return -1;
         } catch (final SQLException e) {
-            throw createSQLError(e);
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
             Database.back(contextId, false, con);
@@ -404,7 +387,7 @@ public class VirtualTreeMigrationTask implements UpdateTask {
             rs = stmt.executeQuery();
             return rs.next();
         } catch (final SQLException e) {
-            throw createSQLError(e);
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
             Database.back(ctx, false, con);

@@ -55,9 +55,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.groupware.update.internal.ConfiguredList;
+import com.openexchange.groupware.update.internal.DependencyComparator;
 import com.openexchange.groupware.update.internal.DynamicList;
-import com.openexchange.groupware.update.internal.UpdateTaskComparator;
+import com.openexchange.groupware.update.internal.ExecutedFilter;
+import com.openexchange.groupware.update.internal.Filter;
 import com.openexchange.groupware.update.internal.UpdateTaskList;
+import com.openexchange.groupware.update.internal.VersionFilter;
 
 /**
  * {@link UpdateTaskCollection} - Collection for update tasks.
@@ -90,25 +93,28 @@ public class UpdateTaskCollection {
     /**
      * Creates a list of <code>UpdateTask</code> instances that apply to current database version
      * 
-     * @param dbVersion - current database version
+     * @param schema - current database version
      * @return list of <code>UpdateTask</code> instances
      */
-    public static final List<UpdateTask> getFilteredAndSortedUpdateTasks(int dbVersion) {
-        final List<UpdateTask> retval = generateList();
-        /*
-         * Filter
-         */
+    public final List<UpdateTask> getFilteredAndSortedUpdateTasks(SchemaUpdateState schema) {
+        final Filter filter;
+        if (Schema.FINAL_VERSION == schema.getDBVersion() || Schema.NO_VERSION == schema.getDBVersion()) {
+            filter = new ExecutedFilter();
+        } else {
+            filter = new VersionFilter();
+        }
+        List<UpdateTask> retval = generateList();
+        // Filter
         Iterator<UpdateTask> iter = retval.iterator();
         while (iter.hasNext()) {
             UpdateTask task = iter.next();
-            if (task.addedWithVersion() <= dbVersion) {
+            if (!filter.mustBeExecuted(schema, task)) {
                 iter.remove();
             }
         }
-        /*
-         * Sort
-         */
-        Collections.sort(retval, new UpdateTaskComparator());
+        // Sort, DependencyComparator uses internal fallback to database schema versions.
+        // TODO Use something like a self written selection sort. DependencyComparator does not work due to missing transitivity.
+        Collections.sort(retval, new DependencyComparator());
         return retval;
     }
 
@@ -131,8 +137,9 @@ public class UpdateTaskCollection {
         return version;
     }
 
-    private static List<UpdateTask> generateList() {
+    public final List<UpdateTask> generateList() {
         List<UpdateTask> retval = new ArrayList<UpdateTask>();
+        // TODO An exclude list can be created.
         UpdateTaskList configured = ConfiguredList.getInstance();
         if (ConfiguredList.getInstance().isConfigured()) {
             retval.addAll(configured.getTaskList());
@@ -144,5 +151,18 @@ public class UpdateTaskCollection {
 
     public void dirtyVersion() {
         versionDirty.set(true);
+    }
+
+    public boolean needsUpdate(SchemaUpdateState state) {
+        if (getHighestVersion() > state.getDBVersion()) {
+            return true;
+        }
+        List<UpdateTask> taskList = generateList();
+        for (UpdateTask task : taskList) {
+            if (!state.isExecuted(task.getClass().getName())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

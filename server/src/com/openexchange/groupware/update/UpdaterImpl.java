@@ -49,14 +49,6 @@
 
 package com.openexchange.groupware.update;
 
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.UpdateException;
-import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
-import com.openexchange.groupware.update.internal.SchemaException;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.TimerService;
@@ -67,13 +59,7 @@ import com.openexchange.timer.TimerService;
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-@OXExceptionSource(classId = Classes.UPDATER_IMPL, component = EnumComponent.UPDATE)
 public class UpdaterImpl extends Updater {
-
-    /**
-     * For creating exceptions.
-     */
-    private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(UpdaterImpl.class);
 
     /**
      * Default constructor.
@@ -87,12 +73,6 @@ public class UpdaterImpl extends Updater {
         return getSchema(contextId).isLocked();
     }
 
-    @OXThrows(
-        category = Category.CODE_ERROR,
-        desc = "",
-        exceptionId = 1,
-        msg = "Update process initialization failed: %1$s."
-    )
     @Override
     public void startUpdate(int contextId) throws UpdateException {
         final TimerService timerService;
@@ -101,13 +81,7 @@ public class UpdaterImpl extends Updater {
         } catch (ServiceException e) {
             throw new UpdateException(e);
         }
-        UpdateProcess process;
-        try {
-            process = new UpdateProcess(contextId);
-        } catch (final SchemaException e) {
-            throw EXCEPTION.create(1, e, e.getMessage());
-        }
-        timerService.schedule(process, 0);
+        timerService.schedule(new UpdateProcess(contextId), 0);
     }
 
     @Override
@@ -115,8 +89,8 @@ public class UpdaterImpl extends Updater {
         return toUpdateInternal(getSchema(contextId));
     }
 
-    private static final boolean toUpdateInternal(final Schema schema) {
-        return (UpdateTaskCollection.getInstance().getHighestVersion() > schema.getDBVersion());
+    private static final boolean toUpdateInternal(SchemaUpdateState schema) {
+        return UpdateTaskCollection.getInstance().needsUpdate(schema);
     }
 
     private SchemaUpdateState getSchema(int contextId) throws UpdateException {
@@ -130,15 +104,15 @@ public class UpdaterImpl extends Updater {
         return schema;
     }
 
-    private Schema getSchema(int poolId, String schemaName) throws UpdateException {
-        final Schema schema;
+    private SchemaUpdateState getSchema(int poolId, String schemaName) throws UpdateException {
+        final SchemaUpdateState state;
         try {
             final SchemaStore store = SchemaStore.getInstance();
-            schema = store.getSchema(poolId, schemaName);
+            state = store.getSchema(poolId, schemaName);
         } catch (final SchemaException e) {
             throw new UpdateException(e);
         }
-        return schema;
+        return state;
     }
 
     /**

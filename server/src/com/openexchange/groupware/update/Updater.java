@@ -49,29 +49,13 @@
 
 package com.openexchange.groupware.update;
 
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.UpdateException;
-import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 
 /**
  * Interface for the updater.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-@OXExceptionSource(classId = Classes.UPDATER, component = EnumComponent.UPDATE)
 public abstract class Updater {
-
-    /**
-     * Current implementation of the updater.
-     */
-    private static Class< ? extends Updater> implementingClass;
-
-    /**
-     * Factory for creating exceptions from annotations.
-     */
-    private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(Updater.class);
 
     /**
      * Default constructor.
@@ -85,7 +69,7 @@ public abstract class Updater {
      * @return the updater.
      * @throws UpdateException if instantiating the implementation fails.
      */
-    public static Updater getInstance() throws UpdateException {
+    public static Updater getInstance() {
         return new UpdaterImpl();
     }
 

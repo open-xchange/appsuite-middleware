@@ -66,7 +66,7 @@ public class SchemaImpl implements Schema {
     /**
      * Version of the schema.
      */
-    private int dbVersion;
+    private int dbVersion = NO_VERSION;
 
     /**
      * Is the update compatible for the groupware?

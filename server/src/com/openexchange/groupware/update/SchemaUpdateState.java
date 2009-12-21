@@ -56,4 +56,6 @@ package com.openexchange.groupware.update;
  */
 public interface SchemaUpdateState extends Schema {
 
+    boolean isExecuted(String taskName);
+
 }

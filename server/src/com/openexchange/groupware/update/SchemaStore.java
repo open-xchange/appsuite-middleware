@@ -49,22 +49,19 @@
 
 package com.openexchange.groupware.update;
 
+import java.sql.Connection;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.update.internal.SchemaException;
+import com.openexchange.groupware.update.internal.SchemaStoreImpl;
 
 /**
- * Abstract class defining the interface for reading the schema version
- * information.
+ * Abstract class defining the interface for reading the schema version information.
  * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public abstract class SchemaStore {
 
-    /**
-     * Default constructor.
-     */
     protected SchemaStore() {
         super();
     }
@@ -74,33 +71,29 @@ public abstract class SchemaStore {
      * 
      * @return an implementation for this interface.
      */
-    public static SchemaStore getInstance() throws SchemaException {
+    public static SchemaStore getInstance() {
         return new SchemaStoreImpl();
     }
 
     public abstract SchemaUpdateState getSchema(int poolId, String schemaName) throws SchemaException;
 
     /**
-     * Marks given schema as locked due to a start of an update process
+     * Marks given schema as locked due to a start of an update process.
      * 
-     * @param schema -
-     *            the schema
-     * @param contextId TODO
-     * 
+     * @param schema the schema
+     * @param contextId unique context identifier
      * @throws SchemaException
      */
-    public abstract void lockSchema(final Schema schema, int contextId) throws SchemaException;
+    public abstract void lockSchema(Schema schema, int contextId) throws SchemaException;
     
     /**
-     * Marks given schem as unlocked to release this schema from an update
-     * process
+     * Marks given schem as unlocked to release this schema from an update process.
      * 
-     * @param schema -
-     *            the schema
-     * @param contextId TODO
+     * @param schema the schema
+     * @param contextId the unique context identifier
      * @throws SchemaException
      */
-    public abstract void unlockSchema(final Schema schema, int contextId) throws SchemaException;
+    public abstract void unlockSchema(Schema schema, int contextId) throws SchemaException;
 
     public final Schema getSchema(Context ctx) throws SchemaException {
         return getSchema(ctx.getContextId());
@@ -113,4 +106,12 @@ public abstract class SchemaStore {
             throw new SchemaException(e);
         }
     }
+
+    public abstract void addExecutedTask(int contextId, String taskName, boolean success) throws SchemaException;
+
+    /**
+     * @param con a writable database connection but into transaction mode.
+     */
+    public abstract void addExecutedTask(Connection con, String taskName, boolean success) throws SchemaException;
+
 }

@@ -49,14 +49,32 @@
 
 package com.openexchange.groupware.update.tasks;
 
+import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.tools.sql.DBUtils.rollback;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.Schema;
+import com.openexchange.groupware.update.SchemaException;
+import com.openexchange.groupware.update.SchemaStore;
+import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.groupware.update.UpdateTaskCollection;
+import com.openexchange.groupware.update.UpdateTaskV2;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link LastVersionedUpdateTask} is the last update task defining a database schema version number. After this task every task should use
- * the new UpdateTask interface.
- * TODO link the new update task interface.
+ * the new {@link UpdateTaskV2} interface.
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class LastVersionedUpdateTask extends UpdateTaskAdapter {
@@ -65,15 +83,74 @@ public class LastVersionedUpdateTask extends UpdateTaskAdapter {
         super();
     }
 
-    public void perform(PerformParameters params) throws AbstractOXException {
-        // TODO Migrate versioned update tasks to updateTask table.
-    }
-
+    @Override
     public int addedWithVersion() {
         return 200;
     }
 
-    public int getPriority() {
-        return UpdateTaskPriority.NORMAL.priority;
+    public String[] getDependencies() {
+        return DEPENDENCIES.clone();
+    }
+
+    private static final String[] DEPENDENCIES = { "com.openexchange.groupware.update.tasks.MALPollCreateTableTask" };
+
+    public void perform(PerformParameters params) throws AbstractOXException {
+        Schema schema = params.getSchema();
+        List<String> executed = determineExecuted(schema.getDBVersion(), UpdateTaskCollection.getInstance().generateList());
+        int contextId = params.getContextId();
+        DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
+        final Connection con = dbService.getForUpdateTask(contextId);
+        try {
+            con.setAutoCommit(false);
+            executed = excludeAlreadyListed(con, executed);
+            insertTasks(con, executed);
+            con.commit();
+        } catch (SQLException e) {
+            rollback(con);
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (SchemaException e) {
+            rollback(con);
+            throw e;
+        } finally {
+            autocommit(con);
+            dbService.backForUpdateTask(contextId, con);
+        }
+    }
+
+    public static void insertTasks(Connection con, List<String> executed) throws SchemaException {
+        SchemaStore store = SchemaStore.getInstance();
+        for (String taskName : executed) {
+            store.addExecutedTask(con, taskName, true);
+        }
+    }
+
+    private List<String> determineExecuted(int version, List<UpdateTask> allTasks) {
+        List<String> retval = new ArrayList<String>();
+        for (UpdateTask task : allTasks) {
+            if (task.addedWithVersion() <= version) {
+                retval.add(task.getClass().getName());
+            }
+        }
+        return retval;
+    }
+
+    private List<String> excludeAlreadyListed(Connection con, List<String> executed) throws UpdateException {
+        Statement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.createStatement();
+            result = stmt.executeQuery("SELECT taskName FROM updateTask WHERE cid=0");
+            while (result.next()) {
+                int pos = executed.indexOf(result.getString(1));
+                if (pos != -1) {
+                    executed.remove(pos);
+                }
+            }
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(result, stmt);
+        }
+        return executed;
     }
 }

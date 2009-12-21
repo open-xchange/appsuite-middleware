@@ -64,10 +64,6 @@ import java.util.Map;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.RdbUserStorage;
@@ -76,10 +72,9 @@ import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.ProgressState;
+import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.UpdateException;
-import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
@@ -92,19 +87,26 @@ import com.openexchange.spamhandler.SpamHandler;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@OXExceptionSource(classId = Classes.UPDATE_TASK, component = EnumComponent.UPDATE)
 public final class MailAccountMigrationTask extends UpdateTaskAdapter {
 
     public MailAccountMigrationTask() {
         super();
     }
 
+    @Override
     public int addedWithVersion() {
         return 40;
     }
 
+    @Override
     public int getPriority() {
         return UpdateTaskPriority.HIGH.priority;
+    }
+
+    private static final String[] DEPENDENCIES = { "com.openexchange.groupware.update.tasks.MailAccountCreateTablesTask" };
+
+    public String[] getDependencies() {
+        return DEPENDENCIES;
     }
 
     public void perform(final PerformParameters params) throws AbstractOXException {
@@ -160,7 +162,7 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
             } while (rs.next());
             return m;
         } catch (final SQLException e) {
-            throw createSQLError(e);
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
             Database.back(contextId, true, writeCon);
@@ -175,16 +177,18 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
             throw new UpdateException(e);
         }
         PreparedStatement stmt = null;
+        ResultSet result = null;
         try {
             stmt = writeCon.prepareStatement("SELECT id FROM user_mail_account WHERE cid = ? AND id = ? AND user = ?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, MailAccount.DEFAULT_ID);
             stmt.setInt(3, userId);
-            return stmt.executeQuery().next();
+            result = stmt.executeQuery();
+            return result.next();
         } catch (final SQLException e) {
-            throw createSQLError(e);
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(stmt);
+            closeSQLStuff(result, stmt);
             Database.back(contextId, true, writeCon);
         }
     }
@@ -291,12 +295,6 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
 
     private static String prepareNonNullString(final String string) {
         return null == string ? "" : string;
-    }
-
-    @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 1 }, msg = { "A SQL error occurred while performing task MailAccountMigrationTask: %1$s." })
-    private static UpdateException createSQLError(final SQLException e) {
-        final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(MailAccountMigrationTask.class);
-        return EXCEPTION.create(1, e, e.getMessage());
     }
 
     private static interface FolderNameProvider {
@@ -433,7 +431,7 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
             stmt.setInt(pos++, 1);
             stmt.executeUpdate();
         } catch (final SQLException e) {
-            throw createSQLError(e);
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
             Database.back(cid, true, con);
@@ -465,11 +463,10 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
             stmt.setLong(2, 0);
             stmt.executeUpdate();
         } catch (final SQLException e) {
-            throw createSQLError(e);
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
             Database.back(cid, true, con);
         }
     }
-
 }

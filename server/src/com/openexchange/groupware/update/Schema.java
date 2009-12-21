@@ -57,6 +57,10 @@ package com.openexchange.groupware.update;
  */
 public interface Schema {
 
+    static final int FINAL_VERSION = 200;
+
+    static final int NO_VERSION = -1;
+
     /**
      * @return the database version number stored in the database.
      */

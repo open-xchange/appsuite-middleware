@@ -49,19 +49,9 @@
 
 package com.openexchange.groupware.update;
 
-import java.sql.SQLException;
-import java.util.Iterator;
-import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.database.DBPoolingException;
-import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.update.internal.PerformParametersImpl;
-import com.openexchange.groupware.update.internal.ProgressStatusImpl;
-import com.openexchange.groupware.update.internal.SchemaException;
+import com.openexchange.groupware.update.internal.UpdateExecutor;
 
 /**
  * The {@link #run()} method of this class is started in a separate thread for
@@ -76,11 +66,10 @@ public class UpdateProcess implements Runnable {
 
     private final int contextId;
 
-    private final SchemaStore schemaStore;
+    private final SchemaStore schemaStore = SchemaStore.getInstance();
 
-    public UpdateProcess(int contextId) throws SchemaException {
+    public UpdateProcess(int contextId) {
         super();
-        schemaStore = SchemaStore.getInstance();
         this.contextId = contextId;
     }
 
@@ -89,90 +78,18 @@ public class UpdateProcess implements Runnable {
      */
     public void run() {
         try {
-            boolean unlock = false;
-            /*
-             * Load schema
-             */
-            final Schema schema = schemaStore.getSchema(contextId);
-            if (schema.getDBVersion() >= UpdateTaskCollection.getInstance().getHighestVersion()) {
-                /*
-                 * Already been updated before by previous thread
-                 */
+            // Load schema
+            SchemaUpdateState schema = schemaStore.getSchema(contextId);
+            if (!UpdateTaskCollection.getInstance().needsUpdate(schema)) {
+                // Already been updated before by previous thread
                 return;
             }
-            try {
-                try {
-                    lockSchema(schema);
-                } catch (final SchemaException e) {
-                    final Throwable cause = e.getCause();
-                    unlock = (null != cause) && (cause instanceof SQLException);
-                }
-                /*
-                 * Lock successfully obtained, thus remember to unlock
-                 */
-                unlock = true;
-                /*
-                 * Remove affected contexts and kick active sessions
-                 */
-                removeContexts();
-                /*
-                 * Get filtered & sorted list of update tasks
-                 */
-                final List<UpdateTask> updateTasks = UpdateTaskCollection.getFilteredAndSortedUpdateTasks(schema.getDBVersion());
-                /*
-                 * Perform updates
-                 */
-                final Iterator<UpdateTask> iter = updateTasks.iterator();
-                while (iter.hasNext()) {
-                    final UpdateTask task = iter.next();
-                    final String taskName = task.getClass().getSimpleName();
-                    try {
-                        LOG.info("Starting update task " + taskName + " on schema " + schema.getSchema() + ".");
-                        if (task instanceof UpdateTaskV2) {
-                            ProgressState logger = new ProgressStatusImpl(taskName, schema.getSchema());
-                            PerformParameters params = new PerformParametersImpl(schema, contextId, logger);
-                            ((UpdateTaskV2) task).perform(params);
-                        } else {
-                            task.perform(schema, contextId);
-                        }
-                    } catch (AbstractOXException e) {
-                        LOG.error(e.getMessage(), e);
-                    }
-                    LOG.info("Update task " + taskName + " on schema " + schema.getSchema() + " done.");
-                }
-                LOG.info("Finished updating schema " + schema.getSchema());
-            } finally {
-                if (unlock) {
-                    unlockSchema(schema);
-                }
-                // Remove contexts from cache if they are cached during
-                // update process.
-                removeContexts();
-            }
+            SchemaUpdateState state = schemaStore.getSchema(contextId);
+            new UpdateExecutor(state, contextId, null).execute();
         } catch (SchemaException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (DBPoolingException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (ContextException e) {
             LOG.error(e.getMessage(), e);
         } catch (Throwable t) {
             LOG.error(t.getMessage(), t);
-        }
-    }
-
-    private final void lockSchema(final Schema schema) throws SchemaException {
-        schemaStore.lockSchema(schema, contextId);
-    }
-
-    private final void unlockSchema(final Schema schema) throws SchemaException {
-        schemaStore.unlockSchema(schema, contextId);
-    }
-
-    private final void removeContexts() throws DBPoolingException, ContextException {
-        final int[] contextIds = Database.getContextsInSameSchema(contextId);
-        final ContextStorage contextStorage = ContextStorage.getInstance();
-        for (final int cid : contextIds) {
-            contextStorage.invalidateContext(cid);
         }
     }
 }
