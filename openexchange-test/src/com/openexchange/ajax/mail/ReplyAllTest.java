@@ -50,6 +50,8 @@
 package com.openexchange.ajax.mail;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -58,6 +60,7 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.mail.contenttypes.MailContentType;
 import com.openexchange.configuration.ConfigurationException;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.tools.servlet.AjaxException;
 
 
@@ -72,15 +75,32 @@ public class ReplyAllTest extends AbstractReplyTest {
         super(name);
     }
     
+    public List<Contact> extract(int amount, Contact[] source, List<String> excludedEmail){
+        List<Contact> returnees = new LinkedList<Contact>();
+        int used = 0;
+        for (Contact elem : source)
+            if (!(excludedEmail.contains(elem.getEmail1()) || excludedEmail.contains(elem.getEmail2()) || excludedEmail.contains(elem.getEmail3())) && used < amount) {
+                returnees.add(elem);
+                used++;
+            }
+        return returnees;
+    }
+    
     public void testShouldReplyToSenderAndAllRecipients() throws AjaxException, IOException, SAXException, JSONException, ConfigurationException {
         AJAXClient client1 = new AJAXClient(User.User1);
         AJAXClient client2 = new AJAXClient(User.User2);
+        
+        
         String mail1 = client1.getValues().getSendAddress(); // note: doesn't work the other way around on the dev system, because only the
         String mail2 = client2.getValues().getSendAddress(); // first account is set up correctly.
-        String anotherMail = "tobias.prinz@open-xchange.com";
-        String yetAnotherMail = "tierlieb@open-xchange.com";
+        
+        List<Contact> otherContacts = extract(2, manager.searchAction("*", 6), Arrays.asList(mail1,mail2));
+        assertTrue("Precondition: This test needs at least to other contacts in the global address book to work", otherContacts.size() > 1);
         
         this.client = client2;
+        String anotherMail = otherContacts.get(0).getEmail1();
+        String yetAnotherMail = otherContacts.get(1).getEmail1();
+        
         JSONObject mySentMail = createEMail(adresses(mail1, anotherMail, yetAnotherMail), "ReplyAll test", MailContentType.ALTERNATIVE.toString(), MAIL_TEXT_BODY);
         sendMail(mySentMail.toString());
 
@@ -92,8 +112,8 @@ public class ReplyAllTest extends AbstractReplyTest {
 
         List<String> to = myReplyMail.getTo();
         assertTrue("Sender of original message should become recipient in reply", contains(to, mail2));
-        assertTrue("1st recipient ("+anotherMail+") of original message should still be recipient in reply", contains(to, anotherMail));
-        assertTrue("2nd recipient ("+yetAnotherMail+") of original message should still be recipient in reply", contains(to, yetAnotherMail));
+        assertTrue("1st recipient ("+anotherMail+") of original message should still be recipient in reply, but TO field only has these: " + to, contains(to, anotherMail));
+        assertTrue("2nd recipient ("+yetAnotherMail+") of original message should still be recipient in reply, but TO field only has these: " + to, contains(to, yetAnotherMail));
     }
     
     
