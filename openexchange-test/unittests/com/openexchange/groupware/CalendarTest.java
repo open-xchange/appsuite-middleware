@@ -196,7 +196,6 @@ public class CalendarTest extends TestCase {
         
         cdao.setStartDate(new Date(start));
         cdao.setEndDate(new Date(end));
-        cdao.setUntil(new Date(until));
     }    
     
     public static int getPrivateFolder() throws Exception {
