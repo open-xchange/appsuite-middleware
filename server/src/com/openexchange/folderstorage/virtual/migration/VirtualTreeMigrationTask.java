@@ -75,10 +75,11 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
+import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.server.impl.OCLPermission;
@@ -89,19 +90,19 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class VirtualTreeMigrationTask implements UpdateTask {
+public class VirtualTreeMigrationTask extends UpdateTaskAdapter {
 
     private static final Log LOG = LogFactory.getLog(VirtualTreeMigrationTask.class);
 
-    public int addedWithVersion() {
-        return 78;
+    private static final String[] DEPENDENCIES = { "com.openexchange.folderstorage.virtual.VirtualTreeCreateTableTask" };
+
+    public String[] getDependencies() {
+        return DEPENDENCIES;
     }
 
-    public int getPriority() {
-        return UpdateTaskPriority.HIGH.priority;
-    }
-
-    public void perform(final Schema schema, final int contextId) throws AbstractOXException {
+    public void perform(PerformParameters params) throws AbstractOXException {
+        int contextId = params.getContextId();
+        Schema schema = params.getSchema();
         final Map<Integer, List<Integer>> m = getAllUsers(contextId);
 
         final int size = m.size();

@@ -47,39 +47,69 @@
  *
  */
 
-package com.openexchange.groupware.update.osgi;
+package com.openexchange.groupware.update.internal;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+import java.util.Map.Entry;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.groupware.update.internal.ExcludedList;
+import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.groupware.update.UpdateTaskCollection;
 
 /**
- * {@link ConfigurationCustomizer}
+ * This class contains the list of excluded update tasks. The configuration can be done by the configuration file
+ * excludedupdatetasks.properties.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class ConfigurationCustomizer implements ServiceTrackerCustomizer {
+public class ExcludedList implements UpdateTaskList {
 
-    private final BundleContext context;
+    private static final ExcludedList SINGLETON = new ExcludedList();
 
-    public ConfigurationCustomizer(BundleContext context) {
+    private static final Log LOG = LogFactory.getLog(ExcludedList.class);
+
+    private static final String CONFIG_FILE_NAME = "excludedupdatetasks.properties";
+
+    private List<UpdateTask> taskList = new ArrayList<UpdateTask>();
+
+    private ExcludedList() {
         super();
-        this.context = context;
     }
 
-    public Object addingService(ServiceReference reference) {
-        ConfigurationService configService = (ConfigurationService) context.getService(reference);
-        ExcludedList.getInstance().configure(configService);
-        return configService;
+    public static ExcludedList getInstance() {
+        return SINGLETON;
     }
 
-    public void modifiedService(ServiceReference reference, Object service) {
-        // Nothing to do.
+    public void configure(ConfigurationService configService) {
+        taskList.clear();
+        Properties props = configService.getFile(CONFIG_FILE_NAME);
+        for (Entry<Object, Object> entry : props.entrySet()) {
+            String className = entry.getKey().toString().trim();
+            addTask(className);
+        }
+        UpdateTaskCollection.getInstance().dirtyVersion();
     }
 
-    public void removedService(ServiceReference reference, Object service) {
-        context.ungetService(reference);
+    private void addTask(String className) {
+        try {
+            taskList.add(Class.forName(className).asSubclass(UpdateTask.class).newInstance());
+        } catch (ClassNotFoundException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (IllegalArgumentException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (SecurityException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (InstantiationException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (IllegalAccessException e) {
+            LOG.error(e.getMessage(), e);
+        }
+    }
+
+    public List<UpdateTask> getTaskList() {
+        return taskList;
     }
 }

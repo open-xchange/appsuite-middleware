@@ -54,12 +54,11 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import com.openexchange.groupware.update.internal.ConfiguredList;
 import com.openexchange.groupware.update.internal.DependencyComparator;
 import com.openexchange.groupware.update.internal.DynamicList;
+import com.openexchange.groupware.update.internal.ExcludedList;
 import com.openexchange.groupware.update.internal.ExecutedFilter;
 import com.openexchange.groupware.update.internal.Filter;
-import com.openexchange.groupware.update.internal.UpdateTaskList;
 import com.openexchange.groupware.update.internal.VersionFilter;
 
 /**
@@ -139,12 +138,16 @@ public class UpdateTaskCollection {
 
     public final List<UpdateTask> generateList() {
         List<UpdateTask> retval = new ArrayList<UpdateTask>();
-        // TODO An exclude list can be created.
-        UpdateTaskList configured = ConfiguredList.getInstance();
-        if (ConfiguredList.getInstance().isConfigured()) {
-            retval.addAll(configured.getTaskList());
-        } else {
-            retval.addAll(DynamicList.getInstance().getTaskList());
+        retval.addAll(DynamicList.getInstance().getTaskList());
+        for (UpdateTask excluded : ExcludedList.getInstance().getTaskList()) {
+            // Matching must be done based on task class name.
+            String toExclude = excluded.getClass().getName();
+            Iterator<UpdateTask> iter = retval.iterator();
+            while (iter.hasNext()) {
+                if (toExclude.equals(iter.next().getClass().getName())) {
+                    iter.remove();
+                }
+            }
         }
         return retval;
     }

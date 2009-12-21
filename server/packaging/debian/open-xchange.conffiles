@@ -32,3 +32,4 @@
 /opt/open-xchange/etc/groupware/user.properties
 /opt/open-xchange/etc/groupware/whitelist.properties
 /opt/open-xchange/etc/groupware/servletmappings/servletmapping.properties
+/opt/open-xchange/etc/groupware/excludedupdatetasks.properties

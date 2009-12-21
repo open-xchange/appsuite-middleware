@@ -306,7 +306,6 @@ public final class InternalList {
         new com.openexchange.groupware.update.tasks.UnifiedINBOXRenamerTask()
 
         // TODO: Enable virtual folder tree update task when needed
-        // Version XY
         // Migrates existing folder data to new outlook-like folder tree structure
         // new com.openexchange.folderstorage.virtual.VirtualTreeMigrationTask()        
     };
