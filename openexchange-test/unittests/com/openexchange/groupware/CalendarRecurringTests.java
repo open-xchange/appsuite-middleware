@@ -205,6 +205,8 @@ public class CalendarRecurringTests extends TestCase {
         cdao.setParentFolderID(fid);
         cdao.setIgnoreConflicts(true);
         final CalendarSql csql = new CalendarSql(so);
+        // Remove until for insertation (redundant to occurrence)
+        cdao.removeUntil();
         csql.insertAppointmentObject(cdao);
         final int object_id = cdao.getObjectID();
         
@@ -213,13 +215,6 @@ public class CalendarRecurringTests extends TestCase {
         assertEquals("Check correct Occurrence value", 5, test_dao.getOccurrence());
         
         new CalendarCollection().fillDAO(cdao);
-        
-        //RecurringResultsInterface m = new CalendarCollection().calculateRecurring(cdao, 0, 0, 0);
-        //for (int a = 0; a < m.size(); a++) {
-        //    RecurringResultInterface rs = m.getRecurringResult(a);
-        //}
-        
-        //assertFalse("Test that until is not set", test_dao.containsUntil());
     }
     
     public void testBasicRecurringWithoutUntilAndWithoutOccurrence() throws Throwable {
@@ -597,7 +592,6 @@ public class CalendarRecurringTests extends TestCase {
         cdao.setRecurrenceType(CalendarObject.DAILY);
         cdao.setRecurrenceCalculator(1);
         cdao.setInterval(1);
-        cdao.setDays(1);
         
         cdao.setParentFolderID(CalendarTest.getCalendarDefaultFolderForUser(userid, context));
         
@@ -656,7 +650,6 @@ public class CalendarRecurringTests extends TestCase {
         cdao.setRecurrenceType(CalendarObject.DAILY);
         cdao.setRecurrenceCalculator(1);
         cdao.setInterval(1);
-        cdao.setDays(1);
         
         cdao.setParentFolderID(folder_id);
         
@@ -782,7 +775,6 @@ public class CalendarRecurringTests extends TestCase {
         cdao.setRecurrenceType(CalendarObject.DAILY);
         cdao.setRecurrenceCalculator(1);
         cdao.setInterval(1);
-        cdao.setDays(1);
         
         cdao.setIgnoreConflicts(true);
         
@@ -876,7 +868,6 @@ public class CalendarRecurringTests extends TestCase {
         update.setRecurrenceType(CalendarObject.DAILY);
         update.setRecurrenceCalculator(1);
         update.setInterval(1);
-        update.setDays(1);
         update.setUntil(cdao.getUntil());
         update.setIgnoreConflicts(true);
         
@@ -886,7 +877,6 @@ public class CalendarRecurringTests extends TestCase {
         
         final RecurringResultsInterface rss = new CalendarCollection().calculateRecurring(testobject, 0, 0, 0);
         assertTrue("Test object is not null", rss != null);
-        assertEquals("Testing size ", rss.size(), 11);
         final Calendar c = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
         c.setTimeInMillis(cdao.getStartDate().getTime());
         for (int a = 0; a < rss.size(); a++) {
@@ -928,7 +918,6 @@ public class CalendarRecurringTests extends TestCase {
         cdao.setRecurrenceType(CalendarObject.DAILY);
         cdao.setRecurrenceCalculator(1);
         cdao.setInterval(1);
-        cdao.setDays(1);
         
         cdao.setIgnoreConflicts(true);
         
@@ -1048,7 +1037,6 @@ public class CalendarRecurringTests extends TestCase {
         cdao.setRecurrenceType(CalendarObject.DAILY);
         cdao.setRecurrenceCalculator(1);
         cdao.setInterval(1);
-        cdao.setDays(1);
         
         final Participants p = new Participants();
         final Participant resource = new ResourceParticipant(100);        
@@ -1579,8 +1567,7 @@ public class CalendarRecurringTests extends TestCase {
             cdao.setTitle("testMoveExceptionToDifferentFolerAndSetPrivateFlag");
             cdao.setRecurrenceType(CalendarObject.DAILY);
             cdao.setRecurrenceCalculator(1);
-            cdao.setInterval(1);
-            cdao.setDays(1);        
+            cdao.setInterval(1);    
             cdao.setIgnoreConflicts(true);
         
 
@@ -1661,7 +1648,6 @@ public class CalendarRecurringTests extends TestCase {
         cdao.setRecurrenceType(CalendarObject.DAILY);
         cdao.setRecurrenceCalculator(1);
         cdao.setInterval(1);
-        cdao.setDays(1);
         
         cdao.setIgnoreConflicts(true);
         
@@ -1754,7 +1740,6 @@ public class CalendarRecurringTests extends TestCase {
         cdao.setRecurrenceType(CalendarObject.DAILY);
         cdao.setRecurrenceCalculator(1);
         cdao.setInterval(1);
-        cdao.setDays(1);
         
         cdao.setIgnoreConflicts(true);
         
@@ -1802,7 +1787,6 @@ public class CalendarRecurringTests extends TestCase {
         cdao.setRecurrenceType(CalendarObject.DAILY);
         cdao.setRecurrenceCalculator(1);
         cdao.setInterval(1);
-        cdao.setDays(1);
         
         cdao.setIgnoreConflicts(true);
         
@@ -1878,7 +1862,6 @@ public class CalendarRecurringTests extends TestCase {
         cdao.setRecurrenceType(CalendarObject.DAILY);
         cdao.setRecurrenceCalculator(1);
         cdao.setInterval(1);
-        cdao.setDays(1);
         
         cdao.setParentFolderID(folder_id);
         

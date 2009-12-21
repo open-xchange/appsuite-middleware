@@ -250,7 +250,6 @@ public class AppointmentBugTests extends TestCase {
         cdao.setTimezone(TIMEZONE);
         cdao.setParentFolderID(fid);
         CalendarTest.fillDatesInDao(cdao);
-        cdao.removeUntil();
         cdao.setOccurrence(10);
         cdao.setTitle("testBug4467");
         cdao.setRecurrenceType(CalendarObject.WEEKLY);
@@ -258,6 +257,7 @@ public class AppointmentBugTests extends TestCase {
         cdao.setDays(Appointment.MONDAY + Appointment.WEDNESDAY + Appointment.FRIDAY);
         cdao.setIgnoreConflicts(true);
         new CalendarCollection().fillDAO(cdao);
+        cdao.removeUntil();
         m = new CalendarCollection().calculateRecurring(cdao, 0, 0, 0);
         assertEquals("Check calculation", 10, m.size());
         final CalendarSql csql = new CalendarSql(so);
@@ -548,7 +548,6 @@ public class AppointmentBugTests extends TestCase {
         cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         cdao.setParentFolderID(fid);
         CalendarTest.fillDatesInDao(cdao);
-        cdao.removeUntil();
         cdao.setTitle("testBug4766");
         cdao.setFullTime(true);
         cdao.setRecurrenceType(CalendarDataObject.DAILY);
@@ -557,6 +556,7 @@ public class AppointmentBugTests extends TestCase {
         cdao.setIgnoreConflicts(true);
 
         new CalendarCollection().fillDAO(cdao);
+        cdao.removeUntil();
         m = new CalendarCollection().calculateRecurring(cdao, 0, 0, 0);
         assertEquals("Check size of calulated results", 2, m.size());
 
@@ -1762,7 +1762,6 @@ public class AppointmentBugTests extends TestCase {
         cdao.setTitle("testBug6960");
         cdao.setRecurrenceType(CalendarObject.DAILY);
         cdao.setInterval(1);
-        cdao.setDays(1);
 
         cdao.setIgnoreConflicts(true);
 
