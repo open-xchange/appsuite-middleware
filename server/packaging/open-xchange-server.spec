@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 9
+%define		ox_release 10
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -483,6 +483,9 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Mon Dec 21 2009 - marcus.klein@open-xchange.com
+ - Bugfix #15102: Reduced logging of missing table inside ReplicationMonitor. Improved update tasks to use connection to the database master
+   only.
 * Fri Dec 18 2009 - thorben.betten@open-xchange.com
  - Bugfix #15108: Fixed error handling on failing move operation of IMAP folders
 * Fri Dec 18 2009 - marcus.klein@open-xchange.com
