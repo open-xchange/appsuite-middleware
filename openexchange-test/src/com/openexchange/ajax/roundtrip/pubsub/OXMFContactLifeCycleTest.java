@@ -76,7 +76,7 @@ public class OXMFContactLifeCycleTest extends AbstractPubSubRoundtripTest {
      * 
      * @throws Exception
      */
-    public void testShouldNotLoseContactsWhileRoundtripping() throws Exception{
+    public void doNot_testShouldNotLoseContactsWhileRoundtripping() throws Exception{
         ContactTestManager cMgr = getContactManager();
         FolderTestManager fMgr = getFolderManager();
         //setup folders
@@ -137,7 +137,7 @@ public class OXMFContactLifeCycleTest extends AbstractPubSubRoundtripTest {
      * Does a publish, then a subscribe and then checks whether basic data (mostly name 
      * and title)  survived the whole process. 
      */
-    public void testContactTrippingWithCensoredDataSet() throws Exception{
+    public void doNot_testContactTrippingWithCensoredDataSet() throws Exception{
         ContactTestManager cMgr = getContactManager();
         FolderTestManager fMgr = getFolderManager();
         //setup folders
@@ -180,7 +180,7 @@ public class OXMFContactLifeCycleTest extends AbstractPubSubRoundtripTest {
      *  This is usually disabled because we publish a censored template that does not
      *  export all data at all.
      */
-    public void do_not_testContactTrippingWithFullDataSet() throws Exception{
+    public void doNot_testContactTrippingWithFullDataSet() throws Exception{
         ContactTestManager cMgr = getContactManager();
         FolderTestManager fMgr = getFolderManager();
         //setup folders
