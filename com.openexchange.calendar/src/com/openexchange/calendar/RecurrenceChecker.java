@@ -213,7 +213,7 @@ public class RecurrenceChecker {
                 skipType = true;
         }
 
-        if (cdao.contains(CalendarObject.RECURRENCE_TYPE) && (Integer)cdao.get(CalendarObject.RECURRENCE_TYPE) != CalendarObject.NO_RECURRENCE)
+        if (!skipType && cdao.contains(CalendarObject.RECURRENCE_TYPE) && (Integer)cdao.get(CalendarObject.RECURRENCE_TYPE) != CalendarObject.NO_RECURRENCE)
             return true;
         
         for (int recurrenceField : reucrrenceFields) {
