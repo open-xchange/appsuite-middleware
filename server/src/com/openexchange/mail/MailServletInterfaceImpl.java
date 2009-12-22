@@ -944,8 +944,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             fullname = argument.getFullname();
         }
         final boolean loadHeaders = (null != headerFields && 0 < headerFields.length);
-        /*
+        /*-
          * Check for presence in cache
+         * TODO: Think about switching to live-fetch if loadHeaders is true. Loading all data once may be faster than
+         * first loading from cache then loading missing headers in next step
          */
         try {
             final MailMessage[] mails =
