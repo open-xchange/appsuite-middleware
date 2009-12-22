@@ -54,6 +54,7 @@ import java.io.InputStream;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.tools.io.SizeAwareInputStream;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
@@ -67,7 +68,14 @@ public class WebdavPutAction extends AbstractAction {
 		if(null != req.getHeader("content-length")) {
 			resource.setLength(new Long(req.getHeader("content-length")));
 		}
-		resource.setContentType(req.getHeader("content-type"));
+		String contentType = MIMEType2ExtMap.getContentType(resource.getUrl().name());
+		if("application/octet-stream".equals(contentType)) {
+		    contentType = req.getHeader("content-type");
+		}
+		if(contentType == null) {
+		    contentType = "application/octet-stream";
+		}
+		resource.setContentType(contentType);
 		
 		SizeExceededInputStream in = null;
 		try {

@@ -101,6 +101,7 @@ import com.openexchange.groupware.upload.impl.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadSizeExceededException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.json.OXJSONWriter;
+import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.tools.UnsynchronizedStringWriter;
@@ -743,7 +744,11 @@ public class Infostore extends PermissionServlet {
             metadata.setFileSize(upload.getSize());
         }
         if (metadata.getFileMIMEType() == null || "application/octet-stream".equals(metadata.getFileMIMEType())) {
-            metadata.setFileMIMEType(upload.getContentType());
+            String contentType = MIMEType2ExtMap.getContentType(metadata.getFileName());
+            if("application/octet-stream".equals(contentType)) {
+                contentType = upload.getContentType();
+            }
+            metadata.setFileMIMEType(contentType);
         }
     }
 
