@@ -51,6 +51,8 @@ package com.openexchange.ajax.roundtrip.pubsub;
 
 import com.openexchange.ajax.publish.tests.PublicationTestManager;
 import com.openexchange.ajax.subscribe.test.SubscriptionTestManager;
+import com.openexchange.datatypes.genericonf.DynamicFormDescription;
+import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.publish.Publication;
@@ -96,13 +98,21 @@ public class OXMFContactLifeCycleTest extends AbstractPubSubRoundtripTest {
         SimPublicationTargetDiscoveryService pubDiscovery = new SimPublicationTargetDiscoveryService();
         pubMgr.setPublicationTargetDiscoveryService(pubDiscovery);
         Publication publication = generatePublication("contacts", String.valueOf(pubFolder.getObjectID()), pubDiscovery);
-        Subscription subscription = generateOXMFSubscription(publication.getTarget().getFormDescription());
-        subscription.setFolderId(subFolder.getObjectID());
-        
+                
         Contact[] contacts;
         
-        //create publication and subscription        
+        //create publication        
         pubMgr.newAction(publication);
+
+        //create subscription for that url
+        DynamicFormDescription formDescription = publication.getTarget().getFormDescription();
+        formDescription.add(FormElement.input("url", "URL"));
+        Subscription subscription = generateOXMFSubscription(formDescription);
+        subscription.setFolderId(subFolder.getObjectID());
+        subMgr.setFormDescription(formDescription);
+        String pubUrl = (String) publication.getConfiguration().get("url");
+        subscription.getConfiguration().put("url", pubUrl);
+        
         subMgr.newAction(subscription);
         
         //refresh and check subscription
