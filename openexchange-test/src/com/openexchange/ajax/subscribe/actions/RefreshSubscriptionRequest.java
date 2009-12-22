@@ -60,7 +60,9 @@ import com.openexchange.ajax.framework.Params;
  */
 public class RefreshSubscriptionRequest extends AbstractSubscriptionRequest<RefreshSubscriptionResponse> {
 
-    private int subscriptionID;
+    private int subscriptionID = -1;
+    
+    private String folderID = null;
 
     public void setSubscriptionID(int subscriptionID) {
         this.subscriptionID = subscriptionID;
@@ -70,13 +72,28 @@ public class RefreshSubscriptionRequest extends AbstractSubscriptionRequest<Refr
         return subscriptionID;
     }
 
+    public void setFolderID(String folderID) {
+        this.folderID = folderID;
+    }
+
+    public String getFolderID() {
+        return folderID;
+    }
+
     public RefreshSubscriptionRequest() {
         super();
     }
 
-    public RefreshSubscriptionRequest(int id) {
+    /**
+     * Sets up a refresh request for either a folder or a subscription.
+     * 
+     * @param subscriptionID ID of a subscription. Set to -1 if not wanted.
+     * @param folderID ID of a folder. Set to null if not wanted.
+     */
+    public RefreshSubscriptionRequest(int subscriptionID, String folderID) {
         this();
-        setSubscriptionID(id);
+        setSubscriptionID(subscriptionID);
+        setFolderID(folderID);
     }
 
     public Object getBody() throws JSONException {
@@ -88,7 +105,12 @@ public class RefreshSubscriptionRequest extends AbstractSubscriptionRequest<Refr
     }
 
     public Parameter[] getParameters() {
-        return new Params(AJAXServlet.PARAMETER_ACTION, "refresh", AJAXServlet.PARAMETER_ID, String.valueOf(getSubscriptionID())).toArray();
+        Params params = new Params(AJAXServlet.PARAMETER_ACTION, "refresh");
+        if(folderID != null)
+            params.add(AJAXServlet.PARAMETER_FOLDERID, folderID);
+        if(subscriptionID != -1)
+            params.add(AJAXServlet.PARAMETER_ID, String.valueOf(subscriptionID));
+        return params.toArray();
     }
 
     public AbstractAJAXParser<RefreshSubscriptionResponse> getParser() {
