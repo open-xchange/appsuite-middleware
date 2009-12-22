@@ -103,7 +103,7 @@ public class OXMFContactLifeCycleTest extends AbstractPubSubRoundtripTest {
         
         //refresh and check subscription
         subMgr.refreshAction(subscription.getId());
-        contacts = cMgr.allAction(pubFolder.getObjectID());
+        contacts = cMgr.allAction(subFolder.getObjectID());
         assertEquals("Should only contain one contact after first publication", 1, contacts.length);
         
         //publish another contact
@@ -113,19 +113,19 @@ public class OXMFContactLifeCycleTest extends AbstractPubSubRoundtripTest {
         
         //refresh and check subscription again
         subMgr.refreshAction(subscription.getId());
-        contacts = cMgr.allAction(pubFolder.getObjectID());
+        contacts = cMgr.allAction(subFolder.getObjectID());
         assertEquals("Should have two contacts after update", 2, contacts.length);
         
         //delete first contact
         cMgr.deleteAction(contact1);
         subMgr.refreshAction(subscription.getId());
-        contacts = cMgr.allAction(pubFolder.getObjectID());
+        contacts = cMgr.allAction(subFolder.getObjectID());
         assertEquals("Should have one contact after deleting one", 1, contacts.length);
 
         //delete second contact
         cMgr.deleteAction(contact2);
         subMgr.refreshAction(subscription.getId());
-        contacts = cMgr.allAction(pubFolder.getObjectID());
+        contacts = cMgr.allAction(subFolder.getObjectID());
         assertEquals("Should have no contacts after deleting them all", 0, contacts.length);
     }
 
@@ -160,12 +160,13 @@ public class OXMFContactLifeCycleTest extends AbstractPubSubRoundtripTest {
         
         //refresh and check subscription
         subMgr.refreshAction(subscription.getId());
-        contacts = cMgr.allAction(pubFolder.getObjectID());
+        contacts = cMgr.allAction(subFolder.getObjectID());
         assertEquals("Should only contain one contact after first publication", 1, contacts.length);
         assertNoDataMessedUpMinimumRequirements(contact1,contacts[0]);        
     }
 
-    public void testContactTrippingWithFullDataSet() throws Exception{
+    //disabled because we usually publish a censored template
+    public void do_not_testContactTrippingWithFullDataSet() throws Exception{
         ContactTestManager cMgr = getContactManager();
         FolderTestManager fMgr = getFolderManager();
         //setup folders
@@ -220,7 +221,7 @@ public class OXMFContactLifeCycleTest extends AbstractPubSubRoundtripTest {
         
         //refresh and check subscription
         subMgr.refreshAction(subscription.getId());
-        contacts = cMgr.allAction(pubFolder.getObjectID());
+        contacts = cMgr.allAction(subFolder.getObjectID());
         assertEquals("Should only contain one contact after first publication", 1, contacts.length);
         assertNoDataMessedUpMaximumRequirements(con,contacts[0]);    
     }
