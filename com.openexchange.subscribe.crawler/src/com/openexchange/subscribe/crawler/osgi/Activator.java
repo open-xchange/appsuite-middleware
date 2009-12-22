@@ -68,6 +68,7 @@ import org.apache.commons.logging.LogFactory;
 import org.ho.yaml.Yaml;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.subscribe.SubscribeService;
@@ -99,7 +100,7 @@ public class Activator implements BundleActivator {
 
     private final Stack<ServiceTracker> trackers = new Stack<ServiceTracker>();
 
-    public static final int CRAWLER_API_VERSION = 614;
+    public static final int CRAWLER_API_VERSION = 616;
 
     // This assures that every time the server/bundle is restarted it will check for updates
     private Long LAST_TIME_CHECKED = new Long("0");
@@ -108,21 +109,31 @@ public class Activator implements BundleActivator {
 
         bundleContext = context;
         services = new ArrayList<ServiceRegistration>();
-        final ConfigurationService configurationService = (ConfigurationService) bundleContext.getService(bundleContext.getServiceReference(ConfigurationService.class.getName()));
-        registerServices(configurationService);
-        // Insert daily TimerTask to look for updates
-        final TimerService timerService = (TimerService) bundleContext.getService(bundleContext.getServiceReference(TimerService.class.getName()));
-        if (timerService != null && configurationService != null) {
-            final long updateInterval = Integer.parseInt(configurationService.getProperty(UPDATE_INTERVAL));
-            LOG.info("Crawler Update interval set to : "+updateInterval / 1000 +" seconds");
-            CrawlerUpdateTask crawlerUpdateTask = new CrawlerUpdateTask(configurationService, this);
-            // Start the job after ten seconds this and repeat it as often as configured (default:daily)
-            scheduledTimerTask = timerService.scheduleWithFixedDelay(crawlerUpdateTask, 30 * 1000, updateInterval);
+        ServiceReference configurationServiceReference = bundleContext.getServiceReference(ConfigurationService.class.getName());
+        ConfigurationService configurationService = null;
+        if (configurationServiceReference != null) {
+            configurationService = (ConfigurationService) bundleContext.getService(configurationServiceReference);
+            registerServices(configurationService);
         }
-        // Track if TimerService is going down removing the ScheduledTimerTask if that happens
-        trackers.push(new ServiceTracker(context, TimerService.class.getName(), new ConfigurationCustomizer(context, scheduledTimerTask)));
-        for (final ServiceTracker tracker : trackers) {
-            tracker.open();
+        // Insert daily TimerTask to look for updates
+        ServiceReference timerServiceReference = bundleContext.getServiceReference(TimerService.class.getName());
+        if (timerServiceReference != null) {
+            final TimerService timerService = (TimerService) bundleContext.getService(timerServiceReference);
+            if (timerService != null && configurationService != null) {
+                final long updateInterval = Integer.parseInt(configurationService.getProperty(UPDATE_INTERVAL));
+                LOG.info("Crawler Update interval set to : " + updateInterval / 1000 + " seconds");
+                CrawlerUpdateTask crawlerUpdateTask = new CrawlerUpdateTask(configurationService, this);
+                // Start the job after ten seconds this and repeat it as often as configured (default:daily)
+                scheduledTimerTask = timerService.scheduleWithFixedDelay(crawlerUpdateTask, 30 * 1000, updateInterval);
+            }
+            // Track if TimerService is going down removing the ScheduledTimerTask if that happens
+            trackers.push(new ServiceTracker(
+                context,
+                TimerService.class.getName(),
+                new ConfigurationCustomizer(context, scheduledTimerTask)));
+            for (final ServiceTracker tracker : trackers) {
+                tracker.open();
+            }
         }
     }
 
@@ -156,18 +167,18 @@ public class Activator implements BundleActivator {
         }
         return crawlers;
     }
-    
-    public boolean removeCrawlerFromFilesystem (final ConfigurationService config, String crawlerIdToDelete){
+
+    public boolean removeCrawlerFromFilesystem(final ConfigurationService config, String crawlerIdToDelete) {
         final String path = config.getProperty(PATH_PROPERTY);
-        if (path != null){            
+        if (path != null) {
             final File directory = new File(path);
             final File[] files = directory.listFiles();
-            if (files != null){                
+            if (files != null) {
                 for (final File file : files) {
                     try {
                         if (file.isFile() && file.getPath().endsWith(".yml")) {
                             CrawlerDescription crawler = (CrawlerDescription) Yaml.load(file);
-                            if (crawler.getId().equals(crawlerIdToDelete)){
+                            if (crawler.getId().equals(crawlerIdToDelete)) {
                                 return file.delete();
                             }
                         }
@@ -203,17 +214,14 @@ public class Activator implements BundleActivator {
         }
     }
 
-    
     public Long getLAST_TIME_CHECKED() {
         return LAST_TIME_CHECKED;
     }
 
-    
     public void setLAST_TIME_CHECKED(Long last_time_checked) {
         LAST_TIME_CHECKED = last_time_checked;
     }
 
-    
     public static int getCRAWLER_API_VERSION() {
         return CRAWLER_API_VERSION;
     }
@@ -222,13 +230,14 @@ public class Activator implements BundleActivator {
     public ArrayList<ServiceRegistration> getServices() {
         return services;
     }
+
     public void setServices(ArrayList<ServiceRegistration> services) {
         this.services = services;
     }
+
     public void setBundleContext(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
     }
-    // THESE METHODS SHOULD ONLY BE USED FOR TESTING   
-    
+    // THESE METHODS SHOULD ONLY BE USED FOR TESTING
 
 }
