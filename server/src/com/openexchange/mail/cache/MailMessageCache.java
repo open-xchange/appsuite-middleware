@@ -459,7 +459,7 @@ public final class MailMessageCache {
                  * TODO: Return cloned version ???
                  */
                 retval[i] = map.getValue(entryKey, uids[i]);
-                if (retval[i] == null) {
+                if (null == retval[i]) {
                     /*
                      * Not all desired messages can be served from cache
                      */
