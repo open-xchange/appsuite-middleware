@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.update.internal;
 
-import java.sql.SQLException;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -94,12 +93,20 @@ public final class UpdateExecutor {
     }
 
     public void execute() throws UpdateException {
-        boolean unlock = false;
         try {
             lockSchema();
-            // Lock successfully obtained, thus remember to unlock
-            unlock = true;
-            // Remove affected contexts and kick active sessions
+        } catch (SchemaException e) {
+            // Try to unlock schema
+            try {
+                unlockSchema();
+            } catch (SchemaException e1) {
+                LOG.error(e1.getMessage(), e1);
+            }
+            throw new UpdateException(e);
+        }
+        // Lock successfully obtained, thus remember to unlock
+        try {
+            // Remove affected contexts.
             removeContexts();
             if (null == tasks) {
                 state = store.getSchema(contextId);
@@ -132,8 +139,6 @@ public final class UpdateExecutor {
             }
             LOG.info("Finished updating schema " + state.getSchema());
         } catch (SchemaException e) {
-            final Throwable cause = e.getCause();
-            unlock = (null != cause) && (cause instanceof SQLException);
             throw new UpdateException(e);
         } catch (UpdateException e) {
             throw e;
@@ -141,9 +146,7 @@ public final class UpdateExecutor {
             throw UpdateExceptionCodes.UPDATE_FAILED.create(t, state.getSchema(), t.getMessage());
         } finally {
             try {
-                if (unlock) {
-                    unlockSchema();
-                }
+                unlockSchema();
                 // Remove contexts from cache if they are cached during update process.
                 removeContexts();
             } catch (SchemaException e) {
