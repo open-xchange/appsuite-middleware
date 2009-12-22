@@ -91,7 +91,8 @@ public final class MIMEStorageUtility {
         CACHE_FETCH_PROFILE.add(FetchProfile.Item.CONTENT_INFO);
         CACHE_FETCH_PROFILE.add(UIDFolder.FetchProfileItem.UID);
         CACHE_FETCH_PROFILE.add(IMAPFolder.FetchProfileItem.SIZE);
-        CACHE_FETCH_PROFILE.add(IMAPFolder.FetchProfileItem.HEADERS);
+        // CACHE_FETCH_PROFILE.add(IMAPFolder.FetchProfileItem.HEADERS);
+
         // Cache fields
         final Collection<MailField> fields = fetchProfile2MailListFields(CACHE_FETCH_PROFILE);
         fields.add(MailField.ACCOUNT_NAME);

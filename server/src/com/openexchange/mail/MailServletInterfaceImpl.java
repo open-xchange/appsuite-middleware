@@ -152,6 +152,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
     private static final MailField[] FIELDS_ID_INFO = new MailField[] { MailField.ID, MailField.FOLDER_ID };
 
+    private static final MailField[] HEADERS = { MailField.ID, MailField.HEADERS };
+
+    private static final String[] STR_ARR = new String[0];
+
     private static final String INBOX_ID = "INBOX";
 
     private static final int MAX_NUMBER_OF_MESSAGES_2_CACHE = 50;
@@ -663,7 +667,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         final String[] arr =
             MailSessionCache.getInstance(session).getParameter(accountId, MailSessionParameterNames.getParamDefaultFolderArray());
         if (arr == null) {
-            return new String[0];
+            return STR_ARR;
         }
         return new String[] {
             INBOX_ID, arr[StorageUtility.INDEX_DRAFTS], arr[StorageUtility.INDEX_SENT], arr[StorageUtility.INDEX_SPAM],
@@ -939,6 +943,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             accountId = argument.getAccountId();
             fullname = argument.getFullname();
         }
+        final boolean loadHeaders = (null != headerFields && 0 < headerFields.length);
+        /*
+         * Check for presence in cache
+         */
         try {
             final MailMessage[] mails =
                 MailMessageCache.getInstance().getMessages(uids, accountId, fullname, session.getUserId(), contextId);
@@ -948,6 +956,26 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                  */
                 this.accountId = accountId;
                 /*
+                 * Check if headers shall be loaded
+                 */
+                if (loadHeaders) {
+                    /*
+                     * Load headers of cached mails
+                     */
+                    final List<String> loadMe = new ArrayList<String>(mails.length);
+                    final Map<String, MailMessage> finder = new HashMap<String, MailMessage>(mails.length);
+                    for (final MailMessage mail : mails) {
+                        final String mailId = mail.getMailId();
+                        finder.put(mailId, mail);
+                        if (!mail.containsHeaders()) {
+                            loadMe.add(mailId);
+                        }
+                    }
+                    for (final MailMessage header : mailAccess.getMessageStorage().getMessages(fullname, loadMe.toArray(STR_ARR), HEADERS)) {
+                        finder.get(header.getMailId()).addHeaders(header.getHeaders());
+                    }
+                }
+                /*
                  * Prefetch messages
                  */
                 prefetchJSONMessages(fullname, uids);
@@ -956,16 +984,23 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         } catch (final OXCachingException e) {
             LOG.error(e.getMessage(), e);
         }
+        /*
+         * Live-Fetch from mail storage
+         */
         initConnection(accountId);
+        /*
+         * Get appropriate mail fields
+         */
         final MailField[] mailFields;
-        if (null == headerFields || 0 == headerFields.length) {
-            mailFields = MailField.toFields(MailListField.getFields(fields));
+        if (loadHeaders) {
+            /*
+             * Ensure MailField.HEADERS is contained
+             */
+            final MailFields col = new MailFields(MailField.toFields(MailListField.getFields(fields)));
+            col.add(MailField.HEADERS);
+            mailFields = col.toArray();
         } else {
-            final MailField[] fields2 = MailField.toFields(MailListField.getFields(fields));
-            final int length = fields2.length;
-            mailFields = new MailField[length + 1];
-            System.arraycopy(fields2, 0, mailFields, 0, length);
-            mailFields[length] = MailField.HEADERS;
+            mailFields = MailField.toFields(MailListField.getFields(fields));
         }
         final MailMessage[] mails = mailAccess.getMessageStorage().getMessages(fullname, uids, mailFields);
         try {
