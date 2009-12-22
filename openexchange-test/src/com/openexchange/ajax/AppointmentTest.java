@@ -1052,7 +1052,9 @@ public class AppointmentTest extends AbstractAJAXTest {
                 }
 				break;
 			case Appointment.UNTIL:
-				appointmentObj.setUntil(new Date(jsonArray.getLong(pos)));
+                if (!jsonArray.isNull(pos)) {
+                    appointmentObj.setUntil(new Date(jsonArray.getLong(pos)));
+                }
 				break;
 			case Appointment.RECURRENCE_COUNT:
                 if (!jsonArray.isNull(pos)) {

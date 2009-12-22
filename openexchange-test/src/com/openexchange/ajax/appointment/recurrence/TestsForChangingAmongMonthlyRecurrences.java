@@ -108,9 +108,15 @@ public class TestsForChangingAmongMonthlyRecurrences extends ManagedAppointmentT
         Appointment app = generateMonthlyAppointment();
 
         Changes changes = new Changes();
+        /**
+         * TODO: Fix test.
+         * It's necessary to set the recurrence type. Otherwise the Appointmen writer will treat this as a normal appointment
+         * and ignore the days value.
+         */
+        changes.put(Appointment.RECURRENCE_TYPE, Appointment.MONTHLY);
         changes.put(Appointment.DAYS, Appointment.MONDAY);
 
-        negativeAssertionOnUpdate.check(app, changes, new OXError("APP", 999));
+        negativeAssertionOnUpdate.check(app, changes, new OXError("APP", -1));
     }
 
     public void testShouldChangeFromMonthly2ToMonthly1With127DuringCreation() throws Exception {
@@ -175,9 +181,15 @@ public class TestsForChangingAmongMonthlyRecurrences extends ManagedAppointmentT
         Appointment app = generateMonthlyAppointment();
 
         Changes changes = new Changes();
+        /**
+         * TODO: Fix test.
+         * It's necessary to set the recurrence type. Otherwise the Appointmen writer will treat this as a normal appointment
+         * and ignore the days value.
+         */
+        changes.put(Appointment.RECURRENCE_TYPE, Appointment.MONTHLY);
         changes.put(Appointment.DAYS, 127);
 
-        negativeAssertionOnUpdate.check(app, changes, new OXError("APP", 999));
+        negativeAssertionOnUpdate.check(app, changes, new OXError("APP", -1));
     }
 
 }

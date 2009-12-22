@@ -54,6 +54,7 @@ import org.json.JSONException;
 import com.openexchange.ajax.appointment.helper.OXError;
 import com.openexchange.ajax.user.UserResolver;
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Changes;
 import com.openexchange.groupware.container.Expectations;
@@ -298,7 +299,7 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
         assertTrue("Expecting " + expected + ", but got " + actual, expected.matches(actual));
     }
 
-    public void testShouldCreateChangeExceptionIfCreatingOneOnADeleteException() throws OXException {
+    public void testShouldFailChangeExceptionIfCreatingOneOnADeleteException() throws OXException {
         Appointment app = generateDailyAppointment();
         app.setOccurrence(3);
 
@@ -312,8 +313,7 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
         changes.put(Appointment.START_DATE, D("3/1/2008 0:00", utc));
         changes.put(Appointment.END_DATE, D("3/1/2008 24:00", utc));
 
-        Expectations expectations = new Expectations(changes);
-        positiveAssertionOnChangeException.check(app, changes, expectations);
+        negativeAssertionOnChangeException.check(app, changes, new OXError("APP", OXCalendarException.Code.UNABLE_TO_CALCULATE_POSITION.getDetailNumber()));
     }
 
 }

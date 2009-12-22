@@ -50,6 +50,7 @@
 package com.openexchange.ajax.appointment.recurrence;
 
 import com.openexchange.ajax.appointment.helper.OXError;
+import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Changes;
 import com.openexchange.groupware.container.Expectations;
@@ -82,9 +83,15 @@ public class TestsForChangingAmongYearlyRecurrences extends ManagedAppointmentTe
         Appointment app = generateYearlyAppointment();
 
         Changes changes = new Changes();
+        /**
+         * TODO: Fix test.
+         * It's necessary to set the recurrence type. Otherwise the Appointmen writer will treat this as a normal appointment
+         * and ignore the days value.
+         */
+        changes.put(Appointment.RECURRENCE_TYPE, Appointment.YEARLY);
         changes.put(Appointment.DAYS, Appointment.MONDAY);
 
-        negativeAssertionOnUpdate.check(app, changes, new OXError("APP", 999));
+        negativeAssertionOnUpdate.check(app, changes, new OXError("APP", -1));
     }
 
     public void testShouldChangeFromYearly2ToYearly1With127() throws Exception {
@@ -127,16 +134,22 @@ public class TestsForChangingAmongYearlyRecurrences extends ManagedAppointmentTe
         changes.put(Appointment.INTERVAL, 1);
         changes.put(Appointment.DAY_IN_MONTH, 1);
 
-        negativeAssertionOnUpdate.check(app, changes, new OXError("APP",91));
+        negativeAssertionOnUpdate.check(app, changes, new OXError("APP", OXCalendarException.Code.RECURRING_MISSING_YEARLY_MONTH.getDetailNumber()));
     }
     
     public void testShouldFailChangingFromYearly2ToYearly1UsingOnlyAdditionalData() throws Exception {
         Appointment app = generateYearlyAppointment();
 
         Changes changes = new Changes();
+        /**
+         * TODO: Fix test.
+         * It's necessary to set the recurrence type. Otherwise the Appointmen writer will treat this as a normal appointment
+         * and ignore the days value.
+         */
+        changes.put(Appointment.RECURRENCE_TYPE, Appointment.YEARLY);
         changes.put(Appointment.DAYS, 127);
 
-        negativeAssertionOnUpdate.check(app, changes, new OXError("APP", 999));
+        negativeAssertionOnUpdate.check(app, changes, new OXError("APP", -1));
     }
 
 }

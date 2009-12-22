@@ -69,36 +69,45 @@ public class TestsForDifferentWaysOfEndingASeries extends ManagedAppointmentTest
     }
 
     public void testShouldNotSetUntilIfOccurrencesIsUsed() throws Exception {
+        Appointment app = generateDailyAppointment();
         Changes changes = new Changes();
         changes.put(Appointment.RECURRENCE_COUNT, 7);
+        changes.put(Appointment.RECURRENCE_TYPE, app.get(Appointment.RECURRENCE_TYPE));
+        changes.put(Appointment.INTERVAL, app.get(Appointment.INTERVAL));
 
         Expectations expectations = new Expectations(changes);
         expectations.put(Appointment.UNTIL, null);
 
-        positiveAssertionOnCreate.check(generateDailyAppointment(), changes, expectations);
-        positiveAssertionOnCreateAndUpdate.check(generateDailyAppointment(), changes, expectations);
+        positiveAssertionOnCreate.check(app, changes, expectations);
+        positiveAssertionOnCreateAndUpdate.check(app, changes, expectations);
     }
 
     public void testShouldNotSetOccurrencesIfUntilIsUsed() throws Exception {
+        Appointment app = generateDailyAppointment();
         Changes changes = new Changes();
-        changes.put(Appointment.UNTIL, D("7/1/2008 12:00"));
+        changes.put(Appointment.UNTIL, D("7/1/2008 00:00"));
+        changes.put(Appointment.RECURRENCE_TYPE, app.get(Appointment.RECURRENCE_TYPE));
+        changes.put(Appointment.INTERVAL, app.get(Appointment.INTERVAL));
 
         Expectations expectations = new Expectations(changes);
         expectations.put(Appointment.RECURRENCE_COUNT, null);
 
-        positiveAssertionOnCreate.check(generateDailyAppointment(), changes, expectations);
-        positiveAssertionOnCreateAndUpdate.check(generateDailyAppointment(), changes, expectations);
+        positiveAssertionOnCreate.check(app, changes, expectations);
+        positiveAssertionOnCreateAndUpdate.check(app, changes, expectations);
     }
 
 
     public void testShouldNotSetOccurrencesIfNothingIsSet() throws Exception {
+        Appointment app = generateDailyAppointment();
         Changes changes = new Changes();
+        changes.put(Appointment.RECURRENCE_TYPE, app.get(Appointment.RECURRENCE_TYPE));
+        changes.put(Appointment.INTERVAL, app.get(Appointment.INTERVAL));
 
         Expectations expectations = new Expectations(changes);
-        expectations.put(Appointment.RECURRENCE_COUNT, 0);
+        expectations.put(Appointment.RECURRENCE_COUNT, null);
         expectations.put(Appointment.UNTIL, null);
 
-        positiveAssertionOnCreate.check(generateDailyAppointment(), changes, expectations);
-        positiveAssertionOnCreateAndUpdate.check(generateDailyAppointment(), changes, expectations);
+        positiveAssertionOnCreate.check(app, changes, expectations);
+        positiveAssertionOnCreateAndUpdate.check(app, changes, expectations);
     }
 }

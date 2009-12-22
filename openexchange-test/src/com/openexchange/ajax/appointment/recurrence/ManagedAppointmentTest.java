@@ -89,6 +89,8 @@ public class ManagedAppointmentTest extends AppointmentTest {
     protected NegativeAssertionOnCreate negativeAssertionOnCreate;
 
     protected NegativeAssertionOnChangeException negativeAssertionOnChangeException;
+    
+    protected NegativeAssertionOnDeleteException negativeAssertionOnDeleteException;
 
     protected AbstractPositiveAssertion positiveAssertionOnCreate;
 
@@ -122,6 +124,7 @@ public class ManagedAppointmentTest extends AppointmentTest {
         this.negativeAssertionOnUpdate = new NegativeAssertionOnUpdate(calendarManager, folder.getObjectID());
         this.negativeAssertionOnCreate = new NegativeAssertionOnCreate(calendarManager, folder.getObjectID());
         this.negativeAssertionOnChangeException = new NegativeAssertionOnChangeException(calendarManager, folder.getObjectID());
+        this.negativeAssertionOnDeleteException = new NegativeAssertionOnDeleteException(calendarManager, folder.getObjectID());
         this.positiveAssertionOnCreateAndUpdate = new PositiveAssertionOnCreateAndUpdate(calendarManager, folder.getObjectID());
         this.positiveAssertionOnCreate = new PositiveAssertionOnCreate(calendarManager, folder.getObjectID());
         this.positiveAssertionOnUpdate = new PositiveAssertionOnUpdateOnly(calendarManager, folder.getObjectID());
@@ -160,7 +163,6 @@ public class ManagedAppointmentTest extends AppointmentTest {
         app.set(Appointment.RECURRENCE_TYPE, Appointment.MONTHLY);
         app.set(Appointment.INTERVAL, 1);
         app.set(Appointment.DAY_IN_MONTH, 1);
-        app.set(Appointment.DAYS, Appointment.MONDAY);
         return app;
     }
 

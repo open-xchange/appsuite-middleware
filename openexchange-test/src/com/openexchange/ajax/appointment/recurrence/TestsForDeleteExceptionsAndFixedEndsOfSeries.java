@@ -89,8 +89,7 @@ public class TestsForDeleteExceptionsAndFixedEndsOfSeries extends ManagedAppoint
         Changes changes = new Changes();
         changes.put(Appointment.RECURRENCE_POSITION, 6);
 
-        negativeAssertionOnCreate.check(app, changes, new OXError("APP",999));
-        negativeAssertionOnUpdate.check(app, changes, new OXError("APP",999));
+        negativeAssertionOnDeleteException.check(app, changes, new OXError("APP", 11));
     }
     
     public void testShouldNotReduceNumberOfOccurrencesWhenDeletingOneInMonthlySeries() throws Exception {

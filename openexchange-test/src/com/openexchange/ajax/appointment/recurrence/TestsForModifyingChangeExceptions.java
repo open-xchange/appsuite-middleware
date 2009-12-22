@@ -103,6 +103,6 @@ public class TestsForModifyingChangeExceptions extends ManagedAppointmentTest {
         calendarManager.update(secondUpdate);
         
         assertTrue("Should get exception when trying to make a change exception a series", calendarManager.hasLastException());
-        assertTrue("Should have correct exception", new OXError("APP",999).matches(calendarManager.getLastException()));
+        assertTrue("Should have correct exception", new OXError("APP", 99).matches(calendarManager.getLastException()));
     }
 }

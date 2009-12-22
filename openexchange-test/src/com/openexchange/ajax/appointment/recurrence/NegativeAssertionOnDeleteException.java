@@ -47,48 +47,40 @@
  *
  */
 
-package com.openexchange.ajax.appointment.test;
+package com.openexchange.ajax.appointment.recurrence;
 
-import java.util.Calendar;
-import com.openexchange.ajax.AppointmentTest;
+import com.openexchange.ajax.appointment.helper.AbstractNegativeAssertion;
+import com.openexchange.ajax.appointment.helper.OXError;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.Changes;
 import com.openexchange.test.CalendarTestManager;
 
 /**
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class UpdateWithRecurrenceIdTest extends AppointmentTest {
+public class NegativeAssertionOnDeleteException extends AbstractNegativeAssertion {
 
-    public UpdateWithRecurrenceIdTest(String name) {
-        super(name);
+    public NegativeAssertionOnDeleteException(CalendarTestManager manager, int folderToWorkIn) {
+        super(manager, folderToWorkIn);
     }
 
-    public void testShouldFailIfRecurrenceIDSetAlbeitNotASeries() throws Throwable {
-        CalendarTestManager cMgr = new CalendarTestManager(getClient());
-        cMgr.setFailOnError(true);
+    @Override
+    public void check(Appointment startWith, Changes changes, OXError expectedError) {
+        int recurrencePosition = (Integer) changes.get(Appointment.RECURRENCE_POSITION);
+        Appointment copy = startWith.clone();
+        if(! startWith.containsObjectID())
+            manager.insert(copy);
         
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.YEAR, -1);
-        cal.set(Calendar.DAY_OF_YEAR, 1);
-        cal.set(Calendar.HOUR_OF_DAY, 1);
-
-        Appointment app = new Appointment();
-        app.setTitle("Generic recurrence test appointment");
-        app.setStartDate(cal.getTime());
-        cal.add(Calendar.HOUR, 1);
-        app.setEndDate(cal.getTime());
-
-        app.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
-
-        app.setFullTime(true);
-
-        cMgr.insert(app);
-
-        app.setTitle("Changed title");
-        app.setRecurrenceID(0);
+        Appointment update = new Appointment();
+        update.setParentFolderID(copy.getParentFolderID());
+        update.setObjectID(copy.getObjectID());
+        update.setLastModified(copy.getLastModified());
+        changes.update(update);
         
-        assertFalse("Precondition: No exceptions occurred", cMgr.hasLastException());
-        cMgr.update(app);
-        assertTrue("Should throw exception when trying to perform update on normal appointment with pointless recurrence_id", cMgr.hasLastException());
+        manager.createDeleteException(copy, recurrencePosition);
+        assertTrue("Expected error " + expectedError +" but got nothing", manager.hasLastException());
+        Exception actual = manager.getLastException();
+        assertTrue("Actual error" + actual + " should match expected error " + expectedError , expectedError.matches(actual));
     }
+
 }

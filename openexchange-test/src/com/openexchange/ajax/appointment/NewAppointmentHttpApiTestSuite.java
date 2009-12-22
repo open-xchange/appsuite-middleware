@@ -57,7 +57,6 @@ import com.openexchange.ajax.appointment.recurrence.TestsForDifferentWaysOfEndin
 import com.openexchange.ajax.appointment.recurrence.TestsForModifyingChangeExceptions;
 import com.openexchange.ajax.appointment.recurrence.TestsForUsingRecurrencePositionToGetChangeExceptions;
 import com.openexchange.ajax.appointment.recurrence.TestsToCreateMinimalAppointmentSeries;
-import com.openexchange.ajax.appointment.test.UpdateWithRecurrenceIdTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -84,7 +83,6 @@ public class NewAppointmentHttpApiTestSuite extends TestSuite{
         tests.addTestSuite(TestsForUsingRecurrencePositionToGetChangeExceptions.class);
         tests.addTestSuite(TestsForDifferentWaysOfEndingASeries.class);
         tests.addTestSuite(TestsForModifyingChangeExceptions.class);
-        tests.addTestSuite(UpdateWithRecurrenceIdTest.class);
         return tests;
     }
 }

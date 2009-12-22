@@ -109,6 +109,7 @@ public class AbstractAssertion extends Assert {
         TimeZone utc = TimeZone.getTimeZone("UTC");
         app.setStartDate(D("1/1/2008 1:00",utc));
         app.setEndDate(D("1/1/2008 2:00", utc));
+        app.setIgnoreConflicts(true);
         return app;
     }
 
