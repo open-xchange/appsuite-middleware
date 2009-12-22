@@ -109,31 +109,18 @@ public class Activator implements BundleActivator {
 
         bundleContext = context;
         services = new ArrayList<ServiceRegistration>();
-        ServiceReference configurationServiceReference = bundleContext.getServiceReference(ConfigurationService.class.getName());
-        ConfigurationService configurationService = null;
-        if (configurationServiceReference != null) {
-            configurationService = (ConfigurationService) bundleContext.getService(configurationServiceReference);
-            registerServices(configurationService);
-        }
-        // Insert daily TimerTask to look for updates
-        ServiceReference timerServiceReference = bundleContext.getServiceReference(TimerService.class.getName());
-        if (timerServiceReference != null) {
-            final TimerService timerService = (TimerService) bundleContext.getService(timerServiceReference);
-            if (timerService != null && configurationService != null) {
-                final long updateInterval = Integer.parseInt(configurationService.getProperty(UPDATE_INTERVAL));
-                LOG.info("Crawler Update interval set to : " + updateInterval / 1000 + " seconds");
-                CrawlerUpdateTask crawlerUpdateTask = new CrawlerUpdateTask(configurationService, this);
-                // Start the job after ten seconds this and repeat it as often as configured (default:daily)
-                scheduledTimerTask = timerService.scheduleWithFixedDelay(crawlerUpdateTask, 30 * 1000, updateInterval);
-            }
-            // Track if TimerService is going down removing the ScheduledTimerTask if that happens
-            trackers.push(new ServiceTracker(
-                context,
-                TimerService.class.getName(),
-                new ConfigurationCustomizer(context, scheduledTimerTask)));
-            for (final ServiceTracker tracker : trackers) {
-                tracker.open();
-            }
+        
+        // react dynamically to the appearance/disappearance of ConfigurationService and TimerService
+        trackers.push(new ServiceTracker(
+            context,
+            ConfigurationService.class.getName(),
+            new ConfigurationServiceTrackerCustomizer(context, this)));
+        trackers.push(new ServiceTracker(context, TimerService.class.getName(), new TimerServiceTrackerCustomizer(
+            context,
+            scheduledTimerTask,
+            this)));
+        for (final ServiceTracker tracker : trackers) {
+            tracker.open();
         }
     }
 

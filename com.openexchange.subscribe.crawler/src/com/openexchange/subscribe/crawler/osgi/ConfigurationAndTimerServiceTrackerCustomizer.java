@@ -53,39 +53,51 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.subscribe.crawler.CrawlerUpdateTask;
 import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
 
 /**
- * {@link ConfigurationCustomizer}
- * This class is meant to close the TimerTask scheduled to check for daily updates to the crawler-configurations.
- * It is needed because otherwise the TimerTask would be saved and a new one would be created each time the crawler-bundle is
- * restarted, resulting in multiple Tasks where only one is needed.
+ * This is meant to initiate and cancel the Task for crawler-auto-updates when necessary
+ * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class ConfigurationCustomizer implements ServiceTrackerCustomizer {
+public class ConfigurationAndTimerServiceTrackerCustomizer implements ServiceTrackerCustomizer {
 
     private final BundleContext context;
 
-    private final ScheduledTimerTask scheduledTimerTask;
+    private ScheduledTimerTask scheduledTimerTask;
 
-    public ConfigurationCustomizer(BundleContext context, ScheduledTimerTask scheduledTimerTask) {
+    private Activator activator;
+    
+    private TimerService timerService;
+
+    public ConfigurationAndTimerServiceTrackerCustomizer(BundleContext context, Activator activator, TimerService timerService, ScheduledTimerTask scheduledTimerTask) {
         super();
         this.context = context;
         this.scheduledTimerTask = scheduledTimerTask;
+        this.activator = activator;
+        this.timerService = timerService;
     }
 
     public Object addingService(ServiceReference reference) {
-        ConfigurationService configService = (ConfigurationService) context.getService(reference);
-        return configService;
+        ConfigurationService configurationService = (ConfigurationService) context.getService(reference);
+        CrawlerUpdateTask crawlerUpdateTask = new CrawlerUpdateTask(configurationService, activator);
+        // Start the job 30 seconds after this and repeat it as often as configured (default:daily)
+        final long updateInterval = Integer.parseInt(configurationService.getProperty(activator.UPDATE_INTERVAL));
+        // Insert daily TimerTask to look for updates
+        scheduledTimerTask = timerService.scheduleWithFixedDelay(crawlerUpdateTask, 30 * 1000, updateInterval);
+        System.out.println("***** Crawler-Updatetask started !!!");
+        return configurationService;
     }
 
     public void modifiedService(ServiceReference reference, Object service) {
-        // Nothing to do.
+        // nothing to do here
     }
 
     public void removedService(ServiceReference reference, Object service) {
-        // cancel the TimerTask before either service (crawler or TimerService) is going down
         scheduledTimerTask.cancel();
         context.ungetService(reference);
     }
+
 }
