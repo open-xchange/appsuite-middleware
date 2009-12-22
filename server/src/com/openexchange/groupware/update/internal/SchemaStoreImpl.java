@@ -65,7 +65,6 @@ import com.openexchange.database.internal.Server;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.SchemaException;
-import com.openexchange.groupware.update.SchemaImpl;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.SchemaUpdateState;
 import com.openexchange.groupware.update.UpdateTaskCollection;

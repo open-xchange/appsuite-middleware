@@ -51,7 +51,6 @@ package com.openexchange.groupware.update.internal;
 
 import java.util.HashSet;
 import java.util.Set;
-import com.openexchange.groupware.update.SchemaImpl;
 import com.openexchange.groupware.update.SchemaUpdateState;
 
 /**
@@ -67,11 +66,22 @@ public class SchemaUpdateStateImpl extends SchemaImpl implements SchemaUpdateSta
         super();
     }
 
+    public SchemaUpdateStateImpl(SchemaUpdateState schema) {
+        super(schema);
+        for (String task : schema.getExecutedList()) {
+            executedTasks.add(task);
+        }
+    }
+
     public void addExecutedTask(String taskName) {
         executedTasks.add(taskName);
     }
 
     public boolean isExecuted(String taskName) {
         return executedTasks.contains(taskName);
+    }
+
+    public String[] getExecutedList() {
+        return executedTasks.toArray(new String[executedTasks.size()]);
     }
 }

@@ -59,6 +59,7 @@ import com.openexchange.groupware.update.internal.DynamicList;
 import com.openexchange.groupware.update.internal.ExcludedList;
 import com.openexchange.groupware.update.internal.ExecutedFilter;
 import com.openexchange.groupware.update.internal.Filter;
+import com.openexchange.groupware.update.internal.SchemaUpdateStateImpl;
 import com.openexchange.groupware.update.internal.VersionFilter;
 
 /**
@@ -96,24 +97,35 @@ public class UpdateTaskCollection {
      * @return list of <code>UpdateTask</code> instances
      */
     public final List<UpdateTask> getFilteredAndSortedUpdateTasks(SchemaUpdateState schema) {
-        final Filter filter;
-        if (Schema.FINAL_VERSION == schema.getDBVersion() || Schema.NO_VERSION == schema.getDBVersion()) {
-            filter = new ExecutedFilter();
-        } else {
-            filter = new VersionFilter();
-        }
         List<UpdateTask> retval = generateList();
+        SchemaUpdateState state = schema;
+        // Calculate version to executed list.
+        if (Schema.FINAL_VERSION != schema.getDBVersion() && Schema.NO_VERSION != schema.getDBVersion()) {
+            state = addExecutedBasedOnVersion(schema, retval);
+        }
         // Filter
+        Filter filter = new ExecutedFilter();
         Iterator<UpdateTask> iter = retval.iterator();
         while (iter.hasNext()) {
             UpdateTask task = iter.next();
-            if (!filter.mustBeExecuted(schema, task)) {
+            if (!filter.mustBeExecuted(state, task)) {
                 iter.remove();
             }
         }
         // Sort, DependencyComparator uses internal fallback to database schema versions.
         // TODO Use something like a self written selection sort. DependencyComparator does not work due to missing transitivity.
         Collections.sort(retval, new DependencyComparator());
+        return retval;
+    }
+
+    private SchemaUpdateState addExecutedBasedOnVersion(SchemaUpdateState schema, List<UpdateTask> tasks) {
+        SchemaUpdateState retval = new SchemaUpdateStateImpl(schema);
+        Filter filter = new VersionFilter();
+        for (UpdateTask task : tasks) {
+            if (!filter.mustBeExecuted(schema, task)) {
+                retval.addExecutedTask(task.getClass().getName());
+            }
+        }
         return retval;
     }
 

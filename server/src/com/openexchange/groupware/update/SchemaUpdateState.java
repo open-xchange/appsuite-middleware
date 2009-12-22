@@ -56,6 +56,9 @@ package com.openexchange.groupware.update;
  */
 public interface SchemaUpdateState extends Schema {
 
+    void addExecutedTask(String taskName);
+
     boolean isExecuted(String taskName);
 
+    String[] getExecutedList();
 }

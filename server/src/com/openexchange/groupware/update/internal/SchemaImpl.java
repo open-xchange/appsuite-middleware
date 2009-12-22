@@ -47,67 +47,50 @@
  *
  */
 
-package com.openexchange.groupware.update;
+package com.openexchange.groupware.update.internal;
+
+import com.openexchange.groupware.update.Schema;
 
 /**
  * This class is a data container for the update information of a database schema.
- * TODO Move this implementation to the internal package.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SchemaImpl implements Schema {
 
-    /**
-     * Currently locked?
-     */
     private boolean locked;
 
-    /**
-     * Version of the schema.
-     */
     private int dbVersion = NO_VERSION;
 
-    /**
-     * Is the update compatible for the groupware?
-     */
     private boolean groupwareCompatible;
 
-    /**
-     * Is the update compatible for the admin?
-     */
     private boolean adminCompatible;
 
-    /**
-     * Hostname of the server that updates the database.
-     */
     private String server;
 
-    /**
-     * Schema name
-     */
     private String schema;
 
-    /**
-     * Default constructor.
-     */
     public SchemaImpl() {
         super();
     }
 
-    /**
-     * @param locked
-     * @param dbVersion
-     * @param groupwareCompatible
-     * @param adminCompatible
-     */
-    public SchemaImpl(final boolean locked, final int dbVersion,
-        final boolean groupwareCompatible, final boolean adminCompatible) {
+    public SchemaImpl(boolean locked, int dbVersion, boolean groupwareCompatible, boolean adminCompatible) {
         super();
         this.locked = locked;
         this.dbVersion = dbVersion;
         this.groupwareCompatible = groupwareCompatible;
         this.adminCompatible = adminCompatible;
+    }
+
+    public SchemaImpl(Schema schema) {
+        super();
+        this.locked = schema.isLocked();
+        this.dbVersion = schema.getDBVersion();
+        this.groupwareCompatible = schema.isGroupwareCompatible();
+        this.adminCompatible = schema.isAdminCompatible();
+        this.server = schema.getServer();
+        this.schema = schema.getSchema();
     }
 
     /**
