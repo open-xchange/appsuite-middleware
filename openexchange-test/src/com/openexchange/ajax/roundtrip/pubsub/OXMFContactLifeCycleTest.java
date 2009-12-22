@@ -72,6 +72,10 @@ public class OXMFContactLifeCycleTest extends AbstractPubSubRoundtripTest {
         super(name);
     }
     
+    /**
+     * 
+     * @throws Exception
+     */
     public void testShouldNotLoseContactsWhileRoundtripping() throws Exception{
         ContactTestManager cMgr = getContactManager();
         FolderTestManager fMgr = getFolderManager();
@@ -129,6 +133,10 @@ public class OXMFContactLifeCycleTest extends AbstractPubSubRoundtripTest {
         assertEquals("Should have no contacts after deleting them all", 0, contacts.length);
     }
 
+    /**
+     * Does a publish, then a subscribe and then checks whether basic data (mostly name 
+     * and title)  survived the whole process. 
+     */
     public void testContactTrippingWithCensoredDataSet() throws Exception{
         ContactTestManager cMgr = getContactManager();
         FolderTestManager fMgr = getFolderManager();
@@ -165,7 +173,13 @@ public class OXMFContactLifeCycleTest extends AbstractPubSubRoundtripTest {
         assertNoDataMessedUpMinimumRequirements(contact1,contacts[0]);        
     }
 
-    //disabled because we usually publish a censored template
+    /**
+     *  Does a publish, then a subscribe. Then checks whether all data of a contact
+     *  survived those steps.
+     *   
+     *  This is usually disabled because we publish a censored template that does not
+     *  export all data at all.
+     */
     public void do_not_testContactTrippingWithFullDataSet() throws Exception{
         ContactTestManager cMgr = getContactManager();
         FolderTestManager fMgr = getFolderManager();
