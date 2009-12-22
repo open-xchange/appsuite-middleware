@@ -196,7 +196,6 @@ public class RecurrenceChecker {
         Set<Integer> reucrrenceFields = new HashSet<Integer>() {
 
             {
-                add(CalendarObject.RECURRENCE_TYPE);
                 add(CalendarObject.INTERVAL);
                 add(CalendarObject.DAYS);
                 add(CalendarObject.DAY_IN_MONTH);
@@ -206,10 +205,17 @@ public class RecurrenceChecker {
             }
         };
 
+        boolean skipType = false;
+        
         for (int exception : exceptions) {
             reucrrenceFields.remove(exception);
+            if (exception == CalendarObject.RECURRENCE_TYPE)
+                skipType = true;
         }
 
+        if (cdao.contains(CalendarObject.RECURRENCE_TYPE) && (Integer)cdao.get(CalendarObject.RECURRENCE_TYPE) != CalendarObject.NO_RECURRENCE)
+            return true;
+        
         for (int recurrenceField : reucrrenceFields) {
             if (cdao.contains(recurrenceField))
                 return true;

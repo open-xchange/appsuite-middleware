@@ -1179,6 +1179,9 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             /*
              * An update of a change exception
              */
+            if (RecurrenceChecker.containsRecurrenceInformation(cdao)) {
+                throw new OXCalendarException(OXCalendarException.Code.CHANGE_EXCEPTION_TO_RECURRENCE);
+            }
             return recColl.RECURRING_NO_ACTION;
         }
         if (edao.containsRecurrenceType() && edao.getRecurrenceType() > CalendarDataObject.NO_RECURRENCE && (!cdao.containsRecurrenceType() || cdao.getRecurrenceType() == edao.getRecurrenceType())) {

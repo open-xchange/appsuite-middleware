@@ -280,7 +280,8 @@ public class OXCalendarException extends OXException {
          * Unnecessary recurrence information.
          */
         UNNECESSARY_RECURRENCE_INFORMATION("Unnecessary recurrence information (%1$s) for type %2$s", 97, Category.USER_INPUT),
-        UNABLE_TO_CALCULATE_POSITION("Unable to calculate given position. Seems to be a delete exception or outside range", 98, Category.USER_INPUT);
+        UNABLE_TO_CALCULATE_POSITION("Unable to calculate given position. Seems to be a delete exception or outside range", 98, Category.USER_INPUT),
+        CHANGE_EXCEPTION_TO_RECURRENCE("Changing an exception into a series is not supported.", 99, Category.USER_INPUT);
 
         /**
          * Message of the exception.
