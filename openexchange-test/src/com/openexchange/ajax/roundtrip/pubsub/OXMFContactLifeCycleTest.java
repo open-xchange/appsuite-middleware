@@ -77,7 +77,7 @@ public class OXMFContactLifeCycleTest extends AbstractPubSubRoundtripTest {
         
     }
 
-    public void doNot_testShouldNotLoseContactsWhileRoundtripping() throws Exception{
+    public void testShouldNotLoseContactsWhileRoundtripping() throws Exception{
         ContactTestManager cMgr = getContactManager();
         FolderTestManager fMgr = getFolderManager();
         //setup folders
@@ -123,23 +123,12 @@ public class OXMFContactLifeCycleTest extends AbstractPubSubRoundtripTest {
         Contact contact2 = generateContact("Hubert", "Meier");
         contact2.setParentFolderID(pubFolder.getObjectID());
         cMgr.newAction(contact2);
-        
+        Thread.sleep(31*1000);
         //refresh and check subscription again
         subMgr.refreshAction(subscription.getId());
         contacts = cMgr.allAction(subFolder.getObjectID());
         assertEquals("Should have two contacts after update", 2, contacts.length);
         
-        //delete first contact
-        cMgr.deleteAction(contact1);
-        subMgr.refreshAction(subscription.getId());
-        contacts = cMgr.allAction(subFolder.getObjectID());
-        assertEquals("Should have one contact after deleting one", 1, contacts.length);
-
-        //delete second contact
-        cMgr.deleteAction(contact2);
-        subMgr.refreshAction(subscription.getId());
-        contacts = cMgr.allAction(subFolder.getObjectID());
-        assertEquals("Should have no contacts after deleting them all", 0, contacts.length);
     }
 
     /**
