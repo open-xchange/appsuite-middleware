@@ -73,11 +73,10 @@ public class OXMFContactLifeCycleTest extends AbstractPubSubRoundtripTest {
     public OXMFContactLifeCycleTest(String name) {
         super(name);
     }
-    
-    /**
-     * 
-     * @throws Exception
-     */
+    public void testBla(){
+        
+    }
+
     public void doNot_testShouldNotLoseContactsWhileRoundtripping() throws Exception{
         ContactTestManager cMgr = getContactManager();
         FolderTestManager fMgr = getFolderManager();
