@@ -243,7 +243,9 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      */
     private static final AtomicLong sequencer = new AtomicLong(0);
 
-    /** Base of nanosecond timings, to avoid wrapping */
+    /**
+     * Base of nanosecond timings, to avoid wrapping
+     */
     private static final long NANO_ORIGIN = System.nanoTime();
 
     /**
