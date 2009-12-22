@@ -85,9 +85,9 @@ public final class MIMEType2ExtMap {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MIMEType2ExtMap.class);
 
-    private static Map<String, String> typeMap;
+    private static volatile Map<String, String> typeMap;
 
-    private static Map<String, List<String>> extMap;
+    private static volatile Map<String, List<String>> extMap;
 
     /**
      * No instance.
@@ -100,12 +100,14 @@ public final class MIMEType2ExtMap {
      * Resets MIME type file map.
      */
     public static void reset() {
-        synchronized (MIMEType2ExtMap.class) {
-            if (null == typeMap) {
-                return;
+        if (null != typeMap) {
+            synchronized (MIMEType2ExtMap.class) {
+                if (null == typeMap) {
+                    return;
+                }
+                typeMap = null;
+                extMap = null;
             }
-            typeMap = null;
-            extMap = null;
         }
     }
 
@@ -113,82 +115,84 @@ public final class MIMEType2ExtMap {
      * Initializes MIME type file map.
      */
     public static void init() {
-        synchronized (MIMEType2ExtMap.class) {
-            if (null != typeMap) {
-                return;
-            }
-            try {
-                typeMap = new HashMap<String, String>();
-                extMap = new HashMap<String, List<String>>();
-                final StringBuilder sb = new StringBuilder(128);
-                {
-                    final String homeDir = System.getProperty("user.home");
-                    if (homeDir != null) {
-                        final File file = new File(sb.append(homeDir).append(File.separatorChar).append(".mime.types").toString());
-                        if (file.exists()) {
-                            if (LOG.isInfoEnabled()) {
-                                sb.setLength(0);
-                                LOG.info(sb.append("Loading MIME type file \"").append(file.getPath()).append('"').toString());
+        if (null == typeMap) {
+            synchronized (MIMEType2ExtMap.class) {
+                if (null != typeMap) {
+                    return;
+                }
+                try {
+                    typeMap = new HashMap<String, String>();
+                    extMap = new HashMap<String, List<String>>();
+                    final StringBuilder sb = new StringBuilder(128);
+                    {
+                        final String homeDir = System.getProperty("user.home");
+                        if (homeDir != null) {
+                            final File file = new File(sb.append(homeDir).append(File.separatorChar).append(".mime.types").toString());
+                            if (file.exists()) {
+                                if (LOG.isInfoEnabled()) {
+                                    sb.setLength(0);
+                                    LOG.info(sb.append("Loading MIME type file \"").append(file.getPath()).append('"').toString());
+                                }
+                                loadInternal(file);
                             }
-                            loadInternal(file);
                         }
                     }
-                }
-                {
-                    final String javaHome = System.getProperty("java.home");
-                    if (javaHome != null) {
-                        sb.setLength(0);
-                        final File file =
-                            new File(sb.append(javaHome).append(File.separatorChar).append("lib").append(File.separator).append(
-                                "mime.types").toString());
-                        if (file.exists()) {
-                            if (LOG.isInfoEnabled()) {
-                                sb.setLength(0);
-                                LOG.info(sb.append("Loading MIME type file \"").append(file.getPath()).append('"').toString());
-                            }
-                            loadInternal(file);
-                        }
-                    }
-                }
-                {
-                    for (final Enumeration<URL> e = ClassLoader.getSystemResources("META-INF/mime.types"); e.hasMoreElements();) {
-                        final URL url = e.nextElement();
-                        if (LOG.isInfoEnabled()) {
+                    {
+                        final String javaHome = System.getProperty("java.home");
+                        if (javaHome != null) {
                             sb.setLength(0);
-                            LOG.info(sb.append("Loading MIME type file \"").append(url.getFile()).append('"').toString());
+                            final File file =
+                                new File(sb.append(javaHome).append(File.separatorChar).append("lib").append(File.separator).append(
+                                    "mime.types").toString());
+                            if (file.exists()) {
+                                if (LOG.isInfoEnabled()) {
+                                    sb.setLength(0);
+                                    LOG.info(sb.append("Loading MIME type file \"").append(file.getPath()).append('"').toString());
+                                }
+                                loadInternal(file);
+                            }
                         }
-                        loadInternal(url);
                     }
-                }
-                {
-                    for (final Enumeration<URL> e = ClassLoader.getSystemResources("META-INF/mimetypes.default"); e.hasMoreElements();) {
-                        final URL url = e.nextElement();
-                        if (LOG.isInfoEnabled()) {
-                            sb.setLength(0);
-                            LOG.info(sb.append("Loading MIME type file \"").append(url.getFile()).append('"').toString());
-                        }
-                        loadInternal(url);
-                    }
-                }
-                {
-                    String mimeTypesFile = SystemConfig.getProperty(SystemConfig.Property.MimeTypeFile);
-                    if ((mimeTypesFile != null) && ((mimeTypesFile = mimeTypesFile.trim()).length() > 0)) {
-                        final File file = new File(mimeTypesFile);
-                        if (file.exists()) {
+                    {
+                        for (final Enumeration<URL> e = ClassLoader.getSystemResources("META-INF/mime.types"); e.hasMoreElements();) {
+                            final URL url = e.nextElement();
                             if (LOG.isInfoEnabled()) {
                                 sb.setLength(0);
-                                LOG.info(sb.append("Loading MIME type file \"").append(file.getPath()).append('"').toString());
+                                LOG.info(sb.append("Loading MIME type file \"").append(url.getFile()).append('"').toString());
                             }
-                            loadInternal(file);
+                            loadInternal(url);
                         }
                     }
+                    {
+                        for (final Enumeration<URL> e = ClassLoader.getSystemResources("META-INF/mimetypes.default"); e.hasMoreElements();) {
+                            final URL url = e.nextElement();
+                            if (LOG.isInfoEnabled()) {
+                                sb.setLength(0);
+                                LOG.info(sb.append("Loading MIME type file \"").append(url.getFile()).append('"').toString());
+                            }
+                            loadInternal(url);
+                        }
+                    }
+                    {
+                        String mimeTypesFile = SystemConfig.getProperty(SystemConfig.Property.MimeTypeFile);
+                        if ((mimeTypesFile != null) && ((mimeTypesFile = mimeTypesFile.trim()).length() > 0)) {
+                            final File file = new File(mimeTypesFile);
+                            if (file.exists()) {
+                                if (LOG.isInfoEnabled()) {
+                                    sb.setLength(0);
+                                    LOG.info(sb.append("Loading MIME type file \"").append(file.getPath()).append('"').toString());
+                                }
+                                loadInternal(file);
+                            }
+                        }
 
+                    }
+                    if (LOG.isInfoEnabled()) {
+                        LOG.info("MIMEType2ExtMap successfully initialized");
+                    }
+                } catch (final IOException e) {
+                    LOG.error(e.getMessage(), e);
                 }
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("MIMEType2ExtMap successfully initialized");
-                }
-            } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
             }
         }
     }
@@ -364,6 +368,8 @@ public final class MIMEType2ExtMap {
         } else if (entry.charAt(0) == '#') {
             return;
         }
+        final Map<String, List<String>> extMap = MIMEType2ExtMap.extMap;
+        final Map<String, String> typeMap = MIMEType2ExtMap.typeMap;
         if (entry.indexOf('=') > 0) {
             final MimeTypeFileLineParser parser = new MimeTypeFileLineParser(entry);
             final String type = parser.getType();
