@@ -52,6 +52,7 @@ package com.openexchange.ajax.roundtrip.pubsub;
 import com.openexchange.ajax.publish.tests.AbstractPubSubTest;
 import com.openexchange.ajax.publish.tests.PublicationTestManager;
 import com.openexchange.ajax.subscribe.test.SubscriptionTestManager;
+import com.openexchange.groupware.container.Contact;
 
 
 /**
@@ -95,6 +96,53 @@ public class AbstractPubSubRoundtripTest extends AbstractPubSubTest{
         getSubscribeManager().cleanUp();
         getPublishManager().cleanUp();
         super.tearDown();
+    }
+
+    protected void assertNoDataMessedUpMinimumRequirements(Contact expected, Contact actual) {
+        assertEquals(expected.getSurName(), actual.getSurName());
+        assertEquals(expected.getGivenName(), actual.getGivenName());
+        assertEquals(expected.getCompany(), actual.getCompany());
+        assertEquals(expected.getEmail1(), actual.getEmail1());
+        assertEquals(expected.getDisplayName(), actual.getDisplayName());
+        assertEquals(expected.getPosition(), actual.getPosition());
+        assertEquals(expected.getTitle(), actual.getTitle());
+        assertEquals(expected.getSurName(), actual.getSurName());
+    }
+
+    protected void assertNoDataMessedUpMaximumRequirements(Contact expected, Contact actual) {
+        assertEquals(expected.getSurName(), actual.getSurName());
+        assertEquals(expected.getGivenName(), actual.getGivenName());
+        assertEquals(expected.getCompany(), actual.getCompany());
+        assertEquals(expected.getEmail1(), actual.getEmail1());
+        assertEquals(expected.getEmail2(), actual.getEmail2());
+        assertEquals(expected.getEmail3(), actual.getEmail3());
+        
+        assertEquals(expected.getDisplayName(), actual.getDisplayName());
+        assertEquals(expected.getPosition(), actual.getPosition());
+        assertEquals(expected.getTitle(), actual.getTitle());
+        assertEquals(expected.getSurName(), actual.getSurName());
+        
+        assertEquals(expected.getPosition(), actual.getPosition());
+        assertEquals(expected.getTitle(), actual.getTitle());
+        assertEquals(expected.getSuffix(), actual.getSuffix());
+        
+        assertEquals(expected.getStreetBusiness(), actual.getStreetBusiness());
+        assertEquals(expected.getStreetHome(), actual.getStreetHome());
+        assertEquals(expected.getStreetOther(), actual.getStreetOther());
+        assertEquals(expected.getPostalCodeBusiness(), actual.getPostalCodeBusiness());
+        assertEquals(expected.getPostalCodeHome(), actual.getPostalCodeHome());
+        assertEquals(expected.getPostalCodeOther(), actual.getPostalCodeOther());
+        assertEquals(expected.getCityBusiness(), actual.getCityBusiness());
+        assertEquals(expected.getCityHome(), actual.getCityHome());
+        assertEquals(expected.getCityOther(), actual.getCityOther());
+        assertEquals(expected.getCountryBusiness(), actual.getCountryBusiness());
+        assertEquals(expected.getCountryHome(), actual.getCountryHome());
+        assertEquals(expected.getCountryOther(), actual.getCountryOther());        
+        assertEquals(expected.getStateBusiness(), actual.getStateBusiness());
+        assertEquals(expected.getStateHome(), actual.getStateHome());
+        assertEquals(expected.getStateOther(), actual.getStateOther());  
+        
+        assertEquals(expected.getUserField01(), actual.getUserField01());
     }
 
     

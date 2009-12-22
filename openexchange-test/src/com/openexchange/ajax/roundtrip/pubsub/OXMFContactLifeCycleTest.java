@@ -71,8 +71,8 @@ public class OXMFContactLifeCycleTest extends AbstractPubSubRoundtripTest {
     public OXMFContactLifeCycleTest(String name) {
         super(name);
     }
-
-    public void testContactTripping() throws Exception{
+    
+    public void testShouldNotLoseContactsWhileRoundtripping() throws Exception{
         ContactTestManager cMgr = getContactManager();
         FolderTestManager fMgr = getFolderManager();
         //setup folders
@@ -105,7 +105,6 @@ public class OXMFContactLifeCycleTest extends AbstractPubSubRoundtripTest {
         subMgr.refreshAction(subscription.getId());
         contacts = cMgr.allAction(pubFolder.getObjectID());
         assertEquals("Should only contain one contact after first publication", 1, contacts.length);
-        assertNoDataMessedUp(contact1,contacts[0]);
         
         //publish another contact
         Contact contact2 = generateContact("Hubert", "Meier");
@@ -130,14 +129,99 @@ public class OXMFContactLifeCycleTest extends AbstractPubSubRoundtripTest {
         assertEquals("Should have no contacts after deleting them all", 0, contacts.length);
     }
 
-    private void assertNoDataMessedUp(Contact expected, Contact actual) {
-        assertEquals(expected.getSurName(), actual.getSurName());
-        assertEquals(expected.getGivenName(), actual.getGivenName());
-        assertEquals(expected.getCompany(), actual.getCompany());
-        assertEquals(expected.getEmail1(), actual.getEmail1());
-        assertEquals(expected.getDisplayName(), actual.getDisplayName());
-        assertEquals(expected.getPosition(), actual.getPosition());
-        assertEquals(expected.getTitle(), actual.getTitle());
-        assertEquals(expected.getSurName(), actual.getSurName());
+    public void testContactTrippingWithCensoredDataSet() throws Exception{
+        ContactTestManager cMgr = getContactManager();
+        FolderTestManager fMgr = getFolderManager();
+        //setup folders
+        FolderObject pubFolder = fMgr.generateFolder("publishRoundtripTest", FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
+        FolderObject subFolder = fMgr.generateFolder("subscribeRoundtripTest", FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
+        fMgr.insertFolderOnServer(pubFolder);
+        fMgr.insertFolderOnServer(subFolder);
+        
+        //setup contact
+        Contact contact1 = generateContact("Herbert", "Meier");
+        contact1.setParentFolderID(pubFolder.getObjectID());
+        cMgr.newAction(contact1);
+        
+        //prepare pubsub
+        PublicationTestManager pubMgr = getPublishManager();
+        SubscriptionTestManager subMgr = getSubscribeManager();
+        SimPublicationTargetDiscoveryService pubDiscovery = new SimPublicationTargetDiscoveryService();
+        pubMgr.setPublicationTargetDiscoveryService(pubDiscovery);
+        Publication publication = generatePublication("contacts", String.valueOf(pubFolder.getObjectID()), pubDiscovery);
+        Subscription subscription = generateOXMFSubscription(publication.getTarget().getFormDescription());
+        subscription.setFolderId(subFolder.getObjectID());
+        
+        Contact[] contacts;
+        
+        //create publication and subscription        
+        pubMgr.newAction(publication);
+        subMgr.newAction(subscription);
+        
+        //refresh and check subscription
+        subMgr.refreshAction(subscription.getId());
+        contacts = cMgr.allAction(pubFolder.getObjectID());
+        assertEquals("Should only contain one contact after first publication", 1, contacts.length);
+        assertNoDataMessedUpMinimumRequirements(contact1,contacts[0]);        
+    }
+
+    public void testContactTrippingWithFullDataSet() throws Exception{
+        ContactTestManager cMgr = getContactManager();
+        FolderTestManager fMgr = getFolderManager();
+        //setup folders
+        FolderObject pubFolder = fMgr.generateFolder("publishRoundtripTest", FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
+        FolderObject subFolder = fMgr.generateFolder("subscribeRoundtripTest", FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
+        fMgr.insertFolderOnServer(pubFolder);
+        fMgr.insertFolderOnServer(subFolder);
+        
+        //setup contact
+        Contact con = generateContact("Herbert", "Meier");
+        con.setEmail2("invalid@open-xchange.com");
+        con.setEmail3("invalid2@open-xchange.com");
+        con.setTitle("Herr");
+        con.setSuffix("Jr.");
+        con.setCompany("Meier's Apostrophen Manufactur");
+        con.setPosition("CAO");
+        con.setUserField01("PEEEEENIS!");
+        
+        con.setStreetBusiness("Business Street");
+        con.setStreetHome("Home Street");
+        con.setStreetOther("Other Street");
+        con.setPostalCodeBusiness("555");
+        con.setPostalCodeHome("666");
+        con.setPostalCodeOther("777");
+        con.setCityBusiness("Business City");
+        con.setCityHome("Home City");
+        con.setCityOther("Other City");
+        con.setCountryBusiness("Business Country");
+        con.setCountryHome("Home Country");
+        con.setCountryOther("Other Country");        
+        con.setStateBusiness("Business State");
+        con.setStateHome("Home State");
+        con.setStateOther("Other State");        
+                
+        con.setParentFolderID(pubFolder.getObjectID());
+        cMgr.newAction(con);
+        
+        //prepare pubsub
+        PublicationTestManager pubMgr = getPublishManager();
+        SubscriptionTestManager subMgr = getSubscribeManager();
+        SimPublicationTargetDiscoveryService pubDiscovery = new SimPublicationTargetDiscoveryService();
+        pubMgr.setPublicationTargetDiscoveryService(pubDiscovery);
+        Publication publication = generatePublication("contacts", String.valueOf(pubFolder.getObjectID()), pubDiscovery);
+        Subscription subscription = generateOXMFSubscription(publication.getTarget().getFormDescription());
+        subscription.setFolderId(subFolder.getObjectID());
+        
+        Contact[] contacts;
+        
+        //create publication and subscription        
+        pubMgr.newAction(publication);
+        subMgr.newAction(subscription);
+        
+        //refresh and check subscription
+        subMgr.refreshAction(subscription.getId());
+        contacts = cMgr.allAction(pubFolder.getObjectID());
+        assertEquals("Should only contain one contact after first publication", 1, contacts.length);
+        assertNoDataMessedUpMaximumRequirements(con,contacts[0]);    
     }
 }
