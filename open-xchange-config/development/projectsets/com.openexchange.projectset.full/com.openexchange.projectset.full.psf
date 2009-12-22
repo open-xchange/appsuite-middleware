@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <psf version="2.0">
 <provider id="org.eclipse.team.svn.core.svnnature">
 <project reference="1.0.1,https://svn.open-xchange.com/open-xchange/com.openexchange.outlook.updater/trunk,com.openexchange.outlook.updater,f0a43fb92adf001e1a6e851cd1b1b247;https:/svn.open-xchange.com/open-xchange/com.openexchange.outlook.updater;https:/svn.open-xchange.com/open-xchange/com.openexchange.outlook.updater;branches;tags;trunk;true;0fe20564-ae94-414e-a2b9-406510c16165;https://svn.open-xchange.com/open-xchange;;false;;;22"/>
@@ -56,5 +56,8 @@
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.report.client,com.openexchange.report.client"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.voipnow.json,com.openexchange.voipnow.json"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.sso,com.openexchange.sso"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.dataretention.csv,com.openexchange.dataretention.csv"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.passwordchange.database,com.openexchange.passwordchange.database"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.passwordchange.servlet,com.openexchange.passwordchange.servlet"/>
 </provider>
 </psf>
