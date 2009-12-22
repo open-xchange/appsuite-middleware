@@ -227,7 +227,7 @@ public class SubscriptionTestManager {
     }
     
     public void refreshAction(int id) throws AjaxException, IOException, SAXException, JSONException{
-        RefreshSubscriptionRequest refreshReq = new RefreshSubscriptionRequest(id);
+        RefreshSubscriptionRequest refreshReq = new RefreshSubscriptionRequest(id, null);
         refreshReq.setFailOnError(getFailOnError());
         RefreshSubscriptionResponse refreshResponse = getClient().execute(refreshReq);
         lastResponse = refreshResponse;
