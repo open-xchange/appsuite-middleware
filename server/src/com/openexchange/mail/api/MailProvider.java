@@ -65,8 +65,6 @@ import com.openexchange.spamhandler.SpamHandlerRegistry;
  */
 public abstract class MailProvider {
 
-    private Integer hashCode;
-
     private boolean deprecated;
 
     /**
@@ -85,12 +83,13 @@ public abstract class MailProvider {
         } else if (!(obj instanceof MailProvider)) {
             return false;
         }
-        final MailProvider other = (MailProvider) obj;
-        if (getProtocol() == null) {
-            if (other.getProtocol() != null) {
+        final Protocol thisProtocol = getProtocol();
+        final Protocol otherProtocol = ((MailProvider) obj).getProtocol();
+        if (thisProtocol == null) {
+            if (otherProtocol != null) {
                 return false;
             }
-        } else if (!getProtocol().equals(other.getProtocol())) {
+        } else if (!thisProtocol.equals(otherProtocol)) {
             return false;
         }
         return true;
@@ -98,10 +97,7 @@ public abstract class MailProvider {
 
     @Override
     public final int hashCode() {
-        if (null == hashCode) {
-            hashCode = Integer.valueOf(getProtocol().hashCode());
-        }
-        return hashCode.intValue();
+        return getProtocol().hashCode();
     }
 
     /**
