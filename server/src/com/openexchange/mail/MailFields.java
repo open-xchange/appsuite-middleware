@@ -104,9 +104,11 @@ public final class MailFields {
      * Adds specified {@link MailField} constant.
      * 
      * @param mailField The mail field to add
+     * @return THis instance with mail field added
      */
-    public void add(final MailField mailField) {
+    public MailFields add(final MailField mailField) {
         arr[mailField.ordinal()] = true;
+        return this;
     }
 
     /**
