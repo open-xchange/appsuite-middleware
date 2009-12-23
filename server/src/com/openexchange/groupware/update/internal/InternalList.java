@@ -50,8 +50,14 @@
 package com.openexchange.groupware.update.internal;
 
 import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.UpdateTaskV2;
 
+/**
+ * {@link InternalList}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
 /**
  * {@link InternalList}
  *
@@ -301,6 +307,9 @@ public final class InternalList {
         // All following update tasks must be added to the list below.
     };
 
+    /**
+     * All this tasks should extend {@link UpdateTaskAdapter} to fulfill the prerequisites to be sorted among their dependencies.
+     */
     private static final UpdateTaskV2[] TASKS = new UpdateTaskV2[] {
         // Renames "Unified INBOX" to "Unified Mail"
         new com.openexchange.groupware.update.tasks.UnifiedINBOXRenamerTask()

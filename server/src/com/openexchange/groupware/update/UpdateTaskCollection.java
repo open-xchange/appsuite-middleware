@@ -50,16 +50,15 @@
 package com.openexchange.groupware.update;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import com.openexchange.groupware.update.internal.DependencyComparator;
 import com.openexchange.groupware.update.internal.DynamicList;
 import com.openexchange.groupware.update.internal.ExcludedList;
 import com.openexchange.groupware.update.internal.ExecutedFilter;
 import com.openexchange.groupware.update.internal.Filter;
 import com.openexchange.groupware.update.internal.SchemaUpdateStateImpl;
+import com.openexchange.groupware.update.internal.UpdateTaskSorter;
 import com.openexchange.groupware.update.internal.VersionFilter;
 
 /**
@@ -95,8 +94,9 @@ public class UpdateTaskCollection {
      * 
      * @param schema - current database version
      * @return list of <code>UpdateTask</code> instances
+     * @throws UpdateException if the order for the update tasks to execute can not be determined.
      */
-    public final List<UpdateTask> getFilteredAndSortedUpdateTasks(SchemaUpdateState schema) {
+    public final List<UpdateTask> getFilteredAndSortedUpdateTasks(SchemaUpdateState schema) throws UpdateException {
         List<UpdateTask> retval = generateList();
         SchemaUpdateState state = schema;
         // Calculate version to executed list.
@@ -112,9 +112,7 @@ public class UpdateTaskCollection {
                 iter.remove();
             }
         }
-        // Sort, DependencyComparator uses internal fallback to database schema versions.
-        // TODO Use something like a self written selection sort. DependencyComparator does not work due to missing transitivity.
-        Collections.sort(retval, new DependencyComparator());
+        retval = new UpdateTaskSorter().sort(state.getExecutedList(), retval);
         return retval;
     }
 

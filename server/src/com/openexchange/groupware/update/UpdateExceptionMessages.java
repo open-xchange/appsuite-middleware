@@ -66,6 +66,8 @@ public final class UpdateExceptionMessages implements LocalizableStrings {
 
     public static final String UNKNOWN_SCHEMA_MSG = "Unknown schema name: %1$s.";
 
+    public static final String UNRESOLVABLE_DEPENDENCIES_MSG = "Unable to determine next update task to execute. Executed: %1$s. Enqueued: %2$s. Scheduled: %3$s.";
+
     public static final String WRONG_ROW_COUNT_MSG = "Processed a wrong number of rows in database. Expected %1$d rows but worked on %2$d rows.";
 
     public static final String UPDATE_FAILED_MSG = "Updating schema %1$s failed. Cause: %2$s.";

@@ -78,6 +78,10 @@ public enum UpdateExceptionCodes implements OXErrorMessage {
      */
     UNKNOWN_SCHEMA(UNKNOWN_SCHEMA_MSG, Category.USER_INPUT, 16),
     /**
+     * Unable to determine next update task to execute. Executed: %1$s. Enqueued: %2$s. Scheduled: %3$s.
+     */
+    UNRESOLVABLE_DEPENDENCIES(UNRESOLVABLE_DEPENDENCIES_MSG, Category.CODE_ERROR, 96),
+    /**
      * %1$s.
      */
     OTHER_PROBLEM("%1$s", Category.CODE_ERROR, 97),
