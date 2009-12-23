@@ -230,6 +230,19 @@ public final class MailFields {
     }
 
     /**
+     * Checks if this instance contains no fields.
+     * 
+     * @return <code>true</code> if this instance contains no fields; otherwise <code>false</code>
+     */
+    public boolean isEmpty() {
+        boolean retval = true;
+        for (int i = 0; retval && i < arr.length; i++) {
+            retval = !arr[i];
+        }
+        return retval;
+    }
+
+    /**
      * Returns a newly created array of {@link MailField} constants
      * 
      * @return A newly created array of {@link MailField} constants
