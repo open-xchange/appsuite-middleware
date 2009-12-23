@@ -65,7 +65,7 @@ import com.openexchange.spamhandler.SpamHandlerRegistry;
  */
 public abstract class MailProvider {
 
-    private final int hashCode;
+    private Integer hashCode;
 
     private boolean deprecated;
 
@@ -74,7 +74,10 @@ public abstract class MailProvider {
      */
     protected MailProvider() {
         super();
-        hashCode = getProtocol().hashCode();
+        final Protocol protocol = getProtocol();
+        if (null != protocol) {
+            hashCode = Integer.valueOf(protocol.hashCode());
+        }
     }
 
     @Override
@@ -99,7 +102,10 @@ public abstract class MailProvider {
 
     @Override
     public final int hashCode() {
-        return hashCode;
+        if (null == hashCode) {
+            hashCode = Integer.valueOf(getProtocol().hashCode());
+        }
+        return hashCode.intValue();
     }
 
     /**
@@ -127,7 +133,10 @@ public abstract class MailProvider {
      */
     public void startUp() throws MailException {
         getProtocolProps().loadProperties();
-        MailAccess.startupImpl(createNewMailAccess(null));
+        final MailAccess<?, ?> access = createNewMailAccess(null);
+        if (null != access) {
+            MailAccess.startupImpl(access);
+        }
     }
 
     /**
@@ -136,7 +145,10 @@ public abstract class MailProvider {
      * @throws MailException if shut-down fails
      */
     public void shutDown() throws MailException {
-        MailAccess.shutdownImpl(createNewMailAccess(null));
+        final MailAccess<?, ?> access = createNewMailAccess(null);
+        if (null != access) {
+            MailAccess.shutdownImpl(access);
+        }
         getProtocolProps().resetProperties();
     }
 
@@ -209,8 +221,9 @@ public abstract class MailProvider {
      * @param session The session providing needed user data; may be <code>null</code> to obtain a dummy instance for initialization purpose
      * @param accountId The account ID
      * @return A non-singleton instance
+     * @throws MailException If non-singleton instance cannot be returned
      */
-    public MailProvider getNonSingletonInstance(final Session session, final int accountId) {
+    public MailProvider getNonSingletonInstance(final Session session, final int accountId) throws MailException {
         return null;
     }
 
@@ -231,7 +244,8 @@ public abstract class MailProvider {
      * @return The newly created {@link MailAccess mail access}.
      * @throws MailException If new {@link MailAccess mail access} instance cannot be created
      */
-    public abstract MailAccess<?, ?> createNewMailAccess(Session session, int accountId) throws MailException;
+    public abstract MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> createNewMailAccess(Session session,
+            int accountId) throws MailException;
 
     /**
      * Gets the protocol properties
