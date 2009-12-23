@@ -74,10 +74,6 @@ public abstract class MailProvider {
      */
     protected MailProvider() {
         super();
-        final Protocol protocol = getProtocol();
-        if (null != protocol) {
-            hashCode = Integer.valueOf(protocol.hashCode());
-        }
     }
 
     @Override
