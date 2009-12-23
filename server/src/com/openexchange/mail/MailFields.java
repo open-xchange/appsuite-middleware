@@ -194,6 +194,42 @@ public final class MailFields {
     }
 
     /**
+     * Removes from this instance all of its fields that are contained in the specified mail fields.
+     * 
+     * @param otherFields The mail fields which will be removed from this instance
+     * @return <code>true</code> if this instance changed as a result of the call; otherwise <code>false</code>
+     */
+    public boolean removeAll(final MailFields otherFields) {
+        final boolean[] otherArr = otherFields.arr;
+        boolean retval = false;
+        for (int i = 0; i < otherArr.length; i++) {
+            if (otherArr[i] && arr[i]) {
+                arr[i] = false;
+                retval = true;
+            }
+        }
+        return retval;
+    }
+
+    /**
+     * Retains only the fields in this instance that are contained in the specified mail fields.
+     * 
+     * @param otherFields The mail fields which this instance will retain
+     * @return <code>true</code> if this instance changed as a result of the call; otherwise <code>false</code>
+     */
+    public boolean retainAll(final MailFields otherFields) {
+        final boolean[] otherArr = otherFields.arr;
+        boolean retval = false;
+        for (int i = 0; i < otherArr.length; i++) {
+            if (!otherArr[i] && arr[i]) {
+                arr[i] = false;
+                retval = true;
+            }
+        }
+        return retval;
+    }
+
+    /**
      * Returns a newly created array of {@link MailField} constants
      * 
      * @return A newly created array of {@link MailField} constants
