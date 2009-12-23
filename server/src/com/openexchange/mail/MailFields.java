@@ -178,6 +178,22 @@ public final class MailFields {
     }
 
     /**
+     * Checks if all of specified mail field constants is contained.
+     * 
+     * @param mailFields The mail fields to check
+     * @return <code>true</code> if all of specified mail field constants is contained; otherwise <code>false</code>.
+     */
+    public boolean containsAll(final MailFields mailFields) {
+        final boolean[] otherArr = mailFields.arr;
+        for (int i = 0; i < otherArr.length; i++) {
+            if (otherArr[i] && !arr[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Returns a newly created array of {@link MailField} constants
      * 
      * @return A newly created array of {@link MailField} constants
