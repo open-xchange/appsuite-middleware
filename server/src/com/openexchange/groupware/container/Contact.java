@@ -55,6 +55,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Set;
+import com.openexchange.groupware.contact.helpers.ContactField;
 
 /**
  * {@link Contact} - Represents a contact.
@@ -4284,4 +4285,17 @@ public class Contact extends CommonObject implements Serializable{
         name.insert(0, "[");
         return name.toString();
     }
+
+    @Override
+    public Contact clone(){
+        Contact clone = new Contact();
+        for(ContactField field: ContactField.values()){
+            int fieldNum = field.getNumber();
+            if(contains(fieldNum))
+                clone.set(fieldNum, get(fieldNum));
+        }
+        return clone;
+    }
+    
+    
 }

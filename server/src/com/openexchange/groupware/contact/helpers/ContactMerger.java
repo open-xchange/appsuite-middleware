@@ -68,20 +68,23 @@ public class ContactMerger {
     }
     
     /**
-     * Merges the first object with the second one by extending the first object 
-     * with values from the second. In case of conflicts: If <i>overwrite</i> is 
-     * set, values from the second object take precedence, otherwise the values 
-     * from the first object remain.
+     * Merges the first object with the second one and returns a merged one. 
+     * In case of conflicts: If <i>overwrite</i> is set, values from the 
+     * second object take precedence, otherwise the values from the first do.
      * 
      * @param c1 first object to be merged. This one will be changed afterwards.
      * @param c2 second object to be merged. This one will not be changed at all.
      */
-    public void merge(Contact c1, Contact c2){
+    public Contact merge(Contact c1, Contact c2){
+        Contact clone = c1.clone();
+        
         for(ContactField field : ContactField.values()){
             int number = field.getNumber();
             if(c2.contains(number))
                 if(overwrite || ! c1.contains(number))
-                    c1.set(number, c2.get(number));
+                    clone.set(number, c2.get(number));
         }
+        
+        return clone;
     }
 }
