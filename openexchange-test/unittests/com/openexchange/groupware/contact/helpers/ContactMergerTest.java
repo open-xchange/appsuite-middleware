@@ -80,26 +80,26 @@ public class ContactMergerTest extends TestCase {
 
     public void testNonConflictingElementsShouldBeMergedAnyway(){
         ContactMerger merger = new ContactMerger(true);
-        merger.merge(c1, c2);
-        assertEquals("Given name should be retained", "Given Name 1" , c1.getGivenName());
-        assertEquals("Surname should be transferred", "Surname 2" , c1.getSurName());
+        Contact merged = merger.merge(c1, c2);
+        assertEquals("Given name should be retained", "Given Name 1" , merged.getGivenName());
+        assertEquals("Surname should be transferred", "Surname 2" , merged.getSurName());
     }
     
     public void testSecondElementShouldPrecedeWithOverwrite(){
         ContactMerger merger = new ContactMerger(true);
-        merger.merge(c1, c2);
-        assertEquals("Company should be same of second", "Company 2" , c1.getCompany());
+        Contact merged = merger.merge(c1, c2);
+        assertEquals("Company should be same of second", "Company 2" , merged.getCompany());
     }
 
     public void testEmptyElementShouldNotOverwriteEvenWithOverwriteEnabled(){
         ContactMerger merger = new ContactMerger(true);
-        merger.merge(c1, c2);
-        assertEquals("Given name should be retained if second one's is null", "Given Name 1" , c1.getGivenName());
+        Contact merged = merger.merge(c1, c2);
+        assertEquals("Given name should be retained if second one's is null", "Given Name 1" , merged.getGivenName());
     }
     
     public void testFirstElementShouldPrecedeWithoutOverwrite(){
         ContactMerger merger = new ContactMerger(false);
-        merger.merge(c1, c2);
-        assertEquals("Company should be same of first, still", "Company 1" , c1.getCompany());
+        Contact merged = merger.merge(c1, c2);
+        assertEquals("Company should be same of first, still", "Company 1" , merged.getCompany());
     }
 }
