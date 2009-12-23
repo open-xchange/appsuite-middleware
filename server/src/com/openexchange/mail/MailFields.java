@@ -101,6 +101,17 @@ public final class MailFields {
     }
 
     /**
+     * Copy constructor: Initializes a new {@link MailFields} from specified mail fields.
+     * 
+     * @param mailFields The mail fields
+     */
+    public MailFields(final MailFields mailFields) {
+        super();
+        arr = new boolean[VALUES.length];
+        System.arraycopy(mailFields.arr, 0, arr, 0, arr.length);
+    }
+
+    /**
      * Adds specified {@link MailField} constant.
      * 
      * @param mailField The mail field to add
