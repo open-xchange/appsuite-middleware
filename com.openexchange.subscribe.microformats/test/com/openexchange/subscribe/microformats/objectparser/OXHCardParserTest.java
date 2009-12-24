@@ -51,6 +51,8 @@ package com.openexchange.subscribe.microformats.objectparser;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Map;
+import org.microformats.hCard.HCardParser;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.Expectations;
 import com.openexchange.subscribe.microformats.objectparser.OXHCardParser;
@@ -89,11 +91,11 @@ public class OXHCardParserTest extends TestCase {
             "</span>\n" +
             "<div class=\"bday\">1970-1-31</div>\n" +
             "<div class=\"org\">World Class Testers Inc.</div>\n" +
-            "<a class=\"email\" href=\"mailto:tester@open-xchange.com\">tester@open-xchange.com</a>\n" +
-            "<a class=\"email\" href=\"mailto:tester2@open-xchange.com\">tester2@open-xchange.com <span class=\"type\">home</span></a>\n" +
-            "<a class=\"email\" href=\"mailto:tester3@open-xchange.com\">tester3@open-xchange.com <span class=\"type\">work</span></a>\n" +
-            "<a class=\"email\" href=\"mailto:ignoreme@open-xchange.com\">ignoreme@open-xchange.com</a>\n" +
-            "<div class=\"title\">Test subject</div>\n" +
+            "<a class=\"email\" href=\"mailto:tester@open-xchange.com\">some-email</a>\n" +
+            "<a class=\"email\" href=\"mailto:tester2@open-xchange.com\">home-email <span class=\"type\">home</span></a>\n" +
+            "<a class=\"email\" href=\"mailto:tester3@open-xchange.com\">work-email <span class=\"type\">work</span></a>\n" +
+            "<a class=\"email\" href=\"mailto:ignoreme@open-xchange.com\">ignore-email</a>\n" +
+            "<div class=\"role\">Test subject</div>\n" +
             "<div class=\"adr\">\n" +
                 "<span class=\"type\">work</span>\n"+
                 "<div class=\"street-address\">Workingstreet 67</div>\n" +
@@ -115,6 +117,8 @@ public class OXHCardParserTest extends TestCase {
             "<div class=\"tel\">(<span class=\"type\">fax</span>) <span class=\"value\">+666 34 54 74 96</span></div>\n" +
             "<div class=\"tel\">(<span class=\"type\">work</span>) <span class=\"value\">+666 34 54 74 97</span></div>\n" +
             "<div class=\"note\">Nice guy. Tester. Testers are rad.</div>\n" +
+            "<div class=\""+OXMFVisitor.OXMF_PREFIX+"userfield01\">One of them userfields that are not used in HCard at all.</div>\n" +
+            "<div class=\""+OXMFVisitor.OXMF_PREFIX+"userfield02\">Another userfield.</div>\n" +
             "<p style=\"font-size:smaller;\">This <a href=\"http://microformats.org/wiki/hcard\">hCard</a> created with the <a href=\"http://microformats.org/code/hcard/creator\">hCard creator</a>.</p>\n";
 
     public static final String HCARD_SNIPPET = 
@@ -309,5 +313,118 @@ public class OXHCardParserTest extends TestCase {
         }};
         
         expectations.verify(parser.parse(html).get(0));
+    }
+    
+    public void testShouldFindOXMFData(){
+        String html = "<div class=\"vcard\" id=\"a\""+HCARD_CONTENT+"</div>"
+        + "<div class=\"vcard\" id=\"b\""+HCARD_CONTENT+"</div>"
+        + "<div class=\"vcard\" id=\"c\""+HCARD_CONTENT+"</div>";
+        
+        List<Contact> contacts = parser.parse(html);
+        int expectedNumber = 3;
+        assertEquals("Should find "+ expectedNumber +" contacts", expectedNumber, contacts.size());
+        List<Map<String, String>> oxmfdata = parser.getOXMFData();
+        assertEquals("Should find "+ expectedNumber +" sets of OXMF data", expectedNumber, contacts.size());
+
+        int i = 0;
+        for(Map<String, String> map: oxmfdata){
+            assertEquals("Should find two elements for contact #"+(i++), 2, map.size());
+
+            String value = map.get(OXMFVisitor.OXMF_PREFIX+"userfield01");
+            assertEquals("Should get the value entered on first field", "One of them userfields that are not used in HCard at all.", value);
+
+            value = map.get(OXMFVisitor.OXMF_PREFIX+"userfield02");
+            assertEquals("Should get the value entered on first field", "Another userfield.", value);
+        }
+    }
+    
+    public void testShouldMergeDataProperlyIfUsingOXMFElementValue(){
+        String html = 
+            "<div class=\"vcard\" id=\"a\">" +
+                "<span class=\"fn n\">\n" +
+                    "<span class=\"given-name\">Terry</span>\n" +
+                "</span>\n" +
+                "<span class=\""+OXMFVisitor.OXMF_PREFIX+"spouseName\">" +
+                    "spouse1" +
+                "</span>" +
+            "</div>" +
+            "<div class=\"vcard\" id=\"b\">"+
+                "<span class=\"fn n\">\n" +
+                    "<span class=\"given-name\">Toni</span>\n" +
+                "</span>\n" +
+                "<span class=\""+OXMFVisitor.OXMF_PREFIX+"spouseName\">" +
+                    "spouse2" +
+                "</span>" +
+            "</div>";
+        
+        List<Contact> contacts = parser.parse(html);
+        int expectedNumber = 2;
+        assertEquals("Should find "+ expectedNumber +" contacts", expectedNumber, contacts.size());
+
+        int i = 0;
+        for(Contact contact: contacts){
+            assertEquals("Should have included OX-specific information (spouseName) in contact", "spouse"+(++i), contact.getSpouseName());
+        }
+    }
+    
+    public void testShouldMergeDataProperlyIfUsingSeparateValueElement(){
+        String html = 
+            "<div class=\"vcard\" id=\"a\">" +
+                "<span class=\"fn n\">\n" +
+                    "<span class=\"given-name\">Terry</span>\n" +
+                "</span>\n" +
+                "<span class=\""+OXMFVisitor.OXMF_PREFIX+"spouseName\">" +
+                    "<span class=\"value\">spouse1</span>" +
+                "</span>" +
+            "</div>" +
+            "<div class=\"vcard\" id=\"b\">"+
+                "<span class=\"fn n\">\n" +
+                    "<span class=\"given-name\">Toni</span>\n" +
+                "</span>\n" +
+                "<span class=\""+OXMFVisitor.OXMF_PREFIX+"spouseName\">" +
+                	"<span class=\"value\">spouse2</span>" +
+                "</span>" +
+            "</div>";
+        
+        List<Contact> contacts = parser.parse(html);
+        int expectedNumber = 2;
+        assertEquals("Should find "+ expectedNumber +" contacts", expectedNumber, contacts.size());
+
+        int i = 0;
+        for(Contact contact: contacts){
+            assertEquals("Should have included OX-specific information (spouseName) in contact", "spouse"+(++i), contact.getSpouseName());
+        }
+    }
+    
+    
+    public void testShouldPrioritizeSeparateValueOverElementValue(){
+        String html = 
+            "<div class=\"vcard\" id=\"a\">" +
+                "<span class=\"fn n\">\n" +
+                    "<span class=\"given-name\">Terry</span>\n" +
+                "</span>\n" +
+                "<span class=\""+OXMFVisitor.OXMF_PREFIX+"spouseName\">" +
+                    "no spouse 1"+
+                    "<span class=\"value\">spouse1</span>" +
+                "</span>" +
+            "</div>" +
+            "<div class=\"vcard\" id=\"b\">"+
+                "<span class=\"fn n\">\n" +
+                    "<span class=\"given-name\">Toni</span>\n" +
+                "</span>\n" +
+                "<span class=\""+OXMFVisitor.OXMF_PREFIX+"spouseName\">" +
+                    "no spouse 2"+
+                    "<span class=\"value\">spouse2</span>" +
+                "</span>" +
+            "</div>";
+        
+        List<Contact> contacts = parser.parse(html);
+        int expectedNumber = 2;
+        assertEquals("Should find "+ expectedNumber +" contacts", expectedNumber, contacts.size());
+
+        int i = 0;
+        for(Contact contact: contacts){
+            assertEquals("Should have included OX-specific information (spouseName) in contact", "spouse"+(++i), contact.getSpouseName());
+        }
     }
 }

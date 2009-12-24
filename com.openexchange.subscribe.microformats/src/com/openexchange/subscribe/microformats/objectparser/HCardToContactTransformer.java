@@ -50,13 +50,13 @@
 package com.openexchange.subscribe.microformats.objectparser;
 
 import java.net.URI;
+import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import org.microformats.hCard.HCard;
 import org.microformats.hCard.HCard.Address;
 import org.microformats.hCard.HCard.Email;
-import org.microformats.hCard.HCard.Organization;
 import org.microformats.hCard.HCard.Tel;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Strings;
@@ -71,6 +71,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class HCardToContactTransformer {
+
     public List<Contact> transform(List<HCard> hcards){
         LinkedList<Contact> results = new LinkedList<Contact>();
         for(HCard hcard: hcards)
@@ -97,9 +98,7 @@ public class HCardToContactTransformer {
 
     private void handleAdditionalInfo(HCard hcard, Contact c) {
         if(hcard.bday != null)
-            c.setBirthday(new Date(hcard.bday));
-        if( hcard.titles != null && hcard.titles.size() > 0)
-            c.setPosition(hcard.titles.get(0)); 
+            c.setBirthday(new Date(hcard.bday)); 
 //        if( hcard.urls != null && hcard.urls.size() > 0)
 //            c.setURL(hcard.urls.get(0).toString());
         if( hcard.notes != null && hcard.notes.size() > 0)
@@ -297,16 +296,36 @@ public class HCardToContactTransformer {
 
 
     private void handleName(HCard hcard, Contact c) {
+        
         c.setGivenName(hcard.n.givenName);
         c.setSurName(hcard.n.familyName);
-        c.setMiddleName( Strings.join( hcard.n.additionalNames, " "));
+        if(exist(hcard.n.additionalNames))
+            c.setMiddleName( Strings.join( hcard.n.additionalNames, " "));
+        if(exist(hcard.titles))
+            c.setTitle( Strings.join( hcard.titles, " "));
+        if(exist(hcard.n.honorificPrefixes))
+            if(c.containsTitle())
+                c.setTitle(c.getTitle() + " " + Strings.join( hcard.n.honorificSuffixes, " "));
+            else
+                c.setTitle( Strings.join( hcard.n.honorificSuffixes, " "));
+        if(exist(hcard.n.honorificSuffixes))
+            c.setSuffix( Strings.join( hcard.n.honorificSuffixes, " "));
+        if(exist(hcard.nicknames))
+            c.setDisplayName( Strings.join(hcard.nicknames, ","));
+    }
+
+
+
+    private boolean exist(Collection coll) {
+        return coll != null && coll.size() > 0;
     }
 
 
     private void handleCompany(HCard hcard, Contact c) {
-        for(Organization org: hcard.orgs){
-            c.setCompany(org.name);
-        }
+        if(exist(hcard.orgs))
+            c.setCompany(Strings.join(hcard.orgs, ","));
+        if(exist(hcard.roles))
+            c.setPosition(Strings.join(hcard.roles, ","));
     }
 
 

@@ -53,11 +53,15 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.List;
+import java.util.Map;
 import org.htmlparser.util.ParserException;
 import org.microformats.hCard.HCard;
+import org.microformats.hCard.HCardParser;
+import com.openexchange.groupware.contact.helpers.ContactMerger;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.microformats.parser.ObjectParser;
+import com.openexchange.subscribe.microformats.transformers.MapToContactObjectTransformer;
 
 
 /**
@@ -83,10 +87,16 @@ public class OXHCardParser implements ObjectParser<Contact>{
     public List<Contact> parse(String html){
         try {
             List<HCard> parseMany = org.microformats.hCard.HCardParser.parseMany(html);
-            return new HCardToContactTransformer().transform(parseMany);
+            List<Contact> contactsFromHCard = new HCardToContactTransformer().transform(parseMany);
+            List<Contact> contactsFromOXMF = new MapToContactObjectTransformer().transform(HCardParser.getOXMFData());
+            return new ContactMerger(false).merge(contactsFromHCard, contactsFromOXMF);
         } catch (ParserException e) {
             e.printStackTrace();
             return null; //FIXME
         }
+    }
+
+    public List<Map<String, String>> getOXMFData() {
+        return org.microformats.hCard.HCardParser.getOXMFData();
     }
 }
