@@ -33,7 +33,7 @@
 					<tr>
 						<td class="left">Name:</td>
 						<td class="right fn n">
-							<@display key="honorific-prefix" title="Title" value=contact.title!"" />
+							<@display key="title" title="Title" value=contact.title!"" />
 							<@display key="given-name" title="First name" value=contact.givenName!"" />
 							<@display key="additional-name" title="Second name" value=contact.middleName!"" />
 							<@display key="family-name" title="Last name" value=contact.surName!"" />
@@ -224,9 +224,14 @@
 			<@imageMicroformatted contact=contact />
 			<table class="a_contact">
 				<@render_name contact=contact />
+				<@render key="nickname" title="Display name" value=contact.displayName!"" />
 				<@render_organisation name=contact.company!"" />
+				<@render key="ox_profession" title="Profession" value=contact.profession!"" /> 
+				<@render key="ox_department" title="Department" value=contact.department!"" /> 
+				<@render key="role" title="Position" value=contact.position!"" /> 
+				<@render key="ox_employeeType" title="Employee type" value=contact.employeeType!"" /> 
+				<@render key="url" title="Url" value=contact.uRL!"" />  
 				<@render key="note" title="Note" value=contact.note!"" /> 
-				<@render key="url" title="Url" value=contact.uRL!"" /> 
 			</table>
 		<div class="back"><a href="#top">Back to the top</a></div>
 		</div>
