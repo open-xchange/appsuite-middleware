@@ -33,7 +33,7 @@
 					<tr>
 						<td class="left">Name:</td>
 						<td class="right fn n">
-							<@display key="honorific-prefix" title="Title" value=contact.title!"" />
+							<@display key="title" title="Title" value=contact.title!"" />
 							<@display key="given-name" title="First name" value=contact.givenName!"" />
 							<@display key="additional-name" title="Second name" value=contact.middleName!"" />
 							<@display key="family-name" title="Last name" value=contact.surName!"" />
@@ -223,101 +223,11 @@
 		<div class="vcard" id="contact_${contacts?seq_index_of(contact)}">
 			<@imageMicroformatted contact=contact />
 			<table class="a_contact">
+				<@render key="nickname" title="Display name" value=contact.displayName!"" />
 				<@render_name contact=contact />
 				<@render_organisation name=contact.company!"" />
-				<div class="adr"> 
-					<td></td><td class="type right">home</td>
-					<@render key="business" title="Street" value=contact.streetHome!"" />
-					<@render key="postal-code" title="Postal code" value=contact.postalCodeHome!"" />
-					<@render key="locality" title="City" value=contact.cityHome!"" /> 
-					<@ignore key="x-ox-stateHome" title="State" value=contact.stateHome!"" /> 
-					<@render key="country" title="Country" value=contact.countryHome!"" />
-				</div>
-				<div class="adr">
-					<td></td><td class="type right">work</td>
-					<@render key="street-address" title="Street" value=contact.streetBusiness!"" /> 
-					<@render key="postal-code" title="Postal code" value=contact.postalCodeBusiness!"" /> 
-					<@render key="locality" title="City" value=contact.cityBusiness!"" />
-					<@ignore key="x-ox-stateBusiness" title="State" value=contact.stateBusiness!"" /> 
-					<@render key="country" title="Country" value=contact.countryBusiness!"" />
-				</div>
-				<div class="adr">
-					<td></td><td class="type right">x-ox-other</td>
-					<@render key="street-address" title="Street" value=contact.streetOther!"" />
-					<@render key="postal-code" title="Postal code" value=contact.postalCodeOther!"" />
-					<@render key="locality" title="City" value=contact.cityOther!"" /> 
-					<@ignore key="x-ox-stateOther" title="State" value=contact.stateOther!"" /> 
-					<@render key="country" title="Country" value=contact.countryOther!"" />
-				</div> 
-				<#if contact.birthday??><tr><td class="left">Birthday:</td><td class="bday right">${contact.birthday?string("yyyy-MM-dd")}</td></tr></#if>
-				<@render key="x-ox-maritalStatus" title="Marital status" value=contact.maritalStatus!"" /> 
-				<@render key="x-ox-numberOfChildren" title="Number of children" value=contact.numberOfChildren!"" />
-				<@render key="x-ox-profession" title="Profession" value=contact.profession!"" /> 
-				<@render key="x-ox-nickname" title="Nickname" value=contact.nickname!"" /> 
-				<@render key="x-ox-spouse_name" title="Spouse name" value=contact.spouseName!"" /> 
-				<#if contact.anniversary??><tr><td class="left">Anniversary:</td><td class="x-ox-anniversary right">${contact.anniversary?string("yyyy-MM-dd")}</td></tr></#if>
-				<@render key="note" title="Note" value=contact.note!"" /> 
-				<@render key="ox_department" title="Department" value=contact.department!"" /> 
-				<@render key="x-ox-position" title="Position" value=contact.position!"" /> 
-				<@render key="x-ox-employeeType" title="Employee type" value=contact.employeeType!"" /> 
-				<@render key="x-ox-roomNumber" title="Room number" value=contact.roomNumber!"" /> 
-				<@render key="x-ox-numberOfEmployees" title="Number of employees" value=contact.numberOfEmployee!"" /> 
-				<@render key="x-ox-salesVolume" title="Sales volume" value=contact.salesVolume!"" /> 
-				<@render key="x-ox-taxId" title="Tax id" value=contact.taxID!"" /> 
-				<@render key="x-ox-commercialRegister" title="Commercial register" value=contact.commercialRegister!"" /> 
-				<@render key="x-ox-branches" title="Branches" value=contact.branches!"" /> 
-				<@render key="x-ox-businessCategory" title="Business category" value=contact.businessCategory!"" /> 
-				<@render key="x-ox-info" title="Info" value=contact.info!"" /> 
-				<@render key="x-ox-managerName" title="Manager name" value=contact.managerName!"" /> 
-				<@render key="x-ox-assistantName" title="Assistant name" value=contact.assistantName!"" /> 
-				<@render key="tel" type="home" title="Telephone" value=contact.telephoneHome1!"" /> 
-				<@render key="tel" type="x-ox-home2" title="Telephone" value=contact.telephoneHome2!"" /> 
-				<@render key="tel" type="work" title="Telephone" value=contact.telephoneBusiness1!"" /> 
-				<@render key="tel" type="x-ox-business2" title="Telephone" value=contact.telephoneBusiness2!"" /> 
-				<@render key="tel" type="x-ox-other" title="Telephone" value=contact.telephoneOther!"" /> 
-				<@render key="tel" type="fax" type0="work" title="Fax" value=contact.faxBusiness!"" /> 
-				<@render key="tel" type="x-ox-callback" title="Telephone" value=contact.telephoneCallback!"" /> 
-				<@render key="tel" type="car" title="Telephone" value=contact.telephoneCar!"" /> 
-				<@render key="tel" type="x-ox-company" title="Telephone" value=contact.telephoneCompany!"" /> 
-				<@render key="tel" type="fax" type0="home" title="Telephone" value=contact.faxHome!"" /> 
-				<@render key="tel" type="cell" title="Telephone" value=contact.cellularTelephone1!"" /> 
-				<@render key="tel" type="x-ox-cellular2" title="Telephone" value=contact.cellularTelephone2!"" /> 
-				<@render key="tel" type="fax" type0="x-ox-other" title="Telephone" value=contact.faxOther!"" /> 
-				<@render key="tel" type="isdn"  title="Telephone" value=contact.telephoneISDN!"" /> 
-				<@render key="tel" type="x-ox-pager" title="Telephone" value=contact.telephonePager!"" /> 
-				<@render key="tel" type="x-ox-primary" title="Telephone" value=contact.telephonePrimary!"" /> 
-				<@render key="tel" type="x-ox-radio" title="Telephone" value=contact.telephoneRadio!"" /> 
-				<@render key="tel" type="x-ox-telex"  title="Telephone" value=contact.telephoneTelex!"" /> 
-				<@render key="tel" type="x-ox-ttytdd" title="Telephone" value=contact.telephoneTTYTTD!"" /> 
-				<@render key="tel" type="x-ox-ip" title="Telephone" value=contact.telephoneIP!"" /> 
-				<@render key="tel" type="x-ox-assistant" title="Telephone" value=contact.telephoneAssistant!"" /> 
-				<@render_mail type="work" value=contact.email1!"" /> 
-				<@render_mail type="home" value=contact.email2!"" /> 
-				<@render_mail type="x-ox-other" value=contact.email3!"" /> 
-				<@render key="url" title="Url" value=contact.uRL!"" /> 
-				<@render key="x-ox-instantMessenger1" title="IM" value=contact.instantMessenger1!"" /> 
-				<@render key="x-ox-instantMessenger2" title="IM" value=contact.instantMessenger2!"" /> 
-		
-				<@render key="x-ox-userfield01" title="Userfield01" value=contact.userField01!"" /> 
-				<@render key="x-ox-userfield02" title="Userfield02" value=contact.userField02!"" /> 
-				<@render key="x-ox-userfield03" title="Userfield03" value=contact.userField03!"" /> 
-				<@render key="x-ox-userfield04" title="Userfield04" value=contact.userField04!"" /> 
-				<@render key="x-ox-userfield05" title="Userfield05" value=contact.userField05!"" /> 
-				<@render key="x-ox-userfield06" title="Userfield06" value=contact.userField06!"" /> 
-				<@render key="x-ox-userfield07" title="Userfield07" value=contact.userField07!"" /> 
-				<@render key="x-ox-userfield08" title="Userfield08" value=contact.userField08!"" /> 
-				<@render key="x-ox-userfield09" title="Userfield09" value=contact.userField09!"" /> 
-				<@render key="x-ox-userfield10" title="Userfield10" value=contact.userField10!"" /> 
-				<@render key="x-ox-userfield11" title="Userfield11" value=contact.userField11!"" /> 
-				<@render key="x-ox-userfield12" title="Userfield12" value=contact.userField12!"" /> 
-				<@render key="x-ox-userfield13" title="Userfield13" value=contact.userField13!"" /> 
-				<@render key="x-ox-userfield14" title="Userfield14" value=contact.userField14!"" /> 
-				<@render key="x-ox-userfield15" title="Userfield15" value=contact.userField15!"" /> 
-				<@render key="x-ox-userfield16" title="Userfield16" value=contact.userField16!"" /> 
-				<@render key="x-ox-userfield17" title="Userfield17" value=contact.userField17!"" /> 
-				<@render key="x-ox-userfield18" title="Userfield18" value=contact.userField18!"" /> 
-				<@render key="x-ox-userfield19" title="Userfield19" value=contact.userField19!"" /> 
-				<@render key="x-ox-userfield20" title="Userfield20" value=contact.userField20!"" /> 
+				<@render key="note" title="Note" value=contact.note!"" />  
+				<@render key="role" title="Position" value=contact.position!"" />  
 			</table>
 		<div class="back"><a href="#top">Back to the top</a></div>
 		</div>
