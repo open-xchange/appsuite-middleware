@@ -70,22 +70,43 @@ import com.openexchange.test.FolderTestManager;
  */
 public class OXMFContactLifeCycleTest extends AbstractPubSubRoundtripTest {
 
+    private ContactTestManager cMgr;
+    private FolderTestManager fMgr;
+    private FolderObject pubFolder;
+    private FolderObject subFolder;
+
     public OXMFContactLifeCycleTest(String name) {
         super(name);
     }
-    public void testBla(){
+    
+    
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        
+        this.cMgr = getContactManager();
+        this.fMgr = getFolderManager();
+
+        //setup folders
+        this.pubFolder = fMgr.generateFolder("publishRoundtripTest", FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
+        this.subFolder = fMgr.generateFolder("subscribeRoundtripTest", FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
+        fMgr.insertFolderOnServer(pubFolder);
+        fMgr.insertFolderOnServer(subFolder);
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        cMgr.cleanUp();
+        fMgr.cleanUp();
+        super.tearDown();
         
     }
 
-    public void testShouldNotLoseContactsWhileRoundtripping() throws Exception{
-        ContactTestManager cMgr = getContactManager();
-        FolderTestManager fMgr = getFolderManager();
-        //setup folders
-        FolderObject pubFolder = fMgr.generateFolder("publishRoundtripTest", FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
-        FolderObject subFolder = fMgr.generateFolder("subscribeRoundtripTest", FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
-        fMgr.insertFolderOnServer(pubFolder);
-        fMgr.insertFolderOnServer(subFolder);
-        
+
+
+    //disabled, because it takes more than 1 minute to run. Should be in smoke test suite
+    public void doNot_testShouldNotLoseContactsWhileRoundtripping() throws Exception{        
         //setup contact
         Contact contact1 = generateContact("Herbert", "Meier");
         contact1.setParentFolderID(pubFolder.getObjectID());
@@ -123,7 +144,10 @@ public class OXMFContactLifeCycleTest extends AbstractPubSubRoundtripTest {
         Contact contact2 = generateContact("Hubert", "Meier");
         contact2.setParentFolderID(pubFolder.getObjectID());
         cMgr.newAction(contact2);
-        Thread.sleep(31*1000);
+        
+        //bypass the 30 sec caching logic
+        Thread.sleep(31*1000); 
+        
         //refresh and check subscription again
         subMgr.refreshAction(subscription.getId());
         contacts = cMgr.allAction(subFolder.getObjectID());
@@ -135,15 +159,7 @@ public class OXMFContactLifeCycleTest extends AbstractPubSubRoundtripTest {
      * Does a publish, then a subscribe and then checks whether basic data (mostly name 
      * and title)  survived the whole process. 
      */
-    public void doNot_testContactTrippingWithCensoredDataSet() throws Exception{
-        ContactTestManager cMgr = getContactManager();
-        FolderTestManager fMgr = getFolderManager();
-        //setup folders
-        FolderObject pubFolder = fMgr.generateFolder("publishRoundtripTest", FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
-        FolderObject subFolder = fMgr.generateFolder("subscribeRoundtripTest", FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
-        fMgr.insertFolderOnServer(pubFolder);
-        fMgr.insertFolderOnServer(subFolder);
-        
+    public void testContactTrippingWithCensoredDataSet() throws Exception{        
         //setup contact
         Contact contact1 = generateContact("Herbert", "Meier");
         contact1.setParentFolderID(pubFolder.getObjectID());
@@ -155,13 +171,21 @@ public class OXMFContactLifeCycleTest extends AbstractPubSubRoundtripTest {
         SimPublicationTargetDiscoveryService pubDiscovery = new SimPublicationTargetDiscoveryService();
         pubMgr.setPublicationTargetDiscoveryService(pubDiscovery);
         Publication publication = generatePublication("contacts", String.valueOf(pubFolder.getObjectID()), pubDiscovery);
-        Subscription subscription = generateOXMFSubscription(publication.getTarget().getFormDescription());
-        subscription.setFolderId(subFolder.getObjectID());
-        
+                
         Contact[] contacts;
         
-        //create publication and subscription        
+        //create publication        
         pubMgr.newAction(publication);
+
+        //create subscription for that url
+        DynamicFormDescription formDescription = publication.getTarget().getFormDescription();
+        formDescription.add(FormElement.input("url", "URL"));
+        Subscription subscription = generateOXMFSubscription(formDescription);
+        subscription.setFolderId(subFolder.getObjectID());
+        subMgr.setFormDescription(formDescription);
+        String pubUrl = (String) publication.getConfiguration().get("url");
+        subscription.getConfiguration().put("url", pubUrl);
+        
         subMgr.newAction(subscription);
         
         //refresh and check subscription
@@ -178,15 +202,8 @@ public class OXMFContactLifeCycleTest extends AbstractPubSubRoundtripTest {
      *  This is usually disabled because we publish a censored template that does not
      *  export all data at all.
      */
-    public void doNot_testContactTrippingWithFullDataSet() throws Exception{
-        ContactTestManager cMgr = getContactManager();
-        FolderTestManager fMgr = getFolderManager();
-        //setup folders
-        FolderObject pubFolder = fMgr.generateFolder("publishRoundtripTest", FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
-        FolderObject subFolder = fMgr.generateFolder("subscribeRoundtripTest", FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
-        fMgr.insertFolderOnServer(pubFolder);
-        fMgr.insertFolderOnServer(subFolder);
-        
+    //disabled, because the main template is a censored one, so this would lack loads of data.
+    public void doNot_testContactTrippingWithFullDataSet() throws Exception{        
         //setup contact
         Contact con = generateContact("Herbert", "Meier");
         con.setEmail2("invalid@open-xchange.com");
@@ -222,13 +239,21 @@ public class OXMFContactLifeCycleTest extends AbstractPubSubRoundtripTest {
         SimPublicationTargetDiscoveryService pubDiscovery = new SimPublicationTargetDiscoveryService();
         pubMgr.setPublicationTargetDiscoveryService(pubDiscovery);
         Publication publication = generatePublication("contacts", String.valueOf(pubFolder.getObjectID()), pubDiscovery);
-        Subscription subscription = generateOXMFSubscription(publication.getTarget().getFormDescription());
-        subscription.setFolderId(subFolder.getObjectID());
-        
+                
         Contact[] contacts;
         
-        //create publication and subscription        
+        //create publication        
         pubMgr.newAction(publication);
+
+        //create subscription for that url
+        DynamicFormDescription formDescription = publication.getTarget().getFormDescription();
+        formDescription.add(FormElement.input("url", "URL"));
+        Subscription subscription = generateOXMFSubscription(formDescription);
+        subscription.setFolderId(subFolder.getObjectID());
+        subMgr.setFormDescription(formDescription);
+        String pubUrl = (String) publication.getConfiguration().get("url");
+        subscription.getConfiguration().put("url", pubUrl);
+        
         subMgr.newAction(subscription);
         
         //refresh and check subscription
