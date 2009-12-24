@@ -90,7 +90,7 @@ public class ContactMerger {
 
     public List<Contact> merge(List<Contact> list1, List<Contact> list2) {
         if (list1.size() != list2.size())
-            throw new IllegalArgumentException("Both lists to be merged must be same length!");
+            throw new IllegalArgumentException("Both lists to be merged must be same length, but are: " + list1.size() + "/" + list2.size());
 
         LinkedList<Contact> merged = new LinkedList<Contact>();
         for (int i = 0, length = list1.size(); i < length; i++)
