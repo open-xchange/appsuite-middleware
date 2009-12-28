@@ -59,19 +59,13 @@ import org.htmlparser.Text;
 import org.microformats.hCard.HCardParser.HCardVisitor;
 
 /**
- * A visitor for the HCardParser. This one extends the typical one by reading
- * OX-specific attributes, identified by the prefix defined in OXMF_PREFIX
- * ("ox_" in the following example).
- * 
- * There are two ways to define an additional OX element:
- * <code>
+ * A visitor for the HCardParser. This one extends the typical one by reading OX-specific attributes, identified by the prefix defined in
+ * OXMF_PREFIX ("ox_" in the following example). There are two ways to define an additional OX element: <code>
  * <span class="ox_element">myValue</span>
- * </code>
- * or:
- * <code>
+ * </code> or: <code>
  * <span class="ox_element">some unimportant stuff<span class="value">myValue</span></span>
- * </code>
- * If both are used, the second form takes precedence.
+ * </code> If both are
+ * used, the second form takes precedence.
  * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
@@ -93,7 +87,6 @@ public class OXMFVisitor extends HCardVisitor {
 
     private List<Map<String, String>> oxmfElements = new LinkedList<Map<String, String>>();
 
-
     public static final String OXMF_PREFIX = "ox_";
 
     public OXMFVisitor(int toParse, URI defaultBase) {
@@ -113,7 +106,7 @@ public class OXMFVisitor extends HCardVisitor {
             return;
 
         if (hClass.equalsIgnoreCase("vcard")) {
-            readingHCardNow  = true;
+            readingHCardNow = true;
             endTagForOxmfElement = tag.getEndTag();
             oxmfElement = new HashMap<String, String>();
         }
@@ -121,7 +114,7 @@ public class OXMFVisitor extends HCardVisitor {
         if (hClass.startsWith(OXMF_PREFIX)) {
             attributeName = hClass;
             endTagForAttribute = tag.getEndTag();
-            readingElementValueNow= true;
+            readingElementValueNow = true;
         }
 
         if (hClass.equalsIgnoreCase("value") && attributeName != null) {
@@ -152,12 +145,12 @@ public class OXMFVisitor extends HCardVisitor {
     public void visitStringNode(Text string) {
         super.visitStringNode(string);
 
-        if (! readingHCardNow)
+        if (!readingHCardNow)
             return;
-        
-        if (!readingSeparateValueNow && ! readingElementValueNow)
+
+        if (!readingSeparateValueNow && !readingElementValueNow)
             return;
-        
+
         if (attributeName == null)
             throw new IllegalStateException("Reading an ox value without an ox element?");
 
