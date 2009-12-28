@@ -1,3 +1,7 @@
+* 2009-12-28 - martin.herfurth@open-xchange.com
+
+ - Bugfix #15046: Participant delete for Outlook.
+
 * 2009-12-22 - thorben.betten@open-xchange.com
 
  - Bugfix #15126: Caching only low-cost fields while loading headers in demand
