@@ -87,9 +87,12 @@ public class OXMFVisitor extends HCardVisitor {
 
     private boolean readingSeparateValueNow = false;
 
+    private boolean readingHCardNow = false;;
+
     private Map<String, String> oxmfElement;
 
     private List<Map<String, String>> oxmfElements = new LinkedList<Map<String, String>>();
+
 
     public static final String OXMF_PREFIX = "ox_";
 
@@ -110,6 +113,7 @@ public class OXMFVisitor extends HCardVisitor {
             return;
 
         if (hClass.equalsIgnoreCase("vcard")) {
+            readingHCardNow  = true;
             endTagForOxmfElement = tag.getEndTag();
             oxmfElement = new HashMap<String, String>();
         }
@@ -132,6 +136,7 @@ public class OXMFVisitor extends HCardVisitor {
         if (tag.equals(endTagForOxmfElement)) {
             oxmfElements.add(oxmfElement);
             endTagForOxmfElement = null;
+            readingHCardNow = false;
         }
 
         if (tag.equals(endTagForAttribute)) {
@@ -147,9 +152,12 @@ public class OXMFVisitor extends HCardVisitor {
     public void visitStringNode(Text string) {
         super.visitStringNode(string);
 
+        if (! readingHCardNow)
+            return;
+        
         if (!readingSeparateValueNow && ! readingElementValueNow)
             return;
-
+        
         if (attributeName == null)
             throw new IllegalStateException("Reading an ox value without an ox element?");
 
