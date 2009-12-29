@@ -7,11 +7,11 @@ workflowString: |
     - !com.openexchange.subscribe.crawler.LoginPageStep
       baseUrl: "https://www.linkedin.com"
       description: Login to www.linkedin.com
-      linkAvailableAfterLogin: /connections?trk=hb_side_cnts
+      linkAvailableAfterLogin: /connections?trk=hb_tab_cnts
       nameOfLoginForm: login
       nameOfPasswordField: session_password
       nameOfUserField: session_key
-      pageTitleAfterLogin: /connections?trk=hb_side_cnts
+      pageTitleAfterLogin: /connections?trk=hb_tab_cnts
       password: ""
       url: "https://www.linkedin.com/secure/login"
       username: ""
@@ -25,8 +25,6 @@ workflowString: |
       description: Get all pages that link to a connections profile
       linkRegex: "(/profile\\?viewProfile=).*(goback).*"
       subpageLinkRegex: "(/connectionsnojs\\?split_page=).*"
-      subpages: []
-      subpagesHref: []
     - !com.openexchange.subscribe.crawler.ContactObjectsByHTMLAnchorsAndPagePartSequenceStep
       description: Get the information of each contact from the individual webpages
       pageParts: !com.openexchange.subscribe.crawler.PagePartSequence
@@ -51,15 +49,15 @@ workflowString: |
             type: 1
             typeOfInfo: title
           - !com.openexchange.subscribe.crawler.PagePart
-            regex: "<dt>(Phone:|Telefon:|Tel.fono:|T.l.phone :)</dt>[\\s]*<dd>[\\s]*<p>[\\s]*([0-9\\s\\+\\-\\/\\(\\)]*)<span class=\"type\">\\((Mobile|mobile)\\)"
+            regex: "<dt>(Phone:|Telefon:|Teléfono:|T.l.phone :)</dt>[\\s]*<dd>[\\s]*<p>[\\s]*([0-9\\s\\+\\-\\/\\(\\)]*)<span class=\"type\">\\((Mobile|mobile)\\)"
             type: 1
             typeOfInfo: cellular_telephone1
           - !com.openexchange.subscribe.crawler.PagePart
-            regex: "<dt>(Phone:|Telefon:|Tel.fono:|T.l.phone :</dt>[\\s]*<dd>[\\s]*<p>[\\s]*)([0-9\\s\\+\\-\\/\\(\\)]*)<span class=\"type\">\\((Mobile|mobile)\\)"
+            regex: "<dt>(Phone:|Telefon:|Teléfono:|T.l.phone :</dt>[\\s]*<dd>[\\s]*<p>[\\s]*)([0-9\\s\\+\\-\\/\\(\\)]*)<span class=\"type\">\\((Mobile|mobile)\\)"
             type: 1
             typeOfInfo: telephone_home1
           - !com.openexchange.subscribe.crawler.PagePart
-            regex: "<dt>(Phone:|Telefon:|Tel.fono:|T.l.phone :)</dt>[\\s]*<dd>[\\s]*<p>[\\s]*([0-9\\s\\+\\-\\/\\(\\)]*)<span class=\"type\">\\((Mobile|mobile)\\)"
+            regex: "<dt>(Phone:|Telefon:|Teléfono:|T.l.phone :)</dt>[\\s]*<dd>[\\s]*<p>[\\s]*([0-9\\s\\+\\-\\/\\(\\)]*)<span class=\"type\">\\((Mobile|mobile)\\)"
             type: 1
             typeOfInfo: telephone_business1
           - !com.openexchange.subscribe.crawler.PagePart
