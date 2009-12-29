@@ -91,7 +91,7 @@ public class Workflow {
     }
 
     // Convenience method for setting username and password after the workflow was created
-    public Contact[] execute(final String username, final String password) throws SubscriptionException {
+    public Object[] execute(final String username, final String password) throws SubscriptionException {
         for (final Step currentStep : steps) {
             if (currentStep instanceof LoginStep) {
                 ((LoginStep) currentStep).setUsername(username);
@@ -105,7 +105,7 @@ public class Workflow {
         return execute();
     }
 
-    public Contact[] execute() throws SubscriptionException {
+    public Object[] execute() throws SubscriptionException {
 
         // emulate a known client, hopefully keeping our profile low
         final WebClient webClient = new WebClient(BrowserVersion.FIREFOX_2);
@@ -136,7 +136,7 @@ public class Workflow {
             }
 
             webClient.closeAllWindows();
-            return (Contact[]) result;
+            return (Object[]) result;
         } finally {
             closer.close(webClient);
         }

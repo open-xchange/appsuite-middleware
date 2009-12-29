@@ -100,7 +100,7 @@ public class GenericSubscribeService extends AbstractSubscribeService {
         return folderModule == FolderObject.CONTACT;
     }
 
-    public Collection<Contact> getContent(final Subscription subscription) throws SubscriptionException {
+    public Collection getContent(final Subscription subscription) throws SubscriptionException {
 
         final Workflow workflow = getWorkflow();
         workflow.setSubscription(subscription);
