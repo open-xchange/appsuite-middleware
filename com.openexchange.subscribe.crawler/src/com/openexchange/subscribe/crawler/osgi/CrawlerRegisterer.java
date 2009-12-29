@@ -51,54 +51,39 @@ package com.openexchange.subscribe.crawler.osgi;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.subscribe.crawler.CrawlerUpdateTask;
-import com.openexchange.timer.ScheduledTimerTask;
-import com.openexchange.timer.TimerService;
+
 
 /**
- * {@link TimerServiceTrackerCustomizer}
- * This class is meant to close the TimerTask scheduled to check for daily updates to the crawler-configurations.
- * It is needed because otherwise the TimerTask would be saved and a new one would be created each time the crawler-bundle is
- * restarted, resulting in multiple Tasks where only one is needed.
+ * {@link CrawlerRegisterer}
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class TimerServiceTrackerCustomizer implements ServiceTrackerCustomizer {
-
-    private final BundleContext context;
-
-    private final ScheduledTimerTask scheduledTimerTask;
+public class CrawlerRegisterer implements ServiceTrackerCustomizer {
     
+    private BundleContext context;
     private Activator activator;
     
-    private ServiceTracker tracker;
-
-    public TimerServiceTrackerCustomizer(BundleContext context, ScheduledTimerTask scheduledTimerTask, Activator activator) {
+    public CrawlerRegisterer(BundleContext context, Activator activator) {
         super();
         this.context = context;
-        this.scheduledTimerTask = scheduledTimerTask;
         this.activator = activator;
     }
 
     public Object addingService(ServiceReference reference) {
-        TimerService timerService = (TimerService) context.getService(reference);
-        tracker = new ServiceTracker(context,
-            ConfigurationService.class.getName(),
-            new ConfigurationAndTimerServiceTrackerCustomizer(context, activator, timerService, scheduledTimerTask));
-        tracker.open();
-        return timerService;
+        ConfigurationService configurationService = (ConfigurationService) context.getService(reference);
+        activator.registerServices(configurationService);
+        return configurationService;
     }
 
     public void modifiedService(ServiceReference reference, Object service) {
-        // Nothing to do.
+        //nothing to do here
     }
 
     public void removedService(ServiceReference reference, Object service) {
-        // cancel the TimerTask before either service (crawler or TimerService) is going down
-        scheduledTimerTask.cancel();
-        tracker.close();
+        activator.unregisterServices();
         context.ungetService(reference);
     }
+
 }

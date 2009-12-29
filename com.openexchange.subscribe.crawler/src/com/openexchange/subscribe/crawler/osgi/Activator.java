@@ -68,6 +68,8 @@ import org.apache.commons.logging.LogFactory;
 import org.ho.yaml.Yaml;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.config.ConfigurationService;
@@ -94,8 +96,6 @@ public class Activator implements BundleActivator {
 
     public static final String UPDATE_INTERVAL = "com.openexchange.subscribe.crawler.updateinterval";
 
-    private ScheduledTimerTask scheduledTimerTask;
-
     private BundleContext bundleContext;
 
     private final Stack<ServiceTracker> trackers = new Stack<ServiceTracker>();
@@ -114,18 +114,16 @@ public class Activator implements BundleActivator {
         trackers.push(new ServiceTracker(
             context,
             ConfigurationService.class.getName(),
-            new ConfigurationServiceTrackerCustomizer(context, this)));
-        trackers.push(new ServiceTracker(context, TimerService.class.getName(), new TimerServiceTrackerCustomizer(
-            context,
-            scheduledTimerTask,
-            this)));
+            new CrawlerRegisterer(context, this)));
+        final Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ConfigurationService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + TimerService.class.getName() + "))");
+        ServiceTracker configAndTimerTracker = new ServiceTracker(context, filter, new CrawlerAutoUpdater(context, this));
+        trackers.push(configAndTimerTracker);
         for (final ServiceTracker tracker : trackers) {
             tracker.open();
         }
     }
 
     public void stop(final BundleContext context) throws Exception {
-        unregisterServices();
         while (!trackers.isEmpty()) {
             trackers.pop().close();
         }
