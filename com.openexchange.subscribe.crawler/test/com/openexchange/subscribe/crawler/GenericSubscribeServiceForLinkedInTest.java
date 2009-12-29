@@ -63,8 +63,8 @@ public class GenericSubscribeServiceForLinkedInTest extends GenericSubscribeServ
 
     public void testGenericSubscribeServiceForLinkedInTest() {
         // insert valid credentials here
-        String username = "roxyexchanger@ox.io";
-        String password = "secret";
+        String username = "";
+        String password = "";
 
         // create a CrawlerDescription
         CrawlerDescription crawler = new CrawlerDescription();
@@ -86,7 +86,7 @@ public class GenericSubscribeServiceForLinkedInTest extends GenericSubscribeServ
             "login",
             "session_key",
             "session_password",
-            "/connections?trk=hb_side_cnts",
+            "/connections?trk=hb_tab_cnts",
             "https://www.linkedin.com"));
         listOfSteps.add(new PageByUrlStep("Get to the contacts list", "http://www.linkedin.com/connections?trk=hb_side_cnts"));
         listOfSteps.add(new PageByUrlStep(
@@ -133,6 +133,6 @@ public class GenericSubscribeServiceForLinkedInTest extends GenericSubscribeServ
 
         findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
         // uncomment this if the crawler description was updated to get the new config-files
-        //dumpThis(crawler, crawler.getDisplayName());
+        // dumpThis(crawler, crawler.getDisplayName());
     }
 }
