@@ -70,11 +70,13 @@ public class GenericSubscribeServiceForFacebookWebTest extends GenericSubscribeS
         final CrawlerDescription crawler = new CrawlerDescription();
         crawler.setDisplayName("Facebook");
         crawler.setId("com.openexchange.subscribe.crawler.facebook");
+        // increment priority with each new version to override (=be able to update) older versions
+        crawler.setPriority(2);
         final List<Step> steps = new LinkedList<Step>();
 
         steps.add(new LoginPageByFormActionStep(
             "Login to facebook.com",
-            "https://m.facebook.com/",
+            "http://m.facebook.com/",
             "",
             "",
             "https://login.facebook.com/login.php?",
@@ -82,14 +84,14 @@ public class GenericSubscribeServiceForFacebookWebTest extends GenericSubscribeS
             "pass",
             "(\\/friends.*)",
             1,
-            "https://m.facebook.com"));
+            "http://m.facebook.com"));
         steps.add(new PageByLinkRegexStep("click the friends-link", "\\/friends.*"));
         steps.add(new PageByLinkRegexStep("click the all-link", "\\/friends.php?.*&a.*"));
         steps.add(new AnchorsByLinkRegexStep(
             "click all the individual friends links on all subpages.",
             "\\/friends.php?.*&a&f.*",
-            "\\/profile.php.*&id.*",
-            ".*&id=([0-9]*)&.*"));
+            "\\/profile.php.*&id=.*",
+            ".*&id=([0-9]*).*"));
         final ArrayList<PagePart> pageParts = new ArrayList<PagePart>();
         pageParts.add(new PagePart("(<div class=\"section_title\">)([^<]*)(</div>)", "display_name"));
         pageParts.add(new PagePart("(<img src=\")(http:\\/\\/profile\\.ak\\.fbcdn\\.net[^\"]*)(\")", "image"));
@@ -113,10 +115,9 @@ public class GenericSubscribeServiceForFacebookWebTest extends GenericSubscribeS
         
         final String yamlString = Yaml.dump(workflow);
         crawler.setWorkflowString(yamlString);
-        //System.out.println(yamlString);
 
         findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
         // uncomment this if the if the crawler description was updated to get the new config-files
-        //dumpThis(crawler, crawler.getDisplayName());
+        // dumpThis(crawler, crawler.getDisplayName());
     }
 }
