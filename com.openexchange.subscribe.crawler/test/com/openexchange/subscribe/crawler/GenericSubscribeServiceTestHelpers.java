@@ -57,6 +57,7 @@ import java.util.HashMap;
 import junit.framework.TestCase;
 import org.ho.yaml.Yaml;
 import com.openexchange.config.SimConfigurationService;
+import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.crawler.osgi.Activator;
@@ -86,6 +87,7 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
      */
     public void setUp(){
         try {
+            // insert path to credentials-file here
             map = (HashMap<String, String>) Yaml.load(getSecretsFile());
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -115,7 +117,7 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
         final Workflow testWorkflow = service.getWorkflow();
         Contact[] contacts = new Contact[0];
         try {
-            contacts = testWorkflow.execute(username, password);
+            contacts = (Contact[]) testWorkflow.execute(username, password);
         } catch (final SubscriptionException e) {
             e.printStackTrace();
         }
@@ -148,6 +150,40 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
             }
         }
         System.out.println("Number of contacts retrieved : " + Integer.toString(contacts.length));
+        rightNow = Calendar.getInstance();
+        final long after = rightNow.getTime().getTime();
+        System.out.println("Time : " + Long.toString((after - before) / 1000) + " seconds");
+    }
+    
+    protected void findOutIfThereAreEventsForThisConfiguration(final String username, final String password, final CrawlerDescription crawler, final boolean verbose) {
+        Calendar rightNow = Calendar.getInstance();
+        final long before = rightNow.getTime().getTime();
+        // create a GenericSubscribeService that uses this CrawlerDescription
+        final GenericSubscribeService service = new GenericSubscribeService(
+            crawler.getDisplayName(),
+            crawler.getId(),
+            crawler.getWorkflowString(),
+            crawler.getPriority());
+
+        final Workflow testWorkflow = service.getWorkflow();
+        CalendarDataObject[] events = new CalendarDataObject[0];
+        try {
+            events = (CalendarDataObject[])testWorkflow.execute(username, password);
+        } catch (final SubscriptionException e) {
+            e.printStackTrace();
+        }
+        assertTrue("There are no events for crawler : " + crawler.getDisplayName(), events.length != 0);
+        if (verbose){
+            for (final CalendarDataObject event : events) {
+                System.out.println("event retrieved is : " + event.getTitle());
+                System.out.println("Timezone is : " + event.getTimezone());
+                System.out.println("Start Date is : " + event.getStartDate());
+                System.out.println("End Date is : " + event.getEndDate());
+                System.out.println("Description is : " + event.getNote());
+                System.out.println("----------");
+            }
+        }
+        System.out.println("Number of events retrieved : " + Integer.toString(events.length));
         rightNow = Calendar.getInstance();
         final long after = rightNow.getTime().getTime();
         System.out.println("Time : " + Long.toString((after - before) / 1000) + " seconds");
