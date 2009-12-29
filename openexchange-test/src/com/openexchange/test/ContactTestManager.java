@@ -89,14 +89,13 @@ import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
 
 /**
- * This class and ContactObject should be all that is needed to write contact-related 
- * tests. If multiple users are needed use multiple instances of this class. Examples 
- * of tests using this class can be found in ExemplaryContactTestManagerTest.java
+ * This class and ContactObject should be all that is needed to write contact-related tests. If multiple users are needed use multiple
+ * instances of this class. Examples of tests using this class can be found in ExemplaryContactTestManagerTest.java
  * 
  * @author <a href="mailto:karsten.will@open-xchange.org">Karsten Will</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - refactoring a bit.
  */
-public class ContactTestManager implements TestManager{
+public class ContactTestManager implements TestManager {
 
     private boolean failOnError;
 
@@ -105,7 +104,7 @@ public class ContactTestManager implements TestManager{
     private AJAXClient client;
 
     private ContactParser contactParser;
-    
+
     private TimeZone timeZone;
 
     private Throwable lastException;
@@ -136,14 +135,14 @@ public class ContactTestManager implements TestManager{
         return client;
     }
 
-    private void setTimeZone(TimeZone timezone){
+    private void setTimeZone(TimeZone timezone) {
         this.timeZone = timezone;
     }
-    
-    private TimeZone getTimeZone(){
+
+    private TimeZone getTimeZone() {
         return this.timeZone;
     }
-    
+
     public void setContactParser(ContactParser contactParser) {
         this.contactParser = contactParser;
     }
@@ -157,6 +156,22 @@ public class ContactTestManager implements TestManager{
         this.setTimeZone(client.getValues().getTimeZone());
         setCreatedEntities(new LinkedList<Contact>());
         setContactParser(new ContactParser());
+    }
+
+    public static Contact generateContact() {
+        Contact contact = new Contact();
+        contact.setGivenName("givenname");
+        contact.setSurName("surname");
+        contact.setMiddleName("middlename");
+        contact.setSuffix("suffix");
+        contact.setEmail1("email1@ox.invalid");
+        contact.setEmail2("email2@ox.invalid");
+        contact.setEmail3("email3@ox.invalid");
+        contact.setDisplayName("displayname");
+        contact.setPosition("position");
+        contact.setTitle("title");
+        contact.setCompany("company");
+        return contact;
     }
 
     /**
@@ -237,13 +252,13 @@ public class ContactTestManager implements TestManager{
         try {
             response = getClient().execute(request);
             lastResponse = response;
-            if(response.hasError() && getFailOnError()) 
+            if (response.hasError() && getFailOnError())
                 throw response.getException();
             returnedContact = response.getContact();
         } catch (Exception e) {
             doExceptionHandling(e, "GetRequest for folder " + folderId + " and object " + objectId);
             return null;
-        } 
+        }
         return returnedContact;
     }
 
@@ -364,7 +379,7 @@ public class ContactTestManager implements TestManager{
         } catch (JSONException e) {
             if (getFailOnError())
                 fail("JSONException occured during " + action + ": " + e.getMessage());
-        } catch (AbstractOXException e){
+        } catch (AbstractOXException e) {
             if (getFailOnError())
                 fail("AbstractOXException occured during " + action + ": " + e.getMessage());
         } catch (Exception e) {
