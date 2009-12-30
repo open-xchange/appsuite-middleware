@@ -1,12 +1,14 @@
 --- !com.openexchange.subscribe.crawler.CrawlerDescription
 displayName: yahoo.com
 id: com.openexchange.subscribe.crawler.yahoocom
+priority: 2
 workflowString: |
   --- !com.openexchange.subscribe.crawler.Workflow
   steps: 
     - !com.openexchange.subscribe.crawler.LoginPageByFormActionStep
       actionOfLoginForm: "https://login.yahoo.com/config/login?"
       baseUrl: ""
+      description: Log in
       linkAvailableAfterLogin: "(.*address.*)"
       nameOfPasswordField: passwd
       nameOfUserField: login
@@ -16,17 +18,76 @@ workflowString: |
       url: "http://address.yahoo.com/index.php"
       username: ""
     - !com.openexchange.subscribe.crawler.PageByUrlStep
+      description: We are not automatically redirected so we have to click a link
       url: "http://address.yahoo.com/"
     - !com.openexchange.subscribe.crawler.PageByLinkRegexStep
+      description: Click on Classic Contacts
       url: ".*contact_list.*"
-    - !com.openexchange.subscribe.crawler.PageByLinkRegexStep
-      url: ".*import_export.*"
-    - !com.openexchange.subscribe.crawler.PageByNamedHtmlElementStep
-      buttonName: "submit[action_export_vcard]"
-      formNumber: 3
-    - !com.openexchange.subscribe.crawler.ContactObjectsByVcardFileStep
-      unwantedLines: 
-        - "BDAY[^\\n]*"
-        - "REV[^\\n]*"
+    - !com.openexchange.subscribe.crawler.AnchorsByLinkRegexStep
+      description: Get the links to all contact detail pages
+      linkRegex: ".*detailed_contact.*"
+      subpageLinkRegex: ""
+    - !com.openexchange.subscribe.crawler.ContactObjectsByHTMLAnchorsAndPagePartSequenceStep
+      description: Get each contacts details
+      pageParts: !com.openexchange.subscribe.crawler.PagePartSequence
+        page: ""
+        pageParts: 
+          - !com.openexchange.subscribe.crawler.PagePart
+            regex: "(<h1>\\s)([a-zA-Z\\säöüß-]*)(</h1>)"
+            type: 1
+            typeOfInfo: display_name
+          - !com.openexchange.subscribe.crawler.PagePart
+            regex: "(qa_compose1[^>]*>)([a-z@A-Z0-9\\.\\-\\{\\}\\#\\|\\^\\$\\*\\+\\?\\'\\/!%&=_`~]*)(<)"
+            type: 1
+            typeOfInfo: email1
+          - !com.openexchange.subscribe.crawler.PagePart
+            regex: (<h2>Phone</h2>)
+          - !com.openexchange.subscribe.crawler.PagePart
+            regex: "([^0-9\\+\\(\\)]*Home:[^0-9\\+\\(\\)])*([0-9\\s\\+\\-\\/\\(\\)]*)(&)"
+            type: 1
+            typeOfInfo: telephone_home1
+          - !com.openexchange.subscribe.crawler.PagePart
+            regex: "([^0-9\\+\\(\\)]*Work:[^0-9\\+\\(\\)])*([0-9\\s\\+\\-\\/\\(\\)]*)(&)"
+            type: 1
+            typeOfInfo: telephone_business1
+          - !com.openexchange.subscribe.crawler.PagePart
+            regex: "([^0-9\\+\\(\\)]*Mobile:[^0-9\\+\\(\\)])*([0-9\\s\\+\\-\\/\\(\\)]*)(&)"
+            type: 1
+            typeOfInfo: cellular_telephone1
+          - !com.openexchange.subscribe.crawler.PagePart
+            regex: (<h2>Work</h2>)
+          - !com.openexchange.subscribe.crawler.PagePart
+            regex: "(<dt>[\\s]*Company:[\\s]*<\\/dt>[\\s]*<dd>[\\s]*<div>[\\s]*)([^<]*)(<\\/div>)"
+            type: 1
+            typeOfInfo: company
+          - !com.openexchange.subscribe.crawler.PagePart
+            regex: "(<dt>[\\s]*Title:[\\s]*<\\/dt>[\\s]*<dd>[\\s]*<div>[\\s]*)([^<]*)(<\\/div>)"
+            type: 1
+            typeOfInfo: title
+          - !com.openexchange.subscribe.crawler.PagePart
+            regex: "(<dt>[\\s]*Address:[\\s]*<\\/dt>[\\s]*<dd>[\\s]*<div>[\\s]*)([a-zA-Z0-9\\säöüß]*<br \\/>[\\s]*<br \\/>[\\s]*[a-zA-Z0-9\\säöüß]*<br \\/>[\\s]*[a-zA-Z0-9\\säöüß]*)(<)"
+            type: 1
+            typeOfInfo: address_note
+          - !com.openexchange.subscribe.crawler.PagePart
+            regex: (<h2>Instant Messenger</h2>)
+          - !com.openexchange.subscribe.crawler.PagePart
+            addInfo: 1
+            regex: "(AIM|Google Talk|Skype|Windows Live|Yahoo):[\\s]*<\\/dt>[\\s]*<dd>[\\s]*<div>[\\s]*([^<]*)(<\\/div>)"
+            type: 1
+            typeOfInfo: instant_messenger1
+          - !com.openexchange.subscribe.crawler.PagePart
+            regex: (<h2>Personal</h2>)
+          - !com.openexchange.subscribe.crawler.PagePart
+            regex: "(Birthday:[^0-9]*)([0-9]{2})(\\/)"
+            type: 1
+            typeOfInfo: birthday_month
+          - !com.openexchange.subscribe.crawler.PagePart
+            regex: "()([0-9]{2})(\\/)"
+            type: 1
+            typeOfInfo: birthday_day
+          - !com.openexchange.subscribe.crawler.PagePart
+            regex: "()([0-9]{4})(<)"
+            type: 1
+            typeOfInfo: birthday_year
   useThreadedRefreshHandler: true
   
