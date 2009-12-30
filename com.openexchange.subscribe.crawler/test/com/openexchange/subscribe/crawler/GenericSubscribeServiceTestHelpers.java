@@ -70,6 +70,7 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
     public static final String VALID_EMAIL_REGEX = "([a-z@A-Z0-9\\.\\-\\{\\}\\#\\|\\^\\$\\*\\+\\?\\'\\/!%&=_`~]*)";
     public static final String VALID_NAME = "([a-zA-Z\\s\u00e4\u00f6\u00fc\u00df-]*)";
     public static final String VALID_PHONE_REGEX = "([0-9\\s\\+\\-\\/\\(\\)]*)";
+    public static final String VALID_ADDRESS_PART = "[a-zA-Z0-9\\s\u00e4\u00f6\u00fc\u00df]*";
     
     private HashMap<String, String> map;
     ArrayList<CrawlerDescription> crawlers;
@@ -87,15 +88,17 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
      */
     public void setUp(){
         try {
-            // insert path to credentials-file here
+            // insert path to credentials-file here (switch for automated tests (Hudson) / local tests)
             map = (HashMap<String, String>) Yaml.load(getSecretsFile());
+            //map = (HashMap<String, String>) Yaml.load(new File("/Users/karstenwill/Documents/Development/crawlerCredentials.yml"));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
         
         SimConfigurationService config = new SimConfigurationService();
-        //test with the real crawlers
+        //test with the real crawlers (switch for automated tests (Hudson) / local tests)
         config.stringProperties.put("com.openexchange.subscribe.crawler.path", System.getProperty("crawlersConf"));
+        //config.stringProperties.put("com.openexchange.subscribe.crawler.path", "conf/crawlers/");
         Activator activator = new Activator();
         crawlers = activator.getCrawlersFromFilesystem(config);
     }
