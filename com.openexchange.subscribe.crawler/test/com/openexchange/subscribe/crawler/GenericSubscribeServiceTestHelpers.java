@@ -57,7 +57,7 @@ import java.util.HashMap;
 import junit.framework.TestCase;
 import org.ho.yaml.Yaml;
 import com.openexchange.config.SimConfigurationService;
-import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.crawler.osgi.Activator;
@@ -86,7 +86,8 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
     /**
      * Get all yml-files in the config directory and create crawlers out of them.
      */
-    public void setUp(){
+    @Override
+    public void setUp() {
         try {
             // insert path to credentials-file here (switch for automated tests (Hudson) / local tests)
             map = (HashMap<String, String>) Yaml.load(getSecretsFile());
@@ -169,15 +170,15 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
             crawler.getPriority());
 
         final Workflow testWorkflow = service.getWorkflow();
-        CalendarDataObject[] events = new CalendarDataObject[0];
+        Appointment[] events = new Appointment[0];
         try {
-            events = (CalendarDataObject[])testWorkflow.execute(username, password);
+            events = (Appointment[])testWorkflow.execute(username, password);
         } catch (final SubscriptionException e) {
             e.printStackTrace();
         }
         assertTrue("There are no events for crawler : " + crawler.getDisplayName(), events.length != 0);
         if (verbose){
-            for (final CalendarDataObject event : events) {
+            for (final Appointment event : events) {
                 System.out.println("event retrieved is : " + event.getTitle());
                 System.out.println("Timezone is : " + event.getTimezone());
                 System.out.println("Start Date is : " + event.getStartDate());
