@@ -55,6 +55,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
 import javax.mail.FetchProfile;
 import javax.mail.Flags;
 import javax.mail.Header;
@@ -63,6 +64,7 @@ import javax.mail.MessagingException;
 import javax.mail.UIDFolder;
 import javax.mail.Message.RecipientType;
 import javax.mail.internet.InternetHeaders;
+
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailListField;
@@ -472,10 +474,12 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
                 FetchItemHandler itemHandler = MAP.get(item.getClass());
                 if (null == itemHandler) {
                     itemHandler = getItemHandlerByItem(item, loadBody);
-                }
-                if (null == itemHandler) {
-                    if (LOG.isWarnEnabled()) {
-                        LOG.warn("Unknown FETCH item: " + item.getClass().getName());
+                    if (null == itemHandler) {
+                        if (LOG.isWarnEnabled()) {
+                            LOG.warn("Unknown FETCH item: " + item.getClass().getName());
+                        }
+                    } else {
+                        itemHandler.handleItem(item, msg, LOG);
                     }
                 } else {
                     itemHandler.handleItem(item, msg, LOG);
