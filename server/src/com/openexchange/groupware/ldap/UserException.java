@@ -69,8 +69,8 @@ public class UserException extends AbstractOXException {
     private final Detail detail;
 
     public UserException(final AbstractOXException cause) {
-    	super(cause);
-    	detail = Detail.ERROR;
+        super(cause);
+        detail = Detail.ERROR;
     }
 
     /**
@@ -88,11 +88,9 @@ public class UserException extends AbstractOXException {
      * @param cause the cause of the exception.
      * @param messageArgs arguments that will be formatted into the message.
      */
-    public UserException(final Code code, final Throwable cause,
-        final Object... messageArgs) {
-        super(EnumComponent.USER, code.category, code.detailNumber, code.message,
-            cause);
-        this.detail = code.detail;
+    public UserException(final Code code, final Throwable cause, final Object... messageArgs) {
+        super(EnumComponent.USER, code.getCategory(), code.getDetailNumber(), code.getMessage(), cause);
+        this.detail = code.getDetail();
         setMessageArgs(messageArgs);
     }
 
@@ -131,6 +129,11 @@ public class UserException extends AbstractOXException {
     /**
      * Error codes for the database pooling exception.
      * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+     */
+    /**
+     * {@link Code}
+     *
+     * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
      */
     public enum Code {
         /**
@@ -201,13 +204,15 @@ public class UserException extends AbstractOXException {
          /**
           * Missing or unknown password mechanism %1$s
           */
-         MISSING_PASSWORD_MECH("Missing or unknown password mechanism %1$s",
-        	Category.CODE_ERROR, Detail.ERROR, 14),
+         MISSING_PASSWORD_MECH("Missing or unknown password mechanism %1$s", Category.CODE_ERROR, Detail.ERROR, 14),
          /**
           * New password contains invalid characters
           */
-         INVALID_PASSWORD("New password contains invalid characters",
-        	Category.USER_INPUT, Detail.ERROR, 15);
+         INVALID_PASSWORD("New password contains invalid characters", Category.USER_INPUT, Detail.ERROR, 15),
+         /**
+          * Attributes of user %1$d in context %2$d have been erased.
+          */
+        ERASED_ATTRIBUTES("Attributes of user %1$d in context %2$d have been erased.", Category.WARNING, Detail.ERROR, 16);
 
         /**
          * Message of the exception.
@@ -243,20 +248,20 @@ public class UserException extends AbstractOXException {
             this.detailNumber = detailNumber;
         }
 
-		public Category getCategory() {
-			return category;
-		}
+        public Category getCategory() {
+            return category;
+        }
 
-		public Detail getDetail() {
-			return detail;
-		}
+        public Detail getDetail() {
+            return detail;
+        }
 
-		public int getDetailNumber() {
-			return detailNumber;
-		}
+        public int getDetailNumber() {
+            return detailNumber;
+        }
 
-		public String getMessage() {
-			return message;
-		}
+        public String getMessage() {
+            return message;
+        }
     }
 }
