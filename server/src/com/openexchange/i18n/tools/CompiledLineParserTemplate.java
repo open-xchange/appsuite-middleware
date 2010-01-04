@@ -139,9 +139,14 @@ public abstract class CompiledLineParserTemplate extends AbstractTemplate {
                 if (escaped) {
                     escaped = false;
                 } else {
-                    positions.add(new int[] { firstPos, i });
-                    firstPos = -1;
-                    open = null;
+                    if(firstPos == -1) {
+                        LOG.error("Parser Error: Missing opening bracket in line: "+lineCount, new Throwable());
+                        open = null;
+                    } else {
+                        positions.add(new int[] { firstPos, i });
+                        firstPos = -1;
+                        open = null;
+                    }
                 }
                 columnCount++;
                 break;
