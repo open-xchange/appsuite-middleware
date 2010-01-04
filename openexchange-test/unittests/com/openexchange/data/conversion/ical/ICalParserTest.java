@@ -454,7 +454,7 @@ public class ICalParserTest extends TestCase {
 
         // Second form : the 3rd monday and tuesday every 2 months
 
-        appointment = appointmentWithRecurrence("FREQ=MONTHLY;INTERVAL=2;COUNT=3;BYDAY=MO,TU;BYWEEKNO=3", start, end);
+        appointment = appointmentWithRecurrence("FREQ=MONTHLY;INTERVAL=2;COUNT=3;BYDAY=MO,TU;BYSETPOS=3", start, end);
         days = appointment.getDays();
         assertEquals(3, appointment.getDayInMonth());
         assertTrue(Appointment.MONDAY == (Appointment.MONDAY & days));
@@ -463,7 +463,7 @@ public class ICalParserTest extends TestCase {
 
         // Second form : the last tuesday every 2 months
 
-        appointment = appointmentWithRecurrence("FREQ=MONTHLY;INTERVAL=2;COUNT=3;BYDAY=TU;BYWEEKNO=-1", start, end);
+        appointment = appointmentWithRecurrence("FREQ=MONTHLY;INTERVAL=2;COUNT=3;BYDAY=TU;BYSETPOS=-1", start, end);
         days = appointment.getDays();
         assertEquals(5, appointment.getDayInMonth());
         assertTrue(Appointment.TUESDAY == (Appointment.TUESDAY & days));
@@ -474,11 +474,6 @@ public class ICalParserTest extends TestCase {
         appointment = appointmentWithRecurrence("FREQ=MONTHLY;INTERVAL=2;COUNT=3", start, end);
         assertEquals(24, appointment.getDayInMonth());
 
-        appointment = appointmentWithRecurrence("FREQ=MONTHLY;INTERVAL=2;COUNT=3;BYWEEKNO=3", start, end);
-        days = appointment.getDays();
-        assertTrue(Appointment.TUESDAY == (Appointment.TUESDAY & days));
-
-
         // YEARLY
 
         // First form: Every 2 years, the 23rd of March
@@ -488,9 +483,9 @@ public class ICalParserTest extends TestCase {
         assertEquals(2, appointment.getMonth());
         assertEquals(23, appointment.getDayInMonth());
 
-        // Second form: 2nd monday and wednesday in april every 2 years
+        // Second form: 2nd of monday and wednesday in april every 2 years
 
-        appointment = appointmentWithRecurrence("FREQ=YEARLY;INTERVAL=2;COUNT=3;BYDAY=MO,WE;BYMONTH=4;BYWEEKNO=2", start, end);
+        appointment = appointmentWithRecurrence("FREQ=YEARLY;INTERVAL=2;COUNT=3;BYDAY=MO,WE;BYMONTH=4;BYSETPOS=2", start, end);
         days = appointment.getDays();
 
         assertEquals(3, appointment.getMonth());
@@ -936,9 +931,9 @@ public class ICalParserTest extends TestCase {
         assertEquals(2, task.getInterval());
         assertEquals(23, task.getDayInMonth());
 
-        // Second form : the 2nd monday and tuesday every 2 months
+        // Second form : the 3rd monday and tuesday every 2 months
 
-        task = taskWithRecurrence("FREQ=MONTHLY;INTERVAL=2;COUNT=3;BYDAY=MO,TU;BYWEEKNO=3", start, end);
+        task = taskWithRecurrence("FREQ=MONTHLY;INTERVAL=2;COUNT=3;BYDAY=MO,TU;BYSETPOS=3", start, end);
         days = task.getDays();
         assertEquals(3, task.getDayInMonth());
         assertTrue(CalendarObject.MONDAY == (CalendarObject.MONDAY & days));
@@ -947,7 +942,7 @@ public class ICalParserTest extends TestCase {
 
         // Second form : the last tuesday every 2 months
 
-        task = taskWithRecurrence("FREQ=MONTHLY;INTERVAL=2;COUNT=3;BYDAY=TU;BYWEEKNO=-1", start, end);
+        task = taskWithRecurrence("FREQ=MONTHLY;INTERVAL=2;COUNT=3;BYDAY=TU;BYSETPOS=-1", start, end);
         days = task.getDays();
         assertEquals(5, task.getDayInMonth());
         assertTrue(CalendarObject.TUESDAY == (CalendarObject.TUESDAY & days));
@@ -957,10 +952,6 @@ public class ICalParserTest extends TestCase {
 
         task = taskWithRecurrence("FREQ=MONTHLY;INTERVAL=2;COUNT=3", start, end);
         assertEquals(24, task.getDayInMonth());
-
-        task = taskWithRecurrence("FREQ=MONTHLY;INTERVAL=2;COUNT=3;BYWEEKNO=3", start, end);
-        days = task.getDays();
-        assertTrue(CalendarObject.TUESDAY == (CalendarObject.TUESDAY & days));
 
 
         // YEARLY
@@ -974,7 +965,7 @@ public class ICalParserTest extends TestCase {
 
         // Second form: 2nd monday and wednesday in april every 2 years
 
-        task = taskWithRecurrence("FREQ=YEARLY;INTERVAL=2;COUNT=3;BYDAY=MO,WE;BYMONTH=4;BYWEEKNO=2", start, end);
+        task = taskWithRecurrence("FREQ=YEARLY;INTERVAL=2;COUNT=3;BYDAY=MO,WE;BYMONTH=4;BYSETPOS=2", start, end);
         days = task.getDays();
 
         assertEquals(3, task.getMonth());
@@ -1117,7 +1108,7 @@ public class ICalParserTest extends TestCase {
     }
 
     public void testAppShouldIncludeErrorForUnknownDayInRRule() throws ConversionError {
-        final String icalText =  fixtures.veventWithSimpleProperties(D("24/02/1981 10:00"), D("24/02/1981 12:00"), "RRULE", "FREQ=MONTHLY;INTERVAL=2;COUNT=3;BYDAY=WU,NI;BYWEEKNO=3");
+        final String icalText =  fixtures.veventWithSimpleProperties(D("24/02/1981 10:00"), D("24/02/1981 12:00"), "RRULE", "FREQ=MONTHLY;INTERVAL=2;COUNT=3;BYDAY=WU,NI;BYSETPOS=3");
         assertErrorWhenParsingAppointment(icalText, "Unknown day: WU");    
     }
 

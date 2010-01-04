@@ -85,4 +85,16 @@ public class CompiledLineParserTemplateTest extends TestCase {
 
         assertEquals(expected, output);
     }
+    
+    public void testMissingOpeningBracket() {
+        String test = "dysfunctional template]";
+        String expected = test;
+
+        final CompiledLineParserTemplate template = new StringTemplate(test);
+        final String output = template.render(locale);
+
+        assertEquals(expected, output);
+        
+        
+    }
 }
