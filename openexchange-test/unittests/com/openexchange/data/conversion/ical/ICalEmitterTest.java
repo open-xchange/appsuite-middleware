@@ -225,7 +225,7 @@ public class ICalEmitterTest extends TestCase {
 
         ical = serialize(appointment);
 
-        assertProperty(ical, "RRULE", "FREQ=MONTHLY;INTERVAL=2;COUNT=3;BYWEEKNO=3;BYDAY=MO,TU");
+        assertProperty(ical, "RRULE", "FREQ=MONTHLY;INTERVAL=2;COUNT=3;BYDAY=MO,TU;BYSETPOS=3");
 
 
         // Second form : the last tuesday every 2 months
@@ -235,7 +235,7 @@ public class ICalEmitterTest extends TestCase {
 
         ical = serialize(appointment);
 
-        assertProperty(ical, "RRULE", "FREQ=MONTHLY;INTERVAL=2;COUNT=3;BYWEEKNO=-1;BYDAY=TU");
+        assertProperty(ical, "RRULE", "FREQ=MONTHLY;INTERVAL=2;COUNT=3;BYDAY=TU;BYSETPOS=-1");
 
         appointment.removeDays();
 
@@ -260,7 +260,7 @@ public class ICalEmitterTest extends TestCase {
         appointment.setDays(days);
         ical = serialize(appointment);
 
-        assertProperty(ical, "RRULE", "FREQ=YEARLY;INTERVAL=2;COUNT=3;BYMONTH=4;BYWEEKNO=2;BYDAY=MO,WE");
+        assertProperty(ical, "RRULE", "FREQ=YEARLY;INTERVAL=2;COUNT=3;BYMONTH=4;BYDAY=MO,WE;BYSETPOS=2");
 
         // UNTIL
 
