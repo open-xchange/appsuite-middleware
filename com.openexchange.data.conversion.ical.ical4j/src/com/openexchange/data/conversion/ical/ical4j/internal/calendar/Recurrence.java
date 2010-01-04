@@ -300,12 +300,23 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
                 setDays(index, cObj, rrule, startDate);
             } else if (!rrule.getDayList().isEmpty()) {
                 setWeekdayInMonth(index, cObj, rrule);
+                setDayInMonthFromSetPos(index, cObj, rrule);
             } else {
                 // Default to monthly series on specific day of month
                 cObj.setDayInMonth(startDate.get(Calendar.DAY_OF_MONTH));
             }
         } else {
             cObj.setDayInMonth(((Integer) monthDayList.get(0)).intValue());
+        }
+    }
+
+    private void setDayInMonthFromSetPos(int index, CalendarObject obj, Recur rrule) {
+        if(!rrule.getSetPosList().isEmpty()) {
+            int firstPos = (Integer) rrule.getSetPosList().get(0);
+            if(firstPos == -1) {
+                firstPos = 5;
+            }
+            obj.setDayInMonth(firstPos);
         }
     }
 
@@ -316,15 +327,18 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
             final int size = weekdayList.size();
             for (int i = 0; i < size; i++) {
                 final WeekDay weekday = (WeekDay) weekdayList.get(i);
-                int offset = weekday.getOffset();
-                if (offset == -1) {
-                    offset = 5;
-                }
-                cObj.setDayInMonth(offset);
                 final Integer day = weekdays.get(weekday.getDay());
                 if (null == day) {
                     throw new ConversionError(index, "Unknown day: %s", weekday.getDay());
                 }
+                int offset = weekday.getOffset();
+                if(offset != 0) {
+                    if(offset == -1) {
+                        offset = 5;
+                    }
+                    cObj.setDayInMonth(offset);
+                }
+                
                 days |= day.intValue();
             }
             cObj.setDays(days);
