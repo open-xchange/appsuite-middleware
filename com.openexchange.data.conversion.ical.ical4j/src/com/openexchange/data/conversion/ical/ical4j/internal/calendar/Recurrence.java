@@ -145,7 +145,7 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
         if (calendar.containsDays()) {
             addDays("BYDAY", calendar.getDays(), recur);
             recur.append(";BYMONTH=").append(calendar.getMonth() + 1);
-            recur.append(";BYWEEKNO=").append(calendar.getDayInMonth());
+            recur.append(";BYSETPOS=").append(calendar.getDayInMonth());
         } else {
             recur.append(";BYMONTH=").append(calendar.getMonth() + 1).append(";BYMONTHDAY=").append(calendar.getDayInMonth());
         }
@@ -160,7 +160,7 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
             if (5 == weekNo) {
                 weekNo = -1;
             }
-            recur.append(";BYWEEKNO=").append(weekNo);
+            recur.append(";BYSETPOS=").append(weekNo);
         } else if (calendar.containsDayInMonth()) {
             recur.append(";BYMONTHDAY=").append(calendar.getDayInMonth());
         }
