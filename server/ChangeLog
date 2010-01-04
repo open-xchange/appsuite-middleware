@@ -1,3 +1,7 @@
+* 2010-01-04 - thorben.betten@open-xchange.com
+
+ - Bugfix #15128: Display of broken multipart/alternative mail
+
 * 2010-01-04 - choeger@open-xchange.com
 
  - Bugfix #15163: some packages are missing the dependency on sun java 6
