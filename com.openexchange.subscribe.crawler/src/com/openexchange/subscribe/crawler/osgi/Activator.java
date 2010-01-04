@@ -49,20 +49,10 @@
 
 package com.openexchange.subscribe.crawler.osgi;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
 import java.util.Stack;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ho.yaml.Yaml;
@@ -70,16 +60,13 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
-import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.crawler.CrawlerDescription;
-import com.openexchange.subscribe.crawler.CrawlerUpdateTask;
 import com.openexchange.subscribe.crawler.GenericSubscribeService;
-import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
-import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * {@link Activator}
@@ -127,6 +114,7 @@ public class Activator implements BundleActivator {
         while (!trackers.isEmpty()) {
             trackers.pop().close();
         }
+        bundleContext = null;
     }
 
     public ArrayList<CrawlerDescription> getCrawlersFromFilesystem(final ConfigurationService config) {
@@ -148,6 +136,7 @@ public class Activator implements BundleActivator {
                     crawlers.add((CrawlerDescription) Yaml.load(file));
                 }
             } catch (final FileNotFoundException e) {
+                // Should not appear because file existence is checked before.
             }
         }
         return crawlers;
@@ -168,6 +157,7 @@ public class Activator implements BundleActivator {
                             }
                         }
                     } catch (final FileNotFoundException e) {
+                        // Should not appear because file existence is checked before.
                     }
                 }
             }

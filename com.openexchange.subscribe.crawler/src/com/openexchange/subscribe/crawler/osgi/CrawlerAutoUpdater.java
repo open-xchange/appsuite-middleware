@@ -55,8 +55,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.subscribe.crawler.CrawlerUpdateTask;
@@ -77,8 +75,6 @@ public class CrawlerAutoUpdater implements ServiceTrackerCustomizer {
     private ScheduledTimerTask scheduledTimerTask;
     
     private Activator activator;
-    
-    private ServiceTracker tracker;
     
     private final Lock lock = new ReentrantLock();
     
@@ -105,14 +101,14 @@ public class CrawlerAutoUpdater implements ServiceTrackerCustomizer {
             if (obj instanceof ConfigurationService) {
                 configurationService = (ConfigurationService) obj;
             }
-            taskSchedulingPossible = null != timerService && null != configurationService;
+            taskSchedulingPossible = null != timerService && null != configurationService && scheduledTimerTask == null;
         } finally {
             lock.unlock();
         }
         if (taskSchedulingPossible) {
             CrawlerUpdateTask crawlerUpdateTask = new CrawlerUpdateTask(configurationService, activator);
             // Start the job 30 seconds after this and repeat it as often as configured (default:daily)
-            final long updateInterval = Integer.parseInt(configurationService.getProperty(activator.UPDATE_INTERVAL));
+            final long updateInterval = Integer.parseInt(configurationService.getProperty(Activator.UPDATE_INTERVAL));
             // Insert daily TimerTask to look for updates
             scheduledTimerTask = timerService.scheduleWithFixedDelay(crawlerUpdateTask, 30 * 1000, updateInterval);
             LOG.info("Task for crawler auto-update initialised");
@@ -124,7 +120,8 @@ public class CrawlerAutoUpdater implements ServiceTrackerCustomizer {
         // Nothing to do.
     }
 
-    public void removedService(ServiceReference reference, Object service) {        
+    public void removedService(ServiceReference reference, Object service) {
+        ScheduledTimerTask cancel = null;
         lock.lock();
         try {
             if (service instanceof TimerService) {
@@ -133,14 +130,17 @@ public class CrawlerAutoUpdater implements ServiceTrackerCustomizer {
             if (service instanceof ConfigurationService) {
                 configurationService = null;
             }
-            if (scheduledTimerTask != null){
-                // cancel the TimerTask before either service (ConfigurationService or TimerService) or the bundle itself is going down
-                scheduledTimerTask.cancel();
-                LOG.info("Task for crawler auto-update cancelled");
+            if (scheduledTimerTask != null) {
+                cancel = scheduledTimerTask;
                 scheduledTimerTask = null;
             }
         } finally {
             lock.unlock();
+        }
+        if (cancel != null) {
+            // cancel the TimerTask before either service (ConfigurationService or TimerService) or the bundle itself is going down
+            cancel.cancel();
+            LOG.info("Task for crawler auto-update cancelled");
         }
         context.ungetService(reference);
     }
