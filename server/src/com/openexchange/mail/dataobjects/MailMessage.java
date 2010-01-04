@@ -50,14 +50,17 @@
 package com.openexchange.mail.dataobjects;
 
 import static com.openexchange.mail.mime.utils.MIMEMessageUtility.decodeMultiEncodedHeader;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.mime.HeaderName;
@@ -370,14 +373,14 @@ public abstract class MailMessage extends MailPart {
     /**
      * The color label (set through an user flag).
      */
-    private int colorLabel = COLOR_LABEL_NONE;
+    private int colorLabel;
 
     private boolean b_colorLabel;
 
     /**
      * The priority (the <code>X-Priority</code> header).
      */
-    private int priority = PRIORITY_NORMAL;
+    private int priority;
 
     private boolean b_priority;
 
@@ -428,6 +431,8 @@ public abstract class MailMessage extends MailPart {
      */
     protected MailMessage() {
         super();
+        priority = PRIORITY_NORMAL;
+        colorLabel = COLOR_LABEL_NONE;
     }
 
     /**
@@ -1063,6 +1068,9 @@ public abstract class MailMessage extends MailPart {
      */
     public String[] getUserFlags() {
         if (containsUserFlags() && (null != userFlags)) {
+            if (userFlags.isEmpty()) {
+                return EMPTY_UF;
+            }
             final int size = userFlags.size();
             final List<String> retval = new ArrayList<String>(size);
             final Iterator<HeaderName> iter = userFlags.iterator();
@@ -1075,23 +1083,23 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
-     * Gets the colorLabel
+     * Gets the color label
      * 
-     * @return the colorLabel
+     * @return the color label
      */
     public int getColorLabel() {
         return colorLabel;
     }
 
     /**
-     * @return <code>true</code> if colorLabel is set; otherwise <code>false</code>
+     * @return <code>true</code> if color label is set; otherwise <code>false</code>
      */
     public boolean containsColorLabel() {
         return b_colorLabel;
     }
 
     /**
-     * Removes the colorLabel
+     * Removes the color label
      */
     public void removeColorLabel() {
         colorLabel = COLOR_LABEL_NONE;
@@ -1099,9 +1107,9 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
-     * Sets the colorLabel
+     * Sets the color label
      * 
-     * @param colorLabel the colorLabel to set
+     * @param colorLabel the color label to set
      */
     public void setColorLabel(final int colorLabel) {
         this.colorLabel = colorLabel;
