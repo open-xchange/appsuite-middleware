@@ -1,3 +1,7 @@
+* 2010-01-04 - choeger@open-xchange.com
+
+ - Bugfix #15163: some packages are missing the dependency on sun java 6
+
 * 2009-12-28 - martin.herfurth@open-xchange.com
 
  - Bugfix #15046: Participant delete for Outlook.
