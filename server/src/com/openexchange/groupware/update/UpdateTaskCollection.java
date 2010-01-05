@@ -112,6 +112,7 @@ public class UpdateTaskCollection {
                 iter.remove();
             }
         }
+        // And sort them
         retval = new UpdateTaskSorter().sort(state.getExecutedList(), retval);
         return retval;
     }

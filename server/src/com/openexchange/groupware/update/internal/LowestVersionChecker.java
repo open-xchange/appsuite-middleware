@@ -49,48 +49,29 @@
 
 package com.openexchange.groupware.update.internal;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import com.openexchange.groupware.update.UpdateException;
-import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.java.Strings;
 
 /**
- * {@link UpdateTaskSorter}
+ * Checks if the current task has the lowest version number and the highest priority in the list of tasks to execute.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class UpdateTaskSorter {
+public class LowestVersionChecker implements DependencyChecker {
 
-    private static final DependencyChecker[] CHECKERS = { new DependenciesResolvedChecker(), new LowestVersionChecker() };
-
-    public UpdateTaskSorter() {
+    public LowestVersionChecker() {
         super();
     }
 
-    public List<UpdateTask> sort(String[] executed, List<UpdateTask> toExecute) throws UpdateException {
-        List<UpdateTask> retval = new ArrayList<UpdateTask>(toExecute.size());
-        boolean found = true;
-        while (!toExecute.isEmpty() && found) {
-            found = false;
-            Iterator<UpdateTask> iter = toExecute.iterator();
-            while (iter.hasNext() && !found) {
-                UpdateTask task = iter.next();
-                UpdateTask[] retvalA = retval.toArray(new UpdateTask[retval.size()]);
-                UpdateTask[] toExecuteA = toExecute.toArray(new UpdateTask[toExecute.size()]);
-                for (int i = 0; i < CHECKERS.length && !found; i++) {
-                    found = CHECKERS[i].check(task, executed, retvalA, toExecuteA);
-                }
-                if (found) {
-                    retval.add(task);
-                    iter.remove();
-                }
-            }
+    public boolean check(UpdateTask task, String[] executed, UpdateTask[] enqueued, UpdateTask[] toExecute) {
+        // Tasks without a version can not be sorted by this dependency checker.
+        if (Schema.NO_VERSION == task.addedWithVersion()) {
+            return false;
         }
-        if (!toExecute.isEmpty()) {
-            throw UpdateExceptionCodes.UNRESOLVABLE_DEPENDENCIES.create(Strings.join(executed, ","), Strings.join(retval, ","), Strings.join(toExecute, ","));
+        boolean retval = true;
+        for (int i = 0; i < toExecute.length && retval; i++) {
+            UpdateTask other = toExecute[i];
+            retval = Schema.NO_VERSION == other.addedWithVersion() || task.addedWithVersion() < other.addedWithVersion() || (task.addedWithVersion() == other.addedWithVersion() && task.getPriority() <= other.getPriority());
         }
         return retval;
     }

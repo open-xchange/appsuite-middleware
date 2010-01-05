@@ -49,49 +49,24 @@
 
 package com.openexchange.groupware.update.internal;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import com.openexchange.groupware.update.UpdateException;
-import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.java.Strings;
 
 /**
- * {@link UpdateTaskSorter}
+ * Checks if the dependencies of an update task are fulfilled.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class UpdateTaskSorter {
+public interface DependencyChecker {
 
-    private static final DependencyChecker[] CHECKERS = { new DependenciesResolvedChecker(), new LowestVersionChecker() };
+    /**
+     * Checks if the current task can be executed next. The sorter iterates across all checkers so every checker has to return
+     * <code>false</code> if prerequisites are not fulfilled.
+     * @param task Current task to check.
+     * @param executed list of tasks that are already executed on the schema.
+     * @param enqueued list of tasks that are scheduled to be executed before the current task.
+     * @param toExecute list of tasks that have to be executed.
+     * @return <code>true</code> if the current task can be now scheduled for execution.
+     */
+    boolean check(UpdateTask task, String[] executed, UpdateTask[] enqueued, UpdateTask[] toExecute);
 
-    public UpdateTaskSorter() {
-        super();
-    }
-
-    public List<UpdateTask> sort(String[] executed, List<UpdateTask> toExecute) throws UpdateException {
-        List<UpdateTask> retval = new ArrayList<UpdateTask>(toExecute.size());
-        boolean found = true;
-        while (!toExecute.isEmpty() && found) {
-            found = false;
-            Iterator<UpdateTask> iter = toExecute.iterator();
-            while (iter.hasNext() && !found) {
-                UpdateTask task = iter.next();
-                UpdateTask[] retvalA = retval.toArray(new UpdateTask[retval.size()]);
-                UpdateTask[] toExecuteA = toExecute.toArray(new UpdateTask[toExecute.size()]);
-                for (int i = 0; i < CHECKERS.length && !found; i++) {
-                    found = CHECKERS[i].check(task, executed, retvalA, toExecuteA);
-                }
-                if (found) {
-                    retval.add(task);
-                    iter.remove();
-                }
-            }
-        }
-        if (!toExecute.isEmpty()) {
-            throw UpdateExceptionCodes.UNRESOLVABLE_DEPENDENCIES.create(Strings.join(executed, ","), Strings.join(retval, ","), Strings.join(toExecute, ","));
-        }
-        return retval;
-    }
 }

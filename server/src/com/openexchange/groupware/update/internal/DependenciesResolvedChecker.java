@@ -49,49 +49,56 @@
 
 package com.openexchange.groupware.update.internal;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import com.openexchange.groupware.update.UpdateException;
-import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.java.Strings;
+import com.openexchange.groupware.update.UpdateTaskV2;
 
 /**
- * {@link UpdateTaskSorter}
+ * Checks if all dependencies are resolved or will be resolved before the current update task is executed.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class UpdateTaskSorter {
+public class DependenciesResolvedChecker implements DependencyChecker {
 
-    private static final DependencyChecker[] CHECKERS = { new DependenciesResolvedChecker(), new LowestVersionChecker() };
-
-    public UpdateTaskSorter() {
+    public DependenciesResolvedChecker() {
         super();
     }
 
-    public List<UpdateTask> sort(String[] executed, List<UpdateTask> toExecute) throws UpdateException {
-        List<UpdateTask> retval = new ArrayList<UpdateTask>(toExecute.size());
-        boolean found = true;
-        while (!toExecute.isEmpty() && found) {
-            found = false;
-            Iterator<UpdateTask> iter = toExecute.iterator();
-            while (iter.hasNext() && !found) {
-                UpdateTask task = iter.next();
-                UpdateTask[] retvalA = retval.toArray(new UpdateTask[retval.size()]);
-                UpdateTask[] toExecuteA = toExecute.toArray(new UpdateTask[toExecute.size()]);
-                for (int i = 0; i < CHECKERS.length && !found; i++) {
-                    found = CHECKERS[i].check(task, executed, retvalA, toExecuteA);
-                }
-                if (found) {
-                    retval.add(task);
-                    iter.remove();
-                }
+    public boolean check(UpdateTask task, String[] executed, UpdateTask[] enqueued, UpdateTask[] toExecute) {
+        if (Schema.NO_VERSION != task.addedWithVersion()) {
+            // Task has a version defined and must be sorted by the {@link LowestVersionChecker}.
+            return false;
+        }
+        if (!(task instanceof UpdateTaskV2)) {
+            // Only V2 tasks can have dependencies defined.
+            return false;
+        }
+        // Only V2 tasks having the version not defined should be in the list to be scheduled.
+        for (UpdateTask other : toExecute) {
+            if (Schema.NO_VERSION != other.addedWithVersion()) {
+                return false;
             }
         }
-        if (!toExecute.isEmpty()) {
-            throw UpdateExceptionCodes.UNRESOLVABLE_DEPENDENCIES.create(Strings.join(executed, ","), Strings.join(retval, ","), Strings.join(toExecute, ","));
+        // Check all dependencies.
+        for (String dependency : ((UpdateTaskV2) task).getDependencies()) {
+            if (!dependencyFulfilled(dependency, executed, enqueued)) {
+                return false;
+            }
         }
-        return retval;
+        return true;
+    }
+
+    private boolean dependencyFulfilled(String dependency, String[] executed, UpdateTask[] enqueued) {
+        for (String taskName : executed) {
+            if (taskName.equals(dependency)) {
+                return true;
+            }
+        }
+        for (UpdateTask task : enqueued) {
+            if (task.getClass().getName().equals(dependency)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
