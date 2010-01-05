@@ -79,12 +79,11 @@ public class UpdateProcess implements Runnable {
     public void run() {
         try {
             // Load schema
-            SchemaUpdateState schema = schemaStore.getSchema(contextId);
-            if (!UpdateTaskCollection.getInstance().needsUpdate(schema)) {
+            SchemaUpdateState state = schemaStore.getSchema(contextId);
+            if (!UpdateTaskCollection.getInstance().needsUpdate(state)) {
                 // Already been updated before by previous thread
                 return;
             }
-            SchemaUpdateState state = schemaStore.getSchema(contextId);
             new UpdateExecutor(state, contextId, null).execute();
         } catch (SchemaException e) {
             LOG.error(e.getMessage(), e);
