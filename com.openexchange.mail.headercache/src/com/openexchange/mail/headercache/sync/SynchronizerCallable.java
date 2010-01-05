@@ -54,6 +54,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;
@@ -66,6 +67,7 @@ import com.openexchange.mail.headercache.HeaderCacheException;
 import com.openexchange.mail.headercache.database.DatabaseAccess;
 import com.openexchange.mail.headercache.properties.HeaderCacheProperties;
 import com.openexchange.mail.headercache.properties.RdbHeaderCacheProperties;
+import com.openexchange.mail.headercache.services.HeaderCacheServiceRegistry;
 import com.openexchange.session.Session;
 
 /**
@@ -140,7 +142,10 @@ public final class SynchronizerCallable implements Callable<Object> {
             if (!enforce) {
                 final long refreshRate;
                 {
-                    final String propRefreshRate = props.getProperty(HeaderCacheProperties.PROP_REFRESH_RATE_MILLIS);
+                    String propRefreshRate = props.getProperty(HeaderCacheProperties.PROP_REFRESH_RATE_MILLIS);
+                    if (null == propRefreshRate) {
+                        propRefreshRate = getProperty("com.openexchange.mail.headercache.defaultRefreshRate");
+                    }
                     refreshRate = null == propRefreshRate ? DEFAULT_REFRESH_RATE : Long.parseLong(propRefreshRate);
                 }
                 if (refreshRate > 0) {
@@ -264,6 +269,14 @@ public final class SynchronizerCallable implements Callable<Object> {
 
     private String getPropertyLastAccessed() {
         return new StringBuilder(64).append(HeaderCacheProperties.PROP_LAST_ACCESSED).append('.').append(folder).toString();
+    }
+
+    private static String getProperty(final String name) {
+        final ConfigurationService cs = HeaderCacheServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+        if (null != cs) {
+            return cs.getProperty(name);
+        }
+        return null;
     }
 
 }
