@@ -54,12 +54,7 @@ import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.UpdateTaskV2;
 
 /**
- * {@link InternalList}
- *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
- */
-/**
- * {@link InternalList}
+ * Lists all update tasks of the com.openexchange.server bundle.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */

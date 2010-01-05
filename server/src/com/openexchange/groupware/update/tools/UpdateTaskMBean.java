@@ -63,6 +63,8 @@ import javax.management.MBeanInfo;
 import javax.management.MBeanOperationInfo;
 import javax.management.MBeanParameterInfo;
 import javax.management.ReflectionException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateException;
 import com.openexchange.groupware.update.UpdateProcess;
@@ -74,7 +76,7 @@ import com.openexchange.groupware.update.UpdateProcess;
  */
 public final class UpdateTaskMBean implements DynamicMBean {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(UpdateTaskMBean.class);
+    private static final Log LOG = LogFactory.getLog(UpdateTaskMBean.class);
 
     private final MBeanInfo mbeanInfo;
 
@@ -87,9 +89,7 @@ public final class UpdateTaskMBean implements DynamicMBean {
     }
 
     private MBeanInfo buildMBeanInfo() {
-        /*
-         * Trigger update process
-         */
+        // Trigger update process
         final MBeanParameterInfo[] tparams =
             new MBeanParameterInfo[] { new MBeanParameterInfo(
                 "id",
@@ -97,9 +97,7 @@ public final class UpdateTaskMBean implements DynamicMBean {
                 "A valid context identifier contained in target schema or a schema name") };
         final MBeanOperationInfo triggerOperation =
             new MBeanOperationInfo("runUpdate", "Runs the schema's update.", tparams, "void", MBeanOperationInfo.ACTION);
-        /*
-         * Reset version operation
-         */
+        // Reset version operation
         final MBeanParameterInfo[] params =
             new MBeanParameterInfo[] {
                 new MBeanParameterInfo("versionNumber", "java.lang.Integer", "The version number to set"),
@@ -111,9 +109,7 @@ public final class UpdateTaskMBean implements DynamicMBean {
                 params,
                 "void",
                 MBeanOperationInfo.ACTION);
-        /*
-         * Schemas and versions operation
-         */
+        // Schemas and versions operation
         final MBeanOperationInfo schemasAndVersionsOperation =
             new MBeanOperationInfo(
                 "schemasAndVersions",
@@ -121,34 +117,23 @@ public final class UpdateTaskMBean implements DynamicMBean {
                 null,
                 "java.lang.String",
                 MBeanOperationInfo.INFO);
-        /*
-         * Force re-run operation
-         */
+        // Force re-run operation
         final MBeanParameterInfo[] forceParams =
             new MBeanParameterInfo[] {
                 new MBeanParameterInfo("className", "java.lang.String", "The update task's class name"),
                 new MBeanParameterInfo("id", "java.lang.String", "A valid context identifier contained in target schema or a schema name") };
         final MBeanOperationInfo forceOperation =
             new MBeanOperationInfo("force", "Forces re-run of given update task.", forceParams, "void", MBeanOperationInfo.ACTION);
-        
-        /*
-         * Force re-run operation on all schemas
-         */
+        // Force re-run operation on all schemas
         final MBeanParameterInfo[] forceAllParams =
             new MBeanParameterInfo[] {
                 new MBeanParameterInfo("className", "java.lang.String", "The update task's class name") };
         final MBeanOperationInfo forceAllOperation =
             new MBeanOperationInfo("forceOnAllSchemas", "Forces re-run of given update task on all schemas.", forceAllParams, "void", MBeanOperationInfo.ACTION);
-
-        /*
-         * Operations
-         */
+        // Operations
         final MBeanOperationInfo[] operations =
             new MBeanOperationInfo[] { triggerOperation, resetOperation, schemasAndVersionsOperation, forceOperation, forceAllOperation };
-
-        /*
-         * MBean info
-         */
+        // MBean info
         return new MBeanInfo(UpdateTaskMBean.class.getName(), "Update task toolkit", null, null, operations, null);
     }
 
@@ -189,7 +174,6 @@ public final class UpdateTaskMBean implements DynamicMBean {
         } else if (actionName.equals("resetVersion")) {
             try {
                 final int versionNumber = ((Integer) params[0]).intValue();
-
                 final Object secParam = params[1];
                 if (secParam instanceof Integer) {
                     UpdateTaskToolkit.resetVersion(versionNumber, ((Integer) secParam).intValue());
@@ -238,7 +222,6 @@ public final class UpdateTaskMBean implements DynamicMBean {
                         UpdateTaskToolkit.forceUpdateTask(((String) params[0]), sParam);
                     }
                 }
-                UpdateTaskToolkit.forceUpdateTask(((String) params[0]), ((Integer) params[1]).intValue());
             } catch (final UpdateException e) {
                 LOG.error(e.getMessage(), e);
                 final Exception wrapMe = new Exception(e.getMessage());

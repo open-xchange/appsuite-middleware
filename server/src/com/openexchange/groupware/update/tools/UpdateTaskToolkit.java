@@ -64,31 +64,21 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.ProgressState;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.SchemaException;
 import com.openexchange.groupware.update.SchemaStore;
+import com.openexchange.groupware.update.SchemaUpdateState;
 import com.openexchange.groupware.update.UpdateException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.groupware.update.UpdateTaskV2;
-import com.openexchange.groupware.update.exception.Classes;
-import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
-import com.openexchange.groupware.update.internal.PerformParametersImpl;
-import com.openexchange.groupware.update.internal.ProgressStatusImpl;
 import com.openexchange.groupware.update.internal.SchemaExceptionCodes;
+import com.openexchange.groupware.update.internal.UpdateExecutor;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -96,12 +86,9 @@ import com.openexchange.tools.sql.DBUtils;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@OXExceptionSource(classId = Classes.UPDATE_TASK, component = EnumComponent.UPDATE)
 public final class UpdateTaskToolkit {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(UpdateTaskToolkit.class);
-
-    private static final UpdateExceptionFactory EXCEPTION = new UpdateExceptionFactory(UpdateTaskToolkit.class);
+    private static final Log LOG = LogFactory.getLog(UpdateTaskToolkit.class);
 
     private static final Object LOCK = new Object();
 
@@ -110,119 +97,6 @@ public final class UpdateTaskToolkit {
      */
     private UpdateTaskToolkit() {
         super();
-    }
-
-    private static final String SELECT_CONTEXT =
-        "SELECT name,enabled,filestore_id,filestore_name,filestore_login,filestore_passwd,quota_max FROM context WHERE cid=?";
-
-    /**
-     * Loads the context by given context identifier.
-     * 
-     * @param contextId The context identifier
-     * @return The context
-     * @throws UpdateException If loading the context fails
-     */
-    public static Context loadContext(final int contextId) throws UpdateException {
-        Connection con = null;
-        try {
-            con = Database.get(false);
-        } catch (final DBPoolingException e) {
-            throw new UpdateException(e);
-        }
-        ContextImpl context = null;
-        PreparedStatement stmt = null;
-        ResultSet result = null;
-        try {
-            stmt = con.prepareStatement(SELECT_CONTEXT);
-            stmt.setInt(1, contextId);
-            result = stmt.executeQuery();
-            if (result.next()) {
-                context = new ContextImpl(contextId);
-                int pos = 1;
-                context.setName(result.getString(pos++));
-                context.setEnabled(result.getBoolean(pos++));
-                context.setFilestoreId(result.getInt(pos++));
-                context.setFilestoreName(result.getString(pos++));
-                final String[] auth = new String[2];
-                auth[0] = result.getString(pos++);
-                auth[1] = result.getString(pos++);
-                context.setFilestoreAuth(auth);
-                context.setFileStorageQuota(result.getLong(pos++));
-            } else {
-                throw new UpdateException(new ContextException(ContextException.Code.NOT_FOUND, Integer.valueOf(contextId)));
-            }
-        } catch (final SQLException e) {
-            throw new UpdateException(new ContextException(ContextException.Code.SQL_ERROR, e, e.getMessage()));
-        } finally {
-            DBUtils.closeSQLStuff(result, stmt);
-            Database.back(false, con);
-        }
-        try {
-            context.setMailadmin(getMailadmin(context));
-            context.setLoginInfo(getLoginInfos(context));
-        } catch (final ContextException e) {
-            throw new UpdateException(e);
-        }
-        return context;
-    }
-
-    private static final String GET_MAILADMIN = "SELECT user FROM user_setting_admin WHERE cid=?";
-
-    private static int getMailadmin(final Context ctx) throws ContextException {
-        Connection con = null;
-        try {
-            con = Database.get(ctx, false);
-        } catch (final DBPoolingException e) {
-            throw new ContextException(ContextException.Code.NO_CONNECTION, e);
-        }
-        int identifier = -1;
-        PreparedStatement stmt = null;
-        ResultSet result = null;
-        try {
-            stmt = con.prepareStatement(GET_MAILADMIN);
-            final int contextId = ctx.getContextId();
-            stmt.setInt(1, contextId);
-            result = stmt.executeQuery();
-            if (result.next()) {
-                identifier = result.getInt(1);
-            } else {
-                throw new ContextException(ContextException.Code.NO_MAILADMIN, Integer.valueOf(contextId));
-            }
-        } catch (final SQLException e) {
-            throw new ContextException(ContextException.Code.SQL_ERROR, e, e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(result, stmt);
-            Database.back(ctx, false, con);
-        }
-        return identifier;
-    }
-
-    private static final String GET_LOGININFOS = "SELECT login_info FROM login2context WHERE cid=?";
-
-    private static String[] getLoginInfos(final Context ctx) throws ContextException {
-        Connection con = null;
-        try {
-            con = Database.get(false);
-        } catch (final DBPoolingException e) {
-            throw new ContextException(ContextException.Code.NO_CONNECTION, e);
-        }
-        PreparedStatement stmt = null;
-        ResultSet result = null;
-        final List<String> loginInfo = new ArrayList<String>();
-        try {
-            stmt = con.prepareStatement(GET_LOGININFOS);
-            stmt.setInt(1, ctx.getContextId());
-            result = stmt.executeQuery();
-            while (result.next()) {
-                loginInfo.add(result.getString(1));
-            }
-        } catch (final SQLException e) {
-            throw new ContextException(ContextException.Code.SQL_ERROR, e, e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(result, stmt);
-            Database.back(false, con);
-        }
-        return loginInfo.toArray(new String[loginInfo.size()]);
     }
 
     /**
@@ -257,35 +131,9 @@ public final class UpdateTaskToolkit {
      * @throws UpdateException If update task cannot be performed
      */
     private static void forceUpdateTask0(final UpdateTask task, final int contextId) throws UpdateException {
-        /*
-         * Get schema for given context ID
-         */
-        final Schema schema = getSchema(contextId);
-        /*
-         * Lock schema
-         */
-        lockSchema(schema, contextId);
-        try {
-            /*
-             * Apply new version number
-             */
-            runUpdateTask(task, schema, contextId);
-        } finally {
-            /*
-             * Unlock schema
-             */
-            unlockSchema(schema, contextId);
-            /*
-             * Invalidate schema's contexts
-             */
-            try {
-                removeContexts(contextId);
-            } catch (final DBPoolingException e) {
-                LOG.error(e.getMessage(), e);
-            } catch (final ContextException e) {
-                LOG.error(e.getMessage(), e);
-            }
-        }
+        List<UpdateTask> taskList = new ArrayList<UpdateTask>(1);
+        taskList.add(task);
+        new UpdateExecutor(getSchema(contextId), contextId, taskList).execute();
     }
 
     /**
@@ -296,20 +144,13 @@ public final class UpdateTaskToolkit {
      */
     public static void forceUpdateTaskOnAllSchemas(final String className) throws UpdateException {
         synchronized (LOCK) {
-            /*
-             * Get update task by class name
-             */
+            // Get update task by class name
             final UpdateTask updateTask = getUpdateTask(className);
-            /*
-             * Get all available schemas
-             */
+            // Get all available schemas
             final Map<String, Set<Integer>> map = getSchemasAndContexts();
-            final int size = map.size();
-            /*
-             * ... and iterate them
-             */
+            // ... and iterate them
             final Iterator<Set<Integer>> iter = map.values().iterator();
-            for (int i = 0; i < size; i++) {
+            while (iter.hasNext()) {
                 final Set<Integer> set = iter.next();
                 if (!set.isEmpty()) {
                     forceUpdateTask0(updateTask, set.iterator().next().intValue());
@@ -325,13 +166,10 @@ public final class UpdateTaskToolkit {
      * @throws UpdateException If retrieving schemas and versions fails
      */
     public static Map<String, Schema> getSchemasAndVersions() throws UpdateException {
-        /*
-         * Get schemas with their context IDs
-         */
+        // TODO Should be reworked. 
+        // Get schemas with their context IDs
         final Map<String, Set<Integer>> schemasAndContexts = getSchemasAndContexts();
-        /*
-         * Get version for each schema
-         */
+        // Get version for each schema
         final int size = schemasAndContexts.size();
         final Map<String, Schema> schemas = new HashMap<String, Schema>(size);
         final Iterator<Map.Entry<String, Set<Integer>>> it = schemasAndContexts.entrySet().iterator();
@@ -352,6 +190,7 @@ public final class UpdateTaskToolkit {
      * @throws UpdateException If an error occurs
      */
     private static Map<String, Set<Integer>> getSchemasAndContexts() throws UpdateException {
+        // TODO rework this method.
         try {
             Connection writeCon = null;
             PreparedStatement stmt = null;
@@ -392,6 +231,7 @@ public final class UpdateTaskToolkit {
     }
 
     public static int getContextIdBySchema(final String schemaName) throws UpdateException {
+        // TODO improve method.
         final Map<String, Set<Integer>> map = getSchemasAndContexts();
         final Set<Integer> set = map.get(schemaName);
         if (null == set) {
@@ -418,36 +258,24 @@ public final class UpdateTaskToolkit {
      * @param contextId A valid context identifier contained in target schema
      * @throws UpdateException If changing version number fails
      */
-    @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 13 }, msg = { "Current version number %1$s is already lower than or equal to desired version number %2$s." })
     public static void resetVersion(final int versionNumber, final int contextId) throws UpdateException {
         synchronized (LOCK) {
-            /*
-             * Get schema for given context ID
-             */
+            // Get schema for given context ID
             final Schema schema = getSchema(contextId);
-            /*
-             * Check version number
-             */
+            // Check version number
             if (schema.getDBVersion() <= versionNumber) {
                 throw UpdateExceptionCodes.ONLY_REDUCE.create(I(schema.getDBVersion()), I(versionNumber));
             }
-            /*
-             * Lock schema
-             */
+            if (schema.getDBVersion() == Schema.FINAL_VERSION) {
+                throw UpdateExceptionCodes.RESET_FORBIDDEN.create(schema.getSchema());
+            }
             lockSchema(schema, contextId);
             try {
-                /*
-                 * Apply new version number
-                 */
+                // Apply new version number
                 setVersionNumber(versionNumber, schema, contextId);
             } finally {
-                /*
-                 * Unlock schema
-                 */
                 unlockSchema(schema, contextId);
-                /*
-                 * Invalidate schema's contexts
-                 */
+                // Invalidate schema's contexts
                 try {
                     removeContexts(contextId);
                 } catch (final DBPoolingException e) {
@@ -459,11 +287,13 @@ public final class UpdateTaskToolkit {
         }
     }
 
-    @OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 15 }, msg = { "Error loading update task \"%1$s\"." })
+    /**
+     * Load update task by class name.
+     * @param className name of the update task class.
+     * @return the update task class.
+     * @throws UpdateException if the update task class can not be determined.
+     */
     private static UpdateTask getUpdateTask(final String className) throws UpdateException {
-        /*
-         * Load update task by class name
-         */
         try {
             return Class.forName(className).asSubclass(UpdateTask.class).newInstance();
         } catch (final InstantiationException e) {
@@ -475,47 +305,8 @@ public final class UpdateTaskToolkit {
         }
     }
 
-    private static void runUpdateTask(final UpdateTask task, final Schema schema, final int contextId) throws UpdateException {
-        try {
-            /*
-             * Remove affected contexts and kick active sessions
-             */
-            removeContexts(contextId);
-            /*
-             * Get class name
-             */
-            final String className = task.getClass().getName();
-            final String schemaName = schema.getSchema();
-            try {
-                LOG.info(new StringBuilder(64).append("Starting update task ").append(className).append(" on schema ").append(schemaName).append(
-                    '.').toString());
-                if (task instanceof UpdateTaskV2) {
-                    final ProgressState logger = new ProgressStatusImpl(className, schemaName);
-                    final PerformParameters params = new PerformParametersImpl(schema, contextId, logger);
-                    ((UpdateTaskV2) task).perform(params);
-                } else {
-                    task.perform(schema, contextId);
-                }
-            } catch (final AbstractOXException e) {
-                LOG.error(e.getMessage(), e);
-                throw new UpdateException(e);
-            }
-            LOG.info(new StringBuilder(64).append("Update task ").append(className).append(schemaName).append(" done.").toString());
-        } catch (final DBPoolingException e) {
-            LOG.error(e.getMessage(), e);
-            throw new UpdateException(e);
-        } catch (final ContextException e) {
-            LOG.error(e.getMessage(), e);
-            throw new UpdateException(e);
-        }
-    }
-
     private static final String SQL_UPDATE_VERSION = "UPDATE version SET version = ?";
 
-    @OXThrowsMultiple(category = { Category.CODE_ERROR, Category.INTERNAL_ERROR, Category.PERMISSION, Category.INTERNAL_ERROR }, desc = {
-        "", "", "", "" }, exceptionId = { 9, 10, 11, 12 }, msg = {
-        "A SQL error occurred while reading schema version information: %1$s.", "Though expected, SQL query returned no result.",
-        "Update conflict detected. Schema %1$s is not marked as LOCKED.", "Table update failed. Schema %1$s could not be updated." })
     private static void setVersionNumber(final int versionNumber, final Schema schema, final int contextId) throws UpdateException {
         final Connection con;
         try {
@@ -572,193 +363,35 @@ public final class UpdateTaskToolkit {
         }
     }
 
-    /**
-     * Gets the schema for given context identifier.
-     * 
-     * @param contextId The context identifier
-     * @return The schema for given context identifier
-     * @throws UpdateException If schema cannot be resolved for given context identifier
+    /*
+     * ++++++++++++++++++++++++++++ ++ + HELPER METHODS + ++ ++++++++++++++++++++++++++++
      */
-    public static Schema getSchema(final int contextId) throws UpdateException {
+
+    private static SchemaUpdateState getSchema(final int contextId) throws UpdateException {
         try {
-            return SchemaStore.getInstance().getSchema(loadContext(contextId));
-        } catch (final SchemaException e) {
-            LOG.error(e.getMessage(), e);
+            return SchemaStore.getInstance().getSchema(contextId);
+        } catch (SchemaException e) {
             throw new UpdateException(e);
         }
     }
 
-    /*-
-     * ++++++++++++++++++++++++++++ ++ + HELPER METHODS + ++ ++++++++++++++++++++++++++++
-     */
-
     private static final String SQL_SELECT_LOCKED_FOR_UPDATE = "SELECT locked FROM version FOR UPDATE";
 
-    private static final String SQL_UPDATE_LOCKED = "UPDATE version SET locked = ?";
-
-    /**
-     * Locks given schema.
-     * 
-     * @param schema The schema to lock
-     * @param contextId A valid context identifier contained in given schema
-     * @throws UpdateException If locking schema fails
-     */
-    @OXThrowsMultiple(category = { Category.CODE_ERROR, Category.INTERNAL_ERROR, Category.PERMISSION, Category.INTERNAL_ERROR }, desc = {
-        "", "", "", "" }, exceptionId = { 1, 2, 3, 4 }, msg = {
-        "A SQL error occurred while reading schema version information: %1$s.", "Though expected, SQL query returned no result.",
-        "Update conflict detected. Another process is currently updating schema %1$s.",
-        "Table update failed. Schema %1$s could not be locked." })
-    private static void lockSchema(final Schema schema, final int contextId) throws UpdateException {
-        /*
-         * Start of update process, so lock schema
-         */
-        boolean error = false;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        Connection writeCon = null;
+    private static void lockSchema(Schema schema, int contextId) throws UpdateException {
         try {
-            writeCon = Database.get(contextId, true);
-        } catch (final DBPoolingException e) {
-            LOG.error(e.getMessage(), e);
+            SchemaStore.getInstance().lockSchema(schema, contextId);
+        } catch (SchemaException e) {
             throw new UpdateException(e);
         }
-        try {
-            /*
-             * Try to obtain exclusive lock on table 'version'
-             */
-            writeCon.setAutoCommit(false); // BEGIN
-            stmt = writeCon.prepareStatement(SQL_SELECT_LOCKED_FOR_UPDATE);
-            rs = stmt.executeQuery();
-            if (!rs.next()) {
-                error = true;
-                throw EXCEPTION.create(2);
-            } else if (rs.getBoolean(1)) {
-                /*
-                 * Schema is already locked by another update process
-                 */
-                error = true;
-                throw EXCEPTION.create(3, schema.getSchema());
-            }
-            rs.close();
-            rs = null;
-            stmt.close();
-            stmt = null;
-            /*
-             * Lock schema
-             */
-            stmt = writeCon.prepareStatement(SQL_UPDATE_LOCKED);
-            stmt.setBoolean(1, true);
-            if (stmt.executeUpdate() == 0) {
-                /*
-                 * Schema could not be locked
-                 */
-                error = true;
-                throw EXCEPTION.create(4, schema.getSchema());
-            }
-            /*
-             * Everything went fine. Schema is marked as locked
-             */
-            writeCon.commit(); // COMMIT
-        } catch (final SQLException e) {
-            error = true;
-            throw EXCEPTION.create(1, e, e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
-            if (writeCon != null) {
-                if (error) {
-                    try {
-                        writeCon.rollback();
-                    } catch (final SQLException e) {
-                        LOG.error(e.getMessage(), e);
-                    }
-                }
-                try {
-                    if (!writeCon.getAutoCommit()) {
-                        writeCon.setAutoCommit(true);
-                    }
-                } catch (final SQLException e) {
-                    LOG.error(e.getMessage(), e);
-                }
-                Database.back(contextId, true, writeCon);
-            }
-        }
-    } // End of lockSchema()
+    }
 
-    @OXThrowsMultiple(category = { Category.CODE_ERROR, Category.INTERNAL_ERROR, Category.PERMISSION, Category.INTERNAL_ERROR }, desc = {
-        "", "", "", "" }, exceptionId = { 5, 6, 7, 8 }, msg = {
-        "A SQL error occurred while reading schema version information: %1$s.", "Though expected, SQL query returned no result.",
-        "Update conflict detected. Schema %1$s is not marked as LOCKED.", "Table update failed. Schema %1$s could not be unlocked." })
-    private static void unlockSchema(final Schema schema, final int contextId) throws UpdateException {
+    private static void unlockSchema(Schema schema, int contextId) throws UpdateException {
         try {
-            boolean error = false;
-            Connection writeCon = null;
-            PreparedStatement stmt = null;
-            ResultSet rs = null;
-            try {
-                /*
-                 * Try to obtain exclusive lock on table 'version'
-                 */
-                writeCon = Database.get(contextId, true);
-                writeCon.setAutoCommit(false); // BEGIN
-                stmt = writeCon.prepareStatement(SQL_SELECT_LOCKED_FOR_UPDATE);
-                rs = stmt.executeQuery();
-                if (!rs.next()) {
-                    error = true;
-                    throw EXCEPTION.create(6);
-                } else if (!rs.getBoolean(1)) {
-                    /*
-                     * Schema is NOT locked by update process
-                     */
-                    error = true;
-                    throw EXCEPTION.create(7, schema.getSchema());
-                }
-                rs.close();
-                rs = null;
-                stmt.close();
-                stmt = null;
-                /*
-                 * Update & unlock schema
-                 */
-                stmt = writeCon.prepareStatement(SQL_UPDATE_LOCKED);
-                stmt.setBoolean(1, false);
-                if (stmt.executeUpdate() == 0) {
-                    /*
-                     * Schema could not be unlocked
-                     */
-                    error = true;
-                    throw EXCEPTION.create(8, schema.getSchema());
-                }
-                /*
-                 * Everything went fine. Schema is marked as unlocked
-                 */
-                writeCon.commit(); // COMMIT
-            } finally {
-                DBUtils.closeSQLStuff(rs, stmt);
-                if (writeCon != null) {
-                    if (error) {
-                        try {
-                            writeCon.rollback();
-                        } catch (final SQLException e) {
-                            LOG.error(e.getMessage(), e);
-                        }
-                    }
-                    if (!writeCon.getAutoCommit()) {
-                        try {
-                            writeCon.setAutoCommit(true);
-                        } catch (final SQLException e) {
-                            LOG.error(e.getMessage(), e);
-                        }
-                    }
-                    Database.back(contextId, true, writeCon);
-                }
-            }
-        } catch (final DBPoolingException e) {
-            LOG.error(e.getMessage(), e);
+            SchemaStore.getInstance().unlockSchema(schema, contextId);
+        } catch (SchemaException e) {
             throw new UpdateException(e);
-        } catch (final SQLException e) {
-            throw EXCEPTION.create(5, e, e.getMessage());
         }
-    } // End of unlockSchema()
+    }
 
     private static void removeContexts(final int contextId) throws DBPoolingException, ContextException {
         final int[] contextIds = Database.getContextsInSameSchema(contextId);
@@ -767,5 +400,4 @@ public final class UpdateTaskToolkit {
             contextStorage.invalidateContext(cid);
         }
     }
-
 }

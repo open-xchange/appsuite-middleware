@@ -50,7 +50,6 @@
 package com.openexchange.groupware.update.exception;
 
 import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.groupware.update.Updater;
 import com.openexchange.groupware.update.tasks.NewAdminExtensionsUpdateTask;
 import com.openexchange.groupware.update.tasks.TaskReminderFolderZero;
 

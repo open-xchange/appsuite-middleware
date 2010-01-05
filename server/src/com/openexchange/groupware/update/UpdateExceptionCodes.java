@@ -78,6 +78,10 @@ public enum UpdateExceptionCodes implements OXErrorMessage {
      */
     UNKNOWN_SCHEMA(UNKNOWN_SCHEMA_MSG, Category.USER_INPUT, 16),
     /**
+     * Version can not be set back if update task handling has been migrated to remembered update tasks concept on schema %1$s.
+     */
+    RESET_FORBIDDEN(RESET_FORBIDDEN_MSG, Category.USER_INPUT, 95),
+    /**
      * Unable to determine next update task to execute. Executed: %1$s. Enqueued: %2$s. Scheduled: %3$s.
      */
     UNRESOLVABLE_DEPENDENCIES(UNRESOLVABLE_DEPENDENCIES_MSG, Category.CODE_ERROR, 96),
