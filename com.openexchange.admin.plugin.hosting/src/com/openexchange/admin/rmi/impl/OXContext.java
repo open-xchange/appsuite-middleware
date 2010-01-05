@@ -91,8 +91,10 @@ import com.openexchange.admin.rmi.exceptions.OXContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.extensions.OXCommonExtension;
 import com.openexchange.admin.storage.interfaces.OXContextStorageInterface;
+import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
+import com.openexchange.admin.storage.mysqlStorage.OXToolMySQLStorage;
 import com.openexchange.admin.taskmanagement.TaskManager;
 import com.openexchange.admin.tools.DatabaseDataMover;
 import com.openexchange.admin.tools.FilestoreDataMover;
@@ -1086,5 +1088,11 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 throw new PluginException(e);
             }
         }
+    }
+    
+    public int getAdminId(Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, StorageException {
+        new BasicAuthenticator(context).doAuthentication(auth);
+        final OXToolStorageInterface oxtool = OXToolMySQLStorage.getInstance();
+        return oxtool.getAdminForContext(ctx);
     }
 }

@@ -89,6 +89,16 @@ public class ContextTest extends AbstractTest {
     public static junit.framework.Test suite() {
         return new JUnit4TestAdapter(ContextTest.class);
     }
+    @Test
+    public void testGetAdminId() throws Exception {
+        final Credentials cred = DummyMasterCredentials();
+        final String hosturl = getRMIHostUrl();
+        Context ctx = addSystemContext(getTestContextObject(cred), getRMIHostUrl(), cred);
+
+        OXContextInterface xctx = (OXContextInterface) Naming.lookup(hosturl + OXContextInterface.RMI_NAME);
+        
+        assertEquals(2, xctx.getAdminId(ctx, cred));
+    }
     
     @Test
     public void testGetAndChangeContext() throws Exception {

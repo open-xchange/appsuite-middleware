@@ -476,4 +476,16 @@ public interface OXContextInterface extends Remote {
      * @throws NoSuchFilestoreException 
      */
     public Context[] listByFilestore(final Filestore fs, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException, NoSuchFilestoreException;
+
+
+    /**
+     * Determines the user ID of the admin user for a given context
+     * @param ctx The context for which the userId of the admin should be determined.
+     * @param auth Credentials for authenticating against the server.
+     * @return The userId of the admin user
+     * @throws RemoteException General RMI Exception
+     * @throws InvalidCredentialsException Thrown when the login fails
+     * @throws StorageException Thrown when an error in a subsystem occurred.
+     */
+    public int getAdminId(Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, StorageException ;
 }
