@@ -60,6 +60,7 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.groupware.delete.DeleteListener;
@@ -99,7 +100,7 @@ public final class HeaderCacheActivator extends DeferredActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { DatabaseService.class, /* CacheService.class, UserService.class, MailAccountStorageService.class, */
-        ThreadPoolService.class };
+        ThreadPoolService.class, ConfigurationService.class };
     }
 
     @Override
