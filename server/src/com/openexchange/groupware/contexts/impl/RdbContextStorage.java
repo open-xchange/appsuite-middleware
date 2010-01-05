@@ -267,9 +267,11 @@ public class RdbContextStorage extends ContextStorage {
 
     @Override
     protected void shutDown() {
+        // Nothing to do.
     }
 
     @Override
     protected void startUp() {
+        // Nothing to do.
     }
 }
