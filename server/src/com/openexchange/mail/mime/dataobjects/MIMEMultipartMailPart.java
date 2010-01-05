@@ -396,7 +396,7 @@ public final class MIMEMultipartMailPart extends MailPart {
                     return createTextPart(subArr, "US-ASCII");
                 } catch (final UnsupportedEncodingException e1) {
                     // Cannot occur
-                    LOG.error(e.getMessage(), e);
+                    LOG.error(e1.getMessage(), e1);
                 }
             }
         }
