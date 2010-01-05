@@ -50,6 +50,7 @@
 package com.openexchange.groupware.update;
 
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.update.internal.UpdaterImpl;
 
 /**
  * Interface for the updater.

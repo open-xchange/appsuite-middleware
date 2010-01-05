@@ -47,15 +47,21 @@
  *
  */
 
-package com.openexchange.groupware.update;
+package com.openexchange.groupware.update.internal;
 
+import com.openexchange.groupware.update.SchemaException;
+import com.openexchange.groupware.update.SchemaStore;
+import com.openexchange.groupware.update.SchemaUpdateState;
+import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.groupware.update.UpdateProcess;
+import com.openexchange.groupware.update.UpdateTaskCollection;
+import com.openexchange.groupware.update.Updater;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.TimerService;
 
 /**
  * Implementation for the updater interface.
- * TODO Move this implementation to internal package.
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */

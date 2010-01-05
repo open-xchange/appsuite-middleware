@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.update;
 
+import java.util.EnumSet;
 import com.openexchange.groupware.AbstractOXException;
 
 /**
@@ -56,11 +57,13 @@ import com.openexchange.groupware.AbstractOXException;
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @deprecated use {@link UpdateTaskV2} or more easy {@link UpdateTaskAdapter}.
  */
+@Deprecated
 public interface UpdateTask {
 
     /**
-     * Priorities for update tasks. TODO remove the int value. this isn't used anywhere. enum itself have an internal order.
+     * Priorities for update tasks.
      */
     public static enum UpdateTaskPriority {
         HIGHEST(0), HIGH(1), NORMAL(3), LOW(4), LOWEST(5);
@@ -69,6 +72,19 @@ public interface UpdateTask {
 
         private UpdateTaskPriority(final int priority) {
             this.priority = priority;
+        }
+
+        public static UpdateTaskPriority getInstance(int priority) {
+            for (UpdateTaskPriority test : values()) {
+                if (test.priority == priority) {
+                    return test;
+                }
+            }
+            throw new IllegalArgumentException();
+        }
+
+        public boolean equalOrHigher(UpdateTaskPriority otherPriority) {
+            return this.ordinal() <= otherPriority.ordinal();
         }
     }
 

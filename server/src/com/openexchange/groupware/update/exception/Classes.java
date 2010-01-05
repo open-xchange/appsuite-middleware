@@ -66,11 +66,6 @@ public final class Classes {
      * {@link UpdateExceptionFactory}.
      */
     public static final int UPDATE_EXCEPTION_FACTORY = 4;
-
-    /**
-     * {@link Updater}.
-     */
-    public static final int UPDATER = 5;
     
     /**
      * {@link UpdateTask}.
