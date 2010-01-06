@@ -56,8 +56,7 @@
     </target>
 
     <target name="compile" depends="prepare">
-        <javac srcdir="${source..}" destdir="${output..}" debug="true"
-            encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
+        <javac srcdir="${source..}" destdir="${output..}" debug="true" encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
             <classpath refid="project.classpath"/>
         </javac>
     </target>
@@ -65,7 +64,6 @@
     <target name="jar" depends="prepare,compile">
         <jar jarfile="${tmp.dir}/${bundle.name}">
             <fileset dir="${output..}"/>
-            <fileset refid="3rdpartyjars"/>
         </jar>
     </target>
 
@@ -80,8 +78,7 @@
         <echo file="${destdir}/${gwbundle.d}/${Bundle-SymbolicName}.ini"
             message="${bundlesdir}/${Bundle-SymbolicName}@start${line.separator}"/>
         <mkdir dir="${destdir}/${adbundle.d}"/>
-        <echo file="${destdir}/${adbundle.d}/${Bundle-SymbolicName}.ini"
-            message="${bundlesdir}/${Bundle-SymbolicName}@start${line.separator}"/>
+        <echo file="${destdir}/${adbundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${Bundle-SymbolicName}@start${line.separator}"/>
     </target>
 
     <target name="installJar" depends="jar">
