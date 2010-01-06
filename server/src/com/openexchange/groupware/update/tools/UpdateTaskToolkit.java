@@ -166,22 +166,17 @@ public final class UpdateTaskToolkit {
      * @throws UpdateException If retrieving schemas and versions fails
      */
     public static Map<String, Schema> getSchemasAndVersions() throws UpdateException {
-        // TODO Should be reworked. 
         // Get schemas with their context IDs
         final Map<String, Set<Integer>> schemasAndContexts = getSchemasAndContexts();
-        // Get version for each schema
-        final int size = schemasAndContexts.size();
-        final Map<String, Schema> schemas = new HashMap<String, Schema>(size);
-        final Iterator<Map.Entry<String, Set<Integer>>> it = schemasAndContexts.entrySet().iterator();
-        for (int i = 0; i < size; i++) {
-            final Map.Entry<String, Set<Integer>> entry = it.next();
+        final Map<String, Schema> schemas = new HashMap<String, Schema>(schemasAndContexts.size());
+        for (Map.Entry<String, Set<Integer>> entry : schemasAndContexts.entrySet()) {
             final Schema schema = getSchema(entry.getValue().iterator().next().intValue());
             schemas.put(entry.getKey(), schema);
         }
         return schemas;
     }
 
-    private static final String SQL_SELECT_SCHEMAS = "SELECT db_schema, cid FROM context_server2db_pool";
+    private static final String SQL_SELECT_SCHEMAS = "SELECT db_schema,cid FROM context_server2db_pool";
 
     /**
      * Gets schemas and their contexts as a map.
@@ -190,48 +185,39 @@ public final class UpdateTaskToolkit {
      * @throws UpdateException If an error occurs
      */
     private static Map<String, Set<Integer>> getSchemasAndContexts() throws UpdateException {
-        // TODO rework this method.
+        final Connection con;
         try {
-            Connection writeCon = null;
-            PreparedStatement stmt = null;
-            ResultSet rs = null;
-            try {
-                writeCon = Database.get(false);
-                stmt = writeCon.prepareStatement(SQL_SELECT_SCHEMAS);
-                rs = stmt.executeQuery();
-
-                final Map<String, Set<Integer>> schemasAndContexts = new HashMap<String, Set<Integer>>();
-
-                while (rs.next()) {
-                    final String schemaName = rs.getString(1);
-                    final int contextId = rs.getInt(2);
-
-                    Set<Integer> contextIds = schemasAndContexts.get(schemaName);
-                    if (null == contextIds) {
-                        contextIds = new HashSet<Integer>();
-                        schemasAndContexts.put(schemaName, contextIds);
-                    }
-                    contextIds.add(Integer.valueOf(contextId));
-                }
-
-                return schemasAndContexts;
-            } finally {
-                DBUtils.closeSQLStuff(rs, stmt);
-                if (writeCon != null) {
-                    Database.back(false, writeCon);
-                }
-            }
+            con = Database.get(false);
         } catch (final DBPoolingException e) {
-            LOG.error(e.getMessage(), e);
             throw new UpdateException(e);
+        }
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement(SQL_SELECT_SCHEMAS);
+            rs = stmt.executeQuery();
+            final Map<String, Set<Integer>> schemasAndContexts = new HashMap<String, Set<Integer>>();
+            while (rs.next()) {
+                final String schemaName = rs.getString(1);
+                final int contextId = rs.getInt(2);
+                Set<Integer> contextIds = schemasAndContexts.get(schemaName);
+                if (null == contextIds) {
+                    contextIds = new HashSet<Integer>();
+                    schemasAndContexts.put(schemaName, contextIds);
+                }
+                contextIds.add(I(contextId));
+            }
+            return schemasAndContexts;
         } catch (final SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+            Database.back(false, con);
         }
 
     }
 
     public static int getContextIdBySchema(final String schemaName) throws UpdateException {
-        // TODO improve method.
         final Map<String, Set<Integer>> map = getSchemasAndContexts();
         final Set<Integer> set = map.get(schemaName);
         if (null == set) {
