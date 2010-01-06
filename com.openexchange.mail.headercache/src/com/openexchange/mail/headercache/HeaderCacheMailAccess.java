@@ -186,8 +186,8 @@ public final class HeaderCacheMailAccess extends MailAccess<IMailFolderStorage, 
     }
 
     @Override
-    public void delegeateConnectInternal() throws MailException {
-        mailAccess.delegeateConnectInternal();
+    public void delegateConnectInternal() throws MailException {
+        mailAccess.delegateConnectInternal();
     }
 
     @Override
@@ -207,42 +207,42 @@ public final class HeaderCacheMailAccess extends MailAccess<IMailFolderStorage, 
 
     @Override
     protected boolean checkMailServerPort() {
-        throw new UnsupportedOperationException("DelegatingMailAccess.checkMailServerPort()");
+        throw new UnsupportedOperationException("checkMailServerPort()");
     }
 
     @Override
     protected void closeInternal() {
-        throw new UnsupportedOperationException("DelegatingMailAccess.closeInternal()");
+        throw new UnsupportedOperationException("closeInternal()");
     }
 
     @Override
     protected void connectInternal() throws MailException {
-        throw new UnsupportedOperationException("DelegatingMailAccess.connectInternal()");
+        throw new UnsupportedOperationException("connectInternal()");
     }
 
     @Override
     protected MailConfig createNewMailConfig() {
-        throw new UnsupportedOperationException("DelegatingMailAccess.createNewMailConfig()");
+        throw new UnsupportedOperationException("createNewMailConfig()");
     }
 
     @Override
     protected IMailProperties createNewMailProperties() throws MailException {
-        throw new UnsupportedOperationException("DelegatingMailAccess.createNewMailProperties()");
+        throw new UnsupportedOperationException("createNewMailProperties()");
     }
 
     @Override
     protected void releaseResources() {
-        throw new UnsupportedOperationException("DelegatingMailAccess.releaseResources()");
+        throw new UnsupportedOperationException("releaseResources()");
     }
 
     @Override
     protected void shutdown() throws MailException {
-        throw new UnsupportedOperationException("DelegatingMailAccess.shutdown()");
+        throw new UnsupportedOperationException("shutdown()");
     }
 
     @Override
     protected void startup() throws MailException {
-        throw new UnsupportedOperationException("DelegatingMailAccess.startup()");
+        throw new UnsupportedOperationException("startup()");
     }
 
 }
