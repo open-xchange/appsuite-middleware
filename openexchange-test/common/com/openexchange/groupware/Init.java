@@ -108,6 +108,7 @@ import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.contact.datahandler.ContactInsertDataHandler;
 import com.openexchange.groupware.contact.internal.ContactInterfaceDiscoveryInitialization;
 import com.openexchange.groupware.contact.internal.ContactInterfaceDiscoveryServiceImpl;
+import com.openexchange.groupware.update.internal.InternalList;
 import com.openexchange.groupware.update.internal.SchemaExceptionFactory;
 import com.openexchange.i18n.impl.I18nImpl;
 import com.openexchange.i18n.impl.POTranslationsDiscoverer;
@@ -447,7 +448,7 @@ public final class Init {
         final ComponentRegistry registry = (ComponentRegistry) services.get(ComponentRegistry.class);
         registry.registerComponent(EnumComponent.UPDATE, "com.openexchange.groupware.update", SchemaExceptionFactory.getInstance());
         // Not configuring configured update task list.
-        com.openexchange.groupware.update.Initialization.getInstance().start();
+        InternalList.getInstance().start();
     }
 
     private static void startAndInjectMonitoringBundle() {
