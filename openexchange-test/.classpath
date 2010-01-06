@@ -46,5 +46,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.publish.microformats"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.user.json"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.calendar.printing"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.templating"/>
+	<classpathentry kind="src" path="/com.openexchange.subscribe.microformats"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
