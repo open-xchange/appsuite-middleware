@@ -4296,6 +4296,53 @@ public class Contact extends CommonObject implements Serializable{
         }
         return clone;
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        
+        for(int col : Contact.ALL_COLUMNS){
+            if(contains(col))
+                result = prime * result + get(col).hashCode();
+            else
+                result = prime * result;
+        }
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        Contact other = (Contact) obj;
+        for(int col: ALL_COLUMNS){
+            if(! contains(col) && other.contains(col))
+                return false;
+            if(contains(col) && !other.contains(col))
+                return false;
+            if(contains(col) && other.contains(col)){
+                Object thisValue = get(col);
+                Object otherValue = other.get(col);
+                if(thisValue == null){
+                    if(otherValue != null)
+                        return false;
+                    continue;
+                }
+                if(! thisValue.equals(otherValue))
+                    return false; 
+            }
+        }
+        return true;
+    }
+
     
     
 }
