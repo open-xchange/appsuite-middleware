@@ -38,6 +38,9 @@
     <property name="templatingjar" value="com.openexchange.templating.jar"/>
 	<property name="configreadjar" value="com.openexchange.configread.jar"/>
 
+    <!-- Bundle dependencies -->
+    <property name="templatingBundle" value="com.openexchange.templating"/>
+
     <!-- Classpath -->
     <path id="project.classpath">
         <pathelement location="${bundlesdir}/${osgijar}"/>
@@ -49,7 +52,7 @@
         <pathelement location="${bundlesdir}/${genconfjar}"/>
         <pathelement location="${bundlesdir}/${publishjar}"/>
         <pathelement location="${bundlesdir}/${publishbasicjar}"/>
-        <pathelement location="${bundlesdir}/${templatingjar}"/>
+        <pathelement location="${bundlesdir}/${templatingBundle}/${templatingjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
     	<pathelement location="${bundlesdir}/${configreadjar}"/>
     </path>

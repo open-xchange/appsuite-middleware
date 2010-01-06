@@ -33,13 +33,16 @@
 	<property name="templatingjar" value="com.openexchange.templating.jar"/>
 	<property name="jsonjar" value="json.jar"/>
 
+    <!-- Bundle dependencies -->
+    <property name="templatingBundle" value="com.openexchange.templating"/>
+
 	<!-- Classpath -->
 	<path id="project.classpath">
 		<pathelement location="${bundlesDir}/${osgijar}"/>
 		<pathelement location="${bundlesDir}/${commonsloggingjar}"/>
         <pathelement location="${bundlesDir}/${servletjar}"/>
 		<pathelement location="${bundlesDir}/${globaljar}"/>
-		<pathelement location="${bundlesDir}/${templatingjar}"/>
+		<pathelement location="${bundlesDir}/${templatingBundle}/${templatingjar}"/>
 		<pathelement location="${bundlesDir}/${serverjar}"/>
 		<pathelement location="${bundlesDir}/${commonBundle}/lib/${jsonjar}"/>
         <pathelement location="${bundlesDir}/${commonBundle}/${commonjar}"/>
