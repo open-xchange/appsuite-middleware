@@ -953,19 +953,17 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                             /*
                              * Default folder is affected, check if owner still holds full rights
                              */
+                            final ACLExtension aclExtension = getACLExtension();
                             if (getChecker().isDefaultFolder(updateMe.getFullName()) && !stillHoldsFullRights(
                                 updateMe,
                                 newACLs,
-                                imapConfig,
-                                session,
-                                ctx)) {
+                                aclExtension)) {
                                 throw IMAPException.create(
                                     IMAPException.Code.NO_DEFAULT_FOLDER_UPDATE,
                                     imapConfig,
                                     session,
                                     updateMe.getFullName());
                             }
-                            final ACLExtension aclExtension = getACLExtension();
                             if (!aclExtension.canSetACL(RightsCache.getCachedRights(updateMe, true, session, accountId))) {
                                 throw IMAPException.create(
                                     IMAPException.Code.NO_ADMINISTER_ACCESS,
@@ -1562,9 +1560,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
         UserFlagsCache.removeUserFlags(deleteMe, session, accountId);
     }
 
-    private static final transient Rights FULL_RIGHTS = new Rights("lrswipcda");
-
-    private static boolean stillHoldsFullRights(final IMAPFolder defaultFolder, final ACL[] newACLs, final IMAPConfig imapConfig, final Session session, final Context ctx) throws AbstractOXException, MessagingException {
+    private boolean stillHoldsFullRights(final IMAPFolder defaultFolder, final ACL[] newACLs, final ACLExtension aclExtension) throws AbstractOXException, MessagingException {
         /*
          * Ensure that owner still holds full rights
          */
@@ -1573,8 +1569,9 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                 session.getUserId(),
                 ctx,
                 IMAPFolderConverter.getEntity2AclArgs(session, defaultFolder, imapConfig));
-        for (int i = 0; i < newACLs.length; i++) {
-            if (newACLs[i].getName().equals(ownerACLName) && newACLs[i].getRights().contains(FULL_RIGHTS)) {
+        final Rights fullRights = aclExtension.getFullRights();
+        for (final ACL newACL : newACLs) {
+            if (newACL.getName().equals(ownerACLName) && newACL.getRights().contains(fullRights)) {
                 return true;
             }
         }
