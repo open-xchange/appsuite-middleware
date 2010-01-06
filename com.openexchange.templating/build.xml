@@ -98,8 +98,8 @@
                 <include name="**"/>
             </fileset>
         </chmod>-->
-        <mkdir dir="${destdir}/${bundle.d}"/>
-        <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${Bundle-SymbolicName}@start${line.separator}"/>
+        <mkdir dir="${destdir}/${gwbundle.d}"/>
+        <echo file="${destdir}/${gwbundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${Bundle-SymbolicName}@start${line.separator}"/>
     </target>
 
     <target name="installJar" depends="jar">
