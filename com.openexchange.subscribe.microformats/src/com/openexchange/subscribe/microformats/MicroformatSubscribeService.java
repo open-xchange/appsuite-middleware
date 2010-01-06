@@ -66,46 +66,53 @@ import com.openexchange.subscribe.microformats.datasources.OXMFDataSource;
 import com.openexchange.subscribe.microformats.parser.ObjectParser;
 import com.openexchange.subscribe.microformats.transformers.MapToObjectTransformer;
 
-
 /**
  * {@link MicroformatSubscribeService}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class MicroformatSubscribeService extends AbstractSubscribeService {
 
     private MapToObjectTransformer transformer;
+
     private OXMFParserFactoryService parserFactory;
+
     private OXMFDataSource mfSource;
+
     private List<String> containers = new LinkedList<String>();
+
     private List<String> prefixes = new LinkedList<String>();
+
     private SubscriptionSource source;
-    private List<ObjectParser> objectParsers  = new LinkedList<ObjectParser>();
+
+    private List<ObjectParser> objectParsers = new LinkedList<ObjectParser>();
 
     public Collection getContent(Subscription subscription) throws SubscriptionException {
         Reader htmlData = mfSource.getData(subscription);
+        return getContent(htmlData);
+    }
+
+    public Collection getContent(Reader htmlData) throws SubscriptionException {
         String data = null;
-        
-        if(!objectParsers.isEmpty()) {
+
+        if (!objectParsers.isEmpty()) {
             data = read(htmlData);
             htmlData = new StringReader(data);
         }
-        
-        
+
         OXMFParser parser = parserFactory.getParser();
         configureParser(parser);
         List<Map<String, String>> parsed = parser.parse(htmlData);
-        List results = new ArrayList( transformer.transform(parsed) );
-        
+        List results = new ArrayList(transformer.transform(parsed));
+
         for (ObjectParser objectParser : objectParsers) {
             Collection parsedObjects = objectParser.parse(new StringReader(data));
             results.addAll(parsedObjects);
         }
-        
+
         return results;
     }
-    
+
     public void addObjectParser(ObjectParser parser) {
         objectParsers.add(parser);
     }
@@ -116,7 +123,7 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
         try {
             reader = new BufferedReader(htmlData);
             String line = null;
-            while((line = reader.readLine()) != null) {
+            while ((line = reader.readLine()) != null) {
                 builder.append(line).append('\n');
             }
             return builder.toString();
@@ -124,7 +131,7 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
         } catch (IOException e) {
             throw OXMFSubscriptionErrorMessage.IOException.create(e);
         } finally {
-            if(reader != null) {
+            if (reader != null) {
                 try {
                     reader.close();
                 } catch (IOException e) {
@@ -137,11 +144,10 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
         return source;
     }
 
-    
     public void setSource(SubscriptionSource source) {
         this.source = source;
     }
-   
+
     public boolean handles(int folderModule) {
         return source.getFolderModule() == folderModule;
     }
@@ -171,11 +177,11 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
      * @param parser
      */
     public void configureParser(OXMFParser parser) {
-        for(String container : containers) {
+        for (String container : containers) {
             parser.addContainerElement(container);
         }
-        
-        for(String prefix : prefixes) {
+
+        for (String prefix : prefixes) {
             parser.addAttributePrefix(prefix);
         }
     }
@@ -193,14 +199,14 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
     public void addPrefix(String string) {
         prefixes.add(string);
     }
-    
+
     @Override
     public void modifyOutgoing(Subscription subscription) throws SubscriptionException {
         subscription.setDisplayName(getDisplayName(subscription));
     }
 
     protected String getDisplayName(Subscription subscription) {
-        return (String)subscription.getConfiguration().get("url");
+        return (String) subscription.getConfiguration().get("url");
     }
 
 }

@@ -52,12 +52,10 @@ package com.openexchange.subscribe.microformats.objectparser;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
-import org.microformats.hCard.HCardParser;
+import junit.framework.TestCase;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.Expectations;
-import com.openexchange.subscribe.microformats.objectparser.OXHCardParser;
 import com.openexchange.tools.encoding.Base64;
-import junit.framework.TestCase;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
@@ -426,5 +424,12 @@ public class OXHCardParserTest extends TestCase {
         for(Contact contact: contacts){
             assertEquals("Should have included OX-specific information (spouseName) in contact", "spouse"+(++i), contact.getSpouseName());
         }
+    }
+    
+    public void testShouldNotMakeNullFieldsEmptyStringFields(){
+        List<Contact> contacts = parser.parse(HCARD_SNIPPET);
+        Contact actual = contacts.get(0);
+        
+        assertNull("Street (other) was not in the hcard, should be null", actual.getStreetOther());
     }
 }

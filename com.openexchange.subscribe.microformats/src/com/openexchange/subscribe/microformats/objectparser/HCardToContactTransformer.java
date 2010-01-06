@@ -340,7 +340,7 @@ public class HCardToContactTransformer {
             } else if(adr.types.contains("work")){
                 addWorkAddress(contact, adr);
                 setWork = true;
-            } else if(adr.types.contains("x-ox-other")){
+            } else if(adr.types.contains("ox_other")){
                 addOtherAddress(contact, adr);
                 setOther = true;
             } else {
