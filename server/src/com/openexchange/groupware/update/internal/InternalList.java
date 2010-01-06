@@ -75,13 +75,13 @@ public final class InternalList {
     }
 
     public void start() {
-        DynamicList registry = DynamicList.getInstance();
-        for (UpdateTask task : OLD_TASKS) {
+        final DynamicList registry = DynamicList.getInstance();
+        for (final UpdateTask task : OLD_TASKS) {
             if (!registry.addUpdateTask(task)) {
                 LOG.error("Internal update task \"" + task.getClass().getName() + "\" could not be registered.", new Exception());
             }
         }
-        for (UpdateTaskV2 task : TASKS) {
+        for (final UpdateTaskV2 task : TASKS) {
             if (!registry.addUpdateTask(task)) {
                 LOG.error("Internal update task \"" + task.getClass().getName() + "\" could not be registered.", new Exception());
             }
@@ -89,11 +89,11 @@ public final class InternalList {
     }
 
     public void stop() {
-        DynamicList registry = DynamicList.getInstance();
-        for (UpdateTaskV2 task : TASKS) {
+        final DynamicList registry = DynamicList.getInstance();
+        for (final UpdateTaskV2 task : TASKS) {
             registry.removeUpdateTask(task);
         }
-        for (UpdateTask task : OLD_TASKS) {
+        for (final UpdateTask task : OLD_TASKS) {
             registry.removeUpdateTask(task);
         }
     }
@@ -315,7 +315,10 @@ public final class InternalList {
      */
     private static final UpdateTaskV2[] TASKS = new UpdateTaskV2[] {
         // Renames "Unified INBOX" to "Unified Mail"
-        new com.openexchange.groupware.update.tasks.UnifiedINBOXRenamerTask()
+        new com.openexchange.groupware.update.tasks.UnifiedINBOXRenamerTask(),
+
+        // Creates necessary tables for mail header cache
+        new com.openexchange.groupware.update.tasks.HeaderCacheCreateTableTask()
 
         // TODO: Enable virtual folder tree update task when needed
         // Migrates existing folder data to new outlook-like folder tree structure
