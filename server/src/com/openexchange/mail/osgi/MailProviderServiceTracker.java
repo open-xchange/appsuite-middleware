@@ -52,6 +52,7 @@ package com.openexchange.mail.osgi;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.api.MailProvider;
@@ -77,9 +78,6 @@ public final class MailProviderServiceTracker implements ServiceTrackerCustomize
 
     public Object addingService(final ServiceReference reference) {
         final Object addedService = context.getService(reference);
-        if (null == addedService) {
-            LOG.warn("Added service is null!", new Throwable());
-        }
         if (addedService instanceof MailProvider) {
             final Object protocol = reference.getProperty("protocol");
             if (null == protocol) {
@@ -105,8 +103,13 @@ public final class MailProviderServiceTracker implements ServiceTrackerCustomize
                 context.ungetService(reference);
                 return null;
             }
+            return addedService;
         }
-        return addedService;
+        if (LOG.isWarnEnabled()) {
+            LOG.warn("Added service is null!", new Throwable());
+        }
+        context.ungetService(reference);
+        return null;
     }
 
     public void modifiedService(final ServiceReference reference, final Object service) {

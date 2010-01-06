@@ -50,10 +50,14 @@
 package com.openexchange.mail;
 
 import static com.openexchange.mail.utils.ProviderUtility.extractProtocol;
+
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicReference;
+
+import com.openexchange.mail.api.AllMailProvider;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.config.MailProperties;
@@ -72,6 +76,8 @@ public final class MailProviderRegistry {
      * Concurrent map used as set for mail providers
      */
     private static final ConcurrentMap<Protocol, MailProvider> providers = new ConcurrentHashMap<Protocol, MailProvider>();
+
+    private static final AtomicReference<AllMailProvider> allProvider = new AtomicReference<AllMailProvider>();
 
     /**
      * Initializes a new {@link MailProviderRegistry}
@@ -104,9 +110,9 @@ public final class MailProviderRegistry {
         final String protocol;
         if (mailServerURL == null) {
             if (LOG.isWarnEnabled()) {
-                LOG.warn(new StringBuilder(128).append("Missing mail server URL. Mail server URL not set in account ").append(accountId).append(
-                    " for user ").append(session.getUserId()).append(" in context ").append(session.getContextId()).append(
-                    ". Using fallback protocol ").append(MailProperties.getInstance().getDefaultMailProvider()));
+                LOG.warn(new StringBuilder(128).append("Missing mail server URL. Mail server URL not set in account ").append(accountId)
+                        .append(" for user ").append(session.getUserId()).append(" in context ").append(session.getContextId()).append(
+                                ". Using fallback protocol ").append(MailProperties.getInstance().getDefaultMailProvider()));
             }
             protocol = MailProperties.getInstance().getDefaultMailProvider();
         } else {
@@ -154,6 +160,21 @@ public final class MailProviderRegistry {
         if (null == protocolName) {
             return null;
         }
+        final AllMailProvider all = allProvider.get();
+        if (null != all) {
+            final MailProvider realMailProvider = getRealMailProvider(protocolName);
+            return (null == realMailProvider) ? null : all.getDelegatingProvider(realMailProvider);
+        }
+        /*
+         * Return real provider
+         */
+        return getRealMailProvider(protocolName);
+    }
+
+    private static MailProvider getRealMailProvider(final String protocolName) {
+        /*
+         * Look-up
+         */
         for (final Iterator<Map.Entry<Protocol, MailProvider>> iter = providers.entrySet().iterator(); iter.hasNext();) {
             final Map.Entry<Protocol, MailProvider> entry = iter.next();
             if (entry.getKey().isSupported(protocolName)) {
@@ -173,11 +194,25 @@ public final class MailProviderRegistry {
      * @throws MailException If provider's start-up fails
      */
     public static boolean registerMailProvider(final String protocol, final MailProvider provider) throws MailException {
-        final Protocol p = Protocol.parseProtocol(protocol);
-        if (providers.containsKey(p)) {
-            return false;
-        }
         try {
+            final Protocol p = Protocol.parseProtocol(protocol);
+            if (Protocol.PROTOCOL_ALL.equals(p)) {
+                /*
+                 * All provider
+                 */
+                if (!allProvider.compareAndSet(null, (AllMailProvider) provider)) {
+                    return false;
+                }
+                /*
+                 * Startup
+                 */
+                provider.startUp();
+                provider.setDeprecated(false);
+                return true;
+            }
+            /*
+             * Non-all provider
+             */
             if (null != providers.putIfAbsent(p, provider)) {
                 return false;
             }
@@ -217,6 +252,21 @@ public final class MailProviderRegistry {
          * Clear registry
          */
         providers.clear();
+        final MailProvider all = allProvider.get();
+        if (null != all) {
+            /*
+             * Perform shutdown
+             */
+            try {
+                all.setDeprecated(true);
+                all.shutDown();
+                allProvider.set(null);
+            } catch (final MailException e) {
+                LOG.error("Mail connection implementation could not be shut down", e);
+            } catch (final RuntimeException t) {
+                LOG.error("Mail connection implementation could not be shut down", t);
+            }
+        }
     }
 
     /**
@@ -227,13 +277,29 @@ public final class MailProviderRegistry {
      * @throws MailException If provider's shut-down fails
      */
     public static MailProvider unregisterMailProvider(final MailProvider provider) throws MailException {
-        if (!providers.containsKey(provider.getProtocol())) {
-            return null;
+        final Protocol protocol = provider.getProtocol();
+        if (Protocol.PROTOCOL_ALL.equals(protocol)) {
+            final MailProvider all = allProvider.get();
+            if (null != all) {
+                /*
+                 * Perform shutdown
+                 */
+                try {
+                    all.setDeprecated(true);
+                    all.shutDown();
+                    allProvider.set(null);
+                } catch (final MailException e) {
+                    throw e;
+                } catch (final RuntimeException t) {
+                    LOG.error(t.getMessage(), t);
+                    return all;
+                }
+            }
         }
         /*
          * Unregister
          */
-        final MailProvider removed = providers.remove(provider.getProtocol());
+        final MailProvider removed = providers.remove(protocol);
         if (null == removed) {
             return null;
         }
@@ -261,6 +327,20 @@ public final class MailProviderRegistry {
      * @throws MailException If provider's shut-down fails
      */
     public static MailProvider unregisterMailProviderByProtocol(final String protocol) throws MailException {
+        if (Protocol.ALL.equals(protocol)) {
+            final MailProvider all = allProvider.get();
+            if (null != all) {
+                /*
+                 * Perform shutdown
+                 */
+                all.setDeprecated(true);
+                all.shutDown();
+                allProvider.set(null);
+            }
+        }
+        /*
+         * Non-all
+         */
         for (final Iterator<Map.Entry<Protocol, MailProvider>> iter = providers.entrySet().iterator(); iter.hasNext();) {
             final Map.Entry<Protocol, MailProvider> entry = iter.next();
             if (entry.getKey().isSupported(protocol)) {
@@ -272,4 +352,5 @@ public final class MailProviderRegistry {
         }
         return null;
     }
+
 }

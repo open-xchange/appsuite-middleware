@@ -161,7 +161,7 @@ public abstract class MailProvider {
      * 
      * @return The spam handler
      */
-    public final SpamHandler getSpamHandler() {
+    public SpamHandler getSpamHandler() {
         return SpamHandlerRegistry.getSpamHandler(getSpamHandlerName());
     }
 
@@ -194,29 +194,6 @@ public abstract class MailProvider {
      */
     public final boolean supportsProtocol(final String protocol) {
         return getProtocol().isSupported(protocol);
-    }
-
-    /**
-     * Whether this mail provide is implemented as a singleton.
-     * 
-     * @return <code>true</code> if this mail provide is implemented as a singleton; otherwise <code>false</code>
-     */
-    public boolean isSingleton() {
-        return true;
-    }
-
-    /**
-     * Gets a non-singleton instance.
-     * <p>
-     * If {@link #isSingleton()} returns <code>true</code> this method returns a <code>null</code>.
-     * 
-     * @param session The session providing needed user data; may be <code>null</code> to obtain a dummy instance for initialization purpose
-     * @param accountId The account ID
-     * @return A non-singleton instance
-     * @throws MailException If non-singleton instance cannot be returned
-     */
-    public MailProvider getNonSingletonInstance(final Session session, final int accountId) throws MailException {
-        return null;
     }
 
     /**

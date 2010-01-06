@@ -60,12 +60,26 @@ import com.openexchange.groupware.Component;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class Protocol implements Component, Serializable {
+public class Protocol implements Component, Serializable {
+
+    /**
+     * The all identifier.
+     */
+    public static final String ALL = "*";
 
     /**
      * All protocols supported.
      */
-    public static final String ALL = "*";
+    public static final Protocol PROTOCOL_ALL = new Protocol(ALL) {
+
+        private static final long serialVersionUID = 388987764125558623L;
+
+        @Override
+        public boolean isSupported(final String protocolName) {
+            return true;
+        }
+
+    };
 
     /**
      * For serialization.
@@ -84,6 +98,9 @@ public final class Protocol implements Component, Serializable {
      * @throws MailException If parsing the specified protocol string fails
      */
     public static Protocol parseProtocol(final String protocol) throws MailException {
+        if (ALL.equals(protocol)) {
+            return PROTOCOL_ALL;
+        }
         final Matcher m = PAT_PROT.matcher(protocol);
         if (!m.matches()) {
             throw new MailException(MailException.Code.PROTOCOL_PARSE_ERROR, protocol);
@@ -229,9 +246,6 @@ public final class Protocol implements Component, Serializable {
      * @return <code>true</code> if supported; otherwise <code>false</code>
      */
     public boolean isSupported(final String protocolName) {
-        if (ALL.equals(name)) {
-            return true;
-        }
         final String oName = protocolName.toLowerCase(Locale.ENGLISH);
         if (name.equals(oName)) {
             return true;
