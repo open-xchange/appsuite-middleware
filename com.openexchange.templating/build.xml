@@ -42,7 +42,7 @@
     <fileset dir="${basedir}" id="3rdpartyjars">
         <include name="${lib.dir}/*.jar"/>
         <exclude name="CVS"/>
-        <exclude name="*-sources.jar"/>
+        <exclude name="${lib.dir}/*-sources.jar"/>
     </fileset>
 
     <!-- Classpath -->
