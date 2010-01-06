@@ -162,6 +162,9 @@ public final class Bug14074Test extends AbstractAJAXSession {
         changed.setStartDate(calendar.getTime());
         calendar.add(Calendar.HOUR_OF_DAY, 1);
         changed.setEndDate(calendar.getTime());
+        changed.setRecurrenceType(Appointment.WEEKLY);
+        changed.setInterval(1);
+        changed.setDays(Appointment.FRIDAY);
         return changed;
     }
 }

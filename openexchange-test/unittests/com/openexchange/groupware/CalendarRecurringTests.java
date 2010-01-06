@@ -830,6 +830,8 @@ public class CalendarRecurringTests extends TestCase {
         update_with_changed_times.setObjectID(object_id);
         update_with_changed_times.setStartDate(new Date(rs.getStart()+3600000));
         update_with_changed_times.setEndDate(new Date(rs.getEnd()+3600000));
+        update_with_changed_times.setRecurrenceType(CalendarObject.DAILY);
+        update_with_changed_times.setInterval(1);
         update_with_changed_times.setIgnoreConflicts(true);
         
         csql.updateAppointmentObject(update_with_changed_times, folder_id, new Date());

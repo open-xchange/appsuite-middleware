@@ -95,6 +95,8 @@ public final class Bug12463Test extends AbstractAJAXSession {
             changeSequence.setObjectID(sequence.getObjectID());
             changeSequence.setParentFolderID(sequence.getParentFolderID());
             changeSequence.setLastModified(exception.getLastModified());
+            changeSequence.setRecurrenceType(Appointment.DAILY);
+            changeSequence.setInterval(1);
             calendar.setTime(sequence.getStartDate());
             calendar.add(Calendar.HOUR_OF_DAY, -1);
             changeSequence.setStartDate(calendar.getTime());

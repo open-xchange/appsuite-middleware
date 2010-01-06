@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment.recurrence;
 
+import java.util.Calendar;
 import java.util.TimeZone;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.helper.AbstractAssertion;
@@ -171,7 +172,7 @@ public class ManagedAppointmentTest extends AppointmentTest {
         app.set(Appointment.RECURRENCE_TYPE, Appointment.YEARLY);
         app.set(Appointment.INTERVAL, 1);
         app.set(Appointment.DAY_IN_MONTH, 1);
-        app.set(Appointment.MONTH, 1);
+        app.set(Appointment.MONTH, Calendar.JANUARY);
         return app;
     }
 
