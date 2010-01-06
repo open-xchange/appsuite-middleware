@@ -159,7 +159,7 @@ public abstract class AbstractVoipNowSOAPAction<S extends Stub> extends Abstract
      * @param setting The VoipNow server setting
      * @return The SOAP {@link UserCredentials} instance
      */
-    protected UserCredentials getUserCredentials(final VoipNowServerSetting setting) {
+    protected static final UserCredentials getUserCredentials(final VoipNowServerSetting setting) {
         /*
          * Create user credentials
          */
