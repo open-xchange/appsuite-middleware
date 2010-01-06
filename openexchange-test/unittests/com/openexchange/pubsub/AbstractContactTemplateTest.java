@@ -57,13 +57,17 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.PublishConfig;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
+import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.publish.microformats.OXMFPublicationService;
 import com.openexchange.publish.microformats.tools.ContactTemplateUtils;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.microformats.MicroformatSubscribeService;
 import com.openexchange.subscribe.microformats.datasources.HTTPOXMFDataSource;
@@ -156,8 +160,10 @@ public abstract class AbstractContactTemplateTest extends TestCase {
         service.setSource(source);
     }
 
-    protected OXTemplate getTemplate(String templateName) throws IOException, ConfigurationException {
-        File path = new File(PublishConfig.init().getProperty(PublishConfig.TEMPLATE_PATH));
+    protected OXTemplate getTemplate(String templateName) throws Exception{
+        Init.startServer();
+        ConfigurationService conf = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+        File path = new File(conf.getProperty("com.openexchange.templating.path"));
 
         TemplateLoader templateLoader = new FileTemplateLoader(path);
         Configuration config = new Configuration();

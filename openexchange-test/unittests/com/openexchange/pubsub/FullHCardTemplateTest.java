@@ -49,8 +49,6 @@
 
 package com.openexchange.pubsub;
 
-import java.io.IOException;
-import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.templating.OXTemplate;
 
 /**
@@ -59,7 +57,8 @@ import com.openexchange.templating.OXTemplate;
 public class FullHCardTemplateTest extends 
 BasicContactTemplateTest {
     
-    protected OXTemplate getTemplate() throws IOException, ConfigurationException {
+    @Override
+    protected OXTemplate getTemplate() throws Exception {
         String templateName = "contacts_hcard_uncensored.tmpl";
         return getTemplate(templateName);
     }

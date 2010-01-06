@@ -49,8 +49,6 @@
 
 package com.openexchange.pubsub;
 
-import java.io.IOException;
-import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.templating.OXTemplate;
 
 
@@ -62,7 +60,7 @@ import com.openexchange.templating.OXTemplate;
 public class CensoredOXMFContactTemplateTest extends BasicCensoredContactTemplateTest {
 
     @Override
-    protected OXTemplate getTemplate() throws IOException, ConfigurationException {
+    protected OXTemplate getTemplate() throws Exception {
         String templateName = "contacts_oxmf_censored.tmpl";
         return getTemplate(templateName);
     }
