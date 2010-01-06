@@ -154,10 +154,10 @@ public abstract class AbstractVoipNowSOAPAction<S extends Stub> extends Abstract
     }
 
     /**
-     * Gets the SOAP {@link UserCredentials} from specified {@link VoipNowServerSetting setting}.
+     * Gets the appropriate SOAP {@link UserCredentials} instance from specified {@link VoipNowServerSetting setting}.
      * 
      * @param setting The VoipNow server setting
-     * @return The SOAP {@link UserCredentials} instance
+     * @return The appropriate SOAP {@link UserCredentials} instance
      */
     protected static final UserCredentials getUserCredentials(final VoipNowServerSetting setting) {
         /*
