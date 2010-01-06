@@ -284,11 +284,9 @@ public final class MimeForward {
                  */
                 final MimeBodyPart textPart = new MimeBodyPart();
                 textPart.setText(
-                    generateForwardText(
-                        firstSeenText == null ? "" : firstSeenText,
-                        UserStorage.getStorageUser(session.getUserId(), ctx).getLocale(),
-                        originalMsg,
-                        contentType.startsWith(TEXT_HTM)),
+                    generateForwardText(firstSeenText == null ? "" : firstSeenText, new LocaleAndTimeZone(UserStorage.getStorageUser(
+                        session.getUserId(),
+                        ctx)), originalMsg, contentType.startsWith(TEXT_HTM)),
                     contentType.getCharsetParameter(),
                     contentType.getSubType());
                 textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
@@ -320,11 +318,12 @@ public final class MimeForward {
                 }
             }
             final String content = MimeProcessingUtility.readContent(originalMsg, originalContentType.getCharsetParameter());
-            forwardMsg.setText(generateForwardText(
-                content == null ? "" : content,
-                UserStorage.getStorageUser(session.getUserId(), ctx).getLocale(),
-                originalMsg,
-                originalContentType.startsWith(TEXT_HTM)), originalContentType.getCharsetParameter(), originalContentType.getSubType());
+            forwardMsg.setText(
+                generateForwardText(content == null ? "" : content, new LocaleAndTimeZone(UserStorage.getStorageUser(
+                    session.getUserId(),
+                    ctx)), originalMsg, originalContentType.startsWith(TEXT_HTM)),
+                originalContentType.getCharsetParameter(),
+                originalContentType.getSubType());
             forwardMsg.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
             forwardMsg.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType(originalContentType.toString()));
             forwardMsg.saveChanges();
@@ -343,7 +342,7 @@ public final class MimeForward {
                 final MimeBodyPart textPart = new MimeBodyPart();
                 textPart.setText(generateForwardText(
                     "",
-                    UserStorage.getStorageUser(session.getUserId(), ctx).getLocale(),
+                    new LocaleAndTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx)),
                     originalMsg,
                     false), MailProperties.getInstance().getDefaultMimeCharset(), "plain");
                 textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
@@ -512,13 +511,13 @@ public final class MimeForward {
      * Generates the forward text on an inline-forward operation.
      * 
      * @param firstSeenText The first seen text from original message
-     * @param locale The locale that determines format of date and time strings
+     * @param ltz The locale that determines format of date and time strings and time zone as well
      * @param msg The original message
      * @param html <code>true</code> if given text is html content; otherwise <code>false</code>
      * @return The forward text
      */
-    private static String generateForwardText(final String firstSeenText, final Locale locale, final MailMessage msg, final boolean html) {
-        final StringHelper strHelper = new StringHelper(locale);
+    private static String generateForwardText(final String firstSeenText, final LocaleAndTimeZone ltz, final MailMessage msg, final boolean html) {
+        final StringHelper strHelper = new StringHelper(ltz.locale);
         String forwardPrefix = strHelper.getString(MailStrings.FORWARD_PREFIX);
         {
             final InternetAddress[] from = msg.getFrom();
@@ -542,7 +541,7 @@ public final class MimeForward {
             try {
                 forwardPrefix =
                     PATTERN_DATE.matcher(forwardPrefix).replaceFirst(
-                        date == null ? "" : DateFormat.getDateInstance(DateFormat.LONG, locale).format(date));
+                        date == null ? "" : MimeProcessingUtility.getFormattedDate(date, DateFormat.LONG, ltz.locale, ltz.timeZone));
             } catch (final Exception t) {
                 if (LOG.isWarnEnabled()) {
                     LOG.warn(t.getMessage(), t);
@@ -552,7 +551,7 @@ public final class MimeForward {
             try {
                 forwardPrefix =
                     PATTERN_TIME.matcher(forwardPrefix).replaceFirst(
-                        date == null ? "" : DateFormat.getTimeInstance(DateFormat.SHORT, locale).format(date));
+                        date == null ? "" : MimeProcessingUtility.getFormattedDate(date, DateFormat.SHORT, ltz.locale, ltz.timeZone));
             } catch (final Exception t) {
                 if (LOG.isWarnEnabled()) {
                     LOG.warn(t.getMessage(), t);

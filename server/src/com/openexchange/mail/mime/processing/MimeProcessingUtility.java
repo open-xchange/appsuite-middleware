@@ -53,7 +53,10 @@ import static com.openexchange.mail.text.HTMLProcessing.getConformHTML;
 import static com.openexchange.mail.text.HTMLProcessing.htmlFormat;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.text.DateFormat;
+import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 import javax.mail.Part;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.mail.MailException;
@@ -84,6 +87,21 @@ public final class MimeProcessingUtility {
      */
     private MimeProcessingUtility() {
         super();
+    }
+
+    /**
+     * Formats specified date in given style with given locale and time zone.
+     * 
+     * @param date The date to format
+     * @param style The style to use
+     * @param locale The locale
+     * @param timeZone The time zone
+     * @return The formatted date
+     */
+    static final String getFormattedDate(final Date date, final int style, final Locale locale, final TimeZone timeZone) {
+        final DateFormat dateFormat = DateFormat.getDateInstance(style, locale);
+        dateFormat.setTimeZone(timeZone);
+        return dateFormat.format(date);
     }
 
     /**

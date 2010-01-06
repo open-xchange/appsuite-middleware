@@ -73,6 +73,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.MailStrings;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.MailException;
@@ -372,8 +373,12 @@ public final class MimeReply {
             final String replyText;
             {
                 final List<String> list = new ArrayList<String>();
-                final Locale locale = UserStorage.getStorageUser(session.getUserId(), ctx).getLocale();
-                generateReplyText(originalMsg, retvalContentType, new StringHelper(locale), locale, usm, mailSession, list);
+                {
+                    final User user = UserStorage.getStorageUser(session.getUserId(), ctx);
+                    final Locale locale = user.getLocale();
+                    final LocaleAndTimeZone ltz = new LocaleAndTimeZone(locale, user.getTimeZone());
+                    generateReplyText(originalMsg, retvalContentType, new StringHelper(locale), ltz, usm, mailSession, list);
+                }
                 final StringBuilder replyTextBuilder = new StringBuilder(8192 << 1);
                 for (int i = list.size() - 1; i >= 0; i--) {
                     replyTextBuilder.append(list.get(i));
@@ -502,13 +507,13 @@ public final class MimeReply {
      * @throws MessagingException
      * @throws IOException
      */
-    private static boolean generateReplyText(final MailMessage msg, final ContentType retvalContentType, final StringHelper strHelper, final Locale locale, final UserSettingMail usm, final javax.mail.Session mailSession, final List<String> replyTexts) throws MailException, MessagingException, IOException {
+    private static boolean generateReplyText(final MailMessage msg, final ContentType retvalContentType, final StringHelper strHelper, final LocaleAndTimeZone ltz, final UserSettingMail usm, final javax.mail.Session mailSession, final List<String> replyTexts) throws MailException, MessagingException, IOException {
         final StringBuilder textBuilder = new StringBuilder(8192);
         final ContentType contentType = msg.getContentType();
         boolean found = false;
         if (contentType.startsWith(MULTIPART)) {
             final ParameterContainer pc =
-                new ParameterContainer(retvalContentType, textBuilder, strHelper, usm, mailSession, locale, replyTexts);
+                new ParameterContainer(retvalContentType, textBuilder, strHelper, usm, mailSession, ltz, replyTexts);
             found |= gatherAllTextContents(msg, contentType, pc);
         } else if (contentType.startsWith(TEXT)) {
             if (retvalContentType.getPrimaryType() == null) {
@@ -529,7 +534,7 @@ public final class MimeReply {
                 try {
                     replyPrefix =
                         PATTERN_DATE.matcher(replyPrefix).replaceFirst(
-                            date == null ? "" : DateFormat.getDateInstance(DateFormat.LONG, locale).format(date));
+                            date == null ? "" : MimeProcessingUtility.getFormattedDate(date, DateFormat.LONG, ltz.locale, ltz.timeZone));
                 } catch (final Exception e) {
                     if (LOG.isWarnEnabled()) {
                         LOG.warn(e.getMessage(), e);
@@ -540,7 +545,7 @@ public final class MimeReply {
                 try {
                     replyPrefix =
                         PATTERN_TIME.matcher(replyPrefix).replaceFirst(
-                            date == null ? "" : DateFormat.getTimeInstance(DateFormat.SHORT, locale).format(date));
+                            date == null ? "" : MimeProcessingUtility.getFormattedDate(date, DateFormat.SHORT, ltz.locale, ltz.timeZone));
                 } catch (final Exception e) {
                     if (LOG.isWarnEnabled()) {
                         LOG.warn(e.getMessage(), e);
@@ -619,8 +624,7 @@ public final class MimeReply {
             partContentType.setContentType(part.getContentType());
             if (partContentType.startsWith(MIMETypes.MIME_MESSAGE_RFC822)) {
                 final MailMessage enclosedMsg = (MailMessage) part.getContent();
-                found |=
-                    generateReplyText(enclosedMsg, pc.retvalContentType, pc.strHelper, pc.locale, pc.usm, pc.mailSession, pc.replyTexts);
+                found |= generateReplyText(enclosedMsg, pc.retvalContentType, pc.strHelper, pc.ltz, pc.usm, pc.mailSession, pc.replyTexts);
             } else if (MimeProcessingUtility.fileNameEndsWith(".eml", part, partContentType)) {
                 /*
                  * Create message from input stream
@@ -634,8 +638,7 @@ public final class MimeReply {
                 }
                 final MailMessage attachedMsg = MIMEMessageConverter.convertMessage(tmp.toByteArray());// MimeMessage(mailSession,
                 // part.getInputStream());
-                found |=
-                    generateReplyText(attachedMsg, pc.retvalContentType, pc.strHelper, pc.locale, pc.usm, pc.mailSession, pc.replyTexts);
+                found |= generateReplyText(attachedMsg, pc.retvalContentType, pc.strHelper, pc.ltz, pc.usm, pc.mailSession, pc.replyTexts);
             }
         }
         return found;
@@ -646,9 +649,7 @@ public final class MimeReply {
         for (int i = 0; !found && i < count; i++) {
             final MailPart part = multipartPart.getEnclosedMailPart(i);
             partContentType.setContentType(part.getContentType());
-            if (partContentType.isMimeType(preferHTML ? MIMETypes.MIME_TEXT_HTM_ALL : MIMETypes.MIME_TEXT_ALL) && MimeProcessingUtility.isInline(
-                part,
-                partContentType)) {
+            if (partContentType.startsWith(preferHTML ? TEXT_HTM : TEXT) && MimeProcessingUtility.isInline(part, partContentType)) {
                 if (pc.retvalContentType.getPrimaryType() == null) {
                     pc.retvalContentType.setContentType(partContentType);
                     final String charset = MessageUtility.checkCharset(part, partContentType);
@@ -667,7 +668,7 @@ public final class MimeReply {
                     MimeProcessingUtility.appendRightVersion(pc.retvalContentType, partContentType, text, pc.textBuilder);
                 }
                 found = true;
-            } else if (partContentType.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
+            } else if (partContentType.startsWith(MULTIPART)) {
                 found |= gatherAllTextContents(part, partContentType, pc);
             }
         }
@@ -725,18 +726,18 @@ public final class MimeReply {
 
         final javax.mail.Session mailSession;
 
-        final Locale locale;
+        final LocaleAndTimeZone ltz;
 
         final List<String> replyTexts;
 
-        public ParameterContainer(final ContentType retvalContentType, final StringBuilder textBuilder, final StringHelper strHelper, final UserSettingMail usm, final javax.mail.Session mailSession, final Locale locale, final List<String> replyTexts) {
+        ParameterContainer(final ContentType retvalContentType, final StringBuilder textBuilder, final StringHelper strHelper, final UserSettingMail usm, final javax.mail.Session mailSession, final LocaleAndTimeZone ltz, final List<String> replyTexts) {
             super();
             this.retvalContentType = retvalContentType;
             this.textBuilder = textBuilder;
             this.strHelper = strHelper;
             this.usm = usm;
             this.mailSession = mailSession;
-            this.locale = locale;
+            this.ltz = ltz;
             this.replyTexts = replyTexts;
         }
 
