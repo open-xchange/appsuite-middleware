@@ -1305,6 +1305,13 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             completenessChecked = true;
             pattern_change = true;
         }
+        if (cdao.containsStartDate() && !cdao.getStartDate().equals(edao.getStartDate())) {
+            if (!completenessChecked) {
+                recColl.checkRecurringCompleteness(cdao, !edao.containsUntil() && !edao.containsOccurrence());
+                completenessChecked = true;
+            }
+            pattern_change = true;
+        }
         if (cdao.containsDays() && cdao.getDays() != edao.getDays()) {
             if (!completenessChecked) {
                 recColl.checkRecurringCompleteness(cdao, !edao.containsUntil() && !edao.containsOccurrence());

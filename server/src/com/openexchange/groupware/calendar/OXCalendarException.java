@@ -275,7 +275,7 @@ public class OXCalendarException extends OXException {
         /**
          * Unnecessary recurrence Information for Type "no".
          */
-        UNNECESSARY_RECURRENCE_INFORMATION_NO("Unnecessary recurrence information for recurrence \"no\".", 96, Category.USER_INPUT),
+        UNNECESSARY_RECURRENCE_INFORMATION_NO("Unnecessary recurrence information for recurrence type \"no recurrence\".", 96, Category.USER_INPUT),
         /**
          * Unnecessary recurrence information.
          */
