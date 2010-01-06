@@ -87,7 +87,7 @@ public class ContactCollectOnMailTransport implements PreferencesItemService {
             }
 
             public boolean isAvailable(final UserConfiguration userConfig) {
-                return userConfig.hasWebMail() && userConfig.hasContact();
+                return userConfig.hasWebMail() && userConfig.hasContact() && userConfig.isCollectEmailAddresses();
             }
 
             public boolean isWritable() {

@@ -90,6 +90,7 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
 
@@ -292,12 +293,16 @@ public class Memorizer implements Runnable {
 
     private boolean isEnabled() {
         Boolean enabled = null;
+        Boolean enabledRight = null;
         try {
             enabled = ServerUserSetting.isContactCollectionEnabled(session.getContextId(), session.getUserId());
+            enabledRight = new ServerSessionAdapter(session).getUserConfiguration().isCollectEmailAddresses();
         } catch (final SettingException e) {
             LOG.error(e.getMessage(), e);
+        } catch (ContextException e) {
+            LOG.error(e.getMessage(), e);
         }
-        return enabled != null && enabled.booleanValue();
+        return enabled != null && enabledRight != null && enabled.booleanValue() && enabled.booleanValue();
     }
 
     private Contact transformInternetAddress(final InternetAddress address) throws ParseException, UnsupportedEncodingException {
