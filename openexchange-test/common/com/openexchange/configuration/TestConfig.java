@@ -70,6 +70,10 @@ public class TestConfig extends AbstractConfig {
          */
         MAIL_PROPS("mailPropertiesFile"),
         /**
+         * pubsub.properties
+         */
+        PUBSUB_PROPS("pubsubPropertiesFile"),
+        /**
          * webdav.properties
          */
         WEBDAV_PROPS("webdavPropertiesFile");
