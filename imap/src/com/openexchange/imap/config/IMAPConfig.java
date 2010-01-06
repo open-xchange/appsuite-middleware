@@ -179,10 +179,7 @@ public final class IMAPConfig extends MailConfig {
      */
     public boolean isImapSearch() {
         final boolean imapSearch = IMAPProperties.getInstance().isImapSearch();
-        if (imapCapabilities != null) {
-            return (imapSearch && (imapCapabilities.hasIMAP4rev1() || imapCapabilities.hasIMAP4()));
-        }
-        return imapSearch;
+        return (imapCapabilities != null) ? (imapSearch && (imapCapabilities.hasIMAP4rev1() || imapCapabilities.hasIMAP4())) : imapSearch;
     }
 
     /**
@@ -192,10 +189,7 @@ public final class IMAPConfig extends MailConfig {
      */
     public boolean isImapSort() {
         final boolean imapSort = IMAPProperties.getInstance().isImapSort();
-        if (imapCapabilities != null) {
-            return (imapSort && imapCapabilities.hasSort());
-        }
-        return imapSort;
+        return (imapCapabilities != null) ? (imapSort && imapCapabilities.hasSort()) : imapSort;
     }
 
     @Override
