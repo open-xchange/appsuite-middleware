@@ -84,7 +84,7 @@ public class VoipNowEnabled implements PreferencesItemService {
         return new ReadOnlyValue() {
 
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws SettingException {
-                setting.setSingleValue(Boolean.valueOf(UserAttributeAccess.getDefaultInstance().getBooleanAttribute("com.4psa.voipnow", user, false)));
+                setting.setSingleValue(Boolean.valueOf(UserAttributeAccess.getDefaultInstance().getBooleanAttribute("com.4psa.voipnow/enabled", user, false)));
             }
 
             /**
