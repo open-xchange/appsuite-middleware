@@ -51,13 +51,13 @@ package com.openexchange.voipnow.json.actions;
 
 import java.rmi.RemoteException;
 import org.apache.axis2.AxisFault;
-import com._4psa.common_xsd._2_0_3.PositiveInteger;
-import com._4psa.extensionmessages_xsd._2_0_3.GetExtensionDetailsRequest;
-import com._4psa.extensionmessages_xsd._2_0_3.GetExtensionDetailsResponse;
-import com._4psa.extensionmessagesinfo_xsd._2_0_3.GetExtensionDetailsResponseType;
-import com._4psa.headerdata_xsd._2_0_3.UserCredentials;
-import com._4psa.headerdata_xsd._2_0_3.UserCredentialsSequence_type0;
-import com._4psa.voipnowservice._2_0_3.ExtensionPortStub;
+import com._4psa.common_xsd._2_0_4.PositiveInteger;
+import com._4psa.extensionmessages_xsd._2_0_4.GetExtensionDetailsRequest;
+import com._4psa.extensionmessages_xsd._2_0_4.GetExtensionDetailsResponse;
+import com._4psa.extensionmessagesinfo_xsd._2_0_4.GetExtensionDetailsResponseType;
+import com._4psa.headerdata_xsd._2_0_4.UserCredentials;
+import com._4psa.headerdata_xsd._2_0_4.UserCredentialsSequence_type0;
+import com._4psa.voipnowservice._2_0_4.ExtensionPortStub;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
@@ -120,11 +120,11 @@ public final class ExtensionDetailsAction extends AbstractVoipNowSOAPAction<Exte
             final UserCredentials userCredentials = new UserCredentials();
             {
                 final UserCredentialsSequence_type0 sequenceType0 = new UserCredentialsSequence_type0();
-                final com._4psa.common_xsd._2_0_3.Password pw = new com._4psa.common_xsd._2_0_3.Password();
+                final com._4psa.common_xsd._2_0_4.Password pw = new com._4psa.common_xsd._2_0_4.Password();
                 pw.setPassword("oxSecure");
                 sequenceType0.setPassword(pw);
 
-                final com._4psa.common_xsd._2_0_3.String login = new com._4psa.common_xsd._2_0_3.String();
+                final com._4psa.common_xsd._2_0_4.String login = new com._4psa.common_xsd._2_0_4.String();
                 login.setString("admin");
                 sequenceType0.setUsername(login);
                 userCredentials.setUserCredentialsSequence_type0(sequenceType0);
@@ -132,7 +132,7 @@ public final class ExtensionDetailsAction extends AbstractVoipNowSOAPAction<Exte
             /*
              * Perform request and retrieve response
              */
-            final GetExtensionDetailsResponse extensionDetailsResponse = stub.GetExtensionDetails(detailRequest, userCredentials);
+            final GetExtensionDetailsResponse extensionDetailsResponse = stub.getExtensionDetails(detailRequest, userCredentials);
             /*
              * Get response type
              */
@@ -140,7 +140,7 @@ public final class ExtensionDetailsAction extends AbstractVoipNowSOAPAction<Exte
             /*
              * Get extension name
              */
-            final com._4psa.common_xsd._2_0_3.String extensionName = extensionDetailsResponseType.getName();
+            final com._4psa.common_xsd._2_0_4.String extensionName = extensionDetailsResponseType.getName();
             /*
              * Return client data
              */

@@ -51,13 +51,13 @@ package com.openexchange.voipnow.json.actions;
 
 import java.rmi.RemoteException;
 import org.apache.axis2.AxisFault;
-import com._4psa.clientmessages_xsd._2_0_3.GetClientDetailsRequest;
-import com._4psa.clientmessages_xsd._2_0_3.GetClientDetailsResponse;
-import com._4psa.clientmessagesinfo_xsd._2_0_3.GetClientDetailsResponseType;
-import com._4psa.common_xsd._2_0_3.PositiveInteger;
-import com._4psa.headerdata_xsd._2_0_3.UserCredentials;
-import com._4psa.headerdata_xsd._2_0_3.UserCredentialsSequence_type0;
-import com._4psa.voipnowservice._2_0_3.ClientPortStub;
+import com._4psa.clientmessages_xsd._2_0_4.GetClientDetailsRequest;
+import com._4psa.clientmessages_xsd._2_0_4.GetClientDetailsResponse;
+import com._4psa.clientmessagesinfo_xsd._2_0_4.GetClientDetailsResponseType;
+import com._4psa.common_xsd._2_0_4.PositiveInteger;
+import com._4psa.headerdata_xsd._2_0_4.UserCredentials;
+import com._4psa.headerdata_xsd._2_0_4.UserCredentialsSequence_type0;
+import com._4psa.voipnowservice._2_0_4.ClientPortStub;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
@@ -105,7 +105,7 @@ public final class ClientDetailsAction extends AbstractVoipNowSOAPAction<ClientP
             /*
              * Call client detail request
              */
-            final com._4psa.clientmessages_xsd._2_0_3.GetClientDetailsRequest detailRequest = new GetClientDetailsRequest();
+            final com._4psa.clientmessages_xsd._2_0_4.GetClientDetailsRequest detailRequest = new GetClientDetailsRequest();
             /*
              * Create "ID" and apply to request
              */
@@ -116,7 +116,7 @@ public final class ClientDetailsAction extends AbstractVoipNowSOAPAction<ClientP
             /*
              * Create "identifier" and apply to request
              */
-            final com._4psa.common_xsd._2_0_3.String identifierString = new com._4psa.common_xsd._2_0_3.String();
+            final com._4psa.common_xsd._2_0_4.String identifierString = new com._4psa.common_xsd._2_0_4.String();
             identifierString.setString(/* identifier */clientId);
             // detailRequest.setIdentifier(identifierString);
             /*
@@ -125,11 +125,11 @@ public final class ClientDetailsAction extends AbstractVoipNowSOAPAction<ClientP
             final UserCredentials userCredentials = new UserCredentials();
             {
                 final UserCredentialsSequence_type0 sequenceType0 = new UserCredentialsSequence_type0();
-                final com._4psa.common_xsd._2_0_3.Password pw = new com._4psa.common_xsd._2_0_3.Password();
+                final com._4psa.common_xsd._2_0_4.Password pw = new com._4psa.common_xsd._2_0_4.Password();
                 pw.setPassword("oxSecure");
                 sequenceType0.setPassword(pw);
 
-                final com._4psa.common_xsd._2_0_3.String login = new com._4psa.common_xsd._2_0_3.String();
+                final com._4psa.common_xsd._2_0_4.String login = new com._4psa.common_xsd._2_0_4.String();
                 login.setString("admin");
                 sequenceType0.setUsername(login);
                 userCredentials.setUserCredentialsSequence_type0(sequenceType0);
@@ -137,7 +137,7 @@ public final class ClientDetailsAction extends AbstractVoipNowSOAPAction<ClientP
                 /*-
                  * 
                 final UserCredentialsSequence_type1 sequenceType1 = new UserCredentialsSequence_type1();
-                com._4psa.common_xsd._2_0_3.String cryptedAuth = new com._4psa.common_xsd._2_0_3.String();
+                com._4psa.common_xsd._2_0_4.String cryptedAuth = new com._4psa.common_xsd._2_0_4.String();
                 cryptedAuth.setString("base64-encoded-crypted-auth");
                 
                 sequenceType1.setCryptedAuth(cryptedAuth);
@@ -146,7 +146,7 @@ public final class ClientDetailsAction extends AbstractVoipNowSOAPAction<ClientP
             /*
              * Perform request and retrieve response
              */
-            final GetClientDetailsResponse clientDetailsResponse = stub.GetClientDetails(detailRequest, userCredentials);
+            final GetClientDetailsResponse clientDetailsResponse = stub.getClientDetails(detailRequest, userCredentials);
             /*
              * Get response type
              */
@@ -154,7 +154,7 @@ public final class ClientDetailsAction extends AbstractVoipNowSOAPAction<ClientP
             /*
              * Get some data from response type; e.g client's address
              */
-            final com._4psa.common_xsd._2_0_3.Email emailString = clientDetailsResponseType.getEmail();
+            final com._4psa.common_xsd._2_0_4.Email emailString = clientDetailsResponseType.getEmail();
             /*
              * Return client data
              */

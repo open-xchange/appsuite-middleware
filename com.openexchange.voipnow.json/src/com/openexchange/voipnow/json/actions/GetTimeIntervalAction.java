@@ -51,16 +51,16 @@ package com.openexchange.voipnow.json.actions;
 
 import java.rmi.RemoteException;
 import org.apache.axis2.AxisFault;
-import com._4psa.common_xsd._2_0_3.Integer;
-import com._4psa.common_xsd._2_0_3.PositiveInteger;
-import com._4psa.headerdata_xsd._2_0_3.UserCredentials;
-import com._4psa.headerdata_xsd._2_0_3.UserCredentialsSequence_type0;
-import com._4psa.pbxdata_xsd._2_0_3.TimeIntervalBlock;
-import com._4psa.pbxmessages_xsd._2_0_3.GetTimeIntervalBlocksRequest;
-import com._4psa.pbxmessages_xsd._2_0_3.GetTimeIntervalBlocksRequestChoice_type0;
-import com._4psa.pbxmessages_xsd._2_0_3.GetTimeIntervalBlocksResponse;
-import com._4psa.pbxmessagesinfo_xsd._2_0_3.GetTimeIntervalBlocksResponseType;
-import com._4psa.voipnowservice._2_0_3.PBXPortStub;
+import com._4psa.common_xsd._2_0_4.Integer;
+import com._4psa.common_xsd._2_0_4.PositiveInteger;
+import com._4psa.headerdata_xsd._2_0_4.UserCredentials;
+import com._4psa.headerdata_xsd._2_0_4.UserCredentialsSequence_type0;
+import com._4psa.pbxdata_xsd._2_0_4.TimeIntervalBlock;
+import com._4psa.pbxmessages_xsd._2_0_4.GetTimeIntervalBlocksRequest;
+import com._4psa.pbxmessages_xsd._2_0_4.GetTimeIntervalBlocksRequestChoice_type0;
+import com._4psa.pbxmessages_xsd._2_0_4.GetTimeIntervalBlocksResponse;
+import com._4psa.pbxmessagesinfo_xsd._2_0_4.GetTimeIntervalBlocksResponseType;
+import com._4psa.voipnowservice._2_0_4.PBXPortStub;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
@@ -131,11 +131,11 @@ public final class GetTimeIntervalAction extends AbstractVoipNowSOAPAction<PBXPo
             final UserCredentials userCredentials = new UserCredentials();
             {
                 final UserCredentialsSequence_type0 sequenceType0 = new UserCredentialsSequence_type0();
-                final com._4psa.common_xsd._2_0_3.Password pw = new com._4psa.common_xsd._2_0_3.Password();
+                final com._4psa.common_xsd._2_0_4.Password pw = new com._4psa.common_xsd._2_0_4.Password();
                 pw.setPassword(setting.getPassword());
                 sequenceType0.setPassword(pw);
 
-                final com._4psa.common_xsd._2_0_3.String login = new com._4psa.common_xsd._2_0_3.String();
+                final com._4psa.common_xsd._2_0_4.String login = new com._4psa.common_xsd._2_0_4.String();
                 login.setString(setting.getLogin());
                 sequenceType0.setUsername(login);
                 userCredentials.setUserCredentialsSequence_type0(sequenceType0);
@@ -143,7 +143,7 @@ public final class GetTimeIntervalAction extends AbstractVoipNowSOAPAction<PBXPo
             /*
              * Execute request
              */
-            final GetTimeIntervalBlocksResponse getTimeIntervalBlocksResponse = stub.GetTimeIntervalBlocks(getTimeIntervalBlocksRequest, userCredentials);
+            final GetTimeIntervalBlocksResponse getTimeIntervalBlocksResponse = stub.getTimeIntervalBlocks(getTimeIntervalBlocksRequest, userCredentials);
             final GetTimeIntervalBlocksResponseType getTimeIntervalBlocksResponseType = getTimeIntervalBlocksResponse.getGetTimeIntervalBlocksResponse();
             
             final TimeIntervalBlock timeIntervalBlock = getTimeIntervalBlocksResponseType.getTimeIntervalBlock()[0];

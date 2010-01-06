@@ -56,27 +56,26 @@ import java.util.List;
 import org.apache.axis2.AxisFault;
 import org.json.JSONArray;
 import org.json.JSONException;
-import com._4psa.common_xsd._2_0_3.DelObject;
-import com._4psa.common_xsd._2_0_3.PositiveInteger;
-import com._4psa.common_xsd._2_0_3.Rule;
-import com._4psa.common_xsd._2_0_3.UpdateObject;
-import com._4psa.extensiondata_xsd._2_0_3.Action_type3;
-import com._4psa.extensiondata_xsd._2_0_3.CallRuleInfo;
-import com._4psa.extensiondata_xsd._2_0_3.Match_type1;
-import com._4psa.extensionmessages_xsd._2_0_3.AddCallRulesInRequest;
-import com._4psa.extensionmessages_xsd._2_0_3.AddCallRulesInRequestChoice_type0;
-import com._4psa.extensionmessages_xsd._2_0_3.AddCallRulesInResponse;
-import com._4psa.extensionmessages_xsd._2_0_3.DelCallRulesInRequest;
-import com._4psa.extensionmessages_xsd._2_0_3.DelCallRulesInRequestChoice_type0;
-import com._4psa.extensionmessages_xsd._2_0_3.DelCallRulesInResponse;
-import com._4psa.extensionmessages_xsd._2_0_3.GetCallRulesInRequest;
-import com._4psa.extensionmessages_xsd._2_0_3.GetCallRulesInResponse;
-import com._4psa.extensionmessagesinfo_xsd._2_0_3.GetCallRulesInResponseType;
-import com._4psa.extensionmessagesinfo_xsd._2_0_3.GetCallRulesInResponseTypeSequence_type0;
-import com._4psa.extensionmessagesinfo_xsd._2_0_3.Rules_type0;
-import com._4psa.headerdata_xsd._2_0_3.UserCredentials;
-import com._4psa.headerdata_xsd._2_0_3.UserCredentialsSequence_type0;
-import com._4psa.voipnowservice._2_0_3.ExtensionPortStub;
+import com._4psa.common_xsd._2_0_4.DelObject;
+import com._4psa.common_xsd._2_0_4.PositiveInteger;
+import com._4psa.common_xsd._2_0_4.Rule;
+import com._4psa.common_xsd._2_0_4.UpdateObject;
+import com._4psa.extensiondata_xsd._2_0_4.CallRuleInfo;
+import com._4psa.extensiondata_xsd._2_0_4.Match_type1;
+import com._4psa.extensionmessages_xsd._2_0_4.AddCallRulesInRequest;
+import com._4psa.extensionmessages_xsd._2_0_4.AddCallRulesInRequestChoice_type0;
+import com._4psa.extensionmessages_xsd._2_0_4.AddCallRulesInResponse;
+import com._4psa.extensionmessages_xsd._2_0_4.DelCallRulesInRequest;
+import com._4psa.extensionmessages_xsd._2_0_4.DelCallRulesInRequestChoice_type0;
+import com._4psa.extensionmessages_xsd._2_0_4.DelCallRulesInResponse;
+import com._4psa.extensionmessages_xsd._2_0_4.GetCallRulesInRequest;
+import com._4psa.extensionmessages_xsd._2_0_4.GetCallRulesInResponse;
+import com._4psa.extensionmessagesinfo_xsd._2_0_4.GetCallRulesInResponseType;
+import com._4psa.extensionmessagesinfo_xsd._2_0_4.GetCallRulesInResponseTypeSequence_type0;
+import com._4psa.extensionmessagesinfo_xsd._2_0_4.Rules_type1;
+import com._4psa.headerdata_xsd._2_0_4.UserCredentials;
+import com._4psa.headerdata_xsd._2_0_4.UserCredentialsSequence_type0;
+import com._4psa.voipnowservice._2_0_4.ExtensionPortStub;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
@@ -139,11 +138,11 @@ public final class SetFollowMeAction extends AbstractVoipNowSOAPAction<Extension
             final UserCredentials userCredentials = new UserCredentials();
             {
                 final UserCredentialsSequence_type0 sequenceType0 = new UserCredentialsSequence_type0();
-                final com._4psa.common_xsd._2_0_3.Password pw = new com._4psa.common_xsd._2_0_3.Password();
+                final com._4psa.common_xsd._2_0_4.Password pw = new com._4psa.common_xsd._2_0_4.Password();
                 pw.setPassword(setting.getPassword());
                 sequenceType0.setPassword(pw);
 
-                final com._4psa.common_xsd._2_0_3.String login = new com._4psa.common_xsd._2_0_3.String();
+                final com._4psa.common_xsd._2_0_4.String login = new com._4psa.common_xsd._2_0_4.String();
                 login.setString(setting.getLogin());
                 sequenceType0.setUsername(login);
                 userCredentials.setUserCredentialsSequence_type0(sequenceType0);
@@ -161,15 +160,15 @@ public final class SetFollowMeAction extends AbstractVoipNowSOAPAction<Extension
             {
                 final GetCallRulesInRequest callRulesInRequest = new GetCallRulesInRequest();
                 callRulesInRequest.setUserID(userIdInteger);
-                final GetCallRulesInResponse getCallRulesInResponse = stub.GetCallRulesIn(callRulesInRequest, userCredentials);
+                final GetCallRulesInResponse getCallRulesInResponse = stub.getCallRulesIn(callRulesInRequest, userCredentials);
                 final GetCallRulesInResponseType getCallRulesInResponseType = getCallRulesInResponse.getGetCallRulesInResponse();
                 final GetCallRulesInResponseTypeSequence_type0 sequenceType0 =
                     getCallRulesInResponseType.getGetCallRulesInResponseTypeSequence_type0();
-                final Rules_type0[] rules = sequenceType0.getRules();
+                final Rules_type1[] rules = sequenceType0.getRules();
                 if (null != rules) {
                     followMeRulesIDs = new ArrayList<Integer>(rules.length);
                     for (int i = 0; i < rules.length; i++) {
-                        final Rules_type0 rule = rules[i];
+                        final Rules_type1 rule = rules[i];
                         if (followMeStr.equals(rule.getAction().getValue())) {
                             followMeRulesIDs.add(Integer.valueOf(rule.getRuleID().getPositiveInteger().intValue()));
                         }
@@ -198,7 +197,7 @@ public final class SetFollowMeAction extends AbstractVoipNowSOAPAction<Extension
                 cType0.setUserID(userIdInteger);
                 delRequest.setDelCallRulesInRequestChoice_type0(cType0);
 
-                final DelCallRulesInResponse delCallRulesInResponse = stub.DelCallRulesIn(delRequest, userCredentials);
+                final DelCallRulesInResponse delCallRulesInResponse = stub.delCallRulesIn(delRequest, userCredentials);
                 final DelObject delObject = delCallRulesInResponse.getDelCallRulesInResponse();
                 final String success = delObject.getResult().getValue();
                 if (!successStr.equalsIgnoreCase(success)) {
@@ -220,7 +219,7 @@ public final class SetFollowMeAction extends AbstractVoipNowSOAPAction<Extension
                 /*
                  * "followme"
                  */
-                final com._4psa.extensiondata_xsd._2_0_3.Action_type3 action = new Action_type3(followMeStr, false) {
+                final com._4psa.extensiondata_xsd._2_0_4.Action_type5 action = new com._4psa.extensiondata_xsd._2_0_4.Action_type5(followMeStr, false) {
                     // Nothing to do
                 };
                 callRuleInfo.setAction(action);
@@ -240,7 +239,7 @@ public final class SetFollowMeAction extends AbstractVoipNowSOAPAction<Extension
                 /*
                  * transferTo
                  */
-                final com._4psa.common_xsd._2_0_3.String transferToString = new com._4psa.common_xsd._2_0_3.String();
+                final com._4psa.common_xsd._2_0_4.String transferToString = new com._4psa.common_xsd._2_0_4.String();
                 final StringBuilder sb = new StringBuilder(transferTo.length * 8);
                 sb.append(transferTo[0]);
                 for (int i = 1; i < transferTo.length; i++) {
@@ -261,7 +260,7 @@ public final class SetFollowMeAction extends AbstractVoipNowSOAPAction<Extension
                 /*
                  * Execute request
                  */
-                final AddCallRulesInResponse addCallRulesInResponse = stub.AddCallRulesIn(addCallRulesInRequest, userCredentials);
+                final AddCallRulesInResponse addCallRulesInResponse = stub.addCallRulesIn(addCallRulesInRequest, userCredentials);
                 final UpdateObject callRulesInResponse = addCallRulesInResponse.getAddCallRulesInResponse();
                 final String success = callRulesInResponse.getResult().getValue();
                 if (!successStr.equalsIgnoreCase(success)) {

@@ -135,7 +135,7 @@ public class Activator implements BundleActivator {
 
                         @Override
                         protected void doInit(final ConfigurationService service) {
-                            com._4psa.Version.setVersion(service.getProperty("com.4psa.voipnow.version", "2.0.3"));
+                            com._4psa.Version.setVersion(service.getProperty("com.4psa.voipnow.version", "2.0.4"));
                         }
                     };
                 trackers.push(new ServiceTracker(context, ConfigurationService.class.getName(), cst));

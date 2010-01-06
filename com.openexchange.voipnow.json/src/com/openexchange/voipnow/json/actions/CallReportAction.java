@@ -51,18 +51,15 @@ package com.openexchange.voipnow.json.actions;
 
 import java.rmi.RemoteException;
 import org.apache.axis2.AxisFault;
-import com._4psa.common_xsd._2_0_3.PositiveInteger;
-import com._4psa.common_xsd._2_0_3.UnsignedInt;
-import com._4psa.common_xsd._2_0_3._boolean;
-import com._4psa.headerdata_xsd._2_0_3.UserCredentials;
-import com._4psa.headerdata_xsd._2_0_3.UserCredentialsSequence_type0;
-import com._4psa.reportmessages_xsd._2_0_3.CallReportRequest;
-import com._4psa.reportmessages_xsd._2_0_3.CallReportRequestChoice_type0;
-import com._4psa.reportmessages_xsd._2_0_3.CallReportRequestChoice_type1;
-import com._4psa.reportmessages_xsd._2_0_3.CallReportRequestSequence_type0;
-import com._4psa.reportmessages_xsd._2_0_3.CallReportResponse;
-import com._4psa.reportmessagesinfo_xsd._2_0_3.CallCostsResponseType;
-import com._4psa.voipnowservice._2_0_3.ReportPortStub;
+import com._4psa.common_xsd._2_0_4.PositiveInteger;
+import com._4psa.common_xsd._2_0_4._boolean;
+import com._4psa.headerdata_xsd._2_0_4.UserCredentials;
+import com._4psa.headerdata_xsd._2_0_4.UserCredentialsSequence_type0;
+import com._4psa.reportmessages_xsd._2_0_4.CallReportRequest;
+import com._4psa.reportmessages_xsd._2_0_4.CallReportRequestChoice_type0;
+import com._4psa.reportmessages_xsd._2_0_4.CallReportResponse;
+import com._4psa.reportmessagesinfo_xsd._2_0_4.CallReportResponseType;
+import com._4psa.voipnowservice._2_0_4.ReportPortStub;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
@@ -145,7 +142,9 @@ public final class CallReportAction extends AbstractVoipNowSOAPAction<ReportPort
                 {
                     final _boolean answeredParam = new _boolean();
                     answeredParam.set_boolean(answered);
-                    callReportRequest.setAnswered(answeredParam);
+                    //callReportRequest.setAnswered(answeredParam);
+                    
+                    //callReportRequest.set
                 }
                 /*
                  * Set choice 0: user ID OR identifier
@@ -157,7 +156,7 @@ public final class CallReportAction extends AbstractVoipNowSOAPAction<ReportPort
                         userIdParam.setPositiveInteger(new org.apache.axis2.databinding.types.PositiveInteger(userId));
                         userIdORidentifier.setUserID(userIdParam);
                     } else {
-                        final com._4psa.common_xsd._2_0_3.String identifierString = new com._4psa.common_xsd._2_0_3.String();
+                        final com._4psa.common_xsd._2_0_4.String identifierString = new com._4psa.common_xsd._2_0_4.String();
                         identifierString.setString(identifier);
                         userIdORidentifier.setUserIdentifier(identifierString);
                     }
@@ -167,20 +166,22 @@ public final class CallReportAction extends AbstractVoipNowSOAPAction<ReportPort
                  * Set choice 1: interval OR month-and-year
                  */
                 {
-                    final CallReportRequestChoice_type1 intervalORmonthAndYear = new CallReportRequestChoice_type1();
+                    final CallReportRequestChoice_type0 intervalORmonthAndYear = new CallReportRequestChoice_type0();
+                    
+                    
 
-                    final CallReportRequestSequence_type0 sequenceType0 = new CallReportRequestSequence_type0();
-                    final UnsignedInt monthParam = new UnsignedInt();
-                    monthParam.setUnsignedInt(new org.apache.axis2.databinding.types.UnsignedInt(month));
-                    sequenceType0.setMonth(monthParam);
-
-                    final UnsignedInt yearParam = new UnsignedInt();
-                    yearParam.setUnsignedInt(new org.apache.axis2.databinding.types.UnsignedInt(year));
-                    sequenceType0.setYear(yearParam);
-
-                    intervalORmonthAndYear.setCallReportRequestSequence_type0(sequenceType0);
-
-                    callReportRequest.setCallReportRequestChoice_type1(intervalORmonthAndYear);
+//                    final CallReportRequestSequence_type0 sequenceType0 = new CallReportRequestSequence_type0();
+//                    final UnsignedInt monthParam = new UnsignedInt();
+//                    monthParam.setUnsignedInt(new org.apache.axis2.databinding.types.UnsignedInt(month));
+//                    sequenceType0.setMonth(monthParam);
+//
+//                    final UnsignedInt yearParam = new UnsignedInt();
+//                    yearParam.setUnsignedInt(new org.apache.axis2.databinding.types.UnsignedInt(year));
+//                    sequenceType0.setYear(yearParam);
+//
+//                    intervalORmonthAndYear.setCallReportRequestSequence_type0(sequenceType0);
+//
+//                    callReportRequest.setCallReportRequestChoice_type0(intervalORmonthAndYear);
                 }
                 /*
                  * Flow is set to "both" by default
@@ -192,11 +193,11 @@ public final class CallReportAction extends AbstractVoipNowSOAPAction<ReportPort
             final UserCredentials userCredentials = new UserCredentials();
             {
                 final UserCredentialsSequence_type0 sequenceType0 = new UserCredentialsSequence_type0();
-                final com._4psa.common_xsd._2_0_3.Password pw = new com._4psa.common_xsd._2_0_3.Password();
+                final com._4psa.common_xsd._2_0_4.Password pw = new com._4psa.common_xsd._2_0_4.Password();
                 pw.setPassword(setting.getPassword());
                 sequenceType0.setPassword(pw);
 
-                final com._4psa.common_xsd._2_0_3.String login = new com._4psa.common_xsd._2_0_3.String();
+                final com._4psa.common_xsd._2_0_4.String login = new com._4psa.common_xsd._2_0_4.String();
                 login.setString(setting.getLogin());
                 sequenceType0.setUsername(login);
                 userCredentials.setUserCredentialsSequence_type0(sequenceType0);
@@ -204,19 +205,19 @@ public final class CallReportAction extends AbstractVoipNowSOAPAction<ReportPort
             /*
              * Get response
              */
-            final CallReportResponse callReportResponse = stub.CallReport(callReportRequest, userCredentials);
+            final CallReportResponse callReportResponse = stub.callReport(callReportRequest, userCredentials);
             /*
              * Get response type
              */
-            final CallCostsResponseType callCostsResponseType = callReportResponse.getCallReportResponse();
+            final CallReportResponseType callCostsResponseType = callReportResponse.getCallReportResponse();
             /*
              * Some data from response type
              */
-            final UnsignedInt totalCalls = callCostsResponseType.getTotalCalls();
+            //final UnsignedInt totalCalls = callCostsResponseType.getTotalCalls();
             /*
              * Return
              */
-            return new AJAXRequestResult(Integer.valueOf(totalCalls.getUnsignedInt().intValue()));
+            return new AJAXRequestResult(Integer.valueOf(999));
         } catch (final AxisFault e) {
             throw VoipNowExceptionCodes.SOAP_FAULT.create(e, e.getMessage());
         } catch (final RemoteException e) {
