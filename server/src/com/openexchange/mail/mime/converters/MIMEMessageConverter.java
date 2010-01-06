@@ -53,6 +53,7 @@ import static com.openexchange.mail.mime.utils.MIMEMessageUtility.decodeMultiEnc
 import static com.openexchange.mail.mime.utils.MIMEMessageUtility.getFileName;
 import static com.openexchange.mail.mime.utils.MIMEMessageUtility.hasAttachments;
 import static com.openexchange.mail.mime.utils.MIMEMessageUtility.unfold;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -63,6 +64,7 @@ import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.Header;
@@ -76,6 +78,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimePart;
+
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
@@ -117,15 +120,16 @@ public final class MIMEMessageConverter {
 
     private static interface MailMessageFieldFiller {
 
-        public static final String[] NON_MATCHING_HEADERS =
-            {
-                MessageHeaders.HDR_FROM, MessageHeaders.HDR_TO, MessageHeaders.HDR_CC, MessageHeaders.HDR_BCC,
-                MessageHeaders.HDR_DISP_NOT_TO, MessageHeaders.HDR_REPLY_TO, MessageHeaders.HDR_SUBJECT, MessageHeaders.HDR_DATE,
-                MessageHeaders.HDR_X_PRIORITY, MessageHeaders.HDR_MESSAGE_ID, MessageHeaders.HDR_IN_REPLY_TO,
+        public static final String[] NON_MATCHING_HEADERS = { MessageHeaders.HDR_FROM, MessageHeaders.HDR_TO, MessageHeaders.HDR_CC,
+                MessageHeaders.HDR_BCC, MessageHeaders.HDR_DISP_NOT_TO, MessageHeaders.HDR_REPLY_TO, MessageHeaders.HDR_SUBJECT,
+                MessageHeaders.HDR_DATE, MessageHeaders.HDR_X_PRIORITY, MessageHeaders.HDR_MESSAGE_ID, MessageHeaders.HDR_IN_REPLY_TO,
                 MessageHeaders.HDR_REFERENCES, MessageHeaders.HDR_X_OX_VCARD, MessageHeaders.HDR_X_OX_NOTIFICATION };
 
-        public static final org.apache.commons.logging.Log LOG1 =
-            org.apache.commons.logging.LogFactory.getLog(MailMessageFieldFiller.class);
+        public static final String[] ALREADY_INSERTED_HEADERS = { MessageHeaders.HDR_MESSAGE_ID, MessageHeaders.HDR_REPLY_TO,
+                MessageHeaders.HDR_REFERENCES };
+
+        public static final org.apache.commons.logging.Log LOG1 = org.apache.commons.logging.LogFactory
+                .getLog(MailMessageFieldFiller.class);
 
         /**
          * Fills a fields from source instance of {@link Message} in given destination instance of {@link MailMessage}.
@@ -585,9 +589,9 @@ public final class MIMEMessageConverter {
                     }
                 }
                 /*
-                 * All other
+                 * Add all as regular headers; except previously inserted headers
                  */
-                for (final Enumeration<?> e = extMimeMessage.getNonMatchingHeaders(NON_MATCHING_HEADERS); e.hasMoreElements();) {
+                for (final Enumeration<?> e = msg.getNonMatchingHeaders(ALREADY_INSERTED_HEADERS); e.hasMoreElements();) {
                     final Header h = (Header) e.nextElement();
                     try {
                         mailMessage.addHeader(h.getName(), h.getValue());
@@ -872,9 +876,9 @@ public final class MIMEMessageConverter {
                     }
                 }
                 /*
-                 * All other
+                 * Add all as regular headers; except previously inserted headers
                  */
-                for (final Enumeration<?> e = msg.getNonMatchingHeaders(NON_MATCHING_HEADERS); e.hasMoreElements();) {
+                for (final Enumeration<?> e = msg.getNonMatchingHeaders(ALREADY_INSERTED_HEADERS); e.hasMoreElements();) {
                     final Header h = (Header) e.nextElement();
                     try {
                         mailMessage.addHeader(h.getName(), h.getValue());
