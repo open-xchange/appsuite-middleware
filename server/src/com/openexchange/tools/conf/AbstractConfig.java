@@ -203,10 +203,10 @@ public abstract class AbstractConfig {
         }
         final File propFile = new File(propFileName);
         if (!propFile.exists()) {
-            throw new ConfigurationException(Code.FILE_NOT_FOUND, propFileName);
+            throw new ConfigurationException(Code.FILE_NOT_FOUND, propFile.getAbsoluteFile());
         }
         if (!propFile.canRead()) {
-            throw new ConfigurationException(Code.NOT_READABLE, propFileName);
+            throw new ConfigurationException(Code.NOT_READABLE, propFile.getAbsoluteFile());
         }
         loadProperties(propFile);
     }
