@@ -53,6 +53,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 import com.openexchange.groupware.importexport.ImportExportStandaloneSuite;
 import com.openexchange.groupware.infostore.WebdavFolderAliasesTest;
+import com.openexchange.pubsub.TemplateTestSuite;
 
 public class UnitTests {
 
@@ -164,6 +165,8 @@ public class UnitTests {
         
         tests.addTest(ImportExportStandaloneSuite.suite());
 
+        tests.addTest(TemplateTestSuite.suite());
+        
         // Slow Tests
         tests.addTest(com.openexchange.webdav.protocol.ProtocolTestSuite.suite());
         tests.addTest(com.openexchange.webdav.action.ActionTestSuite.suite());
