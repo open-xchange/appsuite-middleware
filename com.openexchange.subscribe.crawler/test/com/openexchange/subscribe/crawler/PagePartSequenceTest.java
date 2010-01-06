@@ -129,7 +129,7 @@ public class PagePartSequenceTest extends TestCase {
     }
     
     public void testWebDeSubpage(){
-        String page =">51379ÊLeverkusen<br>Germany</td>";
+        String page =">51379\u00a0Leverkusen<br>Germany</td>";
         ArrayList<PagePart> pageParts = new ArrayList<PagePart>();
         pageParts.add(new PagePart("(>)([0-9]*)()", "postal_code_home"));
         pageParts.add(new PagePart("()([a-zA-Z\u00e4\u00f6\u00fc]*)(<br)", "city_home"));
