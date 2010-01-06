@@ -54,7 +54,6 @@ import org.apache.axis2.AxisFault;
 import com._4psa.common_xsd._2_0_4.PositiveInteger;
 import com._4psa.common_xsd._2_0_4._boolean;
 import com._4psa.headerdata_xsd._2_0_4.UserCredentials;
-import com._4psa.headerdata_xsd._2_0_4.UserCredentialsSequence_type0;
 import com._4psa.reportmessages_xsd._2_0_4.CallReportRequest;
 import com._4psa.reportmessages_xsd._2_0_4.CallReportRequestChoice_type0;
 import com._4psa.reportmessages_xsd._2_0_4.CallReportResponse;
@@ -187,21 +186,7 @@ public final class CallReportAction extends AbstractVoipNowSOAPAction<ReportPort
                  * Flow is set to "both" by default
                  */
             }
-            /*
-             * Create user credentials
-             */
-            final UserCredentials userCredentials = new UserCredentials();
-            {
-                final UserCredentialsSequence_type0 sequenceType0 = new UserCredentialsSequence_type0();
-                final com._4psa.common_xsd._2_0_4.Password pw = new com._4psa.common_xsd._2_0_4.Password();
-                pw.setPassword(setting.getPassword());
-                sequenceType0.setPassword(pw);
-
-                final com._4psa.common_xsd._2_0_4.String login = new com._4psa.common_xsd._2_0_4.String();
-                login.setString(setting.getLogin());
-                sequenceType0.setUsername(login);
-                userCredentials.setUserCredentialsSequence_type0(sequenceType0);
-            }
+            final UserCredentials userCredentials = getUserCredentials(setting);
             /*
              * Get response
              */

@@ -89,7 +89,7 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
 
         final VoipNowServerSetting retval = new VoipNowServerSetting();
         retval.setPort(service.getIntProperty("com.4psa.voipnow.port", 443));
-        retval.setHost(service.getProperty("com.4psa.voipnow.host", "").trim());
+        retval.setHost(service.getProperty("com.4psa.voipnow.host", "localhost").trim());
         retval.setSecure(Boolean.parseBoolean(service.getProperty("com.4psa.voipnow.secure", "true").trim()));
         retval.setLogin(service.getProperty("com.4psa.voipnow.adminLogin", "").trim());
         retval.setPassword(service.getProperty("com.4psa.voipnow.adminPassword", "").trim());

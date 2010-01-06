@@ -56,6 +56,8 @@ import org.apache.axis2.client.Stub;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
+import com._4psa.headerdata_xsd._2_0_4.UserCredentials;
+import com._4psa.headerdata_xsd._2_0_4.UserCredentialsSequence_type0;
 import com.openexchange.voipnow.json.http.TrustAllAdapter;
 
 /**
@@ -149,6 +151,31 @@ public abstract class AbstractVoipNowSOAPAction<S extends Stub> extends Abstract
         options.setCallTransportCleanup(true);
         options.setExceptionToBeThrownOnSOAPFault(false);
         return soapStub;
+    }
+
+    /**
+     * Gets the SOAP {@link UserCredentials} from specified {@link VoipNowServerSetting setting}.
+     * 
+     * @param setting The VoipNow server setting
+     * @return The SOAP {@link UserCredentials} instance
+     */
+    protected UserCredentials getUserCredentials(final VoipNowServerSetting setting) {
+        /*
+         * Create user credentials
+         */
+        final UserCredentials userCredentials = new UserCredentials();
+        {
+            final UserCredentialsSequence_type0 sequenceType0 = new UserCredentialsSequence_type0();
+            final com._4psa.common_xsd._2_0_4.Password pw = new com._4psa.common_xsd._2_0_4.Password();
+            pw.setPassword(setting.getPassword());
+            sequenceType0.setPassword(pw);
+
+            final com._4psa.common_xsd._2_0_4.String login = new com._4psa.common_xsd._2_0_4.String();
+            login.setString(setting.getLogin());
+            sequenceType0.setUsername(login);
+            userCredentials.setUserCredentialsSequence_type0(sequenceType0);
+        }
+        return userCredentials;
     }
 
 }

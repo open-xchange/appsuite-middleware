@@ -56,7 +56,6 @@ import com._4psa.extensionmessages_xsd._2_0_4.GetExtensionDetailsRequest;
 import com._4psa.extensionmessages_xsd._2_0_4.GetExtensionDetailsResponse;
 import com._4psa.extensionmessagesinfo_xsd._2_0_4.GetExtensionDetailsResponseType;
 import com._4psa.headerdata_xsd._2_0_4.UserCredentials;
-import com._4psa.headerdata_xsd._2_0_4.UserCredentialsSequence_type0;
 import com._4psa.voipnowservice._2_0_4.ExtensionPortStub;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -117,18 +116,7 @@ public final class ExtensionDetailsAction extends AbstractVoipNowSOAPAction<Exte
             /*
              * Create user credentials
              */
-            final UserCredentials userCredentials = new UserCredentials();
-            {
-                final UserCredentialsSequence_type0 sequenceType0 = new UserCredentialsSequence_type0();
-                final com._4psa.common_xsd._2_0_4.Password pw = new com._4psa.common_xsd._2_0_4.Password();
-                pw.setPassword("oxSecure");
-                sequenceType0.setPassword(pw);
-
-                final com._4psa.common_xsd._2_0_4.String login = new com._4psa.common_xsd._2_0_4.String();
-                login.setString("admin");
-                sequenceType0.setUsername(login);
-                userCredentials.setUserCredentialsSequence_type0(sequenceType0);
-            }
+            final UserCredentials userCredentials = getUserCredentials(setting);
             /*
              * Perform request and retrieve response
              */

@@ -56,7 +56,6 @@ import com._4psa.clientmessages_xsd._2_0_4.GetClientDetailsResponse;
 import com._4psa.clientmessagesinfo_xsd._2_0_4.GetClientDetailsResponseType;
 import com._4psa.common_xsd._2_0_4.PositiveInteger;
 import com._4psa.headerdata_xsd._2_0_4.UserCredentials;
-import com._4psa.headerdata_xsd._2_0_4.UserCredentialsSequence_type0;
 import com._4psa.voipnowservice._2_0_4.ClientPortStub;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -119,30 +118,7 @@ public final class ClientDetailsAction extends AbstractVoipNowSOAPAction<ClientP
             final com._4psa.common_xsd._2_0_4.String identifierString = new com._4psa.common_xsd._2_0_4.String();
             identifierString.setString(/* identifier */clientId);
             // detailRequest.setIdentifier(identifierString);
-            /*
-             * Create user credentials
-             */
-            final UserCredentials userCredentials = new UserCredentials();
-            {
-                final UserCredentialsSequence_type0 sequenceType0 = new UserCredentialsSequence_type0();
-                final com._4psa.common_xsd._2_0_4.Password pw = new com._4psa.common_xsd._2_0_4.Password();
-                pw.setPassword("oxSecure");
-                sequenceType0.setPassword(pw);
-
-                final com._4psa.common_xsd._2_0_4.String login = new com._4psa.common_xsd._2_0_4.String();
-                login.setString("admin");
-                sequenceType0.setUsername(login);
-                userCredentials.setUserCredentialsSequence_type0(sequenceType0);
-
-                /*-
-                 * 
-                final UserCredentialsSequence_type1 sequenceType1 = new UserCredentialsSequence_type1();
-                com._4psa.common_xsd._2_0_4.String cryptedAuth = new com._4psa.common_xsd._2_0_4.String();
-                cryptedAuth.setString("base64-encoded-crypted-auth");
-                
-                sequenceType1.setCryptedAuth(cryptedAuth);
-                 */
-            }
+            final UserCredentials userCredentials = getUserCredentials(setting);
             /*
              * Perform request and retrieve response
              */

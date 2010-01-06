@@ -54,7 +54,6 @@ import org.apache.axis2.AxisFault;
 import com._4psa.common_xsd._2_0_4.Integer;
 import com._4psa.common_xsd._2_0_4.PositiveInteger;
 import com._4psa.headerdata_xsd._2_0_4.UserCredentials;
-import com._4psa.headerdata_xsd._2_0_4.UserCredentialsSequence_type0;
 import com._4psa.pbxdata_xsd._2_0_4.TimeIntervalBlock;
 import com._4psa.pbxmessages_xsd._2_0_4.GetTimeIntervalBlocksRequest;
 import com._4psa.pbxmessages_xsd._2_0_4.GetTimeIntervalBlocksRequestChoice_type0;
@@ -128,18 +127,7 @@ public final class GetTimeIntervalAction extends AbstractVoipNowSOAPAction<PBXPo
             /*
              * Create user credentials
              */
-            final UserCredentials userCredentials = new UserCredentials();
-            {
-                final UserCredentialsSequence_type0 sequenceType0 = new UserCredentialsSequence_type0();
-                final com._4psa.common_xsd._2_0_4.Password pw = new com._4psa.common_xsd._2_0_4.Password();
-                pw.setPassword(setting.getPassword());
-                sequenceType0.setPassword(pw);
-
-                final com._4psa.common_xsd._2_0_4.String login = new com._4psa.common_xsd._2_0_4.String();
-                login.setString(setting.getLogin());
-                sequenceType0.setUsername(login);
-                userCredentials.setUserCredentialsSequence_type0(sequenceType0);
-            }
+            final UserCredentials userCredentials = getUserCredentials(setting);
             /*
              * Execute request
              */
