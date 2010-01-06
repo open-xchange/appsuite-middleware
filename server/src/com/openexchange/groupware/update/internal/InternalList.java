@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.update.internal;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.UpdateTaskV2;
@@ -59,6 +61,8 @@ import com.openexchange.groupware.update.UpdateTaskV2;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public final class InternalList {
+
+    private static final Log LOG = LogFactory.getLog(InternalList.class);
 
     private static final InternalList SINGLETON = new InternalList();
 
@@ -73,10 +77,14 @@ public final class InternalList {
     public void start() {
         DynamicList registry = DynamicList.getInstance();
         for (UpdateTask task : OLD_TASKS) {
-            registry.addUpdateTask(task);
+            if (!registry.addUpdateTask(task)) {
+                LOG.error("Internal update task \"" + task.getClass().getName() + "\" could not be registered.", new Exception());
+            }
         }
         for (UpdateTaskV2 task : TASKS) {
-            registry.addUpdateTask(task);
+            if (!registry.addUpdateTask(task)) {
+                LOG.error("Internal update task \"" + task.getClass().getName() + "\" could not be registered.", new Exception());
+            }
         }
     }
 

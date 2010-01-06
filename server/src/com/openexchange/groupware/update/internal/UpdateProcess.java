@@ -47,11 +47,14 @@
  *
  */
 
-package com.openexchange.groupware.update;
+package com.openexchange.groupware.update.internal;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.groupware.update.internal.UpdateExecutor;
+import com.openexchange.groupware.update.SchemaException;
+import com.openexchange.groupware.update.SchemaStore;
+import com.openexchange.groupware.update.SchemaUpdateState;
+import com.openexchange.groupware.update.UpdateTaskCollection;
 
 /**
  * The {@link #run()} method of this class is started in a separate thread for

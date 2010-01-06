@@ -50,7 +50,6 @@
 package com.openexchange.groupware.update.osgi;
 
 import java.util.Collection;
-import java.util.Iterator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
@@ -79,28 +78,23 @@ public final class UpdateTaskCustomizer implements ServiceTrackerCustomizer {
     public Object addingService(final ServiceReference reference) {
         UpdateTaskProviderService providerService = (UpdateTaskProviderService) context.getService(reference);
         DynamicList registry = DynamicList.getInstance();
-        if (null != registry) {
-            // Get provider's collection
-            final Collection<UpdateTask> collection = providerService.getUpdateTasks();
-            boolean error = false;
-            final int size = collection.size();
-            final Iterator<UpdateTask> iter = collection.iterator();
-            for (int i = 0; !error && i < size; i++) {
-                final UpdateTask task = iter.next();
-                if (!registry.addUpdateTask(task)) {
-                    LOG.error(new StringBuilder().append("Update task \"").append(task.getClass().getName()).append(
-                        "\" could not be registered."), new Throwable());
-                    error = true;
-                }
+        // Get provider's collection
+        final Collection<UpdateTask> collection = providerService.getUpdateTasks();
+        boolean error = false;
+        for (UpdateTask task : collection) {
+            if (!registry.addUpdateTask(task)) {
+                LOG.error("Update task \"" + task.getClass().getName() + "\" could not be registered.", new Exception());
+                error = true;
+                break;
             }
-            if (!error) {
-                // Everything worked fine
-                return providerService;
-            }
-            // Rollback
-            for (final UpdateTask task : collection) {
-                registry.removeUpdateTask(task);
-            }
+        }
+        if (!error) {
+            // Everything worked fine
+            return providerService;
+        }
+        // Rollback
+        for (final UpdateTask task : collection) {
+            registry.removeUpdateTask(task);
         }
         // Nothing to track, return null
         context.ungetService(reference);
@@ -115,17 +109,14 @@ public final class UpdateTaskCustomizer implements ServiceTrackerCustomizer {
         if (null != service) {
             try {
                 final DynamicList registry = DynamicList.getInstance();
-                if (null != registry) {
-                    final UpdateTaskProviderService providerService = (UpdateTaskProviderService) service;
-                    final Collection<UpdateTask> collection = providerService.getUpdateTasks();
-                    for (final UpdateTask task : collection) {
-                        registry.removeUpdateTask(task);
-                    }
+                final UpdateTaskProviderService providerService = (UpdateTaskProviderService) service;
+                final Collection<UpdateTask> collection = providerService.getUpdateTasks();
+                for (final UpdateTask task : collection) {
+                    registry.removeUpdateTask(task);
                 }
             } finally {
                 context.ungetService(reference);
             }
         }
     }
-
 }

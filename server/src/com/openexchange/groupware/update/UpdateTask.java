@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.update;
 
-import java.util.EnumSet;
 import com.openexchange.groupware.AbstractOXException;
 
 /**

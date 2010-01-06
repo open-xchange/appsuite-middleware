@@ -49,44 +49,15 @@
 
 package com.openexchange.groupware.update;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import com.openexchange.groupware.update.internal.InternalList;
-
 /**
- * {@link Initialization} starts all internal structures especially the list of update tasks.
+ * This is only a marker interface for third party update tasks. In the past there have been reasons for introducing this marker interface.
+ * The reason was the configuration file updatetasks.cfg. It contained a list of tasks to execute. And this marker interface should indicate
+ * tasks that should be executed although they are not listed in the updatetasks.cfg configuration file. But that configuration file has
+ * been removed and it was replaced by a configurable exclude list of update tasks that does not have the necessity to indicate tasks added
+ * by some third party.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class Initialization {
-
-    private static final Initialization SINGLETON = new Initialization();
-
-    private static final Log LOG = LogFactory.getLog(Initialization.class);
-
-    private final AtomicBoolean started;
-
-    private Initialization() {
-        super();
-        started = new AtomicBoolean();
-    }
-
-    public static Initialization getInstance() {
-        return SINGLETON;
-    }
-
-    public void start() {
-        if (!started.compareAndSet(false, true)) {
-            LOG.error("Database update component has already been started.", new Throwable());
-        }
-        InternalList.getInstance().start();
-    }
-
-    public void stop() {
-        if (!started.compareAndSet(true, false)) {
-            LOG.error("Database update component cannot be stopped since it has not been started before.", new Throwable());
-        }
-        InternalList.getInstance().stop();
-    }
+public interface ExternalUpdateTask extends UpdateTaskV2 {
+    // Only a marker interface.
 }

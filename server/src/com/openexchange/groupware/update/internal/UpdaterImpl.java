@@ -53,7 +53,6 @@ import com.openexchange.groupware.update.SchemaException;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.SchemaUpdateState;
 import com.openexchange.groupware.update.UpdateException;
-import com.openexchange.groupware.update.UpdateProcess;
 import com.openexchange.groupware.update.UpdateTaskCollection;
 import com.openexchange.groupware.update.Updater;
 import com.openexchange.server.ServiceException;

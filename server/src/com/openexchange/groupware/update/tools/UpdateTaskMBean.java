@@ -67,7 +67,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateException;
-import com.openexchange.groupware.update.UpdateProcess;
+import com.openexchange.groupware.update.internal.UpdateProcess;
 
 /**
  * {@link UpdateTaskMBean} - MBean for update task toolkit.
