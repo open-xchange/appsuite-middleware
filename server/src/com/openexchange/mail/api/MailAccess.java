@@ -285,7 +285,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * 
      * @return the mailProperties
      */
-    public final Properties getMailProperties() {
+    public Properties getMailProperties() {
         return mailProperties;
     }
 
