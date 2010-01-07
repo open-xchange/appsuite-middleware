@@ -16,12 +16,10 @@ def find_disabled_test(filename)
   fh.each_line do |line|
     if line =~ /void\s+(\w+?[tT]est[^\(]+)\(\)/
       method = Regexp.last_match(1)
-      print "#{classname}##{method}\n"
+      print "#{classname}##{method}\n" unless line =~ /void\s+[tT]est/
     end
   end
 end
-
-disabled_tests = Array.new
 
 Find.find(File.dirname(__FILE__)+"/../../src") do |file|
   if is_ox_java_file?(file)
