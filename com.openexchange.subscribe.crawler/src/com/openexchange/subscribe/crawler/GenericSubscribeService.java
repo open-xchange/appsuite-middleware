@@ -80,14 +80,14 @@ public class GenericSubscribeService extends AbstractSubscribeService {
 
     private final String workflowString;
 
-    public GenericSubscribeService(final String displayName, final String id, final String workflowString, final int priority) {
+    public GenericSubscribeService(final String displayName, final String id, final int module, final String workflowString, final int priority) {
         FORM.add(FormElement.input(LOGIN, FORM_LABEL_LOGIN)).add(FormElement.password("password", FORM_LABEL_PASSWORD));
 
         SOURCE.setDisplayName(displayName);
         SOURCE.setId(id);
         SOURCE.setFormDescription(FORM);
         SOURCE.setSubscribeService(this);
-        SOURCE.setFolderModule(FolderObject.CONTACT);
+        SOURCE.setFolderModule(module);
         SOURCE.setPriority(priority);
         this.workflowString = workflowString;
     }

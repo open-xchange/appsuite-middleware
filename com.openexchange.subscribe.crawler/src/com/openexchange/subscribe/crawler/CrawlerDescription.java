@@ -49,6 +49,7 @@
 
 package com.openexchange.subscribe.crawler;
 
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.subscribe.crawler.osgi.Activator;
 
 /**
@@ -61,6 +62,9 @@ public class CrawlerDescription {
     private int priority = 0;
     
     private int crawlerApiVersion = 614;
+    
+    // set the default module to CONTACT to be compatible with API-Version 614
+    private int module = FolderObject.CONTACT;
 
     public CrawlerDescription() {
 
@@ -108,6 +112,16 @@ public class CrawlerDescription {
     
     public void setCrawlerApiVersion(int crawlerApiVersion) {
         this.crawlerApiVersion = crawlerApiVersion;
+    }
+
+    
+    public int getModule() {
+        return module;
+    }
+
+    
+    public void setModule(int module) {
+        this.module = module;
     }
 
     
