@@ -132,11 +132,6 @@ public abstract class MailCapabilities {
      * 
      * <pre>
      * 
-     * 
-     * 
-     * 
-     * 
-     * 
      * private static final int BIT_CUSTOM1 = 1 &lt;&lt; NEXT_SHIFT_OPERAND;
      * 
      * private static final int BIT_CUSTOM2 = 1 &lt;&lt; (NEXT_SHIFT_OPERAND + 1);
@@ -154,10 +149,14 @@ public abstract class MailCapabilities {
         NEXT_SHIFT_OPERAND = shiftOperand;
     }
 
+    /*-
+     * Member section
+     */
+
     /**
      * Initializes a new {@link MailCapabilities}
      */
-    public MailCapabilities() {
+    protected MailCapabilities() {
         super();
     }
 
@@ -223,6 +222,13 @@ public abstract class MailCapabilities {
         retval |= hasThreadReferences() ? BIT_THREAD_REFERENCES : 0;
         retval |= hasSubscription() ? BIT_SUBSCRIPTION : 0;
         return retval;
+    }
+
+    @Override
+    public String toString() {
+        return new StringBuilder(64).append(MailCapabilities.class.getSimpleName()).append(": hasPermissions=").append(hasPermissions()).append(
+            ", hasQuota=").append(hasQuota()).append(", hasSort=").append(hasSort()).append(", hasSubscription=").append(hasSubscription()).append(
+            ", hasThreadReferences=").append(hasThreadReferences()).toString();
     }
 
 }
