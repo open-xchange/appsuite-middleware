@@ -236,7 +236,7 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
                 }   
                 for (final Im im : entry.getImAddresses()) {
                     if (im.getProtocol() != null) {
-                        final String regex = "[^#]*#([a-zA-Z������]*)";
+                        final String regex = "[^#]*#([a-zA-Z\u00e4\u00f6\u00fc\u00c4\u00d6\u00dc]*)";
                         final Pattern pattern = Pattern.compile(regex);
                         final Matcher matcher = pattern.matcher(im.getProtocol());
                         if (matcher.matches()){
