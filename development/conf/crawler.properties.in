@@ -1,1 +1,4 @@
 com.openexchange.subscribe.crawler.path : @oxgroupwaresysconfdir@/../crawlers/
+com.openexchange.subscribe.crawler.updatepath : http://software.open-xchange.com/OX6/snapshot/crawler-updates/files/
+com.openexchange.subscribe.crawler.updatedfile : http://software.open-xchange.com/OX6/snapshot/crawler-updates/updates.html
+com.openexchange.subscribe.crawler.updateinterval : 86400000
