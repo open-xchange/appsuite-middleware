@@ -51,9 +51,11 @@ package com.openexchange.imap;
 
 import java.io.UnsupportedEncodingException;
 import java.net.SocketTimeoutException;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
@@ -85,6 +87,8 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
@@ -100,6 +104,16 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      * Serial Version UID
      */
     private static final long serialVersionUID = -7510487764376433468L;
+
+    /**
+     * The max. temporary-down value; 5 Minutes.
+     */
+    private static final long MAX_TEMP_DOWN = 300000L;
+
+    /**
+     * The timeout for failed logins.
+     */
+    private static final long FAILED_AUTH_TIMEOUT = 10000L;
 
     /**
      * The logger instance for {@link IMAPAccess} class.
@@ -121,7 +135,12 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      * Remembers failed authentication for 10 seconds. Any further login attempts with such remembered credentials will throw an appropriate
      * exception.
      */
-    private static Map<LoginAndPass, Long> failedAuths;
+    private static Map<LoginAndPass, StampAndError> failedAuths;
+
+    /**
+     * The scheduled timer task to clean-up maps.
+     */
+    private static ScheduledTimerTask cleanUpTimerTask;
 
     /*-
      * Member section
@@ -335,12 +354,13 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Get parameterized IMAP session
              */
-            final javax.mail.Session imapSession = setConnectProperties(
-                config.getPort(),
-                config.isSecure(),
-                imapConfProps.getImapTimeout(),
-                imapConfProps.getImapConnectionTimeout(),
-                imapProps);
+            final javax.mail.Session imapSession =
+                setConnectProperties(
+                    config.getPort(),
+                    config.isSecure(),
+                    imapConfProps.getImapTimeout(),
+                    imapConfProps.getImapConnectionTimeout(),
+                    imapProps);
             /*
              * Check if debug should be enabled
              */
@@ -416,12 +436,13 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Get parameterized IMAP session
              */
-            imapSession = setConnectProperties(
-                config.getPort(),
-                config.isSecure(),
-                imapConfProps.getImapTimeout(),
-                imapConfProps.getImapConnectionTimeout(),
-                imapProps);
+            imapSession =
+                setConnectProperties(
+                    config.getPort(),
+                    config.isSecure(),
+                    imapConfProps.getImapTimeout(),
+                    imapConfProps.getImapConnectionTimeout(),
+                    imapProps);
             /*
              * Check if debug should be enabled
              */
@@ -442,7 +463,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 /*
                  * Remember failed authentication's credentials (for a short amount of time) to fasten subsequent connect trials
                  */
-                failedAuths.put(new LoginAndPass(login, tmpPass), Long.valueOf(System.currentTimeMillis()));
+                failedAuths.put(new LoginAndPass(login, tmpPass), new StampAndError(e, System.currentTimeMillis()));
                 throw e;
             } catch (final MessagingException e) {
                 /*
@@ -480,11 +501,11 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     private static void checkFailedAuths(final String login, final String pass) throws AuthenticationFailedException {
         final LoginAndPass key = new LoginAndPass(login, pass);
-        final Long range = failedAuths.get(key);
-        if (range != null) {
+        final StampAndError sae = failedAuths.get(key);
+        if (sae != null) {
             // TODO: Put time-out to imap.properties
-            if (System.currentTimeMillis() - range.longValue() <= 10000) {
-                throw new AuthenticationFailedException("Login failed: authentication failure");
+            if ((System.currentTimeMillis() - sae.stamp) <= FAILED_AUTH_TIMEOUT) {
+                throw sae.error;
             }
             failedAuths.remove(key);
         }
@@ -590,7 +611,41 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             timedOutServers = new ConcurrentHashMap<HostAndPort, Long>();
         }
         if (null == failedAuths) {
-            failedAuths = new ConcurrentHashMap<LoginAndPass, Long>();
+            failedAuths = new ConcurrentHashMap<LoginAndPass, StampAndError>();
+        }
+        if (null == cleanUpTimerTask) {
+            final TimerService timerService = IMAPServiceRegistry.getService(TimerService.class);
+            if (null != timerService) {
+                final Map<HostAndPort, Long> map1 = timedOutServers;
+                final Map<LoginAndPass, StampAndError> map2 = failedAuths;
+                final Runnable r = new Runnable() {
+
+                    public void run() {
+                        /*
+                         * Clean-up temporary-down map
+                         */
+                        for (final Iterator<Entry<HostAndPort, Long>> iter = map1.entrySet().iterator(); iter.hasNext();) {
+                            final Entry<HostAndPort, Long> entry = iter.next();
+                            if (System.currentTimeMillis() - entry.getValue().longValue() > MAX_TEMP_DOWN) {
+                                iter.remove();
+                            }
+                        }
+                        /*
+                         * Clean-up failed-login map
+                         */
+                        for (final Iterator<Entry<LoginAndPass, StampAndError>> iter = map2.entrySet().iterator(); iter.hasNext();) {
+                            final Entry<LoginAndPass, StampAndError> entry = iter.next();
+                            if (System.currentTimeMillis() - entry.getValue().stamp > FAILED_AUTH_TIMEOUT) {
+                                iter.remove();
+                            }
+                        }
+                    }
+                };
+                /*
+                 * Schedule every 5 minutes
+                 */
+                cleanUpTimerTask = timerService.scheduleWithFixedDelay(r, 300000, 300000);
+            }
         }
     }
 
@@ -619,6 +674,10 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     }
 
     private static synchronized void dropMaps() {
+        if (null != cleanUpTimerTask) {
+            cleanUpTimerTask.cancel(false);
+            cleanUpTimerTask = null;
+        }
         if (null != timedOutServers) {
             timedOutServers = null;
         }
@@ -630,6 +689,20 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     @Override
     protected boolean checkMailServerPort() {
         return true;
+    }
+
+    private static final class StampAndError {
+
+        final AuthenticationFailedException error;
+
+        final long stamp;
+
+        StampAndError(final AuthenticationFailedException error, final long stamp) {
+            super();
+            this.error = error;
+            this.stamp = stamp;
+        }
+
     }
 
     private static final class LoginAndPass {
