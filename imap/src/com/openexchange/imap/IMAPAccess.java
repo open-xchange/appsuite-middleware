@@ -129,13 +129,13 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      * Remembers timed out servers for {@link IIMAPProperties#getImapTemporaryDown()} milliseconds. Any further attempts to connect to such
      * a server-port-pair will throw an appropriate exception.
      */
-    private static Map<HostAndPort, Long> timedOutServers;
+    private static volatile Map<HostAndPort, Long> timedOutServers;
 
     /**
      * Remembers failed authentication for 10 seconds. Any further login attempts with such remembered credentials will throw an appropriate
      * exception.
      */
-    private static Map<LoginAndPass, StampAndError> failedAuths;
+    private static volatile Map<LoginAndPass, StampAndError> failedAuths;
 
     /**
      * The scheduled timer task to clean-up maps.
@@ -501,19 +501,21 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     private static void checkFailedAuths(final String login, final String pass) throws AuthenticationFailedException {
         final LoginAndPass key = new LoginAndPass(login, pass);
-        final StampAndError sae = failedAuths.get(key);
+        final Map<LoginAndPass, StampAndError> map = failedAuths;
+        final StampAndError sae = map.get(key);
         if (sae != null) {
             // TODO: Put time-out to imap.properties
             if ((System.currentTimeMillis() - sae.stamp) <= FAILED_AUTH_TIMEOUT) {
                 throw sae.error;
             }
-            failedAuths.remove(key);
+            map.remove(key);
         }
     }
 
     private void checkTemporaryDown(final IIMAPProperties imapConfProps) throws MailException, IMAPException {
         final HostAndPort key = new HostAndPort(getMailConfig().getServer(), getMailConfig().getPort());
-        final Long range = timedOutServers.get(key);
+        final Map<HostAndPort, Long> map = timedOutServers;
+        final Long range = map.get(key);
         if (range != null) {
             if (System.currentTimeMillis() - range.longValue() <= imapConfProps.getImapTemporaryDown()) {
                 /*
@@ -521,7 +523,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                  */
                 throw IMAPException.create(IMAPException.Code.CONNECT_ERROR, getMailConfig().getServer(), getMailConfig().getLogin());
             }
-            timedOutServers.remove(key);
+            map.remove(key);
         }
     }
 
