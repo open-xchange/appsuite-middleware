@@ -1,0 +1,10 @@
+--- !com.openexchange.subscribe.crawler.CrawlerDescription
+crawlerApiVersion: 616
+displayName: GoogleCalendar
+id: com.openexchange.subscribe.crawler.google.calendar
+module: 2
+workflowString: |
+  --- !com.openexchange.subscribe.crawler.Workflow
+  steps: 
+    - !com.openexchange.subscribe.crawler.GoogleCalendarAPIStep {}
+  
