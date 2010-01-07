@@ -56,16 +56,14 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.api2.RdbContactSQLImpl;
+import com.openexchange.calendar.CalendarSql;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSession;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.calendar.CalendarSql;
 
 /**
  * {@link CalendarFolderUpdaterStrategy}
@@ -88,7 +86,7 @@ public class CalendarFolderUpdaterStrategy implements FolderUpdaterStrategy<Cale
         if ((isset(original.getTitle()) || isset(candidate.getTitle())) && eq(original.getTitle(), candidate.getTitle())) {
             score += 10;
         }
-        
+
         return score;
     }
 
@@ -118,21 +116,15 @@ public class CalendarFolderUpdaterStrategy implements FolderUpdaterStrategy<Cale
         SearchIterator<Appointment> appointmentsInFolder;
         List<CalendarDataObject> retval = new ArrayList<CalendarDataObject>();
         try {
-            appointmentsInFolder = calendarSql.getAppointmentsBetweenInFolder(
-                folderId,
-                COMPARISON_COLUMNS,
-                startDate,
-                endDate,
-                0,
-                "ASC");
-            
+            appointmentsInFolder = calendarSql.getAppointmentsBetweenInFolder(folderId, COMPARISON_COLUMNS, startDate, endDate, 0, "ASC");
+
             while (appointmentsInFolder.hasNext()) {
                 retval.add((CalendarDataObject) appointmentsInFolder.next());
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        
+
         return retval;
     }
 
