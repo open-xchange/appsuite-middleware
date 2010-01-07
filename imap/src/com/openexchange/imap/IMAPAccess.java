@@ -642,9 +642,9 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     }
                 };
                 /*
-                 * Schedule every 5 minutes
+                 * Schedule every minute
                  */
-                cleanUpTimerTask = timerService.scheduleWithFixedDelay(r, 300000, 300000);
+                cleanUpTimerTask = timerService.scheduleWithFixedDelay(r, 60000, 60000);
             }
         }
     }
