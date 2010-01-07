@@ -82,6 +82,9 @@ public class Bug12496Test extends CalendarSqlTest {
             // 3. November 2008 10:00:00 UTC
             final Date newEnd = new Date(1225706400000L);
             update.setEndDate(newEnd);
+            update.setRecurrenceType(CalendarObject.DAILY);
+            update.setInterval(1);
+            update.setOccurrence(5);
             // Save
             appointments.save(update);
             // Load first occurrence and verify

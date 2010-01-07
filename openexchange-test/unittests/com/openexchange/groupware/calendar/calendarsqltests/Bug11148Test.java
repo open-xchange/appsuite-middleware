@@ -125,6 +125,7 @@ public class Bug11148Test extends CalendarSqlTest {
         modified.setParentFolderID(cdao.getParentFolderID());
         modified.setContext(cdao.getContext());
         modified.setLocation("updated location");
+        appointments.copyRecurringInformation(cdao, modified);
 
         try {
             appointments.save(modified);

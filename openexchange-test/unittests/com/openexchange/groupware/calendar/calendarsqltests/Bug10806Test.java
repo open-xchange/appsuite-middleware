@@ -79,6 +79,9 @@ public class Bug10806Test extends CalendarSqlTest {
         final CalendarDataObject update = appointments.createIdentifyingCopy(appointment);
         update.setStartDate(newStart);
         update.setEndDate(newEnd);
+        update.setRecurrenceType(CalendarDataObject.WEEKLY);
+        update.setDays(CalendarDataObject.MONDAY);
+        update.setInterval(1);
         appointments.save(update);
 
         final CalendarDataObject reloaded = appointments.reload(appointment);

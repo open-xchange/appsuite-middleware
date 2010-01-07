@@ -58,7 +58,9 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.TimeZone;
 
 import com.openexchange.api2.AppointmentSQLInterface;
@@ -121,6 +123,31 @@ public class CommonAppointments {
         
         cdao.setContext(ctx);
         return cdao;
+    }
+    
+    public void copyRecurringInformation(CalendarDataObject source, CalendarDataObject target) {
+        Set<Integer> recurrenceFields = new HashSet<Integer>() {
+
+            {
+                add(CalendarObject.RECURRENCE_TYPE);
+                add(CalendarObject.INTERVAL);
+                add(CalendarObject.DAYS);
+                add(CalendarObject.DAY_IN_MONTH);
+                add(CalendarObject.MONTH);
+                add(CalendarObject.RECURRENCE_COUNT);
+                add(CalendarObject.UNTIL);
+            }
+        };
+        
+        for (int recurrenceField : recurrenceFields) {
+            if (source.contains(recurrenceField)) {
+                if (recurrenceField == CalendarObject.UNTIL && target.contains(CalendarObject.RECURRENCE_COUNT))
+                    continue;
+                if (recurrenceField == CalendarObject.RECURRENCE_COUNT && target.contains(CalendarObject.UNTIL))
+                    continue;
+                target.set(recurrenceField, source.get(recurrenceField));
+            }
+        }
     }
 
     public CalendarDataObject buildBasicAppointment(final Date start, final Date end) {
