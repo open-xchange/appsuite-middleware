@@ -96,7 +96,8 @@ public final class IMAPConfig extends MailConfig {
 
     @Override
     public MailCapabilities getCapabilities() {
-        return imapCapabilities == null ? MailCapabilities.EMPTY_CAPS : imapCapabilities;
+        final IMAPCapabilities capabilities = imapCapabilities;
+        return capabilities == null ? MailCapabilities.EMPTY_CAPS : capabilities;
     }
 
     /**
@@ -179,7 +180,8 @@ public final class IMAPConfig extends MailConfig {
      */
     public boolean isImapSearch() {
         final boolean imapSearch = IMAPProperties.getInstance().isImapSearch();
-        return (imapCapabilities != null) ? (imapSearch && (imapCapabilities.hasIMAP4rev1() || imapCapabilities.hasIMAP4())) : imapSearch;
+        final IMAPCapabilities capabilities = imapCapabilities;
+        return (capabilities != null) ? (imapSearch && (capabilities.hasIMAP4rev1() || capabilities.hasIMAP4())) : imapSearch;
     }
 
     /**
@@ -189,7 +191,8 @@ public final class IMAPConfig extends MailConfig {
      */
     public boolean isImapSort() {
         final boolean imapSort = IMAPProperties.getInstance().isImapSort();
-        return (imapCapabilities != null) ? (imapSort && imapCapabilities.hasSort()) : imapSort;
+        final IMAPCapabilities capabilities = imapCapabilities;
+        return (capabilities != null) ? (imapSort && capabilities.hasSort()) : imapSort;
     }
 
     @Override
@@ -209,8 +212,9 @@ public final class IMAPConfig extends MailConfig {
      */
     public boolean isSupportsACLs() {
         final BoolCapVal supportsACLs = IMAPProperties.getInstance().getSupportsACLs();
-        if (imapCapabilities != null && BoolCapVal.AUTO.equals(supportsACLs)) {
-            return imapCapabilities.hasPermissions();
+        final IMAPCapabilities capabilities = imapCapabilities;
+        if (capabilities != null && BoolCapVal.AUTO.equals(supportsACLs)) {
+            return capabilities.hasPermissions();
         }
         return BoolCapVal.TRUE.equals(supportsACLs) ? true : false;
     }
