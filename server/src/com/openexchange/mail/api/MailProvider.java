@@ -198,6 +198,9 @@ public abstract class MailProvider {
 
     /**
      * Gets a newly created {@link MailAccess mail access} with default account ID.
+     * <p>
+     * If specified session is <code>null</code>, a dummy instance for initialization purpose is supposed to be returned. Implementation may
+     * return <code>null</code> in this case if no start-up/shut-down actions are needed.
      * 
      * @param session The session providing needed user data; may be <code>null</code> to obtain a dummy instance for initialization purpose
      * @return The newly created {@link MailAccess mail access}.
@@ -207,14 +210,16 @@ public abstract class MailProvider {
 
     /**
      * Gets a newly created {@link MailAccess mail access}.
+     * <p>
+     * If specified session is <code>null</code>, a dummy instance for initialization purpose is supposed to be returned. Implementation may
+     * return <code>null</code> in this case if no start-up/shut-down actions are needed.
      * 
      * @param session The session providing needed user data; may be <code>null</code> to obtain a dummy instance for initialization purpose
      * @param accountId The account ID
      * @return The newly created {@link MailAccess mail access}.
      * @throws MailException If new {@link MailAccess mail access} instance cannot be created
      */
-    public abstract MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> createNewMailAccess(Session session,
-            int accountId) throws MailException;
+    public abstract MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> createNewMailAccess(Session session, int accountId) throws MailException;
 
     /**
      * Gets the protocol properties
