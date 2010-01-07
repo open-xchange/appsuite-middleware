@@ -73,9 +73,9 @@ public final class HeaderCacheProvider extends AllMailProvider {
     private static final HeaderCacheProvider instance = new HeaderCacheProvider();
 
     /**
-     * Gets the singleton instance of IMAP provider.
+     * Gets the singleton instance of header cache provider.
      * 
-     * @return The singleton instance of IMAP provider
+     * @return The singleton instance of header cache provider
      */
     public static HeaderCacheProvider getInstance() {
         return instance;
@@ -104,6 +104,10 @@ public final class HeaderCacheProvider extends AllMailProvider {
 
     @Override
     public MailAccess<?, ?> createNewMailAccess(final Session session, final int accountId) throws MailException {
+        if (null == session) {
+            // A dummy access for start-up/shut-down purpose
+            return null;
+        }
         throw new UnsupportedOperationException("HeaderCacheProvider.createNewMailAccess()");
     }
 
