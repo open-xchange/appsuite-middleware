@@ -61,6 +61,7 @@ import com.openexchange.context.osgi.WhiteboardContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.datatypes.genericonf.storage.osgi.tools.WhiteboardGenericConfigurationStorageService;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
+import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.tx.DBProvider;
@@ -71,6 +72,7 @@ import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionExecutionService;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.helpers.DocumentMetadataHolder;
+import com.openexchange.subscribe.internal.CalendarFolderUpdaterStrategy;
 import com.openexchange.subscribe.internal.ContactFolderUpdaterStrategy;
 import com.openexchange.subscribe.internal.DocumentMetadataHolderFolderUpdaterStrategy;
 import com.openexchange.subscribe.internal.StrategyFolderUpdaterService;
@@ -122,6 +124,7 @@ public class DiscoveryActivator implements BundleActivator {
 
         final List<FolderUpdaterService> folderUpdaters = new ArrayList<FolderUpdaterService>(1);
         folderUpdaters.add(new StrategyFolderUpdaterService<Contact>(new ContactFolderUpdaterStrategy()));
+        folderUpdaters.add(new StrategyFolderUpdaterService<CalendarDataObject>(new CalendarFolderUpdaterStrategy()));
         folderUpdaters.add(new StrategyFolderUpdaterService<DocumentMetadataHolder>(new DocumentMetadataHolderFolderUpdaterStrategy(
             users,
             userConfigs,
