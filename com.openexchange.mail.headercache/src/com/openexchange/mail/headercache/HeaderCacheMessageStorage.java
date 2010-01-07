@@ -49,9 +49,6 @@
 
 package com.openexchange.mail.headercache;
 
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
@@ -60,7 +57,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
-
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
@@ -70,7 +66,6 @@ import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
@@ -144,8 +139,7 @@ public final class HeaderCacheMessageStorage implements IMailMessageStorage {
      * @param mailAccess The mail access
      * @throws MailException If initialization fails
      */
-    public HeaderCacheMessageStorage(final Session session,
-            final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws MailException {
+    public HeaderCacheMessageStorage(final Session session, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws MailException {
         super();
         this.session = session;
         this.mailAccess = mailAccess;
@@ -161,8 +155,7 @@ public final class HeaderCacheMessageStorage implements IMailMessageStorage {
         return ids;
     }
 
-    public String[] copyMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast)
-            throws MailException {
+    public String[] copyMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast) throws MailException {
         final String[] ids = delegatee.copyMessages(sourceFolder, destFolder, mailIds, fast);
         synchronizeFolder(destFolder, true, true);
         return ids;
@@ -173,8 +166,7 @@ public final class HeaderCacheMessageStorage implements IMailMessageStorage {
         synchronizeFolder(folder, true, true);
     }
 
-    public MailMessage[] getAllMessages(final String folder, final IndexRange indexRange, final MailSortField sortField,
-            final OrderDirection order, final MailField[] fields) throws MailException {
+    public MailMessage[] getAllMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final MailField[] fields) throws MailException {
         return searchMessages(folder, indexRange, sortField, order, null, fields);
     }
 
@@ -218,8 +210,11 @@ public final class HeaderCacheMessageStorage implements IMailMessageStorage {
         /*
          * Request mails
          */
-        final MailMessage[] mails = delegatee.getMessages(folder, mailIds, (requestMailFields.isEmpty()) ? FIELDS_ID : requestMailFields
-                .add(MailField.ID).toArray());
+        final MailMessage[] mails =
+            delegatee.getMessages(
+                folder,
+                mailIds,
+                (requestMailFields.isEmpty()) ? FIELDS_ID : requestMailFields.add(MailField.ID).toArray());
         if (containsAnyCoveredField && (mails.length > 0)) {
             fillMails(folder, originalMailFields, mails);
         }
@@ -230,8 +225,7 @@ public final class HeaderCacheMessageStorage implements IMailMessageStorage {
         return delegatee.getNewAndModifiedMessages(folder, fields);
     }
 
-    public MailMessage[] getThreadSortedMessages(final String folder, final IndexRange indexRange, final MailSortField sortField,
-            final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws MailException {
+    public MailMessage[] getThreadSortedMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws MailException {
         /*
          * Synchronize since we access the message storage
          */
@@ -248,16 +242,21 @@ public final class HeaderCacheMessageStorage implements IMailMessageStorage {
         /*
          * Request mails
          */
-        final MailMessage[] mails = delegatee.getThreadSortedMessages(folder, indexRange, sortField, order, searchTerm, (requestMailFields
-                .isEmpty()) ? FIELDS_ID : requestMailFields.add(MailField.ID).toArray());
+        final MailMessage[] mails =
+            delegatee.getThreadSortedMessages(
+                folder,
+                indexRange,
+                sortField,
+                order,
+                searchTerm,
+                (requestMailFields.isEmpty()) ? FIELDS_ID : requestMailFields.add(MailField.ID).toArray());
         if (containsAnyCoveredField && (mails.length > 0)) {
             fillMails(folder, originalMailFields, mails);
         }
         return mails;
     }
 
-    public MailMessage[] getUnreadMessages(final String folder, final MailSortField sortField, final OrderDirection order,
-            final MailField[] fields, final int limit) throws MailException {
+    public MailMessage[] getUnreadMessages(final String folder, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int limit) throws MailException {
         /*
          * Synchronize since we access the message storage
          */
@@ -274,16 +273,16 @@ public final class HeaderCacheMessageStorage implements IMailMessageStorage {
         /*
          * Request mails
          */
-        final MailMessage[] unreadMails = delegatee.getUnreadMessages(folder, sortField, order, (requestMailFields.isEmpty()) ? FIELDS_ID
-                : requestMailFields.add(MailField.ID).toArray(), limit);
+        final MailMessage[] unreadMails =
+            delegatee.getUnreadMessages(folder, sortField, order, (requestMailFields.isEmpty()) ? FIELDS_ID : requestMailFields.add(
+                MailField.ID).toArray(), limit);
         if (containsAnyCoveredField && (unreadMails.length > 0)) {
             fillMails(folder, originalMailFields, unreadMails);
         }
         return unreadMails;
     }
 
-    public String[] moveMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast)
-            throws MailException {
+    public String[] moveMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast) throws MailException {
         final String[] ids = delegatee.moveMessages(sourceFolder, destFolder, mailIds, fast);
         synchronizeFolder(sourceFolder, true, true);
         synchronizeFolder(destFolder, true, true);
@@ -300,8 +299,7 @@ public final class HeaderCacheMessageStorage implements IMailMessageStorage {
         return draft;
     }
 
-    public MailMessage[] searchMessages(final String folder, final IndexRange indexRange, final MailSortField sortField,
-            final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws MailException {
+    public MailMessage[] searchMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws MailException {
         /*
          * Synchronize since we access the message storage
          */
@@ -318,7 +316,13 @@ public final class HeaderCacheMessageStorage implements IMailMessageStorage {
         /*
          * Request mails
          */
-        final MailMessage[] mails = delegatee.searchMessages(folder, indexRange, sortField, order, searchTerm,
+        final MailMessage[] mails =
+            delegatee.searchMessages(
+                folder,
+                indexRange,
+                sortField,
+                order,
+                searchTerm,
                 (requestMailFields.isEmpty()) ? FIELDS_ID : requestMailFields.add(MailField.ID).toArray());
         if (containsAnyCoveredField && (mails.length > 0)) {
             fillMails(folder, originalMailFields, mails);
@@ -380,8 +384,9 @@ public final class HeaderCacheMessageStorage implements IMailMessageStorage {
              */
             final ThreadPoolService threadPool = HeaderCacheServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class);
             if (null != threadPool) {
-                threadPool.submit(ThreadPools.task(new SyncExtCallable(folder, accountId, session, enforce)), CallerRunsBehavior
-                        .getInstance());
+                threadPool.submit(
+                    ThreadPools.task(new SyncExtCallable(folder, accountId, session, enforce)),
+                    CallerRunsBehavior.getInstance());
                 return;
             }
         }
@@ -401,10 +406,9 @@ public final class HeaderCacheMessageStorage implements IMailMessageStorage {
     /**
      * Dedicated for being performed by a separate thread.
      */
-    static void synchronizeInExternalThread(final String folder, final int accountId, final Session session, final boolean enforce)
-            throws MailException {
-        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = MailAccess.getInstance(session,
-                accountId);
+    static void synchronizeInExternalThread(final String folder, final int accountId, final Session session, final boolean enforce) throws MailException {
+        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess =
+            MailAccess.getInstance(session, accountId);
         mailAccess.connect();
         try {
             synchronize(folder, mailAccess, session, enforce);
@@ -413,13 +417,11 @@ public final class HeaderCacheMessageStorage implements IMailMessageStorage {
         }
     }
 
-    private static void synchronize(final String folder,
-            final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, final Session session,
-            final boolean enforce) throws MailException {
+    private static void synchronize(final String folder, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, final Session session, final boolean enforce) throws MailException {
         /*
          * Sync headers
          */
-        final Key key = new Key(mailAccess, folder);
+        final Key key = new Key(session.getContextId(), session.getUserId(), mailAccess.getAccountId(), folder);
         Future<Object> f;
         if (enforce) {
             /*
@@ -455,9 +457,7 @@ public final class HeaderCacheMessageStorage implements IMailMessageStorage {
     /**
      * Returns a non-<code>null</code> {@link Future} to wait; otherwise <code>null</code>
      */
-    private static Future<Object> startOrWait(final String folder,
-            final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, final Session session,
-            final boolean enforce, final Key key) {
+    private static Future<Object> startOrWait(final String folder, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, final Session session, final boolean enforce, final Key key) {
         final FutureTask<Object> ft = new FutureTask<Object>(new SynchronizerCallable(folder, session, mailAccess, enforce));
         final Future<Object> f = SYNCHRONIZER_MAP.putIfAbsent(key, ft);
         if (null != f) {
@@ -523,9 +523,9 @@ public final class HeaderCacheMessageStorage implements IMailMessageStorage {
 
     private static final class Key {
 
-        private final InetSocketAddress socketAddress;
+        private final int cid;
 
-        private final String login;
+        private final int user;
 
         private final int account;
 
@@ -533,31 +533,24 @@ public final class HeaderCacheMessageStorage implements IMailMessageStorage {
 
         private final int hash;
 
-        Key(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, final String fullname)
-                throws MailException {
+        Key(final int cid, final int user, final int account, final String fullname) {
             super();
-            final MailConfig config = mailAccess.getMailConfig();
-            try {
-                socketAddress = new InetSocketAddress(InetAddress.getByName(config.getServer()), config.getPort());
-            } catch (final UnknownHostException e) {
-                throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
-            }
-            login = config.getLogin();
+            this.cid = cid;
+            this.user = user;
+            this.account = account;
             this.fullname = fullname;
-            this.account = mailAccess.getAccountId();
-            // Hash code
+
             final int prime = 31;
             int result = 1;
             result = prime * result + account;
+            result = prime * result + cid;
             result = prime * result + ((fullname == null) ? 0 : fullname.hashCode());
-            result = prime * result + ((login == null) ? 0 : login.hashCode());
-            result = prime * result + ((socketAddress == null) ? 0 : socketAddress.hashCode());
+            result = prime * result + user;
             hash = result;
         }
 
         @Override
         public int hashCode() {
-
             return hash;
         }
 
@@ -573,25 +566,17 @@ public final class HeaderCacheMessageStorage implements IMailMessageStorage {
             if (account != other.account) {
                 return false;
             }
+            if (cid != other.cid) {
+                return false;
+            }
+            if (user != other.user) {
+                return false;
+            }
             if (fullname == null) {
                 if (other.fullname != null) {
                     return false;
                 }
             } else if (!fullname.equals(other.fullname)) {
-                return false;
-            }
-            if (login == null) {
-                if (other.login != null) {
-                    return false;
-                }
-            } else if (!login.equals(other.login)) {
-                return false;
-            }
-            if (socketAddress == null) {
-                if (other.socketAddress != null) {
-                    return false;
-                }
-            } else if (!socketAddress.equals(other.socketAddress)) {
                 return false;
             }
             return true;

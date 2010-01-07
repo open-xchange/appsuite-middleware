@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.headercache;
 
+import java.util.Properties;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -90,8 +91,7 @@ public final class HeaderCacheMailAccess extends MailAccess<IMailFolderStorage, 
      * @param accountId The account Id
      * @param mailAccess The mail access to delegate to
      */
-    public HeaderCacheMailAccess(final Session session, final int accountId,
-            final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) {
+    public HeaderCacheMailAccess(final Session session, final int accountId, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) {
         super(session, accountId);
         this.mailAccess = mailAccess;
         this.session = session;
@@ -128,6 +128,21 @@ public final class HeaderCacheMailAccess extends MailAccess<IMailFolderStorage, 
             messageStorage = new HeaderCacheMessageStorage(session, mailAccess);
         }
         return messageStorage;
+    }
+
+    @Override
+    public MailConfig getMailConfig() throws MailException {
+        return mailAccess.getMailConfig();
+    }
+
+    @Override
+    public Properties getMailProperties() {
+        return mailAccess.getMailProperties();
+    }
+
+    @Override
+    public void setMailProperties(final Properties mailProperties) {
+        mailAccess.setMailProperties(mailProperties);
     }
 
     @Override
