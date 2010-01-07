@@ -115,6 +115,7 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
         final GenericSubscribeService service = new GenericSubscribeService(
             crawler.getDisplayName(),
             crawler.getId(),
+            crawler.getModule(),
             crawler.getWorkflowString(),
             crawler.getPriority());
 
@@ -166,6 +167,7 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
         final GenericSubscribeService service = new GenericSubscribeService(
             crawler.getDisplayName(),
             crawler.getId(),
+            crawler.getModule(),
             crawler.getWorkflowString(),
             crawler.getPriority());
 
