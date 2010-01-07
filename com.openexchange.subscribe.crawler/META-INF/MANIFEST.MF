@@ -9,6 +9,7 @@ Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Import-Package: com.openexchange.config,
  com.openexchange.datatypes.genericonf,
  com.openexchange.groupware,
+ com.openexchange.groupware.calendar,
  com.openexchange.groupware.container,
  com.openexchange.groupware.contexts,
  com.openexchange.i18n,
@@ -93,4 +94,6 @@ Bundle-ClassPath: lib/commons-collections-3.2.1.jar,
  lib/gdata-contacts-meta-3.0.jar,
  lib/gdata-core-1.0.jar,
  lib/google-collect-1.0-rc1.jar,
- lib/jsr305.jar
+ lib/jsr305.jar,
+ lib/gdata-calendar-2.0.jar,
+ lib/gdata-calendar-meta-2.0.jar
