@@ -116,6 +116,7 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
                 if (null != titleText && !titleText.matches(titleExceptionsRegex)){
                     final String pageString = StringEscapeUtils.unescapeHtml(page.getWebResponse().getContentAsString());                
                     pageParts.setPage(pageString);
+                    LOG.debug("Page evaluated is : "+pageString);
                     final HashMap<String, String> map = pageParts.retrieveInformation();
     
                     final Contact contact = Mappings.translateMapToContact(map);

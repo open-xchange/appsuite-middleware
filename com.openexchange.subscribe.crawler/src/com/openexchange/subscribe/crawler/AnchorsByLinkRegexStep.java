@@ -55,6 +55,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
@@ -80,6 +82,8 @@ public class AnchorsByLinkRegexStep extends AbstractStep<List<HtmlAnchor>, HtmlP
     private ArrayList<HtmlPage> subpages;
     
     private String identifyingCriteria;
+    
+    private static Log LOG = LogFactory.getLog(AnchorsByLinkRegexStep.class);
 
     public AnchorsByLinkRegexStep() {
         subpagesHref = new ArrayList<String>();
@@ -119,6 +123,7 @@ public class AnchorsByLinkRegexStep extends AbstractStep<List<HtmlAnchor>, HtmlP
         try {         
             // add the first page as there should always be results there
             subpages.add(input);
+            LOG.debug("Input page is : " + input.getWebResponse().getContentAsString());
             // search for subpages
             for (final HtmlAnchor link : input.getAnchors()) {
                 // get the subpages
@@ -128,7 +133,7 @@ public class AnchorsByLinkRegexStep extends AbstractStep<List<HtmlAnchor>, HtmlP
                         subpagesHref.add(link.getHrefAttribute());
                         // remember its page for later
                         subpages.add((HtmlPage) link.click());
-
+                        LOG.debug("Subpage added : " + link.getHrefAttribute());
                     }
 
                 }
@@ -141,6 +146,7 @@ public class AnchorsByLinkRegexStep extends AbstractStep<List<HtmlAnchor>, HtmlP
                         if (identifyingCriteria.equals("")){
                             output.add(possibleLinkToResultpage);
                             outputHref.add(possibleLinkToResultpage.getHrefAttribute());
+                            LOG.debug("Added this link to the list : " + possibleLinkToResultpage.getHrefAttribute());
                         // if differentiating by href alone is not enough to prevent double links
                         } else {
                             final Pattern pattern = Pattern.compile(identifyingCriteria);
@@ -151,6 +157,7 @@ public class AnchorsByLinkRegexStep extends AbstractStep<List<HtmlAnchor>, HtmlP
                                     output.add(possibleLinkToResultpage);
                                     outputHref.add(possibleLinkToResultpage.getHrefAttribute());
                                     uniqueIds.add(uniqueId);
+                                    LOG.debug("Added this link to the list : " + possibleLinkToResultpage.getHrefAttribute());
                                 }
                             }
                         }
