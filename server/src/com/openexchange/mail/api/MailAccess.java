@@ -294,7 +294,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * 
      * @param mailProperties The properties
      */
-    public final void setMailProperties(final Properties mailProperties) {
+    public void setMailProperties(final Properties mailProperties) {
         this.mailProperties = mailProperties;
     }
 
