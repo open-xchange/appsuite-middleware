@@ -59,10 +59,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.internal.Server;
 import com.openexchange.databaseold.Database;
+import com.openexchange.groupware.update.ExecutedTask;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.SchemaException;
 import com.openexchange.groupware.update.SchemaStore;
@@ -169,9 +171,9 @@ public class SchemaStoreImpl extends SchemaStore {
 
     private static void insertLock(Connection con, Schema schema) throws SchemaException {
         // Check for existing lock exclusively
-        String[] tasks = readUpdateTasks(con);
-        for (String task : tasks) {
-            if (LOCKED.equals(task)) {
+        ExecutedTask[] tasks = readUpdateTasks(con);
+        for (ExecutedTask task : tasks) {
+            if (LOCKED.equals(task.getTaskName())) {
                 throw SchemaExceptionCodes.ALREADY_LOCKED.create(schema.getSchema());
             }
         }
@@ -262,10 +264,10 @@ public class SchemaStoreImpl extends SchemaStore {
 
     private static void deleteLock(Connection con, Schema schema) throws SchemaException {
         // Check for existing lock exclusively
-        String[] tasks = readUpdateTasks(con);
+        ExecutedTask[] tasks = readUpdateTasks(con);
         boolean found = false;
-        for (String task : tasks) {
-            if (LOCKED.equals(task)) {
+        for (ExecutedTask task : tasks) {
+            if (LOCKED.equals(task.getTaskName())) {
                 found = true;
                 break;
             }
@@ -386,32 +388,33 @@ public class SchemaStoreImpl extends SchemaStore {
     }
 
     private static void loadUpdateTasks(Connection con, SchemaUpdateStateImpl state) throws SchemaException {
-        for (String taskName : readUpdateTasks(con)) {
-            if (LOCKED.equals(taskName)) {
+        for (ExecutedTask task : readUpdateTasks(con)) {
+            if (LOCKED.equals(task.getTaskName())) {
                 state.setLocked(true);
             } else {
-                state.addExecutedTask(taskName);
+                state.addExecutedTask(task.getTaskName());
             }
         }
     }
 
-    private static String[] readUpdateTasks(Connection con) throws SchemaException {
-        String sql = "SELECT taskName FROM updateTask WHERE cid=0 FOR UPDATE";
+    private static ExecutedTask[] readUpdateTasks(Connection con) throws SchemaException {
+        String sql = "SELECT taskName,successful,lastModified FROM updateTask WHERE cid=0 FOR UPDATE";
         Statement stmt = null;
         ResultSet result = null;
-        List<String> retval = new ArrayList<String>();
+        List<ExecutedTask> retval = new ArrayList<ExecutedTask>();
         try {
             stmt = con.createStatement();
             result = stmt.executeQuery(sql);
             while (result.next()) {
-                retval.add(result.getString(1));
+                ExecutedTask task = new ExecutedTaskImpl(result.getString(1), result.getBoolean(2), new Date(result.getLong(3)));
+                retval.add(task);
             }
         } catch (SQLException e) {
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
         }
-        return retval.toArray(new String[retval.size()]);
+        return retval.toArray(new ExecutedTask[retval.size()]);
     }
 
     @Override
@@ -441,21 +444,21 @@ public class SchemaStoreImpl extends SchemaStore {
     @Override
     public void addExecutedTask(Connection con, String taskName, boolean success) throws SchemaException {
         boolean update = false;
-        for (String executed : readUpdateTasks(con)) {
-            if (taskName.equals(executed)) {
+        for (ExecutedTask executed : readUpdateTasks(con)) {
+            if (taskName.equals(executed.getTaskName())) {
                 update = true;
                 break;
             }
         }
-        String insertSQL = "INSERT INTO updateTask (cid,successful,lastModified,taskName) VALUES (0,?,?,?)";
+        String insertSQL = "INSERT INTO updateTask (cid,taskName,successful,lastModified) VALUES (0,?,?,?)";
         String updateSQL = "UPDATE updateTask SET successful=?, lastModified=? WHERE cid=0 AND taskName=?";
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(update ? updateSQL : insertSQL);
             int pos = 1;
+            stmt.setString(pos++, taskName);
             stmt.setBoolean(pos++, success);
             stmt.setLong(pos++, System.currentTimeMillis());
-            stmt.setString(pos++, taskName);
             int rows = stmt.executeUpdate();
             if (1 != rows) {
                 throw SchemaExceptionCodes.WRONG_ROW_COUNT.create(I(1), I(rows));
@@ -465,5 +468,27 @@ public class SchemaStoreImpl extends SchemaStore {
         } finally {
             closeSQLStuff(stmt);
         }
+    }
+
+    @Override
+    public ExecutedTask[] getExecutedTasks(int poolId, String schemaName) throws SchemaException {
+        Connection con;
+        try {
+            con = Database.get(poolId, schemaName);
+        } catch (DBPoolingException e) {
+            throw SchemaExceptionCodes.DATABASE_DOWN.create(e);
+        }
+        final ExecutedTask[] retval;
+        try {
+            con.setAutoCommit(false);
+            retval = readUpdateTasks(con);
+            con.commit();
+        } catch (SQLException e) {
+            throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            autocommit(con);
+            Database.back(poolId, con);
+        }
+        return retval;
     }
 }

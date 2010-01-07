@@ -63,7 +63,6 @@ import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.AttributeNotFoundException;
 import javax.management.DynamicMBean;
-import javax.management.InvalidAttributeValueException;
 import javax.management.MBeanException;
 import javax.management.MBeanInfo;
 import javax.management.ReflectionException;
@@ -287,13 +286,13 @@ public class ReportingMBean implements DynamicMBean {
         return mbeanInfo;
     }
 
-    public Object invoke(String actionName, Object[] params, String[] signature) throws MBeanException, ReflectionException {
+    public Object invoke(String actionName, Object[] params, String[] signature) {
         throw new RuntimeOperationsException(
             new UnsupportedOperationException("invoke is not supported"),
             "The method invoke is not supported.");
     }
 
-    public void setAttribute(Attribute attribute) throws AttributeNotFoundException, InvalidAttributeValueException, MBeanException, ReflectionException {
+    public void setAttribute(Attribute attribute) throws AttributeNotFoundException {
         throw new AttributeNotFoundException("No attribute can be set in this MBean");
     }
 
