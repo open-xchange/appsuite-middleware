@@ -80,7 +80,7 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
     public int calculateSimilarityScore(Contact original, Contact candidate, Object session) throws AbstractOXException {
         int score = 0;
         // For the sake of simplicity we assume that equal names mean equal contacts
-        // TODO: This needs to be diversified in the form of "unique-in-context" later (if there«s only one "Max Mustermann" in a folder it
+        // TODO: This needs to be diversified in the form of "unique-in-context" later (if there is only one "Max Mustermann" in a folder it
         // is unique and qualifies as identifier. If there are two "Max Mustermann" it does not.)
         if ((isset(original.getGivenName()) || isset(candidate.getGivenName())) && eq(original.getGivenName(), candidate.getGivenName())) {
             score += 5;
