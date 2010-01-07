@@ -102,7 +102,7 @@ public final class FolderWriter {
 
     private static abstract class ExtendedMailFolderFieldWriter extends MailFolderFieldWriter {
 
-        public final MailConfig mailConfig;
+        final MailConfig mailConfig;
 
         public ExtendedMailFolderFieldWriter(final MailConfig mailConfig) {
             super();
