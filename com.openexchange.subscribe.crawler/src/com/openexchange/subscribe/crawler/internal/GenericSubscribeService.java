@@ -47,10 +47,10 @@
  *
  */
 
-package com.openexchange.subscribe.crawler;
+package com.openexchange.subscribe.crawler.internal;
 
-import static com.openexchange.subscribe.crawler.FormStrings.FORM_LABEL_LOGIN;
-import static com.openexchange.subscribe.crawler.FormStrings.FORM_LABEL_PASSWORD;
+import static com.openexchange.subscribe.crawler.internal.FormStrings.FORM_LABEL_LOGIN;
+import static com.openexchange.subscribe.crawler.internal.FormStrings.FORM_LABEL_PASSWORD;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
@@ -62,6 +62,7 @@ import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.SubscriptionSource;
+import com.openexchange.subscribe.crawler.Workflow;
 
 /**
  * {@link GenericSubscribeService}
@@ -108,7 +109,7 @@ public class GenericSubscribeService extends AbstractSubscribeService {
         return Arrays.asList(workflow.execute((String) configuration.get("login"), (String) configuration.get("password")));
     }
 
-    protected Workflow getWorkflow() {
+    public Workflow getWorkflow() {
         Workflow workflow = new Workflow();
         try {
             workflow = WorkflowFactory.createWorkflowByString(workflowString);

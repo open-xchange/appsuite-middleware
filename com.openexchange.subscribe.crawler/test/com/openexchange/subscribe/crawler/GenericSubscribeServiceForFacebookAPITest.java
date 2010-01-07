@@ -52,6 +52,7 @@ package com.openexchange.subscribe.crawler;
 import java.util.LinkedList;
 import java.util.List;
 import org.ho.yaml.Yaml;
+import com.openexchange.subscribe.crawler.internal.Step;
 
 /**
  * This is NOT the preferred way to crawl Facebook. FacebookWeb delivers much more information.

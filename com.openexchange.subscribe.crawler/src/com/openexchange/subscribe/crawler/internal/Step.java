@@ -47,38 +47,35 @@
  *
  */
 
-package com.openexchange.subscribe.crawler;
+package com.openexchange.subscribe.crawler.internal;
 
-import com.openexchange.groupware.container.Contact;
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.subscribe.crawler.Workflow;
 
 /**
- * {@link ContactSanitizer}
+ * A Step in a crawling workflow
  * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
+ * @param <O> The Output accessible if the step executed successfully
+ * @param <I> The Input needed for the step to execute
  */
-public class ContactSanitizer {
+public interface Step<O, I>{
 
-    /**
-     * @param contact
-     */
-    public void sanitize(final Contact contact) {
-        for (final int field : Contact.ALL_COLUMNS) {
-            if (field == Contact.LAST_MODIFIED_UTC) {
-                continue;
-            }
-            if (contact.contains(field)) {
-                final Object value = contact.get(field);
-                if (value != null && "".equals(value)) {
-                    contact.remove(field);
-                }
-            }
-        }
-        if (contact.containsImageContentType() && "".equals(contact.getImageContentType())) {
-            contact.removeImageContentType();
-        }
-        if (contact.containsFileAs() && "".equals(contact.getFileAs())) {
-            contact.removeFileAs();
-        }
-    }
+    boolean executedSuccessfully();
+
+    Exception getException();
+
+    void execute(WebClient webClient) throws SubscriptionException;
+
+    Class inputType();
+
+    Class outputType();
+    
+    void setWorkflow(Workflow workflow);
+    
+    public void setInput(I input);
+    
+    public O getOutput();
 
 }

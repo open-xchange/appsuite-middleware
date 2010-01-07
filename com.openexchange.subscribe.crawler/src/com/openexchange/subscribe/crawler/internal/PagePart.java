@@ -47,19 +47,88 @@
  *
  */
 
-package com.openexchange.subscribe.crawler;
+package com.openexchange.subscribe.crawler.internal;
 
-public class WorkflowException extends Exception {
+/**
+ * This a page part to unequivocally identify information (e.g. a contact\u00b4s name) in a webpages sourcecode. To identify a particular bit of
+ * information two factors are used: - Its place in a sequence (->PagePartSequence) (e.g. in the page\u00b4s sourcecode the last name is listed
+ * after the first name) - The sourcecode immediately surrounding it. There are two kinds of page parts (identified by their TYPE-Integer):
+ * - Fillers, only used to make the sequence unequivocal and containing a single-capture-group regex identifiyng them - Infos, containing a
+ * three-capture-group regex (immediately before, relevant part, immediately after) and the type of the info (e.g. Contact.LAST_NAME)
+ * 
+ * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
+ */
 
-    String message;
+public class PagePart {
 
-    public WorkflowException(final String message) {
-        super();
-        this.message = message;
+    public static int FILLER = 0;
+
+    public static int INFO = 1;
+
+    private int type;
+
+    private String regex;
+
+    private String typeOfInfo;
+    
+    private int addInfo;
+
+    public PagePart() {
+
     }
 
-    @Override
-    public String getMessage() {
-        return message;
+    public PagePart(final String regex, final String typeOfInfo) {
+        type = INFO;
+        this.regex = regex;
+        this.typeOfInfo = typeOfInfo;
+        this.addInfo = 0;
     }
+    
+    public PagePart(final String regex, final String typeOfInfo, int addInfo) {
+        this.addInfo = addInfo;
+        type = INFO;
+        this.regex = regex;
+        this.typeOfInfo = typeOfInfo;
+    }
+
+    public PagePart(final String regex) {
+        type = FILLER;
+        this.regex = regex;
+    }
+
+    public int getType() {
+        return type;
+    }
+
+    public void setType(final int type) {
+        this.type = type;
+    }
+
+    public String getRegex() {
+        return regex;
+    }
+
+    public void setRegex(final String regex) {
+        this.regex = regex;
+    }
+
+    public String getTypeOfInfo() {
+        return typeOfInfo;
+    }
+
+    public void setTypeOfInfo(final String typeOfInfo) {
+        this.typeOfInfo = typeOfInfo;
+    }
+
+    
+    public int getAddInfo() {
+        return addInfo;
+    }
+
+    
+    public void setAddInfo(int addInfo) {
+        this.addInfo = addInfo;
+    }
+
+    
 }

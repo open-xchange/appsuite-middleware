@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.subscribe.crawler;
+package com.openexchange.subscribe.crawler.internal;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -66,6 +66,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ho.yaml.Yaml;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.subscribe.crawler.CrawlerDescription;
 import com.openexchange.subscribe.crawler.osgi.Activator;
 
 /**

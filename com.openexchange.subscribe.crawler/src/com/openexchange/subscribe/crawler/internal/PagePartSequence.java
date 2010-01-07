@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.subscribe.crawler;
+package com.openexchange.subscribe.crawler.internal;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -57,7 +57,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.subscribe.crawler.CrawlerUpdateTask;
+import com.openexchange.subscribe.crawler.internal.CrawlerUpdateTask;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 

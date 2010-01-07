@@ -61,6 +61,10 @@ import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.crawler.darkside.WebClientCloser;
+import com.openexchange.subscribe.crawler.internal.LoginStep;
+import com.openexchange.subscribe.crawler.internal.LogoutStep;
+import com.openexchange.subscribe.crawler.internal.NeedsLoginStepString;
+import com.openexchange.subscribe.crawler.internal.Step;
 
 /**
  * A crawling workflow. This holds the individual Steps and the session information (WebClient instance).

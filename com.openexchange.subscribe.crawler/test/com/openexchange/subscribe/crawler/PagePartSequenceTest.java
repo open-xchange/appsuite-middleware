@@ -55,6 +55,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import com.openexchange.subscribe.crawler.internal.PagePart;
+import com.openexchange.subscribe.crawler.internal.PagePartSequence;
 import junit.framework.TestCase;
 
 /**

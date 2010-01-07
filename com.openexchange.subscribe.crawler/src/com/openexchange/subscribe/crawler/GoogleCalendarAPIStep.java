@@ -58,6 +58,8 @@ import com.google.gdata.data.calendar.*;
 import com.google.gdata.data.extensions.*;
 import com.google.gdata.util.*;
 import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.subscribe.crawler.internal.AbstractStep;
+import com.openexchange.subscribe.crawler.internal.LoginStep;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.MalformedURLException;

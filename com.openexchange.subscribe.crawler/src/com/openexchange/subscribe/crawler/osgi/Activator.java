@@ -65,7 +65,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.crawler.CrawlerDescription;
-import com.openexchange.subscribe.crawler.GenericSubscribeService;
+import com.openexchange.subscribe.crawler.internal.GenericSubscribeService;
 import com.openexchange.timer.TimerService;
 
 /**

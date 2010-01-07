@@ -47,53 +47,15 @@
  *
  */
 
-package com.openexchange.subscribe.crawler;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import org.ho.yaml.Yaml;
-import com.openexchange.subscribe.SubscriptionErrorMessage;
-import com.openexchange.subscribe.SubscriptionException;
+package com.openexchange.subscribe.crawler.internal;
 
 /**
- * Gets a text input and creates Workflow
+ * {@link NeedsLoginStepString}
  * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class WorkflowFactory {
+public interface NeedsLoginStepString {
 
-    public static Workflow createWorkflow(final String filename) throws SubscriptionException {
-
-        Workflow workflow = null;
-        try {
-            workflow = (Workflow) Yaml.load(new File(filename));
-            checkSanity(workflow);
-        } catch (final FileNotFoundException e) {
-        }
-
-        return workflow;
-    }
-
-    public static Workflow createWorkflowByString(final String string) throws SubscriptionException {
-
-        Workflow workflow = null;
-
-        workflow = (Workflow) Yaml.load(string);
-        //checkSanity(workflow);
-
-        return workflow;
-    }
-
-    private static void checkSanity(final Workflow workflow) throws SubscriptionException {
-        Step previousStep = null;
-        for (final Step currentStep : workflow.getSteps()) {
-            if (previousStep != null) {
-                if (!previousStep.outputType().equals(currentStep.inputType())) {
-                    throw SubscriptionErrorMessage.INVALID_WORKFLOW.create();
-                }
-            }
-            previousStep = currentStep;
-        }
-    }
+    void setLoginStepString(String loginStepString);
 
 }

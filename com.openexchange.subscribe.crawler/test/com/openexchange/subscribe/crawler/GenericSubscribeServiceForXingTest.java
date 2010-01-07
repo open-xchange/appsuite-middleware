@@ -52,6 +52,7 @@ package com.openexchange.subscribe.crawler;
 import java.util.LinkedList;
 import java.util.List;
 import org.ho.yaml.Yaml;
+import com.openexchange.subscribe.crawler.internal.Step;
 
 /**
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>

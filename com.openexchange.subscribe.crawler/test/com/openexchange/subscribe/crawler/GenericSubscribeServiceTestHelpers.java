@@ -60,6 +60,7 @@ import com.openexchange.config.SimConfigurationService;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.subscribe.crawler.internal.GenericSubscribeService;
 import com.openexchange.subscribe.crawler.osgi.Activator;
 
 /**
@@ -91,7 +92,7 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
         try {
             // insert path to credentials-file here (switch for automated tests (Hudson) / local tests)
             map = (HashMap<String, String>) Yaml.load(getSecretsFile());
-            //map = (HashMap<String, String>) Yaml.load(new File("/Users/karstenwill/Documents/Development/crawlerCredentials.yml"));
+            // map = (HashMap<String, String>) Yaml.load(new File("/Users/karstenwill/Documents/Development/crawlerCredentials.yml"));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -99,7 +100,7 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
         SimConfigurationService config = new SimConfigurationService();
         //test with the real crawlers (switch for automated tests (Hudson) / local tests)
         config.stringProperties.put("com.openexchange.subscribe.crawler.path", System.getProperty("crawlersConf"));
-        //config.stringProperties.put("com.openexchange.subscribe.crawler.path", "conf/crawlers/");
+        // config.stringProperties.put("com.openexchange.subscribe.crawler.path", "conf/crawlers/");
         Activator activator = new Activator();
         crawlers = activator.getCrawlersFromFilesystem(config);
     }

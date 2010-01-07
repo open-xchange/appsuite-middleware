@@ -52,6 +52,7 @@ package com.openexchange.subscribe.crawler;
 import java.util.ArrayList;
 import org.ho.yaml.Yaml;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.subscribe.crawler.internal.Step;
 
 /**
  * {@link GenericSubscribeServiceForGoogleCalendarAPITest}

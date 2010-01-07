@@ -49,6 +49,8 @@
 
 package com.openexchange.subscribe.crawler;
 
+import com.openexchange.subscribe.crawler.internal.LogoutStep;
+
 
 /**
  * {@link LogoutPageByLinkRegexStep}

@@ -47,15 +47,23 @@
  *
  */
 
-package com.openexchange.subscribe.crawler;
+package com.openexchange.subscribe.crawler.internal;
+
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.openexchange.subscribe.SubscriptionException;
 
 /**
- * {@link NeedsLoginStepString}
+ * {@link LoginStep}
  * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public interface NeedsLoginStepString {
+public interface LoginStep {
 
-    void setLoginStepString(String loginStepString);
+    void execute(WebClient webClient) throws SubscriptionException;
 
+    void setUsername(String username);
+
+    void setPassword(String password);
+
+    String getBaseUrl();
 }

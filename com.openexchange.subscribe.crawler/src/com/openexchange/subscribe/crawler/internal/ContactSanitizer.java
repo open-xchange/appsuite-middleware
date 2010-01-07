@@ -47,62 +47,38 @@
  *
  */
 
-package com.openexchange.subscribe.crawler;
+package com.openexchange.subscribe.crawler.internal;
 
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.groupware.container.Contact;
 
-public abstract class AbstractStep<O,I> implements Step<O,I>{
+/**
+ * {@link ContactSanitizer}
+ * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ */
+public class ContactSanitizer {
 
-    protected String description;
-
-    protected Exception exception;
-
-    protected boolean executedSuccessfully;
-    
-    protected Workflow workflow;
-    
-    protected O output;
-    
-    protected I input;
-
-    public boolean executedSuccessfully() {
-        return executedSuccessfully;
+    /**
+     * @param contact
+     */
+    public void sanitize(final Contact contact) {
+        for (final int field : Contact.ALL_COLUMNS) {
+            if (field == Contact.LAST_MODIFIED_UTC) {
+                continue;
+            }
+            if (contact.contains(field)) {
+                final Object value = contact.get(field);
+                if (value != null && "".equals(value)) {
+                    contact.remove(field);
+                }
+            }
+        }
+        if (contact.containsImageContentType() && "".equals(contact.getImageContentType())) {
+            contact.removeImageContentType();
+        }
+        if (contact.containsFileAs() && "".equals(contact.getFileAs())) {
+            contact.removeFileAs();
+        }
     }
 
-    public Exception getException() {
-        return this.exception;
-    }
-    
-    public void setWorkflow (final Workflow workflow){
-        this.workflow = workflow;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-    
-    public void setDescription(final String description) {
-        this.description = description;
-    }
-
-    public abstract void execute(WebClient webClient) throws SubscriptionException;
-
-    public Class inputType() {
-        return input.getClass();
-    }
-
-    public Class outputType() {
-        return output.getClass();
-    }
-
-    public O getOutput() {
-        return output;
-    }
-
-    public void setInput(final I input) {
-        this.input = input;
-        
-    }
-    
 }

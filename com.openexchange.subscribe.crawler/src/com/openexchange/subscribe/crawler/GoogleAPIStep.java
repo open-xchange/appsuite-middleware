@@ -75,6 +75,8 @@ import com.google.gdata.data.extensions.StructuredPostalAddress;
 import com.google.gdata.util.ServiceException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.subscribe.crawler.internal.AbstractStep;
+import com.openexchange.subscribe.crawler.internal.LoginStep;
 
 /**
  * {@link GoogleAPIStep}

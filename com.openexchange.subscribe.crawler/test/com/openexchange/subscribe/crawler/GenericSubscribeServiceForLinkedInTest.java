@@ -51,6 +51,9 @@ package com.openexchange.subscribe.crawler;
 
 import java.util.ArrayList;
 import org.ho.yaml.Yaml;
+import com.openexchange.subscribe.crawler.internal.PagePart;
+import com.openexchange.subscribe.crawler.internal.PagePartSequence;
+import com.openexchange.subscribe.crawler.internal.Step;
 
 //import com.openexchange.server.services.ServerServiceRegistry;
 //import com.openexchange.timer.TimerService;

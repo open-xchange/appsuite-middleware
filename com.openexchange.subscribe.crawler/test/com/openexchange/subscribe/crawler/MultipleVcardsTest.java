@@ -56,6 +56,7 @@ import java.io.IOException;
 import java.util.TimeZone;
 import org.ho.yaml.Yaml;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.subscribe.crawler.internal.ContactSanitizer;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitException;

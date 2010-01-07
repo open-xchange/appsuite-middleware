@@ -51,6 +51,7 @@ package com.openexchange.subscribe.crawler;
 
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.subscribe.crawler.internal.WorkflowFactory;
 import junit.framework.TestCase;
 
 /**

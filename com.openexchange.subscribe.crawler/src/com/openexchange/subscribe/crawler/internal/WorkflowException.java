@@ -47,23 +47,19 @@
  *
  */
 
-package com.openexchange.subscribe.crawler;
+package com.openexchange.subscribe.crawler.internal;
 
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.openexchange.subscribe.SubscriptionException;
+public class WorkflowException extends Exception {
 
-/**
- * {@link LoginStep}
- * 
- * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
- */
-public interface LoginStep {
+    String message;
 
-    void execute(WebClient webClient) throws SubscriptionException;
+    public WorkflowException(final String message) {
+        super();
+        this.message = message;
+    }
 
-    void setUsername(String username);
-
-    void setPassword(String password);
-
-    String getBaseUrl();
+    @Override
+    public String getMessage() {
+        return message;
+    }
 }

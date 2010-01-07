@@ -47,34 +47,63 @@
  *
  */
 
-package com.openexchange.subscribe.crawler;
+package com.openexchange.subscribe.crawler.internal;
 
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.subscribe.crawler.Workflow;
 
-/**
- * A Step in a crawling workflow
- * 
- * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
- * @param <O> The Output accessible if the step executed successfully
- * @param <I> The Input needed for the step to execute
- */
-public interface Step<O, I>{
+public abstract class AbstractStep<O,I> implements Step<O,I>{
 
-    boolean executedSuccessfully();
+    protected String description;
 
-    Exception getException();
+    protected Exception exception;
 
-    void execute(WebClient webClient) throws SubscriptionException;
-
-    Class inputType();
-
-    Class outputType();
+    protected boolean executedSuccessfully;
     
-    void setWorkflow(Workflow workflow);
+    protected Workflow workflow;
     
-    public void setInput(I input);
+    protected O output;
     
-    public O getOutput();
+    protected I input;
 
+    public boolean executedSuccessfully() {
+        return executedSuccessfully;
+    }
+
+    public Exception getException() {
+        return this.exception;
+    }
+    
+    public void setWorkflow (final Workflow workflow){
+        this.workflow = workflow;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+    
+    public void setDescription(final String description) {
+        this.description = description;
+    }
+
+    public abstract void execute(WebClient webClient) throws SubscriptionException;
+
+    public Class inputType() {
+        return input.getClass();
+    }
+
+    public Class outputType() {
+        return output.getClass();
+    }
+
+    public O getOutput() {
+        return output;
+    }
+
+    public void setInput(final I input) {
+        this.input = input;
+        
+    }
+    
 }

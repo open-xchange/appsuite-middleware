@@ -60,6 +60,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.config.SimConfigurationService;
+import com.openexchange.subscribe.crawler.internal.CrawlerUpdateTask;
 import com.openexchange.subscribe.crawler.osgi.Activator;
 
 

@@ -54,6 +54,9 @@ import java.util.LinkedList;
 import java.util.List;
 import org.ho.yaml.Yaml;
 import org.ho.yaml.YamlConfig;
+import com.openexchange.subscribe.crawler.internal.PagePart;
+import com.openexchange.subscribe.crawler.internal.PagePartSequence;
+import com.openexchange.subscribe.crawler.internal.Step;
 
 /**
  * {@link GenericSubscribeServiceForWebDeTest}
