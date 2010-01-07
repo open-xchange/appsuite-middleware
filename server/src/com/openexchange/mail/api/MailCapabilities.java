@@ -91,6 +91,11 @@ public abstract class MailCapabilities {
             return 0;
         }
 
+        @Override
+        public String toString() {
+            return "Empty mail capabilities";
+        };
+
     };
 
     /*-
