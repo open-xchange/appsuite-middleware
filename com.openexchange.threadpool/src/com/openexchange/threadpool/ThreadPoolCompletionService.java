@@ -59,7 +59,7 @@ import java.util.concurrent.TimeUnit;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 
 /**
- * {@link ThreadPoolCompletionService} - - A {@link CompletionService} that uses a supplied {@link ThreadPoolService} to execute tasks. This
+ * {@link ThreadPoolCompletionService} - A {@link CompletionService} that uses a supplied {@link ThreadPoolService} to execute tasks. This
  * class arranges that submitted tasks are, upon completion, placed on a queue accessible using <tt>take</tt>..
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
