@@ -286,7 +286,7 @@ public final class UpdateTaskMBean implements DynamicMBean {
                 return getExecutedTasksList(params[0].toString());
             } catch (UpdateException e) {
                 LOG.error(e.getMessage(), e);
-                throw new MBeanException(new Exception(e.getMessage()));
+                throw new MBeanException(new Exception(e.getMessage()), e.getMessage());
             }
         }
         throw new ReflectionException(new NoSuchMethodException(actionName));

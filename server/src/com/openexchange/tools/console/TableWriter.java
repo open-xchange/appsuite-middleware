@@ -141,7 +141,7 @@ public class TableWriter {
             retval.append(format.getWidth());
             switch (format.getConversion()) {
             case DATE:
-                retval.append('t');
+                retval.append("tc");
                 break;
             case STRING:
             default:

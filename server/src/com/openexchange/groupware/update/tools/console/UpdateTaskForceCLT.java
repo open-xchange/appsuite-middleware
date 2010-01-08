@@ -178,7 +178,7 @@ public final class UpdateTaskForceCLT {
                 environment = null;
             } else {
                 environment = new HashMap<String, Object>(1);
-                environment.put(JMXConnectorServer.AUTHENTICATOR, new JMXAuthenticatorImpl(new String[] { jmxLogin, jmxPassword }));
+                environment.put(JMXConnectorServer.AUTHENTICATOR, new JMXAuthenticatorImpl(jmxLogin, jmxPassword));
             }
 
             final JMXServiceURL url =

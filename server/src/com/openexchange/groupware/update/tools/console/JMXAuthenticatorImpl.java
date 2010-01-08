@@ -49,27 +49,20 @@
 
 package com.openexchange.groupware.update.tools.console;
 
-import java.io.UnsupportedEncodingException;
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
-import java.nio.charset.IllegalCharsetNameException;
-import java.nio.charset.UnsupportedCharsetException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import javax.management.remote.JMXAuthenticator;
 import javax.management.remote.JMXPrincipal;
 import javax.security.auth.Subject;
-import org.apache.commons.codec.binary.Base64;
 
 final class JMXAuthenticatorImpl implements JMXAuthenticator {
 
-    private final String[] credentials;
+    private final String login;
+    private final String password;
 
-    public JMXAuthenticatorImpl(final String[] credentials) {
+    public JMXAuthenticatorImpl(String login, String password) {
         super();
-        this.credentials = new String[credentials.length];
-        System.arraycopy(credentials, 0, this.credentials, 0, credentials.length);
+        this.login = login;
+        this.password = password;
     }
 
     public Subject authenticate(final Object credentials) {
@@ -87,47 +80,11 @@ final class JMXAuthenticatorImpl implements JMXAuthenticator {
          * Perform authentication
          */
         final String username = creds[0];
-        final String password = creds[1];
-        if ((this.credentials[0].equals(username)) && (this.credentials[1].equals(password))) {
+        final String testPassword = creds[1];
+        if (login.equals(username) && password.equals(testPassword)) {
             return new Subject(true, Collections.singleton(new JMXPrincipal(username)), Collections.EMPTY_SET, Collections.EMPTY_SET);
         }
         throw new SecurityException("Invalid credentials");
 
     }
-
-    private static String makeSHAPasswd(final String raw) {
-        MessageDigest md;
-
-        try {
-            md = MessageDigest.getInstance("SHA-1");
-        } catch (final NoSuchAlgorithmException e) {
-            org.apache.commons.logging.LogFactory.getLog(JMXAuthenticatorImpl.class).error(e.getMessage(), e);
-            return raw;
-        }
-
-        final byte[] salt = {};
-
-        md.reset();
-        try {
-            md.update(raw.getBytes("UTF-8"));
-        } catch (final UnsupportedEncodingException e) {
-            /*
-             * Cannot occur
-             */
-            org.apache.commons.logging.LogFactory.getLog(JMXAuthenticatorImpl.class).error(e.getMessage(), e);
-        }
-        md.update(salt);
-
-        try {
-            return Charset.forName("US-ASCII").decode(ByteBuffer.wrap(Base64.encodeBase64(md.digest()))).toString();
-        } catch (final IllegalCharsetNameException e) {
-            org.apache.commons.logging.LogFactory.getLog(JMXAuthenticatorImpl.class).error(e.getMessage(), e);
-        } catch (final UnsupportedCharsetException e) {
-            org.apache.commons.logging.LogFactory.getLog(JMXAuthenticatorImpl.class).error(e.getMessage(), e);
-        }
-
-        return null;
-
-    }
-
 }
