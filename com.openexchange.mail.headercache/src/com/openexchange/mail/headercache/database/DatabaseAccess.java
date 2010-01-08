@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.headercache.database;
 
+import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
@@ -73,10 +74,11 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
-
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.mail.MailException;
@@ -88,10 +90,13 @@ import com.openexchange.mail.headercache.services.HeaderCacheServiceRegistry;
 import com.openexchange.mail.headercache.sync.SyncData;
 import com.openexchange.mail.mime.HeaderCollection;
 import com.openexchange.server.ServiceException;
+import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link DatabaseAccess} - Database access for header cache.
@@ -266,8 +271,7 @@ public final class DatabaseAccess {
                 return "h.headers";
             }
 
-            public int applyField(final MailMessage mail, final ResultSet rs, final int pos) throws IOException, SQLException,
-                    MailException {
+            public int applyField(final MailMessage mail, final ResultSet rs, final int pos) throws IOException, SQLException, MailException {
                 int p = pos;
                 final InputStream binaryStream = rs.getBinaryStream(p++);
                 if (null != binaryStream) {
@@ -280,15 +284,20 @@ public final class DatabaseAccess {
                      * read PipedInputStream depending on ThreadPoolService presence
                      */
                     try {
-                        final ThreadPoolService threadPoolService = HeaderCacheServiceRegistry.getServiceRegistry().getService(
-                                ThreadPoolService.class);
+                        final ThreadPoolService threadPoolService =
+                            HeaderCacheServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class);
                         if (null == threadPoolService) {
                             fillPipeDeflate(pipedOut, binaryStream);
                         } else {
                             final Callable<Object> c = new Callable<Object>() {
 
                                 public Object call() throws IOException {
-                                    fillPipeDeflate(pipedOut, binaryStream);
+                                    try {
+                                        fillPipeDeflate(pipedOut, binaryStream);
+                                    } catch (final IOException e) {
+                                        org.apache.commons.logging.LogFactory.getLog(DatabaseAccess.class).error(e.getMessage(), e);
+                                        throw e;
+                                    }
                                     return null;
                                 }
                             };
@@ -341,6 +350,8 @@ public final class DatabaseAccess {
     // + " JOIN headersAsBlob As h ON m.cid = ? AND h.cid = ? AND m.cid = h.cid AND m.user = h.user AND m.uuid = h.uuid"
     // + " WHERE m.user = ? AND m.account = ? AND m.fullname = ? AND m.id = ?";
 
+    private static final int CHUNK_SIZE = 5000;
+
     /**
      * Fills specified instances of {@link MailMessage} with available data.
      * <p>
@@ -351,6 +362,46 @@ public final class DatabaseAccess {
      * @throws MailException If filling the mails fails
      */
     public void fillMails(final MailMessage[] mails, final List<SetterApplier> setters) throws MailException {
+        if ((null == mails) || (0 == mails.length)) {
+            return;
+        }
+
+        // final long millis = System.currentTimeMillis();
+
+        final List<MailMessage> strippedMails = stripNullValues(mails);
+        final int size = strippedMails.size();
+        final StringBuilder sb = new StringBuilder(size * 32);
+        int fromIndex = 0;
+        int toIndex;
+        while (fromIndex < size) {
+            final int a = fromIndex + CHUNK_SIZE;
+            toIndex = (a <= size) ? a : size;
+            fillMailChunk(strippedMails.subList(fromIndex, toIndex), setters, sb);
+            fromIndex = toIndex;
+        }
+
+        // final long d = System.currentTimeMillis() - millis;
+        // System.out.println(fullname + ": Filling " + size + " mails took " + d + "msec.");
+    }
+
+    /**
+     * Fills specified instances of {@link MailMessage} with available data.
+     * <p>
+     * Note that {@link MailMessage#getMailId()} is expected to return a non-<code>null</code> value for each {@link MailMessage} instance.
+     * 
+     * @param chunkedMails The instances of {@link MailMessage} to fill
+     * @param fields The fields to fill in instances of {@link MailMessage}
+     * @throws MailException If filling the mails fails
+     */
+    private void fillMailChunk(final List<MailMessage> chunkedMails, final List<SetterApplier> setters, final StringBuilder sb) throws MailException {
+        if (chunkedMails.isEmpty()) {
+            return;
+        }
+        final int len = chunkedMails.size();
+        if (1 == len) {
+            fillMail(chunkedMails.get(0), setters);
+            return;
+        }
         final DatabaseService databaseService = getDBService();
         final Connection readConnection;
         try {
@@ -358,15 +409,75 @@ public final class DatabaseAccess {
         } catch (final DBPoolingException e) {
             throw new MailException(e);
         }
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
         try {
-            for (final MailMessage mail : mails) {
-                if (null != mail) {
-                    fillMailInternal(mail, setters, readConnection);
+            /*
+             * Create and fire statement
+             */
+            {
+                sb.setLength(0);
+                sb.append("SELECT ");
+                {
+                    final String name = setters.get(0).getField();
+                    if (null != name) {
+                        sb.append(name);
+                    }
+                }
+                {
+                    final int size = setters.size();
+                    final String delim = ", ";
+                    for (int i = 1; i < size; i++) {
+                        final String name = setters.get(i).getField();
+                        if (null != name) {
+                            sb.append(delim).append(name);
+                        }
+                    }
+                }
+                sb.append(" FROM headersAsBlob AS h INNER JOIN (");
+                sb.append("SELECT uuid FROM mailUUID INNER JOIN (");
+                sb.append("SELECT ? AS id");
+                for (int i = 1; i < len; i++) {
+                    sb.append(" UNION ALL SELECT ?");
+                }
+                sb.append(") AS x ON mailUUID.id = x.id WHERE cid = ? AND user = ? AND account = ? AND fullname = ?");
+                sb.append(") AS y ON h.uuid = y.uuid WHERE cid = ? AND user = ?");
+                stmt = readConnection.prepareStatement(sb.toString());
+                int pos = 1;
+                for (final MailMessage mail : chunkedMails) {
+                    stmt.setString(pos++, mail.getMailId());
+                }
+                stmt.setInt(pos++, contextId);
+                stmt.setInt(pos++, user);
+                stmt.setInt(pos++, accountId);
+                stmt.setString(pos++, fullname);
+                stmt.setInt(pos++, contextId);
+                stmt.setInt(pos++, user);
+                rs = stmt.executeQuery();
+            }
+            /*
+             * Apply to mails
+             */
+            int mailIndex = 0;
+            int pos;
+            while (rs.next()) {
+                /*
+                 * Fill appropriate mail
+                 */
+                final MailMessage mail = chunkedMails.get(mailIndex++);
+                pos = 1;
+                for (final SetterApplier setterApplier : setters) {
+                    pos = setterApplier.applyField(mail, rs, pos);
                 }
             }
+        } catch (final SQLException e) {
+            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+        } catch (final IOException e) {
+            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
         } catch (final Exception e) {
             throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
         } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
             databaseService.backReadOnly(contextId, readConnection);
         }
     }
@@ -397,8 +508,7 @@ public final class DatabaseAccess {
         }
     }
 
-    private void fillMailInternal(final MailMessage mail, final List<SetterApplier> setters, final Connection readConnection)
-            throws MailException {
+    private void fillMailInternal(final MailMessage mail, final List<SetterApplier> setters, final Connection readConnection) throws MailException {
         final String id = mail.getMailId();
         if (null == id) {
             throw new MailException(MailException.Code.MISSING_PARAM, "id");
@@ -483,9 +593,8 @@ public final class DatabaseAccess {
         }
     }
 
-    private static final String SQL_LOAD_SYNC_DATA = "SELECT m.id, h.flags, h.userFlags FROM mailUUID AS m JOIN headersAsBlob As h ON"
-            + " m.cid = ? AND h.cid = ? AND m.cid = h.cid AND m.user = h.user AND m.uuid = h.uuid"
-            + " WHERE m.user = ? AND m.account = ? AND m.fullname = ?";
+    private static final String SQL_LOAD_SYNC_DATA =
+        "SELECT m.id, h.flags, h.userFlags FROM mailUUID AS m JOIN headersAsBlob As h ON" + " m.cid = ? AND h.cid = ? AND m.cid = h.cid AND m.user = h.user AND m.uuid = h.uuid" + " WHERE m.user = ? AND m.account = ? AND m.fullname = ?";
 
     /**
      * Loads sync data from database from specified folder in user's account.
@@ -538,10 +647,8 @@ public final class DatabaseAccess {
         }
     } // End of loadSyncData() method
 
-    private static final String SQL_DELETE = "DELETE mailUUID, headersAsBlob FROM mailUUID JOIN headersAsBlob"
-            + " ON mailUUID.cid = ? AND headersAsBlob.cid = ? AND mailUUID.cid = headersAsBlob.cid"
-            + " AND mailUUID.user = headersAsBlob.user AND mailUUID.uuid = headersAsBlob.uuid"
-            + " WHERE mailUUID.user = ? AND mailUUID.account = ? AND mailUUID.fullname = ? AND mailUUID.uuid = UNHEX(REPLACE(?,'-',''))";
+    private static final String SQL_DELETE =
+        "DELETE mailUUID, headersAsBlob FROM mailUUID JOIN headersAsBlob" + " ON mailUUID.cid = ? AND headersAsBlob.cid = ? AND mailUUID.cid = headersAsBlob.cid" + " AND mailUUID.user = headersAsBlob.user AND mailUUID.uuid = headersAsBlob.uuid" + " WHERE mailUUID.user = ? AND mailUUID.account = ? AND mailUUID.fullname = ? AND mailUUID.uuid = UNHEX(REPLACE(?,'-',''))";
 
     /**
      * Deletes sync data from database associated with specified mail identifiers in folder denoted by given account's fullname.
@@ -592,12 +699,11 @@ public final class DatabaseAccess {
         }
     } // End of deleteSyncData() method
 
-    private static final String SQL_INSERT_UUID = "INSERT INTO mailUUID (cid, user, account, fullname, id, uuid)"
-            + " VALUES (?, ?, ?, ?, ?, UNHEX(REPLACE(?,'-','')))";
+    private static final String SQL_INSERT_UUID =
+        "INSERT INTO mailUUID (cid, user, account, fullname, id, uuid)" + " VALUES (?, ?, ?, ?, ?, UNHEX(REPLACE(?,'-','')))";
 
-    private static final String SQL_INSERT_DATA = "INSERT INTO headersAsBlob"
-            + " (cid, user, uuid, flags, receivedDate, rfc822Size, userFlags, headers)"
-            + " VALUES (?, ?, UNHEX(REPLACE(?,'-','')), ?, ?, ?, ?, ?)";
+    private static final String SQL_INSERT_DATA =
+        "INSERT INTO headersAsBlob" + " (cid, user, uuid, flags, receivedDate, rfc822Size, userFlags, headers)" + " VALUES (?, ?, UNHEX(REPLACE(?,'-','')), ?, ?, ?, ?, ?)";
 
     /**
      * Inserts specified mail collection to sync data.
@@ -605,7 +711,7 @@ public final class DatabaseAccess {
      * @param mails The mail collection to insert
      * @throws MailException If insertion fails
      */
-    public void insertSyncData(final Collection<MailMessage> mails) throws MailException {
+    public void insertSyncData(final List<MailMessage> mails) throws MailException {
         if (null == mails || mails.isEmpty()) {
             return;
         }
@@ -613,151 +719,244 @@ public final class DatabaseAccess {
         final Connection wc;
         try {
             wc = databaseService.getWritable(contextId);
-            wc.setAutoCommit(false); // BEGIN;
         } catch (final DBPoolingException e) {
             throw new MailException(e);
+        }
+        try {
+
+            // final long s = System.currentTimeMillis();
+
+            final int size = mails.size();
+            final StringBuilder sb = new StringBuilder(size * 96);
+            int fromIndex = 0;
+            int toIndex;
+            while (fromIndex < size) {
+                final int a = fromIndex + CHUNK_SIZE;
+                toIndex = (a <= size) ? a : size;
+                insertSyncDataChunk(mails.subList(fromIndex, toIndex), false, sb, wc);
+                fromIndex = toIndex;
+            }
+
+            // final long d = System.currentTimeMillis() - s;
+            // System.out.println(fullname + ": INSERTION of " + mails.size() + " mails took " + d + "msec");
+
+        } finally {
+            databaseService.backWritable(contextId, wc);
+        }
+    }
+
+    private static final String SQL_INSERT_UUID_PREFIX = "INSERT INTO mailUUID (cid, user, account, fullname, id, uuid) VALUES ";
+
+    private static final String SQL_INSERT_UUID_VALUES = "(?, ?, ?, ?, ?, UNHEX(REPLACE(?,'-','')))";
+
+    private static final String SQL_INSERT_DATA_PREFIX =
+        "INSERT INTO headersAsBlob" + " (cid, user, uuid, flags, receivedDate, rfc822Size, userFlags, headers) VALUES ";
+
+    private static final String SQL_INSERT_DATA_VALUES = "(?, ?, UNHEX(REPLACE(?,'-','')), ?, ?, ?, ?, ?)";
+
+    /**
+     * Inserts specified mail collection to sync data.
+     * 
+     * @param mails The mail list to insert
+     * @param wc A writable connection
+     * @throws MailException If insertion fails
+     */
+    private void insertSyncDataChunk(final List<MailMessage> mails, final boolean batch, final StringBuilder sb, final Connection wc) throws MailException {
+        if (mails.isEmpty()) {
+            return;
+        }
+        /*
+         * Begin transaction
+         */
+        try {
+            wc.setAutoCommit(false); // BEGIN;
         } catch (final SQLException e) {
             throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
         }
         PreparedStatement stmt = null;
         try {
             /*
-             * Insert UUID
+             * Insert UUIDs
              */
-            stmt = wc.prepareStatement(SQL_INSERT_UUID);
-            final Map<UUID, MailMessage> uuids = new HashMap<UUID, MailMessage>(mails.size());
-            int pos;
-            for (final MailMessage mail : mails) {
-                pos = 1;
-                stmt.setInt(pos++, contextId);
-                stmt.setInt(pos++, user);
-                stmt.setInt(pos++, accountId);
-                stmt.setString(pos++, fullname);
-                stmt.setString(pos++, mail.getMailId());
-                final UUID uuid = UUID.randomUUID();
-                stmt.setString(pos++, uuid.toString());
-                stmt.addBatch();
-                uuids.put(uuid, mail);
+
+            // long st = System.currentTimeMillis();
+
+            final int size = mails.size();
+            final Map<UUID, MailMessage> uuids = new HashMap<UUID, MailMessage>(size);
+            if (!batch) {
+                /*
+                 * Compose statement string
+                 */
+                sb.setLength(0);
+                sb.append(SQL_INSERT_UUID_PREFIX);
+                sb.append(SQL_INSERT_UUID_VALUES);
+                for (int i = 1; i < size; i++) {
+                    sb.append(", ").append(SQL_INSERT_UUID_VALUES);
+                }
+                stmt = wc.prepareStatement(sb.toString());
+                /*
+                 * Fill prepared statement
+                 */
+                int pos = 1;
+                for (final MailMessage mail : mails) {
+                    pos = fillInsertUUIDStatement(stmt, uuids, pos, mail);
+                }
+                stmt.executeUpdate();
+            } else {
+                stmt = wc.prepareStatement(SQL_INSERT_UUID);
+                final int pos = 1;
+                for (final MailMessage mail : mails) {
+                    fillInsertUUIDStatement(stmt, uuids, pos, mail);
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
             }
-            stmt.executeBatch();
+
+            // long d = System.currentTimeMillis() - st;
+            // System.out.println((batch ? "Batch" : "Serial") + " inserting " + size + " UUIDs took " + d + "msec");
+
             DBUtils.closeSQLStuff(stmt);
+            /*
+             * Completion service
+             */
+            final Set<Entry<UUID, MailMessage>> entrySet = uuids.entrySet();
+            final CompletionService<InputStream> completionService;
+            {
+                final ThreadPoolService tps = HeaderCacheServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class, true);
+                completionService = new ThreadPoolCompletionService<InputStream>(tps);
+                for (final Entry<UUID, MailMessage> entry : entrySet) {
+                    completionService.submit(new InputStreamCallable(entry.getValue()));
+                }
+            }
             /*
              * Insert data
              */
-            for (final Entry<UUID, MailMessage> entry : uuids.entrySet()) {
-                stmt = wc.prepareStatement(SQL_INSERT_DATA);
-                pos = 1;
-                stmt.setInt(pos++, contextId); // cid
-                stmt.setInt(pos++, user); // user
-                stmt.setString(pos++, entry.getKey().toString()); // uuid
-                final MailMessage mail = entry.getValue();
-                stmt.setInt(pos++, mail.getFlags()); // flags
-                {
-                    final Date receivedDate = mail.getReceivedDate();
-                    if (null == receivedDate) {
-                        stmt.setNull(pos++, Types.BIGINT); // receivedDate
-                    } else {
-                        stmt.setLong(pos++, receivedDate.getTime()); // receivedDate
-                    }
-                }
-                {
-                    final long size = mail.getSize();
-                    stmt.setLong(pos++, size < 0 ? 0 : size); // rfc822Size
-                }
-                {
-                    final String[] userFlags = mail.getUserFlags();
-                    if (null == userFlags || userFlags.length <= 0) {
-                        stmt.setNull(pos++, Types.VARCHAR); // userFlags
-                    } else {
-                        final int len = userFlags.length;
-                        final StringBuilder sb = new StringBuilder(len * 8);
-                        sb.append(userFlags[0]);
-                        for (int i = 1; i < len; i++) {
-                            sb.append(',').append(userFlags[i]);
-                        }
-                        if (sb.length() > MAX_USER_FLAGS) {
-                            stmt.setString(pos++, sb.substring(0, 1024)); // userFlags
-                        } else {
-                            stmt.setString(pos++, sb.toString()); // userFlags
-                        }
-                    }
-                }
-                {
-                    final byte[] headers = mail.getHeaders().toString().getBytes("US-ASCII");
-                    final int length = headers.length;
-                    /*
-                     * Create a pipe
-                     */
-                    final PipedOutputStream pipedOut = new PipedOutputStream();
-                    final PipedInputStream pipedIn = new PipedInputStream(pipedOut);
-                    try {
-                        /*
-                         * Fill PipedOutputStream depending on ThreadPoolService presence
-                         */
-                        final ThreadPoolService threadPoolService = HeaderCacheServiceRegistry.getServiceRegistry().getService(
-                                ThreadPoolService.class);
-                        if (null == threadPoolService) {
-                            fillPipedInflate(pipedOut, headers, length);
-                        } else {
-                            final Callable<Object> c = new Callable<Object>() {
 
-                                public Object call() throws IOException {
-                                    fillPipedInflate(pipedOut, headers, length);
-                                    return null;
-                                }
-                            };
-                            threadPoolService.submit(ThreadPools.task(c), CallerRunsBehavior.getInstance());
-                        }
-                        /*
-                         * Set binary as a PipedInputStream linked to previously created PipedOutputStream
-                         */
-                        stmt.setBinaryStream(pos++, pipedIn, length); // headers
-                        /*
-                         * Execute update prior to closing (stream) resources
-                         */
-                        stmt.executeUpdate();
-                    } finally {
-                        closeQuietly(pipedOut);
-                        closeQuietly(pipedIn);
-                    }
-                }
+            // st = System.currentTimeMillis();
+
+            if (!batch) {
                 /*
-                 * Close statement before next loop
+                 * Compose statement string
                  */
-                DBUtils.closeSQLStuff(stmt);
+                sb.setLength(0);
+                sb.append(SQL_INSERT_DATA_PREFIX);
+                sb.append(SQL_INSERT_DATA_VALUES);
+                for (int i = 1; i < size; i++) {
+                    sb.append(", ").append(SQL_INSERT_DATA_VALUES);
+                }
+                stmt = wc.prepareStatement(sb.toString());
+                /*
+                 * Fill prepared statement
+                 */
+                int pos = 1;
+                for (final Entry<UUID, MailMessage> entry : entrySet) {
+                    pos = fillInsertDataStatement(stmt, completionService, pos, entry);
+                }
+                stmt.executeUpdate();
+            } else {
+                stmt = wc.prepareStatement(SQL_INSERT_DATA);
+                final int pos = 1;
+                for (final Entry<UUID, MailMessage> entry : entrySet) {
+                    fillInsertDataStatement(stmt, completionService, pos, entry);
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
             }
+
+            // d = System.currentTimeMillis() - st;
+            // System.out.println((batch ? "Batch" : "Serial") + " inserting " + size + " mail-data-sets took " + d + "msec");
+
             wc.commit(); // COMMIT
         } catch (final SQLException e) {
             DBUtils.rollback(wc); // ROLL-BACK
             throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
-        } catch (final IOException e) {
-            DBUtils.rollback(wc); // ROLL-BACK
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
         } catch (final Exception e) {
             DBUtils.rollback(wc); // ROLL-BACK
             throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);
             DBUtils.autocommit(wc);
-            databaseService.backWritable(contextId, wc);
         }
     } // End of insertSyncData() method
+
+    private int fillInsertUUIDStatement(final PreparedStatement stmt, final Map<UUID, MailMessage> uuids, final int position, final MailMessage mail) throws SQLException {
+        int pos = position;
+        stmt.setInt(pos++, contextId);
+        stmt.setInt(pos++, user);
+        stmt.setInt(pos++, accountId);
+        stmt.setString(pos++, fullname);
+        stmt.setString(pos++, mail.getMailId());
+        final UUID uuid = UUID.randomUUID();
+        stmt.setString(pos++, uuid.toString());
+        uuids.put(uuid, mail);
+        return pos;
+    }
+
+    private int fillInsertDataStatement(final PreparedStatement stmt, final CompletionService<InputStream> completionService, final int position, final Entry<UUID, MailMessage> entry) throws SQLException, InterruptedException, ExecutionException, IOException {
+        int pos = position;
+        stmt.setInt(pos++, contextId); // cid
+        stmt.setInt(pos++, user); // user
+        stmt.setString(pos++, entry.getKey().toString()); // uuid
+        final MailMessage mail = entry.getValue();
+        stmt.setInt(pos++, mail.getFlags()); // flags
+        {
+            final Date receivedDate = mail.getReceivedDate();
+            if (null == receivedDate) {
+                stmt.setNull(pos++, Types.BIGINT); // receivedDate
+            } else {
+                stmt.setLong(pos++, receivedDate.getTime()); // receivedDate
+            }
+        }
+        {
+            final long msize = mail.getSize();
+            stmt.setLong(pos++, msize < 0 ? 0 : msize); // rfc822Size
+        }
+        {
+            final String[] userFlags = mail.getUserFlags();
+            if (null == userFlags || userFlags.length <= 0) {
+                stmt.setNull(pos++, Types.VARCHAR); // userFlags
+            } else {
+                final int len = userFlags.length;
+                final StringBuilder usb = new StringBuilder(len * 8);
+                usb.append(userFlags[0]);
+                for (int i = 1; i < len; i++) {
+                    usb.append(',').append(userFlags[i]);
+                }
+                if (usb.length() > MAX_USER_FLAGS) {
+                    stmt.setString(pos++, usb.substring(0, 1024)); // userFlags
+                } else {
+                    stmt.setString(pos++, usb.toString()); // userFlags
+                }
+            }
+        }
+        {
+            /*
+             * Get input stream
+             */
+            final InputStream in = completionService.take().get();
+            /*
+             * Set binary as a InputStream
+             */
+            stmt.setBinaryStream(pos++, in, in.available()); // headers
+        }
+        return pos;
+    }
 
     /**
      * Fills specified {@link PipedOutputStream} instance.
      * 
      * @param pipedOutputStream The piped output stream
      * @param headers The headers' bytes
-     * @param length The bytes' length
      * @throws IOException If an I/O error occurs
      */
-    static void fillPipedInflate(final PipedOutputStream pipedOutputStream, final byte[] headers, final int length) throws IOException {
-        final GZIPOutputStream gzipOutputStream = new GZIPOutputStream(pipedOutputStream, length);
+    static void fillPipedInflate(final PipedOutputStream pipedOutputStream, final byte[] headers) throws IOException {
+        final GZIPOutputStream gzipOutputStream = new GZIPOutputStream(pipedOutputStream);
         try {
-            gzipOutputStream.write(headers, 0, length);
+            gzipOutputStream.write(headers);
             gzipOutputStream.flush();
         } finally {
             closeQuietly(gzipOutputStream);
+            closeQuietly(pipedOutputStream);
         }
     }
 
@@ -782,8 +981,8 @@ public final class DatabaseAccess {
      * SET TABLE_1.COLUMN = EXPR WHERE TABLE_2.COLUMN2 IS NULL
      */
 
-    private static final String SQL_UPDATE = "UPDATE headersAsBlob SET flags = ? WHERE cid = ? AND user = ? AND uuid ="
-            + " (SELECT uuid FROM mailUUID WHERE cid = ? AND user = ? AND account = ? AND fullname = ? AND id = ?)";
+    private static final String SQL_UPDATE =
+        "UPDATE headersAsBlob SET flags = ? WHERE cid = ? AND user = ? AND uuid =" + " (SELECT uuid FROM mailUUID WHERE cid = ? AND user = ? AND account = ? AND fullname = ? AND id = ?)";
 
     /**
      * Updates specified sync data.
@@ -848,6 +1047,44 @@ public final class DatabaseAccess {
             throw new MailException(e);
         }
         return databaseService;
+    }
+
+    private static List<MailMessage> stripNullValues(final MailMessage[] mails) {
+        final List<MailMessage> l = new ArrayList<MailMessage>(mails.length);
+        for (int i = 0; i < mails.length; i++) {
+            final MailMessage m = mails[i];
+            if (null != m) {
+                l.add(m);
+            }
+        }
+        return l;
+    }
+
+    private static final int BUFSIZE = 0x800;
+
+    private static final class InputStreamCallable implements Callable<InputStream> {
+
+        final MailMessage mail;
+
+        InputStreamCallable(final MailMessage mail) {
+            super();
+            this.mail = mail;
+        }
+
+        public InputStream call() throws Exception {
+            final ByteArrayOutputStream sink = new UnsynchronizedByteArrayOutputStream(BUFSIZE);
+            {
+                final GZIPOutputStream gzipOutputStream = new GZIPOutputStream(sink);
+                try {
+                    gzipOutputStream.write(mail.getHeaders().toString().getBytes("US-ASCII"));
+                    gzipOutputStream.flush();
+                } finally {
+                    closeQuietly(gzipOutputStream);
+                }
+            }
+            return new UnsynchronizedByteArrayInputStream(sink.toByteArray());
+        }
+
     }
 
 }
