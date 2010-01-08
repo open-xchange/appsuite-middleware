@@ -53,8 +53,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
-
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;
@@ -64,10 +62,10 @@ import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.headercache.HeaderCacheException;
+import com.openexchange.mail.headercache.HeaderCacheStaticProperties;
 import com.openexchange.mail.headercache.database.DatabaseAccess;
 import com.openexchange.mail.headercache.properties.HeaderCacheProperties;
 import com.openexchange.mail.headercache.properties.RdbHeaderCacheProperties;
-import com.openexchange.mail.headercache.services.HeaderCacheServiceRegistry;
 import com.openexchange.session.Session;
 
 /**
@@ -83,15 +81,13 @@ public final class SynchronizerCallable implements Callable<Object> {
 
     private static final long ZERO = 0L;
 
-    private static final long DEFAULT_REFRESH_RATE = 60000L;
-
     /**
      * To create appropriate String array on toArray() invocations.
      */
     private static final String[] STR_ARR = new String[0];
 
-    private static final MailField[] FIELDS_LOAD = { MailField.ID, MailField.SIZE, MailField.FLAGS, MailField.RECEIVED_DATE,
-            MailField.HEADERS };
+    private static final MailField[] FIELDS_LOAD =
+        { MailField.ID, MailField.SIZE, MailField.FLAGS, MailField.RECEIVED_DATE, MailField.HEADERS };
 
     /**
      * The mail access.
@@ -116,8 +112,7 @@ public final class SynchronizerCallable implements Callable<Object> {
     /**
      * Initializes a new {@link SynchronizerCallable}.
      */
-    public SynchronizerCallable(final String folder, final Session session,
-            final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, final boolean enforce) {
+    public SynchronizerCallable(final String folder, final Session session, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, final boolean enforce) {
         super();
         this.mailAccess = mailAccess;
         this.folder = folder;
@@ -142,11 +137,9 @@ public final class SynchronizerCallable implements Callable<Object> {
             if (!enforce) {
                 final long refreshRate;
                 {
-                    String propRefreshRate = props.getProperty(HeaderCacheProperties.PROP_REFRESH_RATE_MILLIS);
-                    if (null == propRefreshRate) {
-                        propRefreshRate = getProperty("com.openexchange.mail.headercache.defaultRefreshRate");
-                    }
-                    refreshRate = null == propRefreshRate ? DEFAULT_REFRESH_RATE : Long.parseLong(propRefreshRate);
+                    final String propRefreshRate = props.getProperty(HeaderCacheProperties.PROP_REFRESH_RATE_MILLIS);
+                    refreshRate =
+                        null == propRefreshRate ? HeaderCacheStaticProperties.getInstance().getDefaultRefreshRate() : Long.parseLong(propRefreshRate);
                 }
                 if (refreshRate > 0) {
                     final String propLastAccessed = props.getProperty(propertyLastAccessed);
@@ -156,8 +149,8 @@ public final class SynchronizerCallable implements Callable<Object> {
                          */
                         if (DEBUG) {
                             LOG.debug(new StringBuilder(64).append(HeaderCacheException.COMPONENT.getAbbreviation()).append(
-                                    ": Synchronizing folder \"").append(folder).append("\" of account ").append(accountId).append(
-                                    " aborted.").append(" Refresh-rate not elapsed, yet.").toString());
+                                ": Synchronizing folder \"").append(folder).append("\" of account ").append(accountId).append(" aborted.").append(
+                                " Refresh-rate not elapsed, yet.").toString());
                         }
                         return null;
                     }
@@ -206,8 +199,10 @@ public final class SynchronizerCallable implements Callable<Object> {
                 final Set<String> newUIDs = new HashSet<String>(currentIDs);
                 newUIDs.removeAll(storageIDs);
                 if (!newUIDs.isEmpty()) {
-                    databaseAccess.insertSyncData(Arrays.asList(mailAccess.getMessageStorage().getMessages(folder,
-                            newUIDs.toArray(STR_ARR), FIELDS_LOAD)));
+                    databaseAccess.insertSyncData(Arrays.asList(mailAccess.getMessageStorage().getMessages(
+                        folder,
+                        newUIDs.toArray(STR_ARR),
+                        FIELDS_LOAD)));
                 }
                 /*
                  * Detect IDs of changed messages
@@ -230,9 +225,8 @@ public final class SynchronizerCallable implements Callable<Object> {
              */
             if (DEBUG) {
                 final long dur = System.currentTimeMillis() - s;
-                LOG.debug(new StringBuilder(64).append(HeaderCacheException.COMPONENT.getAbbreviation())
-                        .append(": Synchronizing folder \"").append(folder).append("\" of account ").append(accountId).append(" took ")
-                        .append(dur).append("msec").toString());
+                LOG.debug(new StringBuilder(64).append(HeaderCacheException.COMPONENT.getAbbreviation()).append(": Synchronizing folder \"").append(
+                    folder).append("\" of account ").append(accountId).append(" took ").append(dur).append("msec").toString());
             }
             /*
              * Update properties
@@ -258,8 +252,8 @@ public final class SynchronizerCallable implements Callable<Object> {
         /*
          * Get all messages: id + flags
          */
-        final MailMessage[] mails = mailAccess.getMessageStorage().searchMessages(folder, null, MailSortField.RECEIVED_DATE,
-                OrderDirection.ASC, null, FIELDS_SYNC);
+        final MailMessage[] mails =
+            mailAccess.getMessageStorage().searchMessages(folder, null, MailSortField.RECEIVED_DATE, OrderDirection.ASC, null, FIELDS_SYNC);
         final Set<SyncData> currentData = new HashSet<SyncData>(mails.length);
         for (final MailMessage mail : mails) {
             currentData.add(SyncData.newInstance(mail.getMailId(), mail.getFlags(), Arrays.asList(mail.getUserFlags())));
@@ -269,14 +263,6 @@ public final class SynchronizerCallable implements Callable<Object> {
 
     private String getPropertyLastAccessed() {
         return new StringBuilder(64).append(HeaderCacheProperties.PROP_LAST_ACCESSED).append('.').append(folder).toString();
-    }
-
-    private static String getProperty(final String name) {
-        final ConfigurationService cs = HeaderCacheServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
-        if (null != cs) {
-            return cs.getProperty(name);
-        }
-        return null;
     }
 
 }

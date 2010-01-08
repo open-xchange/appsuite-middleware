@@ -123,7 +123,7 @@ public final class HeaderCacheProvider extends AllMailProvider {
 
     @Override
     protected AbstractProtocolProperties getProtocolProperties() {
-        return HeaderCacheProperties.getInstance();
+        return HeaderCacheStaticProperties.getInstance();
     }
 
     @Override
