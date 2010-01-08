@@ -115,7 +115,7 @@ public final class EmitterTools {
                 calendarCollection.normalizeLong(exception.getTime() - Constants.MILLI_WEEK),
                 calendarCollection.normalizeLong(exception.getTime() + Constants.MILLI_WEEK),
                 0,
-                CalendarCollectionService.MAXTC,
+                CalendarCollectionService.MAX_OCCURRENCESE,
                 true);
             final int recurrencePosition = rrs.getPositionByLong(exception.getTime());
             if (recurrencePosition > 0) {

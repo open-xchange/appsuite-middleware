@@ -1272,7 +1272,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
     private void calculateEndDateForNewType(final CalendarDataObject cdao, final CalendarDataObject edao) throws OXException {
         Date occurrenceDate;
         if (cdao.getOccurrence() <= 0) {
-            occurrenceDate = recColl.getOccurenceDate(cdao, recColl.MAXTC);
+            occurrenceDate = recColl.getOccurenceDate(cdao, recColl.MAX_OCCURRENCESE);
         } else {
             occurrenceDate = recColl.getOccurenceDate(cdao);
         }
@@ -1342,7 +1342,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             // Calculate occurrence's time
             final Date occurrenceDate;
             if (cdao.getOccurrence() <= 0) {
-                occurrenceDate = recColl.getOccurenceDate(cdao, recColl.MAXTC);
+                occurrenceDate = recColl.getOccurenceDate(cdao, recColl.MAX_OCCURRENCESE);
             } else {
                 occurrenceDate = recColl.getOccurenceDate(cdao);
             }

@@ -2315,7 +2315,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 main = edao;
             }
             final RecurringResultsInterface rresults = collection.calculateRecurring(main, 0, 0, 0,
-                collection.MAXTC, true);
+                collection.MAX_OCCURRENCESE, true);
             /*
              * Check if every possible occurrence is covered by a delete exception
              */

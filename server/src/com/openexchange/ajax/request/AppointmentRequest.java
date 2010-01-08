@@ -854,7 +854,7 @@ public class AppointmentRequest {
                     0,
                     0,
                     recurrencePosition,
-                    recColl.MAXTC,
+                    recColl.MAX_OCCURRENCESE,
                     true);
                 if (recuResults.size() == 0) {
                     if (LOG.isWarnEnabled()) {

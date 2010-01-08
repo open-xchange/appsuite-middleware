@@ -90,6 +90,15 @@ public interface CalendarCollectionService {
      * @return The max. until date for given infinite recurring appointment
      */
     public Date getMaxUntilDate(final CalendarDataObject cdao);
+    
+    /**
+     * Adds a the given amount of years to the provided base time. The calculation is based on UTC time.
+     * 
+     * @param base
+     * @param years
+     * @return
+     */
+    public long addYears(long base, int years);
 
     /**
      * Gets the name of specified field ID.
@@ -524,7 +533,7 @@ public interface CalendarCollectionService {
     /**
      * The maximum supported number of occurrences.
      */
-    public final int MAXTC = 999;
+    public final int MAX_OCCURRENCESE = 999;
 
 
     /**
@@ -684,7 +693,7 @@ public interface CalendarCollectionService {
     /**
      * This method calculates the recurring occurrences and stores them within the returned {@link RecurringResultsInterface} collection.
      * <p>
-     * <b>! This method returns max. {@link #MAXTC} results AND ignores exceptions !</b>
+     * <b>! This method returns max. {@link #MAX_OCCURRENCESE} results AND ignores exceptions !</b>
      * <p>
      * A certain occurrence can be calculated by setting parameter {@code pos}.
      * <p>
@@ -702,7 +711,7 @@ public interface CalendarCollectionService {
     /**
      * This method calculates the recurring occurrences and stores them within the returned {@link RecurringResultsInterface} collection.
      * <p>
-     * <b>! This method returns max. {@link #MAXTC} results !</b>
+     * <b>! This method returns max. {@link #MAX_OCCURRENCESE} results !</b>
      * <p>
      * A certain occurrence can be calculated by setting parameter {@code pos}.
      * <p>
@@ -728,7 +737,7 @@ public interface CalendarCollectionService {
      * @param range_start The (optional) range start from which occurrences shall be calculated; leave to <code>0</code> to ignore
      * @param range_end The (optional) range end until occurrences shall be calculated; leave to <code>0</code> to ignore
      * @param pos The (optional) one-based occurrence position to calculate; leave to <code>0</code> to ignore
-     * @param PMAXTC The max. number of occurrences to calculate; mostly set to {@link #MAXTC}
+     * @param PMAXTC The max. number of occurrences to calculate; mostly set to {@link #MAX_OCCURRENCESE}
      * @param ignore_exceptions <code>true</code> to ignore change and delete exceptions during calculation, meaning corresponding
      *            occurrences do not appear in returned {@link RecurringResultsInterface} collection; otherwise <code>false</code>
      * @return The calculated occurrences kept in a {@link RecurringResultsInterface} collection
@@ -747,7 +756,7 @@ public interface CalendarCollectionService {
      * @param range_start The (optional) range start from which occurrences shall be calculated; leave to <code>0</code> to ignore
      * @param range_end The (optional) range end until occurrences shall be calculated; leave to <code>0</code> to ignore
      * @param pos The (optional) one-based occurrence position to calculate; leave to <code>0</code> to ignore
-     * @param PMAXTC The max. number of occurrences to calculate; mostly set to {@link #MAXTC}
+     * @param PMAXTC The max. number of occurrences to calculate; mostly set to {@link #MAX_OCCURRENCESE}
      * @param ignore_exceptions <code>true</code> to ignore change and delete exceptions during calculation, meaning corresponding
      *            occurrences do not appear in returned {@link RecurringResultsInterface} collection; otherwise <code>false</code>
      * @param calc_until This parameter is not used, yet

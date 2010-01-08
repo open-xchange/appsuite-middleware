@@ -378,7 +378,7 @@ public class RecurringCalculation {
     private void checkValues() {
 		if (!contains_until) {
 			end_of_series = (start_of_series + (recurring_type == CalendarObject.YEARLY ? Constants.MILLI_YEAR
-					* recColl.MAXTC : Constants.MILLI_YEAR * 99));
+					* recColl.MAX_OCCURRENCESE : Constants.MILLI_YEAR * 99));
 			this.until = end_of_series;
 		}
 	}

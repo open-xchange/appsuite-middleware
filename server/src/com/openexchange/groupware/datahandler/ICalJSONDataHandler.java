@@ -234,7 +234,7 @@ public final class ICalJSONDataHandler implements DataHandler {
                         // extractRecurringInformation()
                         // appointmentobject.calculateRecurrence();
                         final RecurringResultsInterface recuResults =
-                            recColl.calculateRecurring(appointment, 0, 0, recurrencePosition, CalendarCollectionService.MAXTC, true);
+                            recColl.calculateRecurring(appointment, 0, 0, recurrencePosition, CalendarCollectionService.MAX_OCCURRENCESE, true);
                         if (recuResults.size() == 0) {
                             if (LOG.isWarnEnabled()) {
                                 LOG.warn(new StringBuilder(32).append("No occurrence at position ").append(recurrencePosition));

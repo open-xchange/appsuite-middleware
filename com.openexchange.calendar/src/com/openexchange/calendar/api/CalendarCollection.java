@@ -273,23 +273,23 @@ public final class CalendarCollection implements CalendarCollectionService {
     }
     
     private void checkAndCorrectErrors(final CalendarDataObject cdao) {
-        if (cdao.getInterval() > MAXTC) {
+        if (cdao.getInterval() > MAX_OCCURRENCESE) {
             final OXCalendarException exc = new OXCalendarException(
                     OXCalendarException.Code.RECURRING_VALUE_CONSTRAINT, Integer.valueOf(cdao.getInterval()), Integer
-                            .valueOf(MAXTC));
+                            .valueOf(MAX_OCCURRENCESE));
             if (LOG.isWarnEnabled()) {
-                LOG.warn(exc.getMessage() + " Auto-corrected to " + MAXTC, exc);
+                LOG.warn(exc.getMessage() + " Auto-corrected to " + MAX_OCCURRENCESE, exc);
             }
-            cdao.setInterval(MAXTC);
+            cdao.setInterval(MAX_OCCURRENCESE);
         }
-        if (cdao.getOccurrence() > MAXTC) {
+        if (cdao.getOccurrence() > MAX_OCCURRENCESE) {
             final OXCalendarException exc = new OXCalendarException(
                     OXCalendarException.Code.RECURRING_VALUE_CONSTRAINT, Integer.valueOf(cdao.getOccurrence()), Integer
-                            .valueOf(MAXTC));
+                            .valueOf(MAX_OCCURRENCESE));
             if (LOG.isWarnEnabled()) {
-                LOG.warn(exc.getMessage() + " Auto-corrected to " + MAXTC, exc);
+                LOG.warn(exc.getMessage() + " Auto-corrected to " + MAX_OCCURRENCESE, exc);
             }
-            cdao.setOccurrence(MAXTC);
+            cdao.setOccurrence(MAX_OCCURRENCESE);
         }
         if (cdao.getRecurrenceType() == CalendarDataObject.DAILY) {
             if (cdao.getInterval() < 1) {
@@ -636,23 +636,23 @@ public final class CalendarCollection implements CalendarCollectionService {
             StringBuilder recStrBuilder = new StringBuilder(64);
             final int recurrenceType = cdao.getRecurrenceType();
             int interval = cdao.getInterval(); // i
-            if (interval > MAXTC) {
+            if (interval > MAX_OCCURRENCESE) {
                 final OXCalendarException exc = new OXCalendarException(Code
                     .RECURRING_VALUE_CONSTRAINT, Integer.valueOf(interval), Integer
-                    .valueOf(MAXTC));
-                LOG.warn(exc.getMessage() + " Auto-corrected to " + MAXTC, exc);
-                interval = MAXTC;
+                    .valueOf(MAX_OCCURRENCESE));
+                LOG.warn(exc.getMessage() + " Auto-corrected to " + MAX_OCCURRENCESE, exc);
+                interval = MAX_OCCURRENCESE;
             }
             final int weekdays = cdao.getDays();
             final int monthday = cdao.getDayInMonth();
             final int month = cdao.getMonth();
             int occurrences = cdao.getOccurrence();
-            if (occurrences > MAXTC) {
+            if (occurrences > MAX_OCCURRENCESE) {
                 final OXCalendarException exc = new OXCalendarException(Code
                     .RECURRING_VALUE_CONSTRAINT, Integer.valueOf(occurrences),
-                    Integer.valueOf(MAXTC));
-                LOG.warn(exc.getMessage() + " Auto-corrected to " + MAXTC, exc);
-                occurrences = MAXTC;
+                    Integer.valueOf(MAX_OCCURRENCESE));
+                LOG.warn(exc.getMessage() + " Auto-corrected to " + MAX_OCCURRENCESE, exc);
+                occurrences = MAX_OCCURRENCESE;
             }
             if (!cdao.containsUntil() && !cdao.containsOccurrence()) {
                 occurrences = -1;
@@ -876,13 +876,13 @@ public final class CalendarCollection implements CalendarCollectionService {
      * @throws OXException If calculating the first occurrence fails
      */
     public RecurringResultsInterface calculateFirstRecurring(final CalendarObject cdao) throws OXException {
-        return calculateRecurring(cdao, 0, 0, 1, MAXTC, true, true);
+        return calculateRecurring(cdao, 0, 0, 1, MAX_OCCURRENCESE, true, true);
     }
 
     /**
      * This method calculates the recurring occurrences and stores them within the returned {@link RecurringResultsInterface} collection.
      * <p>
-     * <b>! This method returns max. {@link #MAXTC} results AND ignores exceptions !</b>
+     * <b>! This method returns max. {@link #MAX_OCCURRENCESE} results AND ignores exceptions !</b>
      * <p>
      * A certain occurrence can be calculated by setting parameter {@code pos}.
      * <p>
@@ -896,13 +896,13 @@ public final class CalendarCollection implements CalendarCollectionService {
      * @throws OXException If calculating the occurrences fails
      */
     public RecurringResultsInterface calculateRecurringIgnoringExceptions(final CalendarObject cdao, final long range_start,final  long range_end, final int pos) throws OXException {
-        return calculateRecurring(cdao, range_start, range_end, pos, MAXTC, true, false);
+        return calculateRecurring(cdao, range_start, range_end, pos, MAX_OCCURRENCESE, true, false);
     }
 
     /**
      * This method calculates the recurring occurrences and stores them within the returned {@link RecurringResultsInterface} collection.
      * <p>
-     * <b>! This method returns max. {@link #MAXTC} results !</b>
+     * <b>! This method returns max. {@link #MAX_OCCURRENCESE} results !</b>
      * <p>
      * A certain occurrence can be calculated by setting parameter {@code pos}.
      * <p>
@@ -916,7 +916,7 @@ public final class CalendarCollection implements CalendarCollectionService {
      * @throws OXException If calculating the occurrences fails
      */
     public RecurringResultsInterface calculateRecurring(final CalendarObject cdao, final long range_start, final long range_end, final int pos) throws OXException {
-        return calculateRecurring(cdao, range_start, range_end, pos, MAXTC, false, false);
+        return calculateRecurring(cdao, range_start, range_end, pos, MAX_OCCURRENCESE, false, false);
     }
     
     /**
@@ -930,7 +930,7 @@ public final class CalendarCollection implements CalendarCollectionService {
      * @param range_start The (optional) range start from which occurrences shall be calculated; leave to <code>0</code> to ignore
      * @param range_end The (optional) range end until occurrences shall be calculated; leave to <code>0</code> to ignore
      * @param pos The (optional) one-based occurrence position to calculate; leave to <code>0</code> to ignore
-     * @param PMAXTC The max. number of occurrences to calculate; mostly set to {@link #MAXTC}
+     * @param PMAXTC The max. number of occurrences to calculate; mostly set to {@link #MAX_OCCURRENCESE}
      * @param ignore_exceptions <code>true</code> to ignore change and delete exceptions during calculation, meaning corresponding occurrences do not appear in returned {@link RecurringResultsInterface} collection; otherwise <code>false</code>
      * @return The calculated occurrences kept in a {@link RecurringResultsInterface} collection
      * @throws OXException If calculating the occurrences fails
@@ -950,7 +950,7 @@ public final class CalendarCollection implements CalendarCollectionService {
      * @param range_start The (optional) range start from which occurrences shall be calculated; leave to <code>0</code> to ignore
      * @param range_end The (optional) range end until occurrences shall be calculated; leave to <code>0</code> to ignore
      * @param pos The (optional) one-based occurrence position to calculate; leave to <code>0</code> to ignore
-     * @param PMAXTC The max. number of occurrences to calculate; mostly set to {@link #MAXTC}
+     * @param PMAXTC The max. number of occurrences to calculate; mostly set to {@link #MAX_OCCURRENCESE}
      * @param ignore_exceptions <code>true</code> to ignore change and delete exceptions during calculation, meaning corresponding occurrences do not appear in returned {@link RecurringResultsInterface} collection; otherwise <code>false</code>
      * @param calc_until This parameter is not used, yet
      * @return The calculated occurrences kept in a {@link RecurringResultsInterface} collection
@@ -1254,13 +1254,13 @@ public final class CalendarCollection implements CalendarCollectionService {
     }
     
     public void checkRecurring(final CalendarObject cdao) throws OXException {
-        if (cdao.getInterval() > MAXTC) {
+        if (cdao.getInterval() > MAX_OCCURRENCESE) {
             throw new OXCalendarException(OXCalendarException.Code.RECURRING_VALUE_CONSTRAINT, Integer.valueOf(cdao
-                    .getInterval()), Integer.valueOf(MAXTC));
+                    .getInterval()), Integer.valueOf(MAX_OCCURRENCESE));
         }
-        if (cdao.getOccurrence() > MAXTC) {
+        if (cdao.getOccurrence() > MAX_OCCURRENCESE) {
             throw new OXCalendarException(OXCalendarException.Code.RECURRING_VALUE_CONSTRAINT, Integer.valueOf(cdao
-                    .getOccurrence()), Integer.valueOf(MAXTC));
+                    .getOccurrence()), Integer.valueOf(MAX_OCCURRENCESE));
         }
         if (cdao.getRecurrenceType() == CalendarDataObject.DAILY) {
             if (cdao.getInterval() < 1) {
@@ -1522,7 +1522,7 @@ public final class CalendarCollection implements CalendarCollectionService {
                     0,
                     0,
                     1,
-                    MAXTC,
+                    MAX_OCCURRENCESE,
                     true);
                 final RecurringResultInterface rr = rrs.getRecurringResultByPosition(1);
                 if (rr != null) {
@@ -1558,9 +1558,11 @@ public final class CalendarCollection implements CalendarCollectionService {
          */
         long maxEnd;
         if (cdao.getRecurrenceType() == CalendarObject.YEARLY) {
-            maxEnd = normalizeLong(cdao.getStartDate().getTime() + (Constants.MILLI_YEAR * 99));
+            maxEnd = normalizeLong(addYears(cdao.getStartDate().getTime(), CalendarCollectionService.MAX_OCCURRENCESE));
+            //maxEnd = normalizeLong(cdao.getStartDate().getTime() + (Constants.MILLI_YEAR * CalendarCollectionService.MAX_OCCURRENCESE));
         } else {
-            maxEnd = normalizeLong(cdao.getStartDate().getTime() + (Constants.MILLI_YEAR * recColl.getMAX_END_YEARS()));
+            maxEnd = normalizeLong(addYears(cdao.getStartDate().getTime(), recColl.getMAX_END_YEARS()));
+            //maxEnd = normalizeLong(cdao.getStartDate().getTime() + (Constants.MILLI_YEAR * recColl.getMAX_END_YEARS()));
         }
 
         /*
@@ -1570,7 +1572,7 @@ public final class CalendarCollection implements CalendarCollectionService {
         clone.setEndDate(new Date(maxEnd));
         final RecurringResultsInterface rresults;
         try {
-            rresults = calculateRecurringIgnoringExceptions(clone, 0, 0, recColl.MAXTC);
+            rresults = calculateRecurringIgnoringExceptions(clone, 0, 0, CalendarCollectionService.MAX_OCCURRENCESE);
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             return new Date(maxEnd);
@@ -1583,6 +1585,13 @@ public final class CalendarCollection implements CalendarCollectionService {
             return new Date(normalizeLong(rresult.getEnd()));
         }
         return new Date(maxEnd);
+    }
+    
+    public long addYears(long base, int years) {
+        Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+        calendar.setTimeInMillis(base);
+        calendar.add(Calendar.YEAR, years);
+        return calendar.getTimeInMillis();
     }
 
     /* (non-Javadoc)
@@ -3483,7 +3492,7 @@ public final class CalendarCollection implements CalendarCollectionService {
             rangeStart,
             rangeEnd,
             0,
-            MAXTC,
+            MAX_OCCURRENCESE,
             true);
         return (rresults.getPositionByLong(date.getTime()) != -1);
     }
@@ -3511,7 +3520,7 @@ public final class CalendarCollection implements CalendarCollectionService {
             rangeStart,
             rangeEnd,
             0,
-            MAXTC,
+            MAX_OCCURRENCESE,
             true);
         boolean result = true;
         for (int i = 0; i < dates.length && result; i++) {
@@ -3543,7 +3552,7 @@ public final class CalendarCollection implements CalendarCollectionService {
             rangeStart,
             rangeEnd,
             0,
-            MAXTC,
+            MAX_OCCURRENCESE,
             true);
 
         final int[] retval = new int[dates.length];
