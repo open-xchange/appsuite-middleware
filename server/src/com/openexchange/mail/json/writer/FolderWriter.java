@@ -209,7 +209,7 @@ public final class FolderWriter {
                 try {
                     final Object parent;
                     if (null == folder.getParentFullname()) {
-                        parent = JSONObject.NULL;
+                        parent = FolderObject.SYSTEM_PRIVATE_FOLDER_ID;
                     } else {
                         parent = accountId >= 0 ? prepareFullname(accountId, folder.getParentFullname()) : folder.getParentFullname();
                     }
