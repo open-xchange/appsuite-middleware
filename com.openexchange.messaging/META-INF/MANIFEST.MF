@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Messaging Bundle
+Bundle-SymbolicName: com.openexchange.messaging
+Bundle-Version: 6.15.0.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
