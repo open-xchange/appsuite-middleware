@@ -99,7 +99,7 @@ public final class ThreadPoolCompletionService<V> implements CompletionService<V
      * Initializes a new {@link ThreadPoolCompletionService} with caller-runs behavior and an unbound {@link BlockingQueue}.
      * 
      * @param threadPoolService The thread pool to use
-     * @throws NullPointerException If executor is <tt>null</tt>
+     * @throws NullPointerException If threadPoolService is <tt>null</tt>
      */
     public ThreadPoolCompletionService(final ThreadPoolService threadPoolService) {
         super();
@@ -117,9 +117,19 @@ public final class ThreadPoolCompletionService<V> implements CompletionService<V
      * @param threadPoolService The thread pool to use
      * @param completionQueue The queue to use as the completion queue normally one dedicated for use by this service
      * @param behavior The behavior to apply to submitted tasks
+     * @throws NullPointerException If either threadPoolService, completionQueue, or behavior is <tt>null</tt>
      */
     public ThreadPoolCompletionService(final ThreadPoolService threadPoolService, final BlockingQueue<Future<V>> completionQueue, final RefusedExecutionBehavior<V> behavior) {
         super();
+        if (threadPoolService == null) {
+            throw new NullPointerException();
+        }
+        if (completionQueue == null) {
+            throw new NullPointerException();
+        }
+        if (behavior == null) {
+            throw new NullPointerException();
+        }
         this.threadPoolService = threadPoolService;
         this.completionQueue = completionQueue;
         this.behavior = behavior;
