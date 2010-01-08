@@ -96,7 +96,7 @@ public final class ThreadPoolCompletionService<V> implements CompletionService<V
     private final RefusedExecutionBehavior<V> behavior;
 
     /**
-     * Initializes a new {@link HeaderCacheCompletionService} with caller-runs behavior.
+     * Initializes a new {@link ThreadPoolCompletionService} with caller-runs behavior.
      * 
      * @param threadPoolService The thread pool to use
      * @throws NullPointerException If executor is <tt>null</tt>
