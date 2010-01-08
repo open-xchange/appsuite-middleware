@@ -3382,7 +3382,7 @@ public class AppointmentBugTests extends TestCase {
             assertEquals("Unexpected end time in first occurrence", 1217289600000l, edao.getEndDate().getTime());
 
             // Calculate last occurrence
-            final RecurringResultsInterface rrs = new CalendarCollection().calculateRecurring(edao, 0, 0, 0, CalendarCollection.MAXTC, true);
+            final RecurringResultsInterface rrs = new CalendarCollection().calculateRecurring(edao, 0, 0, 0, CalendarCollection.MAX_OCCURRENCESE, true);
             final RecurringResultInterface rr = rrs.getRecurringResultByPosition(rrs.size());
             assertTrue("Calculated last occurrence is null", rr != null);
 
@@ -3451,7 +3451,7 @@ public class AppointmentBugTests extends TestCase {
             assertEquals("Unexpected end time in first occurrence", 1222088400000l, edao.getEndDate().getTime());
 
             // Calculate last occurrence
-            final RecurringResultsInterface rrs = new CalendarCollection().calculateRecurring(edao, 0, 0, 0, CalendarCollection.MAXTC, true);
+            final RecurringResultsInterface rrs = new CalendarCollection().calculateRecurring(edao, 0, 0, 0, CalendarCollection.MAX_OCCURRENCESE, true);
             assertTrue("Calculating recurrence failed", rrs != null);
             assertEquals("Unexpected number of occurrences: ", 6, rrs.size());
 

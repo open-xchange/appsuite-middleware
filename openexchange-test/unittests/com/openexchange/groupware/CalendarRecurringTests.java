@@ -63,6 +63,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.calendar.CalendarSql;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.event.impl.EventConfigImpl;
+import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.OXCalendarException;
@@ -247,7 +248,7 @@ public class CalendarRecurringTests extends TestCase {
 		try {
 			rresults = new CalendarCollection().calculateRecurring(clone, 0, 0, 0);
 			final RecurringResultInterface rresult = rresults
-					.getRecurringResultByPosition(CalendarCollection.MAXTC);
+					.getRecurringResultByPosition(CalendarCollection.MAX_OCCURRENCESE);
 			if (rresult != null) {
 				test_until = new CalendarCollection().normalizeLong(rresult.getEnd());
 			}
@@ -711,7 +712,7 @@ public class CalendarRecurringTests extends TestCase {
         csql2.deleteAppointmentObject(test_delete_not_owner, folder_id2, new Date());
 
         final Date recurrence_date_position;
-        rss = new CalendarCollection().calculateRecurring(cdao, 0, 0, 5, CalendarCollection.MAXTC, true);
+        rss = new CalendarCollection().calculateRecurring(cdao, 0, 0, 5, CalendarCollection.MAX_OCCURRENCESE, true);
         assertEquals("Can't calculate date position of virtual exception.", 1, rss.size());
         recurrence_date_position = new Date(rss.getRecurringResult(0).getNormalized());
 
@@ -1179,7 +1180,7 @@ public class CalendarRecurringTests extends TestCase {
 		try {
 			rresults = new CalendarCollection().calculateRecurring(clone, 0, 0, 0);
 			final RecurringResultInterface rresult = rresults
-					.getRecurringResultByPosition(CalendarCollection.MAXTC);
+					.getRecurringResultByPosition(CalendarCollection.MAX_OCCURRENCESE);
 			if (rresult != null) {
 				check_until = new CalendarCollection().normalizeLong(rresult.getEnd());
 			}
@@ -1204,12 +1205,7 @@ public class CalendarRecurringTests extends TestCase {
         
         final Calendar check_until2 = new GregorianCalendar();
         check_until2.setTime(cdao2.getStartDate());
-        // No longer any calculation, just say, what is expected...
-        // (-1) in years because internal calculation is 1-based.
-        // 20th of August, because the until date is defined as _inclusive_
-        check_until2.add(Calendar.YEAR, coll.MAXTC - 1);
-        check_until2.set(Calendar.MONTH, Calendar.AUGUST);
-        check_until2.set(Calendar.DAY_OF_MONTH, 20);
+        check_until2.add(Calendar.YEAR, CalendarCollectionService.MAX_OCCURRENCESE);
         
         Date expected = new Date(coll.normalizeLong(check_until2.getTimeInMillis()));
         Date actual = cdao2.getUntil();
@@ -1756,7 +1752,7 @@ public class CalendarRecurringTests extends TestCase {
         update.setIgnoreConflicts(true);
         
         // Get all occurrences
-        final RecurringResultsInterface rss = new CalendarCollection().calculateRecurring(cdao, 0, 0, 0, CalendarCollection.MAXTC, true);
+        final RecurringResultsInterface rss = new CalendarCollection().calculateRecurring(cdao, 0, 0, 0, CalendarCollection.MAX_OCCURRENCESE, true);
         
         // Create one delete exception first
         final RecurringResultInterface first = rss.getRecurringResult(0);
@@ -1803,7 +1799,7 @@ public class CalendarRecurringTests extends TestCase {
         update.setIgnoreConflicts(true);
         
         // Get all occurrences
-        final RecurringResultsInterface rss = new CalendarCollection().calculateRecurring(cdao, 0, 0, 0, CalendarCollection.MAXTC, true);
+        final RecurringResultsInterface rss = new CalendarCollection().calculateRecurring(cdao, 0, 0, 0, CalendarCollection.MAX_OCCURRENCESE, true);
 
         final int size = rss.size();
         final List<Date> ddates = new ArrayList<Date>(size);

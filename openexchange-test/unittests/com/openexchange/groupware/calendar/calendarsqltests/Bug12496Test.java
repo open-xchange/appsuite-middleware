@@ -95,7 +95,7 @@ public class Bug12496Test extends CalendarSqlTest {
                 0,
                 0,
                 1,
-                CalendarCollection.MAXTC,
+                CalendarCollection.MAX_OCCURRENCESE,
                 true);
             if (recuResults.size() == 0) {
                 fail("No occurrence at position " + 1);
