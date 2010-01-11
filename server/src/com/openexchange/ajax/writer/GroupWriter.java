@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.writer;
 
+import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -56,14 +57,11 @@ import org.json.JSONObject;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.GroupFields;
 import com.openexchange.group.Group;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
-import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link GroupWriter} - Writes a group object into a JSON.
  * 
- * @author <a href="mailto:sebastian.kauss@open-xchange.com"">Sebastian
- *         Kauss</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com"">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class GroupWriter extends DataWriter {
@@ -72,7 +70,7 @@ public class GroupWriter extends DataWriter {
 
     public GroupWriter() {
 		super(null, null);
-		utc = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class).getTimeZone("utc");
+		utc = getTimeZone("utc");
 	}
 
 	public void writeGroup(final Group group, final JSONObject json) throws JSONException {
