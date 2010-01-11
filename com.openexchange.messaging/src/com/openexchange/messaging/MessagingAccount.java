@@ -49,21 +49,18 @@
 
 package com.openexchange.messaging;
 
-import java.util.Collection;
 import java.util.Map;
 
 
 /**
- * {@link MessagingMessage}
+ * {@link MessagingAccount}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public interface MessagingMessage extends MessagingPart {
-    public int getColorLabel();
-    public int getFlags();
-    public long getReceivedDate();
-    public Collection<String> getUserFlags();
-    
-    public MessagingPart getBody();
+public interface MessagingAccount {
+    public Map<String, Object> getConfiguration();
+    public int getId();
+    public String getDisplayName();
+    public MessagingService getMessagingService();
 }

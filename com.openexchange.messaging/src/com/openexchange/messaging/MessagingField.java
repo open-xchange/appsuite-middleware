@@ -49,21 +49,13 @@
 
 package com.openexchange.messaging;
 
-import java.util.Collection;
-import java.util.Map;
-
 
 /**
- * {@link MessagingMessage}
+ * {@link MessagingField}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public interface MessagingMessage extends MessagingPart {
-    public int getColorLabel();
-    public int getFlags();
-    public long getReceivedDate();
-    public Collection<String> getUserFlags();
-    
-    public MessagingPart getBody();
+public enum MessagingField {
+    ID, COLOR_LABEL, FLAGS, RECEIVED_DATE, USER_FLAGS, BODY, HEADERS;
 }

@@ -49,21 +49,23 @@
 
 package com.openexchange.messaging;
 
-import java.util.Collection;
-import java.util.Map;
+import java.util.List;
+import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 
 
 /**
- * {@link MessagingMessage}
+ * {@link MessagingService}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public interface MessagingMessage extends MessagingPart {
-    public int getColorLabel();
-    public int getFlags();
-    public long getReceivedDate();
-    public Collection<String> getUserFlags();
+public interface MessagingService {
+    public String getId();
+    public List<String> getCapabilities();
+    public String getDisplayName();
     
-    public MessagingPart getBody();
+    public DynamicFormDescription getFormDescription();
+
+    public MessagingAccountManager getAccountManager();
+    public MessagingAccess getAccess();
 }

@@ -49,21 +49,29 @@
 
 package com.openexchange.messaging;
 
-import java.util.Collection;
-import java.util.Map;
+import java.util.List;
 
 
 /**
- * {@link MessagingMessage}
+ * {@link MessagingAccess}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public interface MessagingMessage extends MessagingPart {
-    public int getColorLabel();
-    public int getFlags();
-    public long getReceivedDate();
-    public Collection<String> getUserFlags();
+public interface MessagingAccess {
+    public MessagingMessage getMessage(String id, boolean peek) throws MessagingException;
     
-    public MessagingPart getBody();
+    public void appendMessages(String folder, MessagingMessage[] messages) throws MessagingException;
+    
+    public String[] copyMessages(String sourceFolder, String destFolder, String[] messageIds, boolean fast) throws MessagingException;
+    
+    public void deleteMessages(String folder, String[] messageIds, boolean hardDelete) throws MessagingException;
+    
+    public List<MessagingMessage> getAllMessages(String folder, MessagingField...fields) throws MessagingException;
+    
+    public MessagingMessage perform(String action, String id) throws MessagingException;
+    
+    public void send(MessagingMessage message) throws MessagingException;
+
+
 }
