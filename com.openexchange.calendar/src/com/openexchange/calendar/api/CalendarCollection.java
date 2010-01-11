@@ -1867,17 +1867,18 @@ public final class CalendarCollection implements CalendarCollectionService {
      */
     public void checkAndConfirmIfUserUserIsParticipant(final CalendarDataObject cdao, final UserParticipant up) {
         final UserParticipant check[] = cdao.getUsers();
-        if (check != null && check.length > 0) {
-            Arrays.sort(check);
-            final int fi = Arrays.binarySearch(check, up);
-            if (fi >= 0) {
-                if (!check[fi].containsConfirm()) {
-                    check[fi].setConfirm(CalendarDataObject.ACCEPT);
+        if (check == null || check.length == 0) {
+            cdao.setUsers(new UserParticipant[] { up } );
+            return;
+        }
+        
+        for (UserParticipant user : check) {
+            if (user.getIdentifier() == up.getIdentifier()) {
+                if (!user.containsConfirm()) {
+                    user.setConfirm(CalendarDataObject.ACCEPT);
                     cdao.setUsers(check);
                 }
             }
-        } else {
-            //cdao.setUsers(new UserParticipant[] { up } );
         }
     }
     
