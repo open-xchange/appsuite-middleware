@@ -3485,6 +3485,8 @@ public class CalendarMySQL implements CalendarSqlImp {
             pdr.setInt(4, Participant.USER);
             pdr.executeUpdate();
             if (!checkForDeletedMasterObject(oid, cid, c)) {
+                OXFolderAccess ofa = new OXFolderAccess(writecon, c);
+                int folderType = ofa.getFolderType(fid, so.getUserId());
                 final PreparedStatement pidm = writecon
                         .prepareStatement("insert into del_dates (creating_date, created_from, changing_date, changed_from, fid, intfield01, cid, pflag) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
                 try {
@@ -3492,7 +3494,10 @@ public class CalendarMySQL implements CalendarSqlImp {
                     pidm.setInt(2, uid);
                     pidm.setLong(3, lastModified);
                     pidm.setInt(4, 0);
-                    pidm.setInt(5, fid);
+                    if (folderType == FolderObject.PRIVATE)
+                        pidm.setInt(5, 0);
+                    else
+                        pidm.setInt(5, fid);
                     pidm.setInt(6, oid);
                     pidm.setInt(7, cid);
                     pidm.setInt(8, 0);
