@@ -49,6 +49,8 @@
 
 package com.openexchange.messaging;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Collection;
 import java.util.Map;
 
@@ -130,5 +132,16 @@ public interface MessagingPart {
      * @throws MessagingException If content cannot be returned
      */
     public MessagingContent getContent() throws MessagingException;
+
+    /**
+     * Writes this part's bytes to given output stream. The bytes are typically an aggregation of the headers and appropriately encoded
+     * content bytes.
+     * <p>
+     * The bytes are typically used for transport.
+     * 
+     * @exception IOException If an I/O error occurs
+     * @exception MessagingException If an error occurs fetching the data to be written
+     */
+    public void writeTo(OutputStream os) throws IOException, MessagingException;
 
 }
