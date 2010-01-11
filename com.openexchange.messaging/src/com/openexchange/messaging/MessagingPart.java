@@ -61,6 +61,16 @@ import java.util.Map;
 public interface MessagingPart {
 
     /**
+     * The part should be presented as an attachment.
+     */
+    public static final String ATTACHMENT = "attachment";
+
+    /**
+     * The part should be presented inline.
+     */
+    public static final String INLINE = "inline";
+
+    /**
      * Gets the headers as an unmodifiable {@link Map}.
      * 
      * @return The headers as an unmodifiable {@link Map}.
@@ -74,6 +84,36 @@ public interface MessagingPart {
      * @return The header associated with specified name or <code>null</code> if not present
      */
     public Collection<MessageHeader> getHeader(String name);
+
+    /**
+     * Gets the disposition.
+     * <p>
+     * The disposition describes how the part should be presented (see RFC 2183). The return value should be compared case-insensitive. For
+     * example:
+     * <p>
+     * 
+     * <pre>
+     * String disposition = part.getDisposition();
+     * if (disposition == null || MessagingPart.ATTACHMENT.equalsIgnoreCase(disposition))
+     *  // treat as attachment if not first part
+     * </pre>
+     * 
+     * @return The disposition of this part, or null if unknown
+     * @throws MessagingException
+     * @see #ATTACHMENT
+     * @see #INLINE
+     */
+    public String getDisposition() throws MessagingException;
+
+    /**
+     * Get the filename associated with this part, if possible.
+     * <p>
+     * Useful if this part represents an "attachment" that was loaded from a file. The filename will usually be a simple name, not including
+     * directory components.
+     * 
+     * @return The filename to associate with this part
+     */
+    public String getFileName() throws MessagingException;
 
     /**
      * Gets the identifier.

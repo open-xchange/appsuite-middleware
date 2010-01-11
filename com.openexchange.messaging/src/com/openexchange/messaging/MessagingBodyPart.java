@@ -57,5 +57,12 @@ package com.openexchange.messaging;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MessagingBodyPart extends MessagingPart {
+
+    /**
+     * Gets the multipart parent.
+     * 
+     * @return The multipart parent
+     */
     public MultipartContent getParent();
+
 }

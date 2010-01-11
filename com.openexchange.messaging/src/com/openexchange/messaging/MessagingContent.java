@@ -57,5 +57,5 @@ package com.openexchange.messaging;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MessagingContent {
-
+    // Empty interface
 }
