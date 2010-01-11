@@ -74,6 +74,8 @@ public class GenericSubscribeServiceForWebDeTest extends GenericSubscribeService
         CrawlerDescription crawler = new CrawlerDescription();
         crawler.setDisplayName("web.de");
         crawler.setId("com.openexchange.subscribe.crawler.webde");
+        crawler.setCrawlerApiVersion(616);
+        crawler.setPriority(2);
         List<Step> steps = new LinkedList<Step>();
 
         steps.add(new LoginPageByFormActionStep(
@@ -123,9 +125,9 @@ public class GenericSubscribeServiceForWebDeTest extends GenericSubscribeService
         workflow.setUseThreadedRefreshHandler(true);
         crawler.setWorkflowString(Yaml.dump(workflow));
 
-        findOutIfThereAreContactsForThisConfiguration(username, password, crawler);
+        findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
         //uncomment this if the if the crawler description was updated to get the new config-files
-        //dumpThis(crawler, crawler.getDisplayName());
+        // dumpThis(crawler, crawler.getDisplayName());
     }
 
 }

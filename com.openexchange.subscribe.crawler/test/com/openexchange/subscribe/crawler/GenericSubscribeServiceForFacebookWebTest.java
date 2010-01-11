@@ -73,8 +73,9 @@ public class GenericSubscribeServiceForFacebookWebTest extends GenericSubscribeS
         final CrawlerDescription crawler = new CrawlerDescription();
         crawler.setDisplayName("Facebook");
         crawler.setId("com.openexchange.subscribe.crawler.facebook");
+        crawler.setCrawlerApiVersion(616);
         // increment priority with each new version to override (=be able to update) older versions
-        crawler.setPriority(2);
+        crawler.setPriority(3);
         final List<Step> steps = new LinkedList<Step>();
 
         steps.add(new LoginPageByFormActionStep(

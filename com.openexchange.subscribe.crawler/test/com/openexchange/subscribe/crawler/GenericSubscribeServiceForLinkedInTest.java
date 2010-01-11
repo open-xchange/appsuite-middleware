@@ -73,6 +73,8 @@ public class GenericSubscribeServiceForLinkedInTest extends GenericSubscribeServ
         CrawlerDescription crawler = new CrawlerDescription();
         crawler.setDisplayName("LinkedIn");
         crawler.setId("com.openexchange.subscribe.linkedin");
+        crawler.setCrawlerApiVersion(616);
+        crawler.setPriority(2);
 
         // initiate the TimerService for MultiThreading
         // final TimerImpl timer = new TimerImpl();

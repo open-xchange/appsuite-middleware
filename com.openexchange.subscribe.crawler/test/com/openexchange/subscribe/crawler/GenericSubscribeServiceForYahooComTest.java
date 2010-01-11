@@ -74,7 +74,8 @@ public class GenericSubscribeServiceForYahooComTest extends GenericSubscribeServ
         CrawlerDescription crawler = new CrawlerDescription();
         crawler.setDisplayName("yahoo.com");
         crawler.setId("com.openexchange.subscribe.crawler.yahoocom");
-        crawler.setPriority(2);
+        crawler.setCrawlerApiVersion(616);
+        crawler.setPriority(3);
         List<Step> steps = new LinkedList<Step>();
 
         steps.add(new LoginPageByFormActionStep(
@@ -119,8 +120,8 @@ public class GenericSubscribeServiceForYahooComTest extends GenericSubscribeServ
         workflow.setUseThreadedRefreshHandler(true);
         crawler.setWorkflowString(Yaml.dump(workflow));
 
-        // findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
+        findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
         // uncomment this if the if the crawler description was updated to get the new config-files
-        dumpThis(crawler, crawler.getDisplayName());
+        // dumpThis(crawler, crawler.getDisplayName());
     }
 }
