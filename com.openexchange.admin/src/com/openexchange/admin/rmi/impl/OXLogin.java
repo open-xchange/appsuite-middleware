@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,7 +47,7 @@
  *
  */
 /*
- * $Id: OXLogin.java,v 1.22 2007/10/29 10:20:42 choeger Exp $
+ * $Id: OXLogin.java,v 1.23 2010/01/11 16:02:36 marcus Exp $
  */
 package com.openexchange.admin.rmi.impl;
 
