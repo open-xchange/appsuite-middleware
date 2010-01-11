@@ -99,7 +99,7 @@ public class CalendarSqlTestSuite {
         tests.addTestSuite(Bug10154Test.class);
         tests.addTestSuite(Node1077Test.class);
         tests.addTestSuite(ParticipantsAgreeViaDifferentLoadMethods.class);
-        tests.addTestSuite(Bug13995Test.class);
+        tests.addTestSuite(Bug13995And14922Test.class);
         tests.addTestSuite(Bug13446Test.class);
         tests.addTestSuite(Bug11210Test.class);
         tests.addTestSuite(Bug13226Test.class);

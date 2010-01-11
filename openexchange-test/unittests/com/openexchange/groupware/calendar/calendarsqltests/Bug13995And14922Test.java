@@ -56,7 +56,7 @@ import com.openexchange.groupware.container.FolderObject;
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class Bug13995Test extends CalendarSqlTest {
+public class Bug13995And14922Test extends CalendarSqlTest {
 
     private CalendarDataObject appointment;
 
@@ -71,7 +71,16 @@ public class Bug13995Test extends CalendarSqlTest {
         clean.add(appointment);
     }
 
-    public void testBug13995() throws Exception {
+    public void testBug13995And14922() throws Exception {
+        appointments.save(appointment);
+        CalendarDataObject loadedAppointment = appointments.load(appointment.getObjectID(), appointment.getParentFolderID());
+        assertEquals("Wrong amount of participants", 1, loadedAppointment.getUsers().length);
+        assertEquals("Wrong participant", userId, loadedAppointment.getUsers()[0].getIdentifier());
+        assertEquals("Wrong status", CalendarObject.ACCEPT, loadedAppointment.getUsers()[0].getConfirm());
+    }
+    
+    public void testBugWithoutUsers() throws Exception {
+        appointment.removeUsers();
         appointments.save(appointment);
         CalendarDataObject loadedAppointment = appointments.load(appointment.getObjectID(), appointment.getParentFolderID());
         assertEquals("Wrong amount of participants", 1, loadedAppointment.getUsers().length);
