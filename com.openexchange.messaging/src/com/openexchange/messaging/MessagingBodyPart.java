@@ -51,7 +51,7 @@ package com.openexchange.messaging;
 
 
 /**
- * {@link MessagingBodyPart} - A messaging part occurring within a mulitpart.
+ * {@link MessagingBodyPart} - A messaging part occurring within a multipart.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
