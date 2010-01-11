@@ -62,14 +62,14 @@ public interface MessagingAccess {
     /**
      * Gets the message associated with specified identifier.
      * 
-     * @param id The identifier
      * @param folder The folder identifier
+     * @param id The identifier
      * @param peek <code>true</code> to peek message content (meaning any mechanisms to mark content as read disabled); otherwise
      *            <code>false</code>
      * @return The message associated with specified identifier
      * @throws MessagingException If message cannot be returned
      */
-    public MessagingMessage getMessage(String id, String folder, boolean peek) throws MessagingException;
+    public MessagingMessage getMessage(String folder, String id, boolean peek) throws MessagingException;
 
     /**
      * Appends specified messages to given folder.
@@ -119,8 +119,15 @@ public interface MessagingAccess {
      */
     public List<MessagingMessage> getAllMessages(String folder, IndexRange indexRange, MessagingField sortField, OrderDirection order, MessagingField... fields) throws MessagingException;
 
-    public MessagingMessage perform(String action, String id, String folder) throws MessagingException;
-
-    public void send(MessagingMessage message) throws MessagingException;
+    /**
+     * Performs specified action to given message and returns resulting message.
+     * 
+     * @param folder The folder identifier
+     * @param id The message identifier
+     * @param action The action to perform
+     * @return The resulting message
+     * @throws MessagingException If performing specified action fails
+     */
+    public MessagingMessage perform(String folder, String id, String action) throws MessagingException;
 
 }
