@@ -53,7 +53,7 @@ import java.io.Serializable;
 import java.util.Collection;
 
 /**
- * {@link SearchTerm}
+ * {@link SearchTerm} - A search term.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
