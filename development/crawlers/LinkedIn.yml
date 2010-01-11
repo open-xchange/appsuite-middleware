@@ -1,6 +1,8 @@
 --- !com.openexchange.subscribe.crawler.CrawlerDescription
+crawlerApiVersion: 616
 displayName: LinkedIn
 id: com.openexchange.subscribe.linkedin
+priority: 2
 workflowString: |
   --- !com.openexchange.subscribe.crawler.Workflow
   steps: 
@@ -27,48 +29,48 @@ workflowString: |
       subpageLinkRegex: "(/connectionsnojs\\?split_page=).*"
     - !com.openexchange.subscribe.crawler.ContactObjectsByHTMLAnchorsAndPagePartSequenceStep
       description: Get the information of each contact from the individual webpages
-      pageParts: !com.openexchange.subscribe.crawler.PagePartSequence
+      pageParts: !com.openexchange.subscribe.crawler.internal.PagePartSequence
         page: ""
         pageParts: 
-          - !com.openexchange.subscribe.crawler.PagePart
+          - !com.openexchange.subscribe.crawler.internal.PagePart
             regex: "(<img src=\")([a-zA-Z://\\._0-9]*)(\" class=\"photo\" width=\"80\" height=\"80\" alt=\"[a-zA-Zäöü\\s]*\">)"
             type: 1
             typeOfInfo: image
-          - !com.openexchange.subscribe.crawler.PagePart
+          - !com.openexchange.subscribe.crawler.internal.PagePart
             regex: "(<h1 class=\"n fn\">)"
-          - !com.openexchange.subscribe.crawler.PagePart
+          - !com.openexchange.subscribe.crawler.internal.PagePart
             regex: "(span class=\"given-name\">)([a-zA-Zäöü]*)(</span>)"
             type: 1
             typeOfInfo: first_name
-          - !com.openexchange.subscribe.crawler.PagePart
+          - !com.openexchange.subscribe.crawler.internal.PagePart
             regex: "(span class=\"family-name\">)([a-zA-Zäöü]*)(</span>)"
             type: 1
             typeOfInfo: last_name
-          - !com.openexchange.subscribe.crawler.PagePart
+          - !com.openexchange.subscribe.crawler.internal.PagePart
             regex: "(<p class=\"title\">[\\s]*)([a-zA-Zäöü\\x20]*)([\\s]*</p>)"
             type: 1
             typeOfInfo: title
-          - !com.openexchange.subscribe.crawler.PagePart
+          - !com.openexchange.subscribe.crawler.internal.PagePart
             regex: "<dt>(Phone:|Telefon:|Teléfono:|T.l.phone :)</dt>[\\s]*<dd>[\\s]*<p>[\\s]*([0-9\\s\\+\\-\\/\\(\\)]*)<span class=\"type\">\\((Mobile|mobile)\\)"
             type: 1
             typeOfInfo: cellular_telephone1
-          - !com.openexchange.subscribe.crawler.PagePart
+          - !com.openexchange.subscribe.crawler.internal.PagePart
             regex: "<dt>(Phone:|Telefon:|Teléfono:|T.l.phone :</dt>[\\s]*<dd>[\\s]*<p>[\\s]*)([0-9\\s\\+\\-\\/\\(\\)]*)<span class=\"type\">\\((Mobile|mobile)\\)"
             type: 1
             typeOfInfo: telephone_home1
-          - !com.openexchange.subscribe.crawler.PagePart
+          - !com.openexchange.subscribe.crawler.internal.PagePart
             regex: "<dt>(Phone:|Telefon:|Teléfono:|T.l.phone :)</dt>[\\s]*<dd>[\\s]*<p>[\\s]*([0-9\\s\\+\\-\\/\\(\\)]*)<span class=\"type\">\\((Mobile|mobile)\\)"
             type: 1
             typeOfInfo: telephone_business1
-          - !com.openexchange.subscribe.crawler.PagePart
+          - !com.openexchange.subscribe.crawler.internal.PagePart
             regex: "<dt>(Address:|Adresse:|Adresse :|Direcci.n:)<\\/dt>[\\s]*<dd>[\\s]*<p>(.*\\s.*\\s.*)(<\\/dd>)"
             type: 1
             typeOfInfo: address_note
-          - !com.openexchange.subscribe.crawler.PagePart
+          - !com.openexchange.subscribe.crawler.internal.PagePart
             regex: "<dt>(IM:|Mensaje instant.neo:|Messagerie instantan.e :) <\\/dt>[\\s]*<dd>[\\s]*<p>[\\s]*([^<]*)(<\\/p>)"
             type: 1
             typeOfInfo: instant_messenger1
-          - !com.openexchange.subscribe.crawler.PagePart
+          - !com.openexchange.subscribe.crawler.internal.PagePart
             regex: "(mailto:)([a-z@A-Z0-9\\.\\-\\{\\}\\#\\|\\^\\$\\*\\+\\?\\'\\/!%&=_`~]*)(\")"
             type: 1
             typeOfInfo: email1
