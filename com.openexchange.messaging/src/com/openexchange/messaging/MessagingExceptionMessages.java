@@ -49,83 +49,23 @@
 
 package com.openexchange.messaging;
 
-import com.openexchange.exceptions.ErrorMessage;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.exceptions.LocalizableStrings;
 
 /**
- * {@link MessagingException} - A messaging exception
+ * {@link MessagingExceptionMessages} - Exception messages for {@link MessagingException} that must be translated.
  * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MessagingException extends AbstractOXException {
+public final class MessagingExceptionMessages implements LocalizableStrings {
 
-    private static final long serialVersionUID = -3554129943396182447L;
-
-    private static final String STR_COMPONENT = "MESSAGING";
-
-    /**
-     * The {@link Component} for twitter exception.
-     */
-    public static final Component COMPONENT = new Component() {
-
-        public String getAbbreviation() {
-            return STR_COMPONENT;
-        }
-    };
+    // An error occurred: %1$s
+    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
 
     /**
-     * Initializes a new {@link MessagingException}.
-     * 
-     * @param cause The cause
+     * Initializes a new {@link MessagingExceptionMessages}.
      */
-    public MessagingException(final AbstractOXException cause) {
-        super(cause);
-    }
-
-    /**
-     * Initializes a new {@link MessagingException}.
-     * 
-     * @param message The message
-     * @param cause The cause
-     */
-    public MessagingException(final String message, final AbstractOXException cause) {
-        super(COMPONENT, message, cause);
-    }
-
-    /**
-     * Initializes a new {@link MessagingException}.
-     * 
-     * @param category The category
-     * @param detailNumber The detail number
-     * @param message The message
-     * @param cause The cause
-     */
-    public MessagingException(final Category category, final int detailNumber, final String message, final Throwable cause) {
-        super(COMPONENT, category, detailNumber, message, cause);
-    }
-
-    /**
-     * Initializes a new {@link MessagingException}.
-     * 
-     * @param message The message
-     * @param cause The cause
-     */
-    public MessagingException(final ErrorMessage message, final Throwable cause) {
-        super(message, cause);
-    }
-
-    /**
-     * Initializes a new {@link MessagingException}.
-     * 
-     * @param message The message
-     * @param cause The cause
-     * @param messageArguments The message arguments
-     */
-    public MessagingException(final ErrorMessage message, final Throwable cause, final Object... messageArguments) {
-        super(message, cause);
-        setMessageArgs(messageArguments);
+    private MessagingExceptionMessages() {
+        super();
     }
 
 }

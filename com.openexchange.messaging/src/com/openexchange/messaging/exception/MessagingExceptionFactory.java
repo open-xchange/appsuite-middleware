@@ -47,85 +47,49 @@
  *
  */
 
-package com.openexchange.messaging;
+package com.openexchange.messaging.exception;
 
 import com.openexchange.exceptions.ErrorMessage;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.exceptions.Exceptions;
+import com.openexchange.messaging.MessagingException;
+import com.openexchange.messaging.MessagingExceptionCodes;
 
 /**
- * {@link MessagingException} - A messaging exception
- * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link MessagingExceptionFactory} - Factory for creating {@link MessagingException}.
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MessagingException extends AbstractOXException {
+public final class MessagingExceptionFactory extends Exceptions<MessagingException> {
 
-    private static final long serialVersionUID = -3554129943396182447L;
-
-    private static final String STR_COMPONENT = "MESSAGING";
+    private static final MessagingExceptionFactory SINGLETON = new MessagingExceptionFactory();
 
     /**
-     * The {@link Component} for twitter exception.
+     * Prevent instantiation.
      */
-    public static final Component COMPONENT = new Component() {
-
-        public String getAbbreviation() {
-            return STR_COMPONENT;
-        }
-    };
-
-    /**
-     * Initializes a new {@link MessagingException}.
-     * 
-     * @param cause The cause
-     */
-    public MessagingException(final AbstractOXException cause) {
-        super(cause);
+    private MessagingExceptionFactory() {
+        super();
     }
 
     /**
-     * Initializes a new {@link MessagingException}.
-     * 
-     * @param message The message
-     * @param cause The cause
+     * @return the singleton instance.
      */
-    public MessagingException(final String message, final AbstractOXException cause) {
-        super(COMPONENT, message, cause);
+    public static MessagingExceptionFactory getInstance() {
+        return SINGLETON;
     }
 
     /**
-     * Initializes a new {@link MessagingException}.
-     * 
-     * @param category The category
-     * @param detailNumber The detail number
-     * @param message The message
-     * @param cause The cause
+     * {@inheritDoc}
      */
-    public MessagingException(final Category category, final int detailNumber, final String message, final Throwable cause) {
-        super(COMPONENT, category, detailNumber, message, cause);
+    @Override
+    protected MessagingException createException(final ErrorMessage message, final Throwable cause, final Object... args) {
+        return new MessagingException(message, cause, args);
     }
 
     /**
-     * Initializes a new {@link MessagingException}.
-     * 
-     * @param message The message
-     * @param cause The cause
+     * {@inheritDoc}
      */
-    public MessagingException(final ErrorMessage message, final Throwable cause) {
-        super(message, cause);
+    @Override
+    protected void knownExceptions() {
+        declareAll(MessagingExceptionCodes.values());
     }
-
-    /**
-     * Initializes a new {@link MessagingException}.
-     * 
-     * @param message The message
-     * @param cause The cause
-     * @param messageArguments The message arguments
-     */
-    public MessagingException(final ErrorMessage message, final Throwable cause, final Object... messageArguments) {
-        super(message, cause);
-        setMessageArgs(messageArguments);
-    }
-
 }

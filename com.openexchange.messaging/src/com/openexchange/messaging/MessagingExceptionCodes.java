@@ -49,83 +49,68 @@
 
 package com.openexchange.messaging;
 
-import com.openexchange.exceptions.ErrorMessage;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.exceptions.OXErrorMessage;
+import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.messaging.exception.MessagingExceptionFactory;
 
 /**
- * {@link MessagingException} - A messaging exception
+ * {@link MessagingExceptionCodes} - Enumeration of all {@link MessagingException}s.
  * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MessagingException extends AbstractOXException {
-
-    private static final long serialVersionUID = -3554129943396182447L;
-
-    private static final String STR_COMPONENT = "MESSAGING";
+public enum MessagingExceptionCodes implements OXErrorMessage {
 
     /**
-     * The {@link Component} for twitter exception.
+     * An error occurred: %1$s
      */
-    public static final Component COMPONENT = new Component() {
+    UNEXPECTED_ERROR(MessagingExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CODE_ERROR, 1);
 
-        public String getAbbreviation() {
-            return STR_COMPONENT;
-        }
-    };
+    private final Category category;
 
-    /**
-     * Initializes a new {@link MessagingException}.
-     * 
-     * @param cause The cause
-     */
-    public MessagingException(final AbstractOXException cause) {
-        super(cause);
+    private final int detailNumber;
+
+    private final String message;
+
+    private MessagingExceptionCodes(final String message, final Category category, final int detailNumber) {
+        this.message = message;
+        this.detailNumber = detailNumber;
+        this.category = category;
+    }
+
+    public Category getCategory() {
+        return category;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public int getDetailNumber() {
+        return detailNumber;
+    }
+
+    public String getHelp() {
+        return null;
     }
 
     /**
-     * Initializes a new {@link MessagingException}.
+     * Creates a new messaging exception of this error type with specified message arguments.
      * 
-     * @param message The message
-     * @param cause The cause
+     * @param messageArgs The message arguments
+     * @return A new twitter exception
      */
-    public MessagingException(final String message, final AbstractOXException cause) {
-        super(COMPONENT, message, cause);
+    public MessagingException create(final Object... messageArgs) {
+        return MessagingExceptionFactory.getInstance().create(this, messageArgs);
     }
 
     /**
-     * Initializes a new {@link MessagingException}.
+     * Creates a new messaging exception of this error type with specified cause and message arguments.
      * 
-     * @param category The category
-     * @param detailNumber The detail number
-     * @param message The message
      * @param cause The cause
+     * @param messageArgs The message arguments
+     * @return A new twitter exception
      */
-    public MessagingException(final Category category, final int detailNumber, final String message, final Throwable cause) {
-        super(COMPONENT, category, detailNumber, message, cause);
+    public MessagingException create(final Throwable cause, final Object... messageArgs) {
+        return MessagingExceptionFactory.getInstance().create(this, cause, messageArgs);
     }
-
-    /**
-     * Initializes a new {@link MessagingException}.
-     * 
-     * @param message The message
-     * @param cause The cause
-     */
-    public MessagingException(final ErrorMessage message, final Throwable cause) {
-        super(message, cause);
-    }
-
-    /**
-     * Initializes a new {@link MessagingException}.
-     * 
-     * @param message The message
-     * @param cause The cause
-     * @param messageArguments The message arguments
-     */
-    public MessagingException(final ErrorMessage message, final Throwable cause, final Object... messageArguments) {
-        super(message, cause);
-        setMessageArgs(messageArguments);
-    }
-
 }
