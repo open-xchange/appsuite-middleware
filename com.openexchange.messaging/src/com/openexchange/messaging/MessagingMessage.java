@@ -51,18 +51,47 @@ package com.openexchange.messaging;
 
 import java.util.Collection;
 
-
 /**
  * {@link MessagingMessage} - A message.
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MessagingMessage extends MessagingPart {
+
+    /**
+     * Gets the color label.
+     * 
+     * @return The color label
+     */
     public int getColorLabel();
+
+    /**
+     * Gets the flag bitmask.
+     * 
+     * @return The flag bitmask
+     */
     public int getFlags();
+
+    /**
+     * Gets the received date (storage's internal time stamp).
+     * 
+     * @return The received date
+     */
     public long getReceivedDate();
+
+    /**
+     * Gets the user flags.
+     * 
+     * @return The user flags
+     */
     public Collection<String> getUserFlags();
-    
+
+    /**
+     * Gets the message body.
+     * 
+     * @return The message body
+     */
     public MessagingPart getBody();
+
 }

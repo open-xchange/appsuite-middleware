@@ -52,15 +52,41 @@ package com.openexchange.messaging;
 import java.util.Collection;
 import java.util.Map;
 
-
 /**
  * {@link MessagingPart} . A message part.
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MessagingPart {
+
+    /**
+     * Gets the headers as an unmodifiable {@link Map}.
+     * 
+     * @return The headers as an unmodifiable {@link Map}.
+     */
     public Map<String, Collection<MessageHeader>> getHeaders();
+
+    /**
+     * Gets the header associated with specified name or <code>null</code> if not present
+     * 
+     * @param name The header name
+     * @return The header associated with specified name or <code>null</code> if not present
+     */
+    public Collection<MessageHeader> getHeader(String name);
+
+    /**
+     * Gets the identifier.
+     * 
+     * @return The identifier
+     */
     public String getId();
+
+    /**
+     * Gets the content.
+     * 
+     * @return The content
+     */
     public MessagingContent getContent();
+
 }
