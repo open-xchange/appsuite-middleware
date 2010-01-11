@@ -49,14 +49,26 @@
 
 package com.openexchange.messaging;
 
-
 /**
  * {@link MessageHeader} - A message header.
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
  */
 public interface MessageHeader {
+
+    /**
+     * Gets the name.
+     * 
+     * @return The name
+     */
+    public String getName();
+
+    /**
+     * Gets the value.
+     * 
+     * @return The value
+     */
+    public String getValue();
 
 }

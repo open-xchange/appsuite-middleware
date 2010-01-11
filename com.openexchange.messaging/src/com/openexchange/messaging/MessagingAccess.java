@@ -51,27 +51,35 @@ package com.openexchange.messaging;
 
 import java.util.List;
 
-
 /**
  * {@link MessagingAccess} - Provides access to message storage.
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MessagingAccess {
-    public MessagingMessage getMessage(String id, boolean peek) throws MessagingException;
-    
-    public void appendMessages(String folder, MessagingMessage[] messages) throws MessagingException;
-    
-    public String[] copyMessages(String sourceFolder, String destFolder, String[] messageIds, boolean fast) throws MessagingException;
-    
-    public void deleteMessages(String folder, String[] messageIds, boolean hardDelete) throws MessagingException;
-    
-    public List<MessagingMessage> getAllMessages(String folder, MessagingField...fields) throws MessagingException;
-    
-    public MessagingMessage perform(String action, String id) throws MessagingException;
-    
-    public void send(MessagingMessage message) throws MessagingException;
 
+    /**
+     * Gets the message associated with specified identifier.
+     * 
+     * @param id The identifier
+     * @param peek <code>true</code> to peek message content (meaning any mechanisms to mark content as read disabled); otherwise
+     *            <code>false</code>
+     * @return The message associated with specified identifier
+     * @throws MessagingException If message cannot be returned
+     */
+    public MessagingMessage getMessage(String id, boolean peek) throws MessagingException;
+
+    public void appendMessages(String folder, MessagingMessage[] messages) throws MessagingException;
+
+    public String[] copyMessages(String sourceFolder, String destFolder, String[] messageIds, boolean fast) throws MessagingException;
+
+    public void deleteMessages(String folder, String[] messageIds, boolean hardDelete) throws MessagingException;
+
+    public List<MessagingMessage> getAllMessages(String folder, MessagingField... fields) throws MessagingException;
+
+    public MessagingMessage perform(String action, String id) throws MessagingException;
+
+    public void send(MessagingMessage message) throws MessagingException;
 
 }
