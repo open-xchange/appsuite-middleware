@@ -99,7 +99,7 @@ public interface MessagingPart {
      * </pre>
      * 
      * @return The disposition of this part, or null if unknown
-     * @throws MessagingException
+     * @throws MessagingException If disposition cannot be returned
      * @see #ATTACHMENT
      * @see #INLINE
      */
@@ -112,6 +112,7 @@ public interface MessagingPart {
      * directory components.
      * 
      * @return The filename to associate with this part
+     * @throws MessagingException If filename cannot be returned
      */
     public String getFileName() throws MessagingException;
 
@@ -126,7 +127,8 @@ public interface MessagingPart {
      * Gets the content.
      * 
      * @return The content
+     * @throws MessagingException If content cannot be returned
      */
-    public MessagingContent getContent();
+    public MessagingContent getContent() throws MessagingException;
 
 }

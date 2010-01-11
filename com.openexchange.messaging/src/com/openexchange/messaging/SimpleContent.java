@@ -58,6 +58,12 @@ package com.openexchange.messaging;
  */
 public interface SimpleContent<D> extends MessagingContent{
 
-    public D getData();
+    /**
+     * Gets the data.
+     * 
+     * @return The data
+     * @throws MessagingException If data cannot be returned
+     */
+    public D getData() throws MessagingException;
     
 }

@@ -186,11 +186,4 @@ public interface MessagingMessage extends MessagingPart {
      */
     public Collection<String> getUserFlags();
 
-    /**
-     * Gets the message body.
-     * 
-     * @return The message body
-     */
-    public MessagingPart getBody();
-
 }

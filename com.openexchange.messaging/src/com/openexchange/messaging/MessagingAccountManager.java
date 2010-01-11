@@ -52,17 +52,57 @@ package com.openexchange.messaging;
 import java.util.List;
 import com.openexchange.session.Session;
 
-
 /**
- * {@link MessagingAccountManager} - A account manager.
- *
+ * {@link MessagingAccountManager} - An account manager.
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MessagingAccountManager {
-    public void addAccount(MessagingAccount account, Session session);
-    public void updateAccount(MessagingAccount account, Session session);
-    public void deleteAccount(MessagingAccount account, Session session);
-    public List<MessagingAccount> getAccounts(Session session);
-    public MessagingAccount getAccount(int id, Session session);
+
+    /**
+     * Adds a new account.
+     * 
+     * @param account The account to add
+     * @param session The session providing needed user data
+     * @throws MessagingException If insertion fails
+     */
+    public void addAccount(MessagingAccount account, Session session) throws MessagingException;
+
+    /**
+     * Updates an existing account.
+     * 
+     * @param account The account providing the identifier and the data to update
+     * @param session The session providing needed user data
+     * @throws MessagingException If update fails
+     */
+    public void updateAccount(MessagingAccount account, Session session) throws MessagingException;;
+
+    /**
+     * Deletes an existing account.
+     * 
+     * @param account The account to delete
+     * @param session The session providing needed user data
+     * @throws MessagingException If deletion fails
+     */
+    public void deleteAccount(MessagingAccount account, Session session) throws MessagingException;
+
+    /**
+     * Gets all accounts associated with session user.
+     * 
+     * @param session The session providing needed user data
+     * @return All accounts associated with session user.
+     * @throws MessagingException If listing fails
+     */
+    public List<MessagingAccount> getAccounts(Session session) throws MessagingException;;
+
+    /**
+     * Gets an existing messaging account.
+     * 
+     * @param id The identifier
+     * @param session The session providing needed user data
+     * @return The messaging account.
+     * @throws MessagingException If retrieval fails
+     */
+    public MessagingAccount getAccount(int id, Session session) throws MessagingException;;
 }
