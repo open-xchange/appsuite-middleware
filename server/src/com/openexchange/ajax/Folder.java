@@ -1274,6 +1274,7 @@ public class Folder extends SessionServlet {
         final Response response = new Response();
         final OXJSONWriter jsonWriter = new OXJSONWriter();
         Date lastModifiedDate = null;
+        AbstractOXException warning = null;
         /*
          * Start response
          */
@@ -1507,7 +1508,7 @@ public class Folder extends SessionServlet {
                                 final Log logger = LOG;
                                 tasks.add(new AbstractTask<Object>() {
 
-                                    public Object call() throws Exception {
+                                    public Object call() throws MailException {
                                         final MailFolder rootFolder;
                                         final MailAccess<?, ?> mailAccess;
                                         try {
@@ -1516,7 +1517,7 @@ public class Folder extends SessionServlet {
                                         } catch (final MailException e) {
                                             logger.error(e.getMessage(), e);
                                             arrays[index] = null;
-                                            return null;
+                                            throw e;
                                         }
                                         try {
                                             final MailFolderFieldWriter[] mailFolderWriters =
@@ -1553,13 +1554,14 @@ public class Folder extends SessionServlet {
                                                 }
                                             }
                                             arrays[index] = ja;
+                                            return null;
                                         } catch (final MailException e) {
                                             logger.error(e.getMessage(), e);
                                             arrays[index] = null;
+                                            throw e;
                                         } finally {
                                             mailAccess.close(true);
                                         }
-                                        return null;
                                     }
                                 });
                             } else {
@@ -1578,7 +1580,22 @@ public class Folder extends SessionServlet {
                     // Wait for completion
                     try {
                         for (int i = 0; i < accountSize; i++) {
-                            completionFuture.take().get();
+                            try {
+                                completionFuture.take().get();
+                            } catch (final ExecutionException e) {
+                                final Throwable t = e.getCause();
+                                if (t instanceof MailException) {
+                                    if (null == warning) {
+                                        /*
+                                         * TODO: Does UI already accept warnings?
+                                         */
+                                        warning = (AbstractOXException) t;
+                                        warning.setCategory(Category.WARNING);
+                                    }
+                                } else {
+                                    throw e;
+                                }
+                            }
                         }
                     } catch (final InterruptedException e) {
                         Thread.currentThread().interrupt();
@@ -1614,6 +1631,9 @@ public class Folder extends SessionServlet {
          * Close response and flush print writer
          */
         jsonWriter.endArray();
+        if (null != warning) {
+            response.setWarning(warning);
+        }
         response.setData(jsonWriter.getObject());
         response.setTimestamp(lastModifiedDate);
         return response;
