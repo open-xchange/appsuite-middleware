@@ -47,57 +47,81 @@
  *
  */
 
-package com.openexchange.messaging.registry.osgi;
+package com.openexchange.messaging;
 
-import java.util.ArrayList;
 import java.util.List;
-import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.messaging.MessagingException;
-import com.openexchange.messaging.MessagingService;
-import com.openexchange.messaging.registry.MessagingServiceRegistry;
+import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 
 
 /**
- * {@link OSGIMessagingServiceRegistry}
+ * {@link SimMessagingService}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
+public class SimMessagingService implements MessagingService {
 
-    private BundleContext context;
-    private ServiceTracker tracker;
+    private List<String> capabilities;
+    private String displayName;
+    private DynamicFormDescription formDescription;
+    private String id;
+    private MessagingAccess access;
+    private MessagingAccountManager accManager;
 
-    public OSGIMessagingServiceRegistry(BundleContext context) {
-        this.context = context;
-    }
-    
-    public void start() {
-        this.tracker = new ServiceTracker(context, MessagingService.class.getName(), null);
-    }
-    
-    public void stop() {
-        this.tracker.close();
-    }
-    
-    public List<MessagingService> getAllServices() throws MessagingException {
-        Object[] services = tracker.getServices();
-        List<MessagingService> messagingServices = new ArrayList<MessagingService>(services.length);
-        for (Object object : services) {
-            messagingServices.add((MessagingService) object);
-        }
-        return messagingServices;
+    public MessagingAccess getAccess() {
+        return access;
     }
 
-    public MessagingService getMessagingService(String id) throws MessagingException {
-        for (MessagingService messagingService : getAllServices()) {
-            if(messagingService.getId().equals(id)) {
-                return messagingService;
-            }
-        }
-        throw new MessagingException(Category.SUBSYSTEM_OR_SERVICE_DOWN, 1, "Can not find MessagingService with id: "+id, null);
+    public MessagingAccountManager getAccountManager() {
+        return accManager;
     }
+
+    public List<String> getCapabilities() {
+        return capabilities;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public DynamicFormDescription getFormDescription() {
+        return formDescription;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    
+    public void setCapabilities(List<String> capabilities) {
+        this.capabilities = capabilities;
+    }
+
+    
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
+    
+    public void setFormDescription(DynamicFormDescription formDescription) {
+        this.formDescription = formDescription;
+    }
+
+    
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    
+    public void setAccess(MessagingAccess access) {
+        this.access = access;
+    }
+
+    
+    public void setAccountManager(MessagingAccountManager accManager) {
+        this.accManager = accManager;
+    }
+    
+    
 
 }
