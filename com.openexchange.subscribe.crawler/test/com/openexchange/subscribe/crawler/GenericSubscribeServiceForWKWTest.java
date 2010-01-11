@@ -65,8 +65,8 @@ public class GenericSubscribeServiceForWKWTest extends GenericSubscribeServiceTe
     
     public void testWKW() {
         // insert valid credentials here
-        final String username = "karsten.will@gmx.de";
-        final String password = "CRAWLER_101";
+        final String username = "";
+        final String password = "";
 
         // create a CrawlerDescription
         final CrawlerDescription crawler = new CrawlerDescription();
