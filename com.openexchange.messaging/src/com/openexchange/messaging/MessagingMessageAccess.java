@@ -52,12 +52,12 @@ package com.openexchange.messaging;
 import java.util.List;
 
 /**
- * {@link MessagingAccess} - Provides access to message storage.
+ * {@link MessagingMessageAccess} - Provides access to message storage.
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface MessagingAccess {
+public interface MessagingMessageAccess {
 
     /**
      * Gets the message associated with specified identifier.
@@ -107,6 +107,15 @@ public interface MessagingAccess {
      * @throws MessagingException If mails cannot be returned
      */
     public List<MessagingMessage> searchMessages(String folder, IndexRange indexRange, MessagingField sortField, OrderDirection order, SearchTerm<?> searchTerm, MessagingField[] fields) throws MessagingException;
+
+    /**
+     * Updates specified fields of given message.
+     * 
+     * @param message The message
+     * @param fields The fields to update
+     * @throws MessagingException If update operation fails
+     */
+    public void updateMessage(MessagingMessage message, MessagingField[] fields) throws MessagingException;
 
     /**
      * Appends specified messages to given folder.

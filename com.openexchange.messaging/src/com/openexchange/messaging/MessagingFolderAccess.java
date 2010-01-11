@@ -49,23 +49,13 @@
 
 package com.openexchange.messaging;
 
-import java.util.List;
-import com.openexchange.datatypes.genericonf.DynamicFormDescription;
-
 
 /**
- * {@link MessagingService} - The messaging service.
+ * {@link MessagingFolderAccess} - Provides access to folder storage.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface MessagingService {
-    public String getId();
-    public List<String> getCapabilities();
-    public String getDisplayName();
-    
-    public DynamicFormDescription getFormDescription();
+public interface MessagingFolderAccess {
 
-    public MessagingAccountManager getAccountManager();
-    public MessagingMessageAccess getAccess();
 }

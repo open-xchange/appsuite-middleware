@@ -159,6 +159,13 @@ public interface MessagingMessage extends MessagingPart {
     public static final String USER_READ_ACK = "$MDNSent";
 
     /**
+     * Gets the folder fullname.
+     * 
+     * @return The folder fullname
+     */
+    public String getFolder();
+
+    /**
      * Gets the color label.
      * 
      * @return The color label
