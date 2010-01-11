@@ -346,7 +346,6 @@
 
     <target name="install" depends="replacer">
         <mkdir dir="${destdir}/var/log/open-xchange"/>
-        <mkdir dir="${destdir}/${prefix}/libexec"/>
         <mkdir dir="${destdir}/${prefix}/${oxconfdir}"/>
 		<chmod perm="750" dir="${destdir}/var/log/open-xchange"/>
     	<copy todir="${destdir}/${prefix}/${oxconfdir}" overwrite="true">

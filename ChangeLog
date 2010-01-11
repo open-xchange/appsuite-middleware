@@ -1,3 +1,7 @@
+* 2010-01-11 - choeger@open-xchange.com
+
+ - Bugfix #15174:  Empty directory /opt/open-xchange/libexec is useless
+
 * 2009-12-18 - marcus.klein@open-xchange.com
 
  - Bugfix #15077: Increased default max object count for some user related caches to increase performance in large contexts.
