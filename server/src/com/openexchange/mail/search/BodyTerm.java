@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -209,7 +209,7 @@ public final class BodyTerm extends SearchTerm<String> {
             charset = CharsetDetector.detectCharset(mailPart.getInputStream());
         }
         try {
-            if (contentType.isMimeType("text/htm*")) {
+            if (contentType.startsWith("text/htm")) {
                 final HTML2TextHandler h = new HTML2TextHandler((int) mailPart.getSize(), false);
                 HTMLParser.parse(HTMLProcessing.getConformHTML(MessageUtility.readMailPart(mailPart, charset), charset), h);
                 return h.getText();

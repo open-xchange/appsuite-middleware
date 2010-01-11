@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -126,8 +126,8 @@ public final class SMTPMessageFiller extends MIMEMessageFiller {
          * Check for reply
          */
         {
-            final MailPath msgref = mail.getMsgref();
-            if (ComposeType.REPLY.equals(type) && (msgref != null)) {
+            final MailPath msgref;
+            if (ComposeType.REPLY.equals(type) && ((msgref = mail.getMsgref()) != null)) {
                 final MailAccess<?, ?> access = MailAccess.getInstance(session, msgref.getAccountId());
                 access.connect();
                 try {

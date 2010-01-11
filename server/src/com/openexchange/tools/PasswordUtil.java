@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -71,6 +71,11 @@ import org.apache.commons.codec.binary.Base64;
 public class PasswordUtil {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(PasswordUtil.class);
+
+    /**
+     * The key length.
+     */
+    private static final int KEY_LENGTH = 16;
 
     /**
      * The algorithm.
@@ -209,8 +214,6 @@ public class PasswordUtil {
         final SecretKey secretKey = keyGenerator.generateKey();
         return secretKey;
     }
-
-    private static final int KEY_LENGTH = 16;
 
     /**
      * Generates a secret key from specified key string.
