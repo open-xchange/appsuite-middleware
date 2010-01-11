@@ -53,10 +53,12 @@ import java.io.ByteArrayOutputStream;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.i18n.MailStrings;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.AbstractMailTest;
@@ -122,7 +124,9 @@ public final class MailForwardTest extends AbstractMailTest {
                 /*
                  * Check if the right prefix was added to the subject
                  */
-                final Locale locale = UserStorage.getStorageUser(session.getUserId(), ctx).getLocale();
+                final User user = UserStorage.getStorageUser(session.getUserId(), ctx);
+                final Locale locale = user.getLocale();
+                final TimeZone tz = TimeZone.getTimeZone(user.getTimeZone());
                 final StringHelper stringHelper = new StringHelper(locale);
                 {
                     final String subjectPrefix = "Fwd: ";
@@ -173,23 +177,18 @@ public final class MailForwardTest extends AbstractMailTest {
                             }
                             {
                                 final Date date = sourceMail.getSentDate();
-                                try {
-                                    forwardPrefix = forwardPrefix.replaceFirst("#DATE#", date == null ? "" : DateFormat.getDateInstance(
-                                        DateFormat.LONG,
-                                        locale).format(date));
-                                } catch (final Throwable t) {
-                                    t.printStackTrace();
+                                if (date == null) {
                                     forwardPrefix = forwardPrefix.replaceFirst("#DATE#", "");
-                                }
-                                try {
-                                    forwardPrefix = forwardPrefix.replaceFirst("#TIME#", date == null ? "" : DateFormat.getTimeInstance(
-                                        DateFormat.SHORT,
-                                        locale).format(date));
-                                } catch (final Throwable t) {
-                                    t.printStackTrace();
                                     forwardPrefix = forwardPrefix.replaceFirst("#TIME#", "");
+                                } else {
+                                    DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.LONG,locale);
+                                    dateFormat.setTimeZone(tz);
+                                    forwardPrefix = forwardPrefix.replaceFirst("#DATE#", dateFormat.format(date));
+                                    
+                                    dateFormat = DateFormat.getDateInstance(DateFormat.SHORT,locale);
+                                    dateFormat.setTimeZone(tz);
+                                    forwardPrefix = forwardPrefix.replaceFirst("#TIME#", dateFormat.format(date));
                                 }
-
                             }
                             forwardPrefix = forwardPrefix.replaceFirst("#SUBJECT#", sourceMail.getSubject());
                             forwardPrefix = new StringBuilder(forwardPrefix.length() + 2).append("\r\n").append(forwardPrefix).toString();
@@ -244,7 +243,9 @@ public final class MailForwardTest extends AbstractMailTest {
                         true)));
                 }
 
-                final Locale locale = UserStorage.getStorageUser(session.getUserId(), ctx).getLocale();
+                final User user = UserStorage.getStorageUser(session.getUserId(), ctx);
+                final Locale locale = user.getLocale();
+                final TimeZone tz = TimeZone.getTimeZone(user.getTimeZone());
                 final StringHelper stringHelper = new StringHelper(locale);
                 {
                     final String subjectPrefix = "Fwd: ";
@@ -294,23 +295,18 @@ public final class MailForwardTest extends AbstractMailTest {
                     }
                     {
                         final Date date = sourceMail.getSentDate();
-                        try {
-                            forwardPrefix = forwardPrefix.replaceFirst("#DATE#", date == null ? "" : DateFormat.getDateInstance(
-                                DateFormat.LONG,
-                                locale).format(date));
-                        } catch (final Throwable t) {
-                            t.printStackTrace();
+                        if (date == null) {
                             forwardPrefix = forwardPrefix.replaceFirst("#DATE#", "");
-                        }
-                        try {
-                            forwardPrefix = forwardPrefix.replaceFirst("#TIME#", date == null ? "" : DateFormat.getTimeInstance(
-                                DateFormat.SHORT,
-                                locale).format(date));
-                        } catch (final Throwable t) {
-                            t.printStackTrace();
                             forwardPrefix = forwardPrefix.replaceFirst("#TIME#", "");
+                        } else {
+                            DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.LONG,locale);
+                            dateFormat.setTimeZone(tz);
+                            forwardPrefix = forwardPrefix.replaceFirst("#DATE#", dateFormat.format(date));
+                            
+                            dateFormat = DateFormat.getDateInstance(DateFormat.SHORT,locale);
+                            dateFormat.setTimeZone(tz);
+                            forwardPrefix = forwardPrefix.replaceFirst("#TIME#", dateFormat.format(date));
                         }
-
                     }
                     forwardPrefix = forwardPrefix.replaceFirst("#SUBJECT#", sourceMail.getSubject());
                     forwardPrefix = new StringBuilder(forwardPrefix.length() + 2).append("\r\n").append(forwardPrefix).toString();

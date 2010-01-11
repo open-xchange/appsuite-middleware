@@ -57,11 +57,13 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
+import java.util.TimeZone;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeUtility;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.i18n.MailStrings;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.AbstractMailTest;
@@ -314,15 +316,25 @@ public final class MailReplyTest extends AbstractMailTest {
 				assertTrue("Header 'Subject' does not carry expected value", "Re: imap server".equals(replyMail
 						.getSubject()));
 
-				final Locale locale = UserStorage.getStorageUser(session.getUserId(), ctx).getLocale();
+				final User user = UserStorage.getStorageUser(session.getUserId(), ctx);
+                final Locale locale = user.getLocale();
+                final TimeZone tz = TimeZone.getTimeZone(user.getTimeZone());
 				final StringHelper strHelper = new StringHelper(locale);
 				String replyPrefix = strHelper.getString(MailStrings.REPLY_PREFIX);
 				{
 					final Date date = sourceMail.getSentDate();
-					replyPrefix = replyPrefix.replaceFirst("#DATE#", date == null ? "" : DateFormat.getDateInstance(
-							DateFormat.LONG, locale).format(date));
-					replyPrefix = replyPrefix.replaceFirst("#TIME#", date == null ? "" : DateFormat.getTimeInstance(
-							DateFormat.SHORT, locale).format(date));
+					if (date == null) {
+                        replyPrefix = replyPrefix.replaceFirst("#DATE#", "");
+                        replyPrefix = replyPrefix.replaceFirst("#TIME#", "");
+                    } else {
+                        DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.LONG,locale);
+                        dateFormat.setTimeZone(tz);
+                        replyPrefix = replyPrefix.replaceFirst("#DATE#", dateFormat.format(date));
+                        
+                        dateFormat = DateFormat.getDateInstance(DateFormat.SHORT,locale);
+                        dateFormat.setTimeZone(tz);
+                        replyPrefix = replyPrefix.replaceFirst("#TIME#", dateFormat.format(date));
+                    }
 				}
 				{
 					final InternetAddress[] from = sourceMail.getFrom();
@@ -389,15 +401,25 @@ public final class MailReplyTest extends AbstractMailTest {
 				assertTrue("Header 'Subject' does not carry expected value",
 						"Re: [dream-team] Good bye und macht's gut".equals(replyMail.getSubject()));
 
-				final Locale locale = UserStorage.getStorageUser(session.getUserId(), ctx).getLocale();
+				final User user = UserStorage.getStorageUser(session.getUserId(), ctx);
+                final Locale locale = user.getLocale();
+                final TimeZone tz = TimeZone.getTimeZone(user.getTimeZone());
 				final StringHelper strHelper = new StringHelper(locale);
 				String replyPrefix = strHelper.getString(MailStrings.REPLY_PREFIX);
 				{
 					final Date date = sourceMail.getSentDate();
-					replyPrefix = replyPrefix.replaceFirst("#DATE#", date == null ? "" : DateFormat.getDateInstance(
-							DateFormat.LONG, locale).format(date));
-					replyPrefix = replyPrefix.replaceFirst("#TIME#", date == null ? "" : DateFormat.getTimeInstance(
-							DateFormat.SHORT, locale).format(date));
+					if (date == null) {
+					    replyPrefix = replyPrefix.replaceFirst("#DATE#", "");
+					    replyPrefix = replyPrefix.replaceFirst("#TIME#", "");
+                    } else {
+                        DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.LONG,locale);
+                        dateFormat.setTimeZone(tz);
+                        replyPrefix = replyPrefix.replaceFirst("#DATE#", dateFormat.format(date));
+                        
+                        dateFormat = DateFormat.getDateInstance(DateFormat.SHORT,locale);
+                        dateFormat.setTimeZone(tz);
+                        replyPrefix = replyPrefix.replaceFirst("#TIME#", dateFormat.format(date));
+                    }
 				}
 				{
 					final InternetAddress[] from = sourceMail.getFrom();
@@ -462,15 +484,25 @@ public final class MailReplyTest extends AbstractMailTest {
 
 				assertTrue("Missing message reference", replyMail.containsMsgref() && replyMail.getMsgref() != null);
 
-				final Locale locale = UserStorage.getStorageUser(session.getUserId(), ctx).getLocale();
+				final User user = UserStorage.getStorageUser(session.getUserId(), ctx);
+                final Locale locale = user.getLocale();
+                final TimeZone tz = TimeZone.getTimeZone(user.getTimeZone());
 				final StringHelper strHelper = new StringHelper(locale);
 				String replyPrefix = strHelper.getString(MailStrings.REPLY_PREFIX);
 				{
-					final Date date = sourceMail.getSentDate();
-					replyPrefix = replyPrefix.replaceFirst("#DATE#", date == null ? "" : DateFormat.getDateInstance(
-							DateFormat.LONG, locale).format(date));
-					replyPrefix = replyPrefix.replaceFirst("#TIME#", date == null ? "" : DateFormat.getTimeInstance(
-							DateFormat.SHORT, locale).format(date));
+				    final Date date = sourceMail.getSentDate();
+                    if (date == null) {
+                        replyPrefix = replyPrefix.replaceFirst("#DATE#", "");
+                        replyPrefix = replyPrefix.replaceFirst("#TIME#", "");
+                    } else {
+                        DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.LONG,locale);
+                        dateFormat.setTimeZone(tz);
+                        replyPrefix = replyPrefix.replaceFirst("#DATE#", dateFormat.format(date));
+                        
+                        dateFormat = DateFormat.getDateInstance(DateFormat.SHORT,locale);
+                        dateFormat.setTimeZone(tz);
+                        replyPrefix = replyPrefix.replaceFirst("#TIME#", dateFormat.format(date));
+                    }
 				}
 				{
 					final InternetAddress[] from = sourceMail.getFrom();
