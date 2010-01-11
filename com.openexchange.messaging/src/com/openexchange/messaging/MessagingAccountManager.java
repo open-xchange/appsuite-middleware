@@ -54,10 +54,10 @@ import com.openexchange.session.Session;
 
 
 /**
- * {@link MessagingAccountManager}
+ * {@link MessagingAccountManager} - A account manager.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MessagingAccountManager {
     public void addAccount(MessagingAccount account, Session session);

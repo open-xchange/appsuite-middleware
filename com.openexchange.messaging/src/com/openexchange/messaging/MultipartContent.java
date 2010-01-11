@@ -51,10 +51,10 @@ package com.openexchange.messaging;
 
 
 /**
- * {@link MultipartContent}
+ * {@link MultipartContent} - A multipart content.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MultipartContent extends MessagingContent {
     public int getCount();

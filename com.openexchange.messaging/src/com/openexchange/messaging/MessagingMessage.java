@@ -50,14 +50,13 @@
 package com.openexchange.messaging;
 
 import java.util.Collection;
-import java.util.Map;
 
 
 /**
- * {@link MessagingMessage}
+ * {@link MessagingMessage} - A message.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MessagingMessage extends MessagingPart {
     public int getColorLabel();

@@ -54,10 +54,10 @@ import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 
 
 /**
- * {@link MessagingService}
+ * {@link MessagingService} - The messaging service.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MessagingService {
     public String getId();

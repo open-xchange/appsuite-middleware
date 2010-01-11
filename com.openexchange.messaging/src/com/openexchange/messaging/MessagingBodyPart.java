@@ -51,10 +51,10 @@ package com.openexchange.messaging;
 
 
 /**
- * {@link MessagingBodyPart}
+ * {@link MessagingBodyPart} - A messaging part occurring within a mulitpart.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MessagingBodyPart extends MessagingPart {
     public MultipartContent getParent();

@@ -51,10 +51,10 @@ package com.openexchange.messaging;
 
 
 /**
- * {@link StringContent}
+ * {@link StringContent} - A string content.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class StringContent implements SimpleContent<String> {
     private String data;
@@ -65,7 +65,7 @@ public class StringContent implements SimpleContent<String> {
     }
 
     
-    public void setData(String data) {
+    public void setData(final String data) {
         this.data = data;
     }
     

@@ -51,10 +51,10 @@ package com.openexchange.messaging;
 
 
 /**
- * {@link SimpleMessagePart}
+ * {@link SimpleMessagePart} - A simple message part.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface SimpleMessagePart extends MessagingPart{
     public String getId();

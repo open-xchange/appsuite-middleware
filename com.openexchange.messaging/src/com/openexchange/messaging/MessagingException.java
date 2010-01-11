@@ -51,10 +51,10 @@ package com.openexchange.messaging;
 
 
 /**
- * {@link MessagingException}
+ * {@link MessagingException} - A messaging exception
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MessagingException extends Exception {
     //TODO!!!

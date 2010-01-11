@@ -53,10 +53,10 @@ import java.util.Map;
 
 
 /**
- * {@link MessagingAccount}
+ * {@link MessagingAccount} - A messaging account.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MessagingAccount {
     public Map<String, Object> getConfiguration();
