@@ -47,13 +47,10 @@
  *
  */
 
-package com.openexchange.messaging.search;
+package com.openexchange.messaging;
 
 import java.io.Serializable;
 import java.util.Collection;
-import com.openexchange.messaging.MessagingException;
-import com.openexchange.messaging.MessagingField;
-import com.openexchange.messaging.MessagingMessage;
 
 /**
  * {@link SearchTerm}

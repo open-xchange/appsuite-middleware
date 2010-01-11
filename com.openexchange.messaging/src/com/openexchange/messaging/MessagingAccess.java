@@ -50,7 +50,6 @@
 package com.openexchange.messaging;
 
 import java.util.List;
-import com.openexchange.messaging.search.SearchTerm;
 
 /**
  * {@link MessagingAccess} - Provides access to message storage.
