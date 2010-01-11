@@ -62,7 +62,7 @@ public interface MessagingBodyPart extends MessagingPart {
      * Gets the multipart parent.
      * 
      * @return The multipart parent
-     * @throws MessagingException If multipart parent cannoit be returned
+     * @throws MessagingException If multipart parent cannot be returned
      */
     public MultipartContent getParent() throws MessagingException;
 
