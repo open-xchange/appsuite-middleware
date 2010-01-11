@@ -69,6 +69,7 @@ import com.openexchange.user.UserService;
 import com.openexchange.voipnow.json.VoipNowException;
 import com.openexchange.voipnow.json.exception.VoipNowExceptionFactory;
 import com.openexchange.voipnow.json.multiple.VoipNowMultipleHandlerFactory;
+import com.openexchange.voipnow.json.preferences.GUI;
 import com.openexchange.voipnow.json.preferences.VoipNowEnabled;
 import com.openexchange.voipnow.json.preferences.VoipNowFaxAddress;
 import com.openexchange.voipnow.json.services.ServiceRegistry;
@@ -114,6 +115,7 @@ public class Activator implements BundleActivator {
                 null));
             serviceRegistrations.add(context.registerService(PreferencesItemService.class.getName(), new VoipNowEnabled(), null));
             serviceRegistrations.add(context.registerService(PreferencesItemService.class.getName(), new VoipNowFaxAddress(), null));
+            serviceRegistrations.add(context.registerService(PreferencesItemService.class.getName(), new GUI(), null));
             /*
              * User service tracker
              */

@@ -51,17 +51,21 @@ package com.openexchange.voipnow.json.actions;
 
 import java.rmi.RemoteException;
 import org.apache.axis2.AxisFault;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com._4psa.common_xsd._2_0_4.PositiveInteger;
-import com._4psa.common_xsd._2_0_4._boolean;
-import com._4psa.headerdata_xsd._2_0_4.UserCredentials;
+import com._4psa.reportdata_xsd._2_0_4.IncomingCalls_type0;
+import com._4psa.reportdata_xsd._2_0_4.OutgoingCalls_type0;
 import com._4psa.reportmessages_xsd._2_0_4.CallReportRequest;
 import com._4psa.reportmessages_xsd._2_0_4.CallReportRequestChoice_type0;
-import com._4psa.reportmessages_xsd._2_0_4.CallReportResponse;
+import com._4psa.reportmessages_xsd._2_0_4.Disposion_type1;
+import com._4psa.reportmessages_xsd._2_0_4.Interval_type0;
 import com._4psa.reportmessagesinfo_xsd._2_0_4.CallReportResponseType;
 import com._4psa.voipnowservice._2_0_4.ReportPortStub;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.voipnow.json.VoipNowExceptionCodes;
 
@@ -96,32 +100,22 @@ public final class CallReportAction extends AbstractVoipNowSOAPAction<ReportPort
             /*
              * Parse parameters
              */
-            /*
-             * Answered call flag.
-             */
-            final boolean answered = Boolean.parseBoolean(checkStringParameter(request, "answered"));
-            /*
-             * Either the (numeric) user id or its identifier
-             */
             final String userId;
             final String identifier;
+            final String login;
             {
-                final String[] eitherOf = checkEitherOfStringParameter(request, "id", "identifier");
+                /*
+                 * Either the (numeric) user id or its identifier
+                 */
+                final String[] eitherOf = checkEitherOfStringParameter(request, "id", "identifier", "login");
                 userId = eitherOf[0];
                 identifier = eitherOf[1];
+                login = eitherOf[2];
             }
-            /*
-             * Search month. Default: current month
-             */
-            final int month = checkIntParameter(request, "month");
-            /*
-             * Search year. Default: current year
-             */
-            final int year = checkIntParameter(request, "year");
-            /*
-             * Call flow: either in, out, or both
-             */
-            // final String flow = checkStringParameter(request, "flow");
+            final long start = checkLongParameter(request, "start");
+            final long end = checkLongParameter(request, "end");
+            final String disposion = "answered";
+            // TODO: What about disposion??? "ANSWERED", "BUSY", "FAILED", "NO ANSWER", "UNKNOWN", or "NOT ALLOWED"
             /*
              * Get setting
              */
@@ -136,77 +130,107 @@ public final class CallReportAction extends AbstractVoipNowSOAPAction<ReportPort
             final CallReportRequest callReportRequest = new CallReportRequest();
             {
                 /*
-                 * Set answered parameter
+                 * Set choice 0: user ID, identifier OR login
                  */
                 {
-                    final _boolean answeredParam = new _boolean();
-                    answeredParam.set_boolean(answered);
-                    //callReportRequest.setAnswered(answeredParam);
-                    
-                    //callReportRequest.set
-                }
-                /*
-                 * Set choice 0: user ID OR identifier
-                 */
-                {
-                    final CallReportRequestChoice_type0 userIdORidentifier = new CallReportRequestChoice_type0();
-                    if (null == identifier) {
+                    final CallReportRequestChoice_type0 type0 = new CallReportRequestChoice_type0();
+                    if (null != userId) {
                         final PositiveInteger userIdParam = new PositiveInteger();
                         userIdParam.setPositiveInteger(new org.apache.axis2.databinding.types.PositiveInteger(userId));
-                        userIdORidentifier.setUserID(userIdParam);
-                    } else {
+                        type0.setUserID(userIdParam);
+                    } else if (null != identifier) {
                         final com._4psa.common_xsd._2_0_4.String identifierString = new com._4psa.common_xsd._2_0_4.String();
                         identifierString.setString(identifier);
-                        userIdORidentifier.setUserIdentifier(identifierString);
+                        type0.setUserIdentifier(identifierString);
+                    } else if (null != login) {
+                        final com._4psa.common_xsd._2_0_4.String loginString = new com._4psa.common_xsd._2_0_4.String();
+                        loginString.setString(login);
+                        type0.setLogin(loginString);
                     }
-                    callReportRequest.setCallReportRequestChoice_type0(userIdORidentifier);
+                    callReportRequest.setCallReportRequestChoice_type0(type0);
                 }
                 /*
-                 * Set choice 1: interval OR month-and-year
+                 * Set interval
                  */
                 {
-                    final CallReportRequestChoice_type0 intervalORmonthAndYear = new CallReportRequestChoice_type0();
-                    
-                    
-
-//                    final CallReportRequestSequence_type0 sequenceType0 = new CallReportRequestSequence_type0();
-//                    final UnsignedInt monthParam = new UnsignedInt();
-//                    monthParam.setUnsignedInt(new org.apache.axis2.databinding.types.UnsignedInt(month));
-//                    sequenceType0.setMonth(monthParam);
-//
-//                    final UnsignedInt yearParam = new UnsignedInt();
-//                    yearParam.setUnsignedInt(new org.apache.axis2.databinding.types.UnsignedInt(year));
-//                    sequenceType0.setYear(yearParam);
-//
-//                    intervalORmonthAndYear.setCallReportRequestSequence_type0(sequenceType0);
-//
-//                    callReportRequest.setCallReportRequestChoice_type0(intervalORmonthAndYear);
+                    final Interval_type0 interval = new Interval_type0();
+                    interval.setStartDate(new java.util.Date(start));
+                    interval.setEndDate(new java.util.Date(end));
+                    callReportRequest.setInterval(interval);
                 }
                 /*
-                 * Flow is set to "both" by default
+                 * Set disposion
                  */
+                {
+                    if ("answered".equalsIgnoreCase(disposion)) {
+                        callReportRequest.setDisposion(Disposion_type1.value1);
+                    } else if ("busy".equalsIgnoreCase(disposion)) {
+                        callReportRequest.setDisposion(Disposion_type1.value2);
+                    } else if ("failed".equalsIgnoreCase(disposion)) {
+                        callReportRequest.setDisposion(Disposion_type1.value3);
+                    } else if ("no answer".equalsIgnoreCase(disposion)) {
+                        callReportRequest.setDisposion(Disposion_type1.value4);
+                    } else if ("unknown".equalsIgnoreCase(disposion)) {
+                        callReportRequest.setDisposion(Disposion_type1.value5);
+                    } else if ("not allowed".equalsIgnoreCase(disposion)) {
+                        callReportRequest.setDisposion(Disposion_type1.value6);
+                    } else {
+                        throw new AjaxException(AjaxException.Code.InvalidParameterValue, "disposion", disposion);
+                    }
+                }
             }
-            final UserCredentials userCredentials = getUserCredentials(setting);
-            /*
-             * Get response
-             */
-            final CallReportResponse callReportResponse = stub.callReport(callReportRequest, userCredentials);
             /*
              * Get response type
              */
-            final CallReportResponseType callCostsResponseType = callReportResponse.getCallReportResponse();
+            final CallReportResponseType callReportResponseType =
+                stub.callReport(callReportRequest, getUserCredentials(setting)).getCallReportResponse();
             /*
-             * Some data from response type
+             * Incoming calls
              */
-            //final UnsignedInt totalCalls = callCostsResponseType.getTotalCalls();
+            final JSONObject calls = new JSONObject();
+            {
+                final IncomingCalls_type0 incomingCalls = callReportResponseType.getIncomingCalls();
+                final JSONObject incomingCallsObject = new JSONObject();
+                incomingCallsObject.put("total", incomingCalls.getTotal().getInteger().intValue());
+                incomingCallsObject.put("answered", incomingCalls.getAnswered().getInteger().intValue());
+                incomingCallsObject.put("busy", incomingCalls.getBusy().getInteger().intValue());
+                incomingCallsObject.put("failed", incomingCalls.getFailed().getInteger().intValue());
+                incomingCallsObject.put("unallowed", incomingCalls.getUnallowed().getInteger().intValue());
+                incomingCallsObject.put("unanswered", incomingCalls.getUnanswered().getInteger().intValue());
+                incomingCallsObject.put("unknown", incomingCalls.getUnknown().getInteger().intValue());
+                /*
+                 * Add to object
+                 */
+                calls.put("incoming", incomingCallsObject);
+            }
+            /*
+             * Outgoing calls
+             */
+            {
+                final OutgoingCalls_type0 outgoingCalls = callReportResponseType.getOutgoingCalls();
+                final JSONObject outgoingCallsObject = new JSONObject();
+                outgoingCallsObject.put("total", outgoingCalls.getTotal().getInteger().intValue());
+                outgoingCallsObject.put("answered", outgoingCalls.getAnswered().getInteger().intValue());
+                outgoingCallsObject.put("busy", outgoingCalls.getBusy().getInteger().intValue());
+                outgoingCallsObject.put("failed", outgoingCalls.getFailed().getInteger().intValue());
+                outgoingCallsObject.put("unallowed", outgoingCalls.getUnallowed().getInteger().intValue());
+                outgoingCallsObject.put("unanswered", outgoingCalls.getUnanswered().getInteger().intValue());
+                outgoingCallsObject.put("unknown", outgoingCalls.getUnknown().getInteger().intValue());
+                /*
+                 * Add to object
+                 */
+                calls.put("outgoing", outgoingCallsObject);
+            }
             /*
              * Return
              */
-            return new AJAXRequestResult(Integer.valueOf(999));
+            return new AJAXRequestResult(calls);
         } catch (final AxisFault e) {
             throw VoipNowExceptionCodes.SOAP_FAULT.create(e, e.getMessage());
         } catch (final RemoteException e) {
             throw VoipNowExceptionCodes.REMOTE_ERROR.create(e, e.getMessage());
+        } catch (final JSONException e) {
+            throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
         }
     }
 

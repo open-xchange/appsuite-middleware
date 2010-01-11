@@ -118,16 +118,6 @@ public final class SetFollowMeAction extends AbstractVoipNowSOAPAction<Extension
             final String[] transferTo = json2StringArr((JSONArray) request.getData());
             final VoipNowServerSetting setting = getVoipNowServerSetting(session);
             /*
-             * Get the interval
-             */
-            final int interval;
-            {
-                final AJAXRequestData innerRequest = new AJAXRequestData();
-                innerRequest.putParameter(idStr, userId);
-                final AJAXRequestResult innerResult = new GetTimeIntervalAction().perform(request, session);
-                interval = ((java.math.BigInteger) innerResult.getResultObject()).intValue();
-            }
-            /*
              * The SOAP stub
              */
             final ExtensionPortStub stub = configureStub(setting);
@@ -141,7 +131,7 @@ public final class SetFollowMeAction extends AbstractVoipNowSOAPAction<Extension
             final PositiveInteger userIdInteger = new PositiveInteger();
             userIdInteger.setPositiveInteger(new org.apache.axis2.databinding.types.PositiveInteger(userId));
             /*
-             * Get rule ID
+             * Detect existing follow-me rules
              */
             final List<Integer> followMeRulesIDs;
             final String followMeStr = "followme";
@@ -207,17 +197,11 @@ public final class SetFollowMeAction extends AbstractVoipNowSOAPAction<Extension
                 /*
                  * "followme"
                  */
-                final com._4psa.extensiondata_xsd._2_0_4.Action_type5 action = new com._4psa.extensiondata_xsd._2_0_4.Action_type5(followMeStr, false) {
-                    // Nothing to do
-                };
-                callRuleInfo.setAction(action);
+                callRuleInfo.setAction(com._4psa.extensiondata_xsd._2_0_4.Action_type5.followme);
                 /*
                  * 1
                  */
-                final Match_type1 match = new Match_type1(1, false) {
-                    // Nothing to do
-                };
-                callRuleInfo.setMatch(match);
+                callRuleInfo.setMatch(Match_type1.value1);
                 /*
                  * "."
                  */
@@ -238,9 +222,21 @@ public final class SetFollowMeAction extends AbstractVoipNowSOAPAction<Extension
                 /*
                  * interval
                  */
-                final PositiveInteger intervalInteger = new PositiveInteger();
-                intervalInteger.setPositiveInteger(new org.apache.axis2.databinding.types.PositiveInteger(String.valueOf(interval)));
-                callRuleInfo.setIntervalID(intervalInteger);
+                {
+                    /*
+                     * Get the interval
+                     */
+                    final int interval;
+                    {
+                        final AJAXRequestData innerRequest = new AJAXRequestData();
+                        innerRequest.putParameter(idStr, userId);
+                        final AJAXRequestResult innerResult = new GetTimeIntervalAction().perform(request, session);
+                        interval = ((java.math.BigInteger) innerResult.getResultObject()).intValue();
+                    }
+                    final PositiveInteger intervalInteger = new PositiveInteger();
+                    intervalInteger.setPositiveInteger(new org.apache.axis2.databinding.types.PositiveInteger(String.valueOf(interval)));
+                    callRuleInfo.setIntervalID(intervalInteger);
+                }
                 /*
                  * Apply rule
                  */
