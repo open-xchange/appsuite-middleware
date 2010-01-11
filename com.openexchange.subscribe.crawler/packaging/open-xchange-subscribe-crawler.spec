@@ -80,6 +80,16 @@ export NO_BRP_CHECK_BYTECODE_VERSION=true
 
 ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 
+%post
+
+if [ ${1:-0} -eq 2 ]; then
+   . /opt/open-xchange/etc/oxfunctions.sh
+   ox_update_permissions "/opt/open-xchange/etc/groupware/crawlers" open-xchange:open-xchange 755
+   for file in /opt/open-xchange/etc/groupware/crawlers/*; do
+       ox_update_permissions "$file" open-xchange:open-xchange 644
+   done
+fi
+
 %clean
 %{__rm} -rf %{buildroot}
 
@@ -88,7 +98,8 @@ ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 %dir /opt/open-xchange/etc/groupware/
 %dir /opt/open-xchange/bundles/
 %dir /opt/open-xchange/etc/*/osgi/bundle.d/
+%dir %attr(-,open-xchange,open-xchange) /opt/open-xchange/etc/groupware/crawlers
 %config(noreplace) /opt/open-xchange/etc/groupware/*.properties
-%config(noreplace) /opt/open-xchange/etc/groupware/crawlers/*
+%config(noreplace) %attr(-,open-xchange,open-xchange) /opt/open-xchange/etc/groupware/crawlers/*
 /opt/open-xchange/bundles/*
 /opt/open-xchange/etc/*/osgi/bundle.d/*

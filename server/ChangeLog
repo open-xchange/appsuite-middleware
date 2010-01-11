@@ -1,3 +1,7 @@
+* 2010-01-11 - choeger@open-xchange.com
+
+ - Bugfix #15176: Crawler YML files can not be updated
+
 * 2010-01-11 - martin.herfurth@open-xchange.com
 
  - Bugfix #14922: Confirm status in public folders.
