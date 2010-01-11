@@ -62,8 +62,10 @@ import com.openexchange.database.AbstractCreateTableImpl;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.update.DefaultAttributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.Schema;
+import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
@@ -132,6 +134,10 @@ public final class HeaderCacheCreateTableTask extends AbstractCreateTableImpl im
 
     public String[] getDependencies() {
         return new String[0];
+    }
+
+    public TaskAttributes getAttributes() {
+        return new DefaultAttributes();
     }
 
     public void perform(final Schema schema, final int contextId) throws AbstractOXException {

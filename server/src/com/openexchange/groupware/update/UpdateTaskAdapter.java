@@ -86,4 +86,8 @@ public abstract class UpdateTaskAdapter implements UpdateTaskV2 {
     public int getPriority() {
         return UpdateTask.UpdateTaskPriority.NORMAL.priority;
     }
+
+    public TaskAttributes getAttributes() {
+        return new DefaultAttributes();
+    }
 }

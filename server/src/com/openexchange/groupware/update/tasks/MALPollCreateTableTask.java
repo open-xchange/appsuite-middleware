@@ -59,8 +59,10 @@ import com.openexchange.database.AbstractCreateTableImpl;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.update.DefaultAttributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.Schema;
+import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
@@ -122,6 +124,10 @@ public final class MALPollCreateTableTask extends AbstractCreateTableImpl implem
 
     public String[] getDependencies() {
         return DEPENDENCIES;
+    }
+
+    public TaskAttributes getAttributes() {
+        return new DefaultAttributes();
     }
 
     public void perform(Schema schema, int contextId) throws AbstractOXException {

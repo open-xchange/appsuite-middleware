@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,38 +49,20 @@
 
 package com.openexchange.groupware.update;
 
-import com.openexchange.groupware.AbstractOXException;
-
 /**
- * Second generation of update tasks.
+ * Possible concurrency levels for update tasks.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public interface UpdateTaskV2 extends UpdateTask {
-
-    static final int NO_VERSION = Schema.NO_VERSION;
+public enum UpdateConcurrency {
 
     /**
-     * Performs the database schema upgrade.
-     * @param params Interface carrying some useful parameters for performing the update. This is a parameter interface to be extendable for
-     * future requirements without breaking the API.
-     * @throws AbstractOXException should be thrown if the update fails. Then it can be tried to execute this task again.
+     * Productive work must be blocked if the task is executed.
      */
-    void perform(PerformParameters params) throws AbstractOXException;
-
+    BLOCKING,
+    
     /**
-     * This method is used to determine the order when executing update tasks. Check VERY carefully what update tasks must be run before
-     * your task can run. For all currently existing update task the dependency returns always the previous update task to remain the same
-     * order as with the versions.
-     * @return a string array containing the update tasks that must be run before running this one. You may return an empty array if you can
-     * not discover any dependencies. Never return <code>null</code>.
+     * Productive work can continue if the task is executed.
      */
-    String[] getDependencies();
-
-    /**
-     * Defines the attributes of a database update task. Please read the corresponding java documentation for the interfaces and enums to
-     * get an understandig for the attributes.
-     * @return the attributes.
-     */
-    TaskAttributes getAttributes();
+    BACKGROUND
 }
