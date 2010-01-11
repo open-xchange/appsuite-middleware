@@ -50,6 +50,7 @@
 package com.openexchange.messaging;
 
 import java.util.List;
+import com.openexchange.messaging.search.SearchTerm;
 
 /**
  * {@link MessagingAccess} - Provides access to message storage.
@@ -61,15 +62,52 @@ public interface MessagingAccess {
 
     /**
      * Gets the message associated with specified identifier.
+     * 
      * @param folder The folder identifier
      * @param id The identifier
      * @param peek <code>true</code> to peek message content (meaning any mechanisms to mark content as read disabled); otherwise
      *            <code>false</code>
-     * 
      * @return The message associated with specified identifier
      * @throws MessagingException If message cannot be returned
      */
     public MessagingMessage getMessage(String folder, String id, boolean peek) throws MessagingException;
+
+    /**
+     * Gets the messages located in given folder whose identifier matches specified identifier.
+     * <p>
+     * The returned instances of {@link MailMessage} are pre-filled with specified fields through argument <code>fields</code>.
+     * <p>
+     * If any mail ID is invalid, <code>null</code> is returned for that entry.
+     * 
+     * @param folder The folder identifier
+     * @param messageIds The message identifiers
+     * @param fields The fields to pre-fill in returned instances of {@link MessagingMessage}
+     * @return The corresponding messages
+     * @throws MessagingException If message could not be returned
+     */
+    public List<MessagingMessage> getMessages(String folder, String[] messageIds, MessagingField[] fields) throws MessagingException;
+
+    /**
+     * Searches for messages located in given folder. If the search yields no results, an empty {@link List} is returned. This method's
+     * purpose is to return filtered messages' information for a <b>fast</b> list view. Therefore this method's <code>fields</code>
+     * parameter should only contain instances of {@link MessagingField} which are marked as <b>[low cost]</b>. Otherwise pre-filling of
+     * returned messages may take a long time and does no more fit to generate a fast list view.
+     * <p>
+     * <b>Note</b> that sorting needs not to be supported by underlying mailing system. This can be done on application side, too.<br>
+     * Same is for search, but in most cases it's faster to search on mailing system, but this heavily depends on how mails are accessed.
+     * 
+     * @param folder The folder fullname
+     * @param indexRange The index range specifying the desired sub-list in sorted list; may be <code>null</code> to obtain complete list.
+     *            Range begins at the specified start index and extends to the message at index <code>end - 1</code>. Thus the length of the
+     *            range is <code>end - start</code>.
+     * @param sortField The sort field
+     * @param order Whether ascending or descending sort order
+     * @param searchTerm The search term to filter messages; may be <code>null</code> to obtain all messages
+     * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
+     * @return The desired, pre-filled instances of {@link MailMessage}
+     * @throws MessagingException If mails cannot be returned
+     */
+    public List<MessagingMessage> searchMessages(String folder, IndexRange indexRange, MessagingField sortField, OrderDirection order, SearchTerm<?> searchTerm, MessagingField[] fields) throws MessagingException;
 
     /**
      * Appends specified messages to given folder.
@@ -82,6 +120,9 @@ public interface MessagingAccess {
 
     /**
      * Copies specified messages from source folder to destination folder.
+     * <p>
+     * If no mail could be found for a given message identifier, the corresponding value in returned array of <code>String</code> is
+     * <code>null</code>.
      * 
      * @param sourceFolder The source folder identifier
      * @param destFolder The destination folder identifier
@@ -92,7 +133,24 @@ public interface MessagingAccess {
      *         then <code>null</code> is returned.
      * @throws MessagingException If copy operation fails
      */
-    public String[] copyMessages(String sourceFolder, String destFolder, String[] messageIds, boolean fast) throws MessagingException;
+    public List<String> copyMessages(String sourceFolder, String destFolder, String[] messageIds, boolean fast) throws MessagingException;
+
+    /**
+     * Moves specified messages from source folder to destination folder.
+     * <p>
+     * If no mail could be found for a given message identifier, the corresponding value in returned array of <code>String</code> is
+     * <code>null</code>.
+     * 
+     * @param sourceFolder The source folder identifier
+     * @param destFolder The destination folder identifier
+     * @param messageIds The message identifiers
+     * @param fast <code>true</code> for fast move (meaning no identifiers of corresponding messages in destination folder); otherwise
+     *            <code>false</code>
+     * @return The identifiers of corresponding messages in destination folder. Unless parameter <tt>fast</tt> is set to <code>true</code>;
+     *         then <code>null</code> is returned.
+     * @throws MessagingException If move operation fails
+     */
+    public List<String> moveMessages(String sourceFolder, String destFolder, String[] messageIds, boolean fast) throws MessagingException;
 
     /**
      * Deletes specified messages in folder.
@@ -106,6 +164,8 @@ public interface MessagingAccess {
 
     /**
      * A convenience method to get all messages located in given folder.
+     * <p>
+     * If any messaging ID is invalid, <code>null</code> is returned for that entry.
      * 
      * @param folder The folder identifier
      * @param indexRange The index range specifying the desired sub-list in sorted list; may be <code>null</code> to obtain complete list.
@@ -119,8 +179,15 @@ public interface MessagingAccess {
      */
     public List<MessagingMessage> getAllMessages(String folder, IndexRange indexRange, MessagingField sortField, OrderDirection order, MessagingField... fields) throws MessagingException;
 
+    /**
+     * Performs specified action to given message and returns resulting message.
+     * 
+     * @param folder The folder identifier
+     * @param id The message identifier
+     * @param action The action to perform
+     * @return The resulting message
+     * @throws MessagingException If performing specified action fails
+     */
     public MessagingMessage perform(String folder, String id, String action) throws MessagingException;
-
-    public void send(MessagingMessage message) throws MessagingException;
 
 }
