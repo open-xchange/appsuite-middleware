@@ -54,7 +54,7 @@ package com.openexchange.messaging;
  * {@link MessagingField}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum MessagingField {
     ID, COLOR_LABEL, FLAGS, RECEIVED_DATE, USER_FLAGS, BODY, HEADERS;
