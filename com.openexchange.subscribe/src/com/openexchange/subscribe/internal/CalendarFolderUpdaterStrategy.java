@@ -141,7 +141,7 @@ public class CalendarFolderUpdaterStrategy implements FolderUpdaterStrategy<Cale
         Subscription subscription = (Subscription) getFromSession(SUBSCRIPTION, session);
         newElement.setParentFolderID(subscription.getFolderIdAsInt());
         newElement.setContext(subscription.getContext());
-        System.out.println("***** Event to save : " + newElement.getTitle());
+        //System.out.println("***** Event to save : " + newElement.getTitle());
         calendarSql.insertAppointmentObject(newElement);
     }
 
