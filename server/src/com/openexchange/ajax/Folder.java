@@ -405,7 +405,7 @@ public class Folder extends SessionServlet {
          */
         final Response response = new Response();
         final OXJSONWriter jsonWriter = new OXJSONWriter();
-
+        AbstractOXException warning = null;
         Date lastModifiedDate = null;
         /*
          * Start response
@@ -694,22 +694,22 @@ public class Folder extends SessionServlet {
                                         final Log logger = LOG;
                                         tasks.add(new AbstractTask<Object>() {
 
-                                            public Object call() throws Exception {
+                                            public Object call() throws MailException {
                                                 final MailFolder rootFolder;
                                                 final MailAccess<?, ?> mailAccess;
                                                 try {
                                                     mailAccess = MailAccess.getInstance(session, mailAccount.getId());
                                                     rootFolder = mailAccess.getRootFolder();
                                                 } catch (final MailException e) {
+                                                    arrays[index] = null;
                                                     if (MailException.Code.ACCOUNT_DOES_NOT_EXIST.getNumber() == e.getDetailNumber()) {
                                                         if (logger.isDebugEnabled()) {
                                                             logger.debug(e.getMessage(), e);
                                                         }
-                                                    } else {
-                                                        logger.error(e.getMessage(), e);
+                                                        return null;
                                                     }
-                                                    arrays[index] = null;
-                                                    return null;
+                                                    logger.error(e.getMessage(), e);
+                                                    throw e;
                                                 }
                                                 try {
                                                     final MailFolderFieldWriter[] mailFolderWriters =
@@ -750,13 +750,14 @@ public class Folder extends SessionServlet {
                                                         }
                                                     }
                                                     arrays[index] = ja;
+                                                    return null;
                                                 } catch (final MailException e) {
                                                     logger.error(e.getMessage(), e);
                                                     arrays[index] = null;
+                                                    throw e;
                                                 } finally {
                                                     mailAccess.close(true);
                                                 }
-                                                return null;
                                             }
                                         });
                                     }
@@ -771,7 +772,22 @@ public class Folder extends SessionServlet {
                                     for (int i = 0; i < size; i++) {
                                         final Future<Object> f = completionFuture.poll(maxRunningMillis, TimeUnit.MILLISECONDS);
                                         if (null != f) {
-                                            f.get();
+                                            try {
+                                                f.get();
+                                            } catch (final ExecutionException e) {
+                                                final Throwable t = e.getCause();
+                                                if (t instanceof MailException) {
+                                                    if (null == warning) {
+                                                        /*
+                                                         * TODO: Does UI already accept warnings?
+                                                         */
+                                                        warning = (AbstractOXException) t;
+                                                        warning.setCategory(Category.WARNING);
+                                                    }
+                                                } else {
+                                                    throw e;
+                                                }
+                                            }
                                         }
                                     }
                                 } catch (final InterruptedException e) {
@@ -1027,6 +1043,9 @@ public class Folder extends SessionServlet {
          * Close response and flush print writer
          */
         jsonWriter.endArray();
+        if (null != warning) {
+            response.setWarning(warning);
+        }
         response.setData(jsonWriter.getObject());
         response.setTimestamp(lastModifiedDate);
         return response;
