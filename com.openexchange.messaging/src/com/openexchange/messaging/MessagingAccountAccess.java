@@ -49,86 +49,12 @@
 
 package com.openexchange.messaging;
 
-import java.util.List;
-import com.openexchange.datatypes.genericonf.DynamicFormDescription;
-
 
 /**
- * {@link SimMessagingService}
+ * {@link MessagingAccountAccess} - TODO Short description of this class' purpose.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SimMessagingService implements MessagingService {
-
-    private List<String> capabilities;
-    private String displayName;
-    private DynamicFormDescription formDescription;
-    private String id;
-    private MessagingMessageAccess access;
-    private MessagingFolderAccess folderAccess;
-    private MessagingAccountManager accManager;
-
-    public MessagingMessageAccess getMessageAccess() {
-        return access;
-    }
-
-    public MessagingAccountManager getAccountManager() {
-        return accManager;
-    }
-
-    public List<String> getCapabilities() {
-        return capabilities;
-    }
-
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    public DynamicFormDescription getFormDescription() {
-        return formDescription;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    
-    public void setCapabilities(final List<String> capabilities) {
-        this.capabilities = capabilities;
-    }
-
-    
-    public void setDisplayName(final String displayName) {
-        this.displayName = displayName;
-    }
-
-    
-    public void setFormDescription(final DynamicFormDescription formDescription) {
-        this.formDescription = formDescription;
-    }
-
-    
-    public void setId(final String id) {
-        this.id = id;
-    }
-
-    
-    public void setAccess(final MessagingMessageAccess access) {
-        this.access = access;
-    }
-
-    
-    public void setAccountManager(final MessagingAccountManager accManager) {
-        this.accManager = accManager;
-    }
-
-    public MessagingFolderAccess getFolderAccess() {
-        return folderAccess;
-    }
-    
-    public void setFolderAccess(final MessagingFolderAccess folderAccess) {
-        this.folderAccess = folderAccess;
-    }
+public interface MessagingAccountAccess {
 
 }

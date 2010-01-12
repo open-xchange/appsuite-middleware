@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -52,20 +52,56 @@ package com.openexchange.messaging;
 import java.util.List;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 
-
 /**
  * {@link MessagingService} - The messaging service.
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MessagingService {
+
+    /**
+     * Gets the identifier of this messaging service.
+     * 
+     * @return The identifier
+     */
     public String getId();
+
+    /**
+     * Gets the list of capabilities of this messaging service.
+     * 
+     * @return The list of capabilities
+     */
     public List<String> getCapabilities();
+
+    /**
+     * Gets the display name.
+     * 
+     * @return The display name
+     */
     public String getDisplayName();
-    
+
+    /**
+     * Get the form description.
+     * 
+     * @return The form description
+     */
     public DynamicFormDescription getFormDescription();
 
+    /**
+     * Gets the account manager for this messaging service.
+     * 
+     * @return The account manager
+     */
     public MessagingAccountManager getAccountManager();
-    public MessagingMessageAccess getAccess();
+
+    /**
+     * @return
+     */
+    public MessagingMessageAccess getMessageAccess();
+
+    /**
+     * @return
+     */
+    public MessagingFolderAccess getFolderAccess();
 }
