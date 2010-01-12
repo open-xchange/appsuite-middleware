@@ -10,5 +10,6 @@ Import-Package: com.openexchange.datatypes.genericonf,
  com.openexchange.datatypes.genericonf.json,
  com.openexchange.i18n,
  com.openexchange.messaging,
+ com.openexchange.messaging.registry,
  org.json,
  org.osgi.framework;version="1.3.0"

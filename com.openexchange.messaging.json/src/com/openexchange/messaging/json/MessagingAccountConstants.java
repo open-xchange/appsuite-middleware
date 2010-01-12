@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,32 +49,15 @@
 
 package com.openexchange.messaging.json;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.datatypes.genericonf.json.FormContentWriter;
-import com.openexchange.messaging.MessagingAccount;
-
-import static com.openexchange.messaging.json.MessagingAccountConstants.*;
 
 /**
- * {@link MessagingAccountWriter}
+ * {@link MessagingAccountConstants}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Firstname Lastname</a>
  */
-public class MessagingAccountWriter {
-
- 
-
-    public JSONObject write(MessagingAccount account) throws JSONException {
-        JSONObject accountJSON = new JSONObject();
-        accountJSON.put(ID, account.getId());
-        accountJSON.put(DISPLAY_NAME, account.getDisplayName());
-        accountJSON.put(MESSAGING_SERVICE, account.getMessagingService().getId());
-        
-        JSONObject configJSON = new FormContentWriter().write(account.getMessagingService().getFormDescription(), account.getConfiguration(), null);
-        accountJSON.put(CONFIGURATION, configJSON);
-        return accountJSON;
-    }
-
+public class MessagingAccountConstants {
+    public static final String CONFIGURATION = "configuration";
+    public static final String MESSAGING_SERVICE = "messagingService";
+    public static final String DISPLAY_NAME = "displayName";
+    public static final String ID = "id";
 }

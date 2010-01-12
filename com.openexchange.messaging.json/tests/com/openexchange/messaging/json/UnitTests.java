@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,32 +49,23 @@
 
 package com.openexchange.messaging.json;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.datatypes.genericonf.json.FormContentWriter;
-import com.openexchange.messaging.MessagingAccount;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
-import static com.openexchange.messaging.json.MessagingAccountConstants.*;
 
 /**
- * {@link MessagingAccountWriter}
+ * {@link UnitTests}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MessagingAccountWriter {
-
- 
-
-    public JSONObject write(MessagingAccount account) throws JSONException {
-        JSONObject accountJSON = new JSONObject();
-        accountJSON.put(ID, account.getId());
-        accountJSON.put(DISPLAY_NAME, account.getDisplayName());
-        accountJSON.put(MESSAGING_SERVICE, account.getMessagingService().getId());
+public class UnitTests {
+    public static Test suite() {
+        final TestSuite tests = new TestSuite();
+        tests.addTestSuite(MessagingAccountParserTest.class);
+        tests.addTestSuite(MessagingAccountWriterTest.class);
+        tests.addTestSuite(MessagingServiceWriterTest.class);
         
-        JSONObject configJSON = new FormContentWriter().write(account.getMessagingService().getFormDescription(), account.getConfiguration(), null);
-        accountJSON.put(CONFIGURATION, configJSON);
-        return accountJSON;
+        return tests;
     }
-
 }

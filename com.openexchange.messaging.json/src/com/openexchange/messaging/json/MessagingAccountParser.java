@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,32 +49,78 @@
 
 package com.openexchange.messaging.json;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.datatypes.genericonf.json.FormContentWriter;
+import com.openexchange.datatypes.genericonf.json.FormContentParser;
 import com.openexchange.messaging.MessagingAccount;
-
+import com.openexchange.messaging.MessagingException;
+import com.openexchange.messaging.MessagingService;
+import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import static com.openexchange.messaging.json.MessagingAccountConstants.*;
 
 /**
- * {@link MessagingAccountWriter}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link MessagingAccountParser}
+ * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Firstname Lastname</a>
  */
-public class MessagingAccountWriter {
+public class MessagingAccountParser {
 
- 
+    private MessagingServiceRegistry registry;
 
-    public JSONObject write(MessagingAccount account) throws JSONException {
-        JSONObject accountJSON = new JSONObject();
-        accountJSON.put(ID, account.getId());
-        accountJSON.put(DISPLAY_NAME, account.getDisplayName());
-        accountJSON.put(MESSAGING_SERVICE, account.getMessagingService().getId());
-        
-        JSONObject configJSON = new FormContentWriter().write(account.getMessagingService().getFormDescription(), account.getConfiguration(), null);
-        accountJSON.put(CONFIGURATION, configJSON);
-        return accountJSON;
+    public MessagingAccountParser(MessagingServiceRegistry serviceRegistry) {
+        this.registry = serviceRegistry;
     }
 
+    public MessagingAccount parse(JSONObject accountJSON) throws MessagingException, JSONException {
+        return new JSONMessagingAccount(accountJSON, registry);
+    }
+
+    private static final class JSONMessagingAccount implements MessagingAccount {
+
+        private JSONObject jsonObject;
+
+        private int id;
+
+        private String displayName;
+
+        private MessagingService messagingService;
+
+        private Map<String, Object> configuration;
+
+        public JSONMessagingAccount(JSONObject accountJSON, MessagingServiceRegistry registry) throws JSONException, MessagingException {
+            this.jsonObject = accountJSON;
+            this.id = jsonObject.optInt(ID);
+            if(accountJSON.has("displayName")) {
+                this.displayName = jsonObject.optString("displayName");
+            }
+            this.messagingService = registry.getMessagingService(accountJSON.getString(MESSAGING_SERVICE));
+            if(accountJSON.has("configuration")) {
+                this.configuration = new FormContentParser().parse(
+                    accountJSON.getJSONObject("configuration"),
+                    messagingService.getFormDescription());
+            } else {
+                this.configuration = null;
+            }
+
+        }
+
+        public Map<String, Object> getConfiguration() {
+            return configuration;
+        }
+
+        public String getDisplayName() {
+            return displayName;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public MessagingService getMessagingService() {
+            return messagingService;
+        }
+
+    }
 }
