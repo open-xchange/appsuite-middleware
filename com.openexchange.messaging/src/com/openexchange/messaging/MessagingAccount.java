@@ -57,6 +57,7 @@ import java.util.Map;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since Open-Xchange v6.16
  */
 public interface MessagingAccount {
     public Map<String, Object> getConfiguration();

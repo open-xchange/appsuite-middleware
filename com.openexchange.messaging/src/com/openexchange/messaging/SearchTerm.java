@@ -68,14 +68,14 @@ public interface SearchTerm<T> extends Serializable {
     public T getPattern();
 
     /**
-     * Adds the addressed MailField to specified collection
+     * Adds the addressed MailField to specified collection.
      * 
      * @param col The collection which gathers addressed fields
      */
     public void addMailField(Collection<MessagingField> col);
 
     /**
-     * Checks if given message matches this search term
+     * Checks if given message matches this search term.
      * 
      * @param msg The message to check
      * @return <code>true</code> if message matches this search term; otherwise <code>false</code>
