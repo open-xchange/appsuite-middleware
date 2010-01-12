@@ -86,7 +86,7 @@ public class SimMessagingService implements MessagingService {
         return accManager;
     }
 
-    public List<String> getCapabilities() {
+    public List<String> getMessageActions() {
         return capabilities;
     }
 

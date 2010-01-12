@@ -69,11 +69,11 @@ public interface MessagingService {
     public String getId();
 
     /**
-     * Gets the list of capabilities of this messaging service.
+     * Gets the list of message actions of this messaging service.
      * 
-     * @return The list of capabilities
+     * @return The list of message actions
      */
-    public List<String> getCapabilities();
+    public List<String> getMessageActions();
 
     /**
      * Gets the display name.
