@@ -71,6 +71,8 @@ public class MessagingException extends AbstractOXException {
      */
     public static final Component COMPONENT = new Component() {
 
+        private static final long serialVersionUID = 7647683196764758763L;
+
         public String getAbbreviation() {
             return STR_COMPONENT;
         }
