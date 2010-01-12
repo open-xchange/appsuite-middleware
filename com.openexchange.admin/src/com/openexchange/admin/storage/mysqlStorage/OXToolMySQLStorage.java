@@ -76,8 +76,8 @@ import com.openexchange.admin.storage.sqlStorage.OXToolSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.GenericChecks;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.groupware.update.UpdateStatus;
 import com.openexchange.groupware.update.Updater;
 
 /**
@@ -1471,10 +1471,11 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     public boolean checkAndUpdateSchemaIfRequired(int contextId) throws StorageException {
         try {
             final Updater updater = Updater.getInstance();
-            if (updater.isLocked(contextId)) {
+            UpdateStatus status = updater.getStatus(contextId);
+            if (status.blockingUpdatesRunning()) {
                 return true;
             }
-            if (updater.toUpdate(contextId)) {
+            if (status.needsBlockingUpdates()) {
                 updater.startUpdate(contextId);
                 return true;
             }
@@ -1484,33 +1485,32 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         return false;
     }
     
-    private boolean condCheckAndUpdateSchemaIfRequired(final int writePoolId, final String schema, final boolean doupdate, final Context ctx) throws StorageException {
+    private boolean condCheckAndUpdateSchemaIfRequired(final int writePoolId, final String schema, final boolean doUpdate, final Context ctx) throws StorageException {
         Updater updater;
         try {
             updater = Updater.getInstance();
-            if( updater.isLocked(schema, writePoolId) ) {
+            UpdateStatus status = updater.getStatus(schema, writePoolId);
+            if (status.blockingUpdatesRunning()) {
                 log.info("Another database update process is already running");
                 return true;
             }
             // we only reach this point, if no other thread is already locking us
-            final boolean needupdate = updater.toUpdate(schema, writePoolId); 
-            if( ! needupdate ) {
+            if (!status.needsBlockingUpdates()) {
                 return false;
             }
             // we only reach this point, if we need an update
-            if( doupdate ) {
-                if( ctx == null ) {
+            if (doUpdate) {
+                if (ctx == null) {
                     final StorageException e = new StorageException("context must not be null when schema update should be done");
                     log.error(e.getMessage(), e);
                     throw e;
                 }
-                final com.openexchange.groupware.contexts.Context ctxas = new ContextImpl(ctx.getId().intValue());
-                updater.startUpdate(ctxas);
+                updater.startUpdate(ctx.getId().intValue());
             }
             // either with or without starting an update task, when we reach this point, we
             // must return true
             return true;
-        } catch (final UpdateException e) {
+        } catch (UpdateException e) {
             if (e.getDetailNumber() == 102) {
                 // NOTE: this situation should not happen!
                 // it can only happen, when a schema has not been initialized correctly!
