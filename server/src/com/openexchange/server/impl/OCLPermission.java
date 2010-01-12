@@ -55,7 +55,7 @@ import com.openexchange.group.GroupStorage;
 import com.openexchange.tools.OXCloneable;
 
 /**
- * OCLPermission
+ * {@link OCLPermission}
  * 
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
