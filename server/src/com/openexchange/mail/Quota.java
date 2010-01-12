@@ -173,10 +173,7 @@ public final class Quota {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
+        if (!(obj instanceof Quota)) {
             return false;
         }
         final Quota other = (Quota) obj;
