@@ -230,7 +230,7 @@ public class OXUtilMySQLStorageCommon {
     }
 
     private void initUpdateTaskTable(Connection con) throws StorageException {
-        List<UpdateTask> tasks = UpdateTaskCollection.getInstance().generateList();
+        List<UpdateTask> tasks = UpdateTaskCollection.getInstance().getListWithoutExcludes();
         SchemaStore store = SchemaStore.getInstance();
         try {
             for (UpdateTask task : tasks) {
