@@ -118,7 +118,7 @@ public interface MessagingFolderAccess {
     public String createFolder(MessagingFolder toCreate) throws MessagingException;
 
     /**
-     * Updates an existing messaging folder identified through given fullname. All attributes set in given messaging folder description are
+     * Updates an existing messaging folder identified through given fullname. All attributes set in given messaging folder instance are
      * applied.
      * <p>
      * The currently known attributes that make sense being updated are:
