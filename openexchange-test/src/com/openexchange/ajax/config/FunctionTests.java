@@ -125,7 +125,7 @@ public class FunctionTests extends AbstractAJAXSession {
         }
         final Date sTime = client.getValues().getServerTime();
         final long localTime = System.currentTimeMillis();
-        LOG.error("Local time: " + localTime + " Server time: " + sTime.getTime());
+        LOG.info("Local time: " + localTime + " Server time: " + sTime.getTime());
         final long difference = Math.abs(secondServerTime - totalDuration - randomWait - firstServerTime);
         LOG.info("Time difference: " + difference);
         assertTrue("Too big time difference: " + difference, difference < MAX_DIFFERENCE);
@@ -146,19 +146,14 @@ public class FunctionTests extends AbstractAJAXSession {
      * Tests if the GUI value can be written and read correctly.
      */
     public void testGUI() throws Throwable {
-        final AJAXClient client = getClient();
-        final GetResponse origGet = ConfigTools.get(client, new GetRequest(Tree
-            .GUI));
-        final String testValue = RandomString.generateChars(20);
+        GetResponse origGet = client.execute(new GetRequest(Tree.GUI));
+        String testValue = RandomString.generateChars(20);
         try {
-            ConfigTools.set(client, new SetRequest(Tree.GUI, testValue));
-            final GetResponse testGet = ConfigTools.get(client, new GetRequest(
-                Tree.GUI));
-            assertEquals("Written GUI value differs from read one.", testValue,
-                testGet.getString());
+            client.execute(new SetRequest(Tree.GUI, testValue));
+            GetResponse testGet = client.execute(new GetRequest(Tree.GUI));
+            assertEquals("Written GUI value differs from read one.", testValue, testGet.getString());
         } finally {
-            ConfigTools.set(client, new SetRequest(Tree.GUI, origGet
-                .getData()));
+            client.execute(new SetRequest(Tree.GUI, origGet.getData()));
         }
     }
 
