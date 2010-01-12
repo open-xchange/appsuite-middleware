@@ -97,9 +97,6 @@ public final class UnifiedINBOXActivator extends DeferredActivator {
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        /*
-         * Never stop the server even if a needed service is absent
-         */
         if (LOG.isWarnEnabled()) {
             LOG.warn("Absent service: " + clazz.getName());
         }
