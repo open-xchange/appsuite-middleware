@@ -62,7 +62,7 @@ public interface MessagingFolderAccess {
      * Checks if a folder exists whose fullname matches given <code>fullname</code>
      * 
      * @param fullname The fullname
-     * @return <code>true</code> if folder exists in mailbox; otherwise <code>false</code>
+     * @return <code>true</code> if folder exists in account; otherwise <code>false</code>
      * @throws MessagingException If existence cannot be checked
      */
     public boolean exists(final String fullname) throws MessagingException;
@@ -82,7 +82,7 @@ public interface MessagingFolderAccess {
      * If no subfolders exist below identified folder the constant {@link #EMPTY_PATH} should be returned.
      * 
      * @param parentFullname The parent fullname
-     * @param all Whether all or only subscribed subfolders shall be returned. If underlying mailing system does not support folder
+     * @param all Whether all or only subscribed subfolders shall be returned. If underlying messaging system does not support folder
      *            subscription, this argument should always be treated as <code>true</code>.
      * @return An array of {@link MessagingFolder} representing the subfolders
      * @throws MessagingException If either parent folder does not exist or its subfolders cannot be delivered
@@ -90,15 +90,15 @@ public interface MessagingFolderAccess {
     public MessagingFolder[] getSubfolders(final String parentFullname, final boolean all) throws MessagingException;
 
     /**
-     * Gets the mailbox's root folder.
+     * Gets the account's root folder.
      * 
-     * @return The mailbox's root folder
-     * @throws MessagingException If mailbox's default folder cannot be delivered
+     * @return The account's root folder
+     * @throws MessagingException If account's default folder cannot be delivered
      */
     public MessagingFolder getRootFolder() throws MessagingException;
 
     /**
-     * Checks user's default folder as defined in user's mail settings and creates them if any is missing.
+     * Checks user's default folder as defined in user's messaging settings and creates them if any is missing.
      * <p>
      * See also {@link com.openexchange.spamhandler.SpamHandler#isCreateConfirmedSpam() createConfirmedSpam()},
      * {@link com.openexchange.spamhandler.SpamHandler#isCreateConfirmedHam() createConfirmedHam()}, and
@@ -109,34 +109,30 @@ public interface MessagingFolderAccess {
     // public void checkDefaultFolders() throws MessagingException;
 
     /**
-     * Creates a new mail folder with attributes taken from given mail folder description
+     * Creates a new messaging folder with attributes taken from given messaging folder description
      * 
-     * @param toCreate The mail folder to create
-     * @return The fullname of the created mail folder
+     * @param toCreate The messaging folder to create
+     * @return The fullname of the created messaging folder
      * @throws MessagingException If creation fails
      */
     public String createFolder(MessagingFolder toCreate) throws MessagingException;
 
     /**
-     * Updates an existing mail folder identified through given fullname. All attributes set in given mail folder description are applied.
+     * Updates an existing messaging folder identified through given fullname. All attributes set in given messaging folder description are
+     * applied.
      * <p>
      * The currently known attributes that make sense being updated are:
      * <ul>
-     * <li>permissions; meaning folder's permissions are updated if {@link MessagingFolderDescription#containsPermissions()} returns
-     * <code>true</code></li>
-     * <li>subscription; meaning a subscribe/unsubscribe operation is performed if {@link MessagingFolderDescription#containsSubscribed()}
-     * returns <code>true</code></li>
+     * <li>permissions</li>
+     * <li>subscription</li>
      * </ul>
-     * Of course more folder attributes may be checked by implementation to enhance update operations. The programmer may extend the
-     * {@link MessagingFolderDescription} class to do so.
+     * Of course more folder attributes may be checked by implementation to enhance update operations.
      * <p>
-     * <b>Note</b>: If underlying mailing system does not support the corresponding capability, the update is treated as a no-op. For
-     * example if both {@link MailCapabilities#hasPermissions()} and {@link MailCapabilities#hasSubscription()} indicate <code>false</code>,
-     * the associated update operations are not going to be performed.
+     * <b>Note</b>: If underlying messaging system does not support the corresponding capability, the update is treated as a no-op.
      * 
-     * @param fullname The fullname of the mail folder to update
-     * @param toUpdate The mail folder to update containing only the modified fields
-     * @return The fullname of the updated mail folder
+     * @param fullname The fullname of the messaging folder to update
+     * @param toUpdate The messaging folder to update containing only the modified fields
+     * @return The fullname of the updated messaging folder
      * @throws MessagingException If either folder does not exist or cannot be updated
      */
     public String updateFolder(String fullname, MessagingFolder toUpdate) throws MessagingException;
@@ -175,19 +171,19 @@ public interface MessagingFolderAccess {
     public String renameFolder(final String fullname, final String newName) throws MessagingException;
 
     /**
-     * Deletes an existing mail folder identified through given fullname.
+     * Deletes an existing messaging folder identified through given fullname.
      * <p>
      * This is a convenience method that invokes {@link #deleteFolder(String, boolean)} with <code>hardDelete</code> set to
      * <code>false</code>.
      * 
-     * @param fullname The fullname of the mail folder to delete
-     * @return The fullname of the deleted mail folder
+     * @param fullname The fullname of the messaging folder to delete
+     * @return The fullname of the deleted messaging folder
      * @throws MessagingException If either folder does not exist or cannot be deleted
      */
     public String deleteFolder(final String fullname) throws MessagingException;
 
     /**
-     * Deletes an existing mail folder identified through given fullname.
+     * Deletes an existing messaging folder identified through given fullname.
      * <p>
      * If <code>hardDelete</code> is not set and folder is not located below default trash folder it is backed up (including subfolder tree)
      * in default trash folder; otherwise it is deleted permanently.
@@ -199,9 +195,9 @@ public interface MessagingFolderAccess {
      * <p>
      * If default trash folder cannot hold subfolders, the folder is either deleted permanently or an appropriate exception may be thrown.
      * 
-     * @param fullname The fullname of the mail folder to delete
+     * @param fullname The fullname of the messaging folder to delete
      * @param hardDelete Whether to delete permanently or to backup into trash folder
-     * @return The fullname of the deleted mail folder
+     * @return The fullname of the deleted messaging folder
      * @throws MessagingException If either folder does not exist or cannot be deleted
      */
     public String deleteFolder(String fullname, boolean hardDelete) throws MessagingException;
@@ -209,7 +205,7 @@ public interface MessagingFolderAccess {
     /**
      * Deletes the content of the folder identified through given fullname.
      * 
-     * @param fullname The fullname of the mail folder whose content should be cleared
+     * @param fullname The fullname of the messaging folder whose content should be cleared
      * @throws MessagingException If either folder does not exist or its content cannot be cleared
      */
     public void clearFolder(final String fullname) throws MessagingException;
@@ -217,7 +213,7 @@ public interface MessagingFolderAccess {
     /**
      * Deletes the content of the folder identified through given fullname.
      * 
-     * @param fullname The fullname of the mail folder whose content should be cleared
+     * @param fullname The fullname of the messaging folder whose content should be cleared
      * @param hardDelete Whether to delete permanently or to backup into trash folder
      * @throws MessagingException If either folder does not exist or its content cannot be cleared
      */
@@ -234,8 +230,8 @@ public interface MessagingFolderAccess {
     public MessagingFolder[] getPath2DefaultFolder(final String fullname) throws MessagingException;
 
     /**
-     * Detects both quota limit and quota usage of STORAGE resource on given mailbox folder's quota-root. If the folder denoted by passed
-     * mailbox folder's quota-root is the INBOX itself, the whole mailbox's STORAGE quota is going to be returned; meaning the sum of all
+     * Detects both quota limit and quota usage of STORAGE resource on given messaging folder's quota-root. If the folder denoted by passed
+     * messaging folder's quota-root is the INBOX itself, the whole account's STORAGE quota is going to be returned; meaning the sum of all
      * available (limit) and allocated (usage) storage size.
      * <p>
      * Note that the {@link Quota#getLimit()} and {@link Quota#getUsage()} is in 1024 octets.
@@ -247,8 +243,8 @@ public interface MessagingFolderAccess {
     public Quota getStorageQuota(final String folder) throws MessagingException;
 
     /**
-     * Detects both quota limit and quota usage of MESSAGE resource on given mailbox folder's quota-root. If the folder denoted by passed
-     * mailbox folder's quota-root is the INBOX itself, the whole mailbox's MESSAGE quota is going to be returned; meaning the sum of all
+     * Detects both quota limit and quota usage of MESSAGE resource on given messaging folder's quota-root. If the folder denoted by passed
+     * messaging folder's quota-root is the INBOX itself, the whole account's MESSAGE quota is going to be returned; meaning the sum of all
      * available (limit) and allocated (usage) message amount.
      * 
      * @param folder The folder fullname (if <code>null</code> <i>"INBOX"</i> is used)
@@ -258,8 +254,8 @@ public interface MessagingFolderAccess {
     public Quota getMessageQuota(final String folder) throws MessagingException;
 
     /**
-     * Detects both quotas' limit and usage on given mailbox folder's quota-root for specified resource types. If the folder denoted by
-     * passed mailbox folder's quota-root is the INBOX itself, the whole mailbox's quota is going to be returned; meaning the sum of all
+     * Detects both quotas' limit and usage on given messaging folder's quota-root for specified resource types. If the folder denoted by
+     * passed messaging folder's quota-root is the INBOX itself, the whole account's quota is going to be returned; meaning the sum of all
      * available (limit) and allocated (usage) resources.
      * <p>
      * If no quota restriction exists for a certain resource type, both quota usage and limit value carry constant {@link Quota#UNLIMITED}
