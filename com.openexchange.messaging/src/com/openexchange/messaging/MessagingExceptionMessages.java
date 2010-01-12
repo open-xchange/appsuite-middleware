@@ -52,7 +52,7 @@ package com.openexchange.messaging;
 import com.openexchange.exceptions.LocalizableStrings;
 
 /**
- * {@link MessagingExceptionMessages} - Exception messages for {@link MessagingException} that must be translated.
+ * {@link MessagingExceptionMessages} - Exception messages for {@link MessagingException} that needs to be translated.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
