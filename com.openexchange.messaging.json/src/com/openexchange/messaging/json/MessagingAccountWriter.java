@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,48 +49,29 @@
 
 package com.openexchange.messaging.json;
 
-import java.util.List;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.datatypes.genericonf.json.FormDescriptionWriter;
-import com.openexchange.i18n.Translator;
-import com.openexchange.messaging.MessagingService;
+import com.openexchange.datatypes.genericonf.json.FormContentWriter;
+import com.openexchange.messaging.MessagingAccount;
+
 
 /**
- * {@link MessagingServiceWriter}
+ * {@link MessagingAccountWriter}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MessagingServiceWriter {
+public class MessagingAccountWriter {
 
-    private static final String FORM_DESCRIPTION = "formDescription";
-    private static final String CAPABILITIES = "capabilities";
-    private static final String DISPLAY_NAME = "displayName";
-    private static final String ID = "id";
-
-    private Translator translator;
-    
-    public MessagingServiceWriter(Translator translator) {
-        this.translator = translator;
-    }
-    
-    public JSONObject write(MessagingService messagingService) throws JSONException {
-        JSONObject object = new JSONObject();
-        object.put(ID, messagingService.getId());
-        object.put(DISPLAY_NAME, messagingService.getDisplayName());
-        object.put(CAPABILITIES, writeCapabilities(messagingService.getCapabilities()));
-        object.put(FORM_DESCRIPTION, new FormDescriptionWriter(translator).write(messagingService.getFormDescription()));
-        return object;
-    }
-
-    private JSONArray writeCapabilities(List<String> capabilities) {
-        JSONArray array = new JSONArray();
-        for (String string : capabilities) {
-            array.put(string);
-        }
-        return array;
+    public JSONObject write(MessagingAccount account) throws JSONException {
+        JSONObject accountJSON = new JSONObject();
+        accountJSON.put("id", account.getId());
+        accountJSON.put("displayName", account.getDisplayName());
+        accountJSON.put("messagingService", account.getMessagingService().getId());
+        
+        JSONObject configJSON = new FormContentWriter().write(account.getMessagingService().getFormDescription(), account.getConfiguration(), null);
+        accountJSON.put("configuration", configJSON);
+        return accountJSON;
     }
 
 }

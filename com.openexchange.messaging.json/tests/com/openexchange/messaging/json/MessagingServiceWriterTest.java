@@ -64,7 +64,7 @@ import static com.openexchange.json.JSONAssertion.assertValidates;
  * {@link MessagingServiceWriterTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MessagingServiceWriterTest extends TestCase{
     public void testSimpleWrite() throws JSONException {

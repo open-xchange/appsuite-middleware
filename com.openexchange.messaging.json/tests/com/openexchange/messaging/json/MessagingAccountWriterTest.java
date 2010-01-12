@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,48 +49,59 @@
 
 package com.openexchange.messaging.json;
 
-import java.util.List;
-import org.json.JSONArray;
+import java.util.HashMap;
+import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.datatypes.genericonf.json.FormDescriptionWriter;
-import com.openexchange.i18n.Translator;
-import com.openexchange.messaging.MessagingService;
+import com.openexchange.datatypes.genericonf.DynamicFormDescription;
+import com.openexchange.datatypes.genericonf.FormElement;
+import com.openexchange.json.JSONAssertion;
+import com.openexchange.messaging.SimMessagingAccount;
+import com.openexchange.messaging.SimMessagingService;
+import junit.framework.TestCase;
+
+import static com.openexchange.json.JSONAssertion.assertValidates;
 
 /**
- * {@link MessagingServiceWriter}
+ * {@link MessagingAccountWriterTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MessagingServiceWriter {
-
-    private static final String FORM_DESCRIPTION = "formDescription";
-    private static final String CAPABILITIES = "capabilities";
-    private static final String DISPLAY_NAME = "displayName";
-    private static final String ID = "id";
-
-    private Translator translator;
-    
-    public MessagingServiceWriter(Translator translator) {
-        this.translator = translator;
+public class MessagingAccountWriterTest extends TestCase {
+    public void testWriteAccount() throws JSONException {
+        SimMessagingAccount account = new SimMessagingAccount();
+        account.setId(12);
+        account.setDisplayName("My Twitter Account");
+        
+        Map<String, Object> configuration = new HashMap<String, Object>();
+        configuration.put("inputField", "My Input Value");
+        account.setConfiguration(configuration);
+        
+        SimMessagingService messagingService = new SimMessagingService();
+        
+        DynamicFormDescription description = new DynamicFormDescription().add(FormElement.input("inputField", "My cool config option"));
+        messagingService.setFormDescription(description);
+        
+        messagingService.setId("com.openexchange.twitter");
+        account.setMessagingService(messagingService);
+        
+        JSONAssertion assertion = new JSONAssertion()
+            .isObject()
+                .hasKey("id").withValue(12)
+                .hasKey("displayName").withValue("My Twitter Account")
+                .hasKey("messagingService").withValue("com.openexchange.twitter")
+                .hasKey("configuration").withValueObject()
+                    .hasKey("inputField").withValue("My Input Value")
+                .objectEnds()
+            .objectEnds()
+        ;
+        
+        MessagingAccountWriter writer = new MessagingAccountWriter();
+        
+        JSONObject object = writer.write(account);
+        
+        assertValidates(assertion, object);
+        
     }
-    
-    public JSONObject write(MessagingService messagingService) throws JSONException {
-        JSONObject object = new JSONObject();
-        object.put(ID, messagingService.getId());
-        object.put(DISPLAY_NAME, messagingService.getDisplayName());
-        object.put(CAPABILITIES, writeCapabilities(messagingService.getCapabilities()));
-        object.put(FORM_DESCRIPTION, new FormDescriptionWriter(translator).write(messagingService.getFormDescription()));
-        return object;
-    }
-
-    private JSONArray writeCapabilities(List<String> capabilities) {
-        JSONArray array = new JSONArray();
-        for (String string : capabilities) {
-            array.put(string);
-        }
-        return array;
-    }
-
 }
