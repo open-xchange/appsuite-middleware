@@ -52,24 +52,27 @@ package com.openexchange.messaging;
 import java.util.List;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 
-
 /**
  * {@link SimMessagingService}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class SimMessagingService implements MessagingService {
 
     private List<String> capabilities;
+
     private String displayName;
+
     private DynamicFormDescription formDescription;
+
     private String id;
-    private MessagingAccess access;
+
+    private MessagingAccountAccess accountAccess;
+
     private MessagingAccountManager accManager;
 
-    public MessagingAccess getAccess() {
-        return access;
+    public SimMessagingService() {
+        super();
     }
 
     public MessagingAccountManager getAccountManager() {
@@ -92,36 +95,28 @@ public class SimMessagingService implements MessagingService {
         return id;
     }
 
-    
-    public void setCapabilities(List<String> capabilities) {
+    public void setCapabilities(final List<String> capabilities) {
         this.capabilities = capabilities;
     }
 
-    
-    public void setDisplayName(String displayName) {
+    public void setDisplayName(final String displayName) {
         this.displayName = displayName;
     }
 
-    
-    public void setFormDescription(DynamicFormDescription formDescription) {
+    public void setFormDescription(final DynamicFormDescription formDescription) {
         this.formDescription = formDescription;
     }
 
-    
-    public void setId(String id) {
+    public void setId(final String id) {
         this.id = id;
     }
 
-    
-    public void setAccess(MessagingAccess access) {
-        this.access = access;
-    }
-
-    
-    public void setAccountManager(MessagingAccountManager accManager) {
+    public void setAccountManager(final MessagingAccountManager accManager) {
         this.accManager = accManager;
     }
-    
-    
+
+    public MessagingAccountAccess getAccountAccess(final int accountId) {
+        return null;
+    }
 
 }

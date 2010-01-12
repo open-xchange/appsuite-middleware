@@ -96,12 +96,11 @@ public interface MessagingService {
     public MessagingAccountManager getAccountManager();
 
     /**
-     * @return
+     * Gets the account access for specified account identifier.
+     * 
+     * @param accountId The account identifier
+     * @return The account access for specified account identifier
      */
-    public MessagingMessageAccess getMessageAccess();
+    public MessagingAccountAccess getAccountAccess(int accountId);
 
-    /**
-     * @return
-     */
-    public MessagingFolderAccess getFolderAccess();
 }
