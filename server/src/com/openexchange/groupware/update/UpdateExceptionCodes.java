@@ -78,25 +78,29 @@ public enum UpdateExceptionCodes implements OXErrorMessage {
      */
     UNKNOWN_SCHEMA(UNKNOWN_SCHEMA_MSG, Category.USER_INPUT, 16),
     /**
+     * Update task %1$s returned an unknown concurrency level. Running as blocking task.
+     */
+    UNKNOWN_CONCURRENCY(UNKNOWN_CONCURRENCY_MSG, Category.CODE_ERROR, 17),
+    /**
      * Version can not be set back if update task handling has been migrated to remembered update tasks concept on schema %1$s.
      */
-    RESET_FORBIDDEN(RESET_FORBIDDEN_MSG, Category.USER_INPUT, 95),
+    RESET_FORBIDDEN(RESET_FORBIDDEN_MSG, Category.USER_INPUT, 18),
     /**
      * Unable to determine next update task to execute. Executed: %1$s. Enqueued: %2$s. Scheduled: %3$s.
      */
-    UNRESOLVABLE_DEPENDENCIES(UNRESOLVABLE_DEPENDENCIES_MSG, Category.CODE_ERROR, 96),
+    UNRESOLVABLE_DEPENDENCIES(UNRESOLVABLE_DEPENDENCIES_MSG, Category.CODE_ERROR, 19),
     /**
      * %1$s.
      */
-    OTHER_PROBLEM("%1$s", Category.CODE_ERROR, 97),
+    OTHER_PROBLEM("%1$s", Category.CODE_ERROR, 20),
     /**
      * Processed a wrong number of rows in database. Expected %1$d rows but worked on %2$d rows.
      */
-    WRONG_ROW_COUNT(WRONG_ROW_COUNT_MSG, Category.CODE_ERROR, 98),
+    WRONG_ROW_COUNT(WRONG_ROW_COUNT_MSG, Category.CODE_ERROR, 21),
     /**
      * Updating schema %1$s failed. Cause: %2$s.
      */
-    UPDATE_FAILED(UPDATE_FAILED_MSG, Category.CODE_ERROR, 99);
+    UPDATE_FAILED(UPDATE_FAILED_MSG, Category.CODE_ERROR, 22);
 
     final String message;
 

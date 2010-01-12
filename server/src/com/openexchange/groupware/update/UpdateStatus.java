@@ -49,52 +49,18 @@
 
 package com.openexchange.groupware.update;
 
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.update.internal.UpdaterImpl;
-
 /**
- * Interface for the updater.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * {@link UpdateStatus}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public abstract class Updater {
+public interface UpdateStatus {
 
-    /**
-     * Default constructor.
-     */
-    protected Updater() {
-        super();
-    }
+    boolean blockingUpdatesRunning();
 
-    /**
-     * Factory method to get an updater.
-     * @return the updater.
-     * @throws UpdateException if instantiating the implementation fails.
-     */
-    public static Updater getInstance() {
-        return new UpdaterImpl();
-    }
+    boolean backgroundUpdatesRunning();
 
-    public final UpdateStatus getStatus(Context ctx) throws UpdateException {
-        return getStatus(ctx.getContextId());
-    }
+    boolean needsBlockingUpdates();
 
-    public abstract UpdateStatus getStatus(int contextId) throws UpdateException;
-
-    public abstract UpdateStatus getStatus(String schema, int writePoolId) throws UpdateException;
-
-    /**
-     * Starts the update process on a schema.
-     * @param contextId Context inside the schema.
-     * @throws UpdateException if an exception occurs.
-     */
-    public final void startUpdate(Context ctx) throws UpdateException {
-        startUpdate(ctx.getContextId());
-    }
-
-    /**
-     * Starts the update process on a schema.
-     * @param contextId Identifier of a context inside the schema.
-     * @throws UpdateException if an exception occurs.
-     */
-    public abstract void startUpdate(int contextId) throws UpdateException;
+    boolean needsBackgroundUpdates();
 }

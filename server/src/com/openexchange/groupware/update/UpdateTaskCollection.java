@@ -53,6 +53,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.update.internal.DynamicList;
 import com.openexchange.groupware.update.internal.ExcludedList;
 import com.openexchange.groupware.update.internal.ExecutedFilter;
@@ -67,6 +69,8 @@ import com.openexchange.groupware.update.internal.VersionFilter;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class UpdateTaskCollection {
+
+    private static final Log LOG = LogFactory.getLog(UpdateTaskCollection.class);
 
     private static final UpdateTaskCollection SINGLETON = new UpdateTaskCollection();
 
@@ -97,30 +101,40 @@ public class UpdateTaskCollection {
      * @throws UpdateException if the order for the update tasks to execute can not be determined.
      */
     public final List<UpdateTask> getFilteredAndSortedUpdateTasks(SchemaUpdateState schema) throws UpdateException {
-        List<UpdateTask> retval = generateList();
+        SeparatedTasks tasks = separateTasks(getListWithoutExcludes());
         SchemaUpdateState state = schema;
         // Calculate version to executed list.
         if (Schema.FINAL_VERSION != schema.getDBVersion() && Schema.NO_VERSION != schema.getDBVersion()) {
-            state = addExecutedBasedOnVersion(schema, retval);
+            state = addExecutedBasedOnVersion(schema, tasks);
         }
         // Filter
         Filter filter = new ExecutedFilter();
-        Iterator<UpdateTask> iter = retval.iterator();
-        while (iter.hasNext()) {
-            UpdateTask task = iter.next();
-            if (!filter.mustBeExecuted(state, task)) {
-                iter.remove();
+        List<UpdateTask> blocking = new ArrayList<UpdateTask>();
+        for (UpdateTask task : tasks.getBlocking()) {
+            if (filter.mustBeExecuted(state, task)) {
+                blocking.add(task);
+            }
+        }
+        List<UpdateTaskV2> background = new ArrayList<UpdateTaskV2>();
+        for (UpdateTaskV2 task : tasks.getBackground()) {
+            if (filter.mustBeExecuted(state, task)) {
+                background.add(task);
             }
         }
         // And sort them
-        retval = new UpdateTaskSorter().sort(state.getExecutedList(), retval);
-        return retval;
+        blocking = new UpdateTaskSorter().sort(state.getExecutedList(), blocking);
+        return blocking;
     }
 
-    private SchemaUpdateState addExecutedBasedOnVersion(SchemaUpdateState schema, List<UpdateTask> tasks) {
+    private SchemaUpdateState addExecutedBasedOnVersion(SchemaUpdateState schema, SeparatedTasks tasks) {
         SchemaUpdateState retval = new SchemaUpdateStateImpl(schema);
         Filter filter = new VersionFilter();
-        for (UpdateTask task : tasks) {
+        for (UpdateTask task : tasks.getBlocking()) {
+            if (!filter.mustBeExecuted(schema, task)) {
+                retval.addExecutedTask(task.getClass().getName());
+            }
+        }
+        for (UpdateTask task : tasks.getBackground()) {
             if (!filter.mustBeExecuted(schema, task)) {
                 retval.addExecutedTask(task.getClass().getName());
             }
@@ -136,7 +150,7 @@ public class UpdateTaskCollection {
      */
     public final int getHighestVersion() {
         if (versionDirty.get()) {
-            List<UpdateTask> tasks = generateList();
+            List<UpdateTask> tasks = getListWithoutExcludes();
             int vers = 0;
             for (UpdateTask task : tasks) {
                 vers = Math.max(vers, task.addedWithVersion());
@@ -147,9 +161,40 @@ public class UpdateTaskCollection {
         return version;
     }
 
-    public final List<UpdateTask> generateList() {
+    private SeparatedTasks separateTasks(List<UpdateTask> tasks) {
+        final List<UpdateTask> blocking = new ArrayList<UpdateTask>();
+        final List<UpdateTaskV2> background = new ArrayList<UpdateTaskV2>();
+        for (UpdateTask toExecute : tasks) {
+            if (toExecute instanceof UpdateTaskV2) {
+                UpdateTaskV2 toExecuteV2 = (UpdateTaskV2) toExecute;
+                switch (toExecuteV2.getAttributes().getConcurrency()) {
+                case BLOCKING:
+                    blocking.add(toExecuteV2);
+                    break;
+                case BACKGROUND:
+                    background.add(toExecuteV2);
+                    break;
+                default:
+                    UpdateException e = UpdateExceptionCodes.UNKNOWN_CONCURRENCY.create(toExecuteV2.getClass().getName());
+                    LOG.error(e.getMessage(), e);
+                    blocking.add(toExecuteV2); 
+                }
+            }
+        }
+        return new SeparatedTasks() {
+            public UpdateTask[] getBlocking() {
+                return blocking.toArray(new UpdateTask[blocking.size()]);
+            }
+            public UpdateTaskV2[] getBackground() {
+                return background.toArray(new UpdateTaskV2[background.size()]);
+            }
+        };
+
+    }
+
+    public List<UpdateTask> getListWithoutExcludes() {
         List<UpdateTask> retval = new ArrayList<UpdateTask>();
-        retval.addAll(DynamicList.getInstance().getTaskList());
+        retval.addAll(getFullList());
         for (UpdateTask excluded : ExcludedList.getInstance().getTaskList()) {
             // Matching must be done based on task class name.
             String toExclude = excluded.getClass().getName();
@@ -163,6 +208,10 @@ public class UpdateTaskCollection {
         return retval;
     }
 
+    public final List<UpdateTask> getFullList() {
+        return DynamicList.getInstance().getTaskList();
+    }
+
     public void dirtyVersion() {
         versionDirty.set(true);
     }
@@ -171,8 +220,8 @@ public class UpdateTaskCollection {
         if (getHighestVersion() > state.getDBVersion()) {
             return true;
         }
-        List<UpdateTask> taskList = generateList();
-        for (UpdateTask task : taskList) {
+        List<UpdateTask> tasks = getListWithoutExcludes();
+        for (UpdateTask task : tasks) {
             if (!state.isExecuted(task.getClass().getName())) {
                 return true;
             }

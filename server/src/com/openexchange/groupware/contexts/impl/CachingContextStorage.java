@@ -62,6 +62,7 @@ import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.impl.ContextException.Code;
+import com.openexchange.groupware.update.UpdateStatus;
 import com.openexchange.groupware.update.Updater;
 import com.openexchange.server.services.ServerServiceRegistry;
 
@@ -152,11 +153,10 @@ public class CachingContextStorage extends ContextStorage {
             public ContextExtended load() throws AbstractOXException {
                 final ContextExtended retval = persistantImpl.loadContext(contextId);
                 final Updater updater = Updater.getInstance();
-                if (updater.isLocked(retval)) {
-                    retval.setUpdating(true);
-                } else if (updater.toUpdate(retval)) {
+                UpdateStatus status = updater.getStatus(retval);
+                retval.setUpdating(status.blockingUpdatesRunning() || status.needsBlockingUpdates());
+                if (status.needsBlockingUpdates() || status.needsBackgroundUpdates()) {
                     updater.startUpdate(retval);
-                    retval.setUpdating(true);
                 }
                 return retval;
             }

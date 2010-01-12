@@ -96,7 +96,7 @@ public class LastVersionedUpdateTask extends UpdateTaskAdapter {
 
     public void perform(PerformParameters params) throws AbstractOXException {
         Schema schema = params.getSchema();
-        List<String> executed = determineExecuted(schema.getDBVersion(), UpdateTaskCollection.getInstance().generateList());
+        List<String> executed = determineExecuted(schema.getDBVersion(), UpdateTaskCollection.getInstance().getListWithoutExcludes());
         int contextId = params.getContextId();
         DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
         final Connection con = dbService.getForUpdateTask(contextId);
@@ -124,10 +124,10 @@ public class LastVersionedUpdateTask extends UpdateTaskAdapter {
         }
     }
 
-    private List<String> determineExecuted(int version, List<UpdateTask> allTasks) {
+    private List<String> determineExecuted(int version, List<UpdateTask> tasks) {
         List<String> retval = new ArrayList<String>();
-        for (UpdateTask task : allTasks) {
-            if (task.addedWithVersion() <= version) {
+        for (UpdateTask task : tasks) {
+            if (task.addedWithVersion() != Schema.NO_VERSION && task.addedWithVersion() <= version) {
                 retval.add(task.getClass().getName());
             }
         }

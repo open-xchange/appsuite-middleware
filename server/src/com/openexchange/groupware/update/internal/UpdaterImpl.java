@@ -53,6 +53,7 @@ import com.openexchange.groupware.update.SchemaException;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.SchemaUpdateState;
 import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.groupware.update.UpdateStatus;
 import com.openexchange.groupware.update.UpdateTaskCollection;
 import com.openexchange.groupware.update.Updater;
 import com.openexchange.server.ServiceException;
@@ -74,8 +75,32 @@ public class UpdaterImpl extends Updater {
     }
 
     @Override
-    public boolean isLocked(int contextId) throws UpdateException {
-        return getSchema(contextId).isLocked();
+    public UpdateStatus getStatus(int contextId) throws UpdateException {
+        return getStatus(getSchema(contextId));
+    }
+
+    @Override
+    public UpdateStatus getStatus(String schema, int writePoolId) throws UpdateException {
+        return getStatus(getSchema(writePoolId, schema));
+    }
+
+    private UpdateStatus getStatus(final SchemaUpdateState schema) {
+        return new UpdateStatus() {
+            public boolean needsBlockingUpdates() {
+                return UpdateTaskCollection.getInstance().needsUpdate(schema);
+            }
+            public boolean needsBackgroundUpdates() {
+                // TODO Auto-generated method stub
+                return false;
+            }
+            public boolean blockingUpdatesRunning() {
+                return schema.isLocked();
+            }
+            public boolean backgroundUpdatesRunning() {
+                // TODO Auto-generated method stub
+                return false;
+            }
+        };
     }
 
     @Override
@@ -87,15 +112,6 @@ public class UpdaterImpl extends Updater {
             throw new UpdateException(e);
         }
         timerService.schedule(new UpdateProcess(contextId), 0);
-    }
-
-    @Override
-    public boolean toUpdate(int contextId) throws UpdateException {
-        return toUpdateInternal(getSchema(contextId));
-    }
-
-    private static final boolean toUpdateInternal(SchemaUpdateState schema) {
-        return UpdateTaskCollection.getInstance().needsUpdate(schema);
     }
 
     private SchemaUpdateState getSchema(int contextId) throws UpdateException {
@@ -118,21 +134,5 @@ public class UpdaterImpl extends Updater {
             throw new UpdateException(e);
         }
         return state;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final boolean isLocked(final String schema, final int writePoolId) throws UpdateException {
-        return getSchema(writePoolId, schema).isLocked();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final boolean toUpdate(final String schema, final int writePoolId) throws UpdateException {
-        return toUpdateInternal(getSchema(writePoolId, schema));
     }
 }
