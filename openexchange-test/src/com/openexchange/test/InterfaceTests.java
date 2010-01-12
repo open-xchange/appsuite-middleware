@@ -96,6 +96,7 @@ public class InterfaceTests {
 		tests.addTestSuite(com.openexchange.webdav.xml.GroupUserTest.class);
 		/* TODO Enable the following test again. But this requires fixing the server. Currently the request fails.
 		tests.addTestSuite(com.openexchange.webdav.client.NaughtyClientTest.class); */
+		tests.addTestSuite(com.openexchange.ajax.FunambolTests.class);
 		tests.addTestSuite(com.openexchange.webdav.client.SmokeTest.class);
         
 		return tests;
