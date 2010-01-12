@@ -72,13 +72,13 @@ public class MessagingServiceWriterTest extends TestCase{
         
         messagingService.setId("com.openexchange.messaging.twitter");
         messagingService.setDisplayName("Twitter");
-        messagingService.setCapabilities(Arrays.asList("send", "reply", "retweet", "powerize!"));
+        messagingService.setMessageActions(Arrays.asList("send", "reply", "retweet", "powerize!"));
         messagingService.setFormDescription(new DynamicFormDescription());
         
         JSONAssertion assertion = new JSONAssertion().isObject()
             .hasKey("id").withValue("com.openexchange.messaging.twitter")
             .hasKey("displayName").withValue("Twitter")
-            .hasKey("capabilities").withValueArray().withValues("send", "reply", "retweet", "powerize!").inAnyOrder()
+            .hasKey("messageActions").withValueArray().withValues("send", "reply", "retweet", "powerize!").inAnyOrder()
             .hasKey("formDescription").withValueArray()
             .objectEnds();
         

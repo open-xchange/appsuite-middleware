@@ -66,7 +66,7 @@ import com.openexchange.messaging.MessagingService;
 public class MessagingServiceWriter {
 
     private static final String FORM_DESCRIPTION = "formDescription";
-    private static final String CAPABILITIES = "capabilities";
+    private static final String MESSAGE_ACTIONS = "messageActions";
     private static final String DISPLAY_NAME = "displayName";
     private static final String ID = "id";
 
@@ -80,7 +80,7 @@ public class MessagingServiceWriter {
         JSONObject object = new JSONObject();
         object.put(ID, messagingService.getId());
         object.put(DISPLAY_NAME, messagingService.getDisplayName());
-        object.put(CAPABILITIES, writeCapabilities(messagingService.getCapabilities()));
+        object.put(MESSAGE_ACTIONS, writeCapabilities(messagingService.getMessageActions()));
         object.put(FORM_DESCRIPTION, new FormDescriptionWriter(translator).write(messagingService.getFormDescription()));
         return object;
     }
