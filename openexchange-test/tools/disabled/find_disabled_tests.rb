@@ -1,3 +1,12 @@
+# This script finds disabled tests within our testing bundle
+#
+# As of now, it only works on JUnit 3 tests, because to disable
+# a JUnit 4 tests, you just remove the @test annotation and then
+# you cannot distinguish it from a normal method at all.
+#
+# Also, it does not find tests that have been uncommented.
+#
+
 require 'find'
 
 def is_ox_java_file?(filename)
