@@ -72,7 +72,11 @@ public enum MessagingExceptionCodes implements OXErrorMessage {
     /**
      * An I/O error occurred: %1$s
      */
-    IO_ERROR(MessagingExceptionMessages.IO_ERROR_MSG, Category.CODE_ERROR, 3);
+    IO_ERROR(MessagingExceptionMessages.IO_ERROR_MSG, Category.CODE_ERROR, 3),
+    /**
+     * Messaging account %1$s could not be found for user %2$s in context %3$s.
+     */
+    ACCOUNT_NOT_FOUND(MessagingExceptionMessages.ACCOUNT_NOT_FOUND_MSG, Category.CODE_ERROR, 4);
 
     private final Category category;
 
