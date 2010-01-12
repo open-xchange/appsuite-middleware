@@ -49,68 +49,19 @@
 
 package com.openexchange.messaging;
 
-import java.util.List;
-import com.openexchange.datatypes.genericonf.DynamicFormDescription;
-
 /**
- * {@link MessagingService} - The messaging service.
+ * {@link MessagingAddress} - Represents a messaging address
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface MessagingService {
+public interface MessagingAddress {
 
     /**
-     * Gets the identifier of this messaging service.
+     * Gets the address.
      * 
-     * @return The identifier
+     * @return The address
      */
-    public String getId();
-
-    /**
-     * Gets the list of capabilities of this messaging service.
-     * 
-     * @return The list of capabilities
-     */
-    public List<String> getCapabilities();
-
-    /**
-     * Gets the display name.
-     * 
-     * @return The display name
-     */
-    public String getDisplayName();
-
-    /**
-     * Get the form description.
-     * 
-     * @return The form description
-     */
-    public DynamicFormDescription getFormDescription();
-
-    /**
-     * Gets the account manager for this messaging service.
-     * 
-     * @return The account manager
-     */
-    public MessagingAccountManager getAccountManager();
-
-    /**
-     * Gets the account access for specified account identifier.
-     * 
-     * @param accountId The account identifier
-     * @return The account access for specified account identifier
-     * @throws MessagingException If account access cannot be returned for given account identifier
-     */
-    public MessagingAccountAccess getAccountAccess(int accountId) throws MessagingException;
-
-    /**
-     * Gets the account transport for specified account identifier.
-     * 
-     * @param accountId The account identifier
-     * @return The account transport for specified account identifier
-     * @throws MessagingException If account transport cannot be returned for given account identifier
-     */
-    public MessagingAccountTransport getAccountTransport(int accountId) throws MessagingException;
+    public String getAddress();
 
 }

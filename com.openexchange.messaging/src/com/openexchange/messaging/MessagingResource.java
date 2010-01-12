@@ -49,68 +49,31 @@
 
 package com.openexchange.messaging;
 
-import java.util.List;
-import com.openexchange.datatypes.genericonf.DynamicFormDescription;
-
 /**
- * {@link MessagingService} - The messaging service.
+ * {@link MessagingResource} - A messaging resource which is connectable, closeable and pingable.
  * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface MessagingService {
+public interface MessagingResource {
 
     /**
-     * Gets the identifier of this messaging service.
+     * Opens this resource. May be invoked on an already opened resource.
      * 
-     * @return The identifier
+     * @throws MessagingException If the resource could not be opened for various reasons
      */
-    public String getId();
+    void connect() throws MessagingException;
 
     /**
-     * Gets the list of capabilities of this messaging service.
-     * 
-     * @return The list of capabilities
+     * Closes this resource. May be invoked on an already closed resource.
      */
-    public List<String> getCapabilities();
+    void close();
 
     /**
-     * Gets the display name.
+     * Pings this resource to check if it can be opened and and immediately closes connection.
      * 
-     * @return The display name
+     * @return <code>true</code> if a connection can be established; otherwise <code>false</code>
+     * @throws MessagingException If the ping fails
      */
-    public String getDisplayName();
-
-    /**
-     * Get the form description.
-     * 
-     * @return The form description
-     */
-    public DynamicFormDescription getFormDescription();
-
-    /**
-     * Gets the account manager for this messaging service.
-     * 
-     * @return The account manager
-     */
-    public MessagingAccountManager getAccountManager();
-
-    /**
-     * Gets the account access for specified account identifier.
-     * 
-     * @param accountId The account identifier
-     * @return The account access for specified account identifier
-     * @throws MessagingException If account access cannot be returned for given account identifier
-     */
-    public MessagingAccountAccess getAccountAccess(int accountId) throws MessagingException;
-
-    /**
-     * Gets the account transport for specified account identifier.
-     * 
-     * @param accountId The account identifier
-     * @return The account transport for specified account identifier
-     * @throws MessagingException If account transport cannot be returned for given account identifier
-     */
-    public MessagingAccountTransport getAccountTransport(int accountId) throws MessagingException;
+    boolean ping() throws MessagingException;
 
 }

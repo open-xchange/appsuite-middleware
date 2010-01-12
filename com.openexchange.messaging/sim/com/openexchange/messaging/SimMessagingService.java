@@ -72,11 +72,14 @@ public class SimMessagingService implements MessagingService {
 
     private final Map<Integer, MessagingAccountAccess> accountAccessMap;
 
+    private final Map<Integer, MessagingAccountTransport> accountTransportMap;
+
     private MessagingAccountManager accManager;
 
     public SimMessagingService() {
         super();
         accountAccessMap = new HashMap<Integer, MessagingAccountAccess>();
+        accountTransportMap = new HashMap<Integer, MessagingAccountTransport>();
     }
 
     public MessagingAccountManager getAccountManager() {
@@ -122,13 +125,25 @@ public class SimMessagingService implements MessagingService {
     public MessagingAccountAccess getAccountAccess(final int accountId) throws MessagingException {
         final MessagingAccountAccess accountAccess = accountAccessMap.get(Integer.valueOf(accountId));
         if (null == accountAccess) {
-            // TODO: THrow appropriate error
+            // TODO: Throw appropriate error
         }
         return accountAccess;
     }
 
     public void setAccountAccess(final int accountId, final MessagingAccountAccess accountAccess) {
         accountAccessMap.put(Integer.valueOf(accountId), accountAccess);
+    }
+
+    public MessagingAccountTransport getAccountTransport(final int accountId) throws MessagingException {
+        final MessagingAccountTransport accountTransport = accountTransportMap.get(Integer.valueOf(accountId));
+        if (null == accountTransport) {
+            // TODO: Throw appropriate error
+        }
+        return accountTransport;
+    }
+
+    public void setAccountTransport(final int accountId, final MessagingAccountTransport accountTransport) {
+        accountTransportMap.put(Integer.valueOf(accountId), accountTransport);
     }
 
 }

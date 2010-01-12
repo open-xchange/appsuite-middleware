@@ -52,21 +52,10 @@ package com.openexchange.messaging;
 /**
  * {@link MessagingAccountAccess} - Provides access to a messaging account.
  * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface MessagingAccountAccess {
-
-    /**
-     * Opens this access. May be invoked on an already opened access.
-     * 
-     * @throws MessagingException If the access could not be opened for various reasons
-     */
-    public void connect() throws MessagingException;
-
-    /**
-     * Closes this access. May be invoked on an already closed access.
-     */
-    public void close();
+public interface MessagingAccountAccess extends MessagingResource {
 
     /**
      * Gets the account identifier of this access.
@@ -74,14 +63,6 @@ public interface MessagingAccountAccess {
      * @return The account identifier
      */
     public int getAccountId();
-
-    /**
-     * Pings this access to check if it can be opened and and immediately closes connection.
-     * 
-     * @return <code>true</code> if a connection can be established; otherwise <code>false</code>
-     * @throws MessagingException If the ping fails
-     */
-    public boolean ping() throws MessagingException;
 
     /**
      * Gets the message access for associated account.
