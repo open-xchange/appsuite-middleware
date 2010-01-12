@@ -126,6 +126,17 @@ public interface TwitterAccess {
     public List<DirectMessage> getDirectMessages(Paging paging) throws TwitterException;
 
     /**
+     * Retweets a tweet. Requires the id parameter of the tweet being retweeted. Returns the original tweet with retweet details embedded.
+     * <p>
+     * This method calls <a href="http://twitter.com/statuses/retweet">http://twitter.com/statuses/retweet</a>
+     * 
+     * @param statusId The ID of the status to retweet.
+     * @return The retweeted status
+     * @throws TwitterException If <a href="http://twitter.com/">twitter</a> service or network is unavailable
+     */
+    public Status retweetStatus(long statusId) throws TwitterException;
+
+    /**
      * Sends a new direct message to the specified user from the authenticating user. Requires both the user and text parameters below. The
      * text will be trimmed if the length of the text is exceeding 140 characters.
      * <p>

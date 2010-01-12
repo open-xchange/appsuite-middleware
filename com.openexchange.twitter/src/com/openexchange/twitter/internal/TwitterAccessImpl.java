@@ -94,11 +94,12 @@ public final class TwitterAccessImpl implements TwitterAccess {
 
     public List<DirectMessage> getDirectMessages(final Paging paging) throws TwitterException {
         try {
-            final List<twitter4j.DirectMessage> l = twitter4jTwitter.getDirectMessages(new twitter4j.Paging(
-                paging.getPage(),
-                paging.getCount(),
-                paging.getSinceId(),
-                paging.getMaxId()));
+            final List<twitter4j.DirectMessage> l =
+                twitter4jTwitter.getDirectMessages(new twitter4j.Paging(
+                    paging.getPage(),
+                    paging.getCount(),
+                    paging.getSinceId(),
+                    paging.getMaxId()));
 
             final List<DirectMessage> ret = new ArrayList<DirectMessage>(l.size());
             for (final twitter4j.DirectMessage dm : l) {
@@ -126,11 +127,12 @@ public final class TwitterAccessImpl implements TwitterAccess {
 
     public List<Status> getFriendsTimeline(final Paging paging) throws TwitterException {
         try {
-            final List<twitter4j.Status> l = twitter4jTwitter.getFriendsTimeline(new twitter4j.Paging(
-                paging.getPage(),
-                paging.getCount(),
-                paging.getSinceId(),
-                paging.getMaxId()));
+            final List<twitter4j.Status> l =
+                twitter4jTwitter.getFriendsTimeline(new twitter4j.Paging(
+                    paging.getPage(),
+                    paging.getCount(),
+                    paging.getSinceId(),
+                    paging.getMaxId()));
 
             final List<Status> ret = new ArrayList<Status>(l.size());
             for (final twitter4j.Status status : l) {
@@ -158,11 +160,12 @@ public final class TwitterAccessImpl implements TwitterAccess {
 
     public List<Status> getHomeTimeline(final Paging paging) throws TwitterException {
         try {
-            final List<twitter4j.Status> l = twitter4jTwitter.getHomeTimeline(new twitter4j.Paging(
-                paging.getPage(),
-                paging.getCount(),
-                paging.getSinceId(),
-                paging.getMaxId()));
+            final List<twitter4j.Status> l =
+                twitter4jTwitter.getHomeTimeline(new twitter4j.Paging(
+                    paging.getPage(),
+                    paging.getCount(),
+                    paging.getSinceId(),
+                    paging.getMaxId()));
 
             final List<Status> ret = new ArrayList<Status>(l.size());
             for (final twitter4j.Status status : l) {
@@ -193,6 +196,14 @@ public final class TwitterAccessImpl implements TwitterAccess {
     public Status updateStatus(final String status, final long inReplyToStatusId) throws TwitterException {
         try {
             return new StatusImpl(twitter4jTwitter.updateStatus(status, inReplyToStatusId));
+        } catch (final twitter4j.TwitterException e) {
+            throw TwitterExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    public Status retweetStatus(final long statusId) throws TwitterException {
+        try {
+            return new StatusImpl(twitter4jTwitter.retweetStatus(statusId));
         } catch (final twitter4j.TwitterException e) {
             throw TwitterExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
