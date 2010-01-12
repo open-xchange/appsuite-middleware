@@ -60,5 +60,5 @@ import java.io.InputStream;
  * @since Open-Xchange v6.16
  */
 public interface BinaryContent extends SimpleContent<InputStream> {
-    
+    // Empty
 }

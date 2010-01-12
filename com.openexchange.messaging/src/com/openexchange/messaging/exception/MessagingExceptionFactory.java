@@ -58,6 +58,7 @@ import com.openexchange.messaging.MessagingExceptionCodes;
  * {@link MessagingExceptionFactory} - Factory for creating {@link MessagingException}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since Open-Xchange v6.16
  */
 public final class MessagingExceptionFactory extends Exceptions<MessagingException> {
 

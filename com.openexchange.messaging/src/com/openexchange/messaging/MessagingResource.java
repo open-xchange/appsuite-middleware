@@ -50,7 +50,8 @@
 package com.openexchange.messaging;
 
 /**
- * {@link MessagingResource} - A messaging resource which is connectable, closeable and pingable.
+ * {@link MessagingResource} - A messaging resource which is {@link #connect() connectable}, {@link #close() closeable} and {@link #ping()
+ * pingable}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
