@@ -65,11 +65,10 @@ public class SimMessagingService implements MessagingService {
     private String displayName;
     private DynamicFormDescription formDescription;
     private String id;
-    private MessagingMessageAccess access;
-    private MessagingFolderAccess folderAccess;
+    private MessagingAccess access;
     private MessagingAccountManager accManager;
 
-    public MessagingMessageAccess getMessageAccess() {
+    public MessagingAccess getAccess() {
         return access;
     }
 
@@ -94,41 +93,35 @@ public class SimMessagingService implements MessagingService {
     }
 
     
-    public void setCapabilities(final List<String> capabilities) {
+    public void setCapabilities(List<String> capabilities) {
         this.capabilities = capabilities;
     }
 
     
-    public void setDisplayName(final String displayName) {
+    public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
 
     
-    public void setFormDescription(final DynamicFormDescription formDescription) {
+    public void setFormDescription(DynamicFormDescription formDescription) {
         this.formDescription = formDescription;
     }
 
     
-    public void setId(final String id) {
+    public void setId(String id) {
         this.id = id;
     }
 
     
-    public void setAccess(final MessagingMessageAccess access) {
+    public void setAccess(MessagingAccess access) {
         this.access = access;
     }
 
     
-    public void setAccountManager(final MessagingAccountManager accManager) {
+    public void setAccountManager(MessagingAccountManager accManager) {
         this.accManager = accManager;
     }
-
-    public MessagingFolderAccess getFolderAccess() {
-        return folderAccess;
-    }
     
-    public void setFolderAccess(final MessagingFolderAccess folderAccess) {
-        this.folderAccess = folderAccess;
-    }
+    
 
 }
