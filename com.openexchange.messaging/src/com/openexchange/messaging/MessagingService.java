@@ -100,7 +100,8 @@ public interface MessagingService {
      * 
      * @param accountId The account identifier
      * @return The account access for specified account identifier
+     * @throws MessagingException If account access cannot be returned for given account identifier
      */
-    public MessagingAccountAccess getAccountAccess(int accountId);
+    public MessagingAccountAccess getAccountAccess(int accountId) throws MessagingException;
 
 }

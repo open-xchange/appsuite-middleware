@@ -49,12 +49,54 @@
 
 package com.openexchange.messaging;
 
-
 /**
- * {@link MessagingAccountAccess} - TODO Short description of this class' purpose.
- *
+ * {@link MessagingAccountAccess} - Provides access to a messaging account.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MessagingAccountAccess {
+
+    /**
+     * Opens this access. May be invoked on an already opened access.
+     * 
+     * @throws MessagingException If the access could not be opened for various reasons
+     */
+    public void connect() throws MessagingException;
+
+    /**
+     * Closes this access. May be invoked on an already closed access.
+     */
+    public void close();
+
+    /**
+     * Gets the account identifier of this access.
+     * 
+     * @return The account identifier
+     */
+    public int getAccountId();
+
+    /**
+     * Pings this access to check if it can be opened and and immediately closes connection.
+     * 
+     * @return <code>true</code> if a connection can be established; otherwise <code>false</code>
+     * @throws MessagingException If the ping fails
+     */
+    public boolean ping() throws MessagingException;
+
+    /**
+     * Gets the message access for associated account.
+     * 
+     * @return The message access
+     * @throws MessagingException If message access cannot be returned
+     */
+    public MessagingMessageAccess getMessageAccess() throws MessagingException;
+
+    /**
+     * Gets the folder access for associated account.
+     * 
+     * @return The folder access
+     * @throws MessagingException If folder access cannot be returned
+     */
+    public MessagingFolderAccess getFolderAccess() throws MessagingException;
 
 }
