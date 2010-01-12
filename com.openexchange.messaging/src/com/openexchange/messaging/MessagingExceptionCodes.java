@@ -64,7 +64,15 @@ public enum MessagingExceptionCodes implements OXErrorMessage {
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(MessagingExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CODE_ERROR, 1);
+    UNEXPECTED_ERROR(MessagingExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CODE_ERROR, 1),
+    /**
+     * A SQL error occurred: %1$s
+     */
+    SQL_ERROR(MessagingExceptionMessages.SQL_ERROR_MSG, Category.CODE_ERROR, 2),
+    /**
+     * An I/O error occurred: %1$s
+     */
+    IO_ERROR(MessagingExceptionMessages.IO_ERROR_MSG, Category.CODE_ERROR, 3);
 
     private final Category category;
 
