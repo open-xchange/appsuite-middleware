@@ -380,4 +380,9 @@ public class InMemoryInfostoreDatabase extends DatabaseImpl {
     public List<DocumentMetadata> getCreated(final Context ctx) {
         return creations.get(ctx);
     }
+    
+    @Override
+    public void setRequestTransactional(final boolean transactional) {
+    }
+
 }
