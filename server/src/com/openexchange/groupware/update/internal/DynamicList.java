@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskCollection;
@@ -64,8 +63,6 @@ import com.openexchange.groupware.update.UpdateTaskCollection;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DynamicList implements UpdateTaskList {
-
-    private static final Log LOG = LogFactory.getLog(DynamicList.class);
 
     private static final DynamicList SINGLETON = new DynamicList();
 
@@ -82,7 +79,8 @@ public final class DynamicList implements UpdateTaskList {
      * -------------------------------- Member section --------------------------------
      */
 
-    private final ConcurrentMap<Class<? extends UpdateTask>, UpdateTask> taskList = new ConcurrentHashMap<Class<? extends UpdateTask>, UpdateTask>();
+    private final ConcurrentMap<Class<? extends UpdateTask>, UpdateTask> taskList =
+        new ConcurrentHashMap<Class<? extends UpdateTask>, UpdateTask>();
 
     /**
      * Initializes a new {@link DynamicList}.
@@ -96,7 +94,7 @@ public final class DynamicList implements UpdateTaskList {
         if (added) {
             UpdateTaskCollection.getInstance().dirtyVersion();
         } else {
-            LOG.error("Update task \"" + updateTask.getClass().getName() + "\" is already registered.");
+            LogFactory.getLog(DynamicList.class).error("Update task \"" + updateTask.getClass().getName() + "\" is already registered.");
         }
         return added;
     }
@@ -109,7 +107,8 @@ public final class DynamicList implements UpdateTaskList {
     public void removeUpdateTask(final UpdateTask updateTask) {
         final UpdateTask removed = taskList.remove(updateTask.getClass());
         if (null == removed) {
-            LOG.error("Update task \"" + updateTask.getClass().getName() + "\" is unknown and could not be deregistered.");
+            LogFactory.getLog(DynamicList.class).error(
+                "Update task \"" + updateTask.getClass().getName() + "\" is unknown and could not be deregistered.");
         } else {
             UpdateTaskCollection.getInstance().dirtyVersion();
         }
