@@ -66,6 +66,7 @@ import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.messaging.generic.groupware.MessagingGenericCreateTableTask;
 import com.openexchange.messaging.generic.groupware.MessagingGenericDeleteListener;
+import com.openexchange.messaging.generic.internal.CachingMessagingAccountStorage;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
@@ -133,20 +134,21 @@ public class MessagingGenericActivator extends DeferredActivator {
                 /*
                  * MessagingAccount region with 5 minutes time-out
                  */
-                final byte[] ccf = ("jcs.region.MessagingAccount=LTCP\n" + 
-                		"jcs.region.MessagingAccount.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" + 
-                		"jcs.region.MessagingAccount.cacheattributes.MaxObjects=10000000\n" + 
-                		"jcs.region.MessagingAccount.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" + 
-                		"jcs.region.MessagingAccount.cacheattributes.UseMemoryShrinker=true\n" + 
-                		"jcs.region.MessagingAccount.cacheattributes.MaxMemoryIdleTimeSeconds=180\n" + 
-                		"jcs.region.MessagingAccount.cacheattributes.ShrinkerIntervalSeconds=60\n" + 
-                		"jcs.region.MessagingAccount.elementattributes=org.apache.jcs.engine.ElementAttributes\n" + 
-                		"jcs.region.MessagingAccount.elementattributes.IsEternal=false\n" + 
-                		"jcs.region.MessagingAccount.elementattributes.MaxLifeSeconds=300\n" + 
-                		"jcs.region.MessagingAccount.elementattributes.IdleTime=180\n" + 
-                		"jcs.region.MessagingAccount.elementattributes.IsSpool=false\n" + 
-                		"jcs.region.MessagingAccount.elementattributes.IsRemote=false\n" + 
-                		"jcs.region.MessagingAccount.elementattributes.IsLateral=false\n").getBytes();
+                final String regionName = CachingMessagingAccountStorage.getRegionName();
+                final byte[] ccf = ("jcs.region."+regionName+"=LTCP\n" + 
+                		"jcs.region."+regionName+".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" + 
+                		"jcs.region."+regionName+".cacheattributes.MaxObjects=10000000\n" + 
+                		"jcs.region."+regionName+".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" + 
+                		"jcs.region."+regionName+".cacheattributes.UseMemoryShrinker=true\n" + 
+                		"jcs.region."+regionName+".cacheattributes.MaxMemoryIdleTimeSeconds=180\n" + 
+                		"jcs.region."+regionName+".cacheattributes.ShrinkerIntervalSeconds=60\n" + 
+                		"jcs.region."+regionName+".elementattributes=org.apache.jcs.engine.ElementAttributes\n" + 
+                		"jcs.region."+regionName+".elementattributes.IsEternal=false\n" + 
+                		"jcs.region."+regionName+".elementattributes.MaxLifeSeconds=300\n" + 
+                		"jcs.region."+regionName+".elementattributes.IdleTime=180\n" + 
+                		"jcs.region."+regionName+".elementattributes.IsSpool=false\n" + 
+                		"jcs.region."+regionName+".elementattributes.IsRemote=false\n" + 
+                		"jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
                 getService(CacheService.class).loadConfiguration(new ByteArrayInputStream(ccf));
             }
 
@@ -187,7 +189,7 @@ public class MessagingGenericActivator extends DeferredActivator {
             }
             final CacheService cacheService = getService(CacheService.class);
             if (null != cacheService) {
-                cacheService.freeCache("MessagingAccount");
+                cacheService.freeCache(CachingMessagingAccountStorage.getRegionName());
             }
             /*
              * Clear service registry

@@ -76,6 +76,15 @@ public final class CachingMessagingAccountStorage implements MessagingAccountSto
     private static final String REGION_NAME = "MessagingAccount";
 
     /**
+     * Gets the cache region name.
+     * 
+     * @return The cache region name
+     */
+    public static String getRegionName() {
+        return REGION_NAME;
+    }
+
+    /**
      * Gets the cache-backed instance.
      * 
      * @return The cache-backed instance
@@ -128,7 +137,7 @@ public final class CachingMessagingAccountStorage implements MessagingAccountSto
         cacheLock = new ReentrantLock(true);
     }
 
-    public void addAccount(String serviceId, final MessagingAccount account, final Session session) throws MessagingException {
+    public void addAccount(final String serviceId, final MessagingAccount account, final Session session) throws MessagingException {
         delegatee.addAccount(serviceId, account, session);
     }
 
