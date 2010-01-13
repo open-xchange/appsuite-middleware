@@ -64,7 +64,7 @@ import com.openexchange.groupware.container.Appointment;
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class UntilTest extends CalendarSqlTest {
+public abstract class UntilTest extends CalendarSqlTest {
 
     protected static final int MONTHLY2 = 5;
 

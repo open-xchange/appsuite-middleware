@@ -56,7 +56,7 @@ import com.openexchange.groupware.calendar.AbstractCalendarTest;
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class CalendarSqlTest extends AbstractCalendarTest {
+public abstract class CalendarSqlTest extends AbstractCalendarTest {
 
     /**
      * Logger.
