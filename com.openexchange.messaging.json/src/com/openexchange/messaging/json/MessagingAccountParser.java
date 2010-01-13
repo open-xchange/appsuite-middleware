@@ -49,7 +49,8 @@
 
 package com.openexchange.messaging.json;
 
-import java.util.HashMap;
+import static com.openexchange.messaging.json.MessagingAccountConstants.ID;
+import static com.openexchange.messaging.json.MessagingAccountConstants.MESSAGING_SERVICE;
 import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -58,7 +59,6 @@ import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
-import static com.openexchange.messaging.json.MessagingAccountConstants.*;
 
 /**
  * {@link MessagingAccountParser}
@@ -67,29 +67,31 @@ import static com.openexchange.messaging.json.MessagingAccountConstants.*;
  */
 public class MessagingAccountParser {
 
-    private MessagingServiceRegistry registry;
+    private final MessagingServiceRegistry registry;
 
-    public MessagingAccountParser(MessagingServiceRegistry serviceRegistry) {
+    public MessagingAccountParser(final MessagingServiceRegistry serviceRegistry) {
         this.registry = serviceRegistry;
     }
 
-    public MessagingAccount parse(JSONObject accountJSON) throws MessagingException, JSONException {
+    public MessagingAccount parse(final JSONObject accountJSON) throws MessagingException, JSONException {
         return new JSONMessagingAccount(accountJSON, registry);
     }
 
     private static final class JSONMessagingAccount implements MessagingAccount {
 
-        private JSONObject jsonObject;
+        private static final long serialVersionUID = -6272295485887154177L;
 
-        private int id;
+        private final JSONObject jsonObject;
+
+        private final int id;
 
         private String displayName;
 
-        private MessagingService messagingService;
+        private final MessagingService messagingService;
 
         private Map<String, Object> configuration;
 
-        public JSONMessagingAccount(JSONObject accountJSON, MessagingServiceRegistry registry) throws JSONException, MessagingException {
+        public JSONMessagingAccount(final JSONObject accountJSON, final MessagingServiceRegistry registry) throws JSONException, MessagingException {
             this.jsonObject = accountJSON;
             this.id = jsonObject.optInt(ID);
             if(accountJSON.has("displayName")) {
