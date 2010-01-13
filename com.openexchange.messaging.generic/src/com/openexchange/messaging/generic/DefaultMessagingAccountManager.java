@@ -78,7 +78,8 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
- * {@link DefaultMessagingAccountManager} - The default messaging account manager.
+ * {@link DefaultMessagingAccountManager} - The default messaging account manager backed by {@link GenericConfigurationStorageService
+ * generic configuration storage service}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
