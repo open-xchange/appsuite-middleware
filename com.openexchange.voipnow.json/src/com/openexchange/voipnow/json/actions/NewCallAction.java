@@ -125,9 +125,8 @@ public final class NewCallAction extends AbstractVoipNowHTTPAction<GetMethod> {
              */
             final StringBuilder builder = new StringBuilder(256);
             builder.append(REQUEST_NEWCALL);
-            builder.append('&').append("user=").append(ActionUtility.urlEncode("admin"/* session.getLogin() */)); // TODO: Full login?
-            // builder.append('&').append("shapass=").append(ActionUtility.SHA1("oxSecure"/* session.getLogin() */));
-            builder.append('&').append("pass=").append("oxSecure");
+            builder.append('&').append("user=").append(ActionUtility.urlEncode(setting.getLogin()));
+            builder.append('&').append("pass=").append(ActionUtility.urlEncode(setting.getPassword()));
             builder.append('&').append("phone=").append(receiverNumber);
             builder.append('&').append("callerid=").append(ActionUtility.urlEncode(receiverDisplayName));
             builder.append('&').append("timeout=").append(timeout);
