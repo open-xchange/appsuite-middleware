@@ -49,19 +49,43 @@
 
 package com.openexchange.messaging;
 
+import java.io.Serializable;
 import java.util.Map;
-
 
 /**
  * {@link MessagingAccount} - A messaging account.
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
-public interface MessagingAccount {
+public interface MessagingAccount extends Serializable {
+
+    /**
+     * Gets this account's configuration.
+     * 
+     * @return The configuration as a {@link Map}
+     */
     public Map<String, Object> getConfiguration();
+
+    /**
+     * Gets the identifier.
+     * 
+     * @return The identifier
+     */
     public int getId();
+
+    /**
+     * Gets the display name.
+     * 
+     * @return The display name
+     */
     public String getDisplayName();
+
+    /**
+     * Gets the associated messaging service.
+     * 
+     * @return The associated messaging service
+     */
     public MessagingService getMessagingService();
 }
