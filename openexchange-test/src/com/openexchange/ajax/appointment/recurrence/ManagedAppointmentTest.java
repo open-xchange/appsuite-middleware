@@ -71,7 +71,7 @@ import com.openexchange.test.ResourceTestManager;
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class ManagedAppointmentTest extends AppointmentTest {
+public abstract class ManagedAppointmentTest extends AppointmentTest {
 
     protected CalendarTestManager calendarManager;
 
