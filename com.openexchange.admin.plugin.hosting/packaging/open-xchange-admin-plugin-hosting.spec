@@ -38,7 +38,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 1
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -143,6 +143,13 @@ mv doc javadoc
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Fri Dec 18 2009 - marcus.klein@open-xchange.com
+ - Bugfix #15073: Using new AJPv13TaskMonitor for statistics.
+* Tue Dec 15 2009 - dennis.sieben@open-xchange.com
+ - Bugfix #15081: showruntimestats -r doesn't work with IBM JAVA
+   - Using ManagementFactory now to determine JMX classes
+* Wed Nov 25 2009 - marcus.klein@open-xchange.com
+ - Bugfix #13634: Using same generic use checks as for creating normal users.
 * Thu Nov 12 2009 - thomas.schweiger@open-xchange.com
  - API change: Due to SoftwareChange_Request-170 the "oxreport" call in "oxsysreport"
                script has been changed to "report". "oxreport" isn't available
