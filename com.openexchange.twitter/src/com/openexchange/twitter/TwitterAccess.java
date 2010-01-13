@@ -126,6 +126,17 @@ public interface TwitterAccess {
     public List<DirectMessage> getDirectMessages(Paging paging) throws TwitterException;
 
     /**
+     * Destroys the status specified by the required ID parameter. The authenticating user must be the author of the specified status.
+     * <p>
+     * This method calls <a href="http://twitter.com/statuses/destroy">http://twitter.com/statuses/destroy</a>
+     * 
+     * @param statusId The ID of the status to destroy.
+     * @return The deleted status
+     * @throws TwitterException If <a href="http://twitter.com/">twitter</a> service or network is unavailable
+     */
+    public Status destroyStatus(long statusId) throws TwitterException;
+
+    /**
      * Retweets a tweet. Requires the id parameter of the tweet being retweeted. Returns the original tweet with retweet details embedded.
      * <p>
      * This method calls <a href="http://twitter.com/statuses/retweet">http://twitter.com/statuses/retweet</a>
