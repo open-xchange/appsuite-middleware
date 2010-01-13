@@ -68,8 +68,8 @@ public final class MessagingExceptionMessages implements LocalizableStrings {
     // An I/O error occurred: %1$s
     public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
 
-    // Messaging account %1$s could not be found for user %2$s in context %3$s.
-    public static final String ACCOUNT_NOT_FOUND_MSG = "Messaging account %1$s could not be found for user %2$s in context %3$s.";
+    // Messaging account %1$s of service "%2$s" could not be found for user %3$s in context %4$s.
+    public static final String ACCOUNT_NOT_FOUND_MSG = "Messaging account %1$s of service \"%2$s\" could not be found for user %3$s in context %4$s.";
 
     /**
      * Initializes a new {@link MessagingExceptionMessages}.
