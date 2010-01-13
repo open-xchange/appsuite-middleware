@@ -85,6 +85,19 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class DefaultMessagingAccountManager implements MessagingAccountManager {
 
+    /**
+     * The {@link DatabaseService} class.
+     */
+    private static final Class<DatabaseService> CLAZZ_DB = DatabaseService.class;
+
+    /**
+     * The {@link GenericConfigurationStorageService} class.
+     */
+    private static final Class<GenericConfigurationStorageService> CLAZZ_GEN_CONF = GenericConfigurationStorageService.class;
+
+    /**
+     * The identifier of associated messaging service.
+     */
     private final String serviceId;
 
     /**
@@ -101,7 +114,7 @@ public class DefaultMessagingAccountManager implements MessagingAccountManager {
         "SELECT confId, serviceId, displayName FROM messagingAccount WHERE cid = ? AND user = ? AND account = ?";
 
     public MessagingAccount getAccount(final int id, final Session session) throws MessagingException {
-        final DatabaseService databaseService = getService(DatabaseService.class);
+        final DatabaseService databaseService = getService(CLAZZ_DB);
         /*
          * Readable connection
          */
@@ -130,7 +143,7 @@ public class DefaultMessagingAccountManager implements MessagingAccountManager {
             final DefaultMessagingAccount account = new DefaultMessagingAccount();
             account.setDisplayName(rs.getString(3));
             {
-                final GenericConfigurationStorageService genericConfStorageService = getService(GenericConfigurationStorageService.class);
+                final GenericConfigurationStorageService genericConfStorageService = getService(CLAZZ_GEN_CONF);
                 final Map<String, Object> configuration = new HashMap<String, Object>();
                 genericConfStorageService.fill(rc, getContext(session), rs.getInt(1), configuration);
                 account.setConfiguration(configuration);
@@ -155,7 +168,7 @@ public class DefaultMessagingAccountManager implements MessagingAccountManager {
         "SELECT account, confId, serviceId, displayName FROM messagingAccount WHERE cid = ? AND user = ? AND serviceId = ?";
 
     public List<MessagingAccount> getAccounts(final Session session) throws MessagingException {
-        final DatabaseService databaseService = getService(DatabaseService.class);
+        final DatabaseService databaseService = getService(CLAZZ_DB);
         /*
          * Readable connection
          */
@@ -178,7 +191,7 @@ public class DefaultMessagingAccountManager implements MessagingAccountManager {
             rs = stmt.executeQuery();
             if (rs.next()) {
                 accounts = new ArrayList<MessagingAccount>(4);
-                final GenericConfigurationStorageService genericConfStorageService = getService(GenericConfigurationStorageService.class);
+                final GenericConfigurationStorageService genericConfStorageService = getService(CLAZZ_GEN_CONF);
                 final MessagingService messagingService;
                 {
                     final MessagingServiceRegistry registry = getService(MessagingServiceRegistry.class);
@@ -212,7 +225,7 @@ public class DefaultMessagingAccountManager implements MessagingAccountManager {
         "INSERT INTO messagingAccount (cid, user, account, confId, serviceId, displayName) VALUES (?, ?, ?, ?, ?, ?)";
 
     public void addAccount(final MessagingAccount account, final Session session) throws MessagingException {
-        final DatabaseService databaseService = getService(DatabaseService.class);
+        final DatabaseService databaseService = getService(CLAZZ_DB);
         /*
          * Writable connection
          */
@@ -233,7 +246,7 @@ public class DefaultMessagingAccountManager implements MessagingAccountManager {
              */
             final int genericConfId;
             {
-                final GenericConfigurationStorageService genericConfStorageService = getService(GenericConfigurationStorageService.class);
+                final GenericConfigurationStorageService genericConfStorageService = getService(CLAZZ_GEN_CONF);
                 genericConfId = genericConfStorageService.save(wc, getContext(session), account.getConfiguration());
             }
             /*
@@ -268,7 +281,7 @@ public class DefaultMessagingAccountManager implements MessagingAccountManager {
     private static final String SQL_DELETE = "DELETE FROM messagingAccount WHERE cid = ? AND user = ? AND account = ?";
 
     public void deleteAccount(final MessagingAccount account, final Session session) throws MessagingException {
-        final DatabaseService databaseService = getService(DatabaseService.class);
+        final DatabaseService databaseService = getService(CLAZZ_DB);
         /*
          * Writable connection
          */
@@ -284,33 +297,13 @@ public class DefaultMessagingAccountManager implements MessagingAccountManager {
         }
         PreparedStatement stmt = null;
         try {
-            final int genericConfId;
-            {
-                ResultSet rs = null;
-                try {
-                    stmt = wc.prepareStatement(SQL_SELECT);
-                    int pos = 1;
-                    stmt.setInt(pos++, contextId);
-                    stmt.setInt(pos++, session.getUserId());
-                    stmt.setInt(pos, account.getId());
-                    rs = stmt.executeQuery();
-                    if (!rs.next()) {
-                        throw MessagingExceptionCodes.ACCOUNT_NOT_FOUND.create(
-                            Integer.valueOf(account.getId()),
-                            Integer.valueOf(session.getUserId()),
-                            Integer.valueOf(contextId));
-                    }
-                    genericConfId = rs.getInt(1);
-                } finally {
-                    DBUtils.closeSQLStuff(rs);
-                }
-            }
-            DBUtils.closeSQLStuff(stmt);
+            final int accountId = account.getId();
             /*
              * Delete account configuration using generic conf
              */
             {
-                final GenericConfigurationStorageService genericConfStorageService = getService(GenericConfigurationStorageService.class);
+                final GenericConfigurationStorageService genericConfStorageService = getService(CLAZZ_GEN_CONF);
+                final int genericConfId = getGenericConfId(contextId, session.getUserId(), accountId, wc);
                 genericConfStorageService.delete(wc, getContext(session), genericConfId);
             }
             /*
@@ -320,7 +313,7 @@ public class DefaultMessagingAccountManager implements MessagingAccountManager {
             int pos = 1;
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, session.getUserId());
-            stmt.setInt(pos, account.getId());
+            stmt.setInt(pos, accountId);
             stmt.executeUpdate();
             wc.commit(); // COMMIT
         } catch (final GenericConfigStorageException e) {
@@ -342,7 +335,7 @@ public class DefaultMessagingAccountManager implements MessagingAccountManager {
     private static final String SQL_UPDATE = "UPDATE messagingAccount SET displayName = ? WHERE cid = ? AND user = ? AND account = ?";
 
     public void updateAccount(final MessagingAccount account, final Session session) throws MessagingException {
-        final DatabaseService databaseService = getService(DatabaseService.class);
+        final DatabaseService databaseService = getService(CLAZZ_DB);
         /*
          * Writable connection
          */
@@ -358,36 +351,14 @@ public class DefaultMessagingAccountManager implements MessagingAccountManager {
         }
         PreparedStatement stmt = null;
         try {
-            final int genericConfId;
-            {
-                ResultSet rs = null;
-                try {
-                    stmt = wc.prepareStatement(SQL_SELECT);
-                    int pos = 1;
-                    stmt.setInt(pos++, contextId);
-                    stmt.setInt(pos++, session.getUserId());
-                    stmt.setInt(pos, account.getId());
-                    rs = stmt.executeQuery();
-                    if (!rs.next()) {
-                        throw MessagingExceptionCodes.ACCOUNT_NOT_FOUND.create(
-                            Integer.valueOf(account.getId()),
-                            Integer.valueOf(session.getUserId()),
-                            Integer.valueOf(contextId));
-                    }
-                    genericConfId = rs.getInt(1);
-                } finally {
-                    DBUtils.closeSQLStuff(rs);
-                }
-            }
-            DBUtils.closeSQLStuff(stmt);
             /*
              * Update account configuration using generic conf
              */
             {
                 final Map<String, Object> configuration = account.getConfiguration();
                 if (null != configuration) {
-                    final GenericConfigurationStorageService genericConfStorageService =
-                        getService(GenericConfigurationStorageService.class);
+                    final GenericConfigurationStorageService genericConfStorageService = getService(CLAZZ_GEN_CONF);
+                    final int genericConfId = getGenericConfId(contextId, session.getUserId(), account.getId(), wc);
                     genericConfStorageService.update(wc, getContext(session), genericConfId, configuration);
                 }
             }
@@ -437,6 +408,28 @@ public class DefaultMessagingAccountManager implements MessagingAccountManager {
             return getService(ContextService.class).getContext(session.getContextId());
         } catch (final ContextException e) {
             throw new MessagingException(e);
+        }
+    }
+
+    private static int getGenericConfId(final int contextId, final int userId, final int accountId, final Connection con) throws MessagingException, SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement(SQL_SELECT);
+            int pos = 1;
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, userId);
+            stmt.setInt(pos, accountId);
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                throw MessagingExceptionCodes.ACCOUNT_NOT_FOUND.create(
+                    Integer.valueOf(accountId),
+                    Integer.valueOf(userId),
+                    Integer.valueOf(contextId));
+            }
+            return rs.getInt(1);
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
         }
     }
 
