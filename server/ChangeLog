@@ -1,3 +1,7 @@
+* 2010-01-13 - martin.herfurth@open-xchange.com
+
+ - Bugfix #15112: Intelligent contact collector settings.
+
 * 2010-01-11 - choeger@open-xchange.com
 
  - Bugfix #15176: Crawler YML files can not be updated

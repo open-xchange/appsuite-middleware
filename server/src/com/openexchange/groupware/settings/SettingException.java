@@ -152,7 +152,12 @@ public class SettingException extends AbstractOXException {
         /**
          * Found duplicate path %s.
          */
-        DUPLICATE_PATH("Found duplicate path %s.", Category.CODE_ERROR, 12);
+        DUPLICATE_PATH("Found duplicate path %s.", Category.CODE_ERROR, 12),
+        
+        /**
+         * Subsystem error.
+         */
+        SUBSYSTEM("Error during use of a subsystem", Category.SUBSYSTEM_OR_SERVICE_DOWN, 13);
 
         /**
          * Message of the exception.

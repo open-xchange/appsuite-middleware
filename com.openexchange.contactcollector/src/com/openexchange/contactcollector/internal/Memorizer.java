@@ -232,11 +232,17 @@ public class Memorizer implements Runnable {
 
         final int retval;
         if (null == foundContact) {
-            final OCLPermission perm = new OXFolderAccess(ctx).getFolderPermission(getFolderId(), session.getUserId(), userConfig);
-            if (perm.canCreateObjects()) {
-                contact.setUseCount(1);
-                contactInterface.insertContactObject(contact);
-                retval = contact.getObjectID();
+            OXFolderAccess folderAccess = new OXFolderAccess(ctx);
+            int folderId = getFolderId();
+            if (folderAccess.exists(folderId)) {
+                OCLPermission perm = folderAccess.getFolderPermission(folderId, session.getUserId(), userConfig);
+                if (perm.canCreateObjects()) {
+                    contact.setUseCount(1);
+                    contactInterface.insertContactObject(contact);
+                    retval = contact.getObjectID();
+                } else {
+                    retval = -1;
+                }
             } else {
                 retval = -1;
             }

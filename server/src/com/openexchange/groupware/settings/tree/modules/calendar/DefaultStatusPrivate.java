@@ -94,7 +94,7 @@ public class DefaultStatusPrivate implements PreferencesItemService {
                 return true;
             }
 
-            public void writeValue(final Context ctx, final User user, final Setting setting) throws SettingException {
+            public void writeValue(final Session session, final Context ctx, final User user, final Setting setting) throws SettingException {
                 Integer value;
                 try {
                     value = new Integer(String.valueOf(setting.getSingleValue()));

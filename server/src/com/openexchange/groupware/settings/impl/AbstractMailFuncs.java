@@ -108,7 +108,7 @@ public abstract class AbstractMailFuncs implements IValueHandler {
     /**
 	 * {@inheritDoc}
 	 */
-	public void writeValue(final Context ctx, final User user,
+	public void writeValue(final Session session, final Context ctx, final User user,
 	    final Setting setting) throws SettingException {
         final UserSettingMailStorage storage = UserSettingMailStorage
             .getInstance();

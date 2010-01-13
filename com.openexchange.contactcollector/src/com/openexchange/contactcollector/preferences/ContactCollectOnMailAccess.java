@@ -95,7 +95,7 @@ public class ContactCollectOnMailAccess implements PreferencesItemService {
             }
 
             public void writeValue(
-                Context ctx, User user, Setting setting) throws SettingException {
+                final Session session, Context ctx, User user, Setting setting) throws SettingException {
                 boolean value = Boolean.parseBoolean(String.valueOf(setting.getSingleValue()));
                 ServerUserSetting.getDefaultInstance().setContactCollectOnMailAccess(ctx.getContextId(), user.getId(), value);
             }

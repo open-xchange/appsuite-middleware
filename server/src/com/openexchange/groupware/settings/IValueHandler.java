@@ -80,12 +80,13 @@ public interface IValueHandler {
 
     /**
      * Write a new value to the setting.
-     * @param ctx Session.
+     * @param session Session.
+     * @param ctx Context.
      * @param user user object.
      * @param setting contains the value for the setting.
      * @throws SettingException if the setting can't be written or an error occurs while writing the value.
      */
-    void writeValue(Context ctx, User user, Setting setting) throws SettingException;
+    void writeValue(Session session, Context ctx, User user, Setting setting) throws SettingException;
 
     /**
      * If the value should be written simply to the database and read from there a unique identifier must be returned instead of

@@ -102,7 +102,7 @@ public class SendAddress implements PreferencesItemService {
             public boolean isWritable() {
                 return true;
             }
-            public void writeValue(final Context ctx, final User user,
+            public void writeValue(final Session session, final Context ctx, final User user,
                 final Setting setting) throws SettingException {
                 final String newAlias = setting.getSingleValue().toString();
                 final String[] aliases = user.getAliases();

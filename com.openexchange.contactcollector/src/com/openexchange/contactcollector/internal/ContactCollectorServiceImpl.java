@@ -49,13 +49,18 @@
 
 package com.openexchange.contactcollector.internal;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Future;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.concurrent.TimeoutConcurrentMap;
 import com.openexchange.contactcollector.ContactCollectorService;
+import com.openexchange.contactcollector.folder.ContactCollectorFolderCreator;
 import com.openexchange.contactcollector.osgi.CCServiceRegistry;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -111,6 +116,10 @@ public class ContactCollectorServiceImpl implements ContactCollectorService {
             aliasesMap.dispose();
             aliasesMap = null;
         }
+    }
+
+    public void createCollectFolder(Session session, Context ctx, String folderName, Connection con) throws AbstractOXException, SQLException {
+        new ContactCollectorFolderCreator().create(session, ctx, folderName, con, false);
     }
 
 }

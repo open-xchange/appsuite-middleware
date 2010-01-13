@@ -91,9 +91,9 @@ public class ContactCollectEnabled implements PreferencesItemService {
                 return true;
             }
 
-            public void writeValue(final Context ctx, final User user, final Setting setting) throws SettingException {
+            public void writeValue(final Session session, final Context ctx, final User user, final Setting setting) throws SettingException {
                 final boolean value = Boolean.parseBoolean(String.valueOf(setting.getSingleValue()));
-                ServerUserSetting.getDefaultInstance().setIContactColletion(ctx.getContextId(), user.getId(), value);
+                ServerUserSetting.getDefaultInstance().setIContactColletion(ctx, session, user.getId(), value);
             }
         };
     }

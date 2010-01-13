@@ -55,9 +55,19 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.i18n.FolderStrings;
+import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.settings.SettingException;
+import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
 
 /**
  * Interface for accessing configuration settings.
@@ -90,7 +100,8 @@ public class ServerUserSetting {
     private static final Attribute<Integer> CONTACT_COLLECT_FOLDER = new Attribute<Integer>() {
 
         public Integer getAttribute(final ResultSet rs) throws SQLException {
-            return Integer.valueOf(rs.getInt(getColumnName()));
+            int retval = rs.getInt(getColumnName());
+            return rs.wasNull() ? null : Integer.valueOf(retval);
         }
 
         public String getColumnName() {
@@ -195,8 +206,8 @@ public class ServerUserSetting {
      * @param cid context id
      * @param user user id
      */
-    public static void setContactColletion(final int cid, final int user, final boolean enabled) throws SettingException {
-        defaultInstance.setIContactColletion(cid, user, enabled);
+    public static void setContactColletion(Context ctx, Session session, final int userId, final boolean enabled) throws SettingException {
+        defaultInstance.setIContactColletion(ctx, session, userId, enabled);
     }
 
     /**
@@ -280,8 +291,23 @@ public class ServerUserSetting {
      * @param cid context id
      * @param user user id
      */
-    public void setIContactColletion(final int cid, final int user, final boolean enabled) throws SettingException {
-        setAttributeInternal(cid, user, CONTACT_COLLECT_ENABLED, Boolean.valueOf(enabled), connection);
+    public void setIContactColletion(Context ctx, Session session, final int userId, final boolean enabled) throws SettingException {
+        setAttributeInternal(ctx.getContextId(), userId, CONTACT_COLLECT_ENABLED, Boolean.valueOf(enabled), connection);
+        if (enabled && getAttributeInternal(ctx.getContextId(), userId, CONTACT_COLLECT_FOLDER, connection) == null) {
+            ContactCollectorService contactCollectService = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
+            User user;
+            try {
+                user = UserStorage.getInstance().getUser(userId, ctx);
+                String folderName = new StringHelper(user.getLocale()).getString(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
+                contactCollectService.createCollectFolder(session, ctx, folderName, connection);
+            } catch (LdapException e) {
+                throw new SettingException(SettingException.Code.SUBSYSTEM, e);
+            } catch (AbstractOXException e) {
+                throw new SettingException(SettingException.Code.SUBSYSTEM, e);
+            } catch (SQLException e) {
+                throw new SettingException(SettingException.Code.SQL_ERROR, e);
+            }
+        }
     }
 
     /**

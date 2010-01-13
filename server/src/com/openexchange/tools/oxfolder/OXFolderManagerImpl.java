@@ -1520,7 +1520,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
                 final ServerUserSetting sus = ServerUserSetting.getInstance(wc);
                 final Integer collectFolder = sus.getIContactCollectionFolder(ctx.getContextId(), user.getId());
                 if (null != collectFolder && folderID == collectFolder.intValue()) {
-                    sus.setIContactColletion(ctx.getContextId(), user.getId(), false);
+                    sus.setIContactColletion(ctx, session, user.getId(), false);
                     sus.setIContactCollectionFolder(ctx.getContextId(), user.getId(), null);
                 }
             } catch (final SettingException e) {

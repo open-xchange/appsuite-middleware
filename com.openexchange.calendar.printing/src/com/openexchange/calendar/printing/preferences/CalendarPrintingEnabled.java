@@ -98,7 +98,7 @@ public class CalendarPrintingEnabled implements PreferencesItemService {
                 return false;
             }
 
-            public void writeValue(final Context ctx, final User user, final Setting setting) throws SettingException {
+            public void writeValue(final Session session, final Context ctx, final User user, final Setting setting) throws SettingException {
                 throw new SettingException(SettingException.Code.NO_WRITE, Arrays.toString(PATH));
             }
         };

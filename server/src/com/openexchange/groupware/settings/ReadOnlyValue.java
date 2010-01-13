@@ -51,6 +51,7 @@ package com.openexchange.groupware.settings;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.session.Session;
 
 /**
  * This class contains shared functions for all setting that are read only.
@@ -74,7 +75,7 @@ public abstract class ReadOnlyValue implements IValueHandler {
     /**
      * {@inheritDoc}
      */
-    public final void writeValue(final Context ctx,
+    public final void writeValue(final Session session, final Context ctx,
         final User user, final Setting setting) throws SettingException {
         throw new SettingException(SettingException.Code.NO_WRITE, setting
             .getName());

@@ -195,7 +195,7 @@ public class RdbSettingStorage extends SettingStorage {
         if (setting.isShared()) {
             final IValueHandler value = ConfigTree.getSharedValue(setting);
             if (null != value && value.isWritable()) {
-                value.writeValue(ctx, user, setting);
+                value.writeValue(session, ctx, user, setting);
             } else {
                 final SettingException e = new SettingException(Code.NO_WRITE,
                     setting.getName());

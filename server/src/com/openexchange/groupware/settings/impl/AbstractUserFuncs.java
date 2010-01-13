@@ -57,6 +57,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingException;
+import com.openexchange.session.Session;
 
 /**
  * This class contains the shared functions for all user settings.
@@ -73,7 +74,7 @@ public abstract class AbstractUserFuncs implements IValueHandler {
     /**
      * {@inheritDoc}
      */
-    public void writeValue(final Context ctx, final User user,
+    public void writeValue(final Session session, final Context ctx, final User user,
         final Setting setting) throws SettingException {
         try {
             final UserImpl newUser = new UserImpl(user);
