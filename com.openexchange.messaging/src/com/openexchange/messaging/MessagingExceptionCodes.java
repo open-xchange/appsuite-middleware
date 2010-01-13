@@ -80,7 +80,11 @@ public enum MessagingExceptionCodes implements OXErrorMessage {
     /**
      * The operation is not supported by service %1$s.
      */
-    OPERATION_NOT_SUPPORTED(MessagingExceptionMessages.OPERATION_NOT_SUPPORTED_MSG, Category.CODE_ERROR, 6);
+    OPERATION_NOT_SUPPORTED(MessagingExceptionMessages.OPERATION_NOT_SUPPORTED_MSG, Category.CODE_ERROR, 6),
+    /**
+     * The folder "%1$s" cannot be found in account %2$s of service "%3$s" of user %4$s in context %5$s.
+     */
+    FOLDER_NOT_FOUND(MessagingExceptionMessages.FOLDER_NOT_FOUND_MSG, Category.CODE_ERROR, 7);
 
     private final Category category;
 

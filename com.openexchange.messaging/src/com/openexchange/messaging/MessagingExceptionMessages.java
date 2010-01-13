@@ -74,6 +74,9 @@ public final class MessagingExceptionMessages implements LocalizableStrings {
     // The operation is not supported by service %1$s.
     public static final String OPERATION_NOT_SUPPORTED_MSG = "The operation is not supported by service %1$s.";
 
+    // The folder "%1$s" cannot be found in account %2$s of service "%3$s" of user %4$s in context %5$s.
+    public static final String FOLDER_NOT_FOUND_MSG = "The folder \"%1$s\" cannot be found in account %2$s of service \"%3$s\" of user %4$s in context %5$s.";
+
     /**
      * Initializes a new {@link MessagingExceptionMessages}.
      */
