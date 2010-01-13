@@ -56,6 +56,7 @@ import java.util.Collection;
 import java.util.List;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.caching.CacheService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
@@ -87,7 +88,8 @@ public class MessagingGenericActivator extends DeferredActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            DatabaseService.class, GenericConfigurationStorageService.class, ContextService.class, MessagingServiceRegistry.class };
+            DatabaseService.class, GenericConfigurationStorageService.class, ContextService.class, MessagingServiceRegistry.class,
+            CacheService.class };
     }
 
     @Override
