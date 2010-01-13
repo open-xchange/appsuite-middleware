@@ -49,6 +49,7 @@
 
 package com.openexchange.caching;
 
+import java.io.InputStream;
 import java.io.Serializable;
 
 /**
@@ -95,6 +96,18 @@ public interface CacheService {
      * @throws CacheException If configuration fails
      */
     public void loadConfiguration(String cacheConfigFile) throws CacheException;
+
+    /**
+     * Additionally feeds the cache manager with specified input stream. The stream will be closed.
+     * <p>
+     * The cache manager reads a default configuration - defined through property "com.openexchange.caching.configfile" in
+     * 'system.properties' file - on initialization automatically. Therefore this method is useful to extend or overwrite the loaded default
+     * configuration and needs <b>not</b> to be invoked to initialize the cache manager at all.
+     * 
+     * @param inputStream The input stream to read from
+     * @throws CacheException If configuration fails
+     */
+    public void loadConfiguration(InputStream inputStream) throws CacheException;
 
     /**
      * Re-Loads the cache manager's default configuration.

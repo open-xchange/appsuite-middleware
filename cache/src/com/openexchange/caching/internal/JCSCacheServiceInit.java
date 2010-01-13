@@ -52,6 +52,7 @@ package com.openexchange.caching.internal;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -135,22 +136,24 @@ public final class JCSCacheServiceInit {
     }
 
     private static Properties loadProperties(final String cacheConfigFile) throws CacheException {
-        FileInputStream fis = null;
-        final Properties props = new Properties();
         try {
-            props.load((fis = new FileInputStream(cacheConfigFile)));
+            return loadProperties(new FileInputStream(cacheConfigFile));
         } catch (final FileNotFoundException e) {
             throw new CacheException(CacheException.Code.MISSING_CACHE_CONFIG_FILE, e, cacheConfigFile);
+        }
+    }
+
+    private static Properties loadProperties(final InputStream in) throws CacheException {
+        final Properties props = new Properties();
+        try {
+            props.load(in);
         } catch (final IOException e) {
             throw new CacheException(CacheException.Code.IO_ERROR, e, e.getMessage());
         } finally {
-            if (fis != null) {
-                try {
-                    fis.close();
-                } catch (final IOException e) {
-                    LOG.error(e.getMessage(), e);
-                }
-                fis = null;
+            try {
+                in.close();
+            } catch (final IOException e) {
+                LOG.error(e.getMessage(), e);
             }
         }
         return props;
@@ -208,6 +211,18 @@ public final class JCSCacheServiceInit {
         initializeCompositeCacheManager(true);
         configure(loadProperties(cacheConfigFile.trim()));
         LOG.info("JCS caching system successfully configured with property file: " + cacheConfigFile);
+    }
+
+    /**
+     * Loads the cache configuration from given input stream.
+     * 
+     * @param inputStream The input stream
+     * @throws CacheException If configuration of JCS caching system fails
+     */
+    public void loadConfiguration(final InputStream inputStream) throws CacheException {
+        initializeCompositeCacheManager(true);
+        configure(loadProperties(inputStream));
+        LOG.info("JCS caching system successfully configured with properties from input stream.");
     }
 
     /**

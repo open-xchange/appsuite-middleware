@@ -49,6 +49,7 @@
 
 package com.openexchange.caching.internal;
 
+import java.io.InputStream;
 import java.io.Serializable;
 import org.apache.jcs.JCS;
 import com.openexchange.caching.Cache;
@@ -118,6 +119,10 @@ public final class JCSCacheService implements CacheService {
 
     public void loadConfiguration(final String cacheConfigFile) throws CacheException {
         JCSCacheServiceInit.getInstance().loadConfiguration(cacheConfigFile);
+    }
+
+    public void loadConfiguration(final InputStream inputStream) throws CacheException {
+        JCSCacheServiceInit.getInstance().loadConfiguration(inputStream);
     }
 
     public void loadDefaultConfiguration() throws CacheException {
