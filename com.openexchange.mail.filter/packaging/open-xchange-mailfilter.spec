@@ -38,7 +38,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 1
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -105,3 +105,11 @@ fi
 /opt/open-xchange/bundles/*
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
 %config(noreplace) /opt/open-xchange/etc/groupware/mailfilter.properties
+%changelog
+* Wed Dec 16 2009 - dennis.sieben@open-xchange.com
+  - Added ability to disable TLS and define the regex for non-correct working
+    TLS implementations in the config file
+* Wed Dec 02 2009 - dennis.sieben@open-xchange.com
+  - Bugfix #14655: [L3] Sieve capability wrong if TLS is used
+    - Fixed regex once again to include all Cyrus versions including 2.3.9 to 
+      the implementations which aren't working correct 

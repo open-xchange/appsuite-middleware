@@ -38,7 +38,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 1
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -98,6 +98,12 @@ fi
 /opt/open-xchange/etc/groupware/*.properties
 
 %changelog
+* Mon Dec 14 2009 - choeger@open-xchange.com
+  - added more logging
+  - disable caching in proxies
+  - do not allow insecure transmissions (must use https now)
+* Mon Oct 12 2009 - manuel.kraft@open-xchange.com
+  - Bugfix #14657 for checking if referrer already contains "?"
 * Fri Jul 10 2009 - dennis.sieben@open-xchange.com
   - Bugfix #14116 Easylogin throws exception on server shutdown
     - Added null check in shutdown code

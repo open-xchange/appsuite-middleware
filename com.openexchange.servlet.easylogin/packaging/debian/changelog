@@ -1,3 +1,9 @@
+open-xchange-easylogin (6.15.0.0-1) unstable; urgency=low
+
+  * first build for 6.15-rev2
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 13 Jan 2010 15:16:12 +0100
+
 open-xchange-easylogin (6.15.0.0-0) unstable; urgency=low
 
   * new unstable cycle 6.15

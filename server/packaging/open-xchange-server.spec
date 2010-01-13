@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 1
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -490,6 +490,76 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Mon Jan 11 2010 - thorben.betten@open-xchange.com
+ - Bugfix #15061: Adding a warning to response object if an account's authentication fails
+* Mon Jan 11 2010 - martin.herfurth@open-xchange.com
+ - Bugfix #14922: Confirm status in public folders.
+* Mon Jan 11 2010 - choeger@open-xchange.com
+ - Bugfix #15176: Crawler YML files can not be updated
+* Wed Jan 06 2010 - martin.herfurth@open-xchange.com
+ - Bugfix #15155: Changing start date of a series (server side).
+* Wed Jan 06 2010 - thorben.betten@open-xchange.com
+ - Bugfix #15161: Applying user time zone to DateFormat instance when filling reply/forward template
+* Mon Jan 04 2010 - choeger@open-xchange.com
+ - Bugfix #15163: some packages are missing the dependency on sun java 6
+* Mon Jan 04 2010 - thorben.betten@open-xchange.com
+ - Bugfix #15128: Display of broken multipart/alternative mail
+* Mon Dec 28 2009 - martin.herfurth@open-xchange.com
+ - Bugfix #15046: Participant delete for Outlook.
+* Tue Dec 22 2009 - thorben.betten@open-xchange.com
+ - Bugfix #15126: Caching only low-cost fields while loading headers in demand
+* Mon Dec 21 2009 - marcus.klein@open-xchange.com
+ - Bugfix #15102: Reduced logging of missing table inside ReplicationMonitor. Improved update tasks to use connection to the database master
+   only.
+* Fri Dec 18 2009 - marcus.klein@open-xchange.com
+ - Bugfix #15077: Increased default max object count for some user related caches to increase performance in large contexts.
+* Fri Dec 18 2009 - thorben.betten@open-xchange.com
+ - Bugfix #15108: Fixed error handling on failing move operation of IMAP folders
+* Fri Dec 18 2009 - francisco.laguna@open-xchange.com
+ - Bugfix #15110: Apply download constraints only to OXMF pages and not attached infostore documents.
+* Thu Dec 17 2009 - thorben.betten@open-xchange.com
+ - Bugfix #15089: Checking for special identifier for all-groups-and-users
+ - Bugfix #15099: Fixed line folding of text mails
+* Thu Dec 17 2009 - marcus.klein@open-xchange.com
+ - Bugfix #15096: Added missing close of prepared statement.
+* Wed Dec 16 2009 - thorben.betten@open-xchange.com
+ - Bugfix #15094: Fixed AJP keep-alive mechanism to not mess up AJP communication cycle
+* Tue Dec 15 2009 - thorben.betten@open-xchange.com
+ - Bugfix #15075: Fixed un-quoting personal part of an email
+* Mon Dec 14 2009 - marcus.klein@open-xchange.com
+ - Bugfix #15070: Corrected category for concurrent modifications exceptions on contacts. 
+* Fri Dec 04 2009 - martin.herfurth@open-xchange.com
+ - Bugfix #14929: Setting until.
+* Thu Dec 03 2009 - thorben.betten@open-xchange.com
+ - Bugfix #15020: Fixed NPE when writing JSON user data
+ - Bugfix #15005: Fixed display of public folder if it contains no subfolders
+* Wed Dec 02 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14993: Checking for default auxiliary on cache start-up
+* Tue Dec 01 2009 - choeger@open-xchange.com
+ - Bugfix #15007: dependency missing on package open-xchange-user-json
+* Tue Dec 01 2009 - thorben.betten@open-xchange.com
+ - Bugfix #15009: Fixed exception on image retrieval
+* Mon Nov 30 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14937: MAL poll uses DB storage for remembered mail IDs
+* Fri Nov 27 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14890: Fixed display of a mail containing multiple inline text/* parts
+* Fri Nov 27 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14624: Using a faster initialization of update task list that does not wait for a timeout of 2 seconds when creating the update
+   task list.
+* Wed Nov 25 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14741: Removed usage of javax.swing.text.BadLocationException
+ - Bugfix #14938: Fixed display of mails with no text body from cached JSON representation
+ - Bugfix #14948: Building a self-describing URL for image look-up if no longer in image cache
+ - Bugfix #14946: Safety check if folder fullname is null in delivered request body
+* Wed Nov 25 2009 - martin.herfurth@open-xchange.com
+ - Bugfix #14984: SQL-Syntax error with special folder rights fixed.
+* Tue Nov 24 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14947: Checking for i18n strings when looking for a duplicate folder
+* Mon Nov 23 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14944: Fixed NPE in mail prefetcher
+ - Bugfix #14949: Checking changed permissions for system folders
+* Fri Nov 20 2009 - thorben.betten@open-xchange.com
+ - Bugfix #14940: Fixed NPE when unregistering from unknown servlet path
 * Wed Nov 18 2009 - marcus.klein@open-xchange.com
  - Bugfix #14889: Using the same connection for deleting reminder when a user is deleted.
  - Bugfix #14834: Not trying to initialize the nested cause of a ServletException because this gives a IllegalStateException.
