@@ -60,6 +60,11 @@ import java.util.List;
 public interface MessagingFolder {
 
     /**
+     * The constant for fullname of an account's root folder.
+     */
+    public static final String ROOT_FULLNAME = "";
+
+    /**
      * Gets the capabilities of this folder; e.g <code>"QUOTA"</code>, <code>"PERMISSIONS"</code>, etc.
      * 
      * @return The list of capabilities
