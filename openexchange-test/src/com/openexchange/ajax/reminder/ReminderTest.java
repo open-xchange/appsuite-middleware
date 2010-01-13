@@ -80,7 +80,7 @@ import com.openexchange.tools.URLParameter;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
 
-public class ReminderTest extends AbstractAJAXTest {
+public abstract class ReminderTest extends AbstractAJAXTest {
 
     private static final String REMINDER_URL = "/ajax/reminder";
 
