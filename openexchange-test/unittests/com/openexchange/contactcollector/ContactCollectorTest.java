@@ -49,11 +49,18 @@
 
 package com.openexchange.contactcollector;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import javax.mail.internet.InternetAddress;
 import junit.framework.TestCase;
+import com.openexchange.ajax.user.UserImpl4Test;
 import com.openexchange.api2.OXException;
+import com.openexchange.authentication.LoginException;
+import com.openexchange.contactcollector.folder.ContactCollectorFolderCreator;
 import com.openexchange.contactcollector.internal.ContactCollectorServiceImpl;
 import com.openexchange.contactcollector.osgi.CCServiceRegistry;
 import com.openexchange.groupware.Init;
@@ -63,14 +70,21 @@ import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.i18n.FolderStrings;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.login.Login;
 import com.openexchange.preferences.ServerUserSetting;
+import com.openexchange.server.impl.DBPool;
+import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.setuptools.TestConfig;
 import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.oxfolder.OXFolderManager;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -84,6 +98,8 @@ public class ContactCollectorTest extends TestCase {
     private Context ctx;
 
     private Session session;
+    
+    private TestContextToolkit tools;
 
     private FolderObject contactFolder;
 
@@ -95,14 +111,11 @@ public class ContactCollectorTest extends TestCase {
         final TestConfig config = new TestConfig();
         user = prepareUser(config.getUser());
 
-        final TestContextToolkit tools = new TestContextToolkit();
+        tools = new TestContextToolkit();
         ctx = tools.getDefaultContext();
         userId = tools.resolveUser(user, ctx);
         session = tools.getSessionForUser(user, ctx);
         contactFolder = getStandardContactFolder();
-
-        ServerUserSetting.setContactCollectionFolder(ctx.getContextId(), userId, contactFolder.getObjectID());
-        ServerUserSetting.setContactColletion(ctx.getContextId(), userId, true);
 
         deleteContactFromFolder(mail);
     }
@@ -117,12 +130,38 @@ public class ContactCollectorTest extends TestCase {
 
     @Override
     public void tearDown() throws Exception {
-        ServerUserSetting.setContactColletion(ctx.getContextId(), userId, false);
+        ServerUserSetting.setContactColletion(ctx, session, userId, false);
         Init.stopServer();
         deleteContactFromFolder(mail);
     }
+    
+    public void testNoFolder() throws Throwable {
+        ServerUserSetting.setContactColletion(ctx, session, userId, true);
+        setFolderNULL();
+        Connection con = DBPool.pickupWriteable(ctx);
+        new ContactCollectorFolderCreator().create(session, ctx, new StringHelper(Locale.ENGLISH).getString(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME), con, false);
+        DBPool.closeWriterSilent(ctx, con);
+        Integer folder = ServerUserSetting.getContactCollectionFolder(ctx.getContextId(), userId);
+        assertNotNull("Folder should not be NULL", folder);
+        assertTrue("Invalid folder id", folder > 0);
+    }
+    
+    public void testNewFeature() throws Throwable {
+        removeUserEntry();
+        Connection con = DBPool.pickupWriteable(ctx);
+        new ContactCollectorFolderCreator().create(session, ctx, new StringHelper(Locale.ENGLISH).getString(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME), con, true);
+        ServerUserSetting setting = ServerUserSetting.getDefaultInstance();
+        assertNotNull("No folder for contact collection", setting.getIContactCollectionFolder(ctx.getContextId(), userId));
+        assertTrue("No folder for contact collection", setting.getIContactCollectionFolder(ctx.getContextId(), userId) > 0);
+        assertTrue("Feature should be switched on", setting.isIContactCollectionEnabled(ctx.getContextId(), userId));
+        assertTrue("Should collect incoming", setting.isContactCollectOnMailAccess(ctx.getContextId(), userId));
+        assertTrue("Should collect on outgoing", setting.isContactCollectOnMailTransport(ctx.getContextId(), userId));
+    }
 
     public void testNewContact() throws Throwable {
+        ServerUserSetting.setContactCollectionFolder(ctx.getContextId(), userId, contactFolder.getObjectID());
+        ServerUserSetting.setContactColletion(ctx, session, userId, true);
+        
         final ContactCollectorServiceImpl collector = new ContactCollectorServiceImpl();
         collector.start();
         try {
@@ -140,6 +179,9 @@ public class ContactCollectorTest extends TestCase {
     }
 
     public void testExistingContact() throws Throwable {
+        ServerUserSetting.setContactCollectionFolder(ctx.getContextId(), userId, contactFolder.getObjectID());
+        ServerUserSetting.setContactColletion(ctx, session, userId, true);
+        
         final ContactCollectorServiceImpl collector = new ContactCollectorServiceImpl();
         collector.start();
         try {
@@ -211,5 +253,57 @@ public class ContactCollectorTest extends TestCase {
                 session);
             contactInterface.deleteContactObject(contact.getObjectID(), contact.getParentFolderID(), contact.getLastModified());
         }
+    }
+    
+    private void removeUserEntry() throws Throwable {
+        Connection con = DBPool.pickupWriteable(ctx);
+        PreparedStatement stmt = con.prepareStatement("DELETE FROM user_setting_server WHERE cid = ? AND user = ?");
+        stmt.setInt(1, ctx.getContextId());
+        stmt.setInt(2, userId);
+        stmt.execute();
+        stmt.close();
+        DBPool.closeWriterSilent(ctx, con);
+    }
+    
+    private void setFolderNULL() throws Throwable {
+        Connection con = DBPool.pickupWriteable(ctx);
+        PreparedStatement stmt = con.prepareStatement("UPDATE user_setting_server SET contact_collect_folder = ? WHERE cid = ? AND user = ?");
+        stmt.setNull(1, Types.INTEGER);
+        stmt.setInt(2, ctx.getContextId());
+        stmt.setInt(3, userId);
+        int count = stmt.executeUpdate();
+        stmt.close();
+        if (count == 0) {
+            stmt = con.prepareStatement("INSERT INTO user_setting_server (cid, user, contact_collect_folder) VALUES (?, ?, ?)");
+            stmt.setInt(1, ctx.getContextId());
+            stmt.setInt(2, userId);
+            stmt.setNull(3, Types.INTEGER);
+            stmt.execute();
+            stmt.close();
+        }
+        DBPool.closeWriterSilent(ctx, con);
+    }
+    
+    private FolderObject createSubFolder() throws Throwable {
+        FolderObject fo = new FolderObject();
+        fo.setFolderName("Contact Collect Folder" + System.currentTimeMillis());
+        fo.setParentFolderID(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
+        fo.setModule(FolderObject.CONTACT);
+        fo.setType(FolderObject.PRIVATE);
+        final OCLPermission ocl = new OCLPermission();
+        ocl.setEntity(userId);
+        ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+        ocl.setGroupPermission(false);
+        ocl.setFolderAdmin(true);
+        fo.setPermissionsAsArray(new OCLPermission[] { ocl });
+        OXFolderManager oxma = OXFolderManager.getInstance(session);
+        int fuid = oxma.createFolder(fo, true, System.currentTimeMillis()).getObjectID();
+        fo.setObjectID(fuid);
+        return fo;
+    }
+    
+    private void deleteFolder(FolderObject fo) throws Throwable {
+        OXFolderManager oxma = OXFolderManager.getInstance(session);
+        oxma.deleteFolder(new FolderObject(fo.getObjectID()), true, System.currentTimeMillis());
     }
 }

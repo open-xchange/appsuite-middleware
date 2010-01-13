@@ -109,7 +109,7 @@ public class OrderByTest extends TestCase {
         contactFolder = getStandardContactFolder();
 
         ServerUserSetting.setContactCollectionFolder(ctx.getContextId(), userId, contactFolder.getObjectID());
-        ServerUserSetting.setContactColletion(ctx.getContextId(), userId, true);
+        ServerUserSetting.setContactColletion(ctx, session, userId, true);
     }
 
     public void testOrderByUserfield20() throws Throwable {
