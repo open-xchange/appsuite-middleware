@@ -66,7 +66,6 @@ import com.openexchange.messaging.generic.groupware.MessagingGenericCreateTableT
 import com.openexchange.messaging.generic.groupware.MessagingGenericDeleteListener;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.server.osgiservice.DeferredActivator;
-import com.openexchange.server.osgiservice.RegistryCustomizer;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
@@ -128,10 +127,6 @@ public class MessagingGenericActivator extends DeferredActivator {
             }
 
             trackers = new ArrayList<ServiceTracker>();
-            trackers.add(new ServiceTracker(
-                context,
-                UpdateTaskProviderService.class.getName(),
-                new RegistryCustomizer<UpdateTaskProviderService>(context, UpdateTaskProviderService.class, getServiceRegistry())));
             for (final ServiceTracker tracker : trackers) {
                 tracker.open();
             }
