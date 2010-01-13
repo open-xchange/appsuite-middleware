@@ -53,14 +53,29 @@ import java.util.List;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingService;
 
-
 /**
  * {@link MessagingServiceRegistry}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since Open-Xchange v6.16
  */
 public interface MessagingServiceRegistry {
+
+    /**
+     * Gets the messaging service associated with specified identifier.
+     * 
+     * @param id The messaging service identifier
+     * @return The messaging service associated with specified identifier
+     * @throws MessagingException If no messaging service is associated with specified identifier
+     */
     public MessagingService getMessagingService(String id) throws MessagingException;
+
+    /**
+     * Gets all messaging services kept in this registry.
+     * 
+     * @return All messaging services kept in this registry
+     * @throws MessagingException If messaging services cannot be returned
+     */
     public List<MessagingService> getAllServices() throws MessagingException;
 }
