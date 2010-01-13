@@ -23,7 +23,7 @@ import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.FileStorageException;
 
-public class UpdateTest extends TestCase {
+public abstract class UpdateTest extends TestCase {
     protected Schema schema = null;
     protected int existing_ctx_id = 0;
     protected int user_id = -1;
