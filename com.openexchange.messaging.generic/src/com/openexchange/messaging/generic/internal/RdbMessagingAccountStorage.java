@@ -59,8 +59,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.context.ContextService;
+import com.openexchange.crypto.CryptoException;
+import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.datatypes.genericonf.DynamicFormDescription;
+import com.openexchange.datatypes.genericonf.FormElement;
+import com.openexchange.datatypes.genericonf.FormElement.Widget;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigStorageException;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.groupware.contexts.Context;
@@ -151,6 +156,20 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
                 final GenericConfigurationStorageService genericConfStorageService = getService(CLAZZ_GEN_CONF);
                 final Map<String, Object> configuration = new HashMap<String, Object>();
                 genericConfStorageService.fill(rc, getContext(session), rs.getInt(1), configuration);
+                /*
+                 * Decrypt password fields for clear-text representation in account's configuration
+                 */
+                final List<String> passwordElementNames = getPasswordElementNames(serviceId);
+                if (!passwordElementNames.isEmpty()) {
+                    final CryptoService cryptoService = getService(CryptoService.class);
+                    for (final String passwordElementName : passwordElementNames) {
+                        final String toDecrypt = (String) configuration.get(passwordElementName);
+                        if (null != toDecrypt) {
+                            final String decrypted = cryptoService.decrypt(toDecrypt, session.getPassword());
+                            configuration.put(passwordElementName, decrypted);
+                        }
+                    }
+                }
                 account.setConfiguration(configuration);
             }
             account.setId(id);
@@ -162,6 +181,8 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
         } catch (final SQLException e) {
             throw MessagingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final GenericConfigStorageException e) {
+            throw new MessagingException(e);
+        } catch (final CryptoException e) {
             throw new MessagingException(e);
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
@@ -299,7 +320,22 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
             final int genericConfId;
             {
                 final GenericConfigurationStorageService genericConfStorageService = getService(CLAZZ_GEN_CONF);
-                genericConfId = genericConfStorageService.save(wc, getContext(session), account.getConfiguration());
+                final Map<String, Object> configuration = account.getConfiguration();
+                /*
+                 * Encrypt password fields to not having clear-text representation in database
+                 */
+                final List<String> passwordElementNames = getPasswordElementNames(serviceId);
+                if (!passwordElementNames.isEmpty()) {
+                    final CryptoService cryptoService = getService(CryptoService.class);
+                    for (final String passwordElementName : passwordElementNames) {
+                        final String toCrypt = (String) configuration.get(passwordElementName);
+                        if (null != toCrypt) {
+                            final String encrypted = cryptoService.encrypt(toCrypt, session.getPassword());
+                            configuration.put(passwordElementName, encrypted);
+                        }
+                    }
+                }
+                genericConfId = genericConfStorageService.save(wc, getContext(session), configuration);
             }
             /*
              * Insert account data
@@ -385,7 +421,8 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
         }
     }
 
-    private static final String SQL_UPDATE = "UPDATE messagingAccount SET displayName = ? WHERE cid = ? AND user = ? AND serviceId = ? AND account = ?";
+    private static final String SQL_UPDATE =
+        "UPDATE messagingAccount SET displayName = ? WHERE cid = ? AND user = ? AND serviceId = ? AND account = ?";
 
     public void updateAccount(final String serviceId, final MessagingAccount account, final Session session) throws MessagingException {
         final DatabaseService databaseService = getService(CLAZZ_DB);
@@ -412,6 +449,20 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
                 if (null != configuration) {
                     final GenericConfigurationStorageService genericConfStorageService = getService(CLAZZ_GEN_CONF);
                     final int genericConfId = getGenericConfId(contextId, session.getUserId(), serviceId, account.getId(), wc);
+                    /*
+                     * Encrypt password fields to not having clear-text representation in database
+                     */
+                    final List<String> passwordElementNames = getPasswordElementNames(serviceId);
+                    if (!passwordElementNames.isEmpty()) {
+                        final CryptoService cryptoService = getService(CryptoService.class);
+                        for (final String passwordElementName : passwordElementNames) {
+                            final String toCrypt = (String) configuration.get(passwordElementName);
+                            if (null != toCrypt) {
+                                final String encrypted = cryptoService.encrypt(toCrypt, session.getPassword());
+                                configuration.put(passwordElementName, encrypted);
+                            }
+                        }
+                    }
                     genericConfStorageService.update(wc, getContext(session), genericConfId, configuration);
                 }
             }
@@ -487,6 +538,26 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
         }
+    }
+
+    /**
+     * Gets the names of those {@link FormElement} associated with given identifier's messaging service which indicate to be of type
+     * {@link Widget#PASSWORD password}.
+     * 
+     * @param serviceId The service identifier
+     * @return The password field names
+     * @throws MessagingException If names cannot be returned
+     */
+    private static List<String> getPasswordElementNames(final String serviceId) throws MessagingException {
+        final DynamicFormDescription formDescription =
+            getService(MessagingServiceRegistry.class).getMessagingService(serviceId).getFormDescription();
+        final List<String> retval = new ArrayList<String>(2);
+        for (final FormElement formElement : formDescription) {
+            if (Widget.PASSWORD.equals(formElement.getWidget())) {
+                retval.add(formElement.getName());
+            }
+        }
+        return retval;
     }
 
 }
