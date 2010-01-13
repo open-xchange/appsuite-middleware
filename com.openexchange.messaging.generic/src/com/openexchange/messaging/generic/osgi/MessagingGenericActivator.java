@@ -50,6 +50,7 @@
 package com.openexchange.messaging.generic.osgi;
 
 import static com.openexchange.messaging.generic.services.MessagingGenericServiceRegistry.getServiceRegistry;
+import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -127,6 +128,27 @@ public class MessagingGenericActivator extends DeferredActivator {
                     }
                 }
             }
+            
+            {
+                /*
+                 * MessagingAccount region with 5 minutes time-out
+                 */
+                final byte[] ccf = ("jcs.region.MessagingAccount=LTCP\n" + 
+                		"jcs.region.MessagingAccount.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" + 
+                		"jcs.region.MessagingAccount.cacheattributes.MaxObjects=10000000\n" + 
+                		"jcs.region.MessagingAccount.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" + 
+                		"jcs.region.MessagingAccount.cacheattributes.UseMemoryShrinker=true\n" + 
+                		"jcs.region.MessagingAccount.cacheattributes.MaxMemoryIdleTimeSeconds=180\n" + 
+                		"jcs.region.MessagingAccount.cacheattributes.ShrinkerIntervalSeconds=60\n" + 
+                		"jcs.region.MessagingAccount.elementattributes=org.apache.jcs.engine.ElementAttributes\n" + 
+                		"jcs.region.MessagingAccount.elementattributes.IsEternal=false\n" + 
+                		"jcs.region.MessagingAccount.elementattributes.MaxLifeSeconds=300\n" + 
+                		"jcs.region.MessagingAccount.elementattributes.IdleTime=180\n" + 
+                		"jcs.region.MessagingAccount.elementattributes.IsSpool=false\n" + 
+                		"jcs.region.MessagingAccount.elementattributes.IsRemote=false\n" + 
+                		"jcs.region.MessagingAccount.elementattributes.IsLateral=false\n").getBytes();
+                getService(CacheService.class).loadConfiguration(new ByteArrayInputStream(ccf));
+            }
 
             trackers = new ArrayList<ServiceTracker>();
             for (final ServiceTracker tracker : trackers) {
@@ -162,6 +184,10 @@ public class MessagingGenericActivator extends DeferredActivator {
                     registrations.remove(0).unregister();
                 }
                 registrations = null;
+            }
+            final CacheService cacheService = getService(CacheService.class);
+            if (null != cacheService) {
+                cacheService.freeCache("MessagingAccount");
             }
             /*
              * Clear service registry
