@@ -76,7 +76,11 @@ public enum MessagingExceptionCodes implements OXErrorMessage {
     /**
      * Messaging account %1$s of service "%2$s" could not be found for user %3$s in context %4$s.
      */
-    ACCOUNT_NOT_FOUND(MessagingExceptionMessages.ACCOUNT_NOT_FOUND_MSG, Category.CODE_ERROR, 4);
+    ACCOUNT_NOT_FOUND(MessagingExceptionMessages.ACCOUNT_NOT_FOUND_MSG, Category.CODE_ERROR, 4),
+    /**
+     * The operation is not supported by service %1$s.
+     */
+    OPERATION_NOT_SUPPORTED(MessagingExceptionMessages.OPERATION_NOT_SUPPORTED_MSG, Category.CODE_ERROR, 6);
 
     private final Category category;
 

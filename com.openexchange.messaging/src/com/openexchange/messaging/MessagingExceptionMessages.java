@@ -71,6 +71,9 @@ public final class MessagingExceptionMessages implements LocalizableStrings {
     // Messaging account %1$s of service "%2$s" could not be found for user %3$s in context %4$s.
     public static final String ACCOUNT_NOT_FOUND_MSG = "Messaging account %1$s of service \"%2$s\" could not be found for user %3$s in context %4$s.";
 
+    // The operation is not supported by service %1$s.
+    public static final String OPERATION_NOT_SUPPORTED_MSG = "The operation is not supported by service %1$s.";
+
     /**
      * Initializes a new {@link MessagingExceptionMessages}.
      */
