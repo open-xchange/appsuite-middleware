@@ -98,7 +98,7 @@ public interface MessagingFolder {
     public MessagingPermission getOwnPermission();
 
     /**
-     * Gets the parent identifier.
+     * Gets the parent identifier or <code>null</code> if this messaging folder denotes the root folder.
      * 
      * @return The parent identifier or <code>null</code> if this messaging folder denotes the root folder
      */
