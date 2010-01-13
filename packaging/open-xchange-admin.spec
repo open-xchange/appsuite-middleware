@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 1
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -335,6 +335,24 @@ fi
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Mon Jan 11 2010 - choeger@open-xchange.com
+ - Bugfix #15174:  Empty directory /opt/open-xchange/libexec is useless
+* Fri Dec 18 2009 - marcus.klein@open-xchange.com
+ - Bugfix #15077: Increased default max object count for some user related caches to increase performance in large contexts.
+* Mon Dec 14 2009 - marcus.klein@open-xchange.com
+ - Bugfix #15066: Removed mail account tables from list of created tables by sql scripts.
+* Tue Dec 08 2009 - choeger@open-xchange.com
+ - Bugfix #15045 -  missing common shell functions file
+* Tue Dec 08 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14289: Toggling boolean value check to get it the correct way around when primary email is unchangeable.
+* Wed Nov 25 2009 - marcus.klein@open-xchange.com
+ - Bugfix #13634: Using same generic use checks as for creating normal users.
+* Tue Nov 24 2009 - marcus.klein@open-xchange.com
+ - Bugfix #14935: Fixed CLI parser to deal with trailing empty string
+* Mon Nov 23 2009 - marcus.klein@open-xchange.com
+ - Toggled the user permission bit for access to the global address book, so the user still has permission to it although the client may
+   have no information about that permission bit.
+ - Bugfix #14953: Correctly configuring disabled access to global address book when using access combination names.
 * Wed Nov 04 2009 - marcus.klein@open-xchange.com
  - Bugfix #14773: Corrected SQL statement to find matching user.
 * Mon Nov 02 2009 - marcus.klein@open-xchange.com
