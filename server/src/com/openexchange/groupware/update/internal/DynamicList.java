@@ -69,15 +69,6 @@ public final class DynamicList implements UpdateTaskList {
 
     private static final DynamicList SINGLETON = new DynamicList();
 
-    private final ConcurrentMap<Class<? extends UpdateTask>, UpdateTask> taskList = new ConcurrentHashMap<Class<? extends UpdateTask>, UpdateTask>();
-
-    /**
-     * Initializes a new {@link DynamicList}.
-     */
-    public DynamicList() {
-        super();
-    }
-
     /**
      * Gets the singleton instance of {@link DynamicList}.
      * 
@@ -85,6 +76,19 @@ public final class DynamicList implements UpdateTaskList {
      */
     public static DynamicList getInstance() {
         return SINGLETON;
+    }
+
+    /*-
+     * -------------------------------- Member section --------------------------------
+     */
+
+    private final ConcurrentMap<Class<? extends UpdateTask>, UpdateTask> taskList = new ConcurrentHashMap<Class<? extends UpdateTask>, UpdateTask>();
+
+    /**
+     * Initializes a new {@link DynamicList}.
+     */
+    private DynamicList() {
+        super();
     }
 
     public boolean addUpdateTask(final UpdateTask updateTask) {
