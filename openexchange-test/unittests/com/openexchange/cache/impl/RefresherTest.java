@@ -49,12 +49,13 @@
 
 package com.openexchange.cache.impl;
 
+import java.io.InputStream;
 import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
+import junit.framework.TestCase;
 import com.openexchange.cache.dynamic.impl.OXObjectFactory;
 import com.openexchange.cache.dynamic.impl.Refresher;
 import com.openexchange.caching.Cache;
@@ -66,8 +67,6 @@ import com.openexchange.caching.CacheStatistics;
 import com.openexchange.caching.ElementAttributes;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.services.ServerServiceRegistry;
-
-import junit.framework.TestCase;
 
 /**
  *
@@ -106,7 +105,7 @@ public class RefresherTest extends TestCase {
         // Some other tests let there other Cache instances.
         ServerServiceRegistry.getInstance().clearRegistry();
         ServerServiceRegistry.getInstance().addService(CacheService.class, new CacheService() {
-            private Cache cache = new Cache() {
+            private final Cache cache = new Cache() {
                 private Serializable value;
                 public void clear() {
                     throw new UnsupportedOperationException();
@@ -215,6 +214,9 @@ public class RefresherTest extends TestCase {
             public void loadConfiguration(final String cacheConfigFile) {
                 throw new UnsupportedOperationException();
             }
+            public void loadConfiguration(final InputStream inputStream) throws CacheException {
+                throw new UnsupportedOperationException();
+            }
             public void loadDefaultConfiguration() {
                 throw new UnsupportedOperationException();
             }
@@ -224,11 +226,11 @@ public class RefresherTest extends TestCase {
             public CacheKey newCacheKey(final int contextId, final Serializable obj) {
                 throw new UnsupportedOperationException();
             }
-            public CacheKey newCacheKey(int contextId, Serializable... objs) {
+            public CacheKey newCacheKey(final int contextId, final Serializable... objs) {
                 throw new UnsupportedOperationException();
             }
         });
-        Refreshed refreshed = new Refreshed();
+        final Refreshed refreshed = new Refreshed();
         consumer1 = new Consumer(refreshed);
         consumer2 = new Consumer(refreshed);
         remover = new Remover();
@@ -302,8 +304,8 @@ public class RefresherTest extends TestCase {
     }
 
     private static class Consumer implements Runnable {
-        private Refreshed refreshed;
-        private AtomicBoolean run = new AtomicBoolean(true);
+        private final Refreshed refreshed;
+        private final AtomicBoolean run = new AtomicBoolean(true);
         private Exception e;
         public Consumer(final Refreshed refreshed) {
             super();
@@ -328,7 +330,7 @@ public class RefresherTest extends TestCase {
     }
 
     private static class Remover implements Runnable {
-        private AtomicBoolean run = new AtomicBoolean(true);
+        private final AtomicBoolean run = new AtomicBoolean(true);
         private Exception e;
         public void stop() {
             run.set(false);
