@@ -99,7 +99,6 @@ public class ImportExportStandaloneSuite extends TestSuite {
 		tests.addTest( Bug8681Suite.suite() );
 		tests.addTestSuite( VCardMimeTypeTest.class);
 		tests.addTestSuite( MissingAddressesAfterImportTest.class);
-		tests.addTest( MessageFillerTest.suite() );
 		
 		return tests;
 	}
