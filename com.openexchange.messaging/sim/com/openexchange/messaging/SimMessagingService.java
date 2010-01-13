@@ -62,8 +62,7 @@ import com.openexchange.datatypes.genericonf.DynamicFormDescription;
  */
 public class SimMessagingService implements MessagingService {
 
-    private List<String> capabilities;
-
+ 
     private String displayName;
 
     private DynamicFormDescription formDescription;
@@ -75,6 +74,8 @@ public class SimMessagingService implements MessagingService {
     private final Map<Integer, MessagingAccountTransport> accountTransportMap;
 
     private MessagingAccountManager accManager;
+
+    private List<String> capabilities;
 
     public SimMessagingService() {
         super();
@@ -102,7 +103,7 @@ public class SimMessagingService implements MessagingService {
         return id;
     }
 
-    public void setCapabilities(final List<String> capabilities) {
+    public void setMessageActions(final List<String> capabilities) {
         this.capabilities = capabilities;
     }
 
