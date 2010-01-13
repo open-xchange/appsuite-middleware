@@ -47,61 +47,70 @@
  *
  */
 
-package com.openexchange.messaging.generic;
+package com.openexchange.messaging.generic.internal;
 
 import java.util.List;
 import com.openexchange.messaging.MessagingAccount;
-import com.openexchange.messaging.MessagingAccountManager;
 import com.openexchange.messaging.MessagingException;
-import com.openexchange.messaging.generic.internal.CachingMessagingAccountStorage;
 import com.openexchange.session.Session;
 
 /**
- * {@link DefaultMessagingAccountManager} - The default messaging account manager.
+ * {@link MessagingAccountStorage}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
-public class DefaultMessagingAccountManager implements MessagingAccountManager {
+public interface MessagingAccountStorage {
 
     /**
-     * The messaging account storage cache.
-     */
-    private static final CachingMessagingAccountStorage CACHE = CachingMessagingAccountStorage.getInstance();
-
-    /**
-     * The identifier of associated messaging service.
-     */
-    private final String serviceId;
-
-    /**
-     * Initializes a new {@link DefaultMessagingAccountManager}.
+     * Gets the denoted account.
      * 
-     * @param serviceId The messaging service identifier
+     * @param serviceId The service identifier
+     * @param id The account ID
+     * @param session The session
+     * @return The account
+     * @throws MessagingException If returning account fails
      */
-    public DefaultMessagingAccountManager(final String serviceId) {
-        super();
-        this.serviceId = serviceId;
-    }
+    public MessagingAccount getAccount(String serviceId, int id, Session session) throws MessagingException;
 
-    public MessagingAccount getAccount(final int id, final Session session) throws MessagingException {
-        return CACHE.getAccount(serviceId, id, session);
-    }
+    /**
+     * Gets all accounts associated with specified service and given user.
+     * 
+     * @param serviceId The service ID
+     * @param session The session
+     * @return All accounts associated with specified service and given user
+     * @throws MessagingException If accounts cannot be returned
+     */
+    public List<MessagingAccount> getAccounts(String serviceId, Session session) throws MessagingException;
 
-    public List<MessagingAccount> getAccounts(final Session session) throws MessagingException {
-        return CACHE.getAccounts(serviceId, session);
-    }
+    /**
+     * Adds given account.
+     * 
+     * @param serviceId The service identifier
+     * @param account The account
+     * @param session The session
+     * @throws MessagingException If insertion fails
+     */
+    public void addAccount(String serviceId, MessagingAccount account, Session session) throws MessagingException;
 
-    public void addAccount(final MessagingAccount account, final Session session) throws MessagingException {
-        CACHE.addAccount(serviceId, account, session);
-    }
+    /**
+     * Deletes denoted account.
+     * 
+     * @param serviceId The service identifier
+     * @param account The account
+     * @param session The session
+     * @throws MessagingException If deletion fails
+     */
+    public void deleteAccount(String serviceId, MessagingAccount account, Session session) throws MessagingException;
 
-    public void deleteAccount(final MessagingAccount account, final Session session) throws MessagingException {
-        CACHE.deleteAccount(serviceId, account, session);
-    }
-
-    public void updateAccount(final MessagingAccount account, final Session session) throws MessagingException {
-        CACHE.updateAccount(serviceId, account, session);
-    }
+    /**
+     * Updates given account.
+     * 
+     * @param serviceId The service identifier
+     * @param account The account
+     * @param session The session
+     * @throws MessagingException If update fails
+     */
+    public void updateAccount(String serviceId, MessagingAccount account, Session session) throws MessagingException;
 
 }

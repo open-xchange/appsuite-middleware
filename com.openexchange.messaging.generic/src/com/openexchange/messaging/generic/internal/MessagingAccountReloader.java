@@ -47,61 +47,82 @@
  *
  */
 
-package com.openexchange.messaging.generic;
+package com.openexchange.messaging.generic.internal;
 
-import java.util.List;
+import java.util.Map;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.messaging.MessagingAccount;
-import com.openexchange.messaging.MessagingAccountManager;
-import com.openexchange.messaging.MessagingException;
-import com.openexchange.messaging.generic.internal.CachingMessagingAccountStorage;
-import com.openexchange.session.Session;
+import com.openexchange.messaging.MessagingService;
 
 /**
- * {@link DefaultMessagingAccountManager} - The default messaging account manager.
+ * {@link MessagingAccountReloader}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since Open-Xchange v6.16
  */
-public class DefaultMessagingAccountManager implements MessagingAccountManager {
+public final class MessagingAccountReloader extends Refresher<MessagingAccount> implements MessagingAccount {
+
+    private static final long serialVersionUID = -522777266183406469L;
 
     /**
-     * The messaging account storage cache.
+     * Cached delegate.
      */
-    private static final CachingMessagingAccountStorage CACHE = CachingMessagingAccountStorage.getInstance();
+    private MessagingAccount delegate;
 
     /**
-     * The identifier of associated messaging service.
-     */
-    private final String serviceId;
-
-    /**
-     * Initializes a new {@link DefaultMessagingAccountManager}.
+     * Initializes a new {@link MessagingAccountReloader}.
      * 
-     * @param serviceId The messaging service identifier
+     * @throws AbstractOXException If initial load of the object fails.
      */
-    public DefaultMessagingAccountManager(final String serviceId) {
-        super();
-        this.serviceId = serviceId;
+    public MessagingAccountReloader(final OXObjectFactory<MessagingAccount> factory, final String regionName) throws AbstractOXException {
+        super(factory, regionName);
+        this.delegate = refresh();
     }
 
-    public MessagingAccount getAccount(final int id, final Session session) throws MessagingException {
-        return CACHE.getAccount(serviceId, id, session);
+    /**
+     * @throws RuntimeException if refreshing fails.
+     */
+    private void updateDelegate() throws RuntimeException {
+        try {
+            this.delegate = refresh();
+        } catch (final AbstractOXException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
     }
 
-    public List<MessagingAccount> getAccounts(final Session session) throws MessagingException {
-        return CACHE.getAccounts(serviceId, session);
+    @Override
+    public boolean equals(final Object obj) {
+        updateDelegate();
+        return delegate.equals(obj);
     }
 
-    public void addAccount(final MessagingAccount account, final Session session) throws MessagingException {
-        CACHE.addAccount(serviceId, account, session);
+    @Override
+    public int hashCode() {
+        updateDelegate();
+        return delegate.hashCode();
     }
 
-    public void deleteAccount(final MessagingAccount account, final Session session) throws MessagingException {
-        CACHE.deleteAccount(serviceId, account, session);
+    @Override
+    public String toString() {
+        return "MessagingAccountReloader: " + delegate.toString();
     }
 
-    public void updateAccount(final MessagingAccount account, final Session session) throws MessagingException {
-        CACHE.updateAccount(serviceId, account, session);
+    public Map<String, Object> getConfiguration() {
+        updateDelegate();
+        return delegate.getConfiguration();
+    }
+
+    public String getDisplayName() {
+        updateDelegate();
+        return delegate.getDisplayName();
+    }
+
+    public int getId() {
+        return delegate.getId();
+    }
+
+    public MessagingService getMessagingService() {
+        updateDelegate();
+        return delegate.getMessagingService();
     }
 
 }

@@ -47,61 +47,34 @@
  *
  */
 
-package com.openexchange.messaging.generic;
+package com.openexchange.messaging.generic.internal;
 
-import java.util.List;
-import com.openexchange.messaging.MessagingAccount;
-import com.openexchange.messaging.MessagingAccountManager;
-import com.openexchange.messaging.MessagingException;
-import com.openexchange.messaging.generic.internal.CachingMessagingAccountStorage;
-import com.openexchange.session.Session;
+import java.io.Serializable;
+import java.util.concurrent.locks.Lock;
+import com.openexchange.groupware.AbstractOXException;
 
 /**
- * {@link DefaultMessagingAccountManager} - The default messaging account manager.
- * 
+ * {@link OXObjectFactory} - A copy of <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>'s OXObjectFactory class.
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @param <T> Type that is loaded by this object factory.
  * @since Open-Xchange v6.16
  */
-public class DefaultMessagingAccountManager implements MessagingAccountManager {
+public interface OXObjectFactory<T> {
 
     /**
-     * The messaging account storage cache.
+     * @return the key for identifying the cached object.
      */
-    private static final CachingMessagingAccountStorage CACHE = CachingMessagingAccountStorage.getInstance();
+    Serializable getKey();
 
     /**
-     * The identifier of associated messaging service.
+     * @return the object loaded from the database that will be put into cache if the object life timeout removed it.
+     * @throws AbstractOXException if loading the object fails.
      */
-    private final String serviceId;
+    T load() throws AbstractOXException;
 
     /**
-     * Initializes a new {@link DefaultMessagingAccountManager}.
-     * 
-     * @param serviceId The messaging service identifier
+     * @return the single lock for the single cache object.
      */
-    public DefaultMessagingAccountManager(final String serviceId) {
-        super();
-        this.serviceId = serviceId;
-    }
-
-    public MessagingAccount getAccount(final int id, final Session session) throws MessagingException {
-        return CACHE.getAccount(serviceId, id, session);
-    }
-
-    public List<MessagingAccount> getAccounts(final Session session) throws MessagingException {
-        return CACHE.getAccounts(serviceId, session);
-    }
-
-    public void addAccount(final MessagingAccount account, final Session session) throws MessagingException {
-        CACHE.addAccount(serviceId, account, session);
-    }
-
-    public void deleteAccount(final MessagingAccount account, final Session session) throws MessagingException {
-        CACHE.deleteAccount(serviceId, account, session);
-    }
-
-    public void updateAccount(final MessagingAccount account, final Session session) throws MessagingException {
-        CACHE.updateAccount(serviceId, account, session);
-    }
-
+    Lock getCacheLock();
 }
