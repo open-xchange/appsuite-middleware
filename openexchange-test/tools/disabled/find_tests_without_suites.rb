@@ -69,9 +69,11 @@ end
 
 
 def is_test(filename)
+  return false if filename =~ /Abstract/
   return true if filename =~ /Test\.java/
   
   content = IO.read(filename)
+  return false if content =~ /abstract\s+class/
   return true if content =~ /public\s+void\s+test/
   return true if content =~ /@test/
   false
@@ -116,7 +118,7 @@ end
 
 
 puts "Unused interface- and unit-tests\n"
-puts("=" * 25)
+puts("=" * 35)
 
 $current_directory = "/Users/development/workspace/openexchange-test/src/"
 find_test_suites("com.openexchange.test.InterfaceTests")
@@ -124,6 +126,7 @@ find_all_tests()
 
 $current_directory = "/Users/development/workspace/openexchange-test/unittests/"
 find_test_suites("com.openexchange.test.UnitTests")
+find_test_suites("com.openexchange.test.I18nTests")
 find_all_tests()
 
 find_unused_tests()
