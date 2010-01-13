@@ -49,6 +49,7 @@
 
 package com.openexchange.twitter.internal;
 
+import com.openexchange.twitter.Paging;
 import com.openexchange.twitter.TwitterAccess;
 import com.openexchange.twitter.TwitterService;
 
@@ -73,6 +74,10 @@ public final class TwitterServiceImpl implements TwitterService {
 
     public TwitterAccess getUnauthenticatedTwitterAccess() {
         return new TwitterAccessImpl(new twitter4j.Twitter());
+    }
+
+    public Paging newPaging() {
+        return new PagingImpl(new twitter4j.Paging());
     }
 
 }

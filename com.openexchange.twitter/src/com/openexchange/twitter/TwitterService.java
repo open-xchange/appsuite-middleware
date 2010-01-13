@@ -49,7 +49,6 @@
 
 package com.openexchange.twitter;
 
-
 /**
  * {@link TwitterService} - The <a href="http://twitter.com/">twitter</a> service.
  * 
@@ -72,5 +71,12 @@ public interface TwitterService {
      * @return An unauthenticated twitter access
      */
     public TwitterAccess getUnauthenticatedTwitterAccess();
+
+    /**
+     * Creates a new instance of {@link Paging}.
+     * 
+     * @return A new instance of {@link Paging}
+     */
+    public Paging newPaging();
 
 }
