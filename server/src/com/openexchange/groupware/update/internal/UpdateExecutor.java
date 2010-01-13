@@ -156,11 +156,11 @@ public final class UpdateExecutor {
     }
 
     private final void lockSchema() throws SchemaException {
-        store.lockSchema(state, contextId);
+        store.lockSchema(state, contextId, false);
     }
 
     private final void unlockSchema() throws SchemaException {
-        store.unlockSchema(state, contextId);
+        store.unlockSchema(state, contextId, false);
     }
 
     private final void addExecutedTask(String taskName, boolean success) throws SchemaException {

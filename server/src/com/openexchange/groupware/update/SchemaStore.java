@@ -49,10 +49,14 @@
 
 package com.openexchange.groupware.update;
 
+import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
+import java.sql.SQLException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.update.internal.SchemaExceptionCodes;
 import com.openexchange.groupware.update.internal.SchemaStoreImpl;
 
 /**
@@ -82,18 +86,20 @@ public abstract class SchemaStore {
      * 
      * @param schema the schema
      * @param contextId unique context identifier
+     * @param background <code>false</code> if blocking tasks are executed.
      * @throws SchemaException
      */
-    public abstract void lockSchema(Schema schema, int contextId) throws SchemaException;
-    
+    public abstract void lockSchema(Schema schema, int contextId, boolean background) throws SchemaException;
+
     /**
      * Marks given schem as unlocked to release this schema from an update process.
      * 
      * @param schema the schema
      * @param contextId the unique context identifier
+     * @param background <code>false</code> if blocking tasks finished.
      * @throws SchemaException
      */
-    public abstract void unlockSchema(Schema schema, int contextId) throws SchemaException;
+    public abstract void unlockSchema(Schema schema, int contextId, boolean background) throws SchemaException;
 
     public final Schema getSchema(Context ctx) throws SchemaException {
         return getSchema(ctx.getContextId());
@@ -109,7 +115,28 @@ public abstract class SchemaStore {
 
     public abstract ExecutedTask[] getExecutedTasks(int poolId, String schemaName) throws SchemaException;
 
-    public abstract void addExecutedTask(int contextId, String taskName, boolean success) throws SchemaException;
+    public final void addExecutedTask(int contextId, String taskName, boolean success) throws SchemaException {
+        final Connection con;
+        try {
+            con = Database.get(contextId, true);
+        } catch (DBPoolingException e) {
+            throw new SchemaException(e);
+        }
+        try {
+            con.setAutoCommit(false);
+            addExecutedTask(con, taskName, success);
+            con.commit();
+        } catch (SQLException e) {
+            rollback(con);
+            throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (SchemaException e) {
+            rollback(con);
+            throw e;
+        } finally {
+            autocommit(con);
+            Database.back(contextId, true, con);
+        }
+    }
 
     /**
      * @param con a writable database connection but into transaction mode.

@@ -365,7 +365,7 @@ public final class UpdateTaskToolkit {
 
     private static void lockSchema(Schema schema, int contextId) throws UpdateException {
         try {
-            SchemaStore.getInstance().lockSchema(schema, contextId);
+            SchemaStore.getInstance().lockSchema(schema, contextId, false);
         } catch (SchemaException e) {
             throw new UpdateException(e);
         }
@@ -373,7 +373,7 @@ public final class UpdateTaskToolkit {
 
     private static void unlockSchema(Schema schema, int contextId) throws UpdateException {
         try {
-            SchemaStore.getInstance().unlockSchema(schema, contextId);
+            SchemaStore.getInstance().unlockSchema(schema, contextId, false);
         } catch (SchemaException e) {
             throw new UpdateException(e);
         }

@@ -84,6 +84,8 @@ public class SchemaStoreImpl extends SchemaStore {
 
     private static final String LOCKED = "LOCKED";
 
+    private static final String BACKGROUND = "BACKGROUND";
+
     public SchemaStoreImpl() {
         super();
     }
@@ -136,7 +138,7 @@ public class SchemaStoreImpl extends SchemaStore {
     }
 
     @Override
-    public void lockSchema(Schema schema, int contextId) throws SchemaException {
+    public void lockSchema(Schema schema, int contextId, boolean background) throws SchemaException {
         final Connection con;
         try {
             con = Database.get(contextId, true);
@@ -145,10 +147,10 @@ public class SchemaStoreImpl extends SchemaStore {
         }
         try {
             con.setAutoCommit(false); // BEGIN
-            // Insert LOCKED
-            insertLock(con, schema);
+            // Insert lock
+            insertLock(con, schema, background ? BACKGROUND : LOCKED);
             // Setting old version table to locked
-            if (Tools.tableExists(con, "version")) {
+            if (Tools.tableExists(con, "version") && !background) {
                 lockOldVersionTable(con, schema);
             }
             // Everything went fine. Schema is marked as locked
@@ -169,11 +171,11 @@ public class SchemaStoreImpl extends SchemaStore {
 
     private static final int MYSQL_DUPLICATE = 1062;
 
-    private static void insertLock(Connection con, Schema schema) throws SchemaException {
+    private static void insertLock(Connection con, Schema schema, String idiom) throws SchemaException {
         // Check for existing lock exclusively
         ExecutedTask[] tasks = readUpdateTasks(con);
         for (ExecutedTask task : tasks) {
-            if (LOCKED.equals(task.getTaskName())) {
+            if (idiom.equals(task.getTaskName())) {
                 throw SchemaExceptionCodes.ALREADY_LOCKED.create(schema.getSchema());
             }
         }
@@ -181,7 +183,7 @@ public class SchemaStoreImpl extends SchemaStore {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("INSERT INTO updateTask (cid,taskName,successful,lastModified) VALUES (0,?,true,?)");
-            stmt.setString(1, LOCKED);
+            stmt.setString(1, idiom);
             stmt.setLong(2, System.currentTimeMillis());
             if (stmt.executeUpdate() == 0) {
                 throw SchemaExceptionCodes.LOCK_FAILED.create(schema.getSchema());
@@ -232,7 +234,7 @@ public class SchemaStoreImpl extends SchemaStore {
     }
 
     @Override
-    public void unlockSchema(final Schema schema, final int contextId) throws SchemaException {
+    public void unlockSchema(Schema schema, int contextId, boolean background) throws SchemaException {
         final Connection con;
         try {
             con = Database.get(contextId, true);
@@ -242,10 +244,10 @@ public class SchemaStoreImpl extends SchemaStore {
         try {
             // End of update process, so unlock schema
             con.setAutoCommit(false);
-            // Delete LOCKED
-            deleteLock(con, schema);
+            // Delete lock
+            deleteLock(con, schema, background ? BACKGROUND : LOCKED);
             // Unlock old version table
-            if (Tools.tableExists(con, "version")) {
+            if (Tools.tableExists(con, "version") && !background) {
                 unlockOldVersionTable(con, schema);
             }
             // Everything went fine. Schema is marked as unlocked
@@ -262,12 +264,12 @@ public class SchemaStoreImpl extends SchemaStore {
         }
     }
 
-    private static void deleteLock(Connection con, Schema schema) throws SchemaException {
+    private static void deleteLock(Connection con, Schema schema, String idiom) throws SchemaException {
         // Check for existing lock exclusively
         ExecutedTask[] tasks = readUpdateTasks(con);
         boolean found = false;
         for (ExecutedTask task : tasks) {
-            if (LOCKED.equals(task.getTaskName())) {
+            if (idiom.equals(task.getTaskName())) {
                 found = true;
                 break;
             }
@@ -279,7 +281,7 @@ public class SchemaStoreImpl extends SchemaStore {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("DELETE FROM updateTask WHERE cid=0 AND taskName=?");
-            stmt.setString(1, LOCKED);
+            stmt.setString(1, idiom);
             if (stmt.executeUpdate() == 0) {
                 throw SchemaExceptionCodes.UNLOCK_FAILED.create(schema.getSchema());
             }
@@ -415,30 +417,6 @@ public class SchemaStoreImpl extends SchemaStore {
             closeSQLStuff(result, stmt);
         }
         return retval.toArray(new ExecutedTask[retval.size()]);
-    }
-
-    @Override
-    public void addExecutedTask(int contextId, String taskName, boolean success) throws SchemaException {
-        final Connection con;
-        try {
-            con = Database.get(contextId, true);
-        } catch (DBPoolingException e) {
-            throw new SchemaException(e);
-        }
-        try {
-            con.setAutoCommit(false);
-            addExecutedTask(con, taskName, success);
-            con.commit();
-        } catch (SQLException e) {
-            rollback(con);
-            throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (SchemaException e) {
-            rollback(con);
-            throw e;
-        } finally {
-            autocommit(con);
-            Database.back(contextId, true, con);
-        }
     }
 
     @Override
