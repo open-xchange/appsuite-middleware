@@ -61,6 +61,8 @@ import com.openexchange.messaging.MessagingService;
  */
 public class DefaultMessagingAccount implements MessagingAccount {
 
+    private static final long serialVersionUID = -8295765793020470243L;
+
     private Map<String, Object> configuration;
 
     private String displayName;

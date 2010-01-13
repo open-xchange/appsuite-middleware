@@ -53,6 +53,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
+import com.openexchange.session.Session;
 
 /**
  * {@link SimMessagingService}
@@ -123,7 +124,7 @@ public class SimMessagingService implements MessagingService {
         this.accManager = accManager;
     }
 
-    public MessagingAccountAccess getAccountAccess(final int accountId) throws MessagingException {
+    public MessagingAccountAccess getAccountAccess(final int accountId, Session session) throws MessagingException {
         final MessagingAccountAccess accountAccess = accountAccessMap.get(Integer.valueOf(accountId));
         if (null == accountAccess) {
             // TODO: Throw appropriate error
@@ -135,7 +136,7 @@ public class SimMessagingService implements MessagingService {
         accountAccessMap.put(Integer.valueOf(accountId), accountAccess);
     }
 
-    public MessagingAccountTransport getAccountTransport(final int accountId) throws MessagingException {
+    public MessagingAccountTransport getAccountTransport(final int accountId, Session session) throws MessagingException {
         final MessagingAccountTransport accountTransport = accountTransportMap.get(Integer.valueOf(accountId));
         if (null == accountTransport) {
             // TODO: Throw appropriate error

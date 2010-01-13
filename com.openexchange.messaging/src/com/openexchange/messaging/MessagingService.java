@@ -51,6 +51,7 @@ package com.openexchange.messaging;
 
 import java.util.List;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
+import com.openexchange.session.Session;
 
 /**
  * {@link MessagingService} - The messaging service.
@@ -100,18 +101,20 @@ public interface MessagingService {
      * Gets the account access for specified account identifier.
      * 
      * @param accountId The account identifier
+     * @param session The session providing needed user data
      * @return The account access for specified account identifier
      * @throws MessagingException If account access cannot be returned for given account identifier
      */
-    public MessagingAccountAccess getAccountAccess(int accountId) throws MessagingException;
+    public MessagingAccountAccess getAccountAccess(int accountId, Session session) throws MessagingException;
 
     /**
      * Gets the account transport for specified account identifier.
      * 
      * @param accountId The account identifier
+     * @param session The session providing needed user data
      * @return The account transport for specified account identifier
      * @throws MessagingException If account transport cannot be returned for given account identifier
      */
-    public MessagingAccountTransport getAccountTransport(int accountId) throws MessagingException;
+    public MessagingAccountTransport getAccountTransport(int accountId, Session session) throws MessagingException;
 
 }
