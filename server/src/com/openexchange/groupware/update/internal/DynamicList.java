@@ -71,20 +71,28 @@ public final class DynamicList implements UpdateTaskList {
 
     private final ConcurrentMap<Class<? extends UpdateTask>, UpdateTask> taskList = new ConcurrentHashMap<Class<? extends UpdateTask>, UpdateTask>();
 
+    /**
+     * Initializes a new {@link DynamicList}.
+     */
     public DynamicList() {
         super();
     }
 
+    /**
+     * Gets the singleton instance of {@link DynamicList}.
+     * 
+     * @return The singleton instance
+     */
     public static DynamicList getInstance() {
         return SINGLETON;
     }
 
-    public boolean addUpdateTask(UpdateTask updateTask) {
-        boolean added = (null == taskList.putIfAbsent(updateTask.getClass(), updateTask));
-        if (!added) {
-            LOG.error("Update task \"" + updateTask.getClass().getName() + "\" is already registered.");
-        } else {
+    public boolean addUpdateTask(final UpdateTask updateTask) {
+        final boolean added = (null == taskList.putIfAbsent(updateTask.getClass(), updateTask));
+        if (added) {
             UpdateTaskCollection.getInstance().dirtyVersion();
+        } else {
+            LOG.error("Update task \"" + updateTask.getClass().getName() + "\" is already registered.");
         }
         return added;
     }
@@ -94,8 +102,8 @@ public final class DynamicList implements UpdateTaskList {
      * 
      * @param updateTask The update task
      */
-    public void removeUpdateTask(UpdateTask updateTask) {
-        UpdateTask removed = taskList.remove(updateTask.getClass());
+    public void removeUpdateTask(final UpdateTask updateTask) {
+        final UpdateTask removed = taskList.remove(updateTask.getClass());
         if (null == removed) {
             LOG.error("Update task \"" + updateTask.getClass().getName() + "\" is unknown and could not be deregistered.");
         } else {
@@ -104,8 +112,9 @@ public final class DynamicList implements UpdateTaskList {
     }
 
     public List<UpdateTask> getTaskList() {
-        List<UpdateTask> retval = new ArrayList<UpdateTask>(taskList.size());
+        final List<UpdateTask> retval = new ArrayList<UpdateTask>(taskList.size());
         retval.addAll(taskList.values());
         return retval;
     }
+
 }
