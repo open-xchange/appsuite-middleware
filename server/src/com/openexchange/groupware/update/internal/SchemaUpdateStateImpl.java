@@ -62,7 +62,9 @@ public class SchemaUpdateStateImpl extends SchemaImpl implements SchemaUpdateSta
 
     private final Set<String> executedTasks = new HashSet<String>();
 
-    public SchemaUpdateStateImpl() {
+    private boolean backgroundUpdatesRunning;
+
+    SchemaUpdateStateImpl() {
         super();
     }
 
@@ -71,6 +73,7 @@ public class SchemaUpdateStateImpl extends SchemaImpl implements SchemaUpdateSta
         for (String task : schema.getExecutedList()) {
             executedTasks.add(task);
         }
+        backgroundUpdatesRunning = schema.backgroundUpdatesRunning();
     }
 
     public void addExecutedTask(String taskName) {
@@ -83,5 +86,13 @@ public class SchemaUpdateStateImpl extends SchemaImpl implements SchemaUpdateSta
 
     public String[] getExecutedList() {
         return executedTasks.toArray(new String[executedTasks.size()]);
+    }
+
+    public boolean backgroundUpdatesRunning() {
+        return backgroundUpdatesRunning;
+    }
+
+    void setBackgroundUpdatesRunning(boolean backgroundUpdatesRunning) {
+        this.backgroundUpdatesRunning = backgroundUpdatesRunning;
     }
 }

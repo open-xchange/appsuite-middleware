@@ -98,8 +98,7 @@ public class UpdaterImpl extends Updater {
                 return schema.isLocked();
             }
             public boolean backgroundUpdatesRunning() {
-                // TODO Auto-generated method stub
-                return false;
+                return schema.backgroundUpdatesRunning();
             }
         };
     }

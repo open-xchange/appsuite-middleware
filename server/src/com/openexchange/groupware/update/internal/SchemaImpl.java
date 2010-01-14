@@ -93,89 +93,51 @@ public class SchemaImpl implements Schema {
         this.schema = schema.getSchema();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public int getDBVersion() {
         return dbVersion;
     }
 
-    /**
-     * @param dbVersion the dbVersion to set
-     */
     public void setDBVersion(final int dbVersion) {
         this.dbVersion = dbVersion;
     }
 
-    /**
-     * @return the adminCompatible
-     */
     public boolean isAdminCompatible() {
         return adminCompatible;
     }
 
-    /**
-     * @param adminCompatible the adminCompatible to set
-     */
     public void setAdminCompatible(final boolean adminCompatible) {
         this.adminCompatible = adminCompatible;
     }
 
-    /**
-     * @return the groupwareCompatible
-     */
     public boolean isGroupwareCompatible() {
         return groupwareCompatible;
     }
 
-    /**
-     * @param groupwareCompatible the groupwareCompatible to set
-     */
     public void setGroupwareCompatible(final boolean groupwareCompatible) {
         this.groupwareCompatible = groupwareCompatible;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public boolean isLocked() {
         return locked;
     }
 
-    /**
-     * @param locked the locked to set
-     */
-    public void setLocked(final boolean locked) {
+    void setBlockingUpdatesRunning(final boolean locked) {
         this.locked = locked;
     }
 
-    /**
-     * @return the server
-     */
     public String getServer() {
         return server;
     }
 
-    /**
-     * @param server the server to set
-     */
     public void setServer(final String server) {
         this.server = server;
     }
 
-    /* (non-Javadoc)
-     *
-     * @see com.openexchange.groupware.update.Schema#getSchema()
-     */
     public String getSchema() {
         return schema;
     }
 
-    /**
-     * @param schema - the schema name
-     */
     public void setSchema(final String schema) {
         this.schema = schema;
     }
-
 }

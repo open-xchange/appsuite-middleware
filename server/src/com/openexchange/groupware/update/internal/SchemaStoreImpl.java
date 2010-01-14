@@ -347,7 +347,7 @@ public class SchemaStoreImpl extends SchemaStore {
                 schema.setDBVersion(result.getInt(pos++));
                 // Use locked information from updateTask before using locked information from version table
                 if (!schema.isLocked()) {
-                    schema.setLocked(result.getBoolean(pos++));
+                    schema.setBlockingUpdatesRunning(result.getBoolean(pos++));
                 }
                 schema.setGroupwareCompatible(result.getBoolean(pos++));
                 schema.setAdminCompatible(result.getBoolean(pos++));
@@ -376,7 +376,8 @@ public class SchemaStoreImpl extends SchemaStore {
             loadOldVersionTable(con, retval);
         } else {
             retval.setDBVersion(Schema.FINAL_VERSION);
-            retval.setLocked(false);
+            retval.setBlockingUpdatesRunning(false);
+            retval.setBackgroundUpdatesRunning(false);
             retval.setGroupwareCompatible(true);
             retval.setAdminCompatible(true);
             try {
@@ -392,7 +393,9 @@ public class SchemaStoreImpl extends SchemaStore {
     private static void loadUpdateTasks(Connection con, SchemaUpdateStateImpl state) throws SchemaException {
         for (ExecutedTask task : readUpdateTasks(con)) {
             if (LOCKED.equals(task.getTaskName())) {
-                state.setLocked(true);
+                state.setBlockingUpdatesRunning(true);
+            } else if (BACKGROUND.equals(task.getTaskName())) {
+                state.setBackgroundUpdatesRunning(true);
             } else {
                 state.addExecutedTask(task.getTaskName());
             }

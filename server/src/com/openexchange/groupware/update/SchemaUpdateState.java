@@ -61,4 +61,7 @@ public interface SchemaUpdateState extends Schema {
     boolean isExecuted(String taskName);
 
     String[] getExecutedList();
+
+    boolean backgroundUpdatesRunning();
+
 }

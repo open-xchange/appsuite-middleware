@@ -56,9 +56,7 @@ import com.openexchange.groupware.AbstractOXException;
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @deprecated use {@link UpdateTaskV2} or more easy {@link UpdateTaskAdapter}.
  */
-@Deprecated
 public interface UpdateTask {
 
     /**
