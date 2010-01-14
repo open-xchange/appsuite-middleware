@@ -209,27 +209,41 @@ public class MailAccountPOP3Storage implements POP3Storage {
 
     public void connect() throws MailException {
         defaultMailAccess.connect(false);
-        // Check path existence
-        if (!defaultMailAccess.getFolderStorage().exists(path)) {
-            final MailFolderDescription toCreate = new MailFolderDescription();
+        try {
+            // Check path existence
+            if (!defaultMailAccess.getFolderStorage().exists(path)) {
+                final MailFolderDescription toCreate = new MailFolderDescription();
 
-            final MailPermission mp = new DefaultMailPermission();
-            mp.setEntity(pop3Access.getSession().getUserId());
+                final MailPermission mp = new DefaultMailPermission();
+                mp.setEntity(pop3Access.getSession().getUserId());
 
-            toCreate.addPermission(mp);
-            toCreate.setExists(false);
+                toCreate.addPermission(mp);
+                toCreate.setExists(false);
 
-            final char separator = defaultMailAccess.getFolderStorage().getFolder("INBOX").getSeparator();
+                final char separator = defaultMailAccess.getFolderStorage().getFolder("INBOX").getSeparator();
 
-            final String[] parentAndName = parseFullname(path, separator);
-            toCreate.setName(parentAndName[1]);
-            toCreate.setParentFullname(parentAndName[0]);
-            toCreate.setSeparator(separator);
+                final String[] parentAndName = parseFullname(path, separator);
+                toCreate.setName(parentAndName[1]);
+                toCreate.setParentFullname(parentAndName[0]);
+                toCreate.setSeparator(separator);
 
-            // Unsubscribe
-            toCreate.setSubscribed(false);
+                // Unsubscribe
+                toCreate.setSubscribed(false);
 
-            defaultMailAccess.getFolderStorage().createFolder(toCreate);
+                defaultMailAccess.getFolderStorage().createFolder(toCreate);
+            }
+        } catch (final MailException e) {
+            /*
+             * Close on error
+             */
+            defaultMailAccess.close(true);
+            throw e;
+        } catch (final Exception e) {
+            /*
+             * Close on error
+             */
+            defaultMailAccess.close(true);
+            throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
         }
     }
 
