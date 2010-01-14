@@ -88,7 +88,11 @@ public enum MessagingExceptionCodes implements OXErrorMessage {
     /**
      * Invalid message identifier: %1$s
      */
-    INVALID_MESSAGE_IDENTIFIER(MessagingExceptionMessages.INVALID_MESSAGE_IDENTIFIER_MSG, Category.CODE_ERROR, 8);
+    INVALID_MESSAGE_IDENTIFIER(MessagingExceptionMessages.INVALID_MESSAGE_IDENTIFIER_MSG, Category.CODE_ERROR, 8),
+    /**
+     * Invalid header "%1$s": %2$s
+     */
+    INVALID_HEADER(MessagingExceptionMessages.INVALID_HEADER_MSG, Category.CODE_ERROR, 9);
 
     private final Category category;
 

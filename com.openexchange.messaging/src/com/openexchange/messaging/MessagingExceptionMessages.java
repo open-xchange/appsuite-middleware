@@ -80,6 +80,9 @@ public final class MessagingExceptionMessages implements LocalizableStrings {
     // Invalid message identifier: %1$s
     public static final String INVALID_MESSAGE_IDENTIFIER_MSG = "Invalid message identifier: %1$s";
 
+    // Invalid header "%1$s": %2$s
+    public static final String INVALID_HEADER_MSG = "Invalid header \"%1$s\": %2$s";
+
     /**
      * Initializes a new {@link MessagingExceptionMessages}.
      */
