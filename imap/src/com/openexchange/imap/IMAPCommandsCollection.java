@@ -182,7 +182,7 @@ public final class IMAPCommandsCollection {
      * @return <code>true</code> if IMAP root folder allows subfolder creation; otherwise <code>false</code>
      * @throws MessagingException If checking IMAP root folder for subfolder creation fails
      */
-    public static boolean canCreateSubfolder(final DefaultFolder rootFolder) throws MessagingException {
+    public static Boolean canCreateSubfolder(final DefaultFolder rootFolder) throws MessagingException {
         return ((Boolean) rootFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
@@ -202,7 +202,7 @@ public final class IMAPCommandsCollection {
                 }
                 return Boolean.FALSE;
             }
-        })).booleanValue();
+        }));
     }
 
     /**

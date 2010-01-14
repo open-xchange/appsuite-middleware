@@ -89,7 +89,7 @@ public final class RootSubfolderCache {
         final SessionMailCache mailCache = SessionMailCache.getInstance(session, accontId);
         mailCache.get(entry);
         if (load && (null == entry.getValue())) {
-            entry.setValue(Boolean.valueOf(canCreateSubfolder(f)));
+            entry.setValue(canCreateSubfolder(f));
             mailCache.put(entry);
         }
         return entry.getValue();
