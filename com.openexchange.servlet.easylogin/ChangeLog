@@ -1,3 +1,9 @@
+* 2010-01-14 - choeger@open-xchange.com
+
+  - Bugfix #15034: 
+     added switch to dissallow insecure transmission
+     added more logging
+
 * 2009-10-12 - manuel.kraft@open-xchange.com
 
   - Bugfix #14657 for checking if referrer already contains "?"
