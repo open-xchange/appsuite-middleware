@@ -92,10 +92,13 @@ public final class UpdateExecutor {
         this.tasks = tasks;
     }
 
-    /**
-     * TODO add background tasks.
-     */
     public void execute() throws UpdateException {
+        // TODO Separate a given list into blocking and background tasks.
+        runBlocking();
+        runBackground();
+    }
+
+    private void runBlocking() throws UpdateException {
         try {
             lockSchema();
         } catch (SchemaException e) {
@@ -114,6 +117,7 @@ public final class UpdateExecutor {
             if (null == tasks) {
                 state = store.getSchema(contextId);
                 // Get filtered & sorted list of update tasks
+                // TODO get blocking tasks.
                 tasks = UpdateTaskCollection.getInstance().getFilteredAndSortedUpdateTasks(state);
             }
             // Perform updates
@@ -156,6 +160,10 @@ public final class UpdateExecutor {
                 throw new UpdateException(e);
             }
         }
+    }
+
+    private void runBackground() throws UpdateException {
+        // TODO run background update tasks
     }
 
     private final void lockSchema() throws SchemaException {
