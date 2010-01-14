@@ -490,7 +490,12 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                             /*
                              * No namespace support or given parent is NOT covered by user's personal namespaces.
                              */
-                            throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, parentFullname);
+                            throw IMAPException.create(
+                                IMAPException.Code.NO_ACCESS,
+                                imapConfig,
+                                session,
+                                e,
+                                parent instanceof DefaultFolder ? DEFAULT_FOLDER_ID : parentFullname);
                         }
                         if (DEBUG) {
                             LOG.debug("MYRIGHTS command failed on namespace folder", e);
