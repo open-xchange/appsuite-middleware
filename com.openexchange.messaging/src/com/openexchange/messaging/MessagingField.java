@@ -50,8 +50,10 @@
 package com.openexchange.messaging;
 
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
+import com.openexchange.messaging.MessageHeader.KnownHeader;
 
 /**
  * {@link MessagingField}
@@ -231,6 +233,48 @@ public enum MessagingField {
      */
     public static MessagingField getField(final String name) {
         return FIELDS_MAP.get(name);
+    }
+    
+    public Object doSwitch(MessagingMessageSwitcher switcher, Object...args) throws MessagingException {
+        switch(this) {
+        case ID : return switcher.id(args);
+        case FOLDER_ID : return switcher.folderId(args);
+        case CONTENT_TYPE : return switcher.contentType(args);
+        case FROM : return switcher.from(args);
+        case TO : return switcher.to(args);
+        case CC : return switcher.cc(args);
+        case BCC : return switcher.bcc(args);
+        case SUBJECT : return switcher.subject(args);
+        case SIZE : return switcher.size(args);
+        case SENT_DATE : return switcher.sentDate(args);
+        case RECEIVED_DATE : return switcher.receivedDate(args);
+        case FLAGS : return switcher.flags(args);
+        case THREAD_LEVEL : return switcher.threadLevel(args);
+        case DISPOSITION_NOTIFICATION_TO : return switcher.dispositionNotificationTo(args);
+        case PRIORITY : return switcher.priority(args);
+        case COLOR_LABEL : return switcher.colorLabel(args);
+        case ACCOUNT_NAME : return switcher.accountName(args);
+        case BODY : return switcher.body(args);
+        case HEADERS : return switcher.headers(args);
+        case FULL : return switcher.full(args);
+        }
+        throw new IllegalArgumentException("Don't know how to handle "+this);
+    }
+    
+    private static final Map<MessagingField, KnownHeader> equivalentHeaders = new EnumMap<MessagingField, KnownHeader>(MessagingField.class);
+    
+    static {
+        for (KnownHeader header : KnownHeader.values()) {
+            equivalentHeaders.put(header.getEquivalentField(), header);
+        }
+    }
+    
+    /**
+     * Maps a MessagingField to a MessagingHeader
+     * @return the MessagingHeader this field is associated with
+     */
+    public KnownHeader getEquivalentHeader() {
+        return equivalentHeaders.get(this);
     }
 
 }

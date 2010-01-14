@@ -72,6 +72,8 @@ public class SimpleMessagingMessage implements MessagingMessage {
     private Map<String, Collection<MessageHeader>> headers;
     private String id;
     private String content;
+    private long size;
+    private int threadLevel;
 
     public int getColorLabel() {
         return colorLabel;
@@ -117,9 +119,78 @@ public class SimpleMessagingMessage implements MessagingMessage {
     public String getId() {
         return id;
     }
+    
+    public long getSize() {
+        return size;
+    }
+
+    public int getThreadLevel() {
+        return threadLevel;
+    }
 
     public void writeTo(OutputStream os) throws IOException, MessagingException {
         throw new UnsupportedOperationException();
     }
 
+    
+    public void setColorLabel(int colorLabel) {
+        this.colorLabel = colorLabel;
+    }
+
+    
+    public void setFlags(int flags) {
+        this.flags = flags;
+    }
+
+    
+    public void setFolder(String folder) {
+        this.folder = folder;
+    }
+
+    
+    public void setReceivedDate(long receivedDate) {
+        this.receivedDate = receivedDate;
+    }
+
+    
+    public void setUserFlags(Collection<String> userFlags) {
+        this.userFlags = userFlags;
+    }
+
+    
+    public void setDisposition(String disposition) {
+        this.disposition = disposition;
+    }
+
+    
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    
+    public void setHeaders(Map<String, Collection<MessageHeader>> headers) {
+        this.headers = headers;
+    }
+
+    
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    
+    public void setSize(long size) {
+        this.size = size;
+    }
+
+    
+    public void setThreadLevel(int threadLevel) {
+        this.threadLevel = threadLevel;
+    }
+
+    
 }

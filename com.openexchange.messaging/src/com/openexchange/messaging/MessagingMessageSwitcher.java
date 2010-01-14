@@ -49,66 +49,31 @@
 
 package com.openexchange.messaging;
 
-import java.util.EnumMap;
-import java.util.Map;
 
 /**
- * {@link MessageHeader} - A message header.
- * 
+ * {@link MessagingMessageSwitcher}
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since Open-Xchange v6.16
  */
-public interface MessageHeader {
-    public static enum KnownHeader {
-        //FIXME
-        BCC("Bcc"), CONTENT_TYPE("Content-Type"), FROM("From"), PRIORITY("X-Priority"), DISPOSITION_NOTIFICATION_TO("Disposition-Notification-To"), SENT_DATE("Date"), SUBJECT("Subject"), TO("To")
-        ;
-        private String name;
-        
-        private KnownHeader(String name) {
-            this.name = name;
-        }
-        
-        @Override
-        public String toString() {
-            return this.name;
-        }
-        
-        private static final Map<KnownHeader, MessagingField> equivalenceMap = new EnumMap<KnownHeader, MessagingField>(KnownHeader.class);
-        
-        static {
-            equivalenceMap.put(BCC, MessagingField.BCC);
-            equivalenceMap.put(CONTENT_TYPE, MessagingField.CONTENT_TYPE);
-            equivalenceMap.put(FROM, MessagingField.FROM);
-            equivalenceMap.put(PRIORITY, MessagingField.PRIORITY);
-            equivalenceMap.put(DISPOSITION_NOTIFICATION_TO, MessagingField.DISPOSITION_NOTIFICATION_TO);
-            equivalenceMap.put(SENT_DATE, MessagingField.SENT_DATE);
-            equivalenceMap.put(SUBJECT, MessagingField.SUBJECT);
-            equivalenceMap.put(TO, MessagingField.TO);
-            
-        }
-
-        /**
-         * Maps a MessagingHeader to a MessagingField
-         * @return the MessagingField this field is associated with
-         */
-        public MessagingField getEquivalentField() {
-            return equivalenceMap.get(this);
-        }
-    }
-    /**
-     * Gets the name.
-     * 
-     * @return The name
-     */
-    public String getName();
-
-    /**
-     * Gets the value.
-     * 
-     * @return The value
-     */
-    public String getValue();
-
+public interface MessagingMessageSwitcher {
+    public Object id(Object...args) throws MessagingException;
+    public Object folderId(Object...args) throws MessagingException;
+    public Object contentType(Object...args) throws MessagingException;
+    public Object from(Object...args) throws MessagingException;
+    public Object to(Object...args) throws MessagingException;
+    public Object cc(Object...args) throws MessagingException;
+    public Object bcc(Object...args) throws MessagingException;
+    public Object subject(Object...args) throws MessagingException;
+    public Object size(Object...args) throws MessagingException;
+    public Object sentDate(Object...args) throws MessagingException;
+    public Object receivedDate(Object...args) throws MessagingException;
+    public Object flags(Object...args) throws MessagingException;
+    public Object threadLevel(Object...args) throws MessagingException;
+    public Object dispositionNotificationTo(Object...args) throws MessagingException;
+    public Object priority(Object...args) throws MessagingException;
+    public Object colorLabel(Object...args) throws MessagingException;
+    public Object accountName(Object...args) throws MessagingException;
+    public Object body(Object...args) throws MessagingException;
+    public Object headers(Object...args) throws MessagingException;
+    public Object full(Object...args) throws MessagingException;
 }

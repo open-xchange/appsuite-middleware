@@ -47,68 +47,81 @@
  *
  */
 
-package com.openexchange.messaging;
+package com.openexchange.messaging.json;
 
-import java.util.EnumMap;
+import java.util.Collection;
 import java.util.Map;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.messaging.MessageHeader;
+import com.openexchange.messaging.MessagingContent;
+import com.openexchange.messaging.MessagingException;
+import com.openexchange.messaging.SimpleMessagingMessage;
+
 
 /**
- * {@link MessageHeader} - A message header.
- * 
+ * {@link MessagingMessageWriter}
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since Open-Xchange v6.16
  */
-public interface MessageHeader {
-    public static enum KnownHeader {
-        //FIXME
-        BCC("Bcc"), CONTENT_TYPE("Content-Type"), FROM("From"), PRIORITY("X-Priority"), DISPOSITION_NOTIFICATION_TO("Disposition-Notification-To"), SENT_DATE("Date"), SUBJECT("Subject"), TO("To")
-        ;
-        private String name;
+public class MessagingMessageWriter {
+
+    public JSONObject write(SimpleMessagingMessage message) throws JSONException, MessagingException {
+        JSONObject messageJSON = new JSONObject();
         
-        private KnownHeader(String name) {
-            this.name = name;
+        messageJSON.put("id", message.getId());
+        
+        if(message.getColorLabel() > 0) {
+            messageJSON.put("colorLabel", message.getColorLabel());
+        }
+        messageJSON.put("flags", message.getFlags());
+        
+        if(message.getReceivedDate() > 0) {
+            messageJSON.put("received_date", message.getReceivedDate());
         }
         
-        @Override
-        public String toString() {
-            return this.name;
+        messageJSON.put("size", message.getSize());
+        messageJSON.put("threadLevel", message.getThreadLevel());
+        
+        if(null != message.getDisposition()) {
+            messageJSON.put("disposition", message.getDisposition());
         }
         
-        private static final Map<KnownHeader, MessagingField> equivalenceMap = new EnumMap<KnownHeader, MessagingField>(KnownHeader.class);
+        if(null != message.getUserFlags()) {
+            JSONArray userFlagsJSON = new JSONArray();
+            for (String flag : message.getUserFlags()) {
+                userFlagsJSON.put(flag);
+            }
+            messageJSON.put("user", userFlagsJSON);
+        }
         
-        static {
-            equivalenceMap.put(BCC, MessagingField.BCC);
-            equivalenceMap.put(CONTENT_TYPE, MessagingField.CONTENT_TYPE);
-            equivalenceMap.put(FROM, MessagingField.FROM);
-            equivalenceMap.put(PRIORITY, MessagingField.PRIORITY);
-            equivalenceMap.put(DISPOSITION_NOTIFICATION_TO, MessagingField.DISPOSITION_NOTIFICATION_TO);
-            equivalenceMap.put(SENT_DATE, MessagingField.SENT_DATE);
-            equivalenceMap.put(SUBJECT, MessagingField.SUBJECT);
-            equivalenceMap.put(TO, MessagingField.TO);
+        if(null != message.getHeaders() && ! message.getHeaders().isEmpty()) {
+            JSONObject headerJSON = new JSONObject();
             
-        }
+            for (Map.Entry<String, Collection<MessageHeader>> entry : message.getHeaders().entrySet()) {
 
-        /**
-         * Maps a MessagingHeader to a MessagingField
-         * @return the MessagingField this field is associated with
-         */
-        public MessagingField getEquivalentField() {
-            return equivalenceMap.get(this);
+                JSONArray array = new JSONArray();
+                
+                for (MessageHeader header : entry.getValue()) {
+                    array.put(header.getValue());
+                }
+                
+                if(array.length() == 1) {
+                    headerJSON.put(entry.getKey(), array.get(0));
+                } else {
+                    headerJSON.put(entry.getKey(), array);
+                }
+            }
+            
+            messageJSON.put("headers", headerJSON);
         }
+        
+        MessagingContent content = message.getContent();
+        
+        
+        return messageJSON;
     }
-    /**
-     * Gets the name.
-     * 
-     * @return The name
-     */
-    public String getName();
-
-    /**
-     * Gets the value.
-     * 
-     * @return The value
-     */
-    public String getValue();
 
 }

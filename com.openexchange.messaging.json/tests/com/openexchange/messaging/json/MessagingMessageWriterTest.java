@@ -49,7 +49,21 @@
 
 package com.openexchange.messaging.json;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.json.JSONAssertion;
+import com.openexchange.messaging.MessageHeader;
+import com.openexchange.messaging.MessagingException;
+import com.openexchange.messaging.MessagingMessage;
+import com.openexchange.messaging.SimpleMessagingMessage;
 import junit.framework.TestCase;
+import static com.openexchange.json.JSONAssertion.*;
 
 
 /**
@@ -59,16 +73,99 @@ import junit.framework.TestCase;
  */
 public class MessagingMessageWriterTest extends TestCase {
     
-    public void testWriteBasicMessage() {
+    public void testWriteSimpleFields() throws JSONException, MessagingException {
+        
+        SimpleMessagingMessage message = new SimpleMessagingMessage();
+        message.setColorLabel(2);
+        message.setFlags(12);
+        message.setReceivedDate(1337);
+        message.setUserFlags(Arrays.asList("eins", "zwo", "drei","vier","fünf"));
+        message.setSize(13);
+        message.setThreadLevel(15);
+        message.setDisposition(MessagingMessage.INLINE);
+        message.setId("message123");
+        
+        JSONObject messageJSON = new MessagingMessageWriter().write(message);
+        
+        JSONAssertion assertion = new JSONAssertion()
+            .isObject()
+                .hasKey("colorLabel").withValue(2)
+                .hasKey("flags").withValue(12)
+                .hasKey("received_date").withValue(1337)
+                .hasKey("user").withValueArray().withValues("eins","zwo","drei","vier","fünf").inAnyOrder()
+                .hasKey("size").withValue(13)
+                .hasKey("threadLevel").withValue(15)
+                .hasKey("disposition").withValue(MessagingMessage.INLINE)
+                .hasKey("id").withValue("message123");
+        
+        assertValidates(assertion, messageJSON);
+    }
+    
+    // TODO: What about special headers, with special structures?
+    public void testHeaders() throws JSONException, MessagingException {
+        SimpleMessagingMessage message = new SimpleMessagingMessage();
+        Map<String, Collection<MessageHeader>> headers = new HashMap<String, Collection<MessageHeader>>();
+        
+        headers.put("simpleHeader", header("simpleHeader", "Value1"));
+        headers.put("multiHeader", header("multiHeader", "v1", "v2", "v3"));
+        
+        message.setHeaders(headers);
+        
+        JSONObject messageJSON = new MessagingMessageWriter().write(message);
+        
+        JSONAssertion assertion = new JSONAssertion()
+            .isObject()
+                .hasKey("headers").withValueObject()
+                    .hasKey("simpleHeader").withValue("Value1")
+                    .hasKey("multiHeader").withValueArray().withValues("v1", "v2", "v3").inStrictOrder()
+                .objectEnds()
+            .objectEnds()
+        ;
+        
+        assertValidates(assertion, messageJSON);
+    }
+    
+    public void testPlainMessage() throws MessagingException, JSONException {
+        SimpleMessagingMessage message = new SimpleMessagingMessage();
+        message.setContent("content");
+        
+        JSONObject messageJSON = new MessagingMessageWriter().write(message);
+        
+        JSONAssertion assertion = new JSONAssertion()
+            .isObject()
+                .hasKey("content").withValue("content")
+            .objectEnds()
+        ;
+        
+        assertValidates(assertion, messageJSON);
         
     }
     
-    public void testWriteMultipartMessage() {
+    public void testBinaryMessage() {
         
     }
     
-    public void testWriteVeryComplexMessage() {
+    public void testMultipartMessage() {
         
+    }
+    
+    private Collection<MessageHeader> header(final String name, String...values) {
+        List<MessageHeader> header = new ArrayList<MessageHeader>();
+        for (final String value : values) {
+            header.add(new MessageHeader() {
+
+                public String getName() {
+                    return name;
+                }
+
+                public String getValue() {
+                    return value;
+                }
+                
+            });
+        }
+        
+        return header;
     }
     
 }
