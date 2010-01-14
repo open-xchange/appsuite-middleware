@@ -82,8 +82,7 @@ public final class DynamicList implements UpdateTaskList {
      * -------------------------------- Member section --------------------------------
      */
 
-    private final ConcurrentMap<Class<? extends UpdateTask>, UpdateTask> taskList =
-        new ConcurrentHashMap<Class<? extends UpdateTask>, UpdateTask>();
+    private final ConcurrentMap<Class<? extends UpdateTask>, UpdateTask> taskList = new ConcurrentHashMap<Class<? extends UpdateTask>, UpdateTask>();
 
     /**
      * Initializes a new {@link DynamicList}.
