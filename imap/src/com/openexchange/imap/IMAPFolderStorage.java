@@ -76,6 +76,7 @@ import com.openexchange.imap.acl.ACLExtensionFactory;
 import com.openexchange.imap.cache.MBoxEnabledCache;
 import com.openexchange.imap.cache.NamespaceFoldersCache;
 import com.openexchange.imap.cache.RightsCache;
+import com.openexchange.imap.cache.RootSubfolderCache;
 import com.openexchange.imap.cache.UserFlagsCache;
 import com.openexchange.imap.command.CopyIMAPCommand;
 import com.openexchange.imap.command.FlagsIMAPCommand;
@@ -474,8 +475,14 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                  */
                 if (imapConfig.isSupportsACLs()) {
                     try {
-                        if (!getACLExtension().canCreate(RightsCache.getCachedRights(parent, true, session, accountId))) {
-                            throw IMAPException.create(IMAPException.Code.NO_CREATE_ACCESS, imapConfig, session, parentFullname);
+                        if (isParentDefault) {
+                            if (!(RootSubfolderCache.canCreateSubfolders((DefaultFolder) parent, true, session, accountId).booleanValue())) {
+                                throw IMAPException.create(IMAPException.Code.NO_CREATE_ACCESS, imapConfig, session, DEFAULT_FOLDER_ID);
+                            }
+                        } else {
+                            if (!getACLExtension().canCreate(RightsCache.getCachedRights(parent, true, session, accountId))) {
+                                throw IMAPException.create(IMAPException.Code.NO_CREATE_ACCESS, imapConfig, session, parentFullname);
+                            }
                         }
                     } catch (final MessagingException e) {
                         /*
