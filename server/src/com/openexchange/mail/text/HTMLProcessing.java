@@ -333,7 +333,7 @@ public final class HTMLProcessing {
      * @return The HTML content conform to W3C standards
      */
     public static String getConformHTML(final String htmlContent, final String charset) {
-        if ((htmlContent == null)) {
+        if (null == htmlContent) {
             /*
              * Nothing to do...
              */
