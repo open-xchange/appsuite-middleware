@@ -61,7 +61,6 @@ import java.util.Map;
  */
 public interface MessageHeader {
     public static enum KnownHeader {
-        //FIXME
         BCC("Bcc"), CONTENT_TYPE("Content-Type"), FROM("From"), PRIORITY("X-Priority"), DISPOSITION_NOTIFICATION_TO("Disposition-Notification-To"), SENT_DATE("Date"), SUBJECT("Subject"), TO("To")
         ;
         private String name;
