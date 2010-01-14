@@ -74,26 +74,14 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public class CachingContextStorage extends ContextStorage {
 
-    /**
-     * Logger.
-     */
     private static final Log LOG = LogFactory.getLog(CachingContextStorage.class);
-   
+
     private static final String REGION_NAME = "Context";
 
-    /**
-     * Boolean flag for started status
-     */
     private boolean started;
 
-    /**
-     * Lock for the cache.
-     */
     private final Lock cacheLock;
 
-    /**
-     * Implementation of the context storage that does persistent storing.
-     */
     private final ContextStorage persistantImpl;
 
     /**
@@ -151,7 +139,7 @@ public class CachingContextStorage extends ContextStorage {
                 return I(contextId);
             }
             public ContextExtended load() throws AbstractOXException {
-                final ContextExtended retval = persistantImpl.loadContext(contextId);
+                final ContextExtended retval = getPersistantImpl().loadContext(contextId);
                 final Updater updater = Updater.getInstance();
                 UpdateStatus status = updater.getStatus(retval);
                 retval.setUpdating(status.blockingUpdatesRunning() || status.needsBlockingUpdates());
@@ -161,7 +149,7 @@ public class CachingContextStorage extends ContextStorage {
                 return retval;
             }
             public Lock getCacheLock() {
-                return cacheLock;
+                return CachingContextStorage.this.getCacheLock();
             }
         };
         try {
@@ -262,4 +250,13 @@ public class CachingContextStorage extends ContextStorage {
             throw new ContextException(e);
         }
     }
+
+    Lock getCacheLock() {
+        return cacheLock;
+    }
+
+    ContextStorage getPersistantImpl() {
+        return persistantImpl;
+    }
+
 }
