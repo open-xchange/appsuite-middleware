@@ -551,7 +551,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
 
     private static final int RADIX = 10;
 
-    static long parseUnsignedLong(final String s) {
+    private static long parseUnsignedLong(final String s) {
         if (s == null) {
             return DEFAULT;
         }
