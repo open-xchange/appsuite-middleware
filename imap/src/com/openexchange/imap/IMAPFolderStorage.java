@@ -756,8 +756,15 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                     if (getChecker().isDefaultFolder(oldFullname)) {
                         throw IMAPException.create(IMAPException.Code.NO_DEFAULT_FOLDER_UPDATE, imapConfig, session, oldFullname);
                     }
-                    IMAPFolder destFolder =
-                        ((IMAPFolder) (MailFolder.DEFAULT_FOLDER_ID.equals(newParent) ? imapStore.getDefaultFolder() : imapStore.getFolder(newParent)));
+                    IMAPFolder destFolder;
+                    final boolean isDestRoot;
+                    if (MailFolder.DEFAULT_FOLDER_ID.equals(newParent)) {
+                        destFolder = (IMAPFolder) imapStore.getDefaultFolder();
+                        isDestRoot = true;
+                    } else {
+                        destFolder = (IMAPFolder) imapStore.getFolder(newParent);
+                        isDestRoot = false;
+                    }
                     if (!destFolder.exists()) {
                         destFolder = checkForNamespaceFolder(newParent);
                         if (null == destFolder) {
@@ -773,12 +780,22 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                                 IMAPException.Code.FOLDER_DOES_NOT_HOLD_FOLDERS,
                                 imapConfig,
                                 session,
-                                destFolder.getFullName());
+                                isDestRoot ? DEFAULT_FOLDER_ID : destFolder.getFullName());
                         }
                         if (imapConfig.isSupportsACLs() && isSelectable(destFolder)) {
                             try {
-                                if (!getACLExtension().canCreate(RightsCache.getCachedRights(destFolder, true, session, accountId))) {
-                                    throw IMAPException.create(IMAPException.Code.NO_CREATE_ACCESS, imapConfig, session, newParent);
+                                if (isDestRoot) {
+                                    if (!(RootSubfolderCache.canCreateSubfolders((DefaultFolder) destFolder, true, session, accountId).booleanValue())) {
+                                        throw IMAPException.create(
+                                            IMAPException.Code.NO_CREATE_ACCESS,
+                                            imapConfig,
+                                            session,
+                                            DEFAULT_FOLDER_ID);
+                                    }
+                                } else {
+                                    if (!getACLExtension().canCreate(RightsCache.getCachedRights(destFolder, true, session, accountId))) {
+                                        throw IMAPException.create(IMAPException.Code.NO_CREATE_ACCESS, imapConfig, session, newParent);
+                                    }
                                 }
                             } catch (final MessagingException e) {
                                 /*
