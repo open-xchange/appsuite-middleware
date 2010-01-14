@@ -119,7 +119,7 @@ public final class IMAPException extends MIMEMailException {
          */
         NO_INSERT_ACCESS(IMAPCode.NO_INSERT_ACCESS),
         /**
-         * No create access on IMAP-Folder %1$s
+         * No create access on mail folder %1$s
          */
         NO_CREATE_ACCESS(IMAPCode.NO_CREATE_ACCESS),
         /**
@@ -401,7 +401,7 @@ public final class IMAPException extends MIMEMailException {
          */
         NO_INSERT_ACCESS_EXT("No insert access to mail folder %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s)", NO_INSERT_ACCESS),
         /**
-         * No create access on IMAP-Folder %1$s
+         * No create access on mail folder %1$s
          */
         NO_CREATE_ACCESS(MailException.Code.NO_CREATE_ACCESS, null),
         /**
