@@ -331,7 +331,7 @@ public final class MailReplyTest extends AbstractMailTest {
                         dateFormat.setTimeZone(tz);
                         replyPrefix = replyPrefix.replaceFirst("#DATE#", dateFormat.format(date));
                         
-                        dateFormat = DateFormat.getDateInstance(DateFormat.SHORT,locale);
+                        dateFormat = DateFormat.getTimeInstance(DateFormat.SHORT,locale);
                         dateFormat.setTimeZone(tz);
                         replyPrefix = replyPrefix.replaceFirst("#TIME#", dateFormat.format(date));
                     }
@@ -416,7 +416,7 @@ public final class MailReplyTest extends AbstractMailTest {
                         dateFormat.setTimeZone(tz);
                         replyPrefix = replyPrefix.replaceFirst("#DATE#", dateFormat.format(date));
                         
-                        dateFormat = DateFormat.getDateInstance(DateFormat.SHORT,locale);
+                        dateFormat = DateFormat.getTimeInstance(DateFormat.SHORT,locale);
                         dateFormat.setTimeZone(tz);
                         replyPrefix = replyPrefix.replaceFirst("#TIME#", dateFormat.format(date));
                     }
@@ -499,7 +499,7 @@ public final class MailReplyTest extends AbstractMailTest {
                         dateFormat.setTimeZone(tz);
                         replyPrefix = replyPrefix.replaceFirst("#DATE#", dateFormat.format(date));
                         
-                        dateFormat = DateFormat.getDateInstance(DateFormat.SHORT,locale);
+                        dateFormat = DateFormat.getTimeInstance(DateFormat.SHORT,locale);
                         dateFormat.setTimeZone(tz);
                         replyPrefix = replyPrefix.replaceFirst("#TIME#", dateFormat.format(date));
                     }

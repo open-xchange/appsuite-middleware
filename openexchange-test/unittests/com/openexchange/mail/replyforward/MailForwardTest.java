@@ -185,7 +185,7 @@ public final class MailForwardTest extends AbstractMailTest {
                                     dateFormat.setTimeZone(tz);
                                     forwardPrefix = forwardPrefix.replaceFirst("#DATE#", dateFormat.format(date));
                                     
-                                    dateFormat = DateFormat.getDateInstance(DateFormat.SHORT,locale);
+                                    dateFormat = DateFormat.getTimeInstance(DateFormat.SHORT,locale);
                                     dateFormat.setTimeZone(tz);
                                     forwardPrefix = forwardPrefix.replaceFirst("#TIME#", dateFormat.format(date));
                                 }
@@ -303,7 +303,7 @@ public final class MailForwardTest extends AbstractMailTest {
                             dateFormat.setTimeZone(tz);
                             forwardPrefix = forwardPrefix.replaceFirst("#DATE#", dateFormat.format(date));
                             
-                            dateFormat = DateFormat.getDateInstance(DateFormat.SHORT,locale);
+                            dateFormat = DateFormat.getTimeInstance(DateFormat.SHORT,locale);
                             dateFormat.setTimeZone(tz);
                             forwardPrefix = forwardPrefix.replaceFirst("#TIME#", dateFormat.format(date));
                         }
