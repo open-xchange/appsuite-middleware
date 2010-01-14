@@ -482,7 +482,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                          * MYRIGHTS command failed for given mailbox
                          */
                         if (!imapConfig.getImapCapabilities().hasNamespace() || !NamespaceFoldersCache.containedInPersonalNamespaces(
-                            parent.getFullName(),
+                            parentFullname,
                             imapStore,
                             true,
                             session,
