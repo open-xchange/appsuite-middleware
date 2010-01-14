@@ -105,6 +105,21 @@ public final class MimeProcessingUtility {
     }
 
     /**
+     * Formats specified time in given style with given locale and time zone.
+     * 
+     * @param date The time to format
+     * @param style The style to use
+     * @param locale The locale
+     * @param timeZone The time zone
+     * @return The formatted time
+     */
+    static final String getFormattedTime(final Date date, final int style, final Locale locale, final TimeZone timeZone) {
+        final DateFormat dateFormat = DateFormat.getTimeInstance(style, locale);
+        dateFormat.setTimeZone(timeZone);
+        return dateFormat.format(date);
+    }
+
+    /**
      * Checks if given part's disposition is inline; meaning more likely a regular message body than an attachment.
      * 
      * @param part The message's part

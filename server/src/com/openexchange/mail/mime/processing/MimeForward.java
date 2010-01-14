@@ -551,7 +551,7 @@ public final class MimeForward {
             try {
                 forwardPrefix =
                     PATTERN_TIME.matcher(forwardPrefix).replaceFirst(
-                        date == null ? "" : MimeProcessingUtility.getFormattedDate(date, DateFormat.SHORT, ltz.locale, ltz.timeZone));
+                        date == null ? "" : MimeProcessingUtility.getFormattedTime(date, DateFormat.SHORT, ltz.locale, ltz.timeZone));
             } catch (final Exception t) {
                 if (LOG.isWarnEnabled()) {
                     LOG.warn(t.getMessage(), t);

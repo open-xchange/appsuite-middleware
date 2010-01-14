@@ -545,7 +545,7 @@ public final class MimeReply {
                 try {
                     replyPrefix =
                         PATTERN_TIME.matcher(replyPrefix).replaceFirst(
-                            date == null ? "" : MimeProcessingUtility.getFormattedDate(date, DateFormat.SHORT, ltz.locale, ltz.timeZone));
+                            date == null ? "" : MimeProcessingUtility.getFormattedTime(date, DateFormat.SHORT, ltz.locale, ltz.timeZone));
                 } catch (final Exception e) {
                     if (LOG.isWarnEnabled()) {
                         LOG.warn(e.getMessage(), e);
