@@ -148,6 +148,17 @@ public interface TwitterAccess {
     public Status retweetStatus(long statusId) throws TwitterException;
 
     /**
+     * Gets a single status, specified by the id parameter. The status's author will be returned inline.
+     * <p>
+     * This method calls <a href="http://twitter.com/statuses/show">http://twitter.com/statuses/show</a>
+     * 
+     * @param id The numerical ID of the status
+     * @return The single status
+     * @throws TwitterException If <a href="http://twitter.com/">twitter</a> service or network is unavailable
+     */
+    public Status showStatus(long statusId) throws TwitterException;
+
+    /**
      * Sends a new direct message to the specified user from the authenticating user. Requires both the user and text parameters below. The
      * text will be trimmed if the length of the text is exceeding 140 characters.
      * <p>

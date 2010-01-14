@@ -217,4 +217,12 @@ public final class TwitterAccessImpl implements TwitterAccess {
         }
     }
 
+    public Status showStatus(final long statusId) throws TwitterException {
+        try {
+            return new StatusImpl(twitter4jTwitter.showStatus(statusId));
+        } catch (final twitter4j.TwitterException e) {
+            throw TwitterExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
 }
