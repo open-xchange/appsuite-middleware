@@ -93,51 +93,79 @@ public class UpdateTaskCollection {
         versionDirty.set(true);
     }
 
-    /**
-     * Creates a list of <code>UpdateTask</code> instances that apply to current database version
-     * 
-     * @param schema - current database version
-     * @return list of <code>UpdateTask</code> instances
-     * @throws UpdateException if the order for the update tasks to execute can not be determined.
-     */
-    public final List<UpdateTask> getFilteredAndSortedUpdateTasks(SchemaUpdateState schema) throws UpdateException {
-        SeparatedTasks tasks = separateTasks(getListWithoutExcludes());
-        SchemaUpdateState state = schema;
-        // Calculate version to executed list.
-        if (Schema.FINAL_VERSION != schema.getDBVersion() && Schema.NO_VERSION != schema.getDBVersion()) {
-            state = addExecutedBasedOnVersion(schema, tasks);
-        }
+    private final List<UpdateTask> getFilteredUpdateTasks(SchemaUpdateState schema) {
+        List<UpdateTask> tasks = getListWithoutExcludes();
+        // Simulate executed list based on schema version if necessary.
+        final SchemaUpdateState state = addExecutedBasedOnVersion(schema, tasks);
         // Filter
         Filter filter = new ExecutedFilter();
-        List<UpdateTask> blocking = new ArrayList<UpdateTask>();
-        for (UpdateTask task : tasks.getBlocking()) {
+        List<UpdateTask> filtered = new ArrayList<UpdateTask>();
+        for (UpdateTask task : tasks) {
             if (filter.mustBeExecuted(state, task)) {
-                blocking.add(task);
+                filtered.add(task);
             }
         }
-        List<UpdateTaskV2> background = new ArrayList<UpdateTaskV2>();
-        for (UpdateTaskV2 task : tasks.getBackground()) {
-            if (filter.mustBeExecuted(state, task)) {
-                background.add(task);
-            }
-        }
-        // And sort them
-        blocking = new UpdateTaskSorter().sort(state.getExecutedList(), blocking);
-        return blocking;
+        return filtered;
     }
 
-    private SchemaUpdateState addExecutedBasedOnVersion(SchemaUpdateState schema, SeparatedTasks tasks) {
-        SchemaUpdateState retval = new SchemaUpdateStateImpl(schema);
-        Filter filter = new VersionFilter();
-        for (UpdateTask task : tasks.getBlocking()) {
-            if (!filter.mustBeExecuted(schema, task)) {
-                retval.addExecutedTask(task.getClass().getName());
+    public SeparatedTasks getFilteredAndSeparatedTasks(SchemaUpdateState schema) {
+        final List<UpdateTask> blocking = new ArrayList<UpdateTask>();
+        final List<UpdateTaskV2> background = new ArrayList<UpdateTaskV2>();
+        for (UpdateTask toExecute : getFilteredUpdateTasks(schema)) {
+            if (toExecute instanceof UpdateTaskV2) {
+                UpdateTaskV2 toExecuteV2 = (UpdateTaskV2) toExecute;
+                switch (toExecuteV2.getAttributes().getConcurrency()) {
+                case BLOCKING:
+                    blocking.add(toExecuteV2);
+                    break;
+                case BACKGROUND:
+                    background.add(toExecuteV2);
+                    break;
+                default:
+                    UpdateException e = UpdateExceptionCodes.UNKNOWN_CONCURRENCY.create(toExecuteV2.getClass().getName());
+                    LOG.error(e.getMessage(), e);
+                    blocking.add(toExecuteV2); 
+                }
+            } else {
+                blocking.add(toExecute);
             }
         }
-        for (UpdateTask task : tasks.getBackground()) {
-            if (!filter.mustBeExecuted(schema, task)) {
-                retval.addExecutedTask(task.getClass().getName());
+        return new SeparatedTasks() {
+            public UpdateTask[] getBlocking() {
+                return blocking.toArray(new UpdateTask[blocking.size()]);
             }
+            public UpdateTaskV2[] getBackground() {
+                return background.toArray(new UpdateTaskV2[background.size()]);
+            }
+        };
+    }
+
+    /**
+     * TODO Sort background tasks.
+     */
+    public final List<UpdateTask> getFilteredAndSortedUpdateTasks(SchemaUpdateState schema) throws UpdateException {
+        SeparatedTasks tasks = getFilteredAndSeparatedTasks(schema);
+        List<UpdateTask> retval = new ArrayList<UpdateTask>();
+        for (UpdateTask task : tasks.getBlocking()) {
+            retval.add(task);
+        }
+        // And sort them
+        retval = new UpdateTaskSorter().sort(schema.getExecutedList(), retval);
+        return retval;
+    }
+
+    private SchemaUpdateState addExecutedBasedOnVersion(SchemaUpdateState schema, List<UpdateTask> tasks) {
+        final SchemaUpdateState retval;
+        if (Schema.FINAL_VERSION != schema.getDBVersion() && Schema.NO_VERSION != schema.getDBVersion()) {
+            retval = new SchemaUpdateStateImpl(schema);
+            Filter filter = new VersionFilter();
+            for (UpdateTask task : tasks) {
+                if (!filter.mustBeExecuted(schema, task)) {
+                    retval.addExecutedTask(task.getClass().getName());
+                }
+            }
+        } else {
+            retval = schema;
         }
         return retval;
     }
@@ -161,40 +189,8 @@ public class UpdateTaskCollection {
         return version;
     }
 
-    private SeparatedTasks separateTasks(List<UpdateTask> tasks) {
-        final List<UpdateTask> blocking = new ArrayList<UpdateTask>();
-        final List<UpdateTaskV2> background = new ArrayList<UpdateTaskV2>();
-        for (UpdateTask toExecute : tasks) {
-            if (toExecute instanceof UpdateTaskV2) {
-                UpdateTaskV2 toExecuteV2 = (UpdateTaskV2) toExecute;
-                switch (toExecuteV2.getAttributes().getConcurrency()) {
-                case BLOCKING:
-                    blocking.add(toExecuteV2);
-                    break;
-                case BACKGROUND:
-                    background.add(toExecuteV2);
-                    break;
-                default:
-                    UpdateException e = UpdateExceptionCodes.UNKNOWN_CONCURRENCY.create(toExecuteV2.getClass().getName());
-                    LOG.error(e.getMessage(), e);
-                    blocking.add(toExecuteV2); 
-                }
-            }
-        }
-        return new SeparatedTasks() {
-            public UpdateTask[] getBlocking() {
-                return blocking.toArray(new UpdateTask[blocking.size()]);
-            }
-            public UpdateTaskV2[] getBackground() {
-                return background.toArray(new UpdateTaskV2[background.size()]);
-            }
-        };
-
-    }
-
     public List<UpdateTask> getListWithoutExcludes() {
-        List<UpdateTask> retval = new ArrayList<UpdateTask>();
-        retval.addAll(getFullList());
+        List<UpdateTask> retval = getFullList();
         for (UpdateTask excluded : ExcludedList.getInstance().getTaskList()) {
             // Matching must be done based on task class name.
             String toExclude = excluded.getClass().getName();

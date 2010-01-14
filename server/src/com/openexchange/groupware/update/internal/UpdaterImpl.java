@@ -52,6 +52,7 @@ package com.openexchange.groupware.update.internal;
 import com.openexchange.groupware.update.SchemaException;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.SchemaUpdateState;
+import com.openexchange.groupware.update.SeparatedTasks;
 import com.openexchange.groupware.update.UpdateException;
 import com.openexchange.groupware.update.UpdateStatus;
 import com.openexchange.groupware.update.UpdateTaskCollection;
@@ -85,13 +86,13 @@ public class UpdaterImpl extends Updater {
     }
 
     private UpdateStatus getStatus(final SchemaUpdateState schema) {
+        final SeparatedTasks tasks = UpdateTaskCollection.getInstance().getFilteredAndSeparatedTasks(schema);
         return new UpdateStatus() {
             public boolean needsBlockingUpdates() {
-                return UpdateTaskCollection.getInstance().needsUpdate(schema);
+                return tasks.getBlocking().length > 0;
             }
             public boolean needsBackgroundUpdates() {
-                // TODO Auto-generated method stub
-                return false;
+                return tasks.getBackground().length > 0;
             }
             public boolean blockingUpdatesRunning() {
                 return schema.isLocked();
