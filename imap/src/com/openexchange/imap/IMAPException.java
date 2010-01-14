@@ -107,15 +107,15 @@ public final class IMAPException extends MIMEMailException {
          */
         NO_LOOKUP_ACCESS(IMAPCode.NO_LOOKUP_ACCESS),
         /**
-         * No read access on IMAP-Folder %1$s
+         * No read access on mail folder %1$s
          */
         NO_READ_ACCESS(IMAPCode.NO_READ_ACCESS),
         /**
-         * No delete access on IMAP-Folder %1$s
+         * No delete access on mail folder %1$s
          */
         NO_DELETE_ACCESS(IMAPCode.NO_DELETE_ACCESS),
         /**
-         * No insert access on IMAP-Folder %1$s
+         * No insert access on mail folder %1$s
          */
         NO_INSERT_ACCESS(IMAPCode.NO_INSERT_ACCESS),
         /**
@@ -123,7 +123,7 @@ public final class IMAPException extends MIMEMailException {
          */
         NO_CREATE_ACCESS(IMAPCode.NO_CREATE_ACCESS),
         /**
-         * No administer access on IMAP-Folder %1$s
+         * No administer access on mail folder %1$s
          */
         NO_ADMINISTER_ACCESS(IMAPCode.NO_ADMINISTER_ACCESS),
         /**
@@ -131,7 +131,7 @@ public final class IMAPException extends MIMEMailException {
          */
         NO_WRITE_ACCESS(IMAPCode.NO_WRITE_ACCESS),
         /**
-         * No keep-seen access on IMAP-Folder %1$s
+         * No keep-seen access on mail folder %1$s
          */
         NO_KEEP_SEEN_ACCESS(IMAPCode.NO_KEEP_SEEN_ACCESS),
         /**
@@ -377,27 +377,27 @@ public final class IMAPException extends MIMEMailException {
          */
         NO_LOOKUP_ACCESS_EXT("No lookup access to mail folder %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s)", NO_LOOKUP_ACCESS),
         /**
-         * No read access on IMAP-Folder %1$s
+         * No read access on mail folder %1$s
          */
         NO_READ_ACCESS("No read access to mail folder %1$s", Category.PERMISSION, 2005),
         /**
-         * No read access on IMAP-Folder %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s)
+         * No read access on mail folder %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s)
          */
         NO_READ_ACCESS_EXT("No read access to mail folder %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s)", NO_READ_ACCESS),
         /**
-         * No delete access on IMAP-Folder %1$s
+         * No delete access on mail folder %1$s
          */
         NO_DELETE_ACCESS("No delete access to mail folder %1$s", Category.PERMISSION, 2006),
         /**
-         * No delete access on IMAP-Folder %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s)
+         * No delete access on mail folder %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s)
          */
         NO_DELETE_ACCESS_EXT("No delete access to mail folder %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s)", NO_DELETE_ACCESS),
         /**
-         * No insert access on IMAP-Folder %1$s
+         * No insert access on mail folder %1$s
          */
         NO_INSERT_ACCESS("No insert access to mail folder %1$s", Category.PERMISSION, 2007),
         /**
-         * No insert access on IMAP-Folder %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s)
+         * No insert access on mail folder %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s)
          */
         NO_INSERT_ACCESS_EXT("No insert access to mail folder %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s)", NO_INSERT_ACCESS),
         /**
@@ -405,15 +405,15 @@ public final class IMAPException extends MIMEMailException {
          */
         NO_CREATE_ACCESS(MailException.Code.NO_CREATE_ACCESS, null),
         /**
-         * No create access on IMAP-Folder %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s)
+         * No create access on mail folder %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s)
          */
         NO_CREATE_ACCESS_EXT(MailException.Code.NO_CREATE_ACCESS_EXT, NO_CREATE_ACCESS),
         /**
-         * No administer access on IMAP-Folder %1$s
+         * No administer access on mail folder %1$s
          */
         NO_ADMINISTER_ACCESS("No administer access to mail folder %1$s", Category.PERMISSION, 2009),
         /**
-         * No administer access on IMAP-Folder %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s)
+         * No administer access on mail folder %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s)
          */
         NO_ADMINISTER_ACCESS_EXT("No administer access to mail folder %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s)", NO_ADMINISTER_ACCESS),
         /**
@@ -425,11 +425,11 @@ public final class IMAPException extends MIMEMailException {
          */
         NO_WRITE_ACCESS_EXT("No write access to IMAP folder %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s)", NO_WRITE_ACCESS),
         /**
-         * No keep-seen access on IMAP-Folder %1$s
+         * No keep-seen access on mail folder %1$s
          */
         NO_KEEP_SEEN_ACCESS("No keep-seen access to mail folder %1$s", Category.PERMISSION, 2011),
         /**
-         * No keep-seen access on IMAP-Folder %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s)
+         * No keep-seen access on mail folder %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s)
          */
         NO_KEEP_SEEN_ACCESS_EXT("No keep-seen access to mail folder %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s)", NO_KEEP_SEEN_ACCESS),
         /**
