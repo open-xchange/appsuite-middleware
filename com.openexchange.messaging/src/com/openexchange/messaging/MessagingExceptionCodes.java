@@ -84,7 +84,11 @@ public enum MessagingExceptionCodes implements OXErrorMessage {
     /**
      * The folder "%1$s" cannot be found in account %2$s of service "%3$s" of user %4$s in context %5$s.
      */
-    FOLDER_NOT_FOUND(MessagingExceptionMessages.FOLDER_NOT_FOUND_MSG, Category.CODE_ERROR, 7);
+    FOLDER_NOT_FOUND(MessagingExceptionMessages.FOLDER_NOT_FOUND_MSG, Category.CODE_ERROR, 7),
+    /**
+     * Invalid message identifier: %1$s
+     */
+    INVALID_MESSAGE_IDENTIFIER(MessagingExceptionMessages.INVALID_MESSAGE_IDENTIFIER_MSG, Category.CODE_ERROR, 8);
 
     private final Category category;
 

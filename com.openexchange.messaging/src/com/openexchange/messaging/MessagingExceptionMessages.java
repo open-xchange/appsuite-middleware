@@ -77,6 +77,9 @@ public final class MessagingExceptionMessages implements LocalizableStrings {
     // The folder "%1$s" cannot be found in account %2$s of service "%3$s" of user %4$s in context %5$s.
     public static final String FOLDER_NOT_FOUND_MSG = "The folder \"%1$s\" cannot be found in account %2$s of service \"%3$s\" of user %4$s in context %5$s.";
 
+    // Invalid message identifier: %1$s
+    public static final String INVALID_MESSAGE_IDENTIFIER_MSG = "Invalid message identifier: %1$s";
+
     /**
      * Initializes a new {@link MessagingExceptionMessages}.
      */
