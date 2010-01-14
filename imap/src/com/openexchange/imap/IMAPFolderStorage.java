@@ -467,7 +467,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                         IMAPException.Code.FOLDER_DOES_NOT_HOLD_FOLDERS,
                         imapConfig,
                         session,
-                        parent instanceof DefaultFolder ? DEFAULT_FOLDER_ID : parentFullname);
+                        isParentDefault ? DEFAULT_FOLDER_ID : parentFullname);
                 }
                 /*
                  * Check ACLs if enabled
@@ -495,7 +495,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                                 imapConfig,
                                 session,
                                 e,
-                                parent instanceof DefaultFolder ? DEFAULT_FOLDER_ID : parentFullname);
+                                isParentDefault ? DEFAULT_FOLDER_ID : parentFullname);
                         }
                         if (DEBUG) {
                             LOG.debug("MYRIGHTS command failed on namespace folder", e);
@@ -546,7 +546,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                                 imapConfig,
                                 session,
                                 createMe.getFullName(),
-                                parent instanceof DefaultFolder ? DEFAULT_FOLDER_ID : parent.getFullName());
+                                isParentDefault ? DEFAULT_FOLDER_ID : parent.getFullName());
                         }
                     } catch (final MessagingException e) {
                         if ("Unsupported type".equals(e.getMessage())) {
@@ -562,7 +562,7 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                                     session,
                                     e,
                                     createMe.getFullName(),
-                                    parent instanceof DefaultFolder ? DEFAULT_FOLDER_ID : parent.getFullName());
+                                    isParentDefault ? DEFAULT_FOLDER_ID : parent.getFullName());
                             }
                             if (LOG.isInfoEnabled()) {
                                 LOG.info("IMAP folder created with fallback type HOLDS_MESSAGES");
