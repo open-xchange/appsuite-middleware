@@ -489,7 +489,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             }
             final UserParticipant up = new UserParticipant(uid);
             up.setConfirm(CalendarDataObject.ACCEPT);
-            recColl.checkAndConfirmIfUserUserIsParticipant(cdao, up);
+            recColl.checkAndConfirmIfUserUserIsParticipantInPublicFolder(cdao, up);
         }
 
         UserParticipant p = null;

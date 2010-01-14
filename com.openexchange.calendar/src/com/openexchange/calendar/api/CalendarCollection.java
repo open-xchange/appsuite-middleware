@@ -1863,12 +1863,24 @@ public final class CalendarCollection implements CalendarCollectionService {
     }
     
     /* (non-Javadoc)
-     * @see com.openexchange.calendar.CalendarCommonCollectionInterface#checkAndConfirmIfUserUserIsParticipant(com.openexchange.calendar.CalendarDataObject, com.openexchange.groupware.container.UserParticipant)
+     * @see com.openexchange.calendar.CalendarCommonCollectionInterface#checkAndConfirmIfUserUserIsParticipantInPublicFolder(com.openexchange.calendar.CalendarDataObject, com.openexchange.groupware.container.UserParticipant)
      */
-    public void checkAndConfirmIfUserUserIsParticipant(final CalendarDataObject cdao, final UserParticipant up) {
-        final UserParticipant check[] = cdao.getUsers();
+    public void checkAndConfirmIfUserUserIsParticipantInPublicFolder(final CalendarDataObject cdao, final UserParticipant up) {
+        Participant[] participants = cdao.getParticipants();
+        boolean isInParticipants = false;
+        if (participants != null) {
+            for (Participant participant : participants) {
+                if (participant.getIdentifier() == up.getIdentifier()) {
+                    isInParticipants  = true;
+                    break;
+                }
+            }
+        }
+
+        UserParticipant check[] = cdao.getUsers();
         if (check == null || check.length == 0) {
-            cdao.setUsers(new UserParticipant[] { up } );
+            if (isInParticipants)
+                cdao.setUsers(new UserParticipant[] { up } );
             return;
         }
         

@@ -141,7 +141,7 @@ public interface CalendarCollectionService {
      */
     public void checkAndFillIfUserIsParticipant(final CalendarDataObject cdao, final UserParticipant up);
 
-    public void checkAndConfirmIfUserUserIsParticipant(final CalendarDataObject cdao, final UserParticipant up);
+    public void checkAndConfirmIfUserUserIsParticipantInPublicFolder(final CalendarDataObject cdao, final UserParticipant up);
 
     public UserParticipant[] checkAndModifyAlarm(final CalendarDataObject cdao, UserParticipant check[], final int uid, final UserParticipant orig[]);
 
