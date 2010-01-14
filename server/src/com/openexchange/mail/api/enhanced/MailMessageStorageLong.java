@@ -520,17 +520,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
         }
         final long[] retval = new long[uids.length];
         for (int i = 0; i < retval.length; i++) {
-            final String s = uids[i];
-            if (null == s) {
-                retval[i] = -1L;
-            } else {
-                try {
-                    retval[i] = Long.parseLong(s);
-                } catch (final NumberFormatException e) {
-                    LOG.error("UID cannot be parsed to a number: " + s, e);
-                    retval[i] = -1L;
-                }
-            }
+            retval[i] = parseUnsignedLong(uids[i]);
         }
         return retval;
     }
@@ -555,6 +545,56 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
             }
         }
         return retval;
+    }
+
+    private static final long DEFAULT = -1L;
+
+    private static final int RADIX = 10;
+
+    static long parseUnsignedLong(final String s) {
+        if (s == null) {
+            return DEFAULT;
+        }
+        final int max = s.length();
+        if (max <= 0) {
+            return -1;
+        }
+        if (s.charAt(0) == '-') {
+            return -1;
+        }
+
+        long result = 0;
+        int i = 0;
+
+        final long limit = -Long.MAX_VALUE;
+        final long multmin = limit / RADIX;
+        int digit;
+
+        if (i < max) {
+            digit = Character.digit(s.charAt(i++), RADIX);
+            if (digit < 0) {
+                return DEFAULT;
+            }
+            result = -digit;
+        }
+        while (i < max) {
+            /*
+             * Accumulating negatively avoids surprises near MAX_VALUE
+             */
+            digit = Character.digit(s.charAt(i++), RADIX);
+            if (digit < 0) {
+                return DEFAULT;
+            }
+            if (result < multmin) {
+                return DEFAULT;
+            }
+            result *= RADIX;
+            if (result < limit + digit) {
+                return DEFAULT;
+            }
+            result -= digit;
+        }
+        return -result;
     }
 
 }
