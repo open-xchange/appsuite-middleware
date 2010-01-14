@@ -375,7 +375,7 @@ public class SchemaStoreImpl extends SchemaStore {
         if (Tools.tableExists(con, "version")) {
             loadOldVersionTable(con, retval);
         } else {
-            retval.setDBVersion(UpdateTaskCollection.getInstance().getHighestVersion());
+            retval.setDBVersion(Schema.FINAL_VERSION);
             retval.setLocked(false);
             retval.setGroupwareCompatible(true);
             retval.setAdminCompatible(true);
