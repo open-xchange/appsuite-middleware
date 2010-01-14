@@ -109,6 +109,15 @@ public interface MessagingPart {
     public String getDisposition() throws MessagingException;
 
     /**
+     * Gets the <code>Content-Type</code> header of this part's content. <code>null</code> is returned if the <code>Content-Type</code>
+     * header could not be determined.
+     * 
+     * @return The <code>Content-Type</code> header of this part
+     * @throws MessagingException If content type cannot be returned
+     */
+    public ContentType getContentType() throws MessagingException;
+
+    /**
      * Get the filename associated with this part, if possible.
      * <p>
      * Useful if this part represents an "attachment" that was loaded from a file. The filename will usually be a simple name, not including
