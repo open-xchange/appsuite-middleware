@@ -107,7 +107,7 @@ public final class SharedNode implements IValueHandler {
     /**
      * {@inheritDoc}
      */
-    public void writeValue(final Context ctx, final User user,
+    public void writeValue(Session session, final Context ctx, final User user,
         final Setting setting) throws SettingException {
         throw new SettingException(SettingException.Code.NO_WRITE, name);
     }
