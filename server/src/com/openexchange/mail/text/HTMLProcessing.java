@@ -342,15 +342,7 @@ public final class HTMLProcessing {
         /*
          * Validate with JTidy library
          */
-        String html;
-        String cs = charset;
-        if (null == cs) {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn("Missing charset. Using fallback \"US-ASCII\" instead.");
-            }
-            cs = CHARSET_US_ASCII;
-        }
-        html = validate(htmlContent);
+        String html = validate(htmlContent);
         /*
          * Check for meta tag in validated html content which indicates documents content type. Add if missing.
          */
@@ -360,6 +352,15 @@ public final class HTMLProcessing {
             final Matcher m = PAT_META_CT.matcher(html.substring(start, html.indexOf(TAG_E_HEAD)));
             if (!m.find()) {
                 final StringBuilder sb = new StringBuilder(html);
+                final String cs;
+                if (null == charset) {
+                    if (LOG.isWarnEnabled()) {
+                        LOG.warn("Missing charset. Using fallback \"US-ASCII\" instead.");
+                    }
+                    cs = CHARSET_US_ASCII;
+                } else {
+                    cs = charset;
+                }
                 sb.insert(start, HTML_META_TEMPLATE.replaceFirst(RPL_CT, CT_TEXT_HTML.replaceFirst(RPL_CS, cs)));
                 html = sb.toString();
             }
