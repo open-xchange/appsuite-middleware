@@ -1,3 +1,7 @@
+* 2010-01-14 - marcus.klein@open-xchange.com
+
+ - Bugfix #15202: Added old UpdateTask 
+
 * 2010-01-13 - martin.herfurth@open-xchange.com
 
  - Bugfix #15112: Intelligent contact collector settings.
