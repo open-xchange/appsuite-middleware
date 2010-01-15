@@ -58,7 +58,7 @@ import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.json.JSONAssertion;
-import com.openexchange.messaging.MessageHeader;
+import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.SimpleMessagingMessage;
@@ -79,7 +79,7 @@ public class MessagingMessageWriterTest extends TestCase {
         message.setColorLabel(2);
         message.setFlags(12);
         message.setReceivedDate(1337);
-        message.setUserFlags(Arrays.asList("eins", "zwo", "drei","vier","fŸnf"));
+        message.setUserFlags(Arrays.asList("eins", "zwo", "drei","vier","fï¿½nf"));
         message.setSize(13);
         message.setThreadLevel(15);
         message.setDisposition(MessagingMessage.INLINE);
@@ -92,7 +92,7 @@ public class MessagingMessageWriterTest extends TestCase {
                 .hasKey("colorLabel").withValue(2)
                 .hasKey("flags").withValue(12)
                 .hasKey("received_date").withValue(1337)
-                .hasKey("user").withValueArray().withValues("eins","zwo","drei","vier","fŸnf").inAnyOrder()
+                .hasKey("user").withValueArray().withValues("eins","zwo","drei","vier","fï¿½nf").inAnyOrder()
                 .hasKey("size").withValue(13)
                 .hasKey("threadLevel").withValue(15)
                 .hasKey("disposition").withValue(MessagingMessage.INLINE)
@@ -104,7 +104,7 @@ public class MessagingMessageWriterTest extends TestCase {
     // TODO: What about special headers, with special structures?
     public void testHeaders() throws JSONException, MessagingException {
         SimpleMessagingMessage message = new SimpleMessagingMessage();
-        Map<String, Collection<MessageHeader>> headers = new HashMap<String, Collection<MessageHeader>>();
+        Map<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
         
         headers.put("simpleHeader", header("simpleHeader", "Value1"));
         headers.put("multiHeader", header("multiHeader", "v1", "v2", "v3"));
@@ -149,10 +149,10 @@ public class MessagingMessageWriterTest extends TestCase {
         
     }
     
-    private Collection<MessageHeader> header(final String name, String...values) {
-        List<MessageHeader> header = new ArrayList<MessageHeader>();
+    private Collection<MessagingHeader> header(final String name, String...values) {
+        List<MessagingHeader> header = new ArrayList<MessagingHeader>();
         for (final String value : values) {
-            header.add(new MessageHeader() {
+            header.add(new MessagingHeader() {
 
                 public String getName() {
                     return name;

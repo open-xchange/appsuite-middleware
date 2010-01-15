@@ -54,7 +54,7 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.messaging.MessageHeader;
+import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.SimpleMessagingMessage;
@@ -100,11 +100,11 @@ public class MessagingMessageWriter {
         if(null != message.getHeaders() && ! message.getHeaders().isEmpty()) {
             JSONObject headerJSON = new JSONObject();
             
-            for (Map.Entry<String, Collection<MessageHeader>> entry : message.getHeaders().entrySet()) {
+            for (Map.Entry<String, Collection<MessagingHeader>> entry : message.getHeaders().entrySet()) {
 
                 JSONArray array = new JSONArray();
                 
-                for (MessageHeader header : entry.getValue()) {
+                for (MessagingHeader header : entry.getValue()) {
                     array.put(header.getValue());
                 }
                 

@@ -49,7 +49,7 @@
 
 package com.openexchange.messaging;
 
-import com.openexchange.messaging.MessageHeader.KnownHeader;
+import com.openexchange.messaging.MessagingHeader.KnownHeader;
 
 
 /**

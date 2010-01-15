@@ -55,7 +55,7 @@ package com.openexchange.messaging;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class StringMessageHeader implements MessageHeader {
+public class StringMessageHeader implements MessagingHeader {
 
     private final String name;
     

@@ -49,62 +49,65 @@
 
 package com.openexchange.messaging;
 
-import java.util.Iterator;
-
+import java.util.EnumMap;
+import java.util.Map;
 
 /**
- * {@link ParameterizedMessagingHeader}
- *
+ * {@link MessagingHeader} - A message header.
+ * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
-public interface ParameterizedMessagingHeader extends MessagingHeader {
+public interface MessagingHeader {
+    public static enum KnownHeader {
+        BCC("Bcc"), CONTENT_TYPE("Content-Type"), FROM("From"), PRIORITY("X-Priority"), DISPOSITION_NOTIFICATION_TO("Disposition-Notification-To"), SENT_DATE("Date"), SUBJECT("Subject"), TO("To")
+        ;
+        private String name;
+        
+        private KnownHeader(String name) {
+            this.name = name;
+        }
+        
+        @Override
+        public String toString() {
+            return this.name;
+        }
+        
+        private static final Map<KnownHeader, MessagingField> equivalenceMap = new EnumMap<KnownHeader, MessagingField>(KnownHeader.class);
+        
+        static {
+            equivalenceMap.put(BCC, MessagingField.BCC);
+            equivalenceMap.put(CONTENT_TYPE, MessagingField.CONTENT_TYPE);
+            equivalenceMap.put(FROM, MessagingField.FROM);
+            equivalenceMap.put(PRIORITY, MessagingField.PRIORITY);
+            equivalenceMap.put(DISPOSITION_NOTIFICATION_TO, MessagingField.DISPOSITION_NOTIFICATION_TO);
+            equivalenceMap.put(SENT_DATE, MessagingField.SENT_DATE);
+            equivalenceMap.put(SUBJECT, MessagingField.SUBJECT);
+            equivalenceMap.put(TO, MessagingField.TO);
+            
+        }
+
+        /**
+         * Maps a MessagingHeader to a MessagingField
+         * @return the MessagingField this field is associated with
+         */
+        public MessagingField getEquivalentField() {
+            return equivalenceMap.get(this);
+        }
+    }
+    /**
+     * Gets the name.
+     * 
+     * @return The name
+     */
+    public String getName();
 
     /**
-     * Adds specified value to given parameter name. If existing, the parameter is treated as a contiguous parameter according to RFC2231.
+     * Gets the value.
      * 
-     * @param key The parameter name
-     * @param value The parameter value to add
+     * @return The value
      */
-    public void addParameter(String key, String value);
+    public String getValue();
 
-    /**
-     * Sets the given parameter. Existing value is overwritten.
-     * 
-     * @param key The parameter name
-     * @param value The parameter value
-     */
-    public void setParameter(String key, String value);
-
-    /**
-     * Gets specified parameter's value
-     * 
-     * @param key The parameter name
-     * @return The parameter's value or <code>null</code> if not existing
-     */
-    public String getParameter(String key);
-
-    /**
-     * Removes specified parameter and returns its value
-     * 
-     * @param key The parameter name
-     * @return The parameter's value or <code>null</code> if not existing
-     */
-    public String removeParameter(String key);
-
-    /**
-     * Checks if parameter is present
-     * 
-     * @param key the parameter name
-     * @return <code>true</code> if parameter is present; otherwise <code>false</code>
-     */
-    public boolean containsParameter(String key);
-
-    /**
-     * Gets all parameter names wrapped in an {@link Iterator}
-     * 
-     * @return All parameter names wrapped in an {@link Iterator}
-     */
-    public Iterator<String> getParameterNames();
-    
 }

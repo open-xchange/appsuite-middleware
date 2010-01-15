@@ -78,7 +78,7 @@ public interface MessagingPart {
      * 
      * @return The headers as an unmodifiable {@link Map}.
      */
-    public Map<String, Collection<MessageHeader>> getHeaders();
+    public Map<String, Collection<MessagingHeader>> getHeaders();
 
     /**
      * Gets the header associated with specified name or <code>null</code> if not present
@@ -86,7 +86,7 @@ public interface MessagingPart {
      * @param name The header name
      * @return The header associated with specified name or <code>null</code> if not present
      */
-    public Collection<MessageHeader> getHeader(String name);
+    public Collection<MessagingHeader> getHeader(String name);
 
     /**
      * Gets the disposition.

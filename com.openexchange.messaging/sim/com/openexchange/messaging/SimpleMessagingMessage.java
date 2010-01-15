@@ -69,11 +69,12 @@ public class SimpleMessagingMessage implements MessagingMessage {
     private Collection<String> userFlags;
     private String disposition;
     private String fileName;
-    private Map<String, Collection<MessageHeader>> headers;
+    private Map<String, Collection<MessagingHeader>> headers;
     private String id;
     private String content;
     private long size;
     private int threadLevel;
+    private ContentType contentType;
 
     public int getColorLabel() {
         return colorLabel;
@@ -108,11 +109,11 @@ public class SimpleMessagingMessage implements MessagingMessage {
         return fileName;
     }
 
-    public Collection<MessageHeader> getHeader(String name) {
+    public Collection<MessagingHeader> getHeader(final String name) {
         return headers.get(name);
     }
 
-    public Map<String, Collection<MessageHeader>> getHeaders() {
+    public Map<String, Collection<MessagingHeader>> getHeaders() {
         return headers;
     }
 
@@ -128,69 +129,76 @@ public class SimpleMessagingMessage implements MessagingMessage {
         return threadLevel;
     }
 
-    public void writeTo(OutputStream os) throws IOException, MessagingException {
+    public void writeTo(final OutputStream os) throws IOException, MessagingException {
         throw new UnsupportedOperationException();
     }
 
     
-    public void setColorLabel(int colorLabel) {
+    public void setColorLabel(final int colorLabel) {
         this.colorLabel = colorLabel;
     }
 
     
-    public void setFlags(int flags) {
+    public void setFlags(final int flags) {
         this.flags = flags;
     }
 
     
-    public void setFolder(String folder) {
+    public void setFolder(final String folder) {
         this.folder = folder;
     }
 
     
-    public void setReceivedDate(long receivedDate) {
+    public void setReceivedDate(final long receivedDate) {
         this.receivedDate = receivedDate;
     }
 
     
-    public void setUserFlags(Collection<String> userFlags) {
+    public void setUserFlags(final Collection<String> userFlags) {
         this.userFlags = userFlags;
     }
 
     
-    public void setDisposition(String disposition) {
+    public void setDisposition(final String disposition) {
         this.disposition = disposition;
     }
 
     
-    public void setFileName(String fileName) {
+    public void setFileName(final String fileName) {
         this.fileName = fileName;
     }
 
     
-    public void setHeaders(Map<String, Collection<MessageHeader>> headers) {
+    public void setHeaders(final Map<String, Collection<MessagingHeader>> headers) {
         this.headers = headers;
     }
 
     
-    public void setId(String id) {
+    public void setId(final String id) {
         this.id = id;
     }
 
     
-    public void setContent(String content) {
+    public void setContent(final String content) {
         this.content = content;
     }
 
     
-    public void setSize(long size) {
+    public void setSize(final long size) {
         this.size = size;
     }
 
     
-    public void setThreadLevel(int threadLevel) {
+    public void setThreadLevel(final int threadLevel) {
         this.threadLevel = threadLevel;
     }
 
+    public ContentType getContentType() throws MessagingException {
+        return contentType;
+    }
+
+    public void setContentType(final ContentType contentType) {
+        this.contentType = contentType;
+    }
     
 }
