@@ -53,7 +53,6 @@ package com.openexchange.messaging;
  * {@link ContentDisposition} - The Content-Disposition header.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since Open-Xchange v6.16
  */
 public interface ContentDisposition extends ParameterizedMessagingHeader {
 
