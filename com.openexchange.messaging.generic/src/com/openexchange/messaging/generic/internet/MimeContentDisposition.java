@@ -64,6 +64,7 @@ import com.openexchange.messaging.generic.internal.ParameterizedHeader;
  * {@link MimeContentDisposition} - The MIME content disposition.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since Open-Xchange v6.16
  */
 public final class MimeContentDisposition extends ParameterizedHeader implements ContentDisposition {
 

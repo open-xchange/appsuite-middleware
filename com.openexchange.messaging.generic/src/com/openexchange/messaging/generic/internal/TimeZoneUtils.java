@@ -57,6 +57,7 @@ import java.util.concurrent.ConcurrentMap;
  * {@link TimeZoneUtils} - Utility class for time zone.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since Open-Xchange v6.16
  */
 public final class TimeZoneUtils {
 

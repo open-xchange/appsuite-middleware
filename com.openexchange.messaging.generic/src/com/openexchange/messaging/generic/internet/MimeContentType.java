@@ -64,6 +64,7 @@ import com.openexchange.messaging.generic.internal.ParameterizedHeader;
  * {@link MimeContentType} - The MIME content type.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since Open-Xchange v6.16
  */
 public final class MimeContentType extends ParameterizedHeader implements ContentType {
 

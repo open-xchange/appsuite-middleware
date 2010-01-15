@@ -51,10 +51,9 @@ package com.openexchange.messaging;
 
 import java.util.Iterator;
 
-
 /**
- * {@link ParameterizedMessagingHeader}
- *
+ * {@link ParameterizedMessagingHeader} - A {@link MessagingHeader header} which is capable to hold parameters.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -106,5 +105,5 @@ public interface ParameterizedMessagingHeader extends MessagingHeader {
      * @return All parameter names wrapped in an {@link Iterator}
      */
     public Iterator<String> getParameterNames();
-    
+
 }
