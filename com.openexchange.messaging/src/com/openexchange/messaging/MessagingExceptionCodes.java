@@ -96,7 +96,11 @@ public enum MessagingExceptionCodes implements OXErrorMessage {
     /**
      * Unknown action to perform: %1$s.
      */
-    UNKNOWN_ACTION(MessagingExceptionMessages.UNKNOWN_ACTION_MSG, Category.CODE_ERROR, 10);
+    UNKNOWN_ACTION(MessagingExceptionMessages.UNKNOWN_ACTION_MSG, Category.CODE_ERROR, 10),
+    /**
+     * A messaging error occurred: %1$s
+     */
+    MESSAGING_ERROR(MessagingExceptionMessages.MESSAGING_ERROR_MSG, Category.CODE_ERROR, 11);
 
     private final Category category;
 

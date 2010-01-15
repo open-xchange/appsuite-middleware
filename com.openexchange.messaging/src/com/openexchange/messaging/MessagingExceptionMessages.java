@@ -86,6 +86,9 @@ public final class MessagingExceptionMessages implements LocalizableStrings {
     // Unknown action to perform: %1$s.
     public static final String UNKNOWN_ACTION_MSG = "Unknown action to perform: %1$s.";
 
+    // A messaging error occurred: %1$s
+    public static final String MESSAGING_ERROR_MSG = "A messaging error occurred: %1$s";
+
     /**
      * Initializes a new {@link MessagingExceptionMessages}.
      */
