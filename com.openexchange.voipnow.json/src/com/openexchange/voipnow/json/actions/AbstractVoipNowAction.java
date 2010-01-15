@@ -98,15 +98,23 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
      * @throws AbstractOXException If returning VoipNow setting fails
      */
     protected static VoipNowServerSetting getVoipNowServerSetting(final ServerSession session, final boolean httpApi) throws AbstractOXException {
-        final ConfigurationService service = ServiceRegistry.getInstance().getService(ConfigurationService.class, true);
-
         final VoipNowServerSetting retval = new VoipNowServerSetting();
-        retval.setPort(service.getIntProperty("com.4psa.voipnow.port", 443));
-        retval.setHost(service.getProperty("com.4psa.voipnow.host", "localhost").trim());
-        retval.setSecure(Boolean.parseBoolean(service.getProperty("com.4psa.voipnow.secure", "true").trim()));
-        retval.setLogin(service.getProperty("com.4psa.voipnow.adminLogin", "").trim());
-        retval.setPassword(service.getProperty(httpApi ? "com.4psa.voipnow.adminPasswordHTTP" : "com.4psa.voipnow.adminPassword", "").trim());
+        final StaticVoipNowServerSetting staticInstance = StaticVoipNowServerSetting.getInstance();
+        if (null == staticInstance) {
+            final ConfigurationService service = ServiceRegistry.getInstance().getService(ConfigurationService.class, true);
 
+            retval.setPort(service.getIntProperty("com.4psa.voipnow.port", 443));
+            retval.setHost(service.getProperty("com.4psa.voipnow.host", "localhost").trim());
+            retval.setSecure(Boolean.parseBoolean(service.getProperty("com.4psa.voipnow.secure", "true").trim()));
+            retval.setLogin(service.getProperty("com.4psa.voipnow.adminLogin", "").trim());
+            retval.setPassword(service.getProperty(httpApi ? "com.4psa.voipnow.adminPasswordHTTP" : "com.4psa.voipnow.adminPassword", "").trim());
+        } else {
+            retval.setPort(staticInstance.getPort());
+            retval.setHost(staticInstance.getHost());
+            retval.setSecure(staticInstance.isSecure());
+            retval.setLogin(staticInstance.getLogin());
+            retval.setPassword(httpApi ? staticInstance.getPasswordHttp() : staticInstance.getPassword());
+        }
         return retval;
     }
 

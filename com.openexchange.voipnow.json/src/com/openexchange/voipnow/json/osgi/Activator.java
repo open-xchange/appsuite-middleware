@@ -129,17 +129,7 @@ public class Activator implements BundleActivator {
              * Configuration service tracker
              */
             {
-                final ServiceTrackerCustomizer cst =
-                    new InitializingRegistryServiceTrackerCustomizer<ConfigurationService>(
-                        context,
-                        serviceRegistry,
-                        ConfigurationService.class) {
-
-                        @Override
-                        protected void doInit(final ConfigurationService service) {
-                            com._4psa.Version.setVersion(service.getProperty("com.4psa.voipnow.version", "2.0.4"));
-                        }
-                    };
+                final ServiceTrackerCustomizer cst = new InitializingRegistryServiceTrackerCustomizer(context, serviceRegistry);
                 trackers.push(new ServiceTracker(context, ConfigurationService.class.getName(), cst));
             }
             /*

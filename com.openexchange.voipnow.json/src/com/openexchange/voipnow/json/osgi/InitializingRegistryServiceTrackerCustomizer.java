@@ -50,41 +50,36 @@
 package com.openexchange.voipnow.json.osgi;
 
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.server.osgiservice.AbstractServiceRegistry;
 import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
+import com.openexchange.voipnow.json.actions.StaticVoipNowServerSetting;
 
 /**
- * {@link InitializingRegistryServiceTrackerCustomizer} - Enhances {@link RegistryServiceTrackerCustomizer} by a {@link #doInit(Object)}
- * method.
+ * {@link InitializingRegistryServiceTrackerCustomizer} - Enhances {@link RegistryServiceTrackerCustomizer}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class InitializingRegistryServiceTrackerCustomizer<T> extends RegistryServiceTrackerCustomizer<T> {
+public final class InitializingRegistryServiceTrackerCustomizer extends RegistryServiceTrackerCustomizer<ConfigurationService> {
 
     /**
      * Initializes a new {@link InitializingRegistryServiceTrackerCustomizer}.
      * 
      * @param context The bundle context
      * @param registry The registry
-     * @param clazz The tracked class
      */
-    public InitializingRegistryServiceTrackerCustomizer(final BundleContext context, final AbstractServiceRegistry registry, final Class<T> clazz) {
-        super(context, registry, clazz);
+    public InitializingRegistryServiceTrackerCustomizer(final BundleContext context, final AbstractServiceRegistry registry) {
+        super(context, registry, ConfigurationService.class);
     }
 
     @Override
-    public Object addingService(final ServiceReference reference) {
-        final Object tmp = context.getService(reference);
-        if (serviceClass.isInstance(tmp)) {
-            doInit(serviceClass.cast(tmp));
-            registry.addService(serviceClass, tmp);
-            return tmp;
-        }
-        context.ungetService(reference);
-        return null;
+    protected void serviceAcquired(final Object service) {
+        StaticVoipNowServerSetting.initInstance(serviceClass.cast(service));
     }
 
-    protected abstract void doInit(final T service);
+    @Override
+    protected void serviceReleased(final Object service) {
+        StaticVoipNowServerSetting.releaseInstance();
+    }
 
 }
