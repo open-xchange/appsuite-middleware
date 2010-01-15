@@ -96,7 +96,7 @@ public class RegistryServiceTrackerCustomizer<T> implements ServiceTrackerCustom
     }
 
     public void removedService(final ServiceReference reference, final Object service) {
-        if (registry.removeService(serviceClass) != null) {
+        if ((null != service) && (registry.removeService(serviceClass) != null)) {
             context.ungetService(reference);
         }
     }
