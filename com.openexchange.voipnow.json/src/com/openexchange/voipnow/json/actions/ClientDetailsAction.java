@@ -96,7 +96,7 @@ public final class ClientDetailsAction extends AbstractVoipNowSOAPAction<ClientP
              */
             final String clientId = checkStringParameter(request, "id");
             final String identifier = checkStringParameter(request, "identifier");
-            final VoipNowServerSetting setting = getVoipNowServerSetting(session);
+            final VoipNowServerSetting setting = getSOAPVoipNowServerSetting(session);
             /*
              * The SOAP stub
              */

@@ -66,6 +66,8 @@ public final class VoipNowServerSetting {
 
     private String password;
 
+    private String passwordHttp;
+
     /**
      * Initializes a new {@link VoipNowServerSetting}.
      */
@@ -74,7 +76,7 @@ public final class VoipNowServerSetting {
     }
 
     /**
-     * Gets the host
+     * Gets the host.
      * 
      * @return The host
      */
@@ -83,7 +85,7 @@ public final class VoipNowServerSetting {
     }
 
     /**
-     * Sets the host
+     * Sets the host.
      * 
      * @param host The host to set
      */
@@ -92,7 +94,7 @@ public final class VoipNowServerSetting {
     }
 
     /**
-     * Gets the port
+     * Gets the port.
      * 
      * @return The port
      */
@@ -101,7 +103,7 @@ public final class VoipNowServerSetting {
     }
 
     /**
-     * Sets the port
+     * Sets the port.
      * 
      * @param port The port to set
      */
@@ -110,7 +112,7 @@ public final class VoipNowServerSetting {
     }
 
     /**
-     * Gets the secure flag
+     * Gets the secure flag.
      * 
      * @return The secure flag
      */
@@ -119,7 +121,7 @@ public final class VoipNowServerSetting {
     }
 
     /**
-     * Sets the secure flag
+     * Sets the secure flag.
      * 
      * @param secure The secure flag to set
      */
@@ -128,7 +130,7 @@ public final class VoipNowServerSetting {
     }
 
     /**
-     * Gets the login
+     * Gets the login.
      * 
      * @return The login
      */
@@ -137,7 +139,7 @@ public final class VoipNowServerSetting {
     }
 
     /**
-     * Sets the login
+     * Sets the login.
      * 
      * @param login The login to set
      */
@@ -146,7 +148,7 @@ public final class VoipNowServerSetting {
     }
 
     /**
-     * Gets the password
+     * Gets the password.
      * 
      * @return The password
      */
@@ -155,12 +157,30 @@ public final class VoipNowServerSetting {
     }
 
     /**
-     * Sets the password
+     * Sets the password.
      * 
      * @param password The password to set
      */
     public void setPassword(final String password) {
         this.password = password;
+    }
+
+    /**
+     * Gets the HTTP-API password.
+     * 
+     * @return The HTTP-API password
+     */
+    public String getPasswordHttp() {
+        return passwordHttp;
+    }
+
+    /**
+     * Sets the HTTP-API password.
+     * 
+     * @param passwordHttp The HTTP-API password
+     */
+    public void setPasswordHttp(final String passwordHttp) {
+        this.passwordHttp = passwordHttp;
     }
 
 }

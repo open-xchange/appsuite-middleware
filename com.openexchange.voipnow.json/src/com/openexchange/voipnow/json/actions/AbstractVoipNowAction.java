@@ -81,10 +81,23 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
      * Gets the VoipNow setting for specified session.
      * 
      * @param session The session
+     * @param httpApi <code>true</code> to authenticate against HTTP-API interface; otherwise <code>false</code>
      * @return The VoipNow setting
      * @throws AbstractOXException If returning VoipNow setting fails
      */
-    protected static VoipNowServerSetting getVoipNowServerSetting(final ServerSession session) throws AbstractOXException {
+    protected static VoipNowServerSetting getSOAPVoipNowServerSetting(final ServerSession session) throws AbstractOXException {
+        return getVoipNowServerSetting(session, false);
+    }
+
+    /**
+     * Gets the VoipNow setting for specified session.
+     * 
+     * @param session The session
+     * @param httpApi <code>true</code> to authenticate against HTTP-API interface; otherwise <code>false</code>
+     * @return The VoipNow setting
+     * @throws AbstractOXException If returning VoipNow setting fails
+     */
+    protected static VoipNowServerSetting getVoipNowServerSetting(final ServerSession session, final boolean httpApi) throws AbstractOXException {
         final ConfigurationService service = ServiceRegistry.getInstance().getService(ConfigurationService.class, true);
 
         final VoipNowServerSetting retval = new VoipNowServerSetting();
@@ -92,7 +105,7 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
         retval.setHost(service.getProperty("com.4psa.voipnow.host", "localhost").trim());
         retval.setSecure(Boolean.parseBoolean(service.getProperty("com.4psa.voipnow.secure", "true").trim()));
         retval.setLogin(service.getProperty("com.4psa.voipnow.adminLogin", "").trim());
-        retval.setPassword(service.getProperty("com.4psa.voipnow.adminPassword", "").trim());
+        retval.setPassword(service.getProperty(httpApi ? "com.4psa.voipnow.adminPasswordHTTP" : "com.4psa.voipnow.adminPassword", "").trim());
 
         return retval;
     }

@@ -119,7 +119,7 @@ public final class CallReportAction extends AbstractVoipNowSOAPAction<ReportPort
             /*
              * Get setting
              */
-            final VoipNowServerSetting setting = getVoipNowServerSetting(session);
+            final VoipNowServerSetting setting = getSOAPVoipNowServerSetting(session);
             /*
              * Perform a SOAP request
              */

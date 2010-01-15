@@ -116,7 +116,7 @@ public final class SetFollowMeAction extends AbstractVoipNowSOAPAction<Extension
             final String idStr = "id";
             final String userId = checkStringParameter(request, idStr);
             final String[] transferTo = json2StringArr((JSONArray) request.getData());
-            final VoipNowServerSetting setting = getVoipNowServerSetting(session);
+            final VoipNowServerSetting setting = getSOAPVoipNowServerSetting(session);
             /*
              * The SOAP stub
              */

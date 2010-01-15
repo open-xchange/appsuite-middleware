@@ -119,7 +119,7 @@ public final class NewCallAction extends AbstractVoipNowHTTPAction<GetMethod> {
                 callerNumber = set.iterator().next();
             }
             final boolean xml = false;
-            final VoipNowServerSetting setting = getVoipNowServerSetting(session);
+            final VoipNowServerSetting setting = getVoipNowServerSetting(session, true);
             /*
              * Compose and apply query string without starting '?' character
              */

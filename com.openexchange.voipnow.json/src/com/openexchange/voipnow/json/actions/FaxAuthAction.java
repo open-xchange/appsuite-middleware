@@ -107,7 +107,7 @@ public final class FaxAuthAction extends AbstractVoipNowAction {
             /*
              * Get VoipNow server setting
              */
-            final VoipNowServerSetting setting = getVoipNowServerSetting(session);
+            final VoipNowServerSetting setting = getVoipNowServerSetting(session, true);
             /*
              * Get user's main extension
              */
