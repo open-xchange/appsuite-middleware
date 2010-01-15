@@ -66,8 +66,6 @@ public final class VoipNowServerSetting {
 
     private String password;
 
-    private String passwordHttp;
-
     /**
      * Initializes a new {@link VoipNowServerSetting}.
      */
@@ -163,24 +161,6 @@ public final class VoipNowServerSetting {
      */
     public void setPassword(final String password) {
         this.password = password;
-    }
-
-    /**
-     * Gets the HTTP-API password.
-     * 
-     * @return The HTTP-API password
-     */
-    public String getPasswordHttp() {
-        return passwordHttp;
-    }
-
-    /**
-     * Sets the HTTP-API password.
-     * 
-     * @param passwordHttp The HTTP-API password
-     */
-    public void setPasswordHttp(final String passwordHttp) {
-        this.passwordHttp = passwordHttp;
     }
 
 }
