@@ -123,7 +123,7 @@ public final class NewCallAction extends AbstractVoipNowHTTPAction<GetMethod> {
                 final String mainExtAttr = set.iterator().next();
                 final int pos = mainExtAttr.indexOf('=');
                 if (pos < 0) {
-                    throw VoipNowExceptionCodes.INVALID_PROPERTY.create("com.4psa.voipnow/mainExtension", mainExtAttr);
+                    throw VoipNowExceptionCodes.INVALID_PROPERTY.create(attributeName, mainExtAttr);
                 }
                 callerNumber = mainExtAttr.substring(pos + 1);
             }

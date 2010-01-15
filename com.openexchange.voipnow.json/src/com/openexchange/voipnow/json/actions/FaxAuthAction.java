@@ -129,7 +129,7 @@ public final class FaxAuthAction extends AbstractVoipNowAction {
                 final String mainExtAttr = set.iterator().next();
                 final int pos = mainExtAttr.indexOf('=');
                 if (pos < 0) {
-                    throw VoipNowExceptionCodes.INVALID_PROPERTY.create("com.4psa.voipnow/mainExtension", mainExtAttr);
+                    throw VoipNowExceptionCodes.INVALID_PROPERTY.create(attributeName, mainExtAttr);
                 }
                 mainExtension = mainExtAttr.substring(pos + 1);
             }
