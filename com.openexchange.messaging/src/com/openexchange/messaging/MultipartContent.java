@@ -49,16 +49,30 @@
 
 package com.openexchange.messaging;
 
-
 /**
  * {@link MultipartContent} - A multipart content.
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
 public interface MultipartContent extends MessagingContent {
-    public int getCount();
-    
-    public MessagingBodyPart get(int index);
+
+    /**
+     * Gets the number of enclosed {@link MessagingBodyPart parts}.
+     * 
+     * @return The number of enclosed parts
+     * @throws MessagingException If the number of enclosed parts cannot be determined
+     */
+    public int getCount() throws MessagingException;
+
+    /**
+     * Get the specified {@link MessagingBodyPart part}. Parts are numbered starting at zero.
+     * 
+     * @param index The zero-based index
+     * @return The indexed {@link MessagingBodyPart part}
+     * @throws MessagingException If {@link MessagingBodyPart part} at index position cannot be returned
+     */
+    public MessagingBodyPart get(int index) throws MessagingException;
+
 }
