@@ -61,5 +61,6 @@
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.mail.headercache,com.openexchange.mail.headercache"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.messaging,com.openexchange.messaging"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.messaging.generic,com.openexchange.messaging.generic"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.messaging.twitter,com.openexchange.messaging.twitter"/>
 </provider>
 </psf>
