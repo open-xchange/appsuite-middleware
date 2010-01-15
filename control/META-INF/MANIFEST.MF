@@ -8,6 +8,7 @@ Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Import-Package: com.openexchange.groupware,
  com.openexchange.management,
  com.openexchange.server,
+ com.openexchange.server.impl,
  com.openexchange.server.osgiservice,
  javax.management,
  org.apache.commons.codec.binary;version="1.3.0",

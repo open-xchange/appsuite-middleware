@@ -63,6 +63,7 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.packageadmin.PackageAdmin;
+import com.openexchange.server.impl.Version;
 
 /**
  * {@link GeneralControl} - Provides several methods to manage OSGi application.
@@ -253,6 +254,10 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
         }
 
         return serviceList;
+    }
+
+    public String version() {
+        return Version.getVersionString();
     }
 
     private Bundle getBundleByName(final String name, final Bundle[] bundle) {
