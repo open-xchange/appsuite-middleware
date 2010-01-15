@@ -83,6 +83,9 @@ public final class MessagingExceptionMessages implements LocalizableStrings {
     // Invalid header "%1$s": %2$s
     public static final String INVALID_HEADER_MSG = "Invalid header \"%1$s\": %2$s";
 
+    // Unknown action to perform: %1$s.
+    public static final String UNKNOWN_ACTION_MSG = "Unknown action to perform: %1$s.";
+
     /**
      * Initializes a new {@link MessagingExceptionMessages}.
      */

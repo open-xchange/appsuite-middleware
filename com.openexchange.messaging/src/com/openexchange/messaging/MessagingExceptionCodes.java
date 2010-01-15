@@ -92,7 +92,11 @@ public enum MessagingExceptionCodes implements OXErrorMessage {
     /**
      * Invalid header "%1$s": %2$s
      */
-    INVALID_HEADER(MessagingExceptionMessages.INVALID_HEADER_MSG, Category.CODE_ERROR, 9);
+    INVALID_HEADER(MessagingExceptionMessages.INVALID_HEADER_MSG, Category.CODE_ERROR, 9),
+    /**
+     * Unknown action to perform: %1$s.
+     */
+    UNKNOWN_ACTION(MessagingExceptionMessages.UNKNOWN_ACTION_MSG, Category.CODE_ERROR, 10);
 
     private final Category category;
 
