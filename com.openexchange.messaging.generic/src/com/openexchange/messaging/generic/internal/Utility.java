@@ -56,13 +56,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import javax.mail.internet.MailDateFormat;
-import com.openexchange.messaging.MessagingException;
-import com.openexchange.messaging.MessagingExceptionCodes;
-
 
 /**
- * {@link Utility}
- *
+ * {@link Utility} - Utility class for <i>com.openexchange.messaging.generic</i> bundle.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Utility {
@@ -76,6 +73,34 @@ public final class Utility {
 
     private static final ConcurrentMap<String, Future<MailDateFormat>> MDF_MAP = new ConcurrentHashMap<String, Future<MailDateFormat>>();
 
+    private static final MailDateFormat DEFAULT_MAIL_DATE_FORMAT;
+
+    static {
+        DEFAULT_MAIL_DATE_FORMAT = new MailDateFormat();
+        DEFAULT_MAIL_DATE_FORMAT.setTimeZone(TimeZoneUtils.getTimeZone("GMT"));
+    }
+
+    /**
+     * Gets the default {@link MailDateFormat} instance configured with GMT time zone.
+     * <p>
+     * Note that returned instance of {@link MailDateFormat} is shared, therefore use a surrounding synchronized block to preserve thread
+     * safety:
+     * 
+     * <pre>
+     * ...
+     * final MailDateFormat mdf = Utility.getDefaultMailDateFormat();
+     * synchronized(mdf) {
+     *  mdf.format(date);
+     * }
+     * ...
+     * </pre>
+     * 
+     * @return The default {@link MailDateFormat} instance configured with GMT time zone
+     */
+    public static MailDateFormat getDefaultMailDateFormat() {
+        return DEFAULT_MAIL_DATE_FORMAT;
+    }
+
     /**
      * Gets the {@link MailDateFormat} for specified time zone identifier.
      * <p>
@@ -84,18 +109,17 @@ public final class Utility {
      * 
      * <pre>
      * ...
-     * final MailDateFormat mdf = MIMEMessageUtility.getMailDateFormat(timeZoneId);
+     * final MailDateFormat mdf = Utility.getMailDateFormat(timeZoneId);
      * synchronized(mdf) {
-     *  mimeMessage.setHeader(&quot;Date&quot;, mdf.format(sendDate));
+     *  mdf.format(date);
      * }
      * ...
      * </pre>
      * 
      * @param timeZoneId The time zone identifier
      * @return The {@link MailDateFormat} for specified time zone identifier
-     * @throws MessagingException If {@link MailDateFormat} cannot be returned
      */
-    public static MailDateFormat getMailDateFormat(final String timeZoneId) throws MessagingException {
+    public static MailDateFormat getMailDateFormat(final String timeZoneId) {
         Future<MailDateFormat> future = MDF_MAP.get(timeZoneId);
         if (null == future) {
             final FutureTask<MailDateFormat> ft = new FutureTask<MailDateFormat>(new Callable<MailDateFormat>() {
@@ -115,12 +139,14 @@ public final class Utility {
         try {
             return future.get();
         } catch (final InterruptedException e) {
+            org.apache.commons.logging.LogFactory.getLog(Utility.class).error(e.getMessage(), e);
             Thread.currentThread().interrupt();
-            throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw new IllegalStateException(e);
         } catch (final ExecutionException e) {
             final Throwable cause = e.getCause();
-            throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(cause, cause.getMessage());
+            org.apache.commons.logging.LogFactory.getLog(Utility.class).error(cause.getMessage(), cause);
+            return DEFAULT_MAIL_DATE_FORMAT;
         }
     }
-    
+
 }
