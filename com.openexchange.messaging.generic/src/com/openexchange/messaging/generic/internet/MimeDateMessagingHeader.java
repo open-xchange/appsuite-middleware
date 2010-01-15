@@ -55,7 +55,7 @@ import javax.mail.internet.MailDateFormat;
 import com.openexchange.messaging.DateMessagingHeader;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingExceptionCodes;
-import com.openexchange.messaging.generic.internal.Utility;
+import com.openexchange.messaging.generic.Utility;
 
 /**
  * {@link MimeDateMessagingHeader}

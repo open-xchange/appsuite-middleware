@@ -47,8 +47,9 @@
  *
  */
 
-package com.openexchange.messaging.generic.internal;
+package com.openexchange.messaging.generic;
 
+import java.io.UnsupportedEncodingException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -56,6 +57,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import javax.mail.internet.MailDateFormat;
+import com.openexchange.mail.mime.utils.MIMEMessageUtility;
+import com.openexchange.messaging.generic.internal.TimeZoneUtils;
 
 /**
  * {@link Utility} - Utility class for <i>com.openexchange.messaging.generic</i> bundle.
@@ -147,6 +150,55 @@ public final class Utility {
             org.apache.commons.logging.LogFactory.getLog(Utility.class).error(cause.getMessage(), cause);
             return DEFAULT_MAIL_DATE_FORMAT;
         }
+    }
+
+    /**
+     * Decodes a string header obtained from ENVELOPE fetch item.
+     * 
+     * @param headerValue The header value
+     * @return The decoded header value
+     */
+    public static String decodeEnvelopeHeader(final String headerValue) {
+        return MIMEMessageUtility.decodeEnvelopeHeader(headerValue);
+    }
+
+    /**
+     * Decodes a multi-mime-encoded header value using the algorithm specified in RFC 2047, Section 6.1.
+     * <p>
+     * If the charset-conversion fails for any sequence, an {@link UnsupportedEncodingException} is thrown.
+     * <p>
+     * If the String is not a RFC 2047 style encoded header, it is returned as-is
+     * 
+     * @param headerValue The possibly encoded header value
+     * @return The possibly decoded header value
+     */
+    public static String decodeMultiEncodedHeader(final String headerValue) {
+        return MIMEMessageUtility.decodeMultiEncodedHeader(headerValue);
+    }
+
+    /**
+     * Folds a string at linear whitespace so that each line is no longer than 76 characters, if possible. If there are more than 76
+     * non-whitespace characters consecutively, the string is folded at the first whitespace after that sequence. The parameter
+     * <tt>used</tt> indicates how many characters have been used in the current line; it is usually the length of the header name.
+     * <p>
+     * Note that line breaks in the string aren't escaped; they probably should be.
+     * 
+     * @param used The characters used in line so far
+     * @param foldMe The string to fold
+     * @return The folded string
+     */
+    public static String fold(final int used, final String foldMe) {
+        return MIMEMessageUtility.fold(used, foldMe);
+    }
+
+    /**
+     * Unfolds a folded header. Any line breaks that aren't escaped and are followed by whitespace are removed.
+     * 
+     * @param headerLine The header line to unfold
+     * @return The unfolded string
+     */
+    public static String unfold(final String headerLine) {
+        return MIMEMessageUtility.unfold(headerLine);
     }
 
 }
