@@ -118,6 +118,14 @@ public interface MessagingPart {
     public ContentType getContentType() throws MessagingException;
 
     /**
+     * Get the size of this part in bytes. Return <code>-1</code> if the size cannot be determined.
+     * 
+     * @return The size of this part or <code>-1</code>
+     * @throws MessagingException If size cannot be returned
+     */
+    public long getSize() throws MessagingException;;
+
+    /**
      * Get the filename associated with this part, if possible.
      * <p>
      * Useful if this part represents an "attachment" that was loaded from a file. The filename will usually be a simple name, not including

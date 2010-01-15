@@ -195,12 +195,6 @@ public interface MessagingMessage extends MessagingPart {
     public Collection<String> getUserFlags();
 
     /**
-     * Get the size of this message
-     * @return
-     */
-    public long getSize();
-
-    /**
      * Get the thread level of this message.
      * @return
      */
