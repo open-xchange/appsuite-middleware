@@ -33,6 +33,7 @@
     <property name="globaljar" value="com.openexchange.global.jar"/>
     <property name="configjar" value="com.openexchange.config.jar"/>
     <property name="managementjar" value="com.openexchange.management.jar"/>
+    <property name="serverjar" value="com.openexchange.server.jar"/>
 
     <!-- Classpath -->
     <path id="project.classpath">
@@ -42,6 +43,7 @@
         <pathelement location="${bundlesdir}/${globaljar}"/>
         <pathelement location="${bundlesdir}/${configjar}"/>
         <pathelement location="${bundlesdir}/${managementjar}"/>
+        <pathelement location="${bundlesdir}/${serverjar}"/>
     </path>
 
     <!-- Compile -->
