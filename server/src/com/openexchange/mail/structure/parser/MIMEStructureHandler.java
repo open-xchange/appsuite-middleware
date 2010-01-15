@@ -105,6 +105,7 @@ import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedPart;
 import com.openexchange.tools.ByteBuffers;
+import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.encoding.Charsets;
 import com.openexchange.tools.regex.MatcherReplacer;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -595,7 +596,12 @@ public final class MIMEStructureHandler implements StructureHandler {
             HeaderName.valueOf("Resent-To"),
             HeaderName.valueOf("Resent-Sender")));
 
-    private static final MailDateFormat MAIL_DATE_FORMAT = new MailDateFormat();
+    private static final MailDateFormat MAIL_DATE_FORMAT;
+
+    static {
+        MAIL_DATE_FORMAT = new MailDateFormat();
+        MAIL_DATE_FORMAT.setTimeZone(TimeZoneUtils.getTimeZone("GMT"));
+    }
 
     private JSONObject generateHeadersObject(final Iterator<Entry<String, String>> iter, final JSONObject parent) throws MailException {
         try {
