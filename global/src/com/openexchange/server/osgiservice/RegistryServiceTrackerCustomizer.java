@@ -55,7 +55,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 /**
  * {@link RegistryServiceTrackerCustomizer} can be used to remember discovered services in an {@link AbstractServiceRegistry}.
- *
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class RegistryServiceTrackerCustomizer<T> implements ServiceTrackerCustomizer {
@@ -66,6 +66,13 @@ public class RegistryServiceTrackerCustomizer<T> implements ServiceTrackerCustom
 
     protected final Class<T> serviceClass;
 
+    /**
+     * Initializes a new {@link RegistryServiceTrackerCustomizer}.
+     * 
+     * @param context The bundle context
+     * @param registry The registry
+     * @param clazz The service class to track
+     */
     public RegistryServiceTrackerCustomizer(final BundleContext context, final AbstractServiceRegistry registry, final Class<T> clazz) {
         super();
         this.context = context;
@@ -77,10 +84,11 @@ public class RegistryServiceTrackerCustomizer<T> implements ServiceTrackerCustom
         final Object tmp = context.getService(reference);
         if (serviceClass.isInstance(tmp)) {
             registry.addService(serviceClass, tmp);
-        } else {
-            context.ungetService(reference);
+            serviceAcquired(tmp);
+            return tmp;
         }
-        return tmp;
+        context.ungetService(reference);
+        return null;
     }
 
     public void modifiedService(final ServiceReference reference, final Object service) {
@@ -92,4 +100,16 @@ public class RegistryServiceTrackerCustomizer<T> implements ServiceTrackerCustom
             context.ungetService(reference);
         }
     }
+
+    /**
+     * A hook for additional actions for newly tracked service instance.
+     * <p>
+     * Sub-classes may cast service using {@link #serviceClass} member.
+     * 
+     * @param service The newly tracked service
+     */
+    protected void serviceAcquired(final Object service) {
+        // Nothing to do in basic implementation
+    }
+
 }
