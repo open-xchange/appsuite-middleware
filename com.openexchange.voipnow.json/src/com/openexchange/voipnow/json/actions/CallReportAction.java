@@ -100,22 +100,14 @@ public final class CallReportAction extends AbstractVoipNowSOAPAction<ReportPort
             /*
              * Parse parameters
              */
-            final String userId;
-            final String identifier;
-            final String login;
-            {
-                /*
-                 * Either the (numeric) user id or its identifier
-                 */
-                final String[] eitherOf = checkEitherOfStringParameter(request, "id", "identifier", "login");
-                userId = eitherOf[0];
-                identifier = eitherOf[1];
-                login = eitherOf[2];
-            }
             final long start = checkLongParameter(request, "start");
             final long end = checkLongParameter(request, "end");
             final String disposion = "answered";
             // TODO: What about disposion??? "ANSWERED", "BUSY", "FAILED", "NO ANSWER", "UNKNOWN", or "NOT ALLOWED"
+            /*
+             * Get session user's main extension identifier
+             */
+            final String userId = String.valueOf(getMainExtensionIDOfSessionUser(session.getUser(), session.getContextId()));
             /*
              * Get setting
              */
@@ -134,19 +126,9 @@ public final class CallReportAction extends AbstractVoipNowSOAPAction<ReportPort
                  */
                 {
                     final CallReportRequestChoice_type0 type0 = new CallReportRequestChoice_type0();
-                    if (null != userId) {
-                        final PositiveInteger userIdParam = new PositiveInteger();
-                        userIdParam.setPositiveInteger(new org.apache.axis2.databinding.types.PositiveInteger(userId));
-                        type0.setUserID(userIdParam);
-                    } else if (null != identifier) {
-                        final com._4psa.common_xsd._2_0_4.String identifierString = new com._4psa.common_xsd._2_0_4.String();
-                        identifierString.setString(identifier);
-                        type0.setUserIdentifier(identifierString);
-                    } else if (null != login) {
-                        final com._4psa.common_xsd._2_0_4.String loginString = new com._4psa.common_xsd._2_0_4.String();
-                        loginString.setString(login);
-                        type0.setLogin(loginString);
-                    }
+                    final PositiveInteger userIdParam = new PositiveInteger();
+                    userIdParam.setPositiveInteger(new org.apache.axis2.databinding.types.PositiveInteger(userId));
+                    type0.setUserID(userIdParam);
                     callReportRequest.setCallReportRequestChoice_type0(type0);
                 }
                 /*

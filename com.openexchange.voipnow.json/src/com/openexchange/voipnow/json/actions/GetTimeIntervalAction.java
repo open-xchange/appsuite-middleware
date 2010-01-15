@@ -106,7 +106,7 @@ public final class GetTimeIntervalAction extends AbstractVoipNowSOAPAction<PBXPo
             /*
              * Parse parameters
              */
-            final String userId = checkStringParameter(request, "id");
+            final String userId = String.valueOf(getMainExtensionIDOfSessionUser(session.getUser(), session.getContextId()));
             final VoipNowServerSetting setting = getSOAPVoipNowServerSetting(session);
             /*
              * Stub

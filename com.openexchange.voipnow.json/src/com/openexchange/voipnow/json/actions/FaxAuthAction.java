@@ -50,8 +50,6 @@
 package com.openexchange.voipnow.json.actions;
 
 import java.util.Date;
-import java.util.Map;
-import java.util.Set;
 import javax.mail.internet.MailDateFormat;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -62,7 +60,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.voipnow.json.Utility;
-import com.openexchange.voipnow.json.VoipNowExceptionCodes;
 
 /**
  * {@link FaxAuthAction} - Maps the action to a <tt>faxauth</tt> action.
@@ -112,27 +109,7 @@ public final class FaxAuthAction extends AbstractVoipNowAction {
              * Get user's main extension
              */
             final User sessionUser = session.getUser();
-            final String mainExtension;
-            {
-                final Map<String, Set<String>> attributes = sessionUser.getAttributes();
-                final String attributeName = "com.4psa.voipnow/mainExtension";
-                final Set<String> set = attributes.get(attributeName);
-                if (null == set || set.isEmpty()) {
-                    throw VoipNowExceptionCodes.MISSING_MAIN_EXTENSION.create(
-                        Integer.valueOf(session.getUserId()),
-                        Integer.valueOf(session.getContextId()));
-                }
-                /*-
-                 * Pattern: <numeric-id>=<phone-number>
-                 * Example: 7=0004*013
-                 */
-                final String mainExtAttr = set.iterator().next();
-                final int pos = mainExtAttr.indexOf('=');
-                if (pos < 0) {
-                    throw VoipNowExceptionCodes.INVALID_PROPERTY.create(attributeName, mainExtAttr);
-                }
-                mainExtension = mainExtAttr.substring(pos + 1);
-            }
+            final String mainExtension = getMainExtensionNumberOfSessionUser(sessionUser, session.getContextId());
             /*
              * RFC822 format created date
              */

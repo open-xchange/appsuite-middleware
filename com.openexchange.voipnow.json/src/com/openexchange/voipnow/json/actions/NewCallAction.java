@@ -53,8 +53,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.util.Map;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.httpclient.HttpException;
@@ -62,7 +60,6 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.voipnow.json.VoipNowException;
@@ -105,28 +102,7 @@ public final class NewCallAction extends AbstractVoipNowHTTPAction<GetMethod> {
             /*
              * Get main extension
              */
-            final String callerNumber;
-            {
-                final User sessionUser = session.getUser();
-                final Map<String, Set<String>> attributes = sessionUser.getAttributes();
-                final String attributeName = "com.4psa.voipnow/mainExtension";
-                final Set<String> set = attributes.get(attributeName);
-                if (null == set || set.isEmpty()) {
-                    throw VoipNowExceptionCodes.MISSING_MAIN_EXTENSION.create(
-                        Integer.valueOf(session.getUserId()),
-                        Integer.valueOf(session.getContextId()));
-                }
-                /*-
-                 * Pattern: <numeric-id>=<phone-number>
-                 * Example: 7=0004*013
-                 */
-                final String mainExtAttr = set.iterator().next();
-                final int pos = mainExtAttr.indexOf('=');
-                if (pos < 0) {
-                    throw VoipNowExceptionCodes.INVALID_PROPERTY.create(attributeName, mainExtAttr);
-                }
-                callerNumber = mainExtAttr.substring(pos + 1);
-            }
+            final String callerNumber = getMainExtensionNumberOfSessionUser(session.getUser(), session.getContextId());
             final boolean xml = false;
             final VoipNowServerSetting setting = getVoipNowServerSetting(session, true);
             /*

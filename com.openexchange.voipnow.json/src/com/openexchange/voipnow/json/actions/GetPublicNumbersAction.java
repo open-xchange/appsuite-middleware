@@ -94,7 +94,7 @@ public final class GetPublicNumbersAction extends AbstractVoipNowSOAPAction<Chan
 
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws AbstractOXException {
         try {
-            final String userId = checkStringParameter(request, "id");
+            final String userId = String.valueOf(getMainExtensionIDOfSessionUser(session.getUser(), session.getContextId()));
             final VoipNowServerSetting setting = getSOAPVoipNowServerSetting(session);
             /*
              * The SOAP stub

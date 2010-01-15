@@ -113,10 +113,12 @@ public final class SetFollowMeAction extends AbstractVoipNowSOAPAction<Extension
             /*
              * Parse parameters
              */
-            final String idStr = "id";
-            final String userId = checkStringParameter(request, idStr);
             final String[] transferTo = json2StringArr((JSONArray) request.getData());
             final VoipNowServerSetting setting = getSOAPVoipNowServerSetting(session);
+            /*
+             * Get session user's main extension identifier
+             */
+            final String userId = String.valueOf(getMainExtensionIDOfSessionUser(session.getUser(), session.getContextId()));
             /*
              * The SOAP stub
              */
@@ -228,9 +230,7 @@ public final class SetFollowMeAction extends AbstractVoipNowSOAPAction<Extension
                      */
                     final int interval;
                     {
-                        final AJAXRequestData innerRequest = new AJAXRequestData();
-                        innerRequest.putParameter(idStr, userId);
-                        final AJAXRequestResult innerResult = new GetTimeIntervalAction().perform(request, session);
+                        final AJAXRequestResult innerResult = new GetTimeIntervalAction().perform(new AJAXRequestData(), session);
                         interval = ((java.math.BigInteger) innerResult.getResultObject()).intValue();
                     }
                     final PositiveInteger intervalInteger = new PositiveInteger();
