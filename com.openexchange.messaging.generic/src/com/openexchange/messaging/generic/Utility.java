@@ -58,6 +58,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import javax.mail.internet.MailDateFormat;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
+import com.openexchange.mail.text.HTMLProcessing;
 import com.openexchange.messaging.generic.internal.TimeZoneUtils;
 
 /**
@@ -199,6 +200,45 @@ public final class Utility {
      */
     public static String unfold(final String headerLine) {
         return MIMEMessageUtility.unfold(headerLine);
+    }
+
+    /**
+     * Formats plain text to HTML by escaping HTML special characters e.g. <code>&quot;&lt;&quot;</code> is converted to
+     * <code>&quot;&amp;lt;&quot;</code>.
+     * <p>
+     * This is just a convenience method which invokes <code>{@link #htmlFormat(String, boolean)}</code> with latter parameter set to
+     * <code>true</code>.
+     * 
+     * @param plainText The plain text
+     * @return properly escaped HTML content
+     * @see #htmlFormat(String, boolean)
+     */
+    public static String htmlFormat(final String plainText) {
+        return HTMLProcessing.htmlFormat(plainText);
+    }
+
+    /**
+     * Searches for non-HTML links and convert them to valid HTML links.
+     * <p>
+     * Example: <code>http://www.somewhere.com</code> is converted to
+     * <code>&lt;a&nbsp;href=&quot;http://www.somewhere.com&quot;&gt;http://www.somewhere.com&lt;/a&gt;</code>.
+     * 
+     * @param content The content to search in
+     * @return The given content with all non-HTML links converted to valid HTML links
+     */
+    public static String formatHrefLinks(final String content) {
+        return HTMLProcessing.formatHrefLinks(content);
+    }
+
+    /**
+     * Creates valid HTML from specified HTML content conform to W3C standards.
+     * 
+     * @param htmlContent The HTML content
+     * @param charset The charset parameter
+     * @return The HTML content conform to W3C standards
+     */
+    public static String getConformHTML(final String htmlContent, final String charset) {
+        return HTMLProcessing.getConformHTML(htmlContent, charset);
     }
 
 }
