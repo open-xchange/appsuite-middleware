@@ -86,6 +86,33 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
     }
 
     /**
+     * Gets the (internal) phone number of given session user's main extension.
+     * 
+     * @param sessionUser The session user
+     * @param contextId The context identifier
+     * @return The (internal) phone number of given session user's main extension
+     * @throws VoipNowException If (internal) phone number cannot be returned
+     */
+    protected String getMainExtensionNumberOfSessionUser(final User sessionUser, final int contextId) throws VoipNowException {
+        final Map<String, Set<String>> attributes = sessionUser.getAttributes();
+        final String attributeName = "com.4psa.voipnow/mainExtension";
+        final Set<String> set = attributes.get(attributeName);
+        if (null == set || set.isEmpty()) {
+            throw VoipNowExceptionCodes.MISSING_MAIN_EXTENSION.create(Integer.valueOf(sessionUser.getId()), Integer.valueOf(contextId));
+        }
+        /*-
+         * Pattern: <numeric-id>=<phone-number>
+         * Example: 7=0004*013
+         */
+        final String mainExtAttr = set.iterator().next();
+        final int pos = mainExtAttr.indexOf('=');
+        if (pos < 0) {
+            throw VoipNowExceptionCodes.INVALID_PROPERTY.create(attributeName, mainExtAttr);
+        }
+        return mainExtAttr.substring(pos + 1);
+    }
+
+    /**
      * Gets the numeric identifier of given session user's main extension.
      * 
      * @param sessionUser The session user
