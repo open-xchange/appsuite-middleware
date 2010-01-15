@@ -122,7 +122,16 @@ public final class FaxAuthAction extends AbstractVoipNowAction {
                         Integer.valueOf(session.getUserId()),
                         Integer.valueOf(session.getContextId()));
                 }
-                mainExtension = set.iterator().next();
+                /*-
+                 * Pattern: <numeric-id>=<phone-number>
+                 * Example: 7=0004*013
+                 */
+                final String mainExtAttr = set.iterator().next();
+                final int pos = mainExtAttr.indexOf('=');
+                if (pos < 0) {
+                    throw VoipNowExceptionCodes.INVALID_PROPERTY.create("com.4psa.voipnow/mainExtension", mainExtAttr);
+                }
+                mainExtension = mainExtAttr.substring(pos + 1);
             }
             /*
              * RFC822 format created date

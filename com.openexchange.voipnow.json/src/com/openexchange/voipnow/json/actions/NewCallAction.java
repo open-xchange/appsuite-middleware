@@ -116,7 +116,16 @@ public final class NewCallAction extends AbstractVoipNowHTTPAction<GetMethod> {
                         Integer.valueOf(session.getUserId()),
                         Integer.valueOf(session.getContextId()));
                 }
-                callerNumber = set.iterator().next();
+                /*-
+                 * Pattern: <numeric-id>=<phone-number>
+                 * Example: 7=0004*013
+                 */
+                final String mainExtAttr = set.iterator().next();
+                final int pos = mainExtAttr.indexOf('=');
+                if (pos < 0) {
+                    throw VoipNowExceptionCodes.INVALID_PROPERTY.create("com.4psa.voipnow/mainExtension", mainExtAttr);
+                }
+                callerNumber = mainExtAttr.substring(pos + 1);
             }
             final boolean xml = false;
             final VoipNowServerSetting setting = getVoipNowServerSetting(session, true);
