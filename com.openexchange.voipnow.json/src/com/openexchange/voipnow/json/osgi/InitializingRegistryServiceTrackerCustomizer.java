@@ -79,10 +79,10 @@ public abstract class InitializingRegistryServiceTrackerCustomizer<T> extends Re
         if (serviceClass.isInstance(tmp)) {
             doInit(serviceClass.cast(tmp));
             registry.addService(serviceClass, tmp);
-        } else {
-            context.ungetService(reference);
+            return tmp;
         }
-        return tmp;
+        context.ungetService(reference);
+        return null;
     }
 
     protected abstract void doInit(final T service);
