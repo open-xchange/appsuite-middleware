@@ -49,13 +49,19 @@
 
 package com.openexchange.voipnow.json.actions;
 
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.voipnow.json.Utility;
+import com.openexchange.voipnow.json.VoipNowException;
+import com.openexchange.voipnow.json.VoipNowExceptionCodes;
 import com.openexchange.voipnow.json.services.ServiceRegistry;
 
 /**
@@ -64,6 +70,8 @@ import com.openexchange.voipnow.json.services.ServiceRegistry;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractVoipNowAction implements AJAXActionService {
+
+    private static final String ATTR_MAIN_EXTENSION = "com.4psa.voipnow/mainExtension";
 
     /**
      * The HTTPS identifier constant.
@@ -75,6 +83,39 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
      */
     protected AbstractVoipNowAction() {
         super();
+    }
+
+    /**
+     * Gets the numeric identifier of given session user's main extension.
+     * 
+     * @param sessionUser The session user
+     * @param contextId The context identifier
+     * @return The numeric identifier of given session user's main extension
+     * @throws VoipNowException If numeric identifier cannot be returned
+     */
+    protected int getMainExtensionIDOfSessionUser(final User sessionUser, final int contextId) throws VoipNowException {
+        /*
+         * Get session user's main extension identifier
+         */
+        final Map<String, Set<String>> attributes = sessionUser.getAttributes();
+        final Set<String> set = attributes.get(ATTR_MAIN_EXTENSION);
+        if (null == set || set.isEmpty()) {
+            throw VoipNowExceptionCodes.MISSING_MAIN_EXTENSION.create(Integer.valueOf(sessionUser.getId()), Integer.valueOf(contextId));
+        }
+        /*-
+         * Pattern: <numeric-id>=<phone-number>
+         * Example: 7=0004*013
+         */
+        final String mainExtAttr = set.iterator().next();
+        final int pos = mainExtAttr.indexOf('=');
+        if (pos < 0) {
+            throw VoipNowExceptionCodes.INVALID_PROPERTY.create(ATTR_MAIN_EXTENSION, mainExtAttr);
+        }
+        final int id = Utility.getUnsignedInteger(mainExtAttr.substring(0, pos));
+        if (id < 0) {
+            throw VoipNowExceptionCodes.INVALID_PROPERTY.create(ATTR_MAIN_EXTENSION, mainExtAttr);
+        }
+        return id;
     }
 
     /**
