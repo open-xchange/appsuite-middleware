@@ -96,8 +96,12 @@ public class RegistryServiceTrackerCustomizer<T> implements ServiceTrackerCustom
     }
 
     public void removedService(final ServiceReference reference, final Object service) {
-        if ((null != service) && (registry.removeService(serviceClass) != null)) {
-            context.ungetService(reference);
+        if (null != service) {
+            final T removedService = registry.removeService(serviceClass);
+            if (null != removedService) {
+                context.ungetService(reference);
+                serviceReleased(removedService);
+            }
         }
     }
 
@@ -109,6 +113,17 @@ public class RegistryServiceTrackerCustomizer<T> implements ServiceTrackerCustom
      * @param service The newly tracked service
      */
     protected void serviceAcquired(final Object service) {
+        // Nothing to do in basic implementation
+    }
+
+    /**
+     * A hook for additional actions for a removed tracked service instance.
+     * <p>
+     * Sub-classes may cast service using {@link #serviceClass} member.
+     * 
+     * @param service The removed tracked service
+     */
+    protected void serviceReleased(final Object service) {
         // Nothing to do in basic implementation
     }
 
