@@ -49,11 +49,9 @@
 
 package com.openexchange.messaging;
 
-
-
 /**
  * {@link ContentDisposition}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface ContentDisposition extends ParameterizedMessagingHeader {
@@ -91,9 +89,12 @@ public interface ContentDisposition extends ParameterizedMessagingHeader {
     public boolean containsFilenameParameter();
 
     /**
-     * Sets Content-Disposition
+     * Sets the Content-Disposition.
+     * 
+     * @param contentDisp The Content-Disposition
+     * @throws MessagingException If applying Content-Disposition fails
      */
-    public void setContentDisposition(final String contentDisp);
+    public void setContentDisposition(final String contentDisp) throws MessagingException;
 
     /**
      * Checks if disposition is inline
