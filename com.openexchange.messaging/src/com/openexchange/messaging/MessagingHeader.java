@@ -63,6 +63,7 @@ public interface MessagingHeader {
 
     public static enum KnownHeader {
         BCC("Bcc"),
+        CC("Cc"),
         CONTENT_TYPE("Content-Type"),
         FROM("From"),
         PRIORITY("X-Priority"),
@@ -87,6 +88,7 @@ public interface MessagingHeader {
 
         static {
             equivalenceMap.put(BCC, MessagingField.BCC);
+            equivalenceMap.put(CC, MessagingField.CC);
             equivalenceMap.put(CONTENT_TYPE, MessagingField.CONTENT_TYPE);
             equivalenceMap.put(FROM, MessagingField.FROM);
             equivalenceMap.put(PRIORITY, MessagingField.PRIORITY);
