@@ -55,6 +55,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.mail.Header;
@@ -268,9 +269,9 @@ public class MimeMessagingPart implements MessagingPart {
                             }
                         }
                         /*
-                         * Seal inner collections
+                         * Seal collection
                          */
-                        for (final String name : tmp.keySet()) {
+                        for (final String name : new HashSet<String>(tmp.keySet())) {
                             tmp.put(name, Collections.unmodifiableCollection(tmp.get(name)));
                         }
                         tmp = Collections.unmodifiableMap(tmp);
