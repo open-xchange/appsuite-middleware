@@ -52,14 +52,17 @@ package com.openexchange.mail.mime.utils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.EnumSet;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import javax.mail.FetchProfile;
 import javax.mail.UIDFolder;
 import javax.mail.FetchProfile.Item;
 import com.openexchange.mail.MailField;
+import com.openexchange.mail.mime.HeaderName;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.protocol.UIDSet;
@@ -302,7 +305,7 @@ public final class MIMEStorageUtility {
      * @return The appropriate IMAP fetch profile
      */
     public static FetchProfile getFetchProfile(final MailField[] fields, final MailField sortField, final boolean preferEnvelope) {
-        return getFetchProfile(fields, null, sortField, preferEnvelope);
+        return getFetchProfile(fields, null, null, sortField, preferEnvelope);
     }
 
     private static final EnumSet<MailField> ENV_FIELDS;
@@ -325,10 +328,11 @@ public final class MIMEStorageUtility {
         // ENV_FIELDS.add(MailListField.SIZE);
     }
 
-    private static final EnumSet<MailField> ENUM_SET_FULL = EnumSet.complementOf(EnumSet.of(
-        MailField.BODY,
-        MailField.FULL,
-        MailField.ACCOUNT_NAME));
+    private static final EnumSet<MailField> ENUM_SET_FULL =
+        EnumSet.complementOf(EnumSet.of(MailField.BODY, MailField.FULL, MailField.ACCOUNT_NAME));
+
+    private static final List<HeaderName> ENV_LIST =
+        Arrays.asList(HeaderName.valuesOf("From", "To", "Cc", "Bcc", "Subject", "Date", "ReplyTo"));
 
     /**
      * Gets the appropriate fetch profile
@@ -343,6 +347,23 @@ public final class MIMEStorageUtility {
      * @return The appropriate IMAP fetch profile
      */
     public static FetchProfile getFetchProfile(final MailField[] fields, final MailField[] searchFields, final MailField sortField, final boolean preferEnvelope) {
+        return getFetchProfile(fields, null, searchFields, sortField, preferEnvelope);
+    }
+
+    /**
+     * Gets the appropriate fetch profile
+     * <p>
+     * <b>Note</b> that {@link MailField#BODY} and {@link MailField#FULL} are discarded since no corresponding fetch profile item exists and
+     * therefore should be handled separately.
+     * 
+     * @param fields The fields
+     * @param headerNames The header names
+     * @param searchFields The search fields
+     * @param sortField The sort field
+     * @param preferEnvelope <code>true</code> to prefer ENVELOPE instead of single fetch items; otherwise <code>false</code>
+     * @return The appropriate IMAP fetch profile
+     */
+    public static FetchProfile getFetchProfile(final MailField[] fields, final String[] headerNames, final MailField[] searchFields, final MailField sortField, final boolean preferEnvelope) {
         final MailField[] arr;
         {
             final EnumSet<MailField> fieldSet = EnumSet.copyOf(Arrays.asList(fields));
@@ -367,6 +388,15 @@ public final class MIMEStorageUtility {
             set.add(sortField);
         }
         /*
+         * Set of header names
+         */
+        final Set<HeaderName> names;
+        if (null == headerNames) {
+            names = Collections.emptySet();
+        } else {
+            names = new HashSet<HeaderName>(Arrays.asList(HeaderName.valuesOf(headerNames)));
+        }
+        /*
          * Check which fields are contained in fetch profile item "ENVELOPE"
          */
         if (preferEnvelope && set.removeAll(ENV_FIELDS)) {
@@ -374,12 +404,53 @@ public final class MIMEStorageUtility {
              * Add ENVELOPE since set of fields has changed
              */
             retval.add(FetchProfile.Item.ENVELOPE);
+            /*
+             * Remove header names covered by ENVELOPE
+             */
+            names.removeAll(ENV_LIST);
         }
+        /*
+         * Proceed
+         */
         if (!set.isEmpty()) {
-            final int size = set.size();
-            final Iterator<MailField> iter = set.iterator();
-            for (int i = 0; i < size; i++) {
-                addFetchItem(retval, iter.next());
+            /*
+             * Check set against header names
+             */
+            if (set.contains(MailField.FROM)) {
+                names.remove(HeaderName.valueOf("From"));
+            }
+            if (set.contains(MailField.TO)) {
+                names.remove(HeaderName.valueOf("To"));
+            }
+            if (set.contains(MailField.CC)) {
+                names.remove(HeaderName.valueOf("Cc"));
+            }
+            if (set.contains(MailField.BCC)) {
+                names.remove(HeaderName.valueOf("Bcc"));
+            }
+            if (set.contains(MailField.SUBJECT)) {
+                names.remove(HeaderName.valueOf("Subject"));
+            }
+            if (set.contains(MailField.SENT_DATE)) {
+                names.remove(HeaderName.valueOf("Date"));
+            }
+            if (set.contains(MailField.DISPOSITION_NOTIFICATION_TO)) {
+                names.remove(HeaderName.valueOf("Disposition-Notification-To"));
+            }
+            if (set.contains(MailField.PRIORITY)) {
+                names.remove(HeaderName.valueOf("X-Priority"));
+            }
+            /*
+             * Iterate fields
+             */
+            for (final MailField mailField : set) {
+                addFetchItem(retval, mailField);
+            }
+            /*
+             * Iterate header names
+             */
+            for (final HeaderName headerName : names) {
+                retval.add(headerName.toString());
             }
         }
         return retval;
@@ -420,12 +491,12 @@ public final class MIMEStorageUtility {
             }
             return;
         }
-        if (field2item.containsKey(field)) {
-            fp.add(field2item.get(field));
+        final Item item = field2item.get(field);
+        if (null != item) {
+            fp.add(item);
             return;
         }
-        if (field2string.containsKey(field)) {
-            fp.add(field2string.get(field));
-        }
+        final String string = field2string.get(field);
+        fp.add(string);
     }
 }
