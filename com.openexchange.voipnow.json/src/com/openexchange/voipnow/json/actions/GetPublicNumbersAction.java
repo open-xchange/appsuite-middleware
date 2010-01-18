@@ -127,9 +127,11 @@ public final class GetPublicNumbersAction extends AbstractVoipNowSOAPAction<Chan
              */
             final JSONArray ja = new JSONArray();
             final Assigned_type0[] assigneds = getNoSelectionResponseType.getPublicNo().getAssigned();
-            for (final Assigned_type0 assigned : assigneds) {
-                final com._4psa.common_xsd._2_0_4.String externalNo = assigned.getExternalNo();
-                ja.put(externalNo.getString());
+            if (null != assigneds) {
+                for (final Assigned_type0 assigned : assigneds) {
+                    final com._4psa.common_xsd._2_0_4.String externalNo = assigned.getExternalNo();
+                    ja.put(externalNo.getString());
+                }
             }
             /*
              * Return ID
