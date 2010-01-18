@@ -54,7 +54,7 @@ import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
- * {@link IMailMessageStorageExt}
+ * {@link IMailMessageStorageExt} - Extends {@link IMailMessageStorage} for mail systems which support to request single header names.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
