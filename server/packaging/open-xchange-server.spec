@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 11
+%define		ox_release 12
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -459,6 +459,12 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Mon Jan 18 2010 - thorben.betten@open-xchange.com
+ - Bugfix #15128: Display of broken multipart/alternative mail
+* Tue Jan 05 2010 - thorben.betten@open-xchange.com
+ - Bugfix #14533: Fixed plain-text reply version
+* Fri Dec 18 2009 - thorben.betten@open-xchange.com
+ - Bugfix #15108: Fixed error handling on failing move operation of IMAP folders
 * Fri Oct 30 2009 - marcus.klein@open-xchange.com
  - Bugfix #14734: Added information about user module access permission to detail method of reporting JMX interface.
 * Fri Oct 16 2009 - martin.herfurth@open-xchange.com
