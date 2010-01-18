@@ -60,22 +60,31 @@ import java.util.Map;
  * @since Open-Xchange v6.16
  */
 public interface MessagingHeader {
+
     public static enum KnownHeader {
-        BCC("Bcc"), CONTENT_TYPE("Content-Type"), FROM("From"), PRIORITY("X-Priority"), DISPOSITION_NOTIFICATION_TO("Disposition-Notification-To"), SENT_DATE("Date"), SUBJECT("Subject"), TO("To")
-        ;
-        private String name;
-        
-        private KnownHeader(String name) {
+        BCC("Bcc"),
+        CONTENT_TYPE("Content-Type"),
+        FROM("From"),
+        PRIORITY("X-Priority"),
+        DISPOSITION_NOTIFICATION_TO("Disposition-Notification-To"),
+        SENT_DATE("Date"),
+        SUBJECT("Subject"),
+        TO("To"),
+        DATE("Date");
+
+        private final String name;
+
+        private KnownHeader(final String name) {
             this.name = name;
         }
-        
+
         @Override
         public String toString() {
             return this.name;
         }
-        
+
         private static final Map<KnownHeader, MessagingField> equivalenceMap = new EnumMap<KnownHeader, MessagingField>(KnownHeader.class);
-        
+
         static {
             equivalenceMap.put(BCC, MessagingField.BCC);
             equivalenceMap.put(CONTENT_TYPE, MessagingField.CONTENT_TYPE);
@@ -85,17 +94,20 @@ public interface MessagingHeader {
             equivalenceMap.put(SENT_DATE, MessagingField.SENT_DATE);
             equivalenceMap.put(SUBJECT, MessagingField.SUBJECT);
             equivalenceMap.put(TO, MessagingField.TO);
-            
+            equivalenceMap.put(DATE, MessagingField.SENT_DATE);
+
         }
 
         /**
          * Maps a MessagingHeader to a MessagingField
+         * 
          * @return the MessagingField this field is associated with
          */
         public MessagingField getEquivalentField() {
             return equivalenceMap.get(this);
         }
     }
+
     /**
      * Gets the name.
      * 
