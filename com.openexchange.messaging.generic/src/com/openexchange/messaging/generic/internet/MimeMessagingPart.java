@@ -91,6 +91,21 @@ public class MimeMessagingPart implements MessagingPart {
         void handleHeader(Header header, Collection<MessagingHeader> collection) throws MessagingException;
     }
 
+    private static final class AddressHeaderHandler implements HeaderHandler {
+
+        private final String name;
+
+        AddressHeaderHandler(final String name) {
+            super();
+            this.name = name;
+        }
+
+        public void handleHeader(final Header header, final Collection<MessagingHeader> collection) throws MessagingException {
+            collection.addAll(MimeAddressMessagingHeader.parseRFC822(name, header.getValue()));
+        }
+
+    }
+
     private static final HeaderName H_CONTENT_TYPE = HeaderName.valueOf(MessagingHeader.KnownHeader.CONTENT_TYPE.toString());
 
     private static final Map<HeaderName, HeaderHandler> HHANDLERS;
@@ -114,41 +129,35 @@ public class MimeMessagingPart implements MessagingPart {
             }
         });
 
-        m.put(HeaderName.valueOf(MessagingHeader.KnownHeader.FROM.toString()), new HeaderHandler() {
+        m.put(HeaderName.valueOf(MessagingHeader.KnownHeader.FROM.toString()), new AddressHeaderHandler(
+            MessagingHeader.KnownHeader.FROM.toString()));
 
-            private final String name = MessagingHeader.KnownHeader.FROM.toString();
+        m.put(HeaderName.valueOf(MessagingHeader.KnownHeader.TO.toString()), new AddressHeaderHandler(
+            MessagingHeader.KnownHeader.TO.toString()));
 
-            public void handleHeader(final Header header, final Collection<MessagingHeader> collection) throws MessagingException {
-                collection.addAll(MimeAddressMessagingHeader.parseRFC822(name, header.getValue()));
-            }
-        });
+        m.put(HeaderName.valueOf(MessagingHeader.KnownHeader.CC.toString()), new AddressHeaderHandler(
+            MessagingHeader.KnownHeader.CC.toString()));
 
-        m.put(HeaderName.valueOf(MessagingHeader.KnownHeader.TO.toString()), new HeaderHandler() {
+        m.put(HeaderName.valueOf(MessagingHeader.KnownHeader.BCC.toString()), new AddressHeaderHandler(
+            MessagingHeader.KnownHeader.BCC.toString()));
 
-            private final String name = MessagingHeader.KnownHeader.TO.toString();
+        m.put(HeaderName.valueOf("Reply-To"), new AddressHeaderHandler("Reply-To"));
 
-            public void handleHeader(final Header header, final Collection<MessagingHeader> collection) throws MessagingException {
-                collection.addAll(MimeAddressMessagingHeader.parseRFC822(name, header.getValue()));
-            }
-        });
+        m.put(HeaderName.valueOf("Resent-Reply-To"), new AddressHeaderHandler("Resent-Reply-To"));
 
-        m.put(HeaderName.valueOf(MessagingHeader.KnownHeader.CC.toString()), new HeaderHandler() {
+        m.put(HeaderName.valueOf("Disposition-Notification-To"), new AddressHeaderHandler("Disposition-Notification-To"));
 
-            private final String name = MessagingHeader.KnownHeader.CC.toString();
+        m.put(HeaderName.valueOf("Resent-From"), new AddressHeaderHandler("Resent-From"));
 
-            public void handleHeader(final Header header, final Collection<MessagingHeader> collection) throws MessagingException {
-                collection.addAll(MimeAddressMessagingHeader.parseRFC822(name, header.getValue()));
-            }
-        });
+        m.put(HeaderName.valueOf("Sender"), new AddressHeaderHandler("Sender"));
 
-        m.put(HeaderName.valueOf(MessagingHeader.KnownHeader.BCC.toString()), new HeaderHandler() {
-
-            private final String name = MessagingHeader.KnownHeader.BCC.toString();
-
-            public void handleHeader(final Header header, final Collection<MessagingHeader> collection) throws MessagingException {
-                collection.addAll(MimeAddressMessagingHeader.parseRFC822(name, header.getValue()));
-            }
-        });
+        m.put(HeaderName.valueOf("Resent-Sender"), new AddressHeaderHandler("Resent-Sender"));
+        
+        m.put(HeaderName.valueOf("Resent-To"), new AddressHeaderHandler("Resent-To"));
+        
+        m.put(HeaderName.valueOf("Resent-Cc"), new AddressHeaderHandler("Resent-Cc"));
+        
+        m.put(HeaderName.valueOf("Resent-Bcc"), new AddressHeaderHandler("Resent-Bcc"));
 
         HHANDLERS = Collections.unmodifiableMap(m);
     }
