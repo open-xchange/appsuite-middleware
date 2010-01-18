@@ -551,7 +551,7 @@ public final class MailProperties implements IMailProperties {
             String javaMailPropertiesStr = configuration.getProperty("com.openexchange.mail.JavaMailProperties");
             if (null != javaMailPropertiesStr) {
                 javaMailPropertiesStr = javaMailPropertiesStr.trim();
-                if (javaMailPropertiesStr.indexOf("@oxgroupwaresysconfdir@") != -1) {
+                if (javaMailPropertiesStr.indexOf("@oxgroupwaresysconfdir@") >= 0) {
                     final String configPath = configuration.getProperty("CONFIGPATH");
                     if (null == configPath) {
                         throw new MailConfigException("Missing property \"CONFIGPATH\" in system.properties");
