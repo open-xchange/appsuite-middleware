@@ -49,8 +49,9 @@
 
 package com.openexchange.messaging.generic.internet;
 
-import javax.mail.internet.MimeBodyPart;
+import javax.mail.BodyPart;
 import javax.mail.internet.MimeMultipart;
+import javax.mail.internet.MimePart;
 import com.openexchange.messaging.MessagingBodyPart;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingExceptionCodes;
@@ -64,7 +65,10 @@ import com.openexchange.messaging.MultipartContent;
  */
 public class MimeMultipartContent implements MultipartContent {
 
-    private final MimeMultipart mimeMultipart;
+    /**
+     * The underlying {@link MimeMultipart} instance.
+     */
+    final MimeMultipart mimeMultipart;
 
     /**
      * Initializes a new {@link MimeMultipartContent}.
@@ -86,7 +90,7 @@ public class MimeMultipartContent implements MultipartContent {
 
     public MessagingBodyPart get(final int index) throws MessagingException {
         try {
-            return new MimeMessagingBodyPart((MimeBodyPart) mimeMultipart.getBodyPart(index), this);
+            return new MimeMessagingBodyPart((MimePart) mimeMultipart.getBodyPart(index), this);
         } catch (final javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
         }
@@ -97,6 +101,69 @@ public class MimeMultipartContent implements MultipartContent {
             return mimeMultipart.getCount();
         } catch (final javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Adds a part to the multipart. The part is appended to the list of existing parts.
+     * 
+     * @param part The part to be appended
+     * @throws MessagingException If part cannot be appended
+     */
+    public void addBodyPart(final MimeMessagingBodyPart part) throws MessagingException {
+        try {
+            mimeMultipart.addBodyPart((BodyPart) part.part);
+            part.setParent(this);
+        } catch (final javax.mail.MessagingException e) {
+            throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Adds a part at position <code>index</code>. If <code>index</code> is not the last one in the list, the subsequent parts are shifted
+     * up. If <code>index</code> is larger than the number of parts present, the part is appended to the end.
+     * 
+     * @param part The part to be inserted
+     * @param index The index where to insert the part
+     * @exception MessagingException If part cannot be inserted
+     */
+    public void addBodyPart(final MimeMessagingBodyPart part, final int index) throws MessagingException {
+        try {
+            mimeMultipart.addBodyPart((BodyPart) part.part, index);
+            part.setParent(this);
+        } catch (final javax.mail.MessagingException e) {
+            throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Remove the specified part from the multipart. Shifts all the parts after the removed part down one.
+     * 
+     * @param part The part to remove
+     * @return <code>true</code> if part removed, <code>false</code> otherwise
+     * @exception MessagingException If removing part fails
+     */
+    public boolean removeBodyPart(final MimeMessagingBodyPart part) throws MessagingException {
+        try {
+            return mimeMultipart.removeBodyPart((BodyPart) part.part);
+        } catch (final javax.mail.MessagingException e) {
+            throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Remove the part at specified location (starting from 0). Shifts all the parts after the removed part down one.
+     * 
+     * @param index Index of the part to remove
+     * @exception MessagingException If removing part fails
+     */
+    public void removeBodyPart(final int index) throws MessagingException {
+        try {
+            mimeMultipart.removeBodyPart(index);
+        } catch (final javax.mail.MessagingException e) {
+            throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
+        } catch (final IndexOutOfBoundsException e) {
+            throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 

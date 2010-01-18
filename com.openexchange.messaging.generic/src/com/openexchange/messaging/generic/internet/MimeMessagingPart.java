@@ -59,20 +59,21 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import javax.mail.Header;
-import javax.mail.Part;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import javax.mail.internet.MimePart;
 import com.openexchange.messaging.ContentType;
 import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.MessagingPart;
+import com.openexchange.messaging.SimpleContent;
 import com.openexchange.messaging.StringContent;
 
 /**
- * {@link MimeMessagingPart}
+ * {@link MimeMessagingPart} - The MIME messaging part.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
@@ -83,7 +84,7 @@ public class MimeMessagingPart implements MessagingPart {
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
-    protected final Part part;
+    protected final MimePart part;
 
     private volatile ContentType cachedContentType;
 
@@ -108,7 +109,7 @@ public class MimeMessagingPart implements MessagingPart {
      * 
      * @param part The part
      */
-    public MimeMessagingPart(final Part part) {
+    public MimeMessagingPart(final MimePart part) {
         super();
         this.part = part;
     }
@@ -303,6 +304,202 @@ public class MimeMessagingPart implements MessagingPart {
             part.writeTo(os);
         } catch (final javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Add this value to the existing values for this header name.
+     * 
+     * @param headerName The header name
+     * @param headerValue The header value
+     * @throws MessagingException If adding header fails
+     */
+    public void addHeader(final String headerName, final String headerValue) throws MessagingException {
+        try {
+            part.addHeader(headerName, headerValue);
+            headers = null;
+            b_cachedContentType = false;
+            cachedContentType = null;
+        } catch (final javax.mail.MessagingException e) {
+            throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
+        } catch (final IllegalStateException e) {
+            throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Remove all headers associated with specified name.
+     * 
+     * @param headerName The header name
+     * @throws MessagingException If header removal fails
+     */
+    public void removeHeader(final String headerName) throws MessagingException {
+        try {
+            part.removeHeader(headerName);
+            headers = null;
+            b_cachedContentType = false;
+            cachedContentType = null;
+        } catch (final javax.mail.MessagingException e) {
+            throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
+        } catch (final IllegalStateException e) {
+            throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Sets the given multipart as this part's content.
+     * 
+     * @param mp The multipart
+     * @throws MessagingException If multipart cannot be set as content
+     */
+    public void setContent(final MimeMultipartContent mp) throws MessagingException {
+        try {
+            part.setContent(mp.mimeMultipart);
+            headers = null;
+            cachedContent = null;
+            b_cachedContentType = false;
+            cachedContentType = null;
+        } catch (final javax.mail.MessagingException e) {
+            throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
+        } catch (final IllegalStateException e) {
+            throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Sets this part's content.
+     * 
+     * @param content The content
+     * @param type The content type
+     * @throws MessagingException
+     */
+    public void setContent(final MessagingContent content, final String type) throws MessagingException {
+        try {
+            if (content instanceof MimeMessagingMessage) {
+                part.setContent(((MimeMessagingMessage) content).mimeMessage, type);
+            } else if (content instanceof MimeMultipartContent) {
+                part.setContent(((MimeMultipartContent) content).mimeMultipart, type);
+            } else if (content instanceof SimpleContent<?>) {
+                part.setContent(((SimpleContent<?>) content).getData(), type);
+            } else {
+                throw MessagingExceptionCodes.UNKNOWN_MESSAGING_CONTENT.create(content.getClass().getName());
+            }
+            headers = null;
+            cachedContent = null;
+            b_cachedContentType = false;
+            cachedContentType = null;
+        } catch (final javax.mail.MessagingException e) {
+            throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
+        } catch (final IllegalStateException e) {
+            throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Set the disposition of this part.
+     * 
+     * @param disposition The disposition to set
+     * @throws MessagingException If setting disposition fails
+     */
+    public void setDisposition(final String disposition) throws MessagingException {
+        try {
+            part.setDisposition(disposition);
+            headers = null;
+        } catch (final javax.mail.MessagingException e) {
+            throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
+        } catch (final IllegalStateException e) {
+            throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Sets this part's file name.
+     * 
+     * @param filename The file name
+     * @throws MessagingException If setting file name fails
+     */
+    public void setFileName(final String filename) throws MessagingException {
+        try {
+            part.setFileName(filename);
+            headers = null;
+        } catch (final javax.mail.MessagingException e) {
+            throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
+        } catch (final IllegalStateException e) {
+            throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Set the value for this header name. Replaces all existing header values associated with header name.
+     * 
+     * @param headerName The header name
+     * @param headerValue The header value
+     * @throws MessagingException If setting file name fails
+     */
+    public void setHeader(final String headerName, final String headerValue) throws MessagingException {
+        try {
+            part.setHeader(headerName, headerValue);
+            headers = null;
+            b_cachedContentType = false;
+            cachedContentType = null;
+        } catch (final javax.mail.MessagingException e) {
+            throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
+        } catch (final IllegalStateException e) {
+            throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Convenience method that sets the given String as this part's content, with a MIME type of "text/plain". If the string contains non
+     * US-ASCII characters. it will be encoded using the platform's default charset. The charset is also used to set the "charset"
+     * parameter.
+     * <p>
+     * Note that there may be a performance penalty if <code>text</code> is large, since this method may have to scan all the characters to
+     * determine what charset to use.
+     * <p>
+     * If the charset is already known, use the <code>setText</code> method that takes the charset parameter.
+     * 
+     * @param text The text content to set
+     * @throws MessagingException If text cannot be applied
+     * @see #setText(String text, String charset)
+     */
+    public void setText(final String text) throws MessagingException {
+        setText(text, null);
+    }
+
+    /**
+     * Convenience method that sets the given String as this part's content, with a MIME type of "text/plain" and the specified charset. The
+     * given Unicode string will be charset-encoded using the specified charset. The charset is also used to set the "charset" parameter.
+     * 
+     * @param text The text content to set
+     * @param charset The charset to use for the text
+     * @throws MessagingException If text cannot be applied
+     */
+    public void setText(final String text, final String charset) throws MessagingException {
+        setText(text, charset, "plain");
+    }
+
+    /**
+     * Convenience method that sets the given String as this part's content, with a primary MIME type of "text" and the specified MIME
+     * subtype. The given Unicode string will be charset-encoded using the specified charset. The charset is also used to set the "charset"
+     * parameter.
+     * 
+     * @param text The text content to set
+     * @param charset The charset to use for the text
+     * @param subtype The MIME subtype to use (e.g., "html")
+     * @throws MessagingException If text cannot be applied
+     */
+    public void setText(final String text, final String charset, final String subtype) throws MessagingException {
+        try {
+            part.setText(text, charset, subtype);
+            headers = null;
+            cachedContent = null;
+            b_cachedContentType = false;
+            cachedContentType = null;
+        } catch (final javax.mail.MessagingException e) {
+            throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
+        } catch (final IllegalStateException e) {
+            throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 

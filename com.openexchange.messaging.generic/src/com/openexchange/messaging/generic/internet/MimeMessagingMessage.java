@@ -64,7 +64,10 @@ import com.openexchange.messaging.MessagingMessage;
  */
 public class MimeMessagingMessage extends MimeMessagingBodyPart implements MessagingMessage {
 
-    private final MimeMessage mimeMessage;
+    /**
+     * The underlying {@link MimeMessage} instance.
+     */
+    final MimeMessage mimeMessage;
 
     private int colorLabel;
 

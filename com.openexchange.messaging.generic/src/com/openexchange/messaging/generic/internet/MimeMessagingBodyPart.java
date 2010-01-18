@@ -49,7 +49,7 @@
 
 package com.openexchange.messaging.generic.internet;
 
-import javax.mail.Part;
+import javax.mail.internet.MimePart;
 import com.openexchange.messaging.MessagingBodyPart;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MultipartContent;
@@ -62,6 +62,9 @@ import com.openexchange.messaging.MultipartContent;
  */
 public class MimeMessagingBodyPart extends MimeMessagingPart implements MessagingBodyPart {
 
+    /**
+     * The multipart parent.
+     */
     private MimeMultipartContent parent;
 
     /**
@@ -87,15 +90,15 @@ public class MimeMessagingBodyPart extends MimeMessagingPart implements Messagin
      * @param part The MIME body part
      * @param parent The multipart parent
      */
-    public MimeMessagingBodyPart(final Part part, final MimeMultipartContent parent) {
+    public MimeMessagingBodyPart(final MimePart part, final MimeMultipartContent parent) {
         super(part);
         this.parent = parent;
     }
 
     /**
-     * Sets the multipart parent
+     * Sets the multipart parent.
      * 
-     * @param parent The multipart parent
+     * @param parent The multipart parent to set
      */
     public void setParent(final MimeMultipartContent parent) {
         this.parent = parent;
