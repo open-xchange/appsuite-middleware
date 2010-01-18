@@ -93,6 +93,7 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.MailException.Code;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.IMailMessageStorageExt;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.cache.JSONMessageCache;
@@ -974,8 +975,20 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                         }
                     }
                     initConnection(accountId);
-                    for (final MailMessage header : mailAccess.getMessageStorage().getMessages(fullname, loadMe.toArray(STR_ARR), HEADERS)) {
-                        finder.get(header.getMailId()).addHeaders(header.getHeaders());
+                    final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
+                    if (messageStorage instanceof IMailMessageStorageExt) {
+                        final IMailMessageStorageExt messageStorageExt = (IMailMessageStorageExt) messageStorage;
+                        for (final MailMessage header : messageStorageExt.getMessages(
+                            fullname,
+                            loadMe.toArray(STR_ARR),
+                            new MailField[0],
+                            headerFields)) {
+                            finder.get(header.getMailId()).addHeaders(header.getHeaders());
+                        }
+                    } else {
+                        for (final MailMessage header : messageStorage.getMessages(fullname, loadMe.toArray(STR_ARR), HEADERS)) {
+                            finder.get(header.getMailId()).addHeaders(header.getHeaders());
+                        }
                     }
                 }
                 /*
@@ -991,21 +1004,32 @@ final class MailServletInterfaceImpl extends MailServletInterface {
          * Live-Fetch from mail storage
          */
         initConnection(accountId);
-        /*
-         * Get appropriate mail fields
-         */
-        final MailField[] mailFields;
-        if (loadHeaders) {
-            /*
-             * Ensure MailField.HEADERS is contained
-             */
-            final MailFields col = new MailFields(MailField.toFields(MailListField.getFields(fields)));
-            col.add(MailField.HEADERS);
-            mailFields = col.toArray();
+        final MailMessage[] mails;
+        final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
+        if (messageStorage instanceof IMailMessageStorageExt) {
+            mails =
+                ((IMailMessageStorageExt) messageStorage).getMessages(
+                    fullname,
+                    uids,
+                    MailField.toFields(MailListField.getFields(fields)),
+                    headerFields);
         } else {
-            mailFields = MailField.toFields(MailListField.getFields(fields));
+            /*
+             * Get appropriate mail fields
+             */
+            final MailField[] mailFields;
+            if (loadHeaders) {
+                /*
+                 * Ensure MailField.HEADERS is contained
+                 */
+                final MailFields col = new MailFields(MailField.toFields(MailListField.getFields(fields)));
+                col.add(MailField.HEADERS);
+                mailFields = col.toArray();
+            } else {
+                mailFields = MailField.toFields(MailListField.getFields(fields));
+            }
+            mails = messageStorage.getMessages(fullname, uids, mailFields);
         }
-        final MailMessage[] mails = mailAccess.getMessageStorage().getMessages(fullname, uids, mailFields);
         try {
             if (MailMessageCache.getInstance().containsFolderMessages(accountId, fullname, session.getUserId(), contextId)) {
                 MailMessageCache.getInstance().putMessages(accountId, mails, session.getUserId(), contextId);
