@@ -88,34 +88,44 @@ public class MimeAddressMessagingHeader implements MessagingHeader {
         }
     }
 
+    /**
+     * Initializes a new {@link MimeAddressMessagingHeader} interpreted in RFC822 format.
+     * 
+     * @param name The header name
+     * @param address The address in RFC822 format
+     * @return A new {@link MimeAddressMessagingHeader} interpreted in RFC822 format
+     * @throws MessagingException If specified address cannot be parsed
+     */
+    public static MimeAddressMessagingHeader valueOfRFC822(final String name, final String address) throws MessagingException {
+        try {
+            return new MimeAddressMessagingHeader(name, new QuotedInternetAddress(address));
+        } catch (final AddressException e) {
+            throw MessagingExceptionCodes.ADDRESS_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Initializes a new plain {@link MimeAddressMessagingHeader} with no specific format.
+     * 
+     * @param name The header name
+     * @param address The address with no specific format
+     * @return A new plain {@link MimeAddressMessagingHeader} with no specific format
+     */
+    public static MimeAddressMessagingHeader valueOfPlain(final String name, final String address) {
+        return new MimeAddressMessagingHeader(name, address);
+    }
+
     private final String address;
 
     private final QuotedInternetAddress internetAddress;
 
     private final String name;
 
-    /**
-     * Initializes a new {@link MimeAddressMessagingHeader}.
-     * 
-     * @param name The header name
-     * @param address The address in RFC822 format
-     * @param rfc822 <code>true</code> if address is in RFC822 syntax; otherwise <code>false</code> for any other syntax
-     * @throws MessagingException If specified address cannot be parsed
-     */
-    public MimeAddressMessagingHeader(final String name, final String address, final boolean rfc822) throws MessagingException {
+    private MimeAddressMessagingHeader(final String name, final String address) {
         super();
-        if (rfc822) {
-            try {
-                internetAddress = new QuotedInternetAddress(address);
-                this.address = null;
-            } catch (final AddressException e) {
-                throw MessagingExceptionCodes.ADDRESS_ERROR.create(e, e.getMessage());
-            }
-        } else {
-            internetAddress = null;
-            this.address = address;
-        }
+        this.address = address;
         this.name = name;
+        internetAddress = null;
     }
 
     private MimeAddressMessagingHeader(final String name, final QuotedInternetAddress internetAddress) {
