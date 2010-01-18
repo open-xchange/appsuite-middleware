@@ -49,9 +49,7 @@
 
 package com.openexchange.voipnow.json.actions;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -62,6 +60,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.voipnow.json.Utility;
 import com.openexchange.voipnow.json.VoipNowException;
 import com.openexchange.voipnow.json.VoipNowExceptionCodes;
 
@@ -73,11 +72,6 @@ import com.openexchange.voipnow.json.VoipNowExceptionCodes;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class NewCallAction extends AbstractVoipNowHTTPAction<GetMethod> {
-
-    /**
-     * The call API request to perform.
-     */
-    private static final String REQUEST_NEWCALL = "request=newcall";
 
     /**
      * The <tt>call</tt> action string.
@@ -98,33 +92,29 @@ public final class NewCallAction extends AbstractVoipNowHTTPAction<GetMethod> {
              */
             final String receiverNumber = checkStringParameter(request, "phone");
             final String receiverDisplayName = checkStringParameter(request, "callerid");
-            final int timeout = parseIntParameter(request, "timeout", 10);
+            final int timeout = parseIntParameter(request, "waitforpickup", 25);
             /*
              * Get main extension
              */
             final String callerNumber = getMainExtensionNumberOfSessionUser(session.getUser(), session.getContextId());
-            final boolean xml = false;
             final VoipNowServerSetting setting = getVoipNowServerSetting(session, true);
             /*
              * Compose and apply query string without starting '?' character
              */
             final StringBuilder builder = new StringBuilder(256);
-            builder.append(REQUEST_NEWCALL);
-            builder.append('&').append("user=").append(ActionUtility.urlEncode(setting.getLogin()));
-            builder.append('&').append("pass=").append(ActionUtility.urlEncode(setting.getPassword()));
-            builder.append('&').append("phone=").append(receiverNumber);
-            builder.append('&').append("callerid=").append(ActionUtility.urlEncode(receiverDisplayName));
-            builder.append('&').append("timeout=").append(timeout);
-            builder.append('&').append("from=").append(callerNumber);
-            if (xml) {
-                builder.append('&').append("interactive=xml");
-            }
+            builder.append("Phonenumbertocall=").append(receiverNumber);
+            builder.append('&').append("FromExtension=").append(callerNumber);
+            builder.append('&').append("CallerID=").append(ActionUtility.urlEncode(receiverDisplayName));
+            builder.append('&').append("WaitForPickup=").append(timeout);
+            builder.append('&').append("Account=").append(ActionUtility.urlEncode(setting.getLogin()));
+            builder.append('&').append("PassSHA256=").append(Utility.getSha256(setting.getPassword(), "hex"));
+            builder.append('&').append("AnswerFormat=xml");
             /*
              * Perform GET request
              */
             final GetMethod getMethod = configure(setting, builder.toString());
             try {
-                return xml ? parseXML(getMethod) : parseHTML(getMethod);
+                return parseXML(getMethod);
             } finally {
                 getMethod.releaseConnection();
             }
@@ -144,25 +134,34 @@ public final class NewCallAction extends AbstractVoipNowHTTPAction<GetMethod> {
     /**
      * The pattern to find the VoipNow response text in XML output.
      */
-    private static final Pattern PATTERN_TEXT = Pattern.compile("<text[^>]*>(.*?)</text>", Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_TEXT = Pattern.compile("<StatusMessage[^>]*>(.*?)</StatusMessage>", Pattern.CASE_INSENSITIVE);
+
+    /**
+     * The pattern to find the VoipNow status response code in XML output.
+     */
+    private static final Pattern PATTERN_STATUS = Pattern.compile("<Status[^>]*>([0-9]+)</Status>", Pattern.CASE_INSENSITIVE);
 
     /**
      * The pattern to find the VoipNow response code in XML output.
      */
-    private static final Pattern PATTERN_CODE = Pattern.compile("<code[^>]*>([0-9]+)</code>", Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_CODE = Pattern.compile("<Code[^>]*>([0-9]+)</Code>", Pattern.CASE_INSENSITIVE);
 
     private AJAXRequestResult parseXML(final GetMethod getMethod) throws IOException, VoipNowException {
         /*
          * Check response body
          */
         final String responseBody = getMethod.getResponseBodyAsString(1024);
-        final Matcher matcher = PATTERN_CODE.matcher(responseBody);
+        final Matcher matcher = PATTERN_STATUS.matcher(responseBody);
         int voipnowResponseCode = 0;
         if (matcher.find()) {
             voipnowResponseCode = ActionUtility.getUnsignedInteger(matcher.group(1));
             if (voipnowResponseCode > 0) {
-                final Matcher m2 = PATTERN_TEXT.matcher(responseBody);
-                throw newRequestFailedException(voipnowResponseCode, m2.find() ? m2.group() : null);
+                final Matcher codeMatcher = PATTERN_CODE.matcher(responseBody);
+                if (codeMatcher.find()) {
+                    final Matcher m2 = PATTERN_TEXT.matcher(responseBody);
+                    throw newRequestFailedException(codeMatcher.group(1), m2.find() ? m2.group(1) : null);
+                }
+                throw VoipNowExceptionCodes.UNPARSEABLE_HTTP_RESPONSE.create("\n"+responseBody);
             }
         }
         /*
@@ -171,51 +170,9 @@ public final class NewCallAction extends AbstractVoipNowHTTPAction<GetMethod> {
         return new AJAXRequestResult(Integer.valueOf(voipnowResponseCode));
     }
 
-    /**
-     * The pattern to find the VoipNow response text in XML output.
-     */
-    private static final Pattern PATTERN_ERR = Pattern.compile("error *= *([0-9]+) *errnum *= *(\\w[\\w ]*)", Pattern.CASE_INSENSITIVE);
-
-    private AJAXRequestResult parseHTML(final GetMethod getMethod) throws IOException, VoipNowException {
-        /*
-         * Check response body
-         */
-        final String responseCharSet = getMethod.getResponseCharSet();
-        final BufferedReader r =
-            new BufferedReader(new InputStreamReader(
-                getMethod.getResponseBodyAsStream(),
-                responseCharSet == null ? "ISO-8859-1" : responseCharSet));
-        try {
-            final String errStr = "error";
-            int voipnowResponseCode = 0;
-            String line = null;
-            while ((line = r.readLine()) != null) {
-                if (line.indexOf(errStr) >= 0) {
-                    final Matcher matcher = PATTERN_ERR.matcher(line);
-                    if (matcher.find()) {
-                        voipnowResponseCode = ActionUtility.getUnsignedInteger(matcher.group(1));
-                        if (voipnowResponseCode > 0) {
-                            throw newRequestFailedException(voipnowResponseCode, matcher.group(2));
-                        }
-                    }
-                }
-            }
-            /*
-             * Return appropriate result
-             */
-            return new AJAXRequestResult(Integer.valueOf(voipnowResponseCode));
-        } finally {
-            try {
-                r.close();
-            } catch (final IOException e) {
-                org.apache.commons.logging.LogFactory.getLog(NewCallAction.class).error(e.getMessage(), e);
-            }
-        }
-    }
-
     @Override
     protected String getPath() {
-        return "/callapi/callapi.php";
+        return "/callapi/204/Calls/MakeCall/";
     }
 
     @Override
