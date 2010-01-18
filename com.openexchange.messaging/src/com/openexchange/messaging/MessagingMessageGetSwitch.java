@@ -63,7 +63,7 @@ public class MessagingMessageGetSwitch implements MessagingMessageSwitcher {
         throw new UnsupportedOperationException(); // TODO
     }
 
-    public Object bcc(final Object... args) {
+    public Object bcc(final Object... args) throws MessagingException {
         return header(args[0], KnownHeader.BCC.toString());
     }
 
@@ -72,7 +72,7 @@ public class MessagingMessageGetSwitch implements MessagingMessageSwitcher {
         return message.getContent();
     }
 
-    public Object cc(final Object... args) {
+    public Object cc(final Object... args) throws MessagingException {
         return header(args[0], MessagingField.CC.toString());
     }
 
@@ -80,7 +80,7 @@ public class MessagingMessageGetSwitch implements MessagingMessageSwitcher {
         return ((MessagingMessage)args[0]).getColorLabel();
     }
 
-    public Object contentType(final Object... args) {
+    public Object contentType(final Object... args) throws MessagingException {
         return header(args[0], KnownHeader.CONTENT_TYPE.toString()); 
     }
 
@@ -96,7 +96,7 @@ public class MessagingMessageGetSwitch implements MessagingMessageSwitcher {
         return ((MessagingMessage)args[0]).getFolder();
     }
 
-    public Object from(final Object... args) {
+    public Object from(final Object... args) throws MessagingException {
         return header(args[0], KnownHeader.FROM.toString());
     }
 
@@ -104,7 +104,7 @@ public class MessagingMessageGetSwitch implements MessagingMessageSwitcher {
         return args[0];
     }
 
-    public Object headers(final Object... args) {
+    public Object headers(final Object... args) throws MessagingException {
         return ((MessagingMessage)args[0]).getHeaders();
     }
 
@@ -112,7 +112,7 @@ public class MessagingMessageGetSwitch implements MessagingMessageSwitcher {
         return ((MessagingMessage)args[0]).getId();
     }
 
-    public Object priority(final Object... args) {
+    public Object priority(final Object... args) throws MessagingException {
         return header(args[0], KnownHeader.PRIORITY.toString());
     }
 
@@ -120,7 +120,7 @@ public class MessagingMessageGetSwitch implements MessagingMessageSwitcher {
         return ((MessagingMessage)args[0]).getReceivedDate();
     }
 
-    public Object sentDate(final Object... args) {
+    public Object sentDate(final Object... args) throws MessagingException {
         return header(args[0], KnownHeader.SENT_DATE.toString());
     }
 
@@ -128,7 +128,7 @@ public class MessagingMessageGetSwitch implements MessagingMessageSwitcher {
         return ((MessagingMessage)args[0]).getSize();
     }
 
-    public Object subject(final Object... args) {
+    public Object subject(final Object... args) throws MessagingException {
         return header(args[0], KnownHeader.SUBJECT.toString());
     }
 
@@ -136,11 +136,11 @@ public class MessagingMessageGetSwitch implements MessagingMessageSwitcher {
         return ((MessagingMessage)args[0]).getThreadLevel();
     }
 
-    public Object to(final Object... args) {
+    public Object to(final Object... args) throws MessagingException {
         return header(args[0], KnownHeader.TO.toString());
     }
 
-    private Object header(final Object object, final String header) {
+    private Object header(final Object object, final String header) throws MessagingException {
         return ((MessagingMessage)object).getHeader(header);
     }
 
