@@ -255,15 +255,15 @@ public class MimeMessagingPart implements MessagingPart {
                             } else if (MessagingHeader.KnownHeader.DATE.toString().equalsIgnoreCase(name)) {
                                 collection.add(new MimeDateMessagingHeader(name, header.getValue()));
                             } else if (MessagingHeader.KnownHeader.FROM.toString().equalsIgnoreCase(name)) {
-                                collection.addAll(MimeAddressMessagingHeader.parse(name, header.getValue()));
+                                collection.addAll(MimeAddressMessagingHeader.parseRFC822(name, header.getValue()));
                             } else if (MessagingHeader.KnownHeader.TO.toString().equalsIgnoreCase(name)) {
-                                collection.addAll(MimeAddressMessagingHeader.parse(name, header.getValue()));
+                                collection.addAll(MimeAddressMessagingHeader.parseRFC822(name, header.getValue()));
                             } else if (MessagingHeader.KnownHeader.CC.toString().equalsIgnoreCase(name)) {
-                                collection.addAll(MimeAddressMessagingHeader.parse(name, header.getValue()));
+                                collection.addAll(MimeAddressMessagingHeader.parseRFC822(name, header.getValue()));
                             } else if (MessagingHeader.KnownHeader.BCC.toString().equalsIgnoreCase(name)) {
-                                collection.addAll(MimeAddressMessagingHeader.parse(name, header.getValue()));
+                                collection.addAll(MimeAddressMessagingHeader.parseRFC822(name, header.getValue()));
                             } else if ("Sender".equalsIgnoreCase(name)) {
-                                collection.addAll(MimeAddressMessagingHeader.parse(name, header.getValue()));
+                                collection.addAll(MimeAddressMessagingHeader.parseRFC822(name, header.getValue()));
                             } else {
                                 collection.add(new MimeStringMessagingHeader(name, header.getValue()));
                             }

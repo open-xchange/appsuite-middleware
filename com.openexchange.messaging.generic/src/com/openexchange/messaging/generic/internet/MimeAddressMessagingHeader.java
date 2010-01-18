@@ -75,7 +75,7 @@ public class MimeAddressMessagingHeader implements MessagingHeader {
      * @return The parsed address headers
      * @throws MessagingException If parsing fails
      */
-    public static Collection<MimeAddressMessagingHeader> parse(final String name, final String addressList) throws MessagingException {
+    public static Collection<MimeAddressMessagingHeader> parseRFC822(final String name, final String addressList) throws MessagingException {
         try {
             final InternetAddress[] internetAddresses = QuotedInternetAddress.parse(addressList);
             final List<MimeAddressMessagingHeader> retval = new ArrayList<MimeAddressMessagingHeader>(internetAddresses.length);
@@ -88,6 +88,8 @@ public class MimeAddressMessagingHeader implements MessagingHeader {
         }
     }
 
+    private final String address;
+
     private final QuotedInternetAddress internetAddress;
 
     private final String name;
@@ -97,14 +99,21 @@ public class MimeAddressMessagingHeader implements MessagingHeader {
      * 
      * @param name The header name
      * @param address The address in RFC822 format
+     * @param rfc822 <code>true</code> if address is in RFC822 syntax; otherwise <code>false</code> for any other syntax
      * @throws MessagingException If specified address cannot be parsed
      */
-    public MimeAddressMessagingHeader(final String name, final String address) throws MessagingException {
+    public MimeAddressMessagingHeader(final String name, final String address, final boolean rfc822) throws MessagingException {
         super();
-        try {
-            internetAddress = new QuotedInternetAddress(address);
-        } catch (final AddressException e) {
-            throw MessagingExceptionCodes.ADDRESS_ERROR.create(e, e.getMessage());
+        if (rfc822) {
+            try {
+                internetAddress = new QuotedInternetAddress(address);
+                this.address = null;
+            } catch (final AddressException e) {
+                throw MessagingExceptionCodes.ADDRESS_ERROR.create(e, e.getMessage());
+            }
+        } else {
+            internetAddress = null;
+            this.address = address;
         }
         this.name = name;
     }
@@ -113,6 +122,7 @@ public class MimeAddressMessagingHeader implements MessagingHeader {
         super();
         this.name = name;
         this.internetAddress = internetAddress;
+        address = null;
     }
 
     public String getName() {
@@ -135,7 +145,7 @@ public class MimeAddressMessagingHeader implements MessagingHeader {
      * @return The properly formatted address
      */
     public String getUnicodeValue() {
-        return internetAddress.toUnicodeString();
+        return (null == internetAddress) ? address : internetAddress.toUnicodeString();
     }
 
 }
