@@ -2,7 +2,7 @@
 
  - Bugfix #15128: Display of broken multipart/alternative mail
 
- * 2010-01-05 - thorben.betten@open-xchange.com
+* 2010-01-05 - thorben.betten@open-xchange.com
 
  - Bugfix #14533: Fixed plain-text reply version
 
