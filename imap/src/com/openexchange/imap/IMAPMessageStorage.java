@@ -93,6 +93,7 @@ import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
+import com.openexchange.mail.api.IMailMessageStorageExt;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
@@ -125,7 +126,7 @@ import com.sun.mail.imap.Rights;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class IMAPMessageStorage extends IMAPFolderWorker {
+public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailMessageStorageExt {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(IMAPMessageStorage.class);
 
@@ -207,20 +208,31 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
         return imapProperties;
     }
 
+    public MailMessage[] getMessages(final String fullname, final String[] mailIds, final MailField[] mailFields, final String[] headerNames) throws MailException {
+        if ((mailIds == null) || (mailIds.length == 0)) {
+            return EMPTY_RETVAL;
+        }
+        return getMessagesInternal(fullname, uids2longs(mailIds), mailFields, headerNames);
+    }
+
     @Override
     public MailMessage[] getMessagesLong(final String fullname, final long[] mailIds, final MailField[] mailFields) throws MailException {
         if ((mailIds == null) || (mailIds.length == 0)) {
             return EMPTY_RETVAL;
         }
+        return getMessagesInternal(fullname, mailIds, mailFields, null);
+    }
+
+    private MailMessage[] getMessagesInternal(final String fullname, final long[] uids, final MailField[] mailFields, final String[] headerNames) throws MailException {
         final MailFields fieldSet = new MailFields(mailFields);
         final boolean body;
         /*
          * Check for field FULL
          */
         if (fieldSet.contains(MailField.FULL)) {
-            final MailMessage[] mails = new MailMessage[mailIds.length];
+            final MailMessage[] mails = new MailMessage[uids.length];
             for (int j = 0; j < mails.length; j++) {
-                mails[j] = getMessageLong(fullname, mailIds[j], false);
+                mails[j] = getMessageLong(fullname, uids[j], false);
             }
             return mails;
         }
@@ -234,10 +246,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
              * Fetch desired messages by given UIDs. Turn UIDs to corresponding sequence numbers to maintain order cause some IMAP servers
              * ignore the order of UIDs provided in a "UID FETCH" command.
              */
-            final int[] seqNums = IMAPCommandsCollection.uids2SeqNums(imapFolder, mailIds);
+            final int[] seqNums = IMAPCommandsCollection.uids2SeqNums(imapFolder, uids);
             final Message[] messages = new Message[seqNums.length];
             final MailField[] fields = fieldSet.toArray();
-            final FetchProfile fetchProfile = getFetchProfile(fields, getIMAPProperties().isFastFetch());
+            final FetchProfile fetchProfile = getFetchProfile(fields, headerNames, null, null, getIMAPProperties().isFastFetch());
             final boolean isRev1 = imapConfig.getImapCapabilities().hasIMAP4rev1();
             int lastPos = 0;
             int pos = 0;
