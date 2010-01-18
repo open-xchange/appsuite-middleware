@@ -53,7 +53,7 @@ import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.generic.Utility;
 
 /**
- * {@link MimeStringMessagingHeader}
+ * {@link MimeStringMessagingHeader} - A string header whose value is possibly RFC 2047 style encoded.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
