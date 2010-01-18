@@ -68,7 +68,7 @@ public final class HeaderName implements Serializable, Cloneable, Comparable<Hea
      * @param names The character sequences
      * @return The header names
      */
-    public static HeaderName[] valuesOf(final CharSequence[] names) {
+    public static HeaderName[] valuesOf(final CharSequence... names) {
         if (null == names) {
             return null;
         }
