@@ -973,6 +973,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                             loadMe.add(mailId);
                         }
                     }
+                    initConnection(accountId);
                     for (final MailMessage header : mailAccess.getMessageStorage().getMessages(fullname, loadMe.toArray(STR_ARR), HEADERS)) {
                         finder.get(header.getMailId()).addHeaders(header.getHeaders());
                     }
