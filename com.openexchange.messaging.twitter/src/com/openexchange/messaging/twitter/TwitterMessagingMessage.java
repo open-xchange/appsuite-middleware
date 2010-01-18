@@ -66,6 +66,7 @@ import com.openexchange.messaging.MessagingPart;
 import com.openexchange.messaging.MultipartContent;
 import com.openexchange.messaging.StringContent;
 import com.openexchange.messaging.StringMessageHeader;
+import com.openexchange.messaging.generic.internet.MimeAddressMessagingHeader;
 import com.openexchange.messaging.generic.internet.MimeContentType;
 import com.openexchange.messaging.generic.internet.MimeDateMessagingHeader;
 import com.openexchange.twitter.Status;
@@ -107,7 +108,7 @@ public final class TwitterMessagingMessage implements MessagingMessage {
         m.put(CONTENT_TYPE.getName(), wrap(CONTENT_TYPE));
         {
             final String name = "From";
-            m.put(name, getSimpleHeader(name, status.getUser().getScreenName()));
+            m.put(name, wrap(MimeAddressMessagingHeader.valueOfPlain(name, status.getUser().getScreenName())));
         }
         {
             final String name = "Subject";
