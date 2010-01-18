@@ -89,6 +89,9 @@ public final class MessagingExceptionMessages implements LocalizableStrings {
     // A messaging error occurred: %1$s
     public static final String MESSAGING_ERROR_MSG = "A messaging error occurred: %1$s";
 
+    // Wrongly formatted address: %1$s.
+    public static final String ADDRESS_ERROR_MSG = "Wrongly formatted address: %1$s.";
+
     /**
      * Initializes a new {@link MessagingExceptionMessages}.
      */

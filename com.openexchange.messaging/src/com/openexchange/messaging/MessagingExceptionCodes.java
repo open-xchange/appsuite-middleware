@@ -100,7 +100,11 @@ public enum MessagingExceptionCodes implements OXErrorMessage {
     /**
      * A messaging error occurred: %1$s
      */
-    MESSAGING_ERROR(MessagingExceptionMessages.MESSAGING_ERROR_MSG, Category.CODE_ERROR, 11);
+    MESSAGING_ERROR(MessagingExceptionMessages.MESSAGING_ERROR_MSG, Category.CODE_ERROR, 11),
+    /**
+     * Wrongly formatted address: %1$s.
+     */
+    ADDRESS_ERROR(MessagingExceptionMessages.ADDRESS_ERROR_MSG, Category.CODE_ERROR, 12);
 
     private final Category category;
 
