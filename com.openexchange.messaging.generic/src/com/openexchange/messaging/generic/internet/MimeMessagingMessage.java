@@ -52,8 +52,8 @@ package com.openexchange.messaging.generic.internet;
 import java.util.Collection;
 import java.util.Collections;
 import javax.mail.Folder;
-import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
+import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.messaging.MessagingMessage;
 
 /**
@@ -83,7 +83,7 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Messa
      * Initializes a new {@link MimeMessagingMessage}.
      */
     public MimeMessagingMessage() {
-        super(new MimeMessage(Session.getDefaultInstance(System.getProperties())), null);
+        super(new MimeMessage(MIMEDefaultSession.getDefaultSession()), null);
         this.mimeMessage = (MimeMessage) part;
     }
 
