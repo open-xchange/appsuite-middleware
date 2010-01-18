@@ -60,6 +60,42 @@ import java.util.Locale;
  */
 public final class HeaderName implements Serializable, Cloneable, Comparable<HeaderName>, CharSequence {
 
+    /**
+     * Initializes header names from specified character sequences.
+     * <p>
+     * Yields significantly better space and time performance by caching frequently requested headers.
+     * 
+     * @param names The character sequences
+     * @return The header names
+     */
+    public static HeaderName[] valuesOf(final CharSequence[] names) {
+        if (null == names) {
+            return null;
+        }
+        final HeaderName[] ret = new HeaderName[names.length];
+        for (int i = 0; i < ret.length; i++) {
+            ret[i] = valueOf(names[i]);
+        }
+        return ret;
+    }
+
+    /**
+     * Initializes a new header name from specified character sequence.
+     * <p>
+     * Yields significantly better space and time performance by caching frequently requested headers.
+     * 
+     * @param s The character sequence
+     * @return The new header name.
+     */
+    public static HeaderName valueOf(final CharSequence s) {
+        final String key = s.toString();
+        final HeaderName cached = CACHE.get(key);
+        if (cached == null) {
+            return new HeaderName(key);
+        }
+        return cached;
+    }
+
     private static final long serialVersionUID = -4841569785169326836L;
 
     /**
@@ -125,23 +161,6 @@ public final class HeaderName implements Serializable, Cloneable, Comparable<Hea
              */
             throw new InternalError("CloneNotSupportedException although Cloneable is implemented");
         }
-    }
-
-    /**
-     * Initializes a new header name from specified character sequence.
-     * <p>
-     * Yields significantly better space and time performance by caching frequently requested headers.
-     * 
-     * @param s The character sequence
-     * @return The new header name.
-     */
-    public static HeaderName valueOf(final CharSequence s) {
-        final String key = s.toString();
-        final HeaderName cached = CACHE.get(key);
-        if (cached == null) {
-            return new HeaderName(key);
-        }
-        return cached;
     }
 
     @Override
