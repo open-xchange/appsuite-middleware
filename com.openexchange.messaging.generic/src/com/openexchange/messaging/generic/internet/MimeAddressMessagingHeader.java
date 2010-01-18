@@ -49,7 +49,11 @@
 
 package com.openexchange.messaging.generic.internet;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingExceptionCodes;
@@ -59,8 +63,30 @@ import com.openexchange.messaging.MessagingHeader;
  * {@link MimeAddressMessagingHeader} - A MIME address.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since Open-Xchange v6.16
  */
 public class MimeAddressMessagingHeader implements MessagingHeader {
+
+    /**
+     * Parse the given comma-separated sequence of addresses. Addresses must follow RFC822 syntax.
+     * 
+     * @param name The header name
+     * @param addressList The comma-separated sequence of addresses
+     * @return The parsed address headers
+     * @throws MessagingException If parsing fails
+     */
+    public static Collection<MimeAddressMessagingHeader> parse(final String name, final String addressList) throws MessagingException {
+        try {
+            final InternetAddress[] internetAddresses = QuotedInternetAddress.parse(addressList);
+            final List<MimeAddressMessagingHeader> retval = new ArrayList<MimeAddressMessagingHeader>(internetAddresses.length);
+            for (int i = 0; i < internetAddresses.length; i++) {
+                retval.add(new MimeAddressMessagingHeader(name, (QuotedInternetAddress) internetAddresses[i]));
+            }
+            return retval;
+        } catch (final AddressException e) {
+            throw MessagingExceptionCodes.ADDRESS_ERROR.create(e, e.getMessage());
+        }
+    }
 
     private final QuotedInternetAddress internetAddress;
 
@@ -81,6 +107,12 @@ public class MimeAddressMessagingHeader implements MessagingHeader {
             throw MessagingExceptionCodes.ADDRESS_ERROR.create(e, e.getMessage());
         }
         this.name = name;
+    }
+
+    private MimeAddressMessagingHeader(final String name, final QuotedInternetAddress internetAddress) {
+        super();
+        this.name = name;
+        this.internetAddress = internetAddress;
     }
 
     public String getName() {
