@@ -95,7 +95,11 @@ public enum VoipNowExceptionCodes implements OXErrorMessage {
     /**
      * A HTTP error occurred: %1$s
      */
-    HTTP_ERROR(VoipNowExceptionMessages.HTTP_ERROR_MSG, Category.CODE_ERROR, 9);
+    HTTP_ERROR(VoipNowExceptionMessages.HTTP_ERROR_MSG, Category.CODE_ERROR, 9),
+    /**
+     * Unparseable HTTP response.
+     */
+    UNPARSEABLE_HTTP_RESPONSE(VoipNowExceptionMessages.UNPARSEABLE_HTTP_RESPONSE_MSG, Category.CODE_ERROR, 10);
 
     private final Category category;
 

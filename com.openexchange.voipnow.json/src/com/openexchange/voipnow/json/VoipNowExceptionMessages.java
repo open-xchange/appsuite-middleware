@@ -85,6 +85,9 @@ public final class VoipNowExceptionMessages implements LocalizableStrings {
     // A HTTP error occurred: %1$s
     public static final String HTTP_ERROR_MSG = "A HTTP error occurred: %1$s";
 
+    // Unparseable HTTP response.
+    public static final String UNPARSEABLE_HTTP_RESPONSE_MSG = "Unparseable HTTP response.";
+
     /**
      * Initializes a new {@link VoipNowExceptionMessages}.
      */
