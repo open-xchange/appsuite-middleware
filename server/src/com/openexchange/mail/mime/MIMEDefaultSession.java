@@ -60,8 +60,6 @@ import com.openexchange.mail.config.MailProperties;
  */
 public final class MIMEDefaultSession {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MIMEDefaultSession.class);
-
     /**
      * No instance
      */
@@ -115,8 +113,9 @@ public final class MIMEDefaultSession {
                     final MailProperties mailProperties = MailProperties.getInstance();
                     final String defaultMimeCharset = mailProperties.getDefaultMimeCharset();
                     if (null == defaultMimeCharset) {
-                        if (LOG.isWarnEnabled()) {
-                            LOG.warn("Missing default MIME charset in mail configuration. Mail configuration is probably not initialized. Using fallback 'UTF-8' instead");
+                        final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(MIMEDefaultSession.class);
+                        if (log.isWarnEnabled()) {
+                            log.warn("Missing default MIME charset in mail configuration. Mail configuration is probably not initialized. Using fallback 'UTF-8' instead");
                         }
                         p.put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET, "UTF-8");
                     } else {
