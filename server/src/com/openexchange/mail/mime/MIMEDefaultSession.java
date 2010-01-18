@@ -74,9 +74,9 @@ public final class MIMEDefaultSession {
     private static volatile Properties properties;
 
     /**
-     * Applies basic properties to system properties and instantiates the singleton instance of {@link Session}.
+     * Applies basic properties to system properties and instantiates the singleton instance of {@link javax.mail.Session}.
      * 
-     * @return The default instance of {@link Session}
+     * @return The default instance of {@link javax.mail.Session}
      */
     public static Session getDefaultSession() {
         Session tmp = instance;
