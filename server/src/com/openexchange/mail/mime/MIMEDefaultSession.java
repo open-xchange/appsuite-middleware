@@ -107,7 +107,7 @@ public final class MIMEDefaultSession {
             synchronized (MIMEDefaultSession.class) {
                 p = properties;
                 if (null == properties) {
-                    p = properties = new Properties();
+                    p = new Properties();
                     p.put(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, "true");
                     p.put(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT, "true");
                     p.put(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, "true");
@@ -129,6 +129,7 @@ public final class MIMEDefaultSession {
                          */
                         p.putAll(javaMailProperties);
                     }
+                    properties = p;
                 }
             }
         }
