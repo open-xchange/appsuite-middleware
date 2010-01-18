@@ -147,7 +147,7 @@ public final class ReplicationMonitor {
             retval = fetch.get(pools, assign, write, false);
             incrementFetched(assign, write);
         } catch (PoolingException e) {
-            DBPoolingException e1 = DBPoolingExceptionCodes.NO_CONFIG_DB.create(e);
+            DBPoolingException e1 = createException(assign, write, e);
             // Immediately fail if connection to master is wanted or no fallback is there.
             if (write || assign.getWritePoolId() == assign.getReadPoolId()) {
                 throw e1;
@@ -158,7 +158,7 @@ public final class ReplicationMonitor {
                 retval = fetch.get(pools, assign, true, true);
                 incrementInstead();
             } catch (PoolingException e2) {
-                throw DBPoolingExceptionCodes.NO_CONFIG_DB.create(e2);
+                throw createException(assign, true, e2);
             }
         }
         if (!write && assign.isTransactionInitialized() && !isUpToDate(assign.getTransaction(), readTransaction(retval, assign.getContextId()))) {
@@ -175,11 +175,16 @@ public final class ReplicationMonitor {
                 }
             } catch (PoolingException e) {
                 // Use not actual slave if master connection cannot be obtained.
-                DBPoolingException e1 = DBPoolingExceptionCodes.NO_CONFIG_DB.create(e);
+                DBPoolingException e1 = createException(assign, true, e);
                 LOG.warn(e1.getMessage(), e1);
             }
         }
         return retval;
+    }
+
+    private static DBPoolingException createException(Assignment assign, boolean write, Throwable cause) {
+        int poolId = write ? assign.getWritePoolId() : assign.getReadPoolId();
+        return assign.getReadPoolId() == Constants.CONFIGDB_READ_ID ? DBPoolingExceptionCodes.NO_CONFIG_DB.create(cause) : DBPoolingExceptionCodes.NO_CONNECTION.create(cause, I(poolId));
     }
 
     private static boolean isUpToDate(long masterTransaction, long slaveTransaction) {

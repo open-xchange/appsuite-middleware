@@ -128,7 +128,7 @@ public class RdbContextStorage extends ContextStorage {
         return contextId;
     }
 
-    private int getMailadmin(final Context ctx) throws ContextException {
+    private int getAdmin(final Context ctx) throws ContextException {
         Connection con = null;
         try {
             con = DBPool.pickup(ctx);
@@ -186,7 +186,7 @@ public class RdbContextStorage extends ContextStorage {
     @Override
     public ContextExtended loadContext(int contextId) throws ContextException {
         ContextImpl context = loadContextData(contextId);
-        context.setMailadmin(getMailadmin(context));
+        context.setMailadmin(getAdmin(context));
         context.setLoginInfo(getLoginInfos(context));
         return context;
     }
