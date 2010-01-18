@@ -104,7 +104,11 @@ public enum MessagingExceptionCodes implements OXErrorMessage {
     /**
      * Wrongly formatted address: %1$s.
      */
-    ADDRESS_ERROR(MessagingExceptionMessages.ADDRESS_ERROR_MSG, Category.CODE_ERROR, 12);
+    ADDRESS_ERROR(MessagingExceptionMessages.ADDRESS_ERROR_MSG, Category.CODE_ERROR, 12),
+    /**
+     * Unknown messaging content: %1$s.
+     */
+    UNKNOWN_MESSAGING_CONTENT(MessagingExceptionMessages.UNKNOWN_MESSAGING_CONTENT_MSG, Category.CODE_ERROR, 13);
 
     private final Category category;
 

@@ -92,6 +92,9 @@ public final class MessagingExceptionMessages implements LocalizableStrings {
     // Wrongly formatted address: %1$s.
     public static final String ADDRESS_ERROR_MSG = "Wrongly formatted address: %1$s.";
 
+    // Unknown messaging content: %1$s.
+    public static final String UNKNOWN_MESSAGING_CONTENT_MSG = "Unknown messaging content: %1$s.";
+
     /**
      * Initializes a new {@link MessagingExceptionMessages}.
      */
