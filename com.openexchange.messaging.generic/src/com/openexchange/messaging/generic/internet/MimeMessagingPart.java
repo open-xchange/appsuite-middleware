@@ -57,7 +57,6 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import javax.mail.Header;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
@@ -92,7 +91,7 @@ public class MimeMessagingPart implements MessagingPart {
 
     private volatile MessagingContent cachedContent;
 
-    private volatile ConcurrentMap<String, Collection<MessagingHeader>> headers;
+    private volatile Map<String, Collection<MessagingHeader>> headers;
 
     private String id;
 
@@ -233,7 +232,7 @@ public class MimeMessagingPart implements MessagingPart {
     }
 
     public Map<String, Collection<MessagingHeader>> getHeaders() throws MessagingException {
-        ConcurrentMap<String, Collection<MessagingHeader>> tmp = headers;
+        Map<String, Collection<MessagingHeader>> tmp = headers;
         if (null == tmp) {
             synchronized (this) {
                 tmp = headers;
@@ -268,6 +267,13 @@ public class MimeMessagingPart implements MessagingPart {
                                 collection.add(new MimeStringMessagingHeader(name, header.getValue()));
                             }
                         }
+                        /*
+                         * Seal inner collections
+                         */
+                        for (final String name : tmp.keySet()) {
+                            tmp.put(name, Collections.unmodifiableCollection(tmp.get(name)));
+                        }
+                        tmp = Collections.unmodifiableMap(tmp);
                         headers = tmp;
                     } catch (final javax.mail.MessagingException e) {
                         throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
@@ -275,7 +281,7 @@ public class MimeMessagingPart implements MessagingPart {
                 }
             }
         }
-        return Collections.unmodifiableMap(tmp);
+        return tmp;
     }
 
     public String getId() {
