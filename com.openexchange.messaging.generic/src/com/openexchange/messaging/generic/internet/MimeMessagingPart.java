@@ -55,6 +55,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -63,6 +64,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimePart;
+import com.openexchange.mail.mime.HeaderName;
 import com.openexchange.messaging.ContentType;
 import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingException;
@@ -83,6 +85,73 @@ public class MimeMessagingPart implements MessagingPart {
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MimeMessagingPart.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
+
+    private static interface HeaderHandler {
+
+        void handleHeader(Header header, Collection<MessagingHeader> collection) throws MessagingException;
+    }
+
+    private static final HeaderName H_CONTENT_TYPE = HeaderName.valueOf(MessagingHeader.KnownHeader.CONTENT_TYPE.toString());
+
+    private static final Map<HeaderName, HeaderHandler> HHANDLERS;
+
+    static {
+        final Map<HeaderName, HeaderHandler> m = new HashMap<HeaderName, HeaderHandler>(8);
+
+        m.put(HeaderName.valueOf(MimeContentDisposition.getContentDispositionName()), new HeaderHandler() {
+
+            public void handleHeader(final Header header, final Collection<MessagingHeader> collection) throws MessagingException {
+                collection.add(new MimeContentDisposition(header.getValue()));
+            }
+        });
+
+        m.put(HeaderName.valueOf(MessagingHeader.KnownHeader.DATE.toString()), new HeaderHandler() {
+
+            private final String name = MessagingHeader.KnownHeader.DATE.toString();
+
+            public void handleHeader(final Header header, final Collection<MessagingHeader> collection) throws MessagingException {
+                collection.add(new MimeDateMessagingHeader(name, header.getValue()));
+            }
+        });
+
+        m.put(HeaderName.valueOf(MessagingHeader.KnownHeader.FROM.toString()), new HeaderHandler() {
+
+            private final String name = MessagingHeader.KnownHeader.FROM.toString();
+
+            public void handleHeader(final Header header, final Collection<MessagingHeader> collection) throws MessagingException {
+                collection.addAll(MimeAddressMessagingHeader.parseRFC822(name, header.getValue()));
+            }
+        });
+
+        m.put(HeaderName.valueOf(MessagingHeader.KnownHeader.TO.toString()), new HeaderHandler() {
+
+            private final String name = MessagingHeader.KnownHeader.TO.toString();
+
+            public void handleHeader(final Header header, final Collection<MessagingHeader> collection) throws MessagingException {
+                collection.addAll(MimeAddressMessagingHeader.parseRFC822(name, header.getValue()));
+            }
+        });
+
+        m.put(HeaderName.valueOf(MessagingHeader.KnownHeader.CC.toString()), new HeaderHandler() {
+
+            private final String name = MessagingHeader.KnownHeader.CC.toString();
+
+            public void handleHeader(final Header header, final Collection<MessagingHeader> collection) throws MessagingException {
+                collection.addAll(MimeAddressMessagingHeader.parseRFC822(name, header.getValue()));
+            }
+        });
+
+        m.put(HeaderName.valueOf(MessagingHeader.KnownHeader.BCC.toString()), new HeaderHandler() {
+
+            private final String name = MessagingHeader.KnownHeader.BCC.toString();
+
+            public void handleHeader(final Header header, final Collection<MessagingHeader> collection) throws MessagingException {
+                collection.addAll(MimeAddressMessagingHeader.parseRFC822(name, header.getValue()));
+            }
+        });
+
+        HHANDLERS = Collections.unmodifiableMap(m);
+    }
 
     protected final MimePart part;
 
@@ -245,27 +314,22 @@ public class MimeMessagingPart implements MessagingPart {
                             final String name = header.getName();
                             Collection<MessagingHeader> collection = tmp.get(name);
                             if (null == collection) {
-                                collection = new ArrayList<MessagingHeader>(4);
+                                collection = new ArrayList<MessagingHeader>(2);
                                 tmp.put(name, collection);
                             }
-                            if (MimeContentType.getContentTypeName().equalsIgnoreCase(name)) {
-                                collection.add(getContentType());
-                            } else if (MimeContentDisposition.getContentDispositionName().equalsIgnoreCase(name)) {
-                                collection.add(new MimeContentDisposition(header.getValue()));
-                            } else if (MessagingHeader.KnownHeader.DATE.toString().equalsIgnoreCase(name)) {
-                                collection.add(new MimeDateMessagingHeader(name, header.getValue()));
-                            } else if (MessagingHeader.KnownHeader.FROM.toString().equalsIgnoreCase(name)) {
-                                collection.addAll(MimeAddressMessagingHeader.parseRFC822(name, header.getValue()));
-                            } else if (MessagingHeader.KnownHeader.TO.toString().equalsIgnoreCase(name)) {
-                                collection.addAll(MimeAddressMessagingHeader.parseRFC822(name, header.getValue()));
-                            } else if (MessagingHeader.KnownHeader.CC.toString().equalsIgnoreCase(name)) {
-                                collection.addAll(MimeAddressMessagingHeader.parseRFC822(name, header.getValue()));
-                            } else if (MessagingHeader.KnownHeader.BCC.toString().equalsIgnoreCase(name)) {
-                                collection.addAll(MimeAddressMessagingHeader.parseRFC822(name, header.getValue()));
-                            } else if ("Sender".equalsIgnoreCase(name)) {
-                                collection.addAll(MimeAddressMessagingHeader.parseRFC822(name, header.getValue()));
+                            final HeaderName headerName = HeaderName.valueOf(name);
+                            final HeaderHandler hh = HHANDLERS.get(headerName);
+                            if (null == hh) {
+                                if (H_CONTENT_TYPE.equals(headerName)) {
+                                    final MimeContentType mct = new MimeContentType(header.getValue());
+                                    cachedContentType = mct;
+                                    b_cachedContentType = true;
+                                    collection.add(mct);
+                                } else {
+                                    collection.add(new MimeStringMessagingHeader(name, header.getValue()));
+                                }
                             } else {
-                                collection.add(new MimeStringMessagingHeader(name, header.getValue()));
+                                hh.handleHeader(header, collection);
                             }
                         }
                         /*
