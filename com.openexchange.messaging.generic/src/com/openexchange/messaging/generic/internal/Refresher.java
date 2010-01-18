@@ -67,7 +67,9 @@ import com.openexchange.messaging.generic.services.MessagingGenericServiceRegist
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class Refresher<T extends Serializable> {
+public abstract class Refresher<T extends Serializable> implements Serializable {
+
+    private static final long serialVersionUID = 6921419705777107829L;
 
     /**
      * Factory for reloading cached objects.
