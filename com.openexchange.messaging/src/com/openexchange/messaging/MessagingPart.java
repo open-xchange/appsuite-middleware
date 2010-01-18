@@ -77,16 +77,18 @@ public interface MessagingPart {
      * Gets the headers as an unmodifiable {@link Map}.
      * 
      * @return The headers as an unmodifiable {@link Map}.
+     * @throws MessagingException If headers cannot be returned
      */
-    public Map<String, Collection<MessagingHeader>> getHeaders();
+    public Map<String, Collection<MessagingHeader>> getHeaders() throws MessagingException;
 
     /**
      * Gets the header associated with specified name or <code>null</code> if not present
      * 
      * @param name The header name
      * @return The header associated with specified name or <code>null</code> if not present
+     * @throws MessagingException If header cannot be returned
      */
-    public Collection<MessagingHeader> getHeader(String name);
+    public Collection<MessagingHeader> getHeader(String name) throws MessagingException;
 
     /**
      * Gets the disposition.
