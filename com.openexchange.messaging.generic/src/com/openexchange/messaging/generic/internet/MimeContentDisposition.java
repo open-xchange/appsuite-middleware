@@ -70,6 +70,15 @@ public final class MimeContentDisposition extends ParameterizedHeader implements
 
     private static final String CONTENT_DISPOSITION = "Content-Disposition";
 
+    /**
+     * Gets the <i>Content-Disposition</i> name.
+     * 
+     * @return The <i>Content-Disposition</i> name
+     */
+    public static String getContentDispositionName() {
+        return CONTENT_DISPOSITION;
+    }
+
     private static final long serialVersionUID = 310827213193290169L;
 
     private static final Pattern PATTERN_CONTENT_DISP = Pattern.compile("(?:inline|attachment)", Pattern.CASE_INSENSITIVE);

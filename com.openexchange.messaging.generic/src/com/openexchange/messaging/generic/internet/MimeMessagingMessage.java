@@ -49,61 +49,114 @@
 
 package com.openexchange.messaging.generic.internet;
 
-import javax.mail.internet.AddressException;
-import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.messaging.MessagingException;
-import com.openexchange.messaging.MessagingExceptionCodes;
-import com.openexchange.messaging.MessagingHeader;
+import java.util.Collection;
+import java.util.Collections;
+import javax.mail.Folder;
+import javax.mail.Session;
+import javax.mail.internet.MimeMessage;
+import com.openexchange.messaging.MessagingMessage;
 
 /**
- * {@link MimeMessagingAddress} - A MIME address.
+ * {@link MimeMessagingMessage}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since Open-Xchange v6.16
  */
-public class MimeMessagingAddress implements MessagingHeader {
+public class MimeMessagingMessage extends MimeMessagingBodyPart implements MessagingMessage {
 
-    private final QuotedInternetAddress internetAddress;
+    private final MimeMessage mimeMessage;
 
-    private final String name;
+    private int colorLabel;
+
+    private int flags;
+
+    private long receivedDate;
+    
+    private int threadLevel;
+
+    private Collection<String> userFlags;
 
     /**
-     * Initializes a new {@link MimeMessagingAddress}.
-     * 
-     * @param name The header name
-     * @param address The address in RFC822 format
-     * @throws MessagingException If specified address cannot be parsed
+     * Initializes a new {@link MimeMessagingMessage}.
      */
-    public MimeMessagingAddress(final String name, final String address) throws MessagingException {
-        super();
-        try {
-            internetAddress = new QuotedInternetAddress(address);
-        } catch (final AddressException e) {
-            throw MessagingExceptionCodes.ADDRESS_ERROR.create(e, e.getMessage());
-        }
-        this.name = name;
-    }
-
-    public String getName() {
-        return name;
+    public MimeMessagingMessage() {
+        super(new MimeMessage(Session.getDefaultInstance(System.getProperties())), null);
+        this.mimeMessage = (MimeMessage) part;
     }
 
     /**
-     * Convert this address into a RFC 822 / RFC 2047 encoded address. The resulting string contains only US-ASCII characters, and hence is
-     * mail-safe.
+     * Initializes a new {@link MimeMessagingMessage}.
      * 
-     * @return The RFC 822 / RFC 2047 encoded address
+     * @param mimeMessage The MIME message
      */
-    public String getValue() {
-        return internetAddress.toString();
+    public MimeMessagingMessage(final MimeMessage mimeMessage) {
+        super(mimeMessage, null);
+        this.mimeMessage = mimeMessage;
+    }
+
+    public int getColorLabel() {
+        return colorLabel;
     }
 
     /**
-     * Gets the properly formatted address.
+     * Sets the color label.
      * 
-     * @return The properly formatted address
+     * @param colorLabel The color label
      */
-    public String getUnicodeValue() {
-        return internetAddress.toUnicodeString();
+    public void setColorLabel(final int colorLabel) {
+        this.colorLabel = colorLabel;
+    }
+
+    public int getFlags() {
+        return flags;
+    }
+
+    /**
+     * Sets the flags.
+     * 
+     * @param flags The flags
+     */
+    public void setFlags(final int flags) {
+        this.flags = flags;
+    }
+
+    public String getFolder() {
+        final Folder folder = mimeMessage.getFolder();
+        return null == folder ? null : folder.getFullName();
+    }
+
+    public long getReceivedDate() {
+        return receivedDate;
+    }
+
+    /**
+     * Sets the received date.
+     * 
+     * @param receivedDate The received date
+     */
+    public void setReceivedDate(final long receivedDate) {
+        this.receivedDate = receivedDate;
+    }
+
+    public int getThreadLevel() {
+        return threadLevel;
+    }
+
+    /**
+     * Sets the thread level.
+     * 
+     * @param threadLevel The thread level
+     */
+    public void setThreadLevel(final int threadLevel) {
+        this.threadLevel = threadLevel;
+    }
+
+    public Collection<String> getUserFlags() {
+        return userFlags;
+    }
+    
+    public void setUserFlags(final Collection<String> userFlags) {
+        this.userFlags = null == userFlags ? null : Collections.unmodifiableCollection(userFlags);
     }
 
 }

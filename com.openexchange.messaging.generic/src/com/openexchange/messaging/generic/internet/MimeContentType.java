@@ -73,6 +73,15 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
     private static final String CONTENT_TYPE = "Content-Type";
 
     /**
+     * Gets the <i>Content-Type</i> name.
+     * 
+     * @return The <i>Content-Type</i> name
+     */
+    public static String getContentTypeName() {
+        return CONTENT_TYPE;
+    }
+
+    /**
      * The default content type: <code>text/plain; charset=us-ascii</code>
      */
     public static final MimeContentType DEFAULT_CONTENT_TYPE;
