@@ -56,7 +56,7 @@ public class KXmlParser implements XmlPullParser {
 
     private Reader reader;
     private String encoding;
-    private char[] srcBuf;
+    private final char[] srcBuf;
 
     private int srcPos;
     private int srcCount;
@@ -88,7 +88,7 @@ public class KXmlParser implements XmlPullParser {
      * A separate peek buffer seems simpler than managing
      * wrap around in the first level read buffer */
 
-    private int[] peek = new int[2];
+    private final int[] peek = new int[2];
     private int peekCount;
     private boolean wasCR;
     private boolean preserveText;
@@ -777,7 +777,10 @@ public class KXmlParser implements XmlPullParser {
 			name = code;
 		}
 
-        if (code.charAt(0) == '#') {
+        /*
+         * Changed by Thorben Betten to fix possible StringhIndexOutOfBoundsException
+         */
+        if (code.length() > 0 && code.charAt(0) == '#') {
         	final int c =
                 (code.charAt(1) == 'x'
                     ? Integer.parseInt(code.substring(2), 16)
@@ -1125,7 +1128,7 @@ public class KXmlParser implements XmlPullParser {
             encoding = _enc;
             srcCount = sc;
         }
-        catch (Exception e) {
+        catch (final Exception e) {
             throw new XmlPullParserException(
                 "Invalid stream or encoding: " + e.toString(),
                 this,
@@ -1290,7 +1293,7 @@ public class KXmlParser implements XmlPullParser {
             || (type == ENTITY_REF && unresolved) ? null : get(0);
     }
 
-    public char[] getTextCharacters(int[] poslen) {
+    public char[] getTextCharacters(final int[] poslen) {
         if (type >= TEXT) {
             if (type == ENTITY_REF) {
                 poslen[0] = 0;

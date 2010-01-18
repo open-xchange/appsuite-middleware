@@ -1,3 +1,7 @@
+* 2010-01-18 - thorben.betten@open-xchange.com
+
+ - Bugfix #14425: Fixed KXML parser to properly check string length
+
 * 2010-01-14 - marcus.klein@open-xchange.com
 
  - Bugfix #15202: Added old UpdateTask 
