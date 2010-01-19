@@ -157,12 +157,19 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
     }
 
     public MessagingMessage perform(final String folder, final String id, final String action) throws MessagingException {
-        if ("retweet".equalsIgnoreCase(action)) {
-            // TODO
-            return null;
-        } else if ("directMessage".equalsIgnoreCase(action)) {
-            // TODO
-            return null;
+        checkFolder(folder);
+        if (TwitterConstants.TYPE_RETWEET.equalsIgnoreCase(action)) {
+            try {
+                return new TwitterRetweetMessage(twitterAccess.showStatus(parseUnsignedLong(id)), twitterAccess.getUser());
+            } catch (final TwitterException e) {
+                throw new MessagingException(e);
+            }
+        } else if (TwitterConstants.TYPE_DIRECT_MESSAGE.equalsIgnoreCase(action)) {
+            try {
+                return new TwitterDirectMessage(twitterAccess.showStatus(parseUnsignedLong(id)).getUser(), twitterAccess.getUser());
+            } catch (final TwitterException e) {
+                throw new MessagingException(e);
+            }
         } else {
             throw MessagingExceptionCodes.UNKNOWN_ACTION.create(action);
         }

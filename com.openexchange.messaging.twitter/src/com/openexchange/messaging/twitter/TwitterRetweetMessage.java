@@ -63,77 +63,83 @@ import com.openexchange.messaging.MessagingFolder;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.MessagingPart;
-import com.openexchange.messaging.MultipartContent;
+import com.openexchange.messaging.StringContent;
 import com.openexchange.messaging.StringMessageHeader;
 import com.openexchange.messaging.generic.internet.MimeAddressMessagingHeader;
 import com.openexchange.messaging.generic.internet.MimeContentType;
-import com.openexchange.messaging.generic.internet.MimeDateMessagingHeader;
 import com.openexchange.twitter.Status;
+import com.openexchange.twitter.User;
 
 /**
- * {@link TwitterMessagingMessage}
+ * {@link TwitterRetweetMessage}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class TwitterMessagingMessage implements MessagingMessage {
+public final class TwitterRetweetMessage implements MessagingMessage {
 
     private static final ContentType CONTENT_TYPE;
 
     static {
         final ContentType contentType = new MimeContentType();
-        contentType.setPrimaryType("multipart");
-        contentType.setSubType("alternative");
+        contentType.setPrimaryType("text");
+        contentType.setSubType("plain");
         CONTENT_TYPE = contentType;
     }
 
-    private final Status status;
-
     private final Map<String, Collection<MessagingHeader>> headers;
 
-    private final MultipartContent content;
+    private final StringContent content;
 
     private final long size;
 
     /**
-     * Initializes a new {@link TwitterMessagingMessage}.
+     * Initializes a new {@link TwitterRetweetMessage}.
      * 
-     * @param status The twitter status
+     * @param status The status to retweet
+     * @param user The authenticated user
      */
-    public TwitterMessagingMessage(final Status status) {
+    public TwitterRetweetMessage(final Status status, final User user) {
         super();
-        this.status = status;
+        /*
+         * Assign string content and size
+         */
+        final String retweet;
+        {
+            final String text = status.getText();
 
-        final Map<String, Collection<MessagingHeader>> m = new HashMap<String, Collection<MessagingHeader>>(16);
-        m.put(CONTENT_TYPE.getName(), wrap(CONTENT_TYPE));
-        {
-            final String name = "From";
-            m.put(name, wrap(MimeAddressMessagingHeader.valueOfPlain(name, status.getUser().getScreenName())));
-        }
-        {
-            final String name = "Subject";
-            m.put(name, getSimpleHeader(name, status.getText()));
-        }
-        {
-            final String name = "Date";
-            m.put(name, wrap(new MimeDateMessagingHeader(name, status.getCreatedAt())));
-        }
-        {
-            final String name = "Twitter-Type";
-            m.put(name, getSimpleHeader(name, TwitterConstants.TYPE_TWEET));
-        }
-        headers = Collections.unmodifiableMap(m);
+            retweet =
+                new StringBuilder(text.length() + 16).append("RT @").append(status.getUser().getScreenName()).append(": ").append(text).toString();
+            final int len = retweet.length();
 
-        final TwitterMultipartContent multipartContent = TwitterMultipartContent.newInstance(status);
-        content = multipartContent;
-
-        long sz = -1;
-        try {
-            sz = multipartContent.get(0).getSize() + multipartContent.get(1).getSize();
-        } catch (final MessagingException e) {
-            // Cannot occur
-            org.apache.commons.logging.LogFactory.getLog(TwitterMessagingMessage.class).error(e.getMessage(), e);
+            final int maxTweetLength = TwitterConstants.MAX_TWEET_LENGTH;
+            if (len > maxTweetLength) {
+                content = new StringContent(retweet.substring(0, maxTweetLength));
+                size = maxTweetLength;
+            } else {
+                content = new StringContent(retweet);
+                size = len;
+            }
         }
-        size = sz;
+        /*
+         * Assign headers
+         */
+        {
+            final Map<String, Collection<MessagingHeader>> m = new HashMap<String, Collection<MessagingHeader>>(16);
+            m.put(CONTENT_TYPE.getName(), wrap(CONTENT_TYPE));
+            {
+                final String name = "From";
+                m.put(name, wrap(MimeAddressMessagingHeader.valueOfPlain(name, user.getScreenName())));
+            }
+            {
+                final String name = "Subject";
+                m.put(name, getSimpleHeader(name, retweet));
+            }
+            {
+                final String name = "Twitter-Type";
+                m.put(name, getSimpleHeader(name, TwitterConstants.TYPE_RETWEET));
+            }
+            headers = Collections.unmodifiableMap(m);
+        }
     }
 
     public int getColorLabel() {
@@ -149,7 +155,7 @@ public final class TwitterMessagingMessage implements MessagingMessage {
     }
 
     public long getReceivedDate() {
-        return status.getCreatedAt().getTime();
+        return -1L;
     }
 
     public Collection<String> getUserFlags() {
@@ -177,7 +183,7 @@ public final class TwitterMessagingMessage implements MessagingMessage {
     }
 
     public String getId() {
-        return String.valueOf(status.getId());
+        return null;
     }
 
     public void writeTo(final OutputStream os) throws IOException, MessagingException {
