@@ -118,7 +118,7 @@ public interface MessagingHeader {
 
         @Override
         public String toString() {
-            return this.name;
+            return name;
         }
 
         private static final Map<KnownHeader, MessagingField> equivalenceMap = new EnumMap<KnownHeader, MessagingField>(KnownHeader.class);
