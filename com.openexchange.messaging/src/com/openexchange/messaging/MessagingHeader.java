@@ -90,6 +90,14 @@ public interface MessagingHeader {
          */
         FROM("From"),
         /**
+         * In-Reply-To
+         */
+        IN_REPLY_TO("In-Reply-To"),
+        /**
+         * Message-Id
+         */
+        MESSAGE_ID("Message-Id"),
+        /**
          * MIME-Version
          */
         MIME_VERSION("MIME-Version"),
@@ -97,6 +105,10 @@ public interface MessagingHeader {
          * X-Priority
          */
         PRIORITY("X-Priority"),
+        /**
+         * References
+         */
+        REFERENCES("References"),
         /**
          * Disposition-Notification-To
          */
@@ -120,7 +132,11 @@ public interface MessagingHeader {
         /**
          * X-Message-Type
          */
-        MESSAGE_TYPE("X-Message-Type");
+        MESSAGE_TYPE("X-Message-Type"),
+        /**
+         * X-Mailer
+         */
+        MAILER("X-Mailer");
 
         private final String name;
 
