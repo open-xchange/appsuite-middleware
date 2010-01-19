@@ -114,6 +114,10 @@ public interface MessagingHeader {
          */
         DISPOSITION_NOTIFICATION_TO("Disposition-Notification-To"),
         /**
+         * Reply-To
+         */
+        REPLY_TO("Reply-To"),
+        /**
          * Date
          */
         SENT_DATE("Date"),
