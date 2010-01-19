@@ -1,3 +1,7 @@
+* 2010-01-19 - francisco.laguna@open-xchange.com
+
+ - Bugfix #15110: Apply download constraints only to OXMF pages and not attached infostore documents.
+
 * 2010-01-18 - thorben.betten@open-xchange.com
 
  - Bugfix #15128: Display of broken multipart/alternative mail

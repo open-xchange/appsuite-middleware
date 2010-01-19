@@ -174,7 +174,7 @@ public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdate
             return null;
         }
         try {
-            return HTTPToolkit.grabStream(newElement.dataLink);
+            return HTTPToolkit.grabStream(newElement.dataLink, false);
         } catch (IOException e) {
             LOG.debug(e.getMessage(), e);
         }

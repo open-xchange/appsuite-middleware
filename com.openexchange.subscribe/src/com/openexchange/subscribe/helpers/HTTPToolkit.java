@@ -78,6 +78,10 @@ public class HTTPToolkit {
     private static final String UTF_8 = "UTF-8";
 
     public static InputStream grabStream(final String site) throws IOException {
+        return grabStream(site, true);
+    }
+    
+    public static InputStream grabStream(final String site, boolean check) throws IOException {
         final HttpClient client = new HttpClient();
         final int timeout = 3000;
         client.getParams().setSoTimeout(timeout);
@@ -86,8 +90,10 @@ public class HTTPToolkit {
         client.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler(0, false));
 
         final java.net.URL javaURL = new java.net.URL(site);
-
-        checkContentAndLength(javaURL, timeout);
+        
+        if(check) {
+            checkContentAndLength(javaURL, timeout);
+        }
 
         if (javaURL.getProtocol().equalsIgnoreCase("https")) {
             int port = javaURL.getPort();
