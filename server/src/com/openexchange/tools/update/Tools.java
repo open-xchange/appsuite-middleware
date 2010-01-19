@@ -383,6 +383,25 @@ public final class Tools {
     }
 
     /**
+     * Checks if denoted table has any primary key set.
+     * 
+     * @param con The connection
+     * @param table The table name
+     * @return <code>true</code> if denoted table has any primary key set; otherwise <code>false</code>
+     * @throws SQLException If a SQL error occurs
+     */
+    public static final boolean hasPrimaryKey(final Connection con, final String table) throws SQLException {
+        final DatabaseMetaData metaData = con.getMetaData();
+        // Get primary keys
+        final ResultSet primaryKeys = metaData.getPrimaryKeys(null, null, table);
+        try {
+            return primaryKeys.next();
+        } finally {
+            closeSQLStuff(primaryKeys);
+        }
+    }
+
+    /**
      * Checks if denoted column in given table is of type {@link java.sql.Types#VARCHAR}.
      * 
      * @param con The connection
