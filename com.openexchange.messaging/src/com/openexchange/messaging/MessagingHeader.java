@@ -71,7 +71,8 @@ public interface MessagingHeader {
         SENT_DATE("Date"),
         SUBJECT("Subject"),
         TO("To"),
-        DATE("Date");
+        DATE("Date"),
+        X_MESSAGE_TYPE("X-Message-Type");
 
         private final String name;
 
