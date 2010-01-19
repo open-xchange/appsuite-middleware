@@ -507,7 +507,7 @@ public class MimeMessagingPart implements MessagingPart {
                     part.setDataHandler(new DataHandler(new StreamDataSource(new BinaryContentISP((BinaryContent) content), type)));
                 } else if (content instanceof StringContent) {
                     final MimeContentType mct = new MimeContentType(type);
-                    part.setText(((StringContent) content).getData(), mct.getCharsetParameter(), mct.getSubType());
+                    part.setText(((StringContent) content).getData().toString(), mct.getCharsetParameter(), mct.getSubType());
                 } else {
                     part.setContent(((SimpleContent<?>) content).getData(), type);
                 }
