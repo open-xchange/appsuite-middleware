@@ -60,6 +60,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -271,17 +272,30 @@ public final class Tools {
      * @param con writable database connection.
      * @param table name of the table that should get a new primary key.
      * @param columns names of the columns the primary key should cover.
+     * @param lengths The column lengths; <code>-1</code> for full column
      * @throws SQLException if some SQL problem occurs.
      */
-    public static final void createPrimaryKey(final Connection con, final String table, final String[] columns) throws SQLException {
+    public static final void createPrimaryKey(final Connection con, final String table, final String[] columns, final int[] lengths) throws SQLException {
         final StringBuilder sql = new StringBuilder("ALTER TABLE `");
         sql.append(table);
-        sql.append("` ADD PRIMARY KEY (`");
-        for (final String column : columns) {
-            sql.append(column);
-            sql.append("`,`");
+        sql.append("` ADD PRIMARY KEY (");
+        {
+            final String column = columns[0];
+            sql.append('`').append(column).append('`');
+            final int len = lengths[0];
+            if (len > 0) {
+                sql.append('(').append(len).append(')');
+            }
         }
-        sql.setLength(sql.length() - 2);
+        for (int i = 1; i < columns.length; i++) {
+            final String column = columns[i];
+            sql.append(',');
+            sql.append('`').append(column).append('`');
+            final int len = lengths[i];
+            if (len > 0) {
+                sql.append('(').append(len).append(')');
+            }
+        }
         sql.append(')');
         Statement stmt = null;
         try {
@@ -290,6 +304,21 @@ public final class Tools {
         } finally {
             closeSQLStuff(null, stmt);
         }
+    }
+
+    /**
+     * This method creates a new primary key on a table. Beware, this method is vulnerable to SQL injection because table and column names
+     * can not be set through a {@link PreparedStatement}.
+     *
+     * @param con writable database connection.
+     * @param table name of the table that should get a new primary key.
+     * @param columns names of the columns the primary key should cover.
+     * @throws SQLException if some SQL problem occurs.
+     */
+    public static final void createPrimaryKey(final Connection con, final String table, final String[] columns) throws SQLException {
+        final int[] lengths = new int[columns.length];
+        Arrays.fill(lengths, -1);
+        createPrimaryKey(con, table, columns, lengths);
     }
 
     /**
