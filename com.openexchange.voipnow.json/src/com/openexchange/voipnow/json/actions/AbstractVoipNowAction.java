@@ -49,7 +49,6 @@
 
 package com.openexchange.voipnow.json.actions;
 
-import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -94,9 +93,8 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
      * @throws VoipNowException If (internal) phone number cannot be returned
      */
     protected String getMainExtensionNumberOfSessionUser(final User sessionUser, final int contextId) throws VoipNowException {
-        final Map<String, Set<String>> attributes = sessionUser.getAttributes();
         final String attributeName = "com.4psa.voipnow/mainExtension";
-        final Set<String> set = attributes.get(attributeName);
+        final Set<String> set = sessionUser.getAttributes().get(attributeName);
         if (null == set || set.isEmpty()) {
             throw VoipNowExceptionCodes.MISSING_MAIN_EXTENSION.create(Integer.valueOf(sessionUser.getId()), Integer.valueOf(contextId));
         }
@@ -121,11 +119,8 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
      * @throws VoipNowException If numeric identifier cannot be returned
      */
     protected int getMainExtensionIDOfSessionUser(final User sessionUser, final int contextId) throws VoipNowException {
-        /*
-         * Get session user's main extension identifier
-         */
-        final Map<String, Set<String>> attributes = sessionUser.getAttributes();
-        final Set<String> set = attributes.get(ATTR_MAIN_EXTENSION);
+        final String attrName = ATTR_MAIN_EXTENSION;
+        final Set<String> set = sessionUser.getAttributes().get(attrName);
         if (null == set || set.isEmpty()) {
             throw VoipNowExceptionCodes.MISSING_MAIN_EXTENSION.create(Integer.valueOf(sessionUser.getId()), Integer.valueOf(contextId));
         }
@@ -136,11 +131,11 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
         final String mainExtAttr = set.iterator().next();
         final int pos = mainExtAttr.indexOf('=');
         if (pos < 0) {
-            throw VoipNowExceptionCodes.INVALID_PROPERTY.create(ATTR_MAIN_EXTENSION, mainExtAttr);
+            throw VoipNowExceptionCodes.INVALID_PROPERTY.create(attrName, mainExtAttr);
         }
         final int id = Utility.getUnsignedInteger(mainExtAttr.substring(0, pos));
         if (id < 0) {
-            throw VoipNowExceptionCodes.INVALID_PROPERTY.create(ATTR_MAIN_EXTENSION, mainExtAttr);
+            throw VoipNowExceptionCodes.INVALID_PROPERTY.create(attrName, mainExtAttr);
         }
         return id;
     }
