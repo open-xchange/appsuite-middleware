@@ -106,19 +106,19 @@ public final class TwitterMessagingMessage implements MessagingMessage {
         final Map<String, Collection<MessagingHeader>> m = new HashMap<String, Collection<MessagingHeader>>(16);
         m.put(CONTENT_TYPE.getName(), wrap(CONTENT_TYPE));
         {
-            final String name = "From";
+            final String name = MessagingHeader.KnownHeader.FROM.toString();
             m.put(name, wrap(MimeAddressMessagingHeader.valueOfPlain(name, status.getUser().getScreenName())));
         }
         {
-            final String name = "Subject";
+            final String name = MessagingHeader.KnownHeader.SUBJECT.toString();
             m.put(name, getSimpleHeader(name, status.getText()));
         }
         {
-            final String name = "Date";
+            final String name = MessagingHeader.KnownHeader.DATE.toString();
             m.put(name, wrap(new MimeDateMessagingHeader(name, status.getCreatedAt())));
         }
         {
-            final String name = "X-Messaging-Type";
+            final String name = MessagingHeader.KnownHeader.X_MESSAGE_TYPE.toString();
             m.put(name, getSimpleHeader(name, TwitterConstants.TYPE_TWEET));
         }
         headers = Collections.unmodifiableMap(m);

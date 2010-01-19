@@ -127,15 +127,15 @@ public final class TwitterRetweetMessage implements MessagingMessage {
             final Map<String, Collection<MessagingHeader>> m = new HashMap<String, Collection<MessagingHeader>>(16);
             m.put(CONTENT_TYPE.getName(), wrap(CONTENT_TYPE));
             {
-                final String name = "From";
+                final String name = MessagingHeader.KnownHeader.FROM.toString();
                 m.put(name, wrap(MimeAddressMessagingHeader.valueOfPlain(name, user.getScreenName())));
             }
             {
-                final String name = "Subject";
+                final String name = MessagingHeader.KnownHeader.SUBJECT.toString();
                 m.put(name, getSimpleHeader(name, retweet));
             }
             {
-                final String name = "X-Messaging-Type";
+                final String name = MessagingHeader.KnownHeader.X_MESSAGE_TYPE.toString();
                 m.put(name, getSimpleHeader(name, TwitterConstants.TYPE_RETWEET));
             }
             headers = Collections.unmodifiableMap(m);
