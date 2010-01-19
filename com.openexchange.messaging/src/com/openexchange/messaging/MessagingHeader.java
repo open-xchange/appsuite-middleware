@@ -61,6 +61,9 @@ import java.util.Map;
  */
 public interface MessagingHeader {
 
+    /**
+     * An enumeration of known headers.
+     */
     public static enum KnownHeader {
         BCC("Bcc"),
         CC("Cc"),
