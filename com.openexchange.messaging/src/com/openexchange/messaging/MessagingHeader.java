@@ -90,6 +90,10 @@ public interface MessagingHeader {
          */
         FROM("From"),
         /**
+         * MIME-Version
+         */
+        MIME_VERSION("MIME-Version"),
+        /**
          * X-Priority
          */
         PRIORITY("X-Priority"),
