@@ -82,6 +82,18 @@ public interface TwitterAccess {
     public User getUser() throws TwitterException;
 
     /**
+     * Gets extended information of a given user, specified by identifier or screen name. This information includes design settings, so
+     * third party developers can theme their widgets according to a given user's preferences.
+     * <p>
+     * This method calls <a href="http://twitter.com/users/show">http://twitter.com/users/show</a>
+     * 
+     * @param id The identifier or screen name of the user
+     * @return The twitter user
+     * @throws TwitterException If <a href="http://twitter.com/">twitter</a> service or network is unavailable
+     */
+    public User showUser(String id) throws TwitterException;
+
+    /**
      * Gets the 20 most recent statuses posted in the last 24 hours from the authenticating user and that user's friends. It's also possible
      * to request another user's friends_timeline via the id parameter below.
      * <p>

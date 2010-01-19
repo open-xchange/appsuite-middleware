@@ -257,4 +257,12 @@ public final class TwitterAccessImpl implements TwitterAccess {
         return tmp;
     }
 
+    public User showUser(final String id) throws TwitterException {
+        try {
+            return new UserImpl(twitter4jTwitter.showUser(id));
+        } catch (final twitter4j.TwitterException e) {
+            throw TwitterExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
 }
