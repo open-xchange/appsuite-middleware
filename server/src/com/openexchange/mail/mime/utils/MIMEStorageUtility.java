@@ -305,7 +305,7 @@ public final class MIMEStorageUtility {
      * @return The appropriate IMAP fetch profile
      */
     public static FetchProfile getFetchProfile(final MailField[] fields, final MailField sortField, final boolean preferEnvelope) {
-        return getFetchProfile(fields, null, null, sortField, preferEnvelope);
+        return getFetchProfile(fields, null, sortField, preferEnvelope);
     }
 
     private static final EnumSet<MailField> ENV_FIELDS;
