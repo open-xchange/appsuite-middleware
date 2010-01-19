@@ -97,12 +97,12 @@ public abstract class AbstractVoipNowHTTPAction<M extends HttpMethod> extends Ab
     /**
      * Creates a new VoipNow exception for a failed request to VoipNow server.
      * 
-     * @param code The error code (and <code>int</code> greater than zero)
+     * @param code The error code
      * @param message The error message or <code>null</code> if none available
      * @return A new VoipNow exception for failed request
      */
-    protected static VoipNowException newRequestFailedException(final int code, final String message) {
-        return VoipNowExceptionCodes.VOIPNOW_REQUEST_FAILED.create(Integer.valueOf(code), message == null ? "" : message);
+    protected static VoipNowException newRequestFailedException(final String code, final String message) {
+        return VoipNowExceptionCodes.VOIPNOW_REQUEST_FAILED.create(code == null ? "" : code, message == null ? "" : message);
     }
 
     /**
