@@ -440,7 +440,21 @@ public final class Tools {
      * @throws SQLException If a SQL error occurs
      */
     public static final boolean isVARCHAR(final Connection con, final String table, final String column) throws SQLException {
-        return java.sql.Types.VARCHAR == getColumnType(con, table, column);
+        return isType(con, table, column, java.sql.Types.VARCHAR);
+    }
+
+    /**
+     * Checks if denoted column in given table is of specified type from {@link java.sql.Types#VARCHAR}.
+     * 
+     * @param con The connection
+     * @param table The table name
+     * @param column The column name
+     * @param type The type to cehck against
+     * @return <code>true</code> if denoted column in given table is of specified type; otherwise <code>false</code>
+     * @throws SQLException If a SQL error occurs
+     */
+    public static final boolean isType(final Connection con, final String table, final String column, final int type) throws SQLException {
+        return type == getColumnType(con, table, column);
     }
 
     /**
