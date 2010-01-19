@@ -507,7 +507,7 @@ public final class MALPollDBUtility {
                 stmt.setInt(pos++, accountId);
                 stmt.setString(pos++, fullname);
                 final UUID hash = UUID.randomUUID();
-                stmt.setString(pos++, hash.toString());
+                stmt.setString(pos, hash.toString());
                 stmt.executeUpdate();
                 return hash;
             } catch (final SQLException e) {
