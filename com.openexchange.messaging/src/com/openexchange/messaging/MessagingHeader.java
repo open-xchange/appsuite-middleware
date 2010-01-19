@@ -118,7 +118,7 @@ public interface MessagingHeader {
 
         @Override
         public String toString() {
-            return name;
+            return this.name;
         }
 
         private static final Map<KnownHeader, MessagingField> equivalenceMap = new EnumMap<KnownHeader, MessagingField>(KnownHeader.class);
@@ -138,9 +138,9 @@ public interface MessagingHeader {
         }
 
         /**
-         * Maps a {@link MessagingHeader} to a {@link MessagingField}
+         * Maps a MessagingHeader to a MessagingField
          * 
-         * @return The {@link MessagingField} this field is associated with
+         * @return the MessagingField this field is associated with
          */
         public MessagingField getEquivalentField() {
             return equivalenceMap.get(this);
