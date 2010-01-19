@@ -243,15 +243,11 @@ public final class TwitterAccessImpl implements TwitterAccess {
     public User getUser() throws TwitterException {
         User tmp = user;
         if (null == tmp) {
-            synchronized (twitter4jTwitter) {
-                tmp = user;
-                if (null == tmp) {
-                    try {
-                        tmp = user = new UserImpl(twitter4jTwitter.showUser(twitter4jTwitter.getUserId()));
-                    } catch (final twitter4j.TwitterException e) {
-                        throw TwitterExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-                    }
-                }
+            // No need for synchronization
+            try {
+                user = tmp = new UserImpl(twitter4jTwitter.showUser(twitter4jTwitter.getUserId()));
+            } catch (final twitter4j.TwitterException e) {
+                throw TwitterExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }
         return tmp;

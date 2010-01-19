@@ -238,45 +238,41 @@ public class MimeMessagingPart implements MessagingPart {
     public MessagingContent getContent() throws MessagingException {
         MessagingContent tmp = cachedContent;
         if (null == tmp) {
-            synchronized (this) {
-                tmp = cachedContent;
-                if (null == tmp) {
-                    /*
-                     * Get Content-Type
-                     */
-                    ContentType contentType = null;
-                    try {
-                        contentType = getContentType();
-                    } catch (final MessagingException e) {
-                        if (DEBUG) {
-                            LOG.debug("Content-Type header could not be requested.", e);
-                        }
+            // No need for synchronization
+            /*
+             * Get Content-Type
+             */
+            ContentType contentType = null;
+            try {
+                contentType = getContentType();
+            } catch (final MessagingException e) {
+                if (DEBUG) {
+                    LOG.debug("Content-Type header could not be requested.", e);
+                }
+            }
+            if (null != contentType) {
+                if (contentType.startsWith("text/")) {
+                    final String content = getContentObject(String.class);
+                    if (null != content) {
+                        cachedContent = tmp = new StringContent(content);
                     }
-                    if (null != contentType) {
-                        if (contentType.startsWith("text/")) {
-                            final String content = getContentObject(String.class);
-                            if (null != content) {
-                                tmp = cachedContent = new StringContent(content);
-                            }
-                        } else if (contentType.startsWith("message/rfc822")) {
-                            final MimeMessage content = getContentObject(MimeMessage.class);
-                            if (null != content) {
-                                tmp = cachedContent = new MimeMessagingMessage(content);
-                            }
-                        } else if (contentType.startsWith("multipart/")) {
-                            final MimeMultipart content = getContentObject(MimeMultipart.class);
-                            if (null != content) {
-                                tmp = cachedContent = new MimeMultipartContent(content);
-                            }
-                        }
+                } else if (contentType.startsWith("message/rfc822")) {
+                    final MimeMessage content = getContentObject(MimeMessage.class);
+                    if (null != content) {
+                        cachedContent = tmp = new MimeMessagingMessage(content);
                     }
-                    /*
-                     * Get binary content
-                     */
-                    if (null == tmp) {
-                        tmp = cachedContent = new MimeBinaryContent(part);
+                } else if (contentType.startsWith("multipart/")) {
+                    final MimeMultipart content = getContentObject(MimeMultipart.class);
+                    if (null != content) {
+                        cachedContent = tmp = new MimeMultipartContent(content);
                     }
                 }
+            }
+            /*
+             * Get binary content
+             */
+            if (null == tmp) {
+                cachedContent = tmp = new MimeBinaryContent(part);
             }
         }
         return tmp;
@@ -307,21 +303,17 @@ public class MimeMessagingPart implements MessagingPart {
         if (!b_cachedContentType) {
             ContentType tmp = cachedContentType;
             if (null == tmp) {
-                synchronized (this) {
-                    tmp = cachedContentType;
-                    if (null == tmp) {
-                        try {
-                            final String[] s = part.getHeader(MimeContentType.getContentTypeName());
-                            if (null == s || 0 == s.length) {
-                                b_cachedContentType = true;
-                                return null;
-                            }
-                            tmp = cachedContentType = new MimeContentType(s[0]);
-                            b_cachedContentType = true;
-                        } catch (final javax.mail.MessagingException e) {
-                            throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
-                        }
+                // No synchronization
+                try {
+                    final String[] s = part.getHeader(MimeContentType.getContentTypeName());
+                    if (null == s || 0 == s.length) {
+                        b_cachedContentType = true;
+                        return null;
                     }
+                    cachedContentType = tmp = new MimeContentType(s[0]);
+                    b_cachedContentType = true;
+                } catch (final javax.mail.MessagingException e) {
+                    throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
                 }
             }
             return tmp;
@@ -356,46 +348,42 @@ public class MimeMessagingPart implements MessagingPart {
     public Map<String, Collection<MessagingHeader>> getHeaders() throws MessagingException {
         Map<String, Collection<MessagingHeader>> tmp = headers;
         if (null == tmp) {
-            synchronized (this) {
-                tmp = headers;
-                if (null == tmp) {
-                    try {
-                        tmp = new ConcurrentHashMap<String, Collection<MessagingHeader>>();
-                        for (final Enumeration<?> allHeaders = part.getAllHeaders(); allHeaders.hasMoreElements();) {
-                            final Header header = (Header) allHeaders.nextElement();
-                            final String name = header.getName();
-                            Collection<MessagingHeader> collection = tmp.get(name);
-                            if (null == collection) {
-                                collection = new ArrayList<MessagingHeader>(2);
-                                tmp.put(name, collection);
-                            }
-                            final HeaderName headerName = HeaderName.valueOf(name);
-                            final HeaderHandler hh = HHANDLERS.get(headerName);
-                            if (null == hh) {
-                                if (H_CONTENT_TYPE.equals(headerName)) {
-                                    final MimeContentType mct = new MimeContentType(header.getValue());
-                                    cachedContentType = mct;
-                                    b_cachedContentType = true;
-                                    collection.add(mct);
-                                } else {
-                                    collection.add(new MimeStringMessagingHeader(name, header.getValue()));
-                                }
-                            } else {
-                                hh.handleHeader(header, collection);
-                            }
+            // No synchronization
+            try {
+                tmp = new ConcurrentHashMap<String, Collection<MessagingHeader>>();
+                for (final Enumeration<?> allHeaders = part.getAllHeaders(); allHeaders.hasMoreElements();) {
+                    final Header header = (Header) allHeaders.nextElement();
+                    final String name = header.getName();
+                    Collection<MessagingHeader> collection = tmp.get(name);
+                    if (null == collection) {
+                        collection = new ArrayList<MessagingHeader>(2);
+                        tmp.put(name, collection);
+                    }
+                    final HeaderName headerName = HeaderName.valueOf(name);
+                    final HeaderHandler hh = HHANDLERS.get(headerName);
+                    if (null == hh) {
+                        if (H_CONTENT_TYPE.equals(headerName)) {
+                            final MimeContentType mct = new MimeContentType(header.getValue());
+                            cachedContentType = mct;
+                            b_cachedContentType = true;
+                            collection.add(mct);
+                        } else {
+                            collection.add(new MimeStringMessagingHeader(name, header.getValue()));
                         }
-                        /*
-                         * Seal collection
-                         */
-                        for (final String name : new HashSet<String>(tmp.keySet())) {
-                            tmp.put(name, Collections.unmodifiableCollection(tmp.get(name)));
-                        }
-                        tmp = Collections.unmodifiableMap(tmp);
-                        headers = tmp;
-                    } catch (final javax.mail.MessagingException e) {
-                        throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
+                    } else {
+                        hh.handleHeader(header, collection);
                     }
                 }
+                /*
+                 * Seal collection
+                 */
+                for (final String name : new HashSet<String>(tmp.keySet())) {
+                    tmp.put(name, Collections.unmodifiableCollection(tmp.get(name)));
+                }
+                tmp = Collections.unmodifiableMap(tmp);
+                headers = tmp;
+            } catch (final javax.mail.MessagingException e) {
+                throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
             }
         }
         return tmp;
