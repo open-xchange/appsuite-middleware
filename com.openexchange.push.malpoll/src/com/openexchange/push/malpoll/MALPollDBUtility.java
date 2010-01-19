@@ -450,7 +450,7 @@ public final class MALPollDBUtility {
             ResultSet rs = null;
             try {
                 stmt =
-                    readableConnection.prepareStatement("SELECT HEX(hash) FROM malPollHash WHERE cid = ? AND user = ? AND id = ? AND fullname = ?");
+                    readableConnection.prepareStatement("SELECT hash FROM malPollHash WHERE cid = ? AND user = ? AND id = ? AND fullname = ?");
                 int pos = 1;
                 stmt.setInt(pos++, cid);
                 stmt.setInt(pos++, user);
@@ -460,7 +460,7 @@ public final class MALPollDBUtility {
                 if (!rs.next()) {
                     return null;
                 }
-                return UUID.fromString(rs.getString(1));
+                return toUUID(rs.getBytes(1));
             } catch (final SQLException e) {
                 LOG.error(e.getMessage(), e);
                 return null;
@@ -518,6 +518,33 @@ public final class MALPollDBUtility {
         } finally {
             databaseService.backWritable(cid, writableConnection);
         }
+    }
+
+    private static final int UUID_BYTE_LENGTH = 16;
+
+    /**
+     * Generates a new {@link UUID} instance from specified byte array.
+     * 
+     * @param bytes The byte array
+     * @return A new {@link UUID} instance
+     * @throws IllegalArgumentException If passed byte array is <code>null</code> or its length is not 16
+     */
+    private static UUID toUUID(final byte[] bytes) {
+        if (null == bytes) {
+            throw new IllegalArgumentException("Byte array is null.");
+        }
+        if (bytes.length != UUID_BYTE_LENGTH) {
+            throw new IllegalArgumentException("UUID must be contructed using a 16 byte array.");
+        }
+        long msb = 0;
+        long lsb = 0;
+        for (int i = 0; i < 8; i++) {
+            msb = (msb << 8) | (bytes[i] & 0xff);
+        }
+        for (int i = 8; i < 16; i++) {
+            lsb = (lsb << 8) | (bytes[i] & 0xff);
+        }
+        return new UUID(msb, lsb);
     }
 
 }
