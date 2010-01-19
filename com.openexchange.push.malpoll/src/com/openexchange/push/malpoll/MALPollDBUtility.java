@@ -455,7 +455,7 @@ public final class MALPollDBUtility {
                 stmt.setInt(pos++, cid);
                 stmt.setInt(pos++, user);
                 stmt.setInt(pos++, accountId);
-                stmt.setString(pos++, fullname);
+                stmt.setString(pos, fullname);
                 rs = stmt.executeQuery();
                 if (!rs.next()) {
                     return null;
