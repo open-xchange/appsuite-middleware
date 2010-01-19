@@ -118,7 +118,7 @@ public final class TwitterMessagingMessage implements MessagingMessage {
             m.put(name, wrap(new MimeDateMessagingHeader(name, status.getCreatedAt())));
         }
         {
-            final String name = MessagingHeader.KnownHeader.X_MESSAGE_TYPE.toString();
+            final String name = MessagingHeader.KnownHeader.MESSAGE_TYPE.toString();
             m.put(name, getSimpleHeader(name, TwitterConstants.TYPE_TWEET));
         }
         headers = Collections.unmodifiableMap(m);

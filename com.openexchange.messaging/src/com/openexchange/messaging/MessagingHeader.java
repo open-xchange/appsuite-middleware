@@ -65,17 +65,50 @@ public interface MessagingHeader {
      * An enumeration of known headers.
      */
     public static enum KnownHeader {
+        /**
+         * Bcc
+         */
         BCC("Bcc"),
+        /**
+         * Cc
+         */
         CC("Cc"),
+        /**
+         * Content-Type
+         */
         CONTENT_TYPE("Content-Type"),
+        /**
+         * From
+         */
         FROM("From"),
+        /**
+         * X-Priority
+         */
         PRIORITY("X-Priority"),
+        /**
+         * Disposition-Notification-To
+         */
         DISPOSITION_NOTIFICATION_TO("Disposition-Notification-To"),
+        /**
+         * Date
+         */
         SENT_DATE("Date"),
+        /**
+         * Subject
+         */
         SUBJECT("Subject"),
+        /**
+         * To
+         */
         TO("To"),
+        /**
+         * Date
+         */
         DATE("Date"),
-        X_MESSAGE_TYPE("X-Message-Type");
+        /**
+         * X-Message-Type
+         */
+        MESSAGE_TYPE("X-Message-Type");
 
         private final String name;
 
@@ -85,7 +118,7 @@ public interface MessagingHeader {
 
         @Override
         public String toString() {
-            return this.name;
+            return name;
         }
 
         private static final Map<KnownHeader, MessagingField> equivalenceMap = new EnumMap<KnownHeader, MessagingField>(KnownHeader.class);
@@ -105,9 +138,9 @@ public interface MessagingHeader {
         }
 
         /**
-         * Maps a MessagingHeader to a MessagingField
+         * Maps a {@link MessagingHeader} to a {@link MessagingField}
          * 
-         * @return the MessagingField this field is associated with
+         * @return The {@link MessagingField} this field is associated with
          */
         public MessagingField getEquivalentField() {
             return equivalenceMap.get(this);
