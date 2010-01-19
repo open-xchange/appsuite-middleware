@@ -69,13 +69,19 @@ public final class TwitterAccessImpl implements TwitterAccess {
 
     private final twitter4j.Twitter twitter4jTwitter;
 
+    private volatile User user;
+
     /**
      * Initializes a new {@link TwitterAccessImpl}.
      * 
      * @param twitter4jTwitter The authenticated <code>twitter4j.Twitter</code> instance
+     * @throws IllegalArgumentException If specified <code>twitter4jTwitter</code> argument is <code>null</code>
      */
     public TwitterAccessImpl(final twitter4j.Twitter twitter4jTwitter) {
         super();
+        if (null == twitter4jTwitter) {
+            throw new IllegalArgumentException("twitter4jTwitter is null.");
+        }
         this.twitter4jTwitter = twitter4jTwitter;
     }
 
@@ -235,11 +241,20 @@ public final class TwitterAccessImpl implements TwitterAccess {
     }
 
     public User getUser() throws TwitterException {
-        try {
-            return new UserImpl(twitter4jTwitter.showUser(twitter4jTwitter.getUserId()));
-        } catch (final twitter4j.TwitterException e) {
-            throw TwitterExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        User tmp = user;
+        if (null == tmp) {
+            synchronized (twitter4jTwitter) {
+                tmp = user;
+                if (null == tmp) {
+                    try {
+                        tmp = user = new UserImpl(twitter4jTwitter.showUser(twitter4jTwitter.getUserId()));
+                    } catch (final twitter4j.TwitterException e) {
+                        throw TwitterExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+                    }
+                }
+            }
         }
+        return tmp;
     }
 
 }
