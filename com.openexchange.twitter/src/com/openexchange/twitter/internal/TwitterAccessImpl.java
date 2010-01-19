@@ -57,6 +57,7 @@ import com.openexchange.twitter.Status;
 import com.openexchange.twitter.TwitterAccess;
 import com.openexchange.twitter.TwitterException;
 import com.openexchange.twitter.TwitterExceptionCodes;
+import com.openexchange.twitter.User;
 
 /**
  * {@link TwitterAccessImpl} - The twitter access implementation based on <a
@@ -220,6 +221,22 @@ public final class TwitterAccessImpl implements TwitterAccess {
     public Status showStatus(final long statusId) throws TwitterException {
         try {
             return new StatusImpl(twitter4jTwitter.showStatus(statusId));
+        } catch (final twitter4j.TwitterException e) {
+            throw TwitterExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    public String getPassword() {
+        return twitter4jTwitter.getPassword();
+    }
+
+    public String getUserId() {
+        return twitter4jTwitter.getUserId();
+    }
+
+    public User getUser() throws TwitterException {
+        try {
+            return new UserImpl(twitter4jTwitter.showUser(twitter4jTwitter.getUserId()));
         } catch (final twitter4j.TwitterException e) {
             throw TwitterExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }

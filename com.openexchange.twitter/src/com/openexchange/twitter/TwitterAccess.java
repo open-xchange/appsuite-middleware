@@ -60,6 +60,28 @@ import java.util.List;
 public interface TwitterAccess {
 
     /**
+     * Gets authenticating user identifier.
+     * 
+     * @return The user identifier
+     */
+    public String getUserId();
+
+    /**
+     * Gets authenticating password.
+     * 
+     * @return The password
+     */
+    public String getPassword();
+
+    /**
+     * Gets authenticating user.
+     * 
+     * @return The authenticating user
+     * @throws TwitterException If <a href="http://twitter.com/">twitter</a> service or network is unavailable
+     */
+    public User getUser() throws TwitterException;
+
+    /**
      * Gets the 20 most recent statuses posted in the last 24 hours from the authenticating user and that user's friends. It's also possible
      * to request another user's friends_timeline via the id parameter below.
      * <p>
