@@ -444,7 +444,7 @@ public final class Tools {
     }
 
     /**
-     * Checks if denoted column in given table is of specified type from {@link java.sql.Types#VARCHAR}.
+     * Checks if denoted column in given table is of specified type from {@link java.sql.Types}.
      * 
      * @param con The connection
      * @param table The table name
