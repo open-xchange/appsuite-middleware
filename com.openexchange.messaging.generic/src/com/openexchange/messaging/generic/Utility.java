@@ -218,6 +218,18 @@ public final class Utility {
     }
 
     /**
+     * Formats plain text to HTML by escaping HTML special characters e.g. <code>&quot;&lt;&quot;</code> is converted to
+     * <code>&quot;&amp;lt;&quot;</code>.
+     * 
+     * @param plainText The plain text
+     * @param withQuote Whether to escape quotes (<code>&quot;</code>) or not
+     * @return properly escaped HTML content
+     */
+    public static String htmlFormat(final String plainText, final boolean withQuote) {
+        return HTMLProcessing.htmlFormat(plainText, withQuote);
+    }
+
+    /**
      * Searches for non-HTML links and convert them to valid HTML links.
      * <p>
      * Example: <code>http://www.somewhere.com</code> is converted to
