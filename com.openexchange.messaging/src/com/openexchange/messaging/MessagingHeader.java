@@ -78,6 +78,14 @@ public interface MessagingHeader {
          */
         CONTENT_TYPE("Content-Type"),
         /**
+         * Content-Disposition
+         */
+        CONTENT_DISPOSITION("Content-Disposition"),
+        /**
+         * Content-Transfer-Encoding
+         */
+        CONTENT_TRANSFER_ENCODING("Content-Transfer-Encoding"),
+        /**
          * From
          */
         FROM("From"),
@@ -138,9 +146,9 @@ public interface MessagingHeader {
         }
 
         /**
-         * Maps a MessagingHeader to a MessagingField
+         * Maps a {@link MessagingHeader} to a {@link MessagingField}
          * 
-         * @return the MessagingField this field is associated with
+         * @return The {@link MessagingField} this field is associated with
          */
         public MessagingField getEquivalentField() {
             return equivalenceMap.get(this);
