@@ -318,7 +318,10 @@ public final class InternalList {
         new com.openexchange.groupware.update.tasks.UnifiedINBOXRenamerTask(),
 
         // Creates necessary tables for mail header cache
-        new com.openexchange.groupware.update.tasks.HeaderCacheCreateTableTask()
+        new com.openexchange.groupware.update.tasks.HeaderCacheCreateTableTask(),
+
+        // Modifies tables needed for MAL Poll
+        new com.openexchange.groupware.update.tasks.MALPollModifyTableTask()
 
         // TODO: Enable virtual folder tree update task when needed
         // Migrates existing folder data to new outlook-like folder tree structure

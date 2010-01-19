@@ -49,10 +49,12 @@
 
 package com.openexchange.push.malpoll;
 
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
@@ -272,13 +274,19 @@ public final class MALPollPushListener implements PushListener {
          * First run
          */
         final String fullname = folder;
-        MALPollDBUtility.dropMailIDs(contextId, userId, ACCOUNT_ID, fullname);
-        final Set<String> uids = gatherUIDs(mailService);
+        UUID hash = MALPollDBUtility.getHash(contextId, userId, ACCOUNT_ID, fullname);
+        boolean loadDBIDs = true;
+        if (null == hash) {
+            /*
+             * Insert hash
+             */
+            hash = MALPollDBUtility.insertHash(contextId, userId, ACCOUNT_ID, fullname);
+            loadDBIDs = false;
+        }
         /*
-         * Insert
+         * Synchronize
          */
-        final String insertedHash = MALPollDBUtility.insertHash(contextId, userId, ACCOUNT_ID, fullname);
-        MALPollDBUtility.insertMailIDs(insertedHash, uids, contextId);
+        synchronizeIDs(mailService, hash, loadDBIDs);
         if (DEBUG_ENABLED) {
             final long d = System.currentTimeMillis() - s;
             LOG.debug("First run took " + d + "msec");
@@ -290,25 +298,46 @@ public final class MALPollPushListener implements PushListener {
         /*
          * Subsequent run
          */
-        final String hash = MALPollDBUtility.getHash(contextId, userId, ACCOUNT_ID, folder);
+        final UUID hash = MALPollDBUtility.getHash(contextId, userId, ACCOUNT_ID, folder);
         if (null == hash) {
             return;
         }
+        synchronizeIDs(mailService, hash, true);
+        if (DEBUG_ENABLED) {
+            final long d = System.currentTimeMillis() - s;
+            LOG.debug("Subsequent run took " + d + "msec");
+        }
+    }
+
+    private void synchronizeIDs(final MailService mailService, final UUID hash, final boolean loadDBIDs) throws MailException, PushException {
         final Set<String> newIds;
         final Set<String> delIds;
         {
             final Set<String> fetchedUids = gatherUIDs(mailService);
-            final Set<String> dbUids = MALPollDBUtility.getMailIDs(hash, contextId);
+            final Set<String> dbUids;
+            if (loadDBIDs) {
+                dbUids = MALPollDBUtility.getMailIDs(hash, contextId);
+            } else {
+                dbUids = Collections.emptySet();
+            }
             /*
              * Check for new mails
              */
-            newIds = new HashSet<String>(fetchedUids);
-            newIds.removeAll(dbUids);
+            if (fetchedUids.isEmpty()) {
+                newIds = new HashSet<String>(dbUids);
+            } else {
+                newIds = new HashSet<String>(fetchedUids);
+                newIds.removeAll(dbUids);
+            }
             /*
              * Check for deleted mails
              */
-            delIds = new HashSet<String>(dbUids);
-            delIds.removeAll(fetchedUids);
+            if (dbUids.isEmpty()) {
+                delIds = Collections.emptySet();
+            } else {
+                delIds = new HashSet<String>(dbUids);
+                delIds.removeAll(fetchedUids);
+            }
         }
         /*
          * Notify (if necessary) and update DB
@@ -324,10 +353,6 @@ public final class MALPollPushListener implements PushListener {
              * Deleted IDs detected, so update DB
              */
             MALPollDBUtility.replaceMailIDs(hash, newIds, delIds, contextId);
-        }
-        if (DEBUG_ENABLED) {
-            final long d = System.currentTimeMillis() - s;
-            LOG.debug("Subsequent run took " + d + "msec");
         }
     }
 

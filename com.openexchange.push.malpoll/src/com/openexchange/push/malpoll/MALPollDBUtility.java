@@ -154,7 +154,7 @@ public final class MALPollDBUtility {
      * @return The mail IDs associated with specified hash
      * @throws PushException If a database resource could not be acquired
      */
-    public static void insertMailIDs(final String hash, final Set<String> mailIds, final int cid) throws PushException {
+    public static void insertMailIDs(final UUID hash, final Set<String> mailIds, final int cid) throws PushException {
         final DatabaseService databaseService;
         try {
             databaseService = MALPollServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
@@ -171,8 +171,8 @@ public final class MALPollDBUtility {
             throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
         try {
-            insert0(hash, mailIds, CHUNK_SIZE, writableConnection);
-
+            final StringBuilder sb = new StringBuilder(CHUNK_SIZE * 16).append(SQL_INSERT_PREFIX);
+            insert0(cid, hash, mailIds, CHUNK_SIZE, sb, writableConnection);
             writableConnection.commit(); // COMMIT
         } catch (final SQLException e) {
             rollback(writableConnection);
@@ -186,38 +186,61 @@ public final class MALPollDBUtility {
         }
     }
 
-    private static final String SQL_INSERT = "INSERT INTO malPollUid (hash, uid) VALUES (?, ?)";
+    // private static final String SQL_INSERT = "INSERT INTO malPollUid (hash, uid) VALUES (?, ?)";
 
-    private static void insert0(final String hash, final Set<String> mailIds, final int chunkSize, final Connection writableConnection) throws SQLException {
+    private static final String SQL_INSERT_PREFIX = "INSERT INTO malPollUid (cid, hash, uid) VALUES ";
+
+    private static final String SQL_INSERT_VALUES = "(?, UNHEX(REPLACE(?,'-','')), ?)";
+
+    private static void insert0(final int cid, final UUID hash, final Set<String> mailIds, final int chunkSize, final StringBuilder sb, final Connection writableConnection) throws SQLException {
         if (mailIds.isEmpty()) {
             return;
         }
+        final String uuidStr = hash.toString();
         final int isize = mailIds.size() + 1;
         final Iterator<String> iter = mailIds.iterator();
         for (int k = 1; k < isize;) {
-            final PreparedStatement stmt = writableConnection.prepareStatement(SQL_INSERT);
+            PreparedStatement stmt = null;
             try {
                 int j = k;
                 k += chunkSize;
                 final int limit = Math.min(k, isize);
-                for (; j < limit; j++) {
-                    stmt.setString(1, hash);
-                    stmt.setString(2, iter.next());
-                    stmt.addBatch();
+                /*
+                 * Compose statement string
+                 */
+                {
+                    sb.setLength(SQL_INSERT_PREFIX.length());
+                    final String values = SQL_INSERT_VALUES; // INSERT INTO malPollUid (hash, uid) VALUES (?, ?)
+                    sb.append(values);
+                    final String delim = ", ";
+                    for (int i = j + 1; i < limit; i++) {
+                        sb.append(delim).append(values); // , VALUES (?, ?)
+                    }
+                    stmt = writableConnection.prepareStatement(sb.toString());
                 }
-                stmt.executeBatch();
+                /*
+                 * Fill values
+                 */
+                int pos = 1;
+                for (; j < limit; j++) {
+                    stmt.setInt(pos++, cid);
+                    stmt.setString(pos++, uuidStr);
+                    stmt.setString(pos++, iter.next());
+                }
+                stmt.executeUpdate();
             } finally {
                 MALPollDBUtility.closeSQLStuff(stmt);
             }
         }
     }
 
-    private static final String SQL_DELETE = "DELETE FROM malPollUid WHERE hash = ? AND uid = ?";
+    private static final String SQL_DELETE = "DELETE FROM malPollUid WHERE cid = ? AND hash = UNHEX(REPLACE(?,'-','')) AND uid = ?";
 
-    private static void deletet0(final String hash, final Set<String> mailIds, final int chunkSize, final Connection writableConnection) throws SQLException {
+    private static void deletet0(final int cid, final UUID hash, final Set<String> mailIds, final int chunkSize, final Connection writableConnection) throws SQLException {
         if (mailIds.isEmpty()) {
             return;
         }
+        final String uuidStr = hash.toString();
         final int isize = mailIds.size() + 1;
         final Iterator<String> iter = mailIds.iterator();
         for (int k = 1; k < isize;) {
@@ -226,9 +249,12 @@ public final class MALPollDBUtility {
                 int j = k;
                 k += chunkSize;
                 final int limit = Math.min(k, isize);
+                int pos;
                 for (; j < limit; j++) {
-                    stmt.setString(1, hash);
-                    stmt.setString(2, iter.next());
+                    pos = 1;
+                    stmt.setInt(pos++, cid);
+                    stmt.setString(pos++, uuidStr);
+                    stmt.setString(pos, iter.next());
                     stmt.addBatch();
                 }
                 stmt.executeBatch();
@@ -247,7 +273,7 @@ public final class MALPollDBUtility {
      * @param cid The context ID
      * @throws PushException If a database resource could not be acquired
      */
-    public static void replaceMailIDs(final String hash, final Set<String> newIds, final Set<String> delIds, final int cid) throws PushException {
+    public static void replaceMailIDs(final UUID hash, final Set<String> newIds, final Set<String> delIds, final int cid) throws PushException {
         final DatabaseService databaseService;
         try {
             databaseService = MALPollServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
@@ -264,9 +290,9 @@ public final class MALPollDBUtility {
             throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
         try {
-            deletet0(hash, delIds, CHUNK_SIZE, writableConnection);
-
-            insert0(hash, newIds, CHUNK_SIZE, writableConnection);
+            deletet0(cid, hash, delIds, CHUNK_SIZE, writableConnection);
+            final StringBuilder sb = new StringBuilder(CHUNK_SIZE * 16).append(SQL_INSERT_PREFIX);
+            insert0(cid, hash, newIds, CHUNK_SIZE, sb, writableConnection);
 
             writableConnection.commit(); // COMMIT
         } catch (final SQLException e) {
@@ -294,7 +320,7 @@ public final class MALPollDBUtility {
         /*
          * Get hash
          */
-        final String hash = getHash(cid, user, accountId, fullname);
+        final UUID hash = getHash(cid, user, accountId, fullname);
         if (null == hash) {
             /*
              * No hash available
@@ -322,13 +348,17 @@ public final class MALPollDBUtility {
         try {
             PreparedStatement stmt = null;
             try {
-                stmt = writableConnection.prepareStatement("DELETE FROM malPollUid WHERE hash = ?");
-                stmt.setString(1, hash);
+                final String uuidStr = hash.toString();
+
+                stmt = writableConnection.prepareStatement("DELETE FROM malPollUid WHERE cid = ? AND hash = UNHEX(REPLACE(?,'-',''))");
+                stmt.setInt(1, cid);
+                stmt.setString(2, uuidStr);
                 stmt.executeUpdate();
                 MALPollDBUtility.closeSQLStuff(stmt);
 
-                stmt = writableConnection.prepareStatement("DELETE FROM malPollHash WHERE hash = ?");
-                stmt.setString(1, hash);
+                stmt = writableConnection.prepareStatement("DELETE FROM malPollHash WHERE cid = ? AND hash = UNHEX(REPLACE(?,'-',''))");
+                stmt.setInt(1, cid);
+                stmt.setString(2, uuidStr);
                 stmt.executeUpdate();
                 writableConnection.commit(); // COMMIT
             } catch (final SQLException e) {
@@ -354,7 +384,7 @@ public final class MALPollDBUtility {
      * @return The mail IDs associated with specified hash
      * @throws PushException If a database resource could not be acquired
      */
-    public static Set<String> getMailIDs(final String hash, final int cid) throws PushException {
+    public static Set<String> getMailIDs(final UUID hash, final int cid) throws PushException {
         final DatabaseService databaseService;
         try {
             databaseService = MALPollServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
@@ -371,8 +401,9 @@ public final class MALPollDBUtility {
             PreparedStatement stmt = null;
             ResultSet rs = null;
             try {
-                stmt = readableConnection.prepareStatement("SELECT uid FROM malPollUid WHERE hash = ?");
-                stmt.setString(1, hash);
+                stmt = readableConnection.prepareStatement("SELECT uid FROM malPollUid WHERE cid = ? AND hash = UNHEX(REPLACE(?,'-',''))");
+                stmt.setInt(1, cid);
+                stmt.setString(2, hash.toString());
                 rs = stmt.executeQuery();
                 final Set<String> ids = new HashSet<String>();
                 while (rs.next()) {
@@ -401,7 +432,7 @@ public final class MALPollDBUtility {
      * @return The read hash or <code>null</code> if none present
      * @throws PushException If a database resource could not be acquired
      */
-    public static String getHash(final int cid, final int user, final int accountId, final String fullname) throws PushException {
+    public static UUID getHash(final int cid, final int user, final int accountId, final String fullname) throws PushException {
         final DatabaseService databaseService;
         try {
             databaseService = MALPollServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
@@ -419,14 +450,17 @@ public final class MALPollDBUtility {
             ResultSet rs = null;
             try {
                 stmt =
-                    readableConnection.prepareStatement("SELECT hash FROM malPollHash WHERE cid = ? AND user = ? AND id = ? AND fullname = ?");
+                    readableConnection.prepareStatement("SELECT HEX(hash) FROM malPollHash WHERE cid = ? AND user = ? AND id = ? AND fullname = ?");
                 int pos = 1;
                 stmt.setInt(pos++, cid);
                 stmt.setInt(pos++, user);
                 stmt.setInt(pos++, accountId);
                 stmt.setString(pos++, fullname);
                 rs = stmt.executeQuery();
-                return rs.next() ? rs.getString(1) : null;
+                if (!rs.next()) {
+                    return null;
+                }
+                return UUID.fromString(rs.getString(1));
             } catch (final SQLException e) {
                 LOG.error(e.getMessage(), e);
                 return null;
@@ -449,7 +483,7 @@ public final class MALPollDBUtility {
      * @return The generated hash or <code>null</code> on failure
      * @throws PushException If a database resource could not be acquired
      */
-    public static String insertHash(final int cid, final int user, final int accountId, final String fullname) throws PushException {
+    public static UUID insertHash(final int cid, final int user, final int accountId, final String fullname) throws PushException {
         final DatabaseService databaseService;
         try {
             databaseService = MALPollServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
@@ -466,14 +500,14 @@ public final class MALPollDBUtility {
             PreparedStatement stmt = null;
             try {
                 stmt =
-                    writableConnection.prepareStatement("INSERT INTO malPollHash (cid, user, id, fullname, hash) VALUES (?, ?, ?, ?, ?)");
+                    writableConnection.prepareStatement("INSERT INTO malPollHash (cid, user, id, fullname, hash) VALUES (?, ?, ?, ?, UNHEX(REPLACE(?,'-','')))");
                 int pos = 1;
                 stmt.setInt(pos++, cid);
                 stmt.setInt(pos++, user);
                 stmt.setInt(pos++, accountId);
                 stmt.setString(pos++, fullname);
-                final String hash = randomUUID();
-                stmt.setString(pos++, hash);
+                final UUID hash = UUID.randomUUID();
+                stmt.setString(pos++, hash.toString());
                 stmt.executeUpdate();
                 return hash;
             } catch (final SQLException e) {
@@ -484,21 +518,6 @@ public final class MALPollDBUtility {
         } finally {
             databaseService.backWritable(cid, writableConnection);
         }
-    }
-
-    /**
-     * Generates a UUID using {@link UUID#randomUUID()} and removes all dashes; e.g.:<br>
-     * <i>a5aa65cb-6c7e-4089-9ce2-b107d21b9d15</i> would be <i>a5aa65cb6c7e40899ce2b107d21b9d15</i>
-     * 
-     * @return A UUID string
-     */
-    private static String randomUUID() {
-        final StringBuilder s = new StringBuilder(36).append(UUID.randomUUID());
-        s.deleteCharAt(23);
-        s.deleteCharAt(18);
-        s.deleteCharAt(13);
-        s.deleteCharAt(8);
-        return s.toString();
     }
 
 }
