@@ -449,7 +449,7 @@ public final class Tools {
      * @param con The connection
      * @param table The table name
      * @param column The column name
-     * @param type The type to cehck against
+     * @param type The type to check against
      * @return <code>true</code> if denoted column in given table is of specified type; otherwise <code>false</code>
      * @throws SQLException If a SQL error occurs
      */
