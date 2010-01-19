@@ -50,6 +50,7 @@
 package com.openexchange.messaging.generic.internet;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -59,12 +60,15 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import javax.activation.DataHandler;
 import javax.mail.Header;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimePart;
 import com.openexchange.mail.mime.HeaderName;
+import com.openexchange.mail.mime.datasource.StreamDataSource;
+import com.openexchange.messaging.BinaryContent;
 import com.openexchange.messaging.ContentType;
 import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingException;
@@ -85,6 +89,45 @@ public class MimeMessagingPart implements MessagingPart {
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MimeMessagingPart.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
+
+    private static final class BinaryContentISP implements StreamDataSource.InputStreamProvider {
+
+        private final BinaryContent binaryContent;
+
+        BinaryContentISP(final BinaryContent binaryContent) {
+            super();
+            this.binaryContent = binaryContent;
+        }
+
+        public InputStream getInputStream() throws IOException {
+            try {
+                return binaryContent.getData();
+            } catch (final MessagingException e) {
+                final Throwable cause = e.getCause();
+                if (cause instanceof IOException) {
+                    throw (IOException) cause;
+                }
+                if (cause instanceof javax.mail.MessagingException) {
+                    final javax.mail.MessagingException me = (javax.mail.MessagingException) cause;
+                    final Exception nextException = me.getNextException();
+                    if (nextException instanceof IOException) {
+                        throw (IOException) nextException;
+                    }
+                    final IOException ioException = new IOException(me.getMessage());
+                    ioException.initCause(me);
+                    throw ioException;
+                }
+                final IOException ioException = new IOException(e.getMessage());
+                ioException.initCause(e);
+                throw ioException;
+            }
+        }
+
+        public String getName() {
+            return null;
+        }
+
+    }
 
     private static interface HeaderHandler {
 
@@ -152,11 +195,11 @@ public class MimeMessagingPart implements MessagingPart {
         m.put(HeaderName.valueOf("Sender"), new AddressHeaderHandler("Sender"));
 
         m.put(HeaderName.valueOf("Resent-Sender"), new AddressHeaderHandler("Resent-Sender"));
-        
+
         m.put(HeaderName.valueOf("Resent-To"), new AddressHeaderHandler("Resent-To"));
-        
+
         m.put(HeaderName.valueOf("Resent-Cc"), new AddressHeaderHandler("Resent-Cc"));
-        
+
         m.put(HeaderName.valueOf("Resent-Bcc"), new AddressHeaderHandler("Resent-Bcc"));
 
         HHANDLERS = Collections.unmodifiableMap(m);
@@ -458,9 +501,16 @@ public class MimeMessagingPart implements MessagingPart {
             if (content instanceof MimeMessagingMessage) {
                 part.setContent(((MimeMessagingMessage) content).mimeMessage, type);
             } else if (content instanceof MimeMultipartContent) {
-                part.setContent(((MimeMultipartContent) content).mimeMultipart, type);
+                part.setContent(((MimeMultipartContent) content).mimeMultipart);
             } else if (content instanceof SimpleContent<?>) {
-                part.setContent(((SimpleContent<?>) content).getData(), type);
+                if (content instanceof BinaryContent) {
+                    part.setDataHandler(new DataHandler(new StreamDataSource(new BinaryContentISP((BinaryContent) content), type)));
+                } else if (content instanceof StringContent) {
+                    final MimeContentType mct = new MimeContentType(type);
+                    part.setText(((StringContent) content).getData(), mct.getCharsetParameter(), mct.getSubType());
+                } else {
+                    part.setContent(((SimpleContent<?>) content).getData(), type);
+                }
             } else {
                 throw MessagingExceptionCodes.UNKNOWN_MESSAGING_CONTENT.create(content.getClass().getName());
             }
