@@ -162,7 +162,7 @@ public interface MessagingMessage extends MessagingPart, MessagingContent {
     /**
      * Gets the folder fullname.
      * 
-     * @return The folder fullname
+     * @return The folder fullname or <code>null</code> if not available
      */
     public String getFolder();
 
@@ -183,7 +183,7 @@ public interface MessagingMessage extends MessagingPart, MessagingContent {
     /**
      * Gets the received date (storage's internal time stamp).
      * 
-     * @return The received date
+     * @return The received date or <code>-1</code> if not available
      */
     public long getReceivedDate();
 
@@ -196,7 +196,8 @@ public interface MessagingMessage extends MessagingPart, MessagingContent {
 
     /**
      * Get the thread level of this message.
-     * @return
+     * 
+     * @return The thread level of this message
      */
     public int getThreadLevel();
 }

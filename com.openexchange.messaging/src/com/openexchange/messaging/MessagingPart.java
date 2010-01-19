@@ -141,7 +141,7 @@ public interface MessagingPart {
     /**
      * Gets the identifier.
      * 
-     * @return The identifier
+     * @return The identifier or <code>null</code> if not available
      */
     public String getId();
 
