@@ -159,13 +159,7 @@ public final class NewCallAction extends AbstractVoipNowHTTPAction<GetMethod> {
                 final Matcher codeMatcher = PATTERN_CODE.matcher(responseBody);
                 if (codeMatcher.find()) {
                     final Matcher m2 = PATTERN_TEXT.matcher(responseBody);
-                    final int code;
-                    try {
-                        code = Integer.parseInt(codeMatcher.group(1));
-                    } catch (NumberFormatException e) {
-                        throw VoipNowExceptionCodes.UNPARSEABLE_HTTP_RESPONSE.create(e, "\n" + responseBody);
-                    }
-                    throw newRequestFailedException(code, m2.find() ? m2.group(1) : null);
+                    throw newRequestFailedException(codeMatcher.group(1), m2.find() ? m2.group(1) : null);
                 }
                 throw VoipNowExceptionCodes.UNPARSEABLE_HTTP_RESPONSE.create("\n"+responseBody);
             }
