@@ -135,7 +135,7 @@ public final class TwitterRetweetMessage implements MessagingMessage {
                 m.put(name, getSimpleHeader(name, retweet));
             }
             {
-                final String name = "Twitter-Type";
+                final String name = "X-Messaging-Type";
                 m.put(name, getSimpleHeader(name, TwitterConstants.TYPE_RETWEET));
             }
             headers = Collections.unmodifiableMap(m);

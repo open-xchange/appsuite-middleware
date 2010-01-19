@@ -137,7 +137,7 @@ public final class TwitterDirectMessage implements MessagingMessage {
                 m.put(name, getSimpleHeader(name, directMessage));
             }
             {
-                final String name = "Twitter-Type";
+                final String name = "X-Messaging-Type";
                 m.put(name, getSimpleHeader(name, TwitterConstants.TYPE_DIRECT_MESSAGE));
             }
             headers = Collections.unmodifiableMap(m);
