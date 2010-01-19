@@ -2407,7 +2407,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                          */
                         int accountId;
                         if (composedMail.containsFrom()) {
-                            accountId = resolveFrom2Account(session, composedMail.getFrom()[0], false);
+                            accountId = resolveFrom2Account(session, composedMail.getFrom()[0], false, true);
                         } else {
                             accountId = MailAccount.DEFAULT_ID;
                         }
@@ -3219,6 +3219,16 @@ public class Mail extends PermissionServlet implements UploadListener {
                 throw new MailException(MailException.Code.MISSING_PARAMETER, PARAMETER_DATA);
             }
             final int flags = paramContainer.getIntParam(PARAMETER_FLAGS);
+            final boolean force;
+            {
+                String tmp = paramContainer.getStringParam("force");
+                if (null == tmp) {
+                    force = false;
+                } else {
+                    tmp = tmp.trim();
+                    force = "1".equals(tmp) || Boolean.parseBoolean(tmp);
+                }
+            }
             /*
              * Get rfc822 bytes and create corresponding mail message
              */
@@ -3254,7 +3264,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     {
                         int accId;
                         try {
-                            accId = resolveFrom2Account(session, from, true);
+                            accId = resolveFrom2Account(session, from, true, !force);
                         } catch (final MailException e) {
                             if (MailException.Code.NO_TRANSPORT_SUPPORT.getNumber() != e.getDetailNumber()) {
                                 // Re-throw
@@ -3333,29 +3343,31 @@ public class Mail extends PermissionServlet implements UploadListener {
                         transport.close();
                     }
                 } else {
-                    /*
-                     * Check for valid from address
-                     */
-                    try {
-                        final Set<InternetAddress> validAddrs = new HashSet<InternetAddress>(4);
-                        final UserSettingMail usm = session.getUserSettingMail();
-                        if (usm.getSendAddr() != null && usm.getSendAddr().length() > 0) {
-                            validAddrs.add(new QuotedInternetAddress(usm.getSendAddr()));
+                    if (!force) {
+                        /*
+                         * Check for valid from address
+                         */
+                        try {
+                            final Set<InternetAddress> validAddrs = new HashSet<InternetAddress>(4);
+                            final UserSettingMail usm = session.getUserSettingMail();
+                            if (usm.getSendAddr() != null && usm.getSendAddr().length() > 0) {
+                                validAddrs.add(new QuotedInternetAddress(usm.getSendAddr()));
+                            }
+                            final User user = session.getUser();
+                            validAddrs.add(new QuotedInternetAddress(user.getMail()));
+                            final String[] aliases = user.getAliases();
+                            for (final String alias : aliases) {
+                                validAddrs.add(new QuotedInternetAddress(alias));
+                            }
+                            final List<InternetAddress> froms = Arrays.asList(m.getFrom());
+                            if (!validAddrs.containsAll(froms)) {
+                                throw new MailException(
+                                    MailException.Code.INVALID_SENDER,
+                                    froms.size() == 1 ? froms.get(0).toString() : Arrays.toString(m.getFrom()));
+                            }
+                        } catch (final AddressException e) {
+                            throw MIMEMailException.handleMessagingException(e);
                         }
-                        final User user = session.getUser();
-                        validAddrs.add(new QuotedInternetAddress(user.getMail()));
-                        final String[] aliases = user.getAliases();
-                        for (final String alias : aliases) {
-                            validAddrs.add(new QuotedInternetAddress(alias));
-                        }
-                        final List<InternetAddress> froms = Arrays.asList(m.getFrom());
-                        if (!validAddrs.containsAll(froms)) {
-                            throw new MailException(
-                                MailException.Code.INVALID_SENDER,
-                                froms.size() == 1 ? froms.get(0).toString() : Arrays.toString(m.getFrom()));
-                        }
-                    } catch (final AddressException e) {
-                        throw MIMEMailException.handleMessagingException(e);
                     }
                     /*
                      * Append message to denoted folder in proper mail storage
@@ -4019,7 +4031,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         }
                         int accountId;
                         try {
-                            accountId = resolveFrom2Account(session, from, true);
+                            accountId = resolveFrom2Account(session, from, true, true);
                         } catch (final MailException e) {
                             if (MailException.Code.NO_TRANSPORT_SUPPORT.getNumber() != e.getDetailNumber()) {
                                 // Re-throw
@@ -4097,7 +4109,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         } catch (final AddressException e) {
                             throw MIMEMailException.handleMessagingException(e);
                         }
-                        int accountId = resolveFrom2Account(session, from, false);
+                        int accountId = resolveFrom2Account(session, from, false, true);
                         /*
                          * Check if detected account has drafts
                          */
@@ -4188,7 +4200,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         }
     }
 
-    private static int resolveFrom2Account(final ServerSession session, final InternetAddress from, final boolean checkTransportSupport) throws MailException, OXException {
+    private static int resolveFrom2Account(final ServerSession session, final InternetAddress from, final boolean checkTransportSupport, final boolean checkFrom) throws MailException, OXException {
         /*
          * Resolve "From" to proper mail account to select right transport server
          */
@@ -4222,21 +4234,23 @@ public class Mail extends PermissionServlet implements UploadListener {
             throw new OXException(e);
         }
         if (accountId == -1) {
-            /*
-             * Check aliases
-             */
-            try {
-                final Set<InternetAddress> validAddrs = new HashSet<InternetAddress>(4);
-                final User user = session.getUser();
-                final String[] aliases = user.getAliases();
-                for (final String alias : aliases) {
-                    validAddrs.add(new QuotedInternetAddress(alias));
+            if (checkFrom) {
+                /*
+                 * Check aliases
+                 */
+                try {
+                    final Set<InternetAddress> validAddrs = new HashSet<InternetAddress>(4);
+                    final User user = session.getUser();
+                    final String[] aliases = user.getAliases();
+                    for (final String alias : aliases) {
+                        validAddrs.add(new QuotedInternetAddress(alias));
+                    }
+                    if (!validAddrs.contains(from)) {
+                        throw new MailException(MailException.Code.INVALID_SENDER, from.toString());
+                    }
+                } catch (final AddressException e) {
+                    throw MIMEMailException.handleMessagingException(e);
                 }
-                if (!validAddrs.contains(from)) {
-                    throw new MailException(MailException.Code.INVALID_SENDER, from.toString());
-                }
-            } catch (final AddressException e) {
-                throw MIMEMailException.handleMessagingException(e);
             }
             accountId = MailAccount.DEFAULT_ID;
         }
