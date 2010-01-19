@@ -382,6 +382,46 @@ public final class Tools {
         }
     }
 
+    /**
+     * Checks if denoted column in given table is of type {@link java.sql.Types#VARCHAR}.
+     * 
+     * @param con The connection
+     * @param table The table name
+     * @param column The column name
+     * @return <code>true</code> if denoted column in given table is of type {@link java.sql.Types#VARCHAR}; otherwise <code>false</code>
+     * @throws SQLException If a SQL error occurs
+     */
+    public static final boolean isVARCHAR(final Connection con, final String table, final String column) throws SQLException {
+        return java.sql.Types.VARCHAR == getColumnType(con, table, column);
+    }
+
+    /**
+     * Gets the type of specified column in given table from {@link java.sql.Types}.
+     * 
+     * @param con The connection
+     * @param table The table name
+     * @param column The column name
+     * @return The type of specified column in given table from {@link java.sql.Types} or <code>-1</code> if column does not exist
+     * @throws SQLException If a SQL error occurs
+     */
+    public static final int getColumnType(final Connection con, final String table, final String column) throws SQLException {
+        if (!columnExists(con, table, column)) {
+            return -1;
+        }
+        final DatabaseMetaData metaData = con.getMetaData();
+        ResultSet rs = null;
+        int type = -1;
+        try {
+            rs = metaData.getColumns(null, null, table, column);
+            while (rs.next()) {
+                type = rs.getInt(5);
+            }
+        } finally {
+            closeSQLStuff(rs);
+        }
+        return type;
+    }
+
     public static final boolean tableExists(final Connection con, final String table) throws SQLException {
         final DatabaseMetaData metaData = con.getMetaData();
         ResultSet rs = null;
