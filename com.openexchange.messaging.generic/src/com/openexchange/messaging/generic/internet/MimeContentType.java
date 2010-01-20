@@ -115,7 +115,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
 
     private String subType;
 
-    private String baseType;
+    private volatile String baseType;
 
     /**
      * Initializes a new {@link MimeContentType}
@@ -202,8 +202,8 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
         if (!ctMatcher.find() || (ctMatcher.start() != 0)) {
             throw MessagingExceptionCodes.INVALID_HEADER.create(CONTENT_TYPE, contentTypeArg);
         }
-        primaryType = ctMatcher.group(1);
-        subType = ctMatcher.group(2);
+        primaryType = toLowerCase(ctMatcher.group(1));
+        subType = toLowerCase(ctMatcher.group(2));
         if ((subType == null) || (subType.length() == 0)) {
             subType = DEFAULT_SUBTYPE;
         }
@@ -268,7 +268,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
      * Sets primary type
      */
     public void setPrimaryType(final String primaryType) {
-        this.primaryType = primaryType;
+        this.primaryType = primaryType == null ? null : toLowerCase(primaryType);
         baseType = null;
     }
 
@@ -283,7 +283,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
      * Sets sub-type
      */
     public void setSubType(final String subType) {
-        this.subType = subType;
+        this.subType = subType == null ? null : toLowerCase(subType);
         baseType = null;
     }
 
@@ -291,10 +291,11 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
      * @return base type (e.g. text/plain)
      */
     public String getBaseType() {
-        if (baseType != null) {
-            return baseType;
+        String tmp = baseType;
+        if (null == tmp) {
+            baseType = tmp = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
         }
-        return (baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString());
+        return tmp;
     }
 
     /**
@@ -375,7 +376,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
         if (null == prefix) {
             throw new IllegalArgumentException("Prefix is null");
         }
-        return toLowerCase(getBaseType()).startsWith(toLowerCase(prefix), 0);
+        return getBaseType().startsWith(toLowerCase(prefix), 0);
     }
 
     /**
@@ -472,7 +473,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder(64);
-        sb.append(primaryType).append(DELIMITER).append(subType);
+        sb.append(getBaseType());
         if (null != parameterList) {
             parameterList.appendUnicodeString(sb);
         }
