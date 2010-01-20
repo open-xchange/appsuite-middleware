@@ -981,7 +981,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                         for (final MailMessage header : messageStorageExt.getMessages(
                             fullname,
                             loadMe.toArray(STR_ARR),
-                            new MailField[0],
+                            FIELDS_ID_INFO,
                             headerFields)) {
                             finder.get(header.getMailId()).addHeaders(header.getHeaders());
                         }
