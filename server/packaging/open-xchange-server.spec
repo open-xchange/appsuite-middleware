@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 11
+%define		ox_release 12
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -483,6 +483,10 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Tue Jan 19 2010 - francisco.laguna@open-xchange.com
+ - Bugfix #15110: Apply download constraints only to OXMF pages and not attached infostore documents.
+* Mon Jan 18 2010 - thorben.betten@open-xchange.com
+ - Bugfix #15128: Display of broken multipart/alternative mail
 * Mon Jan 11 2010 - martin.herfurth@open-xchange.com
  - Bugfix #15046: Participant delete for Outlook.
 * Mon Dec 21 2009 - marcus.klein@open-xchange.com
