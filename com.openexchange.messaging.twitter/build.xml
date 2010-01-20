@@ -17,7 +17,7 @@
 
     <property name="version" value="${Bundle-Version}"/>
     <property name="bundle.name" value="${Bundle-SymbolicName}.jar"/>
-    <property name="composite.name" value="open-xchange-voipnow-json-${version}"/>
+    <property name="composite.name" value="open-xchange-messaging-twitter-${version}"/>
 
     <!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
