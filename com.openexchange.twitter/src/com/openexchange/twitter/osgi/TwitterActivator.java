@@ -146,6 +146,7 @@ public final class TwitterActivator implements BundleActivator {
              */
             if (null != componentRegistration) {
                 componentRegistration.unregister();
+                componentRegistration = null;
             }
         } catch (final Exception e) {
             log.error("Failed shut-down of bundle com.openexchange.twitter: " + e.getMessage(), e);
