@@ -117,10 +117,19 @@ Authors:
 
 
 %files
+%defattr(-,root,root)
+%doc README.TXT
 
 %files -n open-xchange-meta-oxserver
+%defattr(-,root,root)
+%doc README.TXT
 
 %files -n open-xchange-meta-oxgui
+%defattr(-,root,root)
+%doc README.TXT
 
 %files -n open-xchange-meta-oxsingleserver
+%defattr(-,root,root)
+%doc README.TXT
+
 %changelog
