@@ -1052,7 +1052,8 @@ public final class MIMEMessageConverter {
     private static MailMessageFieldFiller[] createFieldFillers(final Folder folder, final MailField[] fields) throws MailException {
         final MailField[] arr;
         {
-            final EnumSet<MailField> fieldSet = EnumSet.copyOf(Arrays.asList(fields));
+            final List<MailField> list = Arrays.asList(fields);
+            final EnumSet<MailField> fieldSet = list.isEmpty() ? EnumSet.noneOf(MailField.class) : EnumSet.copyOf(list);
             if (fieldSet.contains(MailField.FULL)) {
                 arr = ENUM_SET_FULL.toArray(new MailField[ENUM_SET_FULL.size()]);
             } else {

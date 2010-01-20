@@ -942,7 +942,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
     }
 
     private boolean prepareURL(final Set<Attribute> attributes, final Set<Attribute> compareWith, final Attribute urlAttribute) {
-        final EnumSet<Attribute> copy = EnumSet.copyOf(attributes);
+        final EnumSet<Attribute> copy = attributes.isEmpty() ? EnumSet.noneOf(Attribute.class) : EnumSet.copyOf(attributes);
         if (copy.removeAll(compareWith)) {
             attributes.add(urlAttribute);
             // At least one of the mail url attributes is present in attributes
