@@ -230,10 +230,11 @@ public final class SetFollowMeAction extends AbstractVoipNowSOAPAction<Extension
                 }
                 transferToString.setString(sb.toString());
                 callRuleInfo.setTransferTo(transferToString);
+                final boolean requestInterval = false;
                 /*
                  * interval
                  */
-                {
+                if (requestInterval) {
                     /*
                      * Get the interval
                      */
@@ -244,6 +245,10 @@ public final class SetFollowMeAction extends AbstractVoipNowSOAPAction<Extension
                     }
                     final PositiveInteger intervalInteger = new PositiveInteger();
                     intervalInteger.setPositiveInteger(new org.apache.axis2.databinding.types.PositiveInteger(String.valueOf(interval)));
+                    callRuleInfo.setIntervalID(intervalInteger);
+                } else {
+                    final PositiveInteger intervalInteger = new PositiveInteger();
+                    intervalInteger.setPositiveInteger(new org.apache.axis2.databinding.types.PositiveInteger("1"));
                     callRuleInfo.setIntervalID(intervalInteger);
                 }
                 /*
