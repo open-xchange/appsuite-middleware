@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry exported="true" kind="lib" path="lib/xml-apis-1.3.04.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jacksum.jar" sourcepath="source/jacksum-src.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/voipnow-soap-service.jar" sourcepath="lib/voipnow-soap-service.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/httpcore-4.0.jar"/>
