@@ -55,6 +55,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.json.JSONArray;
+import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
@@ -97,6 +99,30 @@ public final class NewCallAction extends AbstractVoipNowHTTPAction<GetMethod> {
              * Get main extension
              */
             final String callerNumber = getMainExtensionNumberOfSessionUser(session.getUser(), session.getContextId());
+            /*
+             * Check for JSON array in body
+             */
+            JSONArray jsonArray = null;
+            {
+                final Object data = request.getData();
+                if (null != data) {
+                    try {
+                        jsonArray = (JSONArray) data;
+                    } catch (final ClassCastException e) {
+                        final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(NewCallAction.class);
+                        log.warn(e.getMessage(), e);
+                        try {
+                            jsonArray = new JSONArray(data.toString());
+                        } catch (final JSONException je) {
+                            log.error("Request data is not a JSON array.", je);
+                            throw new AjaxException(AjaxException.Code.JSONError, je, je.getMessage());
+                        }
+                    }
+                }
+            }
+            if (null != jsonArray && 0 < jsonArray.length()) {
+                // TODO:
+            }
             final VoipNowServerSetting setting = getVoipNowServerSetting(session, true);
             /*
              * Compose and apply query string without starting '?' character
@@ -161,7 +187,7 @@ public final class NewCallAction extends AbstractVoipNowHTTPAction<GetMethod> {
                     final Matcher m2 = PATTERN_TEXT.matcher(responseBody);
                     throw newRequestFailedException(codeMatcher.group(1), m2.find() ? m2.group(1) : null);
                 }
-                throw VoipNowExceptionCodes.UNPARSEABLE_HTTP_RESPONSE.create("\n"+responseBody);
+                throw VoipNowExceptionCodes.UNPARSEABLE_HTTP_RESPONSE.create("\n" + responseBody);
             }
         }
         /*
