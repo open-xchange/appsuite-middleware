@@ -40,7 +40,6 @@
     <property name="globaljar" value="com.openexchange.global.jar"/>
 	<property name="serverjar" value="com.openexchange.server.jar"/>
 	<property name="configreadjar" value="com.openexchange.configread.jar"/>
-	<property name="xmljar" value="com.openexchange.xml.jar"/>
 	
 	<property name="commonjar" value="common.jar"/>
 
@@ -63,7 +62,6 @@
         <pathelement location="${bundlesdir}/${globaljar}"/>
     	<pathelement location="${bundlesdir}/${serverjar}"/>
     	<pathelement location="${bundlesdir}/${configreadjar}"/>
-    	<pathelement location="${bundlesdir}/${xmljar}"/>
     	
     	<pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
     	
