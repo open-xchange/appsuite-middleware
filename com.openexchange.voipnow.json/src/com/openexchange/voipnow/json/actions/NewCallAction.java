@@ -102,7 +102,7 @@ public final class NewCallAction extends AbstractVoipNowHTTPAction<GetMethod> {
              * Compose and apply query string without starting '?' character
              */
             final StringBuilder builder = new StringBuilder(256);
-            builder.append("Phonenumbertocall=").append(receiverNumber);
+            builder.append("PhoneNumberToCall=").append(receiverNumber);
             builder.append('&').append("FromExtension=").append(callerNumber);
             builder.append('&').append("CallerID=").append(ActionUtility.urlEncode(receiverDisplayName));
             builder.append('&').append("WaitForPickup=").append(timeout);
@@ -172,7 +172,7 @@ public final class NewCallAction extends AbstractVoipNowHTTPAction<GetMethod> {
 
     @Override
     protected String getPath() {
-        return "/callapi/204/Calls/MakeCall/";
+        return "callapi/204/Calls/MakeCall/";
     }
 
     @Override

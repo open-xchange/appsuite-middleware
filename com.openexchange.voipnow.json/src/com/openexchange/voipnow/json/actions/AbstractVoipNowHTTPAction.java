@@ -88,10 +88,25 @@ public abstract class AbstractVoipNowHTTPAction<M extends HttpMethod> extends Ab
         super();
     }
 
+    /**
+     * Gets a newly created {@link HttpMethod HTTP method} instance.
+     * 
+     * @return A newly created {@link HttpMethod HTTP method} instance
+     */
     protected abstract M newHttpMethod();
 
+    /**
+     * Gets the request path without leading <code>'/'</code> character.
+     * 
+     * @return The request path
+     */
     protected abstract String getPath();
 
+    /**
+     * Gets the time out.
+     * 
+     * @return The time out
+     */
     protected abstract int getTimeout();
 
     /**
