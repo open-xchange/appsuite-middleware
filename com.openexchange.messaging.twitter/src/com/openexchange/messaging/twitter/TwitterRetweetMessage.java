@@ -56,6 +56,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import com.openexchange.messaging.ContentDisposition;
 import com.openexchange.messaging.ContentType;
 import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingException;
@@ -66,6 +67,7 @@ import com.openexchange.messaging.MessagingPart;
 import com.openexchange.messaging.StringContent;
 import com.openexchange.messaging.StringMessageHeader;
 import com.openexchange.messaging.generic.internet.MimeAddressMessagingHeader;
+import com.openexchange.messaging.generic.internet.MimeContentDisposition;
 import com.openexchange.messaging.generic.internet.MimeContentType;
 import com.openexchange.twitter.Status;
 import com.openexchange.twitter.User;
@@ -79,11 +81,17 @@ public final class TwitterRetweetMessage implements MessagingMessage {
 
     private static final ContentType CONTENT_TYPE;
 
+    private static final ContentDisposition CONTENT_DISPOSITION;
+
     static {
         final ContentType contentType = new MimeContentType();
         contentType.setPrimaryType("text");
         contentType.setSubType("plain");
         CONTENT_TYPE = contentType;
+
+        final ContentDisposition contentDisposition = new MimeContentDisposition();
+        contentDisposition.setDisposition(MessagingPart.INLINE);
+        CONTENT_DISPOSITION = contentDisposition;
     }
 
     private final Map<String, Collection<MessagingHeader>> headers;
@@ -126,6 +134,7 @@ public final class TwitterRetweetMessage implements MessagingMessage {
         {
             final Map<String, Collection<MessagingHeader>> m = new HashMap<String, Collection<MessagingHeader>>(16);
             m.put(CONTENT_TYPE.getName(), wrap(CONTENT_TYPE));
+            m.put(CONTENT_DISPOSITION.getName(), wrap(CONTENT_DISPOSITION));
             {
                 final String name = MessagingHeader.KnownHeader.FROM.toString();
                 m.put(name, wrap(MimeAddressMessagingHeader.valueOfPlain(name, user.getScreenName())));
