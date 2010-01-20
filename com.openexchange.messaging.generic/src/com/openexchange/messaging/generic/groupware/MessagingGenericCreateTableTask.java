@@ -58,7 +58,7 @@ import com.openexchange.database.AbstractCreateTableImpl;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.update.DefaultAttributes;
+import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.TaskAttributes;
@@ -105,7 +105,7 @@ public final class MessagingGenericCreateTableTask extends AbstractCreateTableIm
     }
 
     public TaskAttributes getAttributes() {
-        return new DefaultAttributes();
+        return new Attributes();
     }
 
     public String[] getDependencies() {
