@@ -235,6 +235,12 @@ public class MimeMessagingPart implements MessagingPart {
         this.part = part;
     }
 
+    private static final String CT_TEXT = "text/";
+
+    private static final String CT_MSG_RFC822 = "message/rfc822";
+
+    private static final String CT_MUL = "multipart/";
+
     public MessagingContent getContent() throws MessagingException {
         MessagingContent tmp = cachedContent;
         if (null == tmp) {
@@ -251,20 +257,20 @@ public class MimeMessagingPart implements MessagingPart {
                 }
             }
             if (null != contentType) {
-                if (contentType.startsWith("text/")) {
+                if (contentType.startsWith(CT_MUL)) {
+                    final MimeMultipart content = getContentObject(MimeMultipart.class);
+                    if (null != content) {
+                        cachedContent = tmp = new MimeMultipartContent(content);
+                    }
+                } else if (contentType.startsWith(CT_TEXT)) {
                     final String content = getContentObject(String.class);
                     if (null != content) {
                         cachedContent = tmp = new StringContent(content);
                     }
-                } else if (contentType.startsWith("message/rfc822")) {
+                } else if (contentType.startsWith(CT_MSG_RFC822)) {
                     final MimeMessage content = getContentObject(MimeMessage.class);
                     if (null != content) {
                         cachedContent = tmp = new MimeMessagingMessage(content);
-                    }
-                } else if (contentType.startsWith("multipart/")) {
-                    final MimeMultipart content = getContentObject(MimeMultipart.class);
-                    if (null != content) {
-                        cachedContent = tmp = new MimeMultipartContent(content);
                     }
                 }
             }
