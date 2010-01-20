@@ -698,11 +698,11 @@ public final class JSONMessageHandler implements MailMessageHandler {
          * Since we obviously touched message's content, mark its corresponding message object as seen
          */
         mail.setFlags(mail.getFlags() | MailMessage.FLAG_SEEN);
+        /*-
+         *
         if (!textAppended) {
             try {
-                /*
-                 * Ensure at least one text part is present
-                 */
+                // Ensure at least one text part is present
                 final JSONObject jsonObject = new JSONObject();
                 jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), MIMETypes.MIME_TEXT_PLAIN);
                 jsonObject.put(MailJSONField.SIZE.getKey(), 0);
@@ -713,6 +713,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
                 throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
             }
         }
+         */
     }
 
     public boolean handleMultipart(final MailPart mp, final int bodyPartCount, final String id) throws MailException {
