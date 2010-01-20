@@ -96,7 +96,7 @@ public abstract class AbstractVoipNowHTTPAction<M extends HttpMethod> extends Ab
     protected abstract M newHttpMethod();
 
     /**
-     * Gets the request path without leading <code>'/'</code> character.
+     * Gets the request path.
      * 
      * @return The request path
      */
