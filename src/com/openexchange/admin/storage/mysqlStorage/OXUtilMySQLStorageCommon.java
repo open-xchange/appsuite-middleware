@@ -74,7 +74,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.update.SchemaException;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.groupware.update.UpdateTaskCollection;
+import com.openexchange.groupware.update.Updater;
 
 public class OXUtilMySQLStorageCommon {
 
@@ -230,7 +230,7 @@ public class OXUtilMySQLStorageCommon {
     }
 
     private void initUpdateTaskTable(Connection con) throws StorageException {
-        List<UpdateTask> tasks = UpdateTaskCollection.getInstance().getListWithoutExcludes();
+        UpdateTask[] tasks = Updater.getInstance().getAvailableUpdateTasks();
         SchemaStore store = SchemaStore.getInstance();
         try {
             for (UpdateTask task : tasks) {
