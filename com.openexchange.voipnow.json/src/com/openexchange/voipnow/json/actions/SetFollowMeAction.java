@@ -196,7 +196,8 @@ public final class SetFollowMeAction extends AbstractVoipNowSOAPAction<Extension
              * Add new follow-me rule
              */
             final Integer id;
-            if (transferTo.length > 0) {
+            final int transferToLen = transferTo.length;
+            if (transferToLen > 0) {
                 final AddCallRulesInRequest addCallRulesInRequest = new AddCallRulesInRequest();
 
                 final AddCallRulesInRequestChoice_type0 type0 = new AddCallRulesInRequestChoice_type0();
@@ -222,9 +223,9 @@ public final class SetFollowMeAction extends AbstractVoipNowSOAPAction<Extension
                  * transferTo
                  */
                 final com._4psa.common_xsd._2_0_4.String transferToString = new com._4psa.common_xsd._2_0_4.String();
-                final StringBuilder sb = new StringBuilder(transferTo.length * 8);
+                final StringBuilder sb = new StringBuilder(transferToLen * 8);
                 sb.append(transferTo[0]);
-                for (int i = 1; i < transferTo.length; i++) {
+                for (int i = 1; i < transferToLen; i++) {
                     sb.append(' ').append(transferTo[i]);
                 }
                 transferToString.setString(sb.toString());
