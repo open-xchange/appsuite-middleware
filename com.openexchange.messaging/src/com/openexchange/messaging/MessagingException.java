@@ -67,7 +67,7 @@ public class MessagingException extends AbstractOXException {
     private static final String STR_COMPONENT = "MESSAGING";
 
     /**
-     * The {@link Component} for twitter exception.
+     * The {@link Component} for messaging exception.
      */
     public static final Component COMPONENT = new Component() {
 
