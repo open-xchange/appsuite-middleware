@@ -92,7 +92,7 @@ public class StringContent implements SimpleContent<String> {
 
     @Override
     public String toString() {
-        return data.toString();
+        return data;
     }
 
 }
