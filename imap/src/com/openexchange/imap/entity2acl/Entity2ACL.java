@@ -62,7 +62,7 @@ import com.openexchange.server.impl.OCLPermission;
  */
 public abstract class Entity2ACL {
 
-    private static volatile boolean instantialized;
+    private static volatile boolean instantiated;
 
     /**
      * The constant reflecting the found group {@link OCLPermission#ALL_GROUPS_AND_USERS}.
@@ -82,7 +82,7 @@ public abstract class Entity2ACL {
      * @throws Entity2ACLException if the instance can't be created.
      */
     public static final Entity2ACL getInstance(final IMAPConfig imapConfig) throws Entity2ACLException {
-        if (instantialized) {
+        if (instantiated) {
             /*
              * Auto-detection is turned off, return configured implementation
              */
@@ -103,7 +103,7 @@ public abstract class Entity2ACL {
      */
     final static void resetEntity2ACL() {
         singleton = null;
-        instantialized = false;
+        instantiated = false;
     }
 
     /**
@@ -113,7 +113,7 @@ public abstract class Entity2ACL {
      */
     final static void setInstance(final Entity2ACL singleton) {
         Entity2ACL.singleton = singleton;
-        instantialized = true;
+        instantiated = true;
     }
 
     /*-
