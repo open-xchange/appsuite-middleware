@@ -149,6 +149,10 @@ public final class TwitterDirectMessage implements MessagingMessage {
                 final String name = MessagingHeader.KnownHeader.MESSAGE_TYPE.toString();
                 m.put(name, getSimpleHeader(name, TwitterConstants.TYPE_DIRECT_MESSAGE));
             }
+            {
+                final String name = TwitterConstants.HEADER_SCREEN_NAME;
+                m.put(name, getSimpleHeader(name, recipient.getScreenName()));
+            }
             headers = Collections.unmodifiableMap(m);
         }
     }

@@ -49,6 +49,7 @@
 
 package com.openexchange.messaging.twitter;
 
+import static com.openexchange.messaging.twitter.TwitterMessagingUtility.parseUnsignedLong;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.messaging.IndexRange;
@@ -170,6 +171,13 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
             } catch (final TwitterException e) {
                 throw new MessagingException(e);
             }
+        } else if (TwitterConstants.TYPE_RETWEET_NEW.equalsIgnoreCase(action)) {
+            try {
+                twitterAccess.retweetStatus(parseUnsignedLong(id));
+                return null;
+            } catch (final TwitterException e) {
+                throw new MessagingException(e);
+            }
         } else {
             throw MessagingExceptionCodes.UNKNOWN_ACTION.create(action);
         }
@@ -251,56 +259,6 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
             }
         }
         return retval;
-    }
-
-    private static final long DEFAULT = -1L;
-
-    private static final int RADIX = 10;
-
-    private static long parseUnsignedLong(final String s) {
-        if (s == null) {
-            return DEFAULT;
-        }
-        final int max = s.length();
-        if (max <= 0) {
-            return -1;
-        }
-        if (s.charAt(0) == '-') {
-            return -1;
-        }
-
-        long result = 0;
-        int i = 0;
-
-        final long limit = -Long.MAX_VALUE;
-        final long multmin = limit / RADIX;
-        int digit;
-
-        if (i < max) {
-            digit = Character.digit(s.charAt(i++), RADIX);
-            if (digit < 0) {
-                return DEFAULT;
-            }
-            result = -digit;
-        }
-        while (i < max) {
-            /*
-             * Accumulating negatively avoids surprises near MAX_VALUE
-             */
-            digit = Character.digit(s.charAt(i++), RADIX);
-            if (digit < 0) {
-                return DEFAULT;
-            }
-            if (result < multmin) {
-                return DEFAULT;
-            }
-            result *= RADIX;
-            if (result < limit + digit) {
-                return DEFAULT;
-            }
-            result -= digit;
-        }
-        return -result;
     }
 
 }

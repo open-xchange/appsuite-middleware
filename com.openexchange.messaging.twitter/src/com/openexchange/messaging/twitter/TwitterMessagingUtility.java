@@ -49,53 +49,75 @@
 
 package com.openexchange.messaging.twitter;
 
+
 /**
- * {@link TwitterConstants} - Provides useful constants for twitter.
- * 
+ * {@link TwitterMessagingUtility}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class TwitterConstants {
+public final class TwitterMessagingUtility {
 
     /**
-     * Initializes a new {@link TwitterConstants}.
+     * Initializes a new {@link TwitterMessagingUtility}.
      */
-    private TwitterConstants() {
+    private TwitterMessagingUtility() {
         super();
     }
 
-    /**
-     * The max. length of a tweet: 140 characters.
-     */
-    public static final int MAX_TWEET_LENGTH = 140;
+    private static final long DEFAULT = -1L;
+
+    private static final int RADIX = 10;
 
     /**
-     * The type denoting a common twitter tweet.
+     * Parses as an unsigned <code>long</code>.
+     * 
+     * @param s The string to parse
+     * @return An unsigned <code>long</code> or <code>-1</code>.
      */
-    public static final String TYPE_TWEET = "tweet";
+    public static long parseUnsignedLong(final String s) {
+        if (s == null) {
+            return DEFAULT;
+        }
+        final int max = s.length();
+        if (max <= 0) {
+            return -1;
+        }
+        if (s.charAt(0) == '-') {
+            return -1;
+        }
 
-    /**
-     * The type denoting twitter retweet.
-     */
-    public static final String TYPE_RETWEET = "retweet";
+        long result = 0;
+        int i = 0;
 
-    /**
-     * The type denoting twitter retweet new.
-     */
-    public static final String TYPE_RETWEET_NEW = "retweetNew";
+        final long limit = -Long.MAX_VALUE;
+        final long multmin = limit / RADIX;
+        int digit;
 
-    /**
-     * The type denoting twitter direct message.
-     */
-    public static final String TYPE_DIRECT_MESSAGE = "directMessage";
-
-    /**
-     * The Status-Id header.
-     */
-    public static final String HEADER_STATUS_ID = "X-Twitter-Status-Id";
-
-    /**
-     * The screen name header.
-     */
-    public static final String HEADER_SCREEN_NAME = "X-Twitter-Screen-Name";
+        if (i < max) {
+            digit = Character.digit(s.charAt(i++), RADIX);
+            if (digit < 0) {
+                return DEFAULT;
+            }
+            result = -digit;
+        }
+        while (i < max) {
+            /*
+             * Accumulating negatively avoids surprises near MAX_VALUE
+             */
+            digit = Character.digit(s.charAt(i++), RADIX);
+            if (digit < 0) {
+                return DEFAULT;
+            }
+            if (result < multmin) {
+                return DEFAULT;
+            }
+            result *= RADIX;
+            if (result < limit + digit) {
+                return DEFAULT;
+            }
+            result -= digit;
+        }
+        return -result;
+    }
 
 }

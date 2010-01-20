@@ -69,7 +69,11 @@ import com.openexchange.session.Session;
  */
 public final class TwitterMessagingService implements MessagingService {
 
-    private static final List<String> ACTIONS = Collections.unmodifiableList(Arrays.asList("retweet", "directMessage"));
+    private static final List<String> ACTIONS =
+        Collections.unmodifiableList(Arrays.asList(
+            TwitterConstants.TYPE_RETWEET,
+            TwitterConstants.TYPE_RETWEET_NEW,
+            TwitterConstants.TYPE_DIRECT_MESSAGE));
 
     private static final String ID = "com.openexchange.messaging.twitter";
 
@@ -112,8 +116,7 @@ public final class TwitterMessagingService implements MessagingService {
     }
 
     public MessagingAccountTransport getAccountTransport(final int accountId, final Session session) throws MessagingException {
-        // TODO Auto-generated method stub
-        return null;
+        return new TwitterMessagingAccountTransport(accountManager.getAccount(accountId, session), session);
     }
 
     public List<String> getMessageActions() {
