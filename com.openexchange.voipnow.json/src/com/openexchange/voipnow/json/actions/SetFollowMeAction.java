@@ -113,7 +113,15 @@ public final class SetFollowMeAction extends AbstractVoipNowSOAPAction<Extension
             /*
              * Parse parameters
              */
-            final String[] transferTo = json2StringArr((JSONArray) request.getData());
+            final String[] transferTo;
+            {
+                final Object data = request.getData();
+                if (null == data) {
+                    transferTo = new String[0];
+                } else {
+                    transferTo = json2StringArr((JSONArray) request.getData());
+                }
+            }
             final VoipNowServerSetting setting = getSOAPVoipNowServerSetting(session);
             /*
              * Get session user's main extension identifier
@@ -188,7 +196,7 @@ public final class SetFollowMeAction extends AbstractVoipNowSOAPAction<Extension
              * Add new follow-me rule
              */
             final Integer id;
-            {
+            if (transferTo.length > 0) {
                 final AddCallRulesInRequest addCallRulesInRequest = new AddCallRulesInRequest();
 
                 final AddCallRulesInRequestChoice_type0 type0 = new AddCallRulesInRequestChoice_type0();
@@ -251,6 +259,8 @@ public final class SetFollowMeAction extends AbstractVoipNowSOAPAction<Extension
                     throw VoipNowExceptionCodes.SOAP_FAULT.create("AddCallRulesInRequest failed with: " + success);
                 }
                 id = Integer.valueOf(callRulesInResponse.getID()[0].getPositiveInteger().intValue());
+            } else {
+                id = Integer.valueOf(-1);
             }
             /*
              * Return ID
