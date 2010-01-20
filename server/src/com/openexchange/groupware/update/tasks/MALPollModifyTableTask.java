@@ -138,6 +138,10 @@ public final class MALPollModifyTableTask extends UpdateTaskAdapter {
                  */
                 if (Tools.hasPrimaryKey(con, table2)) {
                     dropPrimaryKey(con, table2, log);
+                    if (!contentDropped) {
+                        dropAllContent(con, log);
+                        contentDropped = true;
+                    }
                 }
                 addPrimaryKey(con, table2, log);
             }
