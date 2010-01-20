@@ -130,10 +130,20 @@ public final class MALPollModifyTableTask extends UpdateTaskAdapter {
                     createColumn(con, table2, columnName, log);
                 }
 
+            }
+
+            if (!Tools.existsPrimaryKey(con, table2, new String[] { "cid", "hash", "uid" })) {
+                /*
+                 * Has any primary key?
+                 */
+                if (Tools.hasPrimaryKey(con, table2)) {
+                    dropPrimaryKey(con, table2, log);
+                }
                 addPrimaryKey(con, table2, log);
             }
 
             con.commit(); // COMMIT
+            log.info("Update task " + MALPollModifyTableTask.class.getName() + " successfully performed.");
         } catch (final SQLException e) {
             rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
@@ -194,9 +204,9 @@ public final class MALPollModifyTableTask extends UpdateTaskAdapter {
     }
 
     private void addPrimaryKey(final Connection con, final String tableName, final Log log) throws SQLException {
-        final String[] columns = new String[] { "cid", "hash", "uid(32)" };
+        final String[] columns = new String[] { "cid", "hash", "uid" };
         log.info("Creating new primary key " + Arrays.toString(columns) + " on table " + tableName + ".");
-        Tools.createPrimaryKey(con, tableName, columns);
+        Tools.createPrimaryKey(con, tableName, columns, new int[] {-1, -1, 32});
     }
 
 }
