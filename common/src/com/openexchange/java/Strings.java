@@ -54,7 +54,6 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
-
 /**
  * {@link Strings} - a library for performing operations that create Strings
  *
@@ -71,31 +70,33 @@ public class Strings {
      * @return connected strings or null if collection == null or empty string if collection is empty
      */
     public static String join(Collection<? extends Object> coll, String connector){
-        if(coll == null)
+        if (coll == null) {
             return null;
+        }
+        if (coll.size() == 0) {
+            return "";
+        }
         StringBuilder builder = new StringBuilder();
-        for(Object obj: coll){
-            if(obj == null)
+        for (Object obj : coll) {
+            if (obj == null) {
                 builder.append(obj);
-            else
+            } else {
                 builder.append(obj.toString());
+            }
             builder.append(connector);
         }
-        if(builder.length() == 0)
-            return "";
         return builder.substring(0, builder.length() - connector.length());
     }
     
-    public static <T> String join(T[] arr, String connector){
-        return join( Arrays.asList(arr), connector );
+    public static <T> String join(T[] arr, String connector) {
+        return join(Arrays.asList(arr), connector);
     }
     
-    public static String join(int[] arr, String connector){
+    public static String join(int[] arr, String connector) {
         List<Integer> list = new LinkedList<Integer>();
-        for(int i  : arr){
-            list.add( Autoboxing.I(i) );
+        for (int i : arr) {
+            list.add(Autoboxing.I(i));
         }
         return join(list, connector);
     }
-    
 }
