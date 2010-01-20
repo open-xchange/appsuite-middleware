@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.update.tasks;
 
+import static com.openexchange.groupware.update.UpdateConcurrency.BACKGROUND;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -56,7 +57,9 @@ import java.sql.SQLException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
@@ -70,6 +73,15 @@ public final class UnifiedINBOXRenamerTask extends UpdateTaskAdapter {
 
     public UnifiedINBOXRenamerTask() {
         super();
+    }
+
+    public String[] getDependencies() {
+        return new String[] { "com.openexchange.groupware.update.tasks.MailAccountMigrationTask" };
+    }
+
+    @Override
+    public TaskAttributes getAttributes() {
+        return new Attributes(BACKGROUND);
     }
 
     public void perform(PerformParameters params) throws AbstractOXException {
@@ -94,9 +106,5 @@ public final class UnifiedINBOXRenamerTask extends UpdateTaskAdapter {
             closeSQLStuff(stmt);
             Database.backNoTimeout(contextId, true, con);
         }
-    }
-
-    public String[] getDependencies() {
-        return new String[] { "com.openexchange.groupware.update.tasks.MailAccountMigrationTask" };
     }
 }

@@ -100,7 +100,11 @@ public enum UpdateExceptionCodes implements OXErrorMessage {
     /**
      * Updating schema %1$s failed. Cause: %2$s.
      */
-    UPDATE_FAILED(UPDATE_FAILED_MSG, Category.CODE_ERROR, 22);
+    UPDATE_FAILED(UPDATE_FAILED_MSG, Category.CODE_ERROR, 22),
+    /**
+     * Blocking tasks (%1$s) must be executed before background tasks can be executed (%2$s).
+     */
+    FIRST_BLOCKING(FIRST_BLOCKING_MSG, Category.CODE_ERROR, 23);
 
     final String message;
 

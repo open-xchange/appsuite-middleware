@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.update.internal;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -62,6 +63,7 @@ import com.openexchange.groupware.update.ProgressState;
 import com.openexchange.groupware.update.SchemaException;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.SchemaUpdateState;
+import com.openexchange.groupware.update.SeparatedTasks;
 import com.openexchange.groupware.update.UpdateException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
@@ -85,6 +87,8 @@ public final class UpdateExecutor {
 
     private List<UpdateTask> tasks;
 
+    private SeparatedTasks separatedTasks;
+
     public UpdateExecutor(SchemaUpdateState state, int contextId, List<UpdateTask> tasks) {
         super();
         this.state = state;
@@ -93,35 +97,56 @@ public final class UpdateExecutor {
     }
 
     public void execute() throws UpdateException {
-        // TODO Separate a given list into blocking and background tasks.
-        runBlocking();
-        runBackground();
+        if (null != tasks) {
+            separatedTasks = UpdateTaskCollection.getInstance().separateTasks(tasks);
+            if (separatedTasks.getBlocking().size() > 0) {
+                runUpdates(true);
+            }
+            if (separatedTasks.getBackground().size() > 0) {
+                runUpdates(false);
+            }
+        } else {
+            SeparatedTasks forCheck = UpdateTaskCollection.getInstance().getFilteredAndSeparatedTasks(state);
+            if (forCheck.getBlocking().size() > 0) {
+                runUpdates(true);
+            }
+            if (forCheck.getBackground().size() > 0) {
+                runUpdates(false);
+            }
+        }
     }
 
-    private void runBlocking() throws UpdateException {
+    private void runUpdates(boolean blocking) throws UpdateException {
+        LOG.info("Starting " + (blocking ? "blocking" : "background") + " updates on schema " + state.getSchema());
         try {
-            lockSchema();
+            lockSchema(blocking);
         } catch (SchemaException e) {
-            // Try to unlock schema
-            try {
-                unlockSchema();
-            } catch (SchemaException e1) {
-                LOG.error(e1.getMessage(), e1);
+            if (e.getDetailNumber() != SchemaExceptionCodes.ALREADY_LOCKED.getDetailNumber()) {
+                // Try to unlock schema
+                try {
+                    unlockSchema(blocking);
+                } catch (SchemaException e1) {
+                    LOG.error(e1.getMessage(), e1);
+                }
             }
             throw new UpdateException(e);
         }
         // Lock successfully obtained, thus remember to unlock
         try {
-            // Remove affected contexts.
-            removeContexts();
-            if (null == tasks) {
+            // Contexts on that scheme can continue
+            if (blocking) {
+                removeContexts();
+            }
+            final List<UpdateTask> scheduled = new ArrayList<UpdateTask>();
+            if (null == separatedTasks) {
                 state = store.getSchema(contextId);
                 // Get filtered & sorted list of update tasks
-                // TODO get blocking tasks.
-                tasks = UpdateTaskCollection.getInstance().getFilteredAndSortedUpdateTasks(state);
+                scheduled.addAll(UpdateTaskCollection.getInstance().getFilteredAndSortedUpdateTasks(state, blocking));
+            } else {
+                scheduled.addAll(blocking ? separatedTasks.getBlocking() : separatedTasks.getBackground());
             }
             // Perform updates
-            for (UpdateTask task : tasks) {
+            for (UpdateTask task : scheduled) {
                 String taskName = task.getClass().getSimpleName();
                 boolean success = false;
                 try {
@@ -144,7 +169,7 @@ public final class UpdateExecutor {
                 }
                 addExecutedTask(task.getClass().getName(), success);
             }
-            LOG.info("Finished updating schema " + state.getSchema());
+            LOG.info("Finished " + (blocking ? "blocking" : "background") + " updates on schema " + state.getSchema());
         } catch (SchemaException e) {
             throw new UpdateException(e);
         } catch (UpdateException e) {
@@ -153,25 +178,23 @@ public final class UpdateExecutor {
             throw UpdateExceptionCodes.UPDATE_FAILED.create(t, state.getSchema(), t.getMessage());
         } finally {
             try {
-                unlockSchema();
+                unlockSchema(blocking);
                 // Remove contexts from cache if they are cached during update process.
-                removeContexts();
+                if (blocking) {
+                    removeContexts();
+                }
             } catch (SchemaException e) {
                 throw new UpdateException(e);
             }
         }
     }
 
-    private void runBackground() throws UpdateException {
-        // TODO run background update tasks
+    private final void lockSchema(boolean blocking) throws SchemaException {
+        store.lockSchema(state, contextId, !blocking);
     }
 
-    private final void lockSchema() throws SchemaException {
-        store.lockSchema(state, contextId, false);
-    }
-
-    private final void unlockSchema() throws SchemaException {
-        store.unlockSchema(state, contextId, false);
+    private final void unlockSchema(boolean blocking) throws SchemaException {
+        store.unlockSchema(state, contextId, !blocking);
     }
 
     private final void addExecutedTask(String taskName, boolean success) throws SchemaException {

@@ -431,15 +431,15 @@ public class SchemaStoreImpl extends SchemaStore {
                 break;
             }
         }
-        String insertSQL = "INSERT INTO updateTask (cid,taskName,successful,lastModified) VALUES (0,?,?,?)";
+        String insertSQL = "INSERT INTO updateTask (cid,successful,lastModified,taskName) VALUES (0,?,?,?)";
         String updateSQL = "UPDATE updateTask SET successful=?, lastModified=? WHERE cid=0 AND taskName=?";
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(update ? updateSQL : insertSQL);
             int pos = 1;
-            stmt.setString(pos++, taskName);
             stmt.setBoolean(pos++, success);
             stmt.setLong(pos++, System.currentTimeMillis());
+            stmt.setString(pos++, taskName);
             int rows = stmt.executeUpdate();
             if (1 != rows) {
                 throw SchemaExceptionCodes.WRONG_ROW_COUNT.create(I(1), I(rows));

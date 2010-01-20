@@ -54,7 +54,7 @@ package com.openexchange.groupware.update;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-enum WorkingLevel {
+public enum WorkingLevel {
 
     /**
      * Update task works on schema level. The task gets executed if some schema needs an update. All schema modifying tasks must use this

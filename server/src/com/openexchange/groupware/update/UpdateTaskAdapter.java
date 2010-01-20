@@ -68,9 +68,7 @@ public abstract class UpdateTaskAdapter implements UpdateTaskV2 {
     }
 
     public final void perform(Schema schema, int contextId) throws AbstractOXException {
-        ProgressState logger = new ProgressStatusImpl(this.getClass().getName(), schema.getSchema());
-        PerformParameters params = new PerformParametersImpl(schema, contextId, logger);
-        perform(params);
+        perform(this, schema, contextId);
     }
 
     public static final void perform(UpdateTaskV2 task, Schema schema, int contextId) throws AbstractOXException {
@@ -88,6 +86,6 @@ public abstract class UpdateTaskAdapter implements UpdateTaskV2 {
     }
 
     public TaskAttributes getAttributes() {
-        return new DefaultAttributes();
+        return new Attributes();
     }
 }

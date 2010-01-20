@@ -62,6 +62,7 @@ import com.openexchange.groupware.update.internal.Filter;
 import com.openexchange.groupware.update.internal.SchemaUpdateStateImpl;
 import com.openexchange.groupware.update.internal.UpdateTaskSorter;
 import com.openexchange.groupware.update.internal.VersionFilter;
+import com.openexchange.java.Strings;
 
 /**
  * {@link UpdateTaskCollection} - Collection for update tasks.
@@ -108,10 +109,14 @@ public class UpdateTaskCollection {
         return filtered;
     }
 
-    public SeparatedTasks getFilteredAndSeparatedTasks(SchemaUpdateState schema) {
+    public SeparatedTasks getFilteredAndSeparatedTasks(SchemaUpdateState state) {
+        return separateTasks(getFilteredUpdateTasks(state));
+    }
+
+    public SeparatedTasks separateTasks(List<UpdateTask> tasks) {
         final List<UpdateTask> blocking = new ArrayList<UpdateTask>();
         final List<UpdateTaskV2> background = new ArrayList<UpdateTaskV2>();
-        for (UpdateTask toExecute : getFilteredUpdateTasks(schema)) {
+        for (UpdateTask toExecute : tasks) {
             if (toExecute instanceof UpdateTaskV2) {
                 UpdateTaskV2 toExecuteV2 = (UpdateTaskV2) toExecute;
                 switch (toExecuteV2.getAttributes().getConcurrency()) {
@@ -131,26 +136,30 @@ public class UpdateTaskCollection {
             }
         }
         return new SeparatedTasks() {
-            public UpdateTask[] getBlocking() {
-                return blocking.toArray(new UpdateTask[blocking.size()]);
+            public List<UpdateTask> getBlocking() {
+                return blocking;
             }
-            public UpdateTaskV2[] getBackground() {
-                return background.toArray(new UpdateTaskV2[background.size()]);
+            public List<UpdateTaskV2> getBackground() {
+                return background;
             }
         };
     }
 
-    /**
-     * TODO Sort background tasks.
-     */
-    public final List<UpdateTask> getFilteredAndSortedUpdateTasks(SchemaUpdateState schema) throws UpdateException {
+    public final List<UpdateTask> getFilteredAndSortedUpdateTasks(SchemaUpdateState schema, boolean blocking) throws UpdateException {
         SeparatedTasks tasks = getFilteredAndSeparatedTasks(schema);
         List<UpdateTask> retval = new ArrayList<UpdateTask>();
-        for (UpdateTask task : tasks.getBlocking()) {
-            retval.add(task);
+        if (blocking) {
+            retval.addAll(tasks.getBlocking());
+        } else {
+            if (tasks.getBlocking().size() > 0) {
+                throw UpdateExceptionCodes.FIRST_BLOCKING.create(Strings.join(tasks.getBlocking(), ","), Strings.join(tasks.getBackground(), ","));
+            }
+            retval.addAll(tasks.getBackground());
         }
-        // And sort them
-        retval = new UpdateTaskSorter().sort(schema.getExecutedList(), retval);
+        final SchemaUpdateState simulatedState = addExecutedBasedOnVersion(schema, getListWithoutExcludes());
+        // And sort them. Sorting this way prerequisites that every blocking task can be executed before any background task is scheduled.
+        // Said in other words: Blocking tasks can not depend on background tasks.
+        retval = new UpdateTaskSorter().sort(simulatedState.getExecutedList(), retval);
         return retval;
     }
 

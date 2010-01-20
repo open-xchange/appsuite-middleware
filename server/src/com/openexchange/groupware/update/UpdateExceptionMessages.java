@@ -76,6 +76,8 @@ public final class UpdateExceptionMessages implements LocalizableStrings {
 
     public static final String UPDATE_FAILED_MSG = "Updating schema %1$s failed. Cause: %2$s.";
 
+    public static final String FIRST_BLOCKING_MSG = "Blocking tasks (%1$s) must be executed before background tasks can be executed (%2$s).";
+
     public UpdateExceptionMessages() {
         super();
     }

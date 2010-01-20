@@ -57,17 +57,31 @@ import static com.openexchange.groupware.update.WorkingLevel.SCHEMA;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class DefaultAttributes implements TaskAttributes {
+public class Attributes implements TaskAttributes {
 
-    public DefaultAttributes() {
+    private final UpdateConcurrency concurrency;
+
+    private final WorkingLevel level;
+
+    public Attributes() {
+        this(BLOCKING, SCHEMA);
+    }
+
+    public Attributes(UpdateConcurrency concurrency, WorkingLevel level) {
         super();
+        this.concurrency = concurrency;
+        this.level = level;
+    }
+
+    public Attributes(UpdateConcurrency concurrency) {
+        this(concurrency, SCHEMA);
     }
 
     public UpdateConcurrency getConcurrency() {
-        return BLOCKING;
+        return concurrency;
     }
 
     public WorkingLevel getLevel() {
-        return SCHEMA;
+        return level;
     }
 }

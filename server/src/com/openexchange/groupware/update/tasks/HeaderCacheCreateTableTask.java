@@ -50,19 +50,14 @@
 package com.openexchange.groupware.update.tasks;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.database.AbstractCreateTableImpl;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.update.DefaultAttributes;
+import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.TaskAttributes;
@@ -80,8 +75,6 @@ import com.openexchange.tools.update.Tools;
  */
 public final class HeaderCacheCreateTableTask extends AbstractCreateTableImpl implements UpdateTaskV2 {
 
-    private static final Log LOG = LogFactory.getLog(HeaderCacheCreateTableTask.class);
-
     public int addedWithVersion() {
         return Schema.NO_VERSION;
     }
@@ -92,31 +85,31 @@ public final class HeaderCacheCreateTableTask extends AbstractCreateTableImpl im
 
     private static String getCreateMailUUIDTable() {
         return "CREATE TABLE mailUUID (" + 
-		" cid INT4 unsigned NOT NULL," + 
-		" user INT4 unsigned NOT NULL," + 
-		" account INT4 unsigned NOT NULL," + 
-		" fullname VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
-		" id VARCHAR(70) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
-		" uuid BINARY(16) NOT NULL," + 
-		" PRIMARY KEY (cid, user, account, fullname, id)," + 
-		" INDEX (cid, user, uuid)," + 
-		" FOREIGN KEY (cid, user) REFERENCES user (cid, id)" + 
-		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+        " cid INT4 unsigned NOT NULL," + 
+        " user INT4 unsigned NOT NULL," + 
+        " account INT4 unsigned NOT NULL," + 
+        " fullname VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
+        " id VARCHAR(70) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
+        " uuid BINARY(16) NOT NULL," + 
+        " PRIMARY KEY (cid, user, account, fullname, id)," + 
+        " INDEX (cid, user, uuid)," + 
+        " FOREIGN KEY (cid, user) REFERENCES user (cid, id)" + 
+        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
     }
 
     private static final String getCreateHeaderBlobTable() {
         return "CREATE TABLE headersAsBlob (" + 
-		" cid INT4 unsigned NOT NULL," + 
-		" user INT4 unsigned NOT NULL," + 
-		" uuid BINARY(16) NOT NULL," + 
-		" flags INT4 unsigned NOT NULL default '0'," + 
-		" receivedDate bigint(64) default NULL," + 
-		" rfc822Size bigint(64) UNSIGNED NOT NULL," + 
-		" userFlags VARCHAR(1024) collate utf8_unicode_ci default NULL," + 
-		" headers BLOB," + 
-		" PRIMARY KEY (cid, user, uuid)," + 
-		" FOREIGN KEY (cid, user, uuid) REFERENCES mailUUID (cid, user, uuid)" + 
-		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+        " cid INT4 unsigned NOT NULL," + 
+        " user INT4 unsigned NOT NULL," + 
+        " uuid BINARY(16) NOT NULL," + 
+        " flags INT4 unsigned NOT NULL default '0'," + 
+        " receivedDate bigint(64) default NULL," + 
+        " rfc822Size bigint(64) UNSIGNED NOT NULL," + 
+        " userFlags VARCHAR(1024) collate utf8_unicode_ci default NULL," + 
+        " headers BLOB," + 
+        " PRIMARY KEY (cid, user, uuid)," + 
+        " FOREIGN KEY (cid, user, uuid) REFERENCES mailUUID (cid, user, uuid)" + 
+        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
     }
 
     @Override
@@ -137,7 +130,7 @@ public final class HeaderCacheCreateTableTask extends AbstractCreateTableImpl im
     }
 
     public TaskAttributes getAttributes() {
-        return new DefaultAttributes();
+        return new Attributes();
     }
 
     public void perform(final Schema schema, final int contextId) throws AbstractOXException {
@@ -148,9 +141,6 @@ public final class HeaderCacheCreateTableTask extends AbstractCreateTableImpl im
         final int contextId = params.getContextId();
         createTable("mailUUID", getCreateMailUUIDTable(), contextId);
         createTable("headersAsBlob", getCreateHeaderBlobTable(), contextId);
-        if (LOG.isInfoEnabled()) {
-            LOG.info("UpdateTask 'HeaderCacheCreateTableTask' successfully performed!");
-        }
     }
 
     private void createTable(final String tablename, final String sqlCreate, final int contextId) throws UpdateException {

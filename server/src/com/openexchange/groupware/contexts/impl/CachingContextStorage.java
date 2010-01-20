@@ -143,7 +143,7 @@ public class CachingContextStorage extends ContextStorage {
                 final Updater updater = Updater.getInstance();
                 UpdateStatus status = updater.getStatus(retval);
                 retval.setUpdating(status.blockingUpdatesRunning() || status.needsBlockingUpdates());
-                if (status.needsBlockingUpdates() || status.needsBackgroundUpdates()) {
+                if ((status.needsBlockingUpdates() || status.needsBackgroundUpdates()) && !status.blockingUpdatesRunning() && !status.backgroundUpdatesRunning()) {
                     updater.startUpdate(retval);
                 }
                 return retval;
