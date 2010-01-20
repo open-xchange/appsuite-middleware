@@ -65,6 +65,7 @@ import com.openexchange.messaging.generic.internal.TimeZoneUtils;
  * {@link Utility} - Utility class for <i>com.openexchange.messaging.generic</i> bundle.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since Open-Xchange v6.16
  */
 public final class Utility {
 

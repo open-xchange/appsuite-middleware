@@ -366,10 +366,10 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
     }
 
     /**
-     * Checks if Content-Type's base type ignore-case starts with specified prefix.
+     * Checks if Content-Type's base type starts ignore-case with specified prefix.
      * 
      * @param prefix The prefix
-     * @return <code>true</code> if Content-Type's base type ignore-case starts with specified prefix; otherwise <code>false</code>
+     * @return <code>true</code> if Content-Type's base type starts ignore-case with specified prefix; otherwise <code>false</code>
      * @throws IllegalArgumentException If specified prefix is <code>null</code>
      */
     public boolean startsWith(final String prefix) {
