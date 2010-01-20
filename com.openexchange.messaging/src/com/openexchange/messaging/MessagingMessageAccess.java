@@ -189,12 +189,14 @@ public interface MessagingMessageAccess {
     public List<MessagingMessage> getAllMessages(String folder, IndexRange indexRange, MessagingField sortField, OrderDirection order, MessagingField... fields) throws MessagingException;
 
     /**
-     * Performs specified action to given message and returns resulting message.
+     * Performs specified action to given message and either returns resulting message or <code>null</code> if no further user interaction
+     * is required.
      * 
      * @param folder The folder identifier
      * @param id The message identifier
      * @param action The action to perform
-     * @return The resulting message
+     * @return The resulting message or <code>null</code> if requested action yields no resulting message (meaning no further user
+     *         interaction required)
      * @throws MessagingException If performing specified action fails
      */
     public MessagingMessage perform(String folder, String id, String action) throws MessagingException;
