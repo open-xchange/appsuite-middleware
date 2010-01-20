@@ -56,9 +56,9 @@ package com.openexchange.messaging;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
-public class StringContent implements SimpleContent<CharSequence> {
+public class StringContent implements SimpleContent<String> {
 
-    private CharSequence data;
+    private String data;
 
     /**
      * Initializes a new {@link StringContent}.
@@ -72,12 +72,12 @@ public class StringContent implements SimpleContent<CharSequence> {
      * 
      * @param data The string data
      */
-    public StringContent(final CharSequence data) {
+    public StringContent(final String data) {
         super();
         this.data = data;
     }
 
-    public CharSequence getData() {
+    public String getData() {
         return data;
     }
 
@@ -86,8 +86,13 @@ public class StringContent implements SimpleContent<CharSequence> {
      * 
      * @param data The string data
      */
-    public void setData(final CharSequence data) {
+    public void setData(final String data) {
         this.data = data;
+    }
+
+    @Override
+    public String toString() {
+        return data.toString();
     }
 
 }
