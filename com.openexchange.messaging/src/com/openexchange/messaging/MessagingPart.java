@@ -91,6 +91,15 @@ public interface MessagingPart {
     public Collection<MessagingHeader> getHeader(String name) throws MessagingException;
 
     /**
+     * Gets the first header value associated with specified name or <code>null</code> if not present
+     * 
+     * @param name The header name
+     * @return The first header value associated with specified name or <code>null</code> if not present
+     * @throws MessagingException If header cannot be returned
+     */
+    public MessagingHeader getFirstHeader(String name) throws MessagingException;
+
+    /**
      * Gets the disposition.
      * <p>
      * The disposition describes how the part should be presented (see RFC 2183). The return value should be compared case-insensitive. For

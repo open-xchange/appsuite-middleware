@@ -185,6 +185,11 @@ public final class TwitterDirectMessage implements MessagingMessage {
         return null;
     }
 
+    public MessagingHeader getFirstHeader(final String name) throws MessagingException {
+        final Collection<MessagingHeader> collection = getHeader(name);
+        return null == collection ? null : (collection.isEmpty() ? null : collection.iterator().next());
+    }
+
     public Collection<MessagingHeader> getHeader(final String name) {
         return headers.get(name);
     }

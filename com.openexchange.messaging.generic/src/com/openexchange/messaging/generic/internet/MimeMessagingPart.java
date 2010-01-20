@@ -343,6 +343,11 @@ public class MimeMessagingPart implements MessagingPart {
         }
     }
 
+    public MessagingHeader getFirstHeader(final String name) throws MessagingException {
+        final Collection<MessagingHeader> collection = getHeader(name);
+        return null == collection ? null : (collection.isEmpty() ? null : collection.iterator().next());
+    }
+
     public Collection<MessagingHeader> getHeader(final String name) throws MessagingException {
         try {
             return getHeaders().get(name);

@@ -172,6 +172,11 @@ public final class TwitterMessagingBodyPart implements MessagingBodyPart {
         return headers;
     }
 
+    public MessagingHeader getFirstHeader(final String name) throws MessagingException {
+        final Collection<MessagingHeader> collection = getHeader(name);
+        return null == collection ? null : (collection.isEmpty() ? null : collection.iterator().next());
+    }
+
     public Collection<MessagingHeader> getHeader(final String name) {
         return headers.get(name);
     }

@@ -109,6 +109,11 @@ public class SimpleMessagingMessage implements MessagingMessage {
         return fileName;
     }
 
+    public MessagingHeader getFirstHeader(final String name) throws MessagingException {
+        final Collection<MessagingHeader> collection = headers.get(name);
+        return null == collection ? null : (collection.isEmpty() ? null : collection.iterator().next());
+    }
+
     public Collection<MessagingHeader> getHeader(final String name) {
         return headers.get(name);
     }
@@ -200,5 +205,5 @@ public class SimpleMessagingMessage implements MessagingMessage {
     public void setContentType(final ContentType contentType) {
         this.contentType = contentType;
     }
-    
+
 }
