@@ -67,7 +67,6 @@ import com.openexchange.groupware.update.SeparatedTasks;
 import com.openexchange.groupware.update.UpdateException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.groupware.update.UpdateTaskCollection;
 import com.openexchange.groupware.update.UpdateTaskV2;
 
 /**

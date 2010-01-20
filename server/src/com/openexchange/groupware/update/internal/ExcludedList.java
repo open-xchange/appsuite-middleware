@@ -57,7 +57,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.groupware.update.UpdateTaskCollection;
 
 /**
  * This class contains the list of excluded update tasks. The configuration can be done by the configuration file

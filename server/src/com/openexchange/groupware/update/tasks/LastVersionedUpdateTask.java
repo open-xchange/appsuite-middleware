@@ -68,8 +68,8 @@ import com.openexchange.groupware.update.UpdateException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.groupware.update.UpdateTaskCollection;
 import com.openexchange.groupware.update.UpdateTaskV2;
+import com.openexchange.groupware.update.Updater;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -96,7 +96,7 @@ public class LastVersionedUpdateTask extends UpdateTaskAdapter {
 
     public void perform(PerformParameters params) throws AbstractOXException {
         Schema schema = params.getSchema();
-        List<String> executed = determineExecuted(schema.getDBVersion(), UpdateTaskCollection.getInstance().getListWithoutExcludes());
+        List<String> executed = determineExecuted(schema.getDBVersion(), Updater.getInstance().getAvailableUpdateTasks());
         int contextId = params.getContextId();
         DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
         final Connection con = dbService.getForUpdateTask(contextId);
@@ -124,7 +124,7 @@ public class LastVersionedUpdateTask extends UpdateTaskAdapter {
         }
     }
 
-    private List<String> determineExecuted(int version, List<UpdateTask> tasks) {
+    private List<String> determineExecuted(int version, UpdateTask[] tasks) {
         List<String> retval = new ArrayList<String>();
         for (UpdateTask task : tasks) {
             if (task.addedWithVersion() != Schema.NO_VERSION && task.addedWithVersion() <= version) {

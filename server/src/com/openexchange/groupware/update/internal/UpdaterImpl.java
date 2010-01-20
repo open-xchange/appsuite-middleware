@@ -49,13 +49,14 @@
 
 package com.openexchange.groupware.update.internal;
 
+import java.util.List;
 import com.openexchange.groupware.update.SchemaException;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.SchemaUpdateState;
 import com.openexchange.groupware.update.SeparatedTasks;
 import com.openexchange.groupware.update.UpdateException;
 import com.openexchange.groupware.update.UpdateStatus;
-import com.openexchange.groupware.update.UpdateTaskCollection;
+import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.Updater;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -134,5 +135,11 @@ public class UpdaterImpl extends Updater {
             throw new UpdateException(e);
         }
         return state;
+    }
+
+    @Override
+    public UpdateTask[] getAvailableUpdateTasks() {
+        List<UpdateTask> retval = UpdateTaskCollection.getInstance().getListWithoutExcludes();
+        return retval.toArray(new UpdateTask[retval.size()]);
     }
 }

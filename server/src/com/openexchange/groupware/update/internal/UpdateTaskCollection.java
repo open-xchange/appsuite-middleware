@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.groupware.update;
+package com.openexchange.groupware.update.internal;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -55,13 +55,13 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.groupware.update.internal.DynamicList;
-import com.openexchange.groupware.update.internal.ExcludedList;
-import com.openexchange.groupware.update.internal.ExecutedFilter;
-import com.openexchange.groupware.update.internal.Filter;
-import com.openexchange.groupware.update.internal.SchemaUpdateStateImpl;
-import com.openexchange.groupware.update.internal.UpdateTaskSorter;
-import com.openexchange.groupware.update.internal.VersionFilter;
+import com.openexchange.groupware.update.Schema;
+import com.openexchange.groupware.update.SchemaUpdateState;
+import com.openexchange.groupware.update.SeparatedTasks;
+import com.openexchange.groupware.update.UpdateException;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.java.Strings;
 
 /**
@@ -69,7 +69,7 @@ import com.openexchange.java.Strings;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class UpdateTaskCollection {
+class UpdateTaskCollection {
 
     private static final Log LOG = LogFactory.getLog(UpdateTaskCollection.class);
 
@@ -83,7 +83,7 @@ public class UpdateTaskCollection {
         super();
     }
 
-    public static UpdateTaskCollection getInstance() {
+    static UpdateTaskCollection getInstance() {
         return SINGLETON;
     }
 
@@ -109,11 +109,11 @@ public class UpdateTaskCollection {
         return filtered;
     }
 
-    public SeparatedTasks getFilteredAndSeparatedTasks(SchemaUpdateState state) {
+    SeparatedTasks getFilteredAndSeparatedTasks(SchemaUpdateState state) {
         return separateTasks(getFilteredUpdateTasks(state));
     }
 
-    public SeparatedTasks separateTasks(List<UpdateTask> tasks) {
+    SeparatedTasks separateTasks(List<UpdateTask> tasks) {
         final List<UpdateTask> blocking = new ArrayList<UpdateTask>();
         final List<UpdateTaskV2> background = new ArrayList<UpdateTaskV2>();
         for (UpdateTask toExecute : tasks) {
@@ -145,7 +145,7 @@ public class UpdateTaskCollection {
         };
     }
 
-    public final List<UpdateTask> getFilteredAndSortedUpdateTasks(SchemaUpdateState schema, boolean blocking) throws UpdateException {
+    final List<UpdateTask> getFilteredAndSortedUpdateTasks(SchemaUpdateState schema, boolean blocking) throws UpdateException {
         SeparatedTasks tasks = getFilteredAndSeparatedTasks(schema);
         List<UpdateTask> retval = new ArrayList<UpdateTask>();
         if (blocking) {
@@ -185,7 +185,7 @@ public class UpdateTaskCollection {
      * 
      * @return The highest version number
      */
-    public final int getHighestVersion() {
+    final int getHighestVersion() {
         if (versionDirty.get()) {
             List<UpdateTask> tasks = getListWithoutExcludes();
             int vers = 0;
@@ -198,7 +198,7 @@ public class UpdateTaskCollection {
         return version;
     }
 
-    public List<UpdateTask> getListWithoutExcludes() {
+    List<UpdateTask> getListWithoutExcludes() {
         List<UpdateTask> retval = getFullList();
         for (UpdateTask excluded : ExcludedList.getInstance().getTaskList()) {
             // Matching must be done based on task class name.
@@ -213,15 +213,15 @@ public class UpdateTaskCollection {
         return retval;
     }
 
-    public final List<UpdateTask> getFullList() {
+    private List<UpdateTask> getFullList() {
         return DynamicList.getInstance().getTaskList();
     }
 
-    public void dirtyVersion() {
+    void dirtyVersion() {
         versionDirty.set(true);
     }
 
-    public boolean needsUpdate(SchemaUpdateState state) {
+    boolean needsUpdate(SchemaUpdateState state) {
         if (getHighestVersion() > state.getDBVersion()) {
             return true;
         }

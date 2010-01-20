@@ -97,4 +97,6 @@ public abstract class Updater {
      * @throws UpdateException if an exception occurs.
      */
     public abstract void startUpdate(int contextId) throws UpdateException;
+
+    public abstract UpdateTask[] getAvailableUpdateTasks();
 }
