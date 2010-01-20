@@ -53,7 +53,6 @@ import static com.openexchange.mail.mime.utils.MIMEMessageUtility.decodeMultiEnc
 import static com.openexchange.mail.mime.utils.MIMEMessageUtility.getFileName;
 import static com.openexchange.mail.mime.utils.MIMEMessageUtility.hasAttachments;
 import static com.openexchange.mail.mime.utils.MIMEMessageUtility.unfold;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -62,9 +61,9 @@ import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.Header;
@@ -78,7 +77,6 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimePart;
-
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
@@ -732,7 +730,8 @@ public final class MIMEMessageConverter {
     private static MailMessageFieldFiller[] createFieldFillers(final MailField[] fields) throws MailException {
         final MailField[] arr;
         {
-            final EnumSet<MailField> fieldSet = EnumSet.copyOf(Arrays.asList(fields));
+            final List<MailField> list = Arrays.asList(fields);
+            final EnumSet<MailField> fieldSet = list.isEmpty() ? EnumSet.noneOf(MailField.class) : EnumSet.copyOf(list);
             if (fieldSet.contains(MailField.FULL)) {
                 arr = ENUM_SET_FULL.toArray(new MailField[ENUM_SET_FULL.size()]);
             } else {
