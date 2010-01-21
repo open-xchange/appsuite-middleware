@@ -64,6 +64,7 @@ import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
+import com.openexchange.ajax.fields.LoginFields;
 
 /**
  * This class contains the login test. It also contains static methods to made
@@ -124,7 +125,7 @@ public class LoginTest extends AbstractAJAXTest {
         assertFalse(json.optString("error"), json.has("error"));
         assertTrue("Session ID is missing: " + body, json.has(
             Login.PARAMETER_SESSION));
-        assertTrue("Random is missing: " + body, json.has(Login.PARAM_RANDOM));
+        assertTrue("Random is missing: " + body, json.has(LoginFields.PARAM_RANDOM));
         return json;
     }
 

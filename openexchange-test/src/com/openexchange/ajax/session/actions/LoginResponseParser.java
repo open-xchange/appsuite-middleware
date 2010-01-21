@@ -13,6 +13,7 @@ import org.json.JSONObject;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.Login;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
@@ -97,12 +98,12 @@ public class LoginResponseParser extends AbstractAJAXParser<LoginResponse> {
         } else {
             retval.setJvmRoute(jvmRoute);
             retval.setSessionId(json.getString(Login.PARAMETER_SESSION));
-            retval.setRandom(json.getString(Login.PARAM_RANDOM));
+            retval.setRandom(json.getString(LoginFields.PARAM_RANDOM));
         }
         if (isFailOnError()) {
             assertFalse(response.getErrorMessage(), response.hasError());
             assertTrue("Session ID is missing.", json.has(Login.PARAMETER_SESSION));
-            assertTrue("Random is missing.", json.has(Login.PARAM_RANDOM));
+            assertTrue("Random is missing.", json.has(LoginFields.PARAM_RANDOM));
         }
         return retval;
     }

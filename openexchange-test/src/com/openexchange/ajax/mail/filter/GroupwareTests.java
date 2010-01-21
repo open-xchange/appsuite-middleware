@@ -18,6 +18,7 @@ import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.Login;
+import com.openexchange.ajax.fields.LoginFields;
 
 public class GroupwareTests extends AJAXTest {
 
@@ -53,7 +54,7 @@ public class GroupwareTests extends AJAXTest {
         }
         assertFalse(json.optString("error"), json.has("error"));
         assertTrue("Session ID is missing: " + body, json.has(Login.PARAMETER_SESSION));
-        assertTrue("Random is missing: " + body, json.has(Login.PARAM_RANDOM));
+        assertTrue("Random is missing: " + body, json.has(LoginFields.PARAM_RANDOM));
         System.out.println(json);
         return new WebconversationAndSessionID(conversation, (String)json.get(Login.PARAMETER_SESSION));
     }
