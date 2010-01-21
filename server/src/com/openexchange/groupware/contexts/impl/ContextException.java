@@ -106,10 +106,6 @@ public class ContextException extends AbstractOXException {
          */
         NOT_FOUND("Cannot find context %d.", Category.SETUP_ERROR, 2),
         /**
-         * Putting an object into the cache failed.
-         */
-        CACHE_PUT("Cannot put object %s into cache.", Category.INTERNAL_ERROR, 3),
-        /**
          * No connection to database.
          */
         NO_CONNECTION("Cannot get connection to database.", Category.SUBSYSTEM_OR_SERVICE_DOWN, 5),
@@ -132,7 +128,7 @@ public class ContextException extends AbstractOXException {
         /**
          * Cannot find context "%s".
          */
-        NO_MAPPING("Cannot find context \"%s\".", Category.USER_INPUT, 10);
+        NO_MAPPING("Cannot find context \"%s\".", Category.CODE_ERROR, 10);
 
         /**
          * Message of the exception.

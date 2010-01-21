@@ -56,7 +56,7 @@ import com.openexchange.authentication.LoginException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
-import com.openexchange.login.Login;
+import com.openexchange.login.LoginResult;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
@@ -77,7 +77,7 @@ public class LdapUserFolderCreator implements LoginHandlerService {
         super();
     }
 
-    public void handleLogin(final Login login) throws LoginException {
+    public void handleLogin(final LoginResult login) throws LoginException {
         // Here we create the users personal LDAP Folder
         final Session session = login.getSession();
         final int cid = session.getContextId();
@@ -160,7 +160,7 @@ public class LdapUserFolderCreator implements LoginHandlerService {
         return newFolder;
     }
 
-    public void handleLogout(final Login logout) throws LoginException {
+    public void handleLogout(final LoginResult logout) throws LoginException {
         // Nothing to do on logout
     }
 }

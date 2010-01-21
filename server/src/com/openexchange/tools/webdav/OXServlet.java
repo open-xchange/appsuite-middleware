@@ -74,6 +74,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.AddSessionParameter;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.encoding.Base64;
@@ -156,12 +157,15 @@ public abstract class OXServlet extends WebDavServlet {
      * @throws ServletException if adding a session fails.
      */
     protected boolean doAuth(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-        final String sessionId = getSessionId(req);
-        Session session = null;
-        if (null != sessionId) {
-            session = getSession(sessionId);
+        Session session;
+        try {
+            session = findSessionByCookie(req, resp);
+        } catch (ServiceException e) {
+            LOG.error(e.getMessage(), e);
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+            return false;
         }
-        if (null == sessionId || null == session) {
+        if (null == session) {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("No sessionId cookie found.");
             }
@@ -204,11 +208,6 @@ public abstract class OXServlet extends WebDavServlet {
                 LOG.trace("Session created.");
             }
             resp.addCookie(new Cookie(COOKIE_SESSIONID, session.getSessionID()));
-            if (null != sessionId) {
-                final Cookie cookie = new Cookie(COOKIE_SESSIONID, sessionId);
-                cookie.setMaxAge(0);
-                resp.addCookie(cookie);
-            }
         } else {
             final String address = req.getRemoteAddr();
             if (null == address || !address.equals(session.getLocalIp())) {
@@ -222,26 +221,6 @@ public abstract class OXServlet extends WebDavServlet {
         }
         req.setAttribute(SESSION, session);
         return true;
-    }
-
-    /**
-     * This methods reads the session identifier from the cookies. TODO Fix handling if request contains old session identifier.
-     * 
-     * @param req http request.
-     * @return the session identifier or <code>null</code> if it can't be found.
-     */
-    private static String getSessionId(final HttpServletRequest req) {
-        final Cookie[] cookies = req.getCookies();
-        String sessionId = null;
-        if (null != cookies) {
-            for (int i = 0; i < cookies.length; i++) {
-                if (COOKIE_SESSIONID.equals(cookies[i].getName())) {
-                    sessionId = cookies[i].getValue();
-                    break;
-                }
-            }
-        }
-        return sessionId;
     }
 
     /**
@@ -344,32 +323,49 @@ public abstract class OXServlet extends WebDavServlet {
                 throw new ContextException(ContextException.Code.NOT_FOUND, Integer.valueOf(contextId));
             }
 
-            int userId = -1;
-            User u = null;
-
+            final UserStorage us = UserStorage.getInstance();
+            final User user;
             try {
-                final UserStorage us = UserStorage.getInstance();
-                userId = us.getUserId(username, context);
-                u = us.getUser(userId, context);
+                int userId = us.getUserId(username, context);
+                user = us.getUser(userId, context);
             } catch (final LdapException ex) {
                 switch (ex.getDetail()) {
-                case ERROR:
-                    throw LoginExceptionCodes.UNKNOWN.create(ex);
                 case NOT_FOUND:
                     throw new UserNotFoundException("User not found.", ex);
+                default:
+                    throw LoginExceptionCodes.UNKNOWN.create(ex);
                 }
             }
 
             // is user active
-            if (u.isMailEnabled()) {
-                if (u.getShadowLastChange() == 0) {
+            if (user.isMailEnabled()) {
+                if (user.getShadowLastChange() == 0) {
                     throw new PasswordExpiredException("user password is expired!");
                 }
             } else {
                 throw new UserNotActivatedException("user is not activated!");
             }
 
-            final String sessionId = sessiondCon.addSession(userId, username, pass, context, ipAddress, login);
+            final String sessionId = sessiondCon.addSession(new AddSessionParameter() {
+                public String getClientIP() {
+                    return ipAddress;
+                }
+                public Context getContext() {
+                    return context;
+                }
+                public String getFullLogin() {
+                    return login;
+                }
+                public String getPassword() {
+                    return pass;
+                }
+                public int getUserId() {
+                    return user.getId();
+                }
+                public String getUserLoginInfo() {
+                    return username;
+                }
+            });
             session = sessiondCon.getSession(sessionId);
         } catch (final LoginException e) {
             if (AbstractOXException.Category.USER_INPUT == e.getCategory()) {
@@ -387,15 +383,27 @@ public abstract class OXServlet extends WebDavServlet {
         return session;
     }
 
-    /**
-     * This method tries to get the session for the given session identifier.
-     * 
-     * @param sessionId session identifier.
-     * @return the session object or <code>null</code> if the session doesn't exist.
-     */
-    private Session getSession(final String sessionId) {
-        final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-        return sessiondCon.getSession(sessionId);
+    private Session findSessionByCookie(HttpServletRequest req, HttpServletResponse resp) throws ServiceException {
+        final Cookie[] cookies = req.getCookies();
+        String sessionId = null;
+        if (null != cookies) {
+            for (Cookie cookie : cookies) {
+                if (COOKIE_SESSIONID.equals(cookie.getName())) {
+                    sessionId = cookie.getValue();
+                    break;
+                }
+            }
+        }
+        if (null == sessionId) {
+            return null;
+        }
+        final Session session = ServerServiceRegistry.getInstance().getService(SessiondService.class, true).getSession(sessionId);
+        if (null == session) {
+            final Cookie cookie = new Cookie(COOKIE_SESSIONID, sessionId);
+            cookie.setMaxAge(0);
+            resp.addCookie(cookie);
+        }
+        return session;
     }
 
     /**

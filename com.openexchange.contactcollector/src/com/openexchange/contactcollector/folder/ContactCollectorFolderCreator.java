@@ -66,7 +66,7 @@ import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.login.Login;
+import com.openexchange.login.LoginResult;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.ServiceException;
@@ -95,7 +95,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
         super();
     }
 
-    public void handleLogin(final Login login) throws LoginException {
+    public void handleLogin(final LoginResult login) throws LoginException {
         int cid = login.getSession().getContextId();
         DatabaseService databaseService = null;
         Connection con = null;
@@ -201,7 +201,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
         return newFolder;
     }
 
-    public void handleLogout(final Login logout) throws LoginException {
+    public void handleLogout(final LoginResult logout) throws LoginException {
         // Nothing to do on logout
     }
 

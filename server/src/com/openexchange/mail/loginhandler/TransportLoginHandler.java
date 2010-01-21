@@ -62,7 +62,7 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.tx.TransactionException;
-import com.openexchange.login.Login;
+import com.openexchange.login.LoginResult;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.transport.config.TransportProperties;
@@ -96,7 +96,7 @@ public final class TransportLoginHandler implements LoginHandlerService {
     private static final Metadata[] METADATA = new Metadata[] {
         Metadata.ID_LITERAL, Metadata.CREATION_DATE_LITERAL, Metadata.CREATED_BY_LITERAL };
 
-    public void handleLogin(final Login login) throws LoginException {
+    public void handleLogin(final LoginResult login) throws LoginException {
         /*
          * Ensure publishing infostore folder exists
          */
@@ -276,7 +276,7 @@ public final class TransportLoginHandler implements LoginHandlerService {
         return newFolder;
     }
 
-    public void handleLogout(final Login logout) throws LoginException {
+    public void handleLogout(final LoginResult logout) throws LoginException {
         // Nothing to do
     }
 }

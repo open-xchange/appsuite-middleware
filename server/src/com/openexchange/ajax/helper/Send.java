@@ -85,9 +85,7 @@ public final class Send {
      * @param resp http servlet response.
      * @throws IOException if sending fails in some way.
      */
-    public static void sendCallbackResponse(final Response response,
-        final String module, final HttpServletResponse resp) throws
-        IOException {
+    public static void sendCallbackResponse(final Response response, final String module, final HttpServletResponse resp) throws IOException {
         final UnsynchronizedStringWriter sWriter = new UnsynchronizedStringWriter();
         try {
             ResponseWriter.write(response, sWriter);
@@ -98,8 +96,7 @@ public final class Send {
         Tools.disableCaching(resp);
         resp.setStatus(HttpServletResponse.SC_OK);
         resp.setContentType(AJAXServlet.CONTENTTYPE_HTML);
-        resp.getWriter().write(AJAXServlet.substitute(AJAXServlet.JS_FRAGMENT,
-            "json", sWriter.toString(), "action", module));
+        resp.getWriter().write(AJAXServlet.substitute(AJAXServlet.JS_FRAGMENT, "json", sWriter.toString(), "action", module));
     }
 
     public static void sendResponse(final Response response, final HttpServletResponse resp) throws IOException {
@@ -113,15 +110,14 @@ public final class Send {
             sendError(resp);
         }
     }
-    
+
     /**
      * Method for sending an internal server error. This should be only used if
      * everything else fails.
      * @param resp http servlet response.
      * @throws IOException if sending fails in some way.
      */
-    public static void sendError(final HttpServletResponse resp) throws
-        IOException {
+    public static void sendError(final HttpServletResponse resp) throws IOException {
         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 }

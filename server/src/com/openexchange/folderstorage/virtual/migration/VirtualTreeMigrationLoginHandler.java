@@ -69,7 +69,7 @@ import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.virtual.sql.Insert;
 import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.login.Login;
+import com.openexchange.login.LoginResult;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailAccess;
@@ -100,7 +100,7 @@ public class VirtualTreeMigrationLoginHandler implements LoginHandlerService {
         super();
     }
 
-    public void handleLogin(final Login login) throws LoginException {
+    public void handleLogin(final LoginResult login) throws LoginException {
         final Session session = login.getSession();
         final int cid = session.getContextId();
         // Get a connection
@@ -218,7 +218,7 @@ public class VirtualTreeMigrationLoginHandler implements LoginHandlerService {
         Insert.insertFolder(s.getContextId(), 1, s.getUserId(), mailFolder);
     }
 
-    public void handleLogout(final Login logout) throws LoginException {
+    public void handleLogout(final LoginResult logout) throws LoginException {
         // Nothing to do
     }
 

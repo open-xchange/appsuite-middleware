@@ -193,10 +193,7 @@ public final class SessionHandler {
         final Session session =
             new SessionImpl(userId, loginName, password, context.getContextId(), sessionId, sessionIdGenerator.createSecretId(
                 loginName,
-                String.valueOf(System.currentTimeMillis())), sessionIdGenerator.createRandomId(), clientHost, login);
-        if (INFO) {
-            LOG.info("Session created. ID: " + sessionId + ", Context: " + context.getContextId() + ", User: " + userId);
-        }
+                Long.toString(System.currentTimeMillis())), sessionIdGenerator.createRandomId(), clientHost, login);
         /*
          * Add session
          */
@@ -247,7 +244,6 @@ public final class SessionHandler {
             return false;
         }
         postSessionRemoval(sessionControl.getSession());
-        LOG.info("Session closed. ID: " + sessionid);
         return true;
     }
 

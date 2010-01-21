@@ -47,40 +47,26 @@
  *
  */
 
-package com.openexchange.login;
+package com.openexchange.sessiond;
 
-import com.openexchange.authentication.LoginException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.session.Session;
 
 /**
- * {@link Login} - Offers information about a performed login.
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link AddSessionParameter}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public interface Login {
+public interface AddSessionParameter {
 
-    /**
-     * Gets the {@link Session session} associated with this login.
-     * 
-     * @return The session associated with this login.
-     */
-    public Session getSession();
+    String getFullLogin();
 
-    /**
-     * Gets the resolved {@link Context context}.
-     * 
-     * @return The resolved context.
-     */
-    public Context getContext();
+    String getPassword();
 
-    /**
-     * Gets the resolved {@link User user}.
-     * 
-     * @return The resolved user.
-     */
-    public User getUser();
+    int getUserId();
+
+    String getUserLoginInfo();
+
+    Context getContext();
     
-    public LoginException getError();
+    String getClientIP();
 }

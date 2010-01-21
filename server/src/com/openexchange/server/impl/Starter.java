@@ -55,7 +55,6 @@ import java.util.Stack;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.server.Initialization;
 
 /**
@@ -181,18 +180,6 @@ public class Starter implements Initialization {
      * Managed file initialization
      */
     new com.openexchange.filemanagement.internal.ManagedFileInitialization(),
-    /**
-     * Release LoginPerformer instance on shut-down
-     */
-    new Initialization() {
-        public void start() throws AbstractOXException {
-            // Nothing to do
-        }
-        public void stop() throws AbstractOXException {
-            // Release LoginPerformer instance on shut-down
-            LoginPerformer.releaseInstance();
-        }
-    },
     new com.openexchange.mailaccount.internal.MailAccountStorageInit(),
     new com.openexchange.mailaccount.servlet.MailAccountServletInit(),
     new com.openexchange.multiple.internal.MultipleHandlerInit() };
@@ -266,18 +253,6 @@ public class Starter implements Initialization {
      * Image registry initialization
      */
     new com.openexchange.image.internal.ImageRegistryInit(),
-    /**
-     * Release LoginPerformer instance on shut-down
-     */
-    new Initialization() {
-        public void start() throws AbstractOXException {
-            // Nothing to do
-        }
-        public void stop() throws AbstractOXException {
-            // Release LoginPerformer instance on shut-down
-            LoginPerformer.releaseInstance();
-        }
-    },
     new com.openexchange.mailaccount.internal.MailAccountStorageInit() };
 
     private static final Log LOG = LogFactory.getLog(Starter.class);
@@ -292,10 +267,7 @@ public class Starter implements Initialization {
         started = new Stack<Initialization>();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public void start() throws AbstractOXException {
+    public void start() {
 
         dumpServerInfos();
 

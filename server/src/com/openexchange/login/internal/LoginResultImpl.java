@@ -47,69 +47,58 @@
  *
  */
 
-package com.openexchange.authentication.service;
+package com.openexchange.login.internal;
 
-import com.openexchange.authentication.Authenticated;
-import com.openexchange.authentication.AuthenticationService;
-import com.openexchange.authentication.LoginException;
-import com.openexchange.authentication.LoginInfo;
-import com.openexchange.server.ServiceException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.login.LoginResult;
+import com.openexchange.session.Session;
 
 /**
- * Provides a static method for the login servlet to do the authentication.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * {@link LoginResultImpl} - The {@link LoginResult} implementation.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class Authentication {
+final class LoginResultImpl implements LoginResult {
 
-    /**
-     * Handles the reference to the authentication service.
-     */
-    private static AuthenticationService service;
+    private Context context;
 
-    /**
-     * Default constructor.
-     */
-    private Authentication() {
+    private User user;
+
+    private Session session;
+
+    LoginResultImpl() {
         super();
     }
 
-    /**
-     * Performs a login using an authentication service.
-     * @param login entered login.
-     * @param pass entered password.
-     * @return a string array with two elements in which the first contains the
-     * login info for the context and the second contains the login info for the
-     * user.
-     * @throws LoginException if something with the login info is wrong.
-     * @throws ServiceException if the authentication service is not available.
-     */
-    public static Authenticated login(final String login, final String pass)
-        throws LoginException, ServiceException {
-        final AuthenticationService auth = service;
-        if (null == auth) {
-            throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, AuthenticationService.class.getName());
-        }
-        return auth.handleLoginInfo(new LoginInfo() {
-            public String getPassword() {
-                return pass;
-            }
-            public String getUsername() {
-                return login;
-            }
-        });
+    public LoginResultImpl(Session session, Context context, User user) {
+        super();
+        this.session = session;
+        this.context = context;
+        this.user = user;
     }
 
-    /**
-     * @return the service
-     */
-    public static AuthenticationService getService() {
-        return service;
+    public Context getContext() {
+        return context;
     }
 
-    /**
-     * @param service the service to set
-     */
-    public static void setService(final AuthenticationService service) {
-        Authentication.service = service;
+    public void setContext(Context context) {
+        this.context = context;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public Session getSession() {
+        return session;
+    }
+
+    public void setSession(Session session) {
+        this.session = session;
     }
 }

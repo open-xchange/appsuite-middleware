@@ -219,11 +219,6 @@ public class LdapException extends AbstractOXException {
         USER_NOT_FOUND("Cannot find user with identifier %1$s in context %2$d.",
             Category.CODE_ERROR, Detail.NOT_FOUND, 15),
         /**
-         * Found two user with same identifier %1$s in context %2$d.
-         */
-        USER_CONFLICT("Found two user with same identifier %1$s in context "
-            + "%2$d.", Category.CODE_ERROR, Detail.ERROR, 16),
-        /**
          * Cannot find group with identifier %1$s in context %2$d.
          */
         GROUP_NOT_FOUND(

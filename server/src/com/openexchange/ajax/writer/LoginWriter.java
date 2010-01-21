@@ -47,53 +47,27 @@
  *
  */
 
-package com.openexchange.login.internal;
+package com.openexchange.ajax.writer;
 
-import com.openexchange.authentication.LoginException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.login.Login;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.session.Session;
 
 /**
- * {@link LoginImpl} - The {@link Login} implementation.
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * JSON writer for login responses.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-final class LoginImpl implements Login {
+public class LoginWriter {
 
-    private final Session session;
-
-    private final Context ctx;
-
-    private final User user;
-    
-    private volatile LoginException exception;
-
-    LoginImpl(final Session session, final Context ctx, final User user) {
+    public LoginWriter() {
         super();
-        this.session = session;
-        this.ctx = ctx;
-        this.user = user;
     }
 
-    public Session getSession() {
-        return session;
-    }
-
-    public Context getContext() {
-        return ctx;
-    }
-
-    public User getUser() {
-        return user;
-    }
-    
-    public LoginException getError() {
-        return exception;
-    }
-    
-    public void setError(final LoginException e) {
-        exception = e;
+    public void writeLogin(Session session, JSONObject json) throws JSONException {
+        json.put(AJAXServlet.PARAMETER_SESSION, session.getSecret());
+        json.put(LoginFields.PARAM_RANDOM, session.getRandomToken());
     }
 }

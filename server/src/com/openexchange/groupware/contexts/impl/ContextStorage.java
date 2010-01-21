@@ -94,8 +94,7 @@ public abstract class ContextStorage {
      * matching context exists.
      * @throws ContextException if an error occurs.
      */
-    public abstract int getContextId(String loginContextInfo)
-        throws ContextException;
+    public abstract int getContextId(String loginContextInfo) throws ContextException;
 
     public final Context getContext(final Session session)
         throws ContextException {

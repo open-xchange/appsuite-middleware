@@ -47,69 +47,23 @@
  *
  */
 
-package com.openexchange.authentication.service;
-
-import com.openexchange.authentication.Authenticated;
-import com.openexchange.authentication.AuthenticationService;
-import com.openexchange.authentication.LoginException;
-import com.openexchange.authentication.LoginInfo;
-import com.openexchange.server.ServiceException;
+package com.openexchange.login;
 
 /**
- * Provides a static method for the login servlet to do the authentication.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * {@link Interface}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class Authentication {
+public enum Interface {
 
-    /**
-     * Handles the reference to the authentication service.
-     */
-    private static AuthenticationService service;
+    HTTP_JSON,
 
-    /**
-     * Default constructor.
-     */
-    private Authentication() {
-        super();
-    }
+    WEBDAV_XML,
 
-    /**
-     * Performs a login using an authentication service.
-     * @param login entered login.
-     * @param pass entered password.
-     * @return a string array with two elements in which the first contains the
-     * login info for the context and the second contains the login info for the
-     * user.
-     * @throws LoginException if something with the login info is wrong.
-     * @throws ServiceException if the authentication service is not available.
-     */
-    public static Authenticated login(final String login, final String pass)
-        throws LoginException, ServiceException {
-        final AuthenticationService auth = service;
-        if (null == auth) {
-            throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, AuthenticationService.class.getName());
-        }
-        return auth.handleLoginInfo(new LoginInfo() {
-            public String getPassword() {
-                return pass;
-            }
-            public String getUsername() {
-                return login;
-            }
-        });
-    }
+    WEBDAV_INFOSTORE,
 
-    /**
-     * @return the service
-     */
-    public static AuthenticationService getService() {
-        return service;
-    }
+    WEBDAV_ICAL,
 
-    /**
-     * @param service the service to set
-     */
-    public static void setService(final AuthenticationService service) {
-        Authentication.service = service;
-    }
+    WEBDAV_VCARD,
+
 }

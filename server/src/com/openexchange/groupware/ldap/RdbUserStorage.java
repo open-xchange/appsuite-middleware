@@ -133,13 +133,8 @@ public class RdbUserStorage extends UserStorage {
             } else {
                 throw new LdapException(EnumComponent.USER, Code.USER_NOT_FOUND, uid, I(context.getContextId()));
             }
-            if (result.next()) {
-                throw new LdapException(EnumComponent.USER, Code.USER_CONFLICT,
-                    uid, I(context.getContextId()));
-            }
         } catch (final SQLException e) {
-            throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e,
-                e.getMessage());
+            throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(context, con);

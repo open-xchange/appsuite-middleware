@@ -61,7 +61,6 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheService;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.contexts.impl.ContextException.Code;
 import com.openexchange.groupware.update.UpdateStatus;
 import com.openexchange.groupware.update.Updater;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -111,12 +110,12 @@ public class CachingContextStorage extends ContextStorage {
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("Cache MISS. Login info: " + loginInfo);
                 }
-                contextId = Integer.valueOf(persistantImpl.getContextId(loginInfo));
+                contextId = I(persistantImpl.getContextId(loginInfo));
                 if (NOT_FOUND != contextId.intValue()) {
                     try {
                         cache.put(loginInfo, contextId);
                     } catch (final CacheException e) {
-                        throw new ContextException(Code.CACHE_PUT, e);
+                        throw new ContextException(e);
                     }
                 }
             } else if (LOG.isTraceEnabled()) {

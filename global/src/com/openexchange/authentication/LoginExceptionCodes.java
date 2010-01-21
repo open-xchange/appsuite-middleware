@@ -125,7 +125,7 @@ public enum LoginExceptionCodes implements OXErrorMessage {
     /**
      * User is not activated.
      */
-    USER_NOT_ACTIVE(USER_NOT_ACTIVE_MSG, Category.CODE_ERROR, 13);
+    USER_NOT_ACTIVE(USER_NOT_ACTIVE_MSG, Category.PERMISSION, 13);
 
     /**
      * Message of the exception.

@@ -133,7 +133,7 @@ public class ServerSessionAdapter implements ServerSession {
             this.user = user;
         }
     }
-    
+
     /**
      * Initializes a new {@link ServerSessionAdapter}.
      * 

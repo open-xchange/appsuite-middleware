@@ -51,6 +51,7 @@ package com.openexchange.sessiond.impl;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.AddSessionParameter;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.exception.SessiondException;
 
@@ -62,8 +63,6 @@ import com.openexchange.sessiond.exception.SessiondException;
  */
 public class SessiondServiceImpl implements SessiondService {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(SessiondServiceImpl.class);
-
     /**
      * Initializes a new {@link SessiondServiceImpl}
      */
@@ -71,8 +70,8 @@ public class SessiondServiceImpl implements SessiondService {
         super();
     }
 
-    public String addSession(final int userId, final String loginName, final String password, final Context context, final String clientHost, final String login) throws SessiondException {
-        return SessionHandler.addSession(userId, loginName, password, context, clientHost, login);
+    public String addSession(AddSessionParameter param) throws SessiondException {
+        return SessionHandler.addSession(param.getUserId(), param.getUserLoginInfo(), param.getPassword(), param.getContext(), param.getClientIP(), param.getFullLogin());
     }
 
     public void changeSessionPassword(final String sessionId, final String newPassword) throws SessiondException {

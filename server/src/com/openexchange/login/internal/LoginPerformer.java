@@ -49,24 +49,32 @@
 
 package com.openexchange.login.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Iterator;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.LoginException;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.service.Authentication;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.login.Login;
+import com.openexchange.java.Strings;
+import com.openexchange.login.LoginResult;
 import com.openexchange.login.LoginHandlerService;
+import com.openexchange.login.LoginRequest;
+import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.AddSessionParameter;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessiond.exception.SessiondException;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 
@@ -77,41 +85,12 @@ import com.openexchange.threadpool.behavior.CallerRunsBehavior;
  */
 public final class LoginPerformer {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(LoginPerformer.class);
+    private static final Log LOG = LogFactory.getLog(LoginPerformer.class);
 
-    private static volatile LoginPerformer instance;
+    private static final LoginPerformer SINGLETON = new LoginPerformer();
 
-    /**
-     * Gets the login performer instance.
-     * 
-     * @return The login performer instance.
-     */
     public static LoginPerformer getInstance() {
-        LoginPerformer tmp = instance;
-        if (null == tmp) {
-            synchronized (LoginPerformer.class) {
-                tmp = instance;
-                if (tmp == null) {
-                    instance = tmp = new LoginPerformer();
-                }
-            }
-        }
-        return tmp;
-    }
-
-    /**
-     * Releases the login performer instance.
-     */
-    public static void releaseInstance() {
-        LoginPerformer tmp = instance;
-        if (null != tmp) {
-            synchronized (LoginPerformer.class) {
-                tmp = instance;
-                if (tmp != null) {
-                    instance = null;
-                }
-            }
-        }
+        return SINGLETON;
     }
 
     /**
@@ -130,77 +109,98 @@ public final class LoginPerformer {
      * @return The login providing login information
      * @throws LoginException If login fails
      */
-    public Login doLogin(final String login, final String password, final String remoteAddress) throws LoginException {
-        Session session = null;
+    public LoginResult doLogin(final LoginRequest request) throws LoginException {
+        final LoginResultImpl retval = new LoginResultImpl();
         try {
-            final Authenticated authed = Authentication.login(login, password);
-
-            final String contextname = authed.getContextInfo();
+            final Authenticated authed = Authentication.login(request.getLogin(), request.getPassword());
+            final Context ctx = findContext(authed.getContextInfo());
+            retval.setContext(ctx);
             final String username = authed.getUserInfo();
-
-            final ContextStorage contextStor = ContextStorage.getInstance();
-            final int contextId = contextStor.getContextId(contextname);
-            if (ContextStorage.NOT_FOUND == contextId) {
-                throw new LoginException(new ContextException(ContextException.Code.NO_MAPPING, contextname));
-            }
-            final Context context = contextStor.getContext(contextId);
-            if (null == context) {
-                throw new LoginException(new ContextException(ContextException.Code.NOT_FOUND, Integer.valueOf(contextId)));
-            }
-
-            int userId = -1;
-            User u = null;
-
+            final User user = findUser(ctx, username);
+            retval.setUser(user);
+            // Checks if something is deactivated.
             try {
-                final UserStorage us = UserStorage.getInstance();
-                userId = us.getUserId(username, context);
-                u = us.getUser(userId, context);
-            } catch (final LdapException e) {
-                switch (e.getDetail()) {
-                case ERROR:
-                    throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
-                case NOT_FOUND:
-                    throw LoginExceptionCodes.USER_NOT_FOUND.create(e, username, Integer.valueOf(contextId));
-                default:
-                    throw new LoginException(e);
-                }
-            }
-
-            // is user active
-            if (u.isMailEnabled()) {
-                if (u.getShadowLastChange() == 0) {
-                    throw LoginExceptionCodes.PASSWORD_EXPIRED.create(new Object[0]);
-                }
-            } else {
-                throw LoginExceptionCodes.USER_NOT_ACTIVE.create(new Object[0]);
-            }
-
-            try {
-                if (!context.isEnabled() || !u.isMailEnabled()) {
+                if (!ctx.isEnabled()) {
                     throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
                 }
             } catch (final UndeclaredThrowableException e) {
                 throw LoginExceptionCodes.UNKNOWN.create(e);
             }
-
-            final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-            if (sessiondService == null) {
-                throw LoginExceptionCodes.COMMUNICATION.create();
+            if (user.isMailEnabled()) {
+                if (user.getShadowLastChange() == 0) {
+                    throw LoginExceptionCodes.PASSWORD_EXPIRED.create();
+                }
+            } else {
+                throw LoginExceptionCodes.USER_NOT_ACTIVE.create();
             }
-            final String sessionId = sessiondService.addSession(userId, username, password, context, remoteAddress, login);
-            session = sessiondService.getSession(sessionId);
-
-            final LoginImpl retval = new LoginImpl(session, context, u);
-            /*
-             * Trigger registered login handlers
-             */
+            // Create session
+            final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class, true);
+            final String sessionId = sessiondService.addSession(new AddSessionParameter() {
+                public String getClientIP() {
+                    return request.getClientIP();
+                }
+                public Context getContext() {
+                    return ctx;
+                }
+                public String getFullLogin() {
+                    return request.getLogin();
+                }
+                public String getUserLoginInfo() {
+                    return username;
+                }
+                public String getPassword() {
+                    return request.getPassword();
+                }
+                public int getUserId() {
+                    return user.getId();
+                }
+            });
+            retval.setSession(sessiondService.getSession(sessionId));
+            // Trigger registered login handlers
             triggerLoginHandlers(retval);
-            return retval;
+        } catch (ServiceException e) {
+            logLoginRequest(request, retval);
+            throw LoginExceptionCodes.COMMUNICATION.create(e);
         } catch (final LoginException e) {
+            logLoginRequest(request, retval);
             throw e;
-        } catch (final AbstractOXException e) {
+        } catch (ContextException e) {
+            logLoginRequest(request, retval);
+            throw new LoginException(e);
+        } catch (UserException e) {
+            logLoginRequest(request, retval);
+            throw new LoginException(e);
+        } catch (SessiondException e) {
+            logLoginRequest(request, retval);
             throw new LoginException(e);
         }
+        logLoginRequest(request, retval);
+        return retval;
+    }
+
+    private Context findContext(String contextInfo) throws ContextException {
+        final ContextStorage contextStor = ContextStorage.getInstance();
+        final int contextId = contextStor.getContextId(contextInfo);
+        if (ContextStorage.NOT_FOUND == contextId) {
+            throw new ContextException(ContextException.Code.NO_MAPPING, contextInfo);
+        }
+        final Context context = contextStor.getContext(contextId);
+        if (null == context) {
+            throw new ContextException(ContextException.Code.NOT_FOUND, I(contextId));
+        }
+        return context;
+    }
+
+    private User findUser(Context ctx, String userInfo) throws UserException {
+        final UserStorage us = UserStorage.getInstance();
+        final User u;
+        try {
+            int userId = us.getUserId(userInfo, ctx);
+            u = us.getUser(userId, ctx);
+        } catch (final LdapException e) {
+            throw new UserException(e);
+        }
+        return u;
     }
 
     /**
@@ -210,10 +210,13 @@ public final class LoginPerformer {
      * @throws LoginException If logout fails
      */
     public void doLogout(final String sessionId) throws LoginException {
-        /*
-         * Drop the session
-         */
-        final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+        // Drop the session
+        final SessiondService sessiondService;
+        try {
+            sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class, true);
+        } catch (ServiceException e) {
+            throw LoginExceptionCodes.COMMUNICATION.create(e);
+        }
         final Session session = sessiondService.getSession(sessionId);
         if (null == session) {
             if (LOG.isDebugEnabled()) {
@@ -240,28 +243,24 @@ public final class LoginPerformer {
         } catch (final LdapException e) {
             throw new LoginException(e);
         }
-        final LoginImpl logout = new LoginImpl(session, context, u);
-        /*
-         * Remove session
-         */
+        final LoginResultImpl logout = new LoginResultImpl(session, context, u);
+        // Remove session
         sessiondService.removeSession(sessionId);
-        /*
-         * Trigger registered logout handlers
-         */
+        logLogout(logout);
+        // Trigger registered logout handlers
         triggerLogoutHandlers(logout);
     }
 
-    private static void triggerLoginHandlers(final LoginImpl login) {
+    private static void triggerLoginHandlers(final LoginResult login) {
         final ThreadPoolService executor = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
         for (final Iterator<LoginHandlerService> it = LoginHandlerRegistry.getInstance().getLoginHandlers(); it.hasNext();) {
             final LoginHandlerService handler = it.next();
             executor.submit(new LoginPerformerTask() {
-
                 public Object call() {
                     try {
                         handler.handleLogin(login);
                     } catch (final LoginException e) {
-                        login.setError(e);
+                        logError(e);
                     }
                     return null;
                 }
@@ -269,17 +268,16 @@ public final class LoginPerformer {
         }
     }
 
-    private static void triggerLogoutHandlers(final LoginImpl logout) {
+    private static void triggerLogoutHandlers(final LoginResult logout) {
         final ThreadPoolService executor = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
         for (final Iterator<LoginHandlerService> it = LoginHandlerRegistry.getInstance().getLoginHandlers(); it.hasNext();) {
             final LoginHandlerService handler = it.next();
             executor.submit(new LoginPerformerTask() {
-
                 public Object call() {
                     try {
                         handler.handleLogout(logout);
                     } catch (final LoginException e) {
-                        logout.setError(e);
+                        logError(e);
                     }
                     return null;
                 }
@@ -287,4 +285,73 @@ public final class LoginPerformer {
         }
     }
 
+    static void logError(LoginException e) {
+        switch (e.getCategory()) {
+        case USER_INPUT:
+            LOG.debug(e.getMessage(), e);
+            break;
+        default:
+            LOG.error(e.getMessage(), e);
+        }
+    }
+
+    private static void logLoginRequest(LoginRequest request, LoginResult result) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Login:");
+        sb.append(request.getLogin());
+        sb.append(" IP:");
+        sb.append(request.getClientIP());
+        sb.append(" AuthID:");
+        sb.append(request.getAuthId());
+        sb.append(" Agent:");
+        sb.append(request.getUserAgent());
+        sb.append(" Client:");
+        sb.append(request.getClient());
+        sb.append('(');
+        sb.append(request.getVersion());
+        sb.append(')');
+        Context ctx = result.getContext();
+        if (null != ctx) {
+            sb.append(" Context:");
+            sb.append(ctx.getContextId());
+            sb.append('(');
+            sb.append(Strings.join(ctx.getLoginInfo(), ","));
+            sb.append(')');
+        }
+        User user = result.getUser();
+        if (null != user) {
+            sb.append(" User:");
+            sb.append(user.getId());
+            sb.append('(');
+            sb.append(user.getLoginInfo());
+            sb.append(')');
+        }
+        Session session = result.getSession();
+        if (null != session) {
+            sb.append(" Session:");
+            sb.append(session.getSessionID());
+        }
+        LOG.info(sb.toString());
+    }
+
+    private static void logLogout(LoginResult result) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Logout ");
+        Context ctx = result.getContext();
+        sb.append(" Context:");
+        sb.append(ctx.getContextId());
+        sb.append('(');
+        sb.append(Strings.join(ctx.getLoginInfo(), ","));
+        sb.append(')');
+        User user = result.getUser();
+        sb.append(" User:");
+        sb.append(user.getId());
+        sb.append('(');
+        sb.append(user.getLoginInfo());
+        sb.append(')');
+        Session session = result.getSession();
+        sb.append(" Session:");
+        sb.append(session.getSessionID());
+        LOG.info(sb.toString());
+    }
 }

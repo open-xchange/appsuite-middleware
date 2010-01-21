@@ -57,7 +57,7 @@ import com.openexchange.dataretention.RetentionData;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.login.Login;
+import com.openexchange.login.LoginResult;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailAccess;
@@ -79,7 +79,7 @@ public final class MailLoginHandler implements LoginHandlerService {
         super();
     }
 
-    public void handleLogin(final Login login) throws LoginException {
+    public void handleLogin(final LoginResult login) throws LoginException {
         /*
          * Track mail login in data retention service
          */
@@ -107,7 +107,7 @@ public final class MailLoginHandler implements LoginHandlerService {
         }
     }
 
-    public void handleLogout(final Login logout) throws LoginException {
+    public void handleLogout(final LoginResult logout) throws LoginException {
         // Time-out mail access cache
         try {
             MailAccessCache.getInstance().clearUserEntries(logout.getSession());

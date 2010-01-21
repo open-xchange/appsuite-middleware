@@ -63,17 +63,12 @@ public interface SessiondService {
 
     /**
      * Creates a new session object in the sessiond storage with the given session parameters.
+     * @param parameterObject TODO
      * 
-     * @param userId - The User ID
-     * @param loginName - The login name of the user (e.g. <code>test</code> extracted from login <code>test@foo</code>)
-     * @param password - The password of the user
-     * @param context - The context of the user
-     * @param clientHost - The hostname of the incoming client
-     * @param login The full login name (e.g <code>test@foo</code>)
      * @return The session ID of the newly created session as a <code>String</code>
      * @throws SessiondException
      */
-    public String addSession(final int userId, final String loginName, final String password, final Context context, final String clientHost, final String login) throws SessiondException;
+    public String addSession(AddSessionParameter parameterObject) throws SessiondException;
 
     /**
      * Replaces the currently stored password in session identified through given session ID with specified <code>newPassword</code>.

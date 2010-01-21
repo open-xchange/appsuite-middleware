@@ -64,7 +64,7 @@ public interface LoginHandlerService {
      * @param login The performed login.
      * @throws LoginException If an error occurs while handling the login
      */
-    public void handleLogin(Login login) throws LoginException;
+    public void handleLogin(LoginResult login) throws LoginException;
 
     /**
      * Handles the specified performed logout.
@@ -72,5 +72,5 @@ public interface LoginHandlerService {
      * @param logout The performed logout.
      * @throws LoginException If an error occurs while handling the logout
      */
-    public void handleLogout(Login logout) throws LoginException;
+    public void handleLogout(LoginResult logout) throws LoginException;
 }
