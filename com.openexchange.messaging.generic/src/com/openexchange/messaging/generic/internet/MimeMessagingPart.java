@@ -435,7 +435,7 @@ public class MimeMessagingPart implements MessagingPart {
      * @param size The size to set
      */
     public void setSize(final long size) {
-        this.size = size <= 0 ? -1L : size;
+        this.size = size;
     }
 
     public void writeTo(final OutputStream os) throws IOException, MessagingException {
