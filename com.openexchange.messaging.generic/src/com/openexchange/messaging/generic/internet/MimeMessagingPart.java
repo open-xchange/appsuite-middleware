@@ -195,35 +195,44 @@ public class MimeMessagingPart implements MessagingPart {
             }
         });
 
-        m.put(HeaderName.valueOf(MessagingHeader.KnownHeader.FROM.toString()), new AddressHeaderHandler(
-            MessagingHeader.KnownHeader.FROM.toString()));
+        String name = MessagingHeader.KnownHeader.FROM.toString();
+        m.put(HeaderName.valueOf(name), new AddressHeaderHandler(name));
 
-        m.put(HeaderName.valueOf(MessagingHeader.KnownHeader.TO.toString()), new AddressHeaderHandler(
-            MessagingHeader.KnownHeader.TO.toString()));
+        name = MessagingHeader.KnownHeader.TO.toString();
+        m.put(HeaderName.valueOf(name), new AddressHeaderHandler(name));
 
-        m.put(HeaderName.valueOf(MessagingHeader.KnownHeader.CC.toString()), new AddressHeaderHandler(
-            MessagingHeader.KnownHeader.CC.toString()));
+        name = MessagingHeader.KnownHeader.CC.toString();
+        m.put(HeaderName.valueOf(name), new AddressHeaderHandler(name));
 
-        m.put(HeaderName.valueOf(MessagingHeader.KnownHeader.BCC.toString()), new AddressHeaderHandler(
-            MessagingHeader.KnownHeader.BCC.toString()));
+        name = MessagingHeader.KnownHeader.BCC.toString();
+        m.put(HeaderName.valueOf(name), new AddressHeaderHandler(name));
 
-        m.put(HeaderName.valueOf("Reply-To"), new AddressHeaderHandler("Reply-To"));
+        name = "Reply-To";
+        m.put(HeaderName.valueOf(name), new AddressHeaderHandler(name));
 
-        m.put(HeaderName.valueOf("Resent-Reply-To"), new AddressHeaderHandler("Resent-Reply-To"));
+        name = "Resent-Reply-To";
+        m.put(HeaderName.valueOf(name), new AddressHeaderHandler(name));
 
-        m.put(HeaderName.valueOf("Disposition-Notification-To"), new AddressHeaderHandler("Disposition-Notification-To"));
+        name = "Disposition-Notification-To";
+        m.put(HeaderName.valueOf(name), new AddressHeaderHandler(name));
 
-        m.put(HeaderName.valueOf("Resent-From"), new AddressHeaderHandler("Resent-From"));
+        name = "Resent-From";
+        m.put(HeaderName.valueOf(name), new AddressHeaderHandler(name));
 
-        m.put(HeaderName.valueOf("Sender"), new AddressHeaderHandler("Sender"));
+        name = "Sender";
+        m.put(HeaderName.valueOf(name), new AddressHeaderHandler(name));
 
-        m.put(HeaderName.valueOf("Resent-Sender"), new AddressHeaderHandler("Resent-Sender"));
+        name = "Resent-Sender";
+        m.put(HeaderName.valueOf(name), new AddressHeaderHandler(name));
 
-        m.put(HeaderName.valueOf("Resent-To"), new AddressHeaderHandler("Resent-To"));
+        name = "Resent-To";
+        m.put(HeaderName.valueOf(name), new AddressHeaderHandler(name));
 
-        m.put(HeaderName.valueOf("Resent-Cc"), new AddressHeaderHandler("Resent-Cc"));
+        name = "Resent-Cc";
+        m.put(HeaderName.valueOf(name), new AddressHeaderHandler(name));
 
-        m.put(HeaderName.valueOf("Resent-Bcc"), new AddressHeaderHandler("Resent-Bcc"));
+        name = "Resent-Bcc";
+        m.put(HeaderName.valueOf(name), new AddressHeaderHandler(name));
 
         HHANDLERS = Collections.unmodifiableMap(m);
     }
