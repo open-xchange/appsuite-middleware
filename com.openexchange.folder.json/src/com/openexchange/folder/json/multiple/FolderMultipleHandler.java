@@ -99,7 +99,11 @@ public final class FolderMultipleHandler implements MultipleHandler {
     }
 
     public Date getTimestamp() {
-        return null == result ? null : result.getTimestamp();
+        if (null == result) {
+            return null;
+        }
+        final Date timestamp = result.getTimestamp();
+        return null == timestamp ? null : new Date(timestamp.getTime());
     }
 
     public void close() {
