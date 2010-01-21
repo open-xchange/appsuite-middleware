@@ -11,6 +11,8 @@ Import-Package: com.openexchange.datatypes.genericonf,
  com.openexchange.groupware,
  com.openexchange.session,
  org.apache.commons.logging,
- org.osgi.framework;version="1.3.0"
-Export-Package: com.openexchange.messaging
+ org.osgi.framework;version="1.3.0",
+ org.osgi.util.tracker;version="1.3.3"
+Export-Package: com.openexchange.messaging,
+ com.openexchange.messaging.registry
 Bundle-Activator: com.openexchange.messaging.osgi.MessagingActivator
