@@ -58,6 +58,6 @@ package com.openexchange.messaging;
  * @since Open-Xchange v6.16
  */
 public interface SimpleMessagePart extends MessagingPart{
-    public String getId();
+    public String getSectionId();
     public Object getData();
 }

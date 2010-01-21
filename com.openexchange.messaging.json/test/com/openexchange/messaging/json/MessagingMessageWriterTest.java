@@ -93,7 +93,7 @@ public class MessagingMessageWriterTest extends TestCase {
         message.setSize(13);
         message.setThreadLevel(15);
         message.setDisposition(MessagingMessage.INLINE);
-        message.setId("message123");
+        message.setSectionId("message123");
         message.setFolder("niceFolder17");
         
         JSONObject messageJSON = new MessagingMessageWriter().write(message);
@@ -220,14 +220,14 @@ public class MessagingMessageWriterTest extends TestCase {
 
     public void testMultipartMessage() throws UnsupportedEncodingException, MessagingException, JSONException {
         SimpleMessagingMessage binMessage = new SimpleMessagingMessage();
-        binMessage.setId("1");
+        binMessage.setSectionId("1");
         binMessage.setContent("content".getBytes("UTF-8"));
         binMessage.setDisposition(MessagingMessage.ATTACHMENT);
         binMessage.setFileName("content.txt");
         
         SimpleMessagingMessage plainMessage = new SimpleMessagingMessage();
         plainMessage.setContent("content");
-        plainMessage.setId("2");
+        plainMessage.setSectionId("2");
         
         SimpleMessagingMessage message = new SimpleMessagingMessage();
         message.setContent(binMessage, plainMessage);

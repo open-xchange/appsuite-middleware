@@ -145,7 +145,7 @@ public class MessagingMessageParser {
     protected void setValues(MimeMessagingBodyPart message, MessagingInputStreamRegistry registry, JSONObject messageJSON) throws JSONException, MessagingException, IOException {
         
         if(messageJSON.has("id")) {
-            message.setId(messageJSON.getString("id"));
+            message.setSectionId(messageJSON.getString("id"));
         }
         
         if(messageJSON.has("size")) {

@@ -202,7 +202,7 @@ public final class TwitterDirectMessage implements MessagingMessage {
         return headers;
     }
 
-    public String getId() {
+    public String getSectionId() {
         return null;
     }
 
@@ -228,6 +228,10 @@ public final class TwitterDirectMessage implements MessagingMessage {
 
     private static Collection<MessagingHeader> getSimpleHeader(final String name, final String value) {
         return wrap(new StringMessageHeader(name, value));
+    }
+
+    public String getId() {
+        return null;
     }
 
 }

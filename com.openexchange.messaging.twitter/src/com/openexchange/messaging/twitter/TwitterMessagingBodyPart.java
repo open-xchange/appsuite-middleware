@@ -114,7 +114,7 @@ public final class TwitterMessagingBodyPart implements MessagingBodyPart {
 
     private final MessagingContent content;
 
-    private final String id;
+    private final String sectionId;
 
     private final long size;
 
@@ -146,12 +146,12 @@ public final class TwitterMessagingBodyPart implements MessagingBodyPart {
                 htmlContent = m.replaceAll(MessageFormat.format("$1\r\n    <img src=\"{0}\" />", status.getUser().getProfileImageURL()));
             }
             content = new StringContent(htmlContent);
-            id = "2";
+            sectionId = "2";
             size = htmlContent.length();
         } else {
             final String text = status.getText();
             content = new StringContent(text);
-            id = "1";
+            sectionId = "1";
             size = text.length();
         }
     }
@@ -164,8 +164,8 @@ public final class TwitterMessagingBodyPart implements MessagingBodyPart {
         return size;
     }
 
-    public String getId() {
-        return id;
+    public String getSectionId() {
+        return sectionId;
     }
 
     public Map<String, Collection<MessagingHeader>> getHeaders() {

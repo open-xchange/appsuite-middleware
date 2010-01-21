@@ -54,28 +54,42 @@ import java.io.OutputStream;
 import java.util.Collection;
 import java.util.Map;
 
-
 /**
  * {@link SimpleMessagingMessage}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SimpleMessagingMessage implements MessagingMessage, MessagingBodyPart {
 
     private int colorLabel;
+
     private int flags;
+
     private String folder;
+
     private long receivedDate;
+
     private Collection<String> userFlags;
+
     private String disposition;
+
     private String fileName;
+
     private Map<String, Collection<MessagingHeader>> headers;
-    private String id;
+
+    private String sectionId;
+
     private MessagingContent content;
+
     private long size;
+
     private int threadLevel;
+
     private MultipartContent parent;
+
     private ContentType contentType;
+
+    private String id;
 
     public int getColorLabel() {
         return colorLabel;
@@ -97,7 +111,6 @@ public class SimpleMessagingMessage implements MessagingMessage, MessagingBodyPa
         return userFlags;
     }
 
-    
     public MessagingContent getContent() throws MessagingException {
         return content;
     }
@@ -123,10 +136,10 @@ public class SimpleMessagingMessage implements MessagingMessage, MessagingBodyPa
         return headers;
     }
 
-    public String getId() {
-        return id;
+    public String getSectionId() {
+        return sectionId;
     }
-    
+
     public long getSize() {
         return size;
     }
@@ -139,81 +152,70 @@ public class SimpleMessagingMessage implements MessagingMessage, MessagingBodyPa
         throw new UnsupportedOperationException();
     }
 
-    
     public void setColorLabel(final int colorLabel) {
         this.colorLabel = colorLabel;
     }
 
-    
     public void setFlags(final int flags) {
         this.flags = flags;
     }
 
-    
     public void setFolder(final String folder) {
         this.folder = folder;
     }
 
-    
     public void setReceivedDate(final long receivedDate) {
         this.receivedDate = receivedDate;
     }
 
-    
     public void setUserFlags(final Collection<String> userFlags) {
         this.userFlags = userFlags;
     }
 
-    
     public void setDisposition(final String disposition) {
         this.disposition = disposition;
     }
 
-    
     public void setFileName(final String fileName) {
         this.fileName = fileName;
     }
 
-    
     public void setHeaders(final Map<String, Collection<MessagingHeader>> headers) {
         this.headers = headers;
     }
 
-    
-    public void setId(final String id) {
-        this.id = id;
+    public void setSectionId(final String sectionId) {
+        this.sectionId = sectionId;
     }
 
-    
-    public void setContent(String content) {
+    public void setContent(final String content) {
         this.content = new StringContent(content);
     }
 
-    
     public void setSize(final long size) {
         this.size = size;
     }
 
-    
     public void setThreadLevel(final int threadLevel) {
         this.threadLevel = threadLevel;
     }
 
-    public void setContent(byte[] bytes) {
+    public void setContent(final byte[] bytes) {
         this.content = new ByteArrayContent(bytes);
     }
 
-    public void setContent(MessagingBodyPart...parts) {
+    public void setContent(final MessagingBodyPart... parts) {
         this.content = new MessagingPartArrayContent(parts);
     }
 
     public MultipartContent getParent() throws MessagingException {
         return parent;
     }
-    
-    public void setParent(MultipartContent parent) {
+
+    public void setParent(final MultipartContent parent) {
         this.parent = parent;
     }
+
     public ContentType getContentType() throws MessagingException {
         return contentType;
     }
@@ -221,5 +223,13 @@ public class SimpleMessagingMessage implements MessagingMessage, MessagingBodyPa
     public void setContentType(final ContentType contentType) {
         this.contentType = contentType;
     }
-    
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(final String id) {
+        this.id = id;
+    }
+
 }

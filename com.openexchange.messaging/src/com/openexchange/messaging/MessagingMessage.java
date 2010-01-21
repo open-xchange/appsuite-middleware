@@ -203,4 +203,12 @@ public interface MessagingMessage extends MessagingPart, MessagingContent {
      * @return The thread level of this message
      */
     public int getThreadLevel();
+
+    /**
+     * Gets the identifier.
+     * 
+     * @return The identifier or <code>null</code> if not available
+     */
+    public String getId();
+    
 }

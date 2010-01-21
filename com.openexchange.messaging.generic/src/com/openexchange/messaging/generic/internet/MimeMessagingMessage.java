@@ -108,6 +108,8 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Messa
 
     private int threadLevel;
 
+    private String id;
+
     /**
      * Initializes a new {@link MimeMessagingMessage}.
      */
@@ -290,6 +292,19 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Messa
      */
     public void setThreadLevel(final int threadLevel) {
         this.threadLevel = threadLevel;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    /**
+     * Sets the message identifier.
+     * 
+     * @param id The message identifier
+     */
+    public void setId(final String id) {
+        this.id = id;
     }
 
 }

@@ -263,7 +263,7 @@ public class MimeMessagingPart implements MessagingPart {
     /**
      * The part identifier.
      */
-    protected String id;
+    protected String sectionId;
 
     /**
      * The part's size. Default is <code>-1L</code> to obtain size from underlying {@link MimePart MIME part} when invoking
@@ -309,7 +309,7 @@ public class MimeMessagingPart implements MessagingPart {
                     final MimeMultipart content = getContentObject(MimeMultipart.class);
                     if (null != content) {
                         final MimeMultipartContent multipartContent = new MimeMultipartContent(content);
-                        multipartContent.setId(id);
+                        multipartContent.setSectionId(sectionId);
                         cachedContent = tmp = multipartContent;
                     }
                 } else if (contentType.startsWith(CT_TEXT)) {
@@ -323,9 +323,9 @@ public class MimeMessagingPart implements MessagingPart {
                         final MimeMessagingMessage message = new MimeMessagingMessage(content);
                         final boolean increaseSecId = false;
                         if (increaseSecId) {
-                            message.setId(id == null ? "1" : new StringBuilder(8).append(id).append('.').append(1).toString());
+                            message.setSectionId(sectionId == null ? "1" : new StringBuilder(8).append(sectionId).append('.').append(1).toString());
                         } else {
-                            message.setId(id);
+                            message.setSectionId(sectionId);
                         }
                         cachedContent = tmp = message;
                     }
@@ -457,17 +457,17 @@ public class MimeMessagingPart implements MessagingPart {
         return tmp;
     }
 
-    public String getId() {
-        return id;
+    public String getSectionId() {
+        return sectionId;
     }
 
     /**
-     * Sets the identifier.
+     * Sets the section identifier.
      * 
-     * @param id The identifier
+     * @param sectionId The section identifier
      */
-    public void setId(final String id) {
-        this.id = id;
+    public void setSectionId(final String sectionId) {
+        this.sectionId = sectionId;
     }
 
     public long getSize() throws MessagingException {

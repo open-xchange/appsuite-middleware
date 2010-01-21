@@ -181,8 +181,9 @@ public final class TwitterMessagingMessage implements MessagingMessage {
         return headers;
     }
 
-    public String getId() {
-        return String.valueOf(status.getId());
+    public String getSectionId() {
+        // Always top level
+        return null;
     }
 
     public void writeTo(final OutputStream os) throws IOException, MessagingException {
@@ -207,6 +208,10 @@ public final class TwitterMessagingMessage implements MessagingMessage {
 
     private static Collection<MessagingHeader> getSimpleHeader(final String name, final String value) {
         return wrap(new StringMessageHeader(name, value));
+    }
+
+    public String getId() {
+        return String.valueOf(status.getId());
     }
 
 }

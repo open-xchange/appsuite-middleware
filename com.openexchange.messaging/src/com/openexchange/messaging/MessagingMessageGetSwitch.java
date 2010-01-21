@@ -109,7 +109,7 @@ public class MessagingMessageGetSwitch implements MessagingMessageSwitcher {
     }
 
     public Object id(final Object... args) {
-        return ((MessagingMessage)args[0]).getId();
+        return ((MessagingMessage)args[0]).getSectionId();
     }
 
     public Object priority(final Object... args) throws MessagingException {

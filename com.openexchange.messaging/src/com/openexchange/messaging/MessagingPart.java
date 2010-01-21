@@ -148,11 +148,11 @@ public interface MessagingPart {
     public String getFileName() throws MessagingException;
 
     /**
-     * Gets the identifier.
+     * Gets the section identifier.
      * 
-     * @return The identifier or <code>null</code> if not available
+     * @return The section identifier or <code>null</code> if top level
      */
-    public String getId();
+    public String getSectionId();
 
     /**
      * Gets the content.

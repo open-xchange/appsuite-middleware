@@ -121,7 +121,7 @@ public class MessagingMessageParserTest extends TestCase {
         
         assertNotNull(message);
         
-        assertEquals("13", message.getId());
+        assertEquals("13", message.getSectionId());
         assertEquals(12, message.getColorLabel());
         assertEquals(1337, message.getFlags());
     

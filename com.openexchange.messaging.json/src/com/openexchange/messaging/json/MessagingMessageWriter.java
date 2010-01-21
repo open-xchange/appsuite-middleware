@@ -135,7 +135,7 @@ public class MessagingMessageWriter {
     private JSONObject write(MessagingPart message) throws JSONException, MessagingException {
         JSONObject messageJSON = new JSONObject();
         
-        messageJSON.put("id", message.getId());
+        messageJSON.put("id", message.getSectionId());
         if(null != message.getHeaders() && ! message.getHeaders().isEmpty()) {
             JSONObject headerJSON = new JSONObject();
             
