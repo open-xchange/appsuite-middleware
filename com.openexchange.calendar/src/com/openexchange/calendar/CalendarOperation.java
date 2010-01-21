@@ -1299,6 +1299,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         // and then modify the recurring. Assume all data has been provided
         boolean pattern_change = false;
         boolean completenessChecked = false;
+        boolean changeStartDate = false;
 
         if (cdao.containsInterval() && cdao.getInterval() != edao.getInterval()) {
             recColl.checkRecurringCompleteness(cdao, !edao.containsUntil() && !edao.containsOccurrence());
@@ -1311,6 +1312,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 completenessChecked = true;
             }
             pattern_change = true;
+            changeStartDate = true;
         }
         if (cdao.containsDays() && cdao.getDays() != edao.getDays()) {
             if (!completenessChecked) {
@@ -1388,6 +1390,8 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
          */
         final int retval;
         if (pattern_change) {
+            if (!changeStartDate)
+                calculateAndSetRealRecurringStartAndEndDate(cdao, edao);
             cdao.setRecurrence(null);
 
             recColl.checkRecurring(cdao);

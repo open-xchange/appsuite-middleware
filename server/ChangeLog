@@ -1,3 +1,7 @@
+* 2010-01-21 - martin.herfurth@open-xchange.com
+
+ - Bugfix #14679: Changing interval of a weekly series.
+
 * 2010-01-18 - thorben.betten@open-xchange.com
 
  - Bugfix #14425: Fixed KXML parser to properly check string length
