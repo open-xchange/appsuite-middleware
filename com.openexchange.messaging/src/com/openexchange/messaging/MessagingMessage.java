@@ -170,8 +170,9 @@ public interface MessagingMessage extends MessagingPart, MessagingContent {
      * Gets the color label.
      * 
      * @return The color label
+     * @throws MessagingException If color label cannot be returned
      */
-    public int getColorLabel();
+    public int getColorLabel() throws MessagingException;
 
     /**
      * Gets the flag bitmask.
@@ -191,9 +192,10 @@ public interface MessagingMessage extends MessagingPart, MessagingContent {
     /**
      * Gets the user flags.
      * 
-     * @return The user flags
+     * @return The user flags or <code>null</code> if none available
+     * @throws MessagingException If user flags cannot be returned
      */
-    public Collection<String> getUserFlags();
+    public Collection<String> getUserFlags() throws MessagingException;
 
     /**
      * Get the thread level of this message.
