@@ -92,6 +92,17 @@ public class MimeMessagingPart implements MessagingPart {
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
     /**
+     * The <code>Content-Type</code> header name.
+     */
+    private static final HeaderName H_CONTENT_TYPE = HeaderName.valueOf(MessagingHeader.KnownHeader.CONTENT_TYPE.toString());
+
+    private static final String CT_TEXT = "text/";
+
+    private static final String CT_MSG_RFC822 = "message/rfc822";
+
+    private static final String CT_MUL = "multipart/";
+
+    /**
      * An {@link StreamDataSource.InputStreamProvider} backed by a {@link BinaryContent}.
      */
     private static final class BinaryContentISP implements StreamDataSource.InputStreamProvider {
@@ -165,11 +176,6 @@ public class MimeMessagingPart implements MessagingPart {
         }
 
     } // End of AddressHeaderHandler class
-
-    /**
-     * The <code>Content-Type</code> header name.
-     */
-    private static final HeaderName H_CONTENT_TYPE = HeaderName.valueOf(MessagingHeader.KnownHeader.CONTENT_TYPE.toString());
 
     /**
      * The static header handler map.
@@ -278,12 +284,6 @@ public class MimeMessagingPart implements MessagingPart {
         this.part = part;
         size = -1L;
     }
-
-    private static final String CT_TEXT = "text/";
-
-    private static final String CT_MSG_RFC822 = "message/rfc822";
-
-    private static final String CT_MUL = "multipart/";
 
     public MessagingContent getContent() throws MessagingException {
         MessagingContent tmp = cachedContent;
