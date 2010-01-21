@@ -430,12 +430,12 @@ public class MimeMessagingPart implements MessagingPart {
     }
 
     /**
-     * Sets this part's size.
+     * Sets this part's size. If passed argument is less than or equal to zero, specified size will not be set.
      * 
      * @param size The size to set
      */
     public void setSize(final long size) {
-        this.size = size;
+        this.size = size <= 0 ? -1L : size;
     }
 
     public void writeTo(final OutputStream os) throws IOException, MessagingException {
