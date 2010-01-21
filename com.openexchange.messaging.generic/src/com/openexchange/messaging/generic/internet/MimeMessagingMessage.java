@@ -50,11 +50,15 @@
 package com.openexchange.messaging.generic.internet;
 
 import java.util.Collection;
-import java.util.Collections;
+import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.internet.MimeMessage;
 import com.openexchange.mail.mime.MIMEDefaultSession;
+import com.openexchange.messaging.MessagingException;
+import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingMessage;
+import com.openexchange.messaging.generic.internal.InternalUtility;
+import com.openexchange.messaging.generic.internal.InternalUtility.ParsedFlags;
 
 /**
  * {@link MimeMessagingMessage}
@@ -64,6 +68,33 @@ import com.openexchange.messaging.MessagingMessage;
  */
 public class MimeMessagingMessage extends MimeMessagingBodyPart implements MessagingMessage {
 
+    private static final Flags ALL_COLOR_LABELS;
+
+    private static final Flags ALL_SYSTEM_FLAGS;
+
+    static {
+        final StringBuilder sb = new StringBuilder(6);
+        Flags flags = new Flags();
+        for (int i = 0; i <= 10; i++) {
+            sb.setLength(0);
+            flags.add(sb.append(InternalUtility.COLOR_LABEL_PREFIX).append(i).toString());
+            sb.setLength(0);
+            flags.add(sb.append(InternalUtility.COLOR_LABEL_PREFIX_OLD).append(i).toString());
+        }
+        ALL_COLOR_LABELS = flags;
+
+        flags = new Flags();
+        flags.add(Flags.Flag.ANSWERED);
+        flags.add(Flags.Flag.DELETED);
+        flags.add(Flags.Flag.DRAFT);
+        flags.add(Flags.Flag.FLAGGED);
+        flags.add(Flags.Flag.SEEN);
+        flags.add(Flags.Flag.USER);
+        flags.add(MessagingMessage.USER_FORWARDED);
+        flags.add(MessagingMessage.USER_READ_ACK);
+        ALL_SYSTEM_FLAGS = flags;
+    }
+
     /**
      * The underlying {@link MimeMessage} instance.
      */
@@ -71,15 +102,11 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Messa
 
     private String folder;
 
-    private int colorLabel;
-
-    private int flags;
+    private ParsedFlags cachedParsedFlags;
 
     private long receivedDate;
-    
-    private int threadLevel;
 
-    private Collection<String> userFlags;
+    private int threadLevel;
 
     /**
      * Initializes a new {@link MimeMessagingMessage}.
@@ -99,30 +126,124 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Messa
         this.mimeMessage = mimeMessage;
     }
 
-    public int getColorLabel() {
-        return colorLabel;
+    public int getColorLabel() throws MessagingException {
+        if (null == cachedParsedFlags) {
+            try {
+                cachedParsedFlags = InternalUtility.parseFlags(mimeMessage.getFlags());
+            } catch (final javax.mail.MessagingException e) {
+                throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
+            }
+        }
+        return cachedParsedFlags.getColorLabel();
     }
 
     /**
      * Sets the color label.
      * 
      * @param colorLabel The color label
+     * @throws MessagingException If setting color lable fails
      */
-    public void setColorLabel(final int colorLabel) {
-        this.colorLabel = colorLabel;
+    public void setColorLabel(final int colorLabel) throws MessagingException {
+        try {
+            /*
+             * Disable all existing color lable flags
+             */
+            mimeMessage.setFlags(ALL_COLOR_LABELS, false);
+            /*
+             * Apply new one
+             */
+            final Flags newFlags = new Flags();
+            newFlags.add(InternalUtility.getColorLabelStringValue(colorLabel));
+            mimeMessage.setFlags(newFlags, true);
+            cachedParsedFlags = null;
+        } catch (final javax.mail.MessagingException e) {
+            throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
+        } catch (final IllegalStateException e) {
+            throw MessagingExceptionCodes.READ_ONLY.create(e, e.getMessage());
+        }
     }
 
-    public int getFlags() {
-        return flags;
+    public int getFlags() throws MessagingException {
+        if (null == cachedParsedFlags) {
+            try {
+                cachedParsedFlags = InternalUtility.parseFlags(mimeMessage.getFlags());
+            } catch (final javax.mail.MessagingException e) {
+                throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
+            }
+        }
+        return cachedParsedFlags.getFlags();
     }
 
     /**
      * Sets the flags.
      * 
      * @param flags The flags
+     * @throws MessagingException If given flags cannot be set
      */
-    public void setFlags(final int flags) {
-        this.flags = flags;
+    public void setFlags(final int flags) throws MessagingException {
+        try {
+            /*
+             * Disable all existing system flags
+             */
+            mimeMessage.setFlags(ALL_SYSTEM_FLAGS, false);
+            /*
+             * Apply new one
+             */
+            final Flags newFlags = InternalUtility.convertMessagingFlags(flags);
+            mimeMessage.setFlags(newFlags, true);
+            cachedParsedFlags = null;
+        } catch (final javax.mail.MessagingException e) {
+            throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
+        } catch (final IllegalStateException e) {
+            throw MessagingExceptionCodes.READ_ONLY.create(e, e.getMessage());
+        }
+    }
+
+    public Collection<String> getUserFlags() throws MessagingException {
+        if (null == cachedParsedFlags) {
+            try {
+                cachedParsedFlags = InternalUtility.parseFlags(mimeMessage.getFlags());
+            } catch (final javax.mail.MessagingException e) {
+                throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
+            }
+        }
+        return cachedParsedFlags.getUserFlags();
+    }
+
+    /**
+     * Sets specified user flags.
+     * 
+     * @param userFlags The user flags to set
+     * @throws MessagingException If setting user flags fails
+     */
+    public void setUserFlags(final Collection<String> userFlags) throws MessagingException {
+        try {
+            final String[] strings = mimeMessage.getFlags().getUserFlags();
+            Flags newFlags = new Flags();
+            for (int i = 0; i < strings.length; i++) {
+                final String uf = strings[i];
+                if (!InternalUtility.isColorLabel(uf) && !MessagingMessage.USER_FORWARDED.equalsIgnoreCase(uf) && !MessagingMessage.USER_READ_ACK.equalsIgnoreCase(uf)) {
+                    newFlags.add(uf);
+                }
+            }
+            /*
+             * Disable all existing system flags
+             */
+            mimeMessage.setFlags(newFlags, false);
+            /*
+             * Apply new ones
+             */
+            newFlags = new Flags();
+            for (final String userFlag : userFlags) {
+                newFlags.add(userFlag);
+            }
+            mimeMessage.setFlags(newFlags, true);
+            cachedParsedFlags = null;
+        } catch (final javax.mail.MessagingException e) {
+            throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
+        } catch (final IllegalStateException e) {
+            throw MessagingExceptionCodes.READ_ONLY.create(e, e.getMessage());
+        }
     }
 
     public String getFolder() {
@@ -169,14 +290,6 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Messa
      */
     public void setThreadLevel(final int threadLevel) {
         this.threadLevel = threadLevel;
-    }
-
-    public Collection<String> getUserFlags() {
-        return userFlags;
-    }
-    
-    public void setUserFlags(final Collection<String> userFlags) {
-        this.userFlags = null == userFlags ? null : Collections.unmodifiableCollection(userFlags);
     }
 
 }

@@ -76,7 +76,7 @@ public class MessagingMessageGetSwitch implements MessagingMessageSwitcher {
         return header(args[0], MessagingField.CC.toString());
     }
 
-    public Object colorLabel(final Object... args) {
+    public Object colorLabel(final Object... args) throws MessagingException {
         return ((MessagingMessage)args[0]).getColorLabel();
     }
 
@@ -88,7 +88,7 @@ public class MessagingMessageGetSwitch implements MessagingMessageSwitcher {
         return header(args[0], KnownHeader.DISPOSITION_NOTIFICATION_TO.toString());
     }
 
-    public Object flags(final Object... args) {
+    public Object flags(final Object... args) throws MessagingException {
         return ((MessagingMessage)args[0]).getUserFlags();
     }
 
