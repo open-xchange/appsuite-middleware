@@ -231,22 +231,24 @@ public class AJAXRequestData {
     public void setUploadStreamProvider(final InputStreamProvider uploadStreamProvider) {
         this.uploadStreamProvider = uploadStreamProvider;
     }
-    
+
     /**
      * Computes a list of missing parameters from a list of mandatory parameters. The typical idiom to use this would be:
-     * <code>
-     *   List<String> missingParameters = requestData.getMissingParameters("param1", "param2", "param3");
-     *   if(! missingParameters.isEmpty()) {
-     *      // Throw AbstractOXException
-     *   }
-     * </code>
+     * 
+     * <pre>
+     * List&lt;String&gt; missingParameters = requestData.getMissingParameters(&quot;param1&quot;, &quot;param2&quot;, &quot;param3&quot;);
+     * if (!missingParameters.isEmpty()) {
+     *     // Throw AbstractOXException
+     * }
+     * </pre>
+     * 
      * @param mandatoryParameters The mandatory parameters expected.
      * @return A list of missing parameter names
      */
-    public List<String> getMissingParameters(String...mandatoryParameters) {
-        List<String> missing = new ArrayList<String>(mandatoryParameters.length);
-        for (String paramName : mandatoryParameters) {
-            if(!params.containsKey(paramName)) {
+    public List<String> getMissingParameters(final String... mandatoryParameters) {
+        final List<String> missing = new ArrayList<String>(mandatoryParameters.length);
+        for (final String paramName : mandatoryParameters) {
+            if (!params.containsKey(paramName)) {
                 missing.add(paramName);
             }
         }
