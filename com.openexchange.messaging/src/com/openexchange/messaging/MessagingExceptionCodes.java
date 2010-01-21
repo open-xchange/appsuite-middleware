@@ -125,8 +125,10 @@ public enum MessagingExceptionCodes implements OXErrorMessage {
      * Invalid parameter: %1$s with value '%2$s'.
      */
     INVALID_PARAMETER(MessagingExceptionMessages.INVALID_PARAMETER_MSG, Category.USER_INPUT, 17),
-    
-    ;
+    /**
+     * Messaging part is read-only.
+     */
+    READ_ONLY(MessagingExceptionMessages.READ_ONLY_MSG, Category.USER_INPUT, 18);
 
     private final Category category;
 
