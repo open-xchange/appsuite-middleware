@@ -237,6 +237,9 @@ public class MimeMessagingPart implements MessagingPart {
         HHANDLERS = Collections.unmodifiableMap(m);
     }
 
+    /**
+     * The underlying {@link MimePart MIME part}.
+     */
     protected final MimePart part;
 
     private volatile ContentType cachedContentType;
@@ -247,8 +250,15 @@ public class MimeMessagingPart implements MessagingPart {
 
     private volatile Map<String, Collection<MessagingHeader>> headers;
 
+    /**
+     * The part identifier.
+     */
     protected String id;
 
+    /**
+     * The part's size. Default is <code>-1L</code> to obtain size from underlying {@link MimePart MIME part} when invoking
+     * {@link #getSize()}.
+     */
     protected long size;
 
     /**
