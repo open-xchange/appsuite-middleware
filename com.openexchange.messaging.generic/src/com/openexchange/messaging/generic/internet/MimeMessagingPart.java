@@ -166,8 +166,14 @@ public class MimeMessagingPart implements MessagingPart {
 
     } // End of AddressHeaderHandler class
 
+    /**
+     * The <code>Content-Type</code> header name.
+     */
     private static final HeaderName H_CONTENT_TYPE = HeaderName.valueOf(MessagingHeader.KnownHeader.CONTENT_TYPE.toString());
 
+    /**
+     * The static header handler map.
+     */
     private static final Map<HeaderName, HeaderHandler> HHANDLERS;
 
     static {
