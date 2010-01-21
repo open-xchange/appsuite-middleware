@@ -36,7 +36,6 @@
 	<property name="genericonfstoragejar" value="com.openexchange.datatypes.genericonf.storage.jar" />
 	<property name="globaljar" value="com.openexchange.global.jar" />
 	<property name="messagingjar" value="com.openexchange.messaging.jar" />
-	<property name="messagingregistryjar" value="com.openexchange.messaging.registry.jar" />
 	<property name="serverjar" value="com.openexchange.server.jar" />
 
 	<property name="mailjar" value="mail-1.4.2.jar" />
@@ -53,7 +52,6 @@
 		<pathelement location="${bundlesdir}/${genericonfstoragejar}" />
 		<pathelement location="${bundlesdir}/${globaljar}" />
 		<pathelement location="${bundlesdir}/${messagingjar}" />
-		<pathelement location="${bundlesdir}/${messagingregistryjar}" />
 		<pathelement location="${bundlesdir}/${serverjar}" />
 
 		<pathelement location="${bundlesdir}/${commonBundle}/lib/${mailjar}" />
