@@ -215,14 +215,15 @@ public class MimeMessagingPart implements MessagingPart {
 
     private volatile Map<String, Collection<MessagingHeader>> headers;
 
-    private String id;
+    protected String id;
+
+    protected long size;
 
     /**
      * Initializes a new {@link MimeMessagingPart}.
      */
     public MimeMessagingPart() {
-        super();
-        part = new MimeBodyPart();
+        this(new MimeBodyPart());
     }
 
     /**
@@ -233,6 +234,7 @@ public class MimeMessagingPart implements MessagingPart {
     public MimeMessagingPart(final MimePart part) {
         super();
         this.part = part;
+        size = -1L;
     }
 
     private static final String CT_TEXT = "text/";
@@ -414,11 +416,26 @@ public class MimeMessagingPart implements MessagingPart {
     }
 
     public long getSize() throws MessagingException {
-        try {
-            return part.getSize();
-        } catch (final javax.mail.MessagingException e) {
-            throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
+        if (size < 0) {
+            /*
+             * Determine part's size
+             */
+            try {
+                return part.getSize();
+            } catch (final javax.mail.MessagingException e) {
+                throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
+            }
         }
+        return size;
+    }
+
+    /**
+     * Sets this part's size.
+     * 
+     * @param size The size to set
+     */
+    public void setSize(final long size) {
+        this.size = size <= 0 ? -1L : size;
     }
 
     public void writeTo(final OutputStream os) throws IOException, MessagingException {

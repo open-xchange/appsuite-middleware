@@ -69,6 +69,8 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Messa
      */
     final MimeMessage mimeMessage;
 
+    private String folder;
+
     private int colorLabel;
 
     private int flags;
@@ -124,8 +126,23 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Messa
     }
 
     public String getFolder() {
-        final Folder folder = mimeMessage.getFolder();
-        return null == folder ? null : folder.getFullName();
+        if (null == folder) {
+            /*
+             * Determine MIME message's folder.
+             */
+            final Folder folder = mimeMessage.getFolder();
+            return null == folder ? null : folder.getFullName();
+        }
+        return folder;
+    }
+
+    /**
+     * Sets the folder fullname.
+     * 
+     * @param folder The folder fullname to set
+     */
+    public void setFolder(final String folder) {
+        this.folder = folder;
     }
 
     public long getReceivedDate() {
