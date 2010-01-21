@@ -71,11 +71,34 @@ public class MimeMultipartContent implements MultipartContent {
     final MimeMultipart mimeMultipart;
 
     /**
+     * This multipart's section identifier.
+     */
+    private String id;
+
+    /**
      * Initializes a new {@link MimeMultipartContent}.
      */
     public MimeMultipartContent() {
         super();
         mimeMultipart = new MimeMultipart();
+    }
+
+    /**
+     * Gets the identifier.
+     * 
+     * @return The identifier
+     */
+    public String getId() {
+        return id;
+    }
+
+    /**
+     * Sets the identifier.
+     * 
+     * @param id The identifier to set
+     */
+    public void setId(final String id) {
+        this.id = id;
     }
 
     /**
@@ -90,7 +113,10 @@ public class MimeMultipartContent implements MultipartContent {
 
     public MessagingBodyPart get(final int index) throws MessagingException {
         try {
-            return new MimeMessagingBodyPart((MimePart) mimeMultipart.getBodyPart(index), this);
+            final MimeMessagingBodyPart bodyPart = new MimeMessagingBodyPart((MimePart) mimeMultipart.getBodyPart(index), this);
+            bodyPart.setId(id == null ? Integer.toString(index + 1) : new StringBuilder(8).append(id).append('.').append(
+                Integer.toString(index + 1)).toString());
+            return bodyPart;
         } catch (final javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
         }

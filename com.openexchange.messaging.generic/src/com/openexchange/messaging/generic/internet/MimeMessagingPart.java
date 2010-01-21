@@ -308,7 +308,9 @@ public class MimeMessagingPart implements MessagingPart {
                 if (contentType.startsWith(CT_MUL)) {
                     final MimeMultipart content = getContentObject(MimeMultipart.class);
                     if (null != content) {
-                        cachedContent = tmp = new MimeMultipartContent(content);
+                        final MimeMultipartContent multipartContent = new MimeMultipartContent(content);
+                        multipartContent.setId(id);
+                        cachedContent = tmp = multipartContent;
                     }
                 } else if (contentType.startsWith(CT_TEXT)) {
                     final String content = getContentObject(String.class);
@@ -318,7 +320,14 @@ public class MimeMessagingPart implements MessagingPart {
                 } else if (contentType.startsWith(CT_MSG_RFC822)) {
                     final MimeMessage content = getContentObject(MimeMessage.class);
                     if (null != content) {
-                        cachedContent = tmp = new MimeMessagingMessage(content);
+                        final MimeMessagingMessage message = new MimeMessagingMessage(content);
+                        final boolean increaseSecId = false;
+                        if (increaseSecId) {
+                            message.setId(id == null ? "1" : new StringBuilder(8).append(id).append('.').append(1).toString());
+                        } else {
+                            message.setId(id);
+                        }
+                        cachedContent = tmp = message;
                     }
                 }
             }
