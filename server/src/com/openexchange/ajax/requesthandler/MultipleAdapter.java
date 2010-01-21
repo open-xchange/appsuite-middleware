@@ -65,6 +65,7 @@ import com.openexchange.tools.session.ServerSession;
  * {@link #getTimestamp()} methods.
  * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MultipleAdapter implements MultipleHandler {
 
@@ -72,6 +73,11 @@ public class MultipleAdapter implements MultipleHandler {
 
     private AJAXRequestResult result;
 
+    /**
+     * Initializes a new {@link MultipleAdapter}.
+     * 
+     * @param factory The factory used to create {@link AJAXActionService} instances
+     */
     public MultipleAdapter(final AJAXActionServiceFactory factory) {
         super();
         this.factory = factory;

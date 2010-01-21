@@ -100,15 +100,14 @@ public final class AJAXRequestResult {
         super();
         this.resultObject = resultObject;
         this.timestamp = null == timestamp ? null : new Date(timestamp.getTime());
-        this.hashCode = calcCashCode();
-    }
-
-    private int calcCashCode() {
+        /*
+         * Hash code
+         */
         final int prime = 31;
         int result = 1;
         result = prime * result + ((resultObject == null) ? 0 : resultObject.hashCode());
         result = prime * result + ((timestamp == null) ? 0 : timestamp.hashCode());
-        return result;
+        this.hashCode = result;
     }
 
     @Override
