@@ -107,8 +107,8 @@ public final class MessagingExceptionMessages implements LocalizableStrings {
     // Invalid parameter: %1$s with value '%2$s'.
     public static final String INVALID_PARAMETER_MSG = "Invalid parameter: %1$s with value '%2$s'.";
 
-    // Messaging part is read-only.
-    public static final String READ_ONLY_MSG = "Messaging part is read-only.";
+    // Messaging part is read-only: %1$s
+    public static final String READ_ONLY_MSG = "Messaging part is read-only.: %1$s";
     /**
      * Initializes a new {@link MessagingExceptionMessages}.
      */
