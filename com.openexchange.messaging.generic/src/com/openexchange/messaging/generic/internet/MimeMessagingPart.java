@@ -620,6 +620,9 @@ public class MimeMessagingPart implements MessagingPart {
                 addHeader(mh.getName(), mh.getValue());
             }
         }
+        this.headers = null;
+        b_cachedContentType = false;
+        cachedContentType = null;
     }
 
     /**
