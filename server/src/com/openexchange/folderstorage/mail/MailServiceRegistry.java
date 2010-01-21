@@ -52,7 +52,7 @@ package com.openexchange.folderstorage.mail;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
- * {@link MailServiceRegistry} - The service registry for database folder storage.
+ * {@link MailServiceRegistry} - The service registry for mail folder storage.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
