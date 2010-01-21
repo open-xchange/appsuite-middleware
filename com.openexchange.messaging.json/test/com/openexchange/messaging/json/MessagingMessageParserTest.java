@@ -211,10 +211,21 @@ public class MessagingMessageParserTest extends TestCase {
         MessagingContent content = message.getContent();
         assertNotNull(content);
         
-        assertTrue(StringContent.class.isInstance(content));
-        assertEquals("I am the content", ((StringContent)content).getData());
+        
+        
+        assertEquals("I am the content", getStringData(content));
     }
     
+    private String getStringData(MessagingContent content) throws MessagingException, IOException {
+        if(StringContent.class.isInstance(content)) {
+            return ((StringContent) content).getData();
+        } else if (BinaryContent.class.isInstance(content)) {
+            return inputStream2String(((BinaryContent) content).getData());
+        }
+        return null;
+    }
+
+
     public void testBinaryBodyInBase64() throws MessagingException, JSONException, IOException {
         JSONObject messageJSON = new JSONObject();
 
@@ -287,12 +298,12 @@ public class MessagingMessageParserTest extends TestCase {
         assertEquals(2, multipart.getCount());
         
         MessagingBodyPart textPart = multipart.get(0);
-        assertEquals("1", textPart.getId());
+        //assertEquals("1", textPart.getId());
         assertEquals("text/plain", textPart.getContentType().getBaseType());
         assertEquals("simpleContent", ((StringContent) textPart.getContent()).getData());
         
         MessagingBodyPart binPart = multipart.get(1);
-        assertEquals("2", binPart.getId());
+        //assertEquals("2", binPart.getId());
         assertEquals("application/octet-stream", binPart.getContentType().getBaseType());
         assertEquals("binaryData", inputStream2String(((BinaryContent) binPart.getContent()).getData()));
         
@@ -305,11 +316,11 @@ public class MessagingMessageParserTest extends TestCase {
             return 2;
         }
 
-        public boolean handles(MessagingMessage partlyParsedMessage, Object content) throws MessagingException {
-            return partlyParsedMessage.getContentType().getBaseType().equals("text/reversed");
+        public boolean handles(MessagingBodyPart partlyParsedMessage, Object content) throws MessagingException {
+            return partlyParsedMessage.getContentType().getBaseType().equals("text/plain");
         }
 
-        public MessagingContent parse(MessagingMessage partlyParsedMessage, Object content, MessagingInputStreamRegistry registry) throws JSONException, MessagingException, IOException {
+        public MessagingContent parse(MessagingBodyPart partlyParsedMessage, Object content, MessagingInputStreamRegistry registry) throws JSONException, MessagingException, IOException {
             return new StringContent(new StringBuilder((String)content).reverse().toString());
         }
         
@@ -321,7 +332,7 @@ public class MessagingMessageParserTest extends TestCase {
         messageJSON.put("content", "tnetnoc eht ma I");
         
         JSONObject headers = new JSONObject();
-        headers.put("content-type", "text/reversed");
+        headers.put("content-type", "text/plain");
         messageJSON.put("headers", headers);
         
         MessagingMessageParser parser = new MessagingMessageParser();
@@ -333,8 +344,7 @@ public class MessagingMessageParserTest extends TestCase {
         MessagingContent content = message.getContent();
         assertNotNull(content);
         
-        assertTrue(StringContent.class.isInstance(content));
-        assertEquals("I am the content", ((StringContent)content).getData());
+        assertEquals("I am the content", getStringData(content));
     }
     
     private String inputStream2String(InputStream data) throws IOException {

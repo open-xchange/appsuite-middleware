@@ -58,6 +58,7 @@ import com.openexchange.datatypes.genericonf.json.FormContentParser;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingService;
+import com.openexchange.messaging.generic.DefaultMessagingAccount;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 
 /**
@@ -74,55 +75,20 @@ public class MessagingAccountParser {
     }
 
     public MessagingAccount parse(final JSONObject accountJSON) throws MessagingException, JSONException {
-        return new JSONMessagingAccount(accountJSON, registry);
-    }
-
-    private static final class JSONMessagingAccount implements MessagingAccount {
-
-        private static final long serialVersionUID = -6272295485887154177L;
-
-        private final JSONObject jsonObject;
-
-        private final int id;
-
-        private String displayName;
-
-        private final MessagingService messagingService;
-
-        private Map<String, Object> configuration;
-
-        public JSONMessagingAccount(final JSONObject accountJSON, final MessagingServiceRegistry registry) throws JSONException, MessagingException {
-            this.jsonObject = accountJSON;
-            this.id = jsonObject.optInt(ID);
-            if(accountJSON.has("displayName")) {
-                this.displayName = jsonObject.optString("displayName");
-            }
-            this.messagingService = registry.getMessagingService(accountJSON.getString(MESSAGING_SERVICE));
-            if(accountJSON.has("configuration")) {
-                this.configuration = new FormContentParser().parse(
-                    accountJSON.getJSONObject("configuration"),
-                    messagingService.getFormDescription());
-            } else {
-                this.configuration = null;
-            }
-
+        DefaultMessagingAccount account = new DefaultMessagingAccount();
+        
+        account.setId(accountJSON.optInt(ID));
+        if(accountJSON.has("displayName")) {
+            account.setDisplayName(accountJSON.optString("displayName"));
         }
-
-        public Map<String, Object> getConfiguration() {
-            return configuration;
+        MessagingService messagingService = registry.getMessagingService(accountJSON.getString(MESSAGING_SERVICE));
+        account.setMessagingService(messagingService);
+        if(accountJSON.has("configuration")) {
+            account.setConfiguration( new FormContentParser().parse(
+                accountJSON.getJSONObject("configuration"),
+                messagingService.getFormDescription()));
         }
-
-        public String getDisplayName() {
-            return displayName;
-        }
-
-        public int getId() {
-            return id;
-        }
-
-        public MessagingService getMessagingService() {
-            return messagingService;
-        }
-
+        
+        return account;
     }
 }

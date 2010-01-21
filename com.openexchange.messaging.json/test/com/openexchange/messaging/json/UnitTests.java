@@ -65,6 +65,17 @@ public class UnitTests {
         tests.addTestSuite(MessagingAccountParserTest.class);
         tests.addTestSuite(MessagingAccountWriterTest.class);
         tests.addTestSuite(MessagingServiceWriterTest.class);
+        tests.addTestSuite(MessagingMessageWriterTest.class);
+        tests.addTestSuite(MessagingMessageParserTest.class);
+        
+        tests.addTestSuite(com.openexchange.messaging.json.actions.accounts.AllTest.class);
+        tests.addTestSuite(com.openexchange.messaging.json.actions.accounts.DeleteTest.class);
+        tests.addTestSuite(com.openexchange.messaging.json.actions.accounts.GetTest.class);
+        tests.addTestSuite(com.openexchange.messaging.json.actions.accounts.NewTest.class);
+        tests.addTestSuite(com.openexchange.messaging.json.actions.accounts.UpdateTest.class);
+        
+        tests.addTestSuite(com.openexchange.messaging.json.actions.accounts.AllTest.class);
+        tests.addTestSuite(com.openexchange.messaging.json.actions.accounts.GetTest.class);
         
         return tests;
     }

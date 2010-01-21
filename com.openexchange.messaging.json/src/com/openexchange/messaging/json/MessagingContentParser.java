@@ -51,9 +51,9 @@ package com.openexchange.messaging.json;
 
 import java.io.IOException;
 import org.json.JSONException;
+import com.openexchange.messaging.MessagingBodyPart;
 import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingException;
-import com.openexchange.messaging.MessagingMessage;
 
 
 /**
@@ -63,6 +63,6 @@ import com.openexchange.messaging.MessagingMessage;
  */
 public interface MessagingContentParser {
     public int getPriority();
-    public boolean handles(MessagingMessage partlyParsedMessage, Object content) throws MessagingException;
-    public MessagingContent parse(MessagingMessage partlyParsedMessage, Object content, MessagingInputStreamRegistry registry) throws JSONException, MessagingException, IOException;
+    public boolean handles(MessagingBodyPart message, Object content) throws MessagingException;
+    public MessagingContent parse(MessagingBodyPart message, Object content, MessagingInputStreamRegistry registry) throws JSONException, MessagingException, IOException;
 }
