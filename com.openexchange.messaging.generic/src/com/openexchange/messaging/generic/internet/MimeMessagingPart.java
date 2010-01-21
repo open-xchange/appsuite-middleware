@@ -582,8 +582,10 @@ public class MimeMessagingPart implements MessagingPart {
         try {
             if (content instanceof MimeMessagingMessage) {
                 part.setContent(((MimeMessagingMessage) content).mimeMessage, type);
+                part.setHeader(H_CONTENT_TYPE.toString(), type);
             } else if (content instanceof MimeMultipartContent) {
                 part.setContent(((MimeMultipartContent) content).mimeMultipart);
+                part.setHeader(H_CONTENT_TYPE.toString(), type);
             } else if (content instanceof SimpleContent<?>) {
                 if (content instanceof BinaryContent) {
                     part.setDataHandler(new DataHandler(new StreamDataSource(new BinaryContentISP((BinaryContent) content), type)));
@@ -593,6 +595,7 @@ public class MimeMessagingPart implements MessagingPart {
                 } else {
                     part.setContent(((SimpleContent<?>) content).getData(), type);
                 }
+                part.setHeader(H_CONTENT_TYPE.toString(), type);
             } else {
                 throw MessagingExceptionCodes.UNKNOWN_MESSAGING_CONTENT.create(content.getClass().getName());
             }
