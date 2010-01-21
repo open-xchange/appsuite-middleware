@@ -91,6 +91,9 @@ public class MimeMessagingPart implements MessagingPart {
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
+    /**
+     * An {@link StreamDataSource.InputStreamProvider} backed by a {@link BinaryContent}.
+     */
     private static final class BinaryContentISP implements StreamDataSource.InputStreamProvider {
 
         private final BinaryContent binaryContent;
