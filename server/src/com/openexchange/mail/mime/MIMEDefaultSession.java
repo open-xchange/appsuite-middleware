@@ -50,7 +50,6 @@
 package com.openexchange.mail.mime;
 
 import java.util.Properties;
-import javax.mail.Session;
 import com.openexchange.mail.config.MailProperties;
 
 /**
@@ -67,7 +66,7 @@ public final class MIMEDefaultSession {
         super();
     }
 
-    private static volatile Session instance;
+    private static volatile javax.mail.Session instance;
 
     private static volatile Properties properties;
 
@@ -76,8 +75,8 @@ public final class MIMEDefaultSession {
      * 
      * @return The default instance of {@link javax.mail.Session}
      */
-    public static Session getDefaultSession() {
-        Session tmp = instance;
+    public static javax.mail.Session getDefaultSession() {
+        javax.mail.Session tmp = instance;
         if (tmp == null) {
             synchronized (MIMEDefaultSession.class) {
                 tmp = instance;
@@ -87,7 +86,7 @@ public final class MIMEDefaultSession {
                      */
                     final Properties systemProperties = System.getProperties();
                     systemProperties.putAll(getDefaultMailProperties());
-                    instance = tmp = Session.getInstance(((Properties) (systemProperties.clone())), null);
+                    instance = tmp = javax.mail.Session.getInstance(((Properties) (systemProperties.clone())), null);
                 }
             }
         }
