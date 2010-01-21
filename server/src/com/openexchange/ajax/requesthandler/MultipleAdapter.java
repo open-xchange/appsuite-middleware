@@ -63,7 +63,7 @@ import com.openexchange.tools.session.ServerSession;
  * {@link MultipleAdapter} maps the {@link MultipleHandler} to several {@link AJAXActionService}s. This class is not thread safe because it
  * has to remember the {@link AJAXRequestResult} between calling {@link #performRequest(String, JSONObject, ServerSession, boolean)} and
  * {@link #getTimestamp()} methods.
- *
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class MultipleAdapter implements MultipleHandler {
@@ -71,7 +71,7 @@ public class MultipleAdapter implements MultipleHandler {
     private final AJAXActionServiceFactory factory;
 
     private AJAXRequestResult result;
-  
+
     public MultipleAdapter(final AJAXActionServiceFactory factory) {
         super();
         this.factory = factory;
@@ -96,7 +96,11 @@ public class MultipleAdapter implements MultipleHandler {
     }
 
     public Date getTimestamp() {
-        return null == result ? null : result.getTimestamp();
+        if (null == result) {
+            return null;
+        }
+        final Date timestamp = result.getTimestamp();
+        return null == timestamp ? null : new Date(timestamp.getTime());
     }
 
     public void close() {
