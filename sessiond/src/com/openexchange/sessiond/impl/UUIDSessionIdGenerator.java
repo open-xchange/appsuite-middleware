@@ -50,6 +50,7 @@
 package com.openexchange.sessiond.impl;
 
 import java.util.UUID;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.sessiond.exception.SessiondException;
 
 /**

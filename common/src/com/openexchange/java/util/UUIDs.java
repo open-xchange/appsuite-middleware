@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.sessiond.impl;
+package com.openexchange.java.util;
 
 import java.util.UUID;
 
