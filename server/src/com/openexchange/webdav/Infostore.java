@@ -56,11 +56,11 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajp13.AJPv13RequestHandler;
+import com.openexchange.authentication.LoginException;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.sessiond.SessiondService;
+import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -164,21 +164,15 @@ public class Infostore extends OXServlet {
                 logout(session, req, resp);
             }
         }
-
     }
 
     private void logout(final ServerSession session, final HttpServletRequest req, final HttpServletResponse resp) {
         removeCookie(req, resp);
-        removeSession(session);
-    }
-
-    private void removeSession(final ServerSession session) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Removing Session " + session.getSessionID());
+        try {
+            LoginPerformer.getInstance().doLogout(session.getSessionID());
+        } catch (LoginException e) {
+            LOG.error(e.getMessage(), e);
         }
-        final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-        sessiondService.removeSession(session.getSessionID());
-
     }
 
     private static final transient Tools.CookieNameMatcher COOKIE_MATCHER = new Tools.CookieNameMatcher() {

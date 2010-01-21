@@ -309,7 +309,8 @@ public final class LoginPerformer {
         sb.append(request.getClient());
         sb.append('(');
         sb.append(request.getVersion());
-        sb.append(')');
+        sb.append(") Interface:");
+        sb.append(request.getInterface().toString());
         Context ctx = result.getContext();
         if (null != ctx) {
             sb.append(" Context:");

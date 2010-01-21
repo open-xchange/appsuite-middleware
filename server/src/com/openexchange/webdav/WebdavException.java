@@ -90,7 +90,11 @@ public class WebdavException extends AbstractOXException {
         /**
          * No principal found: %1$s.
          */
-        NO_PRINCIPAL("No principal found: %1$s.", Category.CODE_ERROR, 7);
+        NO_PRINCIPAL("No principal found: %1$s.", Category.CODE_ERROR, 7),
+        /**
+         * Empty passwords are not allowed.
+         */
+        EMPTY_PASSWORD("Empty passwords are not allowed.", Category.USER_INPUT, 8);
 
         private final String message;
 

@@ -66,4 +66,5 @@ public enum Interface {
 
     WEBDAV_VCARD,
 
+    WEBDAV
 }

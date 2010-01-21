@@ -57,27 +57,19 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdom.JDOMException;
-import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.LoginException;
-import com.openexchange.authentication.LoginExceptionCodes;
-import com.openexchange.authentication.service.Authentication;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.impl.PasswordExpiredException;
-import com.openexchange.groupware.impl.UserNotActivatedException;
-import com.openexchange.groupware.impl.UserNotFoundException;
-import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.login.Interface;
+import com.openexchange.login.LoginRequest;
+import com.openexchange.login.LoginResult;
+import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.AddSessionParameter;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.encoding.Base64;
+import com.openexchange.webdav.WebdavException;
 import com.openexchange.xml.jdom.JDOMParser;
 
 /**
@@ -166,46 +158,26 @@ public abstract class OXServlet extends WebDavServlet {
             return false;
         }
         if (null == session) {
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("No sessionId cookie found.");
-            }
-            final String auth = req.getHeader(AUTH_HEADER);
-            if (!checkForBasicAuthorization(auth)) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Authentication header missing.");
-                }
-                addUnauthorizedHeader(resp);
-                resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Required!");
-                return false;
-            }
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("Authorization header found.");
-            }
-            final String[] userpass = OXServlet.decodeAuthorization(auth);
-            final String login = userpass[0];
-            final String pass = userpass[1];
-            if (!checkLogin(login, pass, req.getRemoteAddr())) {
+            final LoginRequest loginRequest;
+            try {
+                loginRequest = parseLogin(req);
+            } catch (WebdavException e) {
+                LOG.debug(e.getMessage(), e);
                 addUnauthorizedHeader(resp);
                 resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Required!");
                 return false;
             }
             try {
-                session = addSession(login, pass, req.getRemoteAddr());
-            } catch (final AbstractOXException e) {
+                session = addSession(loginRequest);
+            } catch (LoginException e) {
+                if (e.getCategory() == Category.USER_INPUT) {
+                    addUnauthorizedHeader(resp);
+                    resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Required!");
+                    return false;
+                }
                 LOG.error(e.getMessage(), e);
                 resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
                 return false;
-            }
-            if (null == session) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Cannot authenticate user.");
-                }
-                addUnauthorizedHeader(resp);
-                resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Required!");
-                return false;
-            }
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("Session created.");
             }
             resp.addCookie(new Cookie(COOKIE_SESSIONID, session.getSessionID()));
         } else {
@@ -292,6 +264,48 @@ public abstract class OXServlet extends WebDavServlet {
         resp.setHeader("WWW-Authenticate", "Basic realm=\"" + authIdentifier + "\"");
     }
 
+    private LoginRequest parseLogin(final HttpServletRequest req) throws WebdavException, IOException {
+        final String auth = req.getHeader(AUTH_HEADER);
+        if (!checkForBasicAuthorization(auth)) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Authentication header missing.");
+            }
+            throw new WebdavException(WebdavException.Code.MISSING_HEADER_FIELD, AUTH_HEADER);
+        }
+        final String[] userpass = OXServlet.decodeAuthorization(auth);
+        final String login = userpass[0];
+        final String pass = userpass[1];
+        if (!checkLogin(login, pass, req.getRemoteAddr())) {
+            throw new WebdavException(WebdavException.Code.EMPTY_PASSWORD);
+        }
+        return new LoginRequest() {
+            public String getUserAgent() {
+                return req.getHeader("user-agent");
+            }
+            public String getPassword() {
+                return pass;
+            }
+            public String getLogin() {
+                return login;
+            }
+            public Interface getInterface() {
+                return Interface.WEBDAV;
+            }
+            public String getClientIP() {
+                return req.getRemoteAddr();
+            }
+            public String getAuthId() {
+                return null;
+            }
+            public String getClient() {
+                return null;
+            }
+            public String getVersion() {
+                return null;
+            }
+        };
+    }
+
     /**
      * This method tries to create a session for the given user.
      * 
@@ -301,86 +315,9 @@ public abstract class OXServlet extends WebDavServlet {
      * @return the initilized session or <code>null</code>.
      * @throws LoginException if an error occurs while creating the session.
      */
-    private Session addSession(final String login, final String pass, final String ipAddress) throws AbstractOXException {
-        final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-        if (null == sessiondCon) {
-            throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, SessiondService.class.getName());
-        }
-        Session session = null;
-        try {
-            final Authenticated authed = Authentication.login(login, pass);
-
-            final String contextname = authed.getContextInfo();
-            final String username = authed.getUserInfo();
-
-            final ContextStorage contextStor = ContextStorage.getInstance();
-            final int contextId = contextStor.getContextId(contextname);
-            if (ContextStorage.NOT_FOUND == contextId) {
-                throw new ContextException(ContextException.Code.NO_MAPPING, contextname);
-            }
-            final Context context = contextStor.getContext(contextId);
-            if (null == context) {
-                throw new ContextException(ContextException.Code.NOT_FOUND, Integer.valueOf(contextId));
-            }
-
-            final UserStorage us = UserStorage.getInstance();
-            final User user;
-            try {
-                int userId = us.getUserId(username, context);
-                user = us.getUser(userId, context);
-            } catch (final LdapException ex) {
-                switch (ex.getDetail()) {
-                case NOT_FOUND:
-                    throw new UserNotFoundException("User not found.", ex);
-                default:
-                    throw LoginExceptionCodes.UNKNOWN.create(ex);
-                }
-            }
-
-            // is user active
-            if (user.isMailEnabled()) {
-                if (user.getShadowLastChange() == 0) {
-                    throw new PasswordExpiredException("user password is expired!");
-                }
-            } else {
-                throw new UserNotActivatedException("user is not activated!");
-            }
-
-            final String sessionId = sessiondCon.addSession(new AddSessionParameter() {
-                public String getClientIP() {
-                    return ipAddress;
-                }
-                public Context getContext() {
-                    return context;
-                }
-                public String getFullLogin() {
-                    return login;
-                }
-                public String getPassword() {
-                    return pass;
-                }
-                public int getUserId() {
-                    return user.getId();
-                }
-                public String getUserLoginInfo() {
-                    return username;
-                }
-            });
-            session = sessiondCon.getSession(sessionId);
-        } catch (final LoginException e) {
-            if (AbstractOXException.Category.USER_INPUT == e.getCategory()) {
-                LOG.debug(e.getMessage(), e);
-            } else {
-                LOG.error(e.getMessage(), e);
-            }
-        } catch (final UserNotFoundException e) {
-            throw LoginExceptionCodes.INVALID_CREDENTIALS.create(e);
-        } catch (final PasswordExpiredException e) {
-            throw LoginExceptionCodes.INVALID_CREDENTIALS.create(e);
-        } catch (final UserNotActivatedException e) {
-            throw LoginExceptionCodes.INVALID_CREDENTIALS.create(e);
-        }
-        return session;
+    private Session addSession(LoginRequest request) throws LoginException {
+        LoginResult result = LoginPerformer.getInstance().doLogin(request);
+        return result.getSession();
     }
 
     private Session findSessionByCookie(HttpServletRequest req, HttpServletResponse resp) throws ServiceException {
