@@ -51,10 +51,12 @@ package com.openexchange.ajax.requesthandler;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.json.JSONObject;
@@ -228,6 +230,27 @@ public class AJAXRequestData {
      */
     public void setUploadStreamProvider(final InputStreamProvider uploadStreamProvider) {
         this.uploadStreamProvider = uploadStreamProvider;
+    }
+    
+    /**
+     * Computes a list of missing parameters from a list of mandatory parameters. The typical idiom to use this would be:
+     * <code>
+     *   List<String> missingParameters = requestData.getMissingParameters("param1", "param2", "param3");
+     *   if(! missingParameters.isEmpty()) {
+     *      // Throw AbstractOXException
+     *   }
+     * </code>
+     * @param mandatoryParameters The mandatory parameters expected.
+     * @return A list of missing parameter names
+     */
+    public List<String> getMissingParameters(String...mandatoryParameters) {
+        List<String> missing = new ArrayList<String>(mandatoryParameters.length);
+        for (String paramName : mandatoryParameters) {
+            if(!params.containsKey(paramName)) {
+                missing.add(paramName);
+            }
+        }
+        return missing;
     }
 
 }
