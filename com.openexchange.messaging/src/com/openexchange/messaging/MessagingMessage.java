@@ -177,8 +177,9 @@ public interface MessagingMessage extends MessagingPart, MessagingContent {
      * Gets the flag bitmask.
      * 
      * @return The flag bitmask
+     * @throws MessagingException If flag bitmask cannot be returned
      */
-    public int getFlags();
+    public int getFlags() throws MessagingException;
 
     /**
      * Gets the received date (storage's internal time stamp).
@@ -201,5 +202,3 @@ public interface MessagingMessage extends MessagingPart, MessagingContent {
      */
     public int getThreadLevel();
 }
-
-
