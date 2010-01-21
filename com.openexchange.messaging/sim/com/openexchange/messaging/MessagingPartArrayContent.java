@@ -47,55 +47,35 @@
  *
  */
 
-package com.openexchange.messaging.json;
+package com.openexchange.messaging;
 
-import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.datatypes.genericonf.json.FormDescriptionWriter;
-import com.openexchange.i18n.Translator;
-import com.openexchange.messaging.MessagingService;
+import java.util.Collection;
+
 
 /**
- * {@link MessagingServiceWriter}
+ * {@link MessagingPartArrayContent}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MessagingServiceWriter {
+public class MessagingPartArrayContent implements MultipartContent {
 
-    private static final String FORM_DESCRIPTION = "formDescription";
-    private static final String MESSAGE_ACTIONS = "messageActions";
-    private static final String DISPLAY_NAME = "displayName";
-    private static final String ID = "id";
-
-    private Translator translator;
+    private MessagingBodyPart[] parts = null;
     
-    public MessagingServiceWriter(Translator translator) {
-        this.translator = translator;
+    public MessagingPartArrayContent(MessagingBodyPart[] parts) {
+        super();
+        this.parts = parts;
     }
     
-    public JSONObject write(MessagingService messagingService) throws JSONException {
-        JSONObject object = new JSONObject();
-        object.put(ID, messagingService.getId());
-        object.put(DISPLAY_NAME, messagingService.getDisplayName());
-        object.put(MESSAGE_ACTIONS, writeCapabilities(messagingService.getMessageActions()));
-        if(null != messagingService.getFormDescription()) {
-            object.put(FORM_DESCRIPTION, new FormDescriptionWriter(translator).write(messagingService.getFormDescription()));
-        }
-        return object;
+    public MessagingPartArrayContent(Collection<? extends MessagingBodyPart> parts) {
+        this.parts = parts.toArray(new MessagingBodyPart[parts.size()]);
     }
 
-    private JSONArray writeCapabilities(List<String> capabilities) {
-        JSONArray array = new JSONArray();
-        if(capabilities == null) {
-            return array;
-        }
-        for (String string : capabilities) {
-            array.put(string);
-        }
-        return array;
+    public MessagingBodyPart get(int index) {
+        return parts[index];
+    }
+
+    public int getCount() {
+        return parts.length;
     }
 
 }

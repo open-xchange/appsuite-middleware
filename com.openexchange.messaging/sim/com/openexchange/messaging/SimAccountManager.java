@@ -47,55 +47,102 @@
  *
  */
 
-package com.openexchange.messaging.json;
+package com.openexchange.messaging;
 
+import java.util.Arrays;
 import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.datatypes.genericonf.json.FormDescriptionWriter;
-import com.openexchange.i18n.Translator;
-import com.openexchange.messaging.MessagingService;
+import com.openexchange.session.Session;
+
 
 /**
- * {@link MessagingServiceWriter}
+ * {@link SimAccountManager}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MessagingServiceWriter {
+public class SimAccountManager implements MessagingAccountManager {
 
-    private static final String FORM_DESCRIPTION = "formDescription";
-    private static final String MESSAGE_ACTIONS = "messageActions";
-    private static final String DISPLAY_NAME = "displayName";
-    private static final String ID = "id";
+    private Session session;
+    private MessagingAccount createdAccount;
+    private MessagingException exception;
+    private MessagingAccount updatedAccount;
+    private MessagingAccount deletedAccount;
+    private MessagingAccount accountToGet;
+    private int id;
+    private List<MessagingAccount> accounts;
 
-    private Translator translator;
-    
-    public MessagingServiceWriter(Translator translator) {
-        this.translator = translator;
+    public void addAccount(MessagingAccount account, Session session) throws MessagingException {
+        this.createdAccount = account;
+        this.session = session;
+        exception();
     }
     
-    public JSONObject write(MessagingService messagingService) throws JSONException {
-        JSONObject object = new JSONObject();
-        object.put(ID, messagingService.getId());
-        object.put(DISPLAY_NAME, messagingService.getDisplayName());
-        object.put(MESSAGE_ACTIONS, writeCapabilities(messagingService.getMessageActions()));
-        if(null != messagingService.getFormDescription()) {
-            object.put(FORM_DESCRIPTION, new FormDescriptionWriter(translator).write(messagingService.getFormDescription()));
-        }
-        return object;
+    
+    public MessagingAccount getCreatedAccount() {
+        return createdAccount;
+    }
+    
+    
+    public Session getSession() {
+        return session;
     }
 
-    private JSONArray writeCapabilities(List<String> capabilities) {
-        JSONArray array = new JSONArray();
-        if(capabilities == null) {
-            return array;
+    public void deleteAccount(MessagingAccount account, Session session) throws MessagingException {
+        this.deletedAccount = account;
+        this.session = session;
+        exception();
+    }
+
+    
+    public MessagingAccount getAccount(int id, Session session) throws MessagingException {
+        this.id = id;
+        this.session = session;
+        exception();
+        return accountToGet;
+    }
+
+    public List<MessagingAccount> getAccounts(Session session) throws MessagingException {
+        exception();
+        return accounts;
+    }
+
+    public void updateAccount(MessagingAccount account, Session session) throws MessagingException {
+        updatedAccount = account;
+        this.session = session;
+        exception();
+    }
+
+    public void setException(MessagingException messagingException) {
+        this.exception = messagingException;
+    }
+    
+    private void exception() throws MessagingException {
+        if(null != exception) {
+            throw exception;
         }
-        for (String string : capabilities) {
-            array.put(string);
-        }
-        return array;
+    }
+
+
+    public MessagingAccount getUpdatedAccount() {
+        return updatedAccount;
+    }
+
+
+    public MessagingAccount getDeletedAccount() {
+        return deletedAccount;
+    }
+
+    public void setAccountToGet(MessagingAccount account) {
+        this.accountToGet = account;
+    }
+
+
+    public int getId() {
+        return id;
+    }
+
+
+    public void setAllAccounts(MessagingAccount...list) {
+        this.accounts = Arrays.asList(list);
     }
 
 }

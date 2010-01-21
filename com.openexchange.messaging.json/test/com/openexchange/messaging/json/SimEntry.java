@@ -49,53 +49,36 @@
 
 package com.openexchange.messaging.json;
 
-import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.datatypes.genericonf.json.FormDescriptionWriter;
-import com.openexchange.i18n.Translator;
-import com.openexchange.messaging.MessagingService;
+import java.util.Map;
+
 
 /**
- * {@link MessagingServiceWriter}
+ * {@link SimEntry}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MessagingServiceWriter {
+public class SimEntry<T1, T2> implements Map.Entry<T1, T2>{
 
-    private static final String FORM_DESCRIPTION = "formDescription";
-    private static final String MESSAGE_ACTIONS = "messageActions";
-    private static final String DISPLAY_NAME = "displayName";
-    private static final String ID = "id";
+    private T2 value;
+    private T1 key;
 
-    private Translator translator;
-    
-    public MessagingServiceWriter(Translator translator) {
-        this.translator = translator;
+    public SimEntry(T1 key, T2 value) {
+        this.key = key;
+        this.value = value;
     }
     
-    public JSONObject write(MessagingService messagingService) throws JSONException {
-        JSONObject object = new JSONObject();
-        object.put(ID, messagingService.getId());
-        object.put(DISPLAY_NAME, messagingService.getDisplayName());
-        object.put(MESSAGE_ACTIONS, writeCapabilities(messagingService.getMessageActions()));
-        if(null != messagingService.getFormDescription()) {
-            object.put(FORM_DESCRIPTION, new FormDescriptionWriter(translator).write(messagingService.getFormDescription()));
-        }
-        return object;
+    public T1 getKey() {
+        return key;
     }
 
-    private JSONArray writeCapabilities(List<String> capabilities) {
-        JSONArray array = new JSONArray();
-        if(capabilities == null) {
-            return array;
-        }
-        for (String string : capabilities) {
-            array.put(string);
-        }
-        return array;
+    public T2 getValue() {
+        return value;
+    }
+
+    public T2 setValue(T2 value) {
+        T2 old = this.value;
+        this.value = value;
+        return old;
     }
 
 }

@@ -60,7 +60,7 @@ import java.util.Map;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class SimpleMessagingMessage implements MessagingMessage {
+public class SimpleMessagingMessage implements MessagingMessage, MessagingBodyPart {
 
     private int colorLabel;
     private int flags;
@@ -71,9 +71,10 @@ public class SimpleMessagingMessage implements MessagingMessage {
     private String fileName;
     private Map<String, Collection<MessagingHeader>> headers;
     private String id;
-    private String content;
+    private MessagingContent content;
     private long size;
     private int threadLevel;
+    private MultipartContent parent;
     private ContentType contentType;
 
     public int getColorLabel() {
@@ -98,7 +99,7 @@ public class SimpleMessagingMessage implements MessagingMessage {
 
     
     public MessagingContent getContent() throws MessagingException {
-        return new StringContent(content);
+        return content;
     }
 
     public String getDisposition() throws MessagingException {
@@ -184,8 +185,8 @@ public class SimpleMessagingMessage implements MessagingMessage {
     }
 
     
-    public void setContent(final String content) {
-        this.content = content;
+    public void setContent(String content) {
+        this.content = new StringContent(content);
     }
 
     
@@ -198,6 +199,21 @@ public class SimpleMessagingMessage implements MessagingMessage {
         this.threadLevel = threadLevel;
     }
 
+    public void setContent(byte[] bytes) {
+        this.content = new ByteArrayContent(bytes);
+    }
+
+    public void setContent(MessagingBodyPart...parts) {
+        this.content = new MessagingPartArrayContent(parts);
+    }
+
+    public MultipartContent getParent() throws MessagingException {
+        return parent;
+    }
+    
+    public void setParent(MultipartContent parent) {
+        this.parent = parent;
+    }
     public ContentType getContentType() throws MessagingException {
         return contentType;
     }
@@ -205,5 +221,5 @@ public class SimpleMessagingMessage implements MessagingMessage {
     public void setContentType(final ContentType contentType) {
         this.contentType = contentType;
     }
-
+    
 }

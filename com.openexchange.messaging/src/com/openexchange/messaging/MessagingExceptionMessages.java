@@ -68,6 +68,9 @@ public final class MessagingExceptionMessages implements LocalizableStrings {
     // An I/O error occurred: %1$s
     public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
 
+    // A JSON error occurred: %1$s
+    public static final String JSON_ERROR_MSG = "A JSON error occurred: %1$s";
+
     // Messaging account %1$s of service "%2$s" could not be found for user %3$s in context %4$s.
     public static final String ACCOUNT_NOT_FOUND_MSG = "Messaging account %1$s of service \"%2$s\" could not be found for user %3$s in context %4$s.";
 
@@ -94,7 +97,15 @@ public final class MessagingExceptionMessages implements LocalizableStrings {
 
     // Unknown messaging content: %1$s.
     public static final String UNKNOWN_MESSAGING_CONTENT_MSG = "Unknown messaging content: %1$s.";
-
+    
+    // Unknown messaging service: %1$s.
+    public static final String UNKNOWN_MESSAGING_SERVICE_MSG = "Unknown messaging service: %1$s.";
+    
+    //  Missing parameter: %1$s
+    public static final String MISSING_PARAMETER_MSG = "Missing parameter: %1$s.";
+    
+    // Invalid parameter: %1$s with value '%2$s'.
+    public static final String INVALID_PARAMETER_MSG = "Invalid parameter: %1$s with value '%2$s'.";
     /**
      * Initializes a new {@link MessagingExceptionMessages}.
      */

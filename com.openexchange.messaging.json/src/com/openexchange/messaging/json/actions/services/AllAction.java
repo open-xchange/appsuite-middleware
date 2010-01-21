@@ -47,55 +47,38 @@
  *
  */
 
-package com.openexchange.messaging.json;
+package com.openexchange.messaging.json.actions.services;
 
-import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.datatypes.genericonf.json.FormDescriptionWriter;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.i18n.Translator;
 import com.openexchange.messaging.MessagingService;
+import com.openexchange.messaging.registry.MessagingServiceRegistry;
+import com.openexchange.tools.session.ServerSession;
+
 
 /**
- * {@link MessagingServiceWriter}
+ * {@link AllAction}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MessagingServiceWriter {
-
-    private static final String FORM_DESCRIPTION = "formDescription";
-    private static final String MESSAGE_ACTIONS = "messageActions";
-    private static final String DISPLAY_NAME = "displayName";
-    private static final String ID = "id";
-
-    private Translator translator;
+public class AllAction extends AbstractMessagingServiceAction {
     
-    public MessagingServiceWriter(Translator translator) {
-        this.translator = translator;
-    }
     
-    public JSONObject write(MessagingService messagingService) throws JSONException {
-        JSONObject object = new JSONObject();
-        object.put(ID, messagingService.getId());
-        object.put(DISPLAY_NAME, messagingService.getDisplayName());
-        object.put(MESSAGE_ACTIONS, writeCapabilities(messagingService.getMessageActions()));
-        if(null != messagingService.getFormDescription()) {
-            object.put(FORM_DESCRIPTION, new FormDescriptionWriter(translator).write(messagingService.getFormDescription()));
-        }
-        return object;
+    public AllAction(MessagingServiceRegistry registry, Translator translator) {
+        super(registry, translator);
     }
 
-    private JSONArray writeCapabilities(List<String> capabilities) {
-        JSONArray array = new JSONArray();
-        if(capabilities == null) {
-            return array;
+    @Override
+    public AJAXRequestResult doIt(AJAXRequestData request, ServerSession session) throws AbstractOXException, JSONException {
+        JSONArray result = new JSONArray();
+        for(MessagingService service : registry.getAllServices()) {
+            result.put(writer.write(service));
         }
-        for (String string : capabilities) {
-            array.put(string);
-        }
-        return array;
+        return new AJAXRequestResult(result);
     }
 
 }

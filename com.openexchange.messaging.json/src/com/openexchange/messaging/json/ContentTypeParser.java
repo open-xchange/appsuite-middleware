@@ -49,53 +49,57 @@
 
 package com.openexchange.messaging.json;
 
-import java.util.List;
-import org.json.JSONArray;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.datatypes.genericonf.json.FormDescriptionWriter;
-import com.openexchange.i18n.Translator;
-import com.openexchange.messaging.MessagingService;
+import com.openexchange.messaging.MessagingException;
+import com.openexchange.messaging.MessagingHeader;
+import com.openexchange.messaging.generic.internet.MimeContentType;
 
 /**
- * {@link MessagingServiceWriter}
- *
+ * {@link ContentTypeParser}
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MessagingServiceWriter {
+public class ContentTypeParser implements MessagingHeaderParser {
 
-    private static final String FORM_DESCRIPTION = "formDescription";
-    private static final String MESSAGE_ACTIONS = "messageActions";
-    private static final String DISPLAY_NAME = "displayName";
-    private static final String ID = "id";
-
-    private Translator translator;
-    
-    public MessagingServiceWriter(Translator translator) {
-        this.translator = translator;
-    }
-    
-    public JSONObject write(MessagingService messagingService) throws JSONException {
-        JSONObject object = new JSONObject();
-        object.put(ID, messagingService.getId());
-        object.put(DISPLAY_NAME, messagingService.getDisplayName());
-        object.put(MESSAGE_ACTIONS, writeCapabilities(messagingService.getMessageActions()));
-        if(null != messagingService.getFormDescription()) {
-            object.put(FORM_DESCRIPTION, new FormDescriptionWriter(translator).write(messagingService.getFormDescription()));
-        }
-        return object;
+    public int getPriority() {
+        return 1;
     }
 
-    private JSONArray writeCapabilities(List<String> capabilities) {
-        JSONArray array = new JSONArray();
-        if(capabilities == null) {
-            return array;
+    public boolean handles(String key, Object value) {
+        return MimeContentType.getContentTypeName().equalsIgnoreCase(key);
+    }
+
+    public void parseAndAdd(Map<String, Collection<MessagingHeader>> headers, String key, Object value) throws JSONException, MessagingException {
+        if (JSONObject.class.isInstance(value)) {
+            parseObject(headers, key, (JSONObject) value);
+        } else if (String.class.isInstance(value)) {
+            parseString(headers, key, (String) value);
         }
-        for (String string : capabilities) {
-            array.put(string);
+    }
+
+    private void parseString(Map<String, Collection<MessagingHeader>> headers, String key, String value) throws MessagingException {
+        MimeContentType contentType = new MimeContentType(value);
+        headers.put(MimeContentType.getContentTypeName(), Arrays.asList((MessagingHeader) contentType));
+    }
+
+    private void parseObject(Map<String, Collection<MessagingHeader>> headers, String key, JSONObject value) throws MessagingException, JSONException {
+        MimeContentType contentType = new MimeContentType();
+        JSONObject jsonCType = (JSONObject) value;
+        contentType.setBaseType(jsonCType.getString("type"));
+
+        if (jsonCType.has("params")) {
+            JSONObject params = jsonCType.getJSONObject("params");
+            if (params.has("charset")) {
+                contentType.setCharsetParameter(params.getString("charset"));
+                contentType.setNameParameter(params.getString("name"));
+            }
         }
-        return array;
+
+        headers.put(MimeContentType.getContentTypeName(), Arrays.asList((MessagingHeader) contentType));
     }
 
 }

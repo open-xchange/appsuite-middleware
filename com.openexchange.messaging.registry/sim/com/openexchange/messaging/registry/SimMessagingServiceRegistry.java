@@ -49,6 +49,7 @@
 
 package com.openexchange.messaging.registry;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,19 +67,20 @@ public class SimMessagingServiceRegistry implements MessagingServiceRegistry{
 
     private MessagingException exception;
     
-    /* (non-Javadoc)
-     * @see com.openexchange.messaging.registry.MessagingServiceRegistry#getAllServices()
-     */
     public List<MessagingService> getAllServices() throws MessagingException {
-        // TODO Auto-generated method stub
-        return null;
+        exception();
+        return new ArrayList<MessagingService>(services.values());
     }
 
     public MessagingService getMessagingService(String id) throws MessagingException {
+        exception();
+        return services.get(id);
+    }
+
+    private void exception() throws MessagingException {
         if(exception != null) {
             throw exception;
         }
-        return services.get(id);
     }
     
     public void add(MessagingService service) {

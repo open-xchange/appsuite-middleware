@@ -74,6 +74,10 @@ public enum MessagingExceptionCodes implements OXErrorMessage {
      */
     IO_ERROR(MessagingExceptionMessages.IO_ERROR_MSG, Category.CODE_ERROR, 3),
     /**
+     * An I/O error occurred: %1$s
+     */
+    JSON_ERROR(MessagingExceptionMessages.JSON_ERROR_MSG, Category.CODE_ERROR, 14),
+    /**
      * Messaging account %1$s of service "%2$s" could not be found for user %3$s in context %4$s.
      */
     ACCOUNT_NOT_FOUND(MessagingExceptionMessages.ACCOUNT_NOT_FOUND_MSG, Category.CODE_ERROR, 4),
@@ -108,7 +112,21 @@ public enum MessagingExceptionCodes implements OXErrorMessage {
     /**
      * Unknown messaging content: %1$s.
      */
-    UNKNOWN_MESSAGING_CONTENT(MessagingExceptionMessages.UNKNOWN_MESSAGING_CONTENT_MSG, Category.CODE_ERROR, 13);
+    UNKNOWN_MESSAGING_CONTENT(MessagingExceptionMessages.UNKNOWN_MESSAGING_CONTENT_MSG, Category.CODE_ERROR, 14),
+    /**
+     * Unknown messaging service: %1$s.
+     */
+    UNKNOWN_MESSAGING_SERVICE(MessagingExceptionMessages.UNKNOWN_MESSAGING_SERVICE_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 15),
+    /**
+     * Missing parameter: %1$s.
+     */
+    MISSING_PARAMETER(MessagingExceptionMessages.MISSING_PARAMETER_MSG, Category.USER_INPUT, 16),
+    /**
+     * Invalid parameter: %1$s with value '%2$s'.
+     */
+    INVALID_PARAMETER(MessagingExceptionMessages.INVALID_PARAMETER_MSG, Category.USER_INPUT, 17),
+    
+    ;
 
     private final Category category;
 

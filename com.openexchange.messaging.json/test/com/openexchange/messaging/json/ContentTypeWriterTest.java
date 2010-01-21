@@ -49,53 +49,59 @@
 
 package com.openexchange.messaging.json;
 
-import java.util.List;
-import org.json.JSONArray;
+import java.util.Arrays;
+import java.util.Collection;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.datatypes.genericonf.json.FormDescriptionWriter;
-import com.openexchange.i18n.Translator;
-import com.openexchange.messaging.MessagingService;
+import junit.framework.TestCase;
+import com.openexchange.json.JSONAssertion;
+import com.openexchange.messaging.ContentType;
+import com.openexchange.messaging.MessagingException;
+import com.openexchange.messaging.MessagingHeader;
+import com.openexchange.messaging.generic.internet.MimeContentType;
+
+import static com.openexchange.json.JSONAssertion.*;
 
 /**
- * {@link MessagingServiceWriter}
- *
+ * {@link ContentTypeWriterTest}
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MessagingServiceWriter {
+public class ContentTypeWriterTest extends TestCase{
 
-    private static final String FORM_DESCRIPTION = "formDescription";
-    private static final String MESSAGE_ACTIONS = "messageActions";
-    private static final String DISPLAY_NAME = "displayName";
-    private static final String ID = "id";
+    public void testWriteContentType() throws MessagingException, JSONException {
+        ContentType contentType = new MimeContentType();
+        contentType.setPrimaryType("text");
+        contentType.setSubType("plain");
+        contentType.setCharsetParameter("UTF-8");
+        contentType.setNameParameter("something.txt");
 
-    private Translator translator;
-    
-    public MessagingServiceWriter(Translator translator) {
-        this.translator = translator;
+        ContentTypeWriter writer = new ContentTypeWriter();
+
+        SimEntry<String, Collection<MessagingHeader>> entry = entry( contentType );
+
+        assertTrue(writer.handles(entry));
+        assertEquals("content-type", writer.writeKey(entry));
+        
+        Object value = writer.writeValue(entry);
+        assertNotNull(value);
+        
+        JSONObject jsonCType = (JSONObject) value;
+        
+        JSONAssertion assertion = new JSONAssertion()
+            .isObject()
+                .hasKey("type").withValue("text/plain")
+                .hasKey("params").withValueObject()
+                    .hasKey("charset").withValue("UTF-8")
+                    .hasKey("name").withValue("something.txt")
+                .objectEnds()
+            .objectEnds();
+        
+        assertValidates(assertion, jsonCType);
+        
     }
-    
-    public JSONObject write(MessagingService messagingService) throws JSONException {
-        JSONObject object = new JSONObject();
-        object.put(ID, messagingService.getId());
-        object.put(DISPLAY_NAME, messagingService.getDisplayName());
-        object.put(MESSAGE_ACTIONS, writeCapabilities(messagingService.getMessageActions()));
-        if(null != messagingService.getFormDescription()) {
-            object.put(FORM_DESCRIPTION, new FormDescriptionWriter(translator).write(messagingService.getFormDescription()));
-        }
-        return object;
-    }
 
-    private JSONArray writeCapabilities(List<String> capabilities) {
-        JSONArray array = new JSONArray();
-        if(capabilities == null) {
-            return array;
-        }
-        for (String string : capabilities) {
-            array.put(string);
-        }
-        return array;
+    private SimEntry<String, Collection<MessagingHeader>> entry(MessagingHeader header) {
+        return new SimEntry<String, Collection<MessagingHeader>>(header.getName(), Arrays.asList((MessagingHeader) header));
     }
-
 }

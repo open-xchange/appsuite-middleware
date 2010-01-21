@@ -71,9 +71,10 @@ public class MessagingAccountWriter {
         accountJSON.put(ID, account.getId());
         accountJSON.put(DISPLAY_NAME, account.getDisplayName());
         accountJSON.put(MESSAGING_SERVICE, account.getMessagingService().getId());
-        
-        JSONObject configJSON = new FormContentWriter().write(account.getMessagingService().getFormDescription(), account.getConfiguration(), null);
-        accountJSON.put(CONFIGURATION, configJSON);
+        if(null != account.getMessagingService().getFormDescription() && null != account.getConfiguration()) {
+            JSONObject configJSON = new FormContentWriter().write(account.getMessagingService().getFormDescription(), account.getConfiguration(), null);
+            accountJSON.put(CONFIGURATION, configJSON);
+        }
         return accountJSON;
     }
 

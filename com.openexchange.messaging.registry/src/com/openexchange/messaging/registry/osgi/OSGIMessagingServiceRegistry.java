@@ -55,6 +55,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.messaging.MessagingException;
+import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 
@@ -97,7 +98,7 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
                 return messagingService;
             }
         }
-        throw new MessagingException(Category.SUBSYSTEM_OR_SERVICE_DOWN, 1, "Can not find MessagingService with id: "+id, null);
+        throw MessagingExceptionCodes.UNKNOWN_MESSAGING_SERVICE.create(id);
     }
 
 }

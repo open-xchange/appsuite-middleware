@@ -47,55 +47,70 @@
  *
  */
 
-package com.openexchange.messaging.json;
+package com.openexchange.messaging.json.actions.services;
 
-import java.util.List;
+import junit.framework.TestCase;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.datatypes.genericonf.json.FormDescriptionWriter;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.i18n.Translator;
-import com.openexchange.messaging.MessagingService;
+import com.openexchange.messaging.MessagingException;
+import com.openexchange.messaging.SimMessagingService;
+import com.openexchange.messaging.registry.SimMessagingServiceRegistry;
+
 
 /**
- * {@link MessagingServiceWriter}
+ * {@link AllActionTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MessagingServiceWriter {
-
-    private static final String FORM_DESCRIPTION = "formDescription";
-    private static final String MESSAGE_ACTIONS = "messageActions";
-    private static final String DISPLAY_NAME = "displayName";
-    private static final String ID = "id";
-
-    private Translator translator;
+public class AllActionTest extends TestCase {
+    // Success Case
+    public void testSuccess() throws AbstractOXException, JSONException {
+        SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
     
-    public MessagingServiceWriter(Translator translator) {
-        this.translator = translator;
+        SimMessagingService messagingService = new SimMessagingService();
+        messagingService.setId("com.openexchange.test");
+        
+        registry.add(messagingService);
+        
+        AllAction action = new AllAction(registry, Translator.EMPTY);
+        
+        AJAXRequestResult result = action.perform(null, null);
+        
+        assertNotNull(result);
+        
+        Object resultObject = result.getResultObject();
+        assertNotNull(resultObject);
+        
+        assertTrue(JSONArray.class.isInstance(resultObject));
+    
+        JSONArray all = (JSONArray) resultObject;
+        assertEquals(1, all.length());
     }
     
-    public JSONObject write(MessagingService messagingService) throws JSONException {
-        JSONObject object = new JSONObject();
-        object.put(ID, messagingService.getId());
-        object.put(DISPLAY_NAME, messagingService.getDisplayName());
-        object.put(MESSAGE_ACTIONS, writeCapabilities(messagingService.getMessageActions()));
-        if(null != messagingService.getFormDescription()) {
-            object.put(FORM_DESCRIPTION, new FormDescriptionWriter(translator).write(messagingService.getFormDescription()));
+    // Error Cases
+    
+    public void testMessagingException() throws AbstractOXException {
+        SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
+        registry.setException(new MessagingException(null, -1, null, null));
+        
+        SimMessagingService messagingService = new SimMessagingService();
+        messagingService.setId("com.openexchange.test");
+        
+        registry.add(messagingService);
+        
+        AllAction action = new AllAction(registry, Translator.EMPTY);
+        
+        try {
+            AJAXRequestResult result = action.perform(null, null);
+            fail("Should not swallow exceptions");
+        } catch (MessagingException x) {
+            // Success
         }
-        return object;
+    
     }
-
-    private JSONArray writeCapabilities(List<String> capabilities) {
-        JSONArray array = new JSONArray();
-        if(capabilities == null) {
-            return array;
-        }
-        for (String string : capabilities) {
-            array.put(string);
-        }
-        return array;
-    }
-
+    
+    
 }
