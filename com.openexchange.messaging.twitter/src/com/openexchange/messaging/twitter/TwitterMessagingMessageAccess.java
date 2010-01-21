@@ -165,22 +165,23 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
             } catch (final TwitterException e) {
                 throw new MessagingException(e);
             }
-        } else if (TwitterConstants.TYPE_DIRECT_MESSAGE.equalsIgnoreCase(action)) {
+        }
+        if (TwitterConstants.TYPE_DIRECT_MESSAGE.equalsIgnoreCase(action)) {
             try {
                 return new TwitterDirectMessage(twitterAccess.showStatus(parseUnsignedLong(id)).getUser(), twitterAccess.getUser());
             } catch (final TwitterException e) {
                 throw new MessagingException(e);
             }
-        } else if (TwitterConstants.TYPE_RETWEET_NEW.equalsIgnoreCase(action)) {
+        }
+        if (TwitterConstants.TYPE_RETWEET_NEW.equalsIgnoreCase(action)) {
             try {
                 twitterAccess.retweetStatus(parseUnsignedLong(id));
                 return null;
             } catch (final TwitterException e) {
                 throw new MessagingException(e);
             }
-        } else {
-            throw MessagingExceptionCodes.UNKNOWN_ACTION.create(action);
         }
+        throw MessagingExceptionCodes.UNKNOWN_ACTION.create(action);
     }
 
     public List<MessagingMessage> searchMessages(final String folder, final IndexRange indexRange, final MessagingField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MessagingField[] fields) throws MessagingException {
