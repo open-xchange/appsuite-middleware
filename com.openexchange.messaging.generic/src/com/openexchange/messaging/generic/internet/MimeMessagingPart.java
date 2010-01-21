@@ -131,13 +131,26 @@ public class MimeMessagingPart implements MessagingPart {
             return null;
         }
 
-    }
+    } // End of BinaryContentISP class
 
+    /**
+     * Adds an appropriate {@link MessagingHeader} to a collection.
+     */
     private static interface HeaderHandler {
 
+        /**
+         * Adds an appropriate {@link MessagingHeader} created from given header to specified collection
+         * 
+         * @param header The header to convert to a {@link MessagingHeader} instance
+         * @param collection The collection to add to
+         * @throws MessagingException If adding header fails
+         */
         void handleHeader(Header header, Collection<MessagingHeader> collection) throws MessagingException;
-    }
+    } // End of HeaderHandler interface
 
+    /**
+     * Adds an address header to a collection.
+     */
     private static final class AddressHeaderHandler implements HeaderHandler {
 
         private final String name;
@@ -151,7 +164,7 @@ public class MimeMessagingPart implements MessagingPart {
             collection.addAll(MimeAddressMessagingHeader.parseRFC822(name, header.getValue()));
         }
 
-    }
+    } // End of AddressHeaderHandler class
 
     private static final HeaderName H_CONTENT_TYPE = HeaderName.valueOf(MessagingHeader.KnownHeader.CONTENT_TYPE.toString());
 
