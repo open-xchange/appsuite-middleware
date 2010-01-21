@@ -71,6 +71,13 @@ import com.openexchange.tools.session.ServerSession;
 public final class FolderMultipleHandler implements MultipleHandler {
 
     private AJAXRequestResult result;
+    
+    /**
+     * Initializes a new {@link FolderMultipleHandler}.
+     */
+    public FolderMultipleHandler() {
+        super();
+    }
 
     public Object performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws AbstractOXException, JSONException {
         final AJAXActionService actionService = FolderActionFactory.getInstance().createActionService(action);
