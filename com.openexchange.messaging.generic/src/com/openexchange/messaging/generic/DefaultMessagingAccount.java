@@ -58,6 +58,7 @@ import com.openexchange.messaging.MessagingService;
  * {@link DefaultMessagingAccount} - The default {@link MessagingAccount} implementation.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since Open-Xchange v6.16
  */
 public class DefaultMessagingAccount implements MessagingAccount {
 
@@ -69,7 +70,7 @@ public class DefaultMessagingAccount implements MessagingAccount {
 
     private int id;
 
-    private MessagingService messagingService;
+    private transient MessagingService messagingService;
 
     /**
      * Initializes a new {@link DefaultMessagingAccount}.

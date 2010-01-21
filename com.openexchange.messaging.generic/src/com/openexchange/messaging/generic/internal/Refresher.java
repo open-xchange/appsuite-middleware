@@ -66,6 +66,7 @@ import com.openexchange.messaging.generic.services.MessagingGenericServiceRegist
  * {@link Refresher} - A copy of <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>'s Refresher class.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since Open-Xchange v6.16
  */
 public abstract class Refresher<T extends Serializable> implements Serializable {
 

@@ -59,6 +59,7 @@ import com.openexchange.messaging.exception.MessagingExceptionFactory;
  * {@link MessagingActivator}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since Open-Xchange v6.16
  */
 public final class MessagingActivator implements BundleActivator {
 

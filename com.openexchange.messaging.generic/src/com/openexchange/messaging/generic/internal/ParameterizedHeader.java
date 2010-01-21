@@ -58,6 +58,7 @@ import com.openexchange.mail.mime.ParameterList;
  * {@link ParameterizedHeader} - Super class for headers which can hold a parameter list such as <code>Content-Type</code>.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since Open-Xchange v6.16
  */
 public abstract class ParameterizedHeader implements Serializable, Comparable<ParameterizedHeader>, com.openexchange.messaging.ParameterizedMessagingHeader {
 

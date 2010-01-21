@@ -68,6 +68,7 @@ import com.openexchange.session.Session;
  * {@link CachingMessagingAccountStorage} - The messaging account manager backed by {@link CacheService}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since Open-Xchange v6.16
  */
 public final class CachingMessagingAccountStorage implements MessagingAccountStorage {
 
