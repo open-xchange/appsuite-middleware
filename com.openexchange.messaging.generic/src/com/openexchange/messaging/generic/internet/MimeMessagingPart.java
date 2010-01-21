@@ -454,6 +454,9 @@ public class MimeMessagingPart implements MessagingPart {
      * @throws MessagingException If adding headers fails
      */
     public void addAllHeaders(final Map<String, Collection<MessagingHeader>> headers) throws MessagingException {
+        /*
+         * Add headers
+         */
         for (final Entry<String, Collection<MessagingHeader>> header : headers.entrySet()) {
             for (final MessagingHeader mh : header.getValue()) {
                 addHeader(mh.getName(), mh.getValue());
@@ -612,11 +615,7 @@ public class MimeMessagingPart implements MessagingPart {
         /*
          * Set new headers
          */
-        for (final Entry<String, Collection<MessagingHeader>> header : headers.entrySet()) {
-            for (final MessagingHeader mh : header.getValue()) {
-                addHeader(mh.getName(), mh.getValue());
-            }
-        }
+        addAllHeaders(headers);
     }
 
     /**
