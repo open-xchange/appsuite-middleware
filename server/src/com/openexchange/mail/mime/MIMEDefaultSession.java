@@ -54,7 +54,7 @@ import javax.mail.Session;
 import com.openexchange.mail.config.MailProperties;
 
 /**
- * {@link MIMEDefaultSession} - Provides access to default instance of {@link Session}
+ * {@link MIMEDefaultSession} - Provides access to default instance of {@link javax.mail.Session}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

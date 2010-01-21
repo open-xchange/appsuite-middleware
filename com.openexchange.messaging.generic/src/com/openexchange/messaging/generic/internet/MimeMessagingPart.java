@@ -243,6 +243,10 @@ public class MimeMessagingPart implements MessagingPart {
         HHANDLERS = Collections.unmodifiableMap(m);
     }
 
+    /*-
+     * -------------------------------------- MEMBER SECTION --------------------------------------
+     */
+
     /**
      * The underlying {@link MimePart MIME part}.
      */
