@@ -109,6 +109,9 @@ public final class MessagingExceptionMessages implements LocalizableStrings {
 
     // Messaging part is read-only: %1$s
     public static final String READ_ONLY_MSG = "Messaging part is read-only.: %1$s";
+
+    // Unknown color label index: %1$s
+    public static final String UNKNOWN_COLOR_LABEL_MSG = "Unknown color label index: %1$s";
     /**
      * Initializes a new {@link MessagingExceptionMessages}.
      */

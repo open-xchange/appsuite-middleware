@@ -128,7 +128,11 @@ public enum MessagingExceptionCodes implements OXErrorMessage {
     /**
      * Messaging part is read-only: %1$s
      */
-    READ_ONLY(MessagingExceptionMessages.READ_ONLY_MSG, Category.USER_INPUT, 18);
+    READ_ONLY(MessagingExceptionMessages.READ_ONLY_MSG, Category.USER_INPUT, 18),
+    /**
+     * Unknown color label index: %1$s
+     */
+    UNKNOWN_COLOR_LABEL(MessagingExceptionMessages.UNKNOWN_COLOR_LABEL_MSG, Category.USER_INPUT, 19);
 
     private final Category category;
 
