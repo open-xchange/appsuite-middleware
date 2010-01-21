@@ -615,7 +615,11 @@ public class MimeMessagingPart implements MessagingPart {
         /*
          * Set new headers
          */
-        addAllHeaders(headers);
+        for (final Entry<String, Collection<MessagingHeader>> header : headers.entrySet()) {
+            for (final MessagingHeader mh : header.getValue()) {
+                addHeader(mh.getName(), mh.getValue());
+            }
+        }
     }
 
     /**
