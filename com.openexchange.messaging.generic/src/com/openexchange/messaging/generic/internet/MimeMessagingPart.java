@@ -59,6 +59,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.activation.DataHandler;
 import javax.mail.Header;
@@ -447,7 +448,21 @@ public class MimeMessagingPart implements MessagingPart {
     }
 
     /**
-     * Add this value to the existing values for this header name.
+     * Adds given header collection to the existing headers of this messaging part.
+     * 
+     * @param headers The headers to add
+     * @throws MessagingException If adding headers fails
+     */
+    public void addAllHeaders(final Map<String, Collection<MessagingHeader>> headers) throws MessagingException {
+        for (final Entry<String, Collection<MessagingHeader>> header : headers.entrySet()) {
+            for (final MessagingHeader mh : header.getValue()) {
+                addHeader(mh.getName(), mh.getValue());
+            }
+        }
+    }
+
+    /**
+     * Adds specified header value to the existing values for the associated header name.
      * 
      * @param headerName The header name
      * @param headerValue The header value
@@ -462,7 +477,7 @@ public class MimeMessagingPart implements MessagingPart {
         } catch (final javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
         } catch (final IllegalStateException e) {
-            throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw MessagingExceptionCodes.READ_ONLY.create(e, e.getMessage());
         }
     }
 
@@ -481,7 +496,7 @@ public class MimeMessagingPart implements MessagingPart {
         } catch (final javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
         } catch (final IllegalStateException e) {
-            throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw MessagingExceptionCodes.READ_ONLY.create(e, e.getMessage());
         }
     }
 
@@ -501,7 +516,7 @@ public class MimeMessagingPart implements MessagingPart {
         } catch (final javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
         } catch (final IllegalStateException e) {
-            throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw MessagingExceptionCodes.READ_ONLY.create(e, e.getMessage());
         }
     }
 
@@ -537,7 +552,7 @@ public class MimeMessagingPart implements MessagingPart {
         } catch (final javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
         } catch (final IllegalStateException e) {
-            throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw MessagingExceptionCodes.READ_ONLY.create(e, e.getMessage());
         }
     }
 
@@ -554,7 +569,7 @@ public class MimeMessagingPart implements MessagingPart {
         } catch (final javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
         } catch (final IllegalStateException e) {
-            throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw MessagingExceptionCodes.READ_ONLY.create(e, e.getMessage());
         }
     }
 
@@ -571,7 +586,36 @@ public class MimeMessagingPart implements MessagingPart {
         } catch (final javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
         } catch (final IllegalStateException e) {
-            throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw MessagingExceptionCodes.READ_ONLY.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Sets given header collection to this messaging part.
+     * 
+     * @param headers The headers to set
+     * @throws MessagingException If setting headers fails
+     */
+    public void setAllHeaders(final Map<String, Collection<MessagingHeader>> headers) throws MessagingException {
+        /*
+         * Drop all existing headers
+         */
+        try {
+            for (final Enumeration<?> allHeaders = part.getAllHeaders(); allHeaders.hasMoreElements();) {
+                part.removeHeader(((Header) allHeaders.nextElement()).getName());
+            }
+        } catch (final javax.mail.MessagingException e) {
+            throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
+        } catch (final IllegalStateException e) {
+            throw MessagingExceptionCodes.READ_ONLY.create(e, e.getMessage());
+        }
+        /*
+         * Set new headers
+         */
+        for (final Entry<String, Collection<MessagingHeader>> header : headers.entrySet()) {
+            for (final MessagingHeader mh : header.getValue()) {
+                addHeader(mh.getName(), mh.getValue());
+            }
         }
     }
 
@@ -591,7 +635,7 @@ public class MimeMessagingPart implements MessagingPart {
         } catch (final javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
         } catch (final IllegalStateException e) {
-            throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw MessagingExceptionCodes.READ_ONLY.create(e, e.getMessage());
         }
     }
 
@@ -645,7 +689,7 @@ public class MimeMessagingPart implements MessagingPart {
         } catch (final javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
         } catch (final IllegalStateException e) {
-            throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw MessagingExceptionCodes.READ_ONLY.create(e, e.getMessage());
         }
     }
 
