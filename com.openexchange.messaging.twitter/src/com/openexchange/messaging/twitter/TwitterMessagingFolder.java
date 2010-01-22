@@ -123,4 +123,8 @@ public final class TwitterMessagingFolder implements MessagingFolder {
         return false;
     }
 
+    public boolean isSubscribed() {
+        return true;
+    }
+
 }

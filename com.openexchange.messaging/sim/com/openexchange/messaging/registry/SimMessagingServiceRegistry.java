@@ -72,7 +72,7 @@ public class SimMessagingServiceRegistry implements MessagingServiceRegistry{
         return new ArrayList<MessagingService>(services.values());
     }
 
-    public MessagingService getMessagingService(String id) throws MessagingException {
+    public MessagingService getMessagingService(final String id) throws MessagingException {
         exception();
         return services.get(id);
     }
@@ -83,11 +83,15 @@ public class SimMessagingServiceRegistry implements MessagingServiceRegistry{
         }
     }
     
-    public void add(MessagingService service) {
+    public void add(final MessagingService service) {
         services.put(service.getId(), service);
     }
 
-    public void setException(MessagingException exception) {
+    public void setException(final MessagingException exception) {
         this.exception = exception;
+    }
+
+    public boolean containsMessagingService(final String id) {
+        return services.containsKey(id);
     }
 }

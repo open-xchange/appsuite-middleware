@@ -125,4 +125,13 @@ public interface MessagingFolder {
      */
     public boolean hasSubscribedSubfolders();
 
+    /**
+     * Checks whether the denoted mail folder is subscribed or not.
+     * <p>
+     * If messaging system does not support subscription, <code>true</code> is supposed to be returned.
+     * 
+     * @return Whether the denoted mail folder is subscribed or not
+     */
+    public boolean isSubscribed();
+
 }
