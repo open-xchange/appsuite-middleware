@@ -49,8 +49,11 @@
 
 package com.openexchange.messaging.osgi;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.exception.MessagingExceptionFactory;
@@ -67,6 +70,8 @@ public final class MessagingActivator implements BundleActivator {
     private ComponentRegistration componentRegistration;
 
     private OSGIMessagingServiceRegistry registry;
+
+    private List<ServiceRegistration> registrations;
 
     /**
      * Initializes a new {@link MessagingActivator}.
@@ -95,7 +100,11 @@ public final class MessagingActivator implements BundleActivator {
              */
             registry = new OSGIMessagingServiceRegistry();
             registry.start(context);
-            context.registerService(MessagingServiceRegistry.class.getName(), registry, null);
+            /*
+             * Register
+             */
+            registrations = new ArrayList<ServiceRegistration>(4);
+            registrations.add(context.registerService(MessagingServiceRegistry.class.getName(), registry, null));
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
             throw e;
@@ -107,6 +116,12 @@ public final class MessagingActivator implements BundleActivator {
         try {
             if (log.isInfoEnabled()) {
                 log.info("stopping bundle: com.openexchange.twitter");
+            }
+            if (null != registrations) {
+                while (!registrations.isEmpty()) {
+                    registrations.get(0).unregister();
+                }
+                registrations = null;
             }
             /*
              * Stop registry
