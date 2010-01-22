@@ -60,6 +60,13 @@ import java.util.List;
 public interface MessagingFolder {
 
     /**
+     * The default folder type.
+     */
+    public static enum DefaultFolderType {
+        NONE, INBOX, DRAFTS, SENT, SPAM, TRASH, CONFIRMED_SPAM, CONFIRMED_HAM;
+    }
+
+    /**
      * The constant for fullname of an account's root folder.
      */
     public static final String ROOT_FULLNAME = "";
@@ -126,12 +133,86 @@ public interface MessagingFolder {
     public boolean hasSubscribedSubfolders();
 
     /**
-     * Checks whether the denoted mail folder is subscribed or not.
+     * Checks whether the denoted messaging folder is subscribed or not.
      * <p>
      * If messaging system does not support subscription, <code>true</code> is supposed to be returned.
      * 
-     * @return Whether the denoted mail folder is subscribed or not
+     * @return Whether the denoted messaging folder is subscribed or not
      */
     public boolean isSubscribed();
+
+    /**
+     * Checks if this folder is able to hold folders.
+     * 
+     * @return <code>true</code> if this folder is able to hold folders; otherwise <code>false</code>
+     */
+    public boolean isHoldsFolders();
+
+    /**
+     * Checks if this folder is able to hold messages.
+     * 
+     * @return <code>true</code> if this folder is able to hold messages; otherwise <code>false</code>
+     */
+    public boolean isHoldsMessages();
+
+    /**
+     * Checks if this folder denotes the root folder
+     * 
+     * @return <code>true</code> if this folder denotes the root folder; otherwise <code>false</code>
+     */
+    public boolean isRootFolder();
+
+    /**
+     * Checks if this folder denotes a default folder (Drafts, Sent, Trash, etc.)
+     * 
+     * @return <code>true</code> if this folder denotes a default folder; otherwise <code>false</code>
+     */
+    public boolean isDefaultFolder();
+
+    /**
+     * Gets the number of messages.
+     * 
+     * @return The number of messages or <code>-1</code> if this messaging folder does not hold messages
+     * @see #isHoldsMessages()
+     */
+    public int getMessageCount();
+
+    /**
+     * Gets the number of new messages (since last time this folder was accessed).
+     * 
+     * @return The number of new messages or <code>-1</code> if this messaging folder does not hold messages.
+     * @see #isHoldsMessages()
+     */
+    public int getNewMessageCount();
+
+    /**
+     * Gets the number of unread messages.
+     * 
+     * @return The number of unread messages or <code>-1</code> if this messaging folder does not hold messages
+     * @see #isHoldsMessages()
+     */
+    public int getUnreadMessageCount();
+
+    /**
+     * Gets the number of messages marked for deletion in this folder
+     * 
+     * @return The number of messages marked for deletion in this folder or <code>-1</code> if this messaging folder does not hold messages
+     * @see #isHoldsMessages()
+     */
+    public int getDeletedMessageCount();
+
+    /**
+     * Gets the default folder type.
+     * 
+     * @return The default folder type or {@link DefaultFolderType#NONE} if not available
+     */
+    public DefaultFolderType getDefaultFolderType();
+
+    /**
+     * Checks if default folder type was applied to this messaging folder.
+     * 
+     * @return <code>true</code> if default folder type is applied; otherwise <code>false</code>
+     */
+    public boolean containsDefaultFolderType();
 
 }

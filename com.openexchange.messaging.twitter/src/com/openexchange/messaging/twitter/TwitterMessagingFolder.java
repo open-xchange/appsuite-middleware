@@ -127,4 +127,44 @@ public final class TwitterMessagingFolder implements MessagingFolder {
         return true;
     }
 
+    public int getDeletedMessageCount() {
+        return 0;
+    }
+
+    public int getMessageCount() {
+        return TwitterConstants.TIMELINE_LENGTH;
+    }
+
+    public int getNewMessageCount() {
+        return 0;
+    }
+
+    public int getUnreadMessageCount() {
+        return 0;
+    }
+
+    public boolean isDefaultFolder() {
+        return false;
+    }
+
+    public boolean isHoldsFolders() {
+        return false;
+    }
+
+    public boolean isHoldsMessages() {
+        return true;
+    }
+
+    public boolean isRootFolder() {
+        return true;
+    }
+
+    public boolean containsDefaultFolderType() {
+        return true;
+    }
+
+    public DefaultFolderType getDefaultFolderType() {
+        return DefaultFolderType.NONE;
+    }
+
 }
