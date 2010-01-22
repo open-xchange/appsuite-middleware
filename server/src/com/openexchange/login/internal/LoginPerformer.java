@@ -154,6 +154,9 @@ public final class LoginPerformer {
                 public int getUserId() {
                     return user.getId();
                 }
+                public String getAuthId() {
+                    return request.getAuthId();
+                }
             });
             retval.setSession(sessiondService.getSession(sessionId));
             // Trigger registered login handlers

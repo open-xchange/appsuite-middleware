@@ -71,7 +71,7 @@ public class SessiondServiceImpl implements SessiondService {
     }
 
     public String addSession(AddSessionParameter param) throws SessiondException {
-        return SessionHandler.addSession(param.getUserId(), param.getUserLoginInfo(), param.getPassword(), param.getContext(), param.getClientIP(), param.getFullLogin());
+        return SessionHandler.addSession(param.getUserId(), param.getUserLoginInfo(), param.getPassword(), param.getContext(), param.getClientIP(), param.getFullLogin(), param.getAuthId());
     }
 
     public void changeSessionPassword(final String sessionId, final String newPassword) throws SessiondException {

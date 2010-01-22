@@ -69,4 +69,6 @@ public interface AddSessionParameter {
     Context getContext();
     
     String getClientIP();
+
+    String getAuthId();
 }

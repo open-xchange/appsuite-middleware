@@ -82,6 +82,8 @@ public final class SessionImpl implements Session {
 
     private String localIp;
 
+    private final String authId;
+
     private final Map<String, Object> parameters;
 
     /**
@@ -96,7 +98,7 @@ public final class SessionImpl implements Session {
      * @param randomToken The random token
      * @param localIp The local IP
      */
-    public SessionImpl(final int userId, final String loginName, final String password, final int contextId, final String sessionId, final String secret, final String randomToken, final String localIp, final String login) {
+    public SessionImpl(final int userId, final String loginName, final String password, final int contextId, final String sessionId, final String secret, final String randomToken, final String localIp, final String login, String authId) {
         this.userId = userId;
         this.loginName = loginName;
         this.password = password;
@@ -106,6 +108,7 @@ public final class SessionImpl implements Session {
         this.localIp = localIp;
         this.contextId = contextId;
         this.login = login;
+        this.authId = authId;
         parameters = new ConcurrentHashMap<String, Object>();
     }
 
@@ -126,6 +129,7 @@ public final class SessionImpl implements Session {
         randomToken = cachedSession.getRandomToken();
         login = cachedSession.getLogin();
         localIp = localIP;
+        authId = cachedSession.getAuthId();
         final Map<String, Serializable> params = cachedSession.getParameters();
         parameters = new ConcurrentHashMap<String, Object>(params.size());
         for (final Iterator<Map.Entry<String, Serializable>> iter = params.entrySet().iterator(); iter.hasNext();) {
@@ -140,7 +144,7 @@ public final class SessionImpl implements Session {
      * @return An appropriate instance of {@link CachedSession}
      */
     public CachedSession createCachedSession() {
-        return new CachedSession(userId, loginName, password, contextId, sessionId, secret, randomToken, localIp, login, parameters);
+        return new CachedSession(userId, loginName, password, contextId, sessionId, secret, randomToken, localIp, login, authId, parameters);
     }
 
     public int getContextId() {
