@@ -83,6 +83,8 @@ public final class TwitterMessagingAccountTransport implements MessagingAccountT
 
     private final Session session;
 
+    private boolean connected;
+
     /**
      * Initializes a new {@link TwitterMessagingAccountTransport}.
      * 
@@ -168,11 +170,11 @@ public final class TwitterMessagingAccountTransport implements MessagingAccountT
     }
 
     public void close() {
-        // Nothing to do
+        connected = false;
     }
 
     public void connect() throws MessagingException {
-        // Nothing to do
+        connected = true;
     }
 
     public boolean ping() throws MessagingException {
@@ -184,6 +186,10 @@ public final class TwitterMessagingAccountTransport implements MessagingAccountT
         } catch (final TwitterException e) {
             return false;
         }
+    }
+
+    public boolean isConnected() {
+        return connected;
     }
 
 }

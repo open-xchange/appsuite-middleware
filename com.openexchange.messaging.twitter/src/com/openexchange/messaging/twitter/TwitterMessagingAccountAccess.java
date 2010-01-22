@@ -81,6 +81,8 @@ public final class TwitterMessagingAccountAccess implements MessagingAccountAcce
 
     private MessagingMessageAccess messageAccess;
 
+    private boolean connected;
+
     /**
      * Initializes a new {@link TwitterMessagingAccountAccess}.
      * 
@@ -119,11 +121,11 @@ public final class TwitterMessagingAccountAccess implements MessagingAccountAcce
     }
 
     public void close() {
-        // Nothing to do
+        connected = false;
     }
 
     public void connect() throws MessagingException {
-        // Nothing to do
+        connected = true;
     }
 
     public boolean ping() throws MessagingException {
@@ -136,4 +138,9 @@ public final class TwitterMessagingAccountAccess implements MessagingAccountAcce
             return false;
         }
     }
+
+    public boolean isConnected() {
+        return connected;
+    }
+
 }
