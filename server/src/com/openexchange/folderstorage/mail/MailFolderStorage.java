@@ -719,7 +719,7 @@ public final class MailFolderStorage implements FolderStorage {
             final MailAccess<?, ?> mailAccess = getMailAccessForAccount(argument.getAccountId(), storageParameters.getSession(), accesses);
             openMailAccess(mailAccess);
 
-            return mailAccess.getFolderStorage().exists(folderId);
+            return mailAccess.getFolderStorage().exists(argument.getFullname());
         } catch (final MailException e) {
             throw new FolderException(e);
         }
