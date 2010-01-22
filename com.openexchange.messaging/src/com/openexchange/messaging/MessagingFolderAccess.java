@@ -274,7 +274,7 @@ public interface MessagingFolderAccess {
     /**
      * Gets the fullname of default confirmed ham folder
      * 
-     * @return The fullname of default confirmed ham folder
+     * @return The fullname of default confirmed ham folder or <code>null</code> if not applicable
      * @throws MessagingException If confirmed ham folder's fullname cannot be returned
      */
     public String getConfirmedHamFolder() throws MessagingException;
@@ -282,7 +282,7 @@ public interface MessagingFolderAccess {
     /**
      * Gets the fullname of default confirmed spam folder
      * 
-     * @return The fullname of default confirmed spam folder
+     * @return The fullname of default confirmed spam folder or <code>null</code> if not applicable
      * @throws MessagingException If confirmed spam folder's fullname cannot be returned
      */
     public String getConfirmedSpamFolder() throws MessagingException;
@@ -290,7 +290,7 @@ public interface MessagingFolderAccess {
     /**
      * Gets the fullname of default drafts folder
      * 
-     * @return The fullname of default drafts folder
+     * @return The fullname of default drafts folder or <code>null</code> if not applicable
      * @throws MessagingException If draft folder's fullname cannot be returned
      */
     public String getDraftsFolder() throws MessagingException;
@@ -298,7 +298,7 @@ public interface MessagingFolderAccess {
     /**
      * Gets the fullname of default spam folder
      * 
-     * @return The fullname of default spam folder
+     * @return The fullname of default spam folder or <code>null</code> if not applicable
      * @throws MessagingException If spam folder's fullname cannot be returned
      */
     public String getSpamFolder() throws MessagingException;
@@ -306,7 +306,7 @@ public interface MessagingFolderAccess {
     /**
      * Gets the fullname of default sent folder
      * 
-     * @return The fullname of default sent folder
+     * @return The fullname of default sent folder or <code>null</code> if not applicable
      * @throws MessagingException If sent folder's fullname cannot be returned
      */
     public String getSentFolder() throws MessagingException;
@@ -314,7 +314,7 @@ public interface MessagingFolderAccess {
     /**
      * Gets the fullname of default trash folder
      * 
-     * @return The fullname of default trash folder
+     * @return The fullname of default trash folder or <code>null</code> if not applicable
      * @throws MessagingException If trash folder's fullname cannot be returned
      */
     public String getTrashFolder() throws MessagingException;
