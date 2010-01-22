@@ -379,7 +379,7 @@ public class Login extends AJAXServlet {
         }
     }
 
-    private LoginRequest parseLogin(HttpServletRequest req) throws AjaxException {
+    private LoginRequest parseLogin(final HttpServletRequest req) throws AjaxException {
         final String login = req.getParameter(PARAM_NAME);
         if (null == login) {
             throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, PARAM_NAME);
@@ -388,11 +388,7 @@ public class Login extends AJAXServlet {
         if (null == password) {
             throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, PARAM_PASSWORD);
         }
-        final String clientIP = req.getRemoteAddr();
-        final String userAgent = req.getHeader(Header.USER_AGENT);
         final String authId = null == req.getParameter(LoginFields.AUTHID_PARAM) ? UUIDs.getUnformattedString(UUID.randomUUID()) : req.getParameter(LoginFields.AUTHID_PARAM);
-        final String client = req.getParameter(LoginFields.CLIENT_PARAM);
-        final String version = req.getParameter(LoginFields.VERSION_PARAM);
         LoginRequest loginRequest = new LoginRequest() {
             public String getLogin() {
                 return login;
@@ -401,19 +397,19 @@ public class Login extends AJAXServlet {
                 return password;
             }
             public String getClientIP() {
-                return clientIP;
+                return req.getRemoteAddr();
             }
             public String getUserAgent() {
-                return userAgent;
+                return req.getHeader(Header.USER_AGENT);
             }
             public String getAuthId() {
                 return authId;
             }
             public String getClient() {
-                return client;
+                return req.getParameter(LoginFields.CLIENT_PARAM);
             }
             public String getVersion() {
-                return version;
+                return req.getParameter(LoginFields.VERSION_PARAM);
             }
             public Interface getInterface() {
                 return HTTP_JSON;
