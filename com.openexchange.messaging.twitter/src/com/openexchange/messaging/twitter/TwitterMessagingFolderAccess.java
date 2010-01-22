@@ -236,4 +236,28 @@ public final class TwitterMessagingFolderAccess implements MessagingFolderAccess
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(TwitterMessagingService.getServiceId());
     }
 
+    public String getConfirmedHamFolder() throws MessagingException {
+        return null;
+    }
+
+    public String getConfirmedSpamFolder() throws MessagingException {
+        return null;
+    }
+
+    public String getDraftsFolder() throws MessagingException {
+        return null;
+    }
+
+    public String getSentFolder() throws MessagingException {
+        return null;
+    }
+
+    public String getSpamFolder() throws MessagingException {
+        return null;
+    }
+
+    public String getTrashFolder() throws MessagingException {
+        return null;
+    }
+
 }
