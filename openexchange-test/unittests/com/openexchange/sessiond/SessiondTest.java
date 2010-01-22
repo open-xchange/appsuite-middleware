@@ -166,6 +166,9 @@ public class SessiondTest extends TestCase {
             public String getUserLoginInfo() {
                 return testUser1;
             }
+            public String getAuthId() {
+                return "authId";
+            }
         });
     }
     
@@ -193,6 +196,9 @@ public class SessiondTest extends TestCase {
             }
             public String getUserLoginInfo() {
                 return testUser1;
+            }
+            public String getAuthId() {
+                return "authId";
             }
         });
         sessiondCon.refreshSession(sessionId);
@@ -223,6 +229,9 @@ public class SessiondTest extends TestCase {
             public String getUserLoginInfo() {
                 return testUser1;
             }
+            public String getAuthId() {
+                return "authId";
+            }
         });
         sessiondCon.removeSession(sessionId);
     }
@@ -251,6 +260,9 @@ public class SessiondTest extends TestCase {
             }
             public String getUserLoginInfo() {
                 return testUser1;
+            }
+            public String getAuthId() {
+                return "authId";
             }
         });
         sessiondCon.refreshSession(sessionId);
