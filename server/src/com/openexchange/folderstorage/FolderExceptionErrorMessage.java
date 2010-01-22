@@ -158,7 +158,11 @@ public enum FolderExceptionErrorMessage implements OXErrorMessage {
     /**
      * No default folder available for content type "%1$s" in tree "%2$s".
      */
-    NO_DEFAULT_FOLDER(FolderExceptionMessages.NO_DEFAULT_FOLDER_MSG, Category.CODE_ERROR, 24);
+    NO_DEFAULT_FOLDER(FolderExceptionMessages.NO_DEFAULT_FOLDER_MSG, Category.CODE_ERROR, 24),
+    /**
+     * Invalid folder identifier: %1$s.
+     */
+    INVALID_FOLDER_ID(FolderExceptionMessages.INVALID_FOLDER_ID_MSG, Category.CODE_ERROR, 25);
 
     private final Category category;
 

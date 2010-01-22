@@ -133,6 +133,9 @@ public class FolderExceptionMessages implements LocalizableStrings {
     // No default folder available for content type "%1$s" in tree "%2$s".
     public static final String NO_DEFAULT_FOLDER_MSG = "No default folder available for content type \"%1$s\" in tree \"%2$s\".";
 
+    // Invalid folder identifier: %1$s.
+    public static final String INVALID_FOLDER_ID_MSG = "Invalid folder identifier: %1$s.";
+
     /**
      * Initializes a new {@link FolderExceptionMessages}
      */
