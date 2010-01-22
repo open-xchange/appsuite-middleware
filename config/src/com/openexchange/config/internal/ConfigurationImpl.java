@@ -159,11 +159,8 @@ public final class ConfigurationImpl implements ConfigurationService {
     }
 
     private static void processPropertiesFile(final File propFile, final Map<String, String> properties, final Map<String, String> propertiesFiles) {
-        FileInputStream fis = null;
         try {
-            fis = new FileInputStream(propFile);
-            final Properties tmp = new Properties();
-            tmp.load(fis);
+            final Properties tmp = loadProperties(propFile);
             final int size = tmp.size();
             final Iterator<Entry<Object, Object>> iter = tmp.entrySet().iterator();
             for (int i = 0; i < size; i++) {
@@ -186,13 +183,20 @@ public final class ConfigurationImpl implements ConfigurationService {
             LOG.error(e.getMessage(), e);
         } catch (final IOException e) {
             LOG.error(e.getMessage(), e);
+        }
+    }
+
+    private static Properties loadProperties(final File propFile) throws FileNotFoundException, IOException {
+        final FileInputStream fis = new FileInputStream(propFile);
+        try {
+            final Properties tmp = new Properties();
+            tmp.load(fis);
+            return tmp;
         } finally {
-            if (null != fis) {
-                try {
-                    fis.close();
-                } catch (final IOException e) {
-                    LOG.error(e.getMessage(), e);
-                }
+            try {
+                fis.close();
+            } catch (final IOException e) {
+                LOG.error(e.getMessage(), e);
             }
         }
     }
