@@ -141,7 +141,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
     }
 
     /**
-     * Sets the capabilities
+     * Sets the capabilities.
      * 
      * @param capabilities The capabilities
      */
@@ -360,7 +360,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
     }
 
     /**
-     * Sets if this folder is subscribed
+     * Sets if this folder is subscribed.
      * 
      * @param subscribed <code>true</code> if this folder is subscribed; otherwise <code>false</code>
      */
