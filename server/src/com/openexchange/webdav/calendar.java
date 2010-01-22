@@ -78,6 +78,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.login.Interface;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -97,13 +98,18 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
 
     private static final long serialVersionUID = 5779820324953825111L;
 
-    private static final transient Log LOG = LogFactory.getLog(calendar.class);
+    private static final Log LOG = LogFactory.getLog(calendar.class);
 
     /**
      * Initializes a new {@link calendar}.
      */
     public calendar() {
         super();
+    }
+
+    @Override
+    protected Interface getInterface() {
+        return Interface.WEBDAV_XML;
     }
 
     @Override

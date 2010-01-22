@@ -47,41 +47,41 @@
  *
  */
 
-
-
 package com.openexchange.webdav;
 
+import com.openexchange.login.Interface;
 import com.openexchange.tools.webdav.OXServlet;
 
 /**
  * attachments
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
-
 public final class links extends OXServlet {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -3061969385960196356L;
+    private static final long serialVersionUID = -3061969385960196356L;
 
-	protected String getServletUrl() {
-		return "/servlet/webdav.links";
-	}
+    @Override
+    protected Interface getInterface() {
+        return Interface.WEBDAV_ICAL;
+    }
 
-	protected String getUniqueName () {
-		return "links";
-	}
+    protected String getServletUrl() {
+        return "/servlet/webdav.links";
+    }
 
-	@Override
-	protected void decrementRequests() {
-		// Nothing to decrement
-	}
+    protected String getUniqueName () {
+        return "links";
+    }
 
-	@Override
-	protected void incrementRequests() {
-		// Nothing to increment
-	}
+    @Override
+    protected void decrementRequests() {
+        // Nothing to decrement
+    }
+
+    @Override
+    protected void incrementRequests() {
+        // Nothing to increment
+    }
 } 
 
 

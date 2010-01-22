@@ -114,6 +114,8 @@ public abstract class OXServlet extends WebDavServlet {
         return true;
     }
 
+    protected abstract Interface getInterface();
+
     /**
      * {@inheritDoc}
      */
@@ -289,7 +291,7 @@ public abstract class OXServlet extends WebDavServlet {
                 return login;
             }
             public Interface getInterface() {
-                return Interface.WEBDAV;
+                return OXServlet.this.getInterface();
             }
             public String getClientIP() {
                 return req.getRemoteAddr();

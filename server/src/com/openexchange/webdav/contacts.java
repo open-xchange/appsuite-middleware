@@ -75,6 +75,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.login.Interface;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -101,6 +102,11 @@ public final class contacts extends XmlServlet<ContactInterface> {
      */
     public contacts() {
         super();
+    }
+
+    @Override
+    protected Interface getInterface() {
+        return Interface.WEBDAV_XML;
     }
 
     @Override
@@ -162,7 +168,7 @@ public final class contacts extends XmlServlet<ContactInterface> {
 
     @Override
     protected void performActions(final OutputStream os, final Session session,
-            final PendingInvocations<ContactInterface> pendingInvocations) throws IOException, AbstractOXException {
+            final PendingInvocations<ContactInterface> pendingInvocations) throws IOException {
         //final ContactSQLInterface contactsql = new RdbContactSQLInterface(session);
         while (!pendingInvocations.isEmpty()) {
             final QueuedContact qcon = (QueuedContact) pendingInvocations.poll();

@@ -61,7 +61,6 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
@@ -98,6 +97,7 @@ import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.login.Interface;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -159,11 +159,16 @@ public final class ical extends PermissionServlet {
     // private static final String SQL_ENTRY_DELETE =
     // "DELETE FROM ical_ids WHERE cid=? AND principal_id=? AND target_object_id=? AND module=?";
 
+    @Override
+    protected Interface getInterface() {
+        return Interface.WEBDAV_ICAL;
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
-    public void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    public void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         if (LOG.isDebugEnabled()) {
             LOG.debug("GET");
         }

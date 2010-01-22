@@ -64,7 +64,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
@@ -86,6 +85,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.login.Interface;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -105,9 +105,6 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  */
 public final class vcard extends PermissionServlet {
 
-    /**
-	 * 
-	 */
     private static final long serialVersionUID = 1043665340444383184L;
 
     private final static int[] _contactFields = {
@@ -157,7 +154,12 @@ public final class vcard extends PermissionServlet {
     }
 
     @Override
-    public void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    protected Interface getInterface() {
+        return Interface.WEBDAV_VCARD;
+    }
+
+    @Override
+    public void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         if (LOG.isDebugEnabled()) {
             LOG.debug("GET");
         }
@@ -317,7 +319,7 @@ public final class vcard extends PermissionServlet {
     }
 
     @Override
-    public void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    public void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         if (LOG.isDebugEnabled()) {
             LOG.debug("PUT");
         }

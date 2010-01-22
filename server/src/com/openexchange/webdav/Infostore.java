@@ -60,6 +60,7 @@ import com.openexchange.authentication.LoginException;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.login.Interface;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
@@ -76,6 +77,11 @@ public class Infostore extends OXServlet {
     private static final long serialVersionUID = -2064098724675986123L;
 
     private static final transient Log LOG = LogFactory.getLog(Infostore.class);
+
+    @Override
+    protected Interface getInterface() {
+        return Interface.WEBDAV_INFOSTORE;
+    }
 
     @Override
     protected void doCopy(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {

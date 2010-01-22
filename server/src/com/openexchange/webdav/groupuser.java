@@ -57,7 +57,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Date;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
@@ -74,6 +73,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.login.Interface;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.storage.ResourceStorage;
@@ -109,7 +109,12 @@ public final class groupuser extends PermissionServlet {
     private static transient final Log LOG = LogFactory.getLog(groupuser.class);
 
     @Override
-    public void doPropFind(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    protected Interface getInterface() {
+        return Interface.WEBDAV_XML;
+    }
+
+    @Override
+    public void doPropFind(final HttpServletRequest req, final HttpServletResponse resp) {
         if (LOG.isDebugEnabled()) {
             LOG.debug("PROPFIND");
         }
@@ -140,7 +145,7 @@ public final class groupuser extends PermissionServlet {
             resp.setStatus(207);
 
             if (input_doc == null) {
-                doError(req, resp, HttpServletResponse.SC_BAD_REQUEST, "Bad Request");
+                doError(resp, HttpServletResponse.SC_BAD_REQUEST, "Bad Request");
                 return;
             }
 
@@ -216,7 +221,7 @@ public final class groupuser extends PermissionServlet {
             os.flush();
         } catch (final Exception exc) {
             LOG.error("doPropFind", exc);
-            doError(req, resp);
+            doError(resp);
         }
     }
 
@@ -401,11 +406,11 @@ public final class groupuser extends PermissionServlet {
         os.flush();
     }
 
-    public void doError(final HttpServletRequest req, final HttpServletResponse resp) {
-        doError(req, resp, 500, "Server Error");
+    public void doError(final HttpServletResponse resp) {
+        doError(resp, 500, "Server Error");
     }
 
-    public void doError(final HttpServletRequest req, final HttpServletResponse resp, final int code, final String msg) {
+    public void doError(final HttpServletResponse resp, final int code, final String msg) {
         try {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("status: " + code + " message: " + msg);

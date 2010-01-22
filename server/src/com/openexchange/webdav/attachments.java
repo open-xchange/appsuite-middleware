@@ -49,12 +49,10 @@
 
 package com.openexchange.webdav;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLDecoder;
 import java.util.Date;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
@@ -78,6 +76,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.login.Interface;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.session.Session;
 import com.openexchange.tools.webdav.OXServlet;
@@ -92,9 +91,6 @@ import com.openexchange.webdav.xml.fields.DataFields;
  */
 public final class attachments extends OXServlet {
 
-    /**
-	 * 
-	 */
     private static final long serialVersionUID = -7811800176537415542L;
 
     public static final String LAST_MODIFIED = "last_modified";
@@ -126,7 +122,12 @@ public final class attachments extends OXServlet {
     private static final transient Log LOG = LogFactory.getLog(attachments.class);
 
     @Override
-    public void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    protected Interface getInterface() {
+        return Interface.WEBDAV_XML;
+    }
+
+    @Override
+    public void doPut(final HttpServletRequest req, final HttpServletResponse resp) {
         log("PUT");
 
         String client_id = null;
@@ -235,7 +236,7 @@ public final class attachments extends OXServlet {
 
             xo.output(output_doc, resp.getOutputStream());
         } catch (final TransactionException exc) {
-            doError(req, resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, exc.toString());
+            doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, exc.toString());
             LOG.error(exc.getMessage(), exc);
             exc.printStarterTrace();
             rollbackTransaction();
@@ -246,10 +247,10 @@ public final class attachments extends OXServlet {
                 LOG.error(exc.getMessage(), exc);
             }
 
-            doError(req, resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, exc.toString());
+            doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, exc.toString());
             rollbackTransaction();
         } catch (final Exception exc) {
-            doError(req, resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, exc.toString());
+            doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, exc.toString());
             LOG.error("doPut", exc);
             rollbackTransaction();
         } finally {
@@ -258,7 +259,7 @@ public final class attachments extends OXServlet {
     }
 
     @Override
-    public void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    public void doGet(final HttpServletRequest req, final HttpServletResponse resp) {
         log("GET");
 
         int target_id = 0;
@@ -340,11 +341,11 @@ public final class attachments extends OXServlet {
                 i = is.read(b);
             }
         } catch (final OXConflictException exc) {
-            doError(req, resp, HttpServletResponse.SC_CONFLICT, exc.toString());
+            doError(resp, HttpServletResponse.SC_CONFLICT, exc.toString());
             LOG.error("doGet", exc);
             rollbackTransaction();
         } catch (final Exception exc) {
-            doError(req, resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Server Error: " + exc.toString());
+            doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Server Error: " + exc.toString());
             LOG.error("doGet", exc);
             rollbackTransaction();
         } finally {
@@ -353,7 +354,7 @@ public final class attachments extends OXServlet {
     }
 
     @Override
-    public void doDelete(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    public void doDelete(final HttpServletRequest req, final HttpServletResponse resp) {
         log("DELETE");
 
         Session sessionObj = null;
@@ -375,13 +376,13 @@ public final class attachments extends OXServlet {
             ATTACHMENT_BASE.commit();
             resp.setStatus(HttpServletResponse.SC_OK);
         } catch (final OXConflictException exc) {
-            doError(req, resp, HttpServletResponse.SC_CONFLICT, exc.toString());
+            doError(resp, HttpServletResponse.SC_CONFLICT, exc.toString());
             LOG.error("doDelete", exc);
         } catch (final OXObjectNotFoundException exc) {
-            doError(req, resp, HttpServletResponse.SC_NOT_FOUND, exc.toString());
+            doError(resp, HttpServletResponse.SC_NOT_FOUND, exc.toString());
             rollbackTransaction();
         } catch (final Exception exc) {
-            doError(req, resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Server Error: " + exc.toString());
+            doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Server Error: " + exc.toString());
             LOG.error("doDelete", exc);
             rollbackTransaction();
         } finally {
@@ -389,7 +390,7 @@ public final class attachments extends OXServlet {
         }
     }
 
-    protected void doError(final HttpServletRequest req, final HttpServletResponse resp, final int errorcode, final String errormessage) {
+    protected void doError(final HttpServletResponse resp, final int errorcode, final String errormessage) {
         resp.setStatus(errorcode);
         log(errorcode + ": " + errormessage);
     }

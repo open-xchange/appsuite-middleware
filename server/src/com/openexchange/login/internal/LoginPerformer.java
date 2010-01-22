@@ -334,6 +334,8 @@ public final class LoginPerformer {
         if (null != session) {
             sb.append(" Session:");
             sb.append(session.getSessionID());
+        } else {
+            sb.append(" Failed.");
         }
         LOG.info(sb.toString());
     }

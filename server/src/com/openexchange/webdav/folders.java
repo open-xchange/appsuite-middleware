@@ -71,6 +71,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.login.Interface;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -101,6 +102,11 @@ public final class folders extends XmlServlet<FolderSQLInterface> {
      */
     public folders() {
         super();
+    }
+
+    @Override
+    protected Interface getInterface() {
+        return Interface.WEBDAV_XML;
     }
 
     @Override
@@ -156,16 +162,13 @@ public final class folders extends XmlServlet<FolderSQLInterface> {
                     folderobject.setParentFolderID(inFolder);
                 }
 
-                pendingInvocations.add(new QueuedFolder(folderobject, folderparser.getClientID(), method, lastModified,
-                        inFolder));
+                pendingInvocations.add(new QueuedFolder(folderobject, folderparser.getClientID(), method, lastModified));
                 break;
             case DataParser.DELETE:
-                pendingInvocations.add(new QueuedFolder(folderobject, folderparser.getClientID(), method, lastModified,
-                        inFolder));
+                pendingInvocations.add(new QueuedFolder(folderobject, folderparser.getClientID(), method, lastModified));
                 break;
             case DataParser.CLEAR:
-                pendingInvocations.add(new QueuedFolder(folderobject, folderparser.getClientID(), method, lastModified,
-                    inFolder));
+                pendingInvocations.add(new QueuedFolder(folderobject, folderparser.getClientID(), method, lastModified));
                 break;
             default:
                 if (LOG.isDebugEnabled()) {
@@ -226,8 +229,6 @@ public final class folders extends XmlServlet<FolderSQLInterface> {
 
         private final Date lastModified;
 
-        private final int inFolder;
-
         private LastModifiedCache lastModifiedCache;
 
         /**
@@ -240,13 +241,12 @@ public final class folders extends XmlServlet<FolderSQLInterface> {
          * @param inFolder The contact's folder
          */
         public QueuedFolder(final FolderObject folderObject, final String clientId, final int action,
-                final Date lastModified, final int inFolder) {
+                final Date lastModified) {
             super();
             this.folderObject = folderObject;
             this.clientId = clientId;
             this.action = action;
             this.lastModified = lastModified;
-            this.inFolder = inFolder;
             this.lastModifiedCache = new LastModifiedCache();
         }
 

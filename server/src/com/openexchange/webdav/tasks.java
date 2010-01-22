@@ -76,6 +76,7 @@ import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.login.Interface;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.session.Session;
 import com.openexchange.webdav.xml.DataParser;
@@ -96,6 +97,11 @@ public final class tasks extends XmlServlet<TasksSQLInterface> {
 
     public tasks() {
         super();
+    }
+
+    @Override
+    protected Interface getInterface() {
+        return Interface.WEBDAV_ICAL;
     }
 
     @Override
