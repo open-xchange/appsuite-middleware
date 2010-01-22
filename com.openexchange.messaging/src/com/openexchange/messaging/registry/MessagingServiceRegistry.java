@@ -72,6 +72,14 @@ public interface MessagingServiceRegistry {
     public MessagingService getMessagingService(String id) throws MessagingException;
 
     /**
+     * Checks if there is a messaging service associated with specified identifier.
+     * 
+     * @param id The messaging service identifier
+     * @return <code>true</code> if there is a messaging service associated with specified identifier; otherwise <code>false</code>
+     */
+    public boolean containsMessagingService(String id);
+
+    /**
      * Gets all messaging services kept in this registry.
      * 
      * @return All messaging services kept in this registry

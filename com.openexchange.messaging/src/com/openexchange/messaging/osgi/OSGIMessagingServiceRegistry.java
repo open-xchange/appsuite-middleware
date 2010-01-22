@@ -123,6 +123,10 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
         return messagingService;
     }
 
+    public boolean containsMessagingService(final String id) {
+        return null == id ? false : map.containsKey(id);
+    }
+
     private final class Customizer implements ServiceTrackerCustomizer {
 
         private final BundleContext context;
