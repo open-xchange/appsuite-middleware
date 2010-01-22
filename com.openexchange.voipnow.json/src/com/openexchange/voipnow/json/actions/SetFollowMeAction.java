@@ -200,61 +200,96 @@ public final class SetFollowMeAction extends AbstractVoipNowSOAPAction<Extension
             if (transferToLen > 0) {
                 final AddCallRulesInRequest addCallRulesInRequest = new AddCallRulesInRequest();
 
-                final AddCallRulesInRequestChoice_type0 type0 = new AddCallRulesInRequestChoice_type0();
-                type0.setUserID(userIdInteger);
-                addCallRulesInRequest.setAddCallRulesInRequestChoice_type0(type0);
+                {
+                    final AddCallRulesInRequestChoice_type0 type0 = new AddCallRulesInRequestChoice_type0();
+                    type0.setUserID(userIdInteger);
+                    addCallRulesInRequest.setAddCallRulesInRequestChoice_type0(type0);
+                }
 
-                final CallRuleInfo callRuleInfo = new CallRuleInfo();
-                /*
-                 * "followme"
-                 */
-                callRuleInfo.setAction(com._4psa.extensiondata_xsd._2_0_4.Action_type5.followme);
-                /*
-                 * 1
-                 */
-                callRuleInfo.setMatch(Match_type1.value1);
-                /*
-                 * "."
-                 */
-                final Rule rule = new Rule();
-                rule.setRule(".");
-                callRuleInfo.setNumber(rule);
-                /*
-                 * transferTo
-                 */
-                final com._4psa.common_xsd._2_0_4.String transferToString = new com._4psa.common_xsd._2_0_4.String();
-                final StringBuilder sb = new StringBuilder(transferToLen * 8);
-                sb.append(transferTo[0]);
-                for (int i = 1; i < transferToLen; i++) {
-                    sb.append(' ').append(transferTo[i]);
-                }
-                transferToString.setString(sb.toString());
-                callRuleInfo.setTransferTo(transferToString);
-                final boolean requestInterval = false;
-                /*
-                 * interval
-                 */
-                if (requestInterval) {
+                {
+                    final CallRuleInfo callRuleInfo = new CallRuleInfo();
                     /*
-                     * Get the interval
+                     * "followme"
                      */
-                    final int interval;
-                    {
-                        final AJAXRequestResult innerResult = new GetTimeIntervalAction().perform(new AJAXRequestData(), session);
-                        interval = ((java.math.BigInteger) innerResult.getResultObject()).intValue();
+                    callRuleInfo.setAction(com._4psa.extensiondata_xsd._2_0_4.Action_type5.followme);
+                    /*
+                     * 1
+                     */
+                    callRuleInfo.setMatch(Match_type1.value1);
+                    /*
+                     * "."
+                     */
+                    final Rule rule = new Rule();
+                    rule.setRule(".");
+                    callRuleInfo.setNumber(rule);
+                    /*
+                     * transferTo
+                     */
+                    final com._4psa.common_xsd._2_0_4.String transferToString = new com._4psa.common_xsd._2_0_4.String();
+                    final StringBuilder sb = new StringBuilder(transferToLen * 8);
+                    sb.append(transferTo[0]);
+                    for (int i = 1; i < transferToLen; i++) {
+                        sb.append(' ').append(transferTo[i]);
                     }
-                    final PositiveInteger intervalInteger = new PositiveInteger();
-                    intervalInteger.setPositiveInteger(new org.apache.axis2.databinding.types.PositiveInteger(String.valueOf(interval)));
-                    callRuleInfo.setIntervalID(intervalInteger);
-                } else {
-                    final PositiveInteger intervalInteger = new PositiveInteger();
-                    intervalInteger.setPositiveInteger(new org.apache.axis2.databinding.types.PositiveInteger("1"));
-                    callRuleInfo.setIntervalID(intervalInteger);
+                    transferToString.setString(sb.toString());
+                    callRuleInfo.setTransferTo(transferToString);
+                    final boolean requestInterval = false;
+                    /*
+                     * interval
+                     */
+                    if (requestInterval) {
+                        /*
+                         * Get the interval
+                         */
+                        final int interval;
+                        {
+                            final AJAXRequestResult innerResult = new GetTimeIntervalAction().perform(new AJAXRequestData(), session);
+                            interval = ((java.math.BigInteger) innerResult.getResultObject()).intValue();
+                        }
+                        final PositiveInteger intervalInteger = new PositiveInteger();
+                        intervalInteger.setPositiveInteger(new org.apache.axis2.databinding.types.PositiveInteger(String.valueOf(interval)));
+                        callRuleInfo.setIntervalID(intervalInteger);
+                    } else {
+                        final PositiveInteger intervalInteger = new PositiveInteger();
+                        intervalInteger.setPositiveInteger(new org.apache.axis2.databinding.types.PositiveInteger("1"));
+                        callRuleInfo.setIntervalID(intervalInteger);
+                    }
+                    /*
+                     * Dummy values for event type and transfer type
+                     */
+                    {
+                        final com._4psa.extensiondata_xsd._2_0_4.CallRuleInfoSequence_type0 sequenceType0 =
+                            new com._4psa.extensiondata_xsd._2_0_4.CallRuleInfoSequence_type0();
+
+                        {
+                            final com._4psa.extensiondata_xsd._2_0_4.Event_type1 eventType =
+                                com._4psa.extensiondata_xsd._2_0_4.Event_type1.BUSY;
+                            sequenceType0.setEvent(eventType);
+                        }
+
+                        {
+                            final com._4psa.extensiondata_xsd._2_0_4.TransferType_type1 transferType =
+                                com._4psa.extensiondata_xsd._2_0_4.TransferType_type1.internal;
+                            sequenceType0.setTransferType(transferType);
+                        }
+
+                        callRuleInfo.setCallRuleInfoSequence_type0(sequenceType0);
+                    }
+                    /*
+                     * Dummy values for call priority
+                     */
+                    {
+                        final com._4psa.common_xsd._2_0_4.Integer prio = new com._4psa.common_xsd._2_0_4.Integer();
+                        prio.setInteger(java.math.BigInteger.ONE);
+                        callRuleInfo.setCallPriority(prio);
+                    }
+                    /*
+                     * Dummy values for key
+                     */
+                    // callRuleInfo.setKey(java.math.BigDecimal.ONE);
+
+                    addCallRulesInRequest.setRule(new CallRuleInfo[] { callRuleInfo });
                 }
-                /*
-                 * Apply rule
-                 */
-                addCallRulesInRequest.setRule(new CallRuleInfo[] { callRuleInfo });
                 /*
                  * Execute request
                  */
