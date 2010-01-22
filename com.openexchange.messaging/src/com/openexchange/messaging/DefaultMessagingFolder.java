@@ -51,8 +51,6 @@ package com.openexchange.messaging;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.messaging.MessagingFolder;
-import com.openexchange.messaging.MessagingPermission;
 
 /**
  * {@link DefaultMessagingFolder} - The default messaging folder providing setter methods.
@@ -112,6 +110,8 @@ public class DefaultMessagingFolder implements MessagingFolder {
     private boolean b_subscribedSubfolders;
 
     private boolean b_subfolders;
+
+    private boolean exists;
 
     /**
      * Initializes a new {@link DefaultMessagingFolder}.
@@ -509,6 +509,24 @@ public class DefaultMessagingFolder implements MessagingFolder {
     public void removeSubscribed() {
         subscribed = false;
         b_subscribed = false;
+    }
+
+    /**
+     * Indicates whether this folder exists in folder storage.
+     * 
+     * @return <code>true</code> if this folder exists in folder storage; otherwise <code>false</code>
+     */
+    public boolean exists() {
+        return exists;
+    }
+
+    /**
+     * Sets whether this folder exists in folder storage.
+     * 
+     * @param exists <code>true</code> if this folder exists in folder storage; otherwise <code>false</code>
+     */
+    public void setExists(final boolean exists) {
+        this.exists = exists;
     }
 
 }
