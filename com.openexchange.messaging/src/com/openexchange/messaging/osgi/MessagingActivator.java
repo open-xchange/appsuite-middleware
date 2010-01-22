@@ -101,7 +101,7 @@ public final class MessagingActivator implements BundleActivator {
             registry = new OSGIMessagingServiceRegistry();
             registry.start(context);
             /*
-             * Register
+             * Register services
              */
             registrations = new ArrayList<ServiceRegistration>(4);
             registrations.add(context.registerService(MessagingServiceRegistry.class.getName(), registry, null));
