@@ -84,7 +84,7 @@ public final class MessagingActivator implements BundleActivator {
         final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(MessagingActivator.class);
         try {
             if (log.isInfoEnabled()) {
-                log.info("starting bundle: com.openexchange.twitter");
+                log.info("starting bundle: com.openexchange.messaging");
             }
             /*
              * Register component
@@ -115,7 +115,7 @@ public final class MessagingActivator implements BundleActivator {
         final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(MessagingActivator.class);
         try {
             if (log.isInfoEnabled()) {
-                log.info("stopping bundle: com.openexchange.twitter");
+                log.info("stopping bundle: com.openexchange.messaging");
             }
             if (null != registrations) {
                 while (!registrations.isEmpty()) {
