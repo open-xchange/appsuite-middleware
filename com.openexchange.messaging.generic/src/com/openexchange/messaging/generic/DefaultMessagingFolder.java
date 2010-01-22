@@ -50,7 +50,6 @@
 package com.openexchange.messaging.generic;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import com.openexchange.messaging.MessagingFolder;
 import com.openexchange.messaging.MessagingPermission;
@@ -98,13 +97,31 @@ public class DefaultMessagingFolder implements MessagingFolder {
 
     private boolean rootFolder;
 
+    private boolean b_rootFolder;
+
     private boolean subscribed;
+
+    private boolean b_subscribed;
+
+    private boolean b_holdsFolders;
+
+    private boolean b_holdsMessages;
+
+    private boolean b_defaultFolder;
+
+    private boolean b_subscribedSubfolders;
+
+    private boolean b_subfolders;
 
     /**
      * Initializes a new {@link DefaultMessagingFolder}.
      */
     public DefaultMessagingFolder() {
         super();
+        deletedMessageCount = -1;
+        messageCount = -1;
+        unreadMessageCount = -1;
+        newMessageCount = -1;
     }
 
     public boolean containsDefaultFolderType() {
@@ -135,7 +152,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
 
     public List<String> getCapabilities() {
         if (null == capabilities) {
-            return Collections.emptyList();
+            return null;
         }
         return new ArrayList<String>(capabilities);
     }
@@ -147,7 +164,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
      */
     public void setCapabilities(final List<String> capabilities) {
         if (capabilities == null) {
-            this.capabilities = Collections.emptyList();
+            this.capabilities = null;
         } else {
             this.capabilities = new ArrayList<String>(capabilities);
         }
@@ -246,7 +263,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
 
     public List<MessagingPermission> getPermissions() {
         if (null == permissions) {
-            return Collections.emptyList();
+            return null;
         }
         return new ArrayList<MessagingPermission>(permissions);
     }
@@ -258,7 +275,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
      */
     public void setPermissions(final List<MessagingPermission> permissions) {
         if (permissions == null) {
-            this.permissions = Collections.emptyList();
+            this.permissions = null;
         } else {
             this.permissions = new ArrayList<MessagingPermission>(permissions);
         }
@@ -288,6 +305,24 @@ public class DefaultMessagingFolder implements MessagingFolder {
      */
     public void setSubfolders(final boolean subfolders) {
         this.subfolders = subfolders;
+        b_subfolders = true;
+    }
+
+    /**
+     * Indicates whether this folder has the has-subfolders flag set
+     * 
+     * @return <code>true</code> if this folder has the has-subfolders flag set; otherwise <code>false</code>
+     */
+    public boolean containsSubfolders() {
+        return b_subfolders;
+    }
+
+    /**
+     * Removes whether this folder has subfolders.
+     */
+    public void removeSubfolders() {
+        subfolders = false;
+        b_subfolders = false;
     }
 
     public boolean hasSubscribedSubfolders() {
@@ -301,6 +336,24 @@ public class DefaultMessagingFolder implements MessagingFolder {
      */
     public void setSubscribedSubfolders(final boolean subscribedSubfolders) {
         this.subscribedSubfolders = subscribedSubfolders;
+        b_subscribedSubfolders = true;
+    }
+
+    /**
+     * Indicates whether this folder has the has-subscribed-subfolders flag set
+     * 
+     * @return <code>true</code> if this folder has the has-subscribed-subfolders flag set; otherwise <code>false</code>
+     */
+    public boolean containsSubscribedSubfolders() {
+        return b_subscribedSubfolders;
+    }
+
+    /**
+     * Removes whether this folder has subscribed subfolders.
+     */
+    public void removeSubscribedSubfolders() {
+        subscribedSubfolders = false;
+        b_subscribedSubfolders = false;
     }
 
     public boolean isDefaultFolder() {
@@ -314,6 +367,24 @@ public class DefaultMessagingFolder implements MessagingFolder {
      */
     public void setDefaultFolder(final boolean defaultFolder) {
         this.defaultFolder = defaultFolder;
+        b_defaultFolder = true;
+    }
+
+    /**
+     * Indicates whether this folder has the default-folder flag set
+     * 
+     * @return <code>true</code> if this folder has the default-folder flag set; otherwise <code>false</code>
+     */
+    public boolean containsDefaultFolder() {
+        return b_defaultFolder;
+    }
+
+    /**
+     * Removes whether this folder is a default folder.
+     */
+    public void removeDefaultFolder() {
+        defaultFolder = false;
+        b_defaultFolder = false;
     }
 
     public boolean isHoldsFolders() {
@@ -327,10 +398,45 @@ public class DefaultMessagingFolder implements MessagingFolder {
      */
     public void setHoldsFolders(final boolean holdsFolders) {
         this.holdsFolders = holdsFolders;
+        b_holdsFolders = true;
+    }
+
+    /**
+     * Indicates whether this folder has the holds-folders flag set
+     * 
+     * @return <code>true</code> if this folder has the holds-folders flag set; otherwise <code>false</code>
+     */
+    public boolean containsHoldsFolders() {
+        return b_holdsFolders;
+    }
+
+    /**
+     * Removes whether this folder holds folders.
+     */
+    public void removeHoldsFolders() {
+        holdsFolders = false;
+        b_holdsFolders = false;
     }
 
     public boolean isHoldsMessages() {
         return holdsMessages;
+    }
+
+    /**
+     * Indicates whether this folder has the holds-messages flag set
+     * 
+     * @return <code>true</code> if this folder has the holds-messages flag set; otherwise <code>false</code>
+     */
+    public boolean containsHoldsMessages() {
+        return b_holdsMessages;
+    }
+
+    /**
+     * Removes whether this folder holds messages.
+     */
+    public void removeHoldsMessages() {
+        holdsMessages = false;
+        b_holdsMessages = false;
     }
 
     /**
@@ -340,6 +446,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
      */
     public void setHoldsMessages(final boolean holdsMessages) {
         this.holdsMessages = holdsMessages;
+        b_holdsMessages = true;
     }
 
     public boolean isRootFolder() {
@@ -353,6 +460,24 @@ public class DefaultMessagingFolder implements MessagingFolder {
      */
     public void setRootFolder(final boolean rootFolder) {
         this.rootFolder = rootFolder;
+        b_rootFolder = true;
+    }
+
+    /**
+     * Indicates whether this folder has the root-folder flag set
+     * 
+     * @return <code>true</code> if this folder has the root-folder flag set; otherwise <code>false</code>
+     */
+    public boolean containsRootFolder() {
+        return b_rootFolder;
+    }
+
+    /**
+     * Removes whether this folder is the root folder.
+     */
+    public void removeRootFolder() {
+        rootFolder = false;
+        b_rootFolder = false;
     }
 
     public boolean isSubscribed() {
@@ -366,6 +491,24 @@ public class DefaultMessagingFolder implements MessagingFolder {
      */
     public void setSubscribed(final boolean subscribed) {
         this.subscribed = subscribed;
+        b_subscribed = true;
+    }
+
+    /**
+     * Indicates whether this folder has the subscribed flag set
+     * 
+     * @return <code>true</code> if this folder has the subscribed flag set; otherwise <code>false</code>
+     */
+    public boolean containsSubscribed() {
+        return b_subscribed;
+    }
+
+    /**
+     * Removes whether this folder is subscribed.
+     */
+    public void removeSubscribed() {
+        subscribed = false;
+        b_subscribed = false;
     }
 
 }
