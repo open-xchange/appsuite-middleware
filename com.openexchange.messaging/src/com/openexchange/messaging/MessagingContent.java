@@ -51,7 +51,7 @@ package com.openexchange.messaging;
 
 
 /**
- * {@link MessagingContent} - Super (marker) interface for message content.
+ * {@link MessagingContent} - Super (marker) interface for messaging content.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
