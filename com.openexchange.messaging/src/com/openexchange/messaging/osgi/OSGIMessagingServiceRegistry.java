@@ -124,7 +124,7 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
     }
 
     public boolean containsMessagingService(final String id) {
-        return null == id ? false : map.containsKey(id);
+        return map.containsKey(id);
     }
 
     private final class Customizer implements ServiceTrackerCustomizer {
