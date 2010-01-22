@@ -66,6 +66,13 @@ public interface MessagingResource {
     void connect() throws MessagingException;
 
     /**
+     * Checks if this connection is currently connected.
+     * 
+     * @return <code>true</code> if connected; otherwise <code>false</code>
+     */
+    public boolean isConnected();
+
+    /**
      * Closes this resource. May be invoked on an already closed resource.
      */
     void close();
