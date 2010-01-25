@@ -96,8 +96,14 @@ public final class TextProcessing {
         /*
          * Check if the string fits now
          */
-        if (used + s.length() <= linewrap) {
-            return s;
+        {
+            final int total = used + s.length();
+            if (total <= linewrap) {
+                if (null != prefix) {
+                    return new StringBuilder(total).append(prefix).append(s).toString();
+                }
+                return s;
+            }
         }
         /*
          * Fold the string
@@ -124,8 +130,7 @@ public final class TextProcessing {
                     sb.append(prefix);
                 }
                 sb.append(s);
-                s = "";
-                break;
+                return sb.toString();
             }
             if (null != prefix) {
                 sb.append(prefix);
@@ -135,6 +140,9 @@ public final class TextProcessing {
             lastc = s.charAt(lastspace);
             // sb.append(lastc);
             s = s.substring(lastspace + 1);
+        }
+        if (null != prefix) {
+            sb.append(prefix);
         }
         sb.append(s);
         return sb.toString();
