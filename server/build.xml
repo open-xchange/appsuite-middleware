@@ -72,6 +72,8 @@
     <property name="threadpooljar" value="com.openexchange.threadpool.jar"/>
     <property name="publishjar" value="com.openexchange.publish.jar"/>
 	<property name="pushjar" value="com.openexchange.push.jar"/>
+	<property name="messagingjar" value="com.openexchange.messaging.jar"/>
+	<property name="genericonfjar" value="com.openexchange.datatypes.genericonf.jar"/>
 
     <property name="activationjar" value="activation-1.1.1.jar"/>
     <property name="chardetjar" value="chardet-1.0.jar"/>
@@ -115,6 +117,8 @@
         <pathelement location="${bundlesdir}/${threadpooljar}"/>
         <pathelement location="${bundlesdir}/${publishjar}"/>
     	<pathelement location="${bundlesdir}/${pushjar}"/>
+    	<pathelement location="${bundlesdir}/${messagingjar}"/>
+    	<pathelement location="${bundlesdir}/${genericonfjar}"/>
 
         <pathelement location="${bundlesdir}/javax.activation/lib/${activationjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${commonscodecjar}"/>

@@ -264,6 +264,8 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     public static final int INFOSTORE = 8;
 
+    public static final int MESSAGING = 13;
+
     // Types
     public static final int PRIVATE = 1;
 

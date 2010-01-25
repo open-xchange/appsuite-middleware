@@ -121,6 +121,7 @@ public final class FolderStorageActivator implements BundleActivator {
             activators = new ArrayList<BundleActivator>(4);
             activators.add(new DatabaseFolderStorageActivator()); // Database impl
             activators.add(new MailFolderStorageActivator()); // Mail impl
+            // activators.add(new MessagingFolderStorageActivator()); // Messaging impl
             activators.add(new CacheFolderStorageActivator()); // Cache impl
             activators.add(new OutlookFolderStorageActivator()); // MS Outlook storage activator
             // activators.add(new VirtualFolderStorageActivator()); // Virtual storage activator
