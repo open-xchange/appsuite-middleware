@@ -970,24 +970,26 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     for (final MailMessage mail : mails) {
                         final String mailId = mail.getMailId();
                         finder.put(mailId, mail);
-                        if (!mail.containsHeaders()) {
+                        if (!mail.hasHeaders(headerFields)) {
                             loadMe.add(mailId);
                         }
                     }
-                    initConnection(accountId);
-                    final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-                    if (messageStorage instanceof IMailMessageStorageExt) {
-                        final IMailMessageStorageExt messageStorageExt = (IMailMessageStorageExt) messageStorage;
-                        for (final MailMessage header : messageStorageExt.getMessages(
-                            fullname,
-                            loadMe.toArray(STR_ARR),
-                            FIELDS_ID_INFO,
-                            headerFields)) {
-                            finder.get(header.getMailId()).addHeaders(header.getHeaders());
-                        }
-                    } else {
-                        for (final MailMessage header : messageStorage.getMessages(fullname, loadMe.toArray(STR_ARR), HEADERS)) {
-                            finder.get(header.getMailId()).addHeaders(header.getHeaders());
+                    if (!loadMe.isEmpty()) {
+                        initConnection(accountId);
+                        final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
+                        if (messageStorage instanceof IMailMessageStorageExt) {
+                            final IMailMessageStorageExt messageStorageExt = (IMailMessageStorageExt) messageStorage;
+                            for (final MailMessage header : messageStorageExt.getMessages(
+                                fullname,
+                                loadMe.toArray(STR_ARR),
+                                FIELDS_ID_INFO,
+                                headerFields)) {
+                                finder.get(header.getMailId()).addHeaders(header.getHeaders());
+                            }
+                        } else {
+                            for (final MailMessage header : messageStorage.getMessages(fullname, loadMe.toArray(STR_ARR), HEADERS)) {
+                                finder.get(header.getMailId()).addHeaders(header.getHeaders());
+                            }
                         }
                     }
                 }

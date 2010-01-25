@@ -78,6 +78,7 @@ import com.openexchange.imap.cache.UserFlagsCache;
 import com.openexchange.imap.command.CopyIMAPCommand;
 import com.openexchange.imap.command.FetchIMAPCommand;
 import com.openexchange.imap.command.FlagsIMAPCommand;
+import com.openexchange.imap.command.NewFetchIMAPCommand;
 import com.openexchange.imap.config.IIMAPProperties;
 import com.openexchange.imap.search.IMAPSearch;
 import com.openexchange.imap.services.IMAPServiceRegistry;
@@ -225,11 +226,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     private MailMessage[] getMessagesInternal(final String fullname, final long[] uids, final MailField[] mailFields, final String[] headerNames) throws MailException {
         final MailFields fieldSet = new MailFields(mailFields);
-        final boolean body;
         /*
          * Check for field FULL
          */
-        if (fieldSet.contains(MailField.FULL)) {
+        if (fieldSet.contains(MailField.FULL) || fieldSet.contains(MailField.BODY)) {
             final MailMessage[] mails = new MailMessage[uids.length];
             for (int j = 0; j < mails.length; j++) {
                 mails[j] = getMessageLong(fullname, uids[j], false);
@@ -239,7 +239,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         /*
          * Get messages with given fields filled
          */
-        body = fieldSet.contains(MailField.BODY) || fieldSet.contains(MailField.FULL);
         try {
             imapFolder = setAndOpenFolder(imapFolder, fullname, Folder.READ_ONLY);
             /*
@@ -247,7 +246,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
              * ignore the order of UIDs provided in a "UID FETCH" command.
              */
             final int[] seqNums = IMAPCommandsCollection.uids2SeqNums(imapFolder, uids);
-            final Message[] messages = new Message[seqNums.length];
+            final MailMessage[] messages = new MailMessage[seqNums.length];
             final MailField[] fields = fieldSet.toArray();
             final FetchProfile fetchProfile = getFetchProfile(fields, headerNames, null, null, getIMAPProperties().isFastFetch());
             final boolean isRev1 = imapConfig.getImapCapabilities().hasIMAP4rev1();
@@ -257,7 +256,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 if (seqNums[pos] <= 0) {
                     final int len = pos - lastPos;
                     if (len > 0) {
-                        fetchValidSeqNumsWithFallback(lastPos, len, seqNums, messages, fetchProfile, isRev1, body);
+                        fetchValidSeqNumsWithFallback(lastPos, len, seqNums, messages, fetchProfile, isRev1, false);
                     }
                     // Determine next valid position
                     pos++;
@@ -270,18 +269,18 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 }
             }
             if (lastPos < pos) {
-                fetchValidSeqNumsWithFallback(lastPos, pos - lastPos, seqNums, messages, fetchProfile, isRev1, body);
+                fetchValidSeqNumsWithFallback(lastPos, pos - lastPos, seqNums, messages, fetchProfile, isRev1, false);
             }
             if (fieldSet.contains(MailField.ACCOUNT_NAME) || fieldSet.contains(MailField.FULL)) {
-                return setAccountInfo(convert2Mails(messages, fields, body));
+                return setAccountInfo(messages);
             }
-            return convert2Mails(messages, fields, headerNames, body);
+            return messages;
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
         }
     }
 
-    private void fetchValidSeqNumsWithFallback(final int lastPos, final int len, final int[] seqNums, final Message[] messages, final FetchProfile fetchProfile, final boolean isRev1, final boolean body) throws MailException, MessagingException {
+    private void fetchValidSeqNumsWithFallback(final int lastPos, final int len, final int[] seqNums, final MailMessage[] messages, final FetchProfile fetchProfile, final boolean isRev1, final boolean body) throws MailException, MessagingException {
         try {
             fetchValidSeqNums(lastPos, len, seqNums, messages, fetchProfile, isRev1, body, false);
         } catch (final FolderClosedException e) {
@@ -296,17 +295,17 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
     }
 
-    private void fetchValidSeqNums(final int lastPos, final int len, final int[] seqNums, final Message[] messages, final FetchProfile fetchProfile, final boolean isRev1, final boolean body, final boolean ignoreBodystructure) throws MessagingException {
+    private void fetchValidSeqNums(final int lastPos, final int len, final int[] seqNums, final MailMessage[] messages, final FetchProfile fetchProfile, final boolean isRev1, final boolean body, final boolean ignoreBodystructure) throws MessagingException {
         final int[] subarr = new int[len];
         System.arraycopy(seqNums, lastPos, subarr, 0, len);
         final long start = System.currentTimeMillis();
-        final Message[] submessages;
+        final MailMessage[] submessages;
         if (ignoreBodystructure) {
             submessages =
-                new FetchIMAPCommand(imapFolder, isRev1, subarr, FetchIMAPCommand.getSafeFetchProfile(fetchProfile), false, true, body).setDetermineAttachmentyHeader(
+                new NewFetchIMAPCommand(imapFolder, isRev1, subarr, FetchIMAPCommand.getSafeFetchProfile(fetchProfile), false, true, body).setDetermineAttachmentyHeader(
                     true).doCommand();
         } else {
-            submessages = new FetchIMAPCommand(imapFolder, isRev1, subarr, fetchProfile, false, true, body).doCommand();
+            submessages = new NewFetchIMAPCommand(imapFolder, isRev1, subarr, fetchProfile, false, true, body).doCommand();
         }
         final long time = System.currentTimeMillis() - start;
         mailInterfaceMonitor.addUseTime(time);
