@@ -88,6 +88,24 @@ public final class QuotedInternetAddress extends InternetAddress {
     }
 
     /**
+     * Converts given array of {@link InternetAddress} to quoted addresses
+     * 
+     * @param addrs The addresses to convert
+     * @return The quoted addresses
+     * @throws AddressException If conversion fails
+     */
+    public static InternetAddress[] toQuotedAddresses(final InternetAddress[] addrs) throws AddressException {
+        if (null == addrs) {
+            return null;
+        }
+        final InternetAddress[] ret = new InternetAddress[addrs.length];
+        for (int i = 0; i < ret.length; i++) {
+            ret[i] = new QuotedInternetAddress(addrs[i]);
+        }
+        return ret;
+    }
+
+    /**
      * Parse the given comma separated sequence of addresses into {@link InternetAddress} objects. Addresses must follow RFC822 syntax.
      * 
      * @param addresslist A comma separated address strings
@@ -721,6 +739,10 @@ public final class QuotedInternetAddress extends InternetAddress {
         }
     }
 
+    /**
+     * Converts a Unicode string to ASCII using the procedure in RFC3490 section 4.1. Unassigned characters are not allowed and STD3 ASCII
+     * rules are enforced. The input string may be a domain name containing dots.
+     */
     private static String toACE(final String idnString) throws AddressException {
         if (null == idnString) {
             return null;
@@ -737,6 +759,10 @@ public final class QuotedInternetAddress extends InternetAddress {
         }
     }
 
+    /**
+     * Converts an ASCII-encoded string to Unicode. Unassigned characters are not allowed and STD3 hostnames are enforced. Input may be
+     * domain name containing dots.
+     */
     private static String toIDN(final String aceString) {
         if (null == aceString) {
             return null;
@@ -754,6 +780,20 @@ public final class QuotedInternetAddress extends InternetAddress {
      */
     public QuotedInternetAddress() {
         super();
+    }
+
+    /**
+     * Copy constructor.
+     */
+    private QuotedInternetAddress(final InternetAddress src) throws AddressException {
+        this();
+        this.address = toACE(src.getAddress());
+        try {
+            setPersonal(getPersonal(), null);
+        } catch (final UnsupportedEncodingException e) {
+            // Cannot occur
+            throw new IllegalStateException("Unsupported default charset.");
+        }
     }
 
     /**
