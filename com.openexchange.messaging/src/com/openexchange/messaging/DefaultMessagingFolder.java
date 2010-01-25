@@ -285,6 +285,18 @@ public class DefaultMessagingFolder implements MessagingFolder {
         }
     }
 
+    /**
+     * Adds given permission.
+     * 
+     * @param permission The permission
+     */
+    public void addPermission(final MessagingPermission permission) {
+        if (null == permissions) {
+            permissions = new ArrayList<MessagingPermission>(4);
+        }
+        permissions.add(permission);
+    }
+
     public int getUnreadMessageCount() {
         return unreadMessageCount;
     }
