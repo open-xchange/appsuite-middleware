@@ -1,3 +1,7 @@
+* 2010-01-25 - thorben.betten@open-xchange.com
+
+ - Bugfix #15256: Fixed NPE in Unified Mail processing
+
 * 2010-01-21 - martin.herfurth@open-xchange.com
 
  - Bugfix #14679: Changing interval of a weekly series.
