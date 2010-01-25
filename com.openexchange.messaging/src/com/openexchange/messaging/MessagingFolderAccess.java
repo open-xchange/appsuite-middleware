@@ -60,35 +60,35 @@ package com.openexchange.messaging;
 public interface MessagingFolderAccess {
 
     /**
-     * Checks if a folder exists whose fullname matches given <code>fullname</code>
+     * Checks if a folder exists whose identifier matches given <code>identifier</code>
      * 
-     * @param fullname The fullname
+     * @param folderId The identifier
      * @return <code>true</code> if folder exists in account; otherwise <code>false</code>
      * @throws MessagingException If existence cannot be checked
      */
-    public boolean exists(final String fullname) throws MessagingException;
+    public boolean exists(final String folderId) throws MessagingException;
 
     /**
-     * Gets the folder identified through given fullname
+     * Gets the folder identified through given identifier
      * 
-     * @param fullname The fullname
+     * @param folderId The identifier
      * @return The corresponding instance of {@link MessagingFolder}
      * @throws MessagingException If either folder does not exist or could not be fetched
      */
-    public MessagingFolder getFolder(final String fullname) throws MessagingException;
+    public MessagingFolder getFolder(final String folderId) throws MessagingException;
 
     /**
-     * Gets the first level subfolders located below the folder whose fullname matches given parameter <code>parentFullname</code>.
+     * Gets the first level subfolders located below the folder whose identifier matches given parameter <code>parentIdentifier</code>.
      * <p>
      * If no subfolders exist below identified folder the constant {@link #EMPTY_PATH} should be returned.
      * 
-     * @param parentFullname The parent fullname
+     * @param parentIdentifier The parent identifier
      * @param all Whether all or only subscribed subfolders shall be returned. If underlying messaging system does not support folder
      *            subscription, this argument should always be treated as <code>true</code>.
      * @return An array of {@link MessagingFolder} representing the subfolders
      * @throws MessagingException If either parent folder does not exist or its subfolders cannot be delivered
      */
-    public MessagingFolder[] getSubfolders(final String parentFullname, final boolean all) throws MessagingException;
+    public MessagingFolder[] getSubfolders(final String parentIdentifier, final boolean all) throws MessagingException;
 
     /**
      * Gets the account's root folder.
@@ -113,13 +113,13 @@ public interface MessagingFolderAccess {
      * Creates a new messaging folder with attributes taken from given messaging folder description
      * 
      * @param toCreate The messaging folder to create
-     * @return The fullname of the created messaging folder
+     * @return The identifier of the created messaging folder
      * @throws MessagingException If creation fails
      */
     public String createFolder(MessagingFolder toCreate) throws MessagingException;
 
     /**
-     * Updates an existing messaging folder identified through given fullname. All attributes set in given messaging folder instance are
+     * Updates an existing messaging folder identified through given identifier. All attributes set in given messaging folder instance are
      * applied.
      * <p>
      * The currently known attributes that make sense being updated are:
@@ -131,16 +131,15 @@ public interface MessagingFolderAccess {
      * <p>
      * <b>Note</b>: If underlying messaging system does not support the corresponding capability, the update is treated as a no-op.
      * 
-     * @param fullname The fullname of the messaging folder to update
+     * @param identifier The identifier of the messaging folder to update
      * @param toUpdate The messaging folder to update containing only the modified fields
-     * @return The fullname of the updated messaging folder
+     * @return The identifier of the updated messaging folder
      * @throws MessagingException If either folder does not exist or cannot be updated
      */
-    public String updateFolder(String fullname, MessagingFolder toUpdate) throws MessagingException;
+    public String updateFolder(String identifier, MessagingFolder toUpdate) throws MessagingException;
 
     /**
-     * Moves the folder identified through given fullname to the path specified through argument <code>newFullname</code>. Thus a rename can
-     * be implicitly performed.
+     * Moves the folder identified through given identifier to the parent specified through argument <code>newParentId</code>.
      * <p>
      * E.g.:
      * 
@@ -148,15 +147,15 @@ public interface MessagingFolderAccess {
      * my.path.to.folder -&gt; my.newpath.to.folder
      * </pre>
      * 
-     * @param fullname The folder fullname
-     * @param newFullname The new fullname to move to
-     * @return The new fullname where the folder has been moved
+     * @param folderId The folder identifier
+     * @param newParentId The identifier of the new parent to move to
+     * @return The new identifier where the folder has been moved
      * @throws MessagingException If either folder does not exist or cannot be moved
      */
-    public String moveFolder(String fullname, String newFullname) throws MessagingException;
+    public String moveFolder(String folderId, String newParentId) throws MessagingException;
 
     /**
-     * Renames the folder identified through given fullname to the specified new name.
+     * Renames the folder identified through given identifier to the specified new name.
      * <p>
      * E.g.:
      * 
@@ -164,27 +163,27 @@ public interface MessagingFolderAccess {
      * my.path.to.folder -&gt; my.path.to.newfolder
      * </pre>
      * 
-     * @param fullname The folder fullname
+     * @param folderId The folder identifier
      * @param newName The new name
-     * @return The new fullname
+     * @return The new identifier
      * @throws MessagingException If either folder does not exist or cannot be renamed
      */
-    public String renameFolder(final String fullname, final String newName) throws MessagingException;
+    public String renameFolder(final String folderId, final String newName) throws MessagingException;
 
     /**
-     * Deletes an existing messaging folder identified through given fullname.
+     * Deletes an existing messaging folder identified through given identifier.
      * <p>
      * This is a convenience method that invokes {@link #deleteFolder(String, boolean)} with <code>hardDelete</code> set to
      * <code>false</code>.
      * 
-     * @param fullname The fullname of the messaging folder to delete
-     * @return The fullname of the deleted messaging folder
+     * @param folderId The identifier of the messaging folder to delete
+     * @return The identifier of the deleted messaging folder
      * @throws MessagingException If either folder does not exist or cannot be deleted
      */
-    public String deleteFolder(final String fullname) throws MessagingException;
+    public String deleteFolder(final String folderId) throws MessagingException;
 
     /**
-     * Deletes an existing messaging folder identified through given fullname.
+     * Deletes an existing messaging folder identified through given identifier.
      * <p>
      * If <code>hardDelete</code> is not set and folder is not located below default trash folder it is backed up (including subfolder tree)
      * in default trash folder; otherwise it is deleted permanently.
@@ -196,39 +195,39 @@ public interface MessagingFolderAccess {
      * <p>
      * If default trash folder cannot hold subfolders, the folder is either deleted permanently or an appropriate exception may be thrown.
      * 
-     * @param fullname The fullname of the messaging folder to delete
+     * @param folderId The identifier of the messaging folder to delete
      * @param hardDelete Whether to delete permanently or to backup into trash folder
-     * @return The fullname of the deleted messaging folder
+     * @return The identifier of the deleted messaging folder
      * @throws MessagingException If either folder does not exist or cannot be deleted
      */
-    public String deleteFolder(String fullname, boolean hardDelete) throws MessagingException;
+    public String deleteFolder(String folderId, boolean hardDelete) throws MessagingException;
 
     /**
-     * Deletes the content of the folder identified through given fullname.
+     * Deletes the content of the folder identified through given identifier.
      * 
-     * @param fullname The fullname of the messaging folder whose content should be cleared
+     * @param folderId The identifier of the messaging folder whose content should be cleared
      * @throws MessagingException If either folder does not exist or its content cannot be cleared
      */
-    public void clearFolder(final String fullname) throws MessagingException;
+    public void clearFolder(String folderId) throws MessagingException;
 
     /**
-     * Deletes the content of the folder identified through given fullname.
+     * Deletes the content of the folder identified through given identifier.
      * 
-     * @param fullname The fullname of the messaging folder whose content should be cleared
+     * @param folderId The identifier of the messaging folder whose content should be cleared
      * @param hardDelete Whether to delete permanently or to backup into trash folder
      * @throws MessagingException If either folder does not exist or its content cannot be cleared
      */
-    public void clearFolder(String fullname, boolean hardDelete) throws MessagingException;
+    public void clearFolder(String folderId, boolean hardDelete) throws MessagingException;
 
     /**
-     * Gets the reverse path from the folder identified through given fullname to parental default folder. All occurring folders on that
+     * Gets the reverse path from the folder identified through given identifier to parental default folder. All occurring folders on that
      * path are contained in reverse order in returned array of {@link MessagingFolder} instances.
      * 
-     * @param fullname The folder fullname
+     * @param folderId The folder identifier
      * @return All occurring folders in reverse order as an array of {@link MessagingFolder} instances.
      * @throws MessagingException If either folder does not exist or path cannot be determined
      */
-    public MessagingFolder[] getPath2DefaultFolder(final String fullname) throws MessagingException;
+    public MessagingFolder[] getPath2DefaultFolder(final String folderId) throws MessagingException;
 
     /**
      * Detects both quota limit and quota usage of STORAGE resource on given messaging folder's quota-root. If the folder denoted by passed
@@ -237,22 +236,22 @@ public interface MessagingFolderAccess {
      * <p>
      * Note that the {@link Quota#getLimit()} and {@link Quota#getUsage()} is in 1024 octets.
      * 
-     * @param folder The folder fullname (if <code>null</code> <i>"INBOX"</i> is used)
+     * @param folderId The folder identifier (if <code>null</code> <i>"INBOX"</i> is used)
      * @return The quota of STORAGE resource
      * @throws MessagingException If either folder does not exist or quota limit and/or quote usage cannot be determined
      */
-    public Quota getStorageQuota(final String folder) throws MessagingException;
+    public Quota getStorageQuota(final String folderId) throws MessagingException;
 
     /**
      * Detects both quota limit and quota usage of MESSAGE resource on given messaging folder's quota-root. If the folder denoted by passed
      * messaging folder's quota-root is the INBOX itself, the whole account's MESSAGE quota is going to be returned; meaning the sum of all
      * available (limit) and allocated (usage) message amount.
      * 
-     * @param folder The folder fullname (if <code>null</code> <i>"INBOX"</i> is used)
+     * @param folderId The folder identifier (if <code>null</code> <i>"INBOX"</i> is used)
      * @return The quota of MESSAGE resource
      * @throws MessagingException If either folder does not exist or quota limit and/or quote usage cannot be determined
      */
-    public Quota getMessageQuota(final String folder) throws MessagingException;
+    public Quota getMessageQuota(final String folderId) throws MessagingException;
 
     /**
      * Detects both quotas' limit and usage on given messaging folder's quota-root for specified resource types. If the folder denoted by
@@ -264,7 +263,7 @@ public interface MessagingFolderAccess {
      * <p>
      * Note that the {@link Quota#getLimit()} and {@link Quota#getUsage()} returned for {@link Quota.Type#STORAGE} quota is in 1024 octets.
      * 
-     * @param folder The folder fullname (if <code>null</code> <i>"INBOX"</i> is used)
+     * @param folder The folder identifier (if <code>null</code> <i>"INBOX"</i> is used)
      * @param types The desired quota resource types
      * @return The quotas for specified resource types
      * @throws MessagingException If either folder does not exist or quota limit and/or quote usage cannot be determined
@@ -272,50 +271,50 @@ public interface MessagingFolderAccess {
     public Quota[] getQuotas(String folder, Quota.Type[] types) throws MessagingException;
 
     /**
-     * Gets the fullname of default confirmed ham folder
+     * Gets the identifier of default confirmed ham folder
      * 
-     * @return The fullname of default confirmed ham folder or <code>null</code> if not applicable
-     * @throws MessagingException If confirmed ham folder's fullname cannot be returned
+     * @return The identifier of default confirmed ham folder or <code>null</code> if not applicable
+     * @throws MessagingException If confirmed ham folder's identifier cannot be returned
      */
     public String getConfirmedHamFolder() throws MessagingException;
 
     /**
-     * Gets the fullname of default confirmed spam folder
+     * Gets the identifier of default confirmed spam folder
      * 
-     * @return The fullname of default confirmed spam folder or <code>null</code> if not applicable
-     * @throws MessagingException If confirmed spam folder's fullname cannot be returned
+     * @return The identifier of default confirmed spam folder or <code>null</code> if not applicable
+     * @throws MessagingException If confirmed spam folder's identifier cannot be returned
      */
     public String getConfirmedSpamFolder() throws MessagingException;
 
     /**
-     * Gets the fullname of default drafts folder
+     * Gets the identifier of default drafts folder
      * 
-     * @return The fullname of default drafts folder or <code>null</code> if not applicable
-     * @throws MessagingException If draft folder's fullname cannot be returned
+     * @return The identifier of default drafts folder or <code>null</code> if not applicable
+     * @throws MessagingException If draft folder's identifier cannot be returned
      */
     public String getDraftsFolder() throws MessagingException;
 
     /**
-     * Gets the fullname of default spam folder
+     * Gets the identifier of default spam folder
      * 
-     * @return The fullname of default spam folder or <code>null</code> if not applicable
-     * @throws MessagingException If spam folder's fullname cannot be returned
+     * @return The identifier of default spam folder or <code>null</code> if not applicable
+     * @throws MessagingException If spam folder's identifier cannot be returned
      */
     public String getSpamFolder() throws MessagingException;
 
     /**
-     * Gets the fullname of default sent folder
+     * Gets the identifier of default sent folder
      * 
-     * @return The fullname of default sent folder or <code>null</code> if not applicable
-     * @throws MessagingException If sent folder's fullname cannot be returned
+     * @return The identifier of default sent folder or <code>null</code> if not applicable
+     * @throws MessagingException If sent folder's identifier cannot be returned
      */
     public String getSentFolder() throws MessagingException;
 
     /**
-     * Gets the fullname of default trash folder
+     * Gets the identifier of default trash folder
      * 
-     * @return The fullname of default trash folder or <code>null</code> if not applicable
-     * @throws MessagingException If trash folder's fullname cannot be returned
+     * @return The identifier of default trash folder or <code>null</code> if not applicable
+     * @throws MessagingException If trash folder's identifier cannot be returned
      */
     public String getTrashFolder() throws MessagingException;
 
