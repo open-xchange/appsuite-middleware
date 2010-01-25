@@ -72,6 +72,21 @@ public interface MessagingFolder {
     public static final String ROOT_FULLNAME = "";
 
     /**
+     * The capability identifier for permissions support.
+     */
+    public static final String CAPABILITY_PERMISSIONS = "PERMISSIONS";
+
+    /**
+     * The capability identifier for quota support.
+     */
+    public static final String CAPABILITY_QUOTA = "QUOTA";
+
+    /**
+     * The capability identifier for sort support.
+     */
+    public static final String CAPABILITY_SORT = "SORT";
+
+    /**
      * Gets the capabilities of this folder; e.g <code>"QUOTA"</code>, <code>"PERMISSIONS"</code>, etc.
      * 
      * @return The list of capabilities
