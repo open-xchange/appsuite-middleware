@@ -498,6 +498,8 @@ public final class MIMEStorageUtility {
             return;
         }
         final String string = field2string.get(field);
-        fp.add(string);
+        if (null != string) {
+            fp.add(string);
+        }
     }
 }
