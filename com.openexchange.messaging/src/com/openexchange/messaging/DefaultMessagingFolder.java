@@ -113,6 +113,10 @@ public class DefaultMessagingFolder implements MessagingFolder {
 
     private boolean exists;
 
+    private char separator;
+
+    private boolean b_separator;
+
     /**
      * Initializes a new {@link DefaultMessagingFolder}.
      */
@@ -527,6 +531,39 @@ public class DefaultMessagingFolder implements MessagingFolder {
      */
     public void setExists(final boolean exists) {
         this.exists = exists;
+    }
+
+    public char getSeparator() {
+        return separator;
+    }
+
+    /**
+     * Checks if separator character was set through {@link #setSeparator(char)}.
+     * 
+     * @return <code>true</code> if separator is set; otherwise <code>false</code>
+     */
+    public boolean containsSeparator() {
+        return b_separator;
+    }
+
+    /**
+     * Removes the separator character.
+     */
+    public void removeSeparator() {
+        separator = '0';
+        b_separator = false;
+    }
+
+    /**
+     * Sets the separator character.
+     * <p>
+     * If mailing system does not support a separator character, {@link MailConfig#getDefaultSeparator()} should to be used.
+     * 
+     * @param separator the separator to set
+     */
+    public void setSeparator(final char separator) {
+        this.separator = separator;
+        b_separator = true;
     }
 
 }

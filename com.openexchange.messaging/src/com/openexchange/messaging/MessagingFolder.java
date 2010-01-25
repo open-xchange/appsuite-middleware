@@ -93,6 +93,13 @@ public interface MessagingFolder {
     public String getName();
 
     /**
+     * Gets the separator character.
+     * 
+     * @return The separator character.
+     */
+    public char getSeparator();
+
+    /**
      * Gets the permission for currently logged-in user accessing this folder
      * <p>
      * The returned permission should reflect user's permission regardless if messaging system supports permissions or not. An instance of

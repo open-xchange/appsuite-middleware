@@ -167,4 +167,8 @@ public final class TwitterMessagingFolder implements MessagingFolder {
         return DefaultFolderType.NONE;
     }
 
+    public char getSeparator() {
+        return '\0';
+    }
+
 }
