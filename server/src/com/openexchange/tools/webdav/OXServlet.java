@@ -56,6 +56,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jdom.Document;
 import org.jdom.JDOMException;
 import com.openexchange.authentication.LoginException;
 import com.openexchange.groupware.AbstractOXException.Category;
@@ -79,14 +80,8 @@ import com.openexchange.xml.jdom.JDOMParser;
  */
 public abstract class OXServlet extends WebDavServlet {
 
-    /**
-     * For serialization.
-     */
     private static final long serialVersionUID = 301910346402779362L;
 
-    /**
-     * Logger.
-     */
     private static final transient Log LOG = LogFactory.getLog(OXServlet.class);
 
     /**
@@ -116,9 +111,6 @@ public abstract class OXServlet extends WebDavServlet {
 
     protected abstract Interface getInterface();
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         if (!"TRACE".equals(req.getMethod()) && useHttpAuth() && !doAuth(req, resp)) {
@@ -148,7 +140,6 @@ public abstract class OXServlet extends WebDavServlet {
      * @param resp http servlet response.
      * @return <code>true</code> if the authentication can be done correctly.
      * @throws IOException if a communication problem occurs.
-     * @throws ServletException if adding a session fails.
      */
     protected boolean doAuth(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         Session session;
@@ -241,14 +232,11 @@ public abstract class OXServlet extends WebDavServlet {
 
     /**
      * Checks if the login contains only valid values.
-     * 
-     * @param login login name of the user
      * @param pass password of the user
-     * @param ipAddress Client IP.
+     * 
      * @return false if the login contains illegal values.
      */
-    protected static boolean checkLogin(final String login, final String pass, final String ipAddress) {
-        // made by stefan - !!!login without password bugfix - moped!!!
+    protected static boolean checkLogin(final String pass) {
         // check if the user wants to login without password.
         // ldap bind doesn't fail with empty password. so check it here.
         if (pass == null || StringCollection.isEmpty(pass)) {
@@ -277,7 +265,7 @@ public abstract class OXServlet extends WebDavServlet {
         final String[] userpass = OXServlet.decodeAuthorization(auth);
         final String login = userpass[0];
         final String pass = userpass[1];
-        if (!checkLogin(login, pass, req.getRemoteAddr())) {
+        if (!checkLogin(pass)) {
             throw new WebdavException(WebdavException.Code.EMPTY_PASSWORD);
         }
         return new LoginRequest() {
@@ -365,7 +353,7 @@ public abstract class OXServlet extends WebDavServlet {
      * @throws JDOMException if JDOM gets an exception
      * @throws IOException if an exception occurs while reading the body.
      */
-    protected org.jdom.Document getJDOMDocument(final HttpServletRequest req) throws JDOMException, IOException {
+    protected Document getJDOMDocument(final HttpServletRequest req) throws JDOMException, IOException {
         org.jdom.Document doc = null;
         if (req.getContentLength() > 0) {
             doc = ServerServiceRegistry.getInstance().getService(JDOMParser.class).parse(req.getInputStream());
