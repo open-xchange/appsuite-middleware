@@ -689,10 +689,9 @@ public class Folder extends SessionServlet {
                                 {
                                     final List<Task<Object>> tasks = new ArrayList<Task<Object>>(size);
                                     for (int i = 0; i < size; i++) {
-                                        final int index = i;
-                                        final MailAccount mailAccount = accounts.get(index);
+                                        final MailAccount mailAccount = accounts.get(i);
                                         final Log logger = LOG;
-                                        tasks.add(new MailRootFolderWriter(arrays, session, logger, mailAccount, columns, index));
+                                        tasks.add(new MailRootFolderWriter(arrays, session, logger, mailAccount, columns, i));
                                     }
                                     completionFuture =
                                         ServerServiceRegistry.getInstance().getService(ThreadPoolService.class).invoke(tasks);
@@ -1436,7 +1435,6 @@ public class Folder extends SessionServlet {
                         final List<Task<Object>> tasks = new ArrayList<Task<Object>>(accountSize);
                         for (int i = 0; i < accountSize; i++) {
                             final MailAccount mailAccount = accounts.get(i);
-                            final int index = i;
                             /*
                              * Check if current account has been initialized before that is if its default folders were checked.
                              */
@@ -1458,9 +1456,10 @@ public class Folder extends SessionServlet {
                                  * Add root folders
                                  */
                                 final Log logger = LOG;
-                                tasks.add(new MailRootFolderWriter(arrays, session, logger, mailAccount, columns, index));
+                                tasks.add(new MailRootFolderWriter(arrays, session, logger, mailAccount, columns, i));
                             } else {
                                 // Add dummy callable
+                                final int index = i;
                                 tasks.add(new AbstractTask<Object>() {
 
                                     public Object call() throws Exception {
