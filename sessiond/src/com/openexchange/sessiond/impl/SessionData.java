@@ -217,7 +217,7 @@ final class SessionData {
             for (SessionContainer container : sessionList) {
                 for (SessionControl sc : container.getSessionControls()) {
                     if (sc.getSession().getAuthId().equals(authId)) {
-                        throw new SessiondException(Code.DUPLICATE_AUTHID, login, sc.getSession().getLogin());
+                        throw new SessiondException(Code.DUPLICATE_AUTHID, sc.getSession().getLogin(), login);
                     }
                 }
             }
