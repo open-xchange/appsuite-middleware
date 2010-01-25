@@ -136,7 +136,11 @@ public enum MessagingExceptionCodes implements OXErrorMessage {
     /**
      * A duplicate folder named "%1$s" already exists below parent folder "%2$s".
      */
-    DUPLICATE_FOLDER(MessagingExceptionMessages.DUPLICATE_FOLDER_MSG, Category.CODE_ERROR, 20);
+    DUPLICATE_FOLDER(MessagingExceptionMessages.DUPLICATE_FOLDER_MSG, Category.CODE_ERROR, 20),
+    /**
+     * No create access on mail folder %1$s.
+     */
+    NO_CREATE_ACCESS(MessagingExceptionMessages.NO_CREATE_ACCESS_MSG, Category.PERMISSION, 21);
 
     private final Category category;
 

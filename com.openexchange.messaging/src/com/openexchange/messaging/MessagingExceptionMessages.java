@@ -115,6 +115,9 @@ public final class MessagingExceptionMessages implements LocalizableStrings {
 
     // A duplicate folder named "%1$s" already exists below parent folder "%2$s".
     public static final String DUPLICATE_FOLDER_MSG = "A duplicate folder named \"%1$s\" already exists below parent folder \"%2$s\".";
+
+    // No create access on mail folder %1$s.
+    public static final String NO_CREATE_ACCESS_MSG = "No create access on mail folder %1$s.";
     /**
      * Initializes a new {@link MessagingExceptionMessages}.
      */
