@@ -50,6 +50,7 @@
 package com.openexchange.ajax.session.actions;
 
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.fields.LoginFields;
 
 /**
  * 
@@ -63,17 +64,18 @@ public class LoginRequest extends AbstractRequest<LoginResponse> {
 
     private final boolean failOnError;
 
-    public LoginRequest(final String login, final String password) {
-        this(login, password, true);
+    public LoginRequest(String login, String password, String authId, String client, String version) {
+        this(login, password, authId, client, version, true);
     }
 
-    public LoginRequest(final String login, final String password,
-        final boolean failOnError) {
+    public LoginRequest(String login, String password, String authId, String client, String version, boolean failOnError) {
         super(new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
-                .ACTION_LOGIN),
-            new Parameter(PARAM_NAME, login),
-            new Parameter(PARAM_PASSWORD, password)
+            new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LOGIN),
+            new URLParameter(LoginFields.AUTHID_PARAM, authId),
+            new URLParameter(LoginFields.CLIENT_PARAM, client),
+            new URLParameter(LoginFields.VERSION_PARAM, version),
+            new FieldParameter(PARAM_NAME, login),
+            new FieldParameter(PARAM_PASSWORD, password)
         });
         this.failOnError = failOnError;
     }

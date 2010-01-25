@@ -72,17 +72,10 @@ public final class Bug12437Test extends TestCase {
 
     private String password;
 
-    /**
-     * Default constructor.
-     * @param name test name.
-     */
     public Bug12437Test(final String name) {
         super(name);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void setUp() throws Exception {
         super.setUp();
@@ -93,9 +86,6 @@ public final class Bug12437Test extends TestCase {
         password = "some invalid password";
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void tearDown() throws Exception {
         client.getSession().getConversation().clearContents();
@@ -106,7 +96,7 @@ public final class Bug12437Test extends TestCase {
      * Checks if login with wrong credentials gives LGI-0006.
      */
     public void testWrongErrorCode() throws Throwable {
-        final LoginRequest request = new LoginRequest(login, password, false);
+        LoginRequest request = new LoginRequest(login, password, LoginTools.generateAuthId(), Bug12437Test.class.getName(), "6,15.0", false);
         final LoginResponse response = client.execute(request);
         assertTrue("Wrong credentials are not detected.", response.hasError());
         final AbstractOXException exc = response.getException();

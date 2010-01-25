@@ -98,10 +98,10 @@ public class Executor extends Assert {
     public static <T extends AbstractAJAXResponse> T execute(final AJAXSession session,
         final AJAXRequest<T> request) throws AjaxException, IOException,
         SAXException, JSONException {
-		return execute(session, request,
+        return execute(session, request,
             AJAXConfig.getProperty(Property.PROTOCOL),
             AJAXConfig.getProperty(Property.HOSTNAME));
-	}
+    }
 
     public static <T extends AbstractAJAXResponse> T execute(final AJAXSession session,
         final AJAXRequest<T> request, final String hostname) throws AjaxException,
@@ -110,76 +110,80 @@ public class Executor extends Assert {
             .getProperty(Property.PROTOCOL), hostname);
     }
 
-	public static <T extends AbstractAJAXResponse> T execute(final AJAXSession session, final AJAXRequest<T> request,
-			final String protocol, final String hostname) throws AjaxException, IOException, SAXException,
-			JSONException {
+    public static <T extends AbstractAJAXResponse> T execute(final AJAXSession session, final AJAXRequest<T> request,
+            final String protocol, final String hostname) throws AjaxException, IOException, SAXException,
+            JSONException {
 
-		final String urlString = protocol + "://" + hostname + request.getServletPath();
-		final WebRequest req;
-		switch (request.getMethod()) {
-		case GET:
-			req = new GetMethodWebRequest(urlString);
-			addParameter(req, session, request);
-			break;
-		case POST:
-			req = new PostMethodWebRequest(urlString);
-			addParameter(req, session, request);
-			break;
-		case UPLOAD:
-			final PostMethodWebRequest post = new PostMethodWebRequest(urlString + getURLParameter(session, request), true);
-			req = post;
-			addBodyParameter(post, request);
-			break;
-		case PUT:
-			req = new PutMethodWebRequest(urlString + getURLParameter(session, request), createBody(request.getBody()),
-					AJAXServlet.CONTENTTYPE_JAVASCRIPT);
-			break;
-		default:
-			throw new AjaxException(AjaxException.Code.InvalidParameter, request.getMethod().name());
-		}
-		final WebConversation conv = session.getConversation();
-		final WebResponse resp;
-		// The upload returns a web page that should not be interpreted.
-		final long startRequest = System.currentTimeMillis();
-		// Doing only getResource does not handle cookie setting.
-		if (Method.UPLOAD == request.getMethod()) {
-			resp = conv.getResource(req);
-		} else {
-			resp = conv.getResponse(req);
-		}
-		final long requestDuration = System.currentTimeMillis() - startRequest;
-		final AbstractAJAXParser<? extends T> parser = request.getParser();
-		parser.checkResponse(resp);
-		final long startParse = System.currentTimeMillis();
-		final T retval = parser.parse(resp.getText());
-		final long parseDuration = System.currentTimeMillis() - startParse;
-		retval.setRequestDuration(requestDuration);
-		retval.setParseDuration(parseDuration);
-		return retval;
-	}
+        final String urlString = protocol + "://" + hostname + request.getServletPath();
+        final WebRequest req;
+        switch (request.getMethod()) {
+        case GET:
+            GetMethodWebRequest get = new GetMethodWebRequest(urlString);
+            req = get;
+            addURLParameter(get, session, request);
+            break;
+        case POST:
+            req = new PostMethodWebRequest(urlString + getURLParameter(session, request, true));
+            addParameter(req, session, request);
+            break;
+        case UPLOAD:
+            final PostMethodWebRequest post = new PostMethodWebRequest(urlString + getURLParameter(session, request, false), true);
+            req = post;
+            addBodyParameter(post, request);
+            break;
+        case PUT:
+            req = new PutMethodWebRequest(
+                urlString + getURLParameter(session, request, false),
+                createBody(request.getBody()),
+                AJAXServlet.CONTENTTYPE_JAVASCRIPT);
+            break;
+        default:
+            throw new AjaxException(AjaxException.Code.InvalidParameter, request.getMethod().name());
+        }
+        final WebConversation conv = session.getConversation();
+        final WebResponse resp;
+        // The upload returns a web page that should not be interpreted.
+        final long startRequest = System.currentTimeMillis();
+        // Doing only getResource does not handle cookie setting.
+        if (Method.UPLOAD == request.getMethod()) {
+            resp = conv.getResource(req);
+        } else {
+            resp = conv.getResponse(req);
+        }
+        final long requestDuration = System.currentTimeMillis() - startRequest;
+        final AbstractAJAXParser<? extends T> parser = request.getParser();
+        parser.checkResponse(resp);
+        final long startParse = System.currentTimeMillis();
+        final T retval = parser.parse(resp.getText());
+        final long parseDuration = System.currentTimeMillis() - startParse;
+        retval.setRequestDuration(requestDuration);
+        retval.setParseDuration(parseDuration);
+        return retval;
+    }
 
-	public static WebResponse execute4Download(final AJAXSession session, final AJAXRequest<?> request,
-			final String protocol, final String hostname) throws AjaxException, IOException, JSONException {
-		final String urlString = protocol + "://" + hostname + request.getServletPath();
-		final WebRequest req;
-		switch (request.getMethod()) {
-		case GET:
-			req = new GetMethodWebRequest(urlString);
-			addParameter(req, session, request);
-			break;
-		default:
-			throw new AjaxException(AjaxException.Code.InvalidParameter, request.getMethod().name());
-		}
-		final WebConversation conv = session.getConversation();
-		final WebResponse resp;
-		// The upload returns a web page that should not be interpreted.
-		// final long startRequest = System.currentTimeMillis();
-		resp = conv.getResource(req);
-		//final long requestDuration = System.currentTimeMillis() - startRequest;
-		return resp;
-	}
+    public static WebResponse execute4Download(final AJAXSession session, final AJAXRequest<?> request,
+            final String protocol, final String hostname) throws AjaxException, IOException, JSONException {
+        final String urlString = protocol + "://" + hostname + request.getServletPath();
+        final WebRequest req;
+        switch (request.getMethod()) {
+        case GET:
+            GetMethodWebRequest get = new GetMethodWebRequest(urlString);
+            req = get;
+            addURLParameter(get, session, request);
+            break;
+        default:
+            throw new AjaxException(AjaxException.Code.InvalidParameter, request.getMethod().name());
+        }
+        final WebConversation conv = session.getConversation();
+        final WebResponse resp;
+        // The upload returns a web page that should not be interpreted.
+        // final long startRequest = System.currentTimeMillis();
+        resp = conv.getResource(req);
+        //final long requestDuration = System.currentTimeMillis() - startRequest;
+        return resp;
+    }
 
-    private static void addParameter(WebRequest req, AJAXSession session, AJAXRequest<?> request) throws IOException, JSONException {
+    private static void addURLParameter(GetMethodWebRequest req, AJAXSession session, AJAXRequest<?> request) throws IOException, JSONException {
         if (null != session.getId()) {
             req.setParameter(AJAXServlet.PARAMETER_SESSION, session.getId());
         }
@@ -190,30 +194,47 @@ public class Executor extends Assert {
         }
     }
 
+    private static void addParameter(WebRequest req, AJAXSession session, AJAXRequest<?> request) throws IOException, JSONException {
+        if (null != session.getId()) {
+            req.setParameter(AJAXServlet.PARAMETER_SESSION, session.getId());
+        }
+        for (final Parameter param : request.getParameters()) {
+            if (!(param instanceof FileParameter) && !(param instanceof com.openexchange.ajax.framework.AJAXRequest.URLParameter)) {
+                req.setParameter(param.getName(), param.getValue());
+            }
+        }
+    }
+
     private static void addBodyParameter(PostMethodWebRequest post, AJAXRequest<?> request) throws IOException, JSONException {
-		for (final Parameter param : request.getParameters()) {
-			if (param instanceof FieldParameter) {
-				final FieldParameter fparam = (FieldParameter) param;
-				post.setParameter(fparam.getFieldName(), fparam.getFieldContent());
-			}
+        for (final Parameter param : request.getParameters()) {
+            if (param instanceof FieldParameter) {
+                final FieldParameter fparam = (FieldParameter) param;
+                post.setParameter(fparam.getFieldName(), fparam.getFieldContent());
+            }
             if (param instanceof FileParameter) {
                 final FileParameter fparam = (FileParameter) param;
                 post.selectFile(fparam.getName(), fparam.getFileName(), fparam.getInputStream(), fparam.getMimeType());
             }
-		}
-	}
+        }
+    }
 
-    private static String getURLParameter(AJAXSession session, AJAXRequest<?> request) throws IOException, JSONException {
+    /**
+     * @param strict <code>true</code> to only add URLParameters to the URL. This is needed for the POST request of the login method.
+     * Unfortunately breaks this a lot of other tests.
+     */
+    private static String getURLParameter(AJAXSession session, AJAXRequest<?> request, boolean strict) throws IOException, JSONException {
         final URLParameter parameter = new URLParameter();
         if (null != session.getId()) {
             parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session.getId());
         }
         for (final Parameter param : request.getParameters()) {
-            if (!(param instanceof FileParameter) && !(param instanceof FieldParameter)) {
+            if (!strict && !(param instanceof FileParameter) && !(param instanceof FieldParameter)) {
                 parameter.setParameter(param.getName(), param.getValue());
             }
-            // Don't throw error here because field and file parameters are added on POST with addFieldParameter and addFileParameter
-            // methods.
+            if (strict && param instanceof com.openexchange.ajax.framework.AJAXRequest.URLParameter) {
+                parameter.setParameter(param.getName(), param.getValue());
+            }
+            // Don't throw error here because field and file parameters are added on POST with method addBodyParameter().
         }
         return parameter.getURLParameters();
     }

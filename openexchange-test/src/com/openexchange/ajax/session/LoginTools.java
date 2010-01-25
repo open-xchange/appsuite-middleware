@@ -50,6 +50,7 @@
 package com.openexchange.ajax.session;
 
 import java.io.IOException;
+import java.util.UUID;
 
 import org.json.JSONException;
 import org.xml.sax.SAXException;
@@ -62,6 +63,7 @@ import com.openexchange.ajax.session.actions.LogoutRequest;
 import com.openexchange.ajax.session.actions.LogoutResponse;
 import com.openexchange.ajax.session.actions.RedirectRequest;
 import com.openexchange.ajax.session.actions.RedirectResponse;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.tools.servlet.AjaxException;
 
 public class LoginTools {
@@ -87,7 +89,7 @@ public class LoginTools {
         SAXException, JSONException {
         return Executor.execute(session, request);
     }
-	
+
     public static LogoutResponse logout(final AJAXSession session,
         final LogoutRequest request, final String protocol, final String hostname) throws AjaxException, IOException,
         SAXException, JSONException {
@@ -98,5 +100,9 @@ public class LoginTools {
         final RedirectRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
         return Executor.execute(session, request);
+    }
+
+    public static String generateAuthId() {
+        return UUIDs.getUnformattedString(UUID.randomUUID());
     }
 }

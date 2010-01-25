@@ -57,25 +57,15 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
  */
 public class LoginTest extends AbstractAJAXSession {
 
-    /**
-     * Default constructor.
-     * @param name
-     */
     public LoginTest(final String name) {
         super(name);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void setUp() throws Exception {
         // Nothing to do.
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void tearDown() throws Exception {
         // Nothing to do.

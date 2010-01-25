@@ -57,6 +57,7 @@ import com.openexchange.ajax.session.actions.LoginRequest;
 import com.openexchange.ajax.session.actions.LogoutRequest;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.ConfigurationException;
+import com.openexchange.configuration.ConfigurationException.Code;
 import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.tools.servlet.AjaxException;
 
@@ -78,9 +79,6 @@ public class AJAXClient {
 
     private String protocol = null;
 
-    /**
-     * Default constructor.
-     */
     public AJAXClient(final AJAXSession session) {
         this.session = session;
         this.mustLogout = session.mustLogout();
@@ -88,16 +86,16 @@ public class AJAXClient {
 
     public AJAXClient(final User user) throws ConfigurationException, AjaxException, IOException, SAXException, JSONException {
         AJAXConfig.init();
-        final String login = AJAXConfig.getProperty(user.login);
+        final String login = AJAXConfig.getProperty(user.getLogin());
         if (null == login) {
-            throw new ConfigurationException(ConfigurationException.Code.PROPERTY_MISSING, user.login.getPropertyName());
+            throw new ConfigurationException(Code.PROPERTY_MISSING, user.getLogin().getPropertyName());
         }
-        final String password = AJAXConfig.getProperty(user.password);
+        final String password = AJAXConfig.getProperty(user.getPassword());
         if (null == password) {
-            throw new ConfigurationException(ConfigurationException.Code.PROPERTY_MISSING, user.password.getPropertyName());
+            throw new ConfigurationException(Code.PROPERTY_MISSING, user.getPassword().getPropertyName());
         }
         session = new AJAXSession();
-        session.setId(LoginTools.login(session, new LoginRequest(login, password)).getSessionId());
+        session.setId(execute(new LoginRequest(login, password, LoginTools.generateAuthId(), AJAXClient.class.getName(), "6.15.0")).getSessionId());
     }
 
     public enum User {
@@ -130,9 +128,6 @@ public class AJAXClient {
         return session;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void finalize() throws Throwable {
         try {

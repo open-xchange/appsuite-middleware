@@ -110,11 +110,22 @@ public final class MixTest {
     }
 
     private static class AjaxLogin implements Runnable {
+
         private final AJAXSession session = new AJAXSession();
+
         private final LoginRequest request = new LoginRequest(
             AJAXConfig.getProperty(Property.LOGIN),
-            AJAXConfig.getProperty(Property.PASSWORD));
+            AJAXConfig.getProperty(Property.PASSWORD),
+            LoginTools.generateAuthId(),
+            MixTest.class.getName(),
+            "6.15.0");
+
         private final Random rand = new Random(System.currentTimeMillis());
+
+        AjaxLogin() {
+            super();
+        }
+
         public void run() {
             while (true) {
                 LoginResponse resp = null;
@@ -140,7 +151,13 @@ public final class MixTest {
     }
 
     private static class WebDAVLogin implements Runnable {
+
         private final Random rand = new Random(System.currentTimeMillis());
+
+        WebDAVLogin() {
+            super();
+        }
+
         public void run() {
             final WebConversation conv = new WebConversation();
             final WebRequest req = new HeadMethodWebRequest(

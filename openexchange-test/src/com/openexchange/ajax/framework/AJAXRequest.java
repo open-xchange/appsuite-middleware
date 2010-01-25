@@ -176,30 +176,30 @@ public interface AJAXRequest<T extends AbstractAJAXResponse> {
     }
 
     class FieldParameter extends Parameter {
-		/**
-		 * Initializes a new {@link FieldParameter}
-		 * @param fieldName
-		 * @param fieldContent
-		 */
-		public FieldParameter(final String fieldName, final String fieldContent) {
-			super(fieldName, fieldContent);
-		}
-		/**
-		 * Gets the fieldName
-		 *
-		 * @return the fieldName
-		 */
-		public String getFieldName() {
-			return super.getName();
-		}
-		/**
-		 * Gets the fieldContent
-		 *
-		 * @return the fieldContent
-		 */
-		public String getFieldContent() {
-			return super.getValue();
-		}
+        /**
+         * Initializes a new {@link FieldParameter}
+         * @param fieldName
+         * @param fieldContent
+         */
+        public FieldParameter(final String fieldName, final String fieldContent) {
+            super(fieldName, fieldContent);
+        }
+        /**
+         * Gets the fieldName
+         *
+         * @return the fieldName
+         */
+        public String getFieldName() {
+            return super.getName();
+        }
+        /**
+         * Gets the fieldContent
+         *
+         * @return the fieldContent
+         */
+        public String getFieldContent() {
+            return super.getValue();
+        }
     }
 
     /**
