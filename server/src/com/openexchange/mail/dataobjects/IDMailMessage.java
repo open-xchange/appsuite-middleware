@@ -64,6 +64,10 @@ public final class IDMailMessage extends MailMessage {
 
     private String mailId;
 
+    private char separator;
+
+    private int seqnum;
+
     /**
      * Initializes a new {@link IDMailMessage}
      */
@@ -86,6 +90,42 @@ public final class IDMailMessage extends MailMessage {
     @Override
     public void setMailId(final String id) {
         mailId = id;
+    }
+
+    /**
+     * Gets the separator.
+     * 
+     * @return The separator
+     */
+    public char getSeparator() {
+        return separator;
+    }
+
+    /**
+     * Sets the separator.
+     * 
+     * @param separator The separator to set
+     */
+    public void setSeparator(final char separator) {
+        this.separator = separator;
+    }
+
+    /**
+     * Gets the sequence number.
+     * 
+     * @return The sequence number
+     */
+    public int getSeqnum() {
+        return seqnum;
+    }
+
+    /**
+     * Sets the sequence number.
+     * 
+     * @param seqnum The sequence number to set
+     */
+    public void setSeqnum(final int seqnum) {
+        this.seqnum = seqnum;
     }
 
     @Override
