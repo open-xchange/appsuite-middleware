@@ -53,11 +53,11 @@ import com.meterware.httpunit.HttpUnitOptions;
 import com.meterware.httpunit.WebConversation;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class AJAXSession {
-    
+
     private final WebConversation conversation;
 
     private String id;
@@ -67,10 +67,10 @@ public class AJAXSession {
         this(newWebConversation(), null);
     }
 
-	public AJAXSession(final WebConversation conversation) {
+    public AJAXSession(final WebConversation conversation) {
         this(conversation, null);
     }
-	
+
     public AJAXSession(final WebConversation conversation, final String id) {
         super();
         this.conversation = conversation;
@@ -78,7 +78,7 @@ public class AJAXSession {
         this.mustLogout = id == null; // Don't auto logout when supplied with id.
         conversation.getClientProperties().setAcceptGzip(false);
     }
-    
+
     /**
      * @return the conversation
      */

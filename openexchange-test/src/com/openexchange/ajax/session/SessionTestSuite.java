@@ -74,6 +74,7 @@ public final class SessionTestSuite {
         tests.addTestSuite(LoginTest.class);
         tests.addTestSuite(RedirectTest.class);
         tests.addTestSuite(Bug12437Test.class);
+        tests.addTestSuite(DuplicateAuthIdTest.class);
         return tests;
     }
 }
