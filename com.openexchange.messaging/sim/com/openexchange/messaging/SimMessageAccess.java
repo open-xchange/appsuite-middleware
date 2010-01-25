@@ -1,0 +1,142 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.messaging;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+
+/**
+ * {@link SimMessageAccess}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ */
+public class SimMessageAccess implements MessagingMessageAccess {
+
+    public static final class Call {
+        private String name;
+        private Object[] args;
+
+        public Call(String name, Object...args) {
+            this.name = name;
+            this.args = args;
+        }
+        
+        
+        public String getName() {
+            return name;
+        }
+        
+        public Object[] getArgs() {
+            return args;
+        }
+    }
+
+    private List<Call> called = new ArrayList<Call>();
+    private MessagingMessage templateMessage;
+    
+    public List<Call> getCalls() {
+        return called;
+    }
+    
+    public void setTemplateMessage(MessagingMessage templateMessage) {
+        this.templateMessage = templateMessage;
+    }
+    
+    public void appendMessages(String folder, MessagingMessage[] messages) throws MessagingException {
+        called.add(new Call("appendMessages", folder, messages));
+    }
+
+    public List<String> copyMessages(String sourceFolder, String destFolder, String[] messageIds, boolean fast) throws MessagingException {
+        called.add(new Call("copyMessages", sourceFolder, destFolder, messageIds, fast));
+        return new ArrayList<String>(Arrays.asList("blupp"));
+    }
+
+    public void deleteMessages(String folder, String[] messageIds, boolean hardDelete) throws MessagingException {
+        called.add(new Call("deleteMessages", folder, messageIds, hardDelete));
+    }
+
+    public List<MessagingMessage> getAllMessages(String folder, IndexRange indexRange, MessagingField sortField, OrderDirection order, MessagingField... fields) throws MessagingException {
+        called.add(new Call("getAllMessages", folder, indexRange, sortField, order, fields));
+        return new ArrayList<MessagingMessage>(Arrays.asList(templateMessage));
+    }
+    
+
+    public MessagingMessage getMessage(String folder, String id, boolean peek) throws MessagingException {
+        called.add(new Call("getMessage", folder, id, peek));
+        return templateMessage;
+    }
+
+    public List<MessagingMessage> getMessages(String folder, String[] messageIds, MessagingField[] fields) throws MessagingException {
+        called.add(new Call("getMessages", folder, messageIds, fields));
+        return new ArrayList<MessagingMessage>(Arrays.asList(templateMessage));
+    }
+
+    public List<String> moveMessages(String sourceFolder, String destFolder, String[] messageIds, boolean fast) throws MessagingException {
+        called.add(new Call("moveMessages", sourceFolder, destFolder, messageIds, fast));
+        return null;
+    }
+
+    public MessagingMessage perform(String folder, String id, String action) throws MessagingException {
+        called.add(new Call("perform", folder, id, action));
+        return templateMessage;
+    }
+
+    public List<MessagingMessage> searchMessages(String folder, IndexRange indexRange, MessagingField sortField, OrderDirection order, SearchTerm<?> searchTerm, MessagingField[] fields) throws MessagingException {
+        called.add(new Call("searchMessages", folder, indexRange, sortField, order, searchTerm, fields));
+        return new ArrayList<MessagingMessage>(Arrays.asList(templateMessage));
+    }
+
+    public void updateMessage(MessagingMessage message, MessagingField[] fields) throws MessagingException {
+        called.add(new Call("updateMessage", message, fields));
+    }
+
+}

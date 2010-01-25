@@ -94,7 +94,7 @@ public class MessagingMessageParser {
     private Collection<MessagingHeaderParser> headerParsers = new ConcurrentLinkedQueue<MessagingHeaderParser>();
     private Collection<MessagingContentParser> contentParsers = new ConcurrentLinkedQueue<MessagingContentParser>();
     
-    MessagingMessageParser() {
+    public MessagingMessageParser() {
         headerParsers.add(new ContentTypeParser());
         headerParsers.add(new MultiStringParser());
         

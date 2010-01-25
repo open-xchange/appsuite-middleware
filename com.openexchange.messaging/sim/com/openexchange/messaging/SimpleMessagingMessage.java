@@ -52,6 +52,7 @@ package com.openexchange.messaging;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -75,7 +76,7 @@ public class SimpleMessagingMessage implements MessagingMessage, MessagingBodyPa
 
     private String fileName;
 
-    private Map<String, Collection<MessagingHeader>> headers;
+    private Map<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
 
     private String sectionId;
 

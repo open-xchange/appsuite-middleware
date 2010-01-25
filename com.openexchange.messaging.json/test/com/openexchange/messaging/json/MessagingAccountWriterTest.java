@@ -104,4 +104,5 @@ public class MessagingAccountWriterTest extends TestCase {
         assertValidates(assertion, object);
         
     }
+ 
 }

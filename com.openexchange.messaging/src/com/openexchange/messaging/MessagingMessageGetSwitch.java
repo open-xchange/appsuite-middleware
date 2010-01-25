@@ -89,7 +89,7 @@ public class MessagingMessageGetSwitch implements MessagingMessageSwitcher {
     }
 
     public Object flags(final Object... args) throws MessagingException {
-        return ((MessagingMessage)args[0]).getUserFlags();
+        return ((MessagingMessage)args[0]).getFlags();
     }
 
     public Object folderId(final Object... args) {
@@ -109,7 +109,7 @@ public class MessagingMessageGetSwitch implements MessagingMessageSwitcher {
     }
 
     public Object id(final Object... args) {
-        return ((MessagingMessage)args[0]).getSectionId();
+        return ((MessagingMessage)args[0]).getId();
     }
 
     public Object priority(final Object... args) throws MessagingException {

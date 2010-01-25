@@ -47,40 +47,47 @@
  *
  */
 
-package com.openexchange.messaging.json;
+package com.openexchange.messaging.json.actions.messages;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.messaging.MessagingField;
+import com.openexchange.messaging.MessagingMessage;
+import com.openexchange.messaging.MessagingMessageAccess;
+import com.openexchange.messaging.json.MessagingMessageParser;
+import com.openexchange.messaging.json.MessagingMessageWriter;
+import com.openexchange.messaging.registry.MessagingServiceRegistry;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link UnitTests}
+ * {@link ListAction}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class UnitTests {
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(MessagingAccountParserTest.class);
-        tests.addTestSuite(MessagingAccountWriterTest.class);
-        tests.addTestSuite(MessagingServiceWriterTest.class);
-        tests.addTestSuite(MessagingMessageWriterTest.class);
-        tests.addTestSuite(MessagingMessageParserTest.class);
-        
-        tests.addTestSuite(com.openexchange.messaging.json.actions.accounts.AllTest.class);
-        tests.addTestSuite(com.openexchange.messaging.json.actions.accounts.DeleteTest.class);
-        tests.addTestSuite(com.openexchange.messaging.json.actions.accounts.GetTest.class);
-        tests.addTestSuite(com.openexchange.messaging.json.actions.accounts.NewTest.class);
-        tests.addTestSuite(com.openexchange.messaging.json.actions.accounts.UpdateTest.class);
-        
-        tests.addTestSuite(com.openexchange.messaging.json.actions.services.AllActionTest.class);
-        tests.addTestSuite(com.openexchange.messaging.json.actions.services.GetActionTest.class);
-        
-        tests.addTestSuite(com.openexchange.messaging.json.actions.messages.AllTest.class);
-        tests.addTestSuite(com.openexchange.messaging.json.actions.messages.GetTest.class);
-        tests.addTestSuite(com.openexchange.messaging.json.actions.messages.ListTest.class);
-        
-        return tests;
+public class ListAction extends AbstractMessagingAction {
+
+    public ListAction(MessagingServiceRegistry registry, MessagingMessageWriter writer, MessagingMessageParser parser) {
+        super(registry, writer, parser);
     }
+
+    @Override
+    protected AJAXRequestResult doIt(MessagingRequestData req, ServerSession session) throws AbstractOXException, JSONException {
+        JSONArray list = new JSONArray();
+        
+        MessagingMessageAccess access = req.getMessageAccess();
+        
+        MessagingField[] fields = req.getColumns();
+        
+        List<MessagingMessage> messages = access.getMessages(req.getFolderId(), req.getIds(), fields);
+        for (MessagingMessage messagingMessage : messages) {
+            list.put(writer.writeFields(messagingMessage, fields));
+        }
+        
+        return new AJAXRequestResult(list);
+    }
+
 }

@@ -67,12 +67,15 @@ import org.json.JSONObject;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.messaging.BinaryContent;
 import com.openexchange.messaging.MessagingBodyPart;
+import com.openexchange.messaging.MessagingField;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingMessage;
+import com.openexchange.messaging.MessagingMessageGetSwitch;
 import com.openexchange.messaging.MessagingPart;
 import com.openexchange.messaging.MultipartContent;
+import com.openexchange.messaging.SimpleMessagingMessage;
 import com.openexchange.messaging.StringContent;
 
 /**
@@ -94,7 +97,7 @@ public class MessagingMessageWriter {
         }
 
         public String writeKey(Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException {
-            return entry.getKey();
+            return entry.getKey().toLowerCase();
         }
 
         public Object writeValue(Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException {
@@ -118,7 +121,7 @@ public class MessagingMessageWriter {
         }
 
         public String writeKey(Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException {
-            return entry.getKey();
+            return entry.getKey().toLowerCase();
         }
 
         public Object writeValue(Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException {
@@ -135,16 +138,9 @@ public class MessagingMessageWriter {
     private JSONObject write(MessagingPart message) throws JSONException, MessagingException {
         JSONObject messageJSON = new JSONObject();
         
-        messageJSON.put("id", message.getSectionId());
+        messageJSON.put("sectionId", message.getSectionId());
         if(null != message.getHeaders() && ! message.getHeaders().isEmpty()) {
-            JSONObject headerJSON = new JSONObject();
-            
-            for (Map.Entry<String, Collection<MessagingHeader>> entry : message.getHeaders().entrySet()) {
-
-                MessagingHeaderWriter writer = selectWriter(entry);
-                headerJSON.put(writer.writeKey(entry), writer.writeValue(entry));
-                
-            }
+            JSONObject headerJSON = writeHeaders(message.getHeaders());
             
             messageJSON.put("headers", headerJSON);
         }
@@ -152,19 +148,7 @@ public class MessagingMessageWriter {
         MessagingContent content = message.getContent();
         
         if(content != null) {
-            MessagingContentWriter writer = null;
-            int priority = 0;
-            for (MessagingContentWriter renderer : contentWriters) {
-                if(renderer.handles(message, content)) {
-                    if(writer == null) {
-                        writer = renderer;
-                        priority = renderer.getPriority();
-                    } else if (priority < renderer.getPriority()){
-                        writer = renderer;
-                        priority = renderer.getPriority();
-                    }
-                }
-            }
+            MessagingContentWriter writer = getWriter(message, content);
             if(writer != null) {
                 messageJSON.put("content", writer.write(message, content));
             }
@@ -172,6 +156,32 @@ public class MessagingMessageWriter {
         
         return messageJSON;
 
+    }
+
+    private JSONObject writeHeaders(Map<String, Collection<MessagingHeader>> headers) throws MessagingException, JSONException {
+        JSONObject headerJSON = new JSONObject();
+        
+        for (Map.Entry<String, Collection<MessagingHeader>> entry : headers.entrySet()) {
+
+            MessagingHeaderWriter writer = selectWriter(entry);
+            headerJSON.put(writer.writeKey(entry), writer.writeValue(entry));
+            
+        }
+        return headerJSON;
+    }
+
+    private MessagingContentWriter getWriter(MessagingPart message, MessagingContent content) {
+        int priority = 0;
+        MessagingContentWriter writer = null;
+        for (MessagingContentWriter renderer : contentWriters) {
+            if(renderer.handles(message, content)) {
+                if(writer == null || priority < renderer.getPriority()) {
+                    writer = renderer;
+                    priority = renderer.getPriority();
+                }
+            }
+        }
+        return writer;
     }
 
     private MessagingHeaderWriter selectWriter(Entry<String, Collection<MessagingHeader>> entry) {
@@ -202,6 +212,10 @@ public class MessagingMessageWriter {
     public JSONObject write(MessagingMessage message) throws JSONException, MessagingException {
         JSONObject messageJSON = write((MessagingPart)message);
 
+        if(message.getId() != null) {
+            messageJSON.put("id", message.getId());
+        }
+        
         if (message.getColorLabel() > 0) {
             messageJSON.put("colorLabel", message.getColorLabel());
         }
@@ -348,6 +362,61 @@ public class MessagingMessageWriter {
 
     public void addContentWriter(MessagingContentWriter contentWriter) {
         contentWriters.add(contentWriter);
+    }
+
+    public JSONArray writeFields(MessagingMessage message, MessagingField[] fields) throws MessagingException, JSONException {
+        JSONArray fieldJSON = new JSONArray();
+        
+        MessagingMessageGetSwitch switcher = new MessagingMessageGetSwitch();
+        
+        for (MessagingField messagingField : fields) {
+            Object value = messagingField.doSwitch(switcher, message);
+            if(value == null) {
+                
+            }else if(messagingField == MessagingField.HEADERS) {
+                value = writeHeaders(message.getHeaders());
+            }else if(messagingField.getEquivalentHeader() != null) {
+                Entry<String, Collection<MessagingHeader>> entry = new SimpleEntry<String, Collection<MessagingHeader>>(messagingField.getEquivalentHeader().toString(), (Collection<MessagingHeader>) value);
+                MessagingHeaderWriter writer = selectWriter(entry);
+                value = writer.writeValue(entry);
+            } else if (MessagingContent.class.isInstance(value)) {
+                MessagingContent content = (MessagingContent) value;
+                MessagingContentWriter writer = getWriter(message, content);
+                if(writer != null) {
+                    value = writer.write(message, content);
+                }
+
+            }
+            
+            fieldJSON.put( value );
+        }
+        return fieldJSON;
+    }
+    
+    private static final class SimpleEntry<T1, T2> implements Map.Entry<T1, T2> {
+
+        private T1 key;
+        private T2 value;
+        
+        public SimpleEntry(T1 key, T2 value) {
+            this.key = key;
+            this.value = value;
+        }
+
+        public T1 getKey() {
+            return key;
+        }
+
+        public T2 getValue() {
+            return value;
+        }
+
+        public T2 setValue(T2 value) {
+            T2 oldValue = this.value;
+            this.value = value;
+            return oldValue;
+        }
+        
     }
 
 }

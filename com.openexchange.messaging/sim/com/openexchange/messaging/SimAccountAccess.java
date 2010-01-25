@@ -47,40 +47,50 @@
  *
  */
 
-package com.openexchange.messaging.json;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
+package com.openexchange.messaging;
 
 
 /**
- * {@link UnitTests}
+ * {@link SimAccountAccess}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class UnitTests {
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(MessagingAccountParserTest.class);
-        tests.addTestSuite(MessagingAccountWriterTest.class);
-        tests.addTestSuite(MessagingServiceWriterTest.class);
-        tests.addTestSuite(MessagingMessageWriterTest.class);
-        tests.addTestSuite(MessagingMessageParserTest.class);
-        
-        tests.addTestSuite(com.openexchange.messaging.json.actions.accounts.AllTest.class);
-        tests.addTestSuite(com.openexchange.messaging.json.actions.accounts.DeleteTest.class);
-        tests.addTestSuite(com.openexchange.messaging.json.actions.accounts.GetTest.class);
-        tests.addTestSuite(com.openexchange.messaging.json.actions.accounts.NewTest.class);
-        tests.addTestSuite(com.openexchange.messaging.json.actions.accounts.UpdateTest.class);
-        
-        tests.addTestSuite(com.openexchange.messaging.json.actions.services.AllActionTest.class);
-        tests.addTestSuite(com.openexchange.messaging.json.actions.services.GetActionTest.class);
-        
-        tests.addTestSuite(com.openexchange.messaging.json.actions.messages.AllTest.class);
-        tests.addTestSuite(com.openexchange.messaging.json.actions.messages.GetTest.class);
-        tests.addTestSuite(com.openexchange.messaging.json.actions.messages.ListTest.class);
-        
-        return tests;
+public class SimAccountAccess implements MessagingAccountAccess {
+
+    private int accountId;
+    private MessagingFolderAccess folderAccess;
+    private MessagingMessageAccess messageAccess;
+
+    public int getAccountId() {
+        return accountId;
     }
+
+    public MessagingFolderAccess getFolderAccess() throws MessagingException {
+        return folderAccess;
+    }
+
+    public MessagingMessageAccess getMessageAccess() throws MessagingException {
+        return messageAccess;
+    }
+
+    public void close() {
+
+    }
+
+    public void connect() throws MessagingException {
+
+    }
+
+    public boolean ping() throws MessagingException {
+        return true;
+    }
+
+    public void setMessageAccess(SimMessageAccess access) {
+        this.messageAccess = access;
+    }
+
+    public boolean isConnected() {
+        return true;
+    }
+
 }

@@ -55,8 +55,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -103,7 +105,7 @@ public class MessagingMessageParserTest extends TestCase {
         
         messageJSON.put("colorLabel", 12);
         messageJSON.put("id", "13");
-        messageJSON.put("flags", 1337);
+        messageJSON.put("flags", 313);
         messageJSON.put("receivedDate", 7331);
         messageJSON.put("size", 23);
         messageJSON.put("threadLevel", 3);
@@ -123,16 +125,17 @@ public class MessagingMessageParserTest extends TestCase {
         
         assertEquals("13", message.getSectionId());
         assertEquals(12, message.getColorLabel());
-        assertEquals(1337, message.getFlags());
+        assertEquals(313, message.getFlags());
     
         Collection<String> flags = message.getUserFlags();
         assertNotNull(flags);
         assertEquals(3, flags.size());
         Iterator<String> iterator = flags.iterator();
-        assertEquals("flag1", iterator.next());
-        assertEquals("flag2", iterator.next());
-        assertEquals("flag3", iterator.next());
-        
+        Set<String> expectedFlags = new HashSet<String>(Arrays.asList("flag1", "flag2", "flag3"));
+        while(iterator.hasNext()) {
+            assertTrue(expectedFlags.remove(iterator.next()));
+        }
+        assertTrue(expectedFlags.isEmpty());
         assertEquals(7331, message.getReceivedDate());
     
         assertEquals(23, message.getSize());
