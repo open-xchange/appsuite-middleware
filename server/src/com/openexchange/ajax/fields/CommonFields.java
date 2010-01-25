@@ -50,13 +50,15 @@
 package com.openexchange.ajax.fields;
 
 public interface CommonFields extends FolderChildFields {
-	
-	public static final String CATEGORIES = "categories";
 
-	public static final String PRIVATE_FLAG = "private_flag";
-	
-	public static final String COLORLABEL = "color_label";
+    public static final String CATEGORIES = "categories";
+
+    public static final String PRIVATE_FLAG = "private_flag";
+
+    public static final String COLORLABEL = "color_label";
 
     public static final String NUMBER_OF_ATTACHMENTS = "number_of_attachments";
-	
+
+    public static final String LAST_MODIFIED_OF_NEWEST_ATTACHMENT_UTC = "lastModifiedOfNewestAttachmentUTC";
+
 }

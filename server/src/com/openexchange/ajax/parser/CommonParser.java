@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.ajax.parser;
 
 import java.util.TimeZone;
@@ -63,10 +61,9 @@ import com.openexchange.tools.servlet.OXJSONException;
  *
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
-
 public class CommonParser extends FolderChildParser {
 
-	protected CommonParser() {
+    protected CommonParser() {
         super();
     }
 
@@ -78,25 +75,27 @@ public class CommonParser extends FolderChildParser {
         super(parseAll, timeZone);
     }
 
-    protected void parseElementCommon(final CommonObject commonobject, final JSONObject jsonobject) throws JSONException, OXJSONException {
-		if (jsonobject.has(CommonFields.CATEGORIES)) {
-			commonobject.setCategories(parseString(jsonobject, CommonFields.CATEGORIES));
-		}
-		
-		if (jsonobject.has(CommonFields.COLORLABEL)) {
-			commonobject.setLabel(parseInt(jsonobject, CommonFields.COLORLABEL));
-		}
+    protected void parseElementCommon(final CommonObject obj, final JSONObject json) throws JSONException, OXJSONException {
+        if (json.has(CommonFields.CATEGORIES)) {
+            obj.setCategories(parseString(json, CommonFields.CATEGORIES));
+        }
+        
+        if (json.has(CommonFields.COLORLABEL)) {
+            obj.setLabel(parseInt(json, CommonFields.COLORLABEL));
+        }
 
-		if (jsonobject.has(CommonFields.PRIVATE_FLAG)) {
-			commonobject.setPrivateFlag(parseBoolean(jsonobject, CommonFields.PRIVATE_FLAG));
-		}
-		
-		if (jsonobject.has(CommonFields.NUMBER_OF_ATTACHMENTS)) {
-			commonobject.setNumberOfAttachments(parseInt(jsonobject, CommonFields.NUMBER_OF_ATTACHMENTS));
-		}		
-
-		parseElementFolderChildObject(commonobject, jsonobject);
-	}
+        if (json.has(CommonFields.PRIVATE_FLAG)) {
+            obj.setPrivateFlag(parseBoolean(json, CommonFields.PRIVATE_FLAG));
+        }
+        
+        if (json.has(CommonFields.NUMBER_OF_ATTACHMENTS)) {
+            obj.setNumberOfAttachments(parseInt(json, CommonFields.NUMBER_OF_ATTACHMENTS));
+        }        
+        if (parseAll && json.has(CommonFields.LAST_MODIFIED_OF_NEWEST_ATTACHMENT_UTC)) {
+            obj.setLastModifiedOfNewestAttachment(parseDate(json, CommonFields.LAST_MODIFIED_OF_NEWEST_ATTACHMENT_UTC));
+        }
+        parseElementFolderChildObject(obj, json);
+    }
 }
 
 

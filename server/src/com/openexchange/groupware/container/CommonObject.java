@@ -49,6 +49,9 @@
 
 package com.openexchange.groupware.container;
 
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
+import java.util.Date;
 import java.util.Set;
 
 /**
@@ -91,9 +94,13 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
 
     public static final int NUMBER_OF_ATTACHMENTS = 104;
 
+    public static final int LAST_MODIFIED_OF_NEWEST_ATTACHMENT = 105;
+
     protected int personal_folder_id;
 
     protected int number_of_attachments;
+
+    protected Date lastModifiedOfNewestAttachment;
 
     protected int number_of_links;
 
@@ -106,6 +113,8 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
     protected boolean b_personal_folder_id;
 
     protected boolean b_number_of_attachments;
+
+    protected boolean containsLastModifiedOfNewestAttachment;
 
     protected boolean b_number_of_links;
 
@@ -126,6 +135,10 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
 
     public int getNumberOfAttachments() {
         return number_of_attachments;
+    }
+
+    public Date getLastModifiedOfNewestAttachment() {
+        return lastModifiedOfNewestAttachment;
     }
 
     public int getNumberOfLinks() {
@@ -154,6 +167,10 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
     public void setNumberOfAttachments(final int number_of_attachments) {
         this.number_of_attachments = number_of_attachments;
         b_number_of_attachments = true;
+    }
+
+    public void setLastModifiedOfNewestAttachment(Date lastModifiedOfNewestAttachment) {
+        this.lastModifiedOfNewestAttachment = lastModifiedOfNewestAttachment;
     }
 
     public void setNumberOfLinks(final int number_of_links) {
@@ -187,6 +204,10 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
         b_number_of_attachments = false;
     }
 
+    public void removeLastModifiedOfNewestAttachment() {
+        lastModifiedOfNewestAttachment = null;
+    }
+
     public void removeNumberOfLinks() {
         number_of_links = 0;
         b_number_of_links = false;
@@ -215,6 +236,10 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
         return b_number_of_attachments;
     }
 
+    public boolean containsLastModifiedOfNewestAttachment() {
+        return containsLastModifiedOfNewestAttachment;
+    }
+
     public boolean containsNumberOfLinks() {
         return b_number_of_links;
     }
@@ -233,17 +258,20 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
 
         personal_folder_id = 0;
         number_of_attachments = 0;
+        lastModifiedOfNewestAttachment = null;
         number_of_links = 0;
         categories = null;
         label = 0;
 
         b_personal_folder_id = false;
         b_number_of_attachments = false;
+        containsLastModifiedOfNewestAttachment = false;
         b_number_of_links = false;
         b_categories = false;
         bLabel = false;
     }
 
+    @Override
     public Set<Integer> findDifferingFields(DataObject dataObject) {
 
         Set<Integer> differingFields = super.findDifferingFields(dataObject);
@@ -256,23 +284,27 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
 
         if ((!containsCategories() && other.containsCategories()) || (containsCategories() && other.containsCategories() && getCategories() != other.getCategories() && (getCategories() == null || !getCategories().equals(
             other.getCategories())))) {
-            differingFields.add(CATEGORIES);
+            differingFields.add(I(CATEGORIES));
         }
 
         if ((!containsLabel() && other.containsLabel()) || (containsLabel() && other.containsLabel() && getLabel() != other.getLabel())) {
-            differingFields.add(COLOR_LABEL);
+            differingFields.add(I(COLOR_LABEL));
         }
 
         if ((!containsNumberOfAttachments() && other.containsNumberOfAttachments()) || (containsNumberOfAttachments() && other.containsNumberOfAttachments() && getNumberOfAttachments() != other.getNumberOfAttachments())) {
-            differingFields.add(NUMBER_OF_ATTACHMENTS);
+            differingFields.add(I(NUMBER_OF_ATTACHMENTS));
+        }
+
+        if ((!containsLastModifiedOfNewestAttachment() && other.containsLastModifiedOfNewestAttachment()) || (containsLastModifiedOfNewestAttachment() && other.containsLastModifiedOfNewestAttachment() && getLastModifiedOfNewestAttachment() != other.getLastModifiedOfNewestAttachment())) {
+            differingFields.add(I(LAST_MODIFIED_OF_NEWEST_ATTACHMENT));
         }
 
         if ((!containsNumberOfLinks() && other.containsNumberOfLinks()) || (containsNumberOfLinks() && other.containsNumberOfLinks() && getNumberOfLinks() != other.getNumberOfLinks())) {
-            differingFields.add(NUMBER_OF_LINKS);
+            differingFields.add(I(NUMBER_OF_LINKS));
         }
 
         if ((!containsPrivateFlag() && other.containsPrivateFlag()) || (containsPrivateFlag() && other.containsPrivateFlag() && getPrivateFlag() != other.getPrivateFlag())) {
-            differingFields.add(PRIVATE_FLAG);
+            differingFields.add(I(PRIVATE_FLAG));
         }
 
         return differingFields;
@@ -282,19 +314,22 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
     public void set(int field, Object value) {
         switch (field) {
         case COLOR_LABEL:
-            setLabel((Integer) value);
+            setLabel(((Integer) value).intValue());
             break;
         case CATEGORIES:
             setCategories((String) value);
             break;
         case NUMBER_OF_LINKS:
-            setNumberOfLinks((Integer) value);
+            setNumberOfLinks(((Integer) value).intValue());
             break;
         case NUMBER_OF_ATTACHMENTS:
-            setNumberOfAttachments((Integer) value);
+            setNumberOfAttachments(((Integer) value).intValue());
+            break;
+        case LAST_MODIFIED_OF_NEWEST_ATTACHMENT:
+            setLastModifiedOfNewestAttachment((Date) value);
             break;
         case PRIVATE_FLAG:
-            setPrivateFlag((Boolean) value);
+            setPrivateFlag(((Boolean) value).booleanValue());
             break;
         default:
             super.set(field, value);
@@ -306,15 +341,17 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
     public Object get(int field) {
         switch (field) {
         case COLOR_LABEL:
-            return getLabel();
+            return I(getLabel());
         case CATEGORIES:
             return getCategories();
         case NUMBER_OF_LINKS:
-            return getNumberOfLinks();
+            return I(getNumberOfLinks());
         case NUMBER_OF_ATTACHMENTS:
-            return getNumberOfAttachments();
+            return I(getNumberOfAttachments());
+        case LAST_MODIFIED_OF_NEWEST_ATTACHMENT:
+            return getLastModifiedOfNewestAttachment();
         case PRIVATE_FLAG:
-            return getPrivateFlag();
+            return B(getPrivateFlag());
         default:
             return super.get(field);
 
@@ -332,6 +369,8 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
             return containsNumberOfLinks();
         case NUMBER_OF_ATTACHMENTS:
             return containsNumberOfAttachments();
+        case LAST_MODIFIED_OF_NEWEST_ATTACHMENT:
+            return containsLastModifiedOfNewestAttachment;
         case PRIVATE_FLAG:
             return containsPrivateFlag();
         default:
@@ -354,6 +393,9 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
             break;
         case NUMBER_OF_ATTACHMENTS:
             removeNumberOfAttachments();
+            break;
+        case LAST_MODIFIED_OF_NEWEST_ATTACHMENT:
+            removeLastModifiedOfNewestAttachment();
             break;
         case PRIVATE_FLAG:
             removePrivateFlag();
