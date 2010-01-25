@@ -150,6 +150,7 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.mailaccount.internal.CreateMailAccountTables;
 import com.openexchange.management.ManagementService;
+import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.multiple.internal.MultipleHandlerServiceTracker;
 import com.openexchange.passwordchange.PasswordChangeService;
@@ -211,7 +212,7 @@ public final class ServerActivator extends DeferredActivator {
         {
             ConfigurationService.class, CacheService.class, EventAdmin.class, SessiondService.class, SpringParser.class, JDOMParser.class,
             TimerService.class, ThreadPoolService.class, CalendarAdministrationService.class, AppointmentSqlFactoryService.class,
-            CalendarCollectionService.class, ReminderDeleteInterface.class
+            CalendarCollectionService.class, ReminderDeleteInterface.class, MessagingServiceRegistry.class
         };
 
     private final List<ServiceRegistration> registrationList;
