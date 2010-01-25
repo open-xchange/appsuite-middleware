@@ -81,13 +81,14 @@ public final class TextProcessing {
                 used = prefix.length();
                 foldMe = line.substring(used);
             }
-            for (end = foldMe.length() - 1; end >= 0; end--) {
+            final int mlen = foldMe.length() - 1;
+            for (end = mlen; end >= 0; end--) {
                 c = foldMe.charAt(end);
                 if (c != ' ' && c != '\t' && c != '\r' && c != '\n') {
                     break;
                 }
             }
-            if (end != foldMe.length() - 1) {
+            if (end != mlen) {
                 s = foldMe.substring(0, end + 1);
             } else {
                 s = foldMe;
@@ -96,24 +97,53 @@ public final class TextProcessing {
         /*
          * Check if the string fits now
          */
-        {
-            final int total = used + s.length();
-            if (total <= linewrap) {
-                if (null != prefix) {
-                    return new StringBuilder(total).append(prefix).append(s).toString();
-                }
-                return s;
-            }
+        int total = used + s.length();
+        if (total <= linewrap) {
+            return used > 0 ? new StringBuilder(total).append(prefix).append(s).toString() : s;
         }
         /*
          * Fold the string
          */
-        final StringBuilder sb = new StringBuilder(s.length() + 4);
+        final StringBuilder sb = new StringBuilder(total);
         char lastc = 0;
-        while (used + s.length() > linewrap) {
+        if (used > 0) {
+            while (total > linewrap) {
+                int lastspace = -1;
+                for (int i = 0; i < s.length(); i++) {
+                    if (lastspace != -1 && used + i > linewrap) {
+                        break;
+                    }
+                    c = s.charAt(i);
+                    if ((c == ' ' || c == '\t') && !(lastc == ' ' || lastc == '\t')) {
+                        lastspace = i;
+                    }
+                    lastc = c;
+                }
+                if (lastspace < 0) {
+                    /*
+                     * No space, use the whole thing
+                     */
+                    sb.append(prefix).append(s);
+                    return sb.toString();
+                }
+                sb.append(prefix);
+                sb.append(s.substring(0, lastspace));
+                sb.append(CHAR_BREAK);
+                lastc = s.charAt(lastspace);
+                // sb.append(lastc);
+                s = s.substring(lastspace + 1);
+                total = used + s.length();
+            }
+            sb.append(prefix).append(s);
+            return sb.toString();
+        }
+        /*
+         * No prefix given
+         */
+        while (s.length() > linewrap) {
             int lastspace = -1;
             for (int i = 0; i < s.length(); i++) {
-                if (lastspace != -1 && used + i > linewrap) {
+                if (lastspace != -1 && i > linewrap) {
                     break;
                 }
                 c = s.charAt(i);
@@ -122,27 +152,18 @@ public final class TextProcessing {
                 }
                 lastc = c;
             }
-            if (lastspace == -1) {
+            if (lastspace < 0) {
                 /*
                  * No space, use the whole thing
                  */
-                if (null != prefix) {
-                    sb.append(prefix);
-                }
                 sb.append(s);
                 return sb.toString();
-            }
-            if (null != prefix) {
-                sb.append(prefix);
             }
             sb.append(s.substring(0, lastspace));
             sb.append(CHAR_BREAK);
             lastc = s.charAt(lastspace);
             // sb.append(lastc);
             s = s.substring(lastspace + 1);
-        }
-        if (null != prefix) {
-            sb.append(prefix);
         }
         sb.append(s);
         return sb.toString();
