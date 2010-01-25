@@ -77,8 +77,7 @@ public class SubscriptionUserDeleteListenerTest extends AbstractSubscriptionSQLS
         SubscriptionUserDeleteListener listener = new SubscriptionUserDeleteListener();
         listener.setStorage(storage);
 
-        MockUser user = new MockUser();
-        user.setId(userId);
+        MockUser user = new MockUser(userId);
 
         storage.rememberSubscription(subscription);
         DeleteEvent event = new DeleteEvent(user, userId, DeleteEvent.TYPE_USER, ctx);

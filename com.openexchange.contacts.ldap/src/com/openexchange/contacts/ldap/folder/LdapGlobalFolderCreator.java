@@ -252,7 +252,9 @@ public class LdapGlobalFolderCreator {
             public void setParameter(final String name, final Object value) {
                 // Nothing to do
             }
-            
+            public String getAuthId() {
+                throw new UnsupportedOperationException();
+            }
         };
     }
 

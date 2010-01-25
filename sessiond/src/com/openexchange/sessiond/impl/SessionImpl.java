@@ -228,4 +228,8 @@ public final class SessionImpl implements Session {
     public void setPassword(final String password) {
         this.password = password;
     }
+
+    public String getAuthId() {
+        return authId;
+    }
 }

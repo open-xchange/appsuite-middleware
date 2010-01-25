@@ -105,6 +105,10 @@ public class SessiondException extends AbstractOXException {
         setMessageArgs(msgArgs);
     }
 
+    public SessiondException(Code code, Object... msgArgs) {
+        this(code, null, msgArgs);
+    }
+
     public SessiondException(final EnumComponent component, final Category category, final int number, final String message, final Throwable cause, final Object... msgArgs) {
         super(component, category, number, message, cause);
         setMessageArgs(msgArgs);
@@ -126,7 +130,11 @@ public class SessiondException extends AbstractOXException {
         /**
          * Max. session size for user %1$s in context %2$s exceeded
          */
-        MAX_SESSION_PER_USER_EXCEPTION("Max. session size for user %1$s in context %2$s exceeded", 7, AbstractOXException.Category.CODE_ERROR);
+        MAX_SESSION_PER_USER_EXCEPTION("Max. session size for user %1$s in context %2$s exceeded", 7, AbstractOXException.Category.CODE_ERROR),
+        /**
+         * Found duplicate used authentication identifier. Login of existing session: %1$s. Current denied login request: %2$s.
+         */
+        DUPLICATE_AUTHID("Found duplicate used authentication identifier. Login of existing session: %1$s. Current denied login request: %2$s.", 8, Category.CODE_ERROR);
 
         /**
          * Message of the exception.

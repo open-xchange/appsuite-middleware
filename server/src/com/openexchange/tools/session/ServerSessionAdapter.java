@@ -205,6 +205,10 @@ public class ServerSessionAdapter implements ServerSession {
         session().removeRandomToken();
     }
 
+    public String getAuthId() {
+        return session().getAuthId();
+    }
+
     public Context getContext() {
         if (serverSession != null) {
             return serverSession.getContext();

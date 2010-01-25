@@ -112,12 +112,11 @@ public class SubscriptionSession implements Session {
         throw new UnsupportedOperationException();
     }
 
-    public void removeUploadedFileOnly(final String id) {
-        throw new UnsupportedOperationException();
-    }
-
     public void setParameter(final String name, final Object value) {
         throw new UnsupportedOperationException();        
     }
 
+    public String getAuthId() {
+        throw new UnsupportedOperationException();
+    }
 }

@@ -189,6 +189,7 @@ public final class SessionHandler {
      */
     protected static String addSession(final int userId, final String loginName, final String password, final Context context, final String clientHost, final String login, String authId) throws SessiondException {
         checkMaxSessPerUser(userId, context);
+        checkAuthId(login, authId);
         final String sessionId = sessionIdGenerator.createSessionId(loginName, clientHost);
         final Session session =
             new SessionImpl(userId, loginName, password, context.getContextId(), sessionId, sessionIdGenerator.createSecretId(
@@ -216,6 +217,10 @@ public final class SessionHandler {
                 throw new SessiondException(Code.MAX_SESSION_PER_USER_EXCEPTION, null, I(userId), I(context.getContextId()));
             }
         }
+    }
+
+    private static void checkAuthId(String login, String authId) throws SessiondException {
+        sessionData.checkAuthId(login, authId);
     }
 
     /**

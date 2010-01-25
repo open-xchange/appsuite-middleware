@@ -97,6 +97,8 @@ public class SessionObject implements com.openexchange.session.Session {
 
     private String login;
 
+    private String authId;
+
     private final Map<String, Object> parameters;
 
     public SessionObject(final String sessionid) {
@@ -224,9 +226,6 @@ public class SessionObject implements com.openexchange.session.Session {
         this.mailSession = mailSession;
     }
 
-    public void closingOperations() {
-    }
-
     public String getSecret() {
         return secret;
     }
@@ -263,4 +262,11 @@ public class SessionObject implements com.openexchange.session.Session {
         this.login = login;
     }
 
+    public String getAuthId() {
+        return authId;
+    }
+
+    public void setAuthId(String authId) {
+        this.authId = authId;
+    }
 }

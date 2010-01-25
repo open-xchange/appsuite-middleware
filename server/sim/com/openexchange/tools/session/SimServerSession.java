@@ -68,7 +68,6 @@ public class SimServerSession implements ServerSession {
     private Context context;
     private User user;
     private UserConfiguration userConfig;
-
     
     public SimServerSession(Context context, User user, UserConfiguration userConfig) {
         super();
@@ -80,9 +79,7 @@ public class SimServerSession implements ServerSession {
     
     public SimServerSession(int ctxId, int uid) {
         this(new SimContext(ctxId), null, null);
-        MockUser user = new MockUser();
-        user.setId(uid);
-        this.user = user;
+        this.user = new MockUser(uid);
     }
     
     public Context getContext() {
@@ -150,11 +147,14 @@ public class SimServerSession implements ServerSession {
     }
 
     public void removeRandomToken() {
-
+        throw new UnsupportedOperationException();
     }
 
     public void setParameter(String name, Object value) {
-
+        throw new UnsupportedOperationException();
     }
 
+    public String getAuthId() {
+        throw new UnsupportedOperationException();
+    }
 }

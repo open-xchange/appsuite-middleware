@@ -76,7 +76,7 @@ public class MockUser implements User {
     /**
      * Unique identifier. This identifier must be only unique in a context.
      */
-    private int id;
+    private final int id;
 
     /**
      * Unique identifier of the contact belonging to this user.
@@ -165,6 +165,16 @@ public class MockUser implements User {
 
     private Locale locale;
 
+    public MockUser(int id) {
+        super();
+        this.id = id;
+    }
+
+    public MockUser() {
+        super();
+        this.id = 0;
+    }
+
     /**
      * Getter for userPassword.
      *
@@ -172,16 +182,6 @@ public class MockUser implements User {
      */
     public String getUserPassword() {
         return userPassword;
-    }
-
-    /**
-     * Setter for id.
-     *
-     * @param id
-     *            User identifier.
-     */
-    public void setId(final int id) {
-        this.id = id;
     }
 
     /**
@@ -496,12 +496,11 @@ public class MockUser implements User {
         }
         if (contained) {
             return groups;
-        } else {
-            final int[] newgroups = new int[groups.length + 1];
-            newgroups[0] = GROUP_ALL;
-            System.arraycopy(groups, 0, newgroups, 1, groups.length);
-            return newgroups;
         }
+        final int[] newgroups = new int[groups.length + 1];
+        newgroups[0] = GROUP_ALL;
+        System.arraycopy(groups, 0, newgroups, 1, groups.length);
+        return newgroups;
     }
 
     /**
@@ -524,6 +523,10 @@ public class MockUser implements User {
      */
     public String getImapLogin() {
         return imapLogin;
+    }
+
+    public void setImapLogin(String imapLogin) {
+        this.imapLogin = imapLogin;
     }
 
     public String getPasswordMech() {

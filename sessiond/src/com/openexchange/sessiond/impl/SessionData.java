@@ -211,6 +211,21 @@ final class SessionData {
         return count;
     }
 
+    void checkAuthId(String login, String authId) throws SessiondException {
+        rlock.lock();
+        try {
+            for (SessionContainer container : sessionList) {
+                for (SessionControl sc : container.getSessionControls()) {
+                    if (sc.getSession().getAuthId().equals(authId)) {
+                        throw new SessiondException(Code.DUPLICATE_AUTHID, login, sc.getSession().getLogin());
+                    }
+                }
+            }
+        } finally {
+            rlock.unlock();
+        }
+    }
+
     SessionControl addSession(final Session session, final int lifeTime, final boolean noLimit) throws SessiondException {
         if (!noLimit && countSessions() > maxSessions) {
             throw new SessiondException(Code.MAX_SESSION_EXCEPTION);

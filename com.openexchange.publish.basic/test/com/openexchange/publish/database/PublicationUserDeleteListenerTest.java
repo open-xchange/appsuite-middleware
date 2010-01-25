@@ -83,8 +83,7 @@ public class PublicationUserDeleteListenerTest extends AbstractPublicationSQLSto
     public void setUp() throws Exception {
         super.setUp();
 
-        this.user = new MockUser();
-        user.setId(userId);
+        this.user = new MockUser(userId);
         
         this.listener = new PublicationUserDeleteListener();
         this.listener.setStorage(storage);

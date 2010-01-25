@@ -120,11 +120,14 @@ public class PublicationSession implements Session {
     }
 
     public void removeRandomToken() {
-
+        throw new UnsupportedOperationException();
     }
 
     public void setParameter(final String name, final Object value) {
-
+        // Nothing to remember.
     }
 
+    public String getAuthId() {
+        throw new UnsupportedOperationException();
+    }
 }
