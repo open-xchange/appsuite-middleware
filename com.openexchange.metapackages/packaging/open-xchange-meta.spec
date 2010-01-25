@@ -46,6 +46,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        Open-Xchange Meta packages
 
+%define oxcommon %(cat %{name}-%{version}/packaging/debian/substvars | sed 's;oxcommon=;;')
 
 # ----------------------------------------------------------------------------------------------------
 %package -n	open-xchange-meta-oxserver
@@ -56,11 +57,39 @@ Requires:	open-xchange-xerces-ibm
 %else
 Requires:	open-xchange-xerces-sun
 %endif
-Requires:	open-xchange, open-xchange-authentication-database, open-xchange-admin-client, open-xchange-admin-lib, open-xchange-admin-plugin-hosting, open-xchange-admin-plugin-hosting-client, open-xchange-admin-plugin-hosting-lib, open-xchange-configjump-generic, open-xchange-admin-doc, open-xchange-contactcollector, open-xchange-conversion, open-xchange-conversion-engine, open-xchange-conversion-servlet, open-xchange-crypto, open-xchange-data-conversion-ical4j, open-xchange-dataretention, open-xchange-dataretention-csv, open-xchange-genconf, open-xchange-genconf-mysql, open-xchange-imap, open-xchange-mailfilter, open-xchange-management, open-xchange-monitoring, open-xchange-passwordchange-database, open-xchange-passwordchange-servlet, open-xchange-pop3, open-xchange-publish, open-xchange-publish-basic, open-xchange-publish-infostore-online, open-xchange-publish-json, open-xchange-publish-microformats, open-xchange-push-udp, open-xchange-resource-managerequest, open-xchange-server, open-xchange-settings-extensions, open-xchange-smtp, open-xchange-spamhandler-default, open-xchange-sql, open-xchange-subscribe, open-xchange-subscribe-json, open-xchange-subscribe-microformats, open-xchange-subscribe-crawler, open-xchange-templating, open-xchange-threadpool, open-xchange-unifiedinbox, open-xchange-admin-plugin-hosting-doc, open-xchange-charset, open-xchange-control, open-xchange-easylogin, open-xchange-group-managerequest, open-xchange-i18n, open-xchange-jcharset, open-xchange-sessiond, open-xchange-calendar-printing, open-xchange-user-json, open-xchange-gui-wizard-plugin
+Requires:	%{oxcommon}
+Requires:	open-xchange-authentication-database, open-xchange-spamhandler-default
 
 
 %description -n open-xchange-meta-oxserver
 The Open-Xchange Meta package for OX Backend
+
+Authors:
+--------
+    Open-Xchange
+
+# ----------------------------------------------------------------------------------------------------
+%package -n	open-xchange-meta-admin
+Group:          Applications/Productivity
+Summary:	The Open-Xchange Meta package for User/Group Provisioning
+Requires:	open-xchange-admin-client, open-xchange-admin-lib, open-xchange-admin-plugin-hosting, open-xchange-admin-plugin-hosting-client, open-xchange-admin-plugin-hosting-lib, open-xchange-admin-doc, open-xchange-admin-plugin-hosting-doc
+
+%description -n open-xchange-meta-admin
+The Open-Xchange Meta package for User/Group Provisioning
+
+Authors:
+--------
+    Open-Xchange
+
+# ----------------------------------------------------------------------------------------------------
+%package -n	open-xchange-meta-pubsub
+Group:          Applications/Productivity
+Summary:	The Open-Xchange Meta package for Publish and Subscribe
+Requires:	open-xchange-publish, open-xchange-publish-basic, open-xchange-publish-infostore-online, open-xchange-publish-json, open-xchange-publish-microformats, open-xchange-subscribe, open-xchange-subscribe-json, open-xchange-subscribe-microformats, open-xchange-subscribe-crawler, open-xchange-templating, open-xchange-unifiedinbox
+
+
+%description -n open-xchange-meta-pubsub
+The Open-Xchange Meta package for Publish and Subscribe
 
 Authors:
 --------
@@ -84,7 +113,7 @@ Authors:
 %package -n	open-xchange-meta-oxsingleserver
 Group:          Applications/Productivity
 Summary:	The Open-Xchange Meta package for OX on a single server
-Requires:	open-xchange-meta-oxserver, open-xchange-meta-oxgui
+Requires:	open-xchange-meta-oxserver, open-xchange-meta-oxgui, open-xchange-meta-admin, open-xchange-meta-pubsub
 
 
 %description -n open-xchange-meta-oxsingleserver
@@ -125,6 +154,14 @@ Authors:
 %doc README.TXT
 
 %files -n open-xchange-meta-oxgui
+%defattr(-,root,root)
+%doc README.TXT
+
+%files -n open-xchange-meta-admin
+%defattr(-,root,root)
+%doc README.TXT
+
+%files -n open-xchange-meta-pubsub
 %defattr(-,root,root)
 %doc README.TXT
 

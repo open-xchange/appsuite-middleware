@@ -8,21 +8,31 @@ Standards-Version: 3.6.1
 
 Package: open-xchange-meta-oxae
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, open-xchange, open-xchange-authentication-ucs, open-xchange-admin-client, open-xchange-admin-lib, open-xchange-admin-plugin-hosting, open-xchange-admin-plugin-hosting-client, open-xchange-admin-plugin-hosting-lib, open-xchange-configjump-generic, open-xchange-admin-doc, open-xchange-contactcollector, open-xchange-conversion, open-xchange-conversion-engine, open-xchange-conversion-servlet, open-xchange-crypto, open-xchange-data-conversion-ical4j, open-xchange-dataretention, open-xchange-dataretention-csv, open-xchange-genconf, open-xchange-genconf-mysql, open-xchange-imap, open-xchange-mailfilter, open-xchange-management, open-xchange-monitoring, open-xchange-passwordchange-database, open-xchange-passwordchange-servlet, open-xchange-pop3, open-xchange-publish, open-xchange-publish-basic, open-xchange-publish-infostore-online, open-xchange-publish-json, open-xchange-publish-microformats, open-xchange-push-udp, open-xchange-resource-managerequest, open-xchange-server, open-xchange-settings-extensions, open-xchange-smtp, open-xchange-spamhandler-default, open-xchange-sql, open-xchange-subscribe, open-xchange-xerces-sun, open-xchange-subscribe-json, open-xchange-subscribe-microformats, open-xchange-subscribe-crawler, open-xchange-templating, open-xchange-threadpool, open-xchange-unifiedinbox, open-xchange-admin-plugin-hosting-doc, open-xchange-charset, open-xchange-control, open-xchange-easylogin, open-xchange-group-managerequest, open-xchange-i18n, open-xchange-jcharset, open-xchange-sessiond, open-xchange-calendar-printing, open-xchange-user-json, open-xchange-gui-wizard-plugin, open-xchange-configjump-generic-gui, open-xchange-gui, open-xchange-gui-wizard-plugin-gui, open-xchange-online-help-de, open-xchange-online-help-en, open-xchange-online-help-fr
+Depends: ${oxcommon}, open-xchange-authentication-ucs, open-xchange-spamhandler-default, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-oxgui
 Description: The Open-Xchange Meta package for OXAE
 
 Package: open-xchange-meta-oxserver
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, open-xchange, open-xchange-authentication-database, open-xchange-admin-client, open-xchange-admin-lib, open-xchange-admin-plugin-hosting, open-xchange-admin-plugin-hosting-client, open-xchange-admin-plugin-hosting-lib, open-xchange-configjump-generic, open-xchange-admin-doc, open-xchange-contactcollector, open-xchange-conversion, open-xchange-conversion-engine, open-xchange-conversion-servlet, open-xchange-crypto, open-xchange-data-conversion-ical4j, open-xchange-dataretention, open-xchange-dataretention-csv, open-xchange-genconf, open-xchange-genconf-mysql, open-xchange-imap, open-xchange-mailfilter, open-xchange-management, open-xchange-monitoring, open-xchange-passwordchange-database, open-xchange-passwordchange-servlet, open-xchange-pop3, open-xchange-publish, open-xchange-publish-basic, open-xchange-publish-infostore-online, open-xchange-publish-json, open-xchange-publish-microformats, open-xchange-push-udp, open-xchange-resource-managerequest, open-xchange-server, open-xchange-settings-extensions, open-xchange-smtp, open-xchange-spamhandler-default, open-xchange-sql, open-xchange-subscribe, open-xchange-xerces-sun, open-xchange-subscribe-json, open-xchange-subscribe-microformats, open-xchange-subscribe-crawler, open-xchange-templating, open-xchange-threadpool, open-xchange-unifiedinbox, open-xchange-admin-plugin-hosting-doc, open-xchange-charset, open-xchange-control, open-xchange-easylogin, open-xchange-group-managerequest, open-xchange-i18n, open-xchange-jcharset, open-xchange-sessiond, open-xchange-calendar-printing, open-xchange-user-json, open-xchange-gui-wizard-plugin
+Depends: ${oxcommon}, open-xchange-authentication-database, open-xchange-spamhandler-default
 Description: The Open-Xchange Meta package for OX Backend
+
+Package: open-xchange-meta-admin
+Architecture: all
+Depends: open-xchange-admin-client, open-xchange-admin-lib, open-xchange-admin-plugin-hosting, open-xchange-admin-plugin-hosting-client, open-xchange-admin-plugin-hosting-lib, open-xchange-admin-doc, open-xchange-admin-plugin-hosting-doc
+Description: The Open-Xchange Meta package for User/Group Provisioning
+
+Package: open-xchange-meta-pubsub
+Architecture: all
+Depends: open-xchange-publish, open-xchange-publish-basic, open-xchange-publish-infostore-online, open-xchange-publish-json, open-xchange-publish-microformats, open-xchange-subscribe, open-xchange-subscribe-json, open-xchange-subscribe-microformats, open-xchange-subscribe-crawler, open-xchange-templating, open-xchange-unifiedinbox
+Description: The Open-Xchange Meta package for Publish and Subscribe
 
 Package: open-xchange-meta-oxgui
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, open-xchange-configjump-generic-gui, open-xchange-gui, open-xchange-gui-wizard-plugin-gui, open-xchange-online-help-de, open-xchange-online-help-en, open-xchange-online-help-fr
+Depends: open-xchange-configjump-generic-gui, open-xchange-gui, open-xchange-gui-wizard-plugin-gui, open-xchange-online-help-de, open-xchange-online-help-en, open-xchange-online-help-fr
 Description: The Open-Xchange Meta package for OX GUI
 
 Package: open-xchange-meta-oxsingleserver
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, open-xchange-meta-oxserver, open-xchange-meta-oxgui
+Depends: open-xchange-meta-oxserver, open-xchange-meta-oxgui, open-xchange-meta-admin, open-xchange-meta-pubsub
 Description: The Open-Xchange Meta package for OX on a single server
 
