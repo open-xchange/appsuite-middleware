@@ -60,35 +60,19 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.TaskException.Code;
 
 /**
- * This class implements the update of a task if a file is attached or detached
- * to the task.
+ * This class implements the update of a task if a file is attached or detached to the task.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class TaskAttachmentListener implements AttachmentListener {
 
-    /**
-     * Attributes of a task that must be updated if an attachment is added or
-     * removed.
-     */
-    private static final int[] UPDATE_FIELDS = new int[] { Task.LAST_MODIFIED,
-                Task.MODIFIED_BY, Task.NUMBER_OF_ATTACHMENTS };
+    private static final int[] UPDATE_FIELDS = new int[] { Task.LAST_MODIFIED, Task.MODIFIED_BY, Task.NUMBER_OF_ATTACHMENTS };
 
-    /**
-     * Logger.
-     */
-    private static final Log LOG = LogFactory.getLog(
-        TaskAttachmentListener.class);
+    private static final Log LOG = LogFactory.getLog(TaskAttachmentListener.class);
 
-    /**
-     * Default constructor.
-     */
     public TaskAttachmentListener() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public long attached(final AttachmentEvent event) throws OXException {
         final TaskStorage storage = TaskStorage.getInstance();
         final Context ctx = event.getContext();
@@ -109,16 +93,13 @@ public class TaskAttachmentListener implements AttachmentListener {
             throw Tools.convert(e);
         }
         if (LOG.isTraceEnabled()) {
-	        LOG.trace("Increased number of attachments for task "
-	            + event.getAttachedId() + " in context " + ctx.getContextId()
-	            + " to " + task.getNumberOfAttachments());
+            LOG.trace("Increased number of attachments for task "
+                + event.getAttachedId() + " in context " + ctx.getContextId()
+                + " to " + task.getNumberOfAttachments());
         }
         return lastModified.getTime();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public long detached(final AttachmentEvent event) throws OXException {
         final TaskStorage storage = TaskStorage.getInstance();
         final Context ctx = event.getContext();
@@ -144,9 +125,9 @@ public class TaskAttachmentListener implements AttachmentListener {
             throw Tools.convert(e);
         }
         if (LOG.isTraceEnabled()) {
-	        LOG.trace("Decreased number of attachments for task "
-	            + event.getAttachedId() + " in context " + ctx.getContextId()
-	            + " to " + task.getNumberOfAttachments());
+            LOG.trace("Decreased number of attachments for task "
+                + event.getAttachedId() + " in context " + ctx.getContextId()
+                + " to " + task.getNumberOfAttachments());
         }
         return lastModified.getTime();
     }
