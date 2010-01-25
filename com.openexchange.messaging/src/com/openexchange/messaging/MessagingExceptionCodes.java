@@ -132,7 +132,11 @@ public enum MessagingExceptionCodes implements OXErrorMessage {
     /**
      * Unknown color label index: %1$s
      */
-    UNKNOWN_COLOR_LABEL(MessagingExceptionMessages.UNKNOWN_COLOR_LABEL_MSG, Category.USER_INPUT, 19);
+    UNKNOWN_COLOR_LABEL(MessagingExceptionMessages.UNKNOWN_COLOR_LABEL_MSG, Category.USER_INPUT, 19),
+    /**
+     * A duplicate folder named "%1$s" already exists below parent folder "%2$s".
+     */
+    DUPLICATE_FOLDER(MessagingExceptionMessages.DUPLICATE_FOLDER_MSG, Category.CODE_ERROR, 20);
 
     private final Category category;
 

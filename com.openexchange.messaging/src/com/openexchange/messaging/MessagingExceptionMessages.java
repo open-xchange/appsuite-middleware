@@ -112,6 +112,9 @@ public final class MessagingExceptionMessages implements LocalizableStrings {
 
     // Unknown color label index: %1$s
     public static final String UNKNOWN_COLOR_LABEL_MSG = "Unknown color label index: %1$s";
+
+    // A duplicate folder named "%1$s" already exists below parent folder "%2$s".
+    public static final String DUPLICATE_FOLDER_MSG = "A duplicate folder named \"%1$s\" already exists below parent folder \"%2$s\".";
     /**
      * Initializes a new {@link MessagingExceptionMessages}.
      */
