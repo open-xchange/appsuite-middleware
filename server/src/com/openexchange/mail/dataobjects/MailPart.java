@@ -542,6 +542,20 @@ public abstract class MailPart implements Serializable, Cloneable {
     }
 
     /**
+     * Checks if this part contains all of specified headers.
+     * 
+     * @param names The names of the headers to check
+     * @return <code>true</code> if this part contains all of specified headers; otherwise <code>false</code>
+     */
+    public boolean hasHeaders(final String... names) {
+        boolean ret = true;
+        for (int i = 0; ret && i < names.length; i++) {
+            ret = headers.containsHeader(names[i]);
+        }
+        return ret;
+    }
+
+    /**
      * Gets the size
      * 
      * @return the size
