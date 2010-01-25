@@ -57,6 +57,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.EnumSet;
@@ -138,6 +139,27 @@ public final class MIMEMessageConverter {
          * @throws MailException If a mail related error occurs
          */
         public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException, MailException;
+    }
+
+    private static final class HeaderFieldFiller implements MailMessageFieldFiller {
+
+        private final String headerName;
+
+        HeaderFieldFiller(final String headerName) {
+            super();
+            this.headerName = headerName;
+        }
+
+        public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException, MailException {
+            final String[] header = msg.getHeader(headerName);
+            if (null == header || 0 == header.length) {
+                return;
+            }
+            for (final String value : header) {
+                mailMessage.addHeader(headerName, value);
+            }
+        }
+
     }
 
     private static abstract class ExtendedMailMessageFieldFiller implements MailMessageFieldFiller {
@@ -402,7 +424,7 @@ public final class MIMEMessageConverter {
      * @throws MailException If conversion fails
      */
     public static MailMessage[] convertMessages(final Message[] msgs, final MailField[] fields) throws MailException {
-        return convertMessages(msgs, fields, false);
+        return convertMessages(msgs, fields, null, false);
     }
 
     /**
@@ -414,13 +436,23 @@ public final class MIMEMessageConverter {
      * @see #convertMessages(Message[], Folder, MailField[])
      * @param msgs The source messages
      * @param fields The fields to fill
+     * @param headerNames The header names
      * @param includeBody Whether to create mail messages with reference to content or not
      * @return The converted array of {@link Message} instances
      * @throws MailException If conversion fails
      */
-    public static MailMessage[] convertMessages(final Message[] msgs, final MailField[] fields, final boolean includeBody) throws MailException {
+    public static MailMessage[] convertMessages(final Message[] msgs, final MailField[] fields, final String[] headerNames, final boolean includeBody) throws MailException {
         try {
-            final MailMessageFieldFiller[] fillers = createFieldFillers(fields);
+            final MailMessageFieldFiller[] fillers;
+            {
+                final List<MailMessageFieldFiller> tmp = new ArrayList<MailMessageFieldFiller>(Arrays.asList(createFieldFillers(fields)));
+                if (null != headerNames) {
+                    for (final String headerName : headerNames) {
+                        tmp.add(new HeaderFieldFiller(headerName));
+                    }
+                }
+                fillers = tmp.toArray(new MailMessageFieldFiller[tmp.size()]);
+            }
             final MailMessage[] mails = new MIMEMailMessage[msgs.length];
             for (int i = 0; i < mails.length; i++) {
                 if (null != msgs[i]) {

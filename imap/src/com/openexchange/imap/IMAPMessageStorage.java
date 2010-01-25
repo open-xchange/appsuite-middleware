@@ -275,7 +275,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             if (fieldSet.contains(MailField.ACCOUNT_NAME) || fieldSet.contains(MailField.FULL)) {
                 return setAccountInfo(convert2Mails(messages, fields, body));
             }
-            return convert2Mails(messages, fields, body);
+            return convert2Mails(messages, fields, headerNames, body);
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
         }
@@ -1882,11 +1882,19 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     private MailMessage[] convert2Mails(final Message[] msgs, final MailField[] fields) throws MailException {
-        return convert2Mails(msgs, fields, false);
+        return convert2Mails(msgs, fields, null, false);
     }
 
     private MailMessage[] convert2Mails(final Message[] msgs, final MailField[] fields, final boolean includeBody) throws MailException {
-        return MIMEMessageConverter.convertMessages(msgs, fields, includeBody);
+        return convert2Mails(msgs, fields, null, includeBody);
+    }
+
+    private MailMessage[] convert2Mails(final Message[] msgs, final MailField[] fields, final String[] headerNames) throws MailException {
+        return convert2Mails(msgs, fields, headerNames, false);
+    }
+
+    private MailMessage[] convert2Mails(final Message[] msgs, final MailField[] fields, final String[] headerNames, final boolean includeBody) throws MailException {
+        return MIMEMessageConverter.convertMessages(msgs, fields, headerNames, includeBody);
     }
 
 }
