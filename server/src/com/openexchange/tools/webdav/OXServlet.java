@@ -50,6 +50,7 @@
 package com.openexchange.tools.webdav;
 
 import java.io.IOException;
+import java.util.UUID;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -58,8 +59,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdom.Document;
 import org.jdom.JDOMException;
+import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.authentication.LoginException;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.login.Interface;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
@@ -285,7 +288,7 @@ public abstract class OXServlet extends WebDavServlet {
                 return req.getRemoteAddr();
             }
             public String getAuthId() {
-                return null;
+                return UUIDs.getUnformattedString(UUID.randomUUID());
             }
             public String getClient() {
                 return null;
