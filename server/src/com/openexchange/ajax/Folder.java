@@ -2312,7 +2312,7 @@ public class Folder extends SessionServlet {
     }
 
     /**
-     * Writes an messaging account's root folder into a JSON array.
+     * Writes a messaging account's root folder into a JSON array.
      */
     private static final class MessagingRootFolderWriter extends AbstractTask<Object> {
 
