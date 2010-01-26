@@ -134,7 +134,7 @@ public final class RFC2231Tools {
             return encoded;
         }
         final char[] chars = encoded.toCharArray();
-        final ByteBuffer bb = ByteBuffer.allocateDirect(chars.length);
+        final ByteBuffer bb = ByteBuffer.allocate(chars.length);
         for (int i = 0; i < chars.length; i++) {
             final char c = chars[i];
             if ((c == '%') && isHexDigit(chars[i + 1]) && isHexDigit(chars[i + 2])) {
