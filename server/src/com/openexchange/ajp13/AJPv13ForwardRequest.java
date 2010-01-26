@@ -205,7 +205,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
             final int pos = requestURI.toLowerCase(Locale.ENGLISH).indexOf(jsessionIdURI);
             if (pos > -1) {
                 jsessionID = requestURI.substring(pos + jsessionIdURI.length());
-                requestURI = requestURI.substring(0, pos);
+//                requestURI = requestURI.substring(0, pos);
                 servletRequest.setRequestedSessionIdFromURL(true);
                 servletRequest.setRequestedSessionIdFromCookie(false);
             }
