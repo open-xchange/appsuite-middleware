@@ -51,6 +51,7 @@ package com.openexchange.messaging.generic.internal;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -182,6 +183,9 @@ public final class CachingMessagingAccountStorage implements MessagingAccountSto
 
     public List<MessagingAccount> getAccounts(final String serviceId, final Session session) throws MessagingException {
         final List<Integer> ids = delegatee.getAccountIDs(serviceId, session);
+        if (ids.isEmpty()) {
+            return Collections.emptyList();
+        }
         final List<MessagingAccount> accounts = new ArrayList<MessagingAccount>(ids.size());
         for (final Integer id : ids) {
             accounts.add(getAccount(serviceId, id.intValue(), session));
