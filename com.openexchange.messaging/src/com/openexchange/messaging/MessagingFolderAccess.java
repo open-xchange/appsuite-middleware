@@ -49,7 +49,6 @@
 
 package com.openexchange.messaging;
 
-
 /**
  * {@link MessagingFolderAccess} - Provides access to folder storage.
  * 
@@ -92,6 +91,8 @@ public interface MessagingFolderAccess {
 
     /**
      * Gets the account's root folder.
+     * <p>
+     * A convenience method for {@link #getFolder(String)} invoked with {@link MessagingFolder#ROOT_FULLNAME}.
      * 
      * @return The account's root folder
      * @throws MessagingException If account's default folder cannot be delivered
