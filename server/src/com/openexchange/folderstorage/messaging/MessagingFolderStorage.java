@@ -376,7 +376,7 @@ public final class MessagingFolderStorage implements FolderStorage {
             throw FolderExceptionErrorMessage.UNKNOWN_CONTENT_TYPE.create(contentType.toString());
         }
 
-        final String mailServiceId = MailMessagingService.getInstance().getId();
+        final String mailServiceId = MailMessagingService.ID;
         final int primaryAccountId = MailAccount.DEFAULT_ID;
         if (MessagingContentType.getInstance().equals(contentType)) {
             // Return primary account's INBOX folder
@@ -606,7 +606,7 @@ public final class MessagingFolderStorage implements FolderStorage {
                     final MessagingServiceRegistry registry = getServiceRegistry().getService(MessagingServiceRegistry.class, true);
                     final List<MessagingService> allServices = registry.getAllServices();
                     final boolean available = mailFolderStorageAvailable;
-                    final String mailMessagingServiceId = MailMessagingService.getInstance().getId();
+                    final String mailMessagingServiceId = MailMessagingService.ID;
                     for (final MessagingService messagingService : allServices) {
                         /*
                          * Check if messaging service is mail

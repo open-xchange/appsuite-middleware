@@ -86,8 +86,10 @@ import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.helper.ParamContainer;
 import com.openexchange.ajax.parser.FolderParser;
 import com.openexchange.ajax.writer.FolderWriter;
+import com.openexchange.ajax.writer.MessagingFolderWriter;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.ajax.writer.FolderWriter.FolderFieldWriter;
+import com.openexchange.ajax.writer.MessagingFolderWriter.MessagingFolderFieldWriter;
 import com.openexchange.api2.FolderSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbFolderSQLInterface;
@@ -117,10 +119,17 @@ import com.openexchange.mail.cache.SessionMailCache;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.json.writer.FolderWriter.MailFolderFieldWriter;
+import com.openexchange.mail.messaging.MailMessagingService;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
+import com.openexchange.messaging.MessagingAccount;
+import com.openexchange.messaging.MessagingAccountAccess;
+import com.openexchange.messaging.MessagingException;
+import com.openexchange.messaging.MessagingFolder;
+import com.openexchange.messaging.MessagingService;
+import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.AbstractTask;
@@ -669,8 +678,27 @@ public class Folder extends SessionServlet {
                                     ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
                                 accounts.add(storageService.getDefaultMailAccount(session.getUserId(), session.getContextId()));
                             }
-                            if (!accounts.isEmpty()) {
-                                if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(accounts.get(0).getMailProtocol())) {
+                            /*
+                             * Messaging accounts; except mail
+                             */
+                            final List<MessagingAccount> messagingAccounts = new ArrayList<MessagingAccount>();
+                            {
+                                final MessagingServiceRegistry msr =
+                                    ServerServiceRegistry.getInstance().getService(MessagingServiceRegistry.class);
+                                if (null != msr) {
+                                    final List<MessagingService> allServices = msr.getAllServices();
+                                    for (final MessagingService messagingService : allServices) {
+                                        if (!messagingService.getId().equals(MailMessagingService.ID)) {
+                                            /*
+                                             * Only non-mail services
+                                             */
+                                            messagingAccounts.addAll(messagingService.getAccountManager().getAccounts(session));
+                                        }
+                                    }
+                                }
+                            }
+                            if (!accounts.isEmpty() || !messagingAccounts.isEmpty()) {
+                                if (!accounts.isEmpty() && UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(accounts.get(0).getMailProtocol())) {
                                     /*
                                      * Ensure Unified INBOX is enabled; meaning at least one account is subscribed to Unified INBOX
                                      */
@@ -683,15 +711,21 @@ public class Folder extends SessionServlet {
                                 /*
                                  * Request root folder for each account
                                  */
-                                final int size = accounts.size();
+                                final int size = accounts.size() + messagingAccounts.size();
                                 final JSONArray[] arrays = new JSONArray[size];
                                 final CompletionFuture<Object> completionFuture;
                                 {
+                                    final Log logger = LOG;
                                     final List<Task<Object>> tasks = new ArrayList<Task<Object>>(size);
-                                    for (int i = 0; i < size; i++) {
+                                    int sz = accounts.size();
+                                    for (int i = 0; i < sz; i++) {
                                         final MailAccount mailAccount = accounts.get(i);
-                                        final Log logger = LOG;
                                         tasks.add(new MailRootFolderWriter(arrays, session, logger, mailAccount, columns, i));
+                                    }
+                                    sz = messagingAccounts.size();
+                                    for (int i = 0; i < sz; i++) {
+                                        final MessagingAccount ma = messagingAccounts.get(i);
+                                        tasks.add(new MessagingRootFolderWriter(arrays, session, logger, ma, columns, i));
                                     }
                                     completionFuture =
                                         ServerServiceRegistry.getInstance().getService(ThreadPoolService.class).invoke(tasks);
@@ -709,6 +743,14 @@ public class Folder extends SessionServlet {
                                             } catch (final ExecutionException e) {
                                                 final Throwable t = e.getCause();
                                                 if (t instanceof MailException) {
+                                                    if (null == warning) {
+                                                        /*
+                                                         * TODO: Does UI already accept warnings?
+                                                         */
+                                                        warning = (AbstractOXException) t;
+                                                        warning.setCategory(Category.WARNING);
+                                                    }
+                                                } else if (t instanceof MessagingException) {
                                                     if (null == warning) {
                                                         /*
                                                          * TODO: Does UI already accept warnings?
@@ -1418,8 +1460,26 @@ public class Folder extends SessionServlet {
                         ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
                     accounts.add(storageService.getDefaultMailAccount(session.getUserId(), session.getContextId()));
                 }
-                if (!accounts.isEmpty()) {
-                    if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(accounts.get(0).getMailProtocol())) {
+                /*
+                 * Messaging accounts; except mail
+                 */
+                final List<MessagingAccount> messagingAccounts = new ArrayList<MessagingAccount>();
+                {
+                    final MessagingServiceRegistry msr = ServerServiceRegistry.getInstance().getService(MessagingServiceRegistry.class);
+                    if (null != msr) {
+                        final List<MessagingService> allServices = msr.getAllServices();
+                        for (final MessagingService messagingService : allServices) {
+                            if (!messagingService.getId().equals(MailMessagingService.ID)) {
+                                /*
+                                 * Only non-mail services
+                                 */
+                                messagingAccounts.addAll(messagingService.getAccountManager().getAccounts(session));
+                            }
+                        }
+                    }
+                }
+                if (!accounts.isEmpty() || !messagingAccounts.isEmpty()) {
+                    if (!accounts.isEmpty() && UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(accounts.get(0).getMailProtocol())) {
                         /*
                          * Ensure Unified INBOX is enabled; meaning at least one account is subscribed to Unified INBOX
                          */
@@ -1428,12 +1488,14 @@ public class Folder extends SessionServlet {
                             accounts.remove(0);
                         }
                     }
-                    final int accountSize = accounts.size();
+                    final int accountSize = accounts.size() + messagingAccounts.size();
                     final JSONArray[] arrays = new JSONArray[accountSize];
                     final CompletionFuture<Object> completionFuture;
                     {
+                        final Log logger = LOG;
                         final List<Task<Object>> tasks = new ArrayList<Task<Object>>(accountSize);
-                        for (int i = 0; i < accountSize; i++) {
+                        int sz = accounts.size();
+                        for (int i = 0; i < sz; i++) {
                             final MailAccount mailAccount = accounts.get(i);
                             /*
                              * Check if current account has been initialized before that is if its default folders were checked.
@@ -1455,7 +1517,6 @@ public class Folder extends SessionServlet {
                                 /*
                                  * Add root folders
                                  */
-                                final Log logger = LOG;
                                 tasks.add(new MailRootFolderWriter(arrays, session, logger, mailAccount, columns, i));
                             } else {
                                 // Add dummy callable
@@ -1469,6 +1530,11 @@ public class Folder extends SessionServlet {
                                 });
                             }
                         }
+                        sz = messagingAccounts.size();
+                        for (int i = 0; i < sz; i++) {
+                            final MessagingAccount ma = messagingAccounts.get(i);
+                            tasks.add(new MessagingRootFolderWriter(arrays, session, logger, ma, columns, i));
+                        }
                         completionFuture = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class).invoke(tasks);
                     }
                     // Wait for completion
@@ -1479,6 +1545,14 @@ public class Folder extends SessionServlet {
                             } catch (final ExecutionException e) {
                                 final Throwable t = e.getCause();
                                 if (t instanceof MailException) {
+                                    if (null == warning) {
+                                        /*
+                                         * TODO: Does UI already accept warnings?
+                                         */
+                                        warning = (AbstractOXException) t;
+                                        warning.setCategory(Category.WARNING);
+                                    }
+                                } else if (t instanceof MessagingException) {
                                     if (null == warning) {
                                         /*
                                          * TODO: Does UI already accept warnings?
@@ -2233,6 +2307,76 @@ public class Folder extends SessionServlet {
                 throw e;
             } finally {
                 mailAccess.close(true);
+            }
+        }
+    }
+
+    /**
+     * Writes an messaging account's root folder into a JSON array.
+     */
+    private static final class MessagingRootFolderWriter extends AbstractTask<Object> {
+
+        private final JSONArray[] arrays;
+
+        private final ServerSession session;
+
+        private final Log logger;
+
+        private final MessagingAccount messagingAccount;
+
+        private final int[] columns;
+
+        private final int index;
+
+        MessagingRootFolderWriter(final JSONArray[] arrays, final ServerSession session, final Log logger, final MessagingAccount messagingAccount, final int[] columns, final int index) {
+            this.arrays = arrays;
+            this.session = session;
+            this.logger = logger;
+            this.messagingAccount = messagingAccount;
+            this.columns = columns;
+            this.index = index;
+        }
+
+        public Object call() throws MessagingException {
+            final MessagingFolder rootFolder;
+            final MessagingAccountAccess access;
+            final int accountId = messagingAccount.getId();
+            final String serviceId;
+            try {
+                final MessagingService service = messagingAccount.getMessagingService();
+                access = service.getAccountAccess(accountId, session);
+                access.connect();
+                rootFolder = access.getFolderAccess().getFolder(MessagingFolder.ROOT_FULLNAME);
+                serviceId = service.getId();
+            } catch (final MessagingException e) {
+                arrays[index] = null;
+                logger.error(e.getMessage(), e);
+                throw e;
+            }
+            try {
+                final MessagingFolderFieldWriter[] writers = MessagingFolderWriter.getMessagingFolderFieldWriter(columns, session);
+                final JSONArray ja = new JSONArray();
+                for (int i = 0; i < writers.length; i++) {
+                    writers[i].writeField(
+                        ja,
+                        serviceId,
+                        accountId,
+                        rootFolder,
+                        false,
+                        messagingAccount.getDisplayName(),
+                        1,
+                        MailFolderUtility.prepareFullname(accountId, MailFolder.DEFAULT_FOLDER_ID),
+                        FolderObject.SYSTEM_MODULE,
+                        false);
+                }
+                arrays[index] = ja;
+                return null;
+            } catch (final MessagingException e) {
+                logger.error(e.getMessage(), e);
+                arrays[index] = null;
+                throw e;
+            } finally {
+                access.close();
             }
         }
     }

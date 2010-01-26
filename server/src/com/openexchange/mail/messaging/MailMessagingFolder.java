@@ -50,76 +50,124 @@
 package com.openexchange.mail.messaging;
 
 import java.util.List;
-import com.openexchange.datatypes.genericonf.DynamicFormDescription;
-import com.openexchange.messaging.MessagingAccountAccess;
-import com.openexchange.messaging.MessagingAccountManager;
-import com.openexchange.messaging.MessagingAccountTransport;
-import com.openexchange.messaging.MessagingException;
-import com.openexchange.messaging.MessagingService;
-import com.openexchange.session.Session;
+import java.util.Set;
+import com.openexchange.messaging.MessagingFolder;
+import com.openexchange.messaging.MessagingPermission;
+
 
 /**
- * {@link MailMessagingService}
- * 
+ * {@link MailMessagingFolder}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailMessagingService implements MessagingService {
-
-    private static final MailMessagingService INSTANCE = new MailMessagingService();
+public final class MailMessagingFolder implements MessagingFolder {
 
     /**
-     * Gets the instance.
-     * 
-     * @return The instance
+     * Initializes a new {@link MailMessagingFolder}.
      */
-    public static MailMessagingService getInstance() {
-        return INSTANCE;
-    }
-
-    /**
-     * The identifier of mail messaging service.
-     */
-    public static final String ID = "com.openexchange.messaging.mail";
-
-    /**
-     * Initializes a new {@link MailMessagingService}.
-     */
-    private MailMessagingService() {
+    public MailMessagingFolder() {
         super();
+        // TODO MailProperties.getInstance().isIgnoreSubscription()
     }
 
-    public MessagingAccountAccess getAccountAccess(final int accountId, final Session session) throws MessagingException {
+    public boolean containsDefaultFolderType() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    public Set<String> getCapabilities() {
         // TODO Auto-generated method stub
         return null;
     }
 
-    public MessagingAccountManager getAccountManager() {
+    public DefaultFolderType getDefaultFolderType() {
         // TODO Auto-generated method stub
         return null;
     }
 
-    public MessagingAccountTransport getAccountTransport(final int accountId, final Session session) throws MessagingException {
+    public int getDeletedMessageCount() {
         // TODO Auto-generated method stub
-        return null;
-    }
-
-    public String getDisplayName() {
-        // TODO Auto-generated method stub
-        return null;
+        return 0;
     }
 
     public String getId() {
-        return ID;
-    }
-
-    public List<String> getMessageActions() {
         // TODO Auto-generated method stub
         return null;
     }
 
-    public DynamicFormDescription getFormDescription() {
+    public int getMessageCount() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    public String getName() {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    public int getNewMessageCount() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    public MessagingPermission getOwnPermission() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public String getParentId() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public List<MessagingPermission> getPermissions() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public char getSeparator() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    public int getUnreadMessageCount() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    public boolean hasSubfolders() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    public boolean hasSubscribedSubfolders() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    public boolean isDefaultFolder() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    public boolean isHoldsFolders() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    public boolean isHoldsMessages() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    public boolean isRootFolder() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    public boolean isSubscribed() {
+        // TODO Auto-generated method stub
+        return false;
     }
 
 }

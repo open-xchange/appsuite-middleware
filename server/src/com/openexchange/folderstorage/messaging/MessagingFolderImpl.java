@@ -272,15 +272,15 @@ public final class MessagingFolderImpl extends AbstractFolder {
         final Map<IgnoreCaseString, Integer> m = new HashMap<IgnoreCaseString, Integer>(16);
 
         m.put(IgnoreCaseString.valueOf("ACL"), Integer.valueOf(1)); // MailCapabilities.BIT_PERMISSIONS
-        m.put(IgnoreCaseString.valueOf("PERMISSIONS"), Integer.valueOf(1)); // MailCapabilities.BIT_PERMISSIONS
+        m.put(IgnoreCaseString.valueOf(MessagingFolder.CAPABILITY_PERMISSIONS), Integer.valueOf(1)); // MailCapabilities.BIT_PERMISSIONS
 
         m.put(IgnoreCaseString.valueOf("THREAD=REFERENCES"), Integer.valueOf(2)); // MailCapabilities.BIT_THREAD_REFERENCES
         m.put(IgnoreCaseString.valueOf("THREAD_REFERENCES"), Integer.valueOf(2)); // MailCapabilities.BIT_THREAD_REFERENCES
         m.put(IgnoreCaseString.valueOf("THREAD-REFERENCES"), Integer.valueOf(2)); // MailCapabilities.BIT_THREAD_REFERENCES
 
-        m.put(IgnoreCaseString.valueOf("QUOTA"), Integer.valueOf(4)); // MailCapabilities.BIT_QUOTA
+        m.put(IgnoreCaseString.valueOf(MessagingFolder.CAPABILITY_QUOTA), Integer.valueOf(4)); // MailCapabilities.BIT_QUOTA
 
-        m.put(IgnoreCaseString.valueOf("SORT"), Integer.valueOf(8)); // MailCapabilities.BIT_SORT
+        m.put(IgnoreCaseString.valueOf(MessagingFolder.CAPABILITY_SORT), Integer.valueOf(8)); // MailCapabilities.BIT_SORT
 
         m.put(IgnoreCaseString.valueOf("SUBSCRIPTION"), Integer.valueOf(16)); // MailCapabilities.BIT_SUBSCRIPTION
 
