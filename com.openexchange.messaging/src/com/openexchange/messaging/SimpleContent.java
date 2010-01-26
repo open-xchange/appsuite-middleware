@@ -49,15 +49,14 @@
 
 package com.openexchange.messaging;
 
-
 /**
  * {@link SimpleContent} - Simple content
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
-public interface SimpleContent<D> extends MessagingContent{
+public interface SimpleContent<D> extends MessagingContent {
 
     /**
      * Gets the data.
@@ -66,5 +65,5 @@ public interface SimpleContent<D> extends MessagingContent{
      * @throws MessagingException If data cannot be returned
      */
     public D getData() throws MessagingException;
-    
+
 }
