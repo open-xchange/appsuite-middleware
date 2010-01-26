@@ -197,7 +197,7 @@ public interface MessagingMessageAccess {
      * @param action The action to perform
      * @return The resulting message or <code>null</code> if requested action yields no resulting message (meaning no further user
      *         interaction required)
-     * @throws MessagingException If performing specified action fails
+     * @throws MessagingException If performing specified action fails or action is not applicable for this perform() method
      */
     public MessagingMessage perform(String folder, String id, String action) throws MessagingException;
 
@@ -207,7 +207,7 @@ public interface MessagingMessageAccess {
      * @param action The action to perform
      * @return The resulting message or <code>null</code> if requested action yields no resulting message (meaning no further user
      *         interaction required)
-     * @throws MessagingException If performing specified action fails
+     * @throws MessagingException If performing specified action fails or action is not applicable for this perform() method
      */
     public MessagingMessage perform(String action) throws MessagingException;
 
@@ -219,7 +219,7 @@ public interface MessagingMessageAccess {
      * @param action The action to perform
      * @return The resulting message or <code>null</code> if requested action yields no resulting message (meaning no further user
      *         interaction required)
-     * @throws MessagingException If performing specified action fails
+     * @throws MessagingException If performing specified action fails or action is not applicable for this perform() method
      */
     public MessagingMessage perform(MessagingMessage message, String action) throws MessagingException;
 
