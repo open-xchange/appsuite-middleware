@@ -55,6 +55,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Permission;
@@ -313,7 +314,13 @@ public final class MessagingFolderImpl extends AbstractFolder {
         TYPES = Collections.unmodifiableMap(m2);
     }
 
-    private static int parseCaps(final List<String> caps) {
+    /**
+     * Parses given capabilities to an <code>int</code> value.
+     * 
+     * @param caps The capabilities to parse
+     * @return The resulting <code>int</code> value
+     */
+    public static int parseCaps(final Set<String> caps) {
         int retval = 0;
         for (final String cap : caps) {
             final Integer bit = KNOWN_CAPS.get(IgnoreCaseString.valueOf(cap));
