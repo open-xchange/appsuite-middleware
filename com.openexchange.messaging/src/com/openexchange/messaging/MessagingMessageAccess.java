@@ -189,8 +189,8 @@ public interface MessagingMessageAccess {
     public List<MessagingMessage> getAllMessages(String folder, IndexRange indexRange, MessagingField sortField, OrderDirection order, MessagingField... fields) throws MessagingException;
 
     /**
-     * Performs specified action to given message and either returns resulting message or <code>null</code> if no further user interaction
-     * is required.
+     * Performs specified action to the message identified by given arguments and either returns resulting message or <code>null</code> if
+     * no further user interaction is required.
      * 
      * @param folder The folder identifier
      * @param id The message identifier
@@ -200,5 +200,27 @@ public interface MessagingMessageAccess {
      * @throws MessagingException If performing specified action fails
      */
     public MessagingMessage perform(String folder, String id, String action) throws MessagingException;
+
+    /**
+     * Performs specified action and either returns resulting message or <code>null</code> if no further user interaction is required.
+     * 
+     * @param action The action to perform
+     * @return The resulting message or <code>null</code> if requested action yields no resulting message (meaning no further user
+     *         interaction required)
+     * @throws MessagingException If performing specified action fails
+     */
+    public MessagingMessage perform(String action) throws MessagingException;
+
+    /**
+     * Performs specified action to given message and either returns resulting message or <code>null</code> if no further user interaction
+     * is required.
+     * 
+     * @param message The message to process
+     * @param action The action to perform
+     * @return The resulting message or <code>null</code> if requested action yields no resulting message (meaning no further user
+     *         interaction required)
+     * @throws MessagingException If performing specified action fails
+     */
+    public MessagingMessage perform(MessagingMessage message, String action) throws MessagingException;
 
 }

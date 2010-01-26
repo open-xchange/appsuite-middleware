@@ -49,72 +49,71 @@
 
 package com.openexchange.messaging;
 
-import java.util.List;
-import com.openexchange.datatypes.genericonf.DynamicFormDescription;
-import com.openexchange.session.Session;
-
 /**
- * {@link MessagingService} - The messaging service.
+ * {@link MessagingAction} - A messaging action examined in <code>perform()</code> method.
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
-public interface MessagingService {
+public final class MessagingAction {
 
     /**
-     * Gets the identifier of this messaging service.
-     * 
-     * @return The identifier
+     * The action type.
      */
-    public String getId();
+    public static enum Type {
+        /**
+         * The action required no message and no arguments.
+         */
+        NONE,
+        /**
+         * The action requires a message from storage identified by givan arguments.
+         */
+        STORAGE,
+        /**
+         * The action requires a given message.
+         */
+        MESSAGE;
+    }
 
     /**
-     * Gets the list of message actions of this messaging service.
-     * 
-     * @return The list of message actions
+     * The action name.
      */
-    public List<MessagingAction> getMessageActions();
+    private final String name;
 
     /**
-     * Gets the display name.
-     * 
-     * @return The display name
+     * The action type
      */
-    public String getDisplayName();
+    private final Type type;
 
     /**
-     * Get the form description.
+     * Initializes a new {@link MessagingAction}.
      * 
-     * @return The form description
+     * @param name The name
+     * @param type The type
      */
-    public DynamicFormDescription getFormDescription();
+    public MessagingAction(final String name, final Type type) {
+        super();
+        this.name = name;
+        this.type = type;
+    }
 
     /**
-     * Gets the account manager for this messaging service.
+     * Gets the name
      * 
-     * @return The account manager
+     * @return The name
      */
-    public MessagingAccountManager getAccountManager();
+    public String getName() {
+        return name;
+    }
 
     /**
-     * Gets the account access for specified account identifier.
+     * Gets the type
      * 
-     * @param accountId The account identifier
-     * @param session The session providing needed user data
-     * @return The account access for specified account identifier
-     * @throws MessagingException If account access cannot be returned for given account identifier
+     * @return The type
      */
-    public MessagingAccountAccess getAccountAccess(int accountId, Session session) throws MessagingException;
-
-    /**
-     * Gets the account transport for specified account identifier.
-     * 
-     * @param accountId The account identifier
-     * @param session The session providing needed user data
-     * @return The account transport for specified account identifier
-     * @throws MessagingException If account transport cannot be returned for given account identifier
-     */
-    public MessagingAccountTransport getAccountTransport(int accountId, Session session) throws MessagingException;
+    public Type getType() {
+        return type;
+    }
 
 }

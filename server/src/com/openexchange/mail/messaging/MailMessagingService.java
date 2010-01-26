@@ -54,6 +54,7 @@ import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.messaging.MessagingAccountAccess;
 import com.openexchange.messaging.MessagingAccountManager;
 import com.openexchange.messaging.MessagingAccountTransport;
+import com.openexchange.messaging.MessagingAction;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.session.Session;
@@ -112,7 +113,7 @@ public final class MailMessagingService implements MessagingService {
         return ID;
     }
 
-    public List<String> getMessageActions() {
+    public List<MessagingAction> getMessageActions() {
         // TODO Auto-generated method stub
         return null;
     }

@@ -76,7 +76,7 @@ public class SimMessagingService implements MessagingService {
 
     private MessagingAccountManager accManager;
 
-    private List<String> capabilities;
+    private List<MessagingAction> capabilities;
 
     public SimMessagingService() {
         super();
@@ -88,7 +88,7 @@ public class SimMessagingService implements MessagingService {
         return accManager;
     }
 
-    public List<String> getMessageActions() {
+    public List<MessagingAction> getMessageActions() {
         return capabilities;
     }
 
@@ -104,7 +104,7 @@ public class SimMessagingService implements MessagingService {
         return id;
     }
 
-    public void setMessageActions(final List<String> capabilities) {
+    public void setMessageActions(final List<MessagingAction> capabilities) {
         this.capabilities = capabilities;
     }
 
@@ -124,7 +124,7 @@ public class SimMessagingService implements MessagingService {
         this.accManager = accManager;
     }
 
-    public MessagingAccountAccess getAccountAccess(final int accountId, Session session) throws MessagingException {
+    public MessagingAccountAccess getAccountAccess(final int accountId, final Session session) throws MessagingException {
         final MessagingAccountAccess accountAccess = accountAccessMap.get(Integer.valueOf(accountId));
         if (null == accountAccess) {
             // TODO: Throw appropriate error
@@ -136,7 +136,7 @@ public class SimMessagingService implements MessagingService {
         accountAccessMap.put(Integer.valueOf(accountId), accountAccess);
     }
 
-    public MessagingAccountTransport getAccountTransport(final int accountId, Session session) throws MessagingException {
+    public MessagingAccountTransport getAccountTransport(final int accountId, final Session session) throws MessagingException {
         final MessagingAccountTransport accountTransport = accountTransportMap.get(Integer.valueOf(accountId));
         if (null == accountTransport) {
             // TODO: Throw appropriate error

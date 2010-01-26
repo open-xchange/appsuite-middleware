@@ -62,10 +62,10 @@ import java.util.List;
 public class SimMessageAccess implements MessagingMessageAccess {
 
     public static final class Call {
-        private String name;
-        private Object[] args;
+        private final String name;
+        private final Object[] args;
 
-        public Call(String name, Object...args) {
+        public Call(final String name, final Object...args) {
             this.name = name;
             this.args = args;
         }
@@ -80,62 +80,72 @@ public class SimMessageAccess implements MessagingMessageAccess {
         }
     }
 
-    private List<Call> called = new ArrayList<Call>();
+    private final List<Call> called = new ArrayList<Call>();
     private MessagingMessage templateMessage;
     
     public List<Call> getCalls() {
         return called;
     }
     
-    public void setTemplateMessage(MessagingMessage templateMessage) {
+    public void setTemplateMessage(final MessagingMessage templateMessage) {
         this.templateMessage = templateMessage;
     }
     
-    public void appendMessages(String folder, MessagingMessage[] messages) throws MessagingException {
+    public void appendMessages(final String folder, final MessagingMessage[] messages) throws MessagingException {
         called.add(new Call("appendMessages", folder, messages));
     }
 
-    public List<String> copyMessages(String sourceFolder, String destFolder, String[] messageIds, boolean fast) throws MessagingException {
+    public List<String> copyMessages(final String sourceFolder, final String destFolder, final String[] messageIds, final boolean fast) throws MessagingException {
         called.add(new Call("copyMessages", sourceFolder, destFolder, messageIds, fast));
         return new ArrayList<String>(Arrays.asList("blupp"));
     }
 
-    public void deleteMessages(String folder, String[] messageIds, boolean hardDelete) throws MessagingException {
+    public void deleteMessages(final String folder, final String[] messageIds, final boolean hardDelete) throws MessagingException {
         called.add(new Call("deleteMessages", folder, messageIds, hardDelete));
     }
 
-    public List<MessagingMessage> getAllMessages(String folder, IndexRange indexRange, MessagingField sortField, OrderDirection order, MessagingField... fields) throws MessagingException {
+    public List<MessagingMessage> getAllMessages(final String folder, final IndexRange indexRange, final MessagingField sortField, final OrderDirection order, final MessagingField... fields) throws MessagingException {
         called.add(new Call("getAllMessages", folder, indexRange, sortField, order, fields));
         return new ArrayList<MessagingMessage>(Arrays.asList(templateMessage));
     }
     
 
-    public MessagingMessage getMessage(String folder, String id, boolean peek) throws MessagingException {
+    public MessagingMessage getMessage(final String folder, final String id, final boolean peek) throws MessagingException {
         called.add(new Call("getMessage", folder, id, peek));
         return templateMessage;
     }
 
-    public List<MessagingMessage> getMessages(String folder, String[] messageIds, MessagingField[] fields) throws MessagingException {
+    public List<MessagingMessage> getMessages(final String folder, final String[] messageIds, final MessagingField[] fields) throws MessagingException {
         called.add(new Call("getMessages", folder, messageIds, fields));
         return new ArrayList<MessagingMessage>(Arrays.asList(templateMessage));
     }
 
-    public List<String> moveMessages(String sourceFolder, String destFolder, String[] messageIds, boolean fast) throws MessagingException {
+    public List<String> moveMessages(final String sourceFolder, final String destFolder, final String[] messageIds, final boolean fast) throws MessagingException {
         called.add(new Call("moveMessages", sourceFolder, destFolder, messageIds, fast));
         return null;
     }
 
-    public MessagingMessage perform(String folder, String id, String action) throws MessagingException {
+    public MessagingMessage perform(final String folder, final String id, final String action) throws MessagingException {
         called.add(new Call("perform", folder, id, action));
         return templateMessage;
     }
 
-    public List<MessagingMessage> searchMessages(String folder, IndexRange indexRange, MessagingField sortField, OrderDirection order, SearchTerm<?> searchTerm, MessagingField[] fields) throws MessagingException {
+    public MessagingMessage perform(final String action) throws MessagingException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public MessagingMessage perform(final MessagingMessage message, final String action) throws MessagingException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public List<MessagingMessage> searchMessages(final String folder, final IndexRange indexRange, final MessagingField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MessagingField[] fields) throws MessagingException {
         called.add(new Call("searchMessages", folder, indexRange, sortField, order, searchTerm, fields));
         return new ArrayList<MessagingMessage>(Arrays.asList(templateMessage));
     }
 
-    public void updateMessage(MessagingMessage message, MessagingField[] fields) throws MessagingException {
+    public void updateMessage(final MessagingMessage message, final MessagingField[] fields) throws MessagingException {
         called.add(new Call("updateMessage", message, fields));
     }
 
