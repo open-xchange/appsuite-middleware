@@ -54,6 +54,7 @@ import java.nio.charset.Charset;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.openexchange.tools.encoding.Charsets;
 
 /**
  * {@link RFC2231Tools} - A collection of <small><b><a href="http://www.ietf.org/rfc/rfc2231.txt">RFC2231</a></b></small> related utility
@@ -116,6 +117,8 @@ public final class RFC2231Tools {
         return rfc2231Decode(m.group(3), m.group(1));
     }
 
+    private static final int RADIX = 16;
+
     /**
      * Decodes specified string according to mail-safe encoding introduced in <small><b><a
      * href="http://www.ietf.org/rfc/rfc2231.txt">RFC2231</a></b></small>
@@ -135,14 +138,14 @@ public final class RFC2231Tools {
         for (int i = 0; i < chars.length; i++) {
             final char c = chars[i];
             if ((c == '%') && isHexDigit(chars[i + 1]) && isHexDigit(chars[i + 2])) {
-                bb.put((byte) ((Character.digit(chars[i + 1], 16) << 4) + Character.digit(chars[i + 2], 16)));
+                bb.put((byte) ((Character.digit(chars[i + 1], RADIX) << 4) + Character.digit(chars[i + 2], RADIX)));
                 i += 2;
             } else {
                 bb.put((byte) c);
             }
         }
         bb.flip();
-        return Charset.forName(charset).decode(bb).toString();
+        return Charsets.forName(charset).decode(bb).toString();
     }
 
     private static boolean isHexDigit(final char c) {
