@@ -50,6 +50,7 @@
 package com.openexchange.messaging;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * {@link MessagingFolder} - Represents a messaging folder.
@@ -87,11 +88,16 @@ public interface MessagingFolder {
     public static final String CAPABILITY_SORT = "SORT";
 
     /**
+     * The capability identifier for user flags support.
+     */
+    public static final String CAPABILITY_USER_FLAGS = "USER_FLAGS";
+
+    /**
      * Gets the capabilities of this folder; e.g <code>"QUOTA"</code>, <code>"PERMISSIONS"</code>, etc.
      * 
      * @return The list of capabilities
      */
-    public List<String> getCapabilities();
+    public Set<String> getCapabilities();
 
     /**
      * Gets the identifier.

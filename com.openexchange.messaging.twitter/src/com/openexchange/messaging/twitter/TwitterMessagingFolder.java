@@ -51,6 +51,7 @@ package com.openexchange.messaging.twitter;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.messaging.DefaultMessagingPermission;
 import com.openexchange.messaging.MessagingFolder;
 import com.openexchange.messaging.MessagingPermission;
@@ -91,8 +92,8 @@ public final class TwitterMessagingFolder implements MessagingFolder {
         ownPermission = MessagingPermissions.unmodifiablePermission(mp);
     }
 
-    public List<String> getCapabilities() {
-        return Collections.emptyList();
+    public Set<String> getCapabilities() {
+        return Collections.emptySet();
     }
 
     public String getId() {

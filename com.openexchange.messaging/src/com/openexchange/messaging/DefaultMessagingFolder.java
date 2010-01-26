@@ -50,7 +50,9 @@
 package com.openexchange.messaging;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * {@link DefaultMessagingFolder} - The default messaging folder providing setter methods.
@@ -63,7 +65,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
 
     private DefaultFolderType defaultFolderType;
 
-    private List<String> capabilities;
+    private Set<String> capabilities;
 
     private int deletedMessageCount;
 
@@ -154,11 +156,11 @@ public class DefaultMessagingFolder implements MessagingFolder {
         b_defaultFolderType = false;
     }
 
-    public List<String> getCapabilities() {
+    public Set<String> getCapabilities() {
         if (null == capabilities) {
             return null;
         }
-        return new ArrayList<String>(capabilities);
+        return new HashSet<String>(capabilities);
     }
 
     /**
@@ -166,11 +168,11 @@ public class DefaultMessagingFolder implements MessagingFolder {
      * 
      * @param capabilities The capabilities
      */
-    public void setCapabilities(final List<String> capabilities) {
+    public void setCapabilities(final Set<String> capabilities) {
         if (capabilities == null) {
             this.capabilities = null;
         } else {
-            this.capabilities = new ArrayList<String>(capabilities);
+            this.capabilities = new HashSet<String>(capabilities);
         }
     }
 
