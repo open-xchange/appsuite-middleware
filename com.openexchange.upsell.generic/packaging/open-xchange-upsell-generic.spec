@@ -64,8 +64,13 @@ Authors:
 
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
+%if 0%{?rhel_version} || 0%{?fedora_version}
+%define docroot /var/www/html
+%else
+%define docroot /srv/www/htdocs
+%endif
 
-ant -Dlib.dir=/opt/open-xchange/lib -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
+ant -Dguiprefix=%{docroot}/ox6 -Dlib.dir=/opt/open-xchange/lib -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -73,9 +78,9 @@ ant -Dlib.dir=/opt/open-xchange/lib -Ddestdir=%{buildroot} -Dprefix=/opt/open-xc
 %files
 %defattr(-,root,root)
 %dir /opt/open-xchange/etc/groupware/settings
-%dir /var/www/ox6/plugins/com.openexchange.upsell.generic
+%dir %{docroot}/ox6/plugins/com.openexchange.upsell.generic
 %config(noreplace) /opt/open-xchange/etc/groupware/settings/upsell.properties
-/var/www/ox6/plugins/com.openexchange.upsell.generic/*
+%{docroot}/ox6/plugins/com.openexchange.upsell.generic/*
 %changelog
 * Mon Oct 05 2009 - benjamin.otterbach@open-xchange.com
  - Enhancement: Changed default upsell text.
