@@ -52,6 +52,10 @@ package com.openexchange.tools.encoding;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.IllegalCharsetNameException;
+import java.nio.charset.UnsupportedCharsetException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Class for storing character sets.
@@ -71,10 +75,35 @@ public final class Charsets {
     public static final Charset UTF_8 = Charset.forName("UTF-8");
 
     /**
+     * The charset cache.
+     */
+    private static final ConcurrentMap<String, Charset> CACHE = new ConcurrentHashMap<String, Charset>();
+
+    /**
      * Prevent instantiation
      */
     private Charsets() {
         super();
+    }
+
+    /**
+     * Gets a {@link Charset charset} object for the named charset.
+     * 
+     * @param charsetName The name of the requested charset; may be either a canonical name or an alias
+     * @return The {@link Charset charset} object for the named charset
+     * @throws IllegalCharsetNameException If the given charset name is illegal
+     * @throws UnsupportedCharsetException If no support for the named charset is available in this instance of the Java virtual machine
+     */
+    public static Charset forName(final String charsetName) {
+        Charset cs = CACHE.get(charsetName);
+        if (null == cs) {
+            final Charset ncs = Charset.forName(charsetName);
+            cs = CACHE.putIfAbsent(charsetName, ncs);
+            if (null == cs) {
+                cs = ncs;
+            }
+        }
+        return cs;
     }
 
     public static String toString(final byte[] bytes, final Charset charset) {
