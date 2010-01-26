@@ -82,9 +82,14 @@ public final class MessagingAction {
     private final String name;
 
     /**
-     * The action type
+     * The action type.
      */
     private final Type type;
+
+    /**
+     * The name of the (possibly) following messaging action.
+     */
+    private final String follower;
 
     /**
      * Initializes a new {@link MessagingAction}.
@@ -93,9 +98,21 @@ public final class MessagingAction {
      * @param type The type
      */
     public MessagingAction(final String name, final Type type) {
+        this(name, type, null);
+    }
+
+    /**
+     * Initializes a new {@link MessagingAction}.
+     * 
+     * @param name The name
+     * @param type The type
+     * @param follower The follower action name; may be <code>null</code> to indicate no following action
+     */
+    public MessagingAction(final String name, final Type type, final String follower) {
         super();
         this.name = name;
         this.type = type;
+        this.follower = follower;
     }
 
     /**
@@ -114,6 +131,15 @@ public final class MessagingAction {
      */
     public Type getType() {
         return type;
+    }
+
+    /**
+     * Gets the follower
+     * 
+     * @return The follower
+     */
+    public String getFollower() {
+        return follower;
     }
 
 }
