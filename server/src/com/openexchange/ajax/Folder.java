@@ -2345,8 +2345,7 @@ public class Folder extends SessionServlet {
             try {
                 final MessagingService service = messagingAccount.getMessagingService();
                 access = service.getAccountAccess(accountId, session);
-                access.connect();
-                rootFolder = access.getFolderAccess().getFolder(MessagingFolder.ROOT_FULLNAME);
+                rootFolder = access.getRootFolder();
                 serviceId = service.getId();
             } catch (final MessagingException e) {
                 arrays[index] = null;
