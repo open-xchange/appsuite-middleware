@@ -54,6 +54,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.messaging.MessagingService;
+import com.openexchange.messaging.twitter.TwitterMessagingService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.twitter.TwitterService;
@@ -125,6 +127,7 @@ public final class TwitterMessagingActivator extends DeferredActivator {
             }
 
             registrations = new ArrayList<ServiceRegistration>();
+            registrations.add(context.registerService(MessagingService.class.getName(), new TwitterMessagingService(), null));
 
         } catch (final Exception e) {
             org.apache.commons.logging.LogFactory.getLog(TwitterMessagingActivator.class).error(e.getMessage(), e);
