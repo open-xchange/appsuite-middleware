@@ -49,10 +49,14 @@
 
 package com.openexchange.messaging.twitter;
 
+import com.openexchange.messaging.MessagingContent;
+import com.openexchange.messaging.MessagingException;
+import com.openexchange.messaging.MessagingExceptionCodes;
+import com.openexchange.messaging.MessagingMessage;
 
 /**
  * {@link TwitterMessagingUtility}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TwitterMessagingUtility {
@@ -62,6 +66,21 @@ public final class TwitterMessagingUtility {
      */
     private TwitterMessagingUtility() {
         super();
+    }
+
+    /**
+     * Checks specified message's content to be of given type.
+     * 
+     * @param message The message
+     * @return The typed content
+     * @throws MessagingException If message's content is of given type
+     */
+    public static <C extends MessagingContent> C checkContent(final Class<C> clazz, final MessagingMessage message) throws MessagingException {
+        final MessagingContent content = message.getContent();
+        if (!(clazz.isInstance(content))) {
+            throw MessagingExceptionCodes.UNKNOWN_MESSAGING_CONTENT.create(content.toString());
+        }
+        return clazz.cast(content);
     }
 
     private static final long DEFAULT = -1L;

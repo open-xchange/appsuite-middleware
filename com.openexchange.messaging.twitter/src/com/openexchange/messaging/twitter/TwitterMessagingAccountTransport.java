@@ -49,13 +49,12 @@
 
 package com.openexchange.messaging.twitter;
 
+import static com.openexchange.messaging.twitter.TwitterMessagingUtility.checkContent;
 import static com.openexchange.messaging.twitter.TwitterMessagingUtility.parseUnsignedLong;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingAccountTransport;
 import com.openexchange.messaging.MessagingAddress;
-import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingException;
-import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.StringContent;
@@ -115,7 +114,7 @@ public final class TwitterMessagingAccountTransport implements MessagingAccountT
              * A direct message
              */
             try {
-                final StringContent content = checkContent(message);
+                final StringContent content = checkContent(StringContent.class, message);
                 final String screenName;
                 {
                     final MessagingHeader header = message.getFirstHeader(MessagingHeader.KnownHeader.TO.toString());
@@ -133,7 +132,7 @@ public final class TwitterMessagingAccountTransport implements MessagingAccountT
              * A retweet
              */
             try {
-                final StringContent content = checkContent(message);
+                final StringContent content = checkContent(StringContent.class, message);
                 final long inReplyTo;
                 {
                     final MessagingHeader header = message.getFirstHeader(TwitterConstants.HEADER_STATUS_ID);
@@ -153,20 +152,12 @@ public final class TwitterMessagingAccountTransport implements MessagingAccountT
              * A normal tweet
              */
             try {
-                final StringContent content = checkContent(message);
+                final StringContent content = checkContent(StringContent.class, message);
                 twitterAccess.updateStatus(content.toString());
             } catch (final TwitterException e) {
                 throw new MessagingException(e);
             }
         }
-    }
-
-    private static StringContent checkContent(final MessagingMessage message) throws MessagingException {
-        final MessagingContent content = message.getContent();
-        if (!(content instanceof StringContent)) {
-            throw MessagingExceptionCodes.UNKNOWN_MESSAGING_CONTENT.create(content.toString());
-        }
-        return (StringContent) content;
     }
 
     public void close() {

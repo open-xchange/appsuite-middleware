@@ -186,6 +186,9 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
     }
 
     public MessagingMessage perform(final String action) throws MessagingException {
+        /*
+         * No supported actions for this perform() method
+         */
         throw MessagingExceptionCodes.UNKNOWN_ACTION.create(action);
     }
 
