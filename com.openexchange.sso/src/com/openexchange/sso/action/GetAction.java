@@ -56,6 +56,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.sso.SSOConstants;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
@@ -92,10 +93,12 @@ public final class GetAction implements AJAXActionService {
              */
             final JSONObject obj = new JSONObject();
             obj.put("login", session.getLogin());
-            obj.put("username", session.getUser().getLoginInfo());
+            final User user = session.getUser();
+            obj.put("username", user.getLoginInfo());
             obj.put("password", session.getPassword());
             obj.put("context_id", session.getContextId());
             obj.put("context_name", session.getContext().getName());
+            obj.put("imap_login", user.getImapLogin());
             /*
              * Return
              */
