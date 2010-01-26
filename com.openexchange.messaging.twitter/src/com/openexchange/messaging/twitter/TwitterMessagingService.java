@@ -57,6 +57,7 @@ import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.messaging.MessagingAccountAccess;
 import com.openexchange.messaging.MessagingAccountManager;
 import com.openexchange.messaging.MessagingAccountTransport;
+import com.openexchange.messaging.MessagingAction;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.generic.DefaultMessagingAccountManager;
@@ -69,11 +70,12 @@ import com.openexchange.session.Session;
  */
 public final class TwitterMessagingService implements MessagingService {
 
-    private static final List<String> ACTIONS =
+    private static final List<MessagingAction> ACTIONS =
         Collections.unmodifiableList(Arrays.asList(
-            TwitterConstants.TYPE_RETWEET,
-            TwitterConstants.TYPE_RETWEET_NEW,
-            TwitterConstants.TYPE_DIRECT_MESSAGE));
+            new MessagingAction(TwitterConstants.TYPE_RETWEET, MessagingAction.Type.STORAGE, TwitterConstants.TYPE_TWEET),
+            new MessagingAction(TwitterConstants.TYPE_RETWEET_NEW, MessagingAction.Type.STORAGE),
+            new MessagingAction(TwitterConstants.TYPE_DIRECT_MESSAGE, MessagingAction.Type.STORAGE, TwitterConstants.TYPE_TWEET),
+            new MessagingAction(TwitterConstants.TYPE_TWEET, MessagingAction.Type.MESSAGE)));
 
     private static final String ID = "com.openexchange.messaging.twitter";
 
@@ -119,7 +121,7 @@ public final class TwitterMessagingService implements MessagingService {
         return new TwitterMessagingAccountTransport(accountManager.getAccount(accountId, session), session);
     }
 
-    public List<String> getMessageActions() {
+    public List<MessagingAction> getMessageActions() {
         return ACTIONS;
     }
 

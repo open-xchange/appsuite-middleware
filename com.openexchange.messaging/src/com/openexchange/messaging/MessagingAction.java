@@ -134,9 +134,9 @@ public final class MessagingAction {
     }
 
     /**
-     * Gets the follower
+     * Gets the follower or <code>null</code> to indicate no following action.
      * 
-     * @return The follower
+     * @return The follower or <code>null</code> to indicate no following action
      */
     public String getFollower() {
         return follower;
