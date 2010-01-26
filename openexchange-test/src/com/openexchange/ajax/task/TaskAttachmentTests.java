@@ -75,8 +75,6 @@ public class TaskAttachmentTests extends AbstractAJAXSession {
 
     private Task task;
 
-    private int attachmentId;
-
     private Date creationDate;
 
     public TaskAttachmentTests(String name) {
