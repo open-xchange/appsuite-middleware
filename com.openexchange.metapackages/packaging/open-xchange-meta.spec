@@ -113,7 +113,7 @@ Authors:
 %package -n	open-xchange-meta-singleserver
 Group:          Applications/Productivity
 Summary:	The Open-Xchange Meta package for OX on a single server
-Requires:	open-xchange-meta-oxserver, open-xchange-meta-oxgui, open-xchange-meta-admin, open-xchange-meta-pubsub
+Requires:	open-xchange-meta-server, open-xchange-meta-gui, open-xchange-meta-admin, open-xchange-meta-pubsub
 
 
 %description -n open-xchange-meta-singleserver
