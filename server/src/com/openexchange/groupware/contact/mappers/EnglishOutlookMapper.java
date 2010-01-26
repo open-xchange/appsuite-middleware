@@ -213,6 +213,9 @@ public class EnglishOutlookMapper implements ContactFieldMapper {
     english2field.put("Account" , ContactField.EMAIL1);
     field2english.put(ContactField.EMAIL1 , "Account");
 
+    english2field.put("E-mail Address" , ContactField.EMAIL1);
+    field2english.put(ContactField.EMAIL1 , "E-mail Address");
+    
     //french2field.put("E-mail Type" , ContactField.);
     //field2french.put(ContactField. , "E-mail Type");
 
