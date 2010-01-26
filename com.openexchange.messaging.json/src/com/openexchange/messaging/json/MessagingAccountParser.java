@@ -62,9 +62,10 @@ import com.openexchange.messaging.generic.DefaultMessagingAccount;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 
 /**
- * {@link MessagingAccountParser}
+ * Parses the JSON representation of a messaging account according to its messaging services dynamic form.
  * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Firstname Lastname</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MessagingAccountParser {
 

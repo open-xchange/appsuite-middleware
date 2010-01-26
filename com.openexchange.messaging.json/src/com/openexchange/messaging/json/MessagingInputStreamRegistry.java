@@ -55,9 +55,11 @@ import com.openexchange.messaging.MessagingException;
 
 
 /**
- * {@link MessagingInputStreamRegistry}
+ * A {@link MessagingInputStreamRegistry} can look up a certain InputStream for a given name. This is used to resolve
+ * references to binaries when parsing MessagingMessages. 
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MessagingInputStreamRegistry {
     public InputStream get(Object id) throws MessagingException, IOException;

@@ -50,11 +50,9 @@
 package com.openexchange.messaging.json.actions.messages;
 
 import org.json.JSONException;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.messaging.MessagingExceptionCodes;
+import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.json.MessagingMessageParser;
 import com.openexchange.messaging.json.MessagingMessageWriter;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
@@ -62,31 +60,36 @@ import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * Common superclass for all messaging actions providing common services (the registry, a writer and a parser for messages) to subclasses. Subclasses must implement
- * the {@link #doIt(MessagingRequestData, ServerSession)}
- * @see MessagingRequestData
+ * Performs a certain messaging action. Parameters are:
+ * <dl>
+ *  <dt>messagingService</dt><dd>The messaging service id</dd>
+ *  <dt>account</dt><dd>The id of the messaging account</dd>
+ *  <dt>folder</dt><dd>The folder id to list the content for</dd>
+ *  <dt>id</dt><dd>The ID of the message to be loaded</dd>
+ *  <dt>messageAction</dt><dd>The action to be performed</dd>
+ * </dl>
+ * Returns the JSON representation of a message that is to be displayed to the user for further modification or 1 if no
+ * further user interaktion is needed.
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AbstractMessagingAction implements AJAXActionService {
 
-    protected MessagingServiceRegistry registry;
-    protected MessagingMessageWriter writer;
-    protected MessagingMessageParser parser;
-    
-    public AbstractMessagingAction(MessagingServiceRegistry registry, MessagingMessageWriter writer, MessagingMessageParser parser) {
-        this.registry = registry;
-        this.writer = writer;
-        this.parser = parser;
-    }
-    
-    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws AbstractOXException {
-        try {
-            return doIt(new MessagingRequestData(request, session, registry), session);
-        } catch (JSONException e) {
-            throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        }
+public class PerformAction extends AbstractMessagingAction {
+
+    public PerformAction(MessagingServiceRegistry registry, MessagingMessageWriter writer, MessagingMessageParser parser) {
+        super(registry, writer, parser);
     }
 
-    protected abstract AJAXRequestResult doIt(MessagingRequestData messagingRequestData, ServerSession session) throws AbstractOXException, JSONException;
+    @Override
+    protected AJAXRequestResult doIt(MessagingRequestData req, ServerSession session) throws AbstractOXException, JSONException {
+        
+        MessagingMessage message = req.getMessageAccess().perform(req.getFolderId(), req.getId(), req.getMessageAction());
+        
+        if(message == null) {
+            return new AJAXRequestResult(1);
+        } 
+        return new AJAXRequestResult(writer.write(message));
+        
+    }
+
 }

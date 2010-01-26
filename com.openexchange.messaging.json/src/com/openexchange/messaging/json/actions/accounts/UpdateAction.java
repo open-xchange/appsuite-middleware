@@ -61,9 +61,11 @@ import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link UpdateAction}
+ * Updates a messaging account. The request must contain a JSON representation of the changes to the messaging account (that is: all fields that are to be changed) 
+ * and the account id. Returns "1" on success.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class UpdateAction extends AbstractMessagingAccountAction {
 

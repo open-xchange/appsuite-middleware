@@ -61,9 +61,11 @@ import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link AllAction}
+ * Lists all known messaging services. No parameters are needed. Returns a JSONArray consisting of the JSON representations of
+ * all known MessagingServices.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AllAction extends AbstractMessagingServiceAction {
     

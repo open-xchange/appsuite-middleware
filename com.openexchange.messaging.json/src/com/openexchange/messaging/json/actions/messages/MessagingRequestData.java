@@ -62,9 +62,10 @@ import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link MessagingRequestData}
+ * Represents a request to the messaging subsystem. The class contains common parsing methods for arguments.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MessagingRequestData {
 
@@ -78,10 +79,17 @@ public class MessagingRequestData {
         this.session = session;
     }
 
+    /**
+     * Tries to get a message access for the messaging service and account ID as given in the request parameters
+     * @throws MessagingException If parameters 'messagingService' or 'account' are missing
+     */
     public MessagingMessageAccess getMessageAccess() throws MessagingException {
         return registry.getMessagingService(requireParameter("messagingService")).getAccountAccess(getAccountID(), session).getMessageAccess();
     }
     
+    /**
+     * Tries to retrieve the value of a given parameter, failing with a MessagingException if the parameter was not sent.
+     */
     public String requireParameter(String string) throws MessagingException {
         String parameter = request.getParameter(string);
         if(parameter == null) {
@@ -90,6 +98,10 @@ public class MessagingRequestData {
         return parameter;
     }
 
+    /**
+     * Reads and parses the 'account' parameter.
+     * @throws MessagingException - When the 'account' parameter was not set or is not a valid integer.
+     */
     public int getAccountID() throws MessagingException {
         String parameter = requireParameter("account");
         try {
@@ -99,10 +111,20 @@ public class MessagingRequestData {
         }
     }
 
+    /**
+     * Reads the 'folder' parameter, failing when it is not set.
+     * @throws MessagingException - When the 'folder' parameter is not set.
+     */
     public String getFolderId() throws MessagingException {
         return requireParameter("folder");
     }
 
+    /**
+     * Reads and parses the 'columns' parameter. Fails when 'columns' is not set or if it contains an unknown value. Columns
+     * are a string separated list of MessagingField names.
+     * @return An array of MessagingFields corresponding to the comma-separated list given in the 'columns' parameter.
+     * @throws MessagingException - When the 'columns' parameter was not set or contains an illegal value.
+     */
     public MessagingField[] getColumns() throws MessagingException {
         String parameter = requireParameter("columns");
         if(parameter == null) {
@@ -119,6 +141,11 @@ public class MessagingRequestData {
         return fields;
     }
 
+    /**
+     * Retrieves and parses the 'sort' parameter, turning it into a MessagingField. Returns <code>null</code> when 'sort' 
+     * is unset. Fails when 'sort' contains an unknown MessagingField.
+     * @throws MessagingException - When the 'sort' parameter contains an illegal value.
+     */
     public MessagingField getSort() throws MessagingException {
         String parameter = request.getParameter("sort");
         if(parameter == null) {
@@ -131,6 +158,11 @@ public class MessagingRequestData {
         return field;
     }
 
+    /**
+     * Retrieves and parses the 'order' parameter. Returns <code>null</code> when 'order' is not set. Fails when 'order' contains
+     * neither 'desc' and 'asc'. Matches case-insensitively. 
+     * @throws MessagingException - When 'order' contains an illegal value.
+     */
     public OrderDirection getOrder() throws MessagingException {
         String parameter = request.getParameter("order");
         if(parameter == null) {
@@ -143,10 +175,19 @@ public class MessagingRequestData {
         }
     }
 
+    /**
+     * Retrieves the given 'id' parameter. Fails when  the 'id' parameter is unset.
+     * @throws MessagingException - When the 'id' parameter is unset.
+     */
     public String getId() throws MessagingException {
         return requireParameter("id");
     }
 
+    /**
+     * Retrieves and parses the 'peek' parameter. Returns 'false' when 'peek' is not set. Fails when 'peek' contains neither
+     * 'true' nor 'false'. Matches case insensitively.
+     * @throws MessagingException - When 'peek' contains an illegal value.
+     */
     public boolean getPeek() throws MessagingException {
         String parameter = request.getParameter("peek");
         if(parameter == null) {
@@ -161,6 +202,11 @@ public class MessagingRequestData {
         }
     }
 
+    /**
+     * Retrieves a list of ids from the request body. Fails when the body does not contain a JSONArray (or the body is missing).
+     * @throws JSONException - When an underlying parsing exception occurs.
+     * @throws MessagingException - When The body is missing or no JSONArray
+     */
     public String[] getIds() throws JSONException, MessagingException {
         Object data = request.getData();
         if(data == null) {
@@ -177,6 +223,15 @@ public class MessagingRequestData {
         }
         
         return ids;
+    }
+
+    /**
+     * Retrieves the 'messageAction' parameter. Fails when 'messageAction' was not set.
+     * @return
+     * @throws MessagingException - When 'messageAction' was not set.
+     */
+    public String getMessageAction() throws MessagingException {
+        return requireParameter("messageAction");
     }
 
 }

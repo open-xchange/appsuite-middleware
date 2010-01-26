@@ -49,44 +49,94 @@
 
 package com.openexchange.messaging.json.actions.messages;
 
-import org.json.JSONException;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.messaging.MessagingExceptionCodes;
+import com.openexchange.messaging.SimMessageAccess.Call;
 import com.openexchange.messaging.json.MessagingMessageParser;
 import com.openexchange.messaging.json.MessagingMessageWriter;
-import com.openexchange.messaging.registry.MessagingServiceRegistry;
-import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * Common superclass for all messaging actions providing common services (the registry, a writer and a parser for messages) to subclasses. Subclasses must implement
- * the {@link #doIt(MessagingRequestData, ServerSession)}
- * @see MessagingRequestData
+ * {@link PerformTest}
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AbstractMessagingAction implements AJAXActionService {
+public class PerformTest extends AbstractMessagingActionTest {
 
-    protected MessagingServiceRegistry registry;
-    protected MessagingMessageWriter writer;
-    protected MessagingMessageParser parser;
+    // Success Cases
     
-    public AbstractMessagingAction(MessagingServiceRegistry registry, MessagingMessageWriter writer, MessagingMessageParser parser) {
-        this.registry = registry;
-        this.writer = writer;
-        this.parser = parser;
+    public void testPerform() throws AbstractOXException {
+        AJAXRequestData req = new AJAXRequestData();
+        req.putParameter("messagingService", "com.openexchange.test1");
+        req.putParameter("folder", "theFolderID");
+        req.putParameter("account", "12");
+        req.putParameter("id", "theID");
+        req.putParameter("messageAction", "theAction");
+        
+        perform(req);
+        
+        Call call = getMessagingAccessCall("com.openexchange.test1", 12);
+        
+        assertEquals("perform", call.getName());
+        
+        Object[] args = call.getArgs();
+
+        assertEquals("theFolderID", args[0]);
+        assertEquals("theID", args[1]);
+        assertEquals("theAction", args[2]);
+        
     }
     
-    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws AbstractOXException {
-        try {
-            return doIt(new MessagingRequestData(request, session, registry), session);
-        } catch (JSONException e) {
-            throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        }
+    // Error Cases
+    
+    public void testMissingServiceID() throws AbstractOXException {
+        AJAXRequestData req = new AJAXRequestData();
+        req.putParameter("folder", "theFolderID");
+        req.putParameter("account", "12");
+        req.putParameter("id", "theID");
+        req.putParameter("messageAction", "theAction");
+        
+        assertFails(req);
+    }
+    
+    public void testMissingAccountID() throws AbstractOXException {
+        AJAXRequestData req = new AJAXRequestData();
+        req.putParameter("messagingService", "com.openexchange.test1");
+        req.putParameter("folder", "theFolderID");
+        req.putParameter("id", "theID");
+        req.putParameter("messageAction", "theAction");
+        
+        assertFails(req);
+    
+    }
+    
+    public void testMissingFolder() throws AbstractOXException {
+        AJAXRequestData req = new AJAXRequestData();
+        req.putParameter("messagingService", "com.openexchange.test1");
+        req.putParameter("account", "12");
+        req.putParameter("id", "theID");
+        req.putParameter("messageAction", "theAction");
+        
+        assertFails(req);
+    
+    }
+    
+    public void testMissingAction() throws AbstractOXException {
+        AJAXRequestData req = new AJAXRequestData();
+        req.putParameter("messagingService", "com.openexchange.test1");
+        req.putParameter("folder", "theFolderID");
+        req.putParameter("account", "12");
+        req.putParameter("id", "theID");
+        
+        assertFails(req);
+    
+    }
+    
+    
+    @Override
+    protected AbstractMessagingAction getAction() {
+        return new PerformAction(registry, new MessagingMessageWriter(), new MessagingMessageParser());
     }
 
-    protected abstract AJAXRequestResult doIt(MessagingRequestData messagingRequestData, ServerSession session) throws AbstractOXException, JSONException;
 }

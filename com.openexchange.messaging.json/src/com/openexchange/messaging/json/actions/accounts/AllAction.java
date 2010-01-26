@@ -63,9 +63,15 @@ import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link AllAction}
+ * A class implementing the "all" action for listing messaging accounts. Optionally only accounts of a certain service
+ * are returned. Parameters are:
+ * <dl>
+ *  <dt>messagingService</dt><dd>(optional) The ID of the messaging service. If present lists only accounts of this service.</dd>
+ * </dl>
+ * Returns a JSONArray of JSONObjects representing the messaging accounts.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AllAction extends AbstractMessagingAccountAction {
 
@@ -73,9 +79,6 @@ public class AllAction extends AbstractMessagingAccountAction {
         super(registry);
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.messaging.json.actions.accounts.AbstractMessagingAccountAction#doIt(com.openexchange.ajax.requesthandler.AJAXRequestData, com.openexchange.tools.session.ServerSession)
-     */
     @Override
     protected AJAXRequestResult doIt(AJAXRequestData request, ServerSession session) throws AbstractOXException, JSONException {
         

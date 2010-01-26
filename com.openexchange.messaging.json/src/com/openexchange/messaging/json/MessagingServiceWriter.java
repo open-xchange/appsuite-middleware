@@ -55,10 +55,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.datatypes.genericonf.json.FormDescriptionWriter;
 import com.openexchange.i18n.Translator;
+import com.openexchange.messaging.MessagingAction;
 import com.openexchange.messaging.MessagingService;
 
 /**
- * {@link MessagingServiceWriter}
+ * Renders a given MessagingService as its JSON representation. This also contains a dynamic form description.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -66,7 +67,7 @@ import com.openexchange.messaging.MessagingService;
 public class MessagingServiceWriter {
 
     private static final String FORM_DESCRIPTION = "formDescription";
-    private static final String MESSAGE_ACTIONS = "messageActions";
+    private static final String MESSAGE_ACTIONS = "messagingActions";
     private static final String DISPLAY_NAME = "displayName";
     private static final String ID = "id";
 
@@ -87,13 +88,17 @@ public class MessagingServiceWriter {
         return object;
     }
 
-    private JSONArray writeCapabilities(List<String> capabilities) {
+    private JSONArray writeCapabilities(List<MessagingAction> capabilities) throws JSONException {
         JSONArray array = new JSONArray();
         if(capabilities == null) {
             return array;
         }
-        for (String string : capabilities) {
-            array.put(string);
+        for (MessagingAction action : capabilities) {
+            JSONObject object = new JSONObject();
+            object.put("name", action.getName());
+            object.put("type", action.getType().toString().toLowerCase());
+            object.put("follower", action.getFollower());
+            array.put(object);
         }
         return array;
     }

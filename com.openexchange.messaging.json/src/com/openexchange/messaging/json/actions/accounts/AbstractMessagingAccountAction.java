@@ -64,9 +64,12 @@ import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link AbstractMessagingAccountAction}
+ * The common superclass for all AJAXActionServices handling messaging account management. Provides a unified handling
+ * for JSONExceptions and stores commonly used services (the registry, a writer and a parser) for subclasses. 
+ * Subclasses must implement the {@link #doIt(AJAXRequestData, ServerSession)} method.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractMessagingAccountAction implements AJAXActionService {
 

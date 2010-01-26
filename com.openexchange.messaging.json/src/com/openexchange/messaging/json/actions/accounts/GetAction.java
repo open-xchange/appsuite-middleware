@@ -62,9 +62,15 @@ import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link GetAction}
+ * Loads a messaging account. Parameters are:
+ * <dl>
+ *  <dt>messagingService</dt> <dd>The ID of the messaging service. </dd>
+ *  <dt>id</dt><dd>The id of the messaging service that is to be loaded</dd>
+ * </dl>
+ * Throws an exception upon an error or returns the loaded MessagingAccount JSON representation.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class GetAction extends AbstractMessagingAccountAction {
 

@@ -51,9 +51,10 @@ package com.openexchange.messaging.json;
 
 
 /**
- * {@link MessagingAccountConstants}
+ * Collects commonly used strings about MessagingAccount rendering and parsing.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Firstname Lastname</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MessagingAccountConstants {
     public static final String CONFIGURATION = "configuration";

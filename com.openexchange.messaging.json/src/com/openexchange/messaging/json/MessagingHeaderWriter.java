@@ -57,19 +57,33 @@ import com.openexchange.messaging.MessagingHeader;
 
 
 /**
- * {@link MessagingHeaderWriter}
+ * A pair of {@link MessagingHeaderParser} and {@link MessagingHeaderWriter} are used for customizing header reading and writing. Instances
+ * of those classes can be registered in a given {@link MessagingMessageWriter}. 
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MessagingHeaderWriter {
 
+    /**
+     * Returns true if this writer feels responsible for this header map entry. Will usually orient itself
+     * along the key of the entry {@link Entry#getKey()}
+     */
     boolean handles(Entry<String, Collection<MessagingHeader>> entry);
 
+    /**
+     * If multiple header writers feel responsible for a certain header, the one with the highest priority will win.
+     */
     int getPriority();
 
+    /**
+     * Writes the JSON key for the given entry
+     */
     String writeKey(Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException;
 
+    /**
+     * Writes the JSON value for the given entry
+     */
     Object writeValue(Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException;
     
 }

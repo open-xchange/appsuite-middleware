@@ -57,12 +57,27 @@ import com.openexchange.messaging.MessagingException;
 
 
 /**
- * {@link MessagingContentParser}
+ * A MessagingContentParser feels responsible for certain JSON structures and can turn them into a valid MessagingContent. By implementing
+ * a MessagingContentParser (and correspondingly a {@link MessagingContentWriter} and registering it with a {@link MessagingMessageParser},
+ * one can add special handling for special messaging contents.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MessagingContentParser {
+    /**
+     * If multiple parsers feel responsible for a certain content object, the one with the highest priority wins.
+     */
     public int getPriority();
+
+    /**
+     * Determine whether this parser can handle the given json representation of a messaging content. Will usually orient
+     * itself along the (already parsed) content type in the given message.
+     */
     public boolean handles(MessagingBodyPart message, Object content) throws MessagingException;
+
+    /**
+     * Turns the given content into a messaging content.
+     */
     public MessagingContent parse(MessagingBodyPart message, Object content, MessagingInputStreamRegistry registry) throws JSONException, MessagingException, IOException;
 }

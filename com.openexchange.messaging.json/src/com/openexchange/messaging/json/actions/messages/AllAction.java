@@ -66,9 +66,19 @@ import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link AllAction}
- *
+ * Returns all messages in a given folder. Parameters are:
+ * <dl>
+ *  <dt>messagingService</dt><dd>The messaging service id</dd>
+ *  <dt>account</dt><dd>The id of the messaging account</dd>
+ *  <dt>folder</dt><dd>The folder id to list the content for</dd>
+ *  <dt>sort</dt><dd>(optional) the name of a MessagingField to sort the elements by</dd>
+ *  <dt>order</dt><dd>(optional) the sorting direction ('asc' for ascending, 'desc' for descending, defaults to ascending)</dd>
+ *  <dt>columns</dt><dd>A comma separated list of MessagingFields that should be loaded.</dd>
+ * </dl>
+ * Returns a JSONArray containing a JSONArray for every message in the folder. The sub arrays consist of one entry for each
+ * requested field.
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AllAction extends AbstractMessagingAction {
 

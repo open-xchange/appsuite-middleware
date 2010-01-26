@@ -79,11 +79,13 @@ import com.openexchange.messaging.SimpleMessagingMessage;
 import com.openexchange.messaging.StringContent;
 
 /**
- * {@link MessagingMessageWriter}
- * 
+ * A parser to emit JSON representations of MessagingMessages. Note that writing can be customized by registering
+ * one or more {@link MessagingHeaderWriter} and one or more {@link MessagingContentWriter}. 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+
 public class MessagingMessageWriter {
 
     private static final MessagingHeaderWriter MULTI_HEADER_WRITER = new MessagingHeaderWriter() {
@@ -209,6 +211,9 @@ public class MessagingMessageWriter {
 
     private Collection<MessagingHeaderWriter> headerWriters = new ConcurrentLinkedQueue<MessagingHeaderWriter>();
 
+    /**
+     * Renders a MessagingMessage in its JSON representation.
+     */
     public JSONObject write(MessagingMessage message) throws JSONException, MessagingException {
         JSONObject messageJSON = write((MessagingPart)message);
 
@@ -247,15 +252,6 @@ public class MessagingMessageWriter {
             add(new MultipartContentRenderer());
         }
     };
-
-    protected static interface MessagingContentWriter {
-
-        public boolean handles(MessagingPart part, MessagingContent content);
-
-        public int getPriority();
-
-        public Object write(MessagingPart part, MessagingContent content) throws MessagingException, JSONException;
-    }
 
     protected static class StringContentRenderer implements MessagingContentWriter {
 
@@ -356,14 +352,25 @@ public class MessagingMessageWriter {
         }
     }
 
+    /**
+     * Registers a custom writer for a header
+     */
     public void addHeaderWriter(MessagingHeaderWriter writer) {
         headerWriters.add(writer);
     }
 
+    /**
+     * Registers a custom writer for a {@link MessagingContent}
+     * @param contentWriter
+     */
     public void addContentWriter(MessagingContentWriter contentWriter) {
         contentWriters.add(contentWriter);
     }
-
+    
+    /**
+     * Renders a message as a list of fields. The fields to be written are given in the MessagingField array. 
+     * Individual fields are rendered exactly as in the JSONObject representation using custom header writers and content writers.
+     */
     public JSONArray writeFields(MessagingMessage message, MessagingField[] fields) throws MessagingException, JSONException {
         JSONArray fieldJSON = new JSONArray();
         

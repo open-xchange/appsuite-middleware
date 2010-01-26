@@ -60,9 +60,10 @@ import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link NewAction}
+ * Creates a new MessagingAccount. The body of the request must contain the JSON representation of the given account.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class NewAction extends AbstractMessagingAccountAction {
 

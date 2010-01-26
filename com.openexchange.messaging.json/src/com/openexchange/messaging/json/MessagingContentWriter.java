@@ -47,46 +47,37 @@
  *
  */
 
-package com.openexchange.messaging.json.actions.messages;
+package com.openexchange.messaging.json;
 
 import org.json.JSONException;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.messaging.MessagingExceptionCodes;
-import com.openexchange.messaging.json.MessagingMessageParser;
-import com.openexchange.messaging.json.MessagingMessageWriter;
-import com.openexchange.messaging.registry.MessagingServiceRegistry;
-import com.openexchange.tools.session.ServerSession;
-
+import com.openexchange.messaging.MessagingContent;
+import com.openexchange.messaging.MessagingException;
+import com.openexchange.messaging.MessagingPart;
 
 /**
- * Common superclass for all messaging actions providing common services (the registry, a writer and a parser for messages) to subclasses. Subclasses must implement
- * the {@link #doIt(MessagingRequestData, ServerSession)}
- * @see MessagingRequestData
+ * 
+ * A MessagingContentWriter feels responsible for certain MessagingContents and can turn them into a JSON representation. By implementing
+ * a MessagingContentWriter (and correspondingly a {@link MessagingContentParser} and registering it with a {@link MessagingMessageParser},
+ * one can add special handling for special messaging contents.
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AbstractMessagingAction implements AJAXActionService {
+public interface MessagingContentWriter {
 
-    protected MessagingServiceRegistry registry;
-    protected MessagingMessageWriter writer;
-    protected MessagingMessageParser parser;
-    
-    public AbstractMessagingAction(MessagingServiceRegistry registry, MessagingMessageWriter writer, MessagingMessageParser parser) {
-        this.registry = registry;
-        this.writer = writer;
-        this.parser = parser;
-    }
-    
-    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws AbstractOXException {
-        try {
-            return doIt(new MessagingRequestData(request, session, registry), session);
-        } catch (JSONException e) {
-            throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        }
-    }
+    /**
+     * Returns true if this content writer feels responsible for the messaging content. May orient itself along
+     * the content type header in the part or the class of the content.
+     */
+    public boolean handles(MessagingPart part, MessagingContent content);
 
-    protected abstract AJAXRequestResult doIt(MessagingRequestData messagingRequestData, ServerSession session) throws AbstractOXException, JSONException;
+    /**
+     * When multiple content writers feel responsible for a certain content the one with the highest priority is used.
+     */
+    public int getPriority();
+
+    /**
+     * Turns the messaging content into its json representation
+     */
+    public Object write(MessagingPart part, MessagingContent content) throws MessagingException, JSONException;
 }

@@ -61,9 +61,18 @@ import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link GetAction}
- *
+ * Loads a certain message.
+ * Returns all messages in a given folder. Parameters are:
+ * <dl>
+ *  <dt>messagingService</dt><dd>The messaging service id</dd>
+ *  <dt>account</dt><dd>The id of the messaging account</dd>
+ *  <dt>folder</dt><dd>The folder id to list the content for</dd>
+ *  <dt>id</dt><dd>The ID of the message to be loaded</dd>
+ *  <dt>peek</dt><dd>(optional) When set to 'true' the state of the message (read / unread) is not changed. Defaults to false</dd>
+ * </dl>
+ * Returns the JSON representation of the message.
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class GetAction extends AbstractMessagingAction {
 

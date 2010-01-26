@@ -59,9 +59,16 @@ import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.generic.internet.MimeContentType;
 
 /**
- * {@link ContentTypeParser}
- * 
+ * Parses the long and short forms of the json version of the content-type header.
+ * <code>
+ * {"type":"text/plain", "params":{"name":"something.txt","charset":"UTF-8"}}
+ * </code>
+ * or
+ * <code>
+ * "text/plain;charset=UTF-8;name=something.txt"
+ * </code> 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ContentTypeParser implements MessagingHeaderParser {
 

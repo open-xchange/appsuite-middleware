@@ -71,7 +71,6 @@ import com.openexchange.messaging.MessagingPart;
 import com.openexchange.messaging.MultipartContent;
 import com.openexchange.messaging.SimpleMessagingMessage;
 import com.openexchange.messaging.StringContent;
-import com.openexchange.messaging.json.MessagingMessageWriter.MessagingContentWriter;
 import com.openexchange.tools.encoding.Base64;
 import junit.framework.TestCase;
 import static com.openexchange.json.JSONAssertion.*;

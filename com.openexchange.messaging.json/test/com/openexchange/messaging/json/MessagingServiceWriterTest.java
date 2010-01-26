@@ -50,11 +50,15 @@
 package com.openexchange.messaging.json;
 
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.i18n.Translator;
 import com.openexchange.json.JSONAssertion;
+import com.openexchange.messaging.MessagingAction;
 import com.openexchange.messaging.SimMessagingService;
 import junit.framework.TestCase;
 
@@ -70,15 +74,21 @@ public class MessagingServiceWriterTest extends TestCase{
     public void testSimpleWrite() throws JSONException {
         SimMessagingService messagingService = new SimMessagingService();
         
+        List<MessagingAction> actions = new LinkedList<MessagingAction>();
+        actions.add(new MessagingAction("powerize!", MessagingAction.Type.NONE));
+        actions.add(new MessagingAction("send", MessagingAction.Type.MESSAGE));
+        actions.add(new MessagingAction("retweet", MessagingAction.Type.STORAGE, "send"));
+        actions.add(new MessagingAction("reply", MessagingAction.Type.STORAGE, "send"));
+        
+        
         messagingService.setId("com.openexchange.messaging.twitter");
         messagingService.setDisplayName("Twitter");
-        messagingService.setMessageActions(Arrays.asList("send", "reply", "retweet", "powerize!"));
+        messagingService.setMessageActions(actions);
         messagingService.setFormDescription(new DynamicFormDescription());
         
         JSONAssertion assertion = new JSONAssertion().isObject()
             .hasKey("id").withValue("com.openexchange.messaging.twitter")
             .hasKey("displayName").withValue("Twitter")
-            .hasKey("messageActions").withValueArray().withValues("send", "reply", "retweet", "powerize!").inAnyOrder()
             .hasKey("formDescription").withValueArray()
             .objectEnds();
         
@@ -87,5 +97,36 @@ public class MessagingServiceWriterTest extends TestCase{
         
         assertValidates(assertion, messagingServiceJSON);
         
+        JSONArray messagingActionsJSON = messagingServiceJSON.getJSONArray("messagingActions");
+        
+        assertion = new JSONAssertion().isObject()
+            .hasKey("name").withValue("powerize!")
+            .hasKey("type").withValue("none")
+            .objectEnds();
+        
+        assertValidates(assertion, messagingActionsJSON.get(0));
+        
+        assertion = new JSONAssertion().isObject()
+            .hasKey("name").withValue("send")
+            .hasKey("type").withValue("message")
+            .objectEnds();
+    
+        assertValidates(assertion, messagingActionsJSON.get(1));
+    
+        assertion = new JSONAssertion().isObject()
+            .hasKey("name").withValue("retweet")
+            .hasKey("type").withValue("storage")
+            .hasKey("follower").withValue("send")
+            .objectEnds();
+
+        assertValidates(assertion, messagingActionsJSON.get(2));
+        
+        assertion = new JSONAssertion().isObject()
+            .hasKey("name").withValue("reply")
+            .hasKey("type").withValue("storage")
+            .hasKey("follower").withValue("send")
+            .objectEnds();
+
+        assertValidates(assertion, messagingActionsJSON.get(3));
     }
 }

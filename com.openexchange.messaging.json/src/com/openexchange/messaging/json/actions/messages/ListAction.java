@@ -64,10 +64,20 @@ import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link ListAction}
- *
+ * Loads a set of requested messages. Parameters are:
+ * <dl>
+ *  <dt>messagingService</dt><dd>The messaging service id</dd>
+ *  <dt>account</dt><dd>The id of the messaging account</dd>
+ *  <dt>folder</dt><dd>The folder id to list the content for</dd>
+ *  <dt>columns</dt><dd>A comma separated list of MessagingFields that should be loaded.</dd>
+ * </dl>
+ * The body of the request must contain a JSONArray with the message IDs that are to be loaded.
+ * Returns a JSONArray containing a JSONArray for every message that is to be loaded. The sub arrays consist of one entry for each
+ * requested field.
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+
 public class ListAction extends AbstractMessagingAction {
 
     public ListAction(MessagingServiceRegistry registry, MessagingMessageWriter writer, MessagingMessageParser parser) {

@@ -62,9 +62,13 @@ import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link GetAction}
- *
+ * Loads a certain messaging service. Parameters are:
+ * <dl>
+ *  <dt>id</dt><dd>The messaging service id.</dd>
+ * </dl>
+ * Returns the JSON representation of the loaded messaging service id.
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class GetAction extends AbstractMessagingServiceAction {
 

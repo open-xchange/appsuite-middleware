@@ -64,9 +64,11 @@ import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link AbstractMessagingServiceAction}
+ * Common superclass of actions for accessing the known messaging services. Subclasses must implement
+ * {@link #doIt(AJAXRequestData, ServerSession)}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractMessagingServiceAction implements AJAXActionService{
 
