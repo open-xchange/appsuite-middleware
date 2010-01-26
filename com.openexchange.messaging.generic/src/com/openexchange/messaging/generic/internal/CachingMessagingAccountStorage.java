@@ -139,8 +139,8 @@ public final class CachingMessagingAccountStorage implements MessagingAccountSto
         cacheLock = new ReentrantLock(true);
     }
 
-    public void addAccount(final String serviceId, final MessagingAccount account, final Session session) throws MessagingException {
-        delegatee.addAccount(serviceId, account, session);
+    public int addAccount(final String serviceId, final MessagingAccount account, final Session session) throws MessagingException {
+        return delegatee.addAccount(serviceId, account, session);
     }
 
     public void deleteAccount(final String serviceId, final MessagingAccount account, final Session session) throws MessagingException {

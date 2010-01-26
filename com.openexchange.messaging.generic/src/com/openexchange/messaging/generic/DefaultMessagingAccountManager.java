@@ -92,8 +92,8 @@ public class DefaultMessagingAccountManager implements MessagingAccountManager {
         return CACHE.getAccounts(serviceId, session);
     }
 
-    public void addAccount(final MessagingAccount account, final Session session) throws MessagingException {
-        CACHE.addAccount(serviceId, account, session);
+    public int addAccount(final MessagingAccount account, final Session session) throws MessagingException {
+        return CACHE.addAccount(serviceId, account, session);
     }
 
     public void deleteAccount(final MessagingAccount account, final Session session) throws MessagingException {

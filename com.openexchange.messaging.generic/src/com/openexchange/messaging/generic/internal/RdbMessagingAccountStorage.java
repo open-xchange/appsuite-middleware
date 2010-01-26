@@ -297,7 +297,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
     private static final String SQL_INSERT =
         "INSERT INTO messagingAccount (cid, user, account, confId, serviceId, displayName) VALUES (?, ?, ?, ?, ?, ?)";
 
-    public void addAccount(final String serviceId, final MessagingAccount account, final Session session) throws MessagingException {
+    public int addAccount(final String serviceId, final MessagingAccount account, final Session session) throws MessagingException {
         final DatabaseService databaseService = getService(CLAZZ_DB);
         /*
          * Writable connection
@@ -344,12 +344,13 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
             int pos = 1;
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, session.getUserId());
-            stmt.setInt(pos++, account.getId());
+            stmt.setInt(pos++, genericConfId);
             stmt.setInt(pos++, genericConfId);
             stmt.setString(pos++, serviceId);
             stmt.setString(pos, account.getDisplayName());
             stmt.executeUpdate();
             wc.commit(); // COMMIT
+            return genericConfId;
         } catch (final GenericConfigStorageException e) {
             DBUtils.rollback(wc); // ROLL-BACK
             throw new MessagingException(e);

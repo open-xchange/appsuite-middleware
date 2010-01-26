@@ -66,9 +66,10 @@ public interface MessagingAccountManager {
      * 
      * @param account The account to add
      * @param session The session providing needed user data
+     * @return The identifier of the newly created account
      * @throws MessagingException If insertion fails
      */
-    public void addAccount(MessagingAccount account, Session session) throws MessagingException;
+    public int addAccount(MessagingAccount account, Session session) throws MessagingException;
 
     /**
      * Updates an existing account.

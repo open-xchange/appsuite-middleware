@@ -70,10 +70,11 @@ public class SimAccountManager implements MessagingAccountManager {
     private int id;
     private List<MessagingAccount> accounts;
 
-    public void addAccount(MessagingAccount account, Session session) throws MessagingException {
+    public int addAccount(final MessagingAccount account, final Session session) throws MessagingException {
         this.createdAccount = account;
         this.session = session;
         exception();
+        return createdAccount.getId();
     }
     
     
@@ -86,32 +87,32 @@ public class SimAccountManager implements MessagingAccountManager {
         return session;
     }
 
-    public void deleteAccount(MessagingAccount account, Session session) throws MessagingException {
+    public void deleteAccount(final MessagingAccount account, final Session session) throws MessagingException {
         this.deletedAccount = account;
         this.session = session;
         exception();
     }
 
     
-    public MessagingAccount getAccount(int id, Session session) throws MessagingException {
+    public MessagingAccount getAccount(final int id, final Session session) throws MessagingException {
         this.id = id;
         this.session = session;
         exception();
         return accountToGet;
     }
 
-    public List<MessagingAccount> getAccounts(Session session) throws MessagingException {
+    public List<MessagingAccount> getAccounts(final Session session) throws MessagingException {
         exception();
         return accounts;
     }
 
-    public void updateAccount(MessagingAccount account, Session session) throws MessagingException {
+    public void updateAccount(final MessagingAccount account, final Session session) throws MessagingException {
         updatedAccount = account;
         this.session = session;
         exception();
     }
 
-    public void setException(MessagingException messagingException) {
+    public void setException(final MessagingException messagingException) {
         this.exception = messagingException;
     }
     
@@ -131,7 +132,7 @@ public class SimAccountManager implements MessagingAccountManager {
         return deletedAccount;
     }
 
-    public void setAccountToGet(MessagingAccount account) {
+    public void setAccountToGet(final MessagingAccount account) {
         this.accountToGet = account;
     }
 
@@ -141,7 +142,7 @@ public class SimAccountManager implements MessagingAccountManager {
     }
 
 
-    public void setAllAccounts(MessagingAccount...list) {
+    public void setAllAccounts(final MessagingAccount...list) {
         this.accounts = Arrays.asList(list);
     }
 

@@ -89,9 +89,10 @@ public interface MessagingAccountStorage {
      * @param serviceId The service identifier
      * @param account The account
      * @param session The session
+     * @return The identifier of the newly created account
      * @throws MessagingException If insertion fails
      */
-    public void addAccount(String serviceId, MessagingAccount account, Session session) throws MessagingException;
+    public int addAccount(String serviceId, MessagingAccount account, Session session) throws MessagingException;
 
     /**
      * Deletes denoted account.
