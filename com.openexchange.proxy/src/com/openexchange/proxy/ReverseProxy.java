@@ -291,13 +291,12 @@ public class ReverseProxy extends HttpServlet {
         while (proxies.hasMoreElements()) {
             ReverseProxyConfig proxy = (ReverseProxyConfig) proxies.nextElement();
             String prefix = proxy.getPrefix();
-            // replace
             String regex = java.util.regex.Pattern.quote(prefix);
+            // replace
             body = body.replaceAll(regex, "https://www.disco2000.ox/proxy/" + proxy.id);
         }
         // make absolute pathes
-        body = body.replaceAll("\"/(.*?)\"", "\"/proxy/" + currentProxy.id + "/$1\""); //=\\\"\\/(.*?)\\\"", "https://www.disco2000.ox/proxy/" + currentProxy.id + "/$1");
-        //body = body.replaceAll("href=\\\"\\/(.*?)\\\"", "https://www.disco2000.ox/proxy/" + currentProxy.id + "/$1");
+        body = body.replaceAll("\"/(.*?)\"", "\"/proxy/" + currentProxy.id + "/$1\"");
         // done
         return body;
     }
