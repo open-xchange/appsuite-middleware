@@ -212,14 +212,11 @@ final class SessionData {
     }
 
     void checkAuthId(String login, String authId) throws SessiondException {
-        if (null == authId) {
-            throw new SessiondException(Code.SESSIOND_EXCEPTION);
-        }
         rlock.lock();
         try {
             for (SessionContainer container : sessionList) {
                 for (SessionControl sc : container.getSessionControls()) {
-                    if (authId.equals(sc.getSession().getAuthId())) {
+                    if (null != authId && authId.equals(sc.getSession().getAuthId())) {
                         throw new SessiondException(Code.DUPLICATE_AUTHID, sc.getSession().getLogin(), login);
                     }
                 }
