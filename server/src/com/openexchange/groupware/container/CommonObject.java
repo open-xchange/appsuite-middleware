@@ -171,6 +171,7 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
 
     public void setLastModifiedOfNewestAttachment(Date lastModifiedOfNewestAttachment) {
         this.lastModifiedOfNewestAttachment = lastModifiedOfNewestAttachment;
+        containsLastModifiedOfNewestAttachment = true;
     }
 
     public void setNumberOfLinks(final int number_of_links) {
@@ -206,6 +207,7 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
 
     public void removeLastModifiedOfNewestAttachment() {
         lastModifiedOfNewestAttachment = null;
+        containsLastModifiedOfNewestAttachment = false;
     }
 
     public void removeNumberOfLinks() {

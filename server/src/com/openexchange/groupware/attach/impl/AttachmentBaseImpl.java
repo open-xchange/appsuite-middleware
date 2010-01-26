@@ -1178,7 +1178,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             stmt.setInt(pos++, moduleId);
             result = stmt.executeQuery();
             if (result.next()) {
-                retval = result.getTimestamp(1);
+                retval = new Date(result.getLong(1));
             } else {
                 retval = null;
             }

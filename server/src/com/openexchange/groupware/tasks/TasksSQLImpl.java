@@ -76,16 +76,9 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public class TasksSQLImpl implements TasksSQLInterface {
 
-    /**
-     * Logger.
-     */
-    private static final Log LOG = LogFactory.getLog(
-        TasksSQLImpl.class);
+    private static final Log LOG = LogFactory.getLog(TasksSQLImpl.class);
 
-    /**
-     * Reference to the context.
-     */
-    private final transient Session session;
+    private final Session session;
 
     /**
      * Default constructor.
@@ -97,7 +90,6 @@ public class TasksSQLImpl implements TasksSQLInterface {
     }
 
     /**
-     * {@inheritDoc}
      * TODO eliminate duplicate columns
      */
     public SearchIterator<Task> getTaskList(final int folderId, final int from,
@@ -140,17 +132,13 @@ public class TasksSQLImpl implements TasksSQLInterface {
             ctx = Tools.getContext(session.getContextId());
             user = Tools.getUser(ctx, userId);
             userConfig = Tools.getUserConfiguration(ctx, userId);
-            final GetTask get = new GetTask(ctx, user, userConfig, folderId,
-                taskId, StorageType.ACTIVE);
+            final GetTask get = new GetTask(ctx, user, userConfig, folderId, taskId, StorageType.ACTIVE);
             return get.loadAndCheck();
         } catch (final TaskException e) {
             throw Tools.convert(e);
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public SearchIterator<Task> getModifiedTasksInFolder(final int folderId,
         final int[] columns, final Date since) throws OXException {
         final Context ctx;
@@ -181,9 +169,6 @@ public class TasksSQLImpl implements TasksSQLInterface {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public SearchIterator<Task> getDeletedTasksInFolder(final int folderId,
         final int[] columns, final Date since) throws OXException {
         final Context ctx;
@@ -215,9 +200,6 @@ public class TasksSQLImpl implements TasksSQLInterface {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void insertTaskObject(final Task task) throws OXException {
         final Context ctx;
         final Set<TaskParticipant> parts;
@@ -272,9 +254,6 @@ public class TasksSQLImpl implements TasksSQLInterface {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void updateTaskObject(final Task task, final int folderId,
         final Date lastRead) throws OXException {
         final Context ctx;
@@ -303,9 +282,6 @@ public class TasksSQLImpl implements TasksSQLInterface {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void deleteTaskObject(final int taskId, final int folderId,
         final Date lastModified) throws OXException {
         final FolderStorage foldStor = FolderStorage.getInstance();

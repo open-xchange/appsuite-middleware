@@ -205,7 +205,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     public static final String ACTION_DETACH = "detach";
 
-    protected static final String ACTION_ATTACH = "attach";
+    public static final String ACTION_ATTACH = "attach";
 
     public static final String ACTION_REVERT = "revert";
 

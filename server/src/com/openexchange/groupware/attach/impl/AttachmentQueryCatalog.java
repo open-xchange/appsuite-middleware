@@ -75,7 +75,7 @@ public class AttachmentQueryCatalog {
     private static String UPDATE;
     private static String FIELDS;
     private static String SELECT_BY_ID;
-    private static final String SELECT_NEWEST_CREATION_DATE = "SELECT MAX(creation_date) AS creation_date FROM prg_attachment WHERE cid=?,attached=?,module=?";
+    private static final String SELECT_NEWEST_CREATION_DATE = "SELECT MAX(creation_date) AS creation_date FROM prg_attachment WHERE cid=? AND attached=? AND module=?";
     private static final String SELECT_FILE_ID = "SELECT file_id FROM prg_attachment WHERE id = ? AND cid = ? ";
 
     static {

@@ -49,12 +49,22 @@
 
 package com.openexchange.groupware.tasks;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
+import java.util.Date;
 import java.util.Set;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import com.openexchange.groupware.Types;
+import com.openexchange.groupware.attach.AttachmentBase;
+import com.openexchange.groupware.attach.AttachmentException;
+import com.openexchange.groupware.attach.Attachments;
+import com.openexchange.groupware.attach.impl.AttachmentBaseImpl;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.TaskException.Code;
+import com.openexchange.groupware.tx.SimpleDBProvider;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
 
@@ -64,6 +74,8 @@ import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class GetTask {
+
+    private static final Log LOG = LogFactory.getLog(GetTask.class);
 
     private final Context ctx;
 
@@ -108,18 +120,15 @@ public final class GetTask {
     /**
      * Use this constructor if you want permission checks.
      */
-    GetTask(final Context ctx, final User user,
-        final UserConfiguration userConfig, final int folderId,
-        final int taskId, final StorageType type) {
+    GetTask(final Context ctx, final User user, final UserConfiguration userConfig, final int folderId, final int taskId, final StorageType type) {
         this(ctx, null, user, userConfig, folderId, taskId, type);
     }
 
     /**
      * Use this constructor if you want permission checks.
      */
-    GetTask(final Context ctx, final Connection con, final User user,
-        final UserConfiguration userConfig, final int folderId,
-        final int taskId, final StorageType type) {
+    GetTask(final Context ctx, final Connection con, final User user, final UserConfiguration userConfig, final int folderId, final int taskId, final StorageType type) {
+        super();
         this.ctx = ctx;
         this.con = con;
         this.user = user;
@@ -132,16 +141,15 @@ public final class GetTask {
     /**
      * This constructor can be used if permission checks should not be done.
      */
-    GetTask(final Context ctx, final int folderId, final int taskId,
-        final StorageType type) {
+    GetTask(final Context ctx, final int folderId, final int taskId, final StorageType type) {
         this(ctx, null, folderId, taskId, type);
     }
 
     /**
      * This constructor can be used if permission checks should not be done.
      */
-    GetTask(final Context ctx, final Connection con, final int folderId,
-        final int taskId, final StorageType type) {
+    GetTask(final Context ctx, final Connection con, final int folderId, final int taskId, final StorageType type) {
+        super();
         this.ctx = ctx;
         this.con = con;
         this.folderId = folderId;
@@ -183,8 +191,7 @@ public final class GetTask {
             if (null == con) {
                 participants = partStor.selectParticipants(ctx, taskId, type);
             } else {
-                participants = partStor.selectParticipants(ctx, con, taskId,
-                    type);
+                participants = partStor.selectParticipants(ctx, con, taskId, type);
             }
         }
         return participants;
@@ -201,14 +208,11 @@ public final class GetTask {
         return folderMapping;
     }
 
-    static Task load(final Context ctx, final Connection con,
-        final int folderId, final int taskId, final StorageType type)
-        throws TaskException {
+    static Task load(final Context ctx, final Connection con, final int folderId, final int taskId, final StorageType type) throws TaskException {
         return new GetTask(ctx, con, folderId, taskId, type).load();
     }
 
-    static Task load(final Context ctx, final int folderId, final int taskId,
-        final StorageType type) throws TaskException {
+    static Task load(final Context ctx, final int folderId, final int taskId, final StorageType type) throws TaskException {
         return new GetTask(ctx, folderId, taskId, type).load();
     }
 
@@ -237,19 +241,13 @@ public final class GetTask {
             throw new TaskException(Code.UNIMPLEMENTED);
         }
         if (null == con) {
-            Permission.canReadInFolder(ctx, user, userConfig, getFolder(),
-                getTask());
+            Permission.canReadInFolder(ctx, user, userConfig, getFolder(), getTask());
         } else {
-            Permission.canReadInFolder(ctx, con, user, userConfig, getFolder(),
-                getTask());
+            Permission.canReadInFolder(ctx, con, user, userConfig, getFolder(), getTask());
         }
-        final Folder check = FolderStorage.getFolder(getFolders(),
-            folderId);
-        if (null == check
-            || (Tools.isFolderShared(getFolder(), user)
-                && getTask().getPrivateFlag())) {
-            throw new TaskException(Code.NO_PERMISSION, Integer.valueOf(taskId),
-                getFolder().getFolderName(), Integer.valueOf(folderId));
+        final Folder check = FolderStorage.getFolder(getFolders(), folderId);
+        if (null == check || (Tools.isFolderShared(getFolder(), user) && getTask().getPrivateFlag())) {
+            throw new TaskException(Code.NO_PERMISSION, I(taskId), getFolder().getFolderName(), I(folderId));
         }
     }
 
@@ -271,10 +269,25 @@ public final class GetTask {
         if (filledTask) {
             return;
         }
-        final Task task = getTask();
+        getTask();
         task.setParticipants(TaskLogic.createParticipants(getParticipants()));
         task.setUsers(TaskLogic.createUserParticipants(getParticipants()));
         task.setParentFolderID(folderId);
+        final AttachmentBase attachmentBase;
+        if (null == con) {
+            attachmentBase = Attachments.getInstance();
+        } else {
+            attachmentBase = new AttachmentBaseImpl(new SimpleDBProvider(con, null));
+        }
+        Date lastModifiedOfNewestAttachment = null;
+        try {
+            lastModifiedOfNewestAttachment = attachmentBase.getNewestCreationDate(task.getObjectID(), Types.TASK, ctx);
+        } catch (AttachmentException e) {
+            LOG.error(e.getMessage(), e);
+        }
+        if (null != lastModifiedOfNewestAttachment) {
+            task.setLastModifiedOfNewestAttachment(lastModifiedOfNewestAttachment);
+        }
         filledTask = true;
     }
 
