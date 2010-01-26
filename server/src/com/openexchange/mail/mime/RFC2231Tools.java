@@ -50,7 +50,10 @@
 package com.openexchange.mail.mime;
 
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -145,7 +148,75 @@ public final class RFC2231Tools {
             }
         }
         bb.flip();
-        return Charsets.forName(charset).decode(bb).toString();
+        final Charset cs = Charsets.forName(charset);
+        try {
+            return cs.decode(bb).toString();
+        } catch (final java.nio.BufferOverflowException e) {
+            LOG.error(
+                new StringBuilder(96).append("Decoding with charset \"").append(charset).append("\" failed for input string: \"").append(
+                    encoded).append('"').toString(),
+                e);
+            /*
+             * Retry with own allocated char buffer
+             */
+            return rfc2231DecodeRetry(cs, bb);
+        }
+    }
+
+    /**
+     * Retries decoding with self-allocated char buffer with double capacity.
+     * 
+     * @param cs The charset object
+     * @param bb The allocated byte buffer
+     * @return The decoded string
+     */
+    private static String rfc2231DecodeRetry(final Charset cs, final ByteBuffer bb) {
+        try {
+            /*
+             * Set position back to zero
+             */
+            bb.rewind();
+            /*
+             * Obtain charset decoder
+             */
+            final CharsetDecoder decoder =
+                cs.newDecoder().onMalformedInput(java.nio.charset.CodingErrorAction.REPLACE).onUnmappableCharacter(
+                    java.nio.charset.CodingErrorAction.REPLACE);
+
+            int n = (int) (bb.remaining() * decoder.averageCharsPerByte() * 2);
+            java.nio.CharBuffer out = java.nio.CharBuffer.allocate(n);
+            if (n == 0) {
+                return "";
+            }
+            decoder.reset();
+            for (;;) {
+                java.nio.charset.CoderResult cr;
+                if (bb.hasRemaining()) {
+                    cr = decoder.decode(bb, out, true);
+                } else {
+                    cr = decoder.flush(out);
+                }
+                if (cr.isUnderflow()) {
+                    break;
+                }
+                if (cr.isOverflow()) {
+                    n *= 2;
+                    final CharBuffer o = CharBuffer.allocate(n);
+                    out.flip();
+                    o.put(out);
+                    out = o;
+                    continue;
+                }
+                cr.throwException();
+            }
+            out.flip();
+            return out.toString();
+        } catch (final CharacterCodingException e) {
+            /*
+             * Cannot occur
+             */
+            throw new Error(e);
+        }
     }
 
     private static boolean isHexDigit(final char c) {
