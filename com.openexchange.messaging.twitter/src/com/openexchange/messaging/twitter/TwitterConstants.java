@@ -94,11 +94,6 @@ public final class TwitterConstants {
     public static final String HEADER_STATUS_ID = "X-Twitter-Status-Id";
 
     /**
-     * The screen name header.
-     */
-    public static final String HEADER_SCREEN_NAME = "X-Twitter-Screen-Name";
-
-    /**
      * The twitter time line length.
      */
     public static final int TIMELINE_LENGTH = 20;

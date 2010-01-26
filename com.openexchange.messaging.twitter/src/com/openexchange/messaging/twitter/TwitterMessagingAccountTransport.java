@@ -118,11 +118,11 @@ public final class TwitterMessagingAccountTransport implements MessagingAccountT
                 final StringContent content = checkContent(message);
                 final String screenName;
                 {
-                    final MessagingHeader header = message.getFirstHeader(TwitterConstants.HEADER_SCREEN_NAME);
+                    final MessagingHeader header = message.getFirstHeader(MessagingHeader.KnownHeader.TO.toString());
                     screenName = null == header ? null : header.getValue();
                 }
                 if (null == screenName) {
-                    throw TwitterExceptionCodes.MISSING_PROPERTY.create(TwitterConstants.HEADER_SCREEN_NAME);
+                    throw TwitterExceptionCodes.MISSING_PROPERTY.create(MessagingHeader.KnownHeader.TO.toString());
                 }
                 twitterAccess.sendDirectMessage(screenName, content.toString());
             } catch (final TwitterException e) {
