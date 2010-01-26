@@ -49,709 +49,267 @@
 
 package com.openexchange.easylogin;
 
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.util.Properties;
-
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import com.openexchange.configuration.ConfigurationException;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.tools.servlet.http.Tools;
 
-
-
 /**
- * {@link EasyLogin}
- * TODO: Fix configuration loading with ConfigurationService
- *       Put javascript line in external file and load it from file instead hardcoded in servlet
- *       
- * @author <a href="mailto:info@open-xchange.com">Holger Achtziger</a>
+ * New version with a login/handling that is more secure. Also parameter AuthID is added. 
+ * Defaults are still set for maximum security: no GET, SSL only
  * 
+ * @author <a href="mailto:info@open-xchange.com">Holger Achtziger</a>
+ * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class EasyLogin extends HttpServlet {
 
-	/**
+    /**
 	 * 
 	 */
-	private static final long serialVersionUID = 7233346063627500582L;
-	private static final Log LOG = LogFactory.getLog(EasyLogin.class);
-	private static Properties props;
-    private final static String EASYLOGIN_PROPERTY_FILE = "/opt/open-xchange/etc/groupware/easylogin.properties";
-	
-	private static final String RESPONSE1 = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\"\n" +
-			"	\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n" +
-			"<head>\n" +
-			"<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n" +
-			"<script type=\"text/javascript\">\n" +
-			
-			"function format(string, params) {\n"+
-			"var param_array = params;\n"+
-		    "if (typeof(params) != \"object\") {\n"+
-		    "param_array = new Array(arguments.length - 1);\n"+
-		    	 "for (var i = 1; i < arguments.length; i++)\n"+
-		    		 "param_array[i - 1] = arguments[i];\n"+
-		     	"}\n"+
-		     	"if (typeof string == \"function\") {\n"+
-		    	"return function() { return formatRaw(string(), param_array); };\n"+
-		     	"} else {\n"+
-		    	"return formatRaw(string, param_array);\n"+
-		     	"}\n"+
-			 "}\n\n"+
-			
-			
-			 "function formatRaw(string, params) {\n"+
-				    "var index = 0;\n"+
-				    "return String(string).replace(/%(([0-9]+)\\$)?[A-Za-z]/g,\n"+
-				        "function(match, pos, n) {\n"+
-				            "if (pos) index = n - 1;\n"+
-				            "return params[index++];\n"+
-				        "}).replace(/%%/, \"%\");\n"+
-				"}\n"+
+    private static final long serialVersionUID = 7233346063627500582L;
 
-			
-			"var emptyFunction = function (){};\n" +
-			"var _=function (ss){return ss;};\n" +
-			"var format = function (ss){return ss;};\n" +
-			"var AjaxRoot = \"";
-	
-	private static final String RESPONSE2 = "\";\n" +
-			"\n" +
-			"function JSON() {\n" +
-			"	/**\n" +
-			"	 * @private\n" +
-			"	 */\n" +
-			"	this.first = null;\n" +
-			"	\n" +
-			"	/**\n" +
-			"	 * @private\n" +
-			"	 */\n" +
-			"	this.last = null;\n" +
-			"	\n" +
-			"	/**\n" +
-			"	 * @private\n" +
-			"	 */\n" +
-			"	this.processing = false;\n" +
-			"}\n" +
-			"\n" +
-			"JSON.serialize = function(data) {\n" +
-			"	if (typeof(data) == \"string\")\n" +
-			"		return \"\\\"\" + data.replace(/[\\x00-\\x1f\\\\\"]/g, function(c) {\n" +
-			"			var n = Number(c.charCodeAt(0)).toString(16);\n" +
-			"			return \"\\\\u00\" + (n.length < 2 ? \"0\" + n : n);\n" +
-			"		}) + \"\\\"\";\n" +
-			"	if (typeof(data) == \"function\") return \"function\";\n" +
-			"	if (!data || typeof(data) !== \"object\") return String(data);\n" +
-			"	var strings = new Array(data.length);\n" +
-			"	if (data.constructor == Array) {\n" +
-			"		for (var i in data) strings[i] = JSON.serialize(data[i]);\n" +
-			"		return \"[\" + strings.join() + \"]\";\n" +
-			"	}\n" +
-			"	var j = 0;\n" +
-			"	for (var i in data) strings[j++] = \"\\\"\" + i + \"\\\":\" + JSON.serialize(data[i]);\n" +
-			"	return \"{\" + strings.join() + \"}\";\n" +
-			"}\n" +
-			"\n" +
-			"JSON.count = 0;\n" +
-			"\n" +
-			"JSON.prototype = {\n" +
-			"	\n" +
-			"	get: function(uri, meta, cb, errorHandler, raw) {\n" +
-			"		var request = {\n" +
-			"			method: \"GET\",\n" +
-			"			uri: uri,\n" +
-			"			data: \"\",\n" +
-			"			cb: cb,\n" +
-			"			errorHandler: errorHandler,\n" +
-			"			raw: raw,\n" +
-			"			next: null\n" +
-			"		};\n" +
-			"		this.add(request);\n" +
-			"		return request;\n" +
-			"	},\n" +
-			"	\n" +
-			"	\n" +
-			"	post: function(uri, data, meta, cb, errorHandler, raw) {\n" +
-			"		var encoded = new Array(), n = 0;\n" +
-			"		for (var i in data)\n" +
-			"			encoded[n++] = i + \"=\" + encodeURIComponent(data[i]);\n" +
-			"		var request = {\n" +
-			"			method: \"POST\",\n" +
-			"			uri: uri,\n" +
-			"			data: encoded.join(\"&\"),\n" +
-			"			contenttype: \"application/x-www-form-urlencoded\",\n" +
-			"			cb: cb,\n" +
-			"			errorHandler: errorHandler,\n" +
-			"			raw: raw,\n" +
-			"			next: null\n" +
-			"		};\n" +
-			"		this.add(request);\n" +
-			"		return request;\n" +
-			"	},\n" +
-			"	\n" +
-			"	\n" +
-			"	put: function(uri, data, meta, cb, errorHandler, raw) {\n" +
-			"		var request = {\n" +
-			"			method: \"PUT\",\n" +
-			"			uri: uri,\n" +
-			"			contenttype: \"text/javascript; charset=UTF-8\",\n" +
-			"			data: JSON.serialize(data),\n" +
-			"			cb: cb,\n" +
-			"			errorHandler: errorHandler,\n" +
-			"			raw: raw,\n" +
-			"			next: null\n" +
-			"		};\n" +
-			"		this.add(request);\n" +
-			"		return request;\n" +
-			"	},\n" +
-			"	\n" +
-			"	\n" +
-			"	cancel: function(request) {\n" +
-			"		if (request == this.first) {\n" +
-			"			request.cancelled = true;\n" +
-			"			return false;\n" +
-			"		}\n" +
-			"		for (var r = this.first; r; r = r.next)\n" +
-			"			if (request == r.next) {\n" +
-			"				r.next = request.next;\n" +
-			"				return true;\n" +
-			"			}\n" +
-			"		return false;\n" +
-			"	},\n" +
-			"\n" +
-			"	/**\n" +
-			"	 * @private\n" +
-			"	 */\n" +
-			"	remove: function() {\n" +
-			"		if (this.first) {\n" +
-			"			if (this.last == this.first) this.last = null;\n" +
-			"			this.first = this.first.next;\n" +
-			"		}\n" +
-			"	},\n" +
-			"\n" +
-			"	/**\n" +
-			"	 * @private\n" +
-			"	 */\n" +
-			"	add: function(request) {\n" +
-			"		if (!this.first)\n" +
-			"			this.last = this.first = request;\n" +
-			"		else\n" +
-			"			this.last = this.last.next = request;\n" +
-			"		if (!this.processing) this.process();\n" +
-			"	},\n" +
-			"\n" +
-			"	/**\n" +
-			"	 * @private\n" +
-			"	 */\n" +
-			"	process: function() {\n" +
-			"		JSON.count++;\n" +
-			"		if (!(this.processing = this.first != null)) {\n" +
-			"			return;\n" +
-			"		}\n" +
-			"		var xmlhttp = this.getXmlHttp();\n" +
-			"		var Self = this;\n" +
-			"		xmlhttp.onreadystatechange = callback;\n" +
-			"		xmlhttp.open(this.first.method, this.first.uri, true);\n" +
-			"		if (this.first.contenttype)\n" +
-			"			xmlhttp.setRequestHeader(\"Content-Type\", this.first.contenttype);\n" +
-			"		xmlhttp.send(this.first.data);\n" +
-			"		\n" +
-			"		function callback() {\n" +
-			"			if (xmlhttp.readyState != 4) return;\n" +
-			"			JSON.count--;\n" +
-			"			xmlhttp.onreadystatechange = emptyFunction; // fixes IE memory leak\n" +
-			"			var cb = Self.first.cb;\n" +
-			"			var originalErrorHandler = Self.first.errorHandler;\n" +
-			"			var errorHandler = originalErrorHandler ? function(result, status) {\n" +
-			"				if (!originalErrorHandler(result, status))\n" +
-			"					JSON.errorHandler(result, status);\n" +
-			"			} : JSON.errorHandler;\n" +
-			"			var raw = Self.first.raw;\n" +
-			"			Self.remove();\n" +
-			"			var result = {};\n" +
-			"			if (xmlhttp.status != 200) {\n" +
-			"				errorHandler(xmlhttp.statusText, xmlhttp.status);\n" +
-			"				Self.process();\n" +
-			"				return;\n" +
-			"			}\n" +
-			"			if (raw)\n" +
-			"				result = xmlhttp.responseText;\n" +
-			"			else {\n" +
-			"				var s = \"return \" + xmlhttp.responseText;\n" +
-			"				try {\n" +
-			"					result = Function(s)();\n" +
-			"				} catch (e) {\n" +
-			"					//#. %s is the JavaScript error message.\n" +
-			"					//#, c-format\n" +
-			"					alert(format(_(\"Syntax error in server reply:\\n%s\"), e.message, s));\n" +
-			"					Self.process();\n" +
-			"					return;\n" +
-			"				}\n" +
-			"				if (result && typeof(result) == \"object\" && result.error) {\n" +
-			"					errorHandler(result);\n" +
-			"					Self.process();\n" +
-			"					return;\n" +
-			"				}\n" +
-			"			}\n" +
-			"			//try {\n" +
-			"				cb(result);\n" +
-			"			/*} catch(e) {\n" +
-			"				Self.process();\n" +
-			"				throw e;\n" +
-			"			}*/\n" +
-			"			Self.process();\n" +
-			"		};\n" +
-			"	},\n" +
-			"	\n" +
-			"	/**\n" +
-			"	 * @private\n" +
-			"	 */\n" +
-			"	getXmlHttp: function() {\n" +
-			"		alert(_(\"Your browser does not support AJAX.\"));\n" +
-			"	}\n" +
-			"};\n" +
-			"\n" +
-			"JSON.errorHandler = function(result, status) {\n" +
-			"	if (status)\n" +
-			"		//#. HTTP Errors from the server\n" +
-			"		//#. %1$s is the numeric HTTP status code\n" +
-			"		//#. %2$s is the corresponding HTTP status text\n" +
-			"		alert(\"Error: \"+status+\" - \"+result);\n" +
-			"	else\n" +
-			"		alert(formatError(result));\n" +
-			"};\n" +
-			"\n" +
-			"(function() {\n" +
-			"	var xmlhttp = null;\n" +
-			"	try {\n" +
-			"		xmlhttp = new XMLHttpRequest();\n" +
-			"		if (xmlhttp) {\n" +
-			"			xmlhttp = null;\n" +
-			"			JSON.prototype.getXmlHttp = function() { return new XMLHttpRequest(); };\n" +
-			"		}\n" +
-			"	} catch (e) {\n" +
-			"		try {\n" +
-			"			xmlhttp = new ActiveXObject(\"Msxml2.XMLHTTP\");\n" +
-			"			if (xmlhttp) {\n" +
-			"				xmlhttp = null;\n" +
-			"				JSON.prototype.getXmlHttp = function() {\n" +
-			"					return new ActiveXObject(\"Msxml2.XMLHTTP\");\n" +
-			"				};\n" +
-			"			}\n" +
-			"		} catch (e) {\n" +
-			"			try {\n" +
-			"				xmlhttp = new ActiveXObject(\"Microsoft.XMLHTTP\");\n" +
-			"				if (xmlhttp) {\n" +
-			"					xmlhttp = null;\n" +
-			"					JSON.prototype.getXmlHttp = function() {\n" +
-			"						return new ActiveXObject(\"Microsoft.XMLHTTP\");\n" +
-			"					};\n" +
-			"				}\n" +
-			"			} catch (e) {\n" +
-			"				JSON.prototype.getXmlHttp();\n" +
-			"			}\n" +
-			"		}\n" +
-			"	}\n" +
-			"})();\n" +
-			"\n" +
-			"function login(u,p) {	\n" +
-			"	var form = document.getElementById(\"login\");	\n" +
-			"	new JSON().post(\n" +
-			"		AjaxRoot + \"/login?action=login\", \n" +
-			"		{ name: u, password: p },\n" +
-			"		null,\n" +
-			"		function(result) { dologin(result); },\n" +
-			"		function(result, status) {\n";	
-			
-	private static final String RESPONSE28 =			
-			"		},\n" +
-			"		null\n" +
-			"	);\n" +
-			"	return false;\n" +
-			"}\n" +
-			" function authenticate (code,user,pass,method){\n" +
-			// remove all cookies first browser session to not mix up session
-			" // get all cookies from ox\n"+
-			" var cookies = document.cookie.match(/open-xchange-session-\\w+/g);\n"+
-			" // check if we have ox cookies\n"+
-			" if(cookies){\n"+
-			" // get date object\n" + 
-			" var mydate = new Date();\n"+
-			" mydate.setTime(mydate.getTime() - 100000);\n"+ 
-			" for (var i = 0 ; i < cookies.length; i++) {\n" +
-			"  // invalidate all ox cookies\n"+
-			"  document.cookie = cookies[i]+\"=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/\" \n"+  
-			" }\n"+
-		    "}\n"+
-		    "\n"+
-			"	if(code != 0)\n" +
-			"	{\n" +
-			"		alert(_(\"Login failed. Please check your user name and password and try again.\"));\n" +
-			"		return;\n" +
-			"	}\n" +
-			"	login(user,pass);\n" +
-			"}\n" +
-			"\n" +
-			"//redirect to ox\n" +
-			"function dologin(result) {\n" +
-			"	document.location.href=\"";
-	
-	private static final String RESPONSE3 = "\";\n}\n" +
-			"\n" +
-			"function onload_fn()\n" +
-			"{\n";
-	
-	private static final String RESPONSE4 = "\n}\n" +
-			"</script>\n" +
-			"</head>\n" +
-			"<html>\n" +
-			"<body onload=\"onload_fn()\">\n" +
-			"</body>\n" +
-			"</html>\n" +
-			"\n";
-	
-	private static String AJAX_ROOT = "/ajax";
-	private static String passwordPara = "password";
-	private static String loginPara ="login";
-	private static String redirPara ="redirect"; // param for what should be done after error on login
-	private static String directLinkPara ="direct_link";
-	private static String OX_PATH_RELATIVE = "../";
-	private static boolean doGetEnabled = false;
-	private static boolean popUpOnError = true;
-    private static boolean allowInsecure = false;
-	private static String remoteIP = "NONE";
-	
-	/**
-	 * Initializes a new {@link EasyLogin}
-	 */
-	public EasyLogin() {
-		super();
-	}
-	
-	protected void doPost (final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
-	IOException {
-		
+    private static final Log LOG = LogFactory.getLog(EasyLogin.class);
+
+    private static String AJAX_ROOT = "/ajax";
+
+    private static String passwordPara = "password";
+
+    private static String loginPara = "login";
+
+    private static String redirPara = "redirect"; // param for what should be done after error on login
+
+    private static String directLinkPara = "direct_link";
+
+    private static String OX_PATH_RELATIVE = "../";
+
+    private static boolean doGetEnabled = false;
+
+    private static boolean popUpOnError = true;
+
+    private static boolean allowInsecure = true;
+
+    private static String remoteIP = "NONE";
+
+    private static String authIdParameter = "authId";
+
+    private String authID;
+
+    /**
+     * Initializes a new {@link EasyLogin}
+     */
+    public EasyLogin() {
+        super();
+    }
+
+    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+
         remoteIP = req.getRemoteAddr();
-		processLoginRequest(req,resp);
-		
-	}
+        processLoginRequest(req, resp);
 
-	@Override
-	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
-			IOException {
-	    remoteIP = req.getRemoteAddr();
+    }
 
-	    try {
-	        if (props == null) {
-				initConfig();
-			}
-		}catch (ConfigurationException e) {
-            logError("Error processing easylogin configuration" + EASYLOGIN_PROPERTY_FILE + " ", e);
+    @Override
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        remoteIP = req.getRemoteAddr();
+
+        if (!doGetEnabled) {
+            // show error to user
+            resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, "GET not supported");
+        } else {
+            processLoginRequest(req, resp);
         }
-		
-		if( !doGetEnabled ){
-			// show error to user
-			resp.sendError( HttpServletResponse.SC_METHOD_NOT_ALLOWED , "GET not supported");
-		}else{
-			processLoginRequest(req,resp);
-		}	
-		
-	}
-	
-	private void processLoginRequest(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,IOException{
-		
-		try {
-			if (props == null) {
-				initConfig();
-			}
-		} catch (ConfigurationException e) {
-            logError("Error processing easylogin configuration" + EASYLOGIN_PROPERTY_FILE + " ", e);
-        }
-		
-		
-		logInfo("Hostname=" + req.getRemoteHost() +", URI=" + req.getRequestURI() +
-		    ", Scheme=" + req.getScheme());
 
-		Tools.disableCaching(resp);
-		resp.setContentType("text/html");
-		if( allowInsecure || ! req.isSecure() ) {
-		    if( allowInsecure && ! req.isSecure() ) {
-		        logInfo("Using insecure transmission.");
-		    } else {
+    }
+
+    private void processLoginRequest(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        logInfo("Hostname=" + req.getRemoteHost() + ", URI=" + req.getRequestURI() + ", Scheme=" + req.getScheme());
+        Tools.disableCaching(resp);
+        resp.setContentType("text/html");
+        if (allowInsecure || !req.isSecure()) {
+            if (allowInsecure && !req.isSecure()) {
+                logInfo("Using insecure transmission.");
+            } else {
                 logInfo("Rejecting insecure transmission.");
                 resp.sendError(HttpServletResponse.SC_FORBIDDEN, "EasyLogin: Only secure transmission allowed");
                 return;
-		    }
-		}
-		PrintWriter out = resp.getWriter();
-		
-		String login = null;
-		String password = null;
-		
-		
-		if (req.getParameter(passwordPara)==null || req.getParameter(passwordPara).trim().length()==0){
-			resp.sendError( HttpServletResponse.SC_BAD_REQUEST , "parameter " + passwordPara + " missing");
-			logError("Got request without password");
-		} else if (req.getParameter(loginPara)==null || req.getParameter(loginPara).trim().length()==0){
-			resp.sendError( HttpServletResponse.SC_BAD_REQUEST , "parameter " + loginPara + " missing");
-			logError("Got request without login");
-		} else{
-			
-			password = req.getParameter(passwordPara);
-			login = req.getParameter(loginPara).trim().toLowerCase();
+            }
+        }
+        PrintWriter out = resp.getWriter();
 
-			logInfo("Login=" + login);
-			
-			out.print(RESPONSE1);
-			out.print(AJAX_ROOT);
-			out.print(RESPONSE2);
-			
-			if( popUpOnError ) {
-				
-				// for normal errors we must also redirect
-				if(req.getParameter(redirPara)!=null && req.getParameter(redirPara).trim().length()>0){
-					// redir param was sent, now check what action is requested
-					if(req.getParameter(redirPara).equals("_BASE_")){
-						out.println(getJsBaseRedirect(true));
-					}else{
-						// custom redirect url was requested, send this URL in javascript to redirect
-                        out.print(getJsCustomRedirect(req.getParameter(redirPara).toString(),false));                       
-					}
-				}else{				
-					// if via referrer
-					out.println(getJsReferrerRedirect(true));
-				}
-				
-			} else{
-				
-				if(req.getParameter(redirPara)!=null && req.getParameter(redirPara).trim().length()>0){
-					// redir param was sent, now check what action is requested
-					if(req.getParameter(redirPara).equals("_BASE_")){
-						out.println(getJsBaseRedirect(false));
-					}else{
-						// custom redirect url was requested, send this URL in javascript to redirect
-						out.print(getJsCustomRedirect(req.getParameter(redirPara).toString(),false));						
-					}
-				}else{				
-					// if via referrer
-					out.println(getJsReferrerRedirect(false));
-				}
-			}
-			
-			// normal next js lines
-			out.print(RESPONSE28);  
-			
-			// direct links redirecting
-			if(req.getParameter(directLinkPara)!=null && req.getParameter(directLinkPara).trim().length()>0){
-				out.print(OX_PATH_RELATIVE+req.getParameter(directLinkPara));
-			}else{
-				out.print(OX_PATH_RELATIVE);
-			}			
-			out.print(RESPONSE3);
-			out.print("authenticate(0,\"" +
-					login +
-					"\",\"" +
-					password +
-					"\",\"" +  
-					"get\"" +
-					");return;");
-			out.print(RESPONSE4);
-		}
-		
-	}
-	
+        if (req.getParameter(passwordPara) == null || req.getParameter(passwordPara).trim().length() == 0) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "parameter " + passwordPara + " missing");
+            logError("Got request without password");
+        } else if (req.getParameter(loginPara) == null || req.getParameter(loginPara).trim().length() == 0) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "parameter " + loginPara + " missing");
+            logError("Got request without login");
+        } else {
 
-	private String getJsCustomRedirect(String url,boolean popup) {
-		StringBuilder sb = new StringBuilder();
-		sb.append("if (!status) {  \n");
-		sb.append("		// json error \n");		
-		if(popup){
-			sb.append("alert(format(_(result.error), result.error_params))");
-		}		
-		sb.append("} else { \n");
-		sb.append("		// http error\n");
-		if(popup){
-			sb.append("		alert(\"Error: \"+status+\" - \"+result); \n");
-		}
-		sb.append("}\n");
-		sb.append("// now redirect correctly\n");
-		sb.append("window.location.href = \""+url+"\";\n");
-		sb.append("return true; \n");
-		
-		return sb.toString();
-		
-		
-	}
+            final String password = req.getParameter(passwordPara);
+            final String login = req.getParameter(loginPara).trim().toLowerCase();
 
-	private String getJsBaseRedirect(boolean popup) {
-		
-		StringBuilder sb = new StringBuilder();
-		sb.append("if (!status) { \n");
-		sb.append("		// json error \n");		
-		if(popup){
-			sb.append("alert(format(_(result.error), result.error_params))");
-		}		
-		sb.append("} else { \n");
-		sb.append("		// http error\n");
-		if(popup){
-			sb.append("		alert(\"Error: \"+status+\" - \"+result); \n");
-		}
-		sb.append("}\n");
-		sb.append("// now redirect correctly\n");
-		sb.append("window.location.href = location.protocol+\"//\"+location.host;\n");
-		sb.append("return true; \n");
-		
-		return sb.toString();
-	}
+            logInfo("Login=" + login);
+            // TODO: check for / generate AuthID
+            if (req.getParameter(authIdParameter) == null || req.getParameter(authIdParameter).trim().length() == 0) {
+                
+            } else {
+                authID = req.getParameter(authIdParameter).trim();
+            }            
+            // send login request via http
+            String urlString = "http://localhost" + AJAX_ROOT + "/login?action=login&name=" + login + "&password=" + password;
+            if (authID != null){
+                urlString = urlString + "&" + authIdParameter + "=" + authID;
+            }
+            URL url = new URL(urlString);
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setDoOutput(true);
+            con.connect();
+            int i = 1;
+            String hdrKey = null;
+            String jSessionID = "";
+            // TODO: Handle login errors (wrong credentials etc)
+            while ((hdrKey = con.getHeaderFieldKey(i)) != null) {
+                if (hdrKey.equals("Set-Cookie")) {
+                    String content = con.getHeaderField(i);
+                    String key = "";
+                    String value = "";
+                    Pattern keyPattern = Pattern.compile(("([^=]*)"));
+                    Matcher keyMatcher = keyPattern.matcher(content);
+                    if (keyMatcher.find()) {
+                        key = keyMatcher.group(1);
+                    }
+                    Pattern valuePattern = Pattern.compile("=([^;]*)");
+                    Matcher valueMatcher = valuePattern.matcher(content);
+                    if (valueMatcher.find()) {
+                        value = valueMatcher.group(1);
+                    }
+                    logInfo("Getting cookie : " + key + "=" + value);
+                    if (content.startsWith("JSESSIONID")) {
+                        jSessionID = value;
+                        logInfo("jSessionID : " + jSessionID);
+                    }                    
+                }
+                i++;
+            }
 
-	private String getJsReferrerRedirect(boolean popup){
-		
-		StringBuilder sb = new StringBuilder();
-		sb.append("if (!status) { \n");
-		sb.append("		// json error \n");		
-		if(popup){
-			sb.append("alert(format(_(result.error), result.error_params))");
-		}		
-		sb.append("} else { \n");
-		sb.append("		// http error\n");
-		if(popup){
-			sb.append("alert(\"Error: \"+status+\" - \"+result); \n");
-		}
-		sb.append("}\n");
-		sb.append("// now redirect correctly and check if referrer contains ? then add & else add ? \n");
-		sb.append("var referrer=document.referrer\n");
-		sb.append("if(referrer.indexOf(\"?\")==-1){	\n" +
-				"window.location.href = referrer + \"?login=failed&user=\"+ u;  \n" +
-				"}else{\n" +
-				"window.location.href = referrer+ \"&login=failed&user=\"+ u;  \n" +
-				"}\n");
-		
-		sb.append("return true; \n");
-		
-		return sb.toString();
-		
-	}
-	
-	private static void logit(final String msg, final Throwable e, final boolean isError) {
-	    if( isError ) {
-	        if( e != null ) {
-	            LOG.error("EasyLoginIP(" + remoteIP + "): " + msg, e);
-	        } else {
-                LOG.error("EasyLoginIP(" + remoteIP + "): " + msg);
-	        }
-	    } else {
-	        if( e != null ) {
-	            LOG.info("EasyLoginIP(" + remoteIP + "): " + msg, e);
-	        } else {
-                LOG.info("EasyLoginIP(" + remoteIP + "): " + msg);
-	        }
-	    }
-	}
+            // get the random token from the response
+            String randomToken = "";
+            BufferedReader rd = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            String line;
+            while ((line = rd.readLine()) != null) {
+                Pattern randomPattern = Pattern.compile("\"random\":\"([^\"]*)");
+                Matcher randomMatcher = randomPattern.matcher(line);
+                if (randomMatcher.find()) {
+                    randomToken = randomMatcher.group(1);
+                    logInfo("randomToken : " + randomToken);
+                }
+            }
+            rd.close();
 
-	private static void logError(final String msg) {
-        logit(msg,null,true);
+            // send redirect if login worked
+            logInfo("Login worked, sending redirect");
+            resp.sendRedirect(AJAX_ROOT + "/login;jsessionid=" + jSessionID + "?action=redirect&random=" + randomToken);            
+
+        }
     }
-	
+
+    private static void logit(final String msg, final Throwable e, final boolean isError) {
+        if (isError) {
+            if (e != null) {
+                LOG.error("EasyLoginIP(" + remoteIP + "): " + msg, e);
+            } else {
+                LOG.error("EasyLoginIP(" + remoteIP + "): " + msg);
+            }
+        } else {
+            if (e != null) {
+                LOG.info("EasyLoginIP(" + remoteIP + "): " + msg, e);
+            } else {
+                LOG.info("EasyLoginIP(" + remoteIP + "): " + msg);
+            }
+        }
+    }
+
+    private static void logError(final String msg) {
+        logit(msg, null, true);
+    }
+
     private static void logError(final String msg, final Throwable e) {
-        logit(msg,e,true);
+        logit(msg, e, true);
     }
 
     private static void logInfo(final String msg) {
-        logit(msg,null,false);
+        logit(msg, null, false);
     }
 
-    private static void initConfig() throws ConfigurationException {
-	    synchronized (EasyLogin.class) {
-	        if (null == props) {
-	            final File file = new File(EASYLOGIN_PROPERTY_FILE);
-	            if (!file.exists()) {
-	            	logError("Error file not found: " + EASYLOGIN_PROPERTY_FILE);
-	            	throw new ConfigurationException(com.openexchange.configuration.ConfigurationException.Code.FILE_NOT_FOUND, file.getAbsolutePath());
-	            }
-	            FileInputStream fis = null;
-	            try {
-	                fis = new FileInputStream(file);
-	                props = new Properties();
-	                props.load(fis);
-	                
-	                if (props.get("com.openexchange.easylogin.passwordPara") != null) {
-	                	passwordPara  = (String) props.get("com.openexchange.easylogin.passwordPara");
-	                	logInfo("Set passwordPara to " + passwordPara );
-	                } else {
-	                	logError("Could not find passwordPara in " + EASYLOGIN_PROPERTY_FILE + " using default: " + 
-	                			passwordPara );
-	                }
-	                
-	                if (props.get("com.openexchange.easylogin.loginPara") != null) {
-	                	loginPara = (String) props.get("com.openexchange.easylogin.loginPara");
-	                	logInfo("Set loginPara to " +  loginPara);
-	                } else {
-	                	logError("Could not find loginPara in " + EASYLOGIN_PROPERTY_FILE + " using default: " + 
-	                			loginPara );
-	                }
-	                
-	                if (props.get("com.openexchange.easylogin.AJAX_ROOT") != null) {
-	                	AJAX_ROOT = (String) props.get("com.openexchange.easylogin.AJAX_ROOT");
-	                	logInfo("Set AJAX_ROOT to " +  AJAX_ROOT);
-	                } else {
-	                	logError("Could not find AJAX_ROOT in " + EASYLOGIN_PROPERTY_FILE + " using default: " + 
-	                			AJAX_ROOT );
-	                }
-	                
-	                if (props.get("com.openexchange.easylogin.OX_PATH_RELATIVE") != null) {
-	                	OX_PATH_RELATIVE = (String) props.get("com.openexchange.easylogin.OX_PATH_RELATIVE");
-	                	logInfo("Set OX_PATH_RELATIVE to " +  OX_PATH_RELATIVE);
-	                } else {
-	                	logError("Could not find OX_PATH_RELATIVE in " + EASYLOGIN_PROPERTY_FILE + " using default: " + 
-	                			OX_PATH_RELATIVE );
-	                }
-	                
-	                if (props.get("com.openexchange.easylogin.doGetEnabled") != null) {
-	                	String property = props.getProperty("com.openexchange.easylogin.doGetEnabled","").trim();
-	                	doGetEnabled = Boolean.parseBoolean(property);
-	                	logInfo("Set doGetEnabled to " + doGetEnabled );
-	                } else {
-	                	logError("Could not find doGetEnabled in " + EASYLOGIN_PROPERTY_FILE + " using default: " + 
-	                			doGetEnabled );
-	                }
-	                
-	                if (props.get("com.openexchange.easylogin.popUpOnError") != null) {
-	                	String property = props.getProperty("com.openexchange.easylogin.popUpOnError","").trim();
-	                	popUpOnError = Boolean.parseBoolean(property);
-	                	logInfo("Set popUpOnError to " +  popUpOnError);
-	                } else {
-	                	logError("Could not find popUpOnError in " + EASYLOGIN_PROPERTY_FILE + " using default: " + 
-	                			popUpOnError );
-	                }
-                    if (props.get("com.openexchange.easylogin.allowInsecureTransmission") != null) {
-                        String property = props.getProperty("com.openexchange.easylogin.allowInsecureTransmission","").trim();
-                        allowInsecure = Boolean.parseBoolean(property);
-                        logInfo("Set allowInsecure to " +  allowInsecure);
-                    } else {
-                        logError("Could not find allowInsecure in " + EASYLOGIN_PROPERTY_FILE + " using default: " + 
-                                allowInsecure );
-                    }
-	                
-	            } catch (IOException e) {
-	            	logError("Error can't read file: " + EASYLOGIN_PROPERTY_FILE);
-	            	throw new ConfigurationException(com.openexchange.configuration.ConfigurationException.Code.NOT_READABLE, file.getAbsolutePath());
-	            } finally {
-	                try {
-	                    fis.close();
-	                } catch (IOException e) {
-	                    logError("Error closing file inputstream for file " + EASYLOGIN_PROPERTY_FILE + 
-	                    		" ", e);
-	                }
-	            }
-	        }
-	   	}
-	}
+    public static void initConfig(ConfigurationService config) {
+        synchronized (EasyLogin.class) {
+
+            if (config.getProperty("com.openexchange.easylogin.passwordPara") != null) {
+                passwordPara = config.getProperty("com.openexchange.easylogin.passwordPara");
+                logInfo("Set passwordPara to " + passwordPara);
+            } else {
+                logError("Could not find passwordPara in properties-file, using default: " + passwordPara);
+            }
+
+            if (config.getProperty("com.openexchange.easylogin.loginPara") != null) {
+                loginPara = config.getProperty("com.openexchange.easylogin.loginPara");
+                logInfo("Set loginPara to " + loginPara);
+            } else {
+                logError("Could not find loginPara in properties-file, using default: " + loginPara);
+            }
+
+            if (config.getProperty("com.openexchange.easylogin.AJAX_ROOT") != null) {
+                AJAX_ROOT = config.getProperty("com.openexchange.easylogin.AJAX_ROOT");
+                logInfo("Set AJAX_ROOT to " + AJAX_ROOT);
+            } else {
+                logError("Could not find AJAX_ROOT in properties-file, using default: " + AJAX_ROOT);
+            }
+
+            if (config.getProperty("com.openexchange.easylogin.OX_PATH_RELATIVE") != null) {
+                OX_PATH_RELATIVE = config.getProperty("com.openexchange.easylogin.OX_PATH_RELATIVE");
+                logInfo("Set OX_PATH_RELATIVE to " + OX_PATH_RELATIVE);
+            } else {
+                logError("Could not find OX_PATH_RELATIVE in properties-file, using default: " + OX_PATH_RELATIVE);
+            }
+
+            if (config.getProperty("com.openexchange.easylogin.doGetEnabled") != null) {
+                String property = config.getProperty("com.openexchange.easylogin.doGetEnabled", "").trim();
+                doGetEnabled = Boolean.parseBoolean(property);
+                logInfo("Set doGetEnabled to " + doGetEnabled);
+            } else {
+                logError("Could not find doGetEnabled in properties-file, using default: " + doGetEnabled);
+            }
+
+            if (config.getProperty("com.openexchange.easylogin.popUpOnError") != null) {
+                String property = config.getProperty("com.openexchange.easylogin.popUpOnError", "").trim();
+                popUpOnError = Boolean.parseBoolean(property);
+                logInfo("Set popUpOnError to " + popUpOnError);
+            } else {
+                logError("Could not find popUpOnError in properties-file, using default: " + popUpOnError);
+            }
+            if (config.getProperty("com.openexchange.easylogin.allowInsecureTransmission") != null) {
+                String property = config.getProperty("com.openexchange.easylogin.allowInsecureTransmission", "").trim();
+                allowInsecure = Boolean.parseBoolean(property);
+                logInfo("Set allowInsecure to " + allowInsecure);
+            } else {
+                logError("Could not find allowInsecure in properties-file, using default: " + allowInsecure);
+            }
+
+        }
+    }
 
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,58 +49,47 @@
 
 package com.openexchange.easylogin.osgi;
 
-import java.util.Stack;
-import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.service.http.HttpService;
-import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.easylogin.EasyLogin;
+
 
 /**
- * {@link Activator}
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link ConfigurationReader}
+ *
+ * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class Activator implements BundleActivator {
-
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Activator.class);
-
-    private static final String ALIAS = "servlet/easylogin";
-
-    private final Stack<ServiceTracker> trackers = new Stack<ServiceTracker>();
-
-    /**
-     * Initializes a new {@link Activator}
-     */
-    public Activator() {
-        // TODO Auto-generated constructor stub
-        super();
+public class ConfigurationReader implements ServiceTrackerCustomizer {
+    
+    private BundleContext context;
+    
+    public ConfigurationReader (BundleContext context){
+        this.context = context;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
+    /* (non-Javadoc)
+     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
      */
-    public void start(BundleContext context) throws Exception {
-        trackers.push(new ServiceTracker(context, HttpService.class.getName(), new ServletRegisterer(context)));
-        trackers.push(new ServiceTracker(context, ConfigurationService.class.getName(), new ConfigurationReader(context)));
-        for (final ServiceTracker tracker : trackers) {
-            tracker.open();
-        }
+    public Object addingService(ServiceReference reference) {
+        ConfigurationService config = (ConfigurationService) context.getService(reference);
+        EasyLogin.initConfig(config);
+        return config;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
+    /* (non-Javadoc)
+     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference, java.lang.Object)
      */
-    public void stop(BundleContext arg0) throws Exception {
-        while (!trackers.isEmpty()) {
-            trackers.pop().close();
-        }
+    public void modifiedService(ServiceReference reference, Object service) {
+        // nothing to do here
     }
 
-    public static String getALIAS() {
-        return ALIAS;
+    /* (non-Javadoc)
+     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
+     */
+    public void removedService(ServiceReference reference, Object service) {
+        context.ungetService(reference);
     }
 
 }
