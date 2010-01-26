@@ -72,6 +72,10 @@ public final class MIMEMailMessage extends MailMessage {
 
     private int unreadMessages;
 
+    private char separator;
+
+    private int seqnum;
+
     /**
      * Constructor - Constructs an empty mail message
      */
@@ -87,6 +91,42 @@ public final class MIMEMailMessage extends MailMessage {
         super();
         // TODO: this.mailPart = MIMEMessageConverter.convertPart(msg);
         mailPart = new MIMEMailPart(msg);
+    }
+
+    /**
+     * Gets the separator.
+     * 
+     * @return The separator
+     */
+    public char getSeparator() {
+        return separator;
+    }
+
+    /**
+     * Sets the separator.
+     * 
+     * @param separator The separator to set
+     */
+    public void setSeparator(final char separator) {
+        this.separator = separator;
+    }
+
+    /**
+     * Gets the sequence number.
+     * 
+     * @return The sequence number
+     */
+    public int getSeqnum() {
+        return seqnum;
+    }
+
+    /**
+     * Sets the sequence number.
+     * 
+     * @param seqnum The sequence number to set
+     */
+    public void setSeqnum(final int seqnum) {
+        this.seqnum = seqnum;
     }
 
     /**
