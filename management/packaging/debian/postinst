@@ -29,22 +29,26 @@ postFix() {
   # -----------------------------------------------------------------------
   local ofile=/opt/open-xchange/etc/groupware/server.properties
   local nfile=/opt/open-xchange/etc/groupware/management.properties
-  for prop in JMXPort JMXBindAddress JMXLogin JMXPassword; do
-      if ox_exists_property $prop $ofile; then
-          local oldval=$(ox_read_property $prop $ofile)
-          ox_set_property $prop "$oldval" $nfile
-          ox_remove_property $prop $ofile
-      fi
-  done
+  if [ -e $ofile ]; then
+     for prop in JMXPort JMXBindAddress JMXLogin JMXPassword; do
+         if ox_exists_property $prop $ofile; then
+             local oldval=$(ox_read_property $prop $ofile)
+             ox_set_property $prop "$oldval" $nfile
+             ox_remove_property $prop $ofile
+         fi
+     done
+  fi
   local ofile=/opt/open-xchange/etc/admindaemon/plugin/hosting.properties
   local nfile=/opt/open-xchange/etc/admindaemon/management.properties
-  for prop in JMXPort JMXBindAddress JMXLogin JMXPassword; do
-      if ox_exists_property $prop $ofile; then
-          local oldval=$(ox_read_property $prop $ofile)
-          ox_set_property $prop "$oldval" $nfile
-          ox_remove_property $prop $ofile
-      fi
-  done
+  if [ -e $ofile ]; then
+     for prop in JMXPort JMXBindAddress JMXLogin JMXPassword; do
+         if ox_exists_property $prop $ofile; then
+             local oldval=$(ox_read_property $prop $ofile)
+             ox_set_property $prop "$oldval" $nfile
+             ox_remove_property $prop $ofile
+         fi
+     done
+  fi
 }
 
 case "$1" in
