@@ -121,7 +121,7 @@ public final class CachingMessagingAccountStorage implements MessagingAccountSto
      */
 
     /**
-     * The database-backed delagatee.
+     * The database-backed delegatee.
      */
     private final RdbMessagingAccountStorage delegatee;
 
