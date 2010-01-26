@@ -50,7 +50,6 @@
 package com.openexchange.groupware.attach;
 
 import java.io.InputStream;
-import java.sql.Connection;
 import java.util.Date;
 import java.util.SortedSet;
 import com.openexchange.api2.OXException;
