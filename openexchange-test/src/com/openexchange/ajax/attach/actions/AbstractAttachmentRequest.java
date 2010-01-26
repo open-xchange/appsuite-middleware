@@ -47,69 +47,25 @@
  *
  */
 
-package com.openexchange.ajax.task;
+package com.openexchange.ajax.attach.actions;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
- * Suite for all task tests.
+ * {@link AbstractAttachmentRequest}
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class TaskTestSuite {
+public abstract class AbstractAttachmentRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
 
-    /**
-     * Prevent instantiation
-     */
-    private TaskTestSuite() {
+    public static final String ATTACHMENT_URL = "/ajax/attachment";
+
+    public AbstractAttachmentRequest() {
         super();
     }
 
-    /**
-     * Generates the task test suite.
-     * @return the task tests suite.
-     */
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        // First the function tests.
-        tests.addTestSuite(TasksTest.class);
-        tests.addTestSuite(TaskAttachmentTests.class);
-
-        // Now several single function tests.
-        tests.addTestSuite(InsertTest.class);
-        tests.addTestSuite(CharsetTest.class);
-        tests.addTestSuite(TruncationTest.class);
-        tests.addTestSuite(FloatTest.class);
-        tests.addTestSuite(AllTest.class);
-        tests.addTestSuite(ListTest.class);
-        tests.addTestSuite(UpdatesTest.class);
-        tests.addTestSuite(TaskRecurrenceTest.class);
-        tests.addTestSuite(ConfirmTest.class);
-
-        // Nodes
-        tests.addTestSuite(LastModifiedUTCTest.class);
-
-        // And finally bug tests.
-        tests.addTestSuite(Bug6335Test.class);
-        tests.addTestSuite(Bug7276Test.class);
-        tests.addTestSuite(Bug7380Test.class);
-        tests.addTestSuite(Bug7377Test.class);
-        tests.addTestSuite(Bug8935Test.class);
-        tests.addTestSuite(Bug9252Test.class);
-        tests.addTestSuite(Bug10119Test.class);
-        tests.addTestSuite(Bug10400Test.class);
-        tests.addTestSuite(Bug11075Test.class);
-        tests.addTestSuite(Bug11190Test.class);
-        tests.addTestSuite(Bug11195Test.class);
-        tests.addTestSuite(Bug11397Test.class);
-        tests.addTestSuite(Bug11619Test.class);
-        tests.addTestSuite(Bug11650Test.class);
-        tests.addTestSuite(Bug11659Test.class);
-        tests.addTestSuite(Bug11848Test.class);
-        tests.addTestSuite(Bug12364Test.class);
-        tests.addTestSuite(Bug12727Test.class);
-        tests.addTestSuite(Bug12926Test.class);
-        tests.addTestSuite(Bug14002Test.class);
-        return tests;
+    public String getServletPath() {
+        return ATTACHMENT_URL;
     }
 }

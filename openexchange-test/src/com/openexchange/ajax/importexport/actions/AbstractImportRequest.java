@@ -105,8 +105,7 @@ public abstract class AbstractImportRequest<T extends AbstractAJAXResponse> impl
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, action.getName()),
             new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderId),
-            new FileParameter("file", action.fileName, upload,
-                action.format.getMimeType())
+            new FileParameter("file", action.fileName, upload, action.format.getMimeType())
         };
     }
 

@@ -47,69 +47,71 @@
  *
  */
 
-package com.openexchange.ajax.task;
+package com.openexchange.ajax.attach.actions;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.io.InputStream;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.Attachment;
+import com.openexchange.ajax.attach.AttachmentTools;
+import com.openexchange.groupware.attach.AttachmentField;
+import com.openexchange.groupware.container.CommonObject;
 
 /**
- * Suite for all task tests.
+ * {@link AttachRequest}
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class TaskTestSuite {
+public class AttachRequest extends AbstractAttachmentRequest<AttachResponse> {
 
-    /**
-     * Prevent instantiation
-     */
-    private TaskTestSuite() {
+    private final int moduleId;
+
+    private final int folderId;
+
+    private final int attachedId;
+
+    private final String fileName;
+
+    private final InputStream data;
+
+    private final String mimeType;
+
+    public AttachRequest(CommonObject obj, String fileName, InputStream data, String mimeType) {
         super();
+        moduleId = AttachmentTools.determineModule(obj);
+        folderId = obj.getParentFolderID();
+        attachedId = obj.getObjectID();
+        this.fileName = fileName;
+        this.data = data;
+        this.mimeType = mimeType;
     }
 
-    /**
-     * Generates the task test suite.
-     * @return the task tests suite.
-     */
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        // First the function tests.
-        tests.addTestSuite(TasksTest.class);
-        tests.addTestSuite(TaskAttachmentTests.class);
+    public Object getBody() {
+        return null;
+    }
 
-        // Now several single function tests.
-        tests.addTestSuite(InsertTest.class);
-        tests.addTestSuite(CharsetTest.class);
-        tests.addTestSuite(TruncationTest.class);
-        tests.addTestSuite(FloatTest.class);
-        tests.addTestSuite(AllTest.class);
-        tests.addTestSuite(ListTest.class);
-        tests.addTestSuite(UpdatesTest.class);
-        tests.addTestSuite(TaskRecurrenceTest.class);
-        tests.addTestSuite(ConfirmTest.class);
+    public Method getMethod() {
+        return Method.UPLOAD;
+    }
 
-        // Nodes
-        tests.addTestSuite(LastModifiedUTCTest.class);
+    private String writeJSON() throws JSONException {
+        JSONObject json = new JSONObject();
+        json.put(AttachmentField.MODULE_ID_LITERAL.getName(), moduleId);
+        json.put(AttachmentField.FOLDER_ID_LITERAL.getName(), folderId);
+        json.put(AttachmentField.ATTACHED_ID_LITERAL.getName(), attachedId);
+        return json.toString();
+    }
 
-        // And finally bug tests.
-        tests.addTestSuite(Bug6335Test.class);
-        tests.addTestSuite(Bug7276Test.class);
-        tests.addTestSuite(Bug7380Test.class);
-        tests.addTestSuite(Bug7377Test.class);
-        tests.addTestSuite(Bug8935Test.class);
-        tests.addTestSuite(Bug9252Test.class);
-        tests.addTestSuite(Bug10119Test.class);
-        tests.addTestSuite(Bug10400Test.class);
-        tests.addTestSuite(Bug11075Test.class);
-        tests.addTestSuite(Bug11190Test.class);
-        tests.addTestSuite(Bug11195Test.class);
-        tests.addTestSuite(Bug11397Test.class);
-        tests.addTestSuite(Bug11619Test.class);
-        tests.addTestSuite(Bug11650Test.class);
-        tests.addTestSuite(Bug11659Test.class);
-        tests.addTestSuite(Bug11848Test.class);
-        tests.addTestSuite(Bug12364Test.class);
-        tests.addTestSuite(Bug12727Test.class);
-        tests.addTestSuite(Bug12926Test.class);
-        tests.addTestSuite(Bug14002Test.class);
-        return tests;
+    public Parameter[] getParameters() throws JSONException {
+        return new Parameter[] {
+            new URLParameter(AJAXServlet.PARAMETER_ACTION, Attachment.ACTION_ATTACH),
+            new FieldParameter("json_0", writeJSON()),
+            new FileParameter("file_0", fileName, data, mimeType)
+        };
+    }
+
+    public AttachParser getParser() {
+        return new AttachParser(true);
     }
 }

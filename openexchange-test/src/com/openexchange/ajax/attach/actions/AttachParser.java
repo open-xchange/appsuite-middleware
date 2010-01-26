@@ -47,69 +47,34 @@
  *
  */
 
-package com.openexchange.ajax.task;
+package com.openexchange.ajax.attach.actions;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.json.JSONArray;
+import org.json.JSONException;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractUploadParser;
+
 
 /**
- * Suite for all task tests.
+ * {@link AttachParser}
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class TaskTestSuite {
+public class AttachParser extends AbstractUploadParser<AttachResponse> {
 
-    /**
-     * Prevent instantiation
-     */
-    private TaskTestSuite() {
-        super();
+    public AttachParser(boolean failOnError) {
+        super(failOnError);
     }
 
-    /**
-     * Generates the task test suite.
-     * @return the task tests suite.
-     */
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        // First the function tests.
-        tests.addTestSuite(TasksTest.class);
-        tests.addTestSuite(TaskAttachmentTests.class);
-
-        // Now several single function tests.
-        tests.addTestSuite(InsertTest.class);
-        tests.addTestSuite(CharsetTest.class);
-        tests.addTestSuite(TruncationTest.class);
-        tests.addTestSuite(FloatTest.class);
-        tests.addTestSuite(AllTest.class);
-        tests.addTestSuite(ListTest.class);
-        tests.addTestSuite(UpdatesTest.class);
-        tests.addTestSuite(TaskRecurrenceTest.class);
-        tests.addTestSuite(ConfirmTest.class);
-
-        // Nodes
-        tests.addTestSuite(LastModifiedUTCTest.class);
-
-        // And finally bug tests.
-        tests.addTestSuite(Bug6335Test.class);
-        tests.addTestSuite(Bug7276Test.class);
-        tests.addTestSuite(Bug7380Test.class);
-        tests.addTestSuite(Bug7377Test.class);
-        tests.addTestSuite(Bug8935Test.class);
-        tests.addTestSuite(Bug9252Test.class);
-        tests.addTestSuite(Bug10119Test.class);
-        tests.addTestSuite(Bug10400Test.class);
-        tests.addTestSuite(Bug11075Test.class);
-        tests.addTestSuite(Bug11190Test.class);
-        tests.addTestSuite(Bug11195Test.class);
-        tests.addTestSuite(Bug11397Test.class);
-        tests.addTestSuite(Bug11619Test.class);
-        tests.addTestSuite(Bug11650Test.class);
-        tests.addTestSuite(Bug11659Test.class);
-        tests.addTestSuite(Bug11848Test.class);
-        tests.addTestSuite(Bug12364Test.class);
-        tests.addTestSuite(Bug12727Test.class);
-        tests.addTestSuite(Bug12926Test.class);
-        tests.addTestSuite(Bug14002Test.class);
-        return tests;
+    @Override
+    protected AttachResponse createResponse(Response response) throws JSONException {
+        final AttachResponse retval = new AttachResponse(response);
+        final JSONArray data = (JSONArray) response.getData();
+        final int objectId = data.getInt(0);
+        if (isFailOnError()) {
+            assertTrue("Problem while inserting object.", objectId > 0);
+        }
+        retval.setId(objectId);
+        return retval;
     }
 }

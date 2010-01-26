@@ -49,67 +49,61 @@
 
 package com.openexchange.ajax.task;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.io.ByteArrayInputStream;
+import java.util.Date;
+import java.util.TimeZone;
+import com.openexchange.ajax.attach.actions.AttachRequest;
+import com.openexchange.ajax.attach.actions.AttachResponse;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.task.actions.DeleteRequest;
+import com.openexchange.ajax.task.actions.GetRequest;
+import com.openexchange.ajax.task.actions.GetResponse;
+import com.openexchange.ajax.task.actions.InsertRequest;
+import com.openexchange.groupware.tasks.Create;
+import com.openexchange.groupware.tasks.Task;
 
 /**
- * Suite for all task tests.
+ * Function tests for tasks.
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class TaskTestSuite {
+public class TaskAttachmentTests extends AbstractAJAXSession {
 
-    /**
-     * Prevent instantiation
-     */
-    private TaskTestSuite() {
-        super();
+    private int folderId;
+
+    private TimeZone tz;
+
+    private Task task;
+
+    private int attachmentId;
+
+    private Date creationDate;
+
+    public TaskAttachmentTests(String name) {
+        super(name);
     }
 
-    /**
-     * Generates the task test suite.
-     * @return the task tests suite.
-     */
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        // First the function tests.
-        tests.addTestSuite(TasksTest.class);
-        tests.addTestSuite(TaskAttachmentTests.class);
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        folderId = client.getValues().getPrivateTaskFolder();
+        tz = client.getValues().getTimeZone();
+        task = Create.createWithDefaults(folderId, "Test task for testing attachments");
+        client.execute(new InsertRequest(task, tz)).fillTask(task);
+        AttachResponse response = client.execute(new AttachRequest(task, "test.txt", new ByteArrayInputStream("Test".getBytes()), "text/plain"));
+        creationDate = response.getTimestamp();
+    }
 
-        // Now several single function tests.
-        tests.addTestSuite(InsertTest.class);
-        tests.addTestSuite(CharsetTest.class);
-        tests.addTestSuite(TruncationTest.class);
-        tests.addTestSuite(FloatTest.class);
-        tests.addTestSuite(AllTest.class);
-        tests.addTestSuite(ListTest.class);
-        tests.addTestSuite(UpdatesTest.class);
-        tests.addTestSuite(TaskRecurrenceTest.class);
-        tests.addTestSuite(ConfirmTest.class);
+    @Override
+    protected void tearDown() throws Exception {
+        client.execute(new DeleteRequest(task));
+        super.tearDown();
+    }
 
-        // Nodes
-        tests.addTestSuite(LastModifiedUTCTest.class);
-
-        // And finally bug tests.
-        tests.addTestSuite(Bug6335Test.class);
-        tests.addTestSuite(Bug7276Test.class);
-        tests.addTestSuite(Bug7380Test.class);
-        tests.addTestSuite(Bug7377Test.class);
-        tests.addTestSuite(Bug8935Test.class);
-        tests.addTestSuite(Bug9252Test.class);
-        tests.addTestSuite(Bug10119Test.class);
-        tests.addTestSuite(Bug10400Test.class);
-        tests.addTestSuite(Bug11075Test.class);
-        tests.addTestSuite(Bug11190Test.class);
-        tests.addTestSuite(Bug11195Test.class);
-        tests.addTestSuite(Bug11397Test.class);
-        tests.addTestSuite(Bug11619Test.class);
-        tests.addTestSuite(Bug11650Test.class);
-        tests.addTestSuite(Bug11659Test.class);
-        tests.addTestSuite(Bug11848Test.class);
-        tests.addTestSuite(Bug12364Test.class);
-        tests.addTestSuite(Bug12727Test.class);
-        tests.addTestSuite(Bug12926Test.class);
-        tests.addTestSuite(Bug14002Test.class);
-        return tests;
+    public void testLastModifiedOfNewestAttachmentWithGet() throws Throwable {
+        GetResponse response = client.execute(new GetRequest(task.getParentFolderID(), task.getObjectID()));
+        task.setLastModified(response.getTimestamp());
+        Task test = response.getTask(tz);
+        assertEquals("Creation date of attachment does not match.", creationDate, test.getLastModifiedOfNewestAttachment());
     }
 }
