@@ -88,6 +88,11 @@ public interface MessagingFolder {
     public static final String CAPABILITY_SORT = "SORT";
 
     /**
+     * The capability identifier for subscription support.
+     */
+    public static final String CAPABILITY_SUBSCRIPTION = "SUBSCRIPTION";
+
+    /**
      * The capability identifier for user flags support.
      */
     public static final String CAPABILITY_USER_FLAGS = "USER_FLAGS";
