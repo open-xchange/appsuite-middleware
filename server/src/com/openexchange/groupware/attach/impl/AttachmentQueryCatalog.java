@@ -55,104 +55,108 @@ import com.openexchange.groupware.attach.AttachmentMetadata;
 
 public class AttachmentQueryCatalog {
 
-	private static final AttachmentField[] DB_FIELDS = {
-		AttachmentField.CREATED_BY_LITERAL,
-		AttachmentField.CREATION_DATE_LITERAL,
-		AttachmentField.FILE_MIMETYPE_LITERAL,
-		AttachmentField.FILE_SIZE_LITERAL,
-		AttachmentField.FILENAME_LITERAL,
-		AttachmentField.ATTACHED_ID_LITERAL,
-		AttachmentField.MODULE_ID_LITERAL,
-		AttachmentField.RTF_FLAG_LITERAL,
-		AttachmentField.ID_LITERAL,
-		AttachmentField.COMMENT_LITERAL,
-		AttachmentField.FILE_ID_LITERAL
-	};
-	
-	private static final String REMEMBER_DEL = "INSERT INTO del_attachment (id, del_date, cid, attached, module) VALUES (?,?,?,?,?)";
-	
-	private static String INSERT;
-	private static String UPDATE;
-	private static String FIELDS;
-	private static String SELECT_BY_ID;
-	private static final String SELECT_FILE_ID = "SELECT file_id FROM prg_attachment WHERE id = ? AND cid = ? ";
-	
-	static {
-		final StringBuilder updateBuffer = new StringBuilder("UPDATE prg_attachment SET ");
-		final StringBuilder insertBuffer = new StringBuilder("INSERT INTO prg_attachment (");
-		final StringBuilder questionMarks = new StringBuilder();
-		final StringBuilder fieldsBuffer = new StringBuilder();
-		final StringBuilder selectByIdBuffer = new StringBuilder("SELECT ");
-		
-		for(final AttachmentField field : DB_FIELDS) {
-			fieldsBuffer.append(field.getName());
-			fieldsBuffer.append(", ");
-			
-			questionMarks.append("?, ");
-			updateBuffer.append(field);
-			updateBuffer.append(" = ?, ");
-		}
-		updateBuffer.setLength(updateBuffer.length()-2);
-		fieldsBuffer.append("cid");
-		questionMarks.append('?');
-		updateBuffer.append("WHERE cid = ? AND id = ?");
-		
-		insertBuffer.append(fieldsBuffer);
-		insertBuffer.append(") VALUES ( ");
-		insertBuffer.append(questionMarks); 
-		insertBuffer.append(')');
-		
-		
-		INSERT = insertBuffer.toString();
-		FIELDS = fieldsBuffer.toString();
-		UPDATE = updateBuffer.toString();
-		
-		selectByIdBuffer.append(FIELDS);
-		selectByIdBuffer.append(" FROM prg_attachment WHERE id = ? AND cid = ?");
-		
-		SELECT_BY_ID = selectByIdBuffer.toString();
-	}
-	
-	public AttachmentField[] getFields() {
-		return DB_FIELDS;
-	}
+    private static final AttachmentField[] DB_FIELDS = {
+        AttachmentField.CREATED_BY_LITERAL,
+        AttachmentField.CREATION_DATE_LITERAL,
+        AttachmentField.FILE_MIMETYPE_LITERAL,
+        AttachmentField.FILE_SIZE_LITERAL,
+        AttachmentField.FILENAME_LITERAL,
+        AttachmentField.ATTACHED_ID_LITERAL,
+        AttachmentField.MODULE_ID_LITERAL,
+        AttachmentField.RTF_FLAG_LITERAL,
+        AttachmentField.ID_LITERAL,
+        AttachmentField.COMMENT_LITERAL,
+        AttachmentField.FILE_ID_LITERAL
+    };
 
-	public String getInsert() {
-		return INSERT;
-	}
+    private static final String REMEMBER_DEL = "INSERT INTO del_attachment (id, del_date, cid, attached, module) VALUES (?,?,?,?,?)";
 
-	public String getDelete(final String tablename, final List<AttachmentMetadata> attachments) {
-		final StringBuilder builder = new StringBuilder("DELETE FROM ").append(tablename).append(" WHERE id IN (");
-		for(final AttachmentMetadata m : attachments) {
-			builder.append(m.getId()).append(',');
-		}
-		builder.setLength(builder.length()-1);
-		builder.append(") and cid = ?");
-		return builder.toString();
-	}
-	
-	public String getInsertIntoDel(){
-		return REMEMBER_DEL;
-	}
+    private static String INSERT;
+    private static String UPDATE;
+    private static String FIELDS;
+    private static String SELECT_BY_ID;
+    private static final String SELECT_NEWEST_CREATION_DATE = "SELECT MAX(creation_date) AS creation_date FROM prg_attachment WHERE cid=?,attached=?,module=?";
+    private static final String SELECT_FILE_ID = "SELECT file_id FROM prg_attachment WHERE id = ? AND cid = ? ";
 
-	public String getUpdate() {
-		return UPDATE;
-	}
+    static {
+        final StringBuilder updateBuffer = new StringBuilder("UPDATE prg_attachment SET ");
+        final StringBuilder insertBuffer = new StringBuilder("INSERT INTO prg_attachment (");
+        final StringBuilder questionMarks = new StringBuilder();
+        final StringBuilder fieldsBuffer = new StringBuilder();
+        final StringBuilder selectByIdBuffer = new StringBuilder("SELECT ");
 
-	public String getSelectFileId() {
-		return SELECT_FILE_ID;
-	}
+        for(final AttachmentField field : DB_FIELDS) {
+            fieldsBuffer.append(field.getName());
+            fieldsBuffer.append(", ");
 
-	public void appendColumnList(final StringBuilder select, final AttachmentField[] columns) {
-		for(final AttachmentField field : columns ) {
-			select.append(field.getName());
-			select.append(',');
-		}
-		select.setLength(select.length()-1);
-	}
+            questionMarks.append("?, ");
+            updateBuffer.append(field);
+            updateBuffer.append(" = ?, ");
+        }
+        updateBuffer.setLength(updateBuffer.length()-2);
+        fieldsBuffer.append("cid");
+        questionMarks.append('?');
+        updateBuffer.append("WHERE cid = ? AND id = ?");
 
-	public String getSelectById() {
-		return SELECT_BY_ID;
-	}
+        insertBuffer.append(fieldsBuffer);
+        insertBuffer.append(") VALUES ( ");
+        insertBuffer.append(questionMarks);
+        insertBuffer.append(')');
 
+
+        INSERT = insertBuffer.toString();
+        FIELDS = fieldsBuffer.toString();
+        UPDATE = updateBuffer.toString();
+
+        selectByIdBuffer.append(FIELDS);
+        selectByIdBuffer.append(" FROM prg_attachment WHERE id = ? AND cid = ?");
+
+        SELECT_BY_ID = selectByIdBuffer.toString();
+    }
+
+    public AttachmentField[] getFields() {
+        return DB_FIELDS;
+    }
+
+    public String getInsert() {
+        return INSERT;
+    }
+
+    public String getDelete(final String tablename, final List<AttachmentMetadata> attachments) {
+        final StringBuilder builder = new StringBuilder("DELETE FROM ").append(tablename).append(" WHERE id IN (");
+        for(final AttachmentMetadata m : attachments) {
+            builder.append(m.getId()).append(',');
+        }
+        builder.setLength(builder.length()-1);
+        builder.append(") and cid = ?");
+        return builder.toString();
+    }
+
+    public String getInsertIntoDel(){
+        return REMEMBER_DEL;
+    }
+
+    public String getUpdate() {
+        return UPDATE;
+    }
+
+    public String getSelectFileId() {
+        return SELECT_FILE_ID;
+    }
+
+    public void appendColumnList(final StringBuilder select, final AttachmentField[] columns) {
+        for(final AttachmentField field : columns ) {
+            select.append(field.getName());
+            select.append(',');
+        }
+        select.setLength(select.length()-1);
+    }
+
+    public String getSelectById() {
+        return SELECT_BY_ID;
+    }
+
+    public String getSelectNewestCreationDate() {
+        return SELECT_NEWEST_CREATION_DATE;
+    }
 }

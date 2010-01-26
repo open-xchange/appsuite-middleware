@@ -50,6 +50,8 @@
 package com.openexchange.groupware.attach;
 
 import java.io.InputStream;
+import java.sql.Connection;
+import java.util.Date;
 import java.util.SortedSet;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -60,77 +62,83 @@ import com.openexchange.groupware.tx.Service;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 
 public interface AttachmentBase extends Service {
-	
-	public static final int NEW = 0;
-	
-	public static final int ASC = 1;
-	public static final int DESC = -1;
-	
-	/**
-	 * @return the timestamp of modified objects to which this attachment was attached
-	 */
-	public abstract long attachToObject(AttachmentMetadata attachment, InputStream data, Context ctx, User user, UserConfiguration userConfig) throws OXException;
-	
-	/**
-	 * @return the timestamp of modified objects to which these attachments were detached
-	 */
-	public abstract long detachFromObject(int folderId, int objectId, int moduleId, int[] ids, Context ctx, User user, UserConfiguration userConfig) throws OXException;
-	
-	public abstract AttachmentMetadata getAttachment(int folderId, int objectId, int moduleId, int id, Context ctx, User user, UserConfiguration userConfig) throws OXException;
-	
-	public abstract InputStream getAttachedFile(int folderId, int attachedId, int moduleId, int id, Context context, User user, UserConfiguration userConfig)  throws OXException;
 
-	/**
-	 * This method is used to get alle file_ids which are refered to by attachments. This is used by the consistency tool at the moment
-	 * @param ctx The Context
-	 * @return A sorted set of the file_ids
-	 */
-	public abstract SortedSet<String> getAttachmentFileStoreLocationsperContext(Context ctx);
-	
-	public abstract TimedResult getAttachments(int folderId, int attachedId, int moduleId, Context context, User user, UserConfiguration userConfig) throws OXException;
+    public static final int NEW = 0;
 
-	public abstract TimedResult getAttachments(int folderId, int attachedId, int moduleId, AttachmentField[] columns, AttachmentField sort, int order, Context context, User user, UserConfiguration userConfig)  throws OXException;
+    public static final int ASC = 1;
+    public static final int DESC = -1;
 
-	public abstract TimedResult getAttachments(int folderId, int attachedId, int moduleId, int[] idsToFetch, AttachmentField[] fields, Context context, User user, UserConfiguration userConfig) throws OXException;
+    /**
+     * @return the timestamp of modified objects to which this attachment was attached
+     */
+    public abstract long attachToObject(AttachmentMetadata attachment, InputStream data, Context ctx, User user, UserConfiguration userConfig) throws OXException;
 
-	public abstract Delta getDelta(int folderId, int attachedId, int moduleId, long ts, boolean ignoreDeleted, Context context, User user, UserConfiguration userConfig) throws OXException;
+    /**
+     * @return the timestamp of modified objects to which these attachments were detached
+     */
+    public abstract long detachFromObject(int folderId, int objectId, int moduleId, int[] ids, Context ctx, User user, UserConfiguration userConfig) throws OXException;
 
-	public abstract Delta getDelta(int folderId, int attachedId, int moduleId, long ts, boolean ignoreDeleted, AttachmentField[] fields, AttachmentField sort, int order, Context context, User user, UserConfiguration userConfig) throws OXException;
-	
-	public abstract void registerAttachmentListener(AttachmentListener listener, int moduleId);
-	
-	public abstract void removeAttachmentListener(AttachmentListener listener, int moduleId);
+    public abstract AttachmentMetadata getAttachment(int folderId, int objectId, int moduleId, int id, Context ctx, User user, UserConfiguration userConfig) throws OXException;
 
-	/**
-	 * This method removed the element with the given file_id in the given context. It doesn't store the deleted entries in the del_attachment table.
-	 * At the moment this method is used by the consistency tool only 
-	 * @param file_id A String of the file identifier
-	 * @param ctx The Context
-	 * @return The number of inserted entries in del_attachment in int[0] and the number of removed entries from prg_attachment in int[1]
-	 * @throws OXException
-	 */
-	public abstract int[] removeAttachment(String file_id, Context ctx) throws OXException;
-	
-	/**
-	 * This method is used to modify the attachment with the given file_id in the given context. In this entry the new_* are updated. At the moment
-	 * this method is used by the consistency tool only
-	 * @param file_id A String of the file identifier
-	 * @param new_file_id The new file identifier to store
-	 * @param new_comment The new comment to store (Attention this is attached to the old one)
-	 * @param new_mime The new mimetype to store
-	 * @param ctx The Context
-	 * @return The number of changed entries
-	 * @throws OXException
-	 */
-	public abstract int modifyAttachment(String file_id, String new_file_id, String new_comment, String new_mime, Context ctx) throws OXException;
-	
-	public abstract void addAuthorization(AttachmentAuthorization authz, int moduleId);
+    public abstract InputStream getAttachedFile(int folderId, int attachedId, int moduleId, int id, Context context, User user, UserConfiguration userConfig)  throws OXException;
 
-	public abstract void removeAuthorization(AttachmentAuthorization authz, int moduleId);
+    /**
+     * This method is used to get alle file_ids which are refered to by attachments. This is used by the consistency tool at the moment
+     * @param ctx The Context
+     * @return A sorted set of the file_ids
+     */
+    public abstract SortedSet<String> getAttachmentFileStoreLocationsperContext(Context ctx);
+
+    public abstract TimedResult getAttachments(int folderId, int attachedId, int moduleId, Context context, User user, UserConfiguration userConfig) throws OXException;
+
+    public abstract TimedResult getAttachments(int folderId, int attachedId, int moduleId, AttachmentField[] columns, AttachmentField sort, int order, Context context, User user, UserConfiguration userConfig)  throws OXException;
+
+    public abstract TimedResult getAttachments(int folderId, int attachedId, int moduleId, int[] idsToFetch, AttachmentField[] fields, Context context, User user, UserConfiguration userConfig) throws OXException;
+
+    public abstract Delta getDelta(int folderId, int attachedId, int moduleId, long ts, boolean ignoreDeleted, Context context, User user, UserConfiguration userConfig) throws OXException;
+
+    public abstract Delta getDelta(int folderId, int attachedId, int moduleId, long ts, boolean ignoreDeleted, AttachmentField[] fields, AttachmentField sort, int order, Context context, User user, UserConfiguration userConfig) throws OXException;
+
+    public abstract void registerAttachmentListener(AttachmentListener listener, int moduleId);
+
+    public abstract void removeAttachmentListener(AttachmentListener listener, int moduleId);
+
+    /**
+     * This method removed the element with the given file_id in the given context. It doesn't store the deleted entries in the del_attachment table.
+     * At the moment this method is used by the consistency tool only
+     * @param file_id A String of the file identifier
+     * @param ctx The Context
+     * @return The number of inserted entries in del_attachment in int[0] and the number of removed entries from prg_attachment in int[1]
+     * @throws OXException
+     */
+    public abstract int[] removeAttachment(String file_id, Context ctx) throws OXException;
+
+    /**
+     * This method is used to modify the attachment with the given file_id in the given context. In this entry the new_* are updated. At the moment
+     * this method is used by the consistency tool only
+     * @param file_id A String of the file identifier
+     * @param new_file_id The new file identifier to store
+     * @param new_comment The new comment to store (Attention this is attached to the old one)
+     * @param new_mime The new mimetype to store
+     * @param ctx The Context
+     * @return The number of changed entries
+     * @throws OXException
+     */
+    public abstract int modifyAttachment(String file_id, String new_file_id, String new_comment, String new_mime, Context ctx) throws OXException;
+
+    public abstract void addAuthorization(AttachmentAuthorization authz, int moduleId);
+
+    public abstract void removeAuthorization(AttachmentAuthorization authz, int moduleId);
 
     /**
      * Delete all Attachments in a Context.
      * @param context
      */
     public abstract void deleteAll(Context context) throws OXException;
+
+    /**
+     * @return the last modified date of the newest attachment or <code>null</code> if no attachments exist.
+     * @throws AttachmentException if some problem occurs.
+     */
+    public abstract Date getNewestCreationDate(int attachedId, int moduleId, Context ctx) throws AttachmentException;
 }
