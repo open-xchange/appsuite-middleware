@@ -62,6 +62,7 @@ import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.MessagingMessageAccess;
 import com.openexchange.messaging.OrderDirection;
 import com.openexchange.messaging.SearchTerm;
+import com.openexchange.messaging.StringContent;
 import com.openexchange.session.Session;
 import com.openexchange.twitter.Status;
 import com.openexchange.twitter.TwitterAccess;
@@ -177,6 +178,22 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
             try {
                 twitterAccess.retweetStatus(parseUnsignedLong(id));
                 return null;
+            } catch (final TwitterException e) {
+                throw new MessagingException(e);
+            }
+        }
+        throw MessagingExceptionCodes.UNKNOWN_ACTION.create(action);
+    }
+
+    public MessagingMessage perform(final String action) throws MessagingException {
+        throw MessagingExceptionCodes.UNKNOWN_ACTION.create(action);
+    }
+
+    public MessagingMessage perform(final MessagingMessage message, final String action) throws MessagingException {
+        if (TwitterConstants.TYPE_TWEET.equalsIgnoreCase(action)) {
+            try {
+                final StringContent content = TwitterMessagingUtility.checkContent(StringContent.class, message);
+                twitterAccess.updateStatus(content.toString());
             } catch (final TwitterException e) {
                 throw new MessagingException(e);
             }
