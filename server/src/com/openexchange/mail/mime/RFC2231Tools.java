@@ -152,7 +152,7 @@ public final class RFC2231Tools {
         try {
             return cs.decode(bb).toString();
         } catch (final java.nio.BufferOverflowException e) {
-            LOG.error(
+            LOG.warn(
                 new StringBuilder(96).append("Decoding with charset \"").append(charset).append("\" failed for input string: \"").append(
                     encoded).append('"').toString(),
                 e);
