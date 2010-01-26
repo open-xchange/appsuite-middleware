@@ -85,12 +85,16 @@ public class SimAccountAccess implements MessagingAccountAccess {
         return true;
     }
 
-    public void setMessageAccess(SimMessageAccess access) {
+    public void setMessageAccess(final SimMessageAccess access) {
         this.messageAccess = access;
     }
 
     public boolean isConnected() {
         return true;
+    }
+
+    public MessagingFolder getRootFolder() throws MessagingException {
+        return getFolderAccess().getRootFolder();
     }
 
 }

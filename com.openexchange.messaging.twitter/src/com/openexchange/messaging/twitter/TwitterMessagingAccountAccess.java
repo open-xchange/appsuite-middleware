@@ -52,6 +52,7 @@ package com.openexchange.messaging.twitter;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingAccountAccess;
 import com.openexchange.messaging.MessagingException;
+import com.openexchange.messaging.MessagingFolder;
 import com.openexchange.messaging.MessagingFolderAccess;
 import com.openexchange.messaging.MessagingMessageAccess;
 import com.openexchange.messaging.twitter.services.TwitterMessagingServiceRegistry;
@@ -141,6 +142,10 @@ public final class TwitterMessagingAccountAccess implements MessagingAccountAcce
 
     public boolean isConnected() {
         return connected;
+    }
+
+    public MessagingFolder getRootFolder() throws MessagingException {
+        return getFolderAccess().getRootFolder();
     }
 
 }

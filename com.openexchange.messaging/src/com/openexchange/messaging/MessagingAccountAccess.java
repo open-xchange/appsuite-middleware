@@ -81,4 +81,28 @@ public interface MessagingAccountAccess extends MessagingResource {
      */
     public MessagingFolderAccess getFolderAccess() throws MessagingException;
 
+    /**
+     * Convenience method to obtain root folder in a fast way; meaning no default folder check is performed which is not necessary to return
+     * the root folder.
+     * <p>
+     * The same result is yielded through calling <code>getFolderAccess().getRootFolder()</code> on a connected
+     * {@link MessagingFolderAccess}.
+     * <p>
+     * Since this account access instance is connected if not already done before, the {@link #close()} operation should be invoked
+     * afterwards:
+     * 
+     * <pre>
+     * final MessagingMessageAccess access = MailAccess.getInstance(session);
+     * final MessagingFolder rootFolder = access.getRootFolder();
+     * try {
+     *     // Do something with root folder
+     * } finally {
+     *     access.close();
+     * }
+     * </pre>
+     * 
+     * @throws MessagingException If returning the root folder fails
+     */
+    public MessagingFolder getRootFolder() throws MessagingException;
+
 }
