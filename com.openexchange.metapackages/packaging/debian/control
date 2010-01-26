@@ -11,7 +11,7 @@ Architecture: all
 Depends: ${oxcommon}, open-xchange-authentication-ucs, open-xchange-spamhandler-default, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-oxgui
 Description: The Open-Xchange Meta package for OXAE
 
-Package: open-xchange-meta-oxserver
+Package: open-xchange-meta-server
 Architecture: all
 Depends: ${oxcommon}, open-xchange-authentication-database, open-xchange-spamhandler-default
 Description: The Open-Xchange Meta package for OX Backend
@@ -26,13 +26,18 @@ Architecture: all
 Depends: open-xchange-publish, open-xchange-publish-basic, open-xchange-publish-infostore-online, open-xchange-publish-json, open-xchange-publish-microformats, open-xchange-subscribe, open-xchange-subscribe-json, open-xchange-subscribe-microformats, open-xchange-subscribe-crawler, open-xchange-templating, open-xchange-unifiedinbox
 Description: The Open-Xchange Meta package for Publish and Subscribe
 
-Package: open-xchange-meta-oxgui
+Package: open-xchange-meta-gui
 Architecture: all
 Depends: open-xchange-configjump-generic-gui, open-xchange-gui, open-xchange-gui-wizard-plugin-gui, open-xchange-online-help-de, open-xchange-online-help-en, open-xchange-online-help-fr
 Description: The Open-Xchange Meta package for OX GUI
 
-Package: open-xchange-meta-oxsingleserver
+Package: open-xchange-meta-singleserver
 Architecture: all
 Depends: open-xchange-meta-oxserver, open-xchange-meta-oxgui, open-xchange-meta-admin, open-xchange-meta-pubsub
 Description: The Open-Xchange Meta package for OX on a single server
+
+Package: open-xchange-meta-mobility
+Architecture: all
+Depends: open-xchange-usm, open-xchange-help-usm-eas
+Description: The Open-Xchange Meta package for Business Mobility
 

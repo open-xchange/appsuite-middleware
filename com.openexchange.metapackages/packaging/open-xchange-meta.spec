@@ -49,7 +49,7 @@ Summary:        Open-Xchange Meta packages
 %define oxcommon open-xchange, open-xchange-configjump-generic, open-xchange-contactcollector, open-xchange-conversion, open-xchange-conversion-engine, open-xchange-conversion-servlet, open-xchange-crypto, open-xchange-data-conversion-ical4j, open-xchange-dataretention, open-xchange-dataretention-csv, open-xchange-genconf, open-xchange-genconf-mysql, open-xchange-imap, open-xchange-mailfilter, open-xchange-management, open-xchange-monitoring, open-xchange-passwordchange-database, open-xchange-passwordchange-servlet, open-xchange-pop3, open-xchange-push-udp, open-xchange-resource-managerequest, open-xchange-server, open-xchange-settings-extensions, open-xchange-smtp, open-xchange-sql, open-xchange-templating, open-xchange-threadpool, open-xchange-charset, open-xchange-control, open-xchange-easylogin, open-xchange-group-managerequest, open-xchange-i18n, open-xchange-jcharset, open-xchange-sessiond, open-xchange-calendar-printing, open-xchange-user-json, open-xchange-gui-wizard-plugin
 
 # ----------------------------------------------------------------------------------------------------
-%package -n	open-xchange-meta-oxserver
+%package -n	open-xchange-meta-server
 Group:          Applications/Productivity
 Summary:	The Open-Xchange Meta package for OX Backend
 %if 0%{?sles_version}
@@ -61,7 +61,7 @@ Requires:	%{oxcommon}
 Requires:	open-xchange-authentication-database, open-xchange-spamhandler-default
 
 
-%description -n open-xchange-meta-oxserver
+%description -n open-xchange-meta-server
 The Open-Xchange Meta package for OX Backend
 
 Authors:
@@ -96,13 +96,13 @@ Authors:
     Open-Xchange
 
 # ----------------------------------------------------------------------------------------------------
-%package -n	open-xchange-meta-oxgui
+%package -n	open-xchange-meta-gui
 Group:          Applications/Productivity
 Summary:	The Open-Xchange Meta package for OX GUI
 Requires:	open-xchange-configjump-generic-gui, open-xchange-gui, open-xchange-gui-wizard-plugin-gui, open-xchange-online-help-de, open-xchange-online-help-en, open-xchange-online-help-fr
 
 
-%description -n open-xchange-meta-oxgui
+%description -n open-xchange-meta-gui
 The Open-Xchange Meta package for OX Backend
 
 Authors:
@@ -110,19 +110,32 @@ Authors:
     Open-Xchange
 
 # ----------------------------------------------------------------------------------------------------
-%package -n	open-xchange-meta-oxsingleserver
+%package -n	open-xchange-meta-singleserver
 Group:          Applications/Productivity
 Summary:	The Open-Xchange Meta package for OX on a single server
 Requires:	open-xchange-meta-oxserver, open-xchange-meta-oxgui, open-xchange-meta-admin, open-xchange-meta-pubsub
 
 
-%description -n open-xchange-meta-oxsingleserver
+%description -n open-xchange-meta-singleserver
 The Open-Xchange Meta package for OX on a single server
 
 Authors:
 --------
     Open-Xchange
 
+# ----------------------------------------------------------------------------------------------------
+%package -n	open-xchange-meta-mobility
+Group:          Applications/Productivity
+Summary:	The Open-Xchange Meta package for Business Mobility
+Requires:	open-xchange-usm, open-xchange-help-usm-eas
+
+
+%description -n open-xchange-meta-mobility
+The Open-Xchange Meta package for Business Mobility
+
+Authors:
+--------
+    Open-Xchange
 
 # ----------------------------------------------------------------------------------------------------
 
@@ -149,11 +162,11 @@ Authors:
 %defattr(-,root,root)
 %doc README.TXT
 
-%files -n open-xchange-meta-oxserver
+%files -n open-xchange-meta-server
 %defattr(-,root,root)
 %doc README.TXT
 
-%files -n open-xchange-meta-oxgui
+%files -n open-xchange-meta-gui
 %defattr(-,root,root)
 %doc README.TXT
 
@@ -165,7 +178,7 @@ Authors:
 %defattr(-,root,root)
 %doc README.TXT
 
-%files -n open-xchange-meta-oxsingleserver
+%files -n open-xchange-meta-singleserver
 %defattr(-,root,root)
 %doc README.TXT
 
