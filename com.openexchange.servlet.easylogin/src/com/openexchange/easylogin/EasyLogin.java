@@ -50,23 +50,24 @@
 package com.openexchange.easylogin;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.tools.servlet.http.Tools;
 
 /**
@@ -101,13 +102,15 @@ public class EasyLogin extends HttpServlet {
 
     private static boolean popUpOnError = true;
 
-    private static boolean allowInsecure = true;
+    private static boolean allowInsecure = false;
 
     private static String remoteIP = "NONE";
 
-    private static String authIdParameter = "authId";
+    private static final String authIdParameter = "authId";
 
-    private String authID;
+    private static String authID;
+    
+    private static String errorPageTemplate = "<html><body><h1>ERROR_MESSAGE</h1></body></html>";
 
     /**
      * Initializes a new {@link EasyLogin}
@@ -163,17 +166,14 @@ public class EasyLogin extends HttpServlet {
             final String login = req.getParameter(loginPara).trim().toLowerCase();
 
             logInfo("Login=" + login);
-            // TODO: check for / generate AuthID
+            // check for / generate AuthID
             if (req.getParameter(authIdParameter) == null || req.getParameter(authIdParameter).trim().length() == 0) {
-                
+                authID = UUIDs.getUnformattedString(UUID.randomUUID());
             } else {
                 authID = req.getParameter(authIdParameter).trim();
-            }            
-            // send login request via http
-            String urlString = "http://localhost" + AJAX_ROOT + "/login?action=login&name=" + login + "&password=" + password;
-            if (authID != null){
-                urlString = urlString + "&" + authIdParameter + "=" + authID;
             }
+            // send login request via https
+            String urlString = "https://localhost" + AJAX_ROOT + "/login?action=login&name=" + login + "&password=" + password + "&" + authIdParameter + "=" + authID;
             URL url = new URL(urlString);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setDoOutput(true);
@@ -181,7 +181,7 @@ public class EasyLogin extends HttpServlet {
             int i = 1;
             String hdrKey = null;
             String jSessionID = "";
-            // TODO: Handle login errors (wrong credentials etc)
+            
             while ((hdrKey = con.getHeaderFieldKey(i)) != null) {
                 if (hdrKey.equals("Set-Cookie")) {
                     String content = con.getHeaderField(i);
@@ -201,7 +201,7 @@ public class EasyLogin extends HttpServlet {
                     if (content.startsWith("JSESSIONID")) {
                         jSessionID = value;
                         logInfo("jSessionID : " + jSessionID);
-                    }                    
+                    }
                 }
                 i++;
             }
@@ -210,6 +210,7 @@ public class EasyLogin extends HttpServlet {
             String randomToken = "";
             BufferedReader rd = new BufferedReader(new InputStreamReader(con.getInputStream()));
             String line;
+            String errorMessage = null;
             while ((line = rd.readLine()) != null) {
                 Pattern randomPattern = Pattern.compile("\"random\":\"([^\"]*)");
                 Matcher randomMatcher = randomPattern.matcher(line);
@@ -217,28 +218,40 @@ public class EasyLogin extends HttpServlet {
                     randomToken = randomMatcher.group(1);
                     logInfo("randomToken : " + randomToken);
                 }
+                Pattern errorPattern = Pattern.compile("\"error\":\"([^\"]*)\"");
+                Matcher errorMatcher = errorPattern.matcher(line);
+                if (errorMatcher.find()) {
+                    errorMessage = errorMatcher.group(1);
+                }
             }
             rd.close();
-
-            // send redirect if login worked
-            logInfo("Login worked, sending redirect");
-            resp.sendRedirect(AJAX_ROOT + "/login;jsessionid=" + jSessionID + "?action=redirect&random=" + randomToken);            
-
+            con.disconnect();
+            
+            if (errorMessage == null){
+                // send redirect if login worked
+                logInfo("Login worked, sending redirect");
+                resp.sendRedirect(AJAX_ROOT + "/login;jsessionid=" + jSessionID + "?action=redirect&random=" + randomToken);
+            } else {
+                logInfo("Login did not work, sending errorPage");
+                String errorPage = errorPageTemplate.replace("ERROR_MESSAGE", errorMessage);
+                out.write(errorPage);
+            }
+            
         }
     }
 
     private static void logit(final String msg, final Throwable e, final boolean isError) {
         if (isError) {
             if (e != null) {
-                LOG.error("EasyLoginIP(" + remoteIP + "): " + msg, e);
+                LOG.error("EasyLogin IP: " + remoteIP + ", authId: " + authID + " : " + msg, e);
             } else {
-                LOG.error("EasyLoginIP(" + remoteIP + "): " + msg);
+                LOG.error("EasyLogin IP: " + remoteIP + ", authId: " + authID + " : " + msg);
             }
         } else {
             if (e != null) {
-                LOG.info("EasyLoginIP(" + remoteIP + "): " + msg, e);
+                LOG.info("EasyLogin IP: " + remoteIP + ", authId: " + authID + " : " + msg, e);
             } else {
-                LOG.info("EasyLoginIP(" + remoteIP + "): " + msg);
+                LOG.info("EasyLogin IP: " + remoteIP + ", authId: " + authID + " : " + msg);
             }
         }
     }
@@ -308,8 +321,39 @@ public class EasyLogin extends HttpServlet {
             } else {
                 logError("Could not find allowInsecure in properties-file, using default: " + allowInsecure);
             }
-
+            if (config.getProperty("com.openexchange.easylogin.errorPageTemplate") != null) {
+                String templateFileLocation = config.getProperty("com.openexchange.easylogin.errorPageTemplate", "");
+                File templateFile = new File(templateFileLocation);
+                if (templateFile.exists() && templateFile.canRead() && templateFile.isFile()){
+                    errorPageTemplate = getFileContents(templateFile);
+                    logInfo("Found an errorPage-template at " + templateFileLocation);
+                } else {
+                    logError("Could not find an errorPage-template at "+templateFileLocation+", using default.");
+                }
+            } else {
+                logError("No errorPage-template was specified, using default.");
+            }
         }
     }
 
+    static public String getFileContents(File file) {
+        StringBuilder stringBuilder = new StringBuilder();        
+        try {
+          BufferedReader input =  new BufferedReader(new FileReader(file));
+          try {
+            String line = null;
+            while (( line = input.readLine()) != null){
+              stringBuilder.append(line);
+              stringBuilder.append(System.getProperty("line.separator"));
+            }
+          }
+          finally {
+            input.close();
+          }
+        }
+        catch (IOException e){
+          logError(e.getMessage(), e);
+        }
+        return stringBuilder.toString();
+      }
 }
