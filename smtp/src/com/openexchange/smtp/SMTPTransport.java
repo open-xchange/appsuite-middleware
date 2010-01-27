@@ -73,7 +73,6 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
-import javax.mail.internet.ParseException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -678,14 +677,14 @@ public final class SMTPTransport extends MailTransport {
                  * Try to parse with JavaMail Content-Type implementation
                  */
                 new javax.mail.internet.ContentType(type);
-            } catch (final ParseException e) {
+            } catch (final javax.mail.internet.ParseException e) {
                 /*
                  * Sanitize Content-Type header
                  */
                 final String cts = sanitizer.toString();
                 try {
                     new javax.mail.internet.ContentType(cts);
-                } catch (final ParseException pe) {
+                } catch (final javax.mail.internet.ParseException pe) {
                     /*
                      * Still not parseable
                      */
