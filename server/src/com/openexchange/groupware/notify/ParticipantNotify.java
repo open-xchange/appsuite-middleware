@@ -55,7 +55,6 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
-import java.util.EnumSet;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -182,7 +181,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         if (suppressOXReminderHeader) {
             fuid = MailObject.DONT_SET;
         }
-        String type = (overrideType != null) ? overrideType.toString() : state.getType().toString();
+        final String type = (overrideType != null) ? overrideType.toString() : state.getType().toString();
         final MailObject mail = new MailObject(session, obj.getObjectID(), fuid, state.getModule(), type);
         mail.setFromAddr(UserStorage.getStorageUser(session.getUserId(), session.getContext()).getMail());
         mail.setToAddrs(name.toArray(new String[name.size()]));
