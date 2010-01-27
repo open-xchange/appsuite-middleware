@@ -52,13 +52,20 @@ package com.openexchange.ajax.task;
 import java.io.ByteArrayInputStream;
 import java.util.Date;
 import java.util.TimeZone;
+import junit.framework.AssertionFailedError;
 import com.openexchange.ajax.attach.actions.AttachRequest;
 import com.openexchange.ajax.attach.actions.AttachResponse;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.CommonAllResponse;
+import com.openexchange.ajax.framework.CommonListResponse;
+import com.openexchange.ajax.framework.ListIDs;
+import com.openexchange.ajax.task.actions.AllRequest;
 import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
 import com.openexchange.ajax.task.actions.GetResponse;
 import com.openexchange.ajax.task.actions.InsertRequest;
+import com.openexchange.ajax.task.actions.ListRequest;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.tasks.Create;
 import com.openexchange.groupware.tasks.Task;
 
@@ -102,6 +109,47 @@ public class TaskAttachmentTests extends AbstractAJAXSession {
         GetResponse response = client.execute(new GetRequest(task.getParentFolderID(), task.getObjectID()));
         task.setLastModified(response.getTimestamp());
         Task test = response.getTask(tz);
+        assertEquals("Creation date of attachment does not match.", creationDate, test.getLastModifiedOfNewestAttachment());
+    }
+
+    public void testLastModifiedOfNewestAttachmentWithAll() throws Throwable {
+        CommonAllResponse response = client.execute(new AllRequest(task.getParentFolderID(), new int[] {
+            Task.OBJECT_ID, Task.LAST_MODIFIED_OF_NEWEST_ATTACHMENT }, Task.OBJECT_ID, Order.ASCENDING));
+        task.setLastModified(response.getTimestamp());
+        Task test = null;
+        int objectIdPos = response.getColumnPos(Task.OBJECT_ID);
+        int lastModifiedOfNewestAttachmentPos = response.getColumnPos(Task.LAST_MODIFIED_OF_NEWEST_ATTACHMENT);
+        for (Object[] objA : response) {
+            if (task.getObjectID() == ((Integer) objA[objectIdPos]).intValue()) {
+                test = new Task();
+                test.setLastModifiedOfNewestAttachment(new Date(((Long) objA[lastModifiedOfNewestAttachmentPos]).longValue()));
+                break;
+            }
+        }
+        if (null == test) {
+            throw new AssertionFailedError("Can not find the created task with an attachment.");
+        }
+        assertEquals("Creation date of attachment does not match.", creationDate, test.getLastModifiedOfNewestAttachment());
+    }
+
+    public void testLastModifiedOfNewestAttachmentWithList() throws Throwable {
+        CommonListResponse response = client.execute(new ListRequest(
+            ListIDs.l(new int[] { task.getParentFolderID(), task.getObjectID() }),
+            new int[] { Task.OBJECT_ID, Task.LAST_MODIFIED_OF_NEWEST_ATTACHMENT }));
+        task.setLastModified(response.getTimestamp());
+        Task test = null;
+        int objectIdPos = response.getColumnPos(Task.OBJECT_ID);
+        int lastModifiedOfNewestAttachmentPos = response.getColumnPos(Task.LAST_MODIFIED_OF_NEWEST_ATTACHMENT);
+        for (Object[] objA : response) {
+            if (task.getObjectID() == ((Integer) objA[objectIdPos]).intValue()) {
+                test = new Task();
+                test.setLastModifiedOfNewestAttachment(new Date(((Long) objA[lastModifiedOfNewestAttachmentPos]).longValue()));
+                break;
+            }
+        }
+        if (null == test) {
+            throw new AssertionFailedError("Can not find the created task with an attachment.");
+        }
         assertEquals("Creation date of attachment does not match.", creationDate, test.getLastModifiedOfNewestAttachment());
     }
 }
