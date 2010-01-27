@@ -61,6 +61,7 @@ import com.openexchange.messaging.MessagingAction;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.generic.DefaultMessagingAccountManager;
+import com.openexchange.messaging.generic.ReadOnlyDynamicFormDescription;
 import com.openexchange.session.Session;
 
 /**
@@ -104,9 +105,10 @@ public final class TwitterMessagingService implements MessagingService {
     public TwitterMessagingService() {
         super();
         accountManager = new DefaultMessagingAccountManager(ID);
-        formDescription = new DynamicFormDescription();
+        final DynamicFormDescription formDescription = new DynamicFormDescription();
         formDescription.add(FormElement.input(TwitterConfiguration.TWITTER_LOGIN, "Login", true, ""));
         formDescription.add(FormElement.password(TwitterConfiguration.TWITTER_PASSWORD, "Password", true, ""));
+        this.formDescription = new ReadOnlyDynamicFormDescription(formDescription);
     }
 
     public MessagingAccountAccess getAccountAccess(final int accountId, final Session session) throws MessagingException {
