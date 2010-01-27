@@ -51,6 +51,7 @@ package com.openexchange.folderstorage.messaging;
 
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.messaging.MessagingFolder;
 
 /**
  * {@link MessagingFolderIdentifier} - A parsed messaging folder identifier:<br>
@@ -104,15 +105,25 @@ public final class MessagingFolderIdentifier {
         prev = pos + DELIM.length();
         pos = identifier.indexOf('/', prev);
         if (pos <= 0) {
-            throw FolderExceptionErrorMessage.INVALID_FOLDER_ID.create(identifier);
-        }
-        accountId = getUnsignedInteger(identifier.substring(prev, pos));
-        if (accountId <= 0) {
-            throw FolderExceptionErrorMessage.INVALID_FOLDER_ID.create(identifier);
-        }
-        fullname = identifier.substring(pos + 1);
+            /*
+             * "/" character is missing, then expect root folder
+             */
+            accountId = getUnsignedInteger(identifier.substring(prev));
+            if (accountId <= 0) {
+                throw FolderExceptionErrorMessage.INVALID_FOLDER_ID.create(identifier);
+            }
+            fullname = MessagingFolder.ROOT_FULLNAME;
 
-        fqn = identifier;
+            fqn = new StringBuilder(identifier).append('/').toString();
+        } else {
+            accountId = getUnsignedInteger(identifier.substring(prev, pos));
+            if (accountId <= 0) {
+                throw FolderExceptionErrorMessage.INVALID_FOLDER_ID.create(identifier);
+            }
+            fullname = identifier.substring(pos + 1);
+    
+            fqn = identifier;
+        }
     }
 
     /**
