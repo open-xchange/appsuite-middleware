@@ -64,8 +64,14 @@ public final class TwitterConfiguration {
         super();
     }
 
+    /**
+     * The configuration property name for login.
+     */
     public static final String TWITTER_LOGIN = "login";
 
+    /**
+     * The configuration property name for password.
+     */
     public static final String TWITTER_PASSWORD = "password";
 
 }
