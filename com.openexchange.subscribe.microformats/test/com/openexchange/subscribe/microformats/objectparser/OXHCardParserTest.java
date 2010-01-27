@@ -432,4 +432,17 @@ public class OXHCardParserTest extends TestCase {
         
         assertNull("Street (other) was not in the hcard, should be null", actual.getStreetOther());
     }
+    
+    public void testShouldStripTrailingWhitespaces(){
+        String html = 
+            "<div class=\"vcard\" id=\"a\">" +
+                "<span class=\"fn n\">\n" +
+                    "<span class=\"given-name\"> Terry </span>\n" +
+                "</span>\n" +
+            "</div>";
+        List<Contact> contacts = parser.parse(HCARD_SNIPPET);
+        Contact actual = contacts.get(0);
+        assertEquals("Should contain the given name without any whitespaces around it", "Terry", actual.getGivenName());
+    }
+    
 }
