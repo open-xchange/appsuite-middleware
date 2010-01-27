@@ -57,15 +57,15 @@ import java.util.TimeZone;
 import com.openexchange.i18n.tools.TemplateReplacement;
 
 /**
- * {@link AbstractDateReplacement} - An abstract class for date string
- * replacements using {@link DateFormat#format(Date)}.
+ * {@link AbstractDateReplacement} - An abstract class for date string replacements using {@link DateFormat#format(Date)}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public abstract class AbstractDateReplacement implements TemplateReplacement {
 
     private static final String PAT_ZONE = ", z";
+
+    private static final String PAT_DAY_OF_WEEK = "EEEE, ";
 
     protected final boolean withTime;
 
@@ -83,8 +83,7 @@ public abstract class AbstractDateReplacement implements TemplateReplacement {
      * Initializes a new {@link AbstractDateReplacement}
      * 
      * @param date The date
-     * @param withTime <code>true</code> to include given date's time
-     *            information; otherwise <code>false</code>
+     * @param withTime <code>true</code> to include given date's time information; otherwise <code>false</code>
      */
     protected AbstractDateReplacement(final Date date, final boolean withTime) {
         this(date, withTime, null, null);
@@ -94,32 +93,16 @@ public abstract class AbstractDateReplacement implements TemplateReplacement {
      * Initializes a new {@link AbstractDateReplacement}
      * 
      * @param date The date
-     * @param withTime <code>true</code> to include given date's time and time
-     *            zone; otherwise <code>false</code>
+     * @param withTime <code>true</code> to include given date's time and time zone; otherwise <code>false</code>
      * @param locale The locale
      * @param timeZone The time zone; may be <code>null</code>
-     * 
      */
-    protected AbstractDateReplacement(final Date date, final boolean withTime, final Locale locale,
-            final TimeZone timeZone) {
+    protected AbstractDateReplacement(final Date date, final boolean withTime, final Locale locale, final TimeZone timeZone) {
         super();
         this.withTime = withTime;
         this.date = date;
-        this.dateFormat = getDateFormat(withTime, locale);
-        if (timeZone != null) {
-            if (withTime && dateFormat instanceof SimpleDateFormat) {
-                /*
-                 * Extend pattern to contain time zone information
-                 */
-                final SimpleDateFormat simpleDateFormat = (SimpleDateFormat) dateFormat;
-                final String pattern = simpleDateFormat.toPattern();
-                simpleDateFormat.applyPattern(new StringBuilder(pattern.length() + 3).append(pattern).append(PAT_ZONE)
-                        .toString());
-
-            }
-            this.timeZone = timeZone;
-            this.dateFormat.setTimeZone(timeZone);
-        }
+        this.dateFormat = getDateFormat(withTime, locale, timeZone);
+        this.timeZone = timeZone;
     }
 
     @Override
@@ -146,8 +129,7 @@ public abstract class AbstractDateReplacement implements TemplateReplacement {
     }
 
     /**
-     * Gets the replacement for associated date template or an empty string if
-     * applied {@link Date} object is <code>null</code>
+     * Gets the replacement for associated date template or an empty string if applied {@link Date} object is <code>null</code>
      */
     public String getReplacement() {
         return date == null ? "" : dateFormat.format(date);
@@ -194,8 +176,7 @@ public abstract class AbstractDateReplacement implements TemplateReplacement {
         }
         if (!other.changed()) {
             /*
-             * Other replacement does not reflect a changed value; leave
-             * unchanged
+             * Other replacement does not reflect a changed value; leave unchanged
              */
             return false;
         }
@@ -210,21 +191,7 @@ public abstract class AbstractDateReplacement implements TemplateReplacement {
             return;
         }
         this.locale = locale;
-        this.dateFormat = getDateFormat(withTime, locale);
-        if (this.timeZone != null) {
-            if (withTime && dateFormat instanceof SimpleDateFormat) {
-                /*
-                 * Time zone was set before: extend new pattern to contain time
-                 * zone information
-                 */
-                final SimpleDateFormat simpleDateFormat = (SimpleDateFormat) dateFormat;
-                final String pattern = simpleDateFormat.toPattern();
-                simpleDateFormat.applyPattern(new StringBuilder(pattern.length() + 3).append(pattern).append(PAT_ZONE)
-                        .toString());
-            }
-            this.dateFormat.setTimeZone(timeZone);
-        }
-
+        this.dateFormat = getDateFormat(withTime, locale, this.timeZone);
     }
 
     private void applyTimeZone(final TimeZone timeZone) {
@@ -233,25 +200,43 @@ public abstract class AbstractDateReplacement implements TemplateReplacement {
         }
         if (withTime && this.timeZone == null && dateFormat instanceof SimpleDateFormat) {
             /*
-             * Time zone was not set before: extend pattern to contain time zone
-             * information
+             * Time zone was not set before: extend pattern to contain time zone information
              */
             final SimpleDateFormat simpleDateFormat = (SimpleDateFormat) dateFormat;
             final String pattern = simpleDateFormat.toPattern();
-            simpleDateFormat.applyPattern(new StringBuilder(pattern.length() + 3).append(pattern).append(PAT_ZONE)
-                    .toString());
+            simpleDateFormat.applyPattern(new StringBuilder(pattern.length() + 3).append(pattern).append(PAT_ZONE).toString());
 
         }
         this.timeZone = timeZone;
         this.dateFormat.setTimeZone(timeZone);
     }
 
-    private static DateFormat getDateFormat(final boolean withTime, final Locale locale) {
+    private static DateFormat getDateFormat(final boolean withTime, final Locale locale, final TimeZone timeZone) {
+        final Locale l = locale == null ? Locale.ENGLISH : locale;
         if (withTime) {
-            return locale == null ? DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.DEFAULT,
-                    Locale.ENGLISH) : DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.DEFAULT, locale);
+            final SimpleDateFormat sdf = (SimpleDateFormat) DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.DEFAULT, l);
+            /*
+             * Add day of week to pattern and time zone if not null
+             */
+            final String pattern = sdf.toPattern();
+            final StringBuilder builder = new StringBuilder(pattern.length() + 9).append(PAT_DAY_OF_WEEK).append(pattern);
+            if (null != timeZone) {
+                builder.append(PAT_ZONE);
+                sdf.applyPattern(builder.toString());
+                sdf.setTimeZone(timeZone);
+            } else {
+                sdf.applyPattern(builder.toString());
+            }
+            return sdf;
         }
-        return locale == null ? DateFormat.getDateInstance(DateFormat.DEFAULT, Locale.ENGLISH) : DateFormat
-                .getDateInstance(DateFormat.DEFAULT, locale);
+        /*
+         * The date-only instance
+         */
+        final DateFormat format = DateFormat.getDateInstance(DateFormat.DEFAULT, l);
+        if (null != timeZone) {
+            format.setTimeZone(timeZone);
+        }
+        return format;
     }
+
 }
