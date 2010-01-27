@@ -146,7 +146,7 @@ public class HTMLMicroformatParser implements OXMFParser {
     private void parse(Node node, Map<String, String> element, List<String> attributeKeys) {
         String value = isImageElement(node)? getSrc(node) : isAnchorElement(node) ? getHref(node) : node.getTextContent();
         for (String key : attributeKeys) {
-            element.put(key, value);
+            element.put(key, value.trim());
         }
     }
 

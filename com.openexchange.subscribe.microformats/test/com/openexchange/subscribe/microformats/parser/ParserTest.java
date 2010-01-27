@@ -77,7 +77,6 @@ public abstract class ParserTest extends TestCase {
         
         assertEquals("Bla2", blaMap2.get("ox_bla"));
         assertEquals("Blupp2", blaMap2.get("ox_blupp"));
-        
     }
     
     public void testCollectImageSources() throws SubscriptionException {
@@ -117,7 +116,6 @@ public abstract class ParserTest extends TestCase {
         
         assertEquals("Bla2", blaMap2.get("ox_bla"));
         assertEquals("Blupp2", blaMap2.get("ox_blupp"));
-        
     }
 
     public void testLong() throws SubscriptionException {
@@ -127,6 +125,23 @@ public abstract class ParserTest extends TestCase {
                 "</div> </body> </html>";
         final List<Map<String, String>> parsed = parse(text);
         assertNotNull(parsed);
+    }
+    
+    public void testRemovalOfTrailingWhitespaces() throws SubscriptionException{
+        final String text = 
+            "<html><head /><body>" +
+        		"<div class='ox_contact'>" +
+        		    "<span class='ox_bla'> Bla </span>" +
+        		 "</div>" +
+        	"</body></html>";
+        final List<Map<String, String>> parsed = parse(text);
+        
+        assertNotNull("Parsed was null", parsed);
+        assertEquals("Expected one element", 1, parsed.size());
+        
+        final Map blaMap = parsed.get(0);
+        
+        assertEquals("Should remove trailing whitespaces", "Bla", blaMap.get("ox_bla"));
     }
     
     protected abstract List<Map<String, String>> parse(String text) throws SubscriptionException;
