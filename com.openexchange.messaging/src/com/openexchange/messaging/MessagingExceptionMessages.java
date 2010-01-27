@@ -121,6 +121,7 @@ public final class MessagingExceptionMessages implements LocalizableStrings {
 
     // Communication error: %1$s
     public static final String COMMUNICATION_ERROR_MSG = "Communication error: %1$s";
+
     /**
      * Initializes a new {@link MessagingExceptionMessages}.
      */
