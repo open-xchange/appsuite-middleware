@@ -51,6 +51,7 @@ package com.openexchange.sessiond;
 
 import java.io.FileInputStream;
 import java.util.Properties;
+import java.util.UUID;
 
 import junit.framework.TestCase;
 
@@ -59,6 +60,7 @@ import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.test.TestInit;
@@ -167,7 +169,7 @@ public class SessiondTest extends TestCase {
                 return testUser1;
             }
             public String getAuthId() {
-                return "authId";
+                return UUIDs.getUnformattedString(UUID.randomUUID());
             }
         });
     }
@@ -198,7 +200,7 @@ public class SessiondTest extends TestCase {
                 return testUser1;
             }
             public String getAuthId() {
-                return "authId";
+                return UUIDs.getUnformattedString(UUID.randomUUID());
             }
         });
         sessiondCon.refreshSession(sessionId);
@@ -230,7 +232,7 @@ public class SessiondTest extends TestCase {
                 return testUser1;
             }
             public String getAuthId() {
-                return "authId";
+                return UUIDs.getUnformattedString(UUID.randomUUID());
             }
         });
         sessiondCon.removeSession(sessionId);
@@ -262,7 +264,7 @@ public class SessiondTest extends TestCase {
                 return testUser1;
             }
             public String getAuthId() {
-                return "authId";
+                return UUIDs.getUnformattedString(UUID.randomUUID());
             }
         });
         sessiondCon.refreshSession(sessionId);
