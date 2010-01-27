@@ -85,6 +85,8 @@ public class MimeAddressMessagingHeader implements MessagingHeader {
             return retval;
         } catch (final AddressException e) {
             throw MessagingExceptionCodes.ADDRESS_ERROR.create(e, e.getMessage());
+        } catch (final IllegalArgumentException e) {
+            throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -101,6 +103,8 @@ public class MimeAddressMessagingHeader implements MessagingHeader {
             return new MimeAddressMessagingHeader(name, new QuotedInternetAddress(address));
         } catch (final AddressException e) {
             throw MessagingExceptionCodes.ADDRESS_ERROR.create(e, e.getMessage());
+        } catch (final IllegalArgumentException e) {
+            throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -123,6 +127,9 @@ public class MimeAddressMessagingHeader implements MessagingHeader {
 
     private MimeAddressMessagingHeader(final String name, final String address) {
         super();
+        if (null == address) {
+            throw new IllegalArgumentException("Address is null.");
+        }
         this.address = address;
         this.name = name;
         internetAddress = null;
@@ -130,6 +137,9 @@ public class MimeAddressMessagingHeader implements MessagingHeader {
 
     private MimeAddressMessagingHeader(final String name, final QuotedInternetAddress internetAddress) {
         super();
+        if (null == internetAddress) {
+            throw new IllegalArgumentException("Internet address is null.");
+        }
         this.name = name;
         this.internetAddress = internetAddress;
         address = null;
@@ -146,7 +156,7 @@ public class MimeAddressMessagingHeader implements MessagingHeader {
      * @return The RFC 822 / RFC 2047 encoded address
      */
     public String getValue() {
-        return internetAddress.toString();
+        return internetAddress == null ? address : internetAddress.toString();
     }
 
     /**
