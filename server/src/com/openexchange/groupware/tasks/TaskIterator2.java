@@ -49,19 +49,24 @@
 
 package com.openexchange.groupware.tasks;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
-import com.openexchange.api2.OXException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.Types;
+import com.openexchange.groupware.attach.AttachmentBase;
+import com.openexchange.groupware.attach.AttachmentException;
+import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.server.impl.DBPool;
@@ -162,11 +167,10 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
         final List<Integer> tmp1 = new ArrayList<Integer>(attributes.length);
         final List<Integer> tmp2 = new ArrayList<Integer>(attributes.length);
         for (final int column : attributes) {
-            if (null == Mapping.getMapping(column)
-                && Task.FOLDER_ID != column) {
-                tmp2.add(Integer.valueOf(column));
+            if (null == Mapping.getMapping(column) && Task.FOLDER_ID != column) {
+                tmp2.add(I(column));
             } else {
-                tmp1.add(Integer.valueOf(column));
+                tmp1.add(I(column));
             }
         }
         this.taskAttributes = Collections.toArray(tmp1);
@@ -180,13 +184,13 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
     private void modifyAdditionalAttributes(final List<Integer> additional) {
         // If participants are requested we also add users automatically. Users
         // are calculated from participants.
-        if (additional.contains(Integer.valueOf(Task.USERS))) {
-            if (!additional.contains(Integer.valueOf(Task.PARTICIPANTS))) {
-                additional.add(Integer.valueOf(Task.PARTICIPANTS));
+        if (additional.contains(I(Task.USERS))) {
+            if (!additional.contains(I(Task.PARTICIPANTS))) {
+                additional.add(I(Task.PARTICIPANTS));
             }
             // Not removed users will give SearchIteratorException in code
             // below.
-            additional.remove(Integer.valueOf(Task.USERS));
+            additional.remove(I(Task.USERS));
         }
     }
 
@@ -219,7 +223,7 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
     /**
      * {@inheritDoc}
      */
-    public Task next() throws SearchIteratorException, OXException {
+    public Task next() throws SearchIteratorException {
         if (ready.isEmpty() && !preread.hasNext()) {
             throw new SearchIteratorException(exc);
         }
@@ -229,6 +233,9 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
                 tasks.addAll(preread.take(additionalAttributes.length > 0));
                 for (final int attribute : additionalAttributes) {
                     switch (attribute) {
+                    case Task.LAST_MODIFIED_OF_NEWEST_ATTACHMENT:
+                        addLastModifiedOfNewestAttachment(tasks);
+                        break;
                     case Task.PARTICIPANTS:
                         try {
                             readParticipants(tasks);
@@ -291,7 +298,7 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
         }
         final Map<Integer, Set<TaskParticipant>> parts = partStor.selectParticipants(ctx, ids, type);
         for (final Task task : tasks) {
-            final Set<TaskParticipant> participants = parts.get(Integer.valueOf(task.getObjectID()));
+            final Set<TaskParticipant> participants = parts.get(I(task.getObjectID()));
             if (null != participants) {
                 task.setParticipants(TaskLogic.createParticipants(participants));
                 task.setUsers(TaskLogic.createUserParticipants(participants));
@@ -299,6 +306,20 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
         }
     }
 
+    private void addLastModifiedOfNewestAttachment(List<Task> tasks) throws SearchIteratorException {
+        AttachmentBase attachmentBase = Attachments.getInstance();
+        try {
+            for (Task task : tasks) {
+                Date newestCreationDate = attachmentBase.getNewestCreationDate(task.getObjectID(), Types.TASK, ctx);
+                if (null != newestCreationDate) {
+                    task.setLastModifiedOfNewestAttachment(newestCreationDate);
+                }
+            }
+        } catch (AttachmentException e) {
+            throw new SearchIteratorException(e);
+        }
+    }
+    
     /**
      * {@inheritDoc}
      */

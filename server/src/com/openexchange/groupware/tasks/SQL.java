@@ -225,6 +225,7 @@ public final class SQL {
             final Mapper<?> mapper = Mapping.getMapping(i);
             if (null == mapper) {
                 switch (i) {
+                case Task.LAST_MODIFIED_OF_NEWEST_ATTACHMENT:
                 case Task.PARTICIPANTS:
                 case Task.USERS:
                 case Task.ALARM:

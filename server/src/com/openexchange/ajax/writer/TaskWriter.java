@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.writer;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.util.Collections;
 import java.util.HashMap;
@@ -143,14 +144,12 @@ public class TaskWriter extends CalendarWriter {
     }
 
     public void write(final int field, final Task task, final JSONArray array) throws JSONException {
-        final TaskFieldWriter writer = WRITER_MAP.get(Integer.valueOf(field));
+        final TaskFieldWriter writer = WRITER_MAP.get(I(field));
         if (writer != null) {
             writer.write(task, array);
             return;
         }
-        /*
-         * No appropriate static writer found, write manually
-         */
+        // No appropriate static writer found, write manually
         switch (field) {
         case Task.CREATION_DATE:
             writeValue(task.getCreationDate(), timeZone, array);
@@ -174,14 +173,14 @@ public class TaskWriter extends CalendarWriter {
          * Writes this writer's value taken from specified task object to given
          * JSON array
          *
-         * @param taskObject
+         * @param task
          *            The task object
-         * @param jsonArray
+         * @param json
          *            The JSON array
          * @throws JSONException
          *             If writing to JSON array fails
          */
-        void write(Task taskObject, JSONArray jsonArray) throws JSONException;
+        void write(Task task, JSONArray json) throws JSONException;
     }
 
     /*-
@@ -391,7 +390,12 @@ public class TaskWriter extends CalendarWriter {
                 writeValue(taskObject.getNumberOfAttachments(), jsonArray, taskObject.containsNumberOfAttachments());
             }
         });
-
+        m.put(I(Task.LAST_MODIFIED_OF_NEWEST_ATTACHMENT), new TaskFieldWriter() {
+            public void write(Task task, JSONArray json) {
+                writeValue(task.getLastModifiedOfNewestAttachment(), json, task.containsLastModifiedOfNewestAttachment());
+                
+            }
+        });
         m.put(Integer.valueOf(Task.NUMBER_OF_LINKS), new TaskFieldWriter() {
             public void write(final Task taskObject, final JSONArray jsonArray) throws JSONException {
                 writeValue(taskObject.getNumberOfLinks(), jsonArray, taskObject.containsNumberOfLinks());
