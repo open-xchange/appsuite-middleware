@@ -49,6 +49,7 @@
 
 package com.openexchange.voipnow.json.actions;
 
+import static com.openexchange.voipnow.json.actions.ActionUtility.urlEncode;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.regex.Matcher;
@@ -115,7 +116,7 @@ public final class NewCallAction extends AbstractVoipNowHTTPAction<GetMethod> {
                             jsonArray = new JSONArray(data.toString());
                         } catch (final JSONException je) {
                             log.error("Request data is not a JSON array.", je);
-                            //throw new AjaxException(AjaxException.Code.JSONError, je, je.getMessage());
+                            // throw new AjaxException(AjaxException.Code.JSONError, je, je.getMessage());
                         }
                     }
                 }
@@ -128,11 +129,11 @@ public final class NewCallAction extends AbstractVoipNowHTTPAction<GetMethod> {
              * Compose and apply query string without starting '?' character
              */
             final StringBuilder builder = new StringBuilder(256);
-            builder.append("PhoneNumberToCall=").append(receiverNumber);
-            builder.append('&').append("FromExtension=").append(callerNumber);
-            builder.append('&').append("CallerID=").append(ActionUtility.urlEncode(receiverDisplayName));
+            builder.append("PhoneNumberToCall=").append(urlEncode(receiverNumber));
+            builder.append('&').append("FromExtension=").append(urlEncode(callerNumber));
+            builder.append('&').append("CallerID=").append(urlEncode(receiverDisplayName));
             builder.append('&').append("WaitForPickup=").append(timeout);
-            builder.append('&').append("Account=").append(ActionUtility.urlEncode(setting.getLogin()));
+            builder.append('&').append("Account=").append(urlEncode(setting.getLogin()));
             builder.append('&').append("PassSHA256=").append(Utility.getSha256(setting.getPassword(), "hex"));
             builder.append('&').append("AnswerFormat=xml");
             /*
