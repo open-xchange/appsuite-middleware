@@ -2364,7 +2364,7 @@ public class Folder extends SessionServlet {
                         false,
                         messagingAccount.getDisplayName(),
                         1,
-                        MailFolderUtility.prepareFullname(accountId, MailFolder.DEFAULT_FOLDER_ID),
+                        MessagingFolder.ROOT_FULLNAME,
                         FolderObject.SYSTEM_MODULE,
                         false);
                 }
