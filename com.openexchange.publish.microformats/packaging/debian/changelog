@@ -1,3 +1,9 @@
+open-xchange-publish-microformats (6.15.0.0-2) unstable; urgency=low
+
+  * first build for 6.15-rev3
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 27 Jan 2010 14:55:47 +0100
+
 open-xchange-publish-microformats (6.15.0.0-1) unstable; urgency=low
 
   * first build for 6.15-rev2

@@ -38,7 +38,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:        @OXVERSION@
-%define         ox_release 1
+%define         ox_release 2
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -82,5 +82,7 @@ ant -Dguiprefix=%{docroot}/ox6 -Dlib.dir=/opt/open-xchange/lib -Ddestdir=%{build
 %config(noreplace) /opt/open-xchange/etc/groupware/settings/upsell.properties
 %{docroot}/ox6/plugins/com.openexchange.upsell.generic/*
 %changelog
+* Tue Jan 26 2010 - choeger@open-xchange.com
+ - Bugfix ID#15262: usm and upsell gui plugins in the wrong directory on centos
 * Mon Oct 05 2009 - benjamin.otterbach@open-xchange.com
  - Enhancement: Changed default upsell text.

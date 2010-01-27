@@ -1,3 +1,9 @@
+open-xchange-activation (1.1.1-15) unstable; urgency=low
+
+  * first build for 6.15-rev3
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 27 Jan 2010 14:49:44 +0100
+
 open-xchange-activation (1.1.1-14) unstable; urgency=low
 
   * first build for 6.15-rev2

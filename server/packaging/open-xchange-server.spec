@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 1
+%define		ox_release 2
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -490,6 +490,22 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed Jan 27 2010 - tobias.prinz@open-xchange.com
+ - Bugfix #15274: Values read from OXMF are now stripped of trailing whitespaces
+ 2010-01-27 - thorben.betten@open-xchange.com
+ - Bugfix #15258: Added day of week to appointment notification's start/end date replacement
+* Tue Jan 26 2010 - tobias.prinz@open-xchange.com
+ - Bugfix #15247: Outlook CSV import now translates "E-mail Address" as EMAIL1 in English Outlook files, too
+* Mon Jan 25 2010 - thorben.betten@open-xchange.com
+ - Bugfix #15256: Fixed NPE in Unified Mail processing
+* Thu Jan 21 2010 - martin.herfurth@open-xchange.com
+ - Bugfix #14679: Changing interval of a weekly series.
+* Mon Jan 18 2010 - thorben.betten@open-xchange.com
+ - Bugfix #14425: Fixed KXML parser to properly check string length
+* Thu Jan 14 2010 - marcus.klein@open-xchange.com
+ - Bugfix #15202: Added old UpdateTask 
+* Wed Jan 13 2010 - martin.herfurth@open-xchange.com
+ - Bugfix #15112: Intelligent contact collector settings.
 * Mon Jan 11 2010 - thorben.betten@open-xchange.com
  - Bugfix #15061: Adding a warning to response object if an account's authentication fails
 * Mon Jan 11 2010 - martin.herfurth@open-xchange.com
