@@ -1,4 +1,8 @@
-* 2010-01-27 - thorben.betten@open-xchange.com
+* 2010-01-27 - tobias.prinz@open-xchange.com
+
+ - Bugfix #15274: Values read from OXMF are now stripped of trailing whitespaces
+ 
+ 2010-01-27 - thorben.betten@open-xchange.com
 
  - Bugfix #15258: Added day of week to appointment notification's start/end date replacement
 
