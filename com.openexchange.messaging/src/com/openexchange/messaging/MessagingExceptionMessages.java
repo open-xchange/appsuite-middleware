@@ -119,9 +119,6 @@ public final class MessagingExceptionMessages implements LocalizableStrings {
     // No create access on mail folder %1$s.
     public static final String NO_CREATE_ACCESS_MSG = "No create access on mail folder %1$s.";
 
-    // Communication error: %1$s
-    public static final String COMMUNICATION_ERROR_MSG = "Communication error: %1$s";
-
     /**
      * Initializes a new {@link MessagingExceptionMessages}.
      */
