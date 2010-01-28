@@ -95,8 +95,8 @@ public final class TwitterMessagingAccountTransport implements MessagingAccountT
         this.account = account;
         try {
             twitterService = TwitterMessagingServiceRegistry.getServiceRegistry().getService(TwitterService.class, true);
-            final String login = (String) account.getConfiguration().get(TwitterConfiguration.TWITTER_LOGIN);
-            final String password = (String) account.getConfiguration().get(TwitterConfiguration.TWITTER_PASSWORD);
+            final String login = (String) account.getConfiguration().get(TwitterConstants.TWITTER_LOGIN);
+            final String password = (String) account.getConfiguration().get(TwitterConstants.TWITTER_PASSWORD);
             twitterAccess = twitterService.getTwitterAccess(login, password);
         } catch (final ServiceException e) {
             throw new MessagingException(e);

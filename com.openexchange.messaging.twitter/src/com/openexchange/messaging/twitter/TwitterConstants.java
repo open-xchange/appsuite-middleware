@@ -57,11 +57,14 @@ package com.openexchange.messaging.twitter;
 public final class TwitterConstants {
 
     /**
-     * Initializes a new {@link TwitterConstants}.
+     * The configuration property name for login.
      */
-    private TwitterConstants() {
-        super();
-    }
+    public static final String TWITTER_LOGIN = "login";
+
+    /**
+     * The configuration property name for password.
+     */
+    public static final String TWITTER_PASSWORD = "password";
 
     /**
      * The max. length of a tweet: 140 characters.
@@ -97,5 +100,12 @@ public final class TwitterConstants {
      * The twitter time line length.
      */
     public static final int TIMELINE_LENGTH = 20;
+
+    /**
+     * Initializes a new {@link TwitterConstants}.
+     */
+    private TwitterConstants() {
+        super();
+    }
 
 }

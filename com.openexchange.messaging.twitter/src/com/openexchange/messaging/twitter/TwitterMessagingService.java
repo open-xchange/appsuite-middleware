@@ -106,8 +106,8 @@ public final class TwitterMessagingService implements MessagingService {
         super();
         accountManager = new DefaultMessagingAccountManager(ID);
         final DynamicFormDescription formDescription = new DynamicFormDescription();
-        formDescription.add(FormElement.input(TwitterConfiguration.TWITTER_LOGIN, "Login", true, ""));
-        formDescription.add(FormElement.password(TwitterConfiguration.TWITTER_PASSWORD, "Password", true, ""));
+        formDescription.add(FormElement.input(TwitterConstants.TWITTER_LOGIN, "Login", true, ""));
+        formDescription.add(FormElement.password(TwitterConstants.TWITTER_PASSWORD, "Password", true, ""));
         this.formDescription = new ReadOnlyDynamicFormDescription(formDescription);
     }
 
