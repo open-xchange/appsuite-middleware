@@ -160,7 +160,7 @@ public final class TwitterMessagingFolderAccess implements MessagingFolderAccess
     /**
      * The constant to return or represent an empty path.
      */
-    public static final MessagingFolder[] EMPTY_PATH = new MessagingFolder[0];
+    private static final MessagingFolder[] EMPTY_PATH = new MessagingFolder[0];
 
     public MessagingFolder[] getPath2DefaultFolder(final String folderId) throws MessagingException {
         return EMPTY_PATH;
