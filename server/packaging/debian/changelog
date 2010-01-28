@@ -1,3 +1,9 @@
+open-xchange-server (6.12.0.0-14) unstable; urgency=low
+
+  * Second build for PTF 2010012710001374
+
+ -- Benjamin Otterbach <benjamin.otterbach@open-xchange.com>  Thu, 28 Jan 2010 18:56:36 +0100
+
 open-xchange-server (6.12.0.0-13) unstable; urgency=low
 
   * First build for PTF 2010012710001374
