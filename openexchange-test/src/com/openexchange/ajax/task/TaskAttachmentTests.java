@@ -54,7 +54,6 @@ import java.util.Date;
 import java.util.TimeZone;
 import junit.framework.AssertionFailedError;
 import com.openexchange.ajax.attach.actions.AttachRequest;
-import com.openexchange.ajax.attach.actions.AttachResponse;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
@@ -82,6 +81,8 @@ public class TaskAttachmentTests extends AbstractAJAXSession {
 
     private Task task;
 
+    private int attachmentId;
+
     private Date creationDate;
 
     public TaskAttachmentTests(String name) {
@@ -95,8 +96,10 @@ public class TaskAttachmentTests extends AbstractAJAXSession {
         tz = client.getValues().getTimeZone();
         task = Create.createWithDefaults(folderId, "Test task for testing attachments");
         client.execute(new InsertRequest(task, tz)).fillTask(task);
-        AttachResponse response = client.execute(new AttachRequest(task, "test.txt", new ByteArrayInputStream("Test".getBytes()), "text/plain"));
-        creationDate = response.getTimestamp();
+        attachmentId = client.execute(new AttachRequest(task, "test.txt", new ByteArrayInputStream("Test".getBytes()), "text/plain")).getId();
+        com.openexchange.ajax.attach.actions.GetResponse response = client.execute(new com.openexchange.ajax.attach.actions.GetRequest(task, attachmentId));
+        long timestamp = response.getAttachment().getCreationDate().getTime();
+        creationDate = new Date(timestamp - tz.getOffset(timestamp));
     }
 
     @Override
