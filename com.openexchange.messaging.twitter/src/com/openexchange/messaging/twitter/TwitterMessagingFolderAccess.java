@@ -174,10 +174,10 @@ public final class TwitterMessagingFolderAccess implements MessagingFolderAccess
         return EMPTY_PATH;
     }
 
-    public Quota[] getQuotas(final String folder, final Type[] types) throws MessagingException {
-        if (!EMPTY.equals(folder)) {
+    public Quota[] getQuotas(final String folderId, final Type[] types) throws MessagingException {
+        if (!EMPTY.equals(folderId)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
-                folder,
+                folderId,
                 Integer.valueOf(id),
                 TwitterMessagingService.getServiceId(),
                 Integer.valueOf(user),
