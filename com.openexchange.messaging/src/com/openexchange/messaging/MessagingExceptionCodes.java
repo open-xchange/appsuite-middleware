@@ -174,6 +174,17 @@ public enum MessagingExceptionCodes implements OXErrorMessage {
         return null;
     }
 
+    private static final Object[] EMPTY = new Object[0];
+
+    /**
+     * Creates a new messaging exception of this error type with no message arguments.
+     * 
+     * @return A new twitter exception
+     */
+    public MessagingException create() {
+        return MessagingExceptionFactory.getInstance().create(this, EMPTY);
+    }
+
     /**
      * Creates a new messaging exception of this error type with specified message arguments.
      * 
