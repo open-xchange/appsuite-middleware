@@ -163,6 +163,14 @@ public final class TwitterMessagingFolderAccess implements MessagingFolderAccess
     private static final MessagingFolder[] EMPTY_PATH = new MessagingFolder[0];
 
     public MessagingFolder[] getPath2DefaultFolder(final String folderId) throws MessagingException {
+        if (!EMPTY.equals(folderId)) {
+            throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
+                folderId,
+                Integer.valueOf(id),
+                TwitterMessagingService.getServiceId(),
+                Integer.valueOf(user),
+                Integer.valueOf(cid));
+        }
         return EMPTY_PATH;
     }
 
