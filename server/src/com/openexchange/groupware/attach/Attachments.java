@@ -60,6 +60,7 @@ import com.openexchange.groupware.contact.ContactsAttachment;
 import com.openexchange.groupware.tasks.TaskAttachmentListener;
 import com.openexchange.groupware.tasks.TaskAuthorization;
 import com.openexchange.groupware.tx.DBPoolProvider;
+import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.tools.service.ServicePriorityConflictException;
 import com.openexchange.tools.service.SpecificServiceChooser;
 
@@ -67,7 +68,7 @@ public abstract class Attachments {
 
     private static final Map<Integer, SpecificServiceChooser<AttachmentAuthorization>> authz = new HashMap<Integer, SpecificServiceChooser<AttachmentAuthorization>>();
     private static final Map<Integer, SpecificServiceChooser<AttachmentListener>> listener = new HashMap<Integer, SpecificServiceChooser<AttachmentListener>>();
-	
+
     private static final AttachmentBaseImpl impl = new AttachmentBaseImpl(new DBPoolProvider());
     
     static {
@@ -123,6 +124,10 @@ public abstract class Attachments {
 
 
     public static AttachmentBase getInstance(){
-		return impl;
-	}
+        return impl;
+    }
+
+    public static AttachmentBase getInstance(DBProvider provider) {
+        return new AttachmentBaseImpl(provider);
+    }
 }

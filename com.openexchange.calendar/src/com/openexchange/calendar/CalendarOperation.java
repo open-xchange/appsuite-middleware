@@ -71,6 +71,10 @@ import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.Types;
+import com.openexchange.groupware.attach.AttachmentBase;
+import com.openexchange.groupware.attach.AttachmentException;
+import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.OXCalendarException;
@@ -83,6 +87,7 @@ import com.openexchange.groupware.container.Participants;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.tx.SimpleDBProvider;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
 import com.openexchange.tools.StringCollection;
@@ -220,7 +225,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                     }
                 }
                 
-                setAttachmentLastModified(cdao);
+                setAttachmentLastModified(readcon, ctx, cdao);
             } else {
                 final String text = "Object " + oid + " in context " + cdao.getContextID();
                 final OXObjectNotFoundException e = new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, APPOINTMENT, text);
@@ -737,7 +742,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                         ff.fillField(cdao, g++, co_rs);
                     }
                     
-                    setAttachmentLastModified(cdao);
+                    setAttachmentLastModified(readcon, c, cdao);
                 }
             } catch(final SQLException sqle) {
                 throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
@@ -1463,16 +1468,19 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         }
     }
     
-    private void setAttachmentLastModified(CalendarDataObject cdao) {
+    private void setAttachmentLastModified(Connection myCon, Context ctx, CalendarDataObject cdao) {
         if (!cdao.containsObjectID())
             return;
-        
-        if (false) //TODO: Has attachments?
-            return;
-        
-        Date date = null; //TODO:
-        
-        cdao.setLastModifiedOfNewestAttachment(date);
+        AttachmentBase attachmentBase = Attachments.getInstance(new SimpleDBProvider(myCon, null));
+        Date date = null;
+        try {
+            date = attachmentBase.getNewestCreationDate(cdao.getObjectID(), Types.APPOINTMENT, ctx);
+        } catch (AttachmentException e) {
+            LOG.error(e.getMessage(), e);
+        }
+        if (null != date) {
+            cdao.setLastModifiedOfNewestAttachment(date);
+        }
     }
 
     private static interface FieldFiller {

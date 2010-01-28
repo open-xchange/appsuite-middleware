@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.writer;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -508,7 +509,11 @@ public class AppointmentWriter extends CalendarWriter {
                         .containsNumberOfAttachments());
             }
         });
-
+        m.put(I(Appointment.LAST_MODIFIED_OF_NEWEST_ATTACHMENT), new AppointmentFieldWriter() {
+            public void write(Appointment appointment, JSONArray json) {
+                writeValue(appointment.getLastModifiedOfNewestAttachment(), json, appointment.containsLastModifiedOfNewestAttachment());
+            }
+        });
         m.put(Integer.valueOf(Appointment.NUMBER_OF_LINKS), new AppointmentFieldWriter() {
             public void write(final Appointment appointmentObject, final JSONArray jsonArray) {
                 writeValue(appointmentObject.getNumberOfLinks(), jsonArray, appointmentObject.containsNumberOfLinks());
