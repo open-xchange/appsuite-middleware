@@ -80,6 +80,22 @@ if [ ${1:-0} -eq 2 ]; then
    # prevent bash from expanding, see bug 13316
    GLOBIGNORE='*'
 
+   # SoftwareChange_Request-210
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/ldapauth.properties
+   if ! ox_exists_property subtreeSearch $pfile; then
+       ox_set_property subtreeSearch "false" $pfile
+   fi
+   if ! ox_exists_property searchFilter $pfile; then
+       ox_set_property searchFilter "(objectclass=posixAccount)" $pfile
+   fi
+   if ! ox_exists_property bindDN $pfile; then
+       ox_set_property bindDN "" $pfile
+   fi
+   if ! ox_exists_property bindDNPassword $pfile; then
+       ox_set_property bindDNPassword "" $pfile
+   fi
+
    # SoftwareChange_Request-134
    # -----------------------------------------------------------------------
    pfile=/opt/open-xchange/etc/groupware/ldapauth.properties

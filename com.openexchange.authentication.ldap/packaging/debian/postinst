@@ -25,6 +25,22 @@ postFix() {
 
   GLOBIGNORE='*'
 
+  # SoftwareChange_Request-210
+  # -----------------------------------------------------------------------
+  local pfile=/opt/open-xchange/etc/groupware/ldapauth.properties
+  if ! ox_exists_property subtreeSearch $pfile; then
+      ox_set_property subtreeSearch "false" $pfile
+  fi
+  if ! ox_exists_property searchFilter $pfile; then
+      ox_set_property searchFilter "(objectclass=posixAccount)" $pfile
+  fi
+  if ! ox_exists_property bindDN $pfile; then
+      ox_set_property bindDN "" $pfile
+  fi
+  if ! ox_exists_property bindDNPassword $pfile; then
+      ox_set_property bindDNPassword "" $pfile
+  fi
+
   # SoftwareChange_Request-134
   # -----------------------------------------------------------------------
   local pfile=/opt/open-xchange/etc/groupware/ldapauth.properties
