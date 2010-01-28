@@ -219,6 +219,8 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                         cdao.calculateRecurrence();
                     }
                 }
+                
+                setAttachmentLastModified(cdao);
             } else {
                 final String text = "Object " + oid + " in context " + cdao.getContextID();
                 final OXObjectNotFoundException e = new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, APPOINTMENT, text);
@@ -734,6 +736,8 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                     } else {
                         ff.fillField(cdao, g++, co_rs);
                     }
+                    
+                    setAttachmentLastModified(cdao);
                 }
             } catch(final SQLException sqle) {
                 throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
@@ -1457,6 +1461,18 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         if (!cdao.containsShownAs()) {
             cdao.setShownAs(CalendarDataObject.RESERVED); // auto correction
         }
+    }
+    
+    private void setAttachmentLastModified(CalendarDataObject cdao) {
+        if (!cdao.containsObjectID())
+            return;
+        
+        if (false) //TODO: Has attachments?
+            return;
+        
+        Date date = null; //TODO:
+        
+        cdao.setLastModifiedOfNewestAttachment(date);
     }
 
     private static interface FieldFiller {
