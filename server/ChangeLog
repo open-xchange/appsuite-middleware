@@ -1,3 +1,8 @@
+* 2010-01-28 - thorben.betten@open-xchange.com
+
+ - Bugfix #15269: If decoding with Java Charset fails due to buffer overflow decoding is tried again with bigger buffer and text to decode
+   is logged.
+
 * 2010-01-18 - thorben.betten@open-xchange.com
 
  - Bugfix #15128: Display of broken multipart/alternative mail
