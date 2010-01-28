@@ -105,7 +105,7 @@ public class LoginPageByFormActionStep extends AbstractStep<HtmlPage, Object> im
             int numberOfFormCounter = 1;
             for (final HtmlForm form : loginPage.getForms()) {
                 LOG.debug("Forms action attribute / number is : " + form.getActionAttribute() + " / " + numberOfFormCounter + ", should be " + actionOfLoginForm + " / "+numberOfForm);
-                if (form.getActionAttribute().startsWith(actionOfLoginForm) && numberOfForm == numberOfFormCounter & form.getInputsByName(nameOfUserField) != null) {
+                if (form.getActionAttribute().startsWith(actionOfLoginForm) && numberOfForm == numberOfFormCounter && form.getInputsByName(nameOfUserField) != null) {
                     loginForm = form;
                 }
                 numberOfFormCounter++;
