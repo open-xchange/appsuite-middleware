@@ -129,7 +129,7 @@ public class CommonWriter extends DataWriter {
             writeParameter(CommonFields.NUMBER_OF_ATTACHMENTS, commonObj.getNumberOfAttachments(), jsonObj);
         }
         if (commonObj.containsLastModifiedOfNewestAttachment()) {
-            writeParameter(CommonFields.LAST_MODIFIED_OF_NEWEST_ATTACHMENT_UTC, commonObj.getLastModified(), jsonObj);
+            writeParameter(CommonFields.LAST_MODIFIED_OF_NEWEST_ATTACHMENT_UTC, commonObj.getLastModifiedOfNewestAttachment(), jsonObj);
         }
     }
 }

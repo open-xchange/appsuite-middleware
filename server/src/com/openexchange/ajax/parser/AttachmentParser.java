@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.ajax.parser;
 
 import org.json.JSONException;
@@ -56,47 +54,47 @@ import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 
 public class AttachmentParser {
-	
-	/**
+
+    /**
      * TODO Error codes
-	 */    
+     */
     public static final class UnknownColumnException extends Exception {
-		private static final long serialVersionUID = -6760923740785771286L;
+        private static final long serialVersionUID = -6760923740785771286L;
 
-		private final String idString;
+        private final String idString;
 
-		public UnknownColumnException(final String idString){
-			this.idString = idString;
-		}
-		
-		public String getColumn(){
-			return idString;
-		}
-	}
-	
-	public AttachmentMetadata getAttachmentMetadata(final String json) throws JSONException {
-		return new JSONAttachmentMetadata(json);
-	}
-	
-	public AttachmentField[] getColumns(final String[] parameterValues) throws UnknownColumnException{
-		if(parameterValues == null) {
-			return null;
-		}
-		final AttachmentField[] columns = new AttachmentField[parameterValues.length];
-		int i = 0;
-		for(final String idString : parameterValues) {
-			int id = -1;
-			try {
-				id = Integer.valueOf(idString);
-			} catch (final NumberFormatException x) {
-				throw new UnknownColumnException(idString);
-			}
-			final AttachmentField f = AttachmentField.get(id);
-			if(f == null) {
-				throw new UnknownColumnException(idString);
-			}
-			columns[i++] = f;
-		}
-		return columns;
-	}
+        public UnknownColumnException(final String idString){
+            this.idString = idString;
+        }
+
+        public String getColumn(){
+            return idString;
+        }
+    }
+
+    public AttachmentMetadata getAttachmentMetadata(final String json) throws JSONException {
+        return new JSONAttachmentMetadata(json);
+    }
+
+    public AttachmentField[] getColumns(final String[] parameterValues) throws UnknownColumnException{
+        if(parameterValues == null) {
+            return null;
+        }
+        final AttachmentField[] columns = new AttachmentField[parameterValues.length];
+        int i = 0;
+        for(final String idString : parameterValues) {
+            int id = -1;
+            try {
+                id = Integer.parseInt(idString);
+            } catch (final NumberFormatException x) {
+                throw new UnknownColumnException(idString);
+            }
+            final AttachmentField f = AttachmentField.get(id);
+            if(f == null) {
+                throw new UnknownColumnException(idString);
+            }
+            columns[i++] = f;
+        }
+        return columns;
+    }
 }
