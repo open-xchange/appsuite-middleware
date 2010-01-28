@@ -47,111 +47,123 @@
  *
  */
 
-package com.openexchange.ajax.task;
+package com.openexchange.ajax.appointment;
 
 import java.io.ByteArrayInputStream;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 import junit.framework.AssertionFailedError;
+import com.openexchange.ajax.appointment.action.AllRequest;
+import com.openexchange.ajax.appointment.action.DeleteRequest;
+import com.openexchange.ajax.appointment.action.GetRequest;
+import com.openexchange.ajax.appointment.action.GetResponse;
+import com.openexchange.ajax.appointment.action.InsertRequest;
+import com.openexchange.ajax.appointment.action.ListRequest;
 import com.openexchange.ajax.attach.actions.AttachRequest;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.ListIDs;
-import com.openexchange.ajax.task.actions.AllRequest;
-import com.openexchange.ajax.task.actions.DeleteRequest;
-import com.openexchange.ajax.task.actions.GetRequest;
-import com.openexchange.ajax.task.actions.GetResponse;
-import com.openexchange.ajax.task.actions.InsertRequest;
-import com.openexchange.ajax.task.actions.ListRequest;
-import com.openexchange.groupware.search.Order;
-import com.openexchange.groupware.tasks.Create;
-import com.openexchange.groupware.tasks.Task;
+import com.openexchange.groupware.calendar.TimeTools;
+import com.openexchange.groupware.container.Appointment;
 
 /**
- * Attachment tests for tasks.
+ * Attachment tests for appointments.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class TaskAttachmentTests extends AbstractAJAXSession {
+public class AppointmentAttachmentTests extends AbstractAJAXSession {
 
     private int folderId;
 
     private TimeZone tz;
 
-    private Task task;
+    private Appointment appointment;
 
     private int attachmentId;
 
     private Date creationDate;
 
-    public TaskAttachmentTests(String name) {
+    public AppointmentAttachmentTests(String name) {
         super(name);
     }
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        folderId = client.getValues().getPrivateTaskFolder();
+        folderId = client.getValues().getPrivateAppointmentFolder();
         tz = client.getValues().getTimeZone();
-        task = Create.createWithDefaults(folderId, "Test task for testing attachments");
-        client.execute(new InsertRequest(task, tz)).fillTask(task);
-        attachmentId = client.execute(new AttachRequest(task, "test.txt", new ByteArrayInputStream("Test".getBytes()), "text/plain")).getId();
-        com.openexchange.ajax.attach.actions.GetResponse response = client.execute(new com.openexchange.ajax.attach.actions.GetRequest(task, attachmentId));
+        appointment = new Appointment();
+        appointment.setTitle("Test appointment for testing attachments");
+        Calendar calendar = TimeTools.createCalendar(tz);
+        appointment.setStartDate(calendar.getTime());
+        calendar.add(Calendar.HOUR_OF_DAY, 1);
+        appointment.setEndDate(calendar.getTime());
+        appointment.setParentFolderID(folderId);
+        appointment.setIgnoreConflicts(true);
+        client.execute(new InsertRequest(appointment, tz)).fillAppointment(appointment);
+        attachmentId = client.execute(new AttachRequest(appointment, "test.txt", new ByteArrayInputStream("Test".getBytes()), "text/plain")).getId();
+        com.openexchange.ajax.attach.actions.GetResponse response = client.execute(new com.openexchange.ajax.attach.actions.GetRequest(appointment, attachmentId));
         long timestamp = response.getAttachment().getCreationDate().getTime();
         creationDate = new Date(timestamp - tz.getOffset(timestamp));
     }
 
     @Override
     protected void tearDown() throws Exception {
-        client.execute(new DeleteRequest(task));
+        client.execute(new DeleteRequest(appointment));
         super.tearDown();
     }
 
     public void testLastModifiedOfNewestAttachmentWithGet() throws Throwable {
-        GetResponse response = client.execute(new GetRequest(task.getParentFolderID(), task.getObjectID()));
-        task.setLastModified(response.getTimestamp());
-        Task test = response.getTask(tz);
+        GetResponse response = client.execute(new GetRequest(appointment.getParentFolderID(), appointment.getObjectID()));
+        appointment.setLastModified(response.getTimestamp());
+        Appointment test = response.getAppointment(tz);
         assertEquals("Creation date of attachment does not match.", creationDate, test.getLastModifiedOfNewestAttachment());
     }
 
     public void testLastModifiedOfNewestAttachmentWithAll() throws Throwable {
-        CommonAllResponse response = client.execute(new AllRequest(task.getParentFolderID(), new int[] {
-            Task.OBJECT_ID, Task.LAST_MODIFIED_OF_NEWEST_ATTACHMENT }, Task.OBJECT_ID, Order.ASCENDING));
-        task.setLastModified(response.getTimestamp());
-        Task test = null;
-        int objectIdPos = response.getColumnPos(Task.OBJECT_ID);
-        int lastModifiedOfNewestAttachmentPos = response.getColumnPos(Task.LAST_MODIFIED_OF_NEWEST_ATTACHMENT);
+        CommonAllResponse response = client.execute(new AllRequest(
+            appointment.getParentFolderID(),
+            new int[] { Appointment.OBJECT_ID, Appointment.LAST_MODIFIED_OF_NEWEST_ATTACHMENT },
+            appointment.getStartDate(),
+            appointment.getEndDate(),
+            tz,
+            true));
+        appointment.setLastModified(response.getTimestamp());
+        Appointment test = null;
+        int objectIdPos = response.getColumnPos(Appointment.OBJECT_ID);
+        int lastModifiedOfNewestAttachmentPos = response.getColumnPos(Appointment.LAST_MODIFIED_OF_NEWEST_ATTACHMENT);
         for (Object[] objA : response) {
-            if (task.getObjectID() == ((Integer) objA[objectIdPos]).intValue()) {
-                test = new Task();
+            if (appointment.getObjectID() == ((Integer) objA[objectIdPos]).intValue()) {
+                test = new Appointment();
                 test.setLastModifiedOfNewestAttachment(new Date(((Long) objA[lastModifiedOfNewestAttachmentPos]).longValue()));
                 break;
             }
         }
         if (null == test) {
-            throw new AssertionFailedError("Can not find the created task with an attachment.");
+            throw new AssertionFailedError("Can not find the created appointment with an attachment.");
         }
         assertEquals("Creation date of attachment does not match.", creationDate, test.getLastModifiedOfNewestAttachment());
     }
 
     public void testLastModifiedOfNewestAttachmentWithList() throws Throwable {
-        CommonListResponse response = client.execute(new ListRequest(
-            ListIDs.l(new int[] { task.getParentFolderID(), task.getObjectID() }),
-            new int[] { Task.OBJECT_ID, Task.LAST_MODIFIED_OF_NEWEST_ATTACHMENT }));
-        task.setLastModified(response.getTimestamp());
-        Task test = null;
-        int objectIdPos = response.getColumnPos(Task.OBJECT_ID);
-        int lastModifiedOfNewestAttachmentPos = response.getColumnPos(Task.LAST_MODIFIED_OF_NEWEST_ATTACHMENT);
+        CommonListResponse response = client.execute(new ListRequest(ListIDs.l(new int[] {
+            appointment.getParentFolderID(), appointment.getObjectID() }), new int[] {
+            Appointment.OBJECT_ID, Appointment.LAST_MODIFIED_OF_NEWEST_ATTACHMENT }));
+        appointment.setLastModified(response.getTimestamp());
+        Appointment test = null;
+        int objectIdPos = response.getColumnPos(Appointment.OBJECT_ID);
+        int lastModifiedOfNewestAttachmentPos = response.getColumnPos(Appointment.LAST_MODIFIED_OF_NEWEST_ATTACHMENT);
         for (Object[] objA : response) {
-            if (task.getObjectID() == ((Integer) objA[objectIdPos]).intValue()) {
-                test = new Task();
+            if (appointment.getObjectID() == ((Integer) objA[objectIdPos]).intValue()) {
+                test = new Appointment();
                 test.setLastModifiedOfNewestAttachment(new Date(((Long) objA[lastModifiedOfNewestAttachmentPos]).longValue()));
                 break;
             }
         }
         if (null == test) {
-            throw new AssertionFailedError("Can not find the created task with an attachment.");
+            throw new AssertionFailedError("Can not find the created appointment with an attachment.");
         }
         assertEquals("Creation date of attachment does not match.", creationDate, test.getLastModifiedOfNewestAttachment());
     }
