@@ -83,10 +83,10 @@ public final class TwitterMessagingFolderAccess implements MessagingFolderAccess
         cid = session.getContextId();
     }
 
-    public void clearFolder(final String fullname) throws MessagingException {
-        if (!EMPTY.equals(fullname)) {
+    public void clearFolder(final String folderId) throws MessagingException {
+        if (!EMPTY.equals(folderId)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
-                fullname,
+                folderId,
                 Integer.valueOf(id),
                 TwitterMessagingService.getServiceId(),
                 Integer.valueOf(user),
@@ -95,10 +95,10 @@ public final class TwitterMessagingFolderAccess implements MessagingFolderAccess
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(TwitterMessagingService.getServiceId());
     }
 
-    public void clearFolder(final String fullname, final boolean hardDelete) throws MessagingException {
-        if (!EMPTY.equals(fullname)) {
+    public void clearFolder(final String folderId, final boolean hardDelete) throws MessagingException {
+        if (!EMPTY.equals(folderId)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
-                fullname,
+                folderId,
                 Integer.valueOf(id),
                 TwitterMessagingService.getServiceId(),
                 Integer.valueOf(user),
@@ -111,10 +111,10 @@ public final class TwitterMessagingFolderAccess implements MessagingFolderAccess
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(TwitterMessagingService.getServiceId());
     }
 
-    public String deleteFolder(final String fullname) throws MessagingException {
-        if (!EMPTY.equals(fullname)) {
+    public String deleteFolder(final String folderId) throws MessagingException {
+        if (!EMPTY.equals(folderId)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
-                fullname,
+                folderId,
                 Integer.valueOf(id),
                 TwitterMessagingService.getServiceId(),
                 Integer.valueOf(user),
@@ -123,10 +123,10 @@ public final class TwitterMessagingFolderAccess implements MessagingFolderAccess
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(TwitterMessagingService.getServiceId());
     }
 
-    public String deleteFolder(final String fullname, final boolean hardDelete) throws MessagingException {
-        if (!EMPTY.equals(fullname)) {
+    public String deleteFolder(final String folderId, final boolean hardDelete) throws MessagingException {
+        if (!EMPTY.equals(folderId)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
-                fullname,
+                folderId,
                 Integer.valueOf(id),
                 TwitterMessagingService.getServiceId(),
                 Integer.valueOf(user),
@@ -135,14 +135,14 @@ public final class TwitterMessagingFolderAccess implements MessagingFolderAccess
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(TwitterMessagingService.getServiceId());
     }
 
-    public boolean exists(final String fullname) throws MessagingException {
-        return EMPTY.equals(fullname);
+    public boolean exists(final String folderId) throws MessagingException {
+        return EMPTY.equals(folderId);
     }
 
-    public MessagingFolder getFolder(final String fullname) throws MessagingException {
-        if (!EMPTY.equals(fullname)) {
+    public MessagingFolder getFolder(final String folderId) throws MessagingException {
+        if (!EMPTY.equals(folderId)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
-                fullname,
+                folderId,
                 Integer.valueOf(id),
                 TwitterMessagingService.getServiceId(),
                 Integer.valueOf(user),
@@ -162,7 +162,7 @@ public final class TwitterMessagingFolderAccess implements MessagingFolderAccess
      */
     public static final MessagingFolder[] EMPTY_PATH = new MessagingFolder[0];
 
-    public MessagingFolder[] getPath2DefaultFolder(final String fullname) throws MessagingException {
+    public MessagingFolder[] getPath2DefaultFolder(final String folderId) throws MessagingException {
         return EMPTY_PATH;
     }
 
@@ -200,10 +200,10 @@ public final class TwitterMessagingFolderAccess implements MessagingFolderAccess
         return EMPTY_PATH;
     }
 
-    public String moveFolder(final String fullname, final String newFullname) throws MessagingException {
-        if (!EMPTY.equals(fullname)) {
+    public String moveFolder(final String folderId, final String newFullname) throws MessagingException {
+        if (!EMPTY.equals(folderId)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
-                fullname,
+                folderId,
                 Integer.valueOf(id),
                 TwitterMessagingService.getServiceId(),
                 Integer.valueOf(user),
@@ -212,10 +212,10 @@ public final class TwitterMessagingFolderAccess implements MessagingFolderAccess
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(TwitterMessagingService.getServiceId());
     }
 
-    public String renameFolder(final String fullname, final String newName) throws MessagingException {
-        if (!EMPTY.equals(fullname)) {
+    public String renameFolder(final String folderId, final String newName) throws MessagingException {
+        if (!EMPTY.equals(folderId)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
-                fullname,
+                folderId,
                 Integer.valueOf(id),
                 TwitterMessagingService.getServiceId(),
                 Integer.valueOf(user),
@@ -224,10 +224,10 @@ public final class TwitterMessagingFolderAccess implements MessagingFolderAccess
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(TwitterMessagingService.getServiceId());
     }
 
-    public String updateFolder(final String fullname, final MessagingFolder toUpdate) throws MessagingException {
-        if (!EMPTY.equals(fullname)) {
+    public String updateFolder(final String folderId, final MessagingFolder toUpdate) throws MessagingException {
+        if (!EMPTY.equals(folderId)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
-                fullname,
+                folderId,
                 Integer.valueOf(id),
                 TwitterMessagingService.getServiceId(),
                 Integer.valueOf(user),
