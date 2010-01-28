@@ -49,14 +49,19 @@
 
 package com.openexchange.authentication.ldap;
 
+import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.Properties;
 
 import javax.naming.AuthenticationException;
 import javax.naming.Context;
 import javax.naming.InvalidNameException;
+import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.Attributes;
+import javax.naming.directory.SearchControls;
+import javax.naming.directory.SearchResult;
 import javax.naming.ldap.InitialLdapContext;
 import javax.naming.ldap.LdapContext;
 
@@ -79,8 +84,12 @@ public class LDAPAuthentication implements AuthenticationService {
     private enum PropertyNames {
         BASE_DN("baseDN"),
         UID_ATTRIBUTE("uidAttribute"),
-        LDAP_RETURN_FIELD("ldapReturnField");
-
+        LDAP_RETURN_FIELD("ldapReturnField"),
+        SUBTREE_SEARCH("subtreeSearch"),
+        SEARCH_FILTER("searchFilter"),
+        BIND_DN("bindDN"),
+        BIND_DN_PASSWORD("bindDNPassword");
+        
         public String name;
 
         private PropertyNames(String name) {
@@ -98,8 +107,10 @@ public class LDAPAuthentication implements AuthenticationService {
     /**
      * attribute name and base DN.
      */
-    private String uidAttribute, baseDN, ldapReturnField;
+    private String uidAttribute, baseDN, ldapReturnField, searchFilter, bindDN, bindDNPassword;
 
+    private boolean subtreeSearch;
+    
     /**
      * Default constructor.
      * @throws LoginException if setup fails.
@@ -138,14 +149,41 @@ public class LDAPAuthentication implements AuthenticationService {
      * @throws LoginException if some problem occurs.
      */
     private String bind(String uid, String password) throws LoginException {
-        final LdapContext context;
+        LdapContext context = null;
+        String dn = null;
         try {
+            if( subtreeSearch ) {
+                // get user dn from user
+                final Properties aprops = new Properties();
+                aprops.put(LdapContext.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+                if( bindDN != null && bindDN.length() > 0 ) {
+                    LOG.debug("Using bindDN=" + bindDN);
+                    aprops.put(Context.SECURITY_PRINCIPAL, bindDN);
+                    aprops.put(Context.SECURITY_CREDENTIALS, bindDNPassword);
+                    aprops.put(Context.SECURITY_AUTHENTICATION, props.get(Context.SECURITY_AUTHENTICATION));
+                } else {
+                    aprops.put(Context.SECURITY_AUTHENTICATION, "none");
+                }
+                context = new InitialLdapContext(aprops, null);
+                final String filter = "(&" + searchFilter + "(" + uidAttribute + "=" + uid + "))";
+                LOG.debug("Using filter=" + filter);
+                LOG.debug("BaseDN      =" + baseDN);
+                SearchControls cons = new SearchControls();
+                cons.setSearchScope(SearchControls.SUBTREE_SCOPE);
+                cons.setCountLimit(0);
+                cons.setReturningAttributes(new String[]{"dn"});
+                NamingEnumeration<SearchResult> res = context.search(baseDN, filter, cons);
+                if( res.hasMoreElements() ) {
+                    dn = res.nextElement().getNameInNamespace();
+                    if( res.hasMoreElements() ) {
+                        LoginExceptionCodes.UNKNOWN.create("found more then one user with " + uidAttribute + "=" + uid);
+                    }
+                }
+                context.close();
+            } else {
+                dn = uidAttribute + "=" + uid + "," + baseDN;
+            }
             context = new InitialLdapContext(props, null);
-        } catch (NamingException e) {
-            throw LoginExceptionCodes.COMMUNICATION.create(e);
-        }
-        try {
-            final String dn = uidAttribute + "=" + uid + "," + baseDN;
             context.addToEnvironment(Context.SECURITY_PRINCIPAL, dn);
             context.addToEnvironment(Context.SECURITY_CREDENTIALS, password);
             context.reconnect(null);
@@ -156,15 +194,19 @@ public class LDAPAuthentication implements AuthenticationService {
             }
             return null;
         } catch (InvalidNameException e) {
+            LOG.error("Login failed for dn " + dn + ":",e);
             throw LoginExceptionCodes.INVALID_CREDENTIALS.create(e);
         } catch (AuthenticationException e) {
+            LOG.error("Login failed for dn " + dn + ":",e);
             throw LoginExceptionCodes.INVALID_CREDENTIALS.create(e);
         } catch (NamingException e) {
             LOG.error(e.getMessage(), e);
             throw LoginExceptionCodes.COMMUNICATION.create(e);
         } finally {
             try {
-                context.close();
+                if( context != null ) {
+                    context.close();
+                }
             } catch (NamingException e) {
                 LOG.error(e.getMessage(), e);
             }
@@ -176,22 +218,39 @@ public class LDAPAuthentication implements AuthenticationService {
      * @throws LoginException if configuration fails.
      */
     private void init() throws LoginException {
+        props.put(LdapContext.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+
         if (!props.containsKey(PropertyNames.UID_ATTRIBUTE.name)) {
             throw LoginExceptionCodes.MISSING_PROPERTY.create(PropertyNames.UID_ATTRIBUTE.name);
         }
         uidAttribute = props.getProperty(PropertyNames.UID_ATTRIBUTE.name);
+
         if (!props.containsKey(PropertyNames.BASE_DN.name)) {
             throw LoginExceptionCodes.MISSING_PROPERTY.create(PropertyNames.BASE_DN.name);
         }
         baseDN = props.getProperty(PropertyNames.BASE_DN.name);
-        props.put(LdapContext.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+
         final String url = props.getProperty(LdapContext.PROVIDER_URL);
         if (null == url) {
             throw LoginExceptionCodes.MISSING_PROPERTY.create(LdapContext.PROVIDER_URL);
         } else if (url.startsWith("ldaps")) {
             props.put("java.naming.ldap.factory.socket", TrustAllSSLSocketFactory.class.getName());
         }
+
         this.ldapReturnField = props.getProperty(PropertyNames.LDAP_RETURN_FIELD.name);
+
+        if (!props.containsKey(PropertyNames.SUBTREE_SEARCH.name)) {
+            throw LoginExceptionCodes.MISSING_PROPERTY.create(PropertyNames.SUBTREE_SEARCH.name);
+        }
+        subtreeSearch = Boolean.parseBoolean(props.getProperty(PropertyNames.SUBTREE_SEARCH.name));
+
+        if (!props.containsKey(PropertyNames.SEARCH_FILTER.name)) {
+            throw LoginExceptionCodes.MISSING_PROPERTY.create(PropertyNames.SEARCH_FILTER.name);
+        }
+        searchFilter = props.getProperty(PropertyNames.SEARCH_FILTER.name);
+
+        bindDN = props.getProperty(PropertyNames.BIND_DN.name);
+        bindDNPassword = props.getProperty(PropertyNames.BIND_DN_PASSWORD.name);
     }
 
     /**
