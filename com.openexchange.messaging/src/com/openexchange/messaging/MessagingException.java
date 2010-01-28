@@ -131,4 +131,28 @@ public class MessagingException extends AbstractOXException {
         setMessageArgs(messageArguments);
     }
 
+    /**
+     * Initializes a new {@link MessagingException}.
+     * 
+     * @param component The component
+     * @param message The message
+     * @param cause The cause
+     */
+    protected MessagingException(final Component component, final String message, final AbstractOXException cause) {
+        super(component, message, cause);
+    }
+
+    /**
+     * Initializes a new {@link MessagingException}.
+     * 
+     * @param component The component
+     * @param category The category
+     * @param detailNumber The detail number
+     * @param message The message
+     * @param cause The cause
+     */
+    protected MessagingException(final Component component, final Category category, final int detailNumber, final String message, final Throwable cause) {
+        super(component, category, detailNumber, message, cause);
+    }
+
 }

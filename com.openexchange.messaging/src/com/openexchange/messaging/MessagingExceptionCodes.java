@@ -140,7 +140,11 @@ public enum MessagingExceptionCodes implements OXErrorMessage {
     /**
      * No create access on mail folder %1$s.
      */
-    NO_CREATE_ACCESS(MessagingExceptionMessages.NO_CREATE_ACCESS_MSG, Category.PERMISSION, 21);
+    NO_CREATE_ACCESS(MessagingExceptionMessages.NO_CREATE_ACCESS_MSG, Category.PERMISSION, 21),
+    /**
+     * Not connected
+     */
+    NOT_CONNECTED(MessagingExceptionMessages.NOT_CONNECTED_MSG, Category.PERMISSION, 22);
 
     private final Category category;
 
