@@ -1,3 +1,8 @@
+* 2010-01-29 - choeger@open-xchange.com
+
+ - Bugfix #15293: calendar-printing templates are not marked as configfiles on
+   RHEL and SLES
+
 * 2010-01-27 - tobias.prinz@open-xchange.com
 
  - Bugfix #15274: Values read from OXMF are now stripped of trailing whitespaces
