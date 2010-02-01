@@ -56,6 +56,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.Reader;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -71,10 +72,12 @@ import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.commons.httpclient.HttpState;
+import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.params.HttpClientParams;
+import org.apache.commons.httpclient.util.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ho.yaml.Yaml;
@@ -97,7 +100,9 @@ public class ReverseProxy extends HttpServlet {
 
     private boolean firstTime = true;
 
-    private String hostname;
+    private String hostname = "";
+    private String protocol = "";
+    private String location = "";
 
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -111,15 +116,15 @@ public class ReverseProxy extends HttpServlet {
             // get proxy config
             ReverseProxyConfig proxy = proxies.get(proxyId);
 
-            String prefix = "/proxy/" + proxyId;
+            String prefix = this.location + "/" + proxyId;
             String path = req.getRequestURI().substring(prefix.length());
             String methodS = req.getMethod();
             String query = req.getQueryString();
 
             // http client to process subrequest
             HttpClient httpClient = new HttpClient();
-            HttpClientParams params = httpClient.getParams();
-            params.setContentCharset("UTF-8");
+            HttpClientParams clientparams = httpClient.getParams();
+            clientparams.setContentCharset("UTF-8");
             // get method (GET/POST/etc.)
             HttpMethodBase method = determineMethod(methodS);
 
@@ -143,15 +148,36 @@ public class ReverseProxy extends HttpServlet {
                     }
                 }
             }
+            
+            // set host
             HostConfiguration host = httpClient.getHostConfiguration();
             host.setHost(proxy.getHost());
+            // set path
+            String _path_ = proxy.getPath(path);
+            method.setPath(_path_);
+            // set query
+            if (query != null && query != "") {
+                String[] parts = query.split("&");
+                NameValuePair[] params = new NameValuePair[parts.length];
+                int i = 0;
+                for (String param : parts) {
+                    NameValuePair nvp = null;
+                    if (param.contains("=")) {
+                        String[] pair = param.split("=");
+                        nvp = new NameValuePair(pair[0], pair[1]);
+                    } else {
+                        nvp = new NameValuePair(param, "");
+                    }
+                    params[i++] = nvp;
+                }
+                method.setQueryString(params);
+            }
+            
             // set URI
             URI u = proxy.getURI(path, query);
             LOG.info("Proxy-Request: " + req.getRequestURI());
             LOG.info("Proxy-Forward: " + u.getURI());
-            method.setPath(path);
-            method.setQueryString(query);
-
+            
             // add headers
             Enumeration<?> headerNames = req.getHeaderNames();
             while (headerNames.hasMoreElements()) {
@@ -160,7 +186,7 @@ public class ReverseProxy extends HttpServlet {
                 String value = req.getHeader(name);
                 if ("referer".equals(name)) {
                     // bypass "Referer"
-                    String refPrefix = "https://" + hostname + "/proxy/" + proxy.id;
+                    String refPrefix = this.protocol + "://" + this.hostname + this.location + "/" + proxy.id;
                     String remainder = value.substring(refPrefix.length());
                     value = proxy.getPrefix() + remainder;
                     method.addRequestHeader(new Header("Referer", value));
@@ -176,6 +202,9 @@ public class ReverseProxy extends HttpServlet {
                 } else if ("accept-language".equals(name)) {
                     // bypass
                     method.addRequestHeader(new Header("Accept-Language", req.getHeader(name)));
+                } else if ("authorization".equals(name)) {
+                    // bypass
+                    method.addRequestHeader(new Header("Authorization", req.getHeader(name))); 
                 }
             }
             
@@ -201,56 +230,62 @@ public class ReverseProxy extends HttpServlet {
             // do not follow redirects
             method.setFollowRedirects(false);
             
-            // send request
-            int code = httpClient.executeMethod(method);
-            //LOG.info("Proxy: Code="+code);
-
-            // === RESPONSE ====
-
-            // process response cookies
-            state = httpClient.getState();
-            for (Cookie cookie : state.getCookies()) {
-                // LOG.info("Response KEKS: " + cookie.getName() + " " + cookie.getValue());
-                // add to response
-                String cookieName = prefix + cookie.getName();
-                javax.servlet.http.Cookie keks = new javax.servlet.http.Cookie(cookieName, cookie.getValue());
-                keks.setDomain(hostname);
-                keks.setPath("/proxy/" + proxyId);
-                resp.addCookie(keks);
-            }
-
-            // add response header
-            header2Response(method, resp);
-
-            // process response body (html only)
-            Header ct = method.getResponseHeader("Content-Type");
-            if (ct.getValue().startsWith("text/html")) {
-                // get content
-                //byte[] bytes = method.getResponseBody();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(method.getResponseBodyAsStream(), method.getResponseCharSet())); 
-                StringBuffer body = new StringBuffer();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    body.append(line);
+            try {
+                // send request
+                int code = httpClient.executeMethod(method);
+                //LOG.info("Proxy: Code="+code);
+    
+                // === RESPONSE ====
+    
+                // process response cookies
+                state = httpClient.getState();
+                for (Cookie cookie : state.getCookies()) {
+                    // LOG.info("Response KEKS: " + cookie.getName() + " " + cookie.getValue());
+                    // add to response
+                    String cookieName = prefix + cookie.getName();
+                    javax.servlet.http.Cookie keks = new javax.servlet.http.Cookie(cookieName, cookie.getValue());
+                    keks.setDomain(hostname);
+                    keks.setPath(this.location + "/" + proxyId);
+                    resp.addCookie(keks);
                 }
-                // replace content inside body and
-                // write as response
-                resp.getWriter().write(this.processBody(body.toString(), proxy));
-            } else {
-                // binary
-                InputStream responseStream = method.getResponseBodyAsStream();
-                OutputStream outputStream = resp.getOutputStream();
-                byte[] buf = new byte[1024];
-                int length = -1;
-                while ((length = responseStream.read(buf)) != -1) {
-                    outputStream.write(buf, 0, length);
+    
+                // add response header
+                header2Response(method, resp);
+    
+                // process response body (html only)
+                Header ct = method.getResponseHeader("Content-Type");
+                if (ct.getValue().startsWith("text/html")) {
+                    // get content
+                    Reader reader = new InputStreamReader(method.getResponseBodyAsStream(), method.getResponseCharSet());
+                    char[] buf = new char[512];
+                    int length = -1;
+                    StringBuffer body = new StringBuffer();
+                    while ((length = reader.read(buf)) != -1) {
+                        body.append(buf, 0, length);
+                    }
+                    // replace content inside body and
+                    // write as response
+                    resp.getWriter().write(this.processBody(body.toString(), proxy));
+                } else {
+                    // binary
+                    InputStream responseStream = method.getResponseBodyAsStream();
+                    OutputStream outputStream = resp.getOutputStream();
+                    byte[] buf = new byte[1024];
+                    int length = -1;
+                    while ((length = responseStream.read(buf)) != -1) {
+                        outputStream.write(buf, 0, length);
+                    }
                 }
+                
+                // set status
+                resp.setStatus(method.getStatusCode());
             }
+            catch (Exception e) {
+                LOG.error("Exception: " + e.getMessage());
+            }
+            
             // close connection
             method.releaseConnection();
-
-            // set status
-            resp.setStatus(method.getStatusCode());
 
         } else {
 
@@ -269,10 +304,11 @@ public class ReverseProxy extends HttpServlet {
             final File file = new File(path);
             final Object yml = Yaml.load(file);
             try {
-                //LOG.info("Proxy config: " + Yaml.dump(yml));
                 HashMap<?, ?> map = (HashMap<?, ?>) yml;
-                hostname = (String) map.get("hostname");
-                LOG.info("Proxy hostname: " + hostname);
+                this.hostname = (String) map.get("hostname");
+                this.protocol = (String) map.get("protocol");
+                this.location = (String) map.get("location");
+                // get proxies
                 for (Map proxiesMap : (List<Map>) map.get("proxies")) {
                     if (proxiesMap.containsKey("proxy")) {
                         String proxy = (String) proxiesMap.get("proxy");
@@ -308,8 +344,11 @@ public class ReverseProxy extends HttpServlet {
             String value = header.getValue();
 
             if ("Content-Type".equals(name)) {
-                // set content type
-                resp.setContentType(value);
+                if ("text/html".equals(value)) {
+                    resp.setContentType("text/html; charset=" + resp.getCharacterEncoding());
+                } else {
+                    resp.setContentType(value);
+                }
 
             } else if ("Location".equals(name)) {
                 // handle redirects
@@ -321,7 +360,7 @@ public class ReverseProxy extends HttpServlet {
                     // matches header value?
                     if (value.startsWith("/")) {
                         // relative URL
-                        value = "https://" + hostname + "/proxy/" + proxy.id + value;
+                        value = this.protocol + "://" + this.hostname + this.location + "/" + proxy.id + value;
                         resp.addHeader(name, value);
                         break;
                     } else if (value.startsWith(prefix)) { // add trailing slash to prevent id collisions
@@ -329,7 +368,7 @@ public class ReverseProxy extends HttpServlet {
                         String path = value.substring(prefix.length());
                         // remove port
                         path = path.replaceFirst("\\:\\d+", "");
-                        value = "https://" + hostname + "/proxy/" + proxy.id + path;
+                        value = this.protocol + "://" + this.hostname + this.location + "/" + proxy.id + path;
                         //LOG.info("FOUND! Redirect: " + value);
                         resp.addHeader(name, value);
                         break;
@@ -343,8 +382,10 @@ public class ReverseProxy extends HttpServlet {
                 if (length > 0) {
                     resp.setContentLength((int) length);
                 }
+            } else if ("WWW-Authenticate".equals(name)) {
+                // auth
+                resp.addHeader("WWW-Authenticate", value);
             }
-
         }
     }
 
@@ -371,10 +412,10 @@ public class ReverseProxy extends HttpServlet {
             String prefix = proxy.getPrefix();
             String regex = java.util.regex.Pattern.quote(prefix);
             // replace
-            body = body.replaceAll(regex, "https://" + hostname + "/proxy/" + proxy.id);
+            body = body.replaceAll(regex, this.protocol + "://" + this.hostname + this.location + "/" + proxy.id);
         }
         // make absolute pathes
-        body = body.replaceAll("\"/(.*?)\"", "\"/proxy/" + currentProxy.id + "/$1\"");
+        body = body.replaceAll("\"/(.*?)\"", "\"" + this.location + "/" + currentProxy.id + "/$1\"");
         // done
         return body;
     }

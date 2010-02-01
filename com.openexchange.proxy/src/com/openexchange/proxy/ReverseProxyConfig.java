@@ -91,8 +91,18 @@ public class ReverseProxyConfig {
         return u;
     }
     
-    public String getURIPath(String path, String query) throws UnsupportedEncodingException {
-        return location + path + (null == query ? "" : ("?" + URLDecoder.decode(query, "UTF-8")));
+    public String getPath(String path) throws UnsupportedEncodingException {
+        return location + path;
+    }
+    
+    public String getQuery(String query) throws UnsupportedEncodingException {
+        String q = "";
+        try {
+            if (query != null) {
+                q = URLDecoder.decode(query, "UTF-8");
+            }
+        } catch (UnsupportedEncodingException e) {}
+        return q;
     }
 
     public String getPrefix() {

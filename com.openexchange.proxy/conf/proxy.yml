@@ -1,5 +1,7 @@
 
 hostname: "www.disco2000.ox"
+protocol: "https"
+location: "/proxy"
 
 proxies:
     - proxy: "devtank.de"
@@ -27,4 +29,8 @@ proxies:
     - proxy: "cloudoffice"
       protocol: "https"
       host: "174.129.17.230:8181"
+
+    - proxy: "ox6"
+      protocol: "https"
+      host: "ox6-dev.open-xchange.com"
       
