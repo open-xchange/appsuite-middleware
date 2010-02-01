@@ -211,12 +211,12 @@ public abstract class SessionServlet extends AJAXServlet {
         category = Category.PERMISSION,
         desc = "If a session exists every request is checked for its client IP address to match the one while creating the session.",
         exceptionId = 5,
-        msg = "Wrong client IP address."
+        msg = "Request to server was refused. Original client IP address changed. Please try again."
     )
     public static void checkIP(final boolean checkIP, final Session session, final String actual) throws SessiondException {
         if (null == actual || !actual.equals(session.getLocalIp())) {
             if (checkIP) {
-                LOG.info("Request with session " + session.getSessionID() + " denied. IP changed to " + actual + " but login came from " + session.getLocalIp());
+                LOG.info("Request to server denied for session: " + session.getSessionID() + ". Client login IP changed from " + session.getLocalIp() + " to " + actual + ".");
                 throw EXCEPTION.create(5);
             }
             if (DEBUG) {
