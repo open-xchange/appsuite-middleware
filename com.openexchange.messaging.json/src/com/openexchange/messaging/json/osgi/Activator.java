@@ -121,20 +121,25 @@ public class Activator extends DeferredActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        parser = new MessagingMessageParser();
+        try {
+            parser = new MessagingMessageParser();
 
-        trackers.add(new ContentParserTracker(context, parser));
-        trackers.add(new HeaderParserTracker(context, parser));
+            trackers.add(new ContentParserTracker(context, parser));
+            trackers.add(new HeaderParserTracker(context, parser));
 
-        writer = new MessagingMessageWriter();
-        trackers.add(new ContentWriterTracker(context, writer));
-        trackers.add(new HeaderWriterTracker(context, writer));
+            writer = new MessagingMessageWriter();
+            trackers.add(new ContentWriterTracker(context, writer));
+            trackers.add(new HeaderWriterTracker(context, writer));
 
-        for (ServiceTracker tracker : trackers) {
-            tracker.open();
+            for (ServiceTracker tracker : trackers) {
+                tracker.open();
+            }
+
+            register();
+        } catch (Exception x) {
+            LOG.error(x.getMessage(), x);
+            throw x;
         }
-
-        register();
     }
 
     private void register() {
@@ -169,11 +174,16 @@ public class Activator extends DeferredActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        for (ServiceTracker tracker : trackers) {
-            tracker.close();
-        }
-        for (ServiceRegistration registration : registrations) {
-            registration.unregister();
+        try {
+            for (ServiceTracker tracker : trackers) {
+                tracker.close();
+            }
+            for (ServiceRegistration registration : registrations) {
+                registration.unregister();
+            }
+        } catch (Exception x) {
+            LOG.error(x.getMessage(), x);
+            throw x;
         }
     }
 
