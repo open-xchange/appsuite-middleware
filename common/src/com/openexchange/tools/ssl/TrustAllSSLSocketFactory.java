@@ -97,7 +97,7 @@ public class TrustAllSSLSocketFactory extends SSLSocketFactory {
     /**
      * @see javax.net.ssl.SSLSocketFactory#getDefault()
      */
-    public static SocketFactory getDefault() {
+    public static SSLSocketFactory getDefault() {
         return new TrustAllSSLSocketFactory();
     }
 
