@@ -124,6 +124,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     public static final String MODULE_PROJECT = "projects";
 
+    public static final String MODULE_MESSAGING = "messaging";
+
     public static final String MODULE_INFOSTORE = "infostore";
 
     public static final String MODULE_SYSTEM = "system";
@@ -887,6 +889,9 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             } else {
                 moduleStr = MODULE_SYSTEM;
             }
+            break;
+        case FolderObject.MESSAGING:
+            moduleStr = MODULE_MESSAGING;
             break;
         default:
             moduleStr = "";
