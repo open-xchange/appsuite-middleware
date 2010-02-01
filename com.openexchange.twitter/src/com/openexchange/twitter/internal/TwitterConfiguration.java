@@ -168,6 +168,8 @@ public final class TwitterConfiguration {
             }
         }
 
+        Configuration.setProperty("twitter4j.source", "Open-Xchange");
+        
     }
 
     private static boolean isValidVersionString(final String version) {
