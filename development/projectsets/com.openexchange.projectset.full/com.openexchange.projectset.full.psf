@@ -64,5 +64,6 @@
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.messaging.json,com.openexchange.messaging.json"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.servlet.easylogin,com.openexchange.servlet.easylogin"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,openexchange-test-fitnesse,openexchange-test-fitnesse"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.proxy,com.openexchange.proxy"/>
 </provider>
 </psf>
