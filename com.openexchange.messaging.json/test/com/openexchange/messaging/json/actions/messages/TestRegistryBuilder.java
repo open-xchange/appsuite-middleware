@@ -54,6 +54,7 @@ import com.openexchange.messaging.SimAccountManager;
 import com.openexchange.messaging.SimMessageAccess;
 import com.openexchange.messaging.SimMessagingAccount;
 import com.openexchange.messaging.SimMessagingService;
+import com.openexchange.messaging.SimMessagingTransport;
 import com.openexchange.messaging.SimpleMessagingMessage;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.messaging.registry.SimMessagingServiceRegistry;
@@ -91,6 +92,7 @@ public class TestRegistryBuilder {
         accAccess11.setMessageAccess(access11);
         
         service1.setAccountAccess(11, accAccess11);
+        service1.setAccountTransport(11, new SimMessagingTransport());
         
         // Account 1.2
         SimMessagingAccount account12 = new SimMessagingAccount();
@@ -107,7 +109,8 @@ public class TestRegistryBuilder {
         accAccess12.setMessageAccess(access12);
         
         service1.setAccountAccess(12, accAccess12);
-        
+        service1.setAccountTransport(12, new SimMessagingTransport());
+
         
         accManager1.setAllAccounts(account11, account12);
         service1.setAccountManager(accManager1);
@@ -133,7 +136,8 @@ public class TestRegistryBuilder {
         accAccess21.setMessageAccess(access21);
         
         service2.setAccountAccess(21, accAccess21);
-        
+        service2.setAccountTransport(21, new SimMessagingTransport());
+
         // Account 2.2
         SimMessagingAccount account22 = new SimMessagingAccount();
         account22.setDisplayName("acc2.2");
@@ -152,7 +156,8 @@ public class TestRegistryBuilder {
         
         accManager2.setAllAccounts(account21, account22);
         service2.setAccountManager(accManager2);
-        
+        service2.setAccountTransport(22, new SimMessagingTransport());
+
         registry.add(service1);
         registry.add(service2);
         

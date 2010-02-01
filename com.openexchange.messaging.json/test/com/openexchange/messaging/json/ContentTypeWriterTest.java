@@ -81,7 +81,7 @@ public class ContentTypeWriterTest extends TestCase{
         SimEntry<String, Collection<MessagingHeader>> entry = entry( contentType );
 
         assertTrue(writer.handles(entry));
-        assertEquals("content-type", writer.writeKey(entry));
+        assertEquals("Content-Type", writer.writeKey(entry));
         
         Object value = writer.writeValue(entry);
         assertNotNull(value);

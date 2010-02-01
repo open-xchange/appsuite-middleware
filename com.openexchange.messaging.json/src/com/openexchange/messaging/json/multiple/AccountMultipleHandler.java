@@ -47,56 +47,20 @@
  *
  */
 
-package com.openexchange.messaging.json;
+package com.openexchange.messaging.json.multiple;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map.Entry;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.messaging.ContentType;
-import com.openexchange.messaging.MessagingException;
-import com.openexchange.messaging.MessagingHeader;
+import com.openexchange.messaging.json.actions.accounts.AccountActionFactory;
+import com.openexchange.multiple.AJAXActionServiceAdapterHandler;
 
 
 /**
- * Writes a content-type in the long form.
- * @see ContentTypeParser
+ * {@link AccountMultipleHandler}
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ContentTypeWriter implements MessagingHeaderWriter {
-
-    public int getPriority() {
-        return 0;
+public class AccountMultipleHandler extends AJAXActionServiceAdapterHandler {
+    
+    public AccountMultipleHandler() {
+        super(AccountActionFactory.INSTANCE, "messagingAccounts");
     }
-
-    public boolean handles(Entry<String, Collection<MessagingHeader>> entry) {
-        return entry.getKey().equalsIgnoreCase("content-type");
-    }
-
-    public String writeKey(Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException {
-        return "Content-Type";
-    }
-
-    public Object writeValue(Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException {
-        ContentType cType = (ContentType) entry.getValue().iterator().next();
-        JSONObject jsonCType = new JSONObject();
-
-        jsonCType.put("type", cType.getBaseType());
-        
-        JSONObject params = new JSONObject();
-        Iterator<String> names = cType.getParameterNames();
-        boolean write = false;
-        while(names.hasNext()) {
-            write = true;
-            String name = names.next();
-            String value = cType.getParameter(name);
-            params.put(name, value);
-        }
-        
-        jsonCType.put("params", params);
-        return jsonCType;
-    }
-
 }

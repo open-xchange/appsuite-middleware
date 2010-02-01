@@ -49,6 +49,7 @@
 
 package com.openexchange.messaging.json.actions.messages;
 
+import java.io.IOException;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
@@ -69,7 +70,7 @@ import com.openexchange.tools.session.ServerSession;
  *  <dt>messageAction</dt><dd>The action to be performed</dd>
  * </dl>
  * Returns the JSON representation of a message that is to be displayed to the user for further modification or 1 if no
- * further user interaktion is needed.
+ * further user interaction is needed.
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -81,14 +82,24 @@ public class PerformAction extends AbstractMessagingAction {
     }
 
     @Override
-    protected AJAXRequestResult doIt(MessagingRequestData req, ServerSession session) throws AbstractOXException, JSONException {
+    protected AJAXRequestResult doIt(MessagingRequestData req, ServerSession session) throws AbstractOXException, JSONException, IOException {
+        MessagingMessage input = req.getMessage();
+        MessagingMessage output = null;
         
-        MessagingMessage message = req.getMessageAccess().perform(req.getFolderId(), req.getId(), req.getMessageAction());
+        if(input == null) {
+            if(req.isset("folder", "id")) {
+                output = req.getMessageAccess().perform(req.getFolderId(), req.getId(), req.getMessageAction());
+            } else {
+                output = req.getMessageAccess().perform(req.getMessageAction());
+            }
+        } else {
+            output = req.getMessageAccess().perform(input, req.getMessageAction());
+        }
         
-        if(message == null) {
+        if(output == null) {
             return new AJAXRequestResult(1);
         } 
-        return new AJAXRequestResult(writer.write(message));
+        return new AJAXRequestResult(writer.write(output));
         
     }
 

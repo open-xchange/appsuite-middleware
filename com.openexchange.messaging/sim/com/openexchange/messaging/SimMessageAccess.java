@@ -131,13 +131,13 @@ public class SimMessageAccess implements MessagingMessageAccess {
     }
 
     public MessagingMessage perform(final String action) throws MessagingException {
-        // TODO Auto-generated method stub
-        return null;
+        called.add(new Call("perform", action));
+        return templateMessage;
     }
 
     public MessagingMessage perform(final MessagingMessage message, final String action) throws MessagingException {
-        // TODO Auto-generated method stub
-        return null;
+        called.add(new Call("perform", message, action));
+        return templateMessage;
     }
 
     public List<MessagingMessage> searchMessages(final String folder, final IndexRange indexRange, final MessagingField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MessagingField[] fields) throws MessagingException {

@@ -47,56 +47,42 @@
  *
  */
 
-package com.openexchange.messaging.json;
+package com.openexchange.messaging.json.osgi;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map.Entry;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.messaging.ContentType;
-import com.openexchange.messaging.MessagingException;
-import com.openexchange.messaging.MessagingHeader;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.messaging.json.MessagingHeaderParser;
+import com.openexchange.messaging.json.MessagingMessageParser;
 
 
 /**
- * Writes a content-type in the long form.
- * @see ContentTypeParser
+ * {@link HeaderParserTracker}
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ContentTypeWriter implements MessagingHeaderWriter {
+public class HeaderParserTracker extends ServiceTracker {
 
-    public int getPriority() {
-        return 0;
+    private MessagingMessageParser parser;
+
+    public HeaderParserTracker(BundleContext context, MessagingMessageParser parser) {
+        super(context, MessagingHeaderParser.class.getName(), null);
+        this.parser = parser;
     }
-
-    public boolean handles(Entry<String, Collection<MessagingHeader>> entry) {
-        return entry.getKey().equalsIgnoreCase("content-type");
+    
+    @Override
+    public Object addingService(ServiceReference reference) {
+        MessagingHeaderParser parser = (MessagingHeaderParser) super.addingService(reference);
+        this.parser.addHeaderParser(parser);
+        return parser;
     }
-
-    public String writeKey(Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException {
-        return "Content-Type";
+    
+    @Override
+    public void removedService(ServiceReference reference, Object service) {
+        this.parser.removeHeaderParser((MessagingHeaderParser) service);
+        super.removedService(reference, service);
     }
-
-    public Object writeValue(Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException {
-        ContentType cType = (ContentType) entry.getValue().iterator().next();
-        JSONObject jsonCType = new JSONObject();
-
-        jsonCType.put("type", cType.getBaseType());
-        
-        JSONObject params = new JSONObject();
-        Iterator<String> names = cType.getParameterNames();
-        boolean write = false;
-        while(names.hasNext()) {
-            write = true;
-            String name = names.next();
-            String value = cType.getParameter(name);
-            params.put(name, value);
-        }
-        
-        jsonCType.put("params", params);
-        return jsonCType;
-    }
+    
+    
 
 }

@@ -47,56 +47,43 @@
  *
  */
 
-package com.openexchange.messaging.json;
+package com.openexchange.messaging.json.actions.messages;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map.Entry;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.messaging.ContentType;
-import com.openexchange.messaging.MessagingException;
-import com.openexchange.messaging.MessagingHeader;
+import java.util.HashMap;
+import java.util.Map;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.messaging.json.MessagingMessageParser;
+import com.openexchange.messaging.json.MessagingMessageWriter;
+import com.openexchange.messaging.registry.MessagingServiceRegistry;
+import com.openexchange.tools.servlet.AjaxException;
 
 
 /**
- * Writes a content-type in the long form.
- * @see ContentTypeParser
+ * {@link MessagingActionFactory}
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ContentTypeWriter implements MessagingHeaderWriter {
+public class MessagingActionFactory implements AJAXActionServiceFactory {
 
-    public int getPriority() {
-        return 0;
-    }
+    public static MessagingActionFactory INSTANCE = null; // Initialized in Activator
 
-    public boolean handles(Entry<String, Collection<MessagingHeader>> entry) {
-        return entry.getKey().equalsIgnoreCase("content-type");
-    }
-
-    public String writeKey(Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException {
-        return "Content-Type";
-    }
-
-    public Object writeValue(Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException {
-        ContentType cType = (ContentType) entry.getValue().iterator().next();
-        JSONObject jsonCType = new JSONObject();
-
-        jsonCType.put("type", cType.getBaseType());
+    private Map<String, AJAXActionService> actions = null;
+    
+    
+    public MessagingActionFactory(MessagingServiceRegistry registry, MessagingMessageWriter writer, MessagingMessageParser parser) {
+        super();
+        actions = new HashMap<String, AJAXActionService>();
         
-        JSONObject params = new JSONObject();
-        Iterator<String> names = cType.getParameterNames();
-        boolean write = false;
-        while(names.hasNext()) {
-            write = true;
-            String name = names.next();
-            String value = cType.getParameter(name);
-            params.put(name, value);
-        }
-        
-        jsonCType.put("params", params);
-        return jsonCType;
+        actions.put("all", new AllAction(registry, writer, parser));
+        actions.put("get", new GetAction(registry, writer, parser));
+        actions.put("list", new ListAction(registry, writer, parser));
+        actions.put("perform", new PerformAction(registry, writer, parser));
+        actions.put("send", new SendAction(registry, writer, parser));
+    } 
+    
+    public AJAXActionService createActionService(String action) throws AjaxException {
+        return actions.get(action);
     }
 
 }

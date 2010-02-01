@@ -49,6 +49,7 @@
 
 package com.openexchange.messaging.json.actions.messages;
 
+import java.io.IOException;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -82,11 +83,13 @@ public abstract class AbstractMessagingAction implements AJAXActionService {
     
     public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws AbstractOXException {
         try {
-            return doIt(new MessagingRequestData(request, session, registry), session);
+            return doIt(new MessagingRequestData(request, session, registry, parser), session);
         } catch (JSONException e) {
             throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        } catch (IOException e) {
+            throw MessagingExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }
     }
 
-    protected abstract AJAXRequestResult doIt(MessagingRequestData messagingRequestData, ServerSession session) throws AbstractOXException, JSONException;
+    protected abstract AJAXRequestResult doIt(MessagingRequestData messagingRequestData, ServerSession session) throws AbstractOXException, JSONException, IOException;
 }

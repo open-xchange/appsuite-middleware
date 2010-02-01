@@ -98,10 +98,12 @@ public class MessagingMessageWriterTest extends TestCase {
         JSONObject messageJSON = new MessagingMessageWriter().write(message);
 
         JSONAssertion assertion = new JSONAssertion().isObject().hasKey("colorLabel").withValue(2).hasKey("flags").withValue(12).hasKey(
-            "received_date").withValue(1337).hasKey("user").withValueArray().withValues("eins", "zwo", "drei", "vier", "f�nf").inAnyOrder().hasKey(
+            "receivedDate").withValue(1337).hasKey("user").withValueArray().withValues("eins", "zwo", "drei", "vier", "f�nf").inAnyOrder().hasKey(
             "size").withValue(13).hasKey("threadLevel").withValue(15).hasKey("id").withValue("message123").hasKey("folder").withValue(
             "niceFolder17");
 
+        System.out.println(messageJSON);
+        
         assertValidates(assertion, messageJSON);
     }
 
@@ -116,8 +118,8 @@ public class MessagingMessageWriterTest extends TestCase {
 
         JSONObject messageJSON = new MessagingMessageWriter().write(message);
 
-        JSONAssertion assertion = new JSONAssertion().isObject().hasKey("headers").withValueObject().hasKey("simpleheader").withValue(
-            "Value1").hasKey("multiheader").withValueArray().withValues("v1", "v2", "v3").inStrictOrder().objectEnds().objectEnds();
+        JSONAssertion assertion = new JSONAssertion().isObject().hasKey("headers").withValueObject().hasKey("simpleHeader").withValue(
+            "Value1").hasKey("multiHeader").withValueArray().withValues("v1", "v2", "v3").inStrictOrder().objectEnds().objectEnds();
 
         assertValidates(assertion, messageJSON);
     }
@@ -294,7 +296,7 @@ public class MessagingMessageWriterTest extends TestCase {
         
         SimpleMessagingMessage message = new SimpleMessagingMessage();
         
-        Map<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
+        Map<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>(    );
         headers.put("Subject", header("Subject", "the subject"));
         message.setHeaders(headers);
 
@@ -304,7 +306,7 @@ public class MessagingMessageWriterTest extends TestCase {
         
         JSONObject headersJSON = fieldsJSON.getJSONObject(0);
     
-        JSONAssertion assertion = new JSONAssertion().isObject().hasKey("subject").withValue("the subject");
+        JSONAssertion assertion = new JSONAssertion().isObject().hasKey("Subject").withValue("the subject");
         
         assertValidates(assertion, headersJSON);
     }

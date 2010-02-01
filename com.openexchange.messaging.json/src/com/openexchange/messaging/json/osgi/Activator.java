@@ -46,35 +46,134 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-
 package com.openexchange.messaging.json.osgi;
 
+import java.util.LinkedList;
+import java.util.List;
+import javax.servlet.ServletException;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.service.http.HttpService;
+import org.osgi.service.http.NamespaceException;
+import com.openexchange.i18n.I18nService;
+import com.openexchange.i18n.I18nTranslator;
+import com.openexchange.i18n.Translator;
+import com.openexchange.messaging.json.MessagingMessageParser;
+import com.openexchange.messaging.json.MessagingMessageWriter;
+import com.openexchange.messaging.json.actions.accounts.AccountActionFactory;
+import com.openexchange.messaging.json.actions.messages.MessagingActionFactory;
+import com.openexchange.messaging.json.actions.services.ServicesActionFactory;
+import com.openexchange.messaging.json.multiple.AccountMultipleHandler;
+import com.openexchange.messaging.json.multiple.MessagesMultipleHandler;
+import com.openexchange.messaging.json.multiple.ServicesMultipleHandler;
+import com.openexchange.messaging.json.servlets.AccountServlet;
+import com.openexchange.messaging.json.servlets.MessagesServlet;
+import com.openexchange.messaging.json.servlets.ServicesServlet;
+import com.openexchange.messaging.registry.MessagingServiceRegistry;
+import com.openexchange.multiple.MultipleHandler;
+import com.openexchange.server.osgiservice.DeferredActivator;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-/**
- * {@link Activator}
- * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @since Open-Xchange v6.16
- */
-public class Activator implements BundleActivator {
+public class Activator extends DeferredActivator {
 
-    public void start(final BundleContext context) throws Exception {
-        try {
-            // TODO: Cisco code here
-        } catch (final Exception e) {
-            org.apache.commons.logging.LogFactory.getLog(Activator.class).error(e.getMessage(), e);
-            throw e;
+    private static final Log LOG = LogFactory.getLog(Activator.class);
+    private static final Class[] NEEDED_SERVICES = new Class[]{MessagingServiceRegistry.class, HttpService.class};
+    
+    private List<ServiceTracker> trackers = new LinkedList<ServiceTracker>();
+    private List<ServiceRegistration> registrations = new LinkedList<ServiceRegistration>();
+    private HttpService httpService;
+    private MessagingServiceRegistry registry;
+    private MessagingMessageParser parser;
+    private MessagingMessageWriter writer;
+
+    
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return NEEDED_SERVICES;
+    }
+
+    @Override
+    protected void handleAvailability(Class<?> clazz) {
+        register();
+    }
+
+    @Override
+    protected void handleUnavailability(Class<?> clazz) {
+        if(clazz == MessagingServiceRegistry.class) {
+            hide();
         }
     }
 
-    public void stop(final BundleContext context) throws Exception {
+    private void hide() {
+        if(null != httpService) {
+            httpService.unregister("/ajax/messagingAccounts");
+            httpService.unregister("/ajax/messagingMessages");
+            httpService.unregister("/ajax/messagingServices");
+        }
+        
+        for (ServiceRegistration registration : registrations) {
+            registration.unregister();
+        }
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        parser = new MessagingMessageParser();
+
+        trackers.add(new ContentParserTracker(context, parser));
+        trackers.add(new HeaderParserTracker(context, parser));
+
+        writer = new MessagingMessageWriter();
+        trackers.add(new ContentWriterTracker(context, writer));
+        trackers.add(new HeaderWriterTracker(context, writer));
+
+        for (ServiceTracker tracker : trackers) {
+            tracker.open();
+        }
+
+        register();
+    }
+
+    private void register() {
+
+        registry = getService(MessagingServiceRegistry.class);
+        httpService = getService(HttpService.class);
+
+        if (null == registry || null == httpService ) {
+            return;
+        }
+
+       
+        AccountActionFactory.INSTANCE = new AccountActionFactory(registry);
+        MessagingActionFactory.INSTANCE = new MessagingActionFactory(registry, writer, parser);
+        ServicesActionFactory.INSTANCE = new ServicesActionFactory(registry, Translator.EMPTY); // FIXME
+
         try {
-            // TODO: Cisco code here
-        } catch (final Exception e) {
-            org.apache.commons.logging.LogFactory.getLog(Activator.class).error(e.getMessage(), e);
-            throw e;
+            httpService.registerServlet("/ajax/messagingAccounts", new AccountServlet(), null, null);
+            httpService.registerServlet("/ajax/messagingMessages", new MessagesServlet(), null, null);
+            httpService.registerServlet("/ajax/messagingServices", new ServicesServlet(), null, null);
+        } catch (ServletException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (NamespaceException e) {
+            LOG.error(e.getMessage(), e);
+        }
+
+        
+        registrations.add(context.registerService(MultipleHandler.class.getName(), new AccountMultipleHandler(), null));
+        registrations.add(context.registerService(MultipleHandler.class.getName(), new MessagesMultipleHandler(), null));
+        registrations.add(context.registerService(MultipleHandler.class.getName(), new ServicesMultipleHandler(), null));
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        for (ServiceTracker tracker : trackers) {
+            tracker.close();
+        }
+        for (ServiceRegistration registration : registrations) {
+            registration.unregister();
         }
     }
 

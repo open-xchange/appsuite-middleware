@@ -49,14 +49,20 @@
 
 package com.openexchange.messaging.json.actions.messages;
 
+import java.io.IOException;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.messaging.MessagingAccountTransport;
+import com.openexchange.messaging.MessagingAddress;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingField;
+import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.MessagingMessageAccess;
 import com.openexchange.messaging.OrderDirection;
+import com.openexchange.messaging.json.MessagingMessageParser;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 
@@ -69,14 +75,32 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class MessagingRequestData {
 
+    
+    private static class StringRecipients implements MessagingAddress {
+
+        private String address;
+
+        public StringRecipients(String parameter) {
+            super();
+            this.address = parameter;
+        }
+
+        public String getAddress() {
+            return address;
+        }
+
+    }
+
     private AJAXRequestData request;
     private MessagingServiceRegistry registry;
     private ServerSession session;
+    private MessagingMessageParser parser;
 
-    public MessagingRequestData(AJAXRequestData request, ServerSession session, MessagingServiceRegistry registry) {
+    public MessagingRequestData(AJAXRequestData request, ServerSession session, MessagingServiceRegistry registry, MessagingMessageParser parser) {
         this.request = request;
         this.registry = registry;
         this.session = session;
+        this.parser = parser;
     }
 
     /**
@@ -84,7 +108,14 @@ public class MessagingRequestData {
      * @throws MessagingException If parameters 'messagingService' or 'account' are missing
      */
     public MessagingMessageAccess getMessageAccess() throws MessagingException {
-        return registry.getMessagingService(requireParameter("messagingService")).getAccountAccess(getAccountID(), session).getMessageAccess();
+        return registry.getMessagingService(getMessagingServiceId()).getAccountAccess(getAccountID(), session).getMessageAccess();
+    }
+
+    String getMessagingServiceId() throws MessagingException {
+        if(!isset("messagingService") && hasLongFolder()) {
+            return getLongFolder().getMessagingService();
+        }
+        return requireParameter("messagingService");
     }
     
     /**
@@ -103,6 +134,10 @@ public class MessagingRequestData {
      * @throws MessagingException - When the 'account' parameter was not set or is not a valid integer.
      */
     public int getAccountID() throws MessagingException {
+        if(!isset("account") && hasLongFolder()) {
+            return getLongFolder().getAccount();
+        }
+
         String parameter = requireParameter("account");
         try {
             return Integer.parseInt(parameter);
@@ -116,6 +151,9 @@ public class MessagingRequestData {
      * @throws MessagingException - When the 'folder' parameter is not set.
      */
     public String getFolderId() throws MessagingException {
+        if(hasLongFolder()) {
+            return getLongFolder().getFolder();
+        }
         return requireParameter("folder");
     }
 
@@ -232,6 +270,69 @@ public class MessagingRequestData {
      */
     public String getMessageAction() throws MessagingException {
         return requireParameter("messageAction");
+    }
+
+    public MessagingMessage getMessage() throws MessagingException, JSONException, IOException {
+        Object data = request.getData();
+        if(data == null) {
+            return null;
+        }
+        if(!JSONObject.class.isInstance(data)) {
+            throw MessagingExceptionCodes.INVALID_PARAMETER.create("body", data.toString());
+        }
+        return parser.parse((JSONObject) data, null);
+    }
+
+    /**
+     * Determines if the given parameters were set in the request.
+     */
+    public boolean isset(String...params) {
+        for (String param : params) {
+            if(null == request.getParameter(param)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Retrieves the MessagingAccountTransport that matches the parameters 'messagingService' and 'account'. Fails when either
+     * of the parameters has not been set.
+     */
+    public MessagingAccountTransport getTransport() throws MessagingException {
+        return registry.getMessagingService(getMessagingServiceId()).getAccountTransport(getAccountID(), session);
+    }
+
+    /**
+     * Retrieves and parses the 'recipients' parameter. May return null, if no recipients were set.
+     */
+    public MessagingAddress getRecipients() {
+        String parameter = request.getParameter("recipients");
+        if(parameter == null) {
+            return null;
+        }
+        return new StringRecipients(parameter);
+    }
+
+    /**
+     * Tries to either parse the folder in its long form or assemble it from the content
+     * @throws MessagingException 
+     */
+    public MessagingFolderAddress getLongFolder() throws MessagingException {
+        if(hasLongFolder()) {
+            return MessagingFolderAddress.parse(request.getParameter("folder"));
+        } else if (isset("messagingService", "account", "folder")) {
+            MessagingFolderAddress address = new MessagingFolderAddress();
+            address.setMessagingService(getMessagingServiceId());
+            address.setAccount(getAccountID());
+            address.setFolder(getFolderId());
+            return address;
+        }
+        return null;
+    }
+
+    private boolean hasLongFolder() throws MessagingException {
+        return isset("folder") && MessagingFolderAddress.matches(request.getParameter("folder"));
     }
 
 }

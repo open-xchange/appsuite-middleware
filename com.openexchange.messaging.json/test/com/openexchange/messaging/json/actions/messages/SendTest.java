@@ -49,126 +49,110 @@
 
 package com.openexchange.messaging.json.actions.messages;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.messaging.MessagingAddress;
 import com.openexchange.messaging.MessagingMessage;
+import com.openexchange.messaging.SimMessagingTransport;
 import com.openexchange.messaging.StringContent;
-import com.openexchange.messaging.SimMessageAccess.Call;
 import com.openexchange.messaging.json.MessagingMessageParser;
 import com.openexchange.messaging.json.MessagingMessageWriter;
-
+import com.openexchange.tools.session.SimServerSession;
 
 /**
- * {@link PerformTest}
- *
+ * {@link SendTest}
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class PerformTest extends AbstractMessagingActionTest {
+public class SendTest extends AbstractMessagingActionTest {
 
-    // Success Cases
-    
-    public void testPerformStorageCall() throws AbstractOXException {
+    // Success Case
+
+    public void testSendWithRecipients() throws JSONException, AbstractOXException {
         AJAXRequestData req = new AJAXRequestData();
         req.putParameter("messagingService", "com.openexchange.test1");
-        req.putParameter("folder", "theFolderID");
         req.putParameter("account", "12");
-        req.putParameter("id", "theID");
-        req.putParameter("messageAction", "theAction");
-        
+        req.putParameter("recipients", "rec1, rec2, rec3");
+
+        req.setData(new JSONObject("{'headers' : {'content-type' : 'text/plain'}, content : 'Hello World'}"));
+
         perform(req);
         
-        Call call = getMessagingAccessCall("com.openexchange.test1", 12);
+        SimMessagingTransport transport = (SimMessagingTransport) registry.getMessagingService("com.openexchange.test1").getAccountTransport(12, new SimServerSession(null, null, null));
         
-        assertEquals("perform", call.getName());
+        MessagingMessage message = transport.getMessage();
+        assertNotNull(message);
+        assertEquals("Hello World", ((StringContent)message.getContent()).getData());
         
-        Object[] args = call.getArgs();
-
-        assertEquals("theFolderID", args[0]);
-        assertEquals("theID", args[1]);
-        assertEquals("theAction", args[2]);
+        MessagingAddress recipients = transport.getRecipients();
+        assertNotNull(recipients);
+        assertEquals("rec1, rec2, rec3", recipients.getAddress());
         
     }
-    
-    public void testPerformMessageCall() throws AbstractOXException, JSONException {
+
+    public void testSendWithoutRecipients() throws AbstractOXException, JSONException {
         AJAXRequestData req = new AJAXRequestData();
         req.putParameter("messagingService", "com.openexchange.test1");
         req.putParameter("account", "12");
-        req.putParameter("messageAction", "theAction");
+
+        req.setData(new JSONObject("{'headers' : {'content-type' : 'text/plain'}, content : 'Hello World'}"));
+
+        perform(req);
         
+        SimMessagingTransport transport = (SimMessagingTransport) registry.getMessagingService("com.openexchange.test1").getAccountTransport(12, new SimServerSession(null, null, null));
+        
+        MessagingMessage message = transport.getMessage();
+        assertNotNull(message);
+        assertEquals("Hello World", ((StringContent)message.getContent()).getData());
+        
+        MessagingAddress recipients = transport.getRecipients();
+        assertTrue(recipients == null);
+    }
+
+    // Error Cases
+
+    public void testInvalidBody() throws AbstractOXException {
+        AJAXRequestData req = new AJAXRequestData();
+        req.putParameter("messagingService", "com.openexchange.test1");
+        req.putParameter("account", "12");
+
+        req.setData(new JSONArray());
+
+        assertFails(req);
+    }
+
+    public void testMissingBody() throws AbstractOXException {
+        AJAXRequestData req = new AJAXRequestData();
+        req.putParameter("messagingService", "com.openexchange.test1");
+        req.putParameter("account", "12");
+
+        assertFails(req);
+    }
+    
+    public void testMissingMessagingServiceID() throws JSONException, AbstractOXException {
+        AJAXRequestData req = new AJAXRequestData();
+        req.putParameter("account", "12");
+
+        req.setData(new JSONObject("{'headers' : {'content-type' : 'text/plain'}, content : 'Hello World'}"));
+
+        assertFails(req);
+    }
+    
+    public void testMissingAccountID() throws AbstractOXException, JSONException {
+        AJAXRequestData req = new AJAXRequestData();
+        req.putParameter("messagingService", "com.openexchange.test1");
+
         req.setData(new JSONObject("{'headers' : {'content-type' : 'text/plain'}, content : 'Hello World'}"));
         
-        perform(req);
-        
-        Call call = getMessagingAccessCall("com.openexchange.test1", 12);
-        
-        assertEquals("perform", call.getName());
-        
-        Object[] args = call.getArgs();
+        assertFails(req);
+    }
 
-        MessagingMessage message = (MessagingMessage) args[0];
-        assertEquals("Hello World", ((StringContent)message.getContent()).getData());
-        assertEquals("theAction", args[1]);
-        
-    }
-    
-    public void testPerformNullCall() throws AbstractOXException {
-        AJAXRequestData req = new AJAXRequestData();
-        req.putParameter("messagingService", "com.openexchange.test1");
-        req.putParameter("account", "12");
-        req.putParameter("messageAction", "theAction");
-        
-        perform(req);
-        
-        Call call = getMessagingAccessCall("com.openexchange.test1", 12);
-        
-        assertEquals("perform", call.getName());
-        
-        Object[] args = call.getArgs();
-
-        assertEquals("theAction", args[0]);
-    }
-    
-    // Error Cases
-    
-    public void testMissingServiceID() throws AbstractOXException {
-        AJAXRequestData req = new AJAXRequestData();
-        req.putParameter("folder", "theFolderID");
-        req.putParameter("account", "12");
-        req.putParameter("id", "theID");
-        req.putParameter("messageAction", "theAction");
-        
-        assertFails(req);
-    }
-    
-    public void testMissingAccountID() throws AbstractOXException {
-        AJAXRequestData req = new AJAXRequestData();
-        req.putParameter("messagingService", "com.openexchange.test1");
-        req.putParameter("folder", "theFolderID");
-        req.putParameter("id", "theID");
-        req.putParameter("messageAction", "theAction");
-        
-        assertFails(req);
-    
-    }
-    
-    public void testMissingAction() throws AbstractOXException {
-        AJAXRequestData req = new AJAXRequestData();
-        req.putParameter("messagingService", "com.openexchange.test1");
-        req.putParameter("folder", "theFolderID");
-        req.putParameter("account", "12");
-        req.putParameter("id", "theID");
-        
-        assertFails(req);
-    
-    }
-    
-    
     @Override
     protected AbstractMessagingAction getAction() {
-        return new PerformAction(registry, new MessagingMessageWriter(), new MessagingMessageParser());
+        return new SendAction(registry, new MessagingMessageWriter(), new MessagingMessageParser());
     }
 
 }

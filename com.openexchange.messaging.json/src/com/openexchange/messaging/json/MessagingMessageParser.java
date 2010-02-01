@@ -177,6 +177,11 @@ public class MessagingMessageParser {
         headerParsers.add(parser);
     }
     
+    public void removeHeaderParser(MessagingHeaderParser parser) {
+        headerParsers.remove(parser);
+    }
+
+    
     /**
      * Adds a {@link MessagingContentParser} to the list of known parsers. In this way new {@link MessagingContent} types may be parsed in a
      * custom manner
@@ -184,6 +189,10 @@ public class MessagingMessageParser {
      */
     public void addContentParser(MessagingContentParser parser) {
         contentParsers.add(parser);
+    }
+    
+    public void removeContentParser(MessagingContentParser parser) {
+        contentParsers.remove(parser);
     }
     
     private void setHeaders(JSONObject object, MimeMessagingBodyPart message) throws JSONException, MessagingException {
@@ -353,5 +362,6 @@ public class MessagingMessageParser {
         }
         
     }
+
 
 }

@@ -81,6 +81,8 @@ public class UnitTests {
         tests.addTestSuite(com.openexchange.messaging.json.actions.messages.GetTest.class);
         tests.addTestSuite(com.openexchange.messaging.json.actions.messages.ListTest.class);
         tests.addTestSuite(com.openexchange.messaging.json.actions.messages.PerformTest.class);
+        tests.addTestSuite(com.openexchange.messaging.json.actions.messages.SendTest.class);
+        tests.addTestSuite(com.openexchange.messaging.json.actions.messages.MessagingRequestDataTest.class);
         
         
         return tests;

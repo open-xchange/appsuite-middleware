@@ -6,7 +6,8 @@ Bundle-Version: 6.15.0.0
 Bundle-Activator: com.openexchange.messaging.json.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
-Import-Package: com.openexchange.ajax.requesthandler,
+Import-Package: com.openexchange.ajax,
+ com.openexchange.ajax.requesthandler,
  com.openexchange.datatypes.genericonf,
  com.openexchange.datatypes.genericonf.json,
  com.openexchange.groupware,
@@ -15,13 +16,19 @@ Import-Package: com.openexchange.ajax.requesthandler,
  com.openexchange.messaging.generic,
  com.openexchange.messaging.generic.internet,
  com.openexchange.messaging.registry,
+ com.openexchange.multiple,
+ com.openexchange.server.osgiservice,
  com.openexchange.session,
  com.openexchange.tools.encoding,
  com.openexchange.tools.servlet,
  com.openexchange.tools.session,
  javax.mail,
+ javax.servlet,
+ javax.servlet.http,
  org.apache.commons.codec,
  org.apache.commons.codec.binary;version="1.4.0",
- org.apache.commons.logging;version="1.0.4",
+ org.apache.commons.logging,
  org.json,
- org.osgi.framework;version="1.3.0"
+ org.osgi.framework;version="1.3.0",
+ org.osgi.service.http,
+ org.osgi.util.tracker

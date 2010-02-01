@@ -47,56 +47,39 @@
  *
  */
 
-package com.openexchange.messaging.json;
+package com.openexchange.messaging.json.actions.messages;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map.Entry;
+import java.io.IOException;
 import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.messaging.ContentType;
-import com.openexchange.messaging.MessagingException;
-import com.openexchange.messaging.MessagingHeader;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.messaging.MessagingExceptionCodes;
+import com.openexchange.messaging.MessagingMessage;
+import com.openexchange.messaging.json.MessagingMessageParser;
+import com.openexchange.messaging.json.MessagingMessageWriter;
+import com.openexchange.messaging.registry.MessagingServiceRegistry;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * Writes a content-type in the long form.
- * @see ContentTypeParser
+ * {@link SendAction}
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ContentTypeWriter implements MessagingHeaderWriter {
+public class SendAction extends AbstractMessagingAction {
 
-    public int getPriority() {
-        return 0;
+    public SendAction(MessagingServiceRegistry registry, MessagingMessageWriter writer, MessagingMessageParser parser) {
+        super(registry, writer, parser);
     }
 
-    public boolean handles(Entry<String, Collection<MessagingHeader>> entry) {
-        return entry.getKey().equalsIgnoreCase("content-type");
-    }
-
-    public String writeKey(Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException {
-        return "Content-Type";
-    }
-
-    public Object writeValue(Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException {
-        ContentType cType = (ContentType) entry.getValue().iterator().next();
-        JSONObject jsonCType = new JSONObject();
-
-        jsonCType.put("type", cType.getBaseType());
-        
-        JSONObject params = new JSONObject();
-        Iterator<String> names = cType.getParameterNames();
-        boolean write = false;
-        while(names.hasNext()) {
-            write = true;
-            String name = names.next();
-            String value = cType.getParameter(name);
-            params.put(name, value);
+    @Override
+    protected AJAXRequestResult doIt(MessagingRequestData req, ServerSession session) throws AbstractOXException, JSONException, IOException {
+        MessagingMessage message = req.getMessage();
+        if(message == null) {
+            throw MessagingExceptionCodes.MISSING_PARAMETER.create("body");
         }
-        
-        jsonCType.put("params", params);
-        return jsonCType;
+        req.getTransport().transport(message, req.getRecipients());
+        return new AJAXRequestResult(1);
     }
 
 }

@@ -99,7 +99,7 @@ public class MessagingMessageWriter {
         }
 
         public String writeKey(Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException {
-            return entry.getKey().toLowerCase();
+            return entry.getKey();
         }
 
         public Object writeValue(Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException {
@@ -123,7 +123,7 @@ public class MessagingMessageWriter {
         }
 
         public String writeKey(Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException {
-            return entry.getKey().toLowerCase();
+            return entry.getKey();
         }
 
         public Object writeValue(Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException {
@@ -140,7 +140,9 @@ public class MessagingMessageWriter {
     private JSONObject write(MessagingPart message) throws JSONException, MessagingException {
         JSONObject messageJSON = new JSONObject();
         
-        messageJSON.put("sectionId", message.getSectionId());
+        if(message.getSectionId() != null) {
+            messageJSON.put("sectionId", message.getSectionId());
+        }
         if(null != message.getHeaders() && ! message.getHeaders().isEmpty()) {
             JSONObject headerJSON = writeHeaders(message.getHeaders());
             
@@ -227,7 +229,7 @@ public class MessagingMessageWriter {
         messageJSON.put("flags", message.getFlags());
 
         if (message.getReceivedDate() > 0) {
-            messageJSON.put("received_date", message.getReceivedDate());
+            messageJSON.put("receivedDate", message.getReceivedDate());
         }
 
         messageJSON.put("size", message.getSize());
@@ -358,6 +360,10 @@ public class MessagingMessageWriter {
     public void addHeaderWriter(MessagingHeaderWriter writer) {
         headerWriters.add(writer);
     }
+    
+    public void removeHeaderWriter(MessagingHeaderWriter writer) {
+        headerWriters.remove(writer);
+    }
 
     /**
      * Registers a custom writer for a {@link MessagingContent}
@@ -365,6 +371,10 @@ public class MessagingMessageWriter {
      */
     public void addContentWriter(MessagingContentWriter contentWriter) {
         contentWriters.add(contentWriter);
+    }
+    
+    public void removeContentWriter(MessagingContentWriter contentWriter) {
+        contentWriters.remove(contentWriter);
     }
     
     /**

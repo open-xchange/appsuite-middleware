@@ -320,7 +320,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
             final int genericConfId;
             {
                 final GenericConfigurationStorageService genericConfStorageService = getService(CLAZZ_GEN_CONF);
-                final Map<String, Object> configuration = account.getConfiguration();
+                final Map<String, Object> configuration = new HashMap<String, Object>(account.getConfiguration());
                 /*
                  * Encrypt password fields to not having clear-text representation in database
                  */
