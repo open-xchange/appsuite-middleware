@@ -13,6 +13,7 @@ import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.proxy.ReverseProxy;
 
 /**
@@ -23,6 +24,8 @@ public class ServletRegisterer implements ServiceTrackerCustomizer {
 
 	private static final Log LOG = LogFactory.getLog(ServletRegisterer.class);
 	private final BundleContext context;
+    private HttpService httpService;
+    private ConfigurationService config;
 	
 	public ServletRegisterer(BundleContext context) {
 		
@@ -31,18 +34,33 @@ public class ServletRegisterer implements ServiceTrackerCustomizer {
 	}
 
 	public Object addingService(ServiceReference reference) {
-		HttpService service = (HttpService) context.getService(reference);
-		try {
-			service.registerServlet("/proxy", new ReverseProxy(), null, null);
-		} catch (ServletException e) {
-			LOG.error(e.getMessage(), e);
-		} catch (NamespaceException e) {
-			LOG.error(e.getMessage(), e);
-		}
-		return service;
+	    Object someService = context.getService(reference);
+	    if(HttpService.class.isInstance(someService)){
+	        this.httpService = (HttpService) someService;
+	        tryRegistering();
+	    } else if (ConfigurationService.class.isInstance(someService)) {
+	        this.config = (ConfigurationService) someService;
+	        tryRegistering();
+	    }
+	    return someService;
 	}
 
-	public void modifiedService(ServiceReference reference, Object service) {
+	private void tryRegistering() {
+	    if(httpService == null || config == null) {
+	        return;
+	    }
+	    try {
+	        ReverseProxy.path = config.getProperty("com.openexchange.proxy.path");
+	        httpService.registerServlet("/proxy", new ReverseProxy(), null, null);
+	    } catch (ServletException e) {
+	        LOG.error(e.getMessage(), e);
+	    } catch (NamespaceException e) {
+	        LOG.error(e.getMessage(), e);
+	    }
+
+    }
+
+    public void modifiedService(ServiceReference reference, Object service) {
 	}
 
 	public void removedService(ServiceReference reference, Object serv) {

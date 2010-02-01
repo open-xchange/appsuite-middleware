@@ -49,9 +49,14 @@
 
 package com.openexchange.proxy;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import org.apache.commons.httpclient.HttpHost;
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
-
+import org.apache.commons.httpclient.protocol.Protocol;
+import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
+import com.openexchange.httpclient.ssl.TrustAllSecureSocketFactory;
 
 /**
  * {@link ReverseProxyConfig}
@@ -64,22 +69,52 @@ public class ReverseProxyConfig {
     public String protocol = "";
     public String host = "";
     public String location = "";
+    public String agent = "";
 
-    public ReverseProxyConfig(String id, String protocol, String host, String location) {
+    public ReverseProxyConfig(String id, String protocol, String host, String location, String agent) {
         
         this.id = id;
         this.protocol = protocol;
         this.host = host;
         this.location = location;
+        this.agent = agent;
     }
     
     public URI getURI(String path, String query) throws URIException, NullPointerException {
         URI u = new URI(this.getPrefix() + path, false);
-        u.setQuery(query);
+        try {
+            if (query != null) {
+                query = URLDecoder.decode(query, "UTF-8");
+                u.setQuery(query);
+            }
+        } catch (UnsupportedEncodingException e) {}
         return u;
     }
     
+    public String getURIPath(String path, String query) throws UnsupportedEncodingException {
+        return location + path + (null == query ? "" : ("?" + URLDecoder.decode(query, "UTF-8")));
+    }
+
     public String getPrefix() {
         return this.protocol + "://" + this.host + this.location;
+    }
+
+    public HttpHost getHost() throws URIException, NullPointerException {
+        if ("https".equals(protocol)) {
+            final int port;
+            final String hostName;
+            final int pos = host.indexOf(':');
+            if (pos == -1) {
+                port = 443;
+                hostName = host;
+            } else {
+                hostName = host.substring(0, pos);
+                port = Integer.parseInt(host.substring(pos + 1));
+            }
+            Protocol proto = new Protocol("https", (ProtocolSocketFactory) new TrustAllSecureSocketFactory(), port);
+            return new HttpHost(hostName, port, proto);
+        } else {
+            return new HttpHost(new URI(protocol + "://" + host, false));
+        }
     }
 }

@@ -49,21 +49,32 @@
 
 package com.openexchange.proxy.osgi;
 
+import java.util.LinkedList;
+import java.util.List;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.config.ConfigurationService;
 
 public class Activator implements BundleActivator {
 
-	private ServiceTracker tracker;
+	private List<ServiceTracker> tracker = new LinkedList<ServiceTracker>();
 
 	public void start(BundleContext context) throws Exception {
-		tracker = new ServiceTracker(context, HttpService.class.getName(), new ServletRegisterer(context));
-		tracker.open();
+		ServletRegisterer customizer = new ServletRegisterer(context);
+        tracker.add(new ServiceTracker(context, HttpService.class.getName(), customizer));
+        tracker.add(new ServiceTracker(context, ConfigurationService.class.getName(), customizer));
+        
+        for (ServiceTracker serviceTracker : tracker) {
+            serviceTracker.open();
+        }
 	}
 
 	public void stop(BundleContext context) throws Exception {
-		tracker.close();
+	    for (ServiceTracker serviceTracker : tracker) {
+            serviceTracker.close();
+        }
 	}
+	
 }

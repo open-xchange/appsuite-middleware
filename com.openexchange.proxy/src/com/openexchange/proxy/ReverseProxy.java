@@ -49,33 +49,41 @@
 
 package com.openexchange.proxy;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.regex.*;
+import java.util.List;
+import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.httpclient.Cookie;
 import org.apache.commons.httpclient.Header;
+import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.commons.httpclient.HttpState;
-import org.apache.commons.httpclient.cookie.CookiePolicy;
+import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.httpclient.params.HttpClientParams;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.ho.yaml.Yaml;
 
 /**
  * {@link ReverseProxy}
  * 
  * @author <a href="mailto:matthias.biggeleben@open-xchange.com">Matthias Biggeleben</a>
- * @author <a href="mailto:markus.klein@open-xchange.com">Markus Klein</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class ReverseProxy extends HttpServlet {
 
@@ -83,60 +91,66 @@ public class ReverseProxy extends HttpServlet {
 
     private static final Log LOG = LogFactory.getLog(ReverseProxy.class);
 
-    private Hashtable<String,ReverseProxyConfig> proxies = new Hashtable<String, ReverseProxyConfig>();
+    private Hashtable<String, ReverseProxyConfig> proxies = new Hashtable<String, ReverseProxyConfig>();
+
+    public static String path = null;
+
+    private boolean firstTime = true;
+
+    private String hostname;
 
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-
-        // add dummy config
-        proxies.put("devtank.de", new ReverseProxyConfig("devtank.de", "http", "shuffle.devtank.de", ""));
-        proxies.put("login.1und1.de", new ReverseProxyConfig("login.1und1.de", "https", "login.1und1.de", ""));
-        // proxies.put("login.1und1.de", new ReverseProxyConfig("login.1und1.de", "https", "shuffle.devtank.de", ""));
-        proxies.put("mein.1und1.de", new ReverseProxyConfig("mein.1und1.de", "https", "mein.1und1.de", ""));
-
+        initialize();
         // get proxy id
         String proxyId = getProxyId(req);
- 
+
         // valid proxy?
         if (proxies.containsKey(proxyId)) {
-           
+
             // get proxy config
             ReverseProxyConfig proxy = proxies.get(proxyId);
-            
+
             String prefix = "/proxy/" + proxyId;
             String path = req.getRequestURI().substring(prefix.length());
             String methodS = req.getMethod();
             String query = req.getQueryString();
-            
-            //LOG.info("path=" + path + " query=" + query);
-            
+
             // http client to process subrequest
             HttpClient httpClient = new HttpClient();
+            HttpClientParams params = httpClient.getParams();
+            params.setContentCharset("UTF-8");
+            // get method (GET/POST/etc.)
             HttpMethodBase method = determineMethod(methodS);
-            
+
             // === REQUEST ===
-            
+
             // add request cookies
             prefix = ("proxy-" + proxyId + "-").replaceAll("[^\\w\\-]", "-");
             HttpState state = httpClient.getState();
-            
+
             javax.servlet.http.Cookie[] kekse = req.getCookies(); // might return null instead of empty array
             if (kekse != null) {
                 for (javax.servlet.http.Cookie cookie : kekse) {
-                    //LOG.info("Keks: " + cookie.getName() + " " + cookie.getValue() + " Compare with " + prefix);
+                    // LOG.info("Keks: " + cookie.getName() + " " + cookie.getValue() + " Compare with " + prefix);
                     String cookieName = cookie.getName();
                     if (cookieName.startsWith(prefix)) {
                         cookieName = cookieName.substring(prefix.length());
-                        //LOG.info("Set-Cookie " + cookieName + "=" + cookie.getValue() + "; Host=" + proxy.host);
+                        // LOG.info("Set-Cookie " + cookieName + "=" + cookie.getValue() + "; Host=" + proxy.host);
                         Cookie keks = new Cookie(proxy.host, cookieName, cookie.getValue());
-                        keks.setPath("/");
+                        keks.setPath("/"); 
                         httpClient.getState().addCookie(keks);
                     }
                 }
             }
-
+            HostConfiguration host = httpClient.getHostConfiguration();
+            host.setHost(proxy.getHost());
             // set URI
-            method.setURI(proxy.getURI(path, query));
+            URI u = proxy.getURI(path, query);
+            LOG.info("Proxy-Request: " + req.getRequestURI());
+            LOG.info("Proxy-Forward: " + u.getURI());
+            method.setPath(path);
+            method.setQueryString(query);
 
             // add headers
             Enumeration<?> headerNames = req.getHeaderNames();
@@ -146,19 +160,37 @@ public class ReverseProxy extends HttpServlet {
                 String value = req.getHeader(name);
                 if ("referer".equals(name)) {
                     // bypass "Referer"
-                    String refPrefix = "https://www.disco2000.ox/proxy/" + proxy.id;;
+                    String refPrefix = "https://" + hostname + "/proxy/" + proxy.id;
                     String remainder = value.substring(refPrefix.length());
                     value = proxy.getPrefix() + remainder;
-                    method.addRequestHeader(new Header("Referer",  value));
-                } else if ("user-agent".equals(name)) {
-                    // bypass "User-Agent"
-                    method.addRequestHeader(new Header("User-Agent", req.getHeader(name)));
+                    method.addRequestHeader(new Header("Referer", value));
                 } else if ("content-type".equals(name)) {
                     // bypass "Content-Type"
                     method.addRequestHeader(new Header("Content-Type", req.getHeader(name)));
+                } else if ("accept".equals(name)) {
+                    // bypass
+                    method.addRequestHeader(new Header("Accept", req.getHeader(name)));
+                } else if ("accept-charset".equals(name)) {
+                    // bypass
+                    method.addRequestHeader(new Header("Accept-Charset", req.getHeader(name)));
+                } else if ("accept-language".equals(name)) {
+                    // bypass
+                    method.addRequestHeader(new Header("Accept-Language", req.getHeader(name)));
                 }
             }
             
+            // user agent
+            if (!proxy.agent.equals("")) {
+                // override user agent
+                method.addRequestHeader(new Header("User-Agent", proxy.agent));
+            } else {
+                String agent = req.getHeader("user-agent");
+                if (agent != null) {
+                    // bypass user agent
+                    method.addRequestHeader(new Header("User-Agent", agent));
+                }
+            }
+
             // POST?
             if (methodS.equals("POST")) {
                 PostMethod post = (PostMethod) method;
@@ -170,36 +202,42 @@ public class ReverseProxy extends HttpServlet {
             method.setFollowRedirects(false);
             
             // send request
-            httpClient.executeMethod(method);
+            int code = httpClient.executeMethod(method);
+            //LOG.info("Proxy: Code="+code);
 
             // === RESPONSE ====
-            
+
             // process response cookies
             state = httpClient.getState();
             for (Cookie cookie : state.getCookies()) {
-                //LOG.info("Response KEKS: " + cookie.getName() + " " + cookie.getValue());
+                // LOG.info("Response KEKS: " + cookie.getName() + " " + cookie.getValue());
                 // add to response
                 String cookieName = prefix + cookie.getName();
                 javax.servlet.http.Cookie keks = new javax.servlet.http.Cookie(cookieName, cookie.getValue());
-                keks.setDomain("www.disco2000.ox");
+                keks.setDomain(hostname);
                 keks.setPath("/proxy/" + proxyId);
                 resp.addCookie(keks);
             }
-            
+
             // add response header
             header2Response(method, resp);
-            
+
             // process response body (html only)
             Header ct = method.getResponseHeader("Content-Type");
             if (ct.getValue().startsWith("text/html")) {
-                String body = method.getResponseBodyAsString();
-                // replace content inside body
-                body = this.processBody(body, proxy);
+                // get content
+                //byte[] bytes = method.getResponseBody();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(method.getResponseBodyAsStream(), method.getResponseCharSet())); 
+                StringBuffer body = new StringBuffer();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    body.append(line);
+                }
+                // replace content inside body and
                 // write as response
-                PrintWriter out = resp.getWriter();
-                out.write(body);
+                resp.getWriter().write(this.processBody(body.toString(), proxy));
             } else {
-                // binary 
+                // binary
                 InputStream responseStream = method.getResponseBodyAsStream();
                 OutputStream outputStream = resp.getOutputStream();
                 byte[] buf = new byte[1024];
@@ -210,7 +248,7 @@ public class ReverseProxy extends HttpServlet {
             }
             // close connection
             method.releaseConnection();
-            
+
             // set status
             resp.setStatus(method.getStatusCode());
 
@@ -221,44 +259,84 @@ public class ReverseProxy extends HttpServlet {
         }
     }
 
+    private void initialize() {
+        if (!firstTime) {
+            return;
+        }
+        firstTime = false;
+        try {
+            LOG.info("Trying to load config: " + path);
+            final File file = new File(path);
+            final Object yml = Yaml.load(file);
+            try {
+                //LOG.info("Proxy config: " + Yaml.dump(yml));
+                HashMap<?, ?> map = (HashMap<?, ?>) yml;
+                hostname = (String) map.get("hostname");
+                LOG.info("Proxy hostname: " + hostname);
+                for (Map proxiesMap : (List<Map>) map.get("proxies")) {
+                    if (proxiesMap.containsKey("proxy")) {
+                        String proxy = (String) proxiesMap.get("proxy");
+                        String protocol = (String) proxiesMap.get("protocol");
+                        String host = (String) proxiesMap.get("host");
+                        String location = proxiesMap.containsKey("location") ? (String) proxiesMap.get("location") : "";
+                        String agent = proxiesMap.containsKey("agent") ? (String) proxiesMap.get("agent") : "";
+                        LOG.info("Adding proxy: " + proxy);
+                        proxies.put(proxy, new ReverseProxyConfig(proxy, protocol, host, location, agent));
+                    }
+                }
+            } catch (NullPointerException e) {
+                LOG.info("Config not valid! (nullpointer) " + e.getMessage());
+            } catch (Exception e) {
+                LOG.info("Config not valid! (general) " + e.getMessage());
+            }
+        } catch (FileNotFoundException e) {
+            LOG.info("Cannot load config " + e.getMessage());
+        }
+        // add dummy config
+        // proxies.put("devtank.de", new ReverseProxyConfig("devtank.de", "http", "shuffle.devtank.de", ""));
+        // proxies.put("login.1und1.de", new ReverseProxyConfig("login.1und1.de", "https", "login.1und1.de", ""));
+        // // proxies.put("login.1und1.de", new ReverseProxyConfig("login.1und1.de", "https", "shuffle.devtank.de", ""));
+        // proxies.put("mein.1und1.de", new ReverseProxyConfig("mein.1und1.de", "https", "mein.1und1.de", ""));
+
+    }
+
     private void header2Response(HttpMethodBase method, HttpServletResponse resp) {
-        
+
         for (Header header : method.getResponseHeaders()) {
-            
+
             String name = header.getName();
             String value = header.getValue();
-            
+
             if ("Content-Type".equals(name)) {
                 // set content type
                 resp.setContentType(value);
-                
+
             } else if ("Location".equals(name)) {
                 // handle redirects
                 Enumeration<?> proxies = this.proxies.elements();
                 while (proxies.hasMoreElements()) {
                     ReverseProxyConfig proxy = (ReverseProxyConfig) proxies.nextElement();
                     String prefix = proxy.getPrefix();
-                    LOG.info("Test: " + value + " Against: " + prefix);
+                    //LOG.info("Test: " + value + " Against: " + prefix);
                     // matches header value?
                     if (value.startsWith("/")) {
                         // relative URL
-                        value = "https://www.disco2000.ox/proxy/" + proxy.id + value;
+                        value = "https://" + hostname + "/proxy/" + proxy.id + value;
                         resp.addHeader(name, value);
                         break;
-                    }
-                    else if (value.startsWith(prefix)) { // add trailing slash to prevent id collisions
+                    } else if (value.startsWith(prefix)) { // add trailing slash to prevent id collisions
                         // absolute URL
                         String path = value.substring(prefix.length());
                         // remove port
                         path = path.replaceFirst("\\:\\d+", "");
-                        value = "https://www.disco2000.ox/proxy/" + proxy.id + path;
-                        LOG.info("FOUND! Redirect: " + value);
+                        value = "https://" + hostname + "/proxy/" + proxy.id + path;
+                        //LOG.info("FOUND! Redirect: " + value);
                         resp.addHeader(name, value);
                         break;
                     }
-                    LOG.info("Not matching!");
+                    //LOG.info("Not matching!");
                 }
-                
+
             } else if ("Content-Length".equals(name)) {
                 // set content length
                 long length = method.getResponseContentLength();
@@ -266,7 +344,7 @@ public class ReverseProxy extends HttpServlet {
                     resp.setContentLength((int) length);
                 }
             }
-            
+
         }
     }
 
@@ -284,7 +362,7 @@ public class ReverseProxy extends HttpServlet {
         int end = pathInfo.indexOf('/', 1);
         return end > 0 ? pathInfo.substring(1, end) : pathInfo.substring(1);
     }
-    
+
     private String processBody(String body, ReverseProxyConfig currentProxy) {
         // loop through proxies
         Enumeration<?> proxies = this.proxies.elements();
@@ -293,7 +371,7 @@ public class ReverseProxy extends HttpServlet {
             String prefix = proxy.getPrefix();
             String regex = java.util.regex.Pattern.quote(prefix);
             // replace
-            body = body.replaceAll(regex, "https://www.disco2000.ox/proxy/" + proxy.id);
+            body = body.replaceAll(regex, "https://" + hostname + "/proxy/" + proxy.id);
         }
         // make absolute pathes
         body = body.replaceAll("\"/(.*?)\"", "\"/proxy/" + currentProxy.id + "/$1\"");

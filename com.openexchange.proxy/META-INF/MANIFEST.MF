@@ -6,12 +6,19 @@ Bundle-Version: 6.15.0
 Bundle-Activator: com.openexchange.proxy.osgi.Activator
 Bundle-Vendor: Open-Xchange, Inc.
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
-Import-Package: javax.servlet,
+Import-Package: com.openexchange.config,
+ com.openexchange.httpclient.ssl,
+ com.openexchange.tools.ssl,
+ javax.servlet,
  javax.servlet.http,
  org.apache.commons.httpclient,
  org.apache.commons.httpclient.cookie,
  org.apache.commons.httpclient.methods,
+ org.apache.commons.httpclient.params,
+ org.apache.commons.httpclient.protocol,
  org.apache.commons.logging,
  org.osgi.framework;version="1.3.0",
  org.osgi.service.http,
  org.osgi.util.tracker;version="1.3.3"
+Bundle-ClassPath: lib/jyaml-1.3.jar,
+ .
