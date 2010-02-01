@@ -58,7 +58,8 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeUtility;
 
 /**
- * {@link QuotedInternetAddress} - A quoted version of {@link InternetAddress}.
+ * {@link QuotedInternetAddress} - A quoted version of {@link InternetAddress} originally written by <b>Bill Shannon</b> and <b>John
+ * Mani</b>.
  * <p>
  * Quotes are added to encoded personal names to maintain them when converting to mail-safe version. Parental {@link InternetAddress} class
  * ignores quotes when when converting to mail-safe version:
@@ -253,7 +254,7 @@ public final class QuotedInternetAddress extends InternetAddress {
                         index++; // skip both '\' and the escaped char
                         break;
                     case '"':
-                        inquote = !inquote;
+                        inquote ^= true;
                         break;
                     case '>':
                         if (inquote) {
@@ -404,6 +405,7 @@ public final class QuotedInternetAddress extends InternetAddress {
 
                 // otherwise, parsing a header; treat semicolon like comma
                 // fall through to comma case...
+                //$FALL-THROUGH$
 
             case ',': // end of an address, probably
                 if (start == -1) {
@@ -425,7 +427,7 @@ public final class QuotedInternetAddress extends InternetAddress {
                 String pers = null;
                 if (rfc822 && start_personal >= 0) {
                     pers = unquote(s.substring(start_personal, end_personal).trim());
-                    if (pers.trim().length() == 0) {
+                    if (isEmpty(pers)) {
                         pers = null;
                     }
                 }
@@ -551,7 +553,7 @@ public final class QuotedInternetAddress extends InternetAddress {
             String pers = null;
             if (rfc822 && start_personal >= 0) {
                 pers = unquote(s.substring(start_personal, end_personal).trim());
-                if (pers.trim().length() == 0) {
+                if (isEmpty(pers)) {
                     pers = null;
                 }
             }
@@ -720,6 +722,10 @@ public final class QuotedInternetAddress extends InternetAddress {
         }
     }
 
+    /**
+     * Converts a Unicode string to ASCII using the procedure in RFC3490 section 4.1. Unassigned characters are not allowed and STD3 ASCII
+     * rules are enforced. The input string may be a domain name containing dots.
+     */
     private static String toACE(final String idnString) throws AddressException {
         if (null == idnString) {
             return null;
@@ -736,6 +742,10 @@ public final class QuotedInternetAddress extends InternetAddress {
         }
     }
 
+    /**
+     * Converts an ASCII-encoded string to Unicode. Unassigned characters are not allowed and STD3 hostnames are enforced. Input may be
+     * domain name containing dots.
+     */
     private static String toIDN(final String aceString) {
         if (null == aceString) {
             return null;
@@ -870,12 +880,11 @@ public final class QuotedInternetAddress extends InternetAddress {
     }
 
     /**
-     * Gets the email address.
+     * Gets the email address in Unicode characters.
      * 
-     * @return The email address
+     * @return The email address in Unicode characters
      */
-    @Override
-    public String getAddress() {
+    public String getUnicodeAddress() {
         return toIDN(address);
     }
 
@@ -958,7 +967,7 @@ public final class QuotedInternetAddress extends InternetAddress {
         } else if (isGroup() || isSimple()) {
             return toIDN(address);
         } else {
-            return new StringBuilder().append('<').append(toIDN(address)).append('>').toString();
+            return new StringBuilder(32).append('<').append(toIDN(address)).append('>').toString();
         }
     }
 
@@ -1076,6 +1085,9 @@ public final class QuotedInternetAddress extends InternetAddress {
     }
 
     private static String unquote(final String str) {
+        if (isEmpty(str)) {
+            return str;
+        }
         String s = str;
         int length = s.length();
         if ('"' == s.charAt(0) && '"' == s.charAt(length - 1)) {
@@ -1095,6 +1107,18 @@ public final class QuotedInternetAddress extends InternetAddress {
             }
         }
         return s;
+    }
+
+    private static boolean isEmpty(final String str) {
+        if (null == str || 0 == str.length()) {
+            return true;
+        }
+        final int len = str.length();
+        boolean ret = true;
+        for (int i = 0; ret && i < len; i++) {
+            ret = Character.isWhitespace(str.charAt(i));
+        }
+        return ret;
     }
 
 }
