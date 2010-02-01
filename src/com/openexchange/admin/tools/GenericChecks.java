@@ -51,12 +51,10 @@ package com.openexchange.admin.tools;
 
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
-
 import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-
 import com.openexchange.admin.rmi.dataobjects.PasswordMechObject;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 
 /**
  * @author choeger
@@ -86,15 +84,15 @@ public class GenericChecks {
      */
     public final static boolean isValidMailAddress(final String address)  {
         if (null != address) {
-        	try {
-				new InternetAddress(address);
-				return true;
-			} catch (final AddressException e) {
-				return false;
-			}
+            try {
+                new QuotedInternetAddress(address);
+                return true;
+            } catch (final AddressException e) {
+                return false;
+            }
             //return address.matches("[$%\\.+a-zA-Z0-9_#$&'/=!?^`{|}~*-]+@[\\.a-zA-Z0-9_-]+");
         }
-		return false;
+        return false;
     }
 
     /**
