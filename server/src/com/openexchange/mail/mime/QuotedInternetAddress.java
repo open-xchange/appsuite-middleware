@@ -58,7 +58,8 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeUtility;
 
 /**
- * {@link QuotedInternetAddress} - A quoted version of {@link InternetAddress}.
+ * {@link QuotedInternetAddress} - A quoted version of {@link InternetAddress} originally written by <b>Bill Shannon</b> and <b>John
+ * Mani</b>.
  * <p>
  * Quotes are added to encoded personal names to maintain them when converting to mail-safe version. Parental {@link InternetAddress} class
  * ignores quotes when when converting to mail-safe version:
@@ -911,12 +912,11 @@ public final class QuotedInternetAddress extends InternetAddress {
     }
 
     /**
-     * Gets the email address.
+     * Gets the email address in Unicode characters.
      * 
-     * @return The email address
+     * @return The email address in Unicode characters
      */
-    @Override
-    public String getAddress() {
+    public String getUnicodeAddress() {
         return toIDN(address);
     }
 
@@ -999,15 +999,34 @@ public final class QuotedInternetAddress extends InternetAddress {
         } else if (isGroup() || isSimple()) {
             return toIDN(address);
         } else {
-            return new StringBuilder().append('<').append(toIDN(address)).append('>').toString();
+            return new StringBuilder(32).append('<').append(toIDN(address)).append('>').toString();
         }
     }
+
+//    @Override
+//    public boolean equals(final Object a) {
+//        if (this == a) {
+//            return true;
+//        }
+//        if (!(a instanceof InternetAddress)) {
+//            return false;
+//        }
+//        final String s = ((InternetAddress) a).getAddress();
+//        if (address == null) {
+//            if (s != null) {
+//                return false;
+//            }
+//        } else if (!address.equalsIgnoreCase(s) && !toIDN(address).equalsIgnoreCase(s)) {
+//            return false;
+//        }
+//        return true;
+//    }
 
     /**
      * Is this a "simple" address? Simple addresses don't contain quotes or any RFC822 special characters other than '@' and '.'.
      */
     private boolean isSimple() {
-        return address == null || indexOfAny(address, SPECIALS_NO_DOT_NO_AT) < 0;
+        return null == address || indexOfAny(address, SPECIALS_NO_DOT_NO_AT) < 0;
     }
 
     /**

@@ -1,3 +1,7 @@
+* 2010-01-27 - thorben.betten@open-xchange.com
+
+ - Bugfix #15287: Returning 7 bit characters on QuotedInternetAddress.getAddress()
+
 * 2010-01-29 - choeger@open-xchange.com
 
  - Bugfix #15293: calendar-printing templates are not marked as configfiles on
@@ -7,7 +11,7 @@
 
  - Bugfix #15274: Values read from OXMF are now stripped of trailing whitespaces
  
- 2010-01-27 - thorben.betten@open-xchange.com
+* 2010-01-27 - thorben.betten@open-xchange.com
 
  - Bugfix #15258: Added day of week to appointment notification's start/end date replacement
 
