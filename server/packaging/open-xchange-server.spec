@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 12
+%define		ox_release 13
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -483,6 +483,8 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Mon Feb 01 2010 - thorben.betten@open-xchange.com
+ - Bugfix #15287: Returning 7 bit characters on QuotedInternetAddress.getAddress()
 * Tue Jan 19 2010 - francisco.laguna@open-xchange.com
  - Bugfix #15110: Apply download constraints only to OXMF pages and not attached infostore documents.
 * Mon Jan 18 2010 - thorben.betten@open-xchange.com

@@ -1,3 +1,9 @@
+open-xchange-authentication-ldap (6.14.0.0-10) unstable; urgency=low
+
+  * build for public PTF 2010-02-01
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon,  1 Feb 2010 15:29:34 +0100
+
 open-xchange-authentication-ldap (6.14.0.0-9) unstable; urgency=low
 
   * build for public PTF 2010-01-22
