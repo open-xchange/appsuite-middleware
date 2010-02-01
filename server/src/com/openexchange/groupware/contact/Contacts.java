@@ -162,14 +162,14 @@ public final class Contacts {
         if (Boolean.TRUE.toString().equalsIgnoreCase(ContactConfig.getInstance().getProperty(PROP_VALIDATE_CONTACT_EMAIL))) {
             String email = null;
             try {
-                if (co.containsEmail1() && (co.getEmail1() != null)) {
-                    new QuotedInternetAddress((email = co.getEmail1())).validate();
+                if (co.containsEmail1() && ((email = co.getEmail1()) != null)) {
+                    new QuotedInternetAddress(email).validate();
                 }
-                if (co.containsEmail2() && (co.getEmail2() != null)) {
-                    new QuotedInternetAddress((email = co.getEmail2())).validate();
+                if (co.containsEmail2() && ((email = co.getEmail2()) != null)) {
+                    new QuotedInternetAddress(email).validate();
                 }
-                if (co.containsEmail3() && (co.getEmail3() != null)) {
-                    new QuotedInternetAddress((email = co.getEmail3())).validate();
+                if (co.containsEmail3() && ((email = co.getEmail3()) != null)) {
+                    new QuotedInternetAddress(email).validate();
                 }
             } catch (final AddressException e) {
                 throw EXCEPTIONS.create(0, e, email);
