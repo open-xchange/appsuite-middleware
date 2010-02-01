@@ -124,7 +124,7 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
     }
 
     public boolean containsMessagingService(final String id) {
-        return map.containsKey(id);
+        return null == id ? false : map.containsKey(id);
     }
 
     private final class Customizer implements ServiceTrackerCustomizer {
@@ -142,6 +142,12 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
                 final MessagingService addMe = (MessagingService) service;
                 if (null == map.putIfAbsent(addMe.getId(), addMe)) {
                     return service;
+                }
+                final org.apache.commons.logging.Log logger =
+                    org.apache.commons.logging.LogFactory.getLog(OSGIMessagingServiceRegistry.Customizer.class);
+                if (logger.isWarnEnabled()) {
+                    logger.warn(new StringBuilder(128).append("Messaging service ").append(addMe.getDisplayName()).append(
+                        " could not be added to registry. Another service is already registered with identifier: ").append(addMe.getId()).toString());
                 }
             }
             /*
