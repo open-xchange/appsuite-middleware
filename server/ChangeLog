@@ -1,6 +1,7 @@
 * 2010-01-27 - thorben.betten@open-xchange.com
 
  - Bugfix #15287: Returning 7 bit characters on QuotedInternetAddress.getAddress()
+ - Bugfix #15282: Fixed NPE
 
 * 2010-01-29 - choeger@open-xchange.com
 

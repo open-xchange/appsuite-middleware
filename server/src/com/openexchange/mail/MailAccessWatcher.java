@@ -93,10 +93,11 @@ public final class MailAccessWatcher {
                      */
                     final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
                     if (null != timer) {
-                        watcherTask = timer.scheduleWithFixedDelay(
-                            new WatcherTask(mailAccesses, LOG),
-                            1000,
-                            MailProperties.getInstance().getWatcherFrequency());
+                        watcherTask =
+                            timer.scheduleWithFixedDelay(
+                                new WatcherTask(mailAccesses, LOG),
+                                1000,
+                                MailProperties.getInstance().getWatcherFrequency());
                     }
                     initialized.set(true);
                     if (LOG.isInfoEnabled()) {
@@ -176,6 +177,9 @@ public final class MailAccessWatcher {
 
     private static final String INFO_PREFIX3 = "\n\tDONE";
 
+    /**
+     * Helper class.
+     */
     private static class WatcherTask implements Runnable {
 
         private final ConcurrentMap<MailAccess<?, ?>, Long> mailAccessMap;
@@ -192,14 +196,17 @@ public final class MailAccessWatcher {
             try {
                 final StringBuilder sb = new StringBuilder(512);
                 final List<MailAccess<?, ?>> exceededCons = new ArrayList<MailAccess<?, ?>>();
+                final int watcherTime = MailProperties.getInstance().getWatcherTime();
                 for (final Iterator<Entry<MailAccess<?, ?>, Long>> iter = mailAccessMap.entrySet().iterator(); iter.hasNext();) {
                     final Entry<MailAccess<?, ?>, Long> e = iter.next();
-                    if (e.getKey().isConnectedUnsafe()) {
-                        if ((System.currentTimeMillis() - e.getValue().longValue()) > MailProperties.getInstance().getWatcherTime()) {
+                    final MailAccess<?, ?> mailAccess = e.getKey();
+                    if (mailAccess.isConnectedUnsafe()) {
+                        final Long val = e.getValue();
+                        if ((null != val) && ((System.currentTimeMillis() - val.longValue()) > watcherTime)) {
                             sb.setLength(0);
-                            logger.info(sb.append(INFO_PREFIX.replaceFirst("#N#", String.valueOf(MailProperties.getInstance().getWatcherTime()))).append(
-                                e.getKey().getTrace()).toString());
-                            exceededCons.add(e.getKey());
+                            logger.info(sb.append(INFO_PREFIX.replaceFirst("#N#", String.valueOf(watcherTime))).append(
+                                mailAccess.getTrace()).toString());
+                            exceededCons.add(mailAccess);
                         }
                     } else {
                         /*
@@ -213,8 +220,9 @@ public final class MailAccessWatcher {
                      * Remove/Close exceeded accesses
                      */
                     final int n = exceededCons.size();
+                    final Iterator<MailAccess<?, ?>> iter = exceededCons.iterator();
                     for (int i = 0; i < n; i++) {
-                        final MailAccess<?, ?> mailAccess = exceededCons.get(i);
+                        final MailAccess<?, ?> mailAccess = iter.next();
                         try {
                             if (MailProperties.getInstance().isWatcherShallClose()) {
                                 sb.setLength(0);
@@ -232,6 +240,6 @@ public final class MailAccessWatcher {
                 logger.error(e.getMessage(), e);
             }
         }
-    }
+    } // End of WatcherTask class
 
 }
