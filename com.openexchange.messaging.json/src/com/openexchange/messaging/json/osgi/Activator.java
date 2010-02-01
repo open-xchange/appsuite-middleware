@@ -157,9 +157,9 @@ public class Activator extends DeferredActivator {
         ServicesActionFactory.INSTANCE = new ServicesActionFactory(registry, Translator.EMPTY); // FIXME
 
         try {
-            httpService.registerServlet("/ajax/messaging/accounts", new AccountServlet(), null, null);
-            httpService.registerServlet("/ajax/messaging/messages", new MessagesServlet(), null, null);
-            httpService.registerServlet("/ajax/messaging/services", new ServicesServlet(), null, null);
+            httpService.registerServlet("/ajax/messaging/account", new AccountServlet(), null, null);
+            httpService.registerServlet("/ajax/messaging/message", new MessagesServlet(), null, null);
+            httpService.registerServlet("/ajax/messaging/service", new ServicesServlet(), null, null);
         } catch (ServletException e) {
             LOG.error(e.getMessage(), e);
         } catch (NamespaceException e) {

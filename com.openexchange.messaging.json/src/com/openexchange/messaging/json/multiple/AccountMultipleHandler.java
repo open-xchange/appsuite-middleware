@@ -61,6 +61,6 @@ import com.openexchange.multiple.AJAXActionServiceAdapterHandler;
 public class AccountMultipleHandler extends AJAXActionServiceAdapterHandler {
     
     public AccountMultipleHandler() {
-        super(AccountActionFactory.INSTANCE, "messagingAccounts");
+        super(AccountActionFactory.INSTANCE, "messaging/account");
     }
 }

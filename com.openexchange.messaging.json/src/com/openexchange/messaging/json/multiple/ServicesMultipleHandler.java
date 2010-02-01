@@ -61,6 +61,6 @@ import com.openexchange.multiple.AJAXActionServiceAdapterHandler;
 public class ServicesMultipleHandler extends AJAXActionServiceAdapterHandler {
     
     public ServicesMultipleHandler() {
-        super(ServicesActionFactory.INSTANCE, "messagingServices");
+        super(ServicesActionFactory.INSTANCE, "messaging/service");
     }
 }
