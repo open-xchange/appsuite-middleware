@@ -112,7 +112,11 @@
 
 * 2009-12-14 - marcus.klein@open-xchange.com
 
- - Bugfix #15070: Corrected category for concurrent modifications exceptions on contacts. 
+ - Bugfix #15070: Corrected category for concurrent modifications exceptions on contacts.
+ 
+* 2009-12-09 - thorben.betten@open-xchange.com
+
+- Bugfix #15022: Fallback on non-parseable content type header
 
 * 2009-12-04 - martin.herfurth@open-xchange.com
 
