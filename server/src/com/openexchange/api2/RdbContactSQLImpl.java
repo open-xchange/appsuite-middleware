@@ -366,14 +366,6 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
             DBUtils.closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(ctx, con);
         }
-        if (Arrays.contains(cols, Contact.LAST_MODIFIED_OF_NEWEST_ATTACHMENT)) {
-            for (Contact contact : contacts) {
-                Date creationDate = Attachments.getInstance().getNewestCreationDate(contact.getObjectID(), Types.CONTACT, ctx);
-                if (null != creationDate) {
-                    contact.setLastModifiedOfNewestAttachment(creationDate);
-                }
-            }
-        }
         if (order_field == Contact.USE_COUNT_GLOBAL_FIRST) {
             java.util.Arrays.sort(contacts, new UseCountComparator(specialSort));
         } else if (specialSort) {
@@ -1246,6 +1238,8 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
                 if (!Arrays.contains(cols, Contact.IMAGE1) || !tmp.contains(imageId)) {
                     tmp.add(imageId);
                 }
+            } else if (Contact.LAST_MODIFIED_OF_NEWEST_ATTACHMENT == col) {
+                tmp.add(I(col));
             } else {
                 LOG.warn("UNKNOWN FIELD -> " + col);
             }
@@ -1330,7 +1324,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
 
     @OXThrowsMultiple(category = { Category.CODE_ERROR, Category.CODE_ERROR }, desc = { "50", "51" }, exceptionId = { 50, 51 }, msg = {
         ERR_UNABLE_TO_LOAD_OBJECTS_CONTEXT_1$D_USER_2$D, ERR_UNABLE_TO_LOAD_OBJECTS_CONTEXT_1$D_USER_2$D })
-    protected Contact convertResultSet2ContactObject(final ResultSet rs, final int cols[], final boolean check, final Connection readCon) throws OXException {
+    protected Contact convertResultSet2ContactObject(final ResultSet rs, final int cols[], final boolean check, final Connection con) throws OXException {
         final Contact co = new Contact();
 
         try {
@@ -1356,7 +1350,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
             for (int a = 0; a < cols.length; a++) {
                 final mapper m = Contacts.mapping[cols[a]];
                 if (m != null) {
-                    m.addToContactObject(rs, cnt, co, readCon, userId, memberInGroups, ctx, userConfiguration);
+                    m.addToContactObject(rs, cnt, co, con, userId, memberInGroups, ctx, userConfiguration);
                     cnt++;
                 }
             }
@@ -1368,9 +1362,15 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
                     userId,
                     memberInGroups,
                     session,
-                    readCon,
+                    con,
                     ctx)) {
                     throw EXCEPTIONS.createOXConflictException(50, I(ctx.getContextId()), I(userId));
+                }
+            }
+            if (Arrays.contains(cols, Contact.LAST_MODIFIED_OF_NEWEST_ATTACHMENT)) {
+                Date creationDate = Attachments.getInstance(new SimpleDBProvider(con, null)).getNewestCreationDate(co.getObjectID(), Types.CONTACT, ctx);
+                if (null != creationDate) {
+                    co.setLastModifiedOfNewestAttachment(creationDate);
                 }
             }
         } catch (final SQLException e) {
