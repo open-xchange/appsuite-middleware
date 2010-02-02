@@ -75,7 +75,9 @@ import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.OXThrowsMultiple;
+import com.openexchange.groupware.Types;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.contact.Classes;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactExceptionFactory;
@@ -94,6 +96,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.settings.SettingException;
+import com.openexchange.groupware.tx.SimpleDBProvider;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.preferences.ServerUserSetting;
@@ -211,9 +214,9 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
             if (contactFolder.getModule() != FolderObject.CONTACT) {
                 throw EXCEPTIONS.createOXConflictException(
                     2,
-                    Integer.valueOf(folderId),
-                    Integer.valueOf(ctx.getContextId()),
-                    Integer.valueOf(userId));
+                    I(folderId),
+                    I(ctx.getContextId()),
+                    I(userId));
                 // throw new
                 // OXException("getNumberOfContacts() called with a non-Contact-Folder! (cid="+sessionobject.getContext().getContextId()+" fid="+folderId+')');
             }
@@ -235,9 +238,9 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
             if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
                 throw EXCEPTIONS.createOXConflictException(
                     4,
-                    Integer.valueOf(folderId),
-                    Integer.valueOf(ctx.getContextId()),
-                    Integer.valueOf(userId));
+                    I(folderId),
+                    I(ctx.getContextId()),
+                    I(userId));
                 // throw new
                 // OXConflictException("NOT ALLOWED TO SEE FOLDER OBJECTS (cid="+sessionobject.getContext().getContextId()+" fid="+folderId+')');
             }
@@ -247,9 +250,9 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
                 } else {
                     throw EXCEPTIONS.createOXConflictException(
                         5,
-                        Integer.valueOf(folderId),
-                        Integer.valueOf(ctx.getContextId()),
-                        Integer.valueOf(userId));
+                        I(folderId),
+                        I(ctx.getContextId()),
+                        I(userId));
                     // throw new
                     // OXConflictException("NOT ALLOWED TO SEE FOLDER OBJECTS (cid="+sessionobject.getContext().getContextId()+" fid="+folderId+')');
                 }
@@ -267,7 +270,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
                     retval = rs.getInt(1);
                 }
             } catch (final SQLException e) {
-                throw EXCEPTIONS.create(6, e, Integer.valueOf(ctx.getContextId()), Integer.valueOf(folderId), Integer.valueOf(userId));
+                throw EXCEPTIONS.create(6, e, I(ctx.getContextId()), I(folderId), I(userId));
                 // throw new OXException("Exception during getNumberOfContacts() for User "+ userId + " in folder " + folderId + " cid= "
                 // +sessionobject.getContext().getContextId()+' ' + "\n:"+ e.getMessage());
             } finally {
@@ -575,9 +578,9 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
             if (contactFolder.getModule() != FolderObject.CONTACT) {
                 throw EXCEPTIONS.createOXConflictException(
                     21,
-                    Integer.valueOf(folderId),
-                    Integer.valueOf(ctx.getContextId()),
-                    Integer.valueOf(userId));
+                    I(folderId),
+                    I(ctx.getContextId()),
+                    I(userId));
                 // throw new
                 // OXException("getContactsInFolder() called with a non-Contact-Folder! (cid="+sessionobject.getContext().getContextId()+" fid="+folderId+')');
             }
@@ -606,9 +609,9 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
             if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
                 throw EXCEPTIONS.createOXConflictException(
                     22,
-                    Integer.valueOf(folderId),
-                    Integer.valueOf(ctx.getContextId()),
-                    Integer.valueOf(userId));
+                    I(folderId),
+                    I(ctx.getContextId()),
+                    I(userId));
                 // throw new
                 // OXConflictException("NOT ALLOWED TO SEE FOLDER OBJECTS (cid="+sessionobject.getContext().getContextId()+" fid="+folderId+')');
             }
@@ -618,9 +621,9 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
                 } else {
                     throw EXCEPTIONS.createOXConflictException(
                         23,
-                        Integer.valueOf(folderId),
-                        Integer.valueOf(ctx.getContextId()),
-                        Integer.valueOf(userId));
+                        I(folderId),
+                        I(ctx.getContextId()),
+                        I(userId));
                     // throw new
                     // OXConflictException("NOT ALLOWED TO SEE FOLDER OBJECTS (cid="+sessionobject.getContext().getContextId()+" fid="+folderId+')');
                 }
@@ -643,10 +646,10 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
             si = new ContactObjectIterator(rs, stmt, cols, false, readcon);
         } catch (final SearchIteratorException e) {
             error = true;
-            throw EXCEPTIONS.create(24, e, Integer.valueOf(ctx.getContextId()), Integer.valueOf(folderId), Integer.valueOf(userId));
+            throw EXCEPTIONS.create(24, e, I(ctx.getContextId()), I(folderId), I(userId));
         } catch (final SQLException e) {
             error = true;
-            throw EXCEPTIONS.create(25, e, Integer.valueOf(ctx.getContextId()), Integer.valueOf(folderId), Integer.valueOf(userId));
+            throw EXCEPTIONS.create(25, e, I(ctx.getContextId()), I(folderId), I(userId));
         } catch (final OXException e) {
             error = true;
             throw e;
@@ -681,56 +684,34 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
         "26", "27", "28", "29" }, exceptionId = { 26, 27, 28, 29 }, msg = {
         "The object you requested can not be found. Try again. Context %1$d Folder %2$d User %3$d Object %4$d",
         ContactException.NON_CONTACT_FOLDER_MSG, ContactException.NO_READ_PERMISSION_MSG, ContactException.INIT_CONNECTION_FROM_DBPOOL })
-    public Contact getObjectById(final int objectId, final int fid) throws OXException {
-
-        Connection readCon = null;
-        Contact co = null;
+    public Contact getObjectById(int objectId, int fid) throws OXException {
+        if (objectId <= 0) {
+            throw EXCEPTIONS.createOXObjectNotFoundException(26, I(ctx.getContextId()), I(fid), I(userId), I(objectId));
+        }
+        final FolderObject contactFolder = new OXFolderAccess(ctx).getFolderObject(fid);
+        if (contactFolder.getModule() != FolderObject.CONTACT) {
+            throw EXCEPTIONS.createOXConflictException(27, I(fid), I(ctx.getContextId()), I(userId));
+        }
+        final Connection con;
         try {
-            readCon = DBPool.pickup(ctx);
-            if (objectId > 0) {
-                co = Contacts.getContactById(objectId, userId, memberInGroups, ctx, userConfiguration, readCon);
-            } else {
-                throw EXCEPTIONS.createOXObjectNotFoundException(
-                    26,
-                    Integer.valueOf(ctx.getContextId()),
-                    Integer.valueOf(fid),
-                    Integer.valueOf(userId),
-                    Integer.valueOf(objectId));
-                // throw new OXObjectNotFoundException("NO CONTACT FOUND! (cid="+sessionobject.getContext().getContextId()+" fid="+fid+')');
-            }
-
-            final int folderId = co.getParentFolderID();
-
-            final FolderObject contactFolder = new OXFolderAccess(readCon, ctx).getFolderObject(folderId);
-            if (contactFolder.getModule() != FolderObject.CONTACT) {
-                throw EXCEPTIONS.createOXConflictException(
-                    27,
-                    Integer.valueOf(fid),
-                    Integer.valueOf(ctx.getContextId()),
-                    Integer.valueOf(userId));
-                // throw new
-                // OXException("getObjectById() called with a non-Contact-Folder! (cid="+sessionobject.getContext().getContextId()+" fid="+fid+')');
-            }
-
-            if (!performSecurityReadCheck(folderId, co.getCreatedBy(), userId, memberInGroups, session, readCon, ctx)) {
-                throw EXCEPTIONS.createOXConflictException(
-                    28,
-                    Integer.valueOf(folderId),
-                    Integer.valueOf(ctx.getContextId()),
-                    Integer.valueOf(userId));
-                // throw new OXConflictException("NOT ALLOWED TO SEE OBJECTS");
-            }
-        } catch (final DBPoolingException e) {
+            con = DBPool.pickup(ctx);
+        } catch (DBPoolingException e) {
             throw EXCEPTIONS.create(29, e);
-        } catch (final OXException e) {
-            throw e;
-            // throw new
-            // OXException("UNABLE TO LOAD CONTACT BY ID - CHECK RIGHTS (cid="+sessionobject.getContext().getContextId()+" fid="+fid+" oid="+objectId+')',
-            // e);
-        } finally {
-            if (readCon != null) {
-                DBPool.closeReaderSilent(ctx, readCon);
+        }
+        final Contact co;
+        try {
+            co = Contacts.getContactById(objectId, userId, memberInGroups, ctx, userConfiguration, con);
+            if (!performSecurityReadCheck(fid, co.getCreatedBy(), userId, memberInGroups, session, con, ctx)) {
+                throw EXCEPTIONS.createOXConflictException(28, I(fid), I(ctx.getContextId()), I(userId));
             }
+            Date creationDate = Attachments.getInstance(new SimpleDBProvider(con, null)).getNewestCreationDate(objectId, Types.CONTACT, ctx);
+            if (null != creationDate) {
+                co.setLastModifiedOfNewestAttachment(creationDate);
+            }
+        } catch (OXException e) {
+            throw e;
+        } finally {
+            DBPool.closeReaderSilent(ctx, con);
         }
         return co;
     }
@@ -750,10 +731,10 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
             } else {
                 throw EXCEPTIONS.createOXObjectNotFoundException(
                     26,
-                    Integer.valueOf(ctx.getContextId()),
-                    Integer.valueOf(fid),
-                    Integer.valueOf(userId),
-                    Integer.valueOf(userid));
+                    I(ctx.getContextId()),
+                    I(fid),
+                    I(userId),
+                    I(userid));
                 // throw new OXObjectNotFoundException("NO CONTACT FOUND! (cid="+sessionobject.getContext().getContextId()+" fid="+fid+')');
             }
 
@@ -763,9 +744,9 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
             if (contactFolder.getModule() != FolderObject.CONTACT) {
                 throw EXCEPTIONS.createOXConflictException(
                     27,
-                    Integer.valueOf(fid),
-                    Integer.valueOf(ctx.getContextId()),
-                    Integer.valueOf(userId));
+                    I(fid),
+                    I(ctx.getContextId()),
+                    I(userId));
                 // throw new
                 // OXException("getObjectById() called with a non-Contact-Folder! (cid="+sessionobject.getContext().getContextId()+" fid="+fid+')');
             }
@@ -773,9 +754,9 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
             if (performReadCheck && !performSecurityReadCheck(folderId, co.getCreatedBy(), userId, memberInGroups, session, readCon, ctx)) {
                 throw EXCEPTIONS.createOXConflictException(
                     28,
-                    Integer.valueOf(folderId),
-                    Integer.valueOf(ctx.getContextId()),
-                    Integer.valueOf(userId));
+                    I(folderId),
+                    I(ctx.getContextId()),
+                    I(userId));
                 // throw new OXConflictException("NOT ALLOWED TO SEE OBJECTS");
             }
         } catch (final DBPoolingException e) {
@@ -802,10 +783,10 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
             } else {
                 throw EXCEPTIONS.createOXObjectNotFoundException(
                     26,
-                    Integer.valueOf(ctx.getContextId()),
-                    Integer.valueOf(fid),
-                    Integer.valueOf(userId),
-                    Integer.valueOf(userid));
+                    I(ctx.getContextId()),
+                    I(fid),
+                    I(userId),
+                    I(userid));
                 // throw new OXObjectNotFoundException("NO CONTACT FOUND! (cid="+sessionobject.getContext().getContextId()+" fid="+fid+')');
             }
 
@@ -815,9 +796,9 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
             if (contactFolder.getModule() != FolderObject.CONTACT) {
                 throw EXCEPTIONS.createOXConflictException(
                     27,
-                    Integer.valueOf(fid),
-                    Integer.valueOf(ctx.getContextId()),
-                    Integer.valueOf(userId));
+                    I(fid),
+                    I(ctx.getContextId()),
+                    I(userId));
                 // throw new
                 // OXException("getObjectById() called with a non-Contact-Folder! (cid="+sessionobject.getContext().getContextId()+" fid="+fid+')');
             }
@@ -825,9 +806,9 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
             if (performReadCheck && !performSecurityReadCheck(folderId, co.getCreatedBy(), userId, memberInGroups, session, readCon, ctx)) {
                 throw EXCEPTIONS.createOXConflictException(
                     28,
-                    Integer.valueOf(folderId),
-                    Integer.valueOf(ctx.getContextId()),
-                    Integer.valueOf(userId));
+                    I(folderId),
+                    I(ctx.getContextId()),
+                    I(userId));
                 // throw new OXConflictException("NOT ALLOWED TO SEE OBJECTS");
             }
         } catch (final OXException e) {
@@ -861,9 +842,9 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
             if (contactFolder.getModule() != FolderObject.CONTACT) {
                 throw EXCEPTIONS.createOXConflictException(
                     31,
-                    Integer.valueOf(folderId),
-                    Integer.valueOf(ctx.getContextId()),
-                    Integer.valueOf(userId));
+                    I(folderId),
+                    I(ctx.getContextId()),
+                    I(userId));
                 // throw new
                 // OXException("getModifiedContactsInFolder() called with a non-Contact-Folder! (cid="+sessionobject.getContext().getContextId()+" fid="+folderId+')');
             }
@@ -886,9 +867,9 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
             if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
                 throw EXCEPTIONS.createOXConflictException(
                     32,
-                    Integer.valueOf(folderId),
-                    Integer.valueOf(ctx.getContextId()),
-                    Integer.valueOf(userId));
+                    I(folderId),
+                    I(ctx.getContextId()),
+                    I(userId));
                 // throw new
                 // OXConflictException("NOT ALLOWED TO SEE FOLDER OBJECTS (cid="+sessionobject.getContext().getContextId()+" fid="+folderId+')');
             }
@@ -898,9 +879,9 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
                 } else {
                     throw EXCEPTIONS.createOXConflictException(
                         33,
-                        Integer.valueOf(folderId),
-                        Integer.valueOf(ctx.getContextId()),
-                        Integer.valueOf(userId));
+                        I(folderId),
+                        I(ctx.getContextId()),
+                        I(userId));
                     // throw new
                     // OXConflictException("NOT ALLOWED TO SEE FOLDER OBJECTS (cid="+sessionobject.getContext().getContextId()+" fid="+folderId+')');
                 }
@@ -923,10 +904,10 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
             si = new ContactObjectIterator(rs, stmt, cols, false, readCon);
         } catch (final SearchIteratorException e) {
             error = true;
-            throw EXCEPTIONS.create(34, Integer.valueOf(ctx.getContextId()), Integer.valueOf(folderId), Integer.valueOf(userId));
+            throw EXCEPTIONS.create(34, I(ctx.getContextId()), I(folderId), I(userId));
         } catch (final SQLException e) {
             error = true;
-            throw EXCEPTIONS.create(35, Integer.valueOf(ctx.getContextId()), Integer.valueOf(folderId), Integer.valueOf(userId));
+            throw EXCEPTIONS.create(35, I(ctx.getContextId()), I(folderId), I(userId));
         } catch (final OXException e) {
             error = true;
             throw e;
@@ -985,13 +966,13 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
             si = new ContactObjectIterator(rs, stmt, cols, false, readcon);
         } catch (final SearchIteratorException e) {
             error = true;
-            throw EXCEPTIONS.create(37, e, Integer.valueOf(ctx.getContextId()), Integer.valueOf(folderId), Integer.valueOf(userId));
+            throw EXCEPTIONS.create(37, e, I(ctx.getContextId()), I(folderId), I(userId));
         } catch (final DBPoolingException e) {
             error = true;
             throw EXCEPTIONS.create(36, e);
         } catch (final SQLException e) {
             error = true;
-            throw EXCEPTIONS.create(38, e, Integer.valueOf(ctx.getContextId()), Integer.valueOf(folderId), Integer.valueOf(userId));
+            throw EXCEPTIONS.create(38, e, I(ctx.getContextId()), I(folderId), I(userId));
             // throw new OXException("Exception during getDeletedContactsInFolder() for User " + userId+ " in folder " + folderId+
             // "(cid="+sessionobject.getContext().getContextId()+')', e);
         } finally {
@@ -1061,10 +1042,10 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
             } else {
                 throw EXCEPTIONS.createOXObjectNotFoundException(
                     39,
-                    Integer.valueOf(ctx.getContextId()),
-                    Integer.valueOf(fuid),
-                    Integer.valueOf(userId),
-                    Integer.valueOf(oid));
+                    I(ctx.getContextId()),
+                    I(fuid),
+                    I(userId),
+                    I(oid));
                 // throw new OXObjectNotFoundException();
             }
 
@@ -1072,10 +1053,10 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
             if ((client_date != null && client_date.getTime() >= 0) && (client_date.before(changing_date))) {
                 throw EXCEPTIONS.createOXConcurrentModificationException(
                     40,
-                    Integer.valueOf(ctx.getContextId()),
-                    Integer.valueOf(fuid),
-                    Integer.valueOf(userId),
-                    Integer.valueOf(oid));
+                    I(ctx.getContextId()),
+                    I(fuid),
+                    I(userId),
+                    I(oid));
                 // throw new
                 // OXConflictException("CONTACT HAS CHANGED ON SERVER SIDE SINCE THE LAST VISIT (cid="+sessionobject.getContext().getContextId()+" fid="+fuid+" oid="+oid+')');
             }
@@ -1087,9 +1068,9 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
             if (contactFolder.getModule() != FolderObject.CONTACT) {
                 throw EXCEPTIONS.createOXConflictException(
                     41,
-                    Integer.valueOf(fuid),
-                    Integer.valueOf(ctx.getContextId()),
-                    Integer.valueOf(userId));
+                    I(fuid),
+                    I(ctx.getContextId()),
+                    I(userId));
                 // throw new
                 // OXException("deleteContactObject called with a non-Contact-Folder! (cid="+sessionobject.getContext().getContextId()+" fid="+fid+" oid="+oid+')');
             }
@@ -1100,9 +1081,9 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
             } else if ((contactFolder.getType() == FolderObject.PRIVATE) && pflag && created_from != userId) {
                 throw EXCEPTIONS.createOXPermissionException(
                     42,
-                    Integer.valueOf(fuid),
-                    Integer.valueOf(ctx.getContextId()),
-                    Integer.valueOf(userId));
+                    I(fuid),
+                    I(ctx.getContextId()),
+                    I(userId));
                 // throw new
                 // OXConflictException("NOT ALLOWED TO DELETE FOLDER OBJECTS CONTACT CUZ IT IS PRIVATE (cid="+sessionobject.getContext().getContextId()+" fid="+fid+" oid="+oid+')');
             }
@@ -1111,9 +1092,9 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
             if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
                 throw EXCEPTIONS.createOXPermissionException(
                     58,
-                    Integer.valueOf(fuid),
-                    Integer.valueOf(ctx.getContextId()),
-                    Integer.valueOf(userId));
+                    I(fuid),
+                    I(ctx.getContextId()),
+                    I(userId));
                 // throw new
                 // OXConflictException("NOT ALLOWED TO DELETE FOLDER OBJECTS (cid="+sessionobject.getContext().getContextId()+" fid="+fid+" oid="+oid+')');
             }
@@ -1130,10 +1111,10 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
             throw EXCEPTIONS.create(
                 44,
                 e,
-                Integer.valueOf(ctx.getContextId()),
-                Integer.valueOf(fuid),
-                Integer.valueOf(userId),
-                Integer.valueOf(oid));
+                I(ctx.getContextId()),
+                I(fuid),
+                I(userId),
+                I(oid));
             // throw new
             // OXConflictException("NOT ALLOWED TO DELETE FOLDER OBJECT (cid="+sessionobject.getContext().getContextId()+" fid="+fuid+" oid="+oid+')',
             // e);
@@ -1173,9 +1154,9 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
                 } else {
                     throw EXCEPTIONS.createOXConflictException(
                         46,
-                        Integer.valueOf(fuid),
-                        Integer.valueOf(ctx.getContextId()),
-                        Integer.valueOf(userId));
+                        I(fuid),
+                        I(ctx.getContextId()),
+                        I(userId));
                     // throw new
                     // OXConflictException("NOT ALLOWED TO DELETE FOLDER OBJECTS (cid="+sessionobject.getContext().getContextId()+" fid="+fuid+" oid="+oid+')');
                 }
@@ -1242,9 +1223,9 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
             }
             return new SearchIteratorDelegator<Contact>(retval.iterator(), size);
         } catch (final SearchIteratorException e) {
-            throw EXCEPTIONS.create(48, e, Integer.valueOf(ctx.getContextId()), Integer.valueOf(userId));
+            throw EXCEPTIONS.create(48, e, I(ctx.getContextId()), I(userId));
         } catch (final SQLException e) {
-            throw EXCEPTIONS.create(49, e, Integer.valueOf(ctx.getContextId()), Integer.valueOf(userId));
+            throw EXCEPTIONS.create(49, e, I(ctx.getContextId()), I(userId));
         }
     }
 
@@ -1252,10 +1233,10 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
         final List<Integer> tmp = new ArrayList<Integer>();
         for (final int col : cols) {
             if (Contacts.mapping[col] != null) {
-                tmp.add(Integer.valueOf(col));
+                tmp.add(I(col));
             } else if (Contact.IMAGE1_URL == col) {
-                tmp.add(Integer.valueOf(col));
-                final Integer imageId = Integer.valueOf(Contact.IMAGE1);
+                tmp.add(I(col));
+                final Integer imageId = I(Contact.IMAGE1);
                 if (!Arrays.contains(cols, Contact.IMAGE1) || !tmp.contains(imageId)) {
                     tmp.add(imageId);
                 }
@@ -1383,11 +1364,11 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
                     session,
                     readCon,
                     ctx)) {
-                    throw EXCEPTIONS.createOXConflictException(50, Integer.valueOf(ctx.getContextId()), Integer.valueOf(userId));
+                    throw EXCEPTIONS.createOXConflictException(50, I(ctx.getContextId()), I(userId));
                 }
             }
         } catch (final SQLException e) {
-            throw EXCEPTIONS.create(51, e, Integer.valueOf(ctx.getContextId()), Integer.valueOf(userId));
+            throw EXCEPTIONS.create(51, e, I(ctx.getContextId()), I(userId));
         } catch (final OXException e) {
             throw e;
         }
@@ -1434,9 +1415,9 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
                     }
                 }
             } catch (final SQLException exc) {
-                throw EXCEPTIONS.createSearchIteratorException(52, exc, Integer.valueOf(ctx.getContextId()), Integer.valueOf(userId));
+                throw EXCEPTIONS.createSearchIteratorException(52, exc, I(ctx.getContextId()), I(userId));
             } catch (final OXException exc) {
-                throw EXCEPTIONS.createSearchIteratorException(53, exc, Integer.valueOf(ctx.getContextId()), Integer.valueOf(userId));
+                throw EXCEPTIONS.createSearchIteratorException(53, exc, I(ctx.getContextId()), I(userId));
             }
         }
 
@@ -1446,14 +1427,14 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
             try {
                 rs.close();
             } catch (final SQLException e) {
-                throw EXCEPTIONS.createSearchIteratorException(54, e, Integer.valueOf(ctx.getContextId()), Integer.valueOf(userId));
+                throw EXCEPTIONS.createSearchIteratorException(54, e, I(ctx.getContextId()), I(userId));
                 // throw new
                 // SearchIteratorException("UNABLE TO CLOSE SEARCHITERATOR RESULTSET! (cid="+sessionobject.getContext().getContextId()+')',e);
             }
             try {
                 stmt.close();
             } catch (final SQLException e) {
-                throw EXCEPTIONS.createSearchIteratorException(55, e, Integer.valueOf(ctx.getContextId()), Integer.valueOf(userId));
+                throw EXCEPTIONS.createSearchIteratorException(55, e, I(ctx.getContextId()), I(userId));
                 // throw new
                 // SearchIteratorException("UNABLE TO CLOSE SEARCHITERATOR STATEMENT! (cid="+sessionobject.getContext().getContextId()+')',e);
             }
@@ -1481,7 +1462,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
                             pre = convertResultSet2ContactObject(rs, cols, false, readcon);
                         }
                     } catch (final OXException e) {
-                        throw EXCEPTIONS.create(56, Integer.valueOf(ctx.getContextId()), Integer.valueOf(userId));
+                        throw EXCEPTIONS.create(56, I(ctx.getContextId()), I(userId));
                         // throw new
                         // OXException("ERROR DURING RIGHTS CHECK IN SEARCHITERATOR NEXT (cid="+sessionobject.getContext().getContextId()+')',
                         // e);
@@ -1495,7 +1476,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
 
                 return nexto;
             } catch (final SQLException exc) {
-                throw EXCEPTIONS.create(57, exc, Integer.valueOf(ctx.getContextId()), Integer.valueOf(userId));
+                throw EXCEPTIONS.create(57, exc, I(ctx.getContextId()), I(userId));
             } catch (final OXException exc) {
                 throw exc;
                 // throw new SearchIteratorException("ERROR OCCURRED ON NEXT (cid="+sessionobject.getContext().getContextId()+')',exc);
