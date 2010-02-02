@@ -1,0 +1,5 @@
+* 2010-02-02 - dennis.sieben@open-xchange.com
+
+ - Bugfix #15309: [L3] open-xchange-authentication-ldap: multiple OUs works
+   only for LDAP-Server on localhost
+   - Enabled usage of config file parameter for user search

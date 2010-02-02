@@ -149,13 +149,12 @@ public class LDAPAuthentication implements AuthenticationService {
         try {
             if( subtreeSearch ) {
                 // get user dn from user
-                final Properties aprops = new Properties();
+                final Properties aprops = (Properties)props.clone();
                 aprops.put(LdapContext.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
                 if( bindDN != null && bindDN.length() > 0 ) {
                     LOG.debug("Using bindDN=" + bindDN);
                     aprops.put(Context.SECURITY_PRINCIPAL, bindDN);
                     aprops.put(Context.SECURITY_CREDENTIALS, bindDNPassword);
-                    aprops.put(Context.SECURITY_AUTHENTICATION, props.get(Context.SECURITY_AUTHENTICATION));
                 } else {
                     aprops.put(Context.SECURITY_AUTHENTICATION, "none");
                 }
@@ -171,8 +170,14 @@ public class LDAPAuthentication implements AuthenticationService {
                 if( res.hasMoreElements() ) {
                     dn = res.nextElement().getNameInNamespace();
                     if( res.hasMoreElements() ) {
-                        LoginExceptionCodes.UNKNOWN.create("found more then one user with " + uidAttribute + "=" + uid);
+                        final String errortext = "Found more then one user with " + uidAttribute + "=" + uid;
+                        LOG.error(errortext);
+                        throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
                     }
+                } else {
+                    final String errortext = "No user found with " + uidAttribute + "=" + uid;
+                    LOG.error(errortext);
+                    throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
                 }
                 context.close();
             } else {
