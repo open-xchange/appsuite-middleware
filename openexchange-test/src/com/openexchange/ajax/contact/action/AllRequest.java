@@ -50,40 +50,26 @@
 package com.openexchange.ajax.contact.action;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-
 import com.openexchange.ajax.framework.CommonAllRequest;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.Order;
 
 /**
- * Contains the data for an appointment all request.
+ * Contains the data for an contact all request.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  * @author <a href="mailto:ben.pahne@open-xchange.org">Ben Pahne</a>
  */
 public class AllRequest extends CommonAllRequest {
 
     public static final int[] GUI_COLUMNS = new int[] {
-    	Contact.OBJECT_ID,
-    	Contact.FOLDER_ID
+        Contact.OBJECT_ID,
+        Contact.FOLDER_ID
     };
 
     public static final int GUI_SORT = Contact.SUR_NAME;
 
     public static final Order GUI_ORDER = Order.ASCENDING;
-
-    @Deprecated
-    public AllRequest(final int folderId, final int[] columns, final Date start,
-                      final Date end) {
-        this(folderId, columns);
-    }
-
-    @Deprecated
-    public AllRequest(final int folderId, final int[] columns, final Date start,
-                      final Date end, final boolean recurrenceMaster) {
-        this(folderId, columns);
-    }
     
     /**
      * Default constructor.
