@@ -52,9 +52,6 @@ package com.openexchange.ajax.contact.action;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
-
-import org.json.JSONException;
-
 import com.openexchange.ajax.AJAXServlet;
 
 /**
@@ -63,21 +60,12 @@ import com.openexchange.ajax.AJAXServlet;
  */
 public class GetRequest extends AbstractContactRequest<GetResponse> {
 
-    /**
-     * Contact is requested through this folder.
-     */
     private final int folderId;
 
-    /**
-     * Unique identifier of the contact.
-     */
     private final int objectId;
 
     private TimeZone timeZone;
-	
-    /**
-     * Default constructor.
-     */
+
     public GetRequest(final int folderId, final int objectId, TimeZone timeZone) {
         super();
         this.folderId = folderId;
@@ -89,34 +77,22 @@ public class GetRequest extends AbstractContactRequest<GetResponse> {
         this(folderId, insert.getId(), timeZone);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public Object getBody() throws JSONException {
+    public Object getBody() {
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Method getMethod() {
         return Method.GET;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Parameter[] getParameters() {
-		final List<Parameter> parameterList = new ArrayList<Parameter>();
-		parameterList.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET));
+        final List<Parameter> parameterList = new ArrayList<Parameter>();
+        parameterList.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET));
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_INFOLDER, String.valueOf(folderId)));
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_ID, String.valueOf(objectId)));
-		return parameterList.toArray(new Parameter[parameterList.size()]);
+        return parameterList.toArray(new Parameter[parameterList.size()]);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public GetParser getParser() {
         return new GetParser(timeZone);
     }

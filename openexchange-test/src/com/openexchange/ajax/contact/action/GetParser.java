@@ -50,8 +50,6 @@
 package com.openexchange.ajax.contact.action;
 
 import java.util.TimeZone;
-import org.json.JSONException;
-
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
@@ -63,20 +61,13 @@ public class GetParser extends AbstractAJAXParser<GetResponse> {
 
     private TimeZone timeZone;
 
-    /**
-     * Default constructor.
-     */
     GetParser(TimeZone timeZone) {
         super(false);
         this.timeZone = timeZone;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    protected GetResponse createResponse(final Response response)
-        throws JSONException {
+    protected GetResponse createResponse(final Response response) {
         return new GetResponse(response, timeZone);
     }
 }
