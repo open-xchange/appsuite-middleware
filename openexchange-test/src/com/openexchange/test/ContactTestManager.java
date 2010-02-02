@@ -279,12 +279,12 @@ public class ContactTestManager implements TestManager {
         AllRequest request = new AllRequest(folderId, columns);
         try {
             CommonAllResponse response = getClient().execute(request);
+            int objectIdPos = response.getColumnPos(Contact.OBJECT_ID);
+            int folderIdPos = response.getColumnPos(Contact.FOLDER_ID);
             lastResponse = response;
-            final JSONArray data = (JSONArray) response.getResponse().getData();
-            for (int i = 0; i < data.length(); i++) {
-                JSONArray temp = data.optJSONArray(i);
-                int tempObjectId = temp.getInt(0);
-                int tempFolderId = temp.getInt(1);
+            for (Object[] temp : response) {
+                int tempObjectId = ((Integer) temp[objectIdPos]).intValue();
+                int tempFolderId = ((Integer) temp[folderIdPos]).intValue();
                 Contact tempContact = getAction(tempFolderId, tempObjectId);
                 allContacts.add(tempContact);
             }
