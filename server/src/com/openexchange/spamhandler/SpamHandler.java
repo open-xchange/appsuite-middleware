@@ -164,7 +164,7 @@ public abstract class SpamHandler {
         /*
          * Copy to confirmed spam folder
          */
-        final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
+        final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, accountId);
         mailAccess.connect();
         try {
 
