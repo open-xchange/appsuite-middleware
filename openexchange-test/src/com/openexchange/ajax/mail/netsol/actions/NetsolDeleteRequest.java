@@ -67,114 +67,114 @@ import com.openexchange.ajax.mail.netsol.FolderAndID;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class NetsolDeleteRequest implements AJAXRequest {
+public final class NetsolDeleteRequest implements AJAXRequest<NetsolDeleteRequest.NetsolDeleteResponse> {
 
-	private final FolderAndID[] mailPaths;
+    private final FolderAndID[] mailPaths;
 
-	private final boolean hardDelete;
+    private final boolean hardDelete;
 
-	/**
-	 * Initializes a new {@link NetsolDeleteRequest}
-	 * 
-	 * @param mailPaths
-	 *            The mail paths of messages to delete
-	 */
-	public NetsolDeleteRequest(final FolderAndID[] mailPaths, final boolean hardDelete) {
-		super();
-		this.mailPaths = mailPaths;
-		this.hardDelete = hardDelete;
-	}
+    /**
+     * Initializes a new {@link NetsolDeleteRequest}
+     * 
+     * @param mailPaths
+     *            The mail paths of messages to delete
+     */
+    public NetsolDeleteRequest(final FolderAndID[] mailPaths, final boolean hardDelete) {
+        super();
+        this.mailPaths = mailPaths;
+        this.hardDelete = hardDelete;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-	 */
-	public Object getBody() throws JSONException {
-		final JSONArray array = new JSONArray();
-		for (int i = 0; i < mailPaths.length; i++) {
-			final JSONObject jo = new JSONObject();
-			jo.put(AJAXServlet.PARAMETER_FOLDERID, mailPaths[i].folderId);
-			jo.put(AJAXServlet.PARAMETER_ID, mailPaths[i].id);
-			array.put(jo);
-		}
-		return array;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
+     */
+    public Object getBody() throws JSONException {
+        final JSONArray array = new JSONArray();
+        for (int i = 0; i < mailPaths.length; i++) {
+            final JSONObject jo = new JSONObject();
+            jo.put(AJAXServlet.PARAMETER_FOLDERID, mailPaths[i].folderId);
+            jo.put(AJAXServlet.PARAMETER_ID, mailPaths[i].id);
+            array.put(jo);
+        }
+        return array;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-	 */
-	public Method getMethod() {
-		return Method.PUT;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
+     */
+    public Method getMethod() {
+        return Method.PUT;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-	 */
-	public Parameter[] getParameters() {
-		return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE),
-				new Parameter("harddelete", hardDelete ? "1" : "0") };
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
+     */
+    public Parameter[] getParameters() {
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE),
+                new Parameter("harddelete", hardDelete ? "1" : "0") };
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-	 */
-	public AbstractAJAXParser<NetsolDeleteResponse> getParser() {
-		return new DeleteParser(true);
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
+     */
+    public DeleteParser getParser() {
+        return new DeleteParser(true);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getServletPath()
-	 */
-	public String getServletPath() {
-		return AbstractMailRequest.MAIL_URL;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.framework.AJAXRequest#getServletPath()
+     */
+    public String getServletPath() {
+        return AbstractMailRequest.MAIL_URL;
+    }
 
-	final static class DeleteParser extends AbstractAJAXParser<NetsolDeleteResponse> {
+    final static class DeleteParser extends AbstractAJAXParser<NetsolDeleteResponse> {
 
-		/**
-		 * Initializes a new {@link DeleteParser}
-		 * 
-		 * @param failOnError
-		 *            <code>true</code> if fail on error; otherwise
-		 *            <code>false</code>
-		 */
-		DeleteParser(final boolean failOnError) {
-			super(failOnError);
-		}
+        /**
+         * Initializes a new {@link DeleteParser}
+         * 
+         * @param failOnError
+         *            <code>true</code> if fail on error; otherwise
+         *            <code>false</code>
+         */
+        DeleteParser(final boolean failOnError) {
+            super(failOnError);
+        }
 
-		@Override
-		protected NetsolDeleteResponse createResponse(final Response response) throws JSONException {
-			return new NetsolDeleteResponse(response);
-		}
+        @Override
+        protected NetsolDeleteResponse createResponse(final Response response) {
+            return new NetsolDeleteResponse(response);
+        }
 
-	}
+    }
 
-	public final static class NetsolDeleteResponse extends AbstractAJAXResponse {
+    public final static class NetsolDeleteResponse extends AbstractAJAXResponse {
 
-		/**
-		 * Initializes a new {@link NetsolDeleteResponse}
-		 * 
-		 * @param response
-		 *            The response
-		 */
-		public NetsolDeleteResponse(final Response response) {
-			super(response);
-		}
+        /**
+         * Initializes a new {@link NetsolDeleteResponse}
+         * 
+         * @param response
+         *            The response
+         */
+        public NetsolDeleteResponse(final Response response) {
+            super(response);
+        }
 
-		/**
-		 * @return JSON array containing failed
-		 */
-		public JSONArray getFailed() {
-			return (JSONArray) getData();
-		}
-	}
+        /**
+         * @return JSON array containing failed
+         */
+        public JSONArray getFailed() {
+            return (JSONArray) getData();
+        }
+    }
 }

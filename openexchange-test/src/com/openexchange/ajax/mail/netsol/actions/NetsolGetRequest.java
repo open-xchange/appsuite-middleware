@@ -49,8 +49,6 @@
 
 package com.openexchange.ajax.mail.netsol.actions;
 
-import org.json.JSONException;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
@@ -63,90 +61,90 @@ import com.openexchange.ajax.mail.netsol.FolderAndID;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class NetsolGetRequest extends AbstractMailRequest {
+public final class NetsolGetRequest extends AbstractMailRequest<NetsolGetResponse> {
 
-	final static class NetsolGetParser extends AbstractAJAXParser<NetsolGetResponse> {
+    final static class NetsolGetParser extends AbstractAJAXParser<NetsolGetResponse> {
 
-		/**
-		 * Default constructor.
-		 */
-		NetsolGetParser(final boolean failOnError) {
-			super(failOnError);
-		}
+        /**
+         * Default constructor.
+         */
+        NetsolGetParser(final boolean failOnError) {
+            super(failOnError);
+        }
 
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		protected NetsolGetResponse createResponse(final Response response) throws JSONException {
-			return new NetsolGetResponse(response);
-		}
-	}
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        protected NetsolGetResponse createResponse(final Response response) {
+            return new NetsolGetResponse(response);
+        }
+    }
 
-	/**
-	 * Unique identifier
-	 */
-	private final FolderAndID mailPath;
+    /**
+     * Unique identifier
+     */
+    private final FolderAndID mailPath;
 
-	private final boolean failOnError;
+    private final boolean failOnError;
 
-	/**
-	 * Initializes a new {@link NetsolGetRequest}
-	 * 
-	 * @param mailPath
-	 */
-	public NetsolGetRequest(final FolderAndID mailPath) {
-		this(mailPath, true);
-	}
+    /**
+     * Initializes a new {@link NetsolGetRequest}
+     * 
+     * @param mailPath
+     */
+    public NetsolGetRequest(final FolderAndID mailPath) {
+        this(mailPath, true);
+    }
 
-	/**
-	 * Initializes a new {@link NetsolGetRequest}
-	 * 
-	 * @param mailPath
-	 * @param failOnError
-	 */
-	public NetsolGetRequest(final FolderAndID mailPath, final boolean failOnError) {
-		super();
-		this.mailPath = mailPath;
-		this.failOnError = failOnError;
-	}
+    /**
+     * Initializes a new {@link NetsolGetRequest}
+     * 
+     * @param mailPath
+     * @param failOnError
+     */
+    public NetsolGetRequest(final FolderAndID mailPath, final boolean failOnError) {
+        super();
+        this.mailPath = mailPath;
+        this.failOnError = failOnError;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-	 */
-	public Object getBody() throws JSONException {
-		return null;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
+     */
+    public Object getBody() {
+        return null;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-	 */
-	public Method getMethod() {
-		return Method.GET;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
+     */
+    public Method getMethod() {
+        return Method.GET;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-	 */
-	public Parameter[] getParameters() {
-		return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET),
-				new Parameter(AJAXServlet.PARAMETER_FOLDERID, mailPath.folderId),
-				new Parameter(AJAXServlet.PARAMETER_ID, mailPath.id) };
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
+     */
+    public Parameter[] getParameters() {
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET),
+                new Parameter(AJAXServlet.PARAMETER_FOLDERID, mailPath.folderId),
+                new Parameter(AJAXServlet.PARAMETER_ID, mailPath.id) };
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-	 */
-	public AbstractAJAXParser<NetsolGetResponse> getParser() {
-		return new NetsolGetParser(failOnError);
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
+     */
+    public AbstractAJAXParser<NetsolGetResponse> getParser() {
+        return new NetsolGetParser(failOnError);
+    }
 
 }
