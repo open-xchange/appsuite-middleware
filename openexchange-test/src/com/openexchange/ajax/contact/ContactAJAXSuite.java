@@ -54,25 +54,26 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 public class ContactAJAXSuite extends TestSuite {
-	
-	public static Test suite() {
-		final TestSuite tests = new TestSuite();
-		tests.addTestSuite(AllTest.class);
-		tests.addTestSuite(CopyTest.class);
-		tests.addTestSuite(DeleteTest.class);
-		tests.addTestSuite(ListTest.class);
-		tests.addTestSuite(MoveTest.class);
-		tests.addTestSuite(NewTest.class);
-		tests.addTestSuite(SearchTest.class);
-		tests.addTestSuite(UpdateTest.class);
-		tests.addTestSuite(UpdatesTest.class);
-		tests.addTestSuite(MultipleTest.class);
-		tests.addTestSuite(NewListTest.class);
-		tests.addTestSuite(SearchInAllContactFoldersTest.class);
-		tests.addTestSuite(ManagedContactTests.class);
-		tests.addTestSuite(ExemplaryContactTestManagerTest.class);
-		
-		tests.addTest(ContactBugTestSuite.suite());
-		return tests;
-	}
+    
+    public static Test suite() {
+        final TestSuite tests = new TestSuite();
+        tests.addTestSuite(AllTest.class);
+        tests.addTestSuite(CopyTest.class);
+        tests.addTestSuite(DeleteTest.class);
+        tests.addTestSuite(ListTest.class);
+        tests.addTestSuite(MoveTest.class);
+        tests.addTestSuite(NewTest.class);
+        tests.addTestSuite(SearchTest.class);
+        tests.addTestSuite(UpdateTest.class);
+        tests.addTestSuite(UpdatesTest.class);
+        tests.addTestSuite(MultipleTest.class);
+        tests.addTestSuite(NewListTest.class);
+        tests.addTestSuite(SearchInAllContactFoldersTest.class);
+        tests.addTestSuite(ManagedContactTests.class);
+        tests.addTestSuite(ExemplaryContactTestManagerTest.class);
+        tests.addTestSuite(ContactAttachmentTests.class);
+        
+        tests.addTest(ContactBugTestSuite.suite());
+        return tests;
+    }
 }
