@@ -329,9 +329,8 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
             }
             order.append(' ');
         } else {
-            extendedCols =
-                Arrays.addUniquely(extendedCols, new int[] {
-                    Contact.SUR_NAME, Contact.DISPLAY_NAME, Contact.COMPANY, Contact.EMAIL1, Contact.EMAIL2 });
+            extendedCols = Arrays.addUniquely(extendedCols, new int[] {
+                Contact.SUR_NAME, Contact.DISPLAY_NAME, Contact.COMPANY, Contact.EMAIL1, Contact.EMAIL2 });
             specialSort = true;
         }
         if (from != 0 || to != 0) {
@@ -343,7 +342,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
         cs.setOrder(order.toString());
         cs.setSelect(cs.iFgetColsString(extendedCols).toString());
 
-        Connection con = null;
+        final Connection con;
         try {
             con = DBPool.pickup(ctx);
         } catch (final DBPoolingException e) {
@@ -367,7 +366,14 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
             DBUtils.closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(ctx, con);
         }
-
+        if (Arrays.contains(cols, Contact.LAST_MODIFIED_OF_NEWEST_ATTACHMENT)) {
+            for (Contact contact : contacts) {
+                Date creationDate = Attachments.getInstance().getNewestCreationDate(contact.getObjectID(), Types.CONTACT, ctx);
+                if (null != creationDate) {
+                    contact.setLastModifiedOfNewestAttachment(creationDate);
+                }
+            }
+        }
         if (order_field == Contact.USE_COUNT_GLOBAL_FIRST) {
             java.util.Arrays.sort(contacts, new UseCountComparator(specialSort));
         } else if (specialSort) {

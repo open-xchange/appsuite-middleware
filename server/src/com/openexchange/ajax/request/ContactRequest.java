@@ -476,7 +476,10 @@ public class ContactRequest {
         }
 
         final int leftHandLimit = DataParser.parseInt(jsonObj, AJAXServlet.LEFT_HAND_LIMIT);
-        final int rightHandLimit = DataParser.parseInt(jsonObj, AJAXServlet.RIGHT_HAND_LIMIT);
+        int rightHandLimit = DataParser.parseInt(jsonObj, AJAXServlet.RIGHT_HAND_LIMIT);
+        if (rightHandLimit == 0) {
+            rightHandLimit = 50000;
+        }
 
         timestamp = new Date(0);
 
@@ -492,11 +495,7 @@ public class ContactRequest {
                 session);
 
             final ContactWriter contactwriter = new ContactWriter(timeZone);
-            if (rightHandLimit == 0) {
-                it = contactInterface.getContactsInFolder(folderId, leftHandLimit, 50000, orderBy, orderDir, internalColumns);
-            } else {
-                it = contactInterface.getContactsInFolder(folderId, leftHandLimit, rightHandLimit, orderBy, orderDir, internalColumns);
-            }
+            it = contactInterface.getContactsInFolder(folderId, leftHandLimit, rightHandLimit, orderBy, orderDir, internalColumns);
 
             while (it.hasNext()) {
                 final Contact contactObj = it.next();
