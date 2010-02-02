@@ -49,7 +49,6 @@
 
 package com.openexchange.proxy;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -77,7 +76,6 @@ import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.params.HttpClientParams;
-import org.apache.commons.httpclient.util.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ho.yaml.Yaml;
@@ -101,7 +99,6 @@ public class ReverseProxy extends HttpServlet {
     private boolean firstTime = true;
 
     private String hostname = "";
-    private String protocol = "";
     private String location = "";
 
     @Override
@@ -186,7 +183,7 @@ public class ReverseProxy extends HttpServlet {
                 String value = req.getHeader(name);
                 if ("referer".equals(name)) {
                     // bypass "Referer"
-                    String refPrefix = this.protocol + "://" + this.hostname + this.location + "/" + proxy.id;
+                    String refPrefix = req.getScheme() + "://" + this.hostname + this.location + "/" + proxy.id;
                     String remainder = value.substring(refPrefix.length());
                     value = proxy.getPrefix() + remainder;
                     method.addRequestHeader(new Header("Referer", value));
@@ -250,7 +247,7 @@ public class ReverseProxy extends HttpServlet {
                 }
     
                 // add response header
-                header2Response(method, resp);
+                header2Response(req, method, resp);
     
                 // process response body (html only)
                 Header ct = method.getResponseHeader("Content-Type");
@@ -265,7 +262,7 @@ public class ReverseProxy extends HttpServlet {
                     }
                     // replace content inside body and
                     // write as response
-                    resp.getWriter().write(this.processBody(body.toString(), proxy));
+                    resp.getWriter().write(this.processBody(req, body.toString(), proxy));
                 } else {
                     // binary
                     InputStream responseStream = method.getResponseBodyAsStream();
@@ -306,7 +303,6 @@ public class ReverseProxy extends HttpServlet {
             try {
                 HashMap<?, ?> map = (HashMap<?, ?>) yml;
                 this.hostname = (String) map.get("hostname");
-                this.protocol = (String) map.get("protocol");
                 this.location = (String) map.get("location");
                 // get proxies
                 for (Map proxiesMap : (List<Map>) map.get("proxies")) {
@@ -336,7 +332,7 @@ public class ReverseProxy extends HttpServlet {
 
     }
 
-    private void header2Response(HttpMethodBase method, HttpServletResponse resp) {
+    private void header2Response(HttpServletRequest req, HttpMethodBase method, HttpServletResponse resp) {
 
         for (Header header : method.getResponseHeaders()) {
 
@@ -360,7 +356,7 @@ public class ReverseProxy extends HttpServlet {
                     // matches header value?
                     if (value.startsWith("/")) {
                         // relative URL
-                        value = this.protocol + "://" + this.hostname + this.location + "/" + proxy.id + value;
+                        value = req.getScheme() + "://" + this.hostname + this.location + "/" + proxy.id + value;
                         resp.addHeader(name, value);
                         break;
                     } else if (value.startsWith(prefix)) { // add trailing slash to prevent id collisions
@@ -368,7 +364,7 @@ public class ReverseProxy extends HttpServlet {
                         String path = value.substring(prefix.length());
                         // remove port
                         path = path.replaceFirst("\\:\\d+", "");
-                        value = this.protocol + "://" + this.hostname + this.location + "/" + proxy.id + path;
+                        value = req.getScheme() + "://" + this.hostname + this.location + "/" + proxy.id + path;
                         //LOG.info("FOUND! Redirect: " + value);
                         resp.addHeader(name, value);
                         break;
@@ -404,7 +400,7 @@ public class ReverseProxy extends HttpServlet {
         return end > 0 ? pathInfo.substring(1, end) : pathInfo.substring(1);
     }
 
-    private String processBody(String body, ReverseProxyConfig currentProxy) {
+    private String processBody(HttpServletRequest req, String body, ReverseProxyConfig currentProxy) {
         // loop through proxies
         Enumeration<?> proxies = this.proxies.elements();
         while (proxies.hasMoreElements()) {
@@ -412,7 +408,7 @@ public class ReverseProxy extends HttpServlet {
             String prefix = proxy.getPrefix();
             String regex = java.util.regex.Pattern.quote(prefix);
             // replace
-            body = body.replaceAll(regex, this.protocol + "://" + this.hostname + this.location + "/" + proxy.id);
+            body = body.replaceAll(regex, req.getScheme() + "://" + this.hostname + this.location + "/" + proxy.id);
         }
         // make absolute pathes
         body = body.replaceAll("\"/(.*?)\"", "\"" + this.location + "/" + currentProxy.id + "/$1\"");
