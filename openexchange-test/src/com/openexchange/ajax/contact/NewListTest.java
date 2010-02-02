@@ -49,9 +49,7 @@
 
 package com.openexchange.ajax.contact;
 
-import java.util.Date;
 import java.util.Iterator;
-
 import com.openexchange.ajax.contact.action.AllRequest;
 import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.InsertRequest;
@@ -64,7 +62,6 @@ import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.MultipleRequest;
 import com.openexchange.ajax.framework.MultipleResponse;
-import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Contact;
 
 /**
@@ -93,34 +90,29 @@ public class NewListTest extends AbstractAJAXSession {
         final AJAXClient clientA = getClient();
         final int folderA = clientA.getValues().getPrivateContactFolder();
 
-        // Create some tasks.
-        final Date listStart = new Date(TimeTools.getHour(-1));
-        final Date listEnd = new Date(TimeTools.getHour(2));
-        
-               
         final InsertRequest[] inserts = new InsertRequest[NUMBER];
         for (int i = 0; i < inserts.length; i++) {
 
-    		final Contact contactObj = new Contact();
-    		contactObj.setSurName("NewTestList"+i);
-    		contactObj.setParentFolderID(folderA);
+            final Contact contactObj = new Contact();
+            contactObj.setSurName("NewTestList"+i);
+            contactObj.setParentFolderID(folderA);
             
             inserts[i] = new InsertRequest(contactObj, true);
         }
         
         final MultipleRequest<InsertResponse> mRequest = MultipleRequest.create(inserts);
-        final MultipleResponse mInsert = Executor.execute(getClient(), mRequest);
+        final MultipleResponse<InsertResponse> mInsert = Executor.execute(getClient(), mRequest);
 
         // A now gets all of the folder.
         final int[] columns = new int[] { Contact.SUR_NAME, Contact.OBJECT_ID, Contact.FOLDER_ID };
         
         
-        final CommonAllResponse allR = (CommonAllResponse) Executor.execute(clientA, new AllRequest(folderA, columns, listStart, listEnd));
+        final CommonAllResponse allR = Executor.execute(clientA, new AllRequest(folderA, columns));
         
         // Now B deletes some of them.
         final DeleteRequest[] deletes1 = new DeleteRequest[DELETES];
         for (int i = 0; i < deletes1.length; i++) {
-            final InsertResponse insertR = (InsertResponse) mInsert
+            final InsertResponse insertR = mInsert
                 .getResponse( (DELETES + i) );
             deletes1[i] = new DeleteRequest(folderA, insertR.getId(), allR
                 .getTimestamp());
@@ -134,16 +126,16 @@ public class NewListTest extends AbstractAJAXSession {
         
         final Iterator<Object[]> it = listR.iterator();
         while (it.hasNext()) {
-        	final Object[] ar = it.next();
-        	
-        	
-        	final InsertResponse irr = (InsertResponse)mInsert.getResponse(DELETES);
-        	final InsertResponse irr2 = (InsertResponse)mInsert.getResponse(DELETES+1);       	
-        	
-        	if ( ((Integer)ar[1]).intValue() == irr.getId() || ((Integer)ar[1]).intValue() == irr2.getId()){
-        		assertFalse("Error: Object was found in list", true);
-        	}
-        	
+            final Object[] ar = it.next();
+            
+            
+            final InsertResponse irr = mInsert.getResponse(DELETES);
+            final InsertResponse irr2 = mInsert.getResponse(DELETES+1);           
+            
+            if ( ((Integer)ar[1]).intValue() == irr.getId() || ((Integer)ar[1]).intValue() == irr2.getId()){
+                assertFalse("Error: Object was found in list", true);
+            }
+            
         }
         
         final DeleteRequest[] deletes2 = new DeleteRequest[NUMBER - DELETES];
@@ -151,9 +143,9 @@ public class NewListTest extends AbstractAJAXSession {
         int cnt = 0;
         for (int i = 0; i < NUMBER; i++) {
             if ( (i != DELETES) && (i != (DELETES +1)) ){
-            	final InsertResponse insertR = (InsertResponse) mInsert.getResponse(i);
-            	deletes2[cnt] = new DeleteRequest(folderA, insertR.getId(),listR.getTimestamp());
-            	cnt++;
+                final InsertResponse insertR = mInsert.getResponse(i);
+                deletes2[cnt] = new DeleteRequest(folderA, insertR.getId(),listR.getTimestamp());
+                cnt++;
             }
         }
         
