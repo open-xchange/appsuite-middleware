@@ -82,7 +82,7 @@ import com.openexchange.spamhandler.spamassassin.property.PropertyHandler;
  */
 public final class SpamAssassinSpamHandler extends SpamHandler {
 
-    private class PlainAndNestedMessages {
+    private static class PlainAndNestedMessages {
         
         private final String[] nestedMessages;
         
@@ -106,7 +106,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
         
     }
 
-    private class SpamdSettings {
+    private static class SpamdSettings {
 
         private final String hostname;
         
