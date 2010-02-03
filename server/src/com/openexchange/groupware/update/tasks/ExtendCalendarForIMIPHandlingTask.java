@@ -79,26 +79,26 @@ public class ExtendCalendarForIMIPHandlingTask extends UpdateTaskAdapter {
             add("ALTER TABLE del_dates ADD organizer VARCHAR(255)");
 //            add("ALTER TABLE prg_dates_members ADD mailAddress VARCHAR(255)");
 //            add("ALTER TABLE del_dates_members ADD mailAddress VARCHAR(255)");
-        };
+        }
     };
 
     private String addPrgDatesExternals = 
         "CREATE TABLE prg_dates_externals (" +
-        "objectId INT4," +
-        "mailAddress VARCHAR(255)," +
+        "cid INT4 UNSIGNED NOT NULL," +
+        "objectId INT4 UNSIGNED NOT NULL," +
+        "mailAddress VARCHAR(255) NOT NULL," +
         "confirm INT4 UNSIGNED NOT NULL," +
         "reason VARCHAR(255)," +
-        "cid INT4 UNSIGNED NOT NULL," +
         "PRIMARY KEY (cid, objectId, mailAddress)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
     
     private String addDelDatesExternals = 
         "CREATE TABLE del_dates_externals (" +
-        "objectId INT4," +
-        "mailAddress VARCHAR(255)," +
+        "cid INT4 UNSIGNED NOT NULL," +
+        "objectId INT4 UNSIGNED NOT NULL," +
+        "mailAddress VARCHAR(255) NOT NULL," +
         "confirm INT4 UNSIGNED NOT NULL," +
         "reason VARCHAR(255)," +
-        "cid INT4 UNSIGNED NOT NULL," +
         "PRIMARY KEY (cid, objectId, mailAddress)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
     
