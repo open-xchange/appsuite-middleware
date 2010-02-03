@@ -690,7 +690,7 @@ public class MimeMessagingPart implements MessagingPart {
      * 
      * @param headerName The header name
      * @param headerValue The header value
-     * @throws MessagingException If setting file name fails
+     * @throws MessagingException If setting header fails
      */
     public void setHeader(final String headerName, final String headerValue) throws MessagingException {
         try {
