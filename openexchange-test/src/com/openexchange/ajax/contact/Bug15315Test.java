@@ -47,27 +47,42 @@
  *
  */
 
-package com.openexchange.ajax.contact.action;
+package com.openexchange.ajax.contact;
 
+import java.util.Random;
 import java.util.TimeZone;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.contact.action.GetRequest;
+import com.openexchange.ajax.contact.action.GetResponse;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
 
 /**
- * 
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ * {@link Bug15315Test}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class GetParser extends AbstractAJAXParser<GetResponse> {
+public class Bug15315Test extends AbstractAJAXSession {
 
-    private TimeZone timeZone;
+    private static final int RANGE = 1000;
+    private TimeZone tz;
 
-    GetParser(boolean failOnError, TimeZone timeZone) {
-        super(failOnError);
-        this.timeZone = timeZone;
+    public Bug15315Test(String name) {
+        super(name);
     }
 
     @Override
-    protected GetResponse createResponse(final Response response) {
-        return new GetResponse(response, timeZone);
+    protected void setUp() throws Exception {
+        super.setUp();
+        tz = getClient().getValues().getTimeZone();
+    }
+
+    public void testLoadContactsWithRandomFolder() throws Throwable {
+        final Random rand = new Random(System.currentTimeMillis());
+        for (int i=1; i <= RANGE; i++) {
+            GetRequest request = new GetRequest(rand.nextInt(), i, tz, false);
+            GetResponse response = client.execute(request);
+            if (!response.hasError()) {
+                fail("Contacts can be read without respect to the folder identifier.");
+            }
+        }
     }
 }

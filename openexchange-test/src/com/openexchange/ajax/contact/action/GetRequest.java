@@ -66,15 +66,22 @@ public class GetRequest extends AbstractContactRequest<GetResponse> {
 
     private TimeZone timeZone;
 
-    public GetRequest(final int folderId, final int objectId, TimeZone timeZone) {
+    private final boolean failOnError;
+
+    public GetRequest(final int folderId, final int objectId, TimeZone timeZone, boolean failOnError) {
         super();
         this.folderId = folderId;
         this.objectId = objectId;
         this.timeZone = timeZone;
+        this.failOnError = failOnError;
+    }
+
+    public GetRequest(final int folderId, final int objectId, TimeZone timeZone) {
+        this(folderId, objectId, timeZone, true);
     }
 
     public GetRequest(final int folderId, final InsertResponse insert, TimeZone timeZone) {
-        this(folderId, insert.getId(), timeZone);
+        this(folderId, insert.getId(), timeZone, true);
     }
 
     public Object getBody() {
@@ -94,6 +101,6 @@ public class GetRequest extends AbstractContactRequest<GetResponse> {
     }
 
     public GetParser getParser() {
-        return new GetParser(timeZone);
+        return new GetParser(failOnError, timeZone);
     }
 }
