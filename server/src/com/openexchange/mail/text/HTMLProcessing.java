@@ -58,6 +58,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URLEncoder;
@@ -69,7 +70,19 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.w3c.tidy.Tidy;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.image.ImageService;
@@ -367,6 +380,61 @@ public final class HTMLProcessing {
         }
         html = processDownlevelRevealedConditionalComments(html);
         return removeXHTMLCData(html);
+    }
+
+    /**
+     * Creates a {@link Document DOM document} from specified XML/HTML string.
+     * 
+     * @param string The XML/HTML string
+     * @return A newly created DOM document or <code>null</code> if given string cannot be transformed to a DOM document
+     */
+    public static Document createDOMDocument(final String string) {
+        try {
+            return DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(new StringReader(string)));
+        } catch (final ParserConfigurationException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (final SAXException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (final IOException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
+        return null;
+    }
+
+    /**
+     * Pretty-prints specified XML/HTML string.
+     * 
+     * @param string The XML/HTML string to pretty-print
+     * @return The pretty-printed XML/HTML string
+     */
+    public static String prettyPrintXML(final String string) {
+        final Node node = createDOMDocument(string);
+        if (null == node) {
+            return string;
+        }
+        /*
+         * Pretty-print using Transformer
+         */
+        final TransformerFactory tfactory = TransformerFactory.newInstance();
+        try {
+            final Transformer serializer = tfactory.newTransformer();
+            /*
+             * Setup indenting to "pretty print"
+             */
+            serializer.setOutputProperty(OutputKeys.INDENT, "yes");
+            serializer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+            final StringWriter sw = new StringWriter();
+            serializer.transform(new DOMSource(node), new StreamResult(sw));
+            return sw.toString();
+        } catch (final TransformerException e) {
+            LOG.error(e.getMessage(), e);
+            return string;
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+            return string;
+        }
     }
 
     private static final Pattern PATTERN_XHTML_CDATA;

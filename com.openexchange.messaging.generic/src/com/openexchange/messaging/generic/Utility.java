@@ -57,6 +57,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import javax.mail.internet.MailDateFormat;
+import org.w3c.dom.Document;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.mail.text.HTMLProcessing;
 import com.openexchange.messaging.generic.internal.TimeZoneUtils;
@@ -252,6 +253,26 @@ public final class Utility {
      */
     public static String getConformHTML(final String htmlContent, final String charset) {
         return HTMLProcessing.getConformHTML(htmlContent, charset);
+    }
+
+    /**
+     * Creates a {@link Document DOM document} from specified XML/HTML string.
+     * 
+     * @param string The XML/HTML string
+     * @return A newly created DOM document or <code>null</code> if given string cannot be transformed to a DOM document
+     */
+    public static Document createDOMDocument(final String string) {
+        return HTMLProcessing.createDOMDocument(string);
+    }
+
+    /**
+     * Pretty-prints specified XML/HTML string.
+     * 
+     * @param string The XML/HTML string to pretty-print
+     * @return The pretty-printed XML/HTML string
+     */
+    public static String prettyPrintXML(final String string) {
+        return HTMLProcessing.prettyPrintXML(string);
     }
 
 }
