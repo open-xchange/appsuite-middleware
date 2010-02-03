@@ -79,8 +79,17 @@ public class MimeMultipartContent implements MultipartContent {
      * Initializes a new {@link MimeMultipartContent}.
      */
     public MimeMultipartContent() {
+        this("mixed");
+    }
+
+    /**
+     * Initializes a new {@link MimeMultipartContent}.
+     * 
+     * @param subtype The multipart sub-type; e.g. "mixed", "alternative", or "related"
+     */
+    public MimeMultipartContent(final String subtype) {
         super();
-        mimeMultipart = new MimeMultipart();
+        mimeMultipart = new MimeMultipart(subtype);
     }
 
     /**
