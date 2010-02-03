@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import org.ho.yaml.Yaml;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.subscribe.crawler.internal.PagePart;
 import com.openexchange.subscribe.crawler.internal.PagePartSequence;
 import com.openexchange.subscribe.crawler.internal.Step;
@@ -75,15 +76,18 @@ public class GenericSubscribeServiceForFacebookWebTest extends GenericSubscribeS
         crawler.setId("com.openexchange.subscribe.crawler.facebook");
         crawler.setCrawlerApiVersion(616);
         // increment priority with each new version to override (=be able to update) older versions
-        crawler.setPriority(3);
+        crawler.setPriority(5);
+        // this crawler gets contacts
+        crawler.setModule(FolderObject.CONTACT);
+        
         final List<Step> steps = new LinkedList<Step>();
 
-        steps.add(new LoginPageByFormActionStep(
+        steps.add(new LoginPageByFormActionRegexStep(
             "Login to facebook.com",
             "http://m.facebook.com/",
             "",
             "",
-            "https://login.facebook.com/login.php?",
+            "https:\\/\\/(m|login)\\.facebook\\.com\\/login\\.php?.*",
             "email",
             "pass",
             "(\\/friends.*)",
