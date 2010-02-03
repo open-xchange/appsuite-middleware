@@ -423,6 +423,8 @@ public final class HTMLProcessing {
         return prettyPrintXML(node, null);
     }
 
+    private static final int INDENT = 2;
+
     /**
      * Pretty-prints specified XML/HTML string.
      * 
@@ -439,12 +441,13 @@ public final class HTMLProcessing {
          */
         final TransformerFactory tfactory = TransformerFactory.newInstance();
         try {
+            tfactory.setAttribute("indent-number", new Integer(INDENT));
             final Transformer serializer = tfactory.newTransformer();
             /*
              * Setup indenting to "pretty print"
              */
             serializer.setOutputProperty(OutputKeys.INDENT, "yes");
-            serializer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+            serializer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", String.valueOf(INDENT));
             final StringWriter sw = new StringWriter();
             serializer.transform(new DOMSource(node), new StreamResult(sw));
             return sw.toString();
