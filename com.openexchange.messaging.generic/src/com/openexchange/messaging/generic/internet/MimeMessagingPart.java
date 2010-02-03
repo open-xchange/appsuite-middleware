@@ -542,6 +542,25 @@ public class MimeMessagingPart implements MessagingPart {
     }
 
     /**
+     * Adds specified header value to the existing values for the associated header name.
+     * 
+     * @param header The header to add
+     * @throws MessagingException If adding header fails
+     */
+    public void addHeader(final MessagingHeader header) throws MessagingException {
+        try {
+            part.addHeader(header.getName(), header.getValue());
+            headers = null;
+            b_cachedContentType = false;
+            cachedContentType = null;
+        } catch (final javax.mail.MessagingException e) {
+            throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
+        } catch (final IllegalStateException e) {
+            throw MessagingExceptionCodes.READ_ONLY.create(e, e.getMessage());
+        }
+    }
+
+    /**
      * Remove all headers associated with specified name.
      * 
      * @param headerName The header name
@@ -695,6 +714,25 @@ public class MimeMessagingPart implements MessagingPart {
     public void setHeader(final String headerName, final String headerValue) throws MessagingException {
         try {
             part.setHeader(headerName, headerValue);
+            headers = null;
+            b_cachedContentType = false;
+            cachedContentType = null;
+        } catch (final javax.mail.MessagingException e) {
+            throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
+        } catch (final IllegalStateException e) {
+            throw MessagingExceptionCodes.READ_ONLY.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Set the value for this header name. Replaces all existing header values associated with header name.
+     * 
+     * @param header The header to set
+     * @throws MessagingException If setting header fails
+     */
+    public void setHeader(final MessagingHeader header) throws MessagingException {
+        try {
+            part.setHeader(header.getName(), header.getValue());
             headers = null;
             b_cachedContentType = false;
             cachedContentType = null;
