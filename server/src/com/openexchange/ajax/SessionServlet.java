@@ -69,6 +69,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
+import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -151,7 +152,7 @@ public abstract class SessionServlet extends AJAXServlet {
                 throw new SessiondException(
                     new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, SessiondService.class.getName()));
             }
-            final Session session = getSession(req, resp, getCookieId(req), sessiondService);
+            final Session session = getSession(req, resp, getSessionId(req), sessiondService);
             final String sessionId = session.getSessionID();
             final Context ctx = ContextStorage.getStorageContext(session.getContextId());
             if (!ctx.isEnabled()) {
@@ -243,7 +244,7 @@ public abstract class SessionServlet extends AJAXServlet {
      */
     @OXThrows(category = Category.CODE_ERROR, desc = "Every AJAX request must contain a parameter named session "
             + "that value contains the identifier of the session cookie.", exceptionId = 1, msg = "The session parameter is missing.")
-    private static String getCookieId(final ServletRequest req) throws SessiondException {
+    private static String getSessionId(final ServletRequest req) throws SessiondException {
         final String retval = req.getParameter(PARAMETER_SESSION);
         if (null == retval) {
             if (DEBUG) {
@@ -271,7 +272,7 @@ public abstract class SessionServlet extends AJAXServlet {
      * @return a found session identifier or <code>null</code> if the session
      * identifier can not be found.
      */
-    private static String getSessionId(final HttpServletRequest req, final String cookieId) {
+    private static String getSecret(final HttpServletRequest req, final String cookieId) {
         final Cookie[] cookies = req.getCookies();
         String sessionId = null;
         if (cookies != null) {
@@ -293,8 +294,8 @@ public abstract class SessionServlet extends AJAXServlet {
      *            HTTP servlet request.
      * @param resp
      *            HTTP servlet response
-     * @param cookieId
-     *            Identifier of the cookie.
+     * @param sessionId
+     *            Identifier of the session.
      * @param sessiondService
      *            The SessionD service
      * @return The appropriate session.
@@ -305,56 +306,41 @@ public abstract class SessionServlet extends AJAXServlet {
     @OXThrows(category = Category.CODE_ERROR, desc = "Your browser does not send the cookie for identifying your "
             + "session.", exceptionId = 2, msg = "The cookie with the session identifier is missing.")
     private static Session getSession(final HttpServletRequest req, final HttpServletResponse resp,
-            final String cookieId, final SessiondService sessiondService)
+            final String sessionId, final SessiondService sessiondService)
             throws SessiondException {
-        /*
-         * Look for a local session
-         */
-        try {
-            final String sessionId = getSessionId(req, cookieId);
-            if (null != sessionId) {
-                return getLocalSession(sessionId, sessiondService);
+        // Look for a local session
+        final String secret = getSecret(req, sessionId);
+        if (null == secret) {
+            // A cache miss: throw error
+            final Cookie[] cookies = req.getCookies();
+            if (DEBUG && cookies != null) {
+                final StringBuilder debug = new StringBuilder(256);
+                debug.append("No cookie for ID: ");
+                debug.append(sessionId);
+                debug.append(". Cookie names: ");
+                for (final Cookie cookie : cookies) {
+                    debug.append(cookie.getName());
+                    debug.append(',');
+                }
+                debug.setCharAt(debug.length() - 1, '.');
+                LOG.debug(debug.toString());
             }
+            throw EXCEPTION.create(2);
+        }
+        try {
+            return getLocalSession(sessionId, secret, sessiondService);
         } catch (final SessiondException e) {
             if (DEBUG) {
                 LOG.debug("No appropriate local session found");
             }
-            /*
-             * Look for a cached session on second try
-             */
-            final Session session = getCachedSession(req, resp, cookieId, sessiondService);
+            // Look for a cached session on second try
+            final Session session = getCachedSession(req, resp, sessionId, secret, sessiondService);
             if (null != session) {
                 return session;
             }
-            /*
-             * Re-throw original exception to indicate session absence
-             */
+            // Re-throw original exception to indicate session absence
             throw e;
         }
-        /*
-         * No appropriate cookie found: check session cache
-         */
-        final Session session = getCachedSession(req, resp, cookieId, sessiondService);
-        if (null != session) {
-            return session;
-        }
-        /*
-         * A cache miss: throw error
-         */
-        final Cookie[] cookies = req.getCookies();
-        if (DEBUG && cookies != null) {
-            final StringBuilder debug = new StringBuilder(256);
-            debug.append("No cookie for ID: ");
-            debug.append(cookieId);
-            debug.append(". Cookie names: ");
-            for (final Cookie cookie : cookies) {
-                debug.append(cookie.getName());
-                debug.append(',');
-            }
-            debug.setCharAt(debug.length() - 1, '.');
-            LOG.debug(debug.toString());
-        }
-        throw EXCEPTION.create(2);
     }
 
     /**
@@ -364,19 +350,22 @@ public abstract class SessionServlet extends AJAXServlet {
      *            HTTP servlet request
      * @param resp
      *            HTTP servlet response
-     * @param cookieId
-     *            Identifier of the cookie
+     * @param sessionId
+     *            Identifier of the session
      * @param sessiondService
      *            The SessionD service
      * @return The session if fetched from cache; otherwise <code>null</code>.
+     * @throws SessiondException 
      */
+    @OXThrows(category = Category.TRY_AGAIN, desc = "", exceptionId = 7, msg = "Session secret is different. Given %1$s differs from %2$s in session.")
     private static Session getCachedSession(final HttpServletRequest req, final HttpServletResponse resp,
-            final String cookieId, final SessiondService sessiondService) {
-        final Session session = sessiondService.getCachedSession(cookieId, req.getRemoteAddr());
+            final String sessionId, String secret, final SessiondService sessiondService) throws SessiondException {
+        final Session session = sessiondService.getCachedSession(sessionId, req.getRemoteAddr());
         if (null != session) {
-            /*
-             * Adapt cookie
-             */
+            if (!session.getSecret().equals(secret)) {
+                throw EXCEPTION.create(7, secret, session.getSecret());
+            }
+            // Adapt cookie
             Login.writeCookie(resp, session);
             return session;
         }
@@ -394,12 +383,19 @@ public abstract class SessionServlet extends AJAXServlet {
      * @throws SessionException
      *             if the session can not be found.
      */
-    @OXThrows(category = Category.TRY_AGAIN, desc = "A session with the given identifier can not be found.", exceptionId = 3, msg = "Your session %s expired. Please start a new browser session.")
-    private static Session getLocalSession(final String sessionId, final SessiondService sessiondService)
+    @OXThrowsMultiple(
+        category = { Category.TRY_AGAIN, Category.TRY_AGAIN },
+        desc = { "A session with the given identifier can not be found.", "" },
+        exceptionId = { 3, 6 },
+        msg = { "Your session %s expired. Please start a new browser session.", "Session secret is different. Given %1$s differs from %2$s in session." })
+    private static Session getLocalSession(final String sessionId, String secret, final SessiondService sessiondService)
             throws SessiondException {
         final Session retval = sessiondService.getSession(sessionId);
         if (null == retval) {
             throw EXCEPTION.create(3, sessionId);
+        }
+        if (!retval.getSecret().equals(secret)) {
+            throw EXCEPTION.create(6, secret, retval.getSecret());
         }
         try {
             final Context context = ContextStorage.getStorageContext(retval.getContextId());

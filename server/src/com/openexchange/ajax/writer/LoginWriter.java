@@ -67,7 +67,7 @@ public class LoginWriter {
     }
 
     public void writeLogin(Session session, JSONObject json) throws JSONException {
-        json.put(AJAXServlet.PARAMETER_SESSION, session.getSecret());
+        json.put(AJAXServlet.PARAMETER_SESSION, session.getSessionID());
         json.put(LoginFields.PARAM_RANDOM, session.getRandomToken());
     }
 }

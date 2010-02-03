@@ -320,23 +320,21 @@ public final class SessionHandler {
      * <p>
      * Session is going to be added to local session containers on a cache hit.
      * 
-     * @param secret The secret cookie identifier
+     * @param sessionId The session identifier
      * @param localIP The host's local IP
      * @return A wrapping instance of {@link SessionControl} or <code>null</code>
      */
-    public static SessionControl getCachedSession(final String secret, final String localIP) {
+    public static SessionControl getCachedSession(final String sessionId, final String localIP) {
         if (DEBUG) {
-            LOG.debug(new StringBuilder("getCachedSession <").append(secret).append('>').toString());
+            LOG.debug(new StringBuilder("getCachedSession <").append(sessionId).append('>').toString());
         }
         try {
-            final CachedSession cachedSession = SessionCache.getInstance().removeCachedSession(secret);
+            final CachedSession cachedSession = SessionCache.getInstance().removeCachedSession(sessionId);
             if (null != cachedSession) {
                 if (cachedSession.isMarkedAsRemoved()) {
                     removeUserSessions(cachedSession.getUserId(), cachedSession.getContextId(), false);
                 } else {
-                    /*
-                     * A cache hit! Add to local session containers
-                     */
+                    // A cache hit! Add to local session containers
                     LOG.info("Cached session found. ID: " + cachedSession.getSessionId());
                     return sessionData.addSession(new SessionImpl(cachedSession, localIP), config.getLifeTime(), noLimit);
                 }

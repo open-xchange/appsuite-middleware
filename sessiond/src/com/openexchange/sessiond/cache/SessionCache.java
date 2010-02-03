@@ -78,12 +78,7 @@ public final class SessionCache {
 
     private final ReadWriteLock readWriteLock;
 
-    /**
-     * Initializes a new {@link SessionCache}
-     * 
-     * @throws CacheException If initialization fails
-     */
-    private SessionCache() throws CacheException {
+    private SessionCache() {
         super();
         readWriteLock = new ReentrantReadWriteLock();
         /**
@@ -112,13 +107,7 @@ public final class SessionCache {
         return cacheService.getCache(REGION_NAME);
     }
 
-    /**
-     * Get the singleton instance
-     * 
-     * @return The singleton instance
-     * @throws CacheException If instance initialization fails
-     */
-    public static SessionCache getInstance() throws CacheException {
+    public static SessionCache getInstance() {
         if (null == singleton) {
             synchronized (SessionCache.class) {
                 if (null == singleton) {
@@ -145,18 +134,18 @@ public final class SessionCache {
     /**
      * Removes and returns a cached session from cache
      * 
-     * @param secret The secret cookie identifier (which is sent as <i>"session=..."</i> in every request)
+     * @param sessionId The session identifier (which is sent as <i>"session=..."</i> in every request)
      * @param contextId The context ID
      * @return A cached session or <code>null</code>
      * @throws CacheException If removing from cache fails
      * @throws ServiceException If caching service is not available
      */
-    public CachedSession removeCachedSession(final String secret) throws CacheException, ServiceException {
+    public CachedSession removeCachedSession(final String sessionId) throws CacheException, ServiceException {
         final Cache cache = getCache();
         final Lock readLock = readWriteLock.readLock();
         readLock.lock();
         try {
-            final CacheKey key = createKey(secret, cache);
+            final CacheKey key = createKey(sessionId, cache);
             if (cache.get(key) == null) {
                 /*
                  * Cached session is not available. Return immediately.
@@ -210,7 +199,7 @@ public final class SessionCache {
         final Lock readLock = readWriteLock.readLock();
         readLock.lock();
         try {
-            final CacheKey key = createKey(cachedSession.getSecret(), cache);
+            final CacheKey key = createKey(cachedSession.getSessionId(), cache);
             if (cache.get(key) != null) {
                 /*
                  * Key is already in use
@@ -232,7 +221,7 @@ public final class SessionCache {
                 }
                 cachedSession.setMarkedAsRemoved(false);
                 cache.put(key, cachedSession);
-                cache.put(createUserKey(cachedSession, cache), cachedSession.getSecret());
+                cache.put(createUserKey(cachedSession, cache), cachedSession.getSessionId());
                 return true;
             } finally {
                 /*
@@ -268,8 +257,8 @@ public final class SessionCache {
             /*
              * Put to cache
              */
-            cache.put(createKey(cachedSession.getSecret(), cache), cachedSession);
-            cache.put(createUserKey(cachedSession, cache), cachedSession.getSecret());
+            cache.put(createKey(cachedSession.getSessionId(), cache), cachedSession);
+            cache.put(createUserKey(cachedSession, cache), cachedSession.getSessionId());
         } finally {
             writeLock.unlock();
         }
@@ -278,17 +267,17 @@ public final class SessionCache {
     /**
      * Checks if cache already holds a user-bound cached session
      * 
-     * @param secret The secret cookie identifier (which is sent as <i>"session=..."</i> in every request)
+     * @param sessionId The secret cookie identifier (which is sent as <i>"session=..."</i> in every request)
      * @return <code>true</code> if a user-bound cached session is already present in cache; otherwise <code>false</code>
      * @throws CacheException If a caching error occurs
      * @throws ServiceException If caching service is not available
      */
-    public boolean containsCachedSession(final String secret) throws ServiceException, CacheException {
+    public boolean containsCachedSession(final String sessionId) throws ServiceException, CacheException {
         final Cache cache = getCache();
         final Lock readLock = readWriteLock.readLock();
         readLock.lock();
         try {
-            return (cache.get(createKey(secret, cache)) != null);
+            return (cache.get(createKey(sessionId, cache)) != null);
         } finally {
             readLock.unlock();
         }
@@ -308,11 +297,11 @@ public final class SessionCache {
         final Lock readLock = readWriteLock.readLock();
         readLock.lock();
         try {
-            final String secret = (String) cache.get(createUserKey(userId, contextId, cache));
-            if (secret == null) {
+            final String sessionId = (String) cache.get(createUserKey(userId, contextId, cache));
+            if (sessionId == null) {
                 return null;
             }
-            return (CachedSession) cache.get(createKey(secret, cache));
+            return (CachedSession) cache.get(createKey(sessionId, cache));
         } finally {
             readLock.unlock();
         }

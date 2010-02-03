@@ -223,7 +223,7 @@ public class Login extends AJAXServlet {
                 resp.sendError(HttpServletResponse.SC_FORBIDDEN);
             }
             writeCookie(resp, session);
-            resp.sendRedirect(REDIRECT_URL + session.getSecret());
+            resp.sendRedirect(REDIRECT_URL + session.getSessionID());
         } else if (ACTION_AUTOLOGIN.equals(action)) {
             final Cookie[] cookies = req.getCookies();
             final Response response = new Response();
@@ -235,7 +235,7 @@ public class Login extends AJAXServlet {
                 for (final Cookie cookie : cookies) {
                     final String cookieName = cookie.getName();
                     if (cookieName.startsWith(COOKIE_PREFIX)) {
-                        final String sessionId = cookie.getValue();
+                        final String sessionId = cookieName.substring(COOKIE_PREFIX.length(), cookieName.length());
                         if (sessiondService.refreshSession(sessionId)) {
                             final Session session = sessiondService.getSession(sessionId);
                             SessionServlet.checkIP(checkIP, session, req.getRemoteAddr());
@@ -326,7 +326,7 @@ public class Login extends AJAXServlet {
      * @param session The session providing the secret cookie identifier
      */
     protected static void writeCookie(final HttpServletResponse resp, final Session session) {
-        final Cookie cookie = new Cookie(COOKIE_PREFIX + session.getSecret(), session.getSessionID());
+        final Cookie cookie = new Cookie(COOKIE_PREFIX + session.getSessionID(), session.getSecret());
         cookie.setPath("/");
         resp.addCookie(cookie);
     }

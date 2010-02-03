@@ -1,3 +1,7 @@
+* 2010-02-03 - marcus.klein@open-xchange.com
+
+ - Bugfix #14623: Switched sessionId and secret so the sessionId gets used as URL parameter.
+
 * 2010-02-01 - thorben.betten@open-xchange.com
 
  - Bugfix #15287: Returning 7 bit characters on QuotedInternetAddress.getAddress()

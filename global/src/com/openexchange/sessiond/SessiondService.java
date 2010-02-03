@@ -135,11 +135,11 @@ public interface SessiondService {
      * <p>
      * Session is going to be added to local session containers on a cache hit.
      * 
-     * @param secret The secret cookie identifier (which is sent as <i>"session=..."</i> in every request)
+     * @param sessionId The session identifier (which is sent as <i>"session=..."</i> in every request)
      * @param localIP The host's local IP address
      * @return The cached session or <code>null</code> on cache miss.
      */
-    public Session getCachedSession(final String secret, final String localIP);
+    public Session getCachedSession(final String sessionId, final String localIP);
 
     /**
      * The number of active sessions.
