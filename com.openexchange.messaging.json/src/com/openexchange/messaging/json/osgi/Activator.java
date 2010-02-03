@@ -109,9 +109,9 @@ public class Activator extends DeferredActivator {
 
     private void hide() {
         if(null != httpService) {
-            httpService.unregister("/ajax/messagingAccounts");
-            httpService.unregister("/ajax/messagingMessages");
-            httpService.unregister("/ajax/messagingServices");
+            httpService.unregister("/ajax/messaging/account");
+            httpService.unregister("/ajax/messaging/message");
+            httpService.unregister("/ajax/messaging/service");
         }
         
         for (ServiceRegistration registration : registrations) {
