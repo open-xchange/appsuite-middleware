@@ -410,9 +410,29 @@ public final class HTMLProcessing {
      * @return The pretty-printed XML/HTML string
      */
     public static String prettyPrintXML(final String string) {
-        final Node node = createDOMDocument(string);
+        return prettyPrintXML(createDOMDocument(string), string);
+    }
+
+    /**
+     * Pretty-prints specified XML/HTML node.
+     * 
+     * @param node The XML/HTML node pretty-print
+     * @return The pretty-printed XML/HTML node
+     */
+    public static String prettyPrintXML(final Node node) {
+        return prettyPrintXML(node, null);
+    }
+
+    /**
+     * Pretty-prints specified XML/HTML string.
+     * 
+     * @param node The XML/HTML node pretty-print
+     * @param fallback The fallback string to return on error
+     * @return The pretty-printed XML/HTML string
+     */
+    private static String prettyPrintXML(final Node node, final String fallback) {
         if (null == node) {
-            return string;
+            return fallback;
         }
         /*
          * Pretty-print using Transformer
@@ -430,10 +450,10 @@ public final class HTMLProcessing {
             return sw.toString();
         } catch (final TransformerException e) {
             LOG.error(e.getMessage(), e);
-            return string;
+            return fallback;
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
-            return string;
+            return fallback;
         }
     }
 

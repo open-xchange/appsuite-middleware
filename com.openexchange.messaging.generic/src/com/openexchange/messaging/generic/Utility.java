@@ -58,6 +58,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import javax.mail.internet.MailDateFormat;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.mail.text.HTMLProcessing;
 import com.openexchange.messaging.generic.internal.TimeZoneUtils;
@@ -273,6 +274,16 @@ public final class Utility {
      */
     public static String prettyPrintXML(final String string) {
         return HTMLProcessing.prettyPrintXML(string);
+    }
+
+    /**
+     * Pretty-prints specified XML/HTML node.
+     * 
+     * @param node The XML/HTML node pretty-print
+     * @return The pretty-printed XML/HTML node
+     */
+    public static String prettyPrintXML(final Node node) {
+        return HTMLProcessing.prettyPrintXML(node);
     }
 
 }
