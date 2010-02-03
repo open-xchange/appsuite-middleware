@@ -156,6 +156,11 @@ public class DefaultMessagingFolder implements MessagingFolder {
         b_defaultFolderType = false;
     }
 
+    /**
+     * Gets the capabilities of this folder; e.g <code>"QUOTA"</code>, <code>"PERMISSIONS"</code>, etc.
+     * 
+     * @return The list of capabilities or <code>null</code> if not set
+     */
     public Set<String> getCapabilities() {
         if (null == capabilities) {
             return null;
