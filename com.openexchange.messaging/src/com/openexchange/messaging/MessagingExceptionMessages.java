@@ -122,6 +122,9 @@ public final class MessagingExceptionMessages implements LocalizableStrings {
     // Not connected
     public static final String NOT_CONNECTED_MSG = "Not connected";
 
+    // Invalid sorting column. Can not sort by %1$s.
+    public static final String INVALID_SORTING_COLUMN_MSG = "Invalid sorting column. Can not sort by %1$s.";
+
     /**
      * Initializes a new {@link MessagingExceptionMessages}.
      */

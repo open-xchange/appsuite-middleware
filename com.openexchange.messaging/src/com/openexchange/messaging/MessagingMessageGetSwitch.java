@@ -73,7 +73,7 @@ public class MessagingMessageGetSwitch implements MessagingMessageSwitcher {
     }
 
     public Object cc(final Object... args) throws MessagingException {
-        return header(args[0], MessagingField.CC.toString());
+        return header(args[0], KnownHeader.CC.toString());
     }
 
     public Object colorLabel(final Object... args) throws MessagingException {

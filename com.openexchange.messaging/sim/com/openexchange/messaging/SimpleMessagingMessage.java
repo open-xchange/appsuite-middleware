@@ -51,6 +51,8 @@ package com.openexchange.messaging;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -184,6 +186,15 @@ public class SimpleMessagingMessage implements MessagingMessage, MessagingBodyPa
     public void setHeaders(final Map<String, Collection<MessagingHeader>> headers) {
         this.headers = headers;
     }
+    
+    public void putHeader(MessagingHeader header) {
+        if(headers.containsKey(header.getName())) {
+            headers.get(header.getName()).add(header);
+        } else {
+            headers.put(header.getName(), new ArrayList<MessagingHeader>(Arrays.asList(header)));
+        }
+        
+    }
 
     public void setSectionId(final String sectionId) {
         this.sectionId = sectionId;
@@ -232,5 +243,6 @@ public class SimpleMessagingMessage implements MessagingMessage, MessagingBodyPa
     public void setId(final String id) {
         this.id = id;
     }
+
 
 }
