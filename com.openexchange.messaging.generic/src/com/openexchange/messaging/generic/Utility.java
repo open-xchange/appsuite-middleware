@@ -61,6 +61,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.mail.text.HTMLProcessing;
+import com.openexchange.mail.text.parser.HTMLParser;
+import com.openexchange.mail.text.parser.handler.HTML2TextHandler;
 import com.openexchange.messaging.generic.internal.TimeZoneUtils;
 
 /**
@@ -230,6 +232,21 @@ public final class Utility {
      */
     public static String htmlFormat(final String plainText, final boolean withQuote) {
         return HTMLProcessing.htmlFormat(plainText, withQuote);
+    }
+
+    /**
+     * Formats HTML to plain text.
+     * 
+     * @param htmlContent The HTML content
+     * @return The converted plain text
+     */
+    public static String textFormat(final String htmlContent) {
+        if (htmlContent == null || htmlContent.length() == 0) {
+            return "";
+        }
+        final HTML2TextHandler html2textHandler = new HTML2TextHandler(4096, true);
+        HTMLParser.parse(getConformHTML(htmlContent, "UTF-8"), html2textHandler.reset());
+        return html2textHandler.getText();
     }
 
     /**
