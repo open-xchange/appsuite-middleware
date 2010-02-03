@@ -141,9 +141,7 @@ public abstract class BasicCensoredContactTemplateTest extends BasicContactTempl
         templ.process(variables, writer);
     
         String htmlData = writer.toString();
-    
-        System.out.println(htmlData);
-    
+        
         Collection<Contact> actuals = service.getContent(new StringReader(htmlData));
     
         assertEquals("Should return one contact", 1, actuals.size());
