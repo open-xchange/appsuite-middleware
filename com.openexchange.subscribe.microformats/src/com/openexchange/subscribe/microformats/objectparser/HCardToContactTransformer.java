@@ -107,7 +107,6 @@ public class HCardToContactTransformer {
 
 
     private void handleOXSpecific(HCard hcard, Contact c) {
-        System.out.println();
 /*      if( key.equals("x-ox-maritalStatus"))
             c.setMaritalStatus(value); 
         if( key.equals("x-ox-numberOfChildren"))
