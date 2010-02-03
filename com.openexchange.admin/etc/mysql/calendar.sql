@@ -26,6 +26,8 @@ CREATE TABLE prg_dates (
     field07 TEXT,
     field08 TEXT,
     field09 VARCHAR(255),
+    uid VARCHAR(255),
+    organizer VARCHAR(255),
     PRIMARY KEY (cid, intfield01),
     INDEX (cid, intfield02),
     INDEX (cid, timestampfield01),
@@ -78,6 +80,8 @@ CREATE TABLE del_dates (
     field07 text,
     field08 TEXT,
     field09 VARCHAR(255),
+    uid VARCHAR(255),
+    organizer VARCHAR(255),
     PRIMARY KEY (cid, intfield01)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -103,4 +107,23 @@ CREATE TABLE prg_dates_members (
     cid INT4 UNSIGNED NOT NULL,
     PRIMARY KEY (cid, object_id, member_uid),
     UNIQUE INDEX member (cid, member_uid, object_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+
+CREATE TABLE prg_dates_externals (
+	objectId INT4,
+	mailAddress VARCHAR(255),
+	confirm INT4 UNSIGNED NOT NULL,
+	reason VARCHAR(255),
+	cid INT4 UNSIGNED NOT NULL,
+	PRIMARY KEY (cid, objectId, mailAddress)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE del_dates_externals (
+	objectId INT4,
+	mailAddress VARCHAR(255),
+	confirm INT4 UNSIGNED NOT NULL,
+	reason VARCHAR(255),
+	cid INT4 UNSIGNED NOT NULL,
+	PRIMARY KEY (cid, objectId, mailAddress)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
