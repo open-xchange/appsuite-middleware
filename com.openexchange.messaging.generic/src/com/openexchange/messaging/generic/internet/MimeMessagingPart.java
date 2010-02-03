@@ -604,7 +604,7 @@ public class MimeMessagingPart implements MessagingPart {
      * 
      * @param content The content
      * @param type The content type
-     * @throws MessagingException
+     * @throws MessagingException If content cannot be applied
      */
     public void setContent(final MessagingContent content, final String type) throws MessagingException {
         try {
@@ -620,8 +620,10 @@ public class MimeMessagingPart implements MessagingPart {
                 } else if (content instanceof StringContent) {
                     final MimeContentType mct = new MimeContentType(type);
                     part.setText(((StringContent) content).getData().toString(), mct.getCharsetParameter(), mct.getSubType());
-                } else {
+                } else if (content instanceof SimpleContent) {
                     part.setContent(((SimpleContent<?>) content).getData(), type);
+                } else {
+                    throw MessagingExceptionCodes.UNKNOWN_MESSAGING_CONTENT.create(content.getClass().getName());
                 }
                 part.setHeader(H_CONTENT_TYPE.toString(), type);
             } else {
