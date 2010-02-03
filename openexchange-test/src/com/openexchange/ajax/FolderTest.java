@@ -144,7 +144,7 @@ public class FolderTest extends AbstractAJAXTest {
     }
     
     public static List<FolderObject> getRootFolders(final WebConversation conversation, final String protocol, final String hostname, final String sessionId, final boolean printOutput) throws MalformedURLException, IOException, SAXException, JSONException, OXException {
-        return getRootFolders(conversation, null, hostname, sessionId);
+        return getRootFolders(conversation, protocol, hostname, sessionId);
     }
 
     public static List<FolderObject> getRootFolders(final WebConversation conversation, final String protocol, final String hostname, final String sessionId) throws MalformedURLException, IOException, SAXException, JSONException, OXException {
