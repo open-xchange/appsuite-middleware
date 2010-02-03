@@ -56,6 +56,8 @@ import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.httpclient.ssl.TrustAllSecureSocketFactory;
 
 /**
@@ -65,19 +67,23 @@ import com.openexchange.httpclient.ssl.TrustAllSecureSocketFactory;
  */
 public class ReverseProxyConfig {
 
+    private static final Log LOG = LogFactory.getLog(ReverseProxy.class);
+    
     public String id = "";
     public String protocol = "";
     public String host = "";
     public String location = "";
     public String agent = "";
+    public Boolean processLeadingSlashes = Boolean.FALSE;
 
-    public ReverseProxyConfig(String id, String protocol, String host, String location, String agent) {
+    public ReverseProxyConfig(String id, String protocol, String host, String location, String agent, Boolean processLeadingSlashes) {
         
         this.id = id;
         this.protocol = protocol;
         this.host = host;
         this.location = location;
         this.agent = agent;
+        this.processLeadingSlashes = processLeadingSlashes;
     }
     
     public URI getURI(String path, String query) throws URIException, NullPointerException {

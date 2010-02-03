@@ -19,6 +19,7 @@ proxies:
       protocol: "https"
       host: "mein.1und1.de"
       location: ""
+      processLeadingSlashes: true
 
     - proxy: "spiegelmobil"
       protocol: "http"

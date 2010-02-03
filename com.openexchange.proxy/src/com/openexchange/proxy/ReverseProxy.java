@@ -49,6 +49,7 @@
 
 package com.openexchange.proxy;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -56,6 +57,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
+import java.net.URLDecoder;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -76,6 +78,7 @@ import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.params.HttpClientParams;
+import org.apache.commons.httpclient.util.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ho.yaml.Yaml;
@@ -99,6 +102,7 @@ public class ReverseProxy extends HttpServlet {
     private boolean firstTime = true;
 
     private String hostname = "";
+    private String protocol = "";
     private String location = "";
 
     @Override
@@ -130,17 +134,16 @@ public class ReverseProxy extends HttpServlet {
             // add request cookies
             prefix = ("proxy-" + proxyId + "-").replaceAll("[^\\w\\-]", "-");
             HttpState state = httpClient.getState();
-
             javax.servlet.http.Cookie[] kekse = req.getCookies(); // might return null instead of empty array
             if (kekse != null) {
                 for (javax.servlet.http.Cookie cookie : kekse) {
-                    // LOG.info("Keks: " + cookie.getName() + " " + cookie.getValue() + " Compare with " + prefix);
                     String cookieName = cookie.getName();
-                    if (cookieName.startsWith(prefix)) {
+                    //LOG.info("Keks: " + cookieName + " starts with " + prefix); //+ " or equals " + proxy.cookie);
+                    if (cookieName.startsWith(prefix)) { // || cookieName.equals(proxy.cookie)) {
                         cookieName = cookieName.substring(prefix.length());
-                        // LOG.info("Set-Cookie " + cookieName + "=" + cookie.getValue() + "; Host=" + proxy.host);
                         Cookie keks = new Cookie(proxy.host, cookieName, cookie.getValue());
-                        keks.setPath("/"); 
+                        keks.setPath("/");
+                        //LOG.info("Request-Cookie: " + keks.toString());
                         httpClient.getState().addCookie(keks);
                     }
                 }
@@ -161,8 +164,13 @@ public class ReverseProxy extends HttpServlet {
                     NameValuePair nvp = null;
                     if (param.contains("=")) {
                         String[] pair = param.split("=");
+                        // escape name & value
+                        pair[0] = URLDecoder.decode(pair[0], "UTF-8");
+                        pair[1] = URLDecoder.decode(pair[1], "UTF-8");
+                        // create pair
                         nvp = new NameValuePair(pair[0], pair[1]);
                     } else {
+                        // create pair
                         nvp = new NameValuePair(param, "");
                     }
                     params[i++] = nvp;
@@ -183,7 +191,7 @@ public class ReverseProxy extends HttpServlet {
                 String value = req.getHeader(name);
                 if ("referer".equals(name)) {
                     // bypass "Referer"
-                    String refPrefix = req.getScheme() + "://" + this.hostname + this.location + "/" + proxy.id;
+                    String refPrefix = this.protocol + "://" + this.hostname + this.location + "/" + proxy.id;
                     String remainder = value.substring(refPrefix.length());
                     value = proxy.getPrefix() + remainder;
                     method.addRequestHeader(new Header("Referer", value));
@@ -205,6 +213,8 @@ public class ReverseProxy extends HttpServlet {
                 }
             }
             
+            method.addRequestHeader(new Header("Accept-Encoding", ""));
+            
             // user agent
             if (!proxy.agent.equals("")) {
                 // override user agent
@@ -217,13 +227,18 @@ public class ReverseProxy extends HttpServlet {
                 }
             }
 
+            // debug header
+//            for (Header header : method.getRequestHeaders()) {
+//                LOG.info("# Request-Header: " + header.getName() + ": " + header.getValue());
+//            }
+
             // POST?
             if (methodS.equals("POST")) {
-                PostMethod post = (PostMethod) method;
                 // add body (contains url-encoded parameter)
+                PostMethod post = (PostMethod) method;
                 post.setRequestBody(req.getInputStream());
             }
-
+            
             // do not follow redirects
             method.setFollowRedirects(false);
             
@@ -238,16 +253,29 @@ public class ReverseProxy extends HttpServlet {
                 state = httpClient.getState();
                 for (Cookie cookie : state.getCookies()) {
                     // LOG.info("Response KEKS: " + cookie.getName() + " " + cookie.getValue());
+                    javax.servlet.http.Cookie keks;
+                    String cookieName = cookie.getName(); 
+                    if (!cookieName.startsWith("proxy-")) {
+                        // add prefix
+                        cookieName = prefix + cookieName;
+                        // create cookie
+                        keks = new javax.servlet.http.Cookie(cookieName, cookie.getValue());
+                        // set domain & path
+                        keks.setDomain(hostname);
+                        keks.setPath(this.location + "/" + proxyId);
+                    } else {
+                        // create cookie
+                        keks = new javax.servlet.http.Cookie(cookieName, cookie.getValue());
+                        // keep domain & path
+                        keks.setDomain(cookie.getDomain());
+                        keks.setPath(cookie.getPath());
+                    }
                     // add to response
-                    String cookieName = prefix + cookie.getName();
-                    javax.servlet.http.Cookie keks = new javax.servlet.http.Cookie(cookieName, cookie.getValue());
-                    keks.setDomain(hostname);
-                    keks.setPath(this.location + "/" + proxyId);
                     resp.addCookie(keks);
                 }
     
                 // add response header
-                header2Response(req, method, resp);
+                header2Response(method, resp);
     
                 // process response body (html only)
                 Header ct = method.getResponseHeader("Content-Type");
@@ -262,16 +290,19 @@ public class ReverseProxy extends HttpServlet {
                     }
                     // replace content inside body and
                     // write as response
-                    resp.getWriter().write(this.processBody(req, body.toString(), proxy));
+                    resp.getWriter().write(this.processBody(body.toString(), proxy));
                 } else {
                     // binary
                     InputStream responseStream = method.getResponseBodyAsStream();
                     OutputStream outputStream = resp.getOutputStream();
                     byte[] buf = new byte[1024];
                     int length = -1;
+                    int total = 0;
                     while ((length = responseStream.read(buf)) != -1) {
                         outputStream.write(buf, 0, length);
+                        total += length;
                     }
+                    //LOG.info("Proxy: Binary. " + u.getURI() + " Content length=" + total + " Status=" + method.getStatusCode());
                 }
                 
                 // set status
@@ -303,6 +334,7 @@ public class ReverseProxy extends HttpServlet {
             try {
                 HashMap<?, ?> map = (HashMap<?, ?>) yml;
                 this.hostname = (String) map.get("hostname");
+                this.protocol = (String) map.get("protocol");
                 this.location = (String) map.get("location");
                 // get proxies
                 for (Map proxiesMap : (List<Map>) map.get("proxies")) {
@@ -312,8 +344,9 @@ public class ReverseProxy extends HttpServlet {
                         String host = (String) proxiesMap.get("host");
                         String location = proxiesMap.containsKey("location") ? (String) proxiesMap.get("location") : "";
                         String agent = proxiesMap.containsKey("agent") ? (String) proxiesMap.get("agent") : "";
+                        Boolean processLeadingSlashes = proxiesMap.containsKey("processLeadingSlashes") ? (Boolean) proxiesMap.get("processLeadingSlashes") : Boolean.FALSE;
                         LOG.info("Adding proxy: " + proxy);
-                        proxies.put(proxy, new ReverseProxyConfig(proxy, protocol, host, location, agent));
+                        proxies.put(proxy, new ReverseProxyConfig(proxy, protocol, host, location, agent, processLeadingSlashes));
                     }
                 }
             } catch (NullPointerException e) {
@@ -332,13 +365,13 @@ public class ReverseProxy extends HttpServlet {
 
     }
 
-    private void header2Response(HttpServletRequest req, HttpMethodBase method, HttpServletResponse resp) {
+    private void header2Response(HttpMethodBase method, HttpServletResponse resp) {
 
         for (Header header : method.getResponseHeaders()) {
 
             String name = header.getName();
             String value = header.getValue();
-
+            
             if ("Content-Type".equals(name)) {
                 if ("text/html".equals(value)) {
                     resp.setContentType("text/html; charset=" + resp.getCharacterEncoding());
@@ -349,36 +382,46 @@ public class ReverseProxy extends HttpServlet {
             } else if ("Location".equals(name)) {
                 // handle redirects
                 Enumeration<?> proxies = this.proxies.elements();
+                boolean found = false;
+                
+                // hack (don't ask - ever!)
+                if (value.equals("https://174.129.17.230:443/CloudOffice/workspace.jsp")) {
+                    value = "https://174.129.17.230:8181/CloudOffice/workspace.jsp";
+                } 
+                
                 while (proxies.hasMoreElements()) {
                     ReverseProxyConfig proxy = (ReverseProxyConfig) proxies.nextElement();
                     String prefix = proxy.getPrefix();
-                    //LOG.info("Test: " + value + " Against: " + prefix);
                     // matches header value?
                     if (value.startsWith("/")) {
                         // relative URL
-                        value = req.getScheme() + "://" + this.hostname + this.location + "/" + proxy.id + value;
+                        value = this.protocol + "://" + this.hostname + this.location + "/" + proxy.id + value;
                         resp.addHeader(name, value);
+                        found = true;
                         break;
                     } else if (value.startsWith(prefix)) { // add trailing slash to prevent id collisions
                         // absolute URL
                         String path = value.substring(prefix.length());
                         // remove port
                         path = path.replaceFirst("\\:\\d+", "");
-                        value = req.getScheme() + "://" + this.hostname + this.location + "/" + proxy.id + path;
-                        //LOG.info("FOUND! Redirect: " + value);
+                        value = this.protocol + "://" + this.hostname + this.location + "/" + proxy.id + path;
                         resp.addHeader(name, value);
+                        found = true;
                         break;
                     }
-                    //LOG.info("Not matching!");
                 }
-
-            } else if ("Content-Length".equals(name)) {
+                if (!found) {
+                    resp.addHeader(name, value);
+                }
+            } 
+            else if ("Content-Length".equals(name)) {
                 // set content length
                 long length = method.getResponseContentLength();
                 if (length > 0) {
                     resp.setContentLength((int) length);
                 }
-            } else if ("WWW-Authenticate".equals(name)) {
+            } 
+            else if ("WWW-Authenticate".equals(name)) {
                 // auth
                 resp.addHeader("WWW-Authenticate", value);
             }
@@ -400,18 +443,23 @@ public class ReverseProxy extends HttpServlet {
         return end > 0 ? pathInfo.substring(1, end) : pathInfo.substring(1);
     }
 
-    private String processBody(HttpServletRequest req, String body, ReverseProxyConfig currentProxy) {
+    private String processBody(String body, ReverseProxyConfig currentProxy) {
         // loop through proxies
         Enumeration<?> proxies = this.proxies.elements();
         while (proxies.hasMoreElements()) {
             ReverseProxyConfig proxy = (ReverseProxyConfig) proxies.nextElement();
             String prefix = proxy.getPrefix();
             String regex = java.util.regex.Pattern.quote(prefix);
-            // replace
-            body = body.replaceAll(regex, req.getScheme() + "://" + this.hostname + this.location + "/" + proxy.id);
+            // skip local proxies (same protocol, same domain)
+            if (!prefix.equals(this.protocol + "://" + this.hostname)) {
+                // replace
+                body = body.replaceAll(regex, this.protocol + "://" + this.hostname + this.location + "/" + proxy.id);
+            }
         }
-        // make absolute pathes
-        body = body.replaceAll("\"/(.*?)\"", "\"" + this.location + "/" + currentProxy.id + "/$1\"");
+        // make absolute pathes (process leading slashes)
+        if (currentProxy.processLeadingSlashes.booleanValue()) {
+            body = body.replaceAll("\"/(.*?)\"", "\"" + this.location + "/" + currentProxy.id + "/$1\"");
+        }
         // done
         return body;
     }
