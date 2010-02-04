@@ -550,4 +550,24 @@ public class OXContext extends OXSOAPRMIMapper {
         }
     }
 
+    /**
+     * Same as {@link OXContextInterface#getAdminId(Context, Credentials)}
+     * 
+     * @param ctx
+     * @param auth
+     * @return
+     * @throws RemoteException
+     * @throws InvalidCredentialsException
+     * @throws StorageException
+     */
+    public int getAdminId(Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, StorageException {
+        reconnect();
+        try {
+            return ((OXContextInterface)rmistub).getAdminId(ctx, auth);
+        } catch( ConnectException e) {
+            reconnect(true);
+            return ((OXContextInterface)rmistub).getAdminId(ctx, auth);
+        }
+    }
+
 }
