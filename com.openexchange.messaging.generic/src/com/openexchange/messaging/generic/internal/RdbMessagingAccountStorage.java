@@ -446,8 +446,9 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
              * Update account configuration using generic conf
              */
             {
-                final Map<String, Object> configuration = account.getConfiguration();
+                Map<String, Object> configuration = account.getConfiguration();
                 if (null != configuration) {
+                    configuration = new HashMap<String, Object>(configuration);
                     final GenericConfigurationStorageService genericConfStorageService = getService(CLAZZ_GEN_CONF);
                     final int genericConfId = getGenericConfId(contextId, session.getUserId(), serviceId, account.getId(), wc);
                     /*
