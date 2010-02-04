@@ -63,7 +63,6 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.login.LoginResult;
