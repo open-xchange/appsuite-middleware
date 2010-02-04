@@ -80,7 +80,7 @@ public final class ToTerm extends SearchTerm<String> {
     public ToTerm(final String pattern) {
         super();
         try {
-            addr = new QuotedInternetAddress(pattern, true).getAddress();
+            addr = new QuotedInternetAddress(pattern, true).getUnicodeAddress();
         } catch (final AddressException e) {
             addr = pattern;
         }
