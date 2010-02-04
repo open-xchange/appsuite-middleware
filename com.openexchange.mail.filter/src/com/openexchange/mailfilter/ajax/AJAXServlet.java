@@ -141,7 +141,7 @@ public abstract class AJAXServlet extends HttpServlet {
         resp.setStatus(HttpServletResponse.SC_OK);
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
         try {
-            Response.write(response, resp.getWriter());
+            ResponseWriter.write(response, resp.getWriter());
         } catch (final JSONException e) {
             LOG.error("Error while writing JSON.", e);
             sendError(resp);
