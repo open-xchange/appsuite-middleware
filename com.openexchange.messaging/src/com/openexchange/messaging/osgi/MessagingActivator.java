@@ -119,7 +119,7 @@ public final class MessagingActivator implements BundleActivator {
             }
             if (null != registrations) {
                 while (!registrations.isEmpty()) {
-                    registrations.get(0).unregister();
+                    registrations.remove(0).unregister();
                 }
                 registrations = null;
             }
