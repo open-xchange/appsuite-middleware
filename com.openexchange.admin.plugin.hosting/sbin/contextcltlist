@@ -24,3 +24,4 @@ unregisterserver
 changedatabase
 getaccesscombinationnameforcontext
 getmoduleaccessforcontext
+getadminid
