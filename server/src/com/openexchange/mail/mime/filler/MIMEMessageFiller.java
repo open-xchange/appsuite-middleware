@@ -332,17 +332,20 @@ public class MIMEMessageFiller {
                 try {
                     final int userId = session.getUserId();
                     final int contextId = session.getContextId();
-                    final int id = mass.getByPrimaryAddress(from.getAddress(), userId, contextId);
+                    int id = mass.getByPrimaryAddress(from.getAddress(), userId, contextId);
                     if (id < 0) {
-                        /*
-                         * No appropriate mail account found which matches from address
-                         */
-                        final String sendAddr = usm.getSendAddr();
-                        if (sendAddr != null && sendAddr.length() > 0) {
-                            try {
-                                sender = new QuotedInternetAddress(sendAddr, true);
-                            } catch (final AddressException e) {
-                                LOG.error("Default send address cannot be parsed", e);
+                        id = mass.getByPrimaryAddress(QuotedInternetAddress.toIDN(from.getAddress()), userId, contextId);
+                        if (id < 0) {
+                            /*
+                             * No appropriate mail account found which matches from address
+                             */
+                            final String sendAddr = usm.getSendAddr();
+                            if (sendAddr != null && sendAddr.length() > 0) {
+                                try {
+                                    sender = new QuotedInternetAddress(sendAddr, true);
+                                } catch (final AddressException e) {
+                                    LOG.error("Default send address cannot be parsed", e);
+                                }
                             }
                         }
                     }

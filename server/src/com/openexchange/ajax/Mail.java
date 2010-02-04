@@ -4214,6 +4214,9 @@ public class Mail extends PermissionServlet implements UploadListener {
                 accountId = MailAccount.DEFAULT_ID;
             } else {
                 accountId = storageService.getByPrimaryAddress(from.getAddress(), user, cid);
+                if (accountId != -1) {
+                    accountId = storageService.getByPrimaryAddress(QuotedInternetAddress.toIDN(from.getAddress()), user, cid);
+                }
             }
             if (accountId != -1) {
                 if (!session.getUserConfiguration().isMultipleMailAccounts() && accountId != MailAccount.DEFAULT_ID) {
@@ -4234,7 +4237,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             throw new OXException(e);
         }
         if (accountId == -1) {
-            if (checkFrom) {
+            if (checkFrom && null != from) {
                 /*
                  * Check aliases
                  */

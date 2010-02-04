@@ -49,6 +49,7 @@
 
 package com.openexchange.contactcollector.internal;
 
+import static com.openexchange.mail.mime.QuotedInternetAddress.toIDN;
 import java.io.UnsupportedEncodingException;
 import java.text.MessageFormat;
 import java.util.Collections;
@@ -232,10 +233,10 @@ public class Memorizer implements Runnable {
 
         final int retval;
         if (null == foundContact) {
-            OXFolderAccess folderAccess = new OXFolderAccess(ctx);
-            int folderId = getFolderId();
+            final OXFolderAccess folderAccess = new OXFolderAccess(ctx);
+            final int folderId = getFolderId();
             if (folderAccess.exists(folderId)) {
-                OCLPermission perm = folderAccess.getFolderPermission(folderId, session.getUserId(), userConfig);
+                final OCLPermission perm = folderAccess.getFolderPermission(folderId, session.getUserId(), userConfig);
                 if (perm.canCreateObjects()) {
                     contact.setUseCount(1);
                     contactInterface.insertContactObject(contact);
@@ -305,7 +306,7 @@ public class Memorizer implements Runnable {
             enabledRight = new ServerSessionAdapter(session).getUserConfiguration().isCollectEmailAddresses();
         } catch (final SettingException e) {
             LOG.error(e.getMessage(), e);
-        } catch (ContextException e) {
+        } catch (final ContextException e) {
             LOG.error(e.getMessage(), e);
         }
         return enabled != null && enabledRight != null && enabled.booleanValue() && enabled.booleanValue();
@@ -313,7 +314,7 @@ public class Memorizer implements Runnable {
 
     private Contact transformInternetAddress(final InternetAddress address) throws ParseException, UnsupportedEncodingException {
         final Contact retval = new Contact();
-        final String addr = decodeMultiEncodedValue(address.getAddress());
+        final String addr = decodeMultiEncodedValue(toIDN(address.getAddress()));
         retval.setEmail1(addr);
         final String displayName;
         if (address.getPersonal() != null && !"".equals(address.getPersonal().trim())) {
