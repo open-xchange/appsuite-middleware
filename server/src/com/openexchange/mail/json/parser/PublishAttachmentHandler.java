@@ -90,6 +90,7 @@ import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.config.TransportProperties;
@@ -300,6 +301,16 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                  */
                 if (LdapException.Code.NO_USER_BY_MAIL.getDetailNumber() != e.getDetailNumber()) {
                     throw new MailException(e);
+                }
+                /*
+                 * Retry
+                 */
+                try {
+                    user = userService.searchUser(QuotedInternetAddress.toIDN(address.getAddress()), ctx);
+                } catch (final UserException inner) {
+                    if (LdapException.Code.NO_USER_BY_MAIL.getDetailNumber() != inner.getDetailNumber()) {
+                        throw new MailException(inner);
+                    }
                 }
             }
             if (null == user) {
