@@ -2835,12 +2835,9 @@ public class Mail extends PermissionServlet implements UploadListener {
                     mailInterface = MailServletInterface.getInstance(session);
                     closeMailInterface = true;
                 }
-                final int size = idMap.size();
-                final Iterator<Map.Entry<String, List<String>>> iter = idMap.entrySet().iterator();
                 final int userId = session.getUserId();
                 final int contextId = session.getContextId();
-                for (int k = 0; k < size; k++) {
-                    final Map.Entry<String, List<String>> entry = iter.next();
+                for (final Map.Entry<String, List<String>> entry : idMap.entrySet()) {
                     final MailMessage[] mails = mailInterface.getMessageList(entry.getKey(), toArray(entry.getValue()), columns, headers);
                     final int accountID = mailInterface.getAccountID();
                     for (int i = 0; i < mails.length; i++) {
