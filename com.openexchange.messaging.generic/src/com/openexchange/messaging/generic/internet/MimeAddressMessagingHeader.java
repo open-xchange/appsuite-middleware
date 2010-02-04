@@ -49,6 +49,7 @@
 
 package com.openexchange.messaging.generic.internet;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -120,23 +121,27 @@ public class MimeAddressMessagingHeader implements MessagingAddressHeader {
         return new MimeAddressMessagingHeader(name, personal, address);
     }
 
-    private final String address;
+    /*-
+     * Member section
+     */
 
     private final QuotedInternetAddress internetAddress;
 
     private final String name;
-
-    private final String personal;
 
     private MimeAddressMessagingHeader(final String name, final String personal, final String address) {
         super();
         if (null == address) {
             throw new IllegalArgumentException("Address is null.");
         }
-        this.personal = personal;
-        this.address = address;
         this.name = name;
-        internetAddress = null;
+        internetAddress = new QuotedInternetAddress();
+        try {
+            internetAddress.setPersonal(personal, "UTF-8");
+        } catch (final UnsupportedEncodingException e) {
+            // Cannot occur
+        }
+        internetAddress.setAddress(address);
     }
 
     private MimeAddressMessagingHeader(final String name, final QuotedInternetAddress internetAddress) {
@@ -146,8 +151,6 @@ public class MimeAddressMessagingHeader implements MessagingAddressHeader {
         }
         this.name = name;
         this.internetAddress = internetAddress;
-        address = null;
-        personal = null;
     }
 
     public String getName() {
@@ -161,7 +164,7 @@ public class MimeAddressMessagingHeader implements MessagingAddressHeader {
      * @return The RFC 822 / RFC 2047 encoded address
      */
     public String getValue() {
-        return internetAddress == null ? address : internetAddress.toString();
+        return internetAddress.toString();
     }
 
     /**
@@ -170,15 +173,32 @@ public class MimeAddressMessagingHeader implements MessagingAddressHeader {
      * @return The properly formatted address
      */
     public String getUnicodeValue() {
-        return (null == internetAddress) ? address : internetAddress.toUnicodeString();
+        return internetAddress.toUnicodeString();
     }
 
     public String getPersonal() {
-        return (null == internetAddress) ? personal : internetAddress.getPersonal();
+        return internetAddress.getPersonal();
 
     }
 
     public String getAddress() {
-        return (null == internetAddress) ? address : internetAddress.getAddress();
+        return internetAddress.getAddress();
     }
+
+    public void setAddress(final String address) throws MessagingException {
+        if (null == address) {
+            final IllegalArgumentException e = new IllegalArgumentException("Address is null.");
+            throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+        internetAddress.setAddress(address);
+    }
+
+    public void setPersonal(final String personal) {
+        try {
+            internetAddress.setPersonal(personal, "UTF-8");
+        } catch (final UnsupportedEncodingException e) {
+            // Cannot occur
+        }
+    }
+
 }
