@@ -625,7 +625,7 @@ public final class MIMEStructureHandler implements StructureHandler {
                         if (null != personal) {
                             addressJsonObject.put("personal", personal);
                         }
-                        addressJsonObject.put("address", internetAddress.getAddress());
+                        addressJsonObject.put("address", QuotedInternetAddress.toIDN(internetAddress.getAddress()));
                         ja.put(addressJsonObject);
                     }
                 } else if (PARAMETERIZED_HEADERS.contains(headerName)) {

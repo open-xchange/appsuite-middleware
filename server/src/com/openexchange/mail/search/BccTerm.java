@@ -80,7 +80,7 @@ public final class BccTerm extends SearchTerm<String> {
     public BccTerm(final String pattern) {
         super();
         try {
-            addr = new QuotedInternetAddress(pattern, true).getAddress();
+            addr = new QuotedInternetAddress(pattern, true).getUnicodeAddress();
         } catch (final AddressException e) {
             addr = pattern;
         }

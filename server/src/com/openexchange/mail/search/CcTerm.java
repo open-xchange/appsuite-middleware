@@ -80,7 +80,7 @@ public final class CcTerm extends SearchTerm<String> {
     public CcTerm(final String pattern) {
         super();
         try {
-            addr = new QuotedInternetAddress(pattern, true).getAddress();
+            addr = new QuotedInternetAddress(pattern, true).getUnicodeAddress();
         } catch (final AddressException e) {
             addr = pattern;
         }
