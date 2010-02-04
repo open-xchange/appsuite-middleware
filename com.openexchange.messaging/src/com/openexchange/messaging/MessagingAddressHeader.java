@@ -65,10 +65,24 @@ public interface MessagingAddressHeader extends MessagingHeader {
     public String getPersonal();
 
     /**
+     * Sets the personal.
+     * 
+     * @param personal The personal to set
+     */
+    public void setPersonal(String personal);
+
+    /**
      * Gets the address.
      * 
      * @return The address
      */
     public String getAddress();
+
+    /**
+     * Sets the address.
+     * 
+     * @param address The address to set
+     */
+    public void setAddress(String address);
 
 }
