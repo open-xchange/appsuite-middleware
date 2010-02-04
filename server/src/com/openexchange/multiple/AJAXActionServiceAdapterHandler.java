@@ -76,6 +76,7 @@ public class AJAXActionServiceAdapterHandler implements MultipleHandler, Multipl
     
     public AJAXActionServiceAdapterHandler(AJAXActionServiceFactory factory, String module) {
         this.factory = factory;
+        this.module = module;
     }
 
     public void close() {

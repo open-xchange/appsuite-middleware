@@ -73,6 +73,7 @@ import com.openexchange.messaging.json.servlets.MessagesServlet;
 import com.openexchange.messaging.json.servlets.ServicesServlet;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.multiple.MultipleHandler;
+import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -167,9 +168,9 @@ public class Activator extends DeferredActivator {
         }
 
         
-        registrations.add(context.registerService(MultipleHandler.class.getName(), new AccountMultipleHandler(), null));
-        registrations.add(context.registerService(MultipleHandler.class.getName(), new MessagesMultipleHandler(), null));
-        registrations.add(context.registerService(MultipleHandler.class.getName(), new ServicesMultipleHandler(), null));
+        registrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new AccountMultipleHandler(), null));
+        registrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new MessagesMultipleHandler(), null));
+        registrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new ServicesMultipleHandler(), null));
     }
 
     @Override
