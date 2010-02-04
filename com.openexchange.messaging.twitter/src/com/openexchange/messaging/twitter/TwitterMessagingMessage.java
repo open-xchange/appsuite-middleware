@@ -69,6 +69,7 @@ import com.openexchange.messaging.generic.internet.MimeAddressMessagingHeader;
 import com.openexchange.messaging.generic.internet.MimeContentType;
 import com.openexchange.messaging.generic.internet.MimeDateMessagingHeader;
 import com.openexchange.twitter.Status;
+import com.openexchange.twitter.User;
 
 /**
  * {@link TwitterMessagingMessage}
@@ -107,7 +108,8 @@ public final class TwitterMessagingMessage implements MessagingMessage {
         m.put(CONTENT_TYPE.getName(), wrap(CONTENT_TYPE));
         {
             final String name = MessagingHeader.KnownHeader.FROM.toString();
-            m.put(name, wrap(MimeAddressMessagingHeader.valueOfPlain(name, status.getUser().getScreenName())));
+            final User user = status.getUser();
+            m.put(name, wrap(MimeAddressMessagingHeader.valueOfPlain(name, user.getName(), user.getScreenName())));
         }
         {
             final String name = MessagingHeader.KnownHeader.SUBJECT.toString();

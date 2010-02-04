@@ -137,7 +137,7 @@ public final class TwitterRetweetMessage implements MessagingMessage {
             m.put(CONTENT_DISPOSITION.getName(), wrap(CONTENT_DISPOSITION));
             {
                 final String name = MessagingHeader.KnownHeader.FROM.toString();
-                m.put(name, wrap(MimeAddressMessagingHeader.valueOfPlain(name, user.getScreenName())));
+                m.put(name, wrap(MimeAddressMessagingHeader.valueOfPlain(name, user.getName(), user.getScreenName())));
             }
             {
                 final String name = MessagingHeader.KnownHeader.SUBJECT.toString();

@@ -55,17 +55,17 @@ import java.util.List;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.messaging.MessagingAddressHeader;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingExceptionCodes;
-import com.openexchange.messaging.MessagingHeader;
 
 /**
- * {@link MimeAddressMessagingHeader} - A MIME address.
+ * {@link MimeAddressMessagingHeader} - A MIME address header.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
-public class MimeAddressMessagingHeader implements MessagingHeader {
+public class MimeAddressMessagingHeader implements MessagingAddressHeader {
 
     /**
      * Parse the given comma-separated sequence of addresses. Addresses must follow RFC822 syntax.
@@ -112,11 +112,12 @@ public class MimeAddressMessagingHeader implements MessagingHeader {
      * Initializes a new plain {@link MimeAddressMessagingHeader} with no specific format.
      * 
      * @param name The header name
+     * @param personal The (optional) personal part of the address; may be <code>null</code>
      * @param address The address with no specific format
      * @return A new plain {@link MimeAddressMessagingHeader} with no specific format
      */
-    public static MimeAddressMessagingHeader valueOfPlain(final String name, final String address) {
-        return new MimeAddressMessagingHeader(name, address);
+    public static MimeAddressMessagingHeader valueOfPlain(final String name, final String personal, final String address) {
+        return new MimeAddressMessagingHeader(name, personal, address);
     }
 
     private final String address;
@@ -125,11 +126,14 @@ public class MimeAddressMessagingHeader implements MessagingHeader {
 
     private final String name;
 
-    private MimeAddressMessagingHeader(final String name, final String address) {
+    private final String personal;
+
+    private MimeAddressMessagingHeader(final String name, final String personal, final String address) {
         super();
         if (null == address) {
             throw new IllegalArgumentException("Address is null.");
         }
+        this.personal = personal;
         this.address = address;
         this.name = name;
         internetAddress = null;
@@ -143,6 +147,7 @@ public class MimeAddressMessagingHeader implements MessagingHeader {
         this.name = name;
         this.internetAddress = internetAddress;
         address = null;
+        personal = null;
     }
 
     public String getName() {
@@ -168,4 +173,12 @@ public class MimeAddressMessagingHeader implements MessagingHeader {
         return (null == internetAddress) ? address : internetAddress.toUnicodeString();
     }
 
+    public String getPersonal() {
+        return (null == internetAddress) ? personal : internetAddress.getPersonal();
+
+    }
+
+    public String getAddress() {
+        return (null == internetAddress) ? address : internetAddress.getAddress();
+    }
 }

@@ -60,7 +60,7 @@ public interface MessagingAddressHeader extends MessagingHeader {
     /**
      * Gets the personal.
      * 
-     * @return The personal
+     * @return The personal or <code>null</code> if not available
      */
     public String getPersonal();
 
