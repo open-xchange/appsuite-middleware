@@ -82,7 +82,8 @@ public interface MessagingAddressHeader extends MessagingHeader {
      * Sets the address.
      * 
      * @param address The address to set
+     * @throws MessagingException If setting address fails
      */
-    public void setAddress(String address);
+    public void setAddress(String address) throws MessagingException;
 
 }
