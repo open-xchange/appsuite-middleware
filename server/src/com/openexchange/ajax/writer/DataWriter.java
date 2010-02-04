@@ -49,15 +49,22 @@
 
 package com.openexchange.ajax.writer;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONWriter;
+import com.openexchange.ajax.fields.DataFields;
+import com.openexchange.groupware.container.DataObject;
+import com.openexchange.tools.TimeZoneUtils;
 
 /**
  * {@link DataWriter} - Base class for all writers used throughout modules.
@@ -68,6 +75,8 @@ import org.json.JSONWriter;
 public class DataWriter {
 
     protected TimeZone timeZone;
+
+    static final TimeZone UTC = TimeZoneUtils.getTimeZone("UTC");
 
     protected JSONWriter jsonwriter;
 
@@ -352,6 +361,12 @@ public class DataWriter {
         writeParameter(name, value, value, timeZone, jsonObj);
     }
 
+    static void writeParameter(String name, Date value, TimeZone timeZone, JSONObject json, boolean condition) throws JSONException {
+        if (condition) {
+            writeParameter(name, value, timeZone, json);
+        }
+    }
+
     /**
      * Puts given name-<code>Date</code>-pair into specified JSON object with respect to time zone
      * provided that <code>Date</code> value is not <code>null</code>
@@ -541,6 +556,14 @@ public class DataWriter {
         writeValue(value, value, timeZone, jsonArray);
     }
 
+    static void writeValue(Date value, TimeZone timeZone, JSONArray json, boolean condition) {
+        if (condition) {
+            writeValue(value, timeZone, json);
+        } else {
+            json.put(JSONObject.NULL);
+        }
+    }
+
     /**
      * Puts given <code>java.util.Date</code>'s time value into specified JSON array with respect to specified time zone
      *
@@ -581,4 +604,98 @@ public class DataWriter {
     public static void writeValueNull(final JSONArray jsonArray) {
         jsonArray.put(JSONObject.NULL);
     }
+
+    protected void writeFields(DataObject obj, JSONObject json) throws JSONException {
+        for (FieldWriter<DataObject> writer : WRITER_MAP.values()) {
+            writer.write(obj, timeZone, json);
+        }
+    }
+
+    protected void writeFields(DataObject obj, JSONArray json) throws JSONException {
+        for (FieldWriter<DataObject> writer : WRITER_MAP.values()) {
+            writer.write(obj, timeZone, json);
+        }
+    }
+
+    protected static interface FieldWriter<T extends DataObject> {
+
+        /**
+         * Writes this writer's value taken from specified data object to given JSON array.
+         * 
+         * @param data the data object
+         * @param json The JSON array
+         * @throws JSONException If writing to JSON array fails
+         */
+        void write(T obj, TimeZone timeZone, JSONArray json) throws JSONException;
+
+        void write(T obj, TimeZone timeZone, JSONObject json) throws JSONException;
+    }
+
+    protected static final FieldWriter<DataObject> OBJECT_ID_WRITER = new FieldWriter<DataObject>() {
+        public void write(DataObject obj, TimeZone timeZone, JSONArray json) {
+            writeValue(obj.getObjectID(), json, obj.containsObjectID());
+        }
+        public void write(DataObject obj, TimeZone timeZone, JSONObject json) throws JSONException {
+            writeParameter(DataFields.ID, obj.getObjectID(), json, obj.containsObjectID());
+        }
+    };
+
+    protected static final FieldWriter<DataObject> CREATED_BY_WRITER = new FieldWriter<DataObject>() {
+        public void write(DataObject obj, TimeZone timeZone, JSONArray json) {
+            writeValue(obj.getCreatedBy(), json, obj.containsCreatedBy());
+        }
+        public void write(DataObject obj, TimeZone timeZone, JSONObject json) throws JSONException {
+            writeParameter(DataFields.CREATED_BY, obj.getCreatedBy(), json, obj.containsCreatedBy());
+        }
+    };
+
+    protected static final FieldWriter<DataObject> CREATION_DATE_WRITER = new FieldWriter<DataObject>() {
+        public void write(DataObject obj, TimeZone timeZone, JSONArray json) {
+            writeValue(obj.getCreationDate(), timeZone, json, obj.containsCreationDate());
+        }
+        public void write(DataObject obj, TimeZone timeZone, JSONObject json) throws JSONException {
+            writeParameter(DataFields.CREATION_DATE, obj.getCreationDate(), timeZone, json);
+        }
+    };
+
+    protected static final FieldWriter<DataObject> MODIFIED_BY_WRITER = new FieldWriter<DataObject>() {
+        public void write(DataObject obj, TimeZone timeZone, JSONArray json) {
+            writeValue(obj.getModifiedBy(), json, obj.containsModifiedBy());
+        }
+        public void write(DataObject obj, TimeZone timeZone, JSONObject json) throws JSONException {
+            writeParameter(DataFields.MODIFIED_BY, obj.getModifiedBy(), json, obj.containsModifiedBy());
+        }
+    };
+
+    protected static final FieldWriter<DataObject> LAST_MODIFIED_WRITER = new FieldWriter<DataObject>() {
+        public void write(DataObject obj, TimeZone timeZone, JSONArray json) {
+            writeValue(obj.getLastModified(), timeZone, json, obj.containsLastModified());
+        }
+        public void write(DataObject obj, TimeZone timeZone, JSONObject json) throws JSONException {
+            writeParameter(DataFields.LAST_MODIFIED, obj.getLastModified(), timeZone, json, obj.containsLastModified());
+        }
+    };
+
+    protected static final FieldWriter<DataObject> LAST_MODIFIED_UTC_WRITER = new FieldWriter<DataObject>() {
+        public void write(DataObject obj, TimeZone timeZone, JSONArray json) {
+            writeValue(obj.getLastModified(), UTC, json, obj.containsLastModified());
+        }
+        public void write(DataObject obj, TimeZone timeZone, JSONObject json) throws JSONException {
+            writeParameter(DataFields.LAST_MODIFIED_UTC, obj.getLastModified(), UTC, json, obj.containsLastModified());
+        }
+    };
+
+    static {
+        final Map<Integer, FieldWriter<DataObject>> m = new HashMap<Integer, FieldWriter<DataObject>>(6, 1);
+        m.put(I(DataObject.OBJECT_ID), OBJECT_ID_WRITER);
+        m.put(I(DataObject.CREATED_BY), CREATED_BY_WRITER);
+        m.put(I(DataObject.CREATION_DATE), CREATION_DATE_WRITER);
+        m.put(I(DataObject.MODIFIED_BY), MODIFIED_BY_WRITER);
+        m.put(I(DataObject.LAST_MODIFIED), LAST_MODIFIED_WRITER);
+        m.put(I(DataObject.LAST_MODIFIED_UTC), LAST_MODIFIED_UTC_WRITER);
+        WRITER_MAP = Collections.unmodifiableMap(m);
+    }
+
+    private static final Map<Integer, FieldWriter<DataObject>> WRITER_MAP;
+
 }

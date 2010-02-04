@@ -88,26 +88,7 @@ public class CommonWriter extends DataWriter {
      *             If a JSON error occurs
      */
     public void writeCommonFields(final CommonObject commonObj, final JSONObject jsonObj) throws JSONException {
-        if (commonObj.containsObjectID()) {
-            writeParameter(CommonFields.ID, commonObj.getObjectID(), jsonObj);
-        }
-
-        if (commonObj.containsCreatedBy()) {
-            writeParameter(CommonFields.CREATED_BY, commonObj.getCreatedBy(), jsonObj);
-        }
-
-        if (commonObj.containsCreationDate()) {
-            writeParameter(CommonFields.CREATION_DATE, commonObj.getCreationDate(), timeZone, jsonObj);
-        }
-
-        if (commonObj.containsModifiedBy()) {
-            writeParameter(CommonFields.MODIFIED_BY, commonObj.getModifiedBy(), jsonObj);
-        }
-
-        if (commonObj.containsLastModified()) {
-            writeParameter(CommonFields.LAST_MODIFIED, commonObj.getLastModified(), timeZone, jsonObj);
-            writeParameter(CommonFields.LAST_MODIFIED_UTC, commonObj.getLastModified(), jsonObj);
-        }
+        super.writeFields(commonObj, jsonObj);
 
         if (commonObj.containsParentFolderID()) {
             writeParameter(CommonFields.FOLDER_ID, commonObj.getParentFolderID(), jsonObj);

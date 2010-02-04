@@ -69,14 +69,6 @@ import com.openexchange.groupware.container.UserParticipant;
  */
 public abstract class CalendarWriter extends CommonWriter {
 
-    /**
-     * Initializes a new {@link CalendarWriter}
-     * 
-     * @param timeZone
-     *            The user time zone
-     * @param jsonWriter
-     *            The JSON writer to write to
-     */
     protected CalendarWriter(final TimeZone timeZone, final JSONWriter jsonWriter) {
         super(timeZone, jsonWriter);
     }
@@ -86,17 +78,15 @@ public abstract class CalendarWriter extends CommonWriter {
 
         final Participant[] participants = calendarObj.getParticipants();
         if (participants != null) {
-            for (int a = 0; a < participants.length; a++) {
-                final Participant p = participants[a];
+            for (Participant p : participants) {
                 final JSONObject jsonObj = getParticipantAsJSONObject(p);
                 jsonArray.put(jsonObj);
             }
         }
-
         return jsonArray;
     }
 
-    public static JSONArray getUsersAsJSONArray(final CalendarObject calendarObject) throws JSONException {
+    protected static JSONArray getUsersAsJSONArray(final CalendarObject calendarObject) throws JSONException {
         final JSONArray jsonArray = new JSONArray();
 
         final UserParticipant[] users = calendarObject.getUsers();
@@ -111,7 +101,7 @@ public abstract class CalendarWriter extends CommonWriter {
         return jsonArray;
     }
 
-    public static void writeRecurrenceParameter(final CalendarObject calendarObject, final JSONObject jsonObj)
+    protected static void writeRecurrenceParameter(final CalendarObject calendarObject, final JSONObject jsonObj)
             throws JSONException {
         final int recurrenceType = calendarObject.getRecurrenceType();
 
