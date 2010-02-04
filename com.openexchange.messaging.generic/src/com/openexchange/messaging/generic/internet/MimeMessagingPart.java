@@ -172,7 +172,17 @@ public class MimeMessagingPart implements MessagingPart {
         }
 
         public void handleHeader(final Header header, final Collection<MessagingHeader> collection) throws MessagingException {
-            collection.addAll(MimeAddressMessagingHeader.parseRFC822(name, header.getValue()));
+            try {
+                collection.addAll(MimeAddressMessagingHeader.parseRFC822(name, header.getValue()));
+            } catch (final MessagingException e) {
+                /*
+                 * Could not be parsed to a RFC822 address
+                 */
+                if (MessagingExceptionCodes.ADDRESS_ERROR.getDetailNumber() != e.getDetailNumber()) {
+                    throw e;
+                }
+            }
+            collection.add(new MimeStringMessagingHeader(name, header.getValue()));
         }
 
     } // End of AddressHeaderHandler class
