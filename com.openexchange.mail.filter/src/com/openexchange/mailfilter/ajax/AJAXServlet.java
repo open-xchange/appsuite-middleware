@@ -50,25 +50,20 @@
 package com.openexchange.mailfilter.ajax;
 
 import java.io.IOException;
-
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
-
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.mailfilter.ajax.SessionWrapper.Credentials;
 import com.openexchange.mailfilter.ajax.actions.AbstractAction;
 import com.openexchange.mailfilter.ajax.actions.AbstractRequest;
 import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterException;
 import com.openexchange.sessiond.exception.SessiondException;
-import com.openexchange.tools.Logging;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.http.Tools;
 
@@ -78,17 +73,9 @@ import com.openexchange.tools.servlet.http.Tools;
  */
 public abstract class AJAXServlet extends HttpServlet {
 
-    /**
-	 * 
-	 */
 	private static final long serialVersionUID = 3006497622205429579L;
 
-	/**
-     * Logger.
-     */
     private static final Log LOG = LogFactory.getLog(AJAXServlet.class);
-
-    public static final String INIT_PARAM_RMI_HOST = "rmi_host";
 
     /**
      * The content type if the response body contains javascript data. Set it
@@ -96,24 +83,9 @@ public abstract class AJAXServlet extends HttpServlet {
      */
     public static final String CONTENTTYPE_JAVASCRIPT = "text/javascript; charset=UTF-8";
 
-    public static final String CONTENTTYPE_HTML = "text/html; charset=UTF-8";
-
-    public static final String CREDENTIALS = "credentials";
-
-    /**
-     * 
-     */
     protected AJAXServlet() {
         super();
     }
-
-//    protected String getParameter(final HttpServletRequest req, final Parameter param) throws AbstractOXException {
-//        final String value = req.getParameter(param.getName());
-//        if (null == value) {
-//            throw new AjaxException(AjaxException.Code.MissingParameter, param.getName());
-//        }
-//        return value;
-//    }
 
     protected static void sendError(final HttpServletResponse resp) throws IOException {
         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -123,57 +95,26 @@ public abstract class AJAXServlet extends HttpServlet {
         return new SessionWrapper(req);
     }
 
-    /**
-     * Wrapper method for checking the session.
-     * 
-     * @param session
-     * @throws AdminServletException
-     */
-    public static void checkSessionExpired(final HttpSession session) throws OXMailfilterException {
-        if (null == session) {
-            throw new OXMailfilterException(OXMailfilterException.Code.SESSION_EXPIRED, null, "Can't find session.");
-        }
-    }
-
-//    /**
-//     * Wrapper method for checking the credentials
-//     * 
-//     * @param cred
-//     * @throws AdminServletException
-//     */
-//    public static void checkSessionExpired(Credentials cred) throws OXMailfilterException {
-//        if (null == cred) {
-//            throw new OXMailfilterException(Component.SESSION, OXMailfilterException.Code.SESSION_EXPIRED, null, "Can't find session.");
-//        }
-//    }
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         final Response response = new Response();
         try {
             final AbstractRequest request = createRequest();
             request.setSession(new AbstractRequest.Session() {
                 final SessionWrapper session = getSession(req);
                 
-                public Object getAttribute(final String name) throws OXMailfilterException, SessiondException {
+                public Object getAttribute(final String name) {
                     return session.getParameter(name);
                 }
-
-                public void setAttribute(final String name, final Object value) throws OXMailfilterException, SessiondException {
+                public void setAttribute(final String name, final Object value) {
                     session.setParameter(name, value);
                 }
-
-                public void removeAttribute(final String name) throws OXMailfilterException, SessiondException {
+                public void removeAttribute(final String name) {
                     session.removeParameter(name);
                 }
-
-                public Credentials getCredentails() throws SessiondException, OXMailfilterException {
+                public Credentials getCredentails() {
                     return session.getCredentials();
                 }
-
             });
             request.setParameters(new AbstractRequest.Parameters() {
                 public String getParameter(final Parameter param) throws AjaxException {
@@ -211,26 +152,26 @@ public abstract class AJAXServlet extends HttpServlet {
      * {@inheritDoc}
      */
     @Override
-    protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         final Response response = new Response();
         try {
             final AbstractRequest request = createRequest();
             request.setSession(new AbstractRequest.Session() {
                 final SessionWrapper session = getSession(req);
                 
-                public Object getAttribute(final String name) throws OXMailfilterException, SessiondException {
+                public Object getAttribute(final String name) {
                     return session.getParameter(name);
                 }
 
-                public void setAttribute(final String name, final Object value) throws OXMailfilterException, SessiondException {
+                public void setAttribute(final String name, final Object value) {
                     session.setParameter(name, value);
                 }
 
-                public void removeAttribute(final String name) throws OXMailfilterException, SessiondException {
+                public void removeAttribute(final String name) {
                     session.removeParameter(name);
                 }
 
-                public Credentials getCredentails() throws SessiondException, OXMailfilterException {
+                public Credentials getCredentails() {
                     return session.getCredentials();
                 }
             });
@@ -257,7 +198,7 @@ public abstract class AJAXServlet extends HttpServlet {
         resp.setStatus(HttpServletResponse.SC_OK);
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
         try {
-            Response.write(response, resp.getWriter());
+            ResponseWriter.write(response, resp.getWriter());
         } catch (final JSONException e) {
             LOG.error("Error while writing JSON.", e);
             sendError(resp);
