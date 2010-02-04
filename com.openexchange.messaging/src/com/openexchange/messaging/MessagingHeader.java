@@ -66,6 +66,10 @@ public interface MessagingHeader {
      */
     public static enum KnownHeader {
         /**
+         * Account name
+         */
+        ACCOUNT_NAME("X-Account-Name"),
+        /**
          * Bcc
          */
         BCC("Bcc"),
