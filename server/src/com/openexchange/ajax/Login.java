@@ -143,21 +143,21 @@ public class Login extends AJAXServlet {
         } else if (ACTION_LOGOUT.equals(action)) {
             // The magic spell to disable caching
             Tools.disableCaching(resp);
-            final String cookieId = req.getParameter(PARAMETER_SESSION);
-            if (cookieId == null) {
+            final String sessionId = req.getParameter(PARAMETER_SESSION);
+            if (sessionId == null) {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
                 return;
             }
             // Drop relevant cookies
-            String sessionId = null;
+            String secret = null;
             final Cookie[] cookies = req.getCookies();
             if (cookies != null) {
-                final String cookieName = new StringBuilder(Login.COOKIE_PREFIX).append(cookieId).toString();
+                final String cookieName = new StringBuilder(Login.COOKIE_PREFIX).append(sessionId).toString();
                 int stat = 0;
                 for (int a = 0; a < cookies.length && stat != 3; a++) {
                     if (cookieName.equals(cookies[a].getName())) {
-                        sessionId = cookies[a].getValue();
-                        final Cookie respCookie = new Cookie(cookieName, sessionId);
+                        secret = cookies[a].getValue();
+                        final Cookie respCookie = new Cookie(cookieName, secret);
                         respCookie.setPath("/");
                         respCookie.setMaxAge(0); // delete
                         resp.addCookie(respCookie);
@@ -171,7 +171,7 @@ public class Login extends AJAXServlet {
                     }
                 }
             }
-            if (sessionId == null) {
+            if (secret == null) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("no session cookie found in request!");
                 }

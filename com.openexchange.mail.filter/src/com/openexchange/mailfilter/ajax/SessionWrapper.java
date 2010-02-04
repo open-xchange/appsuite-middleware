@@ -236,7 +236,7 @@ public class SessionWrapper {
         super();
         // First determine which mode to choose from the parameters
         final String username = req.getParameter(USERNAME_PARAMETER);
-        final String cookieId = req.getParameter(AJAXServlet.PARAMETER_SESSION);
+        final String sessionId = req.getParameter(AJAXServlet.PARAMETER_SESSION);
         final Cookie[] cookies = req.getCookies();
         for (final Cookie cookie : cookies) {
             if (null != username && cookie.getName().startsWith("JSESSION")) {
@@ -246,18 +246,17 @@ public class SessionWrapper {
                     this.httpSession.setAttribute(USERNAME_SESSION, username);
                     return;
                 }
-            } else if (null == username && null != cookieId && new StringBuilder(Login.COOKIE_PREFIX).append(cookieId).toString().equals(cookie.getName())) {
+            } else if (null == username && null != sessionId && new StringBuilder(Login.COOKIE_PREFIX).append(sessionId).toString().equals(cookie.getName())) {
                 // groupware mode
                 final SessiondService service = MailFilterServletServiceRegistry.getServiceRegistry().getService(SessiondService.class);
                 if (null == service) {
                     throw new SessiondException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE));
                 }
-                this.session = service.getSession(cookie.getValue());
-                if (null != this.session) {
+                this.session = service.getSession(sessionId);
+                if (null != this.session && session.getSecret().equals(cookie.getValue())) {
                     return;
-                } else {
-                    LOG.warn("Found cookie but not matching session. " + cookie.getName() + ':' + cookie.getValue());
                 }
+                LOG.warn("Found cookie but not matching session. " + cookie.getName() + ':' + cookie.getValue());
             } else if (cookie.getName().startsWith(Login.COOKIE_PREFIX)) {
                 LOG.warn("Found cookie with matching prefix but invalid secret. " + cookie.getName() + ':' + cookie.getValue());
             }
