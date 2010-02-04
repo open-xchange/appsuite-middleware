@@ -2365,7 +2365,7 @@ public class Folder extends SessionServlet {
                         messagingAccount.getDisplayName(),
                         1,
                         MessagingFolder.ROOT_FULLNAME,
-                        FolderObject.SYSTEM_MODULE,
+                        FolderObject.MESSAGING,
                         false);
                 }
                 arrays[index] = ja;
