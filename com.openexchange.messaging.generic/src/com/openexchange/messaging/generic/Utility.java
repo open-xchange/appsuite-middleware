@@ -49,7 +49,9 @@
 
 package com.openexchange.messaging.generic;
 
+import java.io.File;
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -59,6 +61,7 @@ import java.util.concurrent.FutureTask;
 import javax.mail.internet.MailDateFormat;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.mail.text.HTMLProcessing;
 import com.openexchange.mail.text.parser.HTMLParser;
@@ -303,4 +306,43 @@ public final class Utility {
         return HTMLProcessing.prettyPrintXML(node);
     }
 
+    /**
+     * Gets the MIME type associated with given file.
+     * 
+     * @param file The file
+     * @return The MIME type associated with given file or <code>application/octet-stream</code> if none found
+     */
+    public static String getContentType(final File file) {
+        return getContentType(file.getName());
+    }
+
+    /**
+     * Gets the MIME type associated with given file name.
+     * 
+     * @param fileName The file name; e.g. <code>"file.html"</code>
+     * @return The MIME type associated with given file name or <code>application/octet-stream</code> if none found
+     */
+    public static String getContentType(final String fileName) {
+        return MIMEType2ExtMap.getContentType(fileName);
+    }
+
+    /**
+     * Gets the MIME type associated with given file extension.
+     * 
+     * @param extension The file extension; e.g. <code>"txt"</code>
+     * @return The MIME type associated with given file extension or <code>application/octet-stream</code> if none found
+     */
+    public static String getContentTypeByExtension(final String extension) {
+        return MIMEType2ExtMap.getContentTypeByExtension(extension);
+    }
+
+    /**
+     * Gets the file extension for given MIME type.
+     * 
+     * @param mimeType The MIME type
+     * @return The file extension for given MIME type or <code>dat</code> if none found
+     */
+    public static List<String> getFileExtensions(final String mimeType) {
+        return MIMEType2ExtMap.getFileExtensions(mimeType);
+    }
 }
