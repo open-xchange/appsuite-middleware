@@ -82,6 +82,8 @@ public final class MessagingFolderIdentifier {
 
     private final String fullname;
 
+    private final int hash;
+
     private final String fqn;
 
     /**
@@ -124,6 +126,15 @@ public final class MessagingFolderIdentifier {
     
             fqn = identifier;
         }
+        /*
+         * Hash code
+         */
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + accountId;
+        result = prime * result + ((fullname == null) ? 0 : fullname.hashCode());
+        result = prime * result + ((serviceId == null) ? 0 : serviceId.hashCode());
+        hash = result;
     }
 
     /**
@@ -139,6 +150,15 @@ public final class MessagingFolderIdentifier {
         this.accountId = accountId;
         this.fullname = fullname;
         fqn = new StringBuilder(64).append(serviceId).append(DELIM).append(accountId).append('/').append(fullname).toString();
+        /*
+         * Hash code
+         */
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + accountId;
+        result = prime * result + ((fullname == null) ? 0 : fullname.hashCode());
+        result = prime * result + ((serviceId == null) ? 0 : serviceId.hashCode());
+        hash = result;
     }
 
     /**
@@ -171,6 +191,40 @@ public final class MessagingFolderIdentifier {
     @Override
     public String toString() {
         return fqn;
+    }
+
+    @Override
+    public int hashCode() {
+        return hash;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof MessagingFolderIdentifier)) {
+            return false;
+        }
+        final MessagingFolderIdentifier other = (MessagingFolderIdentifier) obj;
+        if (accountId != other.accountId) {
+            return false;
+        }
+        if (fullname == null) {
+            if (other.fullname != null) {
+                return false;
+            }
+        } else if (!fullname.equals(other.fullname)) {
+            return false;
+        }
+        if (serviceId == null) {
+            if (other.serviceId != null) {
+                return false;
+            }
+        } else if (!serviceId.equals(other.serviceId)) {
+            return false;
+        }
+        return true;
     }
 
     /**
