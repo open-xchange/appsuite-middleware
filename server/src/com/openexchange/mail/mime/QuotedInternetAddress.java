@@ -59,7 +59,7 @@ import javax.mail.internet.MimeUtility;
 
 /**
  * {@link QuotedInternetAddress} - A quoted version of {@link InternetAddress} originally written by <b>Bill Shannon</b> and <b>John
- * Mani</b>.
+ * Mani</b>. Moreover this class supports <a href="http://en.wikipedia.org/wiki/Punycode">punycode</a>.
  * <p>
  * Quotes are added to encoded personal names to maintain them when converting to mail-safe version. Parental {@link InternetAddress} class
  * ignores quotes when when converting to mail-safe version:
@@ -741,39 +741,50 @@ public final class QuotedInternetAddress extends InternetAddress {
     }
 
     /**
-     * Converts a Unicode string to ASCII using the procedure in RFC3490 section 4.1. Unassigned characters are not allowed and STD3 ASCII
-     * rules are enforced. The input string may be a domain name containing dots.
+     * Converts a unicode representation of an internet address to ASCII using the procedure in RFC3490 section 4.1. Unassigned characters
+     * are not allowed and STD3 ASCII rules are enforced.
+     * <p>
+     * <code>"someone@m&uuml;ller.de"</code> is converted to <code>"someone@xn--mller-kva.de"</code>
+     * 
+     * @param idnAddress The unicode representation of an internet address
+     * @return The ASCII-encoded (punycode) of given internet address
+     * @throws AddressException If ASCII representation of given internet address cannot be created
      */
-    private static String toACE(final String idnString) throws AddressException {
-        if (null == idnString) {
+    public static String toACE(final String idnAddress) throws AddressException {
+        if (null == idnAddress) {
             return null;
         }
         try {
-            final int pos = idnString.indexOf('@');
+            final int pos = idnAddress.indexOf('@');
             if (pos < 0) {
-                return idnString;
+                return idnAddress;
             }
-            return new StringBuilder(idnString.length() + 8).append(idnString.substring(0, pos)).append('@').append(
-                gnu.inet.encoding.IDNA.toASCII(idnString.substring(pos + 1))).toString();
+            return new StringBuilder(idnAddress.length() + 8).append(idnAddress.substring(0, pos)).append('@').append(
+                gnu.inet.encoding.IDNA.toASCII(idnAddress.substring(pos + 1))).toString();
         } catch (final gnu.inet.encoding.IDNAException e) {
-            throw new AddressException(new StringBuilder(e.getMessage()).append(": ").append(idnString).toString());
+            throw new AddressException(new StringBuilder(e.getMessage()).append(": ").append(idnAddress).toString());
         }
     }
 
     /**
-     * Converts an ASCII-encoded string to Unicode. Unassigned characters are not allowed and STD3 hostnames are enforced. Input may be
-     * domain name containing dots.
+     * Converts an ASCII-encoded address to its unicode representation. Unassigned characters are not allowed and STD3 hostnames are
+     * enforced.
+     * <p>
+     * <code>"someone@xn--mller-kva.de"</code> is converted to <code>"someone@m&uuml;ller.de"</code>
+     * 
+     * @param aceAddress The ASCII-encoded (punycode) address
+     * @return The unicode representation of given internet address
      */
-    private static String toIDN(final String aceString) {
-        if (null == aceString) {
+    public static String toIDN(final String aceAddress) {
+        if (null == aceAddress) {
             return null;
         }
-        final int pos = aceString.indexOf('@');
+        final int pos = aceAddress.indexOf('@');
         if (pos < 0) {
-            return aceString;
+            return aceAddress;
         }
-        return new StringBuilder(aceString.length()).append(aceString.substring(0, pos)).append('@').append(
-            gnu.inet.encoding.IDNA.toUnicode(aceString.substring(pos + 1))).toString();
+        return new StringBuilder(aceAddress.length()).append(aceAddress.substring(0, pos)).append('@').append(
+            gnu.inet.encoding.IDNA.toUnicode(aceAddress.substring(pos + 1))).toString();
     }
 
     /**
@@ -1003,24 +1014,24 @@ public final class QuotedInternetAddress extends InternetAddress {
         }
     }
 
-//    @Override
-//    public boolean equals(final Object a) {
-//        if (this == a) {
-//            return true;
-//        }
-//        if (!(a instanceof InternetAddress)) {
-//            return false;
-//        }
-//        final String s = ((InternetAddress) a).getAddress();
-//        if (address == null) {
-//            if (s != null) {
-//                return false;
-//            }
-//        } else if (!address.equalsIgnoreCase(s) && !toIDN(address).equalsIgnoreCase(s)) {
-//            return false;
-//        }
-//        return true;
-//    }
+    // @Override
+    // public boolean equals(final Object a) {
+    // if (this == a) {
+    // return true;
+    // }
+    // if (!(a instanceof InternetAddress)) {
+    // return false;
+    // }
+    // final String s = ((InternetAddress) a).getAddress();
+    // if (address == null) {
+    // if (s != null) {
+    // return false;
+    // }
+    // } else if (!address.equalsIgnoreCase(s) && !toIDN(address).equalsIgnoreCase(s)) {
+    // return false;
+    // }
+    // return true;
+    // }
 
     /**
      * Is this a "simple" address? Simple addresses don't contain quotes or any RFC822 special characters other than '@' and '.'.
