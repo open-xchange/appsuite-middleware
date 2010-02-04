@@ -247,7 +247,7 @@ public class ContactTestManager implements TestManager {
      */
     public Contact getAction(final int folderId, final int objectId) {
         Contact returnedContact = null;
-        GetRequest request = new GetRequest(folderId, objectId, getTimeZone());
+        GetRequest request = new GetRequest(folderId, objectId, getTimeZone(), false);
         GetResponse response = null;
         try {
             response = getClient().execute(request);
