@@ -55,17 +55,15 @@ import org.json.JSONObject;
 import com.openexchange.ajax.mail.filter.action.AbstractAction;
 import com.openexchange.ajax.mail.filter.action.Move;
 
-
 /**
  * MoveParserImpl
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class MoveParserImpl implements ActionParser {
-	
-	public AbstractAction parseAction(final String name, final JSONObject jsonObject) throws JSONException {
-		final String folder = jsonObject.getString("folder");
-
-		return new Move(folder);
-	}
+    
+    public AbstractAction parseAction(final String name, final JSONObject jsonObject) throws JSONException {
+        final String folder = jsonObject.getString("into");
+        return new Move(folder);
+    }
 }

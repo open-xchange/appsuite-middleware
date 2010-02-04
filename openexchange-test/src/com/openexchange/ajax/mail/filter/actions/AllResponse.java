@@ -65,7 +65,6 @@ import com.openexchange.ajax.mail.filter.Rule;
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-
 public class AllResponse extends AbstractAJAXResponse {
 
     /**
@@ -79,21 +78,14 @@ public class AllResponse extends AbstractAJAXResponse {
         final List<Rule> rules = new ArrayList<Rule>(); 
         final JSONArray jsonArray = (JSONArray)getData();
         for (int a = 0; a < jsonArray.length(); a++) {
-        	rules.add(parseRow(jsonArray.getJSONObject(a), a));
+            rules.add(parseRow(jsonArray.getJSONObject(a)));
         }
-        /*
-		 * for (Object[] rows : this) { final FolderObject folder = new
-		 * FolderObject(); for (int columnPos = 0; columnPos < columns.length;
-		 * columnPos++) {
-		 *  } folders.add(folder); }
-		 */
         return rules.toArray(new Rule[rules.size()]);
     }
     
-    public Rule parseRow(final JSONObject jsonObj, final int row) throws JSONException {
-    	final Rule rule = new Rule();
-  		AbstractMailFilterTestParser.parse(jsonObj, rule);
-    	
-    	return rule;
+    public Rule parseRow(final JSONObject jsonObj) throws JSONException {
+        final Rule rule = new Rule();
+        AbstractMailFilterTestParser.parse(jsonObj, rule);
+        return rule;
     }
 }

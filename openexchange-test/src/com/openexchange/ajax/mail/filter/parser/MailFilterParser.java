@@ -49,12 +49,9 @@
 
 package com.openexchange.ajax.mail.filter.parser;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.mail.filter.Rule;
 import com.openexchange.ajax.mail.filter.action.AbstractAction;
 import com.openexchange.ajax.mail.filter.fields.RuleFields;
@@ -67,62 +64,59 @@ import com.openexchange.ajax.parser.DataParser;
 
 /**
  * MailFilterParser
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-
 public class MailFilterParser extends DataParser {
 
-	private static final Log LOG = LogFactory.getLog(MailFilterParser.class);
+    public MailFilterParser() {
+        super();
+    }
 
-	public MailFilterParser() {
+    public void parseMailFilter(final Rule rule, final JSONObject jsonObj) throws JSONException {
+        rule.setId(parseString(jsonObj, RuleFields.ID));
+        rule.setName(parseString(jsonObj, RuleFields.RULENAME));
+        rule.setActive(parseBoolean(jsonObj, RuleFields.ACTIVE));
 
-	}
+        if (jsonObj.has(RuleFields.FLAGS)) {
+            final JSONArray flagsArray = jsonObj.getJSONArray(RuleFields.FLAGS);
+            parseFlags(flagsArray, rule);
+        }
 
-	public void parseMailFilter(final Rule rule, final JSONObject jsonObj) throws JSONException {
-		rule.setId(parseString(jsonObj, RuleFields.ID));
-		rule.setName(parseString(jsonObj, RuleFields.RULENAME));
-		rule.setActive(parseBoolean(jsonObj, RuleFields.ACTIVE));
+        final JSONArray actionCommandArray = jsonObj.getJSONArray(RuleFields.ACTIONCMDS);
+        parseActionCommand(actionCommandArray, rule);
 
-		if (jsonObj.has(RuleFields.FLAGS)) {
-			final JSONArray flagsArray = jsonObj.getJSONArray(RuleFields.FLAGS);
-			parseFlags(flagsArray, rule);
-		}
+        final JSONObject testObj = jsonObj.getJSONObject("test");
+        parseTest(testObj, rule);
+    }
 
-		final JSONArray actionCommandArray = jsonObj.getJSONArray(RuleFields.ACTIONCMDS);
-		parseActionCommand(actionCommandArray, rule);
+    public static void parseFlags(final JSONArray jsonFlagArray, final Rule rule)
+            throws JSONException {
+        String[] flags = new String[jsonFlagArray.length()];
+        for (int a = 0; a < jsonFlagArray.length(); a++) {
+            flags[a] = jsonFlagArray.getString(a);
+        }
 
-		final JSONObject testObj = jsonObj.getJSONObject("test");
-		parseTest(testObj, rule);
-	}
+        rule.setFlags(flags);
+    }
 
-	public static void parseFlags(final JSONArray jsonFlagArray, final Rule rule)
-			throws JSONException {
-		String[] flags = new String[jsonFlagArray.length()];
-		for (int a = 0; a < jsonFlagArray.length(); a++) {
-			flags[a] = jsonFlagArray.getString(a);
-		}
+    public static void parseActionCommand(final JSONArray jsonActionArray, final Rule rule)
+            throws JSONException {
+        final AbstractAction[] abstractActionArray = new AbstractAction[jsonActionArray.length()];
+        for (int a = 0; a < jsonActionArray.length(); a++) {
+            final JSONObject actionCommandObj = jsonActionArray.getJSONObject(a);
+            final String actionId = actionCommandObj.getString("id");
+            final ActionParser actionParser = ActionParserFactory.getWriter(actionId);
+            abstractActionArray[a] = actionParser.parseAction(actionId, actionCommandObj);
+        }
 
-		rule.setFlags(flags);
-	}
+        rule.setActioncmds(abstractActionArray);
+    }
 
-	public static void parseActionCommand(final JSONArray jsonActionArray, final Rule rule)
-			throws JSONException {
-		final AbstractAction[] abstractActionArray = new AbstractAction[jsonActionArray.length()];
-		for (int a = 0; a < jsonActionArray.length(); a++) {
-			final JSONObject actionCommandObj = jsonActionArray.getJSONObject(a);
-			final String actionId = actionCommandObj.getString("id");
-			final ActionParser actionParser = ActionParserFactory.getWriter(actionId);
-			abstractActionArray[a] = actionParser.parseAction(actionId, actionCommandObj);
-		}
-
-		rule.setActioncmds(abstractActionArray);
-	}
-	
-	public static void parseTest(final JSONObject jsonObj, final Rule rule) throws JSONException {
-		final String testId = jsonObj.getString("id");
-		final TestParser testParser = TestParserFactory.getParser(testId);
-		final AbstractTest abstractTest = testParser.parseTest(testId, jsonObj);
-		rule.setTest(abstractTest);
-	}
+    public static void parseTest(final JSONObject jsonObj, final Rule rule) throws JSONException {
+        final String testId = jsonObj.getString("id");
+        final TestParser testParser = TestParserFactory.getParser(testId);
+        final AbstractTest abstractTest = testParser.parseTest(testId, jsonObj);
+        rule.setTest(abstractTest);
+    }
 }

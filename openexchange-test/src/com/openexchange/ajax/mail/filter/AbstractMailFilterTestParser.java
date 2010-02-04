@@ -49,59 +49,48 @@
 
 package com.openexchange.ajax.mail.filter;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.mail.filter.fields.RuleFields;
 import com.openexchange.ajax.mail.filter.parser.MailFilterParser;
 
 /**
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 public final class AbstractMailFilterTestParser {
 
-    /**
-     * Logger.
-     */
-    private static final Log LOG = LogFactory.getLog(AbstractMailFilterTestParser.class);
-
-    /**
-     * Prevent instanciation.
-     */
     private AbstractMailFilterTestParser() {
         super();
     }
 
     public static void parse(final JSONObject jsonObj, final Rule rule) throws JSONException {
-    	if (jsonObj.has(RuleFields.ID)) {
-    		rule.setId(jsonObj.getString(RuleFields.ID));
-    	}
+        if (jsonObj.has(RuleFields.ID)) {
+            rule.setId(jsonObj.getString(RuleFields.ID));
+        }
 
-    	if (jsonObj.has(RuleFields.RULENAME)) {
-    		rule.setName(jsonObj.getString(RuleFields.RULENAME));
-    	}
-    	
-    	if (jsonObj.has(RuleFields.POSITION)) {
-    		rule.setPosition(jsonObj.getInt(RuleFields.POSITION));
-    	}
-    	
-    	if (jsonObj.has(RuleFields.ACTIVE)) {
-    		rule.setActive(jsonObj.getBoolean(RuleFields.ACTIVE));
-    	}
-    	
-    	if (jsonObj.has(RuleFields.FLAGS)) {
-    		MailFilterParser.parseFlags(jsonObj.getJSONArray(RuleFields.FLAGS), rule);
-    	}
-    	
-    	if (jsonObj.has(RuleFields.ACTIONCMDS)) {
-    		MailFilterParser.parseActionCommand(jsonObj.getJSONArray(RuleFields.ACTIONCMDS), rule);
-    	}
-    	
-    	if (jsonObj.has(RuleFields.TEST)) {
-    		MailFilterParser.parseTest(jsonObj.getJSONObject(RuleFields.TEST), rule);
-    	}
+        if (jsonObj.has(RuleFields.RULENAME)) {
+            rule.setName(jsonObj.getString(RuleFields.RULENAME));
+        }
+
+        if (jsonObj.has(RuleFields.POSITION)) {
+            rule.setPosition(jsonObj.getInt(RuleFields.POSITION));
+        }
+
+        if (jsonObj.has(RuleFields.ACTIVE)) {
+            rule.setActive(jsonObj.getBoolean(RuleFields.ACTIVE));
+        }
+
+        if (jsonObj.has(RuleFields.FLAGS)) {
+            MailFilterParser.parseFlags(jsonObj.getJSONArray(RuleFields.FLAGS), rule);
+        }
+
+        if (jsonObj.has(RuleFields.ACTIONCMDS)) {
+            MailFilterParser.parseActionCommand(jsonObj.getJSONArray(RuleFields.ACTIONCMDS), rule);
+        }
+
+        if (jsonObj.has(RuleFields.TEST)) {
+            MailFilterParser.parseTest(jsonObj.getJSONObject(RuleFields.TEST), rule);
+        }
     }
 }

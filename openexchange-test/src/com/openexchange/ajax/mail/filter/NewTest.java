@@ -66,8 +66,7 @@ public class NewTest extends AbstractMailFilterTest {
         
         String forUser = null;
         
-
-
+        deleteAllExistingRules(forUser, ajaxSession);
         
         final Rule rule = new Rule();
         rule.setName("testNew");
