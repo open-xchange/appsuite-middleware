@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.json.writer;
 
+import static com.openexchange.mail.mime.QuotedInternetAddress.toIDN;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import java.util.EnumMap;
 import java.util.TimeZone;
@@ -677,7 +678,7 @@ public final class MessageWriter {
         retval.put(personal == null || personal.length() == 0 ? JSONObject.NULL : preparePersonal(personal));
         // Address
         final String address = addr.getAddress();
-        retval.put(address == null || address.length() == 0 ? JSONObject.NULL : prepareAddress(address));
+        retval.put(address == null || address.length() == 0 ? JSONObject.NULL : prepareAddress(toIDN(address)));
 
         return retval;
     }
