@@ -57,6 +57,11 @@ import com.openexchange.test.ContactTestManager;
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
+/**
+ * {@link ManagedContactTests}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
 public class ManagedContactTests extends AbstractAJAXSession {
 
     private ContactTestManager manager;
@@ -152,12 +157,11 @@ public class ManagedContactTests extends AbstractAJAXSession {
 
         manager.newAction(expected);
 
-        Date updateDate = new Date();
         expected.setDisplayName("Display name");
 
-        manager.updateAction(expected);
+        Contact update = manager.updateAction(expected);
 
-        Contact[] updated = manager.updatesAction(folderID, updateDate);
+        Contact[] updated = manager.updatesAction(folderID, new Date(update.getLastModified().getTime() - 1));
 
         assertEquals("Only one contact should have been updated", 1, updated.length);
 

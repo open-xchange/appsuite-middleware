@@ -208,6 +208,7 @@ public class ContactTestManager implements TestManager {
         UpdateRequest request = new UpdateRequest(contact);
         try {
             lastResponse = getClient().execute(request);
+            contact.setLastModified(lastResponse.getTimestamp());
             remember(contact);
         } catch (Exception e) {
             doExceptionHandling(e, "UpdateRequest for folder " + contact.getParentFolderID() + " and object " + contact.getObjectID());
