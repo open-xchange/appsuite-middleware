@@ -52,6 +52,7 @@ package com.openexchange.groupware.tasks;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import com.openexchange.ajax.fields.ParticipantsFields;
 import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.search.SearchAttributeFetcher;
 
@@ -190,14 +191,14 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
             }
         });
 
-        m.put(TaskFields.CONFIRM_MESSAGE, new AttributeGetter() {
+        m.put(ParticipantsFields.CONFIRM_MESSAGE, new AttributeGetter() {
 
             public Object getObject(final Task candidate) {
                 return candidate.getConfirmMessage();
             }
         });
 
-        m.put(TaskFields.CONFIRMATION, new AttributeGetter() {
+        m.put(ParticipantsFields.CONFIRMATION, new AttributeGetter() {
 
             public Object getObject(final Task candidate) {
                 return Integer.valueOf(candidate.getConfirm());

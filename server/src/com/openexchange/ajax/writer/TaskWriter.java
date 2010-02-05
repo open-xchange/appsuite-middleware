@@ -143,7 +143,7 @@ public class TaskWriter extends CalendarWriter {
         writeParameter(TaskFields.DAYS, task.getDays(), json, task.containsDays());
     }
 
-    public void write(final int field, final Task task, final JSONArray array) throws JSONException {
+    private void write(final int field, final Task task, final JSONArray array) throws JSONException {
         final TaskFieldWriter writer = WRITER_MAP.get(I(field));
         if (writer != null) {
             writer.write(task, array);

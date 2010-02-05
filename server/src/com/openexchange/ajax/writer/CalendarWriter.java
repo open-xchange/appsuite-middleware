@@ -49,7 +49,11 @@
 
 package com.openexchange.ajax.writer;
 
+import static com.openexchange.java.Autoboxing.I;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -66,6 +70,7 @@ import com.openexchange.groupware.container.UserParticipant;
  * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public abstract class CalendarWriter extends CommonWriter {
 
@@ -178,8 +183,8 @@ public abstract class CalendarWriter extends CommonWriter {
         writeParameter(ParticipantsFields.TYPE, participant.getType(), jsonObj, participant.getType() > 0);
         if (Participant.USER == participant.getType()) {
             final UserParticipant userParticipant = (UserParticipant) participant;
-            writeParameter(CalendarFields.CONFIRMATION, userParticipant.getConfirm(), jsonObj, userParticipant.containsConfirm());
-            writeParameter(CalendarFields.CONFIRM_MESSAGE, userParticipant.getConfirmMessage(), jsonObj, userParticipant.containsConfirmMessage());
+            writeParameter(ParticipantsFields.CONFIRMATION, userParticipant.getConfirm(), jsonObj, userParticipant.containsConfirm());
+            writeParameter(ParticipantsFields.CONFIRM_MESSAGE, userParticipant.getConfirmMessage(), jsonObj, userParticipant.containsConfirmMessage());
         }
         return jsonObj;
     }
@@ -205,10 +210,45 @@ public abstract class CalendarWriter extends CommonWriter {
     public static JSONObject getUserParticipantAsJSONObject(final UserParticipant userParticipant) throws JSONException {
         final JSONObject jsonObj = new JSONObject();
         writeParameter(ParticipantsFields.ID, userParticipant.getIdentifier(), jsonObj);
-        writeParameter(CalendarFields.CONFIRMATION, userParticipant.getConfirm(), jsonObj);
+        writeParameter(ParticipantsFields.CONFIRMATION, userParticipant.getConfirm(), jsonObj);
         if (userParticipant.containsConfirmMessage()) {
-            writeParameter(CalendarFields.CONFIRM_MESSAGE, userParticipant.getConfirmMessage(), jsonObj);
+            writeParameter(ParticipantsFields.CONFIRM_MESSAGE, userParticipant.getConfirmMessage(), jsonObj);
         }
         return jsonObj;
     }
+
+    protected void writeFields(CalendarObject obj, JSONArray json) throws JSONException {
+        super.writeFields(obj, json);
+        for (FieldWriter<CalendarObject> writer : WRITER_MAP.values()) {
+            writer.write(obj, timeZone, json);
+        }
+    }
+
+    protected void writeFields(CalendarObject obj, JSONObject json) throws JSONException {
+        super.writeFields(obj, json);
+        for (FieldWriter<CalendarObject> writer : WRITER_MAP.values()) {
+            writer.write(obj, timeZone, json);
+        }
+    }
+
+    protected static final FieldWriter<CalendarObject> CONFIRMATIONS_WRITER = new FieldWriter<CalendarObject>() {
+        public void write(CalendarObject obj, TimeZone timeZone, JSONArray json) throws JSONException {
+            
+            // TODO Auto-generated method stub
+            
+        }
+
+        public void write(CalendarObject obj, TimeZone timeZone, JSONObject json) throws JSONException {
+            // TODO Auto-generated method stub
+            
+        }
+    };
+
+    static {
+        Map<Integer, FieldWriter<CalendarObject>> m = new HashMap<Integer, FieldWriter<CalendarObject>>(1, 1);
+        m.put(I(CalendarObject.CONFIRMATIONS), CONFIRMATIONS_WRITER);
+        WRITER_MAP = Collections.unmodifiableMap(m);
+    }
+
+    private static final Map<Integer, FieldWriter<CalendarObject>> WRITER_MAP;
 }

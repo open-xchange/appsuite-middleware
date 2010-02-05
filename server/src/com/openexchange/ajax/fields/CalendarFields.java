@@ -50,54 +50,50 @@
 package com.openexchange.ajax.fields;
 
 public interface CalendarFields extends CommonFields {
-	
-	public static final String TITLE = "title";
-	
-	public static final String START_DATE = "start_date";
-	
-	public static final String END_DATE = "end_date";
-	
-	public static final String NOTE = "note";
-	
-	public static final String ALARM = "alarm";
 
-	public static final String CONFIRMATION = "confirmation";
-	
-	public static final String CONFIRM_MESSAGE = "confirmmessage";
-	
-	public static final String RECURRENCE_ID = "recurrence_id";
-		
-	public static final String OLD_RECURRENCE_POSITION = "pos";
+    public static final String TITLE = "title";
+
+    public static final String START_DATE = "start_date";
+
+    public static final String END_DATE = "end_date";
+
+    public static final String NOTE = "note";
+
+    public static final String ALARM = "alarm";
+
+    public static final String RECURRENCE_ID = "recurrence_id";
+
+    public static final String OLD_RECURRENCE_POSITION = "pos";
 
     public static final String RECURRENCE_POSITION = "recurrence_position";
-	
-	public static final String RECURRENCE_DATE_POSITION = "recurrence_date_position";
-	
-	public static final String RECURRENCE_TYPE = "recurrence_type";
 
-	public static final String RECURRENCE_START = "recurrence_start";
-	
-	public static final String CHANGE_EXCEPTIONS = "change_exceptions";
-	
-	public static final String DELETE_EXCEPTIONS = "delete_exceptions";
-	
-	public static final String DAYS = "days";
-	
-	public static final String DAY_IN_MONTH = "day_in_month";
-	
-	public static final String MONTH = "month";
-	
-	public static final String INTERVAL = "interval";
-	
-	public static final String UNTIL = "until";
-	
-	public static final String OCCURRENCES = "occurrences";
-	
-	public static final String NOTIFICATION = "notification";
-	
-	public static final String RECURRENCE_CALCULATOR = "recurrence_calculator";
-	
-	public static final String PARTICIPANTS = "participants";
-	
-	public static final String USERS = "users";
+    public static final String RECURRENCE_DATE_POSITION = "recurrence_date_position";
+
+    public static final String RECURRENCE_TYPE = "recurrence_type";
+
+    public static final String RECURRENCE_START = "recurrence_start";
+
+    public static final String CHANGE_EXCEPTIONS = "change_exceptions";
+
+    public static final String DELETE_EXCEPTIONS = "delete_exceptions";
+
+    public static final String DAYS = "days";
+
+    public static final String DAY_IN_MONTH = "day_in_month";
+
+    public static final String MONTH = "month";
+
+    public static final String INTERVAL = "interval";
+
+    public static final String UNTIL = "until";
+
+    public static final String OCCURRENCES = "occurrences";
+
+    public static final String NOTIFICATION = "notification";
+
+    public static final String RECURRENCE_CALCULATOR = "recurrence_calculator";
+
+    public static final String PARTICIPANTS = "participants";
+
+    public static final String USERS = "users";
 }

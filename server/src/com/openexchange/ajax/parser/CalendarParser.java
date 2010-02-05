@@ -162,12 +162,12 @@ public class CalendarParser extends CommonParser {
 			calendarobject.setNotification(parseBoolean(jsonobject, CalendarFields.NOTIFICATION));
 		}
 		
-		if (jsonobject.has(CalendarFields.CONFIRMATION)) {
-			calendarobject.setConfirm(parseInt(jsonobject, CalendarFields.CONFIRMATION));
+		if (jsonobject.has(ParticipantsFields.CONFIRMATION)) {
+			calendarobject.setConfirm(parseInt(jsonobject, ParticipantsFields.CONFIRMATION));
 		}
 		
-		if (jsonobject.has(CalendarFields.CONFIRM_MESSAGE)) {
-			calendarobject.setConfirmMessage(parseString(jsonobject, CalendarFields.CONFIRM_MESSAGE));
+		if (jsonobject.has(ParticipantsFields.CONFIRM_MESSAGE)) {
+			calendarobject.setConfirmMessage(parseString(jsonobject, ParticipantsFields.CONFIRM_MESSAGE));
 		}
 		
 		final Participants participants = new Participants();
@@ -251,11 +251,11 @@ public class CalendarParser extends CommonParser {
 		for (int i = 0; i < jusers.length(); i++) {
 			final JSONObject jUser = jusers.getJSONObject(i);
             final UserParticipant user = new UserParticipant(jUser.getInt(ParticipantsFields.ID));
-			if (jUser.has(CalendarFields.CONFIRMATION)) {
-				user.setConfirm(jUser.getInt(CalendarFields.CONFIRMATION));
+			if (jUser.has(ParticipantsFields.CONFIRMATION)) {
+				user.setConfirm(jUser.getInt(ParticipantsFields.CONFIRMATION));
 			}
-			if (jUser.has(CalendarFields.CONFIRM_MESSAGE)) {
-			    user.setConfirmMessage(jUser.getString(CalendarFields.CONFIRM_MESSAGE));
+			if (jUser.has(ParticipantsFields.CONFIRM_MESSAGE)) {
+			    user.setConfirmMessage(jUser.getString(ParticipantsFields.CONFIRM_MESSAGE));
 			}
 			
 			if (jUser.has(CalendarFields.ALARM)) {

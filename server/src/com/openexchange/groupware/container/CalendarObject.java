@@ -107,6 +107,8 @@ public abstract class CalendarObject extends CommonObject {
      */
     public static final int RECURRENCE_COUNT = 222;
 
+    public static final int CONFIRMATIONS = 223;
+
     public static final int NONE = 0;
 
     public static final int ACCEPT = 1;

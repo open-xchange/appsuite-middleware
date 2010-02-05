@@ -53,6 +53,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.ajax.fields.AppointmentFields;
+import com.openexchange.ajax.fields.ParticipantsFields;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.search.SearchAttributeFetcher;
 
@@ -128,14 +129,14 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
             }
         });
 
-        m.put(AppointmentFields.CONFIRM_MESSAGE, new AttributeGetter() {
+        m.put(ParticipantsFields.CONFIRM_MESSAGE, new AttributeGetter() {
 
             public Object getObject(final Appointment candidate) {
                 return candidate.getConfirmMessage();
             }
         });
 
-        m.put(AppointmentFields.CONFIRMATION, new AttributeGetter() {
+        m.put(ParticipantsFields.CONFIRMATION, new AttributeGetter() {
 
             public Object getObject(final Appointment candidate) {
                 return Integer.valueOf(candidate.getConfirm());

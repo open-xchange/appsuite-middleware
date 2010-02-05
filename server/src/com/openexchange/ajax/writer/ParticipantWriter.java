@@ -47,25 +47,28 @@
  *
  */
 
-package com.openexchange.ajax.fields;
+package com.openexchange.ajax.writer;
 
-public final class ParticipantsFields {
+import org.json.JSONObject;
+import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.container.UserParticipant;
 
-    public static final String ID = "id";
+/**
+ * {@link ParticipantWriter}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
+public class ParticipantWriter {
 
-    public static final String DISPLAY_NAME = "display_name";
-
-    public static final String TYPE = "type";
-
-    public static final String MAIL = "mail";
-
-    public static final String STATUS = "status";
-
-    public static final String CONFIRMATION = "confirmation";
-
-    public static final String CONFIRM_MESSAGE = "confirmmessage";
-
-    private ParticipantsFields() {
+    public ParticipantWriter() {
         super();
+    }
+
+    public void write(Participant participant, JSONObject json) {
+        
+    }
+
+    public void write(UserParticipant participant, JSONObject json) {
+        
     }
 }

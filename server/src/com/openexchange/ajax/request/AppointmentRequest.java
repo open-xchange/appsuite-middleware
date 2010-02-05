@@ -74,6 +74,7 @@ import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
+import com.openexchange.ajax.fields.ParticipantsFields;
 import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.parser.AppointmentParser;
 import com.openexchange.ajax.parser.CalendarParser;
@@ -888,8 +889,8 @@ public class AppointmentRequest {
         if (jData.has(AJAXServlet.PARAMETER_ID)) {
             userId = DataParser.checkInt(jData, AJAXServlet.PARAMETER_ID);
         }
-        final String confirmMessage = jData.has(CalendarFields.CONFIRM_MESSAGE) && !jData.isNull(CalendarFields.CONFIRM_MESSAGE) ? jData.getString(CalendarFields.CONFIRM_MESSAGE) : null;
-        final int confirmStatus = DataParser.checkInt(jData, CalendarFields.CONFIRMATION);
+        final String confirmMessage = jData.has(ParticipantsFields.CONFIRM_MESSAGE) && !jData.isNull(ParticipantsFields.CONFIRM_MESSAGE) ? jData.getString(ParticipantsFields.CONFIRM_MESSAGE) : null;
+        final int confirmStatus = DataParser.checkInt(jData, ParticipantsFields.CONFIRMATION);
 
         final AppointmentSQLInterface appointmentSql = appointmentFactory.createAppointmentSql(session);
         timestamp = appointmentSql.setUserConfirmation(objectId, folderId, userId, confirmStatus, confirmMessage);
