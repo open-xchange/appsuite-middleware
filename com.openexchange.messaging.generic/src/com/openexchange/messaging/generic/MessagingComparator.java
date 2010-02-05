@@ -178,7 +178,7 @@ public class MessagingComparator implements Comparator<MessagingMessage> {
     private Object transform(final Object o) {
         if (INT_FIELDS.contains(field) && String.class.isInstance(o)) {
             try {
-                return Integer.parseInt((String) o);
+                return Integer.valueOf((String) o);
             } catch (final NumberFormatException x) {
                 return o;
             }
