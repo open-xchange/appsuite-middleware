@@ -123,6 +123,10 @@ public class MessagingMessageWriterTest extends TestCase {
 
         assertValidates(assertion, messageJSON);
     }
+    
+    public void testMirrorHeadersInAttributesIfTheyAreMessagingFields() {
+        
+    }
 
     private static final class InverseWriter implements MessagingHeaderWriter {
 
@@ -171,7 +175,7 @@ public class MessagingMessageWriterTest extends TestCase {
 
         JSONObject messageJSON = new MessagingMessageWriter().write(message);
 
-        JSONAssertion assertion = new JSONAssertion().isObject().hasKey("content").withValue("content").objectEnds();
+        JSONAssertion assertion = new JSONAssertion().isObject().hasKey("body").withValue("content").objectEnds();
 
         assertValidates(assertion, messageJSON);
 
@@ -183,7 +187,7 @@ public class MessagingMessageWriterTest extends TestCase {
 
         JSONObject messageJSON = new MessagingMessageWriter().write(message);
 
-        JSONAssertion assertion = new JSONAssertion().isObject().hasKey("content").withValue(Base64.encode("content")).objectEnds();
+        JSONAssertion assertion = new JSONAssertion().isObject().hasKey("body").withValue(Base64.encode("content")).objectEnds();
 
         assertValidates(assertion, messageJSON);
 
@@ -208,24 +212,24 @@ public class MessagingMessageWriterTest extends TestCase {
 
         JSONObject messageJSON = new MessagingMessageWriter().write(message);
 
-        JSONAssertion assertion = new JSONAssertion().isObject().hasKey("content").withValueArray().objectEnds();
+        JSONAssertion assertion = new JSONAssertion().isObject().hasKey("body").withValueArray().objectEnds();
 
         assertValidates(assertion, messageJSON);
 
-        JSONArray array = messageJSON.getJSONArray("content");
+        JSONArray array = messageJSON.getJSONArray("body");
 
         assertEquals(2, array.length());
 
         JSONObject firstContent = array.getJSONObject(0);
 
-        assertion = new JSONAssertion().isObject().hasKey("sectionId").withValue("1").hasKey("content").withValue(Base64.encode("content")).hasKey(
+        assertion = new JSONAssertion().isObject().hasKey("sectionId").withValue("1").hasKey("body").withValue(Base64.encode("content")).hasKey(
             "disposition").withValue(MessagingMessage.ATTACHMENT).hasKey("fileName").withValue("content.txt").objectEnds();
 
         assertValidates(assertion, firstContent);
 
         JSONObject secondContent = array.getJSONObject(1);
 
-        assertion = new JSONAssertion().isObject().hasKey("sectionId").withValue("2").hasKey("content").withValue("content").objectEnds();
+        assertion = new JSONAssertion().isObject().hasKey("sectionId").withValue("2").hasKey("body").withValue("content").objectEnds();
 
         assertValidates(assertion, secondContent);
     }
@@ -255,7 +259,7 @@ public class MessagingMessageWriterTest extends TestCase {
 
         JSONObject messageJSON = writer.write(message);
 
-        JSONAssertion assertion = new JSONAssertion().isObject().hasKey("content").withValue("tnetnoc").objectEnds();
+        JSONAssertion assertion = new JSONAssertion().isObject().hasKey("body").withValue("tnetnoc").objectEnds();
 
         assertValidates(assertion, messageJSON);
     }

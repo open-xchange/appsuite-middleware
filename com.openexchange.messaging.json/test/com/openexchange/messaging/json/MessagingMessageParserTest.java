@@ -178,6 +178,10 @@ public class MessagingMessageParserTest extends TestCase {
         
     }
     
+    public void testParseHeaderAsAttributeIfItIsAMessagingField() {
+        
+    }
+    
     public void testSpecialHeader() throws JSONException, MessagingException, IOException {
         JSONObject messageJSON = new JSONObject();
         
@@ -201,7 +205,7 @@ public class MessagingMessageParserTest extends TestCase {
     public void testPlainBody() throws JSONException, MessagingException, IOException {
         JSONObject messageJSON = new JSONObject();
 
-        messageJSON.put("content", "I am the content");
+        messageJSON.put("body", "I am the content");
         
         JSONObject headers = new JSONObject();
         headers.put("content-type", "text/plain");
@@ -232,7 +236,7 @@ public class MessagingMessageParserTest extends TestCase {
     public void testBinaryBodyInBase64() throws MessagingException, JSONException, IOException {
         JSONObject messageJSON = new JSONObject();
 
-        messageJSON.put("content", Base64.encode("I am the content"));
+        messageJSON.put("body", Base64.encode("I am the content"));
         
         JSONObject headers = new JSONObject();
         headers.put("content-type", "application/octet-stream");
@@ -254,7 +258,7 @@ public class MessagingMessageParserTest extends TestCase {
     public void testBinaryBodyByReference() throws MessagingException, IOException, JSONException {
         JSONObject messageJSON = new JSONObject();
 
-        messageJSON.put("content", new JSONObject("{ref : '12'}"));
+        messageJSON.put("body", new JSONObject("{ref : '12'}"));
         
         JSONObject headers = new JSONObject();
         headers.put("content-type", "application/octet-stream");
@@ -280,13 +284,13 @@ public class MessagingMessageParserTest extends TestCase {
 
         JSONArray multipartJSON = new JSONArray();
         
-        JSONObject body1 = new JSONObject("{content : 'simpleContent', headers: {content-type : 'text/plain'}, id: '1'}");
-        JSONObject body2 = new JSONObject("{content : '"+Base64.encode("binaryData")+"', headers: {content-type : 'application/octet-stream'}, id: '2'}");
+        JSONObject body1 = new JSONObject("{body : 'simpleContent', headers: {content-type : 'text/plain'}, id: '1'}");
+        JSONObject body2 = new JSONObject("{body : '"+Base64.encode("binaryData")+"', headers: {content-type : 'application/octet-stream'}, id: '2'}");
         multipartJSON.put(body1);
         multipartJSON.put(body2);
         
         
-        messageJSON.put("content", multipartJSON);
+        messageJSON.put("body", multipartJSON);
 
         MessagingMessage message = new MessagingMessageParser().parse(messageJSON, null);
         
@@ -332,7 +336,7 @@ public class MessagingMessageParserTest extends TestCase {
     public void testSpecialBody() throws MessagingException, JSONException, IOException {
         JSONObject messageJSON = new JSONObject();
 
-        messageJSON.put("content", "tnetnoc eht ma I");
+        messageJSON.put("body", "tnetnoc eht ma I");
         
         JSONObject headers = new JSONObject();
         headers.put("content-type", "text/plain");

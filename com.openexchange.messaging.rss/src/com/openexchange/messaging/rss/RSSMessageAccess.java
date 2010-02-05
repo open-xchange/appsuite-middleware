@@ -174,7 +174,7 @@ public class RSSMessageAccess extends RSSCommon implements MessagingMessageAcces
         if(sortField == null) {
             return;
         }
-        MessagingComparator comparator = new MessagingComparator(sortField);
+        MessagingComparator comparator = new MessagingComparator(sortField, null);
         try {
             Collections.sort(messages, comparator);
             if(order == OrderDirection.DESC) {

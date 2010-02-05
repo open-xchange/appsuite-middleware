@@ -68,6 +68,12 @@ public class UnitTests {
         tests.addTestSuite(MessagingMessageWriterTest.class);
         tests.addTestSuite(MessagingMessageParserTest.class);
         
+        tests.addTestSuite(ContentTypeWriterTest.class);
+        tests.addTestSuite(ContentTypeParserTest.class);
+        tests.addTestSuite(AddressHeaderWriterTest.class);
+        tests.addTestSuite(AddressHeaderParserTest.class);
+        
+        
         tests.addTestSuite(com.openexchange.messaging.json.actions.accounts.AllTest.class);
         tests.addTestSuite(com.openexchange.messaging.json.actions.accounts.DeleteTest.class);
         tests.addTestSuite(com.openexchange.messaging.json.actions.accounts.GetTest.class);

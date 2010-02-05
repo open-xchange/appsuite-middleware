@@ -73,7 +73,7 @@ public enum MessagingField {
      * The folder ID or fullname<br>
      * <b>[low cost]</b>
      */
-    FOLDER_ID("folderId"),
+    FOLDER_ID("folder"),
     /**
      * The Content-Type; includes whether message contains attachments or not<br>
      * <b>[low cost]</b>

@@ -187,7 +187,6 @@ public class MessagingComparatorTest extends TestCase {
     
     private void assertBigger(final SimpleMessagingMessage bigger, final SimpleMessagingMessage smaller, final MessagingField field) throws MessagingException {
         final MessagingComparator comparator = new MessagingComparator(field, Locale.ENGLISH);
-        
         assertTrue("Comparison Failure in field "+field, comparator.compare(bigger, smaller) > 0);
     }
     

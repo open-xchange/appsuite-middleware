@@ -54,7 +54,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.messaging.MessagingAddress;
+import com.openexchange.messaging.MessagingAddressHeader;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.SimMessagingTransport;
 import com.openexchange.messaging.StringContent;
@@ -75,9 +75,9 @@ public class SendTest extends AbstractMessagingActionTest {
         AJAXRequestData req = new AJAXRequestData();
         req.putParameter("messagingService", "com.openexchange.test1");
         req.putParameter("account", "12");
-        req.putParameter("recipients", "rec1, rec2, rec3");
+        req.putParameter("recipients", "clark.kent@dailyplanet.com");
 
-        req.setData(new JSONObject("{'headers' : {'content-type' : 'text/plain'}, content : 'Hello World'}"));
+        req.setData(new JSONObject("{'headers' : {'content-type' : 'text/plain'}, body : 'Hello World'}"));
 
         perform(req);
         
@@ -87,9 +87,9 @@ public class SendTest extends AbstractMessagingActionTest {
         assertNotNull(message);
         assertEquals("Hello World", ((StringContent)message.getContent()).getData());
         
-        MessagingAddress recipients = transport.getRecipients();
+        MessagingAddressHeader recipients = transport.getRecipients();
         assertNotNull(recipients);
-        assertEquals("rec1, rec2, rec3", recipients.getAddress());
+        assertEquals("clark.kent@dailyplanet.com", recipients.getAddress());
         
     }
 
@@ -98,7 +98,7 @@ public class SendTest extends AbstractMessagingActionTest {
         req.putParameter("messagingService", "com.openexchange.test1");
         req.putParameter("account", "12");
 
-        req.setData(new JSONObject("{'headers' : {'content-type' : 'text/plain'}, content : 'Hello World'}"));
+        req.setData(new JSONObject("{'headers' : {'content-type' : 'text/plain'}, body : 'Hello World'}"));
 
         perform(req);
         
@@ -108,7 +108,7 @@ public class SendTest extends AbstractMessagingActionTest {
         assertNotNull(message);
         assertEquals("Hello World", ((StringContent)message.getContent()).getData());
         
-        MessagingAddress recipients = transport.getRecipients();
+        MessagingAddressHeader recipients = transport.getRecipients();
         assertTrue(recipients == null);
     }
 

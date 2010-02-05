@@ -97,6 +97,7 @@ public class MessagingMessageParser {
     private Collection<MessagingContentParser> contentParsers = new ConcurrentLinkedQueue<MessagingContentParser>();
     
     public MessagingMessageParser() {
+        headerParsers.add(new AddressHeaderParser());
         headerParsers.add(new ContentTypeParser());
         headerParsers.add(new MultiStringParser());
         
@@ -161,8 +162,8 @@ public class MessagingMessageParser {
             setHeaders( messageJSON.getJSONObject("headers"), message );
         }
         
-        if(messageJSON.has("content")) {
-            setContent( messageJSON.get("content"), registry, message);
+        if(messageJSON.has("body")) {
+            setContent( messageJSON.get("body"), registry, message);
         }
         
                 

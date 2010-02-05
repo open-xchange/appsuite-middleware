@@ -47,74 +47,83 @@
  *
  */
 
-package com.openexchange.messaging.rss;
+package com.openexchange.messaging.json;
 
-import com.openexchange.messaging.MessagingAccountAccess;
-import com.openexchange.messaging.MessagingAccountManager;
-import com.openexchange.messaging.MessagingAccountTransport;
-import com.openexchange.messaging.MessagingAddressHeader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.messaging.MessagingException;
-import com.openexchange.messaging.MessagingFolder;
-import com.openexchange.messaging.MessagingFolderAccess;
-import com.openexchange.messaging.MessagingMessage;
-import com.openexchange.messaging.MessagingMessageAccess;
-import com.openexchange.session.Session;
-import com.sun.syndication.fetcher.FeedFetcher;
+import com.openexchange.messaging.MessagingHeader;
+import com.openexchange.messaging.generic.internet.MimeAddressMessagingHeader;
 
 
 /**
- * {@link RSSFeedOperations}
+ * {@link AddressHeaderParser}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class RSSFeedOperations implements MessagingAccountAccess, MessagingAccountTransport {
+public class AddressHeaderParser implements MessagingHeaderParser {
+    
+    private static final Set<String> WHITELIST = new HashSet<String>(Arrays.asList(
+        "From",
+        "To",
+        "Cc",
+        "Bcc",
+        "Reply-To",
+        "Resent-Reply-To",
+        "Disposition-Notification-To",
+        "Resent-From",
+        "Sender",
+        "Resent-Sender",
+        "Resent-To",
+        "Resent-Cc",
+        "Resent-Bcc"));
+    
+    public int getPriority() {
+        return 1;
+    }
 
-    private int accountId;
-    private RSSMessageAccess messageAccess;
-    private RSSFolderAccess folderAccess;
+    public boolean handles(String key, Object value) {
+        return WHITELIST.contains(key);
+    }
 
-    public RSSFeedOperations(int accountId, Session session, FeedFetcher fetcher, MessagingAccountManager accounts) {
-        super();
-        this.accountId = accountId;
+    public void parseAndAdd(Map<String, Collection<MessagingHeader>> headers, String key, Object value) throws JSONException, MessagingException {
+        ArrayList<MessagingHeader> list = new ArrayList<MessagingHeader>();
         
-        folderAccess = new RSSFolderAccess(accountId, session);
-        messageAccess = new RSSMessageAccess(accountId, session, fetcher, accounts);
-    }
-
-    public int getAccountId() {
-        return accountId;
-    }
-
-    public MessagingFolderAccess getFolderAccess() throws MessagingException {
-        return folderAccess;
-    }
-
-    public MessagingMessageAccess getMessageAccess() throws MessagingException {
-        return messageAccess;
-    }
-
-    public MessagingFolder getRootFolder() throws MessagingException {
-        return folderAccess.getRootFolder();
-    }
-
-    public void close() {
+        if(JSONArray.class.isInstance(value)) {
+            JSONArray arr = (JSONArray) value;
+            for(int i = 0, size = arr.length(); i < size; i++) {
+                parse(key, arr.get(i), list);
+            }
+        } else {
+            parse(key, value, list);
+        }
         
+        headers.put(key, list);
     }
 
-    public void connect() throws MessagingException {
-        
+    private void parse(String key, Object value, ArrayList<MessagingHeader> list) throws JSONException, MessagingException {
+        if(JSONObject.class.isInstance(value)) {
+            list.add(parseObject(key, (JSONObject) value));
+        } else if (String.class.isInstance(value)) {
+            list.add(parseString(key, (String) value));
+        }
     }
 
-    public boolean isConnected() {
-        return true;
+    private MessagingHeader parseString(String key, String value) throws MessagingException {
+        return (MessagingHeader) MimeAddressMessagingHeader.parseRFC822(key, value).iterator().next();
     }
 
-    public boolean ping() throws MessagingException {
-        return true;
-    }
-
-    public void transport(MessagingMessage message, MessagingAddressHeader recipients) throws MessagingException {
-        throw new UnsupportedOperationException();
+    private MessagingHeader parseObject(String key, JSONObject value) throws JSONException {
+        String address = value.optString("address");
+        String personal = value.optString("personal");
+        return MimeAddressMessagingHeader.valueOfPlain(key, personal, address);
     }
 
 }

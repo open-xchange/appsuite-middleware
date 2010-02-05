@@ -98,7 +98,7 @@ public class PerformTest extends AbstractMessagingActionTest {
         req.putParameter("account", "12");
         req.putParameter("messageAction", "theAction");
         
-        req.setData(new JSONObject("{'headers' : {'content-type' : 'text/plain'}, content : 'Hello World'}"));
+        req.setData(new JSONObject("{'headers' : {'content-type' : 'text/plain'}, body : 'Hello World'}"));
         
         perform(req);
         

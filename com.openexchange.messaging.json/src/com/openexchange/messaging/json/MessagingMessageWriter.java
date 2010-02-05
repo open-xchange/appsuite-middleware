@@ -135,6 +135,7 @@ public class MessagingMessageWriter {
     
     public MessagingMessageWriter() {
         headerWriters.add(new ContentTypeWriter());
+        headerWriters.add(new AddressHeaderWriter());
     }
     
     private JSONObject write(MessagingPart message) throws JSONException, MessagingException {
@@ -154,7 +155,7 @@ public class MessagingMessageWriter {
         if(content != null) {
             MessagingContentWriter writer = getWriter(message, content);
             if(writer != null) {
-                messageJSON.put("content", writer.write(message, content));
+                messageJSON.put("body", writer.write(message, content));
             }
         }
         
