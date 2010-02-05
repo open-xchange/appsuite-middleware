@@ -72,7 +72,7 @@ public interface SearchTerm<T> extends Serializable {
      * 
      * @param col The collection which gathers addressed fields
      */
-    public void addMailField(Collection<MessagingField> col);
+    public void addMessagingField(Collection<MessagingField> col);
 
     /**
      * Checks if given message matches this search term.
