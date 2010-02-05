@@ -79,54 +79,65 @@ public class Activator implements BundleActivator {
     private List<ServiceTracker> trackers;
 
     public void start(final BundleContext context) throws Exception {
-        /*
-         * Service trackers
-         */
-        trackers = new ArrayList<ServiceTracker>(6);
-        trackers.add(new ServiceTracker(context, FolderService.class.getName(), new RegistryServiceTrackerCustomizer<FolderService>(
-            context,
-            getInstance(),
-            FolderService.class)));
-        trackers.add(new ServiceTracker(context, HttpService.class.getName(), new ServletRegisterer(context)));
-        trackers.add(new ServiceTracker(
-            context,
-            ContentTypeDiscoveryService.class.getName(),
-            new RegistryServiceTrackerCustomizer<ContentTypeDiscoveryService>(context, getInstance(), ContentTypeDiscoveryService.class)));
-        trackers.add(new ServiceTracker(context, AdditionalFolderField.class.getName(), new FolderFieldCollector(
-            context,
-            Constants.ADDITIONAL_FOLDER_FIELD_LIST)));
-        /*
-         * Open trackers
-         */
-        for (final ServiceTracker tracker : trackers) {
-            tracker.open();
-        }
-        /*
-         * Preference item
-         */
-        serviceRegistrations.add(context.registerService(PreferencesItemService.class.getName(), new GUI(), null));
-        serviceRegistrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new FolderMultipleHandlerFactory(), null));
+        try {
+			/*
+			 * Service trackers
+			 */
+			trackers = new ArrayList<ServiceTracker>(6);
+			trackers.add(new ServiceTracker(context, FolderService.class.getName(), new RegistryServiceTrackerCustomizer<FolderService>(
+			    context,
+			    getInstance(),
+			    FolderService.class)));
+			trackers.add(new ServiceTracker(context, HttpService.class.getName(), new ServletRegisterer(context)));
+			trackers.add(new ServiceTracker(
+			    context,
+			    ContentTypeDiscoveryService.class.getName(),
+			    new RegistryServiceTrackerCustomizer<ContentTypeDiscoveryService>(context, getInstance(), ContentTypeDiscoveryService.class)));
+			trackers.add(new ServiceTracker(context, AdditionalFolderField.class.getName(), new FolderFieldCollector(
+			    context,
+			    Constants.ADDITIONAL_FOLDER_FIELD_LIST)));
+			/*
+			 * Open trackers
+			 */
+			for (final ServiceTracker tracker : trackers) {
+			    tracker.open();
+			}
+			/*
+			 * Preference item
+			 */
+			serviceRegistrations = new ArrayList<ServiceRegistration>(2);
+			serviceRegistrations.add(context.registerService(PreferencesItemService.class.getName(), new GUI(), null));
+			serviceRegistrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new FolderMultipleHandlerFactory(), null));
+		} catch (Exception e) {
+			org.apache.commons.logging.LogFactory.getLog(Activator.class).error(e.getMessage(), e);
+			throw e;
+		}
     }
 
     public void stop(final BundleContext context) throws Exception {
-        if (null != trackers) {
-            /*
-             * Close trackers
-             */
-            while (!trackers.isEmpty()) {
-                trackers.remove(0).close();
-            }
-            trackers = null;
-        }
-        if (null != serviceRegistrations) {
-            /*
-             * Unregister
-             */
-            while (!serviceRegistrations.isEmpty()) {
-                serviceRegistrations.remove(0).unregister();
-            }
-            serviceRegistrations = null;
-        }
+        try {
+			if (null != trackers) {
+			    /*
+			     * Close trackers
+			     */
+			    while (!trackers.isEmpty()) {
+			        trackers.remove(0).close();
+			    }
+			    trackers = null;
+			}
+			if (null != serviceRegistrations) {
+			    /*
+			     * Unregister
+			     */
+			    while (!serviceRegistrations.isEmpty()) {
+			        serviceRegistrations.remove(0).unregister();
+			    }
+			    serviceRegistrations = null;
+			}
+		} catch (Exception e) {
+			org.apache.commons.logging.LogFactory.getLog(Activator.class).error(e.getMessage(), e);
+			throw e;
+		}
     }
 
 }
