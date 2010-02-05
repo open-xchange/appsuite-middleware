@@ -1,0 +1,364 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.messaging.facebook;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
+import com.google.code.facebookapi.FacebookException;
+import com.google.code.facebookapi.IFacebookRestClient;
+import com.google.code.facebookapi.ProfileField;
+import com.google.code.facebookapi.schema.UsersGetInfoResponse;
+import com.openexchange.messaging.DefaultMessagingFolder;
+import com.openexchange.messaging.DefaultMessagingPermission;
+import com.openexchange.messaging.MessagingAccount;
+import com.openexchange.messaging.MessagingException;
+import com.openexchange.messaging.MessagingExceptionCodes;
+import com.openexchange.messaging.MessagingFolder;
+import com.openexchange.messaging.MessagingFolderAccess;
+import com.openexchange.messaging.MessagingPermission;
+import com.openexchange.messaging.Quota;
+import com.openexchange.messaging.Quota.Type;
+import com.openexchange.session.Session;
+
+/**
+ * {@link FacebookMessagingFolderAccess} - The facebook folder access.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since Open-Xchange v6.16
+ */
+public class FacebookMessagingFolderAccess implements MessagingFolderAccess {
+
+    private static String EMPTY = MessagingFolder.ROOT_FULLNAME;
+
+    /**
+     * The constant to return or represent an empty path.
+     */
+    private static final MessagingFolder[] EMPTY_PATH = new MessagingFolder[0];
+
+    private final int id;
+
+    private final int user;
+
+    private final int cid;
+
+    private final IFacebookRestClient<Object> facebookRestClient;
+
+    private final long facebookUserId;
+
+    private final String facebookSession;
+
+    /**
+     * Initializes a new {@link FacebookMessagingFolderAccess}.
+     * 
+     * @param facebookRestClient The facebook REST client
+     * @param messagingAccount The facebook messaging account
+     * @param session The session
+     * @param facebookUserId The facebook user identifier
+     * @param facebookSession The facebook session identifier
+     */
+    public FacebookMessagingFolderAccess(final IFacebookRestClient<Object> facebookRestClient, final MessagingAccount messagingAccount, final Session session, final long facebookUserId, final String facebookSession) {
+        super();
+        this.facebookRestClient = facebookRestClient;
+        id = messagingAccount.getId();
+        user = session.getUserId();
+        cid = session.getContextId();
+        this.facebookUserId = facebookUserId;
+        this.facebookSession = facebookSession;
+    }
+
+    public void clearFolder(final String folderId) throws MessagingException {
+        if (!EMPTY.equals(folderId)) {
+            throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
+                folderId,
+                Integer.valueOf(id),
+                FacebookMessagingService.getServiceId(),
+                Integer.valueOf(user),
+                Integer.valueOf(cid));
+        }
+        throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(FacebookMessagingService.getServiceId());
+    }
+
+    public void clearFolder(final String folderId, final boolean hardDelete) throws MessagingException {
+        if (!EMPTY.equals(folderId)) {
+            throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
+                folderId,
+                Integer.valueOf(id),
+                FacebookMessagingService.getServiceId(),
+                Integer.valueOf(user),
+                Integer.valueOf(cid));
+        }
+        throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(FacebookMessagingService.getServiceId());
+    }
+
+    public String createFolder(final MessagingFolder toCreate) throws MessagingException {
+        throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(FacebookMessagingService.getServiceId());
+    }
+
+    public String deleteFolder(final String folderId) throws MessagingException {
+        if (!EMPTY.equals(folderId)) {
+            throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
+                folderId,
+                Integer.valueOf(id),
+                FacebookMessagingService.getServiceId(),
+                Integer.valueOf(user),
+                Integer.valueOf(cid));
+        }
+        throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(FacebookMessagingService.getServiceId());
+    }
+
+    public String deleteFolder(final String folderId, final boolean hardDelete) throws MessagingException {
+        if (!EMPTY.equals(folderId)) {
+            throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
+                folderId,
+                Integer.valueOf(id),
+                FacebookMessagingService.getServiceId(),
+                Integer.valueOf(user),
+                Integer.valueOf(cid));
+        }
+        throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(FacebookMessagingService.getServiceId());
+    }
+
+    public boolean exists(final String folderId) throws MessagingException {
+        return (EMPTY.equals(folderId));
+    }
+
+    public String getConfirmedHamFolder() throws MessagingException {
+        return null;
+    }
+
+    public String getConfirmedSpamFolder() throws MessagingException {
+        return null;
+    }
+
+    public String getDraftsFolder() throws MessagingException {
+        return null;
+    }
+
+    public MessagingFolder getFolder(final String folderId) throws MessagingException {
+        if (!EMPTY.equals(folderId)) {
+            throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
+                folderId,
+                Integer.valueOf(id),
+                FacebookMessagingService.getServiceId(),
+                Integer.valueOf(user),
+                Integer.valueOf(cid));
+        }
+        return getRootFolder();
+    }
+
+    public Quota getMessageQuota(final String folderId) throws MessagingException {
+        if (!EMPTY.equals(folderId)) {
+            throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
+                folderId,
+                Integer.valueOf(id),
+                FacebookMessagingService.getServiceId(),
+                Integer.valueOf(user),
+                Integer.valueOf(cid));
+        }
+        return Quota.getUnlimitedQuota(Quota.Type.MESSAGE);
+
+    }
+
+    public MessagingFolder[] getPath2DefaultFolder(final String folderId) throws MessagingException {
+        if (!EMPTY.equals(folderId)) {
+            throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
+                folderId,
+                Integer.valueOf(id),
+                FacebookMessagingService.getServiceId(),
+                Integer.valueOf(user),
+                Integer.valueOf(cid));
+        }
+        return EMPTY_PATH;
+    }
+
+    public Quota[] getQuotas(final String folder, final Type[] types) throws MessagingException {
+        if (!EMPTY.equals(folder)) {
+            throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
+                folder,
+                Integer.valueOf(id),
+                FacebookMessagingService.getServiceId(),
+                Integer.valueOf(user),
+                Integer.valueOf(cid));
+        }
+        return Quota.getUnlimitedQuotas(types);
+    }
+
+    private static final EnumSet<ProfileField> FIELDS_WALL_COUNT = EnumSet.of(ProfileField.WALL_COUNT);
+
+    private static final Set<String> CAPS = Collections.emptySet();
+
+    public MessagingFolder getRootFolder() throws MessagingException {
+        try {
+            /*
+             * The collection of users
+             */
+            final UsersGetInfoResponse response =
+                (UsersGetInfoResponse) facebookRestClient.users_getInfo(
+                    Collections.singletonList(Long.valueOf(facebookUserId)),
+                    FIELDS_WALL_COUNT);
+            /*
+             * Fill root folder
+             */
+            final DefaultMessagingFolder dmf = new DefaultMessagingFolder();
+            dmf.setId(MessagingFolder.ROOT_FULLNAME);
+            dmf.setCapabilities(CAPS);
+            dmf.setDefaultFolder(false);
+            dmf.setDefaultFolderType(MessagingFolder.DefaultFolderType.NONE);
+            dmf.setDeletedMessageCount(0);
+            dmf.setExists(true);
+            dmf.setHoldsFolders(false);
+            dmf.setHoldsMessages(true);
+            dmf.setMessageCount(response.getUser().get(0).getWallCount().intValue());
+            dmf.setName("Facebook");
+            dmf.setNewMessageCount(0);
+
+            final DefaultMessagingPermission perm = DefaultMessagingPermission.newInstance();
+            perm.setAdmin(false);
+            perm.setAllPermissions(
+                MessagingPermission.READ_FOLDER,
+                MessagingPermission.READ_ALL_OBJECTS,
+                MessagingPermission.NO_PERMISSIONS,
+                MessagingPermission.NO_PERMISSIONS);
+            perm.setEntity(user);
+            perm.setGroup(false);
+
+            dmf.setOwnPermission(perm);
+            dmf.setParentId(null);
+            {
+                final List<MessagingPermission> perms = new ArrayList<MessagingPermission>(1);
+                perms.add(perm);
+                dmf.setPermissions(perms);
+            }
+            dmf.setRootFolder(true);
+            dmf.setSubfolders(false);
+            dmf.setSubscribedSubfolders(false);
+            dmf.setUnreadMessageCount(0);
+            return dmf;
+        } catch (final FacebookException e) {
+            throw FacebookMessagingException.create(e);
+        }
+    }
+
+    public String getSentFolder() throws MessagingException {
+        return null;
+    }
+
+    public String getSpamFolder() throws MessagingException {
+        return null;
+    }
+
+    public Quota getStorageQuota(final String folderId) throws MessagingException {
+        if (!EMPTY.equals(folderId)) {
+            throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
+                folderId,
+                Integer.valueOf(id),
+                FacebookMessagingService.getServiceId(),
+                Integer.valueOf(user),
+                Integer.valueOf(cid));
+        }
+        return Quota.getUnlimitedQuota(Quota.Type.STORAGE);
+    }
+
+    public MessagingFolder[] getSubfolders(final String parentIdentifier, final boolean all) throws MessagingException {
+        if (!EMPTY.equals(parentIdentifier)) {
+            throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
+                parentIdentifier,
+                Integer.valueOf(id),
+                FacebookMessagingService.getServiceId(),
+                Integer.valueOf(user),
+                Integer.valueOf(cid));
+        }
+        return EMPTY_PATH;
+    }
+
+    public String getTrashFolder() throws MessagingException {
+        return null;
+    }
+
+    public String moveFolder(final String folderId, final String newParentId) throws MessagingException {
+        if (!EMPTY.equals(folderId)) {
+            throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
+                folderId,
+                Integer.valueOf(id),
+                FacebookMessagingService.getServiceId(),
+                Integer.valueOf(user),
+                Integer.valueOf(cid));
+        }
+        throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(FacebookMessagingService.getServiceId());
+    }
+
+    public String renameFolder(final String folderId, final String newName) throws MessagingException {
+        if (!EMPTY.equals(folderId)) {
+            throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
+                folderId,
+                Integer.valueOf(id),
+                FacebookMessagingService.getServiceId(),
+                Integer.valueOf(user),
+                Integer.valueOf(cid));
+        }
+        throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(FacebookMessagingService.getServiceId());
+    }
+
+    public String updateFolder(final String folderId, final MessagingFolder toUpdate) throws MessagingException {
+        if (!EMPTY.equals(folderId)) {
+            throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
+                folderId,
+                Integer.valueOf(id),
+                FacebookMessagingService.getServiceId(),
+                Integer.valueOf(user),
+                Integer.valueOf(cid));
+        }
+        throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(FacebookMessagingService.getServiceId());
+    }
+
+}
