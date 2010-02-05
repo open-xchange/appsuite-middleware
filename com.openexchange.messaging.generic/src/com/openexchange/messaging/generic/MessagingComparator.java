@@ -78,7 +78,7 @@ import com.openexchange.messaging.MessagingMessageGetSwitch;
 /**
  * {@link MessagingComparator} - A {@link Comparator comparator} for {@link MessagingMessage messages}.
  * <p>
- * <b>Note</b>: Users must catch RuntimeExceptions that wrap messaging exceptions.
+ * <b>Note</b>: Users must catch {@link RuntimeException}s that wrap messaging exceptions.
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @since Open-Xchange v6.16
