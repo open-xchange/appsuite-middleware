@@ -49,12 +49,13 @@
 
 package com.openexchange.messaging.generic;
 
+import java.util.Locale;
+import junit.framework.TestCase;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingField;
 import com.openexchange.messaging.SimpleMessagingMessage;
 import com.openexchange.messaging.StringMessageHeader;
 import com.openexchange.messaging.generic.internet.MimeContentType;
-import junit.framework.TestCase;
 
 
 /**
@@ -184,8 +185,8 @@ public class MessagingComparatorTest extends TestCase {
     
     
     
-    private void assertBigger(SimpleMessagingMessage bigger, SimpleMessagingMessage smaller, MessagingField field) throws MessagingException {
-        MessagingComparator comparator = new MessagingComparator(field);
+    private void assertBigger(final SimpleMessagingMessage bigger, final SimpleMessagingMessage smaller, final MessagingField field) throws MessagingException {
+        final MessagingComparator comparator = new MessagingComparator(field, Locale.ENGLISH);
         
         assertTrue("Comparison Failure in field "+field, comparator.compare(bigger, smaller) > 0);
     }
