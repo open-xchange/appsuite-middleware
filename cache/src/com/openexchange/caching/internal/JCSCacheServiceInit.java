@@ -58,6 +58,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.jcs.engine.control.CompositeCacheManager;
 import com.openexchange.caching.CacheException;
@@ -159,19 +160,26 @@ public final class JCSCacheServiceInit {
         return props;
     }
 
-    private void configure(final Properties props) {
+    private void configure(final Properties props) throws CacheException {
         if (this.props == null) {
             this.props = props;
         } else {
             /*
              * Overwrite or add with previously loaded properties
              */
-            this.props.putAll(props);
+            for (final Entry<Object, Object> property : props.entrySet()) {
+                final String value = (String) property.getValue();
+                if (!isEmpty(value)) {
+                    this.props.put(property.getKey(), value);
+                }
+            }
+            //this.props.putAll(props);
         }
         /*
          * ... and (re-)configure composite cache manager
          */
-        ccmInstance.configure(props);
+        checkDefaultAuxiliary();
+        ccmInstance.configure(this.props, false);
     }
 
     /**
@@ -298,7 +306,7 @@ public final class JCSCacheServiceInit {
          * Ensure an auxiliary cache is present
          */
         final String value = props.getProperty(DEFAULT_REGION);
-        if (null == value) {
+        if (null == value || 0 == value.length()) {
             throw new CacheException(CacheException.Code.MISSING_DEFAULT_AUX);
         }
     }
@@ -334,6 +342,18 @@ public final class JCSCacheServiceInit {
      */
     public boolean isDefaultCacheRegion(final String regionName) {
         return defaultCacheRegions.contains(regionName);
+    }
+
+    private static boolean isEmpty(final String str) {
+        if (null == str || 0 == str.length()) {
+            return true;
+        }
+        final int len = str.length();
+        boolean ret = true;
+        for (int i = 0; ret && i < len; i++) {
+            ret = Character.isWhitespace(str.charAt(i));
+        }
+        return ret;
     }
 
 }
