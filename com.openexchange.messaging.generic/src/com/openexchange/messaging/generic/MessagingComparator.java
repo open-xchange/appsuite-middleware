@@ -49,6 +49,22 @@
 
 package com.openexchange.messaging.generic;
 
+import static com.openexchange.messaging.MessagingField.BCC;
+import static com.openexchange.messaging.MessagingField.CC;
+import static com.openexchange.messaging.MessagingField.COLOR_LABEL;
+import static com.openexchange.messaging.MessagingField.CONTENT_TYPE;
+import static com.openexchange.messaging.MessagingField.DISPOSITION_NOTIFICATION_TO;
+import static com.openexchange.messaging.MessagingField.FLAGS;
+import static com.openexchange.messaging.MessagingField.FOLDER_ID;
+import static com.openexchange.messaging.MessagingField.FROM;
+import static com.openexchange.messaging.MessagingField.ID;
+import static com.openexchange.messaging.MessagingField.PRIORITY;
+import static com.openexchange.messaging.MessagingField.RECEIVED_DATE;
+import static com.openexchange.messaging.MessagingField.SENT_DATE;
+import static com.openexchange.messaging.MessagingField.SIZE;
+import static com.openexchange.messaging.MessagingField.SUBJECT;
+import static com.openexchange.messaging.MessagingField.THREAD_LEVEL;
+import static com.openexchange.messaging.MessagingField.TO;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.EnumSet;
@@ -58,12 +74,13 @@ import com.openexchange.messaging.MessagingField;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.MessagingMessageGetSwitch;
-import static com.openexchange.messaging.MessagingField.*;
 
 /**
- * {@link MessagingComparator}
- * Note: Users must catch RuntimeExceptions that wrap messaging exceptions.
+ * {@link MessagingComparator} - A {@link Comparator comparator} for {@link MessagingMessage messages}. Note: Users must catch
+ * RuntimeExceptions that wrap messaging exceptions.
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @since Open-Xchange v6.16
  */
 public class MessagingComparator implements Comparator<MessagingMessage> {
 
@@ -86,22 +103,22 @@ public class MessagingComparator implements Comparator<MessagingMessage> {
         COLOR_LABEL
     );
     
-    private MessagingField field;
-    private MessagingMessageGetSwitch get = new MessagingMessageGetSwitch();
+    private final MessagingField field;
+    private final MessagingMessageGetSwitch get = new MessagingMessageGetSwitch();
     
     
-    public MessagingComparator(MessagingField field) throws MessagingException {
+    public MessagingComparator(final MessagingField field) throws MessagingException {
         checkField(field);
         this.field = field;
     }
     
-    private void checkField(MessagingField field) throws MessagingException {
+    private void checkField(final MessagingField field) throws MessagingException {
         if(!WHITELIST.contains(field)) {
             throw MessagingExceptionCodes.INVALID_SORTING_COLUMN.create(field);
         }
     }
 
-    public int compare(MessagingMessage o1, MessagingMessage o2) {
+    public int compare(final MessagingMessage o1, final MessagingMessage o2) {
         try {
             Object c1 = field.doSwitch(get, o1);
             Object c2 = field.doSwitch(get, o2);
@@ -119,11 +136,11 @@ public class MessagingComparator implements Comparator<MessagingMessage> {
             }
             
             if(null != field.getEquivalentHeader()) {
-                Collection<MessagingHeader> headers1 = (Collection<MessagingHeader>) c1;
-                Collection<MessagingHeader> headers2 = (Collection<MessagingHeader>) c2;
+                final Collection<MessagingHeader> headers1 = (Collection<MessagingHeader>) c1;
+                final Collection<MessagingHeader> headers2 = (Collection<MessagingHeader>) c2;
 
-                MessagingHeader h1 = (headers1.isEmpty()) ? null : headers1.iterator().next();
-                MessagingHeader h2 = (headers2.isEmpty()) ? null : headers2.iterator().next();
+                final MessagingHeader h1 = (headers1.isEmpty()) ? null : headers1.iterator().next();
+                final MessagingHeader h2 = (headers2.isEmpty()) ? null : headers2.iterator().next();
                 
                 c1 = h1.getValue();
                 c2 = h2.getValue();
@@ -149,18 +166,18 @@ public class MessagingComparator implements Comparator<MessagingMessage> {
             }
             
             throw MessagingExceptionCodes.INVALID_SORTING_COLUMN.create(field);
-        } catch (MessagingException x) {
+        } catch (final MessagingException x) {
             throw new RuntimeException(x);
         }
     }
 
     private static final EnumSet<MessagingField> INT_FIELDS = EnumSet.of(PRIORITY, THREAD_LEVEL);
     
-    private Object transform(Object o) {
+    private Object transform(final Object o) {
         if(INT_FIELDS.contains(field) && String.class.isInstance(o)) {
             try {
                 return Integer.parseInt((String)o);
-            } catch (NumberFormatException x) {
+            } catch (final NumberFormatException x) {
                 return o;
             }
         }
