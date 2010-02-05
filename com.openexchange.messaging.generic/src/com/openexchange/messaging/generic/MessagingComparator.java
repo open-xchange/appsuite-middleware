@@ -85,36 +85,37 @@ import com.openexchange.messaging.MessagingMessageGetSwitch;
  */
 public class MessagingComparator implements Comparator<MessagingMessage> {
 
-    private static final EnumSet<MessagingField> WHITELIST = EnumSet.of(
-        ID,
-        FOLDER_ID,
-        CONTENT_TYPE,
-        FROM,
-        TO,
-        BCC,
-        CC,
-        SUBJECT,
-        SIZE,
-        SENT_DATE,
-        RECEIVED_DATE,
-        FLAGS,
-        THREAD_LEVEL,
-        DISPOSITION_NOTIFICATION_TO,
-        PRIORITY,
-        COLOR_LABEL
-    );
-    
+    private static final EnumSet<MessagingField> WHITELIST =
+        EnumSet.of(
+            ID,
+            FOLDER_ID,
+            CONTENT_TYPE,
+            FROM,
+            TO,
+            BCC,
+            CC,
+            SUBJECT,
+            SIZE,
+            SENT_DATE,
+            RECEIVED_DATE,
+            FLAGS,
+            THREAD_LEVEL,
+            DISPOSITION_NOTIFICATION_TO,
+            PRIORITY,
+            COLOR_LABEL);
+
     private final MessagingField field;
-    private final MessagingMessageGetSwitch get = new MessagingMessageGetSwitch();
-    
-    
+
+    private final MessagingMessageGetSwitch get;
+
     public MessagingComparator(final MessagingField field) throws MessagingException {
         checkField(field);
         this.field = field;
+        get = new MessagingMessageGetSwitch();
     }
-    
+
     private void checkField(final MessagingField field) throws MessagingException {
-        if(!WHITELIST.contains(field)) {
+        if (!WHITELIST.contains(field)) {
             throw MessagingExceptionCodes.INVALID_SORTING_COLUMN.create(field);
         }
     }
@@ -123,49 +124,49 @@ public class MessagingComparator implements Comparator<MessagingMessage> {
         try {
             Object c1 = field.doSwitch(get, o1);
             Object c2 = field.doSwitch(get, o2);
-            
-            if(c1 == c2) {
+
+            if (c1 == c2) {
                 return 0;
             }
-            
-            if(c1 == null) {
+
+            if (c1 == null) {
                 return -1;
             }
-            
-            if(c2 == null) {
+
+            if (c2 == null) {
                 return 1;
             }
-            
-            if(null != field.getEquivalentHeader()) {
+
+            if (null != field.getEquivalentHeader()) {
                 final Collection<MessagingHeader> headers1 = (Collection<MessagingHeader>) c1;
                 final Collection<MessagingHeader> headers2 = (Collection<MessagingHeader>) c2;
 
                 final MessagingHeader h1 = (headers1.isEmpty()) ? null : headers1.iterator().next();
                 final MessagingHeader h2 = (headers2.isEmpty()) ? null : headers2.iterator().next();
-                
+
                 c1 = h1.getValue();
                 c2 = h2.getValue();
-                
-                if(c1 == c2) {
+
+                if (c1 == c2) {
                     return 0;
                 }
-                
-                if(c1 == null) {
+
+                if (c1 == null) {
                     return -1;
                 }
-                
-                if(c2 == null) {
+
+                if (c2 == null) {
                     return 1;
                 }
             }
-            
+
             c1 = transform(c1);
             c2 = transform(c2);
-            
-            if(Comparable.class.isInstance(c1)) {
-                return ((Comparable)c1).compareTo(c2);
+
+            if (Comparable.class.isInstance(c1)) {
+                return ((Comparable) c1).compareTo(c2);
             }
-            
+
             throw MessagingExceptionCodes.INVALID_SORTING_COLUMN.create(field);
         } catch (final MessagingException x) {
             throw new RuntimeException(x);
@@ -173,17 +174,16 @@ public class MessagingComparator implements Comparator<MessagingMessage> {
     }
 
     private static final EnumSet<MessagingField> INT_FIELDS = EnumSet.of(PRIORITY, THREAD_LEVEL);
-    
+
     private Object transform(final Object o) {
-        if(INT_FIELDS.contains(field) && String.class.isInstance(o)) {
+        if (INT_FIELDS.contains(field) && String.class.isInstance(o)) {
             try {
-                return Integer.parseInt((String)o);
+                return Integer.parseInt((String) o);
             } catch (final NumberFormatException x) {
                 return o;
             }
         }
         return o;
     }
-    
 
 }
