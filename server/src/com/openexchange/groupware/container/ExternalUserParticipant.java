@@ -49,12 +49,14 @@
 
 package com.openexchange.groupware.container;
 
+import com.openexchange.groupware.container.participants.AbstractConfirmableParticipant;
+
 /**
  * {@link ExternalUserParticipant} - Represents an external user participant.
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-public class ExternalUserParticipant implements Participant, Comparable<Participant> {
+public class ExternalUserParticipant extends AbstractConfirmableParticipant implements Comparable<Participant> {
 
     private int id = NO_ID;
 
@@ -74,66 +76,34 @@ public class ExternalUserParticipant implements Participant, Comparable<Particip
         emailaddress = emailAddress;
     }
 
-    /**
-     * @deprecated Use {@link #ExternalUserParticipant(String)}.
-     */
-    @Deprecated
-    public ExternalUserParticipant() {
-        super();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public void setIdentifier(final int id) {
         this.id = id;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public int getIdentifier() {
         return id;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void setDisplayName(final String displayName) {
         this.displayName = displayName;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String getDisplayName() {
         return displayName;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String getEmailAddress() {
         return emailaddress;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void setEmailAddress(final String emailaddress) {
         this.emailaddress = emailaddress;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public int getType() {
         return EXTERNAL_USER;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -144,9 +114,6 @@ public class ExternalUserParticipant implements Participant, Comparable<Particip
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean equals(final Object obj) {
         if (this == obj) {
