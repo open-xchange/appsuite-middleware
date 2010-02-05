@@ -51,6 +51,7 @@ package com.openexchange.messaging.twitter;
 
 import static com.openexchange.messaging.twitter.TwitterMessagingUtility.checkContent;
 import static com.openexchange.messaging.twitter.TwitterMessagingUtility.parseUnsignedLong;
+import java.util.Collection;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingAccountTransport;
 import com.openexchange.messaging.MessagingAddressHeader;
@@ -103,7 +104,7 @@ public final class TwitterMessagingAccountTransport implements MessagingAccountT
         }
     }
 
-    public void transport(final MessagingMessage message, final MessagingAddressHeader recipients) throws MessagingException {
+    public void transport(final MessagingMessage message, final Collection<MessagingAddressHeader> recipients) throws MessagingException {
         final String messageType;
         {
             final MessagingHeader header = message.getFirstHeader(MessagingHeader.KnownHeader.MESSAGE_TYPE.toString());
