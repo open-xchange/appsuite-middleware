@@ -49,6 +49,7 @@
 
 package com.openexchange.messaging.json.actions.messages;
 
+import java.util.Collection;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -87,9 +88,10 @@ public class SendTest extends AbstractMessagingActionTest {
         assertNotNull(message);
         assertEquals("Hello World", ((StringContent)message.getContent()).getData());
         
-        MessagingAddressHeader recipients = transport.getRecipients();
+        Collection<MessagingAddressHeader> recipients = transport.getRecipients();
         assertNotNull(recipients);
-        assertEquals("clark.kent@dailyplanet.com", recipients.getAddress());
+        assertEquals(1, recipients.size());
+        assertEquals("clark.kent@dailyplanet.com", recipients.iterator().next().getAddress());
         
     }
 
@@ -108,7 +110,7 @@ public class SendTest extends AbstractMessagingActionTest {
         assertNotNull(message);
         assertEquals("Hello World", ((StringContent)message.getContent()).getData());
         
-        MessagingAddressHeader recipients = transport.getRecipients();
+        Collection<MessagingAddressHeader> recipients = transport.getRecipients();
         assertTrue(recipients == null);
     }
 

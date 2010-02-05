@@ -49,6 +49,7 @@
 
 package com.openexchange.messaging.rss;
 
+import java.util.Collection;
 import com.openexchange.messaging.MessagingAccountAccess;
 import com.openexchange.messaging.MessagingAccountManager;
 import com.openexchange.messaging.MessagingAccountTransport;
@@ -113,7 +114,7 @@ public class RSSFeedOperations implements MessagingAccountAccess, MessagingAccou
         return true;
     }
 
-    public void transport(MessagingMessage message, MessagingAddressHeader recipients) throws MessagingException {
+    public void transport(MessagingMessage message, Collection<MessagingAddressHeader> recipients) throws MessagingException {
         throw new UnsupportedOperationException();
     }
 

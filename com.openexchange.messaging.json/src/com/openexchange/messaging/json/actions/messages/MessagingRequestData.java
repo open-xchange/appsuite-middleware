@@ -50,6 +50,8 @@
 package com.openexchange.messaging.json.actions.messages;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -305,12 +307,12 @@ public class MessagingRequestData {
      * Retrieves and parses the 'recipients' parameter. May return null, if no recipients were set.
      * @throws MessagingException 
      */
-    public MessagingAddressHeader getRecipients() throws MessagingException {
+    public Collection<MessagingAddressHeader> getRecipients() throws MessagingException {
         String parameter = request.getParameter("recipients");
         if(parameter == null) {
             return null;
         }
-        return MimeAddressMessagingHeader.valueOfRFC822("", parameter);
+        return new ArrayList<MessagingAddressHeader>( MimeAddressMessagingHeader.parseRFC822("", parameter));
     }
 
     /**
