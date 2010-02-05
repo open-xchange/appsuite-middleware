@@ -72,6 +72,7 @@ import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AbstractAJAXTest;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.fields.ParticipantsFields;
 import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
@@ -454,10 +455,10 @@ public final class TaskTools extends Assert {
         final int taskId, final int confirm, final String confirmMessage)
         throws IOException, SAXException, JSONException {
         final JSONObject json = new JSONObject();
-        json.put(TaskFields.CONFIRMATION, confirm);
+        json.put(ParticipantsFields.CONFIRMATION, confirm);
         json.put(TaskFields.FOLDER_ID, folderId);
         json.put(TaskFields.ID, taskId);
-        json.put(TaskFields.CONFIRM_MESSAGE, confirmMessage);
+        json.put(ParticipantsFields.CONFIRM_MESSAGE, confirmMessage);
         final ByteArrayInputStream bais = new ByteArrayInputStream(json
             .toString().getBytes(ENCODING));
         final URLParameter parameter = new URLParameter();

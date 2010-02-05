@@ -72,6 +72,7 @@ import com.openexchange.ajax.config.ConfigTools;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.fields.DataFields;
+import com.openexchange.ajax.fields.ParticipantsFields;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.Executor;
@@ -420,8 +421,8 @@ public class AppointmentTest extends AbstractAJAXTest {
 		parameter.setParameter(AJAXServlet.PARAMETER_FOLDERID, folderId);
 		
 		final JSONObject jsonObj = new JSONObject();
-		jsonObj.put(CalendarFields.CONFIRMATION, confirm);
-		jsonObj.put(CalendarFields.CONFIRM_MESSAGE, confirmMessage);
+		jsonObj.put(ParticipantsFields.CONFIRMATION, confirm);
+		jsonObj.put(ParticipantsFields.CONFIRM_MESSAGE, confirmMessage);
 		
 		final ByteArrayInputStream bais = new ByteArrayInputStream(jsonObj.toString()
 		.getBytes());

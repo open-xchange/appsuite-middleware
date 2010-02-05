@@ -54,7 +54,7 @@ import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.fields.CalendarFields;
+import com.openexchange.ajax.fields.ParticipantsFields;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.AJAXRequest.Method;
 import com.openexchange.ajax.framework.AJAXRequest.Parameter;
@@ -92,8 +92,8 @@ public class ConfirmRequest extends AbstractAppointmentRequest<ConfirmResponse> 
 
     public Object getBody() throws JSONException {
         JSONObject json = new JSONObject();
-        json.put(CalendarFields.CONFIRM_MESSAGE, confirmMessage);
-        json.put(CalendarFields.CONFIRMATION, confirmStatus);
+        json.put(ParticipantsFields.CONFIRM_MESSAGE, confirmMessage);
+        json.put(ParticipantsFields.CONFIRMATION, confirmStatus);
         if (user != 0) {
             json.put(AJAXServlet.PARAMETER_ID, user);
         }
