@@ -65,7 +65,7 @@ import com.openexchange.messaging.MessagingHeader.KnownHeader;
 public enum MessagingField {
 
     /**
-     * The implementation-specific unique mail ID<br>
+     * The implementation-specific unique message ID<br>
      * <b>[low cost]</b>
      */
     ID("id"),
@@ -235,7 +235,7 @@ public enum MessagingField {
         return FIELDS_MAP.get(name);
     }
     
-    public Object doSwitch(MessagingMessageSwitcher switcher, Object...args) throws MessagingException {
+    public Object doSwitch(final MessagingMessageSwitcher switcher, final Object...args) throws MessagingException {
         switch(this) {
         case ID : return switcher.id(args);
         case FOLDER_ID : return switcher.folderId(args);
@@ -264,7 +264,7 @@ public enum MessagingField {
     private static final Map<MessagingField, KnownHeader> equivalentHeaders = new EnumMap<MessagingField, KnownHeader>(MessagingField.class);
     
     static {
-        for (KnownHeader header : KnownHeader.values()) {
+        for (final KnownHeader header : KnownHeader.values()) {
             if(null != header.getEquivalentField()) {
                 equivalentHeaders.put(header.getEquivalentField(), header);
             }
