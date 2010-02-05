@@ -58,7 +58,6 @@ import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folder.json.writer.FolderWriter;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
-import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.servlet.AjaxException;
@@ -89,7 +88,7 @@ public final class GetAction extends AbstractFolderAction {
             /*
              * Fallback to default tree identifier
              */
-            treeId = FolderStorage.REAL_TREE_ID;
+            treeId = getDefaultTreeIdentifier();
         }
         final String folderId = request.getParameter("id");
         if (null == folderId) {

@@ -64,7 +64,6 @@ import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
-import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.servlet.AjaxException;
@@ -95,7 +94,7 @@ public final class UpdatesAction extends AbstractFolderAction {
             /*
              * Fallback to default tree identifier
              */
-            treeId = FolderStorage.REAL_TREE_ID;
+            treeId = getDefaultTreeIdentifier();
         }
         final Date timestamp;
         {

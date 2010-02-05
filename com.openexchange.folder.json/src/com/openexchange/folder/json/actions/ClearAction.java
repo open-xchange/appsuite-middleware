@@ -57,7 +57,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderService;
-import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
@@ -87,7 +86,7 @@ public final class ClearAction extends AbstractFolderAction {
             /*
              * Fallback to default tree identifier
              */
-            treeId = FolderStorage.REAL_TREE_ID;
+            treeId = getDefaultTreeIdentifier();
         }
         /*
          * Compose JSON array with id

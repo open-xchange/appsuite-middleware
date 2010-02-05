@@ -52,6 +52,7 @@ package com.openexchange.folder.json.actions;
 import java.util.regex.Pattern;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.tools.servlet.AjaxException;
 
 /**
@@ -66,6 +67,15 @@ public abstract class AbstractFolderAction implements AJAXActionService {
      */
     protected AbstractFolderAction() {
         super();
+    }
+
+    /**
+     * Gets the default tree identifier to use if request does not provide any.
+     * 
+     * @return The default tree identifier
+     */
+    protected String getDefaultTreeIdentifier() {
+        return FolderStorage.REAL_TREE_ID;
     }
 
     private static final Pattern PAT = Pattern.compile(" *, *");
