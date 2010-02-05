@@ -65,9 +65,11 @@ import static com.openexchange.messaging.MessagingField.SIZE;
 import static com.openexchange.messaging.MessagingField.SUBJECT;
 import static com.openexchange.messaging.MessagingField.THREAD_LEVEL;
 import static com.openexchange.messaging.MessagingField.TO;
+import java.text.Collator;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.EnumSet;
+import java.util.Locale;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingField;
@@ -110,14 +112,19 @@ public class MessagingComparator implements Comparator<MessagingMessage> {
 
     private final boolean descending;
 
+    private final Locale locale;
+
+    private final Collator collator;
+
     /**
      * Initializes a new {@link MessagingComparator} to sort by given field in ascending order.
      * 
      * @param field The field to sort by
+     * @param locale The locale to use for sorting
      * @throws MessagingException If initialization fails
      */
-    public MessagingComparator(final MessagingField field) throws MessagingException {
-        this(field, false);
+    public MessagingComparator(final MessagingField field, final Locale locale) throws MessagingException {
+        this(field, false, locale);
     }
 
     /**
@@ -125,12 +132,16 @@ public class MessagingComparator implements Comparator<MessagingMessage> {
      * 
      * @param field The field to sort by
      * @param descending <code>true</code> to sort in descending order; otherwise <code>false</code> for ascending order
+     *  @param locale The locale to use for sorting
      * @throws MessagingException If initialization fails
      */
-    public MessagingComparator(final MessagingField field, final boolean descending) throws MessagingException {
+    public MessagingComparator(final MessagingField field, final boolean descending, final Locale locale) throws MessagingException {
         checkField(field);
         this.field = field;
         this.descending = descending;
+        this.locale = locale;
+        collator = Collator.getInstance(locale);
+        collator.setStrength(Collator.SECONDARY);
         get = new MessagingMessageGetSwitch();
     }
 
