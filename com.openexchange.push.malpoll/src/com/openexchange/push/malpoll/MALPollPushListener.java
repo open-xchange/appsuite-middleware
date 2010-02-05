@@ -50,14 +50,10 @@
 package com.openexchange.push.malpoll;
 
 import java.util.Collections;
-import java.util.Dictionary;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventAdmin;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;
@@ -66,9 +62,9 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.utils.MailFolderUtility;
-import com.openexchange.push.PushEventConstants;
 import com.openexchange.push.PushException;
 import com.openexchange.push.PushListener;
+import com.openexchange.push.PushUtility;
 import com.openexchange.push.malpoll.services.MALPollServiceRegistry;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
@@ -374,32 +370,7 @@ public final class MALPollPushListener implements PushListener {
     }
 
     public void notifyNewMail() throws PushException {
-        final EventAdmin eventAdmin;
-        try {
-            eventAdmin = MALPollServiceRegistry.getServiceRegistry().getService(EventAdmin.class, true);
-        } catch (final ServiceException e) {
-            throw new PushException(e);
-        }
-        /*
-         * Create event's properties
-         */
-        final Dictionary<String, Object> properties = new Hashtable<String, Object>();
-        properties.put(PushEventConstants.PROPERTY_CONTEXT, Integer.valueOf(contextId));
-        properties.put(PushEventConstants.PROPERTY_USER, Integer.valueOf(userId));
-        properties.put(PushEventConstants.PROPERTY_SESSION, session);
-        properties.put(PushEventConstants.PROPERTY_FOLDER, MailFolderUtility.prepareFullname(ACCOUNT_ID, folder));
-        /*
-         * Create event with push topic
-         */
-        final Event event = new Event(PushEventConstants.TOPIC, properties);
-        /*
-         * Finally post it
-         */
-        eventAdmin.postEvent(event);
-        if (DEBUG_ENABLED) {
-            LOG.debug(new StringBuilder(64).append("Notified new mails in folder \"").append(folder).append("\" for user ").append(userId).append(
-                " in context ").append(contextId).toString());
-        }
+        PushUtility.triggerOSGiEvent(MailFolderUtility.prepareFullname(ACCOUNT_ID, folder), session);
     }
 
     /**

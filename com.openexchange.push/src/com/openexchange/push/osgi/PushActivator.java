@@ -49,11 +49,14 @@
 
 package com.openexchange.push.osgi;
 
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.List;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
@@ -77,11 +80,9 @@ public final class PushActivator implements BundleActivator {
 
     private ServiceRegistration eventHandlerRegistration;
 
-    private ServiceTracker serviceTracker;
+    private List<ServiceTracker> trackers;
 
     private ComponentRegistration componentRegistration;
-
-    private ServiceTracker tpServiceTracker;
 
     /**
      * Initializes a new {@link PushActivator}.
@@ -104,18 +105,23 @@ public final class PushActivator implements BundleActivator {
             /*
              * Initialize and open service tracker for push manager services
              */
+            trackers = new ArrayList<ServiceTracker>(4);
             PushManagerRegistry.init();
-            serviceTracker = new ServiceTracker(context, PushManagerService.class.getName(), new PushManagerServiceTracker(context));
-            serviceTracker.open();
+            trackers.add(new ServiceTracker(context, PushManagerService.class.getName(), new PushManagerServiceTracker(context)));
             /*
              * Thread pool service tracker
              */
-            tpServiceTracker =
-                new ServiceTracker(context, ThreadPoolService.class.getName(), new RegistryServiceTrackerCustomizer<ThreadPoolService>(
+            trackers.add(new ServiceTracker(context, ThreadPoolService.class.getName(), new RegistryServiceTrackerCustomizer<ThreadPoolService>(
                     context,
                     ServiceRegistry.getInstance(),
-                    ThreadPoolService.class));
-            tpServiceTracker.open();
+                    ThreadPoolService.class)));
+            trackers.add(new ServiceTracker(context, EventAdmin.class.getName(), new RegistryServiceTrackerCustomizer<EventAdmin>(
+                context,
+                ServiceRegistry.getInstance(),
+                EventAdmin.class)));
+            for (final ServiceTracker tracker : trackers) {
+                tracker.open();
+            }
             /*
              * Register event handler to detect removed sessions
              */
@@ -144,13 +150,11 @@ public final class PushActivator implements BundleActivator {
             /*
              * Drop service tracker
              */
-            if (null != tpServiceTracker) {
-                tpServiceTracker.close();
-                tpServiceTracker = null;
-            }
-            if (null != serviceTracker) {
-                serviceTracker.close();
-                serviceTracker = null;
+            if (null != trackers) {
+                while (!trackers.isEmpty()) {
+                    trackers.remove(0).close();
+                }
+                trackers = null;
             }
             PushManagerRegistry.shutdown();
             /*
