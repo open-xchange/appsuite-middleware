@@ -60,8 +60,10 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.folder.json.Constants;
 import com.openexchange.folder.json.multiple.FolderMultipleHandlerFactory;
+import com.openexchange.folder.json.preferences.GUI;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.FolderService;
+import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
 
@@ -72,13 +74,11 @@ import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
  */
 public class Activator implements BundleActivator {
 
-    private ServiceRegistration folderMultipleService;
+    private List<ServiceRegistration> serviceRegistrations;
 
     private List<ServiceTracker> trackers;
 
     public void start(final BundleContext context) throws Exception {
-        folderMultipleService =
-            context.registerService(MultipleHandlerFactoryService.class.getName(), new FolderMultipleHandlerFactory(), null);
         /*
          * Service trackers
          */
@@ -101,6 +101,11 @@ public class Activator implements BundleActivator {
         for (final ServiceTracker tracker : trackers) {
             tracker.open();
         }
+        /*
+         * Preference item
+         */
+        serviceRegistrations.add(context.registerService(PreferencesItemService.class.getName(), new GUI(), null));
+        serviceRegistrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new FolderMultipleHandlerFactory(), null));
     }
 
     public void stop(final BundleContext context) throws Exception {
@@ -113,9 +118,14 @@ public class Activator implements BundleActivator {
             }
             trackers = null;
         }
-        if (null != folderMultipleService) {
-            folderMultipleService.unregister();
-            folderMultipleService = null;
+        if (null != serviceRegistrations) {
+            /*
+             * Unregister
+             */
+            while (!serviceRegistrations.isEmpty()) {
+                serviceRegistrations.remove(0).unregister();
+            }
+            serviceRegistrations = null;
         }
     }
 
