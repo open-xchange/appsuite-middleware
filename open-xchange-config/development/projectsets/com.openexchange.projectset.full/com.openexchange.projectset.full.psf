@@ -62,6 +62,7 @@
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.messaging.generic,com.openexchange.messaging.generic"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.messaging.twitter,com.openexchange.messaging.twitter"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.messaging.facebook,com.openexchange.messaging.facebook"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.messaging.rss,com.openexchange.messaging.rss"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.messaging.json,com.openexchange.messaging.json"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.servlet.easylogin,com.openexchange.servlet.easylogin"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,openexchange-test-fitnesse,openexchange-test-fitnesse"/>
