@@ -108,9 +108,29 @@ public class MessagingComparator implements Comparator<MessagingMessage> {
 
     private final MessagingMessageGetSwitch get;
 
+    private final boolean descending;
+
+    /**
+     * Initializes a new {@link MessagingComparator} to sort by given field in ascending order.
+     * 
+     * @param field The field to sort by
+     * @throws MessagingException If initialization fails
+     */
     public MessagingComparator(final MessagingField field) throws MessagingException {
+        this(field, false);
+    }
+
+    /**
+     * Initializes a new {@link MessagingComparator} to sort by given field in specified order.
+     * 
+     * @param field The field to sort by
+     * @param descending <code>true</code> to sort in descending order; otherwise <code>false</code> for ascending order
+     * @throws MessagingException If initialization fails
+     */
+    public MessagingComparator(final MessagingField field, final boolean descending) throws MessagingException {
         checkField(field);
         this.field = field;
+        this.descending = descending;
         get = new MessagingMessageGetSwitch();
     }
 
@@ -121,6 +141,10 @@ public class MessagingComparator implements Comparator<MessagingMessage> {
     }
 
     public int compare(final MessagingMessage o1, final MessagingMessage o2) {
+        return descending ? -1 * compare0(o1, o2) : compare0(o1, o2);
+    }
+
+    private int compare0(final MessagingMessage o1, final MessagingMessage o2) {
         try {
             Object c1 = field.doSwitch(get, o1);
             Object c2 = field.doSwitch(get, o2);
@@ -164,7 +188,7 @@ public class MessagingComparator implements Comparator<MessagingMessage> {
             c2 = transform(c2);
 
             if (Comparable.class.isInstance(c1)) {
-                return ((Comparable) c1).compareTo(c2);
+                return ((Comparable<Object>) c1).compareTo(c2);
             }
 
             throw MessagingExceptionCodes.INVALID_SORTING_COLUMN.create(field);
