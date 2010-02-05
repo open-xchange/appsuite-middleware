@@ -58,10 +58,18 @@ public abstract class AbstractConfirmableParticipant implements ConfirmableParti
 
     private ConfirmStatus status = ConfirmStatus.NONE;
 
+    private boolean bStatus = false;
+
     private String message;
+
+    private boolean bMessage = false;
 
     protected AbstractConfirmableParticipant() {
         super();
+    }
+
+    public final boolean containsStatus() {
+        return bStatus;
     }
 
     public final int getConfirm() {
@@ -78,14 +86,16 @@ public abstract class AbstractConfirmableParticipant implements ConfirmableParti
 
     public final void setConfirm(int confirm) {
         status = ConfirmStatus.byId(confirm);
-
+        bStatus = true;
     }
 
     public void setMessage(String confirmMessage) {
         this.message = confirmMessage;
+        bMessage = true;
     }
 
     public void setStatus(ConfirmStatus status) {
         this.status = status;
+        bStatus = true;
     }
 }

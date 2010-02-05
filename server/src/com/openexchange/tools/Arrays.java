@@ -105,6 +105,17 @@ public final class Arrays {
         return retval;
     }
 
+    public static <T> T[] add(T[] toExtend, T... other) {
+        if (other == null) {
+            return toExtend;
+        }
+        @SuppressWarnings("unchecked")
+        T[] tmp = (T[]) java.lang.reflect.Array.newInstance(other.getClass().getComponentType(), toExtend.length + other.length);
+        System.arraycopy(toExtend, 0, tmp, 0, toExtend.length);
+        System.arraycopy(other, 0, tmp, toExtend.length, other.length);
+        return tmp;
+    }
+
     /**
      * Gets a newly allocated array containing all of the elements in specified collection.
      * 

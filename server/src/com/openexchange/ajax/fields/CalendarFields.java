@@ -96,4 +96,6 @@ public interface CalendarFields extends CommonFields {
     public static final String PARTICIPANTS = "participants";
 
     public static final String USERS = "users";
+
+    public static final String CONFIRMATIONS = "confirmations";
 }

@@ -62,6 +62,8 @@ public interface ConfirmableParticipant extends Participant {
 
     ConfirmStatus getStatus();
 
+    boolean containsStatus();
+
     /**
      * @deprecated use {@link #setStatus(ConfirmStatus)}.
      */

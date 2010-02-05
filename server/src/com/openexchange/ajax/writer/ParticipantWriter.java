@@ -49,9 +49,17 @@
 
 package com.openexchange.ajax.writer;
 
+import static com.openexchange.ajax.writer.DataWriter.writeParameter;
+import java.util.TimeZone;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.fields.ParticipantsFields;
+import com.openexchange.ajax.writer.DataWriter.FieldWriter;
+import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 
 /**
  * {@link ParticipantWriter}
@@ -65,10 +73,66 @@ public class ParticipantWriter {
     }
 
     public void write(Participant participant, JSONObject json) {
-        
+        // will replace 
     }
 
     public void write(UserParticipant participant, JSONObject json) {
         
     }
+
+    public void write(ConfirmableParticipant participant, JSONObject json) throws JSONException {
+        if (participant instanceof ExternalUserParticipant) {
+            write((ExternalUserParticipant) participant, json);
+        }
+    }
+
+    public void write(ExternalUserParticipant participant, JSONObject json) throws JSONException {
+        for (FieldWriter<Participant> writer : EXTERNAL_WRITERS) {
+            writer.write(participant, null, json);
+        }
+//        writeParameter(ParticipantsFields.CONFIRMATION, userParticipant.getConfirm(), jsonObj);
+//        if (userParticipant.containsConfirmMessage()) {
+//            writeParameter(ParticipantsFields.CONFIRM_MESSAGE, userParticipant.getConfirmMessage(), jsonObj);
+//        }
+    }
+
+    protected static final FieldWriter<Participant> TYPE_WRITER = new FieldWriter<Participant>() {
+        public void write(Participant obj, TimeZone timeZone, JSONArray json) {
+            throw new UnsupportedOperationException("JSON array writing is not supported for participants.");
+        }
+        public void write(Participant obj, TimeZone timeZone, JSONObject json) throws JSONException {
+            writeParameter(ParticipantsFields.TYPE, obj.getType(), json, obj.getType() > 0);
+        }
+    };
+
+    protected static final FieldWriter<ExternalUserParticipant> MAIL_WRITER = new FieldWriter<ExternalUserParticipant>() {
+        public void write(ExternalUserParticipant obj, TimeZone timeZone, JSONArray json) {
+            throw new UnsupportedOperationException("JSON array writing is not supported for participants.");
+        }
+        public void write(ExternalUserParticipant obj, TimeZone timeZone, JSONObject json) throws JSONException {
+            writeParameter(ParticipantsFields.MAIL, obj.getEmailAddress(), json);
+        }
+    };
+
+    protected static final FieldWriter<Participant> DISPLAY_NAME_WRITER = new FieldWriter<Participant>() {
+        public void write(Participant obj, TimeZone timeZone, JSONArray json) {
+            throw new UnsupportedOperationException("JSON array writing is not supported for participants.");
+        }
+        public void write(Participant obj, TimeZone timeZone, JSONObject json) throws JSONException {
+            writeParameter(ParticipantsFields.DISPLAY_NAME, obj.getDisplayName(), json);
+        }
+    };
+
+    protected static final FieldWriter<ConfirmableParticipant> STATUS_WRITER = new FieldWriter<ConfirmableParticipant>() {
+        public void write(ConfirmableParticipant obj, TimeZone timeZone, JSONArray json) {
+            throw new UnsupportedOperationException("JSON array writing is not supported for participants.");
+        }
+        public void write(ConfirmableParticipant obj, TimeZone timeZone, JSONObject json) throws JSONException {
+            writeParameter(ParticipantsFields.STATUS, obj.getStatus().getId(), json, obj.containsStatus());
+        }
+    };
+
+    @SuppressWarnings("unchecked")
+    private static final FieldWriter<Participant>[] EXTERNAL_WRITERS = (FieldWriter<Participant>[]) new FieldWriter<?>[] {
+        TYPE_WRITER, MAIL_WRITER, DISPLAY_NAME_WRITER, STATUS_WRITER };
 }

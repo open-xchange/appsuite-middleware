@@ -473,7 +473,7 @@ public class DataWriter {
         }
     }
 
-    protected static interface FieldWriter<T extends DataObject> {
+    protected static interface FieldWriter<T> {
 
         /**
          * Writes this writer's value taken from specified data object to given JSON array.
