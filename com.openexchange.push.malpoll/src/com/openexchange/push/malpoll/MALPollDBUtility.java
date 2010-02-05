@@ -84,68 +84,6 @@ public final class MALPollDBUtility {
     }
 
     /**
-     * Rolls-back specified connection.
-     * 
-     * @param con The connection to roll back.
-     */
-    public static void rollback(final Connection con) {
-        if (null == con) {
-            return;
-        }
-        try {
-            con.rollback();
-        } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
-        }
-    }
-
-    /**
-     * Convenience method to set the auto-commit of a connection to <code>true</code>.
-     * 
-     * @param con The connection that should go into auto-commit mode.
-     */
-    public static void autocommit(final Connection con) {
-        if (null == con) {
-            return;
-        }
-        try {
-            con.setAutoCommit(true);
-        } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
-        }
-    }
-
-    /**
-     * Closes the {@link ResultSet}.
-     * 
-     * @param result <code>null</code> or a {@link ResultSet} to close.
-     */
-    public static void closeSQLStuff(final ResultSet result) {
-        if (result != null) {
-            try {
-                result.close();
-            } catch (final SQLException e) {
-                LOG.error(e.getMessage(), e);
-            }
-        }
-    }
-
-    /**
-     * Closes the {@link Statement}.
-     * 
-     * @param stmt <code>null</code> or a {@link Statement} to close.
-     */
-    public static void closeSQLStuff(final Statement stmt) {
-        if (null != stmt) {
-            try {
-                stmt.close();
-            } catch (final SQLException e) {
-                LOG.error(e.getMessage(), e);
-            }
-        }
-    }
-
-    /**
      * Inserts the mail IDs associated with specified hash.
      * 
      * @param hash The hash
@@ -155,12 +93,7 @@ public final class MALPollDBUtility {
      * @throws PushException If a database resource could not be acquired
      */
     public static void insertMailIDs(final UUID hash, final Set<String> mailIds, final int cid) throws PushException {
-        final DatabaseService databaseService;
-        try {
-            databaseService = MALPollServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
-        } catch (final ServiceException e) {
-            throw new PushException(e);
-        }
+        final DatabaseService databaseService = getDBService();
         final Connection writableConnection;
         try {
             writableConnection = databaseService.getWritable(cid);
@@ -274,12 +207,7 @@ public final class MALPollDBUtility {
      * @throws PushException If a database resource could not be acquired
      */
     public static void replaceMailIDs(final UUID hash, final Set<String> newIds, final Set<String> delIds, final int cid) throws PushException {
-        final DatabaseService databaseService;
-        try {
-            databaseService = MALPollServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
-        } catch (final ServiceException e) {
-            throw new PushException(e);
-        }
+        final DatabaseService databaseService = getDBService();
         final Connection writableConnection;
         try {
             writableConnection = databaseService.getWritable(cid);
@@ -327,15 +255,7 @@ public final class MALPollDBUtility {
              */
             return;
         }
-        /*
-         * Drop everything related to hash
-         */
-        final DatabaseService databaseService;
-        try {
-            databaseService = MALPollServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
-        } catch (final ServiceException e) {
-            throw new PushException(e);
-        }
+        final DatabaseService databaseService = getDBService();
         final Connection writableConnection;
         try {
             writableConnection = databaseService.getForUpdateTask(cid);
@@ -385,12 +305,7 @@ public final class MALPollDBUtility {
      * @throws PushException If a database resource could not be acquired
      */
     public static Set<String> getMailIDs(final UUID hash, final int cid) throws PushException {
-        final DatabaseService databaseService;
-        try {
-            databaseService = MALPollServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
-        } catch (final ServiceException e) {
-            throw new PushException(e);
-        }
+        final DatabaseService databaseService = getDBService();
         final Connection readableConnection;
         try {
             readableConnection = databaseService.getReadOnly(cid);
@@ -433,12 +348,7 @@ public final class MALPollDBUtility {
      * @throws PushException If a database resource could not be acquired
      */
     public static UUID getHash(final int cid, final int user, final int accountId, final String fullname) throws PushException {
-        final DatabaseService databaseService;
-        try {
-            databaseService = MALPollServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
-        } catch (final ServiceException e) {
-            throw new PushException(e);
-        }
+        final DatabaseService databaseService = getDBService();
         final Connection readableConnection;
         try {
             readableConnection = databaseService.getReadOnly(cid);
@@ -484,12 +394,7 @@ public final class MALPollDBUtility {
      * @throws PushException If a database resource could not be acquired
      */
     public static UUID insertHash(final int cid, final int user, final int accountId, final String fullname) throws PushException {
-        final DatabaseService databaseService;
-        try {
-            databaseService = MALPollServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
-        } catch (final ServiceException e) {
-            throw new PushException(e);
-        }
+        final DatabaseService databaseService = getDBService();
         final Connection writableConnection;
         try {
             writableConnection = databaseService.getWritable(cid);
@@ -520,6 +425,22 @@ public final class MALPollDBUtility {
         }
     }
 
+    /**
+     * Gets the {@link DatabaseService database service} from service registry.
+     * 
+     * @return The database service
+     * @throws PushException If database service is not available
+     */
+    private static DatabaseService getDBService() throws PushException {
+        final DatabaseService databaseService;
+        try {
+            databaseService = MALPollServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
+        } catch (final ServiceException e) {
+            throw new PushException(e);
+        }
+        return databaseService;
+    }
+
     private static final int UUID_BYTE_LENGTH = 16;
 
     /**
@@ -534,7 +455,7 @@ public final class MALPollDBUtility {
             throw new IllegalArgumentException("Byte array is null.");
         }
         if (bytes.length != UUID_BYTE_LENGTH) {
-            throw new IllegalArgumentException("UUID must be contructed using a 16 byte array.");
+            throw new IllegalArgumentException("UUID must be contructed using a byte array with length 16.");
         }
         long msb = 0;
         long lsb = 0;
@@ -545,6 +466,68 @@ public final class MALPollDBUtility {
             lsb = (lsb << 8) | (bytes[i] & 0xff);
         }
         return new UUID(msb, lsb);
+    }
+
+    /**
+     * Rolls-back specified connection.
+     * 
+     * @param con The connection to roll back.
+     */
+    private static void rollback(final Connection con) {
+        if (null == con) {
+            return;
+        }
+        try {
+            con.rollback();
+        } catch (final SQLException e) {
+            LOG.error(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Convenience method to set the auto-commit of a connection to <code>true</code>.
+     * 
+     * @param con The connection that should go into auto-commit mode.
+     */
+    private static void autocommit(final Connection con) {
+        if (null == con) {
+            return;
+        }
+        try {
+            con.setAutoCommit(true);
+        } catch (final SQLException e) {
+            LOG.error(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Closes the {@link ResultSet}.
+     * 
+     * @param result <code>null</code> or a {@link ResultSet} to close.
+     */
+    private static void closeSQLStuff(final ResultSet result) {
+        if (result != null) {
+            try {
+                result.close();
+            } catch (final SQLException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+    }
+
+    /**
+     * Closes the {@link Statement}.
+     * 
+     * @param stmt <code>null</code> or a {@link Statement} to close.
+     */
+    private static void closeSQLStuff(final Statement stmt) {
+        if (null != stmt) {
+            try {
+                stmt.close();
+            } catch (final SQLException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
     }
 
 }
