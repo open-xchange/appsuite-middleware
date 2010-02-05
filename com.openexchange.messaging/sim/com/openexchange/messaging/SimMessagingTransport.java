@@ -58,9 +58,9 @@ package com.openexchange.messaging;
 public class SimMessagingTransport implements MessagingAccountTransport {
 
     private MessagingMessage message;
-    private MessagingAddress recipients;
+    private MessagingAddressHeader recipients;
 
-    public void transport(MessagingMessage message, MessagingAddress recipients) throws MessagingException {
+    public void transport(final MessagingMessage message, final MessagingAddressHeader recipients) throws MessagingException {
         this.message = message;
         this.recipients = recipients;
     }
@@ -85,7 +85,7 @@ public class SimMessagingTransport implements MessagingAccountTransport {
         return message;
     }
     
-    public MessagingAddress getRecipients() {
+    public MessagingAddressHeader getRecipients() {
         return recipients;
     }
 

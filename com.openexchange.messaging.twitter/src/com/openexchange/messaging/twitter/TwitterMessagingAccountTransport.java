@@ -53,7 +53,7 @@ import static com.openexchange.messaging.twitter.TwitterMessagingUtility.checkCo
 import static com.openexchange.messaging.twitter.TwitterMessagingUtility.parseUnsignedLong;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingAccountTransport;
-import com.openexchange.messaging.MessagingAddress;
+import com.openexchange.messaging.MessagingAddressHeader;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.MessagingMessage;
@@ -103,7 +103,7 @@ public final class TwitterMessagingAccountTransport implements MessagingAccountT
         }
     }
 
-    public void transport(final MessagingMessage message, final MessagingAddress recipients) throws MessagingException {
+    public void transport(final MessagingMessage message, final MessagingAddressHeader recipients) throws MessagingException {
         final String messageType;
         {
             final MessagingHeader header = message.getFirstHeader(MessagingHeader.KnownHeader.MESSAGE_TYPE.toString());
