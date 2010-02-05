@@ -57,6 +57,7 @@ import com.openexchange.push.PushException;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.malpoll.services.MALPollServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.tools.Collections;
 
 /**
  * {@link MALPollPushListenerRegistry} - The registry for MAL poll {@link PushListener}s.
@@ -188,37 +189,7 @@ public final class MALPollPushListenerRegistry {
      * @return A read-only {@link Iterator iterator} over the push listeners in this registry.
      */
     public Iterator<MALPollPushListener> getPushListeners() {
-        return unmodifiableIterator(map.values().iterator());
-    }
-
-    /**
-     * Strips the <tt>remove()</tt> functionality from an existing iterator.
-     * <p>
-     * Wraps the supplied iterator into a new one that will always throw an <tt>UnsupportedOperationException</tt> if its <tt>remove()</tt>
-     * method is called.
-     * 
-     * @param iterator The iterator to turn into an unmodifiable iterator.
-     * @return An iterator with no remove functionality.
-     */
-    private static <T> Iterator<T> unmodifiableIterator(final Iterator<T> iterator) {
-        if (iterator == null) {
-            throw new NullPointerException();
-        }
-
-        return new Iterator<T>() {
-
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
-
-            public T next() {
-                return iterator.next();
-            }
-
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
-        };
+        return Collections.unmodifiableIterator(map.values().iterator());
     }
 
     private static final class SimpleKey {
