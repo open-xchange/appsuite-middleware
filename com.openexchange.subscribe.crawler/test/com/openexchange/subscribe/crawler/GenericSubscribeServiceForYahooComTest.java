@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -53,6 +53,9 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import org.ho.yaml.Yaml;
+import com.openexchange.subscribe.crawler.PagePart;
+import com.openexchange.subscribe.crawler.PagePartSequence;
+import com.openexchange.subscribe.crawler.Step;
 
 /**
  * {@link GenericSubscribeServiceForYahooComTest}
@@ -60,8 +63,11 @@ import org.ho.yaml.Yaml;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class GenericSubscribeServiceForYahooComTest extends GenericSubscribeServiceTestHelpers {
-
-    public void testGenericSubscribeServiceForYahooCom() {
+	
+	public static final String VALID_ADDRESS_PART = "[a-zA-Z0-9\\s\u00e4\u00f6\u00fc\u00df]*";
+    
+    public void testGenericSubscribeServiceForYahooCom() {        
+        
         // insert valid credentials here
         String username = "";
         String password = "";
@@ -70,6 +76,7 @@ public class GenericSubscribeServiceForYahooComTest extends GenericSubscribeServ
         CrawlerDescription crawler = new CrawlerDescription();
         crawler.setDisplayName("yahoo.com");
         crawler.setId("com.openexchange.subscribe.crawler.yahoocom");
+        crawler.setPriority(3);
         List<Step> steps = new LinkedList<Step>();
 
         steps.add(new LoginPageByFormActionStep(
@@ -85,21 +92,36 @@ public class GenericSubscribeServiceForYahooComTest extends GenericSubscribeServ
             ""));
         steps.add(new PageByUrlStep("We are not automatically redirected so we have to click a link", "http://address.yahoo.com/"));
         steps.add(new PageByLinkRegexStep("Click on Classic Contacts", ".*contact_list.*"));
-        steps.add(new PageByLinkRegexStep("Click on Import/Export", ".*import_export.*"));
-        steps.add(new PageByNamedHtmlElementStep(
-            "Click the \"Export Now\"-Button (underneath \"vCard Single File\")",
-            3,
-            "submit[action_export_vcard]"));
-        List<String> list = new ArrayList<String>();
-        list.add("BDAY[^\\n]*");
-        list.add("REV[^\\n]*");
-        steps.add(new ContactObjectsByVcardFileStep("Work through the vcard-file", list));
+        steps.add(new AnchorsByLinkRegexStep("Get the links to all contact detail pages", "", ".*detailed_contact.*"));
+        ArrayList<PagePart> pageParts = new ArrayList<PagePart>();
+        pageParts.add(new PagePart("(<h1>\\s)"+VALID_NAME+"(</h1>)","display_name"));
+        pageParts.add(new PagePart("(qa_compose1[^>]*>)"+VALID_EMAIL_REGEX+"(<)","email1"));        
+        // add a filler to be sure we are in the phone numbers part
+        pageParts.add(new PagePart("(<h2>Phone</h2>)"));
+        pageParts.add(new PagePart("([^0-9\\+\\(\\)]*Home:[^0-9\\+\\(\\)])*"+VALID_PHONE_REGEX+"(&)","telephone_home1"));
+        pageParts.add(new PagePart("([^0-9\\+\\(\\)]*Work:[^0-9\\+\\(\\)])*"+VALID_PHONE_REGEX+"(&)","telephone_business1"));
+        pageParts.add(new PagePart("([^0-9\\+\\(\\)]*Mobile:[^0-9\\+\\(\\)])*"+VALID_PHONE_REGEX+"(&)","cellular_telephone1"));
+        // add a filler to be sure we are in the work part
+        pageParts.add(new PagePart("(<h2>Work</h2>)"));
+        pageParts.add(new PagePart("(<dt>[\\s]*Company:[\\s]*<\\/dt>[\\s]*<dd>[\\s]*<div>[\\s]*)([^<]*)(<\\/div>)","company"));
+        pageParts.add(new PagePart("(<dt>[\\s]*Title:[\\s]*<\\/dt>[\\s]*<dd>[\\s]*<div>[\\s]*)([^<]*)(<\\/div>)","title"));
+        pageParts.add(new PagePart("(<dt>[\\s]*Address:[\\s]*<\\/dt>[\\s]*<dd>[\\s]*<div>[\\s]*)("+VALID_ADDRESS_PART+"<br \\/>[\\s]*<br \\/>[\\s]*"+VALID_ADDRESS_PART+"<br \\/>[\\s]*"+VALID_ADDRESS_PART+")(<)", "address_note"));
+        // add a filler to be sure we are in the instant messenger part
+        pageParts.add(new PagePart("(<h2>Instant Messenger</h2>)")); 
+        pageParts.add(new PagePart("(AIM|Google Talk|Skype|Windows Live|Yahoo):[\\s]*<\\/dt>[\\s]*<dd>[\\s]*<div>[\\s]*([^<]*)(<\\/div>)","instant_messenger1",1));
+        // add a filler to be sure we are in the personal address
+        pageParts.add(new PagePart("(<h2>Personal</h2>)"));
+        pageParts.add(new PagePart("(Birthday:[^0-9]*)([0-9]{2})(\\/)","birthday_month"));
+        pageParts.add(new PagePart("()([0-9]{2})(\\/)","birthday_day"));
+        pageParts.add(new PagePart("()([0-9]{4})(<)","birthday_year"));
+        PagePartSequence sequence = new PagePartSequence(pageParts, "");
+        steps.add(new ContactObjectsByHTMLAnchorsAndPagePartSequenceStep("Get each contacts details", sequence, "", ""));
 
         Workflow workflow = new Workflow(steps);
         workflow.setUseThreadedRefreshHandler(true);
         crawler.setWorkflowString(Yaml.dump(workflow));
 
-        findOutIfThereAreContactsForThisConfiguration(username, password, crawler);
+        findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
         // uncomment this if the if the crawler description was updated to get the new config-files
         // dumpThis(crawler, crawler.getDisplayName());
     }

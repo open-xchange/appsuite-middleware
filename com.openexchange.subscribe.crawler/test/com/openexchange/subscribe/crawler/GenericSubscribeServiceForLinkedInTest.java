@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,6 +51,9 @@ package com.openexchange.subscribe.crawler;
 
 import java.util.ArrayList;
 import org.ho.yaml.Yaml;
+import com.openexchange.subscribe.crawler.PagePart;
+import com.openexchange.subscribe.crawler.PagePartSequence;
+import com.openexchange.subscribe.crawler.Step;
 
 //import com.openexchange.server.services.ServerServiceRegistry;
 //import com.openexchange.timer.TimerService;
@@ -70,11 +73,7 @@ public class GenericSubscribeServiceForLinkedInTest extends GenericSubscribeServ
         CrawlerDescription crawler = new CrawlerDescription();
         crawler.setDisplayName("LinkedIn");
         crawler.setId("com.openexchange.subscribe.linkedin");
-
-        // initiate the TimerService for MultiThreading
-        // final TimerImpl timer = new TimerImpl();
-        // timer.start();
-        // ServerServiceRegistry.getInstance().addService(TimerService.class, timer);
+        crawler.setPriority(3);        
 
         ArrayList<Step> listOfSteps = new ArrayList<Step>();
 
@@ -86,7 +85,7 @@ public class GenericSubscribeServiceForLinkedInTest extends GenericSubscribeServ
             "login",
             "session_key",
             "session_password",
-            "/connections?trk=hb_side_cnts",
+            "/connections?trk=hb_tab_cnts",
             "https://www.linkedin.com"));
         listOfSteps.add(new PageByUrlStep("Get to the contacts list", "http://www.linkedin.com/connections?trk=hb_side_cnts"));
         listOfSteps.add(new PageByUrlStep(
@@ -131,8 +130,8 @@ public class GenericSubscribeServiceForLinkedInTest extends GenericSubscribeServ
         Workflow workflow = new Workflow(listOfSteps);
         crawler.setWorkflowString(Yaml.dump(workflow));
 
-        //findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
+        findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
         // uncomment this if the crawler description was updated to get the new config-files
-        //dumpThis(crawler, crawler.getDisplayName());
+        // dumpThis(crawler, crawler.getDisplayName());
     }
 }

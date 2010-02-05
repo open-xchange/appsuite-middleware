@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -53,6 +53,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import org.ho.yaml.Yaml;
+import com.openexchange.subscribe.crawler.Step;
 
 /**
  * {@link GenericSubscribeServiceForGMXTest}
@@ -61,7 +62,7 @@ import org.ho.yaml.Yaml;
  */
 public class GenericSubscribeServiceForGMXTest extends GenericSubscribeServiceTestHelpers {
 
-	public void testGenericSubscribeServiceForGMX() {
+    public void testGenericSubscribeServiceForGMX() {
         // insert valid credentials here
         String username = "";
         String password = "";
@@ -72,17 +73,19 @@ public class GenericSubscribeServiceForGMXTest extends GenericSubscribeServiceTe
         crawler.setId("com.openexchange.subscribe.crawler.gmx");
         List<Step> steps = new LinkedList<Step>();
 
-        steps.add(new LoginPageStep(
+        steps.add(new LoginPageByFormActionStep(
             "Log in",
             "https://www.gmx.de",
             "",
             "",
-            "login1",
+            "https://service.gmx.net/de/cgi/login",
             "id",
             "p",
-            "https://service.gmx.net",        
+            ".*/service\\.gmx\\.net\\/de\\/cgi\\/g\\.fcgi/addressbook.*",
+            2,
             ""));
-        steps.add(new PageByLinkRegexStep("Click on the addressbook link in the menu to the left.", ".*service\\.gmx\\.net\\/de\\/cgi\\/g\\.fcgi/addressbook.*"));
+        //new ConditionalStep needed "https://service.gmx.net/de/cgi/g.fcgi/application/navigator"
+        steps.add(new PageByLinkRegexStep("Click on the addressbook link in the menu to the left.", ".*/service\\.gmx\\.net\\/de\\/cgi\\/g\\.fcgi/addressbook.*"));
         steps.add(new PageByFrameNumberStep("Get the first iframe", 1));
         steps.add(new PageByLinkRegexStep("Click on the manage-Addressbook-Link in the upper right ","categories.*"));
         steps.add(new PageByLinkRegexStep("Click on the Export-link to the left","exportcontacts.*"));
@@ -127,8 +130,8 @@ public class GenericSubscribeServiceForGMXTest extends GenericSubscribeServiceTe
         Workflow workflow = new Workflow(steps);
         crawler.setWorkflowString(Yaml.dump(workflow));
 
-        // findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
+        findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
         // uncomment this if the if the crawler description was updated to get the new config-files
-        dumpThis(crawler, crawler.getDisplayName());
+        // dumpThis(crawler, crawler.getDisplayName());
     }
 }
