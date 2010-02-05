@@ -131,15 +131,13 @@ public class TasksTest extends AbstractAJAXTest {
         task.setBillingInformation("billing information");
         task.setCompanies("companies");
 
-        final int folderId = TaskTools.getPrivateTaskFolder(getWebConversation(),
-            getHostName(), getSessionId());
+        final int folderId = TaskTools.getPrivateTaskFolder(getWebConversation(), getHostName(), getSessionId());
 
         final List<Participant> participants = ParticipantTools.getParticipants(
             getWebConversation(), getHostName(), getSessionId(), 2, true,
             ConfigTools.getUserId(getWebConversation(), getHostName(),
                 getSessionId()));
-        final ExternalUserParticipant external = new ExternalUserParticipant();
-        external.setEmailAddress("external@external.no");
+        final ExternalUserParticipant external = new ExternalUserParticipant("external@external.no");
         external.setDisplayName("External, External");
         participants.add(external);
         task.setParticipants(participants);
