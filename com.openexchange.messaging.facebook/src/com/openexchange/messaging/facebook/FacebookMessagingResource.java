@@ -235,8 +235,8 @@ public class FacebookMessagingResource implements MessagingResource {
             if (connected) {
                 return;
             }
-            connected = true;
             login(true, true);
+            connected = true;
         }
     }
 
