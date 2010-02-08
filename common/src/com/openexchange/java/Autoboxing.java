@@ -128,13 +128,13 @@ public final class Autoboxing {
 
     /**
      * Converts an Integer-list into an int-array.
-     * @param integerList List of Integers to be converted to int[]
+     * @param integerCollection List of Integers to be converted to int[]
      * @return int[]
      */
-    public static int[] I2i(Collection<Integer> integerList) {
-        int[] intArray = new int[integerList.size()];
+    public static int[] I2i(Collection<Integer> integerCollection) {
+        int[] intArray = new int[integerCollection.size()];
         int pos = 0;
-        for (Integer i : integerList) {
+        for (Integer i : integerCollection) {
             intArray[pos++] = i.intValue();
         }
         return intArray;
