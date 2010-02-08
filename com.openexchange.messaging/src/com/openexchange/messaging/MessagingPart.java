@@ -55,7 +55,7 @@ import java.util.Collection;
 import java.util.Map;
 
 /**
- * {@link MessagingPart} . A message part.
+ * {@link MessagingPart} - A message part.
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
