@@ -162,12 +162,11 @@ public final class OutlookFolderStorage implements FolderStorage {
 
     public boolean containsFolder(final String treeId, final String folderId, final StorageType storageType, final StorageParameters storageParameters) throws FolderException {
         // Exclude unsupported folders like infostore folders
-        final Folder folder =
-            folderStorageRegistry.getDedicatedFolderStorage(FolderStorage.REAL_TREE_ID, folderId).getFolder(
-                FolderStorage.REAL_TREE_ID,
-                folderId,
-                storageType,
-                storageParameters);
+        final FolderStorage dedicatedFolderStorage = folderStorageRegistry.getDedicatedFolderStorage(FolderStorage.REAL_TREE_ID, folderId);
+        if (!dedicatedFolderStorage.containsFolder(FolderStorage.REAL_TREE_ID, folderId, storageType, storageParameters)) {
+            return false;
+        }
+        final Folder folder = dedicatedFolderStorage.getFolder(FolderStorage.REAL_TREE_ID, folderId, storageType, storageParameters);
         if (InfostoreContentType.getInstance().equals(folder.getContentType())) {
             return false;
         }
@@ -471,7 +470,8 @@ public final class OutlookFolderStorage implements FolderStorage {
                         treeMap.put(folderStorage.getFolder(realTreeId, id, storageParameters).getLocalizedName(locale), id);
                     }
                     // Simulate altnamespace feature
-                    final SortableId[] inboxSubfolders = folderStorage.getSubfolders(realTreeId, PREPARED_FULLNAME_INBOX, storageParameters);
+                    final SortableId[] inboxSubfolders =
+                        folderStorage.getSubfolders(realTreeId, PREPARED_FULLNAME_INBOX, storageParameters);
                     for (final SortableId sortableId : inboxSubfolders) {
                         final String id = sortableId.getId();
                         treeMap.put(folderStorage.getFolder(realTreeId, id, storageParameters).getLocalizedName(locale), id);
@@ -494,7 +494,8 @@ public final class OutlookFolderStorage implements FolderStorage {
                 folderStorage.startTransaction(storageParameters, false);
                 try {
                     // Get subfolders
-                    final SortableId[] subfolders = folderStorage.getSubfolders(FolderStorage.REAL_TREE_ID, FolderStorage.ROOT_ID, storageParameters);
+                    final SortableId[] subfolders =
+                        folderStorage.getSubfolders(FolderStorage.REAL_TREE_ID, FolderStorage.ROOT_ID, storageParameters);
                     for (int i = 0; i < subfolders.length; i++) {
                         final String id = subfolders[i].getId();
                         if (FolderStorage.PUBLIC_ID.equals(id)) {
