@@ -373,7 +373,11 @@ public final class POP3Exception extends MIMEMailException {
         /**
          * Missing required capability %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s).
          */
-        MISSING_REQUIRED_CAPABILITY("Missing required capability %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s).", Category.SETUP_ERROR, 2068);
+        MISSING_REQUIRED_CAPABILITY("Missing required capability %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s).", Category.SETUP_ERROR, 2068),
+        /**
+         * POP3 storage path "%1$s" cannot be created for user %2$s in context %3$s.
+         */
+        ILLEGAL_PATH("POP3 storage path \"%1$s\" cannot be created for user %2$s in context %3$s.", Category.CODE_ERROR, 2069);
 
         private final String message;
 

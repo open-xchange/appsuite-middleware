@@ -215,7 +215,8 @@ public class MailAccountPOP3Storage implements POP3Storage {
                 final MailFolderDescription toCreate = new MailFolderDescription();
 
                 final MailPermission mp = new DefaultMailPermission();
-                mp.setEntity(pop3Access.getSession().getUserId());
+                final Session session = pop3Access.getSession();
+                mp.setEntity(session.getUserId());
 
                 toCreate.addPermission(mp);
                 toCreate.setExists(false);
@@ -230,7 +231,12 @@ public class MailAccountPOP3Storage implements POP3Storage {
                 // Unsubscribe
                 toCreate.setSubscribed(false);
 
-                defaultMailAccess.getFolderStorage().createFolder(toCreate);
+                try {
+                    defaultMailAccess.getFolderStorage().createFolder(toCreate);
+                } catch (final MailException e) {
+                    throw new POP3Exception(POP3Exception.Code.ILLEGAL_PATH, e, path, Integer.valueOf(session.getUserId()),
+                        Integer.valueOf(session.getContextId()));
+                }
             }
         } catch (final MailException e) {
             /*
