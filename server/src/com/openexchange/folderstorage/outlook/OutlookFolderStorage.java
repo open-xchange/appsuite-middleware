@@ -70,6 +70,7 @@ import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StoragePriority;
 import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
+import com.openexchange.folderstorage.internal.Tools;
 import com.openexchange.folderstorage.outlook.sql.Delete;
 import com.openexchange.folderstorage.outlook.sql.Insert;
 import com.openexchange.folderstorage.outlook.sql.Select;
@@ -205,7 +206,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         }
         Insert.insertFolder(
             storageParameters.getContext().getContextId(),
-            Integer.parseInt(folder.getTreeID()),
+            Tools.getUnsignedInteger(folder.getTreeID()),
             storageParameters.getUser().getId(),
             folder);
     }
@@ -216,7 +217,7 @@ public final class OutlookFolderStorage implements FolderStorage {
          */
         Delete.deleteFolder(
             storageParameters.getContext().getContextId(),
-            Integer.parseInt(treeId),
+            Tools.getUnsignedInteger(treeId),
             storageParameters.getUser().getId(),
             folderId,
             true);
@@ -353,7 +354,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         final User user = storageParameters.getUser();
         Select.fillFolder(
             storageParameters.getContext().getContextId(),
-            Integer.parseInt(treeId),
+            Tools.getUnsignedInteger(treeId),
             user.getId(),
             user.getLocale(),
             outlookFolder,
@@ -598,7 +599,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         final String[] ids =
             Select.getSubfolderIds(
                 storageParameters.getContext().getContextId(),
-                Integer.parseInt(treeId),
+                Tools.getUnsignedInteger(treeId),
                 user.getId(),
                 locale,
                 parentId,
@@ -627,12 +628,11 @@ public final class OutlookFolderStorage implements FolderStorage {
         /*
          * Update only if folder is contained
          */
-        if (containsFolder(folder.getTreeID(), folder.getID(), storageParameters)) {
-            Update.updateFolder(
-                storageParameters.getContext().getContextId(),
-                Integer.parseInt(folder.getTreeID()),
-                storageParameters.getUser().getId(),
-                folder);
+        final int contextId = storageParameters.getContext().getContextId();
+        final int tree = Tools.getUnsignedInteger(folder.getTreeID());
+        final int userId = storageParameters.getUser().getId();
+        if (Select.containsFolder(contextId, tree, userId, folder.getID(), StorageType.WORKING)) {
+            Update.updateFolder(contextId, tree, userId, folder);
         }
     }
 
