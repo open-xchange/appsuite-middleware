@@ -55,7 +55,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.groupware.container.participants.ConfirmableParticipant;
-import com.openexchange.tools.Arrays;
 
 /**
  * CalendarObject
@@ -243,6 +242,8 @@ public abstract class CalendarObject extends CommonObject {
     protected boolean b_participants;
 
     protected boolean b_users;
+
+    protected boolean bConfirmations;
 
     protected boolean b_confirm;
 
@@ -698,6 +699,16 @@ public abstract class CalendarObject extends CommonObject {
 
     public void setConfirmations(ConfirmableParticipant[] confirmations) {
         this.confirmations = confirmations;
+        bConfirmations = true;
+    }
+
+    public void removeConfigurations() {
+        this.confirmations = null;
+        bConfirmations = false;
+    }
+
+    public boolean containsConfirmations() {
+        return bConfirmations;
     }
 
     @Override
@@ -720,6 +731,7 @@ public abstract class CalendarObject extends CommonObject {
         notification = false;
         participants = null;
         users = null;
+        confirmations = null;
         occurrence = 0;
 
         b_title = false;

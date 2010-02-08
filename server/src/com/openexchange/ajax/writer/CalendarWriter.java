@@ -244,11 +244,13 @@ public abstract class CalendarWriter extends CommonWriter {
         }
         private JSONArray createConfirmationArray(CalendarObject obj) throws JSONException {
             JSONArray confirmations = new JSONArray();
-            ParticipantWriter writer = new ParticipantWriter();
-            for (ConfirmableParticipant participant : obj.getConfirmations()) {
-                JSONObject jParticipant = new JSONObject();
-                writer.write(participant, jParticipant);
-                confirmations.put(jParticipant);
+            if (obj.containsConfirmations()) {
+                ParticipantWriter writer = new ParticipantWriter();
+                for (ConfirmableParticipant participant : obj.getConfirmations()) {
+                    JSONObject jParticipant = new JSONObject();
+                    writer.write(participant, jParticipant);
+                    confirmations.put(jParticipant);
+                }
             }
             return confirmations;
         }
