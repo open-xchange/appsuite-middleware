@@ -63,8 +63,10 @@ import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.messaging.generic.groupware.Enabled;
 import com.openexchange.messaging.generic.groupware.MessagingGenericCreateTableTask;
 import com.openexchange.messaging.generic.groupware.MessagingGenericDeleteListener;
 import com.openexchange.messaging.generic.internal.CachingMessagingAccountStorage;
@@ -167,6 +169,7 @@ public class MessagingGenericActivator extends DeferredActivator {
             }, null));
             registrations.add(context.registerService(DeleteListener.class.getName(), new MessagingGenericDeleteListener(), null));
 
+            registrations.add(context.registerService(PreferencesItemService.class.getName(), new Enabled(), null));
         } catch (final Exception e) {
             org.apache.commons.logging.LogFactory.getLog(MessagingGenericActivator.class).error(e.getMessage(), e);
             throw e;
