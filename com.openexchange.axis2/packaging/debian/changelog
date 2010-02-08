@@ -1,3 +1,9 @@
+open-xchange-axis2 (6.12.0.0-11) unstable; urgency=low
+
+  * second build for public PTF 2009-11-20
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon,  8 Feb 2010 11:09:47 +0100
+
 open-xchange-axis2 (6.12.0.0-10) unstable; urgency=low
 
   * build for PTF 2009122210000133
