@@ -598,6 +598,7 @@ public class MimeMessagingPart implements MessagingPart {
     public void setContent(final MimeMultipartContent mp) throws MessagingException {
         try {
             part.setContent(mp.mimeMultipart);
+            part.setHeader(H_CONTENT_TYPE.toString(), mp.mimeMultipart.getContentType());
             headers = null;
             cachedContent = null;
             b_cachedContentType = false;
