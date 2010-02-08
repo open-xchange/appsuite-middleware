@@ -83,6 +83,9 @@ public final class Tools {
      * @throws IllegalStateException If this method fails to return an appropriate time zone
      */
     public static TimeZone getTimeZone(final String timeZoneID) {
+        if (null == timeZoneID) {
+            return null;
+        }
         Future<TimeZone> future = TZ_MAP.get(timeZoneID);
         if (null == future) {
             final FutureTask<TimeZone> ft = new FutureTask<TimeZone>(new Callable<TimeZone>() {
