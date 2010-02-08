@@ -153,7 +153,7 @@ public final class FacebookConfiguration {
             String pattern =
                 configurationService.getProperty(
                     "com.openexchange.messaging.facebook.linkAfterLogin",
-                    "\"(http://www.facebook.com/inbox/\\\\?ref=[a-z]*)\"").trim();
+                    "\"\\Qhttp://www.facebook.com/profile.php?ref=profile&id=\\E([0-9]+)\"").trim();
             /*
              * Remove surrounding quotes
              */
