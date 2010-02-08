@@ -75,4 +75,6 @@ public interface ConfirmableParticipant extends Participant {
     void setMessage(String message);
 
     String getMessage();
+
+    boolean containsMessage();
 }

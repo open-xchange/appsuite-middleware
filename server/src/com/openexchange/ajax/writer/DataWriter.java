@@ -50,11 +50,14 @@
 package com.openexchange.ajax.writer;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.I2i;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
@@ -467,10 +470,17 @@ public class DataWriter {
         }
     }
 
-    protected void writeFields(DataObject obj, JSONArray json) throws JSONException {
-        for (FieldWriter<DataObject> writer : WRITER_MAP.values()) {
-            writer.write(obj, timeZone, json);
+    protected int[] writeFields(DataObject obj, int[] columns, JSONArray json) throws JSONException {
+        List<Integer> retval = new ArrayList<Integer>();
+        for (int column : columns) {
+            FieldWriter<DataObject> writer = WRITER_MAP.get(I(column));
+            if (null != writer) {
+                writer.write(obj, timeZone, json);
+            } else {
+                retval.add(I(column));
+            }
         }
+        return I2i(retval);
     }
 
     protected static interface FieldWriter<T> {

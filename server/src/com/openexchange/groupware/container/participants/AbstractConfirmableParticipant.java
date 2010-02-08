@@ -98,4 +98,8 @@ public abstract class AbstractConfirmableParticipant implements ConfirmableParti
         this.status = status;
         bStatus = true;
     }
+
+    public boolean containsMessage() {
+        return bMessage;
+    }
 }

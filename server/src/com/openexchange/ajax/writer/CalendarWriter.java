@@ -50,9 +50,12 @@
 package com.openexchange.ajax.writer;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.I2i;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import org.json.JSONArray;
@@ -211,11 +214,18 @@ public abstract class CalendarWriter extends CommonWriter {
         return jsonObj;
     }
 
-    protected void writeFields(CalendarObject obj, JSONArray json) throws JSONException {
-        super.writeFields(obj, json);
-        for (FieldWriter<CalendarObject> writer : WRITER_MAP.values()) {
-            writer.write(obj, timeZone, json);
+    protected int[] writeFields(CalendarObject obj, int[] columns, JSONArray json) throws JSONException {
+        int[] toWrite = super.writeFields(obj, columns, json);
+        List<Integer> retval = new ArrayList<Integer>();
+        for (int column : toWrite) {
+            FieldWriter<CalendarObject> writer = WRITER_MAP.get(I(column));
+            if (null != writer) {
+                writer.write(obj, timeZone, json);
+            } else {
+                retval.add(I(column));
+            }
         }
+        return I2i(retval);
     }
 
     protected void writeFields(CalendarObject obj, JSONObject json) throws JSONException {
@@ -227,6 +237,12 @@ public abstract class CalendarWriter extends CommonWriter {
 
     protected static final FieldWriter<CalendarObject> CONFIRMATIONS_WRITER = new FieldWriter<CalendarObject>() {
         public void write(CalendarObject obj, TimeZone timeZone, JSONArray json) throws JSONException {
+            json.put(createConfirmationArray(obj));
+        }
+        public void write(CalendarObject obj, TimeZone timeZone, JSONObject json) throws JSONException {
+            json.put(CalendarFields.CONFIRMATIONS, createConfirmationArray(obj));
+        }
+        private JSONArray createConfirmationArray(CalendarObject obj) throws JSONException {
             JSONArray confirmations = new JSONArray();
             ParticipantWriter writer = new ParticipantWriter();
             for (ConfirmableParticipant participant : obj.getConfirmations()) {
@@ -234,12 +250,7 @@ public abstract class CalendarWriter extends CommonWriter {
                 writer.write(participant, jParticipant);
                 confirmations.put(jParticipant);
             }
-            json.put(confirmations);
-        }
-        public void write(CalendarObject obj, TimeZone timeZone, JSONObject json) throws JSONException {
-            JSONObject confirmations = new JSONObject();
-            // TODO Auto-generated method stub
-            json.put(CalendarFields.CONFIRMATIONS, confirmations);
+            return confirmations;
         }
     };
 

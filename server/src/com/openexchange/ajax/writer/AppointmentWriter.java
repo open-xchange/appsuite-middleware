@@ -65,7 +65,6 @@ import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.TimeZoneUtils;
 
 /**
  * {@link AppointmentWriter} - Writer for appointments
@@ -77,8 +76,6 @@ public class AppointmentWriter extends CalendarWriter {
 
     private static final Log LOG = LogFactory.getLog(AppointmentWriter.class);
 
-    private final TimeZone utc;
-    
     private CalendarCollectionService calColl;
 
     /**
@@ -89,16 +86,15 @@ public class AppointmentWriter extends CalendarWriter {
      */
     public AppointmentWriter(final TimeZone timeZone) {
         super(timeZone, null);
-        utc = TimeZoneUtils.getTimeZone("utc");
     }
-    
+
     public CalendarCollectionService getCalendarCollectionService(){
         if ( null == calColl ) {
             calColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
         }
         return calColl;
     }
-    
+
     public void setCalendarCollectionService(CalendarCollectionService calColl){
         this.calColl = calColl;
     }
@@ -118,22 +114,19 @@ public class AppointmentWriter extends CalendarWriter {
     public void writeArray(final Appointment appointmentObject, final int cols[], final JSONArray jsonArray)
             throws JSONException {
         final JSONArray jsonAppointmentArray = new JSONArray();
-        for (int a = 0; a < cols.length; a++) {
-            write(cols[a], appointmentObject, jsonAppointmentArray);
+        int[] toWrite = super.writeFields(appointmentObject, cols, jsonArray);
+        for (int column : toWrite) {
+            write(column, appointmentObject, jsonAppointmentArray);
         }
         jsonArray.put(jsonAppointmentArray);
     }
 
-    public void writeAppointment(final Appointment appointmentObject, final JSONObject jsonObj)
-            throws JSONException {
-        writeCommonFields(appointmentObject, jsonObj);
-
+    public void writeAppointment(final Appointment appointmentObject, final JSONObject jsonObj) throws JSONException {
+        super.writeFields(appointmentObject, jsonObj);
         if (appointmentObject.containsTitle()) {
             writeParameter(AppointmentFields.TITLE, appointmentObject.getTitle(), jsonObj);
         }
-
         final boolean isFullTime = appointmentObject.getFullTime();
-
         if (isFullTime) {
             writeParameter(AppointmentFields.START_DATE, appointmentObject.getStartDate(), jsonObj);
             writeParameter(AppointmentFields.END_DATE, appointmentObject.getEndDate(), jsonObj);
@@ -148,72 +141,49 @@ public class AppointmentWriter extends CalendarWriter {
                         .getEndDate(), timeZone, jsonObj);
             }
         }
-
         if (appointmentObject.containsShownAs()) {
             writeParameter(AppointmentFields.SHOW_AS, appointmentObject.getShownAs(), jsonObj);
         }
-
         if (appointmentObject.containsLocation()) {
             writeParameter(AppointmentFields.LOCATION, appointmentObject.getLocation(), jsonObj);
         }
-
         if (appointmentObject.containsNote()) {
             writeParameter(AppointmentFields.NOTE, appointmentObject.getNote(), jsonObj);
         }
-
         if (appointmentObject.containsFullTime()) {
             writeParameter(AppointmentFields.FULL_TIME, appointmentObject.getFullTime(), jsonObj);
         }
-
-        if (appointmentObject.containsCategories()) {
-            writeParameter(AppointmentFields.CATEGORIES, appointmentObject.getCategories(), jsonObj);
-        }
-
-        if (appointmentObject.containsLabel()) {
-            writeParameter(AppointmentFields.COLORLABEL, appointmentObject.getLabel(), jsonObj);
-        }
-
         if (appointmentObject.containsAlarm()) {
             writeParameter(AppointmentFields.ALARM, appointmentObject.getAlarm(), jsonObj);
         }
-
         if (appointmentObject.containsRecurrenceType()) {
             writeRecurrenceParameter(appointmentObject, jsonObj);
         }
-
         if (appointmentObject.containsRecurrenceID()) {
             writeParameter(AppointmentFields.RECURRENCE_ID, appointmentObject.getRecurrenceID(), jsonObj);
         }
-
         if (appointmentObject.containsRecurrencePosition()) {
             writeParameter(AppointmentFields.RECURRENCE_POSITION, appointmentObject.getRecurrencePosition(), jsonObj);
         }
-
         if (appointmentObject.containsRecurrenceDatePosition()) {
             writeParameter(AppointmentFields.RECURRENCE_DATE_POSITION, appointmentObject.getRecurrenceDatePosition(),
                     jsonObj);
         }
-
         if (appointmentObject.containsParticipants()) {
             jsonObj.put(AppointmentFields.PARTICIPANTS, getParticipantsAsJSONArray(appointmentObject));
         }
-
         if (appointmentObject.containsUserParticipants()) {
             jsonObj.put(AppointmentFields.USERS, getUsersAsJSONArray(appointmentObject));
         }
-
         if (appointmentObject.getIgnoreConflicts()) {
             writeParameter(AppointmentFields.IGNORE_CONFLICTS, true, jsonObj);
         }
-
         if (appointmentObject.containsTimezone()) {
             writeParameter(AppointmentFields.TIMEZONE, appointmentObject.getTimezoneFallbackUTC(), jsonObj);
         }
-
         if (appointmentObject.containsRecurringStart()) {
             writeParameter(AppointmentFields.RECURRENCE_START, appointmentObject.getRecurringStart(), jsonObj);
         }
-
         if (appointmentObject instanceof CalendarDataObject && ((CalendarDataObject) appointmentObject).isHardConflict()) {
             writeParameter(AppointmentFields.HARD_CONFLICT, true, jsonObj);
         }
@@ -227,9 +197,8 @@ public class AppointmentWriter extends CalendarWriter {
      * @param jsonArray The JSON array to put into
      * @throws JSONException If a JSON error occurs while putting into JSON array
      */
-    public void write(final int field, final Appointment appointmentObject, final JSONArray jsonArray)
-            throws JSONException {
-        final AppointmentFieldWriter writer = WRITER_MAP.get(Integer.valueOf(field));
+    public void write(final int field, final Appointment appointmentObject, final JSONArray jsonArray) throws JSONException {
+        final AppointmentFieldWriter writer = WRITER_MAP.get(I(field));
         if (writer != null) {
             writer.write(appointmentObject, jsonArray);
             return;
@@ -239,15 +208,6 @@ public class AppointmentWriter extends CalendarWriter {
          */
         final boolean isFullTime = appointmentObject.getFullTime();
         switch (field) {
-        case Appointment.CREATION_DATE:
-            writeValue(appointmentObject.getCreationDate(), timeZone, jsonArray);
-            break;
-        case Appointment.LAST_MODIFIED:
-            writeValue(appointmentObject.getLastModified(), timeZone, jsonArray);
-            break;
-        case Appointment.LAST_MODIFIED_UTC:
-            writeValue(appointmentObject.getLastModified(), utc, jsonArray);
-            break;
         case Appointment.START_DATE:
             if (isFullTime) {
                 writeValue(appointmentObject.getStartDate(), jsonArray);
@@ -299,118 +259,64 @@ public class AppointmentWriter extends CalendarWriter {
     private static final Map<Integer, AppointmentFieldWriter> WRITER_MAP;
 
     static {
-        final Map<Integer, AppointmentFieldWriter> m = new HashMap<Integer, AppointmentFieldWriter>(64);
-
-        m.put(Integer.valueOf(Appointment.OBJECT_ID), new AppointmentFieldWriter() {
-            public void write(final Appointment appointmentObject, final JSONArray jsonArray) {
-                writeValue(appointmentObject.getObjectID(), jsonArray, appointmentObject.containsObjectID());
-            }
-        });
-
-        m.put(Integer.valueOf(Appointment.CREATED_BY), new AppointmentFieldWriter() {
-            public void write(final Appointment appointmentObject, final JSONArray jsonArray) {
-                writeValue(appointmentObject.getCreatedBy(), jsonArray, appointmentObject.containsCreatedBy());
-            }
-        });
-
-        m.put(Integer.valueOf(Appointment.MODIFIED_BY), new AppointmentFieldWriter() {
-            public void write(final Appointment appointmentObject, final JSONArray jsonArray) {
-                writeValue(appointmentObject.getModifiedBy(), jsonArray, appointmentObject.containsModifiedBy());
-            }
-        });
-
-        m.put(Integer.valueOf(Appointment.FOLDER_ID), new AppointmentFieldWriter() {
-            public void write(final Appointment appointmentObject, final JSONArray jsonArray) {
-                writeValue(appointmentObject.getParentFolderID(), jsonArray, appointmentObject.containsParentFolderID());
-            }
-        });
-
-        m.put(Integer.valueOf(Appointment.TITLE), new AppointmentFieldWriter() {
+        final Map<Integer, AppointmentFieldWriter> m = new HashMap<Integer, AppointmentFieldWriter>(24, 1);
+        m.put(I(Appointment.TITLE), new AppointmentFieldWriter() {
             public void write(final Appointment appointmentObject, final JSONArray jsonArray) {
                 writeValue(appointmentObject.getTitle(), jsonArray);
             }
         });
-
-        m.put(Integer.valueOf(Appointment.SHOWN_AS), new AppointmentFieldWriter() {
+        m.put(I(Appointment.SHOWN_AS), new AppointmentFieldWriter() {
             public void write(final Appointment appointmentObject, final JSONArray jsonArray) {
                 writeValue(appointmentObject.getShownAs(), jsonArray, appointmentObject.containsShownAs());
             }
         });
-
-        m.put(Integer.valueOf(Appointment.LOCATION), new AppointmentFieldWriter() {
+        m.put(I(Appointment.LOCATION), new AppointmentFieldWriter() {
             public void write(final Appointment appointmentObject, final JSONArray jsonArray) {
                 writeValue(appointmentObject.getLocation(), jsonArray);
             }
         });
-
-        m.put(Integer.valueOf(Appointment.CATEGORIES), new AppointmentFieldWriter() {
-            public void write(final Appointment appointmentObject, final JSONArray jsonArray) {
-                writeValue(appointmentObject.getCategories(), jsonArray);
-            }
-        });
-
-        m.put(Integer.valueOf(Appointment.COLOR_LABEL), new AppointmentFieldWriter() {
-            public void write(final Appointment appointmentObject, final JSONArray jsonArray) {
-                writeValue(appointmentObject.getLabel(), jsonArray, appointmentObject.containsLabel());
-            }
-        });
-
-        m.put(Integer.valueOf(Appointment.PRIVATE_FLAG), new AppointmentFieldWriter() {
-            public void write(final Appointment appointmentObject, final JSONArray jsonArray) {
-                writeValue(appointmentObject.getPrivateFlag(), jsonArray, appointmentObject.containsPrivateFlag());
-            }
-        });
-
-        m.put(Integer.valueOf(Appointment.FULL_TIME), new AppointmentFieldWriter() {
+        m.put(I(Appointment.FULL_TIME), new AppointmentFieldWriter() {
             public void write(final Appointment appointmentObject, final JSONArray jsonArray) {
                 writeValue(appointmentObject.getFullTime(), jsonArray, appointmentObject.containsFullTime());
             }
         });
-
-        m.put(Integer.valueOf(Appointment.NOTE), new AppointmentFieldWriter() {
+        m.put(I(Appointment.NOTE), new AppointmentFieldWriter() {
             public void write(final Appointment appointmentObject, final JSONArray jsonArray) {
                 writeValue(appointmentObject.getNote(), jsonArray);
             }
         });
-
         // modification for mobility support
-        m.put(Integer.valueOf(Appointment.RECURRENCE_ID), new AppointmentFieldWriter() {
+        m.put(I(Appointment.RECURRENCE_ID), new AppointmentFieldWriter() {
             public void write(final Appointment appointmentObject, final JSONArray jsonArray) {
                 writeValue(appointmentObject.getRecurrenceID(), jsonArray, appointmentObject.containsRecurrenceID());
             }
         });
-
-        m.put(Integer.valueOf(Appointment.RECURRENCE_TYPE), new AppointmentFieldWriter() {
+        m.put(I(Appointment.RECURRENCE_TYPE), new AppointmentFieldWriter() {
             public void write(final Appointment appointmentObject, final JSONArray jsonArray) {
                 writeValue(appointmentObject.getRecurrenceType(), jsonArray, appointmentObject.containsRecurrenceType());
             }
         });
-
-        m.put(Integer.valueOf(Appointment.INTERVAL), new AppointmentFieldWriter() {
+        m.put(I(Appointment.INTERVAL), new AppointmentFieldWriter() {
             public void write(final Appointment appointmentObject, final JSONArray jsonArray) {
                 writeValue(appointmentObject.getInterval(), jsonArray, appointmentObject.containsInterval());
             }
         });
-
-        m.put(Integer.valueOf(Appointment.DAYS), new AppointmentFieldWriter() {
+        m.put(I(Appointment.DAYS), new AppointmentFieldWriter() {
             public void write(final Appointment appointmentObject, final JSONArray jsonArray) {
                 writeValue(appointmentObject.getDays(), jsonArray, appointmentObject.containsDays());
             }
         });
-
-        m.put(Integer.valueOf(Appointment.DAY_IN_MONTH), new AppointmentFieldWriter() {
+        m.put(I(Appointment.DAY_IN_MONTH), new AppointmentFieldWriter() {
             public void write(final Appointment appointmentObject, final JSONArray jsonArray) {
                 writeValue(appointmentObject.getDayInMonth(), jsonArray, appointmentObject.containsDayInMonth());
             }
         });
-
-        m.put(Integer.valueOf(Appointment.MONTH), new AppointmentFieldWriter() {
+        m.put(I(Appointment.MONTH), new AppointmentFieldWriter() {
             public void write(final Appointment appointmentObject, final JSONArray jsonArray) {
                 writeValue(appointmentObject.getMonth(), jsonArray, appointmentObject.containsMonth());
             }
         });
-
-        m.put(Integer.valueOf(Appointment.UNTIL), new AppointmentFieldWriter() {
+        m.put(I(Appointment.UNTIL), new AppointmentFieldWriter() {
             public void write(final Appointment appointmentObject, final JSONArray jsonArray) {
                 if (appointmentObject.containsOccurrence()) {
                     jsonArray.put(JSONObject.NULL);
@@ -422,20 +328,17 @@ public class AppointmentWriter extends CalendarWriter {
                 }
             }
         });
-
-        m.put(Integer.valueOf(Appointment.RECURRENCE_COUNT), new AppointmentFieldWriter() {
+        m.put(I(Appointment.RECURRENCE_COUNT), new AppointmentFieldWriter() {
             public void write(final Appointment appointmentObject, final JSONArray jsonArray) {
                 writeValue(appointmentObject.getOccurrence(), jsonArray, appointmentObject.containsOccurrence());
             }
         });
-
-        m.put(Integer.valueOf(Appointment.RECURRENCE_DATE_POSITION), new AppointmentFieldWriter() {
+        m.put(I(Appointment.RECURRENCE_DATE_POSITION), new AppointmentFieldWriter() {
             public void write(final Appointment appointmentObject, final JSONArray jsonArray) {
                 writeValue(appointmentObject.getRecurrenceDatePosition(), jsonArray);
             }
         });
-
-        m.put(Integer.valueOf(Appointment.DELETE_EXCEPTIONS), new AppointmentFieldWriter() {
+        m.put(I(Appointment.DELETE_EXCEPTIONS), new AppointmentFieldWriter() {
             public void write(final Appointment appointmentObject, final JSONArray jsonArray) {
                 final JSONArray jsonDeleteExceptionArray = getExceptionAsJSONArray(appointmentObject
                         .getDeleteException());
@@ -446,8 +349,7 @@ public class AppointmentWriter extends CalendarWriter {
                 }
             }
         });
-
-        m.put(Integer.valueOf(Appointment.CHANGE_EXCEPTIONS), new AppointmentFieldWriter() {
+        m.put(I(Appointment.CHANGE_EXCEPTIONS), new AppointmentFieldWriter() {
             public void write(final Appointment appointmentObject, final JSONArray jsonArray) {
                 final JSONArray jsonChangeExceptionArray = getExceptionAsJSONArray(appointmentObject
                         .getChangeException());
@@ -459,27 +361,23 @@ public class AppointmentWriter extends CalendarWriter {
             }
         });
         // end of modification for mobility support
-
-        m.put(Integer.valueOf(Appointment.RECURRENCE_POSITION), new AppointmentFieldWriter() {
+        m.put(I(Appointment.RECURRENCE_POSITION), new AppointmentFieldWriter() {
             public void write(final Appointment appointmentObject, final JSONArray jsonArray) {
                 writeValue(appointmentObject.getRecurrencePosition(), jsonArray, appointmentObject
                         .containsRecurrencePosition());
             }
         });
-
-        m.put(Integer.valueOf(Appointment.TIMEZONE), new AppointmentFieldWriter() {
+        m.put(I(Appointment.TIMEZONE), new AppointmentFieldWriter() {
             public void write(final Appointment appointmentObject, final JSONArray jsonArray) {
                 writeValue(appointmentObject.getTimezoneFallbackUTC(), jsonArray);
             }
         });
-
-        m.put(Integer.valueOf(Appointment.RECURRENCE_START), new AppointmentFieldWriter() {
+        m.put(I(Appointment.RECURRENCE_START), new AppointmentFieldWriter() {
             public void write(final Appointment appointmentObject, final JSONArray jsonArray) {
                 writeValue(appointmentObject.getRecurringStart(), jsonArray, appointmentObject.containsRecurringStart());
             }
         });
-
-        m.put(Integer.valueOf(Appointment.PARTICIPANTS), new AppointmentFieldWriter() {
+        m.put(I(Appointment.PARTICIPANTS), new AppointmentFieldWriter() {
             public void write(final Appointment appointmentObject, final JSONArray jsonArray)
                     throws JSONException {
                 final JSONArray jsonParticipantArray = getParticipantsAsJSONArray(appointmentObject);
@@ -490,8 +388,7 @@ public class AppointmentWriter extends CalendarWriter {
                 }
             }
         });
-
-        m.put(Integer.valueOf(Appointment.USERS), new AppointmentFieldWriter() {
+        m.put(I(Appointment.USERS), new AppointmentFieldWriter() {
             public void write(final Appointment appointmentObject, final JSONArray jsonArray)
                     throws JSONException {
                 final JSONArray jsonUserArray = getUsersAsJSONArray(appointmentObject);
@@ -502,43 +399,21 @@ public class AppointmentWriter extends CalendarWriter {
                 }
             }
         });
-
-        m.put(Integer.valueOf(Appointment.NUMBER_OF_ATTACHMENTS), new AppointmentFieldWriter() {
-            public void write(final Appointment appointmentObject, final JSONArray jsonArray) {
-                writeValue(appointmentObject.getNumberOfAttachments(), jsonArray, appointmentObject
-                        .containsNumberOfAttachments());
-            }
-        });
-        m.put(I(Appointment.LAST_MODIFIED_OF_NEWEST_ATTACHMENT), new AppointmentFieldWriter() {
-            public void write(Appointment appointment, JSONArray json) {
-                writeValue(appointment.getLastModifiedOfNewestAttachment(), json, appointment.containsLastModifiedOfNewestAttachment());
-            }
-        });
-        m.put(Integer.valueOf(Appointment.NUMBER_OF_LINKS), new AppointmentFieldWriter() {
-            public void write(final Appointment appointmentObject, final JSONArray jsonArray) {
-                writeValue(appointmentObject.getNumberOfLinks(), jsonArray, appointmentObject.containsNumberOfLinks());
-            }
-        });
-        m.put(Integer.valueOf(Appointment.ALARM), new AppointmentFieldWriter() {
+        m.put(I(Appointment.ALARM), new AppointmentFieldWriter() {
             public void write(final Appointment appointmentObject, final JSONArray jsonArray) {
                 writeValue(appointmentObject.getAlarm(), jsonArray, appointmentObject.containsAlarm());
             }
         });
-
-        m.put(Integer.valueOf(Appointment.NOTIFICATION), new AppointmentFieldWriter() {
+        m.put(I(Appointment.NOTIFICATION), new AppointmentFieldWriter() {
             public void write(final Appointment appointmentObject, final JSONArray jsonArray) {
                 writeValue(appointmentObject.getNotification(), jsonArray, appointmentObject.getNotification());
             }
         });
-
-        m.put(Integer.valueOf(Appointment.RECURRENCE_CALCULATOR), new AppointmentFieldWriter() {
-
-            public void write(Appointment appointmentObject, JSONArray jsonArray) throws JSONException {
+        m.put(I(Appointment.RECURRENCE_CALCULATOR), new AppointmentFieldWriter() {
+            public void write(Appointment appointmentObject, JSONArray jsonArray) {
                 writeValue(appointmentObject.getRecurrenceCalculator(), jsonArray);
             }
-            
         });
-        
         WRITER_MAP = Collections.unmodifiableMap(m);
     }
 }

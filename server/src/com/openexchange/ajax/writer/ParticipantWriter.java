@@ -58,7 +58,6 @@ import com.openexchange.ajax.fields.ParticipantsFields;
 import com.openexchange.ajax.writer.DataWriter.FieldWriter;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.Participant;
-import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 
 /**
@@ -72,14 +71,6 @@ public class ParticipantWriter {
         super();
     }
 
-    public void write(Participant participant, JSONObject json) {
-        // will replace 
-    }
-
-    public void write(UserParticipant participant, JSONObject json) {
-        
-    }
-
     public void write(ConfirmableParticipant participant, JSONObject json) throws JSONException {
         if (participant instanceof ExternalUserParticipant) {
             write((ExternalUserParticipant) participant, json);
@@ -90,10 +81,6 @@ public class ParticipantWriter {
         for (FieldWriter<Participant> writer : EXTERNAL_WRITERS) {
             writer.write(participant, null, json);
         }
-//        writeParameter(ParticipantsFields.CONFIRMATION, userParticipant.getConfirm(), jsonObj);
-//        if (userParticipant.containsConfirmMessage()) {
-//            writeParameter(ParticipantsFields.CONFIRM_MESSAGE, userParticipant.getConfirmMessage(), jsonObj);
-//        }
     }
 
     protected static final FieldWriter<Participant> TYPE_WRITER = new FieldWriter<Participant>() {
@@ -132,7 +119,16 @@ public class ParticipantWriter {
         }
     };
 
+    protected static final FieldWriter<ConfirmableParticipant> MESSAGE_WRITER = new FieldWriter<ConfirmableParticipant>() {
+        public void write(ConfirmableParticipant obj, TimeZone timeZone, JSONArray json) {
+            throw new UnsupportedOperationException("JSON array writing is not supported for participants.");
+        }
+        public void write(ConfirmableParticipant obj, TimeZone timeZone, JSONObject json) throws JSONException {
+            writeParameter(ParticipantsFields.CONFIRM_MESSAGE, obj.getMessage(), json, obj.containsMessage());
+        }
+    };
+
     @SuppressWarnings("unchecked")
     private static final FieldWriter<Participant>[] EXTERNAL_WRITERS = (FieldWriter<Participant>[]) new FieldWriter<?>[] {
-        TYPE_WRITER, MAIL_WRITER, DISPLAY_NAME_WRITER, STATUS_WRITER };
+        TYPE_WRITER, MAIL_WRITER, DISPLAY_NAME_WRITER, STATUS_WRITER, MESSAGE_WRITER };
 }

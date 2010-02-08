@@ -50,8 +50,11 @@
 package com.openexchange.ajax.writer;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.I2i;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import org.json.JSONArray;
@@ -93,11 +96,18 @@ public class CommonWriter extends FolderChildWriter {
         writeFields(commonObj, jsonObj);
     }
 
-    protected void writeFields(CommonObject obj, JSONArray json) throws JSONException {
-        super.writeFields(obj, json);
-        for (FieldWriter<CommonObject> writer : WRITER_MAP.values()) {
-            writer.write(obj, timeZone, json);
+    protected int[] writeFields(CommonObject obj, int[] columns, JSONArray json) throws JSONException {
+        int[] toWrite = super.writeFields(obj, columns, json);
+        List<Integer> retval = new ArrayList<Integer>();
+        for (int column : toWrite) {
+            FieldWriter<CommonObject> writer = WRITER_MAP.get(I(column));
+            if (null != writer) {
+                writer.write(obj, timeZone, json);
+            } else {
+                retval.add(I(column));
+            }
         }
+        return I2i(retval);
     }
 
     protected void writeFields(CommonObject obj, JSONObject json) throws JSONException {
@@ -158,13 +168,22 @@ public class CommonWriter extends FolderChildWriter {
         }
     };
 
+    protected static final FieldWriter<CommonObject> NUMBER_OF_LINKS_WRITER = new FieldWriter<CommonObject>() {
+        public void write(CommonObject obj, TimeZone timeZone, JSONArray json) {
+            writeValue(obj.getNumberOfLinks(), json, obj.containsNumberOfLinks());
+        }
+        public void write(CommonObject obj, TimeZone timeZone, JSONObject json) {
+            // This value is nowhere written to a JSON object.
+        }
+    };
     static {
-        final Map<Integer, FieldWriter<CommonObject>> m = new HashMap<Integer, FieldWriter<CommonObject>>(5, 1);
+        final Map<Integer, FieldWriter<CommonObject>> m = new HashMap<Integer, FieldWriter<CommonObject>>(6, 1);
         m.put(I(CommonObject.CATEGORIES), CATEGORIES_WRITER);
         m.put(I(CommonObject.PRIVATE_FLAG), PRIVATE_FLAG_WRITER);
         m.put(I(CommonObject.COLOR_LABEL), COLORLABEL_WRITER);
         m.put(I(CommonObject.NUMBER_OF_ATTACHMENTS), NUMBER_OF_ATTACHMENTS_WRITER);
         m.put(I(CommonObject.LAST_MODIFIED_OF_NEWEST_ATTACHMENT), LAST_MODIFIED_OF_NEWEST_ATTACHMENT_UTC_WRITER);
+        m.put(I(CommonObject.NUMBER_OF_LINKS), NUMBER_OF_LINKS_WRITER);
         WRITER_MAP = Collections.unmodifiableMap(m);
     }
 
