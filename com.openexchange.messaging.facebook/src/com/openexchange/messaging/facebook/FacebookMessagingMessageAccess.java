@@ -529,7 +529,7 @@ public final class FacebookMessagingMessageAccess implements MessagingMessageAcc
         /*
          * Already sorted by query itself?
          */
-        if (!query.containsOrderBy()) {
+        if (!query.containsOrderBy() && null != sortField) {
             /*
              * Sort manually
              */
