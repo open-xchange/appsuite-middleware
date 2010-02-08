@@ -66,10 +66,13 @@ import static com.openexchange.messaging.MessagingField.SUBJECT;
 import static com.openexchange.messaging.MessagingField.THREAD_LEVEL;
 import static com.openexchange.messaging.MessagingField.TO;
 import java.text.Collator;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.Locale;
+import javax.mail.internet.MailDateFormat;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingField;
@@ -179,8 +182,8 @@ public class MessagingComparator implements Comparator<MessagingMessage> {
                 final MessagingHeader h1 = (headers1.isEmpty()) ? null : headers1.iterator().next();
                 final MessagingHeader h2 = (headers2.isEmpty()) ? null : headers2.iterator().next();
 
-                c1 = h1.getValue();
-                c2 = h2.getValue();
+                c1 = getValue(h1);
+                c2 = getValue(h2);
 
                 if (c1 == c2) {
                     return 0;
@@ -198,6 +201,13 @@ public class MessagingComparator implements Comparator<MessagingMessage> {
             c1 = transform(c1);
             c2 = transform(c2);
 
+            if (String.class.isInstance(c1)) {
+                String s1 = (String) c1;
+                String s2 = (String) c2;
+                
+                return collator.compare(s1, s2);
+            }
+            
             if (Comparable.class.isInstance(c1)) {
                 return ((Comparable<Object>) c1).compareTo(c2);
             }
@@ -206,6 +216,20 @@ public class MessagingComparator implements Comparator<MessagingMessage> {
         } catch (final MessagingException x) {
             throw new RuntimeException(x);
         }
+    }
+
+    private static final String DATE = "Date";
+    private static final SimpleDateFormat dateFormat = new MailDateFormat();
+    
+    private Object getValue(MessagingHeader h) {
+        if(DATE.equalsIgnoreCase(h.getName())) {
+            try {
+                return dateFormat.parse(h.getValue());
+            } catch (ParseException e) {
+                // IGNORE
+            }
+        }
+        return h.getValue();
     }
 
     private static final EnumSet<MessagingField> INT_FIELDS = EnumSet.of(PRIORITY, THREAD_LEVEL);

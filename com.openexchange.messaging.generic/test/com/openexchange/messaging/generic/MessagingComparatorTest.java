@@ -49,7 +49,9 @@
 
 package com.openexchange.messaging.generic;
 
+import java.util.Date;
 import java.util.Locale;
+import javax.mail.internet.MailDateFormat;
 import junit.framework.TestCase;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingField;
@@ -133,10 +135,10 @@ public class MessagingComparatorTest extends TestCase {
     }
     
     public void testSentDate() throws MessagingException {
-        msg1.putHeader(new StringMessageHeader("Date", "a"));
-        msg2.putHeader(new StringMessageHeader("Date", "b"));
+        MailDateFormat dateFormat = new MailDateFormat();
+        msg1.putHeader(new StringMessageHeader("Date",dateFormat.format(new Date(0))));
+        msg2.putHeader(new StringMessageHeader("Date",dateFormat.format(new Date())));
         
-        //FIXME this probably doesn't make much sense.
         assertBigger(msg2, msg1, MessagingField.SENT_DATE);
     }
     

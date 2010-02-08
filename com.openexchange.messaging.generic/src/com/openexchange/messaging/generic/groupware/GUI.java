@@ -49,44 +49,24 @@
 
 package com.openexchange.messaging.generic.groupware;
 
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.groupware.settings.ReadOnlyValue;
-import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.settings.SettingException;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.session.Session;
+import com.openexchange.groupware.settings.impl.SharedNode;
 
 
 /**
- * {@link Enabled}
+ * {@link GUI}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class Enabled implements PreferencesItemService {
+public class GUI implements PreferencesItemService {
 
     public String[] getPath() {
-        return new String[] { "modules", "messaging", "module" };
+        return new String[]{"modules", "messaging" , "gui"};
     }
 
     public IValueHandler getSharedValue() {
-        return new ReadOnlyValue() {
-
-            /**
-             * {@inheritDoc}
-             */
-            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws SettingException {
-                setting.setSingleValue(Boolean.valueOf(true));
-            }
-
-            /**
-             * {@inheritDoc}
-             */
-            public boolean isAvailable(final UserConfiguration userConfig) {
-                return true;
-            }
-        };
+        return new SharedNode("gui", 10); // FIXME Which ID is appropriate?
     }
+
 }
