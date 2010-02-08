@@ -47,78 +47,32 @@
  *
  */
 
-package com.openexchange.messaging.json;
+package com.openexchange.messaging.json.actions.messages;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.Map.Entry;
-import org.json.JSONArray;
+import java.io.IOException;
 import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.messaging.MessagingAddressHeader;
-import com.openexchange.messaging.MessagingException;
-import com.openexchange.messaging.MessagingHeader;
-import com.openexchange.messaging.MessagingHeader.KnownHeader;
-import com.openexchange.messaging.generic.internet.MimeAddressMessagingHeader;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.messaging.json.MessagingMessageParser;
+import com.openexchange.messaging.json.MessagingMessageWriter;
+import com.openexchange.messaging.registry.MessagingServiceRegistry;
+import com.openexchange.tools.session.ServerSession;
+
 
 /**
- * {@link AddressHeaderWriter}
- * 
+ * {@link UpdateAction}
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class AddressHeaderWriter implements MessagingHeaderWriter {
+public class UpdateAction extends AbstractMessagingAction {
 
-    private static final Set<String> WHITELIST = new HashSet<String>(Arrays.asList(
-        "From",
-        "To",
-        "Cc",
-        "Bcc",
-        "Reply-To",
-        "Resent-Reply-To",
-        "Disposition-Notification-To",
-        "Resent-From",
-        "Sender",
-        "Resent-Sender",
-        "Resent-To",
-        "Resent-Cc",
-        "Resent-Bcc"));
-
-    public int getPriority() {
-        return 1;
+    public UpdateAction(MessagingServiceRegistry registry, MessagingMessageWriter writer, MessagingMessageParser parser) {
+        super(registry, writer, parser);
     }
 
-    public boolean handles(Entry<String, Collection<MessagingHeader>> entry) {
-        return WHITELIST.contains(entry.getKey());
-    }
-
-    public String writeKey(Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException {
-        return entry.getKey();
-    }
-
-    public Object writeValue(Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException {
-        JSONArray addresses = new JSONArray();
-        for (MessagingHeader address : entry.getValue()) {
-            JSONObject object = new JSONObject();
-            MessagingAddressHeader addr = toMessagingAddress(address);
-            object.put("personal", addr.getPersonal());
-            object.put("address", addr.getAddress());
-            if(entry.getKey().equalsIgnoreCase(KnownHeader.FROM.toString())) {
-                return object;
-            }
-            addresses.put(object);
-        }
-        
-        return addresses;
-    }
-
-    private MessagingAddressHeader toMessagingAddress(MessagingHeader address) throws MessagingException {
-        if(MessagingAddressHeader.class.isInstance(address)) {
-            return (MessagingAddressHeader) address;
-        }
-        
-        return MimeAddressMessagingHeader.valueOfRFC822(address.getName(), address.getValue());
+    @Override
+    protected AJAXRequestResult doIt(MessagingRequestData messagingRequestData, ServerSession session) throws AbstractOXException, JSONException, IOException {
+        return new AJAXRequestResult(1);
     }
 
 }

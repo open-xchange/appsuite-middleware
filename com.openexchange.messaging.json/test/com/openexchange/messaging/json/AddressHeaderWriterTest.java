@@ -61,81 +61,89 @@ import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.StringMessageHeader;
 import com.openexchange.messaging.generic.internet.MimeAddressMessagingHeader;
 import junit.framework.TestCase;
-
 import static com.openexchange.json.JSONAssertion.assertValidates;
-
 
 /**
  * {@link AddressHeaderWriterTest}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class AddressHeaderWriterTest extends TestCase {
-    
+
     public void testFeelsResponsible() {
         AddressHeaderWriter writer = new AddressHeaderWriter();
-        
+
         List<String> headerNames = Arrays.asList(
-            "From",
+            "To",
             "To",
             "Cc",
             "Bcc",
             "Reply-To",
             "Resent-Reply-To",
             "Disposition-Notification-To",
-            "Resent-From",
+            "Resent-To",
             "Sender",
             "Resent-Sender",
             "Resent-To",
             "Resent-Cc",
             "Resent-Bcc");
-        
+
         for (String headerName : headerNames) {
             assertTrue(writer.handles(entry(new StringMessageHeader(headerName, ""))));
         }
-        
+
     }
-    
+
     public void testWrite() throws MessagingException, JSONException {
+        MimeAddressMessagingHeader header = MimeAddressMessagingHeader.valueOfPlain("To", "Clark Kent", "clark.kent@dailyplanet.com");
+
+        AddressHeaderWriter writer = new AddressHeaderWriter();
+
+        JSONArray headerJSON = (JSONArray) writer.writeValue(entry(header));
+
+        assertNotNull(headerJSON);
+
+        assertEquals(1, headerJSON.length());
+
+        JSONAssertion assertion = new JSONAssertion().isObject().hasKey("personal").withValue("Clark Kent").hasKey("address").withValue(
+            "clark.kent@dailyplanet.com").objectEnds();
+
+        assertValidates(assertion, headerJSON.getJSONObject(0));
+    }
+
+    public void testWriteFromAsSingleObject() throws MessagingException, JSONException {
         MimeAddressMessagingHeader header = MimeAddressMessagingHeader.valueOfPlain("From", "Clark Kent", "clark.kent@dailyplanet.com");
-        
+
         AddressHeaderWriter writer = new AddressHeaderWriter();
-        
-        JSONArray headerJSON = (JSONArray) writer.writeValue(entry(header));
-        
-        assertNotNull(headerJSON);
-        
-        assertEquals(1, headerJSON.length());
-        
-        JSONAssertion assertion = new JSONAssertion().isObject()
-            .hasKey("personal").withValue("Clark Kent")
-            .hasKey("address").withValue("clark.kent@dailyplanet.com")
-        .objectEnds();
-        
-        assertValidates(assertion, headerJSON.getJSONObject(0));
+
+        JSONObject headerJSON = (JSONObject) writer.writeValue(entry(header));
+
+
+        JSONAssertion assertion = new JSONAssertion().isObject().hasKey("personal").withValue("Clark Kent").hasKey("address").withValue(
+            "clark.kent@dailyplanet.com").objectEnds();
+
+        assertValidates(assertion, headerJSON);
     }
-    
+
     public void testWriteBasic() throws MessagingException, JSONException {
-        MessagingHeader header = new StringMessageHeader("From", "Clark Kent <clark.kent@dailyplanet.com>");
-        
+        MessagingHeader header = new StringMessageHeader("To", "Clark Kent <clark.kent@dailyplanet.com>");
+
         AddressHeaderWriter writer = new AddressHeaderWriter();
-        
+
         JSONArray headerJSON = (JSONArray) writer.writeValue(entry(header));
-        
+
         assertNotNull(headerJSON);
-        
+
         assertEquals(1, headerJSON.length());
-        
-        JSONAssertion assertion = new JSONAssertion().isObject()
-            .hasKey("personal").withValue("Clark Kent")
-            .hasKey("address").withValue("clark.kent@dailyplanet.com")
-        .objectEnds();
-        
+
+        JSONAssertion assertion = new JSONAssertion().isObject().hasKey("personal").withValue("Clark Kent").hasKey("address").withValue(
+            "clark.kent@dailyplanet.com").objectEnds();
+
         assertValidates(assertion, headerJSON.getJSONObject(0));
     }
-    
+
     private SimEntry<String, Collection<MessagingHeader>> entry(MessagingHeader header) {
         return new SimEntry<String, Collection<MessagingHeader>>(header.getName(), Arrays.asList((MessagingHeader) header));
     }
-    
+
 }

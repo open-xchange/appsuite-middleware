@@ -57,6 +57,7 @@ import org.json.JSONObject;
 import com.openexchange.messaging.ContentType;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingHeader;
+import com.openexchange.messaging.generic.internet.MimeContentType;
 
 
 /**
@@ -80,7 +81,7 @@ public class ContentTypeWriter implements MessagingHeaderWriter {
     }
 
     public Object writeValue(Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException {
-        ContentType cType = (ContentType) entry.getValue().iterator().next();
+        ContentType cType = (ContentType) toCType(entry.getValue().iterator().next());
         JSONObject jsonCType = new JSONObject();
 
         jsonCType.put("type", cType.getBaseType());
@@ -97,6 +98,14 @@ public class ContentTypeWriter implements MessagingHeaderWriter {
         
         jsonCType.put("params", params);
         return jsonCType;
+    }
+
+    private ContentType toCType(MessagingHeader header) throws MessagingException {
+        if(ContentType.class.isInstance(header)) {
+            return (ContentType) header;
+        } else {
+            return new MimeContentType(header.getValue());
+        }
     }
 
 }

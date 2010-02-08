@@ -55,6 +55,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -66,8 +67,10 @@ import com.openexchange.messaging.BinaryContent;
 import com.openexchange.messaging.MessagingBodyPart;
 import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingException;
+import com.openexchange.messaging.MessagingField;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.MessagingMessage;
+import com.openexchange.messaging.MessagingMessageGetSwitch;
 import com.openexchange.messaging.MultipartContent;
 import com.openexchange.messaging.SimpleContent;
 import com.openexchange.messaging.StringContent;
@@ -178,9 +181,6 @@ public class MessagingMessageParserTest extends TestCase {
         
     }
     
-    public void testParseHeaderAsAttributeIfItIsAMessagingField() {
-        
-    }
     
     public void testSpecialHeader() throws JSONException, MessagingException, IOException {
         JSONObject messageJSON = new JSONObject();
@@ -201,6 +201,28 @@ public class MessagingMessageParserTest extends TestCase {
         assertNotNull(header);
         assertEquals("Value1", header.iterator().next().getValue());
     }
+    
+    public void testParseHeaderAsAttributeIfItIsAMessagingField() throws JSONException, MessagingException, IOException {
+        String date = "Sun, 7 Feb 2010 19:20:40 +0100 (CET)";
+        JSONObject messageJSON = new JSONObject("{'to':[{'address':'to.clark.kent@dailyplanet.com'}],'flags':0,'subject':'Subject-Value','bcc':[{'address':'bcc.clark.kent@dailyplanet.com'}],'contentType':{'params':{},'type':'text/plain'},'from':[{'address':'from.clark.kent@dailyplanet.com'}],'size':0,'threadLevel':0,'dispositionNotificationTo':[{'address':'disp.notification.to.clark.kent@dailyplanet.com'}],'priority':'12','sentDate':'"+date+"','cc':[{'address':'cc.clark.kent@dailyplanet.com'}]}");
+        
+        MessagingMessage message = new MessagingMessageParser().parse(messageJSON, null);
+        assertNotNull(message);
+
+        MessagingMessageGetSwitch get = new MessagingMessageGetSwitch();
+        
+        for (MessagingField field : MessagingField.values()) {
+            if(field.getEquivalentHeader() != null) {
+                Object value = field.doSwitch(get, message);
+                assertNotNull(value);
+            }
+        }
+    }
+    
+    public void testAttributeTrumpsHeader() {
+        
+    }
+
     
     public void testPlainBody() throws JSONException, MessagingException, IOException {
         JSONObject messageJSON = new JSONObject();

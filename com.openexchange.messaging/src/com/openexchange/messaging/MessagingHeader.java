@@ -170,7 +170,7 @@ public interface MessagingHeader {
             equivalenceMap.put(SUBJECT, MessagingField.SUBJECT);
             equivalenceMap.put(TO, MessagingField.TO);
             equivalenceMap.put(DATE, MessagingField.SENT_DATE);
-
+            MessagingField.initHeaders();
         }
 
         /**

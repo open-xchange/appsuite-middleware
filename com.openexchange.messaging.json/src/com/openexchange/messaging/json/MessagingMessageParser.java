@@ -70,12 +70,14 @@ import com.openexchange.messaging.ContentType;
 import com.openexchange.messaging.MessagingBodyPart;
 import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingException;
+import com.openexchange.messaging.MessagingField;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.MessagingPartArrayContent;
 import com.openexchange.messaging.MultipartContent;
 import com.openexchange.messaging.StringContent;
 import com.openexchange.messaging.StringMessageHeader;
+import com.openexchange.messaging.MessagingHeader.KnownHeader;
 import com.openexchange.messaging.generic.internet.MimeContentType;
 import com.openexchange.messaging.generic.internet.MimeMessagingBodyPart;
 import com.openexchange.messaging.generic.internet.MimeMessagingMessage;
@@ -157,10 +159,18 @@ public class MessagingMessageParser {
             message.setSize(messageJSON.getLong("size"));
         }
         
-        
-        if(messageJSON.has("headers")) {
-            setHeaders( messageJSON.getJSONObject("headers"), message );
+        JSONObject headers = messageJSON.optJSONObject("headers");
+        if(headers == null) {
+            headers = new JSONObject();
         }
+        
+        for (MessagingField field : MessagingField.values()) {
+            if(field.getEquivalentHeader() != null && messageJSON.has(field.toString())) {
+                headers.put(field.getEquivalentHeader().toString(), messageJSON.get(field.toString()));
+            }
+        }
+        
+        setHeaders( headers, message );
         
         if(messageJSON.has("body")) {
             setContent( messageJSON.get("body"), registry, message);

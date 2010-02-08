@@ -80,6 +80,7 @@ public class MessagingActionFactory implements AJAXActionServiceFactory {
         actions.put("list", new ListAction(registry, writer, parser));
         actions.put("perform", new PerformAction(registry, writer, parser));
         actions.put("send", new SendAction(registry, writer, parser));
+        actions.put("update", new UpdateAction(registry, writer, parser));
     } 
     
     public AJAXActionService createActionService(String action) throws AjaxException {

@@ -102,8 +102,6 @@ public class MessagingMessageWriterTest extends TestCase {
             "size").withValue(13).hasKey("threadLevel").withValue(15).hasKey("id").withValue("message123").hasKey("folder").withValue(
             "niceFolder17");
 
-        System.out.println(messageJSON);
-        
         assertValidates(assertion, messageJSON);
     }
 
@@ -124,8 +122,31 @@ public class MessagingMessageWriterTest extends TestCase {
         assertValidates(assertion, messageJSON);
     }
     
-    public void testMirrorHeadersInAttributesIfTheyAreMessagingFields() {
+    public void testMirrorHeadersInAttributesIfTheyAreMessagingFields() throws MessagingException, JSONException {
+        SimpleMessagingMessage message = new SimpleMessagingMessage();
+        Map<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
         
+        headers.put("Content-Type", header("Content-Type", "text/plain"));
+        headers.put("From", header("From", "from.clark.kent@dailyplanet.com"));
+        headers.put("To", header("To", "to.clark.kent@dailyplanet.com"));
+        headers.put("Cc", header("Cc", "cc.clark.kent@dailyplanet.com"));
+        headers.put("Bcc", header("Bcc", "bcc.clark.kent@dailyplanet.com"));
+        headers.put("Subject", header("Subject", "Subject-Value"));
+        headers.put("Date", header("Date", "Date-Value"));
+        headers.put("Disposition-Notification-To", header("Disposition-Notification-To", "disp.notification.to.clark.kent@dailyplanet.com"));
+        headers.put("X-Priority", header("X-Priority", "12"));
+        
+        message.setHeaders(headers);
+        
+        JSONObject messageJSON = new MessagingMessageWriter().write(message);
+        
+        // Where happy if they are all included. Concrete header writing is tested elsewhere
+        
+        for (MessagingField field : MessagingField.values()) {
+            if(field.getEquivalentHeader() != null) {
+                assertTrue("Missing field: "+field.toString()+" in ", messageJSON.has(field.toString()));
+            }
+        }
     }
 
     private static final class InverseWriter implements MessagingHeaderWriter {

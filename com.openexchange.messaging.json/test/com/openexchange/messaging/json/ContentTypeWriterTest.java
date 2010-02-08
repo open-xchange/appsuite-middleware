@@ -58,6 +58,7 @@ import com.openexchange.json.JSONAssertion;
 import com.openexchange.messaging.ContentType;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingHeader;
+import com.openexchange.messaging.StringMessageHeader;
 import com.openexchange.messaging.generic.internet.MimeContentType;
 
 import static com.openexchange.json.JSONAssertion.*;
@@ -75,6 +76,34 @@ public class ContentTypeWriterTest extends TestCase{
         contentType.setSubType("plain");
         contentType.setCharsetParameter("UTF-8");
         contentType.setNameParameter("something.txt");
+
+        ContentTypeWriter writer = new ContentTypeWriter();
+
+        SimEntry<String, Collection<MessagingHeader>> entry = entry( contentType );
+
+        assertTrue(writer.handles(entry));
+        assertEquals("Content-Type", writer.writeKey(entry));
+        
+        Object value = writer.writeValue(entry);
+        assertNotNull(value);
+        
+        JSONObject jsonCType = (JSONObject) value;
+        
+        JSONAssertion assertion = new JSONAssertion()
+            .isObject()
+                .hasKey("type").withValue("text/plain")
+                .hasKey("params").withValueObject()
+                    .hasKey("charset").withValue("UTF-8")
+                    .hasKey("name").withValue("something.txt")
+                .objectEnds()
+            .objectEnds();
+        
+        assertValidates(assertion, jsonCType);
+        
+    }
+    
+    public void testWriteBasicHeader() throws MessagingException, JSONException {
+        MessagingHeader contentType = new StringMessageHeader("Content-Type", "text/plain;charset=UTF-8;name=something.txt");
 
         ContentTypeWriter writer = new ContentTypeWriter();
 

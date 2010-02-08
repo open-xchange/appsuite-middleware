@@ -263,13 +263,6 @@ public enum MessagingField {
     
     private static final Map<MessagingField, KnownHeader> equivalentHeaders = new EnumMap<MessagingField, KnownHeader>(MessagingField.class);
     
-    static {
-        for (final KnownHeader header : KnownHeader.values()) {
-            if(null != header.getEquivalentField()) {
-                equivalentHeaders.put(header.getEquivalentField(), header);
-            }
-        }
-    }
     
     /**
      * Maps a MessagingField to a MessagingHeader
@@ -277,6 +270,14 @@ public enum MessagingField {
      */
     public KnownHeader getEquivalentHeader() {
         return equivalentHeaders.get(this);
+    }
+
+    public static void initHeaders() {
+        for (final KnownHeader header : KnownHeader.values()) {
+            if(null != header.getEquivalentField()) {
+                equivalentHeaders.put(header.getEquivalentField(), header);
+            }
+        }
     }
 
 }

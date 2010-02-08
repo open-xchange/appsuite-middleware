@@ -159,6 +159,18 @@ public class MessagingMessageWriter {
             }
         }
         
+        for (MessagingField field : MessagingField.values()) {
+            if(null != field.getEquivalentHeader()) {
+                Collection<MessagingHeader> header = message.getHeader(field.getEquivalentHeader().toString());
+                if(header != null && ! header.isEmpty()) {
+                    SimpleEntry<String, Collection<MessagingHeader>> entry = new SimpleEntry<String, Collection<MessagingHeader>>(field.getEquivalentHeader().toString(), header);
+                    MessagingHeaderWriter writer = selectWriter(entry);
+                    
+                    messageJSON.put(field.toString(), writer.writeValue(entry));
+                }
+            }
+        }
+        
         return messageJSON;
 
     }
