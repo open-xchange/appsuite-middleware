@@ -170,18 +170,13 @@ public class FacebookMessagingResource implements MessagingResource {
         this.messagingAccount = messagingAccount;
         mutex = new Object();
         performWebLogout = true;
+        apiKey = FacebookConfiguration.getInstance().getApiKey();
+        secretKey = FacebookConfiguration.getInstance().getSecretKey();
+
         /*
          * Read-in configuration
          */
         final Map<String, Object> accountConfiguration = messagingAccount.getConfiguration();
-        {
-            final String tmp = accountConfiguration.get(FacebookConstants.FACEBOOK_API_KEY).toString();
-            apiKey = null == tmp ? FacebookConstants.KEY_API : tmp;
-        }
-        {
-            final String tmp = accountConfiguration.get(FacebookConstants.FACEBOOK_SECRET_KEY).toString();
-            secretKey = null == tmp ? FacebookConstants.KEY_SECRET : tmp;
-        }
         this.login = accountConfiguration.get(FacebookConstants.FACEBOOK_LOGIN).toString();
         this.password = accountConfiguration.get(FacebookConstants.FACEBOOK_PASSWORD).toString();
         facebookUserId = -1L;

@@ -103,21 +103,6 @@ public final class FacebookMessagingService implements MessagingService {
         /*
          * API & secret key
          */
-        final String apiKey = FacebookConfiguration.getInstance().getApiKey();
-        formDescription.add(FormElement.input(
-            FacebookConstants.FACEBOOK_API_KEY,
-            "API key",
-            false,
-            null == apiKey ? FacebookConstants.KEY_API : apiKey));
-        final String secretKey = FacebookConfiguration.getInstance().getSecretKey();
-        formDescription.add(FormElement.input(
-            FacebookConstants.FACEBOOK_SECRET_KEY,
-            "Secret key",
-            false,
-            null == secretKey ? FacebookConstants.KEY_SECRET : secretKey));
-        /*
-         * Credentials
-         */
         formDescription.add(FormElement.input(FacebookConstants.FACEBOOK_LOGIN, "Login", true, ""));
         formDescription.add(FormElement.password(FacebookConstants.FACEBOOK_PASSWORD, "Password", true, ""));
         this.formDescription = new ReadOnlyDynamicFormDescription(formDescription);
