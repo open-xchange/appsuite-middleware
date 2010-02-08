@@ -144,24 +144,21 @@ public final class Select {
         } catch (final DBPoolingException e) {
             throw new FolderException(e);
         }
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
         try {
-            PreparedStatement stmt = null;
-            ResultSet rs = null;
-            try {
-                stmt = con.prepareStatement(StorageType.WORKING.equals(storageType) ? SQL_SELECT2 : SQL_SELECT2_BCK);
-                int pos = 1;
-                stmt.setInt(pos++, cid);
-                stmt.setInt(pos++, tree);
-                stmt.setInt(pos++, user);
-                stmt.setString(pos, folderId);
-                rs = stmt.executeQuery();
-                return rs.next();
-            } catch (final SQLException e) {
-                throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-            } finally {
-                DBUtils.closeSQLStuff(rs, stmt);
-            }
+            stmt = con.prepareStatement(StorageType.WORKING.equals(storageType) ? SQL_SELECT2 : SQL_SELECT2_BCK);
+            int pos = 1;
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, tree);
+            stmt.setInt(pos++, user);
+            stmt.setString(pos, folderId);
+            rs = stmt.executeQuery();
+            return rs.next();
+        } catch (final SQLException e) {
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
             databaseService.backReadOnly(cid, con);
         }
     }
