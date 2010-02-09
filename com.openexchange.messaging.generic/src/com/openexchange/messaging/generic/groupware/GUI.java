@@ -66,7 +66,7 @@ public class GUI implements PreferencesItemService {
     }
 
     public IValueHandler getSharedValue() {
-        return new SharedNode("gui", 10); // FIXME Which ID is appropriate?
+        return new SharedNode("gui", 11);
     }
 
 }
