@@ -159,7 +159,7 @@ public class GoogleCalendarAPIStep extends AbstractStep<CalendarDataObject[], Ob
                     oxEvent.setEndDate(endDate);
                 }
                 String recurrenceLine = recurrenceMatcher.group(1);
-                LOG.debug("***** Event title : " + oxEvent.getTitle());
+                LOG.debug("Event title : " + oxEvent.getTitle());
                 LOG.debug("Start Date : " + oxEvent.getStartDate());
                 LOG.debug("End   Date : " + oxEvent.getEndDate());
                 LOG.debug(recurrenceLine);
