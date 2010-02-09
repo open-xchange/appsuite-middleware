@@ -52,16 +52,12 @@ package com.openexchange.ajax.config;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.TimeZone;
-
 import javax.servlet.http.HttpServletResponse;
-
 import junit.framework.Assert;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
-
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
@@ -230,18 +226,19 @@ public final class ConfigTools extends Assert {
         return client.execute(request);
     }
 
-    public static GetResponse get(final AJAXSession session,
-        final GetRequest request) throws AjaxException, IOException,
-        SAXException, JSONException {
+    public static GetResponse get(final AJAXSession session, final GetRequest request) throws AjaxException, IOException, SAXException, JSONException {
         return Executor.execute(session, request);
     }
 
-    public static SetResponse set(final AJAXClient client,
-        final SetRequest request) throws AjaxException, IOException,
+    /**
+     * @deprecated use {@link AJAXClient#execute(com.openexchange.ajax.framework.AJAXRequest)}.
+     */
+    @Deprecated
+    public static SetResponse set(final AJAXClient client, final SetRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
         return client.execute(request);
     }
-    
+
     public static GetResponse get(final AJAXSession session,
         final GetRequest request, String protocol, String hostname) throws AjaxException, IOException,
         SAXException, JSONException {

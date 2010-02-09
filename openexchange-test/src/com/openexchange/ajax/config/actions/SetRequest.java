@@ -49,8 +49,6 @@
 
 package com.openexchange.ajax.config.actions;
 
-import org.json.JSONException;
-
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
@@ -63,16 +61,10 @@ public final class SetRequest extends AbstractConfigRequest<SetResponse> {
 
     private final boolean failOnError;
 
-    /**
-     * Easier constructor.
-     */
     public SetRequest(final Tree param, final Object value) {
         this(param, value, true);
     }
 
-    /**
-     * Default constructor.
-     */
     public SetRequest(final Tree param, final Object value, final boolean failOnError) {
         super();
         this.param = param;
@@ -80,38 +72,23 @@ public final class SetRequest extends AbstractConfigRequest<SetResponse> {
         this.failOnError = failOnError;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getServletPath() {
         return super.getServletPath() + param.getPath();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public Object getBody() throws JSONException {
+    public Object getBody() {
         return value;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Method getMethod() {
         return Method.PUT;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Parameter[] getParameters() {
         return new Parameter[0];
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public SetParser getParser() {
         return new SetParser(failOnError);
     }

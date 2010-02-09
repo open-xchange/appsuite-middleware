@@ -77,6 +77,7 @@ public class ConfigTestSuite {
         tests.addTestSuite(SpamButtonTest.class);
         tests.addTestSuite(ModulesTest.class);
         tests.addTestSuite(BugTests.class);
+        tests.addTestSuite(Bug15354Test.class);
         return tests;
     }
 }

@@ -264,6 +264,15 @@ public enum Tree {
     /** Timeout after that idle uploads are deleted. */
     MaxUploadIdleTimeout("/maxUploadIdleTimeout"),
 
+    /** If the user wants to receive notification emails for appointments */
+    CalendarNotification("/calendarnotification"),
+
+    /** If the user wants to receive notification emails for tasks */
+    TaskNotification("/tasknotification"),
+
+    /** Wether spell checking is enabled for that user or not */
+    SpellCheck("/spellcheck"),
+
     /** the standard task folder (read-only) */
     PrivateTaskFolder("/folder/tasks"),
 

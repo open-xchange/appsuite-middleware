@@ -49,8 +49,6 @@
 
 package com.openexchange.ajax.config.actions;
 
-import org.json.JSONException;
-
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
@@ -59,46 +57,28 @@ public class GetRequest extends AbstractConfigRequest<GetResponse> {
 
     private final Tree param;
 
-    /**
-     * Default constructor.
-     */
     public GetRequest(final Tree param) {
         super();
         this.param = param;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getServletPath() {
         return super.getServletPath() + param.getPath();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public Object getBody() throws JSONException {
+    public Object getBody() {
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Method getMethod() {
         return Method.GET;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Parameter[] getParameters() {
         return new Parameter[0];
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public GetParser getParser() {
         return new GetParser();
     }

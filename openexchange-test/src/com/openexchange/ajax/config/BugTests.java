@@ -49,18 +49,20 @@
 
 package com.openexchange.ajax.config;
 
-import static com.openexchange.ajax.config.ConfigTools.readSetting;
-import static com.openexchange.ajax.config.ConfigTools.storeSetting;
-
-import com.meterware.httpunit.WebConversation;
+import static com.openexchange.java.Autoboxing.B;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Random;
+import org.json.JSONException;
+import org.xml.sax.SAXException;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.SetResponse;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.tools.RandomString;
+import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * Tests resulting from bug reports.
@@ -68,37 +70,9 @@ import com.openexchange.tools.RandomString;
  */
 public class BugTests extends AbstractAJAXSession {
 
-    /**
-     * Path to the configuration parameter.
-     */
-    private static final String DRAFTS_PATH = "mail/folder/drafts";
+    private AJAXClient client;
 
-    /**
-     * Path to the configuration parameter.
-     */
-    private static final String SENT_PATH = "mail/folder/sent";
-
-    /**
-     * Path to the configuration parameter.
-     */
-    private static final String SPAM_PATH = "mail/folder/spam";
-
-    /**
-     * Path to the configuration parameter.
-     */
-    private static final String TRASH_PATH = "mail/folder/trash";
-
-    /**
-     * Path to the configuration parameter if the user wants to receive calendar
-     * notifications or not.
-     */
-    private static final String CAL_NOT_PATH = "calendarnotification";
-
-    /**
-     * Path to the configuration parameter if the user wants to receive task
-     * notifications or not.
-     */
-    private static final String TASK_NOT_PATH = "tasknotification";
+    private Random rand;
 
     /**
      * Default constructor.
@@ -108,36 +82,24 @@ public class BugTests extends AbstractAJAXSession {
         super(name);
     }
 
-    private WebConversation getWebConversation() {
-        return getClient().getSession().getConversation();
-    }
-
-    private String getHostName() {
-        return AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME);
-    }
-
-    private String getSessionId() {
-        return getClient().getSession().getId();
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        client = getClient();
+        rand = new Random(System.currentTimeMillis());
     }
 
     /**
      * Tests if the mail folder are sent correctly to the GUI.
      */
     public void testBug5607() throws Throwable {
-        final String drafts = readSetting(getWebConversation(), getHostName(),
-            getSessionId(), DRAFTS_PATH);
+        final String drafts = client.execute(new GetRequest(Tree.DraftsFolder)).getString();
         assertNotNull("Can't get drafts folder.", drafts);
-
-        final String sent = readSetting(getWebConversation(), getHostName(),
-            getSessionId(), SENT_PATH);
+        final String sent = client.execute(new GetRequest(Tree.SentFolder)).getString();
         assertNotNull("Can't get sent folder.", sent);
-
-        final String spam = readSetting(getWebConversation(), getHostName(),
-            getSessionId(), SPAM_PATH);
+        final String spam = client.execute(new GetRequest(Tree.SpamFolder)).getString();
         assertNotNull("Can't get spam folder.", spam);
-
-        final String trash = readSetting(getWebConversation(), getHostName(),
-            getSessionId(), TRASH_PATH);
+        final String trash = client.execute(new GetRequest(Tree.TrashFolder)).getString();
         assertNotNull("Can't get trash folder.", trash);
     }
 
@@ -147,23 +109,16 @@ public class BugTests extends AbstractAJAXSession {
      * @throws Throwable if an exception occurs.
      */
     public void testBug6462() throws Throwable {
-        for (final String path : new String[] { CAL_NOT_PATH, TASK_NOT_PATH }) {
-            final String origValue = readSetting(getWebConversation(),
-                getHostName(), getSessionId(), path);
+        for (Tree tree : new Tree[] { Tree.CalendarNotification, Tree.TaskNotification }) {
+            boolean origValue = client.execute(new GetRequest(tree)).getBoolean();
             for (final boolean test : new boolean[] { true, false }) {
-                storeSetting(getWebConversation(), getHostName(),
-                    getSessionId(), path, Boolean.toString(test));
-                final String testValue = readSetting(getWebConversation(),
-                    getHostName(), getSessionId(), path);
-                assertEquals("Setting calendar notification failed.", test, Boolean
-                    .parseBoolean(testValue));
+                client.execute(new SetRequest(tree, Boolean.toString(test)));
+                boolean testValue = client.execute(new GetRequest(tree)).getBoolean();
+                assertEquals("Setting calendar/task notification failed.", test, testValue);
             }
-            storeSetting(getWebConversation(), getHostName(), getSessionId(),
-                path, origValue);
-            final String testValue = readSetting(getWebConversation(),
-                getHostName(), getSessionId(), path);
-            assertEquals("Restoring original value failed.", origValue,
-                testValue);
+            client.execute(new SetRequest(tree, B(origValue)));
+            boolean testValue = client.execute(new GetRequest(tree)).getBoolean();
+            assertEquals("Restoring original value failed.", origValue, testValue);
         }
     }
 
@@ -172,25 +127,50 @@ public class BugTests extends AbstractAJAXSession {
      * @throws Throwable
      */
     public void testWriteSenderAddress() throws Throwable {
-        final AJAXClient client = getClient();
         // Get original value.
-        final String origAddress = ConfigTools.get(client, new GetRequest(Tree
-            .SendAddress)).getString();
+        final String origAddress = client.execute(new GetRequest(Tree.SendAddress)).getString();
         try {
             // Write something for the test.
             String garbage;
             do {
                 garbage = RandomString.generateLetter(20);
             } while (garbage.equals(origAddress));
-            final SetResponse response = ConfigTools.set(client, new SetRequest(Tree
-                .SendAddress, garbage, false));
+            final SetResponse response = client.execute(new SetRequest(Tree.SendAddress, garbage, false));
             if (!response.hasError()) {
                 fail("SendAddress in config tree can be written with garbage.");
             }
         } finally {
             // Restore original value
-            ConfigTools.set(client, new SetRequest(Tree.SendAddress,
-                origAddress));
+            client.execute(new SetRequest(Tree.SendAddress, origAddress));
+        }
+    }
+
+    public void testKillAliases() throws Throwable {
+        // Tree.SpellCheck is currently not active.
+        for (Tree tree : new Tree[] { Tree.Beta }) {
+            tryToKillAliases(tree);
+        }
+    }
+
+    private void tryToKillAliases(Tree tree) throws AjaxException, IOException, SAXException, JSONException {
+        Object[] origAliases = client.execute(new GetRequest(Tree.MailAddresses)).getArray();
+        String origValue = client.execute(new GetRequest(tree)).getString();
+        try {
+            // We only need to write it to kill aliases
+            client.execute(new SetRequest(tree, B(rand.nextBoolean())));
+            Object[] testAliases = client.execute(new GetRequest(Tree.MailAddresses)).getArray();
+            assertNotNull("Aliases are null.", origAliases);
+            assertNotNull("Aliases are null.", testAliases);
+            assertEquals("Number of aliases are not equal.", origAliases.length, testAliases.length);
+            Arrays.sort(origAliases);
+            Arrays.sort(testAliases);
+            for (int i = 0; i < origAliases.length; i++) {
+                assertEquals("Aliases are not the same.", origAliases[i], testAliases[i]);
+            }
+        } finally {
+            client.execute(new SetRequest(tree, origValue));
+            String testValue = client.execute(new GetRequest(tree)).getString();
+            assertEquals("Restored value does not match.", origValue, testValue);
         }
     }
 }

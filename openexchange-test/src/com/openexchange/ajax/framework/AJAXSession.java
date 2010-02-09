@@ -111,6 +111,7 @@ public class AJAXSession {
      */
     public static WebConversation newWebConversation() {
         HttpUnitOptions.setDefaultCharacterSet("UTF-8");
+        HttpUnitOptions.setScriptingEnabled(false);
         return new WebConversation();
     }
 }
