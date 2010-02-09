@@ -49,6 +49,10 @@
 
 package com.openexchange.folderstorage.internal;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
@@ -68,6 +72,11 @@ public final class EffectivePermission implements Permission {
      * The configuration profile of the current logged in user.
      */
     private UserConfiguration userConfig;
+
+    /**
+     * The allowed content types.
+     */
+    private Set<Integer> allowedContentTypes;
 
     /**
      * The type of the referenced folder.
@@ -98,13 +107,21 @@ public final class EffectivePermission implements Permission {
      * @param contentType The type of the referenced folder
      * @param userConfig The configuration profile of the current logged in user
      */
-    public EffectivePermission(final Permission underlyingPerm, final String folderId, final Type type, final ContentType contentType, final UserConfiguration userConfig) {
+    public EffectivePermission(final Permission underlyingPerm, final String folderId, final Type type, final ContentType contentType, final UserConfiguration userConfig, final List<ContentType> allowedContentTypes) {
         super();
         this.underlyingPerm = underlyingPerm;
         this.folderId = folderId;
         this.contentType = contentType;
         this.type = type;
         this.userConfig = userConfig;
+        if (null == allowedContentTypes || allowedContentTypes.isEmpty()) {
+            this.allowedContentTypes = Collections.<Integer> emptySet();
+        } else {
+            this.allowedContentTypes = new HashSet<Integer>(allowedContentTypes.size());
+            for (final ContentType allowedContentType : allowedContentTypes) {
+                this.allowedContentTypes.add(Integer.valueOf(allowedContentType.getModule()));
+            }
+        }
     }
 
     @Override
@@ -152,7 +169,13 @@ public final class EffectivePermission implements Permission {
     }
 
     private boolean hasModuleAccess() {
-        return userConfig.hasModuleAccess(getModule());
+        if (!userConfig.hasModuleAccess(getModule())) {
+            return false;
+        }
+        if (allowedContentTypes.isEmpty()) {
+            return true;
+        }
+        return allowedContentTypes.contains(Integer.valueOf(getModule()));
     }
 
     private int getType() {
@@ -289,6 +312,9 @@ public final class EffectivePermission implements Permission {
             final EffectivePermission clone = (EffectivePermission) super.clone();
             clone.userConfig = (UserConfiguration) userConfig.clone();
             clone.underlyingPerm = (Permission) underlyingPerm.clone();
+            clone.allowedContentTypes =
+                (null == allowedContentTypes || allowedContentTypes.isEmpty()) ? Collections.<Integer> emptySet() : new HashSet<Integer>(
+                    allowedContentTypes);
             return clone;
         } catch (final CloneNotSupportedException e) {
             throw new InternalError(e.getMessage());

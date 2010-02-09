@@ -50,6 +50,7 @@
 package com.openexchange.folderstorage;
 
 import java.util.Date;
+import java.util.Map;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
@@ -60,6 +61,13 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface FolderService {
+
+    /**
+     * Gets a map of available content types registered by folder storages.
+     * 
+     * @return A map of available content types registered by folder storages
+     */
+    Map<Integer, ContentType> getAvailableContentTypes();
 
     /**
      * Gets the folder identified by given folder identifier and tree identifier.

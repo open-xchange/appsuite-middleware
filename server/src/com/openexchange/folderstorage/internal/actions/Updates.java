@@ -447,9 +447,9 @@ public final class Updates extends AbstractUserizedFolderAction {
 
     private Permission getEffectivePermission(final Folder folder) throws FolderException {
         if (null == getSession()) {
-            return CalculatePermission.calculate(folder, getUser(), getContext());
+            return CalculatePermission.calculate(folder, getUser(), getContext(), getAllowedContentTypes());
         }
-        return CalculatePermission.calculate(folder, getSession());
+        return CalculatePermission.calculate(folder, getSession(), getAllowedContentTypes());
     }
 
     private Folder getFolder(final String treeId, final String folderId, final Collection<FolderStorage> storages) throws FolderException {

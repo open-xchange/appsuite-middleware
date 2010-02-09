@@ -135,9 +135,9 @@ public final class Unsubscribe extends AbstractAction {
                  */
                 final Permission parentPermission;
                 if (null == getSession()) {
-                    parentPermission = CalculatePermission.calculate(folder, getUser(), getContext());
+                    parentPermission = CalculatePermission.calculate(folder, getUser(), getContext(), ALL_ALLOWED);
                 } else {
-                    parentPermission = CalculatePermission.calculate(folder, getSession());
+                    parentPermission = CalculatePermission.calculate(folder, getSession(), ALL_ALLOWED);
                 }
                 if (parentPermission.getFolderPermission() <= Permission.NO_PERMISSIONS) {
                     throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(

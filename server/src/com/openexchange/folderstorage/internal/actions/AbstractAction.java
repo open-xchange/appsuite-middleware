@@ -49,6 +49,9 @@
 
 package com.openexchange.folderstorage.internal.actions;
 
+import java.util.Collections;
+import java.util.List;
+import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
@@ -66,6 +69,11 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractAction {
+
+    /**
+     * The constant indicating all content types are allowed.
+     */
+    protected static final List<ContentType> ALL_ALLOWED = Collections.emptyList();
 
     protected final FolderStorageDiscoverer folderStorageDiscoverer;
 

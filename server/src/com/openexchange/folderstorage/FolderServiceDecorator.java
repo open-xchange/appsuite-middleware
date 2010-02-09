@@ -49,6 +49,9 @@
 
 package com.openexchange.folderstorage;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -63,11 +66,36 @@ public final class FolderServiceDecorator {
 
     private Locale locale;
 
+    private List<ContentType> allowedContentTypes;
+
     /**
      * Initializes a new {@link FolderServiceDecorator}.
      */
     public FolderServiceDecorator() {
         super();
+        allowedContentTypes = Collections.<ContentType> emptyList();
+    }
+
+    /**
+     * Gets the list of allowed content types or an empty list if all are allowed.
+     * 
+     * @return The list of allowed content types
+     */
+    public List<ContentType> getAllowedContentTypes() {
+        return allowedContentTypes;
+    }
+
+    /**
+     * Sets the list of allowed content types or an empty list if all are allowed.
+     * 
+     * @param allowedContentTypes The list of allowed content types
+     * @return This decorator with allowed content types applied
+     */
+    public FolderServiceDecorator setAllowedContentTypes(final List<ContentType> allowedContentTypes) {
+        this.allowedContentTypes =
+            (null == allowedContentTypes || allowedContentTypes.isEmpty()) ? Collections.<ContentType> emptyList() : new ArrayList<ContentType>(
+                allowedContentTypes);
+        return this;
     }
 
     /**

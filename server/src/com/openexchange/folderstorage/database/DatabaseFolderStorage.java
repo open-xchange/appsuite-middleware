@@ -156,7 +156,12 @@ public final class DatabaseFolderStorage implements FolderStorage {
             con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, params);
             writable = getParameter(Boolean.class, DatabaseParameterConstants.PARAM_WRITABLE, params);
         } catch (final FolderException e) {
-            LOG.error(e.getMessage(), e);
+            /*
+             * Already committed
+             */
+            if (LOG.isWarnEnabled()) {
+                LOG.warn(e.getMessage(), e);
+            }
             return;
         }
         try {

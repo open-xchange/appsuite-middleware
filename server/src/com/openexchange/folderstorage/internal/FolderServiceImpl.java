@@ -50,6 +50,7 @@
 package com.openexchange.folderstorage.internal;
 
 import java.util.Date;
+import java.util.Map;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
@@ -73,7 +74,7 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
- * {@link FolderServiceImpl} - TODO Short description of this class' purpose.
+ * {@link FolderServiceImpl} - The {@link FolderService} implementation.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -223,6 +224,10 @@ public final class FolderServiceImpl implements FolderService {
         } catch (final ContextException e) {
             throw new FolderException(e);
         }
+    }
+
+    public Map<Integer, ContentType> getAvailableContentTypes() {
+        return ContentTypeRegistry.getInstance().getAvailableContentTypes();
     }
 
 }

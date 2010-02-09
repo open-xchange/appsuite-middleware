@@ -68,6 +68,7 @@ import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.outlook.OutlookFolder;
 import com.openexchange.folderstorage.outlook.OutlookPermission;
@@ -99,6 +100,11 @@ public final class Select {
     private static final String SQL_SELECT2_BCK =
         "SELECT folderId, name FROM virtualBackupTree WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
 
+    private static final String SQL_SELECT3 = "SELECT folderId FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND parentId = ?";
+
+    private static final String SQL_SELECT3_BCK =
+        "SELECT folderId, name FROM virtualBackupTree WHERE cid = ? AND tree = ? AND user = ? AND parentId = ?";
+
     private static final String SQL_SELECT_SUBF =
         "SELECT folderId, name FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND parentId = ?";
 
@@ -122,6 +128,46 @@ public final class Select {
 
     private static final String SQL_SELECT2_SUBF_BCK =
         "SELECT folderId, name FROM virtualBackupTree WHERE cid = ? AND tree = ? AND user = ? AND parentId = ?";
+
+    /**
+     * Checks if the specified virtual tree contains a parent denoted by given parent identifier.
+     * 
+     * @param cid The context identifier
+     * @param tree The tree identifier
+     * @param user The user identifier
+     * @param parentId The parent identifier
+     * @param storageType The storage type to use
+     * @return <code>true</code> if the specified virtual tree contains a parent denoted by given parent identifier; otherwise
+     *         <code>false</code>
+     * @throws FolderException If checking folder's presence fails
+     */
+    public static boolean containsParent(final int cid, final int tree, final int user, final String parentId, final StorageType storageType) throws FolderException {
+        final DatabaseService databaseService = getDatabaseService();
+        // Get a connection
+        final Connection con;
+        try {
+            con = databaseService.getReadOnly(cid);
+        } catch (final DBPoolingException e) {
+            throw new FolderException(e);
+        }
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement(StorageType.WORKING.equals(storageType) ? SQL_SELECT3 : SQL_SELECT3_BCK);
+            int pos = 1;
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, tree);
+            stmt.setInt(pos++, user);
+            stmt.setString(pos, parentId);
+            rs = stmt.executeQuery();
+            return rs.next();
+        } catch (final SQLException e) {
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+            databaseService.backReadOnly(cid, con);
+        }
+    }
 
     /**
      * Checks if the specified virtual tree contains a folder denoted by given folder identifier.
@@ -155,6 +201,100 @@ public final class Select {
             stmt.setString(pos, folderId);
             rs = stmt.executeQuery();
             return rs.next();
+        } catch (final SQLException e) {
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+            databaseService.backReadOnly(cid, con);
+        }
+    }
+
+    /**
+     * Checks if the specified virtual tree contains any of the folders denoted by given folder identifiers.
+     * 
+     * @param cid The context identifier
+     * @param tree The tree identifier
+     * @param user The user identifier
+     * @param folderIds The folder identifiers
+     * @param storageType The storage type to use
+     * @return A <code>boolean</code> array containing the flag, whether the folder is contained or not
+     * @throws FolderException If checking folder's presence fails
+     */
+    public static boolean[] containsFolders(final int cid, final int tree, final int user, final String[] folderIds, final StorageType storageType) throws FolderException {
+        final DatabaseService databaseService = getDatabaseService();
+        // Get a connection
+        final Connection con;
+        try {
+            con = databaseService.getReadOnly(cid);
+        } catch (final DBPoolingException e) {
+            throw new FolderException(e);
+        }
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            final boolean[] ret = new boolean[folderIds.length];
+            int pos;
+            for (int i = 0; i < ret.length; i++) {
+                stmt = con.prepareStatement(StorageType.WORKING.equals(storageType) ? SQL_SELECT2 : SQL_SELECT2_BCK);
+                pos = 1;
+                stmt.setInt(pos++, cid);
+                stmt.setInt(pos++, tree);
+                stmt.setInt(pos++, user);
+                stmt.setString(pos, folderIds[i]);
+                rs = stmt.executeQuery();
+                ret[i] = rs.next();
+                DBUtils.closeSQLStuff(rs, stmt);
+            }
+            stmt = null;
+            rs = null;
+            return ret;
+        } catch (final SQLException e) {
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+            databaseService.backReadOnly(cid, con);
+        }
+    }
+
+    /**
+     * Checks if the specified virtual tree contains any of the folders denoted by given folder identifiers.
+     * 
+     * @param cid The context identifier
+     * @param tree The tree identifier
+     * @param user The user identifier
+     * @param folderIds The folder identifiers
+     * @param storageType The storage type to use
+     * @return A <code>boolean</code> array containing the flag, whether the folder is contained or not
+     * @throws FolderException If checking folder's presence fails
+     */
+    public static boolean[] containsFolders(final int cid, final int tree, final int user, final SortableId[] folderIds, final StorageType storageType) throws FolderException {
+        final DatabaseService databaseService = getDatabaseService();
+        // Get a connection
+        final Connection con;
+        try {
+            con = databaseService.getReadOnly(cid);
+        } catch (final DBPoolingException e) {
+            throw new FolderException(e);
+        }
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            final boolean[] ret = new boolean[folderIds.length];
+            int pos;
+            for (int i = 0; i < ret.length; i++) {
+                stmt = con.prepareStatement(StorageType.WORKING.equals(storageType) ? SQL_SELECT2 : SQL_SELECT2_BCK);
+                pos = 1;
+                stmt.setInt(pos++, cid);
+                stmt.setInt(pos++, tree);
+                stmt.setInt(pos++, user);
+                stmt.setString(pos, folderIds[i].getId());
+                rs = stmt.executeQuery();
+                ret[i] = rs.next();
+                DBUtils.closeSQLStuff(rs, stmt);
+            }
+            stmt = null;
+            rs = null;
+            return ret;
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {

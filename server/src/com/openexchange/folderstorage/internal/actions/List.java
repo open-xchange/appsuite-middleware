@@ -202,9 +202,9 @@ public final class List extends AbstractUserizedFolderAction {
                  */
                 final Permission parentPermission;
                 if (null == getSession()) {
-                    parentPermission = CalculatePermission.calculate(parent, getUser(), getContext());
+                    parentPermission = CalculatePermission.calculate(parent, getUser(), getContext(), getAllowedContentTypes());
                 } else {
-                    parentPermission = CalculatePermission.calculate(parent, getSession());
+                    parentPermission = CalculatePermission.calculate(parent, getSession(), getAllowedContentTypes());
                 }
                 if (parentPermission.getFolderPermission() <= Permission.NO_PERMISSIONS) {
                     throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
@@ -250,9 +250,9 @@ public final class List extends AbstractUserizedFolderAction {
                                  */
                                 final Permission subfolderPermission;
                                 if (null == getSession()) {
-                                    subfolderPermission = CalculatePermission.calculate(subfolder, getUser(), getContext());
+                                    subfolderPermission = CalculatePermission.calculate(subfolder, getUser(), getContext(), getAllowedContentTypes());
                                 } else {
-                                    subfolderPermission = CalculatePermission.calculate(subfolder, getSession());
+                                    subfolderPermission = CalculatePermission.calculate(subfolder, getSession(), getAllowedContentTypes());
                                 }
                                 if (subfolderPermission.getFolderPermission() > Permission.NO_PERMISSIONS && (all ? true : subfolder.isSubscribed())) {
                                     final java.util.List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(2);
@@ -426,12 +426,12 @@ public final class List extends AbstractUserizedFolderAction {
                         /*
                          * Check for subscribed status dependent on parameter "all"
                          */
-                        if (all ? true : subfolder.isSubscribed()) {
+                        if (all || subfolder.isSubscribed()) {
                             final Permission userPermission;
                             if (null == getSession()) {
-                                userPermission = CalculatePermission.calculate(subfolder, getUser(), getContext());
+                                userPermission = CalculatePermission.calculate(subfolder, getUser(), getContext(), getAllowedContentTypes());
                             } else {
-                                userPermission = CalculatePermission.calculate(subfolder, getSession());
+                                userPermission = CalculatePermission.calculate(subfolder, getSession(), getAllowedContentTypes());
                             }
                             final UserizedFolder userizedFolder =
                                 getUserizedFolder(subfolder, userPermission, treeId, all, true, newParameters, openedStorages);

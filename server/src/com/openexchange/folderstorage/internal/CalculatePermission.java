@@ -51,6 +51,7 @@ package com.openexchange.folderstorage.internal;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
@@ -105,7 +106,14 @@ public final class CalculatePermission {
                         userizedPermission = staticPermission;
                     } else {
                         final UserConfiguration userConfig = userConfStorage.getUserConfiguration(staticPermission.getEntity(), context);
-                        userizedPermission = new EffectivePermission(staticPermission, id, type, contentType, userConfig);
+                        userizedPermission =
+                            new EffectivePermission(
+                                staticPermission,
+                                id,
+                                type,
+                                contentType,
+                                userConfig,
+                                Collections.<ContentType> emptyList());
                     }
                     userizedPermissions.add(userizedPermission);
                 }
@@ -122,10 +130,11 @@ public final class CalculatePermission {
      * @param folder The folder
      * @param user The user
      * @param context The context
+     * @param allowedContentTypes The allowed content types; an empty list indicates all are allowed
      * @return The effective permission for given user in given folder
      * @throws FolderException If calculating the effective permission fails
      */
-    public static Permission calculate(final Folder folder, final User user, final Context context) throws FolderException {
+    public static Permission calculate(final Folder folder, final User user, final Context context, final java.util.List<ContentType> allowedContentTypes) throws FolderException {
         final UserConfiguration userConfiguration;
         try {
             userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), context);
@@ -137,7 +146,8 @@ public final class CalculatePermission {
             folder.getID(),
             folder.getType(),
             folder.getContentType(),
-            userConfiguration);
+            userConfiguration,
+            allowedContentTypes);
     }
 
     /**
@@ -145,16 +155,18 @@ public final class CalculatePermission {
      * 
      * @param folder The folder
      * @param session The session
+     * @param allowedContentTypes The allowed content types; an empty list indicates all are allowed
      * @return The effective permission for given session's user in given folder
      */
-    public static Permission calculate(final Folder folder, final ServerSession session) {
+    public static Permission calculate(final Folder folder, final ServerSession session, final java.util.List<ContentType> allowedContentTypes) {
         final UserConfiguration userConfiguration = session.getUserConfiguration();
         return new EffectivePermission(
             getMaxPermission(folder.getPermissions(), userConfiguration),
             folder.getID(),
             folder.getType(),
             folder.getContentType(),
-            userConfiguration);
+            userConfiguration,
+            allowedContentTypes);
     }
 
     private static Permission getMaxPermission(final Permission[] permissions, final UserConfiguration userConfig) {

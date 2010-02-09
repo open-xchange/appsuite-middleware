@@ -132,9 +132,9 @@ public final class Get extends AbstractUserizedFolderAction {
              */
             final Permission ownPermission;
             if (null == getSession()) {
-                ownPermission = CalculatePermission.calculate(folder, getUser(), getContext());
+                ownPermission = CalculatePermission.calculate(folder, getUser(), getContext(), getAllowedContentTypes());
             } else {
-                ownPermission = CalculatePermission.calculate(folder, getSession());
+                ownPermission = CalculatePermission.calculate(folder, getSession(), getAllowedContentTypes());
             }
             if (ownPermission.getFolderPermission() <= Permission.NO_PERMISSIONS) {
                 throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(

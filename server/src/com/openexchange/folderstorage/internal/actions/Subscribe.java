@@ -137,9 +137,9 @@ public final class Subscribe extends AbstractAction {
                  */
                 final Permission parentPermission;
                 if (null == getSession()) {
-                    parentPermission = CalculatePermission.calculate(sourceFolder, getUser(), getContext());
+                    parentPermission = CalculatePermission.calculate(sourceFolder, getUser(), getContext(), ALL_ALLOWED);
                 } else {
-                    parentPermission = CalculatePermission.calculate(sourceFolder, getSession());
+                    parentPermission = CalculatePermission.calculate(sourceFolder, getSession(), ALL_ALLOWED);
                 }
                 if (parentPermission.getFolderPermission() <= Permission.NO_PERMISSIONS) {
                     throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(

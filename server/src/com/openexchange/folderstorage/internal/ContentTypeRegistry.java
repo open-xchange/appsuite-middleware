@@ -51,8 +51,10 @@ package com.openexchange.folderstorage.internal;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
@@ -153,8 +155,7 @@ public final class ContentTypeRegistry implements ContentTypeDiscoveryService {
      * @return <code>true</code> if content type was successfully registered; otherwise <code>false</code>
      */
     public boolean addContentType(final String treeId, final ContentType contentType, final FolderStorage folderStorage) {
-        final Element element = getElementForTreeId(treeId);
-        final ConcurrentMap<ContentType, FolderStorage> types = element.getConcreteStorages();
+        final ConcurrentMap<ContentType, FolderStorage> types = getElementForTreeId(treeId).getConcreteStorages();
         final boolean added = (null == types.putIfAbsent(contentType, folderStorage));
         if (!added) {
             final StringBuilder sb = new StringBuilder(32);
@@ -181,6 +182,23 @@ public final class ContentTypeRegistry implements ContentTypeDiscoveryService {
         Collections.sort(generalStorages, FolderStorageComparator.getInstance());
         element.replaceGeneralStorages(generalStorages);
         return true;
+    }
+
+    /**
+     * Gets the available content types.
+     * 
+     * @return The available content types
+     */
+    public Map<Integer, ContentType> getAvailableContentTypes() {
+        final ConcurrentMap<ContentType, FolderStorage> concreteStorages = getElementForTreeId(FolderStorage.REAL_TREE_ID).getConcreteStorages();
+        if (concreteStorages.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        final Map<Integer, ContentType> ret = new HashMap<Integer, ContentType>(concreteStorages.size());
+        for (final ContentType contentType : concreteStorages.keySet()) {
+            ret.put(Integer.valueOf(contentType.getModule()), contentType);
+        }
+        return ret;
     }
 
     /**

@@ -86,6 +86,8 @@ public abstract class AbstractUserizedFolderAction extends AbstractAction {
 
     private volatile Locale locale;
 
+    private volatile java.util.List<ContentType> allowedContentTypes;
+
     /**
      * Initializes a new {@link AbstractUserizedFolderAction}.
      * 
@@ -162,7 +164,7 @@ public abstract class AbstractUserizedFolderAction extends AbstractAction {
                 tmp = timeZone;
                 if (null == tmp) {
                     final TimeZone tz = null == decorator ? null : decorator.getTimeZone();
-                    tmp = timeZone = (tz == null ? Tools.getTimeZone(getUser().getTimeZone()) : tz);
+                    timeZone = tmp = (tz == null ? Tools.getTimeZone(getUser().getTimeZone()) : tz);
                 }
             }
         }
@@ -184,7 +186,25 @@ public abstract class AbstractUserizedFolderAction extends AbstractAction {
                 tmp = locale;
                 if (null == tmp) {
                     final Locale l = null == decorator ? null : decorator.getLocale();
-                    tmp = locale = l == null ? getUser().getLocale() : l;
+                    locale = tmp = l == null ? getUser().getLocale() : l;
+                }
+            }
+        }
+        return tmp;
+    }
+
+    /**
+     * Gets the allowed content types.
+     * 
+     * @return The allowed content types
+     */
+    protected java.util.List<ContentType> getAllowedContentTypes() {
+        java.util.List<ContentType> tmp = allowedContentTypes;
+        if (null == tmp) {
+            synchronized (this) {
+                tmp = allowedContentTypes;
+                if (null == tmp) {
+                    allowedContentTypes = tmp = null == decorator ? ALL_ALLOWED : decorator.getAllowedContentTypes();
                 }
             }
         }
@@ -308,9 +328,9 @@ public abstract class AbstractUserizedFolderAction extends AbstractAction {
                  */
                 final Permission subfolderPermission;
                 if (null == getSession()) {
-                    subfolderPermission = CalculatePermission.calculate(subfolder, getUser(), getContext());
+                    subfolderPermission = CalculatePermission.calculate(subfolder, getUser(), getContext(), getAllowedContentTypes());
                 } else {
-                    subfolderPermission = CalculatePermission.calculate(subfolder, getSession());
+                    subfolderPermission = CalculatePermission.calculate(subfolder, getSession(), getAllowedContentTypes());
                 }
                 if (subfolderPermission.getFolderPermission() > Permission.NO_PERMISSIONS && (all ? true : subfolder.isSubscribed())) {
                     visibleSubfolderIds.add(id);

@@ -142,9 +142,9 @@ public final class Create extends AbstractAction {
              */
             final Permission parentPermission;
             if (null == getSession()) {
-                parentPermission = CalculatePermission.calculate(parent, getUser(), getContext());
+                parentPermission = CalculatePermission.calculate(parent, getUser(), getContext(), ALL_ALLOWED);
             } else {
-                parentPermission = CalculatePermission.calculate(parent, getSession());
+                parentPermission = CalculatePermission.calculate(parent, getSession(), ALL_ALLOWED);
             }
             if (parentPermission.getFolderPermission() <= Permission.NO_PERMISSIONS) {
                 throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(

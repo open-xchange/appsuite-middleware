@@ -51,6 +51,7 @@ package com.openexchange.folderstorage.internal.actions;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -126,13 +127,16 @@ public final class Path extends AbstractUserizedFolderAction {
 
         private final ServerSession session;
 
-        public SessionPermissionProvider(final ServerSession session) {
+        private final java.util.List<ContentType> allowedContentTypes;
+
+        public SessionPermissionProvider(final ServerSession session, final java.util.List<ContentType> allowedContentTypes) {
             super();
             this.session = session;
+            this.allowedContentTypes = allowedContentTypes;
         }
 
         public Permission getOwnPermission(final Folder folder) {
-            return CalculatePermission.calculate(folder, session);
+            return CalculatePermission.calculate(folder, session, allowedContentTypes);
         }
 
     }
@@ -143,14 +147,17 @@ public final class Path extends AbstractUserizedFolderAction {
 
         private final Context ctx;
 
-        public UserCtxPermissionProvider(final User user, final Context ctx) {
+        private final java.util.List<ContentType> allowedContentTypes;
+
+        public UserCtxPermissionProvider(final User user, final Context ctx, final java.util.List<ContentType> allowedContentTypes) {
             super();
             this.user = user;
             this.ctx = ctx;
+            this.allowedContentTypes = allowedContentTypes;
         }
 
         public Permission getOwnPermission(final Folder folder) throws FolderException {
-            return CalculatePermission.calculate(folder, user, ctx);
+            return CalculatePermission.calculate(folder, user, ctx, allowedContentTypes);
         }
 
     }
@@ -185,9 +192,9 @@ public final class Path extends AbstractUserizedFolderAction {
              */
             final PermissionProvider permissionProvider;
             if (null == session) {
-                permissionProvider = new UserCtxPermissionProvider(user, context);
+                permissionProvider = new UserCtxPermissionProvider(user, context, getAllowedContentTypes());
             } else {
-                permissionProvider = new SessionPermissionProvider(session);
+                permissionProvider = new SessionPermissionProvider(session, getAllowedContentTypes());
             }
 
             Permission ownPermission = permissionProvider.getOwnPermission(folder);
