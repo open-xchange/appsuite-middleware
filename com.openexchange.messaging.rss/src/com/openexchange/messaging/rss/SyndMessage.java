@@ -84,26 +84,33 @@ public class SyndMessage implements MessagingMessage {
         this.folder = folder;
         
         addStringHeader(KnownHeader.SUBJECT, syndEntry.getTitle());
-        addStringHeader(KnownHeader.FROM, syndEntry.getAuthor());
-        
+        //addStringHeader(KnownHeader.FROM, syndEntry.getAuthor());
         List<SyndContent> contents = (List<SyndContent>) syndEntry.getContents();
         // For now we'll only use the first content element
         
         if(contents.size() > 0) {
             SyndContent content = contents.get(0);
-            String type = content.getType();
-            if(type == null) {
-                type = "text/plain";
-            }
-            if(knowsType(type)) {
-                if(!type.startsWith("text")) {
-                    type = "text/"+type;
-                }
-            }
-            MimeContentType contentType = new MimeContentType(type);
-            addHeader(KnownHeader.CONTENT_TYPE, contentType);
-            this.content = new StringContent(content.getValue());
+            setContent(content);
+        } else if (entry.getDescription() != null){
+            setContent(entry.getDescription());
+        } else if (entry.getTitle() != null) {
+            setContent(entry.getTitleEx());
         }
+    }
+
+    private void setContent(SyndContent content) throws MessagingException {
+        String type = content.getType();
+        if(type == null) {
+            type = "text/plain";
+        }
+        if(knowsType(type)) {
+            if(!type.startsWith("text")) {
+                type = "text/"+type;
+            }
+        }
+        MimeContentType contentType = new MimeContentType(type);
+        addHeader(KnownHeader.CONTENT_TYPE, contentType);
+        this.content = new StringContent(content.getValue());
     }
 
     private boolean knowsType(String type) {
