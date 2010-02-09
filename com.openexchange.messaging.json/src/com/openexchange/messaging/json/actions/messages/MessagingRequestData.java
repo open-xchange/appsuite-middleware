@@ -52,10 +52,12 @@ package com.openexchange.messaging.json.actions.messages;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.messaging.MessagingAccountAccess;
 import com.openexchange.messaging.MessagingAccountTransport;
 import com.openexchange.messaging.MessagingAddressHeader;
 import com.openexchange.messaging.MessagingException;
@@ -86,6 +88,8 @@ public class MessagingRequestData {
 
     private MessagingMessageParser parser;
 
+    private MessagingAccountAccess accountAccess;
+
     public MessagingRequestData(AJAXRequestData request, ServerSession session, MessagingServiceRegistry registry, MessagingMessageParser parser) {
         this.request = request;
         this.registry = registry;
@@ -99,7 +103,14 @@ public class MessagingRequestData {
      * @throws MessagingException If parameters 'messagingService' or 'account' are missing
      */
     public MessagingMessageAccess getMessageAccess() throws MessagingException {
-        return registry.getMessagingService(getMessagingServiceId()).getAccountAccess(getAccountID(), session).getMessageAccess();
+        return getAccountAccess().getMessageAccess();
+    }
+    
+    public MessagingAccountAccess getAccountAccess() throws MessagingException {
+        if(accountAccess != null) {
+            return accountAccess;
+        }
+        return accountAccess = registry.getMessagingService(getMessagingServiceId()).getAccountAccess(getAccountID(), session);
     }
 
     String getMessagingServiceId() throws MessagingException {
@@ -238,29 +249,6 @@ public class MessagingRequestData {
         }
     }
 
-    /**
-     * Retrieves a list of ids from the request body. Fails when the body does not contain a JSONArray (or the body is missing).
-     * 
-     * @throws JSONException - When an underlying parsing exception occurs.
-     * @throws MessagingException - When The body is missing or no JSONArray
-     */
-    public String[] getIds() throws JSONException, MessagingException {
-        Object data = request.getData();
-        if (data == null) {
-            throw MessagingExceptionCodes.MISSING_PARAMETER.create("body");
-        }
-        if (!JSONArray.class.isInstance(data)) {
-            throw MessagingExceptionCodes.INVALID_PARAMETER.create("body", data.toString());
-        }
-        JSONArray idsJSON = (JSONArray) data;
-        String[] ids = new String[idsJSON.length()];
-
-        for (int i = 0; i < ids.length; i++) {
-            ids[i] = idsJSON.getString(i);
-        }
-
-        return ids;
-    }
 
     /**
      * Retrieves the 'messageAction' parameter. Fails when 'messageAction' was not set.
@@ -335,6 +323,26 @@ public class MessagingRequestData {
 
     private boolean hasLongFolder() throws MessagingException {
         return isset("folder") && MessagingFolderAddress.matches(request.getParameter("folder"));
+    }
+
+    public List<MessageAddress> getMessageAddresses() throws JSONException, MessagingException {
+        Object data = request.getData();
+        if (data == null) {
+            throw MessagingExceptionCodes.MISSING_PARAMETER.create("body");
+        }
+        if (!JSONArray.class.isInstance(data)) {
+            throw MessagingExceptionCodes.INVALID_PARAMETER.create("body", data.toString());
+        }
+        JSONArray idsJSON = (JSONArray) data;
+        
+        List<MessageAddress> addresses = new ArrayList<MessageAddress>(idsJSON.length());
+        
+        for (int i = 0, size = idsJSON.length(); i < size; i++) {
+            JSONArray pair = idsJSON.getJSONArray(i);
+            addresses.add(new MessageAddress(pair.getString(0), pair.getString(1)));
+        }
+
+        return addresses;
     }
 
 }

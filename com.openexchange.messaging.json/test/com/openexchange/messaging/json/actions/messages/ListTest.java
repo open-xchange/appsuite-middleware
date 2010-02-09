@@ -71,12 +71,11 @@ public class ListTest extends AbstractMessagingActionTest {
     
     public void testList() throws JSONException, AbstractOXException {
         AJAXRequestData req = new AJAXRequestData();
-        req.putParameter("messagingService", "com.openexchange.test1");
-        req.putParameter("folder", "theFolderID");
-        req.putParameter("account", "12");
         req.putParameter("columns", "id, subject");
         
-        req.setData(new JSONArray("['id1', 'id2', 'id3']"));
+        String folderId = "com.openexchange.test1://12/theFolderID";
+        
+        req.setData(new JSONArray("[['"+folderId+"', 'id1'], ['"+folderId+"', 'id2'], ['"+folderId+"', 'id3']]"));
     
         AJAXRequestResult result = perform(req);
         

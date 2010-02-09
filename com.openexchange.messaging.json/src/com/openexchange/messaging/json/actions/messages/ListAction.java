@@ -49,11 +49,13 @@
 
 package com.openexchange.messaging.json.actions.messages;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingField;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.MessagingMessageAccess;
@@ -88,11 +90,29 @@ public class ListAction extends AbstractMessagingAction {
     protected AJAXRequestResult doIt(MessagingRequestData req, ServerSession session) throws AbstractOXException, JSONException {
         JSONArray list = new JSONArray();
         
-        MessagingMessageAccess access = req.getMessageAccess();
-        
         MessagingField[] fields = req.getColumns();
+
+       
+        MessagingFolderAddress folder = null;
+        List<String> ids = new ArrayList<String>();
+        for (MessageAddress address : req.getMessageAddresses()) {
+            if(folder == null) {
+                folder = address.getLongFolder();
+                ids.add(address.getId());
+            } else if (folder.equals(address.getLongFolder())) {
+                ids.add(address.getId());
+            } else {
+                throw MessagingExceptionCodes.INVALID_PARAMETER.create("folder", address.getLongFolder().toString());
+            }
+        }
+
+        if(folder == null) {
+            return new AJAXRequestResult(new JSONArray());
+        }
         
-        List<MessagingMessage> messages = access.getMessages(req.getFolderId(), req.getIds(), fields);
+        MessagingMessageAccess messageAccess = registry.getMessagingService(folder.getMessagingService()).getAccountAccess(folder.getAccount(), session).getMessageAccess();
+        List<MessagingMessage> messages = messageAccess.getMessages(folder.getFolder(), ids.toArray(new String[ids.size()]), fields);
+        
         for (MessagingMessage messagingMessage : messages) {
             list.put(writer.writeFields(messagingMessage, fields));
         }
