@@ -147,9 +147,8 @@ public class CommonWriter extends FolderChildWriter {
 
     protected static final FieldWriter<CommonObject> LAST_MODIFIED_OF_NEWEST_ATTACHMENT_UTC_WRITER = new FieldWriter<CommonObject>() {
         public void write(CommonObject obj, TimeZone timeZone, JSONArray json) {
-            writeValue(obj.getLastModified(), UTC, json, obj.containsLastModifiedOfNewestAttachment());
+            writeValue(obj.getLastModifiedOfNewestAttachment(), UTC, json, obj.containsLastModifiedOfNewestAttachment());
         }
-
         public void write(CommonObject obj, TimeZone timeZone, JSONObject json) throws JSONException {
             writeParameter(
                 CommonFields.LAST_MODIFIED_OF_NEWEST_ATTACHMENT_UTC,
