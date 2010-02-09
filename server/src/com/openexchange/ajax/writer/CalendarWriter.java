@@ -50,12 +50,9 @@
 package com.openexchange.ajax.writer;
 
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.I2i;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import org.json.JSONArray;
@@ -214,18 +211,13 @@ public abstract class CalendarWriter extends CommonWriter {
         return jsonObj;
     }
 
-    protected int[] writeFields(CalendarObject obj, int[] columns, JSONArray json) throws JSONException {
-        int[] toWrite = super.writeFields(obj, columns, json);
-        List<Integer> retval = new ArrayList<Integer>();
-        for (int column : toWrite) {
-            FieldWriter<CalendarObject> writer = WRITER_MAP.get(I(column));
-            if (null != writer) {
-                writer.write(obj, timeZone, json);
-            } else {
-                retval.add(I(column));
-            }
+    protected boolean writeField(CalendarObject obj, int column, TimeZone tz, JSONArray json) throws JSONException {
+        FieldWriter<CalendarObject> writer = WRITER_MAP.get(I(column));
+        if (null == writer) {
+            return super.writeField(obj, column, tz, json);
         }
-        return I2i(retval);
+        writer.write(obj, tz, json);
+        return true;
     }
 
     protected void writeFields(CalendarObject obj, JSONObject json) throws JSONException {

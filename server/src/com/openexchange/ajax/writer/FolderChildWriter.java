@@ -50,11 +50,8 @@
 package com.openexchange.ajax.writer;
 
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.I2i;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import org.json.JSONArray;
@@ -80,18 +77,13 @@ public class FolderChildWriter extends DataWriter {
         super(timeZone, writer);
     }
 
-    protected int[] writeFields(FolderChildObject obj, int[] columns, JSONArray json) throws JSONException {
-        int[] toWrite = super.writeFields(obj, columns, json);
-        List<Integer> retval = new ArrayList<Integer>();
-        for (int column : toWrite) {
-            FieldWriter<FolderChildObject> writer = WRITER_MAP.get(I(column));
-            if (null != writer) {
-                writer.write(obj, timeZone, json);
-            } else {
-                retval.add(I(column));
-            }
+    protected boolean writeField(FolderChildObject obj, int column, TimeZone tz, JSONArray json) throws JSONException {
+        FieldWriter<FolderChildObject> writer = WRITER_MAP.get(I(column));
+        if (null == writer) {
+            return super.writeField(obj, column, tz, json);
         }
-        return I2i(retval);
+        writer.write(obj, timeZone, json);
+        return true;
     }
 
     protected void writeFields(FolderChildObject obj, JSONObject json) throws JSONException {

@@ -111,14 +111,12 @@ public class AppointmentWriter extends CalendarWriter {
         }
     }
 
-    public void writeArray(final Appointment appointmentObject, final int cols[], final JSONArray jsonArray)
-            throws JSONException {
-        final JSONArray jsonAppointmentArray = new JSONArray();
-        int[] toWrite = super.writeFields(appointmentObject, cols, jsonArray);
-        for (int column : toWrite) {
-            write(column, appointmentObject, jsonAppointmentArray);
+    public void writeArray(final Appointment appointment, final int[] columns, final JSONArray json) throws JSONException {
+        final JSONArray array = new JSONArray();
+        for (int column : columns) {
+            writeField(appointment, column, timeZone, array);
         }
-        jsonArray.put(jsonAppointmentArray);
+        json.put(array);
     }
 
     public void writeAppointment(final Appointment appointmentObject, final JSONObject jsonObj) throws JSONException {
@@ -189,49 +187,40 @@ public class AppointmentWriter extends CalendarWriter {
         }
     }
 
-    /**
-     * Writes given appointment field's value into specified JSON array
-     *
-     * @param field The appointment field
-     * @param appointmentObject The appointment object to take the value from
-     * @param jsonArray The JSON array to put into
-     * @throws JSONException If a JSON error occurs while putting into JSON array
-     */
-    public void write(final int field, final Appointment appointmentObject, final JSONArray jsonArray) throws JSONException {
-        final AppointmentFieldWriter writer = WRITER_MAP.get(I(field));
-        if (writer != null) {
-            writer.write(appointmentObject, jsonArray);
+    protected void writeField(Appointment appointment, int column, TimeZone tz, JSONArray json) throws JSONException {
+        AppointmentFieldWriter writer = WRITER_MAP.get(I(column));
+        if (null != writer) {
+            writer.write(appointment, json);
+        } else if (super.writeField(appointment, column, tz, json)) {
             return;
         }
-        /*
-         * No appropriate static writer found, write manually
-         */
-        final boolean isFullTime = appointmentObject.getFullTime();
-        switch (field) {
+        // No appropriate static writer found, write manually
+        final boolean isFullTime = appointment.getFullTime();
+        switch (column) {
         case Appointment.START_DATE:
             if (isFullTime) {
-                writeValue(appointmentObject.getStartDate(), jsonArray);
+                writeValue(appointment.getStartDate(), json);
             } else {
-                if (appointmentObject.getRecurrenceType() == Appointment.NO_RECURRENCE) {
-                    writeValue(appointmentObject.getStartDate(), timeZone, jsonArray);
+                if (appointment.getRecurrenceType() == Appointment.NO_RECURRENCE) {
+                    writeValue(appointment.getStartDate(), timeZone, json);
                 } else {
-                    writeValue(appointmentObject.getStartDate(), appointmentObject.getStartDate(), timeZone, jsonArray);
+                    writeValue(appointment.getStartDate(), appointment.getStartDate(), timeZone, json);
                 }
             }
             break;
         case Appointment.END_DATE:
             if (isFullTime) {
-                writeValue(appointmentObject.getEndDate(), jsonArray);
+                writeValue(appointment.getEndDate(), json);
             } else {
-                if (appointmentObject.getRecurrenceType() == Appointment.NO_RECURRENCE) {
-                    writeValue(appointmentObject.getEndDate(), timeZone, jsonArray);
+                if (appointment.getRecurrenceType() == Appointment.NO_RECURRENCE) {
+                    writeValue(appointment.getEndDate(), timeZone, json);
                 } else {
-                    writeValue(appointmentObject.getEndDate(), appointmentObject.getEndDate(), timeZone, jsonArray);
+                    writeValue(appointment.getEndDate(), appointment.getEndDate(), timeZone, json);
                 }
             }
             break;
         default:
-            LOG.warn("missing field in mapping: " + field);
+            LOG.warn("Column " + column + " is unknown for appointment.");
         }
     }
 

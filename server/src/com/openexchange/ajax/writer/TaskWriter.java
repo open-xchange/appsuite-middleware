@@ -81,11 +81,10 @@ public class TaskWriter extends CalendarWriter {
         super(timeZone, null);
     }
 
-    public void writeArray(final Task taskObject, final int cols[], final JSONArray jsonArray) throws JSONException {
+    public void writeArray(final Task taskObject, final int[] columns, final JSONArray jsonArray) throws JSONException {
         final JSONArray jsonTaskArray = new JSONArray();
-        int[] toWrite = super.writeFields(taskObject, cols, jsonArray);
-        for (int column : toWrite) {
-            write(column, taskObject, jsonTaskArray);
+        for (int column : columns) {
+            writeField(taskObject, column, timeZone, jsonTaskArray);
         }
         jsonArray.put(jsonTaskArray);
     }
@@ -132,19 +131,20 @@ public class TaskWriter extends CalendarWriter {
         writeParameter(TaskFields.DAYS, task.getDays(), json, task.containsDays());
     }
 
-    private void write(final int field, final Task task, final JSONArray array) throws JSONException {
-        final TaskFieldWriter writer = WRITER_MAP.get(I(field));
-        if (writer != null) {
-            writer.write(task, array);
+    protected void writeField(Task task, int column, TimeZone tz, JSONArray json) throws JSONException {
+        TaskFieldWriter writer = WRITER_MAP.get(I(column));
+        if (null != writer) {
+            writer.write(task, json);
+        } else if (super.writeField(task, column, tz, json)) {
             return;
         }
         // No appropriate static writer found, write manually
-        switch (field) {
+        switch (column) {
         case Task.ALARM:
-            writeValue(task.getAlarm(), timeZone, array);
+            writeValue(task.getAlarm(), tz, json);
             break;
         default:
-            LOG.warn("missing field in mapping: " + field);
+            LOG.warn("Column " + column + " is unknown for tasks.");
         }
     }
 
