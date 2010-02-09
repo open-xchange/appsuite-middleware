@@ -65,25 +65,16 @@ import com.openexchange.session.Session;
  */
 public final class Language implements PreferencesItemService {
 
-    public static final String NAME = "language";
+    private static final String NAME = "language";
 
-    /**
-     * Default constructor.
-     */
     public Language() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String[] getPath() {
         return new String[] { NAME };
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public IValueHandler getSharedValue() {
         return  new AbstractUserFuncs() {
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) {
