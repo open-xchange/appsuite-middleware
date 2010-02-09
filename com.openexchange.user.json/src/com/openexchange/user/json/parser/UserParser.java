@@ -149,12 +149,11 @@ public final class UserParser {
             }
 
             if (userJSONObject.has(UserField.ID.getName())) {
-                contact.setInternalUserId(parseInt(userJSONObject, UserField.ID.getName()));
-                // contact.setObjectID(parseInt(userJSONObject, UserField.ID.getName()));
+                contact.setObjectID(parseInt(userJSONObject, UserField.ID.getName()));
             }
 
-            if (userJSONObject.has(UserField.CONTACT_ID.getName())) {
-                contact.setObjectID(parseInt(userJSONObject, UserField.CONTACT_ID.getName()));
+            if (userJSONObject.has(UserField.INTERNAL_USERID.getName())) {
+                contact.setInternalUserId(parseInt(userJSONObject, UserField.INTERNAL_USERID.getName()));
             }
 
             if (userJSONObject.has(UserField.CREATED_BY.getName())) {
