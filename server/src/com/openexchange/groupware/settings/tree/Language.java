@@ -55,7 +55,6 @@ import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.settings.impl.AbstractUserFuncs;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
@@ -87,9 +86,7 @@ public final class Language implements PreferencesItemService {
      */
     public IValueHandler getSharedValue() {
         return  new AbstractUserFuncs() {
-            public void getValue(final Session session, final Context ctx,
-                final User user, final UserConfiguration userConfig,
-                final Setting setting) throws SettingException {
+            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) {
                 setting.setSingleValue(user.getPreferredLanguage());
             }
             public boolean isAvailable(final UserConfiguration userConfig) {
