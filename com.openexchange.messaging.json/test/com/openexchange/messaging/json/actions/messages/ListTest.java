@@ -75,7 +75,7 @@ public class ListTest extends AbstractMessagingActionTest {
         
         String folderId = "com.openexchange.test1://12/theFolderID";
         
-        req.setData(new JSONArray("[['"+folderId+"', 'id1'], ['"+folderId+"', 'id2'], ['"+folderId+"', 'id3']]"));
+        req.setData(new JSONArray("[{folder : '"+folderId+"', id : 'id1'}, {folder : '"+folderId+"', id : 'id2'}, {folder : '"+folderId+"', id : 'id3'}]"));
     
         AJAXRequestResult result = perform(req);
         

@@ -338,8 +338,8 @@ public class MessagingRequestData {
         List<MessageAddress> addresses = new ArrayList<MessageAddress>(idsJSON.length());
         
         for (int i = 0, size = idsJSON.length(); i < size; i++) {
-            JSONArray pair = idsJSON.getJSONArray(i);
-            addresses.add(new MessageAddress(pair.getString(0), pair.getString(1)));
+            JSONObject pair = idsJSON.getJSONObject(i);
+            addresses.add(new MessageAddress(pair.getString("folder"), pair.getString("id")));
         }
 
         return addresses;
