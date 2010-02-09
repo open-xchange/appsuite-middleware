@@ -74,7 +74,7 @@ public class AddressHeaderWriterTest extends TestCase {
         AddressHeaderWriter writer = new AddressHeaderWriter();
 
         List<String> headerNames = Arrays.asList(
-            "To",
+            "From",
             "To",
             "Cc",
             "Bcc",
