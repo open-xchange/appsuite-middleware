@@ -74,39 +74,21 @@ import com.openexchange.session.Session;
  */
 public final class BetaFeatures implements PreferencesItemService {
 
-    /**
-     * The beta feature name.
-     */
-    public static final String NAME = "beta";
+    private static final String NAME = "beta";
 
-    /**
-     * The property name within configuration.
-     */
     private static final String PROP_BETA = "com.openexchange.user.beta";
 
-    /**
-     * Default constructor.
-     */
     public BetaFeatures() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String[] getPath() {
         return new String[] { NAME };
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public IValueHandler getSharedValue() {
         return new AbstractUserFuncs() {
-
-            public void getValue(final Session session, final Context ctx, final User user,
-                final UserConfiguration userConfig, final Setting setting) throws SettingException {
-
+            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) {
                 final Set<String> set = user.getAttributes().get(NAME);
                 if (null == set || set.isEmpty()) {
                     // Return global configuration setting for beta features
@@ -116,15 +98,12 @@ public final class BetaFeatures implements PreferencesItemService {
                     setting.setSingleValue(set.iterator().next());
                 }
             }
-
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return true;
             }
-
             public boolean isWritable() {
                 return true;
             }
-
             @Override
             protected void setValue(final UserImpl newUser, final String value, final User originalUser) throws SettingException {
                 if (!("true".equalsIgnoreCase(value)) && !("false".equalsIgnoreCase(value))) {
@@ -153,5 +132,4 @@ public final class BetaFeatures implements PreferencesItemService {
         }
         return service.getBoolProperty(name, defaultValue);
     }
-
 }

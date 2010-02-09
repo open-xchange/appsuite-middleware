@@ -60,7 +60,6 @@ import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.settings.impl.AbstractUserFuncs;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
@@ -75,34 +74,19 @@ import com.openexchange.session.Session;
  */
 public final class SpellCheck implements PreferencesItemService {
 
-    /**
-     * The spell check name.
-     */
-    public static final String NAME = "spellcheck";
+    private static final String NAME = "spellcheck";
 
-    /**
-     * Default constructor.
-     */
     public SpellCheck() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String[] getPath() {
         return new String[] { NAME };
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public IValueHandler getSharedValue() {
         return new AbstractUserFuncs() {
-
-            public void getValue(final Session session, final Context ctx, final User user,
-                final UserConfiguration userConfig, final Setting setting) throws SettingException {
-
+            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) {
                 final Set<String> set = user.getAttributes().get(NAME);
                 if (null != set && !set.isEmpty()) {
                     setting.setSingleValue(Boolean.valueOf(set.iterator().next()));
@@ -110,15 +94,12 @@ public final class SpellCheck implements PreferencesItemService {
                     setting.setSingleValue(Boolean.FALSE);
                 }
             }
-
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return true;
             }
-
             public boolean isWritable() {
                 return true;
             }
-
             @Override
             protected void setValue(final UserImpl newUser, final String value, final User originalUser) {
                 final Map<String, Set<String>> clonedAttrs = new HashMap<String, Set<String>>(originalUser.getAttributes());
@@ -129,5 +110,4 @@ public final class SpellCheck implements PreferencesItemService {
             }
         };
     }
-
 }

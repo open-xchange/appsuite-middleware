@@ -55,7 +55,6 @@ import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.settings.impl.AbstractUserFuncs;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
@@ -66,29 +65,19 @@ import com.openexchange.session.Session;
  */
 public final class TimeZone implements PreferencesItemService {
 
-    public static final String NAME = "timezone";
+    private static final String NAME = "timezone";
 
-    /**
-     * Default constructor.
-     */
     public TimeZone() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String[] getPath() {
         return new String[] { NAME };
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public IValueHandler getSharedValue() {
         return new AbstractUserFuncs() {
-            public void getValue(final Session session, final Context ctx,
-                final User user, final UserConfiguration userConfig, final Setting setting) throws SettingException {
+            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) {
                 setting.setSingleValue(user.getTimeZone());
             }
             public boolean isAvailable(final UserConfiguration userConfig) {
