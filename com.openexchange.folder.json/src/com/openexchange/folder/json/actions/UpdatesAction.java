@@ -116,17 +116,20 @@ public final class UpdatesAction extends AbstractFolderAction {
             includeMail = "1".equals(parameter) || Boolean.parseBoolean(parameter);
         }
         final String timeZoneId = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
+        final java.util.List<ContentType> allowedContentTypes = parseOptionalContentTypeArrayParameter("allowed_modules", request);
         /*
          * Request subfolders from folder service
          */
         final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
-        final UserizedFolder[][] result = folderService.getUpdates(
-            treeId,
-            timestamp,
-            ignoreDeleted,
-            includeMail ? new ContentType[] { ServiceRegistry.getInstance().getService(ContentTypeDiscoveryService.class).getByString(
-                "mail") } : null,
-            session, timeZoneId == null ? null : new FolderServiceDecorator().setTimeZone(Tools.getTimeZone(timeZoneId)));
+        final UserizedFolder[][] result =
+            folderService.getUpdates(
+                treeId,
+                timestamp,
+                ignoreDeleted,
+                includeMail ? new ContentType[] { ServiceRegistry.getInstance().getService(ContentTypeDiscoveryService.class).getByString(
+                    "mail") } : null,
+                session,
+                new FolderServiceDecorator().setTimeZone(Tools.getTimeZone(timeZoneId)).setAllowedContentTypes(allowedContentTypes));
         /*
          * Determine last-modified time stamp
          */
@@ -150,7 +153,12 @@ public final class UpdatesAction extends AbstractFolderAction {
          */
         final JSONArray resultArray = FolderWriter.writeMultiple2Array(columns, result[0], session, Constants.ADDITIONAL_FOLDER_FIELD_LIST);
         try {
-            final JSONArray jsonArray2 = FolderWriter.writeMultiple2Array(new int[] { FolderField.ID.getColumn() }, result[1], session, Constants.ADDITIONAL_FOLDER_FIELD_LIST);
+            final JSONArray jsonArray2 =
+                FolderWriter.writeMultiple2Array(
+                    new int[] { FolderField.ID.getColumn() },
+                    result[1],
+                    session,
+                    Constants.ADDITIONAL_FOLDER_FIELD_LIST);
             final int len = jsonArray2.length();
             for (int i = 0; i < len; i++) {
                 resultArray.put(jsonArray2.getJSONArray(i));

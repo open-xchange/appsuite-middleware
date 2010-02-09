@@ -49,10 +49,20 @@
 
 package com.openexchange.folder.json.actions;
 
+import static com.openexchange.folder.json.Tools.getUnsignedInteger;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.folder.json.services.ServiceRegistry;
+import com.openexchange.folderstorage.ContentType;
+import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.servlet.AjaxException;
 
 /**
@@ -96,7 +106,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
         final String[] sa = PAT.split(tmp, 0);
         final int[] columns = new int[sa.length];
         for (int i = 0; i < sa.length; i++) {
-            columns[i] = Integer.parseInt(sa[i]);
+            columns[i] = getUnsignedInteger(sa[i]);
         }
         return columns;
     }
@@ -116,9 +126,62 @@ public abstract class AbstractFolderAction implements AJAXActionService {
         final String[] sa = PAT.split(tmp, 0);
         final int[] columns = new int[sa.length];
         for (int i = 0; i < sa.length; i++) {
-            columns[i] = Integer.parseInt(sa[i]);
+            columns[i] = getUnsignedInteger(sa[i]);
         }
         return columns;
+    }
+
+    /**
+     * Parses the optional content type array parameter.
+     * 
+     * @param parameterName The parameter name
+     * @param request The request
+     * @return The parsed array of {@link ContentType} as a list.
+     * @throws AbstractOXException If an invalid content type is denoted
+     */
+    protected static List<ContentType> parseOptionalContentTypeArrayParameter(final String parameterName, final AJAXRequestData request) throws AbstractOXException {
+        final String tmp = request.getParameter(parameterName);
+        if (null == tmp) {
+            return Collections.emptyList();
+        }
+        final String[] sa = PAT.split(tmp, 0);
+        final List<ContentType> ret = new ArrayList<ContentType>(sa.length);
+        /*
+         * Get available content types
+         */
+        final Map<Integer, ContentType> availableContentTypes =
+            ServiceRegistry.getInstance().getService(FolderService.class, true).getAvailableContentTypes();
+        Map<String, ContentType> tmpMap = null;
+        for (int i = 0; i < sa.length; i++) {
+            final String str = sa[i];
+            final int module = getUnsignedInteger(str);
+            if (module < 0) {
+                /*
+                 * Not a number
+                 */
+                if (null == tmpMap) {
+                    tmpMap = new HashMap<String, ContentType>(availableContentTypes.size());
+                    for (final ContentType ct : availableContentTypes.values()) {
+                        tmpMap.put(ct.toString(), ct);
+                    }
+                }
+                final ContentType ct = tmpMap.get(str);
+                if (null == ct) {
+                    org.apache.commons.logging.LogFactory.getLog(AbstractFolderAction.class).error("No content type for string: " + str);
+                    throw new AjaxException(AjaxException.Code.InvalidParameterValue, parameterName, tmp);
+                }
+                ret.add(ct);
+            } else {
+                final Integer key = Integer.valueOf(module);
+                final ContentType ct = availableContentTypes.get(key);
+                if (null == ct) {
+                    org.apache.commons.logging.LogFactory.getLog(AbstractFolderAction.class).error("No content type for module: " + key);
+                    throw new AjaxException(AjaxException.Code.InvalidParameterValue, parameterName, tmp);
+                }
+                ret.add(ct);
+            }
+        }
+        return ret;
     }
 
 }

@@ -58,6 +58,7 @@ import com.openexchange.folder.json.Constants;
 import com.openexchange.folder.json.Tools;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folder.json.writer.FolderWriter;
+import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -98,11 +99,17 @@ public final class PathAction extends AbstractFolderAction {
         }
         final int[] columns = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
         final String timeZoneId = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
+        final java.util.List<ContentType> allowedContentTypes = parseOptionalContentTypeArrayParameter("allowed_modules", request);
         /*
          * Request subfolders from folder service
          */
         final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
-        final UserizedFolder[] subfolders = folderService.getPath(treeId, folderId, session, timeZoneId == null ? null : new FolderServiceDecorator().setTimeZone(Tools.getTimeZone(timeZoneId)));
+        final UserizedFolder[] subfolders =
+            folderService.getPath(
+                treeId,
+                folderId,
+                session,
+                new FolderServiceDecorator().setTimeZone(Tools.getTimeZone(timeZoneId)).setAllowedContentTypes(allowedContentTypes));
         /*
          * Determine last-modified time stamp
          */

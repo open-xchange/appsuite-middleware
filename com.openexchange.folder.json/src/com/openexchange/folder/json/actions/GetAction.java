@@ -56,6 +56,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.folder.json.Tools;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folder.json.writer.FolderWriter;
+import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -95,6 +96,7 @@ public final class GetAction extends AbstractFolderAction {
             throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, "id");
         }
         final String timeZoneId = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
+        final java.util.List<ContentType> allowedContentTypes = parseOptionalContentTypeArrayParameter("allowed_modules", request);
         /*
          * Request subfolders from folder service
          */
@@ -104,7 +106,7 @@ public final class GetAction extends AbstractFolderAction {
                 treeId,
                 folderId,
                 session,
-                timeZoneId == null ? null : new FolderServiceDecorator().setTimeZone(Tools.getTimeZone(timeZoneId)));
+                new FolderServiceDecorator().setTimeZone(Tools.getTimeZone(timeZoneId)).setAllowedContentTypes(allowedContentTypes));
         /*
          * Write subfolders as JSON arrays to JSON array
          */

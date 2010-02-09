@@ -58,6 +58,7 @@ import com.openexchange.folder.json.Constants;
 import com.openexchange.folder.json.Tools;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folder.json.writer.FolderWriter;
+import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -99,11 +100,14 @@ public final class ListAction extends AbstractFolderAction {
         final int[] columns = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
         final boolean all = Boolean.parseBoolean(request.getParameter(AJAXServlet.PARAMETER_ALL));
         final String timeZoneId = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
+        final java.util.List<ContentType> allowedContentTypes = parseOptionalContentTypeArrayParameter("allowed_modules", request);
         /*
          * Request subfolders from folder service
          */
         final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
-        final UserizedFolder[] subfolders = folderService.getSubfolders(treeId, parentId, all, session, timeZoneId == null ? null : new FolderServiceDecorator().setTimeZone(Tools.getTimeZone(timeZoneId)));
+        final UserizedFolder[] subfolders =
+            folderService.getSubfolders(treeId, parentId, all, session, new FolderServiceDecorator().setTimeZone(
+                Tools.getTimeZone(timeZoneId)).setAllowedContentTypes(allowedContentTypes));
         /*
          * Determine max. last-modified time stamp
          */
