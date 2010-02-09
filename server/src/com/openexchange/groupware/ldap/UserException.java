@@ -207,7 +207,11 @@ public class UserException extends AbstractOXException {
           * New password contains invalid characters
           */
          INVALID_PASSWORD("New password contains invalid characters",
-        	Category.USER_INPUT, Detail.ERROR, 15);
+        	Category.USER_INPUT, Detail.ERROR, 15),
+         /**
+          * Attributes of user %1$d in context %2$d have been erased.
+          */
+        ERASED_ATTRIBUTES("Attributes of user %1$d in context %2$d have been erased.", Category.WARNING, Detail.ERROR, 16);
 
         /**
          * Message of the exception.

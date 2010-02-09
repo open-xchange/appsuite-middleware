@@ -51,8 +51,10 @@ package com.openexchange.groupware.ldap;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
+import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.getIN;
+import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -67,6 +69,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.contexts.Context;
@@ -80,6 +84,8 @@ import com.openexchange.tools.Collections.SmartIntArray;
  * of a directory service.
  */
 public class RdbUserStorage extends UserStorage {
+
+    private static final Log LOG = LogFactory.getLog(RdbUserStorage.class);
 
     private static final String SELECT_ALL_USER = "SELECT id,userPassword,mailEnabled,imapServer,imapLogin,smtpServer,mailDomain," +
         "shadowLastChange,mail,timeZone,preferredLanguage,passwordMech,contactId FROM user WHERE user.cid=?";
@@ -388,83 +394,86 @@ public class RdbUserStorage extends UserStorage {
 
     @Override
     public void updateUser(final User user, final Context context) throws LdapException {
+        int contextId = context.getContextId();
+        int userId = user.getId();
+        String timeZone = user.getTimeZone();
+        String preferredLanguage = user.getPreferredLanguage();
         final Connection con;
         try {
             con = DBPool.pickupWriteable(context);
-        } catch (final Exception e) {
+        } catch (DBPoolingException e) {
             throw new LdapException(EnumComponent.USER, Code.NO_CONNECTION, e);
         }
         try {
-            final int contextId = context.getContextId();
-            final int id = user.getId();
-            /*
-             * Update time zone and language
-             */
-            PreparedStatement stmt = null;
-            try {
-                final String sql = "UPDATE user SET " + TIMEZONE + "=?," + LANGUAGE
-                    + "=? WHERE cid=? AND id=?";
-                stmt = con.prepareStatement(sql);
-                int pos = 1;
-                stmt.setString(pos++, user.getTimeZone());
-                stmt.setString(pos++, user.getPreferredLanguage());
-                stmt.setInt(pos++, contextId);
-                stmt.setInt(pos++, id);
-                stmt.execute();
-            } catch (final SQLException e) {
-                throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e,
-                    e.getMessage());
-            } finally {
-                closeSQLStuff(null, stmt);
-            }
-            /*
-             * Check if attributes are set
-             */
-            final Map<String, Set<String>> attributes = user.getAttributes();
-            if (null != attributes) {
-                /*
-                 * Update attributes
-                 */
+            con.setAutoCommit(false);
+            // Update time zone and language
+            if (null != timeZone && null != preferredLanguage) {
+                PreparedStatement stmt = null;
                 try {
-                    /*
-                     * Clear all attributes
-                     */
-                    stmt = con.prepareStatement("DELETE FROM user_attribute WHERE cid=? AND " + IDENTIFIER + "=?");
+                    String sql = "UPDATE user SET " + TIMEZONE + "=?," + LANGUAGE + "=? WHERE cid=? AND id=?";
+                    stmt = con.prepareStatement(sql);
                     int pos = 1;
+                    stmt.setString(pos++, timeZone);
+                    stmt.setString(pos++, preferredLanguage);
                     stmt.setInt(pos++, contextId);
-                    stmt.setInt(pos++, id);
-                    stmt.executeUpdate();
-                    closeSQLStuff(null, stmt);
-                    /*
-                     * Insert new ones
-                     */
-                    if (!attributes.isEmpty()) {
-                        /*
-                         * Batch update them
-                         */
-                        stmt = con.prepareStatement("INSERT INTO user_attribute (cid, " + IDENTIFIER + ", name, value) VALUES (?, ?, ?, ?)");
-                        for (final Entry<String, Set<String>> entry : attributes.entrySet()) {
-                            final String name = entry.getKey();
-                            for (final String value : entry.getValue()) {
-                                pos = 1;
-                                stmt.setInt(pos++, contextId);
-                                stmt.setInt(pos++, id);
-                                stmt.setString(pos++, name);
-                                stmt.setString(pos++, value);
-                                stmt.addBatch();
-                            }
-                        }
-                        stmt.executeBatch();
-                    }
-                } catch (final SQLException e) {
-                    throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e,
-                        e.getMessage());
+                    stmt.setInt(pos++, userId);
+                    stmt.execute();
                 } finally {
-                    closeSQLStuff(null, stmt);
+                    closeSQLStuff(stmt);
                 }
             }
+            if (null != user.getAttributes()) {
+                updateAttributes(context, user, con);
+            }
+            con.commit();
+        } catch (SQLException e) {
+            rollback(con);
+            throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e, e.getMessage());
         } finally {
+            autocommit(con);
             DBPool.closeWriterSilent(context, con);
+        }
+    }
+
+    private void updateAttributes(Context ctx, User user, Connection con) throws SQLException {
+        // Update attributes
+        int contextId = ctx.getContextId();
+        int userId = user.getId();
+        Map<String, Set<String>> attributes = user.getAttributes();
+        // Clear all attributes
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("DELETE FROM user_attribute WHERE cid=? AND " + IDENTIFIER + "=?");
+            int pos = 1;
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, userId);
+            stmt.executeUpdate();
+        } finally {
+            closeSQLStuff(stmt);
+        }
+        // Insert new ones
+        if (!attributes.isEmpty()) {
+            // Batch update them
+            stmt = null;
+            try {
+                stmt = con.prepareStatement("INSERT INTO user_attribute (cid," + IDENTIFIER + ",name,value) VALUES (?,?,?,?)");
+                for (final Entry<String, Set<String>> entry : attributes.entrySet()) {
+                    for (final String value : entry.getValue()) {
+                        int pos = 1;
+                        stmt.setInt(pos++, contextId);
+                        stmt.setInt(pos++, userId);
+                        stmt.setString(pos++, entry.getKey());
+                        stmt.setString(pos++, value);
+                        stmt.addBatch();
+                    }
+                }
+                stmt.executeBatch();
+            } finally {
+                closeSQLStuff(stmt);
+            }
+        } else {
+            UserException e = new UserException(UserException.Code.ERASED_ATTRIBUTES, I(contextId), I(userId));
+            LOG.warn(e.getMessage(), e);
         }
     }
 

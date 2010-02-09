@@ -1,3 +1,7 @@
+* 2010-02-09 - marcus.klein@open-xchange.com
+
+ - Bugfix #15354: Updating user attributes inside a transaction to prevent loss of aliases.
+
 * 2010-02-01 - thorben.betten@open-xchange.com
 
  - Bugfix #15287: Returning 7 bit characters on QuotedInternetAddress.getAddress()
