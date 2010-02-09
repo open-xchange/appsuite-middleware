@@ -340,8 +340,7 @@ public final class CacheFolderStorage implements FolderStorage {
         /*
          * Try global cache key
          */
-        CacheKey key = newCacheKey(folderId, treeId, contextId);
-        Folder folder = (Folder) globalCache.get(key);
+        Folder folder = (Folder) globalCache.get(newCacheKey(folderId, treeId, contextId));
         if (null != folder) {
             /*
              * Return a cloned version
@@ -351,8 +350,7 @@ public final class CacheFolderStorage implements FolderStorage {
         /*
          * Try user cache key
          */
-        key = newCacheKey(folderId, treeId, contextId, storageParameters.getUser().getId());
-        folder = (Folder) userCache.get(key);
+        folder = (Folder) userCache.get(newCacheKey(folderId, treeId, contextId, storageParameters.getUser().getId()));
         if (null == folder) {
             folder = loadFolder(treeId, folderId, storageType, storageParameters);
             putFolder(folder, treeId, storageParameters);
