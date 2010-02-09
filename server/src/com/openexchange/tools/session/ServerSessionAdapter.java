@@ -141,7 +141,7 @@ public class ServerSessionAdapter implements ServerSession {
      * @param ctx The session's context object
      * @param user The session's user object
      */
-    public ServerSessionAdapter(final Session session, final Context ctx, final User user, UserConfiguration userConfiguration) {
+    public ServerSessionAdapter(final Session session, final Context ctx, final User user, final UserConfiguration userConfiguration) {
         super();
         if (ServerSession.class.isInstance(session)) {
             this.serverSession = (ServerSession) session;
@@ -229,7 +229,7 @@ public class ServerSessionAdapter implements ServerSession {
             synchronized (this) {
                 tmp = user;
                 if (null == tmp) {
-                    tmp = user = UserStorage.getStorageUser(getUserId(), ctx);
+                    user = tmp = UserStorage.getStorageUser(getUserId(), ctx);
                 }
             }
         }
@@ -246,7 +246,7 @@ public class ServerSessionAdapter implements ServerSession {
                 tmp = userConfiguration;
                 if (null == tmp) {
                     try {
-                        tmp = userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(getUserId(), ctx);
+                        userConfiguration = tmp = UserConfigurationStorage.getInstance().getUserConfiguration(getUserId(), ctx);
                     } catch (final UserConfigurationException e) {
                         LOG.error(e.getMessage(), e);
                     }
@@ -265,7 +265,7 @@ public class ServerSessionAdapter implements ServerSession {
             synchronized (this) {
                 tmp = userSettingMail;
                 if (null == tmp) {
-                    tmp = userSettingMail = UserSettingMailStorage.getInstance().getUserSettingMail(getUserId(), ctx);
+                    userSettingMail = tmp = UserSettingMailStorage.getInstance().getUserSettingMail(getUserId(), ctx);
                 }
             }
         }
