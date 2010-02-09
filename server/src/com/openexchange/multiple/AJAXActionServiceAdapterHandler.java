@@ -107,7 +107,7 @@ public class AJAXActionServiceAdapterHandler implements MultipleHandler, Multipl
                 request.putParameter(key, entry.getValue().toString());
             }
         }
-        result = actionService.perform(null, session);
+        result = actionService.perform(request, session);
         return result.getResultObject();
     }
 
