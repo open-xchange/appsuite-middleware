@@ -143,6 +143,10 @@ public class MessagingMessageParser {
         if(messageJSON.has("folder")) {
             message.setFolder(messageJSON.getString("folder"));
         }
+        
+        if(messageJSON.has("picture")) {
+            message.setPicture(messageJSON.getString("picture"));
+        }
      
         setValues(message, registry, messageJSON);
         

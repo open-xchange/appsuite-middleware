@@ -230,4 +230,8 @@ public final class TwitterDirectMessage implements MessagingMessage {
         return null;
     }
 
+    public String getPicture() {
+        return null;
+    }
+
 }

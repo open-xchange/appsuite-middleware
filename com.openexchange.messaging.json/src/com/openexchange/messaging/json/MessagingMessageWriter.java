@@ -257,6 +257,10 @@ public class MessagingMessageWriter {
         }
         
         messageJSON.put("folder", message.getFolder());
+        
+        if(message.getPicture() != null) {
+            messageJSON.put("picture", message.getPicture());
+        }
         return messageJSON;
     }
 

@@ -69,6 +69,7 @@ import com.openexchange.messaging.MessagingHeader.KnownHeader;
 import com.openexchange.messaging.generic.internet.MimeContentType;
 import com.sun.syndication.feed.synd.SyndContent;
 import com.sun.syndication.feed.synd.SyndEntry;
+import com.sun.syndication.feed.synd.SyndFeed;
 
 public class SyndMessage implements MessagingMessage {
 
@@ -78,10 +79,12 @@ public class SyndMessage implements MessagingMessage {
     private Map<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
     private MessagingContent content;
     private String folder;
+    private SyndFeed feed;
      
-    public SyndMessage(SyndEntry syndEntry, String folder) throws MessagingException {
+    public SyndMessage(SyndFeed feed, SyndEntry syndEntry, String folder) throws MessagingException {
         this.entry = syndEntry;
         this.folder = folder;
+        this.feed = feed;
         
         addStringHeader(KnownHeader.SUBJECT, syndEntry.getTitle());
         //addStringHeader(KnownHeader.FROM, syndEntry.getAuthor());
@@ -205,6 +208,14 @@ public class SyndMessage implements MessagingMessage {
 
     public void writeTo(OutputStream os) throws IOException, MessagingException {
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create();
+    }
+    
+    public String getPicture() {
+        SyndFeed source = (entry.getSource() != null) ? entry.getSource() : feed;
+        if(null != source.getImage()) {
+            return source.getImage().getUrl();
+        }
+        return null;
     }
 
 }

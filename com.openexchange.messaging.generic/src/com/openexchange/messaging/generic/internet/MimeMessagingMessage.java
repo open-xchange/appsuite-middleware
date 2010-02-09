@@ -110,6 +110,8 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Messa
 
     private String id;
 
+    private String picture;
+
     /**
      * Initializes a new {@link MimeMessagingMessage}.
      */
@@ -306,5 +308,20 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Messa
     public void setId(final String id) {
         this.id = id;
     }
+    
+    public String getPicture() {
+        return picture;
+    }
+    
+    
+    /**
+     * Sets the picture
+     *
+     * @param picture The picture url
+     */
+    public void setPicture(String picture) {
+        this.picture = picture;
+    }
+
 
 }

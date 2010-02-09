@@ -95,6 +95,8 @@ public final class TwitterMessagingMessage implements MessagingMessage {
 
     private final long size;
 
+    private String picture;
+
     /**
      * Initializes a new {@link TwitterMessagingMessage}.
      * 
@@ -136,6 +138,8 @@ public final class TwitterMessagingMessage implements MessagingMessage {
             org.apache.commons.logging.LogFactory.getLog(TwitterMessagingMessage.class).error(e.getMessage(), e);
         }
         size = sz;
+        
+        picture = status.getUser().getProfileImageURL().toString();
     }
 
     public int getColorLabel() {
@@ -214,6 +218,10 @@ public final class TwitterMessagingMessage implements MessagingMessage {
 
     public String getId() {
         return String.valueOf(status.getId());
+    }
+    
+    public String getPicture() {
+        return picture;
     }
 
 }

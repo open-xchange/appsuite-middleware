@@ -94,13 +94,14 @@ public class MessagingMessageWriterTest extends TestCase {
         message.setDisposition(MessagingMessage.INLINE);
         message.setId("message123");
         message.setFolder("niceFolder17");
+        message.setPicture("http://www.somesite.invalid/somepic.png");
 
         JSONObject messageJSON = new MessagingMessageWriter().write(message);
 
         JSONAssertion assertion = new JSONAssertion().isObject().hasKey("colorLabel").withValue(2).hasKey("flags").withValue(12).hasKey(
             "receivedDate").withValue(1337).hasKey("user").withValueArray().withValues("eins", "zwo", "drei", "vier", "f�nf").inAnyOrder().hasKey(
             "size").withValue(13).hasKey("threadLevel").withValue(15).hasKey("id").withValue("message123").hasKey("folder").withValue(
-            "niceFolder17");
+            "niceFolder17").hasKey("picture").withValue("http://www.somesite.invalid/somepic.png");
 
         assertValidates(assertion, messageJSON);
     }
@@ -289,7 +290,7 @@ public class MessagingMessageWriterTest extends TestCase {
         // Test with one header equivalent field and all non-header fields
         MessagingField[] fields = new MessagingField[] {
             MessagingField.ID, MessagingField.FOLDER_ID, MessagingField.SUBJECT, MessagingField.SIZE, MessagingField.RECEIVED_DATE,
-            MessagingField.FLAGS, MessagingField.THREAD_LEVEL, MessagingField.COLOR_LABEL, MessagingField.BODY};
+            MessagingField.FLAGS, MessagingField.THREAD_LEVEL, MessagingField.COLOR_LABEL, MessagingField.BODY, MessagingField.PICTURE};
 
         
         //TODO AccountName ? What is that?
@@ -302,6 +303,7 @@ public class MessagingMessageWriterTest extends TestCase {
         message.setThreadLevel(12);
         message.setColorLabel(13);
         message.setContent("Supercontent!");
+        message.setPicture("pic");
         
         Map<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
         headers.put("Subject", header("Subject", "the subject"));
@@ -309,7 +311,7 @@ public class MessagingMessageWriterTest extends TestCase {
 
         JSONArray fieldsJSON = new MessagingMessageWriter().writeFields(message, fields);
 
-        JSONAssertion assertion = new JSONAssertion().isArray().withValues("msg123", "folder12", "the subject", 1337l, 1234567l, 313, 12, 13, "Supercontent!").inStrictOrder();
+        JSONAssertion assertion = new JSONAssertion().isArray().withValues("msg123", "folder12", "the subject", 1337l, 1234567l, 313, 12, 13, "Supercontent!", "pic").inStrictOrder();
 
         assertValidates(assertion, fieldsJSON);
     }

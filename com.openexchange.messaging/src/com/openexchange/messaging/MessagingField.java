@@ -150,6 +150,11 @@ public enum MessagingField {
      */
     ACCOUNT_NAME("accountName"),
     /**
+     * Picture url<br>
+     * <b>[low cost]</b>
+     */
+     PICTURE("picture"),
+    /**
      * To peek the mail body (\Seen flag is left unchanged)<br>
      * <b>[high cost]</b>
      */
@@ -182,7 +187,7 @@ public enum MessagingField {
     public static final MessagingField[] FIELDS_LOW_COST =
         {
             ID, FOLDER_ID, CONTENT_TYPE, FROM, TO, CC, BCC, SUBJECT, SIZE, SENT_DATE, RECEIVED_DATE, FLAGS, THREAD_LEVEL,
-            DISPOSITION_NOTIFICATION_TO, PRIORITY, COLOR_LABEL };
+            DISPOSITION_NOTIFICATION_TO, PRIORITY, COLOR_LABEL, PICTURE };
 
     /**
      * All fields except {@link #BODY} and {@link #FULL}
@@ -254,6 +259,7 @@ public enum MessagingField {
         case PRIORITY : return switcher.priority(args);
         case COLOR_LABEL : return switcher.colorLabel(args);
         case ACCOUNT_NAME : return switcher.accountName(args);
+        case PICTURE: return switcher.picture(args);
         case BODY : return switcher.body(args);
         case HEADERS : return switcher.headers(args);
         case FULL : return switcher.full(args);

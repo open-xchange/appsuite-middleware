@@ -145,7 +145,7 @@ public interface MessagingHeader {
          * X-Mailer
          */
         MAILER("X-Mailer");
-
+        
         private final String name;
 
         private KnownHeader(final String name) {

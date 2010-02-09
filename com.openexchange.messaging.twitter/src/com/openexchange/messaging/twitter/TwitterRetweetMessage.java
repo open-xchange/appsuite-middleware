@@ -232,4 +232,8 @@ public final class TwitterRetweetMessage implements MessagingMessage {
         return null;
     }
 
+    public String getPicture() {
+        return null;
+    }
+
 }

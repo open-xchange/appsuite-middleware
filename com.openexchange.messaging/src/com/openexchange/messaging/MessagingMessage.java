@@ -210,5 +210,9 @@ public interface MessagingMessage extends MessagingPart, MessagingContent {
      * @return The identifier or <code>null</code> if not available
      */
     public String getId();
+    /**
+     * Gets the URL to use as a picture for this message. Typically represents the source or author.
+     */
+    public String getPicture();
     
 }

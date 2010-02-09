@@ -121,6 +121,7 @@ public class MessagingMessageParserTest extends TestCase {
         
         messageJSON.put("userFlags", userFlags);
         messageJSON.put("folder", "niceFolder17");
+        messageJSON.put("picture", "http://somesite.invalid/somepic.png");
         
         MessagingMessage message = new MessagingMessageParser().parse(messageJSON, null);
         
@@ -145,6 +146,7 @@ public class MessagingMessageParserTest extends TestCase {
         assertEquals(3, message.getThreadLevel());
         
         assertEquals("niceFolder17", message.getFolder());
+        assertEquals("http://somesite.invalid/somepic.png", message.getPicture());
     }
     
     

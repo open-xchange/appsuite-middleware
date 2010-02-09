@@ -94,6 +94,8 @@ public class SimpleMessagingMessage implements MessagingMessage, MessagingBodyPa
 
     private String id;
 
+    private String picture;
+
     public int getColorLabel() {
         return colorLabel;
     }
@@ -242,6 +244,14 @@ public class SimpleMessagingMessage implements MessagingMessage, MessagingBodyPa
 
     public void setId(final String id) {
         this.id = id;
+    }
+
+    public String getPicture() {
+        return picture;
+    }
+    
+    public void setPicture(String picture) {
+        this.picture = picture;
     }
 
 

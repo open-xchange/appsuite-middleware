@@ -74,7 +74,7 @@ public class FeedAdapter {
     
         List<SyndEntry> entries = (List<SyndEntry>) feed.getEntries();
         for (SyndEntry syndEntry : entries) {
-            remember(new SyndMessage(syndEntry, folder));
+            remember(new SyndMessage(feed, syndEntry, folder));
         }
     }
 
