@@ -94,11 +94,7 @@ public class MessagingServiceWriter {
             return array;
         }
         for (MessagingAction action : capabilities) {
-            JSONObject object = new JSONObject();
-            object.put("name", action.getName());
-            object.put("type", action.getType().toString().toLowerCase());
-            object.put("follower", action.getFollower());
-            array.put(object);
+            array.put(action.getName());
         }
         return array;
     }

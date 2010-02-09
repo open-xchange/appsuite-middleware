@@ -89,6 +89,7 @@ public class MessagingServiceWriterTest extends TestCase{
         JSONAssertion assertion = new JSONAssertion().isObject()
             .hasKey("id").withValue("com.openexchange.messaging.twitter")
             .hasKey("displayName").withValue("Twitter")
+            .hasKey("messagingActions").withValueArray().withValues("powerize!", "send", "retweet", "reply").objectEnds()
             .hasKey("formDescription").withValueArray()
             .objectEnds();
         
@@ -97,36 +98,5 @@ public class MessagingServiceWriterTest extends TestCase{
         
         assertValidates(assertion, messagingServiceJSON);
         
-        JSONArray messagingActionsJSON = messagingServiceJSON.getJSONArray("messagingActions");
-        
-        assertion = new JSONAssertion().isObject()
-            .hasKey("name").withValue("powerize!")
-            .hasKey("type").withValue("none")
-            .objectEnds();
-        
-        assertValidates(assertion, messagingActionsJSON.get(0));
-        
-        assertion = new JSONAssertion().isObject()
-            .hasKey("name").withValue("send")
-            .hasKey("type").withValue("message")
-            .objectEnds();
-    
-        assertValidates(assertion, messagingActionsJSON.get(1));
-    
-        assertion = new JSONAssertion().isObject()
-            .hasKey("name").withValue("retweet")
-            .hasKey("type").withValue("storage")
-            .hasKey("follower").withValue("send")
-            .objectEnds();
-
-        assertValidates(assertion, messagingActionsJSON.get(2));
-        
-        assertion = new JSONAssertion().isObject()
-            .hasKey("name").withValue("reply")
-            .hasKey("type").withValue("storage")
-            .hasKey("follower").withValue("send")
-            .objectEnds();
-
-        assertValidates(assertion, messagingActionsJSON.get(3));
     }
 }
