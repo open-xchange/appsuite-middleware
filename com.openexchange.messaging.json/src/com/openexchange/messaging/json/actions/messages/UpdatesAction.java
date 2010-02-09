@@ -49,43 +49,30 @@
 
 package com.openexchange.messaging.json.actions.messages;
 
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import java.io.IOException;
+import org.json.JSONArray;
+import org.json.JSONException;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.messaging.json.MessagingMessageParser;
 import com.openexchange.messaging.json.MessagingMessageWriter;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link MessagingActionFactory}
+ * {@link UpdatesAction}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class MessagingActionFactory implements AJAXActionServiceFactory {
+public class UpdatesAction extends AbstractMessagingAction {
 
-    public static MessagingActionFactory INSTANCE = null; // Initialized in Activator
-
-    private Map<String, AJAXActionService> actions = null;
-    
-    
-    public MessagingActionFactory(MessagingServiceRegistry registry, MessagingMessageWriter writer, MessagingMessageParser parser) {
-        super();
-        actions = new HashMap<String, AJAXActionService>();
-        
-        actions.put("all", new AllAction(registry, writer, parser));
-        actions.put("get", new GetAction(registry, writer, parser));
-        actions.put("list", new ListAction(registry, writer, parser));
-        actions.put("perform", new PerformAction(registry, writer, parser));
-        actions.put("send", new SendAction(registry, writer, parser));
-        actions.put("update", new UpdateAction(registry, writer, parser));
-        actions.put("updates", new UpdatesAction(registry, writer, parser));
-    } 
-    
-    public AJAXActionService createActionService(String action) throws AjaxException {
-        return actions.get(action);
+    public UpdatesAction(MessagingServiceRegistry registry, MessagingMessageWriter writer, MessagingMessageParser parser) {
+        super(registry, writer, parser);
+    }
+    @Override
+    protected AJAXRequestResult doIt(MessagingRequestData messagingRequestData, ServerSession session) throws AbstractOXException, JSONException, IOException {
+        return new AJAXRequestResult(new JSONArray());
     }
 
 }
