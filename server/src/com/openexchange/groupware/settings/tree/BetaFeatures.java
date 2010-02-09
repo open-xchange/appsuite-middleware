@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.settings.tree;
 
+import static com.openexchange.java.Autoboxing.B;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -92,10 +93,10 @@ public final class BetaFeatures implements PreferencesItemService {
                 final Set<String> set = user.getAttributes().get(NAME);
                 if (null == set || set.isEmpty()) {
                     // Return global configuration setting for beta features
-                    setting.setSingleValue(String.valueOf(getBooleanProperty(PROP_BETA, true)));
+                    setting.setSingleValue(B(getBooleanProperty(PROP_BETA, true)));
                 } else {
                     // Return user's individual setting for beta features
-                    setting.setSingleValue(set.iterator().next());
+                    setting.setSingleValue(Boolean.valueOf(set.iterator().next()));
                 }
             }
             public boolean isAvailable(final UserConfiguration userConfig) {
