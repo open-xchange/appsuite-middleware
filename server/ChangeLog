@@ -1,3 +1,7 @@
+* 2010-02-09 - marcus.klein@open-xchange.com
+
+ - Bugfix #15354: Updating user attributes inside a transaction to prevent loss of aliases.
+
 * 2010-02-03 - marcus.klein@open-xchange.com
 
  - Bugfix #14623: Switched sessionId and secret so the sessionId gets used as URL parameter.
