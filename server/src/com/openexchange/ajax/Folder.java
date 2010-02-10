@@ -718,14 +718,15 @@ public class Folder extends SessionServlet {
                                     final Log logger = LOG;
                                     final List<Task<Object>> tasks = new ArrayList<Task<Object>>(size);
                                     int sz = accounts.size();
+                                    int index = 0;
                                     for (int i = 0; i < sz; i++) {
                                         final MailAccount mailAccount = accounts.get(i);
-                                        tasks.add(new MailRootFolderWriter(arrays, session, logger, mailAccount, columns, i));
+                                        tasks.add(new MailRootFolderWriter(arrays, session, logger, mailAccount, columns, index++));
                                     }
                                     sz = messagingAccounts.size();
                                     for (int i = 0; i < sz; i++) {
                                         final MessagingAccount ma = messagingAccounts.get(i);
-                                        tasks.add(new MessagingRootFolderWriter(arrays, session, logger, ma, columns, i));
+                                        tasks.add(new MessagingRootFolderWriter(arrays, session, logger, ma, columns, index++));
                                     }
                                     completionFuture =
                                         ServerServiceRegistry.getInstance().getService(ThreadPoolService.class).invoke(tasks);
@@ -956,6 +957,7 @@ public class Folder extends SessionServlet {
                 final boolean all = (STRING_1.equals(paramContainer.getStringParam(PARAMETER_ALL)));
                 SearchIterator<MailFolder> it = null;
                 MailServletInterface mailInterface = null;
+                if(false) {
                 try {
                     mailInterface = MailServletInterface.getInstance(session);
                     /*
@@ -1000,6 +1002,7 @@ public class Folder extends SessionServlet {
                             LOG.error(e.getMessage(), e);
                         }
                     }
+                }
                 }
             }
         } catch (final OXFolderException e) {
@@ -2281,7 +2284,7 @@ public class Folder extends SessionServlet {
                     return null;
                 }
                 logger.error(e.getMessage(), e);
-                throw e;
+                return null; //throw e;
             }
             try {
                 final MailFolderFieldWriter[] mailFolderWriters =
