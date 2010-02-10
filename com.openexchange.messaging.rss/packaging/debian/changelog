@@ -1,29 +1,5 @@
-open-xchange-messaging-rss (6.14.0.0-1) unstable; urgency=low
+open-xchange-messaging-rss (6.15.0.0-1) unstable; urgency=low
 
-  * build for 6.14 rev1
+  * Initial version
 
- -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 13 Nov 2009 15:06:54 +0100
-
-open-xchange-twitter (6.13.0.0-3) unstable; urgency=low
-
-  * build for 6.13 rev5
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Wed,  4 Nov 2009 14:26:51 +0100
-
-open-xchange-twitter (6.13.0.0-2) unstable; urgency=low
-
-  * build for 6.13 rev3
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 21 Oct 2009 15:30:14 +0200
-
-open-xchange-twitter (6.13.0.0-1) unstable; urgency=low
-
-  * build for 6.13 rev2
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Wed,  7 Oct 2009 14:51:39 +0200
-
-open-xchange-twitter (6.13.0.0-0) unstable; urgency=low
-
-  * Initial release.
-
- -- Thorben Betten <thorben.betten@open-xchange.com>  Wed, 9 Sep 2009 15:38:15 +0200
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Wed, 10 Feb 2010 22:02:38 +0100
