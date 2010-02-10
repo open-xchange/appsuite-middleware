@@ -84,55 +84,55 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link Updates} - Serves the <code>UPDATES</code> request.
+ * {@link UpdatesPerformer} - Serves the <code>UPDATES</code> request.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class Updates extends AbstractUserizedFolderAction {
+public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Updates.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(UpdatesPerformer.class);
 
     /**
-     * Initializes a new {@link Updates}.
+     * Initializes a new {@link UpdatesPerformer}.
      * 
      * @param session The session
      * @param decorator The optional folder service decorator
      */
-    public Updates(final ServerSession session, final FolderServiceDecorator decorator) {
+    public UpdatesPerformer(final ServerSession session, final FolderServiceDecorator decorator) {
         super(session, decorator);
     }
 
     /**
-     * Initializes a new {@link Updates}.
+     * Initializes a new {@link UpdatesPerformer}.
      * 
      * @param user The user
      * @param context The context
      * @param decorator The optional folder service decorator
      */
-    public Updates(final User user, final Context context, final FolderServiceDecorator decorator) {
+    public UpdatesPerformer(final User user, final Context context, final FolderServiceDecorator decorator) {
         super(user, context, decorator);
     }
 
     /**
-     * Initializes a new {@link Updates}.
+     * Initializes a new {@link UpdatesPerformer}.
      * 
      * @param session The session
      * @param decorator The optional folder service decorator
      * @param folderStorageDiscoverer The folder storage discoverer
      */
-    public Updates(final ServerSession session, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
+    public UpdatesPerformer(final ServerSession session, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
         super(session, decorator, folderStorageDiscoverer);
     }
 
     /**
-     * Initializes a new {@link Updates}.
+     * Initializes a new {@link UpdatesPerformer}.
      * 
      * @param user The user
      * @param context The context
      * @param decorator The optional folder service decorator
      * @param folderStorageDiscoverer The folder storage discoverer
      */
-    public Updates(final User user, final Context context, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
+    public UpdatesPerformer(final User user, final Context context, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
         super(user, context, decorator, folderStorageDiscoverer);
     }
 

@@ -52,6 +52,7 @@ package com.openexchange.folderstorage.internal.actions;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderFilter;
@@ -64,55 +65,55 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link AllVisibleFolders} - Serves the request to deliver all visible folders.
+ * {@link AllVisibleFoldersPerformer} - Serves the request to deliver all visible folders.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AllVisibleFolders extends AbstractUserizedFolderAction {
+public final class AllVisibleFoldersPerformer extends AbstractUserizedFolderPerformer {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AllVisibleFolders.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AllVisibleFoldersPerformer.class);
 
     /**
-     * Initializes a new {@link AllVisibleFolders}.
+     * Initializes a new {@link AllVisibleFoldersPerformer}.
      * 
      * @param session The session
      * @param decorator The optional folder service decorator
      */
-    public AllVisibleFolders(final ServerSession session, final FolderServiceDecorator decorator) {
+    public AllVisibleFoldersPerformer(final ServerSession session, final FolderServiceDecorator decorator) {
         super(session, decorator);
     }
 
     /**
-     * Initializes a new {@link AllVisibleFolders}.
+     * Initializes a new {@link AllVisibleFoldersPerformer}.
      * 
      * @param user The user
      * @param context The context final
      * @param decorator The optional folder service decorator
      */
-    public AllVisibleFolders(final User user, final Context context, final FolderServiceDecorator decorator) {
+    public AllVisibleFoldersPerformer(final User user, final Context context, final FolderServiceDecorator decorator) {
         super(user, context, decorator);
     }
 
     /**
-     * Initializes a new {@link AllVisibleFolders}.
+     * Initializes a new {@link AllVisibleFoldersPerformer}.
      * 
      * @param session The session
      * @param decorator The optional folder service decorator
      * @param folderStorageDiscoverer The folder storage discoverer
      */
-    public AllVisibleFolders(final ServerSession session, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
+    public AllVisibleFoldersPerformer(final ServerSession session, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
         super(session, decorator, folderStorageDiscoverer);
     }
 
     /**
-     * Initializes a new {@link AllVisibleFolders}.
+     * Initializes a new {@link AllVisibleFoldersPerformer}.
      * 
      * @param user The user
      * @param context The context
      * @param decorator The optional folder service decorator
      * @param folderStorageDiscoverer The folder storage discoverer
      */
-    public AllVisibleFolders(final User user, final Context context, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
+    public AllVisibleFoldersPerformer(final User user, final Context context, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
         super(user, context, decorator, folderStorageDiscoverer);
     }
 
@@ -131,11 +132,12 @@ public final class AllVisibleFolders extends AbstractUserizedFolderAction {
         }
         rootStorage.startTransaction(storageParameters, false);
         final long start = LOG.isDebugEnabled() ? System.currentTimeMillis() : 0L;
-        final java.util.List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(4);
+        final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(4);
         openedStorages.add(rootStorage);
         try {
-            final java.util.List<UserizedFolder> visibleFolders = new ArrayList<UserizedFolder>();
-            final List listAction = null == session ? new List(user, context, getDecorator()) : new List(session, getDecorator());
+            final List<UserizedFolder> visibleFolders = new ArrayList<UserizedFolder>();
+            final ListPerformer listAction =
+                null == session ? new ListPerformer(user, context, getDecorator()) : new ListPerformer(session, getDecorator());
 
             fillSubfolders(treeId, FolderStorage.ROOT_ID, filter, visibleFolders, listAction, openedStorages);
 
@@ -164,7 +166,7 @@ public final class AllVisibleFolders extends AbstractUserizedFolderAction {
         }
     }
 
-    private void fillSubfolders(final String treeId, final String parentId, final FolderFilter filter, final java.util.List<UserizedFolder> visibleFolders, final List listAction, final Collection<FolderStorage> openedStorages) throws FolderException {
+    private void fillSubfolders(final String treeId, final String parentId, final FolderFilter filter, final List<UserizedFolder> visibleFolders, final ListPerformer listAction, final Collection<FolderStorage> openedStorages) throws FolderException {
         final UserizedFolder[] subfolders = getSubfolders(treeId, parentId, listAction, openedStorages);
         if (subfolders.length > 0) {
             if (null == filter) {
@@ -197,7 +199,7 @@ public final class AllVisibleFolders extends AbstractUserizedFolderAction {
         }
     }
 
-    private UserizedFolder[] getSubfolders(final String treeId, final String parentId, final List listAction, final Collection<FolderStorage> openedStorages) throws FolderException {
+    private UserizedFolder[] getSubfolders(final String treeId, final String parentId, final ListPerformer listAction, final Collection<FolderStorage> openedStorages) throws FolderException {
         return listAction.doList(treeId, parentId, true, openedStorages);
     }
 

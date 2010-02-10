@@ -139,6 +139,8 @@ public class DatabaseFolder extends AbstractFolder {
             this.lastModified = null == d ? null : new Date(d.getTime());
         }
         this.subscribed = true;
+        deefault = folderObject.isDefaultFolder();
+        defaultType = deefault ? contentType.getModule() : 0;
     }
 
     @Override

@@ -74,11 +74,11 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link AbstractUserizedFolderAction} - Abstract super class for actions which return one or multiple instances of {@link UserizedFolder}.
+ * {@link AbstractUserizedFolderPerformer} - Abstract super class for actions which return one or multiple instances of {@link UserizedFolder}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AbstractUserizedFolderAction extends AbstractAction {
+public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer {
 
     private final FolderServiceDecorator decorator;
 
@@ -89,52 +89,52 @@ public abstract class AbstractUserizedFolderAction extends AbstractAction {
     private volatile java.util.List<ContentType> allowedContentTypes;
 
     /**
-     * Initializes a new {@link AbstractUserizedFolderAction}.
+     * Initializes a new {@link AbstractUserizedFolderPerformer}.
      * 
      * @param session The session
      * @param decorator The optional folder service decorator
      */
-    public AbstractUserizedFolderAction(final ServerSession session, final FolderServiceDecorator decorator) {
+    public AbstractUserizedFolderPerformer(final ServerSession session, final FolderServiceDecorator decorator) {
         super(session);
         this.decorator = decorator;
         storageParameters.setDecorator(decorator);
     }
 
     /**
-     * Initializes a new {@link AbstractUserizedFolderAction}.
+     * Initializes a new {@link AbstractUserizedFolderPerformer}.
      * 
      * @param user The user
      * @param context The context
      * @param decorator The optional folder service decorator
      */
-    public AbstractUserizedFolderAction(final User user, final Context context, final FolderServiceDecorator decorator) {
+    public AbstractUserizedFolderPerformer(final User user, final Context context, final FolderServiceDecorator decorator) {
         super(user, context);
         this.decorator = decorator;
         storageParameters.setDecorator(decorator);
     }
 
     /**
-     * Initializes a new {@link AbstractUserizedFolderAction}.
+     * Initializes a new {@link AbstractUserizedFolderPerformer}.
      * 
      * @param session The session
      * @param decorator The optional folder service decorator
      * @param folderStorageDiscoverer The folder storage discoverer
      */
-    public AbstractUserizedFolderAction(final ServerSession session, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
+    public AbstractUserizedFolderPerformer(final ServerSession session, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
         super(session, folderStorageDiscoverer);
         this.decorator = decorator;
         storageParameters.setDecorator(decorator);
     }
 
     /**
-     * Initializes a new {@link AbstractUserizedFolderAction}.
+     * Initializes a new {@link AbstractUserizedFolderPerformer}.
      * 
      * @param user The user
      * @param context The context
      * @param decorator The optional folder service decorator
      * @param folderStorageDiscoverer The folder storage discoverer
      */
-    public AbstractUserizedFolderAction(final User user, final Context context, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
+    public AbstractUserizedFolderPerformer(final User user, final Context context, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
         super(user, context, folderStorageDiscoverer);
         this.decorator = decorator;
         storageParameters.setDecorator(decorator);
@@ -227,6 +227,8 @@ public abstract class AbstractUserizedFolderAction extends AbstractAction {
      */
     protected UserizedFolder getUserizedFolder(final Folder folder, final Permission ownPermission, final String treeId, final boolean all, final boolean nullIsPublicAccess, final StorageParameters storageParameters, final java.util.Collection<FolderStorage> openedStorages) throws FolderException {
         final UserizedFolder userizedFolder = new UserizedFolderImpl(folder);
+        /*-
+         * 
         if (folder.isGlobalID()) {
             // Set default folder flag
             final String id = folder.getID();
@@ -242,6 +244,7 @@ public abstract class AbstractUserizedFolderAction extends AbstractAction {
                 userizedFolder.setDefaultType(0);
             }
         }
+         */
         userizedFolder.setLocale(getLocale());
         // Permissions
         userizedFolder.setOwnPermission(ownPermission);

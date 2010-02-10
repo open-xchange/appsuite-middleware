@@ -439,12 +439,27 @@ public final class OutlookFolderStorage implements FolderStorage {
                 folderStorage.startTransaction(storageParameters, false);
                 try {
                     // Get real subfolders
-                    final String[] realSubfolderIds =
-                        getSubfolderIDs(folderStorage.getFolder(realTreeId, parentId, storageParameters), folderStorage, storageParameters);
+                    final Folder parentFolder = folderStorage.getFolder(realTreeId, parentId, storageParameters);
+                    final String[] realSubfolderIds = getSubfolderIDs(parentFolder, folderStorage, storageParameters);
                     l = new ArrayList<String[]>(realSubfolderIds.length);
-                    for (final String realSubfolderId : realSubfolderIds) {
-                        l.add(new String[] {
-                            realSubfolderId, folderStorage.getFolder(realTreeId, realSubfolderId, storageParameters).getName() });
+                    if (parentFolder.isDefault()) {
+                        /*
+                         * Strip subfolders occurring at another location in folder tree
+                         */
+                        final boolean[] contained =
+                            Select.containsFolders(contextId, tree, storageParameters.getUserId(), realSubfolderIds, StorageType.WORKING);
+                        for (int k = 0; k < realSubfolderIds.length; k++) {
+                            final String realSubfolderId = realSubfolderIds[k];
+                            if (!contained[k]) {
+                                l.add(new String[] {
+                                    realSubfolderId, folderStorage.getFolder(realTreeId, realSubfolderId, storageParameters).getName() });
+                            }
+                        }
+                    } else {
+                        for (final String realSubfolderId : realSubfolderIds) {
+                            l.add(new String[] {
+                                realSubfolderId, folderStorage.getFolder(realTreeId, realSubfolderId, storageParameters).getName() });
+                        }
                     }
                     folderStorage.commitTransaction(storageParameters);
                 } catch (final FolderException e) {
@@ -522,7 +537,7 @@ public final class OutlookFolderStorage implements FolderStorage {
             /*
              * Get real folder storage
              */
-            final FolderStorage folderStorage = folderStorageRegistry.getDedicatedFolderStorage(realTreeId, parentId);
+            final FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, parentId);
             if (null == folderStorage) {
                 throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, parentId);
             }

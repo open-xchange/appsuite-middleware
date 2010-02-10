@@ -64,11 +64,11 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link AbstractAction} - Abstract action.
+ * {@link AbstractPerformer} - Abstract action.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AbstractAction {
+public abstract class AbstractPerformer {
 
     /**
      * The constant indicating all content types are allowed.
@@ -86,49 +86,49 @@ public abstract class AbstractAction {
     protected StorageParameters storageParameters;
 
     /**
-     * Initializes a new {@link AbstractAction} from given session.
+     * Initializes a new {@link AbstractPerformer} from given session.
      * 
      * @param session The session
      */
-    protected AbstractAction(final ServerSession session) {
+    protected AbstractPerformer(final ServerSession session) {
         this(session, FolderStorageRegistry.getInstance());
     }
 
     /**
-     * Initializes a new {@link AbstractAction} from given session.
+     * Initializes a new {@link AbstractPerformer} from given session.
      * 
      * @param session The session
      * @param folderStorageDiscoverer The folder storage discoverer
      */
-    protected AbstractAction(final ServerSession session, final FolderStorageDiscoverer folderStorageDiscoverer) {
+    protected AbstractPerformer(final ServerSession session, final FolderStorageDiscoverer folderStorageDiscoverer) {
         super();
         this.folderStorageDiscoverer = folderStorageDiscoverer;
         this.session = session;
         // Pre-Initialize session
-        session.getUserConfiguration();
+        session.getUserConfiguration().isMultipleMailAccounts();
         user = session.getUser();
         context = session.getContext();
         storageParameters = new StorageParametersImpl(session);
     }
 
     /**
-     * Initializes a new {@link AbstractAction} from given user-context-pair.
+     * Initializes a new {@link AbstractPerformer} from given user-context-pair.
      * 
      * @param user The user
      * @param context The context
      */
-    protected AbstractAction(final User user, final Context context) {
+    protected AbstractPerformer(final User user, final Context context) {
         this(user, context, FolderStorageRegistry.getInstance());
     }
 
     /**
-     * Initializes a new {@link AbstractAction} from given user-context-pair.
+     * Initializes a new {@link AbstractPerformer} from given user-context-pair.
      * 
      * @param user The user
      * @param context The context
      * @param folderStorageDiscoverer The folder storage discoverer
      */
-    protected AbstractAction(final User user, final Context context, final FolderStorageDiscoverer folderStorageDiscoverer) {
+    protected AbstractPerformer(final User user, final Context context, final FolderStorageDiscoverer folderStorageDiscoverer) {
         super();
         this.folderStorageDiscoverer = folderStorageDiscoverer;
         session = null;

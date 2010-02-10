@@ -65,51 +65,51 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link Update} - Serves the <code>UPDATE</code> request.
+ * {@link UpdatePerformer} - Serves the <code>UPDATE</code> request.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class Update extends AbstractAction {
+public final class UpdatePerformer extends AbstractPerformer {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Update.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(UpdatePerformer.class);
 
     /**
-     * Initializes a new {@link Update} from given session.
+     * Initializes a new {@link UpdatePerformer} from given session.
      * 
      * @param session The session
      */
-    public Update(final ServerSession session) {
+    public UpdatePerformer(final ServerSession session) {
         super(session);
     }
 
     /**
-     * Initializes a new {@link Update} from given user-context-pair.
+     * Initializes a new {@link UpdatePerformer} from given user-context-pair.
      * 
      * @param user The user
      * @param context The context
      */
-    public Update(final User user, final Context context) {
+    public UpdatePerformer(final User user, final Context context) {
         super(user, context);
     }
 
     /**
-     * Initializes a new {@link Update}.
+     * Initializes a new {@link UpdatePerformer}.
      * 
      * @param session The session
      * @param folderStorageDiscoverer The folder storage discoverer
      */
-    public Update(final ServerSession session, final FolderStorageDiscoverer folderStorageDiscoverer) {
+    public UpdatePerformer(final ServerSession session, final FolderStorageDiscoverer folderStorageDiscoverer) {
         super(session, folderStorageDiscoverer);
     }
 
     /**
-     * Initializes a new {@link Update}.
+     * Initializes a new {@link UpdatePerformer}.
      * 
      * @param user The user
      * @param context The context
      * @param folderStorageDiscoverer The folder storage discoverer
      */
-    public Update(final User user, final Context context, final FolderStorageDiscoverer folderStorageDiscoverer) {
+    public UpdatePerformer(final User user, final Context context, final FolderStorageDiscoverer folderStorageDiscoverer) {
         super(user, context, folderStorageDiscoverer);
     }
 
@@ -390,11 +390,11 @@ public final class Update extends AbstractAction {
     }
 
     private boolean equallyNamedSibling(final String name, final String treeId, final String parentId, final Collection<FolderStorage> openedStorages) throws FolderException {
-        final com.openexchange.folderstorage.internal.actions.List listAction;
+        final ListPerformer listAction;
         if (null == session) {
-            listAction = new com.openexchange.folderstorage.internal.actions.List(user, context, null);
+            listAction = new ListPerformer(user, context, null);
         } else {
-            listAction = new com.openexchange.folderstorage.internal.actions.List(session, null);
+            listAction = new ListPerformer(session, null);
         }
         listAction.setStorageParameters(storageParameters);
         final UserizedFolder[] subfolders = listAction.doList(treeId, parentId, true, openedStorages);
@@ -407,11 +407,11 @@ public final class Update extends AbstractAction {
     }
 
     private String nonExistingName(final String name, final String treeId, final String parentId, final Collection<FolderStorage> openedStorages) throws FolderException {
-        final com.openexchange.folderstorage.internal.actions.List listAction;
+        final ListPerformer listAction;
         if (null == session) {
-            listAction = new com.openexchange.folderstorage.internal.actions.List(user, context, null);
+            listAction = new ListPerformer(user, context, null);
         } else {
-            listAction = new com.openexchange.folderstorage.internal.actions.List(session, null);
+            listAction = new ListPerformer(session, null);
         }
         listAction.setStorageParameters(storageParameters);
         final UserizedFolder[] subfolders = listAction.doList(treeId, parentId, true, openedStorages);

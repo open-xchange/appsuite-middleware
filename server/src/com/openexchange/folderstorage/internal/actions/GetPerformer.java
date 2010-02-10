@@ -50,8 +50,6 @@
 package com.openexchange.folderstorage.internal.actions;
 
 import java.util.ArrayList;
-import java.util.List;
-import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -66,116 +64,59 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link Path} - Serves the <code>PATH</code> request.
+ * {@link GetPerformer} - Serves the <code>GET</code> request.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class Path extends AbstractUserizedFolderAction {
+public final class GetPerformer extends AbstractUserizedFolderPerformer {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Path.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(GetPerformer.class);
 
     /**
-     * Initializes a new {@link Path} from given session.
+     * Initializes a new {@link GetPerformer}.
      * 
      * @param session The session
      * @param decorator The optional folder service decorator
      */
-    public Path(final ServerSession session, final FolderServiceDecorator decorator) {
+    public GetPerformer(final ServerSession session, final FolderServiceDecorator decorator) {
         super(session, decorator);
     }
 
     /**
-     * Initializes a new {@link Path} from given user-context-pair.
+     * Initializes a new {@link GetPerformer}.
      * 
      * @param user The user
      * @param context The context
      * @param decorator The optional folder service decorator
      */
-    public Path(final User user, final Context context, final FolderServiceDecorator decorator) {
+    public GetPerformer(final User user, final Context context, final FolderServiceDecorator decorator) {
         super(user, context, decorator);
     }
 
     /**
-     * Initializes a new {@link Path}.
+     * Initializes a new {@link GetPerformer}.
      * 
      * @param session The session
      * @param decorator The optional folder service decorator
      * @param folderStorageDiscoverer The folder storage discoverer
      */
-    public Path(final ServerSession session, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
+    public GetPerformer(final ServerSession session, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
         super(session, decorator, folderStorageDiscoverer);
     }
 
     /**
-     * Initializes a new {@link Path}.
+     * Initializes a new {@link GetPerformer}.
      * 
      * @param user The user
      * @param context The context
-     * @param decorator The optional folder service decoratorde
+     * @param decorator The optional folder service decorator
      * @param folderStorageDiscoverer The folder storage discoverer
      */
-    public Path(final User user, final Context context, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
+    public GetPerformer(final User user, final Context context, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
         super(user, context, decorator, folderStorageDiscoverer);
     }
 
-    private static interface PermissionProvider {
-
-        Permission getOwnPermission(Folder folder) throws FolderException;
-    }
-
-    private static final class SessionPermissionProvider implements PermissionProvider {
-
-        private final ServerSession session;
-
-        private final java.util.List<ContentType> allowedContentTypes;
-
-        public SessionPermissionProvider(final ServerSession session, final java.util.List<ContentType> allowedContentTypes) {
-            super();
-            this.session = session;
-            this.allowedContentTypes = allowedContentTypes;
-        }
-
-        public Permission getOwnPermission(final Folder folder) {
-            return CalculatePermission.calculate(folder, session, allowedContentTypes);
-        }
-
-    }
-
-    private static final class UserCtxPermissionProvider implements PermissionProvider {
-
-        private final User user;
-
-        private final Context ctx;
-
-        private final java.util.List<ContentType> allowedContentTypes;
-
-        public UserCtxPermissionProvider(final User user, final Context ctx, final java.util.List<ContentType> allowedContentTypes) {
-            super();
-            this.user = user;
-            this.ctx = ctx;
-            this.allowedContentTypes = allowedContentTypes;
-        }
-
-        public Permission getOwnPermission(final Folder folder) throws FolderException {
-            return CalculatePermission.calculate(folder, user, ctx, allowedContentTypes);
-        }
-
-    }
-
-    /**
-     * Performs the <code>PATH</code> request.
-     * 
-     * @param treeId The tree identifier
-     * @param folderId The folder identifier
-     * @param all <code>true</code> to get all subfolders regardless of their subscription status; otherwise <code>false</code> to only get
-     *            subscribed ones
-     * @return The user-sensitive folders describing the path to root folder
-     * @throws FolderException If a folder error occurs
-     */
-    public UserizedFolder[] doPath(final String treeId, final String folderId, final boolean all) throws FolderException {
-        if (FolderStorage.ROOT_ID.equals(folderId)) {
-            return new UserizedFolder[0];
-        }
+    public UserizedFolder doGet(final String treeId, final String folderId) throws FolderException {
         final FolderStorage folderStorage = folderStorageDiscoverer.getFolderStorage(treeId, folderId);
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
@@ -184,46 +125,39 @@ public final class Path extends AbstractUserizedFolderAction {
         folderStorage.startTransaction(storageParameters, false);
         final java.util.List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(4);
         openedStorages.add(folderStorage);
-        final UserizedFolder[] ret;
         try {
-            Folder folder = folderStorage.getFolder(treeId, folderId, storageParameters);
+            final Folder folder = folderStorage.getFolder(treeId, folderId, storageParameters);
             /*
-             * Check folder permission for parent folder
+             * Check folder permission for folder
              */
-            final PermissionProvider permissionProvider;
-            if (null == session) {
-                permissionProvider = new UserCtxPermissionProvider(user, context, getAllowedContentTypes());
+            final Permission ownPermission;
+            if (null == getSession()) {
+                ownPermission = CalculatePermission.calculate(folder, getUser(), getContext(), getAllowedContentTypes());
             } else {
-                permissionProvider = new SessionPermissionProvider(session, getAllowedContentTypes());
+                ownPermission = CalculatePermission.calculate(folder, getSession(), getAllowedContentTypes());
             }
-
-            Permission ownPermission = permissionProvider.getOwnPermission(folder);
             if (ownPermission.getFolderPermission() <= Permission.NO_PERMISSIONS) {
                 throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
                     folderId,
                     getUser().getDisplayName(),
                     Integer.valueOf(getContextId()));
             }
-            final List<UserizedFolder> path = new ArrayList<UserizedFolder>(8);
-            path.add(getUserizedFolder(folder, ownPermission, treeId, all, true, storageParameters, openedStorages));
-            while (!FolderStorage.ROOT_ID.equals(folder.getParentID())) {
-                final FolderStorage fs = getOpenedStorage(folder.getParentID(), treeId, storageParameters, openedStorages);
-                folder = fs.getFolder(treeId, folder.getParentID(), storageParameters);
-                ownPermission = permissionProvider.getOwnPermission(folder);
-                if (ownPermission.getFolderPermission() <= Permission.NO_PERMISSIONS) {
-                    throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
-                        folderId,
-                        getUser().getDisplayName(),
-                        Integer.valueOf(getContextId()));
-                }
-                path.add(getUserizedFolder(folder, ownPermission, treeId, all, true, storageParameters, openedStorages));
+            // TODO: All or only subscribed subfolders?
+            final UserizedFolder userizedFolder =
+                getUserizedFolder(folder, ownPermission, treeId, true, true, storageParameters, openedStorages);
+            if (LOG.isDebugEnabled()) {
+                final long duration = System.currentTimeMillis() - start;
+                LOG.debug(new StringBuilder().append("Get.doGet() took ").append(duration).append("msec for folder: ").append(folderId).toString());
             }
 
-            ret = path.toArray(new UserizedFolder[path.size()]);
-
+            /*
+             * Commit
+             */
             for (final FolderStorage fs : openedStorages) {
                 fs.commitTransaction(storageParameters);
             }
+
+            return userizedFolder;
         } catch (final FolderException e) {
             for (final FolderStorage fs : openedStorages) {
                 fs.rollback(storageParameters);
@@ -235,12 +169,6 @@ public final class Path extends AbstractUserizedFolderAction {
             }
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
-        if (LOG.isDebugEnabled()) {
-            final long duration = System.currentTimeMillis() - start;
-            LOG.debug(new StringBuilder().append("List.doList() with single storage took ").append(duration).append(
-                "msec for parent folder: ").append(folderId).toString());
-        }
-        return ret;
     }
 
 }

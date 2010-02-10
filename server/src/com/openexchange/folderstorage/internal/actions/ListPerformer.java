@@ -53,6 +53,7 @@ import static com.openexchange.server.services.ServerServiceRegistry.getInstance
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
@@ -78,59 +79,60 @@ import com.openexchange.threadpool.CompletionFuture;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link List} - Serves the <code>LIST</code> request.
+ * {@link ListPerformer} - Serves the <code>LIST</code> request.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class List extends AbstractUserizedFolderAction {
+public final class ListPerformer extends AbstractUserizedFolderPerformer {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(List.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ListPerformer.class);
 
     /**
-     * Initializes a new {@link List} from given session.
+     * Initializes a new {@link ListPerformer} from given session.
      * 
      * @param session The session
      * @param decorator The optional folder service decorator
      */
-    public List(final ServerSession session, final FolderServiceDecorator decorator) {
+    public ListPerformer(final ServerSession session, final FolderServiceDecorator decorator) {
         super(session, decorator);
     }
 
     /**
-     * Initializes a new {@link List} from given user-context-pair.
+     * Initializes a new {@link ListPerformer} from given user-context-pair.
      * 
      * @param user The user
      * @param context The context
      * @param decorator The optional folder service decorator
      */
-    public List(final User user, final Context context, final FolderServiceDecorator decorator) {
+    public ListPerformer(final User user, final Context context, final FolderServiceDecorator decorator) {
         super(user, context, decorator);
     }
 
     /**
-     * Initializes a new {@link List}.
+     * Initializes a new {@link ListPerformer}.
      * 
      * @param session The session
      * @param decorator The optional folder service decorator
      * @param folderStorageDiscoverer The folder storage discoverer
      */
-    public List(final ServerSession session, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
+    public ListPerformer(final ServerSession session, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
         super(session, decorator, folderStorageDiscoverer);
     }
 
     /**
-     * Initializes a new {@link List}.
+     * Initializes a new {@link ListPerformer}.
      * 
      * @param user The user
      * @param context The context
      * @param decorator The optional folder service decorator
      * @param folderStorageDiscoverer The folder storage discoverer
      */
-    public List(final User user, final Context context, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
+    public ListPerformer(final User user, final Context context, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
         super(user, context, decorator, folderStorageDiscoverer);
     }
 
@@ -151,7 +153,7 @@ public final class List extends AbstractUserizedFolderAction {
         }
         final long start = LOG.isDebugEnabled() ? System.currentTimeMillis() : 0L;
         folderStorage.startTransaction(storageParameters, false);
-        final java.util.List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(4);
+        final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(4);
         openedStorages.add(folderStorage);
         try {
             final UserizedFolder[] ret = doList(treeId, parentId, all, openedStorages);
@@ -229,7 +231,7 @@ public final class List extends AbstractUserizedFolderAction {
                 final UserizedFolder[] subfolders = new UserizedFolder[subfolderIds.length];
                 final CompletionFuture<Object> completionFuture;
                 {
-                    final java.util.List<Task<Object>> tasks = new ArrayList<Task<Object>>(subfolderIds.length);
+                    final List<Task<Object>> tasks = new ArrayList<Task<Object>>(subfolderIds.length);
                     for (int i = 0; i < subfolderIds.length; i++) {
                         final int index = i;
                         tasks.add(new AbstractTask<Object>() {
@@ -256,7 +258,7 @@ public final class List extends AbstractUserizedFolderAction {
                                     subfolderPermission = CalculatePermission.calculate(subfolder, getSession(), getAllowedContentTypes());
                                 }
                                 if (subfolderPermission.getFolderPermission() > Permission.NO_PERMISSIONS && (all ? true : subfolder.isSubscribed())) {
-                                    final java.util.List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(2);
+                                    final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(2);
                                     try {
                                         final UserizedFolder userizedFolder =
                                             getUserizedFolder(
@@ -330,22 +332,36 @@ public final class List extends AbstractUserizedFolderAction {
         if (null == neededStorages || 0 == neededStorages.length) {
             return new UserizedFolder[0];
         }
-        final java.util.List<SortableId> allSubfolderIds = new ArrayList<SortableId>(neededStorages.length * 8);
-        {
-            final CompletionService<java.util.List<SortableId>> completionService =
-                new ThreadPoolCompletionService<java.util.List<SortableId>>(getInstance().getService(ThreadPoolService.class));
+        final List<SortableId> allSubfolderIds;
+        if (1 == neededStorages.length) {
+            final FolderStorage neededStorage = neededStorages[0];
+            neededStorage.startTransaction(storageParameters, false);
+            try {
+                allSubfolderIds = Arrays.asList(neededStorage.getSubfolders(treeId, parentId, storageParameters));
+                neededStorage.commitTransaction(storageParameters);
+            } catch (final FolderException e) {
+                neededStorage.rollback(storageParameters);
+                throw e;
+            } catch (final Exception e) {
+                neededStorage.rollback(storageParameters);
+                throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+            }
+
+        } else {
+            allSubfolderIds = new ArrayList<SortableId>(neededStorages.length * 8);
+            final CompletionService<List<SortableId>> completionService =
+                new ThreadPoolCompletionService<List<SortableId>>(getInstance().getService(ThreadPoolService.class));
             /*
              * Get all visible subfolders from each storage
              */
             for (final FolderStorage neededStorage : neededStorages) {
-                completionService.submit(new Callable<java.util.List<SortableId>>() {
+                completionService.submit(new Callable<List<SortableId>>() {
 
-                    public java.util.List<SortableId> call() throws Exception {
+                    public List<SortableId> call() throws Exception {
                         final StorageParameters newParameters = newStorageParameters();
                         neededStorage.startTransaction(newParameters, false);
                         try {
-                            final java.util.List<SortableId> l =
-                                Arrays.asList(neededStorage.getSubfolders(treeId, parentId, newParameters));
+                            final List<SortableId> l = Arrays.asList(neededStorage.getSubfolders(treeId, parentId, newParameters));
                             neededStorage.commitTransaction(newParameters);
                             return l;
                         } catch (final Exception e) {
@@ -358,32 +374,10 @@ public final class List extends AbstractUserizedFolderAction {
             /*
              * Wait for completion
              */
-            final int maxRunningMillis = getMaxRunningMillis();
-            try {
-                for (int i = neededStorages.length; i > 0; i--) {
-                    final Future<java.util.List<SortableId>> f = completionService.poll(maxRunningMillis, TimeUnit.MILLISECONDS);
-                    if (null != f) {
-                        allSubfolderIds.addAll(f.get());
-                    } else if (LOG.isWarnEnabled()) {
-                        LOG.warn("Completion service's task did not complete in a timely manner!");
-                    }
-                }
-            } catch (final InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
-            } catch (final ExecutionException e) {
-                final Throwable t = e.getCause();
-                if (FolderException.class.isAssignableFrom(t.getClass())) {
-                    throw (FolderException) t;
-                } else if (AbstractOXException.class.isAssignableFrom(t.getClass())) {
-                    throw new FolderException((AbstractOXException) t);
-                } else if (t instanceof RuntimeException) {
-                    throw (RuntimeException) t;
-                } else if (t instanceof Error) {
-                    throw (Error) t;
-                } else {
-                    throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(t, t.getMessage());
-                }
+            final List<List<SortableId>> results =
+                ThreadPools.pollCompletionService(completionService, neededStorages.length, getMaxRunningMillis(), FACTORY);
+            for (final List<SortableId> result : results) {
+                allSubfolderIds.addAll(result);
             }
         }
         /*
@@ -406,7 +400,7 @@ public final class List extends AbstractUserizedFolderAction {
                     final SortableId sortableId = allSubfolderIds.get(index);
                     final String id = sortableId.getId();
                     final StorageParameters newParameters = newStorageParameters();
-                    final java.util.List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(2);
+                    final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(2);
                     try {
                         final FolderStorage tmp = getOpenedStorage(id, treeId, newParameters, openedStorages);
                         /*
@@ -452,33 +446,7 @@ public final class List extends AbstractUserizedFolderAction {
         /*
          * Wait for completion
          */
-        final int maxRunningMillis = getMaxRunningMillis();
-        try {
-            for (int i = 0; i < size; i++) {
-                final Future<Object> f = completionService.poll(maxRunningMillis, TimeUnit.MILLISECONDS);
-                if (null != f) {
-                    f.get();
-                } else if (LOG.isWarnEnabled()) {
-                    LOG.warn("Completion service's task did not complete in a timely manner!");
-                }
-            }
-        } catch (final InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final ExecutionException e) {
-            final Throwable t = e.getCause();
-            if (FolderException.class.isAssignableFrom(t.getClass())) {
-                throw (FolderException) t;
-            } else if (AbstractOXException.class.isAssignableFrom(t.getClass())) {
-                throw new FolderException((AbstractOXException) t);
-            } else if (t instanceof RuntimeException) {
-                throw (RuntimeException) t;
-            } else if (t instanceof Error) {
-                throw (Error) t;
-            } else {
-                throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(t, t.getMessage());
-            }
-        }
+        ThreadPools.pollCompletionService(completionService, size, getMaxRunningMillis(), FACTORY);
         return trimArray(subfolders);
     }
 
@@ -494,6 +462,18 @@ public final class List extends AbstractUserizedFolderAction {
         return confService.getIntProperty("AJP_WATCHER_MAX_RUNNING_TIME", DEFAULT_MAX_RUNNING_MILLIS) * 2;
     }
 
+    private static final ThreadPools.ExpectedExceptionFactory<FolderException> FACTORY =
+        new ThreadPools.ExpectedExceptionFactory<FolderException>() {
+
+            public Class<FolderException> getType() {
+                return FolderException.class;
+            }
+
+            public FolderException newUnexpectedError(final Throwable t) {
+                return FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(t, t.getMessage());
+            }
+        };
+
     /**
      * Creates a newly allocated array containing all elements of specified array in the same order except <code>null</code> values.
      * 
@@ -504,7 +484,7 @@ public final class List extends AbstractUserizedFolderAction {
         if (null == userizedFolders) {
             return new UserizedFolder[0];
         }
-        final java.util.List<UserizedFolder> l = new ArrayList<UserizedFolder>(userizedFolders.length);
+        final List<UserizedFolder> l = new ArrayList<UserizedFolder>(userizedFolders.length);
         for (int i = 0; i < userizedFolders.length; i++) {
             final UserizedFolder uf = userizedFolders[i];
             if (null != uf) {

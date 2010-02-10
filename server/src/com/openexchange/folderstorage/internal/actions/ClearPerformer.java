@@ -49,7 +49,6 @@
 
 package com.openexchange.folderstorage.internal.actions;
 
-import java.util.Date;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
@@ -59,116 +58,73 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link Delete} - Serves the <code>DELETE</code> request.
+ * {@link ClearPerformer} - Serves the <code>CLEAR</code> request.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class Delete extends AbstractAction {
+public final class ClearPerformer extends AbstractPerformer {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Delete.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ClearPerformer.class);
 
     /**
-     * Initializes a new {@link Delete}.
+     * Initializes a new {@link ClearPerformer}.
      * 
      * @param session The session
      */
-    public Delete(final ServerSession session) {
+    public ClearPerformer(final ServerSession session) {
         super(session);
     }
 
     /**
-     * Initializes a new {@link Delete}.
+     * Initializes a new {@link ClearPerformer}.
      * 
      * @param user The user
      * @param context The context
      */
-    public Delete(final User user, final Context context) {
+    public ClearPerformer(final User user, final Context context) {
         super(user, context);
     }
 
     /**
-     * Initializes a new {@link Delete}.
+     * Initializes a new {@link ClearPerformer}.
      * 
      * @param session The session
      * @param folderStorageDiscoverer The folder storage discoverer
      */
-    public Delete(final ServerSession session, final FolderStorageDiscoverer folderStorageDiscoverer) {
+    public ClearPerformer(final ServerSession session, final FolderStorageDiscoverer folderStorageDiscoverer) {
         super(session, folderStorageDiscoverer);
     }
 
     /**
-     * Initializes a new {@link Delete}.
+     * Initializes a new {@link ClearPerformer}.
      * 
      * @param user The user
      * @param context The context
      * @param folderStorageDiscoverer The folder storage discoverer
      */
-    public Delete(final User user, final Context context, final FolderStorageDiscoverer folderStorageDiscoverer) {
+    public ClearPerformer(final User user, final Context context, final FolderStorageDiscoverer folderStorageDiscoverer) {
         super(user, context, folderStorageDiscoverer);
     }
 
     /**
-     * Performs the <code>DELETE</code> request.
+     * Performs the <code>CLEAR</code> request.
      * 
      * @param treeId The tree identifier
      * @param folderId The folder identifier
-     * @param timeStamp The requestor's last-modified time stamp
      * @throws FolderException If an error occurs during deletion
      */
-    public void doDelete(final String treeId, final String folderId, final Date timeStamp) throws FolderException {
+    public void doClear(final String treeId, final String folderId) throws FolderException {
         final FolderStorage folderStorage = folderStorageDiscoverer.getFolderStorage(treeId, folderId);
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
         }
         final long start = LOG.isDebugEnabled() ? System.currentTimeMillis() : 0L;
         folderStorage.startTransaction(storageParameters, true);
-        if (null != timeStamp) {
-            storageParameters.setTimeStamp(timeStamp);
-        }
         try {
-            if (FolderStorage.REAL_TREE_ID.equals(treeId)) {
-                /*
-                 * Real delete
-                 */
-                folderStorage.deleteFolder(treeId, folderId, storageParameters);
-            } else {
-                /*-
-                 * Virtual delete:
-                 * 
-                 * 1. Delete from virtual storage
-                 * 2. Delete from real storage
-                 */
-                final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, folderId);
-                if (null == realStorage) {
-                    throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folderId);
-                }
-                if (folderStorage.equals(realStorage)) {
-                    folderStorage.deleteFolder(treeId, folderId, storageParameters);
-                } else {
-                    /*
-                     * Delete from virtual storage
-                     */
-                    folderStorage.deleteFolder(treeId, folderId, storageParameters);
-                    /*
-                     * And now from real storage
-                     */
-                    realStorage.startTransaction(storageParameters, true);
-                    try {
-                        realStorage.deleteFolder(FolderStorage.REAL_TREE_ID, folderId, storageParameters);
-                        realStorage.commitTransaction(storageParameters);
-                    } catch (final FolderException e) {
-                        realStorage.rollback(storageParameters);
-                        throw e;
-                    } catch (final Exception e) {
-                        realStorage.rollback(storageParameters);
-                        throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
-                    }
-                }
-            }
+            folderStorage.clearFolder(treeId, folderId, storageParameters);
             if (LOG.isDebugEnabled()) {
                 final long duration = System.currentTimeMillis() - start;
-                LOG.debug(new StringBuilder().append("Delete.doDelete() took ").append(duration).append("msec for folder: ").append(
-                    folderId).toString());
+                LOG.debug(new StringBuilder().append("Clear.doClear() took ").append(duration).append("msec for folder: ").append(folderId).toString());
             }
             folderStorage.commitTransaction(storageParameters);
         } catch (final FolderException e) {

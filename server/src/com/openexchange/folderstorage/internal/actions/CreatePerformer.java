@@ -66,51 +66,51 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link Create} - Serves the <code>CREATE</code> request.
+ * {@link CreatePerformer} - Serves the <code>CREATE</code> request.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class Create extends AbstractAction {
+public final class CreatePerformer extends AbstractPerformer {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Create.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(CreatePerformer.class);
 
     /**
-     * Initializes a new {@link Create}.
+     * Initializes a new {@link CreatePerformer}.
      * 
      * @param session The session
      */
-    public Create(final ServerSession session) {
+    public CreatePerformer(final ServerSession session) {
         super(session);
     }
 
     /**
-     * Initializes a new {@link Create}.
+     * Initializes a new {@link CreatePerformer}.
      * 
      * @param user The user
      * @param context The context
      */
-    public Create(final User user, final Context context) {
+    public CreatePerformer(final User user, final Context context) {
         super(user, context);
     }
 
     /**
-     * Initializes a new {@link Create}.
+     * Initializes a new {@link CreatePerformer}.
      * 
      * @param session The session
      * @param folderStorageDiscoverer The folder storage discoverer
      */
-    public Create(final ServerSession session, final FolderStorageDiscoverer folderStorageDiscoverer) {
+    public CreatePerformer(final ServerSession session, final FolderStorageDiscoverer folderStorageDiscoverer) {
         super(session, folderStorageDiscoverer);
     }
 
     /**
-     * Initializes a new {@link Create}.
+     * Initializes a new {@link CreatePerformer}.
      * 
      * @param user The user
      * @param context The context
      * @param folderStorageDiscoverer The folder storage discoverer
      */
-    public Create(final User user, final Context context, final FolderStorageDiscoverer folderStorageDiscoverer) {
+    public CreatePerformer(final User user, final Context context, final FolderStorageDiscoverer folderStorageDiscoverer) {
         super(user, context, folderStorageDiscoverer);
     }
 
@@ -238,15 +238,6 @@ public final class Create extends AbstractAction {
                 virtualStorage.createFolder(toCreate, storageParameters);
             } else {
                 /*
-                 * Find the real storage which is capable to create the folder
-                 */
-                final FolderStorage capStorage =
-                    folderStorageDiscoverer.getFolderStorageByContentType(FolderStorage.REAL_TREE_ID, folderContentType);
-                if (null == capStorage) {
-                    throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(FolderStorage.REAL_TREE_ID, folderContentType.toString());
-                }
-                checkOpenedStorage(capStorage, openedStorages);
-                /*
                  * Check for possible duplicate folder name
                  */
                 {
@@ -264,6 +255,15 @@ public final class Create extends AbstractAction {
                         }
                     }
                 }
+                /*
+                 * Find the real storage which is capable to create the folder
+                 */
+                final FolderStorage capStorage =
+                    folderStorageDiscoverer.getFolderStorageByContentType(FolderStorage.REAL_TREE_ID, folderContentType);
+                if (null == capStorage) {
+                    throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(FolderStorage.REAL_TREE_ID, folderContentType.toString());
+                }
+                checkOpenedStorage(capStorage, openedStorages);
                 /*
                  * 1. Create at default location in capable real storage
                  */
