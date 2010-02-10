@@ -31,14 +31,6 @@
     <property name="messagingjar" value="com.openexchange.messaging.jar"/>
     <property name="messaginggenjar" value="com.openexchange.messaging.generic.jar"/>
 
-    <property name="xmlbundlejar" value="com.openexchange.xml.jar"/>
-
-    <!-- Third party libs -->
-    <fileset dir="${basedir}" id="3rdpartyjars">
-        <include name="${lib.dir}/*.jar"/>
-        <exclude name="CVS"/>
-    </fileset>
-
     <!-- Classpath -->
     <path id="project.classpath">
         <pathelement location="${bundlesdir}/${osgijar}"/>
@@ -48,10 +40,6 @@
         <pathelement location="${bundlesdir}/${genericonfjar}"/>
         <pathelement location="${bundlesdir}/${messagingjar}"/>
         <pathelement location="${bundlesdir}/${messaginggenjar}"/>
-
-        <pathelement location="${bundlesdir}/${xmlBundle}/${xmlbundlejar}"/>
-
-        <fileset refid="3rdpartyjars"/>
     </path>
 
     <!-- Compile -->
