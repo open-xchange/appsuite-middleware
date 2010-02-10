@@ -204,14 +204,9 @@ public final class DeletePerformer extends AbstractPerformer {
                     getUser().getDisplayName(),
                     Integer.valueOf(getContextId()));
             }
-            final int deletePermission = parentPermission.getDeletePermission();
-            if (deletePermission <= Permission.NO_PERMISSIONS) {
-                
-            } else if (deletePermission <= Permission.DELETE_OWN_OBJECTS) {
-                
-            }
-            
-            // TODO: Check delete permission: only own? empty folder?
+            /*
+             * Delete permissions are checked when deleting from real storage
+             */
         }
         final SortableId[] subfolders = folderStorage.getSubfolders(treeId, folderId, storageParameters);
         for (int i = 0; i < subfolders.length; i++) {
