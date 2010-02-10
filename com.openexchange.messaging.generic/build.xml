@@ -41,6 +41,12 @@
 	<property name="mailjar" value="mail-1.4.2.jar" />
 	<property name="activationjar" value="activation-1.1.1.jar" />
 
+	<!-- Third party libs -->
+	    <fileset dir="${basedir}" id="3rdpartyjars">
+	        <include name="${lib.dir}/*.jar"/>
+	        <exclude name="CVS"/>
+	    </fileset>
+
 	<!-- Classpath -->
 	<path id="project.classpath">
 		<pathelement location="${bundlesdir}/${osgijar}" />
