@@ -69,6 +69,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.update.tools.Constants;
+import com.openexchange.management.console.JMXAuthenticatorImpl;
 
 /**
  * {@link UpdateTaskForceCLT} - Command-Line access to reset version via update task toolkit.

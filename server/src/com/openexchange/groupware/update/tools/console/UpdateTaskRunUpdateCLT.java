@@ -69,6 +69,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.update.tools.Constants;
+import com.openexchange.management.console.JMXAuthenticatorImpl;
 
 /**
  * {@link UpdateTaskRunUpdateCLT} - Command-Line access to run update process for a certain schema via update task toolkit.

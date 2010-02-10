@@ -68,6 +68,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import com.openexchange.groupware.update.tools.Constants;
+import com.openexchange.management.console.JMXAuthenticatorImpl;
 
 /**
  * {@link UpdateTaskSchemasAndVersionsCLT} - Command-Line access to get schemas and versions via update task toolkit.
