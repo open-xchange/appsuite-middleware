@@ -98,6 +98,11 @@ public final class OutlookFolder implements Folder {
     }
 
     @Override
+    public String toString() {
+        return new StringBuilder(32).append("{ name=").append(getName()).append(", id=").append(getID()).append('}').toString();
+    }
+
+    @Override
     public Object clone() {
         try {
             final OutlookFolder clone = (OutlookFolder) super.clone();

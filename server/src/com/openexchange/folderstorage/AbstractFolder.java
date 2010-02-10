@@ -119,6 +119,11 @@ public abstract class AbstractFolder implements Folder {
     }
 
     @Override
+    public String toString() {
+        return new StringBuilder(32).append("{ name=").append(getName()).append(", id=").append(getID()).append('}').toString();
+    }
+
+    @Override
     public Object clone() {
         try {
             final AbstractFolder clone = (AbstractFolder) super.clone();

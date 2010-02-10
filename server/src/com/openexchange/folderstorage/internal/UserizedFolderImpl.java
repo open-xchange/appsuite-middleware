@@ -82,11 +82,20 @@ public final class UserizedFolderImpl implements UserizedFolder {
      * Initializes a new {@link UserizedFolderImpl} from specified folder.
      * 
      * @param folder The underlying folder
+     * @throws IllegalArgumentException If folder is <code>null</code>
      */
     public UserizedFolderImpl(final Folder folder) {
         super();
+        if (null == folder) {
+            throw new IllegalArgumentException("Folder is null.");
+        }
         // TODO: clone folder?
         this.folder = folder;
+    }
+
+    @Override
+    public String toString() {
+        return new StringBuilder(32).append("{ name=").append(folder.getName()).append(", id=").append(folder.getID()).append('}').toString();
     }
 
     @Override
