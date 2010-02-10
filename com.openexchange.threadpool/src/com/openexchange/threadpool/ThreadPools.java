@@ -105,6 +105,7 @@ public final class ThreadPools {
      * @param factory The exception factory to launder a possible {@link ExecutionException} or {@link InterruptedException}
      * @return A list of results polled from completion service
      * @throws E If polling completion service fails
+     * @see #launderThrowable(ExecutionException, Class)
      */
     public static <R, E extends Exception> java.util.List<R> pollCompletionService(final CompletionService<R> completionService, final int size, final long timeoutMillis, final ExpectedExceptionFactory<E> factory) throws E {
         /*
@@ -139,6 +140,7 @@ public final class ThreadPools {
      * @param factory The exception factory to launder a possible {@link ExecutionException} or {@link InterruptedException}
      * @return A list of results taken from completion service
      * @throws E If taking from completion service fails
+     * @see #launderThrowable(ExecutionException, Class)
      */
     public static <R, E extends Exception> java.util.List<R> takeCompletionService(final CompletionService<R> completionService, final int size, final ExpectedExceptionFactory<E> factory) throws E {
         /*
