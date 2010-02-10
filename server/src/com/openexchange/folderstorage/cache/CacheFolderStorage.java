@@ -273,6 +273,7 @@ public final class CacheFolderStorage implements FolderStorage {
 
     public void deleteFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
         final String parentId;
+        final String realParentId;
         final boolean cacheable;
         final boolean global;
         {
@@ -280,6 +281,15 @@ public final class CacheFolderStorage implements FolderStorage {
             cacheable = deleteMe.isCacheable();
             global = deleteMe.isGlobalID();
             parentId = deleteMe.getParentID();
+            if (!FolderStorage.REAL_TREE_ID.equals(treeId)) {
+                realParentId =
+                    registry.getFolderStorage(FolderStorage.REAL_TREE_ID, folderId).getFolder(
+                        FolderStorage.REAL_TREE_ID,
+                        folderId,
+                        storageParameters).getParentID();
+            } else {
+                realParentId = null;
+            }
         }
         final Session session = storageParameters.getSession();
         /*
@@ -292,7 +302,10 @@ public final class CacheFolderStorage implements FolderStorage {
                 storageParameters.getTimeStamp());
         } else {
             try {
-                new DeletePerformer(new ServerSessionAdapter(session), registry).doDelete(treeId, folderId, storageParameters.getTimeStamp());
+                new DeletePerformer(new ServerSessionAdapter(session), registry).doDelete(
+                    treeId,
+                    folderId,
+                    storageParameters.getTimeStamp());
             } catch (final ContextException e) {
                 throw new FolderException(e);
             }
@@ -322,6 +335,10 @@ public final class CacheFolderStorage implements FolderStorage {
             if (parentFolder.isCacheable()) {
                 putFolder(parentFolder, treeId, storageParameters);
             }
+        }
+        if (null != realParentId && !FolderStorage.ROOT_ID.equals(realParentId)) {
+            removeFolder(realParentId, treeId, storageParameters);
+            removeFolder(realParentId, FolderStorage.REAL_TREE_ID, storageParameters);
         }
     }
 
@@ -567,11 +584,11 @@ public final class CacheFolderStorage implements FolderStorage {
         final boolean ignoreDelete = index == 0;
         if (null == session) {
             folders =
-                new UpdatesPerformer(storageParameters.getUser(), storageParameters.getContext(), storageParameters.getDecorator(), registry).doUpdates(
-                    treeId,
-                    timeStamp,
-                    ignoreDelete,
-                    includeContentTypes)[index];
+                new UpdatesPerformer(
+                    storageParameters.getUser(),
+                    storageParameters.getContext(),
+                    storageParameters.getDecorator(),
+                    registry).doUpdates(treeId, timeStamp, ignoreDelete, includeContentTypes)[index];
         } else {
             try {
                 folders =
