@@ -200,9 +200,23 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
     }
 
     private void parseParameterList(final String parameterList) {
-        final Matcher m = PATTERN_PARAM_LIST.matcher(parameterList);
-        while (m.find()) {
-            parseParameter(m.group(1).toLowerCase(Locale.ENGLISH), m.group(2));
+        try {
+            final Matcher m = PATTERN_PARAM_LIST.matcher(parameterList);
+            while (m.find()) {
+                parseParameter(m.group(1).toLowerCase(Locale.ENGLISH), m.group(2));
+            }
+        } catch (final StackOverflowError regexFailed) {
+            /*
+             * Regex failed for given parameter list. Perform very simple manual parsing.
+             */
+            int pos = parameterList.indexOf(';');
+            while (pos >= 0) {
+                final int delim = parameterList.indexOf('=', pos);
+                final String name = parameterList.substring(pos+1, delim).trim();
+                pos = parameterList.indexOf(';', pos + 1);
+                final String value =  pos < 0 ? parameterList.substring(delim + 1) : parameterList.substring(delim + 1, pos);
+                parseParameter(name.toLowerCase(Locale.ENGLISH), value);
+            }
         }
     }
 
