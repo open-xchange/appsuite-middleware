@@ -132,10 +132,20 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
     public MessagingMessage getMessage(final String folder, final String id, final boolean peek) throws MessagingException {
         checkFolder(folder);
         try {
-            return new TwitterMessagingMessage(twitterAccess.showStatus(parseUnsignedLong(id)));
+            return get(parseUnsignedLong(id));
         } catch (final TwitterException e) {
             throw new MessagingException(e);
         }
+    }
+    
+    private TwitterMessagingMessage get(long id) throws TwitterException {
+        TwitterMessagingMessage message = DummyMessageCache.get(id);
+        if(message != null) {
+            return message;
+        }
+        message = new TwitterMessagingMessage(twitterAccess.showStatus(id));
+        DummyMessageCache.store(message);
+        return message;
     }
 
     public List<MessagingMessage> getMessages(final String folder, final String[] messageIds, final MessagingField[] fields) throws MessagingException {
@@ -144,13 +154,15 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
             final long[] ids = strings2longs(messageIds);
             final List<MessagingMessage> l = new ArrayList<MessagingMessage>(ids.length);
             for (int i = 0; i < ids.length; i++) {
-                l.add(new TwitterMessagingMessage(twitterAccess.showStatus(ids[i])));
+                l.add(get(ids[i]));
             }
             return l;
         } catch (final TwitterException e) {
             throw new MessagingException(e);
         }
     }
+    
+    
 
     public List<String> moveMessages(final String sourceFolder, final String destFolder, final String[] messageIds, final boolean fast) throws MessagingException {
         checkFolder(sourceFolder);
@@ -213,6 +225,7 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
                 msgs = new ArrayList<MessagingMessage>(friendsTimeline.size());
                 for (final Status status : friendsTimeline) {
                     final TwitterMessagingMessage message = new TwitterMessagingMessage(status);
+                    DummyMessageCache.store(message);
                     if (searchTerm.matches(message)) {
                         msgs.add(message);
                     }
@@ -221,8 +234,10 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
                 final List<Status> friendsTimeline = twitterAccess.getFriendsTimeline();
                 msgs = new ArrayList<MessagingMessage>(friendsTimeline.size());
                 for (final Status status : friendsTimeline) {
-                    msgs.add(new TwitterMessagingMessage(status));
-                }
+                    TwitterMessagingMessage message = new TwitterMessagingMessage(status);
+                    msgs.add(message);
+                    DummyMessageCache.store(message);
+               }
             }
             /*
              * Sort
