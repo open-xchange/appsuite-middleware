@@ -79,7 +79,7 @@ public class GenericSubscribeServiceForFacebookAPITest extends GenericSubscribeS
             "https://login.facebook.com/login.php?login_attempt=1",
             "email",
             "pass",
-            "(http://www.facebook.com/inbox/\\?ref=[a-z]*)"));
+            "(http://www.facebook.com/profile.*)"));
 
         Workflow workflow = new Workflow(steps);
         crawler.setWorkflowString(Yaml.dump(workflow));
