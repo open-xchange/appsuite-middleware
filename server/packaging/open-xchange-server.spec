@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 2
+%define		ox_release 3
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -490,10 +490,20 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Tue Feb 09 2010 - marcus.klein@open-xchange.com
+ - Bugfix #15354: Updating user attributes inside a transaction to prevent loss of aliases.
+* Wed Feb 03 2010 - marcus.klein@open-xchange.com
+ - Bugfix #14623: Switched sessionId and secret so the sessionId gets used as URL parameter.
+* Mon Feb 01 2010 - thorben.betten@open-xchange.com
+ - Bugfix #15287: Returning 7 bit characters on QuotedInternetAddress.getAddress()
+ - Bugfix #15282: Fixed NPE
+* Fri Jan 29 2010 - choeger@open-xchange.com
+ - Bugfix #15293: calendar-printing templates are not marked as configfiles on
+   RHEL and SLES
+* Wed Jan 27 2010 - thorben.betten@open-xchange.com
+ - Bugfix #15258: Added day of week to appointment notification's start/end date replacement
 * Wed Jan 27 2010 - tobias.prinz@open-xchange.com
  - Bugfix #15274: Values read from OXMF are now stripped of trailing whitespaces
- 2010-01-27 - thorben.betten@open-xchange.com
- - Bugfix #15258: Added day of week to appointment notification's start/end date replacement
 * Tue Jan 26 2010 - tobias.prinz@open-xchange.com
  - Bugfix #15247: Outlook CSV import now translates "E-mail Address" as EMAIL1 in English Outlook files, too
 * Mon Jan 25 2010 - thorben.betten@open-xchange.com
@@ -543,7 +553,9 @@ fi
 * Tue Dec 15 2009 - thorben.betten@open-xchange.com
  - Bugfix #15075: Fixed un-quoting personal part of an email
 * Mon Dec 14 2009 - marcus.klein@open-xchange.com
- - Bugfix #15070: Corrected category for concurrent modifications exceptions on contacts. 
+ - Bugfix #15070: Corrected category for concurrent modifications exceptions on contacts.
+* Wed Dec 09 2009 - thorben.betten@open-xchange.com
+- Bugfix #15022: Fallback on non-parseable content type header
 * Fri Dec 04 2009 - martin.herfurth@open-xchange.com
  - Bugfix #14929: Setting until.
 * Thu Dec 03 2009 - thorben.betten@open-xchange.com

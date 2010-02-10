@@ -1,3 +1,9 @@
+open-xchange-conversion-servlet (6.15.0.0-3) unstable; urgency=low
+
+  * first build for 6.15-rev4
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 10 Feb 2010 16:36:21 +0100
+
 open-xchange-conversion-servlet (6.15.0.0-2) unstable; urgency=low
 
   * first build for 6.15-rev3

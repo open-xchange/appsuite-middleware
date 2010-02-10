@@ -40,7 +40,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 2
+%define		ox_release 3
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -113,3 +113,8 @@ fi
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
 %config(noreplace) /opt/open-xchange/etc/groupware/ldapauth.properties
 
+%changelog
+* Tue Feb 02 2010 - dennis.sieben@open-xchange.com
+ - Bugfix #15309: [L3] open-xchange-authentication-ldap: multiple OUs works
+   only for LDAP-Server on localhost
+   - Enabled usage of config file parameter for user search
