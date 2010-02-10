@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.config;
 
+import static com.openexchange.java.Autoboxing.B;
 import java.util.Arrays;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -137,15 +138,15 @@ public class ConfigMenuTest extends AbstractAJAXSession {
     public void testBeta() throws Throwable {
         final GetRequest getRequest = new GetRequest(Tree.Beta);
         GetResponse getResponse = getClient().execute(getRequest);
-        final String beta = getResponse.getString();
-        final String testBeta = "false";
-        SetRequest setRequest = new SetRequest(Tree.Beta, testBeta);
+        final boolean beta = getResponse.getBoolean();
+        final boolean testBeta = false;
+        SetRequest setRequest = new SetRequest(Tree.Beta, B(testBeta));
         try {
             getClient().execute(setRequest);
             getResponse = getClient().execute(getRequest);
-            assertEquals("Written timezone isn't returned from server.", testBeta, getResponse.getString());
+            assertEquals("Written timezone isn't returned from server.", testBeta, getResponse.getBoolean());
         } finally {
-            setRequest = new SetRequest(Tree.Beta, beta);
+            setRequest = new SetRequest(Tree.Beta, B(beta));
             getClient().execute(setRequest);
         }
     }
