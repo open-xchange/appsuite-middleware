@@ -691,7 +691,7 @@ public final class Select {
                 /*
                  * Names loaded from DB have no locale-sensitive string
                  */
-                l.add(new String[] {rs.getString(fpos), rs.getString(spos)});
+                l.add(new String[] { rs.getString(fpos), rs.getString(spos) });
             }
             return l;
         } catch (final SQLException e) {

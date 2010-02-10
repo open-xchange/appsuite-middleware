@@ -63,6 +63,8 @@ public interface FolderFilter {
      * 
      * <pre>
      * 
+     * 
+     * 
      * FolderFilter myFilter = new FolderFilter() {
      * 
      *     public boolean accept(Folder folder) {

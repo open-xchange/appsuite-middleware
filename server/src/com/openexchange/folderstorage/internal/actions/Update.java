@@ -194,7 +194,8 @@ public final class Update extends AbstractAction {
                  * Move folder dependent on folder is virtual or not
                  */
                 final String newParentId = folder.getParentID();
-                final FolderStorage newRealParentStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, newParentId);
+                final FolderStorage newRealParentStorage =
+                    folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, newParentId);
                 if (null == newRealParentStorage) {
                     throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, newParentId);
                 }
@@ -327,11 +328,8 @@ public final class Update extends AbstractAction {
                  * Move to default location in real storage
                  */
                 checkOpenedStorage(realStorage, openedStorages);
-                final String defaultParentId = realStorage.getDefaultFolderID(
-                    user,
-                    FolderStorage.REAL_TREE_ID,
-                    realStorage.getDefaultContentType(),
-                    storageParameters);
+                final String defaultParentId =
+                    realStorage.getDefaultFolderID(user, FolderStorage.REAL_TREE_ID, realStorage.getDefaultContentType(), storageParameters);
                 if (null == defaultParentId) {
                     /*
                      * No default folder found

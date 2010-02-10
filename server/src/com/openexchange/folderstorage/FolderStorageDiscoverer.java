@@ -47,7 +47,6 @@
  *
  */
 
-
 package com.openexchange.folderstorage;
 
 /**

@@ -78,11 +78,14 @@ public final class Insert {
         super();
     }
 
-    private static final String SQL_INSERT = "INSERT INTO virtualTree (cid, tree, user, folderId, parentId, name, modifiedBy, lastModified, shadow) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String SQL_INSERT =
+        "INSERT INTO virtualTree (cid, tree, user, folderId, parentId, name, modifiedBy, lastModified, shadow) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-    private static final String SQL_INSERT_PERM = "INSERT INTO virtualPermission (cid, tree, user, folderId, entity, groupFlag, fp, orp, owp, odp, adminFlag, system) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String SQL_INSERT_PERM =
+        "INSERT INTO virtualPermission (cid, tree, user, folderId, entity, groupFlag, fp, orp, owp, odp, adminFlag, system) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-    private static final String SQL_INSERT_SUBS = "INSERT INTO virtualSubscription (cid, tree, user, folderId, subscribed) VALUES (?, ?, ?, ?, ?)";
+    private static final String SQL_INSERT_SUBS =
+        "INSERT INTO virtualSubscription (cid, tree, user, folderId, subscribed) VALUES (?, ?, ?, ?, ?)";
 
     /**
      * Inserts specified folder.

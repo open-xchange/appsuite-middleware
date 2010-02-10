@@ -152,7 +152,7 @@ public final class Create extends AbstractAction {
                 throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
                     parentId,
                     getUser().getDisplayName(),
-                    Integer.valueOf(getContext().getContextId()));
+                    Integer.valueOf(getContextId()));
             }
             /*
              * Create folder dependent on folder is virtual or not

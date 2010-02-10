@@ -93,11 +93,7 @@ public final class VirtualFolderStorage implements FolderStorage {
     }
 
     public void createFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
-        Insert.insertFolder(
-            storageParameters.getContext().getContextId(),
-            Integer.parseInt(folder.getTreeID()),
-            storageParameters.getUser().getId(),
-            folder);
+        Insert.insertFolder(storageParameters.getContextId(), Integer.parseInt(folder.getTreeID()), storageParameters.getUserId(), folder);
     }
 
     public void clearFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
@@ -105,12 +101,7 @@ public final class VirtualFolderStorage implements FolderStorage {
     }
 
     public void deleteFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
-        Delete.deleteFolder(
-            storageParameters.getContext().getContextId(),
-            Integer.parseInt(treeId),
-            storageParameters.getUser().getId(),
-            folderId,
-            true);
+        Delete.deleteFolder(storageParameters.getContextId(), Integer.parseInt(treeId), storageParameters.getUserId(), folderId, true);
     }
 
     public String getDefaultFolderID(final User user, final String treeId, final ContentType contentType, final StorageParameters storageParameters) throws FolderException {
@@ -161,7 +152,7 @@ public final class VirtualFolderStorage implements FolderStorage {
         // Load folder data from database
         final User user = storageParameters.getUser();
         Select.fillFolder(
-            storageParameters.getContext().getContextId(),
+            storageParameters.getContextId(),
             Integer.parseInt(treeId),
             user.getId(),
             user.getLocale(),
@@ -181,13 +172,14 @@ public final class VirtualFolderStorage implements FolderStorage {
     public SortableId[] getSubfolders(final String treeId, final String parentId, final StorageParameters storageParameters) throws FolderException {
         final User user = storageParameters.getUser();
         final Locale locale = user.getLocale();
-        final String[] ids = Select.getSubfolderIds(
-            storageParameters.getContext().getContextId(),
-            Integer.parseInt(treeId),
-            user.getId(),
-            locale,
-            parentId,
-            StorageType.WORKING);
+        final String[] ids =
+            Select.getSubfolderIds(
+                storageParameters.getContextId(),
+                Integer.parseInt(treeId),
+                user.getId(),
+                locale,
+                parentId,
+                StorageType.WORKING);
         final SortableId[] ret = new SortableId[ids.length];
         for (int i = 0; i < ids.length; i++) {
             ret[i] = new VirtualId(ids[i], i);
@@ -221,11 +213,7 @@ public final class VirtualFolderStorage implements FolderStorage {
             folder.setName(storageFolder.getName());
         }
 
-        Update.updateFolder(
-            storageParameters.getContext().getContextId(),
-            Integer.parseInt(folder.getTreeID()),
-            storageParameters.getUser().getId(),
-            folder);
+        Update.updateFolder(storageParameters.getContextId(), Integer.parseInt(folder.getTreeID()), storageParameters.getUserId(), folder);
 
     }
 
@@ -239,9 +227,9 @@ public final class VirtualFolderStorage implements FolderStorage {
 
     public boolean containsFolder(final String treeId, final String folderId, final StorageType storageType, final StorageParameters storageParameters) throws FolderException {
         return Select.containsFolder(
-            storageParameters.getContext().getContextId(),
+            storageParameters.getContextId(),
             Integer.parseInt(treeId),
-            storageParameters.getUser().getId(),
+            storageParameters.getUserId(),
             folderId,
             storageType);
     }
@@ -267,9 +255,8 @@ public final class VirtualFolderStorage implements FolderStorage {
      */
     private static FolderStorage getRealFolderStorage(final String folderId, final StorageParameters storageParameters, final boolean modify) throws FolderException {
         // Get real folder storage
-        final FolderStorage realFolderStorage = VirtualFolderStorageRegistry.getInstance().getFolderStorage(
-            FolderStorage.REAL_TREE_ID,
-            folderId);
+        final FolderStorage realFolderStorage =
+            VirtualFolderStorageRegistry.getInstance().getFolderStorage(FolderStorage.REAL_TREE_ID, folderId);
         if (null == realFolderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folderId);
         }

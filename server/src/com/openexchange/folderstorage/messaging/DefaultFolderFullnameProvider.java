@@ -51,10 +51,9 @@ package com.openexchange.folderstorage.messaging;
 
 import com.openexchange.messaging.MessagingException;
 
-
 /**
  * {@link DefaultFolderFullnameProvider}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface DefaultFolderFullnameProvider {
@@ -114,5 +113,5 @@ public interface DefaultFolderFullnameProvider {
      * @throws MessagingException If trash folder's fullname cannot be returned
      */
     public String getTrashFolder() throws MessagingException;
-    
+
 }

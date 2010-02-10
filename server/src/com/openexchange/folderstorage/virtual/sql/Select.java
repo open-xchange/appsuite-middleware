@@ -91,29 +91,40 @@ public final class Select {
         super();
     }
 
-    private static final String SQL_SELECT = "SELECT parentId, name, modifiedBy, lastModified FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+    private static final String SQL_SELECT =
+        "SELECT parentId, name, modifiedBy, lastModified FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
 
-    private static final String SQL_SELECT_BCK = "SELECT parentId, name, modifiedBy, lastModified FROM virtualBackupTree WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+    private static final String SQL_SELECT_BCK =
+        "SELECT parentId, name, modifiedBy, lastModified FROM virtualBackupTree WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
 
     private static final String SQL_SELECT2 = "SELECT folderId FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
 
-    private static final String SQL_SELECT2_BCK = "SELECT folderId, name FROM virtualBackupTree WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+    private static final String SQL_SELECT2_BCK =
+        "SELECT folderId, name FROM virtualBackupTree WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
 
-    private static final String SQL_SELECT_SUBF = "SELECT folderId, name FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND parentId = ?";
+    private static final String SQL_SELECT_SUBF =
+        "SELECT folderId, name FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND parentId = ?";
 
-    private static final String SQL_SELECT_SUBF_BCK = "SELECT folderId, name FROM virtualBackupTree WHERE cid = ? AND tree = ? AND user = ? AND parentId = ?";
+    private static final String SQL_SELECT_SUBF_BCK =
+        "SELECT folderId, name FROM virtualBackupTree WHERE cid = ? AND tree = ? AND user = ? AND parentId = ?";
 
-    private static final String SQL_SELECT_PERMS = "SELECT entity, groupFlag, fp, orp, owp, odp, adminFlag, system FROM virtualPermission WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+    private static final String SQL_SELECT_PERMS =
+        "SELECT entity, groupFlag, fp, orp, owp, odp, adminFlag, system FROM virtualPermission WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
 
-    private static final String SQL_SELECT_PERMS_BCK = "SELECT entity, groupFlag, fp, orp, owp, odp, adminFlag, system FROM virtualBackupPermission WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+    private static final String SQL_SELECT_PERMS_BCK =
+        "SELECT entity, groupFlag, fp, orp, owp, odp, adminFlag, system FROM virtualBackupPermission WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
 
-    private static final String SQL_SELECT_SUBSCRIPTION = "SELECT subscribed FROM virtualSubscription WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+    private static final String SQL_SELECT_SUBSCRIPTION =
+        "SELECT subscribed FROM virtualSubscription WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
 
-    private static final String SQL_SELECT_SUBSCRIPTION_BCK = "SELECT subscribed FROM virtualBackupSubscription WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+    private static final String SQL_SELECT_SUBSCRIPTION_BCK =
+        "SELECT subscribed FROM virtualBackupSubscription WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
 
-    private static final String SQL_SELECT2_SUBF = "SELECT folderId, name FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND parentId = ?";
+    private static final String SQL_SELECT2_SUBF =
+        "SELECT folderId, name FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND parentId = ?";
 
-    private static final String SQL_SELECT2_SUBF_BCK = "SELECT folderId, name FROM virtualBackupTree WHERE cid = ? AND tree = ? AND user = ? AND parentId = ?";
+    private static final String SQL_SELECT2_SUBF_BCK =
+        "SELECT folderId, name FROM virtualBackupTree WHERE cid = ? AND tree = ? AND user = ? AND parentId = ?";
 
     /**
      * Checks if the specified virtual tree contains a folder denoted by given folder identifier.

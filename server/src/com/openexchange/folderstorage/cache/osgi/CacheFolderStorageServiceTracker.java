@@ -62,7 +62,8 @@ import com.openexchange.folderstorage.cache.CacheFolderStorageRegistry;
  */
 public final class CacheFolderStorageServiceTracker implements ServiceTrackerCustomizer {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(CacheFolderStorageServiceTracker.class);
+    private static final org.apache.commons.logging.Log LOG =
+        org.apache.commons.logging.LogFactory.getLog(CacheFolderStorageServiceTracker.class);
 
     private final BundleContext context;
 

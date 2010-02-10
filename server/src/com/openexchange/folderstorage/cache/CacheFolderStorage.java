@@ -217,10 +217,10 @@ public final class CacheFolderStorage implements FolderStorage {
                 final CacheKey key;
                 final String id = folder.getID();
                 if (folder.isGlobalID()) {
-                    key = newCacheKey(id, treeId, storageParameters.getContext().getContextId());
+                    key = newCacheKey(id, treeId, storageParameters.getContextId());
                     globalCache.put(key, folder);
                 } else {
-                    key = newCacheKey(id, treeId, storageParameters.getContext().getContextId(), storageParameters.getUser().getId());
+                    key = newCacheKey(id, treeId, storageParameters.getContextId(), storageParameters.getUserId());
                     userCache.put(key, folder);
                 }
             } catch (final CacheException e) {
@@ -231,8 +231,8 @@ public final class CacheFolderStorage implements FolderStorage {
 
     private void removeFolder(final String id, final String treeId, final StorageParameters storageParameters) throws FolderException {
         try {
-            final int contextId = storageParameters.getContext().getContextId();
-            final int userId = storageParameters.getUser().getId();
+            final int contextId = storageParameters.getContextId();
+            final int userId = storageParameters.getUserId();
             globalCache.remove(newCacheKey(id, treeId, contextId));
             userCache.remove(newCacheKey(id, treeId, contextId, userId));
             if (!FolderStorage.REAL_TREE_ID.equals(treeId)) {
@@ -293,11 +293,10 @@ public final class CacheFolderStorage implements FolderStorage {
                  * Delete from cache
                  */
                 if (global) {
-                    final CacheKey key = newCacheKey(folderId, treeId, storageParameters.getContext().getContextId());
+                    final CacheKey key = newCacheKey(folderId, treeId, storageParameters.getContextId());
                     globalCache.remove(key);
                 } else {
-                    final CacheKey key =
-                        newCacheKey(folderId, treeId, storageParameters.getContext().getContextId(), storageParameters.getUser().getId());
+                    final CacheKey key = newCacheKey(folderId, treeId, storageParameters.getContextId(), storageParameters.getUserId());
                     userCache.remove(key);
                 }
             } catch (final CacheException e) {
@@ -336,7 +335,7 @@ public final class CacheFolderStorage implements FolderStorage {
     }
 
     public Folder getFolder(final String treeId, final String folderId, final StorageType storageType, final StorageParameters storageParameters) throws FolderException {
-        final int contextId = storageParameters.getContext().getContextId();
+        final int contextId = storageParameters.getContextId();
         /*
          * Try global cache key
          */
@@ -350,7 +349,7 @@ public final class CacheFolderStorage implements FolderStorage {
         /*
          * Try user cache key
          */
-        folder = (Folder) userCache.get(newCacheKey(folderId, treeId, contextId, storageParameters.getUser().getId()));
+        folder = (Folder) userCache.get(newCacheKey(folderId, treeId, contextId, storageParameters.getUserId()));
         if (null == folder) {
             folder = loadFolder(treeId, folderId, storageType, storageParameters);
             putFolder(folder, treeId, storageParameters);
@@ -550,7 +549,11 @@ public final class CacheFolderStorage implements FolderStorage {
         } else {
             try {
                 folders =
-                    new Updates(new ServerSessionAdapter(session), storageParameters.getDecorator(), registry).doUpdates(treeId, timeStamp, ignoreDelete, includeContentTypes)[index];
+                    new Updates(new ServerSessionAdapter(session), storageParameters.getDecorator(), registry).doUpdates(
+                        treeId,
+                        timeStamp,
+                        ignoreDelete,
+                        includeContentTypes)[index];
             } catch (final ContextException e) {
                 throw new FolderException(e);
             }

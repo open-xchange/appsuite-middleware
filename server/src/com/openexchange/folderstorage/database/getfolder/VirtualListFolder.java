@@ -110,13 +110,8 @@ public final class VirtualListFolder {
         // Return non-isEmpty()
         final SearchIterator<FolderObject> searchIterator;
         try {
-            searchIterator = OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(
-                module,
-                user.getId(),
-                user.getGroups(),
-                userConfiguration,
-                ctx,
-                con);
+            searchIterator =
+                OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(module, user.getId(), user.getGroups(), userConfiguration, ctx, con);
         } catch (final OXException e) {
             throw new FolderException(e);
         }
@@ -144,39 +139,43 @@ public final class VirtualListFolder {
         final FolderObject fo;
         if (FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID == folderId) {
             // Task
-            fo = FolderObject.createVirtualFolderObject(
-                folderId,
-                FolderStrings.VIRTUAL_LIST_TASK_FOLDER_NAME,
-                FolderObject.SYSTEM_MODULE,
-                true,
-                FolderObject.SYSTEM_TYPE);
+            fo =
+                FolderObject.createVirtualFolderObject(
+                    folderId,
+                    FolderStrings.VIRTUAL_LIST_TASK_FOLDER_NAME,
+                    FolderObject.SYSTEM_MODULE,
+                    true,
+                    FolderObject.SYSTEM_TYPE);
             fo.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
         } else if (FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID == folderId) {
             // Calendar
-            fo = FolderObject.createVirtualFolderObject(
-                folderId,
-                FolderStrings.VIRTUAL_LIST_CALENDAR_FOLDER_NAME,
-                FolderObject.SYSTEM_MODULE,
-                true,
-                FolderObject.SYSTEM_TYPE);
+            fo =
+                FolderObject.createVirtualFolderObject(
+                    folderId,
+                    FolderStrings.VIRTUAL_LIST_CALENDAR_FOLDER_NAME,
+                    FolderObject.SYSTEM_MODULE,
+                    true,
+                    FolderObject.SYSTEM_TYPE);
             fo.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
         } else if (FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID == folderId) {
             // Contact
-            fo = FolderObject.createVirtualFolderObject(
-                folderId,
-                FolderStrings.VIRTUAL_LIST_CONTACT_FOLDER_NAME,
-                FolderObject.SYSTEM_MODULE,
-                true,
-                FolderObject.SYSTEM_TYPE);
+            fo =
+                FolderObject.createVirtualFolderObject(
+                    folderId,
+                    FolderStrings.VIRTUAL_LIST_CONTACT_FOLDER_NAME,
+                    FolderObject.SYSTEM_MODULE,
+                    true,
+                    FolderObject.SYSTEM_TYPE);
             fo.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
         } else {
             // Infostore
-            fo = FolderObject.createVirtualFolderObject(
-                folderId,
-                FolderStrings.VIRTUAL_LIST_INFOSTORE_FOLDER_NAME,
-                FolderObject.SYSTEM_MODULE,
-                true,
-                FolderObject.SYSTEM_TYPE);
+            fo =
+                FolderObject.createVirtualFolderObject(
+                    folderId,
+                    FolderStrings.VIRTUAL_LIST_INFOSTORE_FOLDER_NAME,
+                    FolderObject.SYSTEM_MODULE,
+                    true,
+                    FolderObject.SYSTEM_TYPE);
             fo.setParentFolderID(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
         }
         final DatabaseFolder retval = new LocalizedDatabaseFolder(fo);
@@ -216,13 +215,14 @@ public final class VirtualListFolder {
         }
         final Queue<FolderObject> q;
         try {
-            q = ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(
-                module,
-                user.getId(),
-                user.getGroups(),
-                userConfiguration,
-                ctx,
-                con)).asQueue();
+            q =
+                ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(
+                    module,
+                    user.getId(),
+                    user.getGroups(),
+                    userConfiguration,
+                    ctx,
+                    con)).asQueue();
         } catch (final SearchIteratorException e) {
             throw new FolderException(e);
         } catch (final OXException e) {

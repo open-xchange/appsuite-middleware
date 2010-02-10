@@ -118,14 +118,15 @@ public final class SystemSharedFolder {
         // Enforce getSubfolders() from storage if at least one shared folder is accessible for user
         final SearchIterator<FolderObject> searchIterator;
         try {
-            searchIterator = OXFolderIteratorSQL.getVisibleSubfoldersIterator(
-                FolderObject.SYSTEM_SHARED_FOLDER_ID,
-                user.getId(),
-                user.getGroups(),
-                ctx,
-                userConfiguration,
-                null,
-                con);
+            searchIterator =
+                OXFolderIteratorSQL.getVisibleSubfoldersIterator(
+                    FolderObject.SYSTEM_SHARED_FOLDER_ID,
+                    user.getId(),
+                    user.getGroups(),
+                    ctx,
+                    userConfiguration,
+                    null,
+                    con);
         } catch (final DBPoolingException e) {
             throw new FolderException(e);
         } catch (final OXException e) {
@@ -168,14 +169,15 @@ public final class SystemSharedFolder {
         {
             final Queue<FolderObject> q;
             try {
-                q = ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleSubfoldersIterator(
-                    FolderObject.SYSTEM_SHARED_FOLDER_ID,
-                    user.getId(),
-                    user.getGroups(),
-                    ctx,
-                    userConfiguration,
-                    null,
-                    con)).asQueue();
+                q =
+                    ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleSubfoldersIterator(
+                        FolderObject.SYSTEM_SHARED_FOLDER_ID,
+                        user.getId(),
+                        user.getGroups(),
+                        ctx,
+                        userConfiguration,
+                        null,
+                        con)).asQueue();
             } catch (final SearchIteratorException e) {
                 throw new FolderException(e);
             } catch (final DBPoolingException e) {

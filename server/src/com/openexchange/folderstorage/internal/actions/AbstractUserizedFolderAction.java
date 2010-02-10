@@ -248,7 +248,7 @@ public abstract class AbstractUserizedFolderAction extends AbstractAction {
         CalculatePermission.calculateUserPermissions(userizedFolder, getContext());
         // Type
         final boolean isShared;
-        if (userizedFolder.getCreatedBy() != getUser().getId() && PrivateType.getInstance().equals(userizedFolder.getType())) {
+        if (userizedFolder.getCreatedBy() != getUserId() && PrivateType.getInstance().equals(userizedFolder.getType())) {
             userizedFolder.setType(SharedType.getInstance());
             userizedFolder.setSubfolderIDs(new String[0]);
             isShared = true;

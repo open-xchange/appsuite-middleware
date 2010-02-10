@@ -97,11 +97,12 @@ public final class FolderStorageActivator implements BundleActivator {
     public void start(final BundleContext context) throws Exception {
         try {
             // Register error component
-            componentRegistration = new ComponentRegistration(
-                context,
-                EnumComponent.FOLDER,
-                "com.openexchange.folderstorage",
-                FolderExceptionFactory.getInstance());
+            componentRegistration =
+                new ComponentRegistration(
+                    context,
+                    EnumComponent.FOLDER,
+                    "com.openexchange.folderstorage",
+                    FolderExceptionFactory.getInstance());
             // Register services
             serviceRegistrations = new ArrayList<ServiceRegistration>(4);
             // Register folder service

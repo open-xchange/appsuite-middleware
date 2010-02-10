@@ -582,7 +582,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                  * Every folder located below INBOX folder is placed beside INBOX folder; excluding the ones held in virtual structure
                  */
                 final SortableId[] inboxSubfolders = folderStorage.getSubfolders(realTreeId, PREPARED_FULLNAME_INBOX, storageParameters);
-                final int userId = storageParameters.getUser().getId();
+                final int userId = storageParameters.getUserId();
                 final boolean[] contained = Select.containsFolders(contextId, tree, userId, inboxSubfolders, StorageType.WORKING);
                 for (int i = 0; i < inboxSubfolders.length; i++) {
                     if (!contained[i]) {

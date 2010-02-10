@@ -123,7 +123,7 @@ public final class MessagingFolderIdentifier {
                 throw FolderExceptionErrorMessage.INVALID_FOLDER_ID.create(identifier);
             }
             fullname = identifier.substring(pos + 1);
-    
+
             fqn = identifier;
         }
         /*

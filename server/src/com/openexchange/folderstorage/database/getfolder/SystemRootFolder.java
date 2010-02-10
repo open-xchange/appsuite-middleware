@@ -79,12 +79,13 @@ public final class SystemRootFolder {
         /*
          * The system root folder
          */
-        final FolderObject fo = FolderObject.createVirtualFolderObject(
-            FolderObject.SYSTEM_ROOT_FOLDER_ID,
-            "root",
-            FolderObject.SYSTEM_MODULE,
-            true,
-            FolderObject.SYSTEM_TYPE);
+        final FolderObject fo =
+            FolderObject.createVirtualFolderObject(
+                FolderObject.SYSTEM_ROOT_FOLDER_ID,
+                "root",
+                FolderObject.SYSTEM_MODULE,
+                true,
+                FolderObject.SYSTEM_TYPE);
         final DatabaseFolder retval = new DatabaseFolder(fo);
         // Enforce getSubfolders() from storage
         final List<String> list = new ArrayList<String>(4);

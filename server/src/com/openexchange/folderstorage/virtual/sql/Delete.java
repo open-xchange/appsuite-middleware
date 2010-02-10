@@ -74,17 +74,21 @@ public final class Delete {
         super();
     }
 
-    private static final String SQL_DELETE_SUBS = "DELETE FROM virtualSubscription WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+    private static final String SQL_DELETE_SUBS =
+        "DELETE FROM virtualSubscription WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
 
-    private static final String SQL_DELETE_INSERT_SUBS = "INSERT INTO virtualBackupSubscription SELECT * FROM virtualSubscription WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+    private static final String SQL_DELETE_INSERT_SUBS =
+        "INSERT INTO virtualBackupSubscription SELECT * FROM virtualSubscription WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
 
     private static final String SQL_DELETE_PERMS = "DELETE FROM virtualPermission WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
 
-    private static final String SQL_DELETE_INSERT_PERMS = "INSERT INTO virtualBackupPermission SELECT * FROM virtualPermission WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+    private static final String SQL_DELETE_INSERT_PERMS =
+        "INSERT INTO virtualBackupPermission SELECT * FROM virtualPermission WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
 
     private static final String SQL_DELETE = "DELETE FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
 
-    private static final String SQL_DELETE_INSERT = "INSERT INTO virtualBackupTree SELECT * FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+    private static final String SQL_DELETE_INSERT =
+        "INSERT INTO virtualBackupTree SELECT * FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
 
     /**
      * Deletes specified folder.

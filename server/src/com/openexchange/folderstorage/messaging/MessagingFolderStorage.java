@@ -461,10 +461,7 @@ public final class MessagingFolderStorage implements FolderStorage {
                         final MailAccountStorageService storageService =
                             MailServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
                         final MailAccount mailAccount =
-                            storageService.getMailAccount(
-                                accountId,
-                                storageParameters.getUser().getId(),
-                                storageParameters.getContext().getContextId());
+                            storageService.getMailAccount(accountId, storageParameters.getUserId(), storageParameters.getContextId());
                         if (!UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(mailAccount.getMailProtocol())) {
                             retval.setName(mailAccount.getName());
                         }
@@ -948,7 +945,7 @@ public final class MessagingFolderStorage implements FolderStorage {
                                     otherAccess,
                                     newParent,
                                     p.getSeparator(),
-                                    storageParameters.getUser().getId(),
+                                    storageParameters.getUserId(),
                                     p.getCapabilities().contains(MessagingFolder.CAPABILITY_PERMISSIONS));
                             // Delete source
                             accountAccess.getFolderAccess().deleteFolder(id, true);

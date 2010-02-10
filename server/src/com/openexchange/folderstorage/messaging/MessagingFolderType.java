@@ -106,7 +106,8 @@ public final class MessagingFolderType implements FolderType {
         /*
          * Check if service exists
          */
-        final MessagingServiceRegistry registry = MessagingFolderStorageServiceRegistry.getServiceRegistry().getService(MessagingServiceRegistry.class);
+        final MessagingServiceRegistry registry =
+            MessagingFolderStorageServiceRegistry.getServiceRegistry().getService(MessagingServiceRegistry.class);
         if (null == registry) {
             return false;
         }

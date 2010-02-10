@@ -109,14 +109,15 @@ public final class SharedPrefixFolder {
         }
         final SearchIterator<FolderObject> searchIterator;
         try {
-            searchIterator = OXFolderIteratorSQL.getVisibleSharedFolders(
-                user.getId(),
-                user.getGroups(),
-                userConfiguration.getAccessibleModules(),
-                sharedOwner,
-                ctx,
-                null,
-                con);
+            searchIterator =
+                OXFolderIteratorSQL.getVisibleSharedFolders(
+                    user.getId(),
+                    user.getGroups(),
+                    userConfiguration.getAccessibleModules(),
+                    sharedOwner,
+                    ctx,
+                    null,
+                    con);
         } catch (final OXException e) {
             throw new FolderException(e);
         } catch (final SearchIteratorException e) {
@@ -172,14 +173,15 @@ public final class SharedPrefixFolder {
 
         final Queue<FolderObject> q;
         try {
-            q = ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleSharedFolders(
-                user.getId(),
-                user.getGroups(),
-                userConfiguration.getAccessibleModules(),
-                sharedOwner,
-                ctx,
-                null,
-                con)).asQueue();
+            q =
+                ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleSharedFolders(
+                    user.getId(),
+                    user.getGroups(),
+                    userConfiguration.getAccessibleModules(),
+                    sharedOwner,
+                    ctx,
+                    null,
+                    con)).asQueue();
         } catch (final SearchIteratorException e) {
             throw new FolderException(e);
         } catch (final OXException e) {

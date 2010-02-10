@@ -47,9 +47,7 @@
  *
  */
 
-
 package com.openexchange.folderstorage;
-
 
 public interface ContentTypeDiscoveryService {
 

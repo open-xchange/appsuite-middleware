@@ -121,14 +121,15 @@ public final class SystemInfostoreFolder {
             final List<FolderObject> l;
             final int size;
             {
-                final Queue<FolderObject> q = ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleSubfoldersIterator(
-                    FolderObject.SYSTEM_INFOSTORE_FOLDER_ID,
-                    user.getId(),
-                    user.getGroups(),
-                    ctx,
-                    userConfiguration,
-                    null,
-                    con)).asQueue();
+                final Queue<FolderObject> q =
+                    ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleSubfoldersIterator(
+                        FolderObject.SYSTEM_INFOSTORE_FOLDER_ID,
+                        user.getId(),
+                        user.getGroups(),
+                        ctx,
+                        userConfiguration,
+                        null,
+                        con)).asQueue();
                 size = q.size();
                 /*
                  * Write UserStore first
@@ -152,13 +153,14 @@ public final class SystemInfostoreFolder {
             /*
              * Check if user has non-tree-visible folders
              */
-            final Queue<FolderObject> q = ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(
-                FolderObject.INFOSTORE,
-                user.getId(),
-                user.getGroups(),
-                userConfiguration,
-                ctx,
-                con)).asQueue();
+            final Queue<FolderObject> q =
+                ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(
+                    FolderObject.INFOSTORE,
+                    user.getId(),
+                    user.getGroups(),
+                    userConfiguration,
+                    ctx,
+                    con)).asQueue();
             if (!q.isEmpty()) {
                 subfolderIds.add(String.valueOf(FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID));
             }

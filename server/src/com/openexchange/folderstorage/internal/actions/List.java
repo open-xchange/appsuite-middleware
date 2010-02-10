@@ -210,7 +210,7 @@ public final class List extends AbstractUserizedFolderAction {
                     throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
                         parentId,
                         getUser().getDisplayName(),
-                        Integer.valueOf(getContext().getContextId()));
+                        Integer.valueOf(getContextId()));
                 }
             }
             /*
@@ -250,7 +250,8 @@ public final class List extends AbstractUserizedFolderAction {
                                  */
                                 final Permission subfolderPermission;
                                 if (null == getSession()) {
-                                    subfolderPermission = CalculatePermission.calculate(subfolder, getUser(), getContext(), getAllowedContentTypes());
+                                    subfolderPermission =
+                                        CalculatePermission.calculate(subfolder, getUser(), getContext(), getAllowedContentTypes());
                                 } else {
                                     subfolderPermission = CalculatePermission.calculate(subfolder, getSession(), getAllowedContentTypes());
                                 }
@@ -429,7 +430,8 @@ public final class List extends AbstractUserizedFolderAction {
                         if (all || subfolder.isSubscribed()) {
                             final Permission userPermission;
                             if (null == getSession()) {
-                                userPermission = CalculatePermission.calculate(subfolder, getUser(), getContext(), getAllowedContentTypes());
+                                userPermission =
+                                    CalculatePermission.calculate(subfolder, getUser(), getContext(), getAllowedContentTypes());
                             } else {
                                 userPermission = CalculatePermission.calculate(subfolder, getSession(), getAllowedContentTypes());
                             }

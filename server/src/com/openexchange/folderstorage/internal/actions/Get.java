@@ -140,10 +140,11 @@ public final class Get extends AbstractUserizedFolderAction {
                 throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
                     folderId,
                     getUser().getDisplayName(),
-                    Integer.valueOf(getContext().getContextId()));
+                    Integer.valueOf(getContextId()));
             }
             // TODO: All or only subscribed subfolders?
-            final UserizedFolder userizedFolder = getUserizedFolder(folder, ownPermission, treeId, true, true, storageParameters, openedStorages);
+            final UserizedFolder userizedFolder =
+                getUserizedFolder(folder, ownPermission, treeId, true, true, storageParameters, openedStorages);
             if (LOG.isDebugEnabled()) {
                 final long duration = System.currentTimeMillis() - start;
                 LOG.debug(new StringBuilder().append("Get.doGet() took ").append(duration).append("msec for folder: ").append(folderId).toString());

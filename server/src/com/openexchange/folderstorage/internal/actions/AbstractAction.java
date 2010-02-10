@@ -211,6 +211,15 @@ public abstract class AbstractAction {
     }
 
     /**
+     * Gets the context identifier.
+     * 
+     * @return The context identifier
+     */
+    public int getContextId() {
+        return context.getContextId();
+    }
+
+    /**
      * Sets the storage parameters.
      * 
      * @param storageParameters The storage parameters
@@ -226,6 +235,15 @@ public abstract class AbstractAction {
      */
     public User getUser() {
         return user;
+    }
+
+    /**
+     * Gets the user identifier.
+     * 
+     * @return The user identifier
+     */
+    public int getUserId() {
+        return user.getId();
     }
 
     /**

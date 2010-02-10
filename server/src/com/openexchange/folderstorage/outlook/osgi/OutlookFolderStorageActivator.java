@@ -71,7 +71,8 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
  */
 public class OutlookFolderStorageActivator extends DeferredActivator {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(OutlookFolderStorageActivator.class);
+    private static final org.apache.commons.logging.Log LOG =
+        org.apache.commons.logging.LogFactory.getLog(OutlookFolderStorageActivator.class);
 
     private List<ServiceRegistration> serviceRegistrations;
 

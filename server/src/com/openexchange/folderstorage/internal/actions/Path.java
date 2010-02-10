@@ -202,7 +202,7 @@ public final class Path extends AbstractUserizedFolderAction {
                 throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
                     folderId,
                     getUser().getDisplayName(),
-                    Integer.valueOf(getContext().getContextId()));
+                    Integer.valueOf(getContextId()));
             }
             final List<UserizedFolder> path = new ArrayList<UserizedFolder>(8);
             path.add(getUserizedFolder(folder, ownPermission, treeId, all, true, storageParameters, openedStorages));
@@ -214,7 +214,7 @@ public final class Path extends AbstractUserizedFolderAction {
                     throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
                         folderId,
                         getUser().getDisplayName(),
-                        Integer.valueOf(getContext().getContextId()));
+                        Integer.valueOf(getContextId()));
                 }
                 path.add(getUserizedFolder(folder, ownPermission, treeId, all, true, storageParameters, openedStorages));
             }

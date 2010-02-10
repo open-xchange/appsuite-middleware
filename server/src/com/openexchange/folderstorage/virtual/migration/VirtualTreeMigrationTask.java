@@ -270,8 +270,7 @@ public class VirtualTreeMigrationTask extends UpdateTaskAdapter {
             /*
              * Insert other mail default folders: Drafts, Sent, Spam, and Trash
              */
-            
-            
+
         } catch (final OXException e) {
             throw new UpdateException(e);
         } catch (final FolderException e) {

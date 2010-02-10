@@ -115,14 +115,15 @@ public final class SystemPublicFolder {
             /*
              * The system public folder
              */
-            final Queue<FolderObject> q = ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleSubfoldersIterator(
-                FolderObject.SYSTEM_PUBLIC_FOLDER_ID,
-                user.getId(),
-                user.getGroups(),
-                ctx,
-                userConfiguration,
-                null,
-                con)).asQueue();
+            final Queue<FolderObject> q =
+                ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleSubfoldersIterator(
+                    FolderObject.SYSTEM_PUBLIC_FOLDER_ID,
+                    user.getId(),
+                    user.getGroups(),
+                    ctx,
+                    userConfiguration,
+                    null,
+                    con)).asQueue();
             final List<String> subfolderIds = new ArrayList<String>(q.size());
             /*
              * Add global address book and subfolders
@@ -135,37 +136,40 @@ public final class SystemPublicFolder {
              * Check for presence of virtual folders
              */
             {
-                final Queue<FolderObject> tmp = ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(
-                    FolderObject.CALENDAR,
-                    user.getId(),
-                    user.getGroups(),
-                    userConfiguration,
-                    ctx,
-                    con)).asQueue();
+                final Queue<FolderObject> tmp =
+                    ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(
+                        FolderObject.CALENDAR,
+                        user.getId(),
+                        user.getGroups(),
+                        userConfiguration,
+                        ctx,
+                        con)).asQueue();
                 if (!tmp.isEmpty()) {
                     subfolderIds.add(String.valueOf(FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID));
                 }
             }
             {
-                final Queue<FolderObject> tmp = ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(
-                    FolderObject.CONTACT,
-                    user.getId(),
-                    user.getGroups(),
-                    userConfiguration,
-                    ctx,
-                    con)).asQueue();
+                final Queue<FolderObject> tmp =
+                    ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(
+                        FolderObject.CONTACT,
+                        user.getId(),
+                        user.getGroups(),
+                        userConfiguration,
+                        ctx,
+                        con)).asQueue();
                 if (!tmp.isEmpty()) {
                     subfolderIds.add(String.valueOf(FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID));
                 }
             }
             {
-                final Queue<FolderObject> tmp = ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(
-                    FolderObject.TASK,
-                    user.getId(),
-                    user.getGroups(),
-                    userConfiguration,
-                    ctx,
-                    con)).asQueue();
+                final Queue<FolderObject> tmp =
+                    ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(
+                        FolderObject.TASK,
+                        user.getId(),
+                        user.getGroups(),
+                        userConfiguration,
+                        ctx,
+                        con)).asQueue();
                 if (!tmp.isEmpty()) {
                     subfolderIds.add(String.valueOf(FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID));
                 }

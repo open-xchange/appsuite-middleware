@@ -433,7 +433,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                              * owner
                              */
                             retval = new DatabaseFolder(fo);
-                            if (PrivateType.getInstance().equals(retval.getType()) && storageParameters.getUser().getId() != retval.getCreatedBy()) {
+                            if (PrivateType.getInstance().equals(retval.getType()) && storageParameters.getUserId() != retval.getCreatedBy()) {
                                 retval.setType(SharedType.getInstance());
                                 /*
                                  * A shared folder has no subfolders in real tree

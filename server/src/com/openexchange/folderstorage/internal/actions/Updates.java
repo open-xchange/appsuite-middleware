@@ -224,7 +224,7 @@ public final class Updates extends AbstractUserizedFolderAction {
                     final Folder f = iter.next();
                     final Permission effectivePerm = getEffectivePermission(f);
                     if (effectivePerm.getFolderPermission() >= Permission.READ_FOLDER) {
-                        if (isShared(f, getUser().getId())) {
+                        if (isShared(f, getUserId())) {
                             if (sharedFolderAccess) {
                                 /*
                                  * Add display name of shared folder owner

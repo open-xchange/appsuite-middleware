@@ -123,7 +123,8 @@ public final class OutlookFolderStorageRegistry implements FolderStorageDiscover
                     added.add(contentTypes[j]);
                 } else {
                     // No, already present
-                    final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(OutlookFolderStorageRegistry.class);
+                    final org.apache.commons.logging.Log log =
+                        org.apache.commons.logging.LogFactory.getLog(OutlookFolderStorageRegistry.class);
                     if (log.isErrorEnabled()) {
                         log.error("Duplicate folder storage for content type \"" + contentTypes[j].toString() + "\"", new Throwable());
                     }

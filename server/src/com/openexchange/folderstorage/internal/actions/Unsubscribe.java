@@ -143,7 +143,7 @@ public final class Unsubscribe extends AbstractAction {
                     throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
                         folderId,
                         getUser().getDisplayName(),
-                        Integer.valueOf(getContext().getContextId()));
+                        Integer.valueOf(getContextId()));
                 }
             }
             {

@@ -145,7 +145,7 @@ public final class Subscribe extends AbstractAction {
                     throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
                         folderId,
                         getUser().getDisplayName(),
-                        Integer.valueOf(getContext().getContextId()));
+                        Integer.valueOf(getContextId()));
                 }
             }
             final FolderStorage targetStorage = getOpenedStorage(targetParentId, targetTreeId, storageParameters, openedStorages);
@@ -153,11 +153,12 @@ public final class Subscribe extends AbstractAction {
                 /*
                  * Check for equally named folder
                  */
-                final UserizedFolder[] subfolders = (session == null ? new List(user, context, null) : new List(session, null)).doList(
-                    targetTreeId,
-                    targetParentId,
-                    true,
-                    openedStorages);
+                final UserizedFolder[] subfolders =
+                    (session == null ? new List(user, context, null) : new List(session, null)).doList(
+                        targetTreeId,
+                        targetParentId,
+                        true,
+                        openedStorages);
                 for (final UserizedFolder userizedFolder : subfolders) {
                     if (userizedFolder.getName().equals(sourceFolder.getName())) {
                         throw FolderExceptionErrorMessage.EQUAL_NAME.create(sourceFolder.getName(), targetParentId, targetTreeId);

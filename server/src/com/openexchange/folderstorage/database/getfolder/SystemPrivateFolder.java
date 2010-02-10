@@ -115,14 +115,15 @@ public final class SystemPrivateFolder {
             /*
              * The system private folder
              */
-            final Queue<FolderObject> q = ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleSubfoldersIterator(
-                FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
-                user.getId(),
-                user.getGroups(),
-                ctx,
-                userConfiguration,
-                null,
-                con)).asQueue();
+            final Queue<FolderObject> q =
+                ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleSubfoldersIterator(
+                    FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
+                    user.getId(),
+                    user.getGroups(),
+                    ctx,
+                    userConfiguration,
+                    null,
+                    con)).asQueue();
             final List<String> subfolderIds = new ArrayList<String>(q.size());
             for (final FolderObject folderObject : q) {
                 subfolderIds.add(String.valueOf(folderObject.getObjectID()));

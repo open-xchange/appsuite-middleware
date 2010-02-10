@@ -190,7 +190,8 @@ public final class ContentTypeRegistry implements ContentTypeDiscoveryService {
      * @return The available content types
      */
     public Map<Integer, ContentType> getAvailableContentTypes() {
-        final ConcurrentMap<ContentType, FolderStorage> concreteStorages = getElementForTreeId(FolderStorage.REAL_TREE_ID).getConcreteStorages();
+        final ConcurrentMap<ContentType, FolderStorage> concreteStorages =
+            getElementForTreeId(FolderStorage.REAL_TREE_ID).getConcreteStorages();
         if (concreteStorages.isEmpty()) {
             return Collections.emptyMap();
         }

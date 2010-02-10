@@ -49,7 +49,6 @@
 
 package com.openexchange.folderstorage;
 
-
 /**
  * {@link SystemContentType} - The folder storage content type for system.
  * 
