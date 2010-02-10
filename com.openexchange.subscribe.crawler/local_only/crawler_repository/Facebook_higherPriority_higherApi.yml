@@ -1,5 +1,5 @@
 --- !com.openexchange.subscribe.crawler.CrawlerDescription
-crawlerApiVersion: 616
+crawlerApiVersion: 618
 displayName: Facebook
 id: com.openexchange.subscribe.crawler.facebook
 priority: 1
