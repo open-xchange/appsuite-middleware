@@ -58,8 +58,7 @@ public interface CrawlerUpdateMBean {
 
     public static final String DOMAIN_NAME = "com.openexchange.subscribe.crawler.commandline";
 
-    public abstract void updateAllInstalledCrawlers();
+    public abstract void updateCrawlersAccordingToConfiguration();
 
-    public abstract void updateSelectedCrawler(String crawlerId);
 
 }

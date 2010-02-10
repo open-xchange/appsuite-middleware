@@ -156,7 +156,7 @@ public class CrawlerUpdateCLT {
                 ObjectName objectName = new ObjectName(CrawlerUpdateMBean.DOMAIN_NAME);
                 mbsc.invoke(
                     objectName,
-                    "updateAllInstalledCrawlers",
+                    "updateCrawlersAccordingToConfiguration",
                     new Object[] {},
                     null);
 

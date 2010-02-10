@@ -51,6 +51,12 @@ package com.openexchange.subscribe.crawler.commandline;
 
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.subscribe.crawler.internal.CrawlerUpdateTask;
+import com.openexchange.subscribe.crawler.osgi.Activator;
+import com.openexchange.subscribe.crawler.osgi.CrawlerMBeanRegisterer;
 
 
 /**
@@ -59,26 +65,30 @@ import javax.management.StandardMBean;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public final class CrawlerUpdateMBeanImpl extends StandardMBean implements CrawlerUpdateMBean{
+    
+    private ConfigurationService configurationService;
+    
+    private Activator activator;
+    
+    private static final Log LOG = LogFactory.getLog(CrawlerUpdateMBeanImpl.class);
 
     /**
      * Initializes a new {@link CrawlerUpdateMBeanImpl}.
      * @throws NotCompliantMBeanException
      */
-    public CrawlerUpdateMBeanImpl() throws NotCompliantMBeanException {
+    public CrawlerUpdateMBeanImpl(ConfigurationService configurationService, Activator activator) throws NotCompliantMBeanException {
         super(CrawlerUpdateMBean.class);
+        this.configurationService = configurationService;
+        this.activator = activator;
     }
 
     /* (non-Javadoc)
      * @see com.openexchange.subscribe.crawler.commandline.CrawlerUpdateMBean#updateAllInstalledCrawlers()
      */
-    public void updateAllInstalledCrawlers(){
-        System.out.println("***** Called updateAllInstalledCrawlers");
+    public void updateCrawlersAccordingToConfiguration(){
+        LOG.info("Called updateCrawlersAccordingToConfiguration");
+        CrawlerUpdateTask update = new CrawlerUpdateTask(configurationService, activator);
+        update.run();
     }
     
-    /* (non-Javadoc)
-     * @see com.openexchange.subscribe.crawler.commandline.CrawlerUpdateMBean#updateSelectedCrawler(java.lang.String)
-     */
-    public void updateSelectedCrawler(String crawlerId){
-        System.out.println("***** Called updatedSelectedCrawler for : " + crawlerId);
-    }
 }

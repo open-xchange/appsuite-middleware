@@ -49,6 +49,8 @@
 
 package com.openexchange.subscribe.crawler.osgi;
 
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
@@ -57,10 +59,12 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.management.ManagementException;
 import com.openexchange.management.ManagementService;
 import com.openexchange.subscribe.crawler.commandline.CrawlerUpdateMBean;
 import com.openexchange.subscribe.crawler.commandline.CrawlerUpdateMBeanImpl;
+import com.openexchange.timer.TimerService;
 
 
 /**
@@ -74,25 +78,49 @@ public class CrawlerMBeanRegisterer implements ServiceTrackerCustomizer{
     
     private static final Log LOG = LogFactory.getLog(CrawlerMBeanRegisterer.class);
     
-    public CrawlerMBeanRegisterer (BundleContext context){
+    private ManagementService managementService;
+    
+    private ConfigurationService configurationService;
+    
+    private Activator activator;
+    
+    private final Lock lock = new ReentrantLock();
+    
+    public CrawlerMBeanRegisterer (BundleContext context, Activator activator){
         this.context = context;
+        this.activator = activator;
     }
     
     public Object addingService(ServiceReference reference) {
-        ManagementService managementService = (ManagementService) context.getService(reference);
+        final Object obj = context.getService(reference);
+        lock.lock();
+        boolean registeringMBeanPossible = false;
         try {
-            ObjectName objectName = new ObjectName(CrawlerUpdateMBean.DOMAIN_NAME , "name", "CrawlerUpdateMBeanImpl");
-            managementService.registerMBean(objectName, new CrawlerUpdateMBeanImpl());
-        } catch (MalformedObjectNameException e) {
-            LOG.error(e);
-        } catch (NotCompliantMBeanException e) {
-            LOG.error(e);
-        } catch (ManagementException e) {
-            LOG.error(e);
-        } catch (NullPointerException e) {
-            LOG.error(e);
+            if (obj instanceof ManagementService) {
+                managementService = (ManagementService) obj;
+            }
+            if (obj instanceof ConfigurationService) {
+                configurationService = (ConfigurationService) obj;
+            }
+            registeringMBeanPossible = null != managementService && null != configurationService;
+        } finally {
+            lock.unlock();
         }
-        return managementService;
+        if (registeringMBeanPossible){
+            try {
+                ObjectName objectName = new ObjectName(CrawlerUpdateMBean.DOMAIN_NAME , "name", "CrawlerUpdateMBeanImpl");
+                managementService.registerMBean(objectName, new CrawlerUpdateMBeanImpl(configurationService, activator));
+            } catch (MalformedObjectNameException e) {
+                LOG.error(e);
+            } catch (NotCompliantMBeanException e) {
+                LOG.error(e);
+            } catch (ManagementException e) {
+                LOG.error(e);
+            } catch (NullPointerException e) {
+                LOG.error(e);
+            }
+        }    
+        return obj;
     }
 
     
@@ -102,12 +130,22 @@ public class CrawlerMBeanRegisterer implements ServiceTrackerCustomizer{
 
     
     public void removedService(ServiceReference reference, Object service) {
-        ManagementService managementService = (ManagementService) service;
+        lock.lock();
         try {
-            managementService.unregisterMBean("CrawlerUpdateMBeanImpl");
-        } catch (ManagementException e) {
-            LOG.error(e);
-        }
+            if (service instanceof ManagementService) {                
+                try {
+                    managementService.unregisterMBean("CrawlerUpdateMBeanImpl");
+                } catch (ManagementException e) {
+                    LOG.error(e);
+                }
+                managementService = null;
+            }
+            if (service instanceof ConfigurationService) {
+                configurationService = null;
+            }            
+        } finally {
+            lock.unlock();
+        }        
         context.ungetService(reference);
     }
 

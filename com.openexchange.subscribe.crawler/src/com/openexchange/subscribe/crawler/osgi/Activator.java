@@ -114,10 +114,9 @@ public class Activator implements BundleActivator {
         final Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ConfigurationService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + TimerService.class.getName() + "))");
         ServiceTracker configAndTimerTracker = new ServiceTracker(context, filter, new CrawlerAutoUpdater(context, this));
         trackers.push(configAndTimerTracker);
-        trackers.push(new ServiceTracker(
-            context,
-            ManagementService.class.getName(),
-            new CrawlerMBeanRegisterer(context)));
+        final Filter filter2 = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ConfigurationService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + ManagementService.class.getName() + "))");
+        ServiceTracker configAndManagementTracker = new ServiceTracker(context, filter2, new CrawlerMBeanRegisterer(context, this));
+        trackers.push(configAndManagementTracker);
         for (final ServiceTracker tracker : trackers) {
             tracker.open();
         }
