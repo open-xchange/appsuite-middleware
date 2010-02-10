@@ -1524,11 +1524,12 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
                 folderObj.setLastModified(new Date(rs.getLong(7)));
                 folderObj.setModifiedBy(parseStringValue(rs.getString(8), ctx));
                 folderObj.setPermissionFlag(rs.getInt(9));
-                int defaultFolder = rs.getInt(11);
+                final int defaultFolder = rs.getInt(11);
                 if (rs.wasNull()) {
-                    defaultFolder = 0;
+                    folderObj.setDefaultFolder(false);
+                } else {
+                    folderObj.setDefaultFolder(defaultFolder > 0);
                 }
-                folderObj.setDefaultFolder(defaultFolder > 0);
                 if (loadSubfolderList) {
                     final ArrayList<Integer> subfolderList = getSubfolderIds(folderId, ctx, readCon, table);
                     folderObj.setSubfolderIds(subfolderList);
