@@ -51,6 +51,7 @@ package com.openexchange.folderstorage.internal.actions;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
@@ -58,6 +59,7 @@ import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -245,6 +247,24 @@ public final class Create extends AbstractAction {
                 }
                 checkOpenedStorage(capStorage, openedStorages);
                 /*
+                 * Check for possible duplicate folder name
+                 */
+                {
+                    final SortableId[] checkMe = virtualStorage.getSubfolders(treeId, toCreate.getParentID(), storageParameters);
+                    final Locale locale = storageParameters.getUser().getLocale();
+                    for (final SortableId sortableId : checkMe) {
+                        final String localizedName =
+                            virtualStorage.getFolder(treeId, sortableId.getId(), storageParameters).getLocalizedName(locale);
+                        if (localizedName.equals(toCreate.getName())) {
+                            checkOpenedStorage(realStorage, openedStorages);
+                            throw FolderExceptionErrorMessage.EQUAL_NAME.create(toCreate.getName(), realStorage.getFolder(
+                                FolderStorage.REAL_TREE_ID,
+                                parentId,
+                                storageParameters).getLocalizedName(locale), treeId);
+                        }
+                    }
+                }
+                /*
                  * 1. Create at default location in capable real storage
                  */
                 {
@@ -265,6 +285,28 @@ public final class Create extends AbstractAction {
                     // TODO: Check permission for obtained default folder ID?
                     final Folder clone4Real = (Folder) toCreate.clone();
                     clone4Real.setParentID(realParentId);
+                    {
+                        /*
+                         * Ensure no duplicate
+                         */
+                        final SortableId[] subfolders =
+                            capStorage.getSubfolders(FolderStorage.REAL_TREE_ID, realParentId, storageParameters);
+                        final String prefix = clone4Real.getName();
+                        int appendixCount = 2;
+                        while (true) {
+                            boolean found = false;
+                            final String n = clone4Real.getName();
+                            for (int i = 0; !found && i < subfolders.length; i++) {
+                                if (n.equals(capStorage.getFolder(FolderStorage.REAL_TREE_ID, subfolders[i].getId(), storageParameters).getName())) {
+                                    found = true;
+                                    clone4Real.setName(new StringBuilder(prefix).append(appendixCount++).toString());
+                                }
+                            }
+                            if (!found) {
+                                break;
+                            }
+                        }
+                    }
                     capStorage.createFolder(clone4Real, storageParameters);
                     toCreate.setID(clone4Real.getID());
                 }
