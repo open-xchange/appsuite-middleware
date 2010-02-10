@@ -144,33 +144,4 @@ public class BugTests extends AbstractAJAXSession {
             client.execute(new SetRequest(Tree.SendAddress, origAddress));
         }
     }
-
-    public void testKillAliases() throws Throwable {
-        // Tree.SpellCheck is currently not active.
-        for (Tree tree : new Tree[] { Tree.Beta }) {
-            tryToKillAliases(tree);
-        }
-    }
-
-    private void tryToKillAliases(Tree tree) throws AjaxException, IOException, SAXException, JSONException {
-        Object[] origAliases = client.execute(new GetRequest(Tree.MailAddresses)).getArray();
-        String origValue = client.execute(new GetRequest(tree)).getString();
-        try {
-            // We only need to write it to kill aliases
-            client.execute(new SetRequest(tree, B(rand.nextBoolean())));
-            Object[] testAliases = client.execute(new GetRequest(Tree.MailAddresses)).getArray();
-            assertNotNull("Aliases are null.", origAliases);
-            assertNotNull("Aliases are null.", testAliases);
-            assertEquals("Number of aliases are not equal.", origAliases.length, testAliases.length);
-            Arrays.sort(origAliases);
-            Arrays.sort(testAliases);
-            for (int i = 0; i < origAliases.length; i++) {
-                assertEquals("Aliases are not the same.", origAliases[i], testAliases[i]);
-            }
-        } finally {
-            client.execute(new SetRequest(tree, origValue));
-            String testValue = client.execute(new GetRequest(tree)).getString();
-            assertEquals("Restored value does not match.", origValue, testValue);
-        }
-    }
 }
