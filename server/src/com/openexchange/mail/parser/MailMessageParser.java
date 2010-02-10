@@ -158,7 +158,15 @@ public final class MailMessageParser {
 
     private static final String TNEF_IPM_MS_READ_RECEIPT = "IPM.Microsoft Mail.Read Receipt";
 
-    // private static final String TNEF_IPM_MS_SCHEDULE = "IPM.Microsoft Schedule.MtgCncl";
+    // private static final String TNEF_IPM_MS_SCHEDULE_CANCELED = "IPM.Microsoft Schedule.MtgCncl";
+
+    // private static final String TNEF_IPM_MS_SCHEDULE_REQUEST = "IPM.Microsoft Schedule.MtgReq";
+
+    // private static final String TNEF_IPM_MS_SCHEDULE_ACCEPTED = "IPM.Microsoft Schedule.MtgRespP";
+
+    // private static final String TNEF_IPM_MS_SCHEDULE_DECLINED = "IPM.Microsoft Schedule.MtgRespN";
+
+    // private static final String TNEF_IPM_MS_SCHEDULE_TENTATIVE = "IPM.Microsoft Schedule.MtgRespA";
 
     /*
      * +++++++++++++++++++ MEMBERS +++++++++++++++++++
@@ -527,7 +535,9 @@ public final class MailMessageParser {
                             if (attachFilename != null) {
                                 final ContentDisposition cd = new ContentDisposition(Part.ATTACHMENT);
                                 cd.setFilenameParameter(attachFilename);
-                                bodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MIMEMessageUtility.foldContentDisposition(cd.toString()));
+                                bodyPart.setHeader(
+                                    MessageHeaders.HDR_CONTENT_DISPOSITION,
+                                    MIMEMessageUtility.foldContentDisposition(cd.toString()));
                             }
                             os.reset();
                             attachment.writeTo(os);
@@ -574,7 +584,9 @@ public final class MailMessageParser {
                         if (attachFilename != null) {
                             final ContentDisposition cd = new ContentDisposition(Part.ATTACHMENT);
                             cd.setFilenameParameter(attachFilename);
-                            bodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MIMEMessageUtility.foldContentDisposition(cd.toString()));
+                            bodyPart.setHeader(
+                                MessageHeaders.HDR_CONTENT_DISPOSITION,
+                                MIMEMessageUtility.foldContentDisposition(cd.toString()));
                         }
                         bodyPart.setSize(messageClass.getLength());
                         parseMailContent(MIMEMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
