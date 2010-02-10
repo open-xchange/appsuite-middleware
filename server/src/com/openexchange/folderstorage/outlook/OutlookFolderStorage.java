@@ -675,17 +675,15 @@ public final class OutlookFolderStorage implements FolderStorage {
                 throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }
-        final SortableId[] sis;
+        final List<String> sortedIDs;
         {
-            final Collection<List<String>> sortedIDs = treeMap.values();
-            final List<SortableId> tmp = new ArrayList<SortableId>(sortedIDs.size());
-            int i = 0;
-            for (final List<String> list : sortedIDs) {
+            final Collection<List<String>> values = treeMap.values();
+            sortedIDs = new ArrayList<String>(values.size());
+            for (final List<String> list : values) {
                 for (final String id : list) {
-                    tmp.add(new OutlookId(id, i++));
+                    sortedIDs.add(id);
                 }
             }
-            sis = tmp.toArray(new SortableId[tmp.size()]);
         }
         /*
          * External mail accounts
@@ -703,10 +701,10 @@ public final class OutlookFolderStorage implements FolderStorage {
                 throw new FolderException(e);
             }
             if (accounts.isEmpty()) {
-                subfolderIDs = toIDList(sis);
+                subfolderIDs = sortedIDs;
             } else {
-                subfolderIDs = new ArrayList<String>(sis.length + accounts.size());
-                subfolderIDs.addAll(toIDList(sis));
+                subfolderIDs = new ArrayList<String>(sortedIDs.size() + accounts.size());
+                subfolderIDs.addAll(sortedIDs);
                 for (final MailAccount mailAccount : accounts) {
                     if (!mailAccount.isDefaultAccount()) {
                         subfolderIDs.add(MailFolderUtility.prepareFullname(mailAccount.getId(), MailFolder.DEFAULT_FOLDER_ID));
@@ -715,7 +713,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                 // TODO: No Unified INBOX if not enabled
             }
         } else {
-            subfolderIDs = toIDList(sis);
+            subfolderIDs = sortedIDs;
         }
         final SortableId[] ret = new SortableId[subfolderIDs.size()];
         {
