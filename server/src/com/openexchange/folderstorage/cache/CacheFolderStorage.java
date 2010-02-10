@@ -329,16 +329,16 @@ public final class CacheFolderStorage implements FolderStorage {
         /*
          * Refresh parent
          */
+        if (null != realParentId && !FolderStorage.ROOT_ID.equals(realParentId)) {
+            removeFolder(realParentId, treeId, storageParameters);
+            removeFolder(realParentId, FolderStorage.REAL_TREE_ID, storageParameters);
+        }
         if (!FolderStorage.ROOT_ID.equals(parentId)) {
             removeFolder(parentId, treeId, storageParameters);
             final Folder parentFolder = loadFolder(treeId, parentId, StorageType.WORKING, storageParameters);
             if (parentFolder.isCacheable()) {
                 putFolder(parentFolder, treeId, storageParameters);
             }
-        }
-        if (null != realParentId && !FolderStorage.ROOT_ID.equals(realParentId)) {
-            removeFolder(realParentId, treeId, storageParameters);
-            removeFolder(realParentId, FolderStorage.REAL_TREE_ID, storageParameters);
         }
     }
 
