@@ -1,10 +1,10 @@
 
 # norootforbuild
 
-Name:           open-xchange-messaging-generic
+Name:           open-xchange-messaging-facebook
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-messaging >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@ open-xchange-cache >= @OXVERSION@ open-xchange-crypto >= @OXVERSION@ open-xchange-server >= @OXVERSION@
+BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-configread >= @OXVERSION@ open-xchange-datatypes-genericonf >= @OXVERSION@ open-xchange-datatypes-genericonf-storage >= @OXVERSION@ open-xchange-messaging >= @OXVERSION@ open-xchange-messaging-generic >= @OXVERSION@ open-xchange-server >= @OXVERSION@
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
@@ -45,12 +45,12 @@ License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
-Summary:        The Open-Xchange Messaging Generic Bundle
-Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-messaging >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@ open-xchange-cache >= @OXVERSION@ open-xchange-crypto >= @OXVERSION@ open-xchange-server >= @OXVERSION@
+Summary:        The Open-Xchange Messaging Facebook Bundle
+Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-configread >= @OXVERSION@ open-xchange-datatypes-genericonf >= @OXVERSION@ open-xchange-datatypes-genericonf-storage >= @OXVERSION@ open-xchange-messaging >= @OXVERSION@ open-xchange-messaging-generic >= @OXVERSION@ open-xchange-server >= @OXVERSION@
 #
 
 %description
-The Open-Xchange Messaging Generic Bundle
+The Open-Xchange Messaging Facebook Bundle
 
 Authors:
 --------
@@ -77,4 +77,4 @@ ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 %dir /opt/open-xchange/bundles
 /opt/open-xchange/bundles/*
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
-# %config(noreplace) /opt/open-xchange/etc/groupware/twitter.properties
+%config(noreplace) /opt/open-xchange/etc/groupware/facebookmessaging.properties
