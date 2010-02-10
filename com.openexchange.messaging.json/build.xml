@@ -47,7 +47,7 @@
     <path id="project.classpath">
         <pathelement location="${bundlesdir}/${osgijar}"/>
         <pathelement location="${bundlesdir}/${commonsloggingjar}"/>
-        <pathelement location="${bundlesdir/${servletjar}"/>
+        <pathelement location="${bundlesdir}/${servletjar}"/>
 
         <pathelement location="${bundlesdir}/${genericonfjar}"/>
         <pathelement location="${bundlesdir}/${genericonfstoragejar}"/>
