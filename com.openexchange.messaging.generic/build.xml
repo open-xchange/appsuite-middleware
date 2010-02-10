@@ -56,6 +56,8 @@
 
 		<pathelement location="${bundlesdir}/${commonBundle}/lib/${mailjar}" />
 		<pathelement location="${bundlesdir}/javax.activation/lib/${activationjar}" />
+
+		<fileset refid="3rdpartyjars"/>
 	</path>
 
 	<!-- Compile -->
