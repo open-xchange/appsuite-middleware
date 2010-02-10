@@ -399,6 +399,7 @@ public final class List extends AbstractUserizedFolderAction {
             new ThreadPoolCompletionService<Object>(getInstance().getService(ThreadPoolService.class));
         for (int i = 0; i < size; i++) {
             final int index = i;
+            final org.apache.commons.logging.Log logger = LOG;
             completionService.submit(new Callable<Object>() {
 
                 public Object call() throws Exception {
@@ -415,7 +416,7 @@ public final class List extends AbstractUserizedFolderAction {
                         try {
                             subfolder = tmp.getFolder(treeId, id, newParameters);
                         } catch (final FolderException e) {
-                            LOG.warn(new StringBuilder(128).append("The folder with ID \"").append(id).append("\" in tree \"").append(
+                            logger.warn(new StringBuilder(128).append("The folder with ID \"").append(id).append("\" in tree \"").append(
                                 treeId).append("\" could not be fetched from storage \"").append(tmp.getClass().getSimpleName()).append(
                                 "\"").toString(), e);
                             return null;
