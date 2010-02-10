@@ -51,6 +51,7 @@ package com.openexchange.subscribe.crawler.commandline;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.HashMap;
 import java.util.Map;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
@@ -60,6 +61,7 @@ import javax.management.ObjectName;
 import javax.management.ReflectionException;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
+import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXServiceURL;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -69,6 +71,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.management.console.JMXAuthenticatorImpl;
 
 
 
@@ -88,11 +91,7 @@ public class CrawlerUpdateCLT {
 
     static {
         toolkitOptions = new Options();
-        toolkitOptions.addOption("h", "help", false, "Prints a help text");
-        toolkitOptions.addOption("u", "url", true, "URL of the directory containing crawler-updates for this release");
-        toolkitOptions.addOption("id", "id", true, "id of the crawler to install / update (optional)");
-        toolkitOptions.addOption("i", "id", true, "update only already installed crawlers");
-        toolkitOptions.addOption("a", "id", true, "update all installed crawlers and install compatible new ones");
+        toolkitOptions.addOption("h", "help", false, "Prints a help text");        
         toolkitOptions.addOption("p", "port", true, "The optional JMX port (default:9999)");
         toolkitOptions.addOption("l", "login", true, "The optional JMX login (if JMX has authentication enabled)");
         toolkitOptions.addOption("s", "password", true, "The optional JMX password (if JMX has authentication enabled)");
@@ -100,7 +99,7 @@ public class CrawlerUpdateCLT {
 
     private static void printHelp() {
         final HelpFormatter helpFormatter = new HelpFormatter();
-        helpFormatter.printHelp("crawlerupdatedefaults", toolkitOptions);
+        helpFormatter.printHelp("crawlerupdate \n This updates the crawlers on this machine according to the settings in the file crawler.properties", toolkitOptions);
     }
     
     public static void main(final String[] args) {
@@ -143,17 +142,16 @@ public class CrawlerUpdateCLT {
             final Map<String, Object> environment;
             if (jmxLogin == null || jmxPassword == null) {
                 environment = null;
-            } else {
-                environment = null;
-//                environment = new HashMap<String, Object>(1);
-//                environment.put(JMXConnectorServer.AUTHENTICATOR, new JMXAuthenticatorImpl(new String[] { jmxLogin, jmxPassword }));
+            } else {                
+                environment = new HashMap<String, Object>(1);
+                environment.put(JMXConnectorServer.AUTHENTICATOR, new JMXAuthenticatorImpl(jmxLogin, jmxPassword ));
             }
 
             final JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:" + port + "/server");
             final JMXConnector jmxConnector = JMXConnectorFactory.connect(url, environment);
             try {
                 final MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
-                ObjectName objectName = new ObjectName(CrawlerUpdateMBean.DOMAIN_NAME);
+                ObjectName objectName = new ObjectName(CrawlerUpdateMBean.DOMAIN_NAME , "name", "CrawlerUpdateMBeanImpl");
                 mbsc.invoke(
                     objectName,
                     "updateCrawlersAccordingToConfiguration",
@@ -161,7 +159,7 @@ public class CrawlerUpdateCLT {
                     null);
 
             } catch (final MalformedObjectNameException e) {
-                LOG.error(e.getMessage(), e);
+                System.err.println(e.getMessage());
             } finally {
                 jmxConnector.close();
             }
@@ -176,7 +174,7 @@ public class CrawlerUpdateCLT {
         } catch (final InstanceNotFoundException e) {
             System.err.println("Instance is not available: " + e.getMessage());
         } catch (final MBeanException e) {
-            LOG.error(e.getMessage());
+            System.err.println(e.getMessage());
         } catch (final ReflectionException e) {
             System.err.println("Problem with reflective type handling: " + e.getMessage());
         } catch (final RuntimeException e) {
