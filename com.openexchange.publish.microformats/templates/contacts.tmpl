@@ -1,8 +1,3 @@
-<#--                                                                             --> 
-<#--                                                                             --> 
-<#--   For more extensive templates, and examples, see http://ox.io              --> 
-<#--                                                                             --> 
-
 <#macro display key value title>
 	<#if value != "">
 		<span class="${key}">${value?html}</span>
@@ -31,191 +26,176 @@
 
 <#macro render_name contact>
 	<#if contact.givenName?? || contact.surName?? || contact.middleName??>
-		<tr>
-			<td class="key">Name:</td>
-			<td class="value">
-				<@display key="ox_title" title="Title" value=contact.title!"" />
-				<@display key="ox_firstName" title="First name" value=contact.givenName!"" />
-				<@display key="ox_secondName" title="Second name" value=contact.middleName!"" />
-				<@display key="ox_lastName" title="Last name" value=contact.surName!"" />
-				<@display key="ox_suffix" title="Suffix" value=contact.suffix!"" />
-			</td>
-		</tr>
+	  <div class="group">
+			<div class="key co_4">
+				<span class="key">
+					Name:
+				</span>
+			</div>
+			<div class="co_12">
+				<span class="value">
+					<@display key="ox_title" title="Title" value=contact.title!"" />
+					<@display key="ox_firstName" title="First name" value=contact.givenName!"" />
+					<@display key="ox_secondName" title="Second name" value=contact.middleName!"" />
+					<@display key="ox_lastName" title="Last name" value=contact.surName!"" />
+					<@display key="ox_suffix" title="Suffix" value=contact.suffix!"" />
+				</span>
+			</div>
+		</div>
 	</#if>
 </#macro>
 
 <#macro render key value title>
 	<#if value != "">
-		<tr>
-			<td class="key">${title}:</td> 
-			<td class="${key} value">${value?html}</td>
-		</tr>
+		<div class="group">
+			<div class="key co_4">
+				<span class="key">
+					${title}:
+				</span>
+			</div>
+			<div class="co_12">
+				<span class="${key} value">
+					${value?html}
+				</span>
+			</div>
+		</div>
 	</#if>
 </#macro>
 
 <#macro render_mail key value title>
 	<#if value != "">
-		<tr>
-			<td class="key">${title}:</td> 
-			<td class="value"><a href="mailto:${value?html}"><span class="${key}">${value?html}</span></a></td>
-		</tr>
+		<div class="group">
+			<div class="key co_4">
+				<span class="key">
+					${title}:
+				</span>
+			</div>
+			<div class="co_12">
+				<span class="${key} value">
+					<a href="mailto:${value?html}"><span class="${key}">${value?html}</span></a>
+				</span>
+			</div>
+		</div>
 	</#if>
 </#macro>
 
 <#macro image contact>
 	<#if contact.containsImage1()>
-		<img src="${request.scheme!"http"}://${request.serverName}${utils.getImageURL(publication, contact)}" alt="" />
+		<div class="group">
+			<div class="key co_4">
+				<span class="key">
+					&nbsp;
+				</span>
+			</div>
+			<div class="co_12">
+				<span class="value">
+					<img src="${request.scheme!"http"}://${request.serverName}${utils.getImageURL(publication, contact)}" alt="" />
+				</span>
+			</div>
+		</div>
 	</#if>
 </#macro>
 
 <#macro imageMicroformatted contact>
 	<#if contact.containsImage1()>
-		<img class="ox_image" src="${request.scheme!"http"}://${request.serverName}${utils.getImageURL(publication, contact)}"  alt="" />
+		<div class="group">
+			<div class="key co_4">
+				<span class="key">
+					&nbsp;
+				</span>
+			</div>
+			<div class="co_12">
+				<span class="value">
+					<img class="ox_image" src="${request.scheme!"http"}://${request.serverName}${utils.getImageURL(publication, contact)}"  alt="" />
+				</span>
+			</div>
+		</div>
 	</#if>
 </#macro>
 
 
+
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de">
-<head>
-	<title>OX PubSub</title>
-	<style type="text/css">
-	<!--
-	html, body {
-		margin: 0;
-		padding: 0;
-		border: none;
-		height: 100%;
-		width: 100%;
-		background: #e1e4eb;
-	}
-
-	html * {
-		font-family: Helvetica, Arial, sans-serif;
-		color: #000;
-	}
-	#nav {
-		float:left;
-		width: 20%;
-	}
-	#contacts {
-		float: left;
-		<#if (contacts?size > 2)>
-		width: 70%;
-		<#else>
-		width: 95%;
-		</#if>
-	}
-	#disclaimer {
-		clear: both;
-		padding: 10em 35% 0 35%;
-		text-align: justify;
-	}
-	#disclaimer p, #disclaimer h2{
-		font-size: 60%;
-	}
-	#disclaimer h2 {
-		text-align: center;
-	}
-	td.key {
-		width: 25%;
-		text-align: right;
-		padding-right: 1em;
-	}
-	table.a_contact, td.value {
-		width: 100%;
-	}
-	td.value, td.value span {
-		color: #446;
-		font-weight: bold;
-		text-align: left;
-	}
-	.ox_contact{
-		clear: both;
-	}
-	#nav, .ox_contact {
-		margin: .5em;
-		border: 1px solid #999;
-		background: #fff;
-		padding: .5em;
-	}
-	#nav a, #nav a:visited, #nav a:hover, #nav a:link {
-		font-weight: bold;
-	}
-	a, a:visited, a:hover, a:link {
-		text-decoration: none;
-		color: #446;
-	}
-	#nav li, #nav ul {
-		list-style-type: none; 
-		margin: 0;
-		padding: 0;
-		left-indent: 0;
-	}
-	.back {
-		text-align: center;
-		font-size: 75%;
-		text-decoration none;
-		color: #446;
-	}
-	.ox_image{
-		float:right;
-	}
-	.message {
-		margin-top: 2em;
-		text-align: center;
-	}
-
-	-->
-	</style>
-</head>
-
-<body>
-	<#assign contacts = utils.onlyPublic(contacts)>
-	<#if (contacts?size == 0)>
-		<div class="message">Folder is empty</div>
-	</#if>
-
-	<#if (contacts?size > 2)>
-	<div id="nav">
-		<ul>
-			<#list contacts as contact>
-			<li>
-				<a href="#contact_${contacts?seq_index_of(contact)}">
-					<@display_link_value contact=contact />
-				</a>
-			</li>
-			</#list>
-		</ul>
-	</div>
-	</#if>
-	
-	<div id="contacts">
-		<#list contacts as contact>
-		<div class="ox_contact" id="contact_${contacts?seq_index_of(contact)}">
-			<@imageMicroformatted contact=contact />
-			<table class="a_contact">
-				<@render_name contact=contact />
-				<@render key="ox_displayName" title="Display name" value=contact.displayName!"" />
-				<@render key="ox_company" title="Company" value=contact.company!"" /> 
-				<@render key="ox_profession" title="Profession" value=contact.profession!"" /> 
-				<@render key="ox_department" title="Department" value=contact.department!"" /> 
-				<@render key="ox_position" title="Position" value=contact.position!"" /> 
-				<@render key="ox_employeeType" title="Employee type" value=contact.employeeType!"" /> 
-				<@render key="ox_url" title="Url" value=contact.uRL!"" /> 
-				<@render key="ox_note" title="Note" value=contact.note!"" /> 
-			</table>
-		<div class="back"><a href="#nav">Back to the top</a></div>
-		</div>
-		</#list>
-	</div>
-	
-	<#if (contacts?size > 0)>
-	<div id="disclaimer">
-		${privacy}
-	</div>
-	</#if>
-</body>
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link href="http://www.open-xchange.com/fileadmin/pub_sub/_data/css/pubsub.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="http://www.open-xchange.com/fileadmin/pub_sub/_data/jss/jquery.js"></script>
+    <script type="text/javascript" src="http://www.open-xchange.com/fileadmin/pub_sub/_data/jss/base.js"></script>
+    <title>
+      Social OX - Sharing Documents and Contacts 
+    </title>
+  </head>
+  <body>
+    <div id="layout" class="hasJs">
+      <div id="head_area">
+        <div id="bill_board">
+        </div>
+      </div>
+      <div id="content_area" >
+        <div class="info_section">
+          <h2 class="header_visual">
+        		Social OX - Sharing Documents and Contacts
+        	</h2>
+        	<div class="group spacer">
+            <p>
+              Is sharing contacts and documents with your business partners and your social network a useful feature for you? Then you should definitely check out Open-Xchange's innovative social features and learn how to benefit from them.
+            </p>
+            <p>            
+              Create your own test account here: <a href="http://ox.io" target="_blank">http://ox.io</a>
+            </p>
+            <p>
+              You are convinced? Sign up <a href="http://www.open-xchange.com/en/buy/partner" target="_blank">here</a>
+            </p>
+          </div>
+        </div>
+        <div class="left_section co_5 same_h">
+        	<h2 class="header_visual">
+        		Table of Contens
+        	</h2>
+          <ul id="nav" class="navigation_vertical">
+            <#list contacts as contact>
+              <li>
+                <a href="#contact_${contacts?seq_index_of(contact)}" class="user">
+                  <@display_link_value contact=contact />
+                </a>
+              </li>
+            </#list>
+          </ul>
+        </div>
+        <div class="right_section co_11 flex_childs same_h" id="infostore">
+          <h2 class="header_visual">
+        		Contacts
+        	</h2>
+        	<#list contacts as contact>
+            <div class="ox_contact group_visual" id="contact_${contacts?seq_index_of(contact)}">
+              <div class="a_contact">
+                <@imageMicroformatted contact=contact />
+                <@render_name contact=contact />
+                <@render key="ox_company" title="Company" value=contact.company!"" /> 
+                <@render key="ox_mail" title="Mail" value=contact.email1!"" /> 
+                <@render key="ox_profession" title="Profession" value=contact.profession!"" /> 
+                <@render key="ox_department" title="Department" value=contact.department!"" /> 
+                <@render key="ox_position" title="Position" value=contact.position!"" /> 
+                <@render key="ox_employeeType" title="Employee type" value=contact.employeeType!"" /> 
+                <@render key="ox_url" title="Url" value=contact.uRL!"" /> 
+                <@render key="ox_note" title="Note" value=contact.note!"" /> 
+              </div>
+            </div>
+            <a href="#layout" class="back_to_top"></a>
+          </#list>
+        </div>
+      </div>
+      <div id="footerArea" class="disclaimer_section">
+        <h2 class="header_visual">
+        		Disclaimer
+        	</h2>
+        <div class="group spacer">
+          ${privacy}
+        </div>
+      </div>
+    </div>
+  </body>
 </html>
