@@ -136,6 +136,9 @@ public class FolderExceptionMessages implements LocalizableStrings {
     // Invalid folder identifier: %1$s.
     public static final String INVALID_FOLDER_ID_MSG = "Invalid folder identifier: %1$s.";
 
+    // Folder "%1$s" must not be deleted by user "%2$s" in context "%3$s".
+    public static final String FOLDER_NOT_DELETEABLE_MSG = "Folder \"%1$s\" must not be deleted by user \"%2$s\" in context \"%3$s\".";
+
     /**
      * Initializes a new {@link FolderExceptionMessages}
      */

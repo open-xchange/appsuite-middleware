@@ -162,7 +162,13 @@ public enum FolderExceptionErrorMessage implements OXErrorMessage {
     /**
      * Invalid folder identifier: %1$s.
      */
-    INVALID_FOLDER_ID(FolderExceptionMessages.INVALID_FOLDER_ID_MSG, Category.CODE_ERROR, 25);
+    INVALID_FOLDER_ID(FolderExceptionMessages.INVALID_FOLDER_ID_MSG, Category.CODE_ERROR, 25),
+    /**
+     * Folder "%1$s" must not be deleted by user "%2$s" in context "%3$s".
+     * <p>
+     * Folder identifier should be passed as first argument to not injure privacy through publishing folder name.
+     */
+    FOLDER_NOT_DELETEABLE(FolderExceptionMessages.FOLDER_NOT_DELETEABLE_MSG, Category.PERMISSION, 26);
 
     private final Category category;
 
