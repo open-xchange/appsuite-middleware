@@ -96,7 +96,6 @@ public class CrawlerUpdateTask implements Runnable {
         if (configurationService != null) {
             final String lastUpdatedFilePath = configurationService.getProperty(LAST_UPDATED_FILE_PROPERTY);
             final String updateDirectoryPath = configurationService.getProperty(UPDATE_DIRECTORY_PATH_PROPERTY);
-            boolean wasUpdated = false;
             try {
                 long now = Calendar.getInstance().getTimeInMillis();
                 URL url = new URL(lastUpdatedFilePath);
@@ -123,7 +122,7 @@ public class CrawlerUpdateTask implements Runnable {
                             }
                         }
                     }
-                    wasUpdated = downloadAndCheckTheFiles(configurationService, updateDirectoryPath, ymlFilenames);
+                    downloadAndCheckTheFiles(configurationService, updateDirectoryPath, ymlFilenames);
                     // Set the date so that we remember that we looked for changes for today and before
                     activator.setLAST_TIME_CHECKED(now);
                 } else {
@@ -135,20 +134,12 @@ public class CrawlerUpdateTask implements Runnable {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
-            if (wasUpdated) {
-
-                // restart the services and reload the yml-files
-                activator.unregisterServices();
-                activator.registerServices(configurationService);
-            }
         }
     }
 
-    private boolean downloadAndCheckTheFiles(final ConfigurationService config, final String updateDirectoryPath, ArrayList<String> ymlFilenames) throws MalformedURLException, IOException, FileNotFoundException {
+    private void downloadAndCheckTheFiles(final ConfigurationService config, final String updateDirectoryPath, ArrayList<String> ymlFilenames) throws MalformedURLException, IOException, FileNotFoundException {
         BufferedReader in;
         String line;
-        boolean wasUpdated = false;
         for (String ymlFilename : ymlFilenames) {
             // Create CrawlerDescriptions of the yml-files
             URL url = new URL(updateDirectoryPath + ymlFilename);
@@ -182,7 +173,7 @@ public class CrawlerUpdateTask implements Runnable {
                             //removal needs to happen before saving in case of the filename being the same
                             activator.removeCrawlerFromFilesystem(config, possibleNewCrawlerDescription.getId());
                             Yaml.dump(possibleNewCrawlerDescription, new File(path + ymlFilename));
-                            wasUpdated = true;
+                            activator.restartSingleCrawler(possibleNewCrawlerDescription.getId(), config);
                         }
                         // it is a description for a completely new crawler
                     } else {
@@ -191,7 +182,7 @@ public class CrawlerUpdateTask implements Runnable {
                         if (!onlyUpdateInstalled){
                             LOG.info("It is a completely new crawler and will be saved");
                             Yaml.dump(possibleNewCrawlerDescription, new File(path + ymlFilename));
-                            wasUpdated = true;
+                            activator.restartSingleCrawler(possibleNewCrawlerDescription.getId(), config);
                         }    
                     }
                 } else {
@@ -201,6 +192,5 @@ public class CrawlerUpdateTask implements Runnable {
                 LOG.info("there is no new crawler description");
             }
         }
-        return wasUpdated;
     }
 }

@@ -52,6 +52,8 @@ package com.openexchange.subscribe.crawler.osgi;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Stack;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -91,6 +93,8 @@ public class Activator implements BundleActivator {
     private BundleContext bundleContext;
 
     private final Stack<ServiceTracker> trackers = new Stack<ServiceTracker>();
+    
+    private Map<String, ServiceRegistration> activeServices = new HashMap<String, ServiceRegistration>(); 
 
     public static final int CRAWLER_API_VERSION = 616;
 
@@ -189,6 +193,7 @@ public class Activator implements BundleActivator {
                     subscribeService,
                     null);
                 services.add(serviceRegistration);
+                activeServices.put(crawler.getId(), serviceRegistration);
             }
         }
     }
@@ -196,6 +201,30 @@ public class Activator implements BundleActivator {
     public void unregisterServices() {
         for (final ServiceRegistration serviceRegistration : services) {
             serviceRegistration.unregister();
+        }
+    }
+    
+    public void restartSingleCrawler(String crawlerIdToUpdate, ConfigurationService config){
+        ServiceRegistration serviceRegistration = activeServices.get(crawlerIdToUpdate);
+        if (serviceRegistration != null){
+            serviceRegistration.unregister();
+            activeServices.remove(crawlerIdToUpdate);
+        }
+        for (final CrawlerDescription crawler : getCrawlersFromFilesystem(config)){
+            if (crawler.getId().equals(crawlerIdToUpdate)){
+                final GenericSubscribeService subscribeService = new GenericSubscribeService(
+                    crawler.getDisplayName(),
+                    crawler.getId(),
+                    crawler.getModule(),
+                    crawler.getWorkflowString(),
+                    crawler.getPriority());
+                serviceRegistration = bundleContext.registerService(
+                    SubscribeService.class.getName(),
+                    subscribeService,
+                    null);
+                services.add(serviceRegistration);
+                activeServices.put(crawler.getId(), serviceRegistration);
+            }
         }
     }
 
