@@ -11,7 +11,6 @@
     <!-- Constants -->
     <property name="tmp.dir" value="tmp"/>
     <property name="lib.dir" value="lib"/>
-    <property name="conf.dir" value="conf"/>
 
     <property file="META-INF/MANIFEST.MF"/>
     <property file="build.properties"/>
@@ -77,7 +76,6 @@
     <target name="jar" depends="prepare,compile">
         <jar jarfile="${tmp.dir}/${bundle.name}" manifest="META-INF/MANIFEST.MF">
             <fileset dir="${output..}"/>
-            <fileset refid="3rdpartyjars"/>
         </jar>
     </target>
 
@@ -87,16 +85,10 @@
         <antcall target="installConfig"/>
     </target>
 
-    <!--
     <target name="installConfig">
-        <mkdir dir="${confInstallCopyDir}"/>
-        <copy todir="${confInstallCopyDir}" overwrite="true">
-            <fileset dir="${conf.dir}"/>
-        </copy>
         <mkdir dir="${destdir}/${bundle.d}"/>
         <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
     </target>
-    -->
 
     <target name="installJar" depends="jar">
         <mkdir dir="${destdir}/${bundlesdir}"/>
