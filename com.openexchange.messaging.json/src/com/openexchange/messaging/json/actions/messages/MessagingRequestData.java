@@ -345,4 +345,8 @@ public class MessagingRequestData {
         return addresses;
     }
 
+    public String getAccountAddress() throws MessagingException {
+        return getMessagingServiceId()+"://"+getAccountID();
+    }
+
 }

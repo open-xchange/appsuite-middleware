@@ -52,10 +52,9 @@ package com.openexchange.messaging.json.actions.messages;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingExceptionCodes;
 
-
 /**
  * {@link MessagingFolderAddress}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class MessagingFolderAddress {
@@ -64,25 +63,24 @@ public class MessagingFolderAddress {
         return folderId.contains("://");
     }
 
-    
     public static MessagingFolderAddress parse(String folderId) throws MessagingException {
         MessagingFolderAddress address = new MessagingFolderAddress();
         int state = 0;
         StringBuilder builder = new StringBuilder();
         for (char c : folderId.toCharArray()) {
-            switch(c) {
-            case ':' : 
-                switch(state) {
-                case 0 :
+            switch (c) {
+            case ':':
+                switch (state) {
+                case 0:
                     state = 1;
                     break;
                 default:
                     builder.append(c);
                     break;
-                } 
+                }
                 break;
-            case '/' :
-                switch(state) {
+            case '/':
+                switch (state) {
                 case 1:
                     state = 2;
                     break;
@@ -105,8 +103,8 @@ public class MessagingFolderAddress {
                 break;
             }
         }
-        
-        switch(state) {
+
+        switch (state) {
         case 2:
             address.setMessagingService(builder.toString());
             builder.setLength(0);
@@ -125,22 +123,23 @@ public class MessagingFolderAddress {
     }
 
     private String messagingService = "";
+
     private int account = -1;
+
     private String folder = "";
 
     public String getMessagingService() {
         return messagingService;
     }
-    
+
     public void setMessagingService(String messagingService) {
         this.messagingService = messagingService;
     }
 
-
     public int getAccount() {
         return account;
     }
-    
+
     public void setAccount(String account) throws MessagingException {
         try {
             this.account = Integer.parseInt(account);
@@ -153,15 +152,13 @@ public class MessagingFolderAddress {
         this.account = accountID;
     }
 
-
     public String getFolder() {
         return folder;
     }
-    
+
     public void setFolder(String folder) {
         this.folder = folder;
     }
-
 
     @Override
     public int hashCode() {
@@ -172,7 +169,6 @@ public class MessagingFolderAddress {
         result = prime * result + ((messagingService == null) ? 0 : messagingService.hashCode());
         return result;
     }
-
 
     @Override
     public boolean equals(Object obj) {
@@ -206,6 +202,13 @@ public class MessagingFolderAddress {
         return true;
     }
 
-    
+    @Override
+    public String toString() {
+        return messagingService + "://" + account + "/" + folder;
+    }
+
+    public String getAccountAddress() {
+        return messagingService + "://" + account;
+    }
 
 }

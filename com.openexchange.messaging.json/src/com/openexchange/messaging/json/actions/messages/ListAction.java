@@ -114,7 +114,7 @@ public class ListAction extends AbstractMessagingAction {
         List<MessagingMessage> messages = messageAccess.getMessages(folder.getFolder(), ids.toArray(new String[ids.size()]), fields);
         
         for (MessagingMessage messagingMessage : messages) {
-            list.put(writer.writeFields(messagingMessage, fields));
+            list.put(writer.writeFields(messagingMessage, fields, folder.getAccountAddress()));
         }
         
         return new AJAXRequestResult(list);

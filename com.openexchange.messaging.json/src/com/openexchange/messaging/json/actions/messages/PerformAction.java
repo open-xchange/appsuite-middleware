@@ -99,7 +99,7 @@ public class PerformAction extends AbstractMessagingAction {
         if(output == null) {
             return new AJAXRequestResult(1);
         } 
-        return new AJAXRequestResult(writer.write(output));
+        return new AJAXRequestResult(writer.write(output, req.getAccountAddress()));
         
     }
 

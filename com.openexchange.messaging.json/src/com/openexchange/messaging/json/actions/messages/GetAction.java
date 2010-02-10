@@ -86,7 +86,7 @@ public class GetAction extends AbstractMessagingAction {
         MessagingMessageAccess messageAccess = req.getMessageAccess();
         MessagingMessage message = messageAccess.getMessage(req.getFolderId(), req.getId(), req.getPeek());
         
-        return new AJAXRequestResult(writer.write(message));
+        return new AJAXRequestResult(writer.write(message, req.getAccountAddress()));
     }
 
 }

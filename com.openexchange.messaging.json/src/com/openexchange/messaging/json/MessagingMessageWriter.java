@@ -228,8 +228,9 @@ public class MessagingMessageWriter {
 
     /**
      * Renders a MessagingMessage in its JSON representation.
+     * @param string 
      */
-    public JSONObject write(MessagingMessage message) throws JSONException, MessagingException {
+    public JSONObject write(MessagingMessage message, String folderPrefix) throws JSONException, MessagingException {
         JSONObject messageJSON = write((MessagingPart)message);
 
         if(message.getId() != null) {
@@ -256,7 +257,7 @@ public class MessagingMessageWriter {
             messageJSON.put("user", userFlagsJSON);
         }
         
-        messageJSON.put("folder", message.getFolder());
+        messageJSON.put("folder", folderPrefix+"/"+message.getFolder());
         
         if(message.getPicture() != null) {
             messageJSON.put("picture", message.getPicture());
@@ -397,8 +398,9 @@ public class MessagingMessageWriter {
     /**
      * Renders a message as a list of fields. The fields to be written are given in the MessagingField array. 
      * Individual fields are rendered exactly as in the JSONObject representation using custom header writers and content writers.
+     * @param folderPrefix 
      */
-    public JSONArray writeFields(MessagingMessage message, MessagingField[] fields) throws MessagingException, JSONException {
+    public JSONArray writeFields(MessagingMessage message, MessagingField[] fields, String folderPrefix) throws MessagingException, JSONException {
         JSONArray fieldJSON = new JSONArray();
         
         MessagingMessageGetSwitch switcher = new MessagingMessageGetSwitch();
@@ -420,6 +422,8 @@ public class MessagingMessageWriter {
                     value = writer.write(message, content);
                 }
 
+            } else if (MessagingField.FOLDER_ID == messagingField) {
+                value = folderPrefix+"/"+value;
             }
             
             fieldJSON.put( value );
