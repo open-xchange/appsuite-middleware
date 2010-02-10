@@ -83,7 +83,6 @@
         <antcall target="installConfig"/>
     </target>
 
-	<!--
     <target name="installConfig">
     	<mkdir dir="${confInstallCopyDir}"/>
         <copy todir="${confInstallCopyDir}" overwrite="true">
@@ -93,7 +92,6 @@
         <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini"
             message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
     </target>
-    -->
 
     <target name="installJar" depends="jar">
         <mkdir dir="${destdir}/${bundlesdir}"/>
