@@ -105,7 +105,8 @@ public class CrawlerAutoUpdater implements ServiceTrackerCustomizer {
         } finally {
             lock.unlock();
         }
-        if (taskSchedulingPossible) {
+        // only activate the auto-update if both services are available and it is enabled via config-file 
+        if (taskSchedulingPossible && configurationService.getBoolProperty(activator.ENABLE_AUTO_UPDATE, true)) {
             CrawlerUpdateTask crawlerUpdateTask = new CrawlerUpdateTask(configurationService, activator);
             // Start the job 30 seconds after this and repeat it as often as configured (default:daily)
             final long updateInterval = Integer.parseInt(configurationService.getProperty(Activator.UPDATE_INTERVAL));

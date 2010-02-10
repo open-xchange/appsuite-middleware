@@ -186,9 +186,13 @@ public class CrawlerUpdateTask implements Runnable {
                         }
                         // it is a description for a completely new crawler
                     } else {
-                        LOG.info("It is a completely new crawler and will be saved");
-                        Yaml.dump(possibleNewCrawlerDescription, new File(path + ymlFilename));
-                        wasUpdated = true;
+                        // only download configurations for new crawlers if this is enable by configuration-file
+                        boolean onlyUpdateInstalled = Boolean.parseBoolean(config.getProperty(activator.ONLY_UPDATE_INSTALLED));                         
+                        if (!onlyUpdateInstalled){
+                            LOG.info("It is a completely new crawler and will be saved");
+                            Yaml.dump(possibleNewCrawlerDescription, new File(path + ymlFilename));
+                            wasUpdated = true;
+                        }    
                     }
                 } else {
                     LOG.info("The API-Version does not fit");

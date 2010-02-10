@@ -67,6 +67,7 @@ import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.crawler.CrawlerDescription;
 import com.openexchange.subscribe.crawler.internal.GenericSubscribeService;
 import com.openexchange.timer.TimerService;
+import com.openexchange.management.ManagementService;
 
 /**
  * {@link Activator}
@@ -81,7 +82,11 @@ public class Activator implements BundleActivator {
 
     public static final String PATH_PROPERTY = "com.openexchange.subscribe.crawler.path";
 
-    public static final String UPDATE_INTERVAL = "com.openexchange.subscribe.crawler.updateinterval";
+    public static final String UPDATE_INTERVAL = "com.openexchange.subscribe.crawler.updateinterval";    
+    
+    public static final String ENABLE_AUTO_UPDATE = "com.openexchange.subscribe.crawler.enableautoupdate";
+    
+    public static final String ONLY_UPDATE_INSTALLED = "com.openexchange.subscribe.crawler.onlyupdatealreadyinstalled";
 
     private BundleContext bundleContext;
 
@@ -105,6 +110,10 @@ public class Activator implements BundleActivator {
         final Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ConfigurationService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + TimerService.class.getName() + "))");
         ServiceTracker configAndTimerTracker = new ServiceTracker(context, filter, new CrawlerAutoUpdater(context, this));
         trackers.push(configAndTimerTracker);
+        trackers.push(new ServiceTracker(
+            context,
+            ManagementService.class.getName(),
+            new CrawlerMBeanRegisterer(context)));
         for (final ServiceTracker tracker : trackers) {
             tracker.open();
         }

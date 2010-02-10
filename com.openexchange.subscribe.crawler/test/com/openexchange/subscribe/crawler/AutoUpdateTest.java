@@ -88,6 +88,8 @@ public class AutoUpdateTest extends GenericSubscribeServiceTestHelpers {
         configurationService.stringProperties.put("com.openexchange.subscribe.crawler.updatedfile", "http://localhost/~karstenwill/crawlers/updates.html");
         //set the path for the updated crawler configfiles
         configurationService.stringProperties.put("com.openexchange.subscribe.crawler.updatepath", "http://localhost/~karstenwill/crawlers/files/");
+        //enable download of previously uninstalled crawler-configs
+        configurationService.stringProperties.put("com.openexchange.subscribe.crawler.onlyupdatealreadyinstalled", "false");
         activator = new Activator();
         //set an empty ServiceRegistration as this is not the subject of this test
         activator.setServices(new ArrayList<ServiceRegistration>());
@@ -149,6 +151,16 @@ public class AutoUpdateTest extends GenericSubscribeServiceTestHelpers {
         copyFileFromRepository("new_service.yml", availableUpdatesPath);
         update.run();
         assertTrue("The new file should be present.", thisFileIsPresent("new_service.yml"));
+    }
+    
+    public void testNewCrawlersWithRightApiWillNotBeDownloadedIfNotEnabled(){
+        configurationService.stringProperties.put("com.openexchange.subscribe.crawler.onlyupdatealreadyinstalled", "true");
+        CrawlerUpdateTask update = new CrawlerUpdateTask(configurationService, activator);
+        copyFileFromRepository("new_service.yml", availableUpdatesPath);
+        update.run();
+        // reset to default
+        configurationService.stringProperties.put("com.openexchange.subscribe.crawler.onlyupdatealreadyinstalled", "false");
+        assertFalse("The new file should not be present.", thisFileIsPresent("new_service.yml"));
     }
     
     public void testOnlyUpdateWithValidCredentials(){
