@@ -1,3 +1,7 @@
+* 2010-02-11 - francisco.laguna@open-xchange.com
+
+ - Bugfix #15257: Don't get servlet writer after having selected an output stream.
+
 * 2010-02-09 - marcus.klein@open-xchange.com
 
  - Bugfix #15354: Updating user attributes inside a transaction to prevent loss of aliases.

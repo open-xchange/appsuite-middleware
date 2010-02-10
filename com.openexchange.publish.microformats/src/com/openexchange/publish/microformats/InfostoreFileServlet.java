@@ -125,6 +125,7 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         final Map<String, String> args = getPublicationArguments(req);
+        boolean startedWriting = false;
         try {
             final Context ctx = contexts.getContext(Integer.parseInt(args.get(CONTEXTID)));
             final Publication publication = infostorePublisher.getPublication(ctx, args.get(SITE));
@@ -136,20 +137,24 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
             if (!checkProtected(publication, args, resp)) {
                 return;
             }
-            
+
             final int infoId = Integer.parseInt(args.get(INFOSTORE_ID));
      
             final User user = getUser(publication);
             final UserConfiguration userConfig = getUserConfiguration(publication);
             
             final DocumentMetadata metadata = loadMetadata(publication, infoId, user, userConfig);
+
             final InputStream fileData = loadFile(publication, infoId, user, userConfig);
             
+            startedWriting = true;
             writeFile(metadata, fileData, req, resp);
             
         } catch (final Throwable t) {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            t.printStackTrace(resp.getWriter());
+            if(!startedWriting) {
+                t.printStackTrace(resp.getWriter());
+            }
             LOG.error(t.getMessage(), t);
         }
 
