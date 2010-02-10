@@ -50,11 +50,12 @@
 package com.openexchange.groupware.update.tasks;
 
 import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import static com.openexchange.tools.update.Tools.tableExists;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.databaseold.Database;
@@ -64,26 +65,22 @@ import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 
 /**
- * {@link ExtendCalendarForIMIPHandlingTask}
- * 
+ * Alters calendar tables and add tables for external participants to support iCal handling with external participants: iMIP.
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class ExtendCalendarForIMIPHandlingTask extends UpdateTaskAdapter {
 
     private List<String> ALTERS = new ArrayList<String>() {
-
+        private static final long serialVersionUID = -608244184446189852L;
         {
-            add("ALTER TABLE prg_dates ADD uid VARCHAR(255)");
-            add("ALTER TABLE del_dates ADD uid VARCHAR(255)");
-            add("ALTER TABLE prg_dates ADD organizer VARCHAR(255)");
-            add("ALTER TABLE del_dates ADD organizer VARCHAR(255)");
-//            add("ALTER TABLE prg_dates_members ADD mailAddress VARCHAR(255)");
-//            add("ALTER TABLE del_dates_members ADD mailAddress VARCHAR(255)");
+            add("ALTER TABLE prg_dates ADD uid VARCHAR(255), ADD organizer VARCHAR(255), ADD sequence INT4 UNSIGNED");
+            add("ALTER TABLE del_dates ADD uid VARCHAR(255), ADD organizer VARCHAR(255), ADD sequence INT4 UNSIGNED");
         }
     };
 
-    private String addPrgDatesExternals = 
-        "CREATE TABLE prg_dates_externals (" +
+    private static final String DATES_EXTERNALS_CREATE = 
+        "CREATE TABLE datesExternals (" +
         "cid INT4 UNSIGNED NOT NULL," +
         "objectId INT4 UNSIGNED NOT NULL," +
         "mailAddress VARCHAR(255) NOT NULL," +
@@ -92,8 +89,8 @@ public class ExtendCalendarForIMIPHandlingTask extends UpdateTaskAdapter {
         "PRIMARY KEY (cid, objectId, mailAddress)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
     
-    private String addDelDatesExternals = 
-        "CREATE TABLE del_dates_externals (" +
+    private static final String DELDATES_EXTERNALS_CREATE = 
+        "CREATE TABLE delDatesExternals (" +
         "cid INT4 UNSIGNED NOT NULL," +
         "objectId INT4 UNSIGNED NOT NULL," +
         "mailAddress VARCHAR(255) NOT NULL," +
@@ -110,9 +107,7 @@ public class ExtendCalendarForIMIPHandlingTask extends UpdateTaskAdapter {
         Connection con = Database.getNoTimeout(params.getContextId(), true);
         try {
             con.setAutoCommit(false);
-
             innerPerform(con);
-
             con.commit();
         } catch (SQLException e) {
             rollback(con);
@@ -125,19 +120,31 @@ public class ExtendCalendarForIMIPHandlingTask extends UpdateTaskAdapter {
 
     private void innerPerform(Connection con) throws SQLException {
         for (String alter : ALTERS) {
-            PreparedStatement statement = con.prepareStatement(alter);
-            statement.execute();
+            Statement stmt = null;
+            try {
+                stmt = con.createStatement();
+                stmt.execute(alter);
+            } finally {
+                closeSQLStuff(stmt);
+            }
         }
-        
         if (!tableExists(con, "prg_dates_externals")) {
-            PreparedStatement statement = con.prepareStatement(addPrgDatesExternals);
-            statement.execute();
+            Statement stmt = null;
+            try {
+                stmt = con.createStatement();
+                stmt.execute(DATES_EXTERNALS_CREATE);
+            } finally {
+                closeSQLStuff(stmt);
+            }
         }
-        
         if (!tableExists(con, "del_dates_externals")) {
-            PreparedStatement statement = con.prepareStatement(addDelDatesExternals);
-            statement.execute();
+            Statement stmt = null;
+            try {
+                stmt = con.createStatement();
+                stmt.execute(DELDATES_EXTERNALS_CREATE);
+            } finally {
+                closeSQLStuff(stmt);
+            }
         }
     }
-
 }
