@@ -69,11 +69,27 @@ public interface StorageParameters {
     Context getContext();
 
     /**
+     * Convenience method to get the context identifier.
+     * 
+     * @return The context identifier
+     * @see #getContext()
+     */
+    int getContextId();
+
+    /**
      * Gets the user.
      * 
      * @return The user
      */
     User getUser();
+
+    /**
+     * Convenience method to get the user identifier.
+     * 
+     * @return The user identifier
+     * @see #getUser()
+     */
+    int getUserId();
 
     /**
      * Gets the session.

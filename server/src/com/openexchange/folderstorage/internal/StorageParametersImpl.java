@@ -74,7 +74,11 @@ public final class StorageParametersImpl implements StorageParameters {
 
     private final User user;
 
+    private final int userId;
+
     private final Context context;
+
+    private final int contextId;
 
     private final ConcurrentMap<FolderType, ConcurrentMap<String, Object>> parameters;
 
@@ -89,7 +93,9 @@ public final class StorageParametersImpl implements StorageParameters {
         super();
         this.session = session;
         user = session.getUser();
+        userId = user.getId();
         context = session.getContext();
+        contextId = context.getContextId();
         parameters = new ConcurrentHashMap<FolderType, ConcurrentMap<String, Object>>();
     }
 
@@ -103,7 +109,9 @@ public final class StorageParametersImpl implements StorageParameters {
         super();
         session = null;
         this.user = user;
+        userId = user.getId();
         this.context = context;
+        contextId = context.getContextId();
         parameters = new ConcurrentHashMap<FolderType, ConcurrentMap<String, Object>>();
     };
 
@@ -174,6 +182,14 @@ public final class StorageParametersImpl implements StorageParameters {
 
     public void setDecorator(final FolderServiceDecorator decorator) {
         this.decorator = decorator;
+    }
+
+    public int getContextId() {
+        return contextId;
+    }
+
+    public int getUserId() {
+        return userId;
     }
 
 }
