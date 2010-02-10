@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 13
+%define		ox_release 14
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -483,6 +483,8 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Tue Feb 09 2010 - marcus.klein@open-xchange.com
+ - Bugfix #15354: Updating user attributes inside a transaction to prevent loss of aliases.
 * Mon Feb 01 2010 - thorben.betten@open-xchange.com
  - Bugfix #15287: Returning 7 bit characters on QuotedInternetAddress.getAddress()
 * Tue Jan 19 2010 - francisco.laguna@open-xchange.com
