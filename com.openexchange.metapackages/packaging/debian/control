@@ -6,10 +6,10 @@ Build-Depends: debhelper (>= 4.0.0), ant (>= 1.6.5), sun-j2sdk1.5|sun-java5-jdk|
 Build-Conflicts: ecj, libecj-java-gcj, ecj-gcj, libecj-java, gcj-4.3-base, libgcj-common, libgcj9-0, libgcj-bc, libgcj9-jar, java-gcj-compat-headless, gcj-4.3, java-gcj-compat, java-gcj-compat-dev
 Standards-Version: 3.6.1
 
-Package: open-xchange-meta-oxae
+Package: open-xchange-meta-oxucs
 Architecture: all
 Depends: ${oxcommon}, open-xchange-authentication-ucs, open-xchange-spamhandler-default, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-gui, open-xchange-lang-es-es, open-xchange-lang-nl-nl, open-xchange-gui-lang-es-es, open-xchange-gui-lang-es-es, open-xchange-online-help-es, open-xchange-online-help-nl, open-xchange-outlook-updater
-Description: The Open-Xchange Meta package for OXAE
+Description: The Open-Xchange Meta package for OX into UCS integration
 
 Package: open-xchange-meta-server
 Architecture: all
