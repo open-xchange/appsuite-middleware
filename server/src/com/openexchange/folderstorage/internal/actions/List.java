@@ -49,13 +49,13 @@
 
 package com.openexchange.folderstorage.internal.actions;
 
+import static com.openexchange.server.services.ServerServiceRegistry.getInstance;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.config.ConfigurationService;
@@ -73,10 +73,10 @@ import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.CompletionFuture;
 import com.openexchange.threadpool.Task;
+import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 import com.openexchange.tools.session.ServerSession;
@@ -282,10 +282,7 @@ public final class List extends AbstractUserizedFolderAction {
                             }
                         });
                     }
-                    completionFuture =
-                        ServerServiceRegistry.getInstance().getService(ThreadPoolService.class).invoke(
-                            tasks,
-                            CallerRunsBehavior.getInstance());
+                    completionFuture = getInstance().getService(ThreadPoolService.class).invoke(tasks, CallerRunsBehavior.getInstance());
                 }
                 /*
                  * Wait for completion
@@ -336,8 +333,7 @@ public final class List extends AbstractUserizedFolderAction {
         final java.util.List<SortableId> allSubfolderIds = new ArrayList<SortableId>(neededStorages.length * 8);
         {
             final CompletionService<java.util.List<SortableId>> completionService =
-                new ExecutorCompletionService<java.util.List<SortableId>>(ServerServiceRegistry.getInstance().getService(
-                    ThreadPoolService.class).getExecutor());
+                new ThreadPoolCompletionService<java.util.List<SortableId>>(getInstance().getService(ThreadPoolService.class));
             /*
              * Get all visible subfolders from each storage
              */
@@ -400,7 +396,7 @@ public final class List extends AbstractUserizedFolderAction {
          * Get corresponding user-sensitive folders
          */
         final CompletionService<Object> completionService =
-            new ExecutorCompletionService<Object>(ServerServiceRegistry.getInstance().getService(ThreadPoolService.class).getExecutor());
+            new ThreadPoolCompletionService<Object>(getInstance().getService(ThreadPoolService.class));
         for (int i = 0; i < size; i++) {
             final int index = i;
             completionService.submit(new Callable<Object>() {
@@ -488,7 +484,7 @@ public final class List extends AbstractUserizedFolderAction {
     private static final int DEFAULT_MAX_RUNNING_MILLIS = 120000;
 
     private int getMaxRunningMillis() {
-        final ConfigurationService confService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+        final ConfigurationService confService = getInstance().getService(ConfigurationService.class);
         if (null == confService) {
             // Default of 2 minutes
             return DEFAULT_MAX_RUNNING_MILLIS;
