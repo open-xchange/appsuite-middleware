@@ -73,8 +73,7 @@ abstract class ParticipantStorage {
     /**
      * Singleton attribute.
      */
-    private static final ParticipantStorage SINGLETON =
-        new RdbParticipantStorage();
+    private static final ParticipantStorage SINGLETON = new RdbParticipantStorage();
 
     /**
      * Prevent instantiation
