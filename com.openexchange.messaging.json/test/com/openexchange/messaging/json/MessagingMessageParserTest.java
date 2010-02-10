@@ -58,7 +58,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -74,7 +73,6 @@ import com.openexchange.messaging.MessagingMessageGetSwitch;
 import com.openexchange.messaging.MultipartContent;
 import com.openexchange.messaging.SimpleContent;
 import com.openexchange.messaging.StringContent;
-import com.openexchange.messaging.StringMessageHeader;
 import com.openexchange.tools.encoding.Base64;
 import junit.framework.TestCase;
 
@@ -86,23 +84,6 @@ import junit.framework.TestCase;
  */
 public class MessagingMessageParserTest extends TestCase {
     
-    public class InvertedHeaderParser implements MessagingHeaderParser {
-
-        public boolean handles(String key, Object value) {
-            return true;
-        }
-
-        public void parseAndAdd(Map<String, Collection<MessagingHeader>> headers, String key, Object value) {
-            StringMessageHeader header = new StringMessageHeader(key, new StringBuilder((String)value).reverse().toString());
-            headers.put(key, Arrays.asList((MessagingHeader)header));
-        }
-
-        public int getPriority() {
-            return 2;
-        }
-
-    }
-
     public void testParseSimpleFields() throws JSONException, MessagingException, IOException {
         JSONObject messageJSON = new JSONObject();
         
