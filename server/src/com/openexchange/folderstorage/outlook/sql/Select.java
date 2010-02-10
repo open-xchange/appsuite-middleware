@@ -95,15 +95,23 @@ public final class Select {
     private static final String SQL_SELECT_BCK =
         "SELECT parentId, name, modifiedBy, lastModified FROM virtualBackupTree WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
 
-    private static final String SQL_SELECT2 = "SELECT folderId FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+    private static final String SQL_SELECT2 =
+        "SELECT folderId, name FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
 
     private static final String SQL_SELECT2_BCK =
         "SELECT folderId, name FROM virtualBackupTree WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
 
-    private static final String SQL_SELECT3 = "SELECT folderId FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND parentId = ?";
+    private static final String SQL_SELECT3 =
+        "SELECT folderId, name FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND parentId = ?";
 
     private static final String SQL_SELECT3_BCK =
         "SELECT folderId, name FROM virtualBackupTree WHERE cid = ? AND tree = ? AND user = ? AND parentId = ?";
+
+    private static final String SQL_SELECT_BY_NAME =
+        "SELECT folderId FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND parentId = ? AND name = ?";
+
+    private static final String SQL_SELECT_BY_NAME_BCK =
+        "SELECT folderId FROM virtualBackupTree WHERE cid = ? AND tree = ? AND user = ? AND parentId = ? AND name = ?";
 
     private static final String SQL_SELECT_SUBF =
         "SELECT folderId, name FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND parentId = ?";
@@ -128,6 +136,35 @@ public final class Select {
 
     private static final String SQL_SELECT2_SUBF_BCK =
         "SELECT folderId, name FROM virtualBackupTree WHERE cid = ? AND tree = ? AND user = ? AND parentId = ?";
+
+    public static String getByName(final int cid, final int tree, final int user, final String parentId, final String name, final StorageType storageType) throws FolderException {
+        final DatabaseService databaseService = getDatabaseService();
+        // Get a connection
+        final Connection con;
+        try {
+            con = databaseService.getReadOnly(cid);
+        } catch (final DBPoolingException e) {
+            throw new FolderException(e);
+        }
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement(StorageType.WORKING.equals(storageType) ? SQL_SELECT_BY_NAME : SQL_SELECT_BY_NAME_BCK);
+            int pos = 1;
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, tree);
+            stmt.setInt(pos++, user);
+            stmt.setString(pos++, parentId);
+            stmt.setString(pos, name);
+            rs = stmt.executeQuery();
+            return rs.next() ? rs.getString(1) : null;
+        } catch (final SQLException e) {
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+            databaseService.backReadOnly(cid, con);
+        }
+    }
 
     /**
      * Checks if the specified virtual tree contains a parent denoted by given parent identifier.
@@ -201,6 +238,45 @@ public final class Select {
             stmt.setString(pos, folderId);
             rs = stmt.executeQuery();
             return rs.next();
+        } catch (final SQLException e) {
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+            databaseService.backReadOnly(cid, con);
+        }
+    }
+
+    /**
+     * Gets the name of the folder held in virtual tree for the folder denoted by given folder identifier.
+     * 
+     * @param cid The context identifier
+     * @param tree The tree identifier
+     * @param user The user identifier
+     * @param folderId The folder identifier
+     * @param storageType The storage type to use
+     * @return The name of the folder or <code>null</code> if virtual tree does not hold denoted folder
+     * @throws FolderException If checking folder's presence fails
+     */
+    public static String getFolderName(final int cid, final int tree, final int user, final String folderId, final StorageType storageType) throws FolderException {
+        final DatabaseService databaseService = getDatabaseService();
+        // Get a connection
+        final Connection con;
+        try {
+            con = databaseService.getReadOnly(cid);
+        } catch (final DBPoolingException e) {
+            throw new FolderException(e);
+        }
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement(StorageType.WORKING.equals(storageType) ? SQL_SELECT2 : SQL_SELECT2_BCK);
+            int pos = 1;
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, tree);
+            stmt.setInt(pos++, user);
+            stmt.setString(pos, folderId);
+            rs = stmt.executeQuery();
+            return rs.next() ? rs.getString(2) : null;
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -315,7 +391,17 @@ public final class Select {
      * @return <code>true</code> if folder was present in tables; otherwise <code>false</code>
      * @throws FolderException If filling the folder fails
      */
-    public static boolean fillFolder(final int cid, final int tree, final int user, final Locale locale, final OutlookFolder outlookFolder, /*final List<String[]> l, */final StorageType storageType) throws FolderException {
+    public static boolean fillFolder(final int cid, final int tree, final int user, final Locale locale, final OutlookFolder outlookFolder, /*
+                                                                                                                                             * final
+                                                                                                                                             * List
+                                                                                                                                             * <
+                                                                                                                                             * String
+                                                                                                                                             * [
+                                                                                                                                             * ]
+                                                                                                                                             * >
+                                                                                                                                             * l
+                                                                                                                                             * ,
+                                                                                                                                             */final StorageType storageType) throws FolderException {
         final DatabaseService databaseService = getDatabaseService();
         // Get a connection
         final Connection con;
@@ -343,7 +429,14 @@ public final class Select {
                 }
                 pos = 1;
                 outlookFolder.setParentID(rs.getString(pos++));
-                outlookFolder.setName(rs.getString(pos++));
+                // Set name
+                {
+                    final String name = rs.getString(pos++);
+                    if (!rs.wasNull()) {
+                        outlookFolder.setName(name);
+                    }
+
+                }
                 // Set optional modified-by
                 {
                     final int modifiedBy = rs.getInt(pos++);
@@ -525,15 +618,36 @@ public final class Select {
                     subfolderIds.add(fn[0]);
                 }
             } else {
-                final TreeMap<String, String> treeMap = new TreeMap<String, String>(new FolderNameComparator(locale));
+                final TreeMap<String, List<String>> treeMap = new TreeMap<String, List<String>>(new FolderNameComparator(locale));
                 final StringHelper stringHelper = new StringHelper(locale);
                 for (final String[] realSubfolderId : realSubfolderIds) {
-                    treeMap.put(stringHelper.getString(realSubfolderId[1]), realSubfolderId[0]);
+                    final String localizedName = stringHelper.getString(realSubfolderId[1]);
+                    List<String> list = treeMap.get(localizedName);
+                    if (null == list) {
+                        list = new ArrayList<String>(2);
+                        treeMap.put(localizedName, list);
+                    }
+                    list.add(realSubfolderId[0]);
                 }
                 while (rs.next()) {
-                    treeMap.put(stringHelper.getString(rs.getString(2)), rs.getString(pos));
+                    /*
+                     * Names loaded from DB have no locale-sensitive string
+                     */
+                    // String localizedName = stringHelper.getString(rs.getString(2));
+                    final String name = rs.getString(2);
+                    List<String> list = treeMap.get(name);
+                    if (null == list) {
+                        list = new ArrayList<String>(2);
+                        treeMap.put(name, list);
+                    }
+                    list.add(rs.getString(pos));
                 }
-                subfolderIds = new ArrayList<String>(treeMap.values());
+                subfolderIds = new ArrayList<String>(treeMap.size());
+                for (final List<String> list : treeMap.values()) {
+                    for (final String name : list) {
+                        subfolderIds.add(name);
+                    }
+                }
             }
             return subfolderIds.toArray(new String[subfolderIds.size()]);
         } catch (final SQLException e) {
@@ -547,6 +661,51 @@ public final class Select {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
+        }
+    }
+
+    public static List<String[]> getSubfolderIds(final int cid, final int tree, final int user, final String parentId, final StorageType storageType) throws FolderException {
+        final DatabaseService databaseService = getDatabaseService();
+        // Get a connection
+        final Connection con;
+        try {
+            con = databaseService.getReadOnly(cid);
+        } catch (final DBPoolingException e) {
+            throw new FolderException(e);
+        }
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            final boolean working = StorageType.WORKING.equals(storageType);
+            stmt = con.prepareStatement(working ? SQL_SELECT_SUBF : SQL_SELECT_SUBF_BCK);
+            int pos = 1;
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, tree);
+            stmt.setInt(pos++, user);
+            stmt.setString(pos, parentId);
+            rs = stmt.executeQuery();
+            final List<String[]> l = new ArrayList<String[]>();
+            final int fpos = 1;
+            final int spos = 2;
+            while (rs.next()) {
+                /*
+                 * Names loaded from DB have no locale-sensitive string
+                 */
+                l.add(new String[] {rs.getString(fpos), rs.getString(spos)});
+            }
+            return l;
+        } catch (final SQLException e) {
+            if (null != stmt) {
+                final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Select.class);
+                if (LOG.isDebugEnabled()) {
+                    final String sql = getSQLString(stmt);
+                    LOG.debug(new StringBuilder(sql.length() + 16).append("Failed SQL:\n\t").append(sql).toString());
+                }
+            }
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+            databaseService.backReadOnly(cid, con);
         }
     }
 
