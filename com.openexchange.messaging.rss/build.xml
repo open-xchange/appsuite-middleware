@@ -22,6 +22,9 @@
     <property name="conf.install.dir" value="${prefix}/etc/groupware"/>
     <property name="confInstallCopyDir" location="${destdir}${conf.install.dir}"/>
 
+    <!-- Bundle dependencies -->
+    <property name="xmlBundle" value="com.openexchange.xml"/>
+
     <!-- JAR names for classpath -->
     <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar"/>
     <property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar"/>
@@ -30,6 +33,14 @@
     <property name="genericonfjar" value="com.openexchange.datatypes.genericonf.jar"/>
     <property name="messagingjar" value="com.openexchange.messaging.jar"/>
     <property name="messaginggenjar" value="com.openexchange.messaging.generic.jar"/>
+
+    <property name="jdomjar" value="jdom-1.1.1.jar"/>
+
+    <!-- Third party libs -->
+    <fileset dir="${basedir}" id="3rdpartyjars">
+        <include name="${lib.dir}/*.jar"/>
+        <exclude name="CVS"/>
+    </fileset>
 
     <!-- Classpath -->
     <path id="project.classpath">
@@ -40,6 +51,10 @@
         <pathelement location="${bundlesdir}/${genericonfjar}"/>
         <pathelement location="${bundlesdir}/${messagingjar}"/>
         <pathelement location="${bundlesdir}/${messaginggenjar}"/>
+
+        <pathelement location="${bundlesdir}/${xmlBundle}/lib/${jdomjar}"/>
+
+        <fileset refid="3rdpartyjars"/>
     </path>
 
     <!-- Compile -->
@@ -57,6 +72,7 @@
     <target name="jar" depends="prepare,compile">
         <jar jarfile="${tmp.dir}/${bundle.name}" manifest="META-INF/MANIFEST.MF">
             <fileset dir="${output..}"/>
+            <fileset refid="3rdpartyjars"/>
         </jar>
     </target>
 
