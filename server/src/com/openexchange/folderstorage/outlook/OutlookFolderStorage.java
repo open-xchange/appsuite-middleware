@@ -648,15 +648,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                     folderStorage.getSubfolders(FolderStorage.REAL_TREE_ID, FolderStorage.ROOT_ID, storageParameters);
                 for (int i = 0; i < subfolders.length; i++) {
                     final String id = subfolders[i].getId();
-                    if (FolderStorage.PUBLIC_ID.equals(id)) {
-                        final String localizedName = getLocalizedName(id, tree, locale, folderStorage, storageParameters);
-                        List<String> list = treeMap.get(localizedName);
-                        if (null == list) {
-                            list = new ArrayList<String>(2);
-                            treeMap.put(localizedName, list);
-                        }
-                        list.add(id);
-                    } else if (FolderStorage.SHARED_ID.equals(id)) {
+                    if (!FolderStorage.PRIVATE_ID.equals(id)) { // Exclude private folder
                         final String localizedName = getLocalizedName(id, tree, locale, folderStorage, storageParameters);
                         List<String> list = treeMap.get(localizedName);
                         if (null == list) {
@@ -665,6 +657,24 @@ public final class OutlookFolderStorage implements FolderStorage {
                         }
                         list.add(id);
                     }
+
+                    // if (FolderStorage.PUBLIC_ID.equals(id)) {
+                    // final String localizedName = getLocalizedName(id, tree, locale, folderStorage, storageParameters);
+                    // List<String> list = treeMap.get(localizedName);
+                    // if (null == list) {
+                    // list = new ArrayList<String>(2);
+                    // treeMap.put(localizedName, list);
+                    // }
+                    // list.add(id);
+                    // } else if (FolderStorage.SHARED_ID.equals(id)) {
+                    // final String localizedName = getLocalizedName(id, tree, locale, folderStorage, storageParameters);
+                    // List<String> list = treeMap.get(localizedName);
+                    // if (null == list) {
+                    // list = new ArrayList<String>(2);
+                    // treeMap.put(localizedName, list);
+                    // }
+                    // list.add(id);
+                    // }
                 }
                 folderStorage.commitTransaction(storageParameters);
             } catch (final FolderException e) {
