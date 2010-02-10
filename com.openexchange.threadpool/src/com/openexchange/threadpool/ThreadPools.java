@@ -49,8 +49,12 @@
 
 package com.openexchange.threadpool;
 
+import java.util.ArrayList;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 /**
  * {@link ThreadPools} - Utility methods for {@link ThreadPoolService} and {@link Task}.
@@ -59,11 +63,99 @@ import java.util.concurrent.ExecutionException;
  */
 public final class ThreadPools {
 
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ThreadPools.class);
+
     /**
      * Initializes a new {@link ThreadPools}.
      */
     private ThreadPools() {
         super();
+    }
+
+    public interface ExpectedExceptionFactory<E extends Exception> {
+
+        /**
+         * Gets the exception's type.
+         * 
+         * @return The exception's type
+         */
+        Class<E> getType();
+
+        /**
+         * Creates a new exception from given unexpected (checked) exception.
+         * <p>
+         * Passed {@link Throwable} instance is either a {@link IllegalStateException} wrapping a {@link Throwable} or a
+         * {@link InterruptedException}
+         * 
+         * @param t The unexpected (checked) exception
+         * @return A new exception
+         */
+        E newUnexpectedError(Throwable t);
+
+    }
+
+    /**
+     * Polls given completion service and returns its results as a list.
+     * 
+     * @param <R> The result type
+     * @param <E> The exception type
+     * @param completionService The completion service to poll
+     * @param size The number of tasks performed by completion service
+     * @param timeoutMillis The time out in milliseconds
+     * @param factory The exception factory to launder a possible {@link ExecutionException} or {@link InterruptedException}
+     * @return A list of results polled from completion service
+     * @throws E If polling completion service fails
+     */
+    public static <R, E extends Exception> java.util.List<R> pollCompletionService(final CompletionService<R> completionService, final int size, final long timeoutMillis, final ExpectedExceptionFactory<E> factory) throws E {
+        /*
+         * Wait for completion
+         */
+        try {
+            final java.util.List<R> ret = new ArrayList<R>(size);
+            for (int i = 0; i < size; i++) {
+                final Future<R> f = completionService.poll(timeoutMillis, TimeUnit.MILLISECONDS);
+                if (null != f) {
+                    ret.add(f.get());
+                } else if (LOG.isWarnEnabled()) {
+                    LOG.warn("Completion service's task did not complete in a timely manner!");
+                }
+            }
+            return ret;
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw factory.newUnexpectedError(e);
+        } catch (final ExecutionException e) {
+            throw launderThrowable(e, factory.getType());
+        }
+    }
+
+    /**
+     * Takes from given completion service and returns its results as a list.
+     * 
+     * @param <R> The result type
+     * @param <E> The exception type
+     * @param completionService The completion service to take from
+     * @param size The number of tasks performed by completion service
+     * @param factory The exception factory to launder a possible {@link ExecutionException} or {@link InterruptedException}
+     * @return A list of results taken from completion service
+     * @throws E If taking from completion service fails
+     */
+    public static <R, E extends Exception> java.util.List<R> takeCompletionService(final CompletionService<R> completionService, final int size, final ExpectedExceptionFactory<E> factory) throws E {
+        /*
+         * Wait for completion
+         */
+        try {
+            final java.util.List<R> ret = new ArrayList<R>(size);
+            for (int i = 0; i < size; i++) {
+                ret.add(completionService.take().get());
+            }
+            return ret;
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw factory.newUnexpectedError(e);
+        } catch (final ExecutionException e) {
+            throw launderThrowable(e, factory.getType());
+        }
     }
 
     /**
