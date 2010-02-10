@@ -957,7 +957,6 @@ public class Folder extends SessionServlet {
                 final boolean all = (STRING_1.equals(paramContainer.getStringParam(PARAMETER_ALL)));
                 SearchIterator<MailFolder> it = null;
                 MailServletInterface mailInterface = null;
-                if(false) {
                 try {
                     mailInterface = MailServletInterface.getInstance(session);
                     /*
@@ -1002,7 +1001,6 @@ public class Folder extends SessionServlet {
                             LOG.error(e.getMessage(), e);
                         }
                     }
-                }
                 }
             }
         } catch (final OXFolderException e) {
@@ -2284,7 +2282,7 @@ public class Folder extends SessionServlet {
                     return null;
                 }
                 logger.error(e.getMessage(), e);
-                return null; //throw e;
+                throw e;
             }
             try {
                 final MailFolderFieldWriter[] mailFolderWriters =
