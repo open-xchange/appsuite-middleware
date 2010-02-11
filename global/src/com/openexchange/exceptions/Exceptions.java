@@ -130,7 +130,7 @@ public abstract class Exceptions<T extends AbstractOXException> {
             if(initialized) {
                 throw new UndeclaredErrorCodeException(code, getApplicationId(), getComponent());
             } else {
-                System.err.println("Apparently this exception factory was not regsitered.: "+this);
+                System.err.println("Apparently this exception factory was not registered.: "+this);
                 setComponent(new StringComponent("???"));
                 setApplicationId("unset");
                 return create(code, cause, args);
