@@ -1,7 +1,7 @@
 
 # norootforbuild
 
-Name:           open-xchange-twitter
+Name:           open-xchange-messaging-twitter
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
 BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-messaging >= @OXVERSION@ open-xchange-messaging-generic >= @OXVERSION@ open-xchange-genconf >= @OXVERSION@ open-xchange-twitter >= @OXVERSION@
