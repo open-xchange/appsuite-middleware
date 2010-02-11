@@ -1301,10 +1301,10 @@ public final class Contacts {
 
             final ContactSql cs = new ContactMySql(null);
 
-            if (admin_delete == false) {
-                cs.iFdeleteContact(id, cid, del);
-            } else if (admin_delete == true) {
+            if (admin_delete) {
                 cs.iFtrashTheAdmin(del, cid, id);
+            } else {
+                cs.iFdeleteContact(id, cid, del);
             }
         } catch (final ContextException d) {
             throw new ContactException(d);
