@@ -71,7 +71,6 @@ import com.openexchange.messaging.generic.services.MessagingGenericServiceRegist
 import com.openexchange.server.ServiceException;
 import com.openexchange.tools.sql.DBUtils;
 
-
 /**
  * {@link MessagingGenericCreateTableTask}
  *
