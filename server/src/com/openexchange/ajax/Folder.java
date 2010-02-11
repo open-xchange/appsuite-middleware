@@ -95,6 +95,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.folderstorage.messaging.MessagingFolderIdentifier;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.AbstractOXException.Category;
@@ -128,8 +129,10 @@ import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingAccountAccess;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingFolder;
+import com.openexchange.messaging.MessagingFolderAccess;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
+import com.openexchange.server.ServiceException;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.AbstractTask;
@@ -970,20 +973,22 @@ public class Folder extends SessionServlet {
                             session);
                     final int size = it.size();
                     boolean inboxFound = false;
+                    final com.openexchange.mail.json.writer.FolderWriter.JSONArrayPutter putter = newArrayPutter();
                     for (int i = 0; i < size; i++) {
                         final MailFolder f = it.next();
                         if (!inboxFound && STR_INBOX.equals(f.getFullname())) {
                             inboxFound = true;
                             final JSONArray ja = new JSONArray();
+                            putter.setJSONArray(ja);
                             // TODO: Translation for INBOX?!
                             for (int j = 0; j < writers.length; j++) {
-                                writers[j].writeField(ja, mailInterface.getAccountID(), f, false, DEF_NAME_INBOX, -1, null, -1, all);
+                                writers[j].writeField(putter, mailInterface.getAccountID(), f, DEF_NAME_INBOX, -1, null, -1, all);
                             }
                             jsonWriter.value(ja);
                         } else {
                             final JSONArray ja = new JSONArray();
                             for (int j = 0; j < writers.length; j++) {
-                                writers[j].writeField(ja, mailInterface.getAccountID(), f, false, null, -1, null, -1, all);
+                                writers[j].writeField(putter, mailInterface.getAccountID(), f, null, -1, null, -1, all);
                             }
                             jsonWriter.value(ja);
                         }
@@ -1132,83 +1137,156 @@ public class Folder extends SessionServlet {
                     }
                 }
             } else {
-                MailServletInterface mailInterface = null;
-                SearchIterator<MailFolder> it = null;
-                try {
-                    mailInterface = MailServletInterface.getInstance(session);
-                    /*
-                     * Pre-Select field writers
-                     */
-                    it = mailInterface.getPathToDefaultFolder(folderIdentifier);
-                    final MailFolderFieldWriter[] writers =
-                        com.openexchange.mail.json.writer.FolderWriter.getMailFolderFieldWriter(
-                            columns,
-                            mailInterface.getMailConfig(),
-                            session);
-                    final int size = it.size();
-                    final int accountID = mailInterface.getAccountID();
-                    for (int i = 0; i < size; i++) {
-                        final MailFolder fld = it.next();
-                        final JSONArray ja = new JSONArray();
-                        for (final MailFolderFieldWriter w : writers) {
-                            w.writeField(ja, accountID, fld, false);
-                        }
-                        jsonWriter.value(ja);
-                    }
-                    it.close();
-                    it = null;
-                    {
-                        final String preparedFullname = MailFolderUtility.prepareFullname(accountID, MailFolder.DEFAULT_FOLDER_ID);
+                final MessagingFolderIdentifier mfi = MessagingFolderIdentifier.parseFQN(folderIdentifier);
+                if (null == mfi) {
+                    MailServletInterface mailInterface = null;
+                    SearchIterator<MailFolder> it = null;
+                    try {
+                        mailInterface = MailServletInterface.getInstance(session);
                         /*
-                         * Write virtual folder "E-Mail"
+                         * Pre-Select field writers
                          */
-                        final MailFolder defaultFolder = mailInterface.getFolder(preparedFullname, true);
-                        if (defaultFolder != null) {
-                            final MailAccountStorageService storageService =
-                                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-                            final MailAccount mailAccount =
-                                storageService.getMailAccount(accountID, session.getUserId(), session.getContextId());
+                        it = mailInterface.getPathToDefaultFolder(folderIdentifier);
+                        final MailFolderFieldWriter[] writers =
+                            com.openexchange.mail.json.writer.FolderWriter.getMailFolderFieldWriter(
+                                columns,
+                                mailInterface.getMailConfig(),
+                                session);
+                        final int size = it.size();
+                        final int accountID = mailInterface.getAccountID();
+                        final com.openexchange.mail.json.writer.FolderWriter.JSONArrayPutter putter = newArrayPutter();
+                        for (int i = 0; i < size; i++) {
+                            final MailFolder fld = it.next();
                             final JSONArray ja = new JSONArray();
+                            putter.setJSONArray(ja);
                             for (final MailFolderFieldWriter w : writers) {
+                                w.writeField(putter, accountID, fld);
+                            }
+                            jsonWriter.value(ja);
+                        }
+                        it.close();
+                        it = null;
+                        {
+                            final String preparedFullname = MailFolderUtility.prepareFullname(accountID, MailFolder.DEFAULT_FOLDER_ID);
+                            /*
+                             * Write virtual folder "E-Mail"
+                             */
+                            final MailFolder defaultFolder = mailInterface.getFolder(preparedFullname, true);
+                            if (defaultFolder != null) {
+                                final MailAccountStorageService storageService =
+                                    ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+                                final MailAccount mailAccount =
+                                    storageService.getMailAccount(accountID, session.getUserId(), session.getContextId());
+                                final JSONArray ja = new JSONArray();
+                                putter.setJSONArray(ja);
+                                for (final MailFolderFieldWriter w : writers) {
+                                    w.writeField(
+                                        putter,
+                                        accountID,
+                                        defaultFolder,
+                                        mailAccount.getName(),
+                                        1,
+                                        preparedFullname,
+                                        FolderObject.SYSTEM_MODULE,
+                                        false);
+                                }
+                                jsonWriter.value(ja);
+                            }
+                        }
+                        /*
+                         * Finally, write "private" folder
+                         */
+                        FolderObject privateFolder;
+                        if (FolderCacheManager.isEnabled()) {
+                            privateFolder =
+                                FolderCacheManager.getInstance().getFolderObject(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, true, ctx, null);
+                        } else {
+                            privateFolder = FolderObject.loadFolderObjectFromDB(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, ctx);
+                        }
+                        folderWriter.writeOXFolderFieldsAsArray(columns, privateFolder, FolderObject.getFolderString(
+                            FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
+                            session.getUser().getLocale()), -1);
+                    } finally {
+                        if (it != null) {
+                            it.close();
+                            it = null;
+                        }
+                        if (mailInterface != null) {
+                            try {
+                                mailInterface.close(true);
+                                mailInterface = null;
+                            } catch (final MailException e) {
+                                LOG.error(e.getMessage(), e);
+                            }
+                        }
+                    }
+                } else {
+                    /*
+                     * A messaging folder identifier
+                     */
+                    final String serviceId = mfi.getServiceId();
+                    final MessagingService messagingService = messagingServiceRegistry().getMessagingService(serviceId);
+                    final int accountId = mfi.getAccountId();
+                    final MessagingAccountAccess accountAccess = messagingService.getAccountAccess(accountId, session);
+                    accountAccess.connect();
+                    try {
+                        final MessagingFolderAccess folderAccess = accountAccess.getFolderAccess();
+                        final List<MessagingFolder> path = new ArrayList<MessagingFolder>();
+                        MessagingFolder folder = folderAccess.getFolder(mfi.getFullname());
+                        path.add(folder);
+                        String parentId;
+                        while (!MessagingFolder.ROOT_FULLNAME.equals((parentId = folder.getParentId()))) {
+                            folder = folderAccess.getFolder(parentId);
+                            path.add(folder);
+                        }
+                        final MessagingFolderFieldWriter[] writers = com.openexchange.ajax.writer.MessagingFolderWriter.getMessagingFolderFieldWriter(columns, session);
+                        final com.openexchange.ajax.writer.MessagingFolderWriter.JSONArrayPutter putter = newMessagingArrayPutter();
+                        for (final MessagingFolder messagingFolder : path) {
+                            final JSONArray ja = new JSONArray();
+                            putter.setJSONArray(ja);
+                            for (final MessagingFolderFieldWriter w : writers) {
+                                w.writeField(putter, serviceId, accountId, messagingFolder);
+                            }
+                            jsonWriter.value(ja);
+                        }
+                        {
+                            /*
+                             * Write virtual folder "E-Mail"
+                             */
+                            final MessagingFolder rootFolder = folderAccess.getFolder(MessagingFolder.ROOT_FULLNAME);
+                            final JSONArray ja = new JSONArray();
+                            putter.setJSONArray(ja);
+                            final String fqn = MessagingFolderIdentifier.getFQN(serviceId, accountId, MessagingFolder.ROOT_FULLNAME);
+                            final String name = messagingService.getAccountManager().getAccount(accountId, session).getDisplayName();
+                            for (final MessagingFolderFieldWriter w : writers) {
                                 w.writeField(
-                                    ja,
-                                    accountID,
-                                    defaultFolder,
-                                    false,
-                                    mailAccount.getName(),
+                                    putter,
+                                    serviceId,
+                                    accountId,
+                                    rootFolder,
+                                    name,
                                     1,
-                                    preparedFullname,
-                                    FolderObject.SYSTEM_MODULE,
+                                    fqn,
+                                    FolderObject.MESSAGING,
                                     false);
                             }
                             jsonWriter.value(ja);
                         }
-                    }
-                    /*
-                     * Finally, write "private" folder
-                     */
-                    FolderObject privateFolder;
-                    if (FolderCacheManager.isEnabled()) {
-                        privateFolder =
-                            FolderCacheManager.getInstance().getFolderObject(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, true, ctx, null);
-                    } else {
-                        privateFolder = FolderObject.loadFolderObjectFromDB(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, ctx);
-                    }
-                    folderWriter.writeOXFolderFieldsAsArray(columns, privateFolder, FolderObject.getFolderString(
-                        FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
-                        session.getUser().getLocale()), -1);
-                } finally {
-                    if (it != null) {
-                        it.close();
-                        it = null;
-                    }
-                    if (mailInterface != null) {
-                        try {
-                            mailInterface.close(true);
-                            mailInterface = null;
-                        } catch (final MailException e) {
-                            LOG.error(e.getMessage(), e);
+                        /*
+                         * Finally, write "private" folder
+                         */
+                        FolderObject privateFolder;
+                        if (FolderCacheManager.isEnabled()) {
+                            privateFolder =
+                                FolderCacheManager.getInstance().getFolderObject(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, true, ctx, null);
+                        } else {
+                            privateFolder = FolderObject.loadFolderObjectFromDB(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, ctx);
                         }
+                        folderWriter.writeOXFolderFieldsAsArray(columns, privateFolder, FolderObject.getFolderString(
+                            FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
+                            session.getUser().getLocale()), -1);
+                    } finally {
+                        accountAccess.close();
                     }
                 }
             }
@@ -1675,8 +1753,9 @@ public class Folder extends SessionServlet {
                             mailInterface.getMailConfig(),
                             session);
                     final JSONObject jo = new JSONObject();
+                    final com.openexchange.mail.json.writer.FolderWriter.JSONObjectPutter putter = newObjectPutter().setJSONObject(jo);
                     for (final MailFolderFieldWriter writer : writers) {
-                        writer.writeField(jo, mailInterface.getAccountID(), f, true);
+                        writer.writeField(putter, mailInterface.getAccountID(), f);
                     }
                     jsonWriter = new OXJSONWriter(jo);
                 } finally {
@@ -2288,12 +2367,13 @@ public class Folder extends SessionServlet {
                 final MailFolderFieldWriter[] mailFolderWriters =
                     com.openexchange.mail.json.writer.FolderWriter.getMailFolderFieldWriter(columns, mailAccess.getMailConfig(), session);
                 final JSONArray ja = new JSONArray();
+                final com.openexchange.mail.json.writer.FolderWriter.JSONArrayPutter putter =
+                    new com.openexchange.mail.json.writer.FolderWriter.JSONArrayPutter().setJSONArray(ja);
                 for (int i = 0; i < mailFolderWriters.length; i++) {
                     mailFolderWriters[i].writeField(
-                        ja,
+                        putter,
                         accountId,
                         rootFolder,
-                        false,
                         (mailAccount.isDefaultAccount()) ? MailFolder.DEFAULT_FOLDER_NAME : mailAccount.getName(),
                         1,
                         MailFolderUtility.prepareFullname(accountId, MailFolder.DEFAULT_FOLDER_ID),
@@ -2356,16 +2436,19 @@ public class Folder extends SessionServlet {
             try {
                 final MessagingFolderFieldWriter[] writers = MessagingFolderWriter.getMessagingFolderFieldWriter(columns, session);
                 final JSONArray ja = new JSONArray();
+                final com.openexchange.ajax.writer.MessagingFolderWriter.JSONValuePutter putter =
+                    new com.openexchange.ajax.writer.MessagingFolderWriter.JSONArrayPutter(ja);
+                final String displayName = messagingAccount.getDisplayName();
+                final String fqn = MessagingFolderIdentifier.getFQN(serviceId, accountId, MessagingFolder.ROOT_FULLNAME);
                 for (int i = 0; i < writers.length; i++) {
                     writers[i].writeField(
-                        ja,
+                        putter,
                         serviceId,
                         accountId,
                         rootFolder,
-                        false,
-                        messagingAccount.getDisplayName(),
+                        displayName,
                         1,
-                        MessagingFolder.ROOT_FULLNAME,
+                        fqn,
                         FolderObject.MESSAGING,
                         false);
                 }
@@ -2432,6 +2515,22 @@ public class Folder extends SessionServlet {
             return collator.compare(o1.getName(), o2.getName());
         }
 
+    }
+
+    private static com.openexchange.mail.json.writer.FolderWriter.JSONArrayPutter newArrayPutter() {
+        return new com.openexchange.mail.json.writer.FolderWriter.JSONArrayPutter();
+    }
+
+    private static com.openexchange.ajax.writer.MessagingFolderWriter.JSONArrayPutter newMessagingArrayPutter() {
+        return new com.openexchange.ajax.writer.MessagingFolderWriter.JSONArrayPutter();
+    }
+
+    private static com.openexchange.mail.json.writer.FolderWriter.JSONObjectPutter newObjectPutter() {
+        return new com.openexchange.mail.json.writer.FolderWriter.JSONObjectPutter();
+    }
+
+    private static MessagingServiceRegistry messagingServiceRegistry() throws ServiceException {
+        return ServerServiceRegistry.getInstance().getService(MessagingServiceRegistry.class, true);
     }
 
 }
