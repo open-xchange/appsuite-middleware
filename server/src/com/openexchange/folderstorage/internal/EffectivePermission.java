@@ -117,10 +117,12 @@ public final class EffectivePermission implements Permission {
         if (null == allowedContentTypes || allowedContentTypes.isEmpty()) {
             this.allowedContentTypes = Collections.<Integer> emptySet();
         } else {
-            this.allowedContentTypes = new HashSet<Integer>(allowedContentTypes.size());
+            this.allowedContentTypes = new HashSet<Integer>(allowedContentTypes.size() + 1);
             for (final ContentType allowedContentType : allowedContentTypes) {
                 this.allowedContentTypes.add(Integer.valueOf(allowedContentType.getModule()));
             }
+            // Module SYSTEM is allowed in any case
+            this.allowedContentTypes.add(Integer.valueOf(FolderObject.SYSTEM_MODULE));
         }
     }
 
