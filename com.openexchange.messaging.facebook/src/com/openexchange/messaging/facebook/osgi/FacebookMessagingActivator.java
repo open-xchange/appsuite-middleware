@@ -138,7 +138,7 @@ public final class FacebookMessagingActivator extends DeferredActivator {
                 new ComponentRegistration(
                     context,
                     FacebookMessagingException.COMPONENT,
-                    "com.openexchange.messaging",
+                    "com.openexchange.messaging.facebook",
                     FacebookMessagingExceptionFactory.getInstance());
 
             trackers = new ArrayList<ServiceTracker>();
