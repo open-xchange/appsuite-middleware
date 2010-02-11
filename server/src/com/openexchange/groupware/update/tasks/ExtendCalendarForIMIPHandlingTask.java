@@ -79,21 +79,23 @@ public class ExtendCalendarForIMIPHandlingTask extends UpdateTaskAdapter {
         }
     };
 
-    private static final String DATES_EXTERNALS_CREATE = 
-        "CREATE TABLE datesExternals (" +
+    private static final String DATES_EXTERNAL_CREATE = 
+        "CREATE TABLE dateExternal (" +
         "cid INT4 UNSIGNED NOT NULL," +
         "objectId INT4 UNSIGNED NOT NULL," +
         "mailAddress VARCHAR(255) NOT NULL," +
+        "displayName VARCHAR(255)," +
         "confirm INT4 UNSIGNED NOT NULL," +
         "reason VARCHAR(255)," +
         "PRIMARY KEY (cid, objectId, mailAddress)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
     
-    private static final String DELDATES_EXTERNALS_CREATE = 
-        "CREATE TABLE delDatesExternals (" +
+    private static final String DELDATES_EXTERNAL_CREATE = 
+        "CREATE TABLE delDateExternal (" +
         "cid INT4 UNSIGNED NOT NULL," +
         "objectId INT4 UNSIGNED NOT NULL," +
         "mailAddress VARCHAR(255) NOT NULL," +
+        "displayName VARCHAR(255)," +
         "confirm INT4 UNSIGNED NOT NULL," +
         "reason VARCHAR(255)," +
         "PRIMARY KEY (cid, objectId, mailAddress)" +
@@ -128,20 +130,20 @@ public class ExtendCalendarForIMIPHandlingTask extends UpdateTaskAdapter {
                 closeSQLStuff(stmt);
             }
         }
-        if (!tableExists(con, "prg_dates_externals")) {
+        if (!tableExists(con, "dateExternal")) {
             Statement stmt = null;
             try {
                 stmt = con.createStatement();
-                stmt.execute(DATES_EXTERNALS_CREATE);
+                stmt.execute(DATES_EXTERNAL_CREATE);
             } finally {
                 closeSQLStuff(stmt);
             }
         }
-        if (!tableExists(con, "del_dates_externals")) {
+        if (!tableExists(con, "delDateExternal")) {
             Statement stmt = null;
             try {
                 stmt = con.createStatement();
-                stmt.execute(DELDATES_EXTERNALS_CREATE);
+                stmt.execute(DELDATES_EXTERNAL_CREATE);
             } finally {
                 closeSQLStuff(stmt);
             }

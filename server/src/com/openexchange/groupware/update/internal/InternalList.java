@@ -321,7 +321,10 @@ public final class InternalList {
         new com.openexchange.groupware.update.tasks.HeaderCacheCreateTableTask(),
 
         // Modifies tables needed for MAL Poll
-        new com.openexchange.groupware.update.tasks.MALPollModifyTableTask()
+        new com.openexchange.groupware.update.tasks.MALPollModifyTableTask(),
+
+        // Extends the calendar tables and create table to store the confirmation data for external participants.
+        new com.openexchange.groupware.update.tasks.ExtendCalendarForIMIPHandlingTask()
 
         // TODO: Enable virtual folder tree update task when needed
         // Migrates existing folder data to new outlook-like folder tree structure

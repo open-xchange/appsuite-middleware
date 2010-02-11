@@ -59,9 +59,6 @@ import com.openexchange.groupware.EnumComponent;
  */
 public class OXCalendarException extends OXException {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = -33608409653330247L;
 
     /**
@@ -82,10 +79,6 @@ public class OXCalendarException extends OXException {
         super.setMessageArgs(messageArgs);
     }
 
-    /**
-     * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
-     *
-     */
     public enum Code {
         CFO_NOT_INITIALIZIED("FATAL: CalendarFolderObject not initialized!", 1, AbstractOXException.Category.CODE_ERROR),
         NOT_YET_SUPPORTED("Not yet supported!", 2, AbstractOXException.Category.CODE_ERROR),
@@ -281,7 +274,9 @@ public class OXCalendarException extends OXException {
          */
         UNNECESSARY_RECURRENCE_INFORMATION("Unnecessary recurrence information (%1$s) for type %2$s", 97, Category.USER_INPUT),
         UNABLE_TO_CALCULATE_POSITION("Unable to calculate given position. Seems to be a delete exception or outside range", 98, Category.USER_INPUT),
-        CHANGE_EXCEPTION_TO_RECURRENCE("Changing an exception into a series is not supported.", 99, Category.USER_INPUT);
+        CHANGE_EXCEPTION_TO_RECURRENCE("Changing an exception into a series is not supported.", 99, Category.USER_INPUT),
+        /** SQL Problem: "%s". */
+        SQL_ERROR("SQL Problem: \"%s\".", 100, Category.CODE_ERROR);
 
         /**
          * Message of the exception.
@@ -304,9 +299,7 @@ public class OXCalendarException extends OXException {
          * @param category category.
          * @param detailNumber detail number.
          */
-        private Code(final String message,
-                final int detailNumber,
-                final Category category)  {
+        private Code(final String message, final int detailNumber, final Category category) {
             this.message = message;
             this.category = category;
             this.detailNumber = detailNumber;
@@ -323,10 +316,5 @@ public class OXCalendarException extends OXException {
         public String getMessage() {
             return message;
         }
-
-
     }
-
-
-
 }

@@ -76,6 +76,7 @@ import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.ReminderSQLInterface;
 import com.openexchange.calendar.api.CalendarCollection;
+import com.openexchange.calendar.storage.ExternalParticipantStorage;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
@@ -334,6 +335,7 @@ public class CalendarMySQL implements CalendarSqlImp {
     }
     
     public CalendarMySQL() {
+        super();
     }
 
     public final PreparedStatement getAllAppointmentsForUser(final Context c, final int uid, final int groups[], final UserConfiguration uc, final java.util.Date d1, final java.util.Date d2, final String select, final Connection readcon, final java.util.Date since, final int orderBy, final String orderDir) throws OXException, SQLException {
@@ -1322,6 +1324,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
             insertParticipants(cdao, writecon);
             insertUserParticipants(cdao, writecon, so.getUserId());
+            ExternalParticipantStorage.getInstance().insertParticipants(cdao.getContext(), writecon, cdao.getObjectID(), cdao.getParticipants());
             pst.executeUpdate();
         } finally {
             collection.closePreparedStatement(pst);
