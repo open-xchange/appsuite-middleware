@@ -80,7 +80,7 @@ public class ComponentRegistration implements ServiceTrackerCustomizer {
 
     private final ServiceTracker serviceTracker;
 
-    public ComponentRegistration(BundleContext context, String component, String applicationId, Exceptions<?> exceptions) {
+    public ComponentRegistration(final BundleContext context, final String component, final String applicationId, final Exceptions<?> exceptions) {
         super();
         this.component = new StringComponent(component);
         this.applicationId = applicationId;
@@ -90,7 +90,7 @@ public class ComponentRegistration implements ServiceTrackerCustomizer {
         serviceTracker.open();
     }
 
-    public ComponentRegistration(BundleContext context, Component component, String applicationId, Exceptions<?> exceptions) {
+    public ComponentRegistration(final BundleContext context, final Component component, final String applicationId, final Exceptions<?> exceptions) {
         super();
         this.component = component;
         this.applicationId = applicationId;
@@ -111,7 +111,7 @@ public class ComponentRegistration implements ServiceTrackerCustomizer {
             try {
                 registry.registerComponent(component, applicationId, exceptions);
             } catch (final ComponentAlreadyRegisteredException e) {
-                LOG.fatal(applicationId + " could not register component for excetpions: " + e.getMessage(), e);
+                LOG.fatal(applicationId + " could not register component for exceptions: " + e.getMessage(), e);
             }
             this.registry = registry;
         }
