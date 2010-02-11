@@ -2,6 +2,7 @@
 
  - Bugfix #15257: Don't get servlet writer after having selected an output stream.
  - Bugfix #15228 - Gracefully handle missing infostore permissions for publications and templating
+ - Bugfix #14597 - Maintain a full set of properties for each property file
 
 * 2010-02-09 - marcus.klein@open-xchange.com
 

@@ -79,6 +79,8 @@ public final class ConfigurationImpl implements ConfigurationService {
 
     private static final String EXT = ".properties";
 
+    private static Map<String, Properties> propertiesByFile = new HashMap<String, Properties>();
+
     private final File[] dirs;
 
     private static final class PropertyFileFilter implements FileFilter {
@@ -161,6 +163,7 @@ public final class ConfigurationImpl implements ConfigurationService {
     private static void processPropertiesFile(final File propFile, final Map<String, String> properties, final Map<String, String> propertiesFiles) {
         try {
             final Properties tmp = loadProperties(propFile);
+            propertiesByFile.put(propFile.getPath(), tmp);
             final int size = tmp.size();
             final Iterator<Entry<Object, Object>> iter = tmp.entrySet().iterator();
             for (int i = 0; i < size; i++) {
@@ -266,18 +269,23 @@ public final class ConfigurationImpl implements ConfigurationService {
      * {@inheritDoc}
      */
     public Properties getFile(final String filename, final PropertyListener listener) {
-        final Properties retval = new Properties();
-        final Iterator<Entry<String, String>> iter = propertiesFiles.entrySet().iterator();
-        while (iter.hasNext()) {
-            final Entry<String, String> entry = iter.next();
-            if (entry.getValue().endsWith(filename)) {
-                final String value;
-                if (null == listener) {
-                    value = getProperty(entry.getKey());
-                } else {
-                    value = getProperty(entry.getKey(), listener);
-                }
-                retval.put(entry.getKey(), value);
+        String key = null;
+        for (String k : propertiesByFile.keySet()) {
+            if(k.endsWith(filename)) {
+                key = k;
+                break;
+            }
+        }
+        
+        if(key == null) {
+            return new Properties();
+        }
+        
+        final Properties retval = new Properties(propertiesByFile.get(key));
+        
+        if(listener != null) {
+            for(Object k : retval.keySet()) {
+                getProperty((String) k, listener);
             }
         }
         return retval;
