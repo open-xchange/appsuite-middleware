@@ -49,9 +49,6 @@
 
 package com.openexchange.ajax.task;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.groupware.AbstractOXException.ProblematicAttribute;
@@ -66,11 +63,6 @@ import com.openexchange.tools.RandomString;
  */
 public class TruncationTest extends AbstractTaskTest {
 
-    /**
-     * Logger.
-     */
-    private static final Log LOG = LogFactory.getLog(TruncationTest.class);
-    
     /**
      * Default constructor.
      * @param name Name of the test.
@@ -94,17 +86,18 @@ public class TruncationTest extends AbstractTaskTest {
         final InsertResponse response = getClient().execute(new InsertRequest(
             task, getTimeZone(), false));
         assertTrue("Server did not detect truncated data.", response.hasError());
-        assertTrue("Array of truncated attribute identifier is empty.", response
-            .getProblematics().length > 0);
+        assertTrue("Array of truncated attribute identifier is empty.", response.getProblematics().length > 0);
         final StringBuilder sb = new StringBuilder();
         sb.append("Truncated attribute identifier: [");
+        int truncatedAttributeId = -1;
         for (final ProblematicAttribute problematic : response.getProblematics()) {
             if (problematic instanceof Truncated) {
-                sb.append(((Truncated) problematic).getId());
+                truncatedAttributeId = ((Truncated) problematic).getId();
+                sb.append(truncatedAttributeId);
                 sb.append(',');
             }
         }
         sb.setCharAt(sb.length() - 1, ']');
-        LOG.info(sb.toString());
+        assertEquals("Wrong attribute discovered as truncated.", Task.TITLE, truncatedAttributeId);
     }
 }
