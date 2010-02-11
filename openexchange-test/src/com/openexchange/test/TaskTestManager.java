@@ -297,7 +297,7 @@ public class TaskTestManager implements TestManager{
             break;
         case Task.ACTUAL_DURATION:
         case Task.TARGET_DURATION:
-            retval = Long.valueOf(((Integer) value).longValue());
+            retval = Long.valueOf((String) value);
             break;
         case Task.ACTUAL_COSTS:
         case Task.TARGET_COSTS:
