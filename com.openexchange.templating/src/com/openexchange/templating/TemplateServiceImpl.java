@@ -118,7 +118,7 @@ public class TemplateServiceImpl implements TemplateService {
     }
 
     public OXTemplate loadTemplate(String templateName, String defaultTemplateName, ServerSession session) throws TemplateException {
-        if(isEmpty(templateName) || !isUserTemplatingEnabled()) {
+        if(isEmpty(templateName) || !isUserTemplatingEnabled(session)) {
             return loadTemplate(defaultTemplateName);
         }
         try {
@@ -163,8 +163,8 @@ public class TemplateServiceImpl implements TemplateService {
         }
     }
 
-    private boolean isUserTemplatingEnabled() {
-        return "true".equalsIgnoreCase(config.getProperty(USER_TEMPLATING_PROPERTY,"true"));
+    private boolean isUserTemplatingEnabled(ServerSession session) {
+        return "true".equalsIgnoreCase(config.getProperty(USER_TEMPLATING_PROPERTY,"true")) && session.getUserConfiguration().hasInfostore();
     }
 
     private boolean isEmpty(String templateName) {

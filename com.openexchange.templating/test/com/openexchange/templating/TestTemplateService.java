@@ -56,6 +56,7 @@ import com.openexchange.config.SimConfigurationService;
 import com.openexchange.exceptions.StringComponent;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 import com.openexchange.sim.SimBuilder;
 import com.openexchange.templating.impl.OXFolderHelper;
@@ -70,7 +71,9 @@ public class TestTemplateService extends TestCase {
     
     protected SimConfigurationService configService = null;
     protected TemplateServiceImpl templateService = null;
-    private ServerSession session = new ServerSessionAdapter((Session)null, (Context) null);
+    private ServerSession session = null;
+    private ServerSession sessionWithoutInfostore = null;
+    
     private FolderObject privateTemplateFolder;
     private FolderObject globalTemplateFolder;
 
@@ -101,6 +104,15 @@ public class TestTemplateService extends TestCase {
         globalTemplateFolder = new FolderObject();
         globalTemplateFolder.setFolderName("Templates");
         globalTemplateFolder.setObjectID(13);
+        
+        UserConfiguration userConfig = new UserConfiguration(0, 0, new int[0], null);
+        userConfig.setInfostore(true);
+        
+        UserConfiguration noInfostore = new UserConfiguration(0,0,new int[0],null);
+        noInfostore.setInfostore(false);
+        
+        session = new ServerSessionAdapter(null, null, null, userConfig);
+        sessionWithoutInfostore = new ServerSessionAdapter(null, null, null, noInfostore);
     }
 
     @Override
@@ -234,6 +246,22 @@ public class TestTemplateService extends TestCase {
         };
         
         templateService.loadTemplate("user-template", "test-template", session);
+        assertTrue(called[0]);
+        
+    }
+    
+    public void testDisableUserTemplatingWhenInfostoreIsDisabled() throws Exception {
+
+        final boolean[] called = new boolean[]{false};
+        templateService = new TemplateServiceImpl(configService) {
+            @Override
+            public OXTemplateImpl loadTemplate(String templateName) throws TemplateException {
+                called[0] = true;
+                return null;
+            }
+        };
+        
+        templateService.loadTemplate("user-template", "test-template", sessionWithoutInfostore);
         assertTrue(called[0]);
         
     }

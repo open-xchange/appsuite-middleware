@@ -55,9 +55,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
+import com.openexchange.datatypes.genericonf.FormElement;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.i18n.Translator;
 import com.openexchange.json.JSONAssertion;
 import com.openexchange.publish.PublicationTarget;
+import com.openexchange.publish.interfaces.UserSpecificPublicationTarget;
 
 /**
  * {@link PublicationTargetWriterTest}
@@ -81,7 +85,7 @@ public class PublicationTargetWriterTest extends TestCase {
     }
 
     public void testWriteObject() throws JSONException {
-        JSONObject object = new PublicationTargetWriter(Translator.EMPTY).write(target);
+        JSONObject object = new PublicationTargetWriter(Translator.EMPTY).write(target, null, null);
 
         JSONAssertion assertion = new JSONAssertion().isObject()
             .hasKey("id").withValue("com.openexchange.publish.test1")
@@ -96,7 +100,7 @@ public class PublicationTargetWriterTest extends TestCase {
     }
 
     public void testWriteArray() throws JSONException, PublicationJSONException {
-        JSONArray array = new PublicationTargetWriter(Translator.EMPTY).writeArray(target, new String[]{"id", "displayName", "icon", "module"});
+        JSONArray array = new PublicationTargetWriter(Translator.EMPTY).writeArray(target, new String[]{"id", "displayName", "icon", "module"}, null, null);
 
         JSONAssertion assertion = new JSONAssertion().isArray().withValues(target.getId(), target.getDisplayName(), target.getIcon(), target.getModule());
 
@@ -105,10 +109,48 @@ public class PublicationTargetWriterTest extends TestCase {
 
     public void testUnknownColumn() throws JSONException {
         try {
-            new PublicationTargetWriter(Translator.EMPTY).writeArray(target, new String[]{"id", "unkownColumn"});
+            new PublicationTargetWriter(Translator.EMPTY).writeArray(target, new String[]{"id", "unkownColumn"}, null, null);
             fail("Expected exception");
         } catch (PublicationJSONException e) {
             // Hooray!
         }
+    }
+    
+    public void testWriteUserSpecificForm() throws JSONException {
+        TestTarget target = new TestTarget();
+        target.setId("com.openexchange.publish.test1");
+        target.setDisplayName("Test 1 PubTarget");
+        target.setIcon("http://example.invalid/icon.png");
+        target.setModule("contacts");
+        
+        JSONObject object = new PublicationTargetWriter(Translator.EMPTY).write(target, null, null);
+        
+        JSONArray array = object.getJSONArray("formDescription");
+        assertEquals(1, array.length());
+        
+    }
+    
+    public void testWriteUserSpecificFormInArray() throws PublicationJSONException, JSONException {
+        TestTarget target = new TestTarget();
+        target.setId("com.openexchange.publish.test1");
+        target.setDisplayName("Test 1 PubTarget");
+        target.setIcon("http://example.invalid/icon.png");
+        target.setModule("contacts");
+
+        JSONArray array = new PublicationTargetWriter(Translator.EMPTY).writeArray(target, new String[]{"formDescription"}, null, null);
+
+        JSONArray formDescription = array.getJSONArray(0);
+        assertEquals(1, formDescription.length());
+        
+            
+    }
+    
+    
+    private static final class TestTarget extends PublicationTarget implements UserSpecificPublicationTarget {
+
+        public DynamicFormDescription getUserSpecificDescription(User user, UserConfiguration configuration) {
+            return new DynamicFormDescription().add(FormElement.input("userSpecific", "User Specific"));
+        }
+        
     }
 }

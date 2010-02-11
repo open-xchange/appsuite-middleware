@@ -63,17 +63,21 @@ import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.Strings;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.helpers.AbstractPublicationService;
 import com.openexchange.publish.helpers.SecurityStrategy;
+import com.openexchange.publish.interfaces.UserSpecificPublicationTarget;
 import com.openexchange.publish.tools.PublicationSession;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateException;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.UserService;
 
 /**
  * {@link OXMFPublicationService}
@@ -113,13 +117,23 @@ public class OXMFPublicationService extends AbstractPublicationService {
     }
 
     private PublicationTarget buildTarget() {
-        PublicationTarget target = new PublicationTarget();
-
         DynamicFormDescription form = new DynamicFormDescription();
+        DynamicFormDescription withoutInfostore = new DynamicFormDescription();
+        
         form.add(FormElement.input(SITE, FORM_LABEL_SITE, true, null));
+        withoutInfostore.add(FormElement.input(SITE, FORM_LABEL_SITE, true, null));
+
         form.add(FormElement.input(TEMPLATE, FORM_LABEL_TEMPLATE));
+        // No templating without infostore
+        
         form.add(FormElement.checkbox(PROTECTED, FORM_LABEL_PROTECTED, true, Boolean.TRUE));
+        withoutInfostore.add(FormElement.checkbox(PROTECTED, FORM_LABEL_PROTECTED, true, Boolean.TRUE));
+        
         form.add(FormElement.link(URL, FORM_LABEL_LINK, false, null));
+        withoutInfostore.add(FormElement.link(URL, FORM_LABEL_LINK, false, null));
+
+        
+        PublicationTarget target = new OptionalTemplatingTarget(withoutInfostore);
 
         target.setFormDescription(form);
         target.setPublicationService(this);
@@ -285,6 +299,22 @@ public class OXMFPublicationService extends AbstractPublicationService {
     @Override
     protected SecurityStrategy getSecurityStrategy() {
         return FOLDER_ADMIN_ONLY;
+    }
+    
+    private static final class OptionalTemplatingTarget extends PublicationTarget implements UserSpecificPublicationTarget {
+
+        private DynamicFormDescription withoutInfostore;
+
+        public OptionalTemplatingTarget(DynamicFormDescription withoutInfostore) {
+            this.withoutInfostore = withoutInfostore;
+        }
+        
+        public DynamicFormDescription getUserSpecificDescription(User user, UserConfiguration configuration) {
+            if (configuration.hasInfostore()) {
+                return getFormDescription();
+            }
+            return withoutInfostore;
+        }
     }
 
 }

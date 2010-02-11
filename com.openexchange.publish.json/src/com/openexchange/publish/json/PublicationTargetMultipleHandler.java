@@ -120,7 +120,7 @@ public class PublicationTargetMultipleHandler implements MultipleHandler {
         if(target == null) {
             throw UNKNOWN_TARGET.create(identifier);
         }
-        JSONObject data = new PublicationTargetWriter(createTranslator(session)).write(target);
+        JSONObject data = new PublicationTargetWriter(createTranslator(session)).write(target, session.getUser(), session.getUserConfiguration());
         return data;
     }
 
@@ -133,7 +133,7 @@ public class PublicationTargetMultipleHandler implements MultipleHandler {
     private JSONValue listTargets(JSONObject request, ServerSession session) throws JSONException, PublicationJSONException, PublicationException {
         Collection<PublicationTarget> targets = discoverer.listTargets();
         String[] columns = getColumns(request);
-        JSONArray json = new PublicationTargetWriter(createTranslator(session)).writeJSONArray(targets, columns);
+        JSONArray json = new PublicationTargetWriter(createTranslator(session)).writeJSONArray(targets, columns, session.getUser(), session.getUserConfiguration());
         return json;
     }
 
