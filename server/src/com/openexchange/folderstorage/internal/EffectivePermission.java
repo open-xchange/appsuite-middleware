@@ -123,6 +123,7 @@ public final class EffectivePermission implements Permission {
             }
             // Module SYSTEM is allowed in any case
             this.allowedContentTypes.add(Integer.valueOf(FolderObject.SYSTEM_MODULE));
+            this.allowedContentTypes.add(Integer.valueOf(FolderObject.UNBOUND));
         }
     }
 
