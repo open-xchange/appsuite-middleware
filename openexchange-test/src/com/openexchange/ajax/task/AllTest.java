@@ -50,11 +50,7 @@
 package com.openexchange.ajax.task;
 
 import java.util.Date;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import com.openexchange.ajax.framework.Executor;
+import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.MultipleRequest;
 import com.openexchange.ajax.framework.MultipleResponse;
 import com.openexchange.ajax.task.actions.AllRequest;
@@ -71,19 +67,17 @@ import com.openexchange.groupware.tasks.Task;
  */
 public final class AllTest extends AbstractTaskTest {
 
-    /**
-     * Logger.
-     */
-    private static final Log LOG = LogFactory.getLog(AllTest.class);
-
     private static final int NUMBER = 10;
+    private AJAXClient client;
     
-    /**
-     * Default constructor.
-     * @param name Name of this test.
-     */
     public AllTest(final String name) {
         super(name);
+    }
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        client = getClient();
     }
 
     public void testAll() throws Throwable {
@@ -96,26 +90,21 @@ public final class AllTest extends AbstractTaskTest {
             // TODO add participants
             inserts[i] = new InsertRequest(task, getTimeZone());
         }
-        final MultipleResponse<InsertResponse> mInsert = Executor.execute(
-            getSession(), MultipleRequest.create(inserts));
+        final MultipleResponse<InsertResponse> mInsert = client.execute(MultipleRequest.create(inserts));
         final GetRequest[] gets = new GetRequest[NUMBER];
         for (int i = 0; i < gets.length; i++) {
             final InsertResponse ins = mInsert.getResponse(i);
-            LOG.info(Integer.valueOf(ins.getId()));
             gets[i] = new GetRequest(ins);
         }
-        final MultipleResponse<GetResponse> mGet = Executor.execute(
-            getSession(), MultipleRequest.create(gets));
+        final MultipleResponse<GetResponse> mGet = client.execute(MultipleRequest.create(gets));
         // TODO Read Task.ALARM
-        final int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID,
-            Task.LAST_MODIFIED, Task.FOLDER_ID, Task.PARTICIPANTS };
-        TaskTools.all(getSession(),
-            new AllRequest(getPrivateFolder(), columns, 0, null));
+        final int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID, Task.LAST_MODIFIED, Task.FOLDER_ID, Task.PARTICIPANTS };
+        client.execute(new AllRequest(getPrivateFolder(), columns, 0, null));
         final DeleteRequest[] deletes = new DeleteRequest[inserts.length];
         for (int i = 0; i < inserts.length; i++) {
             final GetResponse get = mGet.getResponse(i);
             deletes[i] = new DeleteRequest(get.getTask(getTimeZone()));
         }
-        Executor.execute(getSession(), MultipleRequest.create(deletes)); 
+        client.execute(MultipleRequest.create(deletes)); 
     }
 }
