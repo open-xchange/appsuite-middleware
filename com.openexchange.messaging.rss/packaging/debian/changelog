@@ -1,5 +1,11 @@
 open-xchange-messaging-rss (6.15.0.0-1) unstable; urgency=low
 
+  * first build for 6.15-rev4
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 11 Feb 2010 16:51:15 +0100
+
+open-xchange-messaging-rss (6.15.0.0-0) unstable; urgency=low
+
   * Initial version
 
  -- Thorben Betten <thorben.betten@open-xchange.com>  Wed, 10 Feb 2010 22:02:38 +0100

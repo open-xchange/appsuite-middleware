@@ -1,3 +1,9 @@
+open-xchange-messaging-twitter (6.15.0.0-1) unstable; urgency=low
+
+  * first build for 6.15-rev4
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 11 Feb 2010 16:49:22 +0100
+
 open-xchange-messaging-twitter (6.15.0.0-0) unstable; urgency=low
 
   * Initial release.
