@@ -682,7 +682,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
         "26", "27", "28", "29" }, exceptionId = { 26, 27, 28, 29 }, msg = {
         "The object you requested can not be found. Try again. Context %1$d Folder %2$d User %3$d Object %4$d",
         ContactException.NON_CONTACT_FOLDER_MSG, ContactException.NO_READ_PERMISSION_MSG, ContactException.INIT_CONNECTION_FROM_DBPOOL })
-    public Contact getObjectById(int objectId, int fid) throws OXException {
+    public Contact getObjectById(final int objectId, final int fid) throws OXException {
         if (objectId <= 0) {
             throw EXCEPTIONS.createOXObjectNotFoundException(26, I(ctx.getContextId()), I(fid), I(userId), I(objectId));
         }
@@ -693,7 +693,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
         final Connection con;
         try {
             con = DBPool.pickup(ctx);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw EXCEPTIONS.create(29, e);
         }
         final Contact co;
@@ -702,11 +702,11 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
             if (!performSecurityReadCheck(fid, co.getCreatedBy(), userId, memberInGroups, session, con, ctx)) {
                 throw EXCEPTIONS.createOXConflictException(28, I(fid), I(ctx.getContextId()), I(userId));
             }
-            Date creationDate = Attachments.getInstance(new SimpleDBProvider(con, null)).getNewestCreationDate(objectId, Types.CONTACT, ctx);
+            final Date creationDate = Attachments.getInstance(new SimpleDBProvider(con, null)).getNewestCreationDate(objectId, Types.CONTACT, ctx);
             if (null != creationDate) {
                 co.setLastModifiedOfNewestAttachment(creationDate);
             }
-        } catch (OXException e) {
+        } catch (final OXException e) {
             throw e;
         } finally {
             DBPool.closeReaderSilent(ctx, con);
@@ -1144,20 +1144,24 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
         try {
             writecon = DBPool.pickupWriteable(ctx);
 
-            if (oclPerm.canDeleteAllObjects()) {
+            final int deletePermission = oclPerm.getDeletePermission();
+            if (deletePermission >= OCLPermission.DELETE_ALL_OBJECTS) {
+                /*
+                 * May delete any contact
+                 */
                 Contacts.deleteContact(oid, ctx.getContextId(), writecon);
             } else {
-                if (oclPerm.canDeleteOwnObjects() && created_from == userId) {
-                    Contacts.deleteContact(oid, ctx.getContextId(), writecon);
-                } else {
+                if ((deletePermission < OCLPermission.DELETE_OWN_OBJECTS) || created_from != userId) {
                     throw EXCEPTIONS.createOXConflictException(
                         46,
                         I(fuid),
                         I(ctx.getContextId()),
                         I(userId));
-                    // throw new
-                    // OXConflictException("NOT ALLOWED TO DELETE FOLDER OBJECTS (cid="+sessionobject.getContext().getContextId()+" fid="+fuid+" oid="+oid+')');
                 }
+                /*
+                 * May delete own contact
+                 */
+                Contacts.deleteContact(oid, ctx.getContextId(), writecon);
             }
             final EventClient ec = new EventClient(session);
             ec.delete(co);
@@ -1368,7 +1372,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
                 }
             }
             if (Arrays.contains(cols, Contact.LAST_MODIFIED_OF_NEWEST_ATTACHMENT)) {
-                Date creationDate = Attachments.getInstance(new SimpleDBProvider(con, null)).getNewestCreationDate(co.getObjectID(), Types.CONTACT, ctx);
+                final Date creationDate = Attachments.getInstance(new SimpleDBProvider(con, null)).getNewestCreationDate(co.getObjectID(), Types.CONTACT, ctx);
                 if (null != creationDate) {
                     co.setLastModifiedOfNewestAttachment(creationDate);
                 }
