@@ -69,6 +69,7 @@ public class TemplateTestSuite extends TestSuite {
          */
         public static Test suite() {
             final TestSuite suite = new TestSuite();
+            suite.addTestSuite(DefaultTemplateTest.class);
             suite.addTestSuite(CensoredHCardTemplateTest.class);
             suite.addTestSuite(CensoredOXMFContactTemplateTest.class);
             suite.addTestSuite(FullHCardTemplateTest.class);
