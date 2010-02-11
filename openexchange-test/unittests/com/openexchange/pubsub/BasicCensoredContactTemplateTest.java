@@ -98,7 +98,7 @@ public abstract class BasicCensoredContactTemplateTest extends BasicContactTempl
         contact.setGivenName("givenname" + identifier);
         contact.setSurName("surname" + identifier);
         contact.setMiddleName("middlename" + identifier);
-        contact.setDisplayName("displayname" + identifier);
+//        contact.setDisplayName("displayname" + identifier);
         contact.setPosition("position" + identifier);
         contact.setTitle("title" + identifier);
         contact.setCompany("company" + identifier);
