@@ -85,4 +85,11 @@ public interface MessagingResource {
      */
     boolean ping() throws MessagingException;
 
+    /**
+     * Indicates if this resource may be cached (for a little amount of time) once opened.
+     * 
+     * @return <code>true</code> if this resource may be cached; otherwise <code>false</code>
+     */
+    boolean cacheable();
+
 }

@@ -91,4 +91,8 @@ public class SimMessagingTransport implements MessagingAccountTransport {
         return recipients;
     }
 
+    public boolean cacheable() {
+        return true;
+    }
+
 }

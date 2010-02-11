@@ -675,4 +675,8 @@ public class FacebookMessagingResource implements MessagingResource {
         return;
     }
 
+    public boolean cacheable() {
+        return true;
+    }
+
 }

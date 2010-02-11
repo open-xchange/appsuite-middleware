@@ -97,4 +97,8 @@ public class SimAccountAccess implements MessagingAccountAccess {
         return getFolderAccess().getRootFolder();
     }
 
+    public boolean cacheable() {
+        return true;
+    }
+
 }

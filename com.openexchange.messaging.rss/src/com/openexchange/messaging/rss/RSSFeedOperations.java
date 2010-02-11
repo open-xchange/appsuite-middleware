@@ -70,11 +70,12 @@ import com.sun.syndication.fetcher.FeedFetcher;
  */
 public class RSSFeedOperations implements MessagingAccountAccess, MessagingAccountTransport {
 
-    private int accountId;
-    private RSSMessageAccess messageAccess;
-    private RSSFolderAccess folderAccess;
+    private final int accountId;
+    private final RSSMessageAccess messageAccess;
+    private final RSSFolderAccess folderAccess;
+    private boolean connected;
 
-    public RSSFeedOperations(int accountId, Session session, FeedFetcher fetcher, MessagingAccountManager accounts) {
+    public RSSFeedOperations(final int accountId, final Session session, final FeedFetcher fetcher, final MessagingAccountManager accounts) {
         super();
         this.accountId = accountId;
         
@@ -99,23 +100,28 @@ public class RSSFeedOperations implements MessagingAccountAccess, MessagingAccou
     }
 
     public void close() {
-        
+        connected = false;
     }
 
     public void connect() throws MessagingException {
-        
+        connected = true;
     }
 
     public boolean isConnected() {
-        return true;
+        return connected;
     }
 
     public boolean ping() throws MessagingException {
         return true;
     }
 
-    public void transport(MessagingMessage message, Collection<MessagingAddressHeader> recipients) throws MessagingException {
+    public void transport(final MessagingMessage message, final Collection<MessagingAddressHeader> recipients) throws MessagingException {
         throw new UnsupportedOperationException();
+    }
+
+    public boolean cacheable() {
+        // Nothing to cache
+        return false;
     }
 
 }

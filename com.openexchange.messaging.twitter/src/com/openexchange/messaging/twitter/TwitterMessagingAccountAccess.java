@@ -148,4 +148,8 @@ public final class TwitterMessagingAccountAccess implements MessagingAccountAcce
         return getFolderAccess().getRootFolder();
     }
 
+    public boolean cacheable() {
+        return true;
+    }
+
 }

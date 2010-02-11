@@ -184,4 +184,9 @@ public final class TwitterMessagingAccountTransport implements MessagingAccountT
         return connected;
     }
 
+    public boolean cacheable() {
+        // Nothing to cache
+        return false;
+    }
+
 }
