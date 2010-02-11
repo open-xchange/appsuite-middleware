@@ -209,6 +209,7 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
             try {
                 final StringContent content = TwitterMessagingUtility.checkContent(StringContent.class, message);
                 twitterAccess.updateStatus(content.toString());
+                return null;
             } catch (final TwitterException e) {
                 throw new MessagingException(e);
             }
