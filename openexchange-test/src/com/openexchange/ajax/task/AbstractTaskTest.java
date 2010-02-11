@@ -55,6 +55,7 @@ import java.util.TimeZone;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 
+import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.tools.servlet.AjaxException;
 
@@ -64,24 +65,27 @@ import com.openexchange.tools.servlet.AjaxException;
  */
 public abstract class AbstractTaskTest extends AbstractAJAXSession {
 
-    /**
-     * Default constructor.
-     * @param name name of the test.
-     */
+    private AJAXClient client;
+    private int folderId;
+    private TimeZone timeZone;
+
     protected AbstractTaskTest(final String name) {
         super(name);
     }
 
-    /**
-     * @return the private task folder of the user.
-     */
-    protected int getPrivateFolder() throws AjaxException, IOException,
-        SAXException, JSONException {
-        return getClient().getValues().getPrivateTaskFolder();
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        client = getClient();
+        folderId = client.getValues().getPrivateTaskFolder();
+        timeZone = client.getValues().getTimeZone();
     }
 
-    protected TimeZone getTimeZone() throws AjaxException, IOException,
-        SAXException, JSONException {
-        return getClient().getValues().getTimeZone();
+    protected int getPrivateFolder() {
+        return folderId;
+    }
+
+    protected TimeZone getTimeZone() {
+        return timeZone;
     }
 }
