@@ -51,13 +51,8 @@ package com.openexchange.ajax.task;
 
 import java.util.Date;
 import java.util.TimeZone;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonUpdatesResponse;
-import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.MultipleRequest;
 import com.openexchange.ajax.framework.MultipleResponse;
 import com.openexchange.ajax.framework.CommonUpdatesRequest.Ignore;
@@ -73,15 +68,6 @@ import com.openexchange.groupware.tasks.Task;
  */
 public class Bug10119Test extends AbstractTaskTest {
 
-    /**
-     * Logger.
-     */
-    private static final Log LOG = LogFactory.getLog(Bug10119Test.class);
-
-    /**
-     * Default constructor.
-     * @param name Name of the test.
-     */
     public Bug10119Test(final String name) {
         super(name);
     }
@@ -107,22 +93,17 @@ public class Bug10119Test extends AbstractTaskTest {
             }
             mInsert =  client.execute(MultipleRequest.create(initialInserts));
         }
-        final int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID,
-            Task.FOLDER_ID };
+        final int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID, Task.FOLDER_ID };
         final CommonUpdatesResponse uResponse;
         {
-            final UpdatesRequest uRequest = new UpdatesRequest(folderId,
-                columns, 0, null, beforeInsert);
-            uResponse = TaskTools.updates(client,
-                uRequest);
-            LOG.info("Updates size after 2 initial inserts: " + uResponse.size());
+            final UpdatesRequest uRequest = new UpdatesRequest(folderId, columns, 0, null, beforeInsert);
+            uResponse = client.execute(uRequest);
             assertTrue("Can't find initial inserts", uResponse.size() >= 2);
         }
         // Delete one
         {
             final InsertResponse secondInsert = mInsert.getResponse(1);
-            TaskTools.delete(client, new DeleteRequest(folderId,
-                secondInsert.getId(), secondInsert.getTimestamp()));
+            client.execute(new DeleteRequest(folderId, secondInsert.getId(), secondInsert.getTimestamp()));
         }
         // Insert one
         final InsertResponse iResponse;
@@ -130,26 +111,20 @@ public class Bug10119Test extends AbstractTaskTest {
             final Task task = new Task();
             task.setParentFolderID(folderId);
             task.setTitle("anotherInsert");
-            iResponse = TaskTools.insert(client, new InsertRequest(task,
-                timeZone));
+            iResponse = client.execute(new InsertRequest(task, timeZone));
         }
         // Check if we see 2 updates, 1 insert and 1 delete.
         {
-            final CommonUpdatesResponse uResponse2 = TaskTools.updates(client,
-                new UpdatesRequest(folderId, columns, 0, null,
-                uResponse.getTimestamp(), Ignore.NONE));
-            LOG.info("Updates size after 1 create and 1 delete: " + uResponse2.size());
+            final CommonUpdatesResponse uResponse2 = client.execute(new UpdatesRequest(folderId, columns, 0, null, uResponse.getTimestamp(), Ignore.NONE));
             assertTrue("Can't get created and deleted item.", uResponse2.size() >= 2);
         }
         // Delete all.
         {
             final DeleteRequest[] deletes = new DeleteRequest[2];
             final InsertResponse firstInsert = mInsert.getResponse(0);
-            deletes[0] = new DeleteRequest(folderId, firstInsert.getId(),
-                firstInsert.getTimestamp());
-            deletes[1] = new DeleteRequest(folderId, iResponse.getId(),
-                iResponse.getTimestamp());
-            Executor.execute(client, MultipleRequest.create(deletes));
+            deletes[0] = new DeleteRequest(folderId, firstInsert.getId(), firstInsert.getTimestamp());
+            deletes[1] = new DeleteRequest(folderId, iResponse.getId(), iResponse.getTimestamp());
+            client.execute(MultipleRequest.create(deletes));
         }
     }
 }
