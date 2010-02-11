@@ -97,9 +97,11 @@ fi
 %defattr(-,root,root)
 %dir /opt/open-xchange/etc/groupware/
 %dir /opt/open-xchange/bundles/
+%dir /opt/open-xchange/sbin/
 %dir /opt/open-xchange/etc/*/osgi/bundle.d/
 %dir %attr(-,open-xchange,open-xchange) /opt/open-xchange/etc/groupware/crawlers
 %config(noreplace) /opt/open-xchange/etc/groupware/*.properties
 %config(noreplace) %attr(-,open-xchange,open-xchange) /opt/open-xchange/etc/groupware/crawlers/*
 /opt/open-xchange/bundles/*
 /opt/open-xchange/etc/*/osgi/bundle.d/*
+/opt/open-xchange/sbin/*
