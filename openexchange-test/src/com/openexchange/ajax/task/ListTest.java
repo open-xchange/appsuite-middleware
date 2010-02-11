@@ -52,15 +52,9 @@ package com.openexchange.ajax.task;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
-import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.MultipleRequest;
 import com.openexchange.ajax.framework.MultipleResponse;
 import com.openexchange.ajax.framework.AJAXClient.User;
@@ -80,19 +74,17 @@ import com.openexchange.groupware.tasks.Task;
 public class ListTest extends AbstractTaskTest {
 
     private static final int NUMBER = 10;
-
     private static final int DELETES = 2;
+    private AJAXClient client;
 
-    /**
-     * Logger.
-     */
-    private static final Log LOG = LogFactory.getLog(ListTest.class);
-
-    /**
-     * @param name
-     */
     public ListTest(final String name) {
         super(name);
+    }
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        client = getClient();
     }
 
     public void testTaskList() throws Throwable {
@@ -103,106 +95,69 @@ public class ListTest extends AbstractTaskTest {
             task.setParentFolderID(getPrivateFolder());
             inserts[i] = new InsertRequest(task, getTimeZone());
         }
-        final MultipleResponse mInsert = Executor.execute(
-            getClient(), MultipleRequest.create(inserts));
+        final MultipleResponse<InsertResponse> mInsert = client.execute(MultipleRequest.create(inserts));
         
         final int[][] tasks = new int[NUMBER][2];
         for (int i = 0; i < tasks.length; i++) {
-            final InsertResponse insertR = (InsertResponse) mInsert.getResponse(i);
+            final InsertResponse insertR = mInsert.getResponse(i);
             tasks[i] = new int[] { insertR.getFolderId(), insertR.getId() };
         }
-        final int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID,
-            Task.LAST_MODIFIED };
-        final CommonListResponse listR = TaskTools.list(getClient(),
-            new ListRequest(tasks, columns));
-        StringBuilder output = new StringBuilder();
-        for (final int column : columns) {
-            output.append(column);
-            output.append(',');
-        }
-        output.setLength(output.length() - 1);
-        LOG.info(output);
-        for (final Object[] values : listR) {
-            output = new StringBuilder(); 
-            for (final Object value : values) {
-                output.append(value);
-                output.append(',');
-            }
-            output.setLength(output.length() - 1);
-            LOG.info(output);
-        }
+        final int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID, Task.LAST_MODIFIED };
+        final CommonListResponse listR = client.execute(new ListRequest(tasks, columns));
         final DeleteRequest[] deletes = new DeleteRequest[inserts.length];
         for (int i = 0; i < inserts.length; i++) {
-            deletes[i] = new DeleteRequest(tasks[i][0], tasks[i][1], listR
-                .getTimestamp());
+            deletes[i] = new DeleteRequest(tasks[i][0], tasks[i][1], listR.getTimestamp());
         }
-        Executor.execute(getClient(), MultipleRequest.create(deletes)); 
+        client.execute(MultipleRequest.create(deletes)); 
     }
 
     public void oldRemovedObjectHandling() throws Throwable {
-        final int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID,
-            Task.LAST_MODIFIED };
-        final CommonListResponse listR = TaskTools.list(getClient(),
-            new ListRequest(new int[][] { { getPrivateFolder(),
-                Integer.MAX_VALUE } }, columns, false));
-        assertTrue("No error when listing not existing object.", listR
-            .hasError());
-        LOG.info(listR.getException().toString());
+        final int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID, Task.LAST_MODIFIED };
+        final CommonListResponse listR = client.execute(new ListRequest(new int[][] { { getPrivateFolder(), Integer.MAX_VALUE } }, columns, false));
+        assertTrue("No error when listing not existing object.", listR.hasError());
     }
 
-    /**
-     * This method tests the new handling of not more available objects for LIST
-     * requests.
-     */
     public void testRemovedObjectHandling() throws Throwable {
-        final AJAXClient clientA = getClient();
-        final int folderA = clientA.getValues().getPrivateTaskFolder();
+        final int folderA = client.getValues().getPrivateTaskFolder();
         final AJAXClient clientB = new AJAXClient(User.User2);
         final int folderB = clientB.getValues().getPrivateTaskFolder();
-
         // Create some tasks.
         final InsertRequest[] inserts = new InsertRequest[NUMBER];
         for (int i = 0; i < inserts.length; i++) {
             final Task task = new Task();
             task.setTitle("Task " + (i + 1));
             task.setParentFolderID(folderA);
-            task.addParticipant(new UserParticipant(clientA.getValues().getUserId()));
+            task.addParticipant(new UserParticipant(client.getValues().getUserId()));
             task.addParticipant(new UserParticipant(clientB.getValues().getUserId()));
             inserts[i] = new InsertRequest(task, getTimeZone());
         }
-        final MultipleResponse mInsert = Executor.execute(
-            getClient(), MultipleRequest.create(inserts));
+        final MultipleResponse<InsertResponse> mInsert = client.execute(MultipleRequest.create(inserts));
         final List<InsertResponse> toDelete = new ArrayList<InsertResponse>(NUMBER);
-        final Iterator<AbstractAJAXResponse> iter = mInsert.iterator();
+        final Iterator<InsertResponse> iter = mInsert.iterator();
         while (iter.hasNext()) {
-            toDelete.add((InsertResponse) iter.next());
+            toDelete.add(iter.next());
         }
-
         // A now gets all of the folder.
         final int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID, Task.FOLDER_ID };
-        final CommonAllResponse allR = TaskTools.all(clientA, new AllRequest(
-            folderA, columns, Task.TITLE, Order.ASCENDING));
+        final CommonAllResponse allR = client.execute(new AllRequest(folderA, columns, Task.TITLE, Order.ASCENDING));
         
         // Now B deletes some of them.
         final DeleteRequest[] deletes1 = new DeleteRequest[DELETES];
         for (int i = 0; i < deletes1.length; i++) {
             final InsertResponse insertR = toDelete.remove((NUMBER - DELETES)/2 + i); 
-            deletes1[i] = new DeleteRequest(folderB, insertR.getId(), insertR
-                .getTimestamp());
+            deletes1[i] = new DeleteRequest(folderB, insertR.getId(), insertR.getTimestamp());
         }
-        Executor.execute(clientB, MultipleRequest.create(deletes1));
+        clientB.execute(MultipleRequest.create(deletes1));
 
         // List request of A must now not contain the deleted objects and give
         // no error.
-        final CommonListResponse listR = TaskTools.list(clientA,
-            new ListRequest(allR.getListIDs(), columns, true));
+        final CommonListResponse listR = client.execute(new ListRequest(allR.getListIDs(), columns, true));
         
         final DeleteRequest[] deletes2 = new DeleteRequest[toDelete.size()];
         for (int i = 0; i < deletes2.length; i++) {
             final InsertResponse insertR = toDelete.get(i);
-            deletes2[i] = new DeleteRequest(insertR.getFolderId(),
-                insertR.getId(), listR.getTimestamp());
+            deletes2[i] = new DeleteRequest(insertR.getFolderId(), insertR.getId(), listR.getTimestamp());
         }
-        Executor.execute(getClient(), MultipleRequest.create(deletes2)); 
+        client.execute(MultipleRequest.create(deletes2)); 
     }
 }
