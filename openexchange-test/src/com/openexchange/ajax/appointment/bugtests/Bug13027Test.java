@@ -349,7 +349,7 @@ public class Bug13027Test extends AbstractAJAXSession {
 
         Object[][] responseColumns = response.getArray();
         for (Object[] obj : responseColumns) {
-            client.execute(new DeleteRequest(((Integer) obj[0]).intValue(), folderId, (Date) obj[1]));
+            client.execute(new DeleteRequest(((Integer) obj[0]).intValue(), folderId, new Date(Long.MAX_VALUE)));
         }
     }
 
