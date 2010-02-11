@@ -55,6 +55,7 @@ import com.openexchange.messaging.MessagingAccountManager;
 import com.openexchange.messaging.MessagingAccountTransport;
 import com.openexchange.messaging.MessagingAddressHeader;
 import com.openexchange.messaging.MessagingException;
+import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingFolder;
 import com.openexchange.messaging.MessagingFolderAccess;
 import com.openexchange.messaging.MessagingMessage;
@@ -116,7 +117,7 @@ public class RSSFeedOperations implements MessagingAccountAccess, MessagingAccou
     }
 
     public void transport(final MessagingMessage message, final Collection<MessagingAddressHeader> recipients) throws MessagingException {
-        throw new UnsupportedOperationException();
+        throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(RSSMessagingService.ID);
     }
 
     public boolean cacheable() {
