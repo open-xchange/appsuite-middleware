@@ -51,21 +51,18 @@ package com.openexchange.pubsub;
 
 import static com.openexchange.subscribe.microformats.FormStrings.FORM_LABEL_URL;
 import java.io.File;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import junit.framework.TestCase;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.configuration.ConfigurationException;
-import com.openexchange.configuration.PublishConfig;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.publish.microformats.OXMFPublicationService;
 import com.openexchange.publish.microformats.tools.ContactTemplateUtils;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.subscribe.SubscriptionSource;
@@ -79,7 +76,6 @@ import com.openexchange.templating.OXTemplateImpl;
 import freemarker.cache.FileTemplateLoader;
 import freemarker.cache.TemplateLoader;
 import freemarker.template.Configuration;
-import junit.framework.TestCase;
 
 /**
  * Tests a template for proper rendering of contacts by checking if they can be converted back after being rendered in a template. The tests
