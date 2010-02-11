@@ -191,6 +191,7 @@ public class AppointmentWriter extends CalendarWriter {
         AppointmentFieldWriter writer = WRITER_MAP.get(I(column));
         if (null != writer) {
             writer.write(appointment, json);
+            return;
         } else if (super.writeField(appointment, column, tz, json)) {
             return;
         }

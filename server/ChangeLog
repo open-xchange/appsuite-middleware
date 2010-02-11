@@ -1,3 +1,7 @@
+* 2010-02-11 - marcus.klein@open-xchange.com
+
+ - Bugfix #15361: Added missing return statement when the attribute has been written.
+
 * 2010-02-11 - francisco.laguna@open-xchange.com
 
  - Bugfix #15257: Don't get servlet writer after having selected an output stream.

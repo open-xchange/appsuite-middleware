@@ -135,6 +135,7 @@ public class TaskWriter extends CalendarWriter {
         TaskFieldWriter writer = WRITER_MAP.get(I(column));
         if (null != writer) {
             writer.write(task, json);
+            return;
         } else if (super.writeField(task, column, tz, json)) {
             return;
         }
