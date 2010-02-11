@@ -9,6 +9,7 @@
     <property name="tmp.dir" value="tmp"/>
     <property name="lib.dir" value="lib"/>
     <property name="conf.dir" value="conf"/>
+	<property name="sbindir" value="${prefix}/sbin"/>
 
     <property file="META-INF/MANIFEST.MF"/>
     <property file="build.properties"/>
@@ -91,7 +92,7 @@
     </target>
 
     <!-- Install targets -->
-    <target name="install" depends="installJar,installConfig"/>
+    <target name="install" depends="installJar,installConfig,installSbin"/>
 
     <target name="patchConfigFiles">
         <fail message="Define conf.subst.patch." unless="conf.subst.patch"/>
@@ -136,6 +137,18 @@
             </fileset>
         </copy>
     </target>
+	
+	<target name="installSbin">
+	        <mkdir dir="${destdir}/${sbindir}"/>
+	        <copy todir="${destdir}/${sbindir}">
+	            <fileset dir="sbin"/>
+	        </copy>
+	        <replace dir="${destdir}/${sbindir}">
+	            <replacefilter token="@oxfunctions@" value="${conf.install.dir}/oxfunctions.sh"/>
+	            <replacefilter token="@prefix@" value="${prefix}"/>
+	        </replace>
+	        <chmod perm="755" dir="${destdir}/${sbindir}" includes="*"/>
+	</target>
 
     <!-- Dist -->
     <target name="dist" depends="clean">
