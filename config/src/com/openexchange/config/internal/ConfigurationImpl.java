@@ -79,7 +79,7 @@ public final class ConfigurationImpl implements ConfigurationService {
 
     private static final String EXT = ".properties";
 
-    private static Map<String, Properties> propertiesByFile = new HashMap<String, Properties>();
+    private Map<String, Properties> propertiesByFile = new HashMap<String, Properties>();
 
     private final File[] dirs;
 
@@ -141,11 +141,11 @@ public final class ConfigurationImpl implements ConfigurationService {
             } else if (!dirs[i].isDirectory()) {
                 throw new IllegalArgumentException(MessageFormat.format("Not a directory: {0}", directories[i]));
             }
-            processDirectory(dirs[i], fileFilter, properties, propertiesFiles);
+            processDirectory(dirs[i], fileFilter, properties, propertiesFiles, propertiesByFile);
         }
     }
 
-    private static void processDirectory(final File dir, final FileFilter fileFilter, final Map<String, String> properties, final Map<String, String> propertiesFiles) {
+    private static void processDirectory(final File dir, final FileFilter fileFilter, final Map<String, String> properties, final Map<String, String> propertiesFiles, Map<String, Properties> propertiesByFile) {
         final File[] files = dir.listFiles(fileFilter);
         if (files == null) {
             LOG.info(MessageFormat.format("Can't read {0}. Skipping.", dir));
@@ -153,14 +153,14 @@ public final class ConfigurationImpl implements ConfigurationService {
         }
         for (int i = 0; i < files.length; i++) {
             if (files[i].isDirectory()) {
-                processDirectory(files[i], fileFilter, properties, propertiesFiles);
+                processDirectory(files[i], fileFilter, properties, propertiesFiles, propertiesByFile);
             } else {
-                processPropertiesFile(files[i], properties, propertiesFiles);
+                processPropertiesFile(files[i], properties, propertiesFiles, propertiesByFile);
             }
         }
     }
 
-    private static void processPropertiesFile(final File propFile, final Map<String, String> properties, final Map<String, String> propertiesFiles) {
+    private static void processPropertiesFile(final File propFile, final Map<String, String> properties, final Map<String, String> propertiesFiles, Map<String, Properties> propertiesByFile) {
         try {
             final Properties tmp = loadProperties(propFile);
             propertiesByFile.put(propFile.getPath(), tmp);
