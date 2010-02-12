@@ -50,6 +50,7 @@
 package com.openexchange.tools;
 
 import static com.openexchange.java.Autoboxing.I;
+import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -110,7 +111,7 @@ public final class Arrays {
             return toExtend;
         }
         @SuppressWarnings("unchecked")
-        T[] tmp = (T[]) java.lang.reflect.Array.newInstance(other.getClass().getComponentType(), toExtend.length + other.length);
+        T[] tmp = (T[]) Array.newInstance(toExtend.getClass().getComponentType(), toExtend.length + other.length);
         System.arraycopy(toExtend, 0, tmp, 0, toExtend.length);
         System.arraycopy(other, 0, tmp, toExtend.length, other.length);
         return tmp;
@@ -122,9 +123,10 @@ public final class Arrays {
      * @param c The collection whose elements shall be contained in returned array.
      * @return A newly allocated array containing all elements
      */
-    @SuppressWarnings("unchecked")
     public static <T> T[] toArray(final Collection<T> c) {
-        return (T[]) c.toArray(new Object[c.size()]);
+        @SuppressWarnings("unchecked")
+        T[] retval = (T[]) c.toArray(new Object[c.size()]);
+        return retval;
     }
 
 }
