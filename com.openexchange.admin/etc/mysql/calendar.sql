@@ -109,19 +109,21 @@ CREATE TABLE prg_dates_members (
     UNIQUE INDEX member (cid, member_uid, object_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-CREATE TABLE prg_dates_externals (
+CREATE TABLE dateExternal (
     cid INT4 UNSIGNED NOT NULL,
 	objectId INT4 UNSIGNED NOT NULL,
 	mailAddress VARCHAR(255) NOT NULL,
+	displayName VARCHAR(255),
 	confirm INT4 UNSIGNED NOT NULL,
 	reason VARCHAR(255),
 	PRIMARY KEY (cid, objectId, mailAddress)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-CREATE TABLE del_dates_externals (
+CREATE TABLE delDateExternal (
     cid INT4 UNSIGNED NOT NULL,
 	objectId INT4 UNSIGNED NOT NULL,
 	mailAddress VARCHAR(255) NOT NULL,
+	displayName VARCHAR(255),
 	confirm INT4 UNSIGNED NOT NULL,
 	reason VARCHAR(255),
 	PRIMARY KEY (cid, objectId, mailAddress)
