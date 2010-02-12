@@ -75,7 +75,7 @@ public interface Participant extends Cloneable {
      *             {@link ResourceParticipant#ResourceParticipant(int)}, {@link ResourceGroupParticipant#ResourceGroupParticipant(int)}
      */
     @Deprecated
-    void setIdentifier(final int name);
+    void setIdentifier(final int id);
 
     /**
      * Gets this participant's identifier.
