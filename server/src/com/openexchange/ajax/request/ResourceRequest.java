@@ -72,207 +72,205 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ResourceRequest} - Executes a resource request.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public class ResourceRequest {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(ResourceRequest.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+            .getLog(ResourceRequest.class);
 
-	private final ServerSession session;
+    private final ServerSession session;
 
-	private Date timestamp;
+    private Date timestamp;
 
-	/**
-	 * Initializes a new {@link ResourceRequest}.
-	 * 
-	 * @param session
-	 *            The session providing needed user data
-	 */
-	public ResourceRequest(final ServerSession session) {
-		super();
-		this.session = session;
-	}
+    /**
+     * Initializes a new {@link ResourceRequest}.
+     *
+     * @param session
+     *            The session providing needed user data
+     */
+    public ResourceRequest(final ServerSession session) {
+        super();
+        this.session = session;
+    }
 
-	private static final String MODULE_RESOURCE = "resource";
+    private static final String MODULE_RESOURCE = "resource";
 
-	public Object action(final String action, final JSONObject jsonObject) throws AbstractOXException,
-			JSONException {
-		if (action.equalsIgnoreCase(AJAXServlet.ACTION_LIST)) {
-			return actionList(jsonObject);
-		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_GET)) {
-			return actionGet(jsonObject);
-		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_SEARCH)) {
-			return actionSearch(jsonObject);
-		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_ALL)) {
-			return actionAll();
-		} else {
-			/*
-			 * Look-up manage request
-			 */
-			final AJAXRequestHandler handler = ServerRequestHandlerRegistry.getInstance().getHandler(MODULE_RESOURCE,
-					action);
-			if (null == handler) {
-				/*
-				 * No appropriate handler
-				 */
-				throw new AjaxException(AjaxException.Code.UnknownAction, action);
-			}
-			/*
-			 * ... and delegate to manage request
-			 */
-			final AJAXRequestResult result = handler.performAction(action, jsonObject, session, session.getContext());
-			timestamp = result.getTimestamp();
-			return result.getResultObject();
-		}
-	}
+    public Object action(final String action, final JSONObject jsonObject) throws AbstractOXException,
+            JSONException {
+        if (action.equalsIgnoreCase(AJAXServlet.ACTION_LIST)) {
+            return actionList(jsonObject);
+        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_GET)) {
+            return actionGet(jsonObject);
+        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_SEARCH)) {
+            return actionSearch(jsonObject);
+        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_ALL)) {
+            return actionAll();
+        } else {
+            /*
+             * Look-up manage request
+             */
+            final AJAXRequestHandler handler = ServerRequestHandlerRegistry.getInstance().getHandler(MODULE_RESOURCE,
+                    action);
+            if (null == handler) {
+                /*
+                 * No appropriate handler
+                 */
+                throw new AjaxException(AjaxException.Code.UnknownAction, action);
+            }
+            /*
+             * ... and delegate to manage request
+             */
+            final AJAXRequestResult result = handler.performAction(action, jsonObject, session, session.getContext());
+            timestamp = result.getTimestamp();
+            return result.getResultObject();
+        }
+    }
 
-	private JSONArray actionList(final JSONObject jsonObj) throws AbstractOXException, JSONException {
-		final JSONArray jsonResponseArray = new JSONArray();
+    private JSONArray actionList(final JSONObject jsonObj) throws AbstractOXException, JSONException {
+        final JSONArray jsonResponseArray = new JSONArray();
 
-		UserStorage userStorage = null;
+        UserStorage userStorage = null;
 
-		final JSONArray jsonArray = DataParser.checkJSONArray(jsonObj, AJAXServlet.PARAMETER_DATA);
-		final int len = jsonArray.length();
-		if (len > 0) {
-			long lastModified = Long.MIN_VALUE;
-			for (int a = 0; a < len; a++) {
-				final JSONObject jData = jsonArray.getJSONObject(a);
-				final int id = DataParser.checkInt(jData, DataFields.ID);
-				com.openexchange.resource.Resource r = null;
+        final JSONArray jsonArray = DataParser.checkJSONArray(jsonObj, AJAXServlet.PARAMETER_DATA);
+        final int len = jsonArray.length();
+        if (len > 0) {
+            long lastModified = Long.MIN_VALUE;
+            for (int a = 0; a < len; a++) {
+                final JSONObject jData = jsonArray.getJSONObject(a);
+                final int id = DataParser.checkInt(jData, DataFields.ID);
+                com.openexchange.resource.Resource r = null;
 
-				try {
-					r = ResourceServiceImpl.getInstance().getResource(id, session.getContext());
-				} catch (final ResourceException exc) {
-					LOG.debug("resource not found try to find id in user table", exc);
-				}
+                try {
+                    r = ResourceServiceImpl.getInstance().getResource(id, session.getContext());
+                } catch (final ResourceException exc) {
+                    LOG.debug("resource not found try to find id in user table", exc);
+                }
 
-				if (r == null) {
-					if (userStorage == null) {
-						userStorage = UserStorage.getInstance();
-					}
+                if (r == null) {
+                    if (userStorage == null) {
+                        userStorage = UserStorage.getInstance();
+                    }
 
-					final User u = userStorage.getUser(id, session.getContext());
+                    final User u = userStorage.getUser(id, session.getContext());
 
-					r = new com.openexchange.resource.Resource();
-					r.setIdentifier(u.getId());
-					r.setDisplayName(u.getDisplayName());
-					r.setLastModified(new Date(0));
-				}
+                    r = new com.openexchange.resource.Resource();
+                    r.setIdentifier(u.getId());
+                    r.setDisplayName(u.getDisplayName());
+                    r.setLastModified(new Date(0));
+                }
 
-				if (lastModified < r.getLastModified().getTime()) {
-					lastModified = r.getLastModified().getTime();
-				}
+                if (lastModified < r.getLastModified().getTime()) {
+                    lastModified = r.getLastModified().getTime();
+                }
 
-				jsonResponseArray.put(com.openexchange.resource.json.ResourceWriter.writeResource(r));
-			}
-			timestamp = new Date(lastModified);
-		} else {
-			timestamp = new Date(0);
-		}
+                jsonResponseArray.put(com.openexchange.resource.json.ResourceWriter.writeResource(r));
+            }
+            timestamp = new Date(lastModified);
+        } else {
+            timestamp = new Date(0);
+        }
 
-		return jsonResponseArray;
-	}
+        return jsonResponseArray;
+    }
 
-	private JSONObject actionGet(final JSONObject jsonObj) throws AbstractOXException, JSONException {
-		final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
-		com.openexchange.resource.Resource r = null;
-		try {
-			r = ResourceServiceImpl.getInstance().getResource(id, session.getContext());
-		} catch (final ResourceException exc) {
-			LOG.debug("resource not found try to find id in user table", exc);
-		}
+    private JSONObject actionGet(final JSONObject jsonObj) throws AbstractOXException, JSONException {
+        final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
+        com.openexchange.resource.Resource r = null;
+        try {
+            r = ResourceServiceImpl.getInstance().getResource(id, session.getContext());
+        } catch (final ResourceException exc) {
+            LOG.debug("resource not found try to find id in user table", exc);
+        }
 
-		if (r == null) {
-			final User u = UserStorage.getInstance().getUser(id, session.getContext());
+        if (r == null) {
+            final User u = UserStorage.getInstance().getUser(id, session.getContext());
 
-			r = new com.openexchange.resource.Resource();
-			r.setIdentifier(u.getId());
-			r.setDisplayName(u.getDisplayName());
-			r.setLastModified(new Date(0));
-		}
-		timestamp = r.getLastModified();
+            r = new com.openexchange.resource.Resource();
+            r.setIdentifier(u.getId());
+            r.setDisplayName(u.getDisplayName());
+            r.setLastModified(new Date(0));
+        }
+        timestamp = r.getLastModified();
 
-		return com.openexchange.resource.json.ResourceWriter.writeResource(r);
-	}
+        return com.openexchange.resource.json.ResourceWriter.writeResource(r);
+    }
 
-	private JSONArray actionSearch(final JSONObject jsonObj) throws AbstractOXException,
-			JSONException {
-		final ResourceService resourceService = ResourceServiceImpl.getInstance();
-		if (null == resourceService) {
-			throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, ResourceService.class.getName());
-		}
+    private JSONArray actionSearch(final JSONObject jsonObj) throws AbstractOXException,
+            JSONException {
+        final ResourceService resourceService = ResourceServiceImpl.getInstance();
+        if (null == resourceService) {
+            throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, ResourceService.class.getName());
+        }
 
-		final JSONArray jsonResponseArray = new JSONArray();
+        final JSONArray jsonResponseArray = new JSONArray();
 
-		final String searchpattern;
-		final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
-		if (jData.has(SearchFields.PATTERN) && !jData.isNull(SearchFields.PATTERN)) {
-			searchpattern = jData.getString(SearchFields.PATTERN);
-		} else {
-			if (LOG.isWarnEnabled()) {
-				LOG.warn(new StringBuilder(64).append("Missing field \"").append(SearchFields.PATTERN).append(
-						"\" in JSON data. Searching for all as fallback"));
-			}
-			return actionAll();
-		}
+        final String searchpattern;
+        final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
+        if (jData.has(SearchFields.PATTERN) && !jData.isNull(SearchFields.PATTERN)) {
+            searchpattern = jData.getString(SearchFields.PATTERN);
+        } else {
+            if (LOG.isWarnEnabled()) {
+                LOG.warn(new StringBuilder(64).append("Missing field \"").append(SearchFields.PATTERN).append(
+                        "\" in JSON data. Searching for all as fallback"));
+            }
+            return actionAll();
+        }
 
-		final com.openexchange.resource.Resource[] resources = resourceService.searchResources(searchpattern, session.getContext());
-		if (resources.length > 0) {
-			long lastModified = Long.MIN_VALUE;
-			for (final com.openexchange.resource.Resource resource : resources) {
-				if (lastModified < resource.getLastModified().getTime()) {
-					lastModified = resource.getLastModified().getTime();
-				}
-				jsonResponseArray.put(com.openexchange.resource.json.ResourceWriter.writeResource(resource));
-			}
-			timestamp = new Date(lastModified);
-		} else {
-			timestamp = new Date(0);
-		}
+        final com.openexchange.resource.Resource[] resources = resourceService.searchResources(searchpattern, session.getContext());
+        if (resources.length > 0) {
+            long lastModified = Long.MIN_VALUE;
+            for (final com.openexchange.resource.Resource resource : resources) {
+                if (lastModified < resource.getLastModified().getTime()) {
+                    lastModified = resource.getLastModified().getTime();
+                }
+                jsonResponseArray.put(com.openexchange.resource.json.ResourceWriter.writeResource(resource));
+            }
+            timestamp = new Date(lastModified);
+        } else {
+            timestamp = new Date(0);
+        }
 
-		return jsonResponseArray;
-	}
+        return jsonResponseArray;
+    }
 
-	private static final String STR_ALL = "*";
+    private static final String STR_ALL = "*";
 
-	/**
-	 * Performs an all request
-	 * 
-	 * @return A JSON array of all available resources' IDs
-	 * @throws AbstractOXException
-	 *             If all resources cannot be retrieved from resource storage
-	 */
-	private JSONArray actionAll() throws AbstractOXException {
-		final JSONArray jsonResponseArray = new JSONArray();
+    /**
+     * Performs an all request
+     *
+     * @return A JSON array of all available resources' IDs
+     * @throws AbstractOXException
+     *             If all resources cannot be retrieved from resource storage
+     */
+    private JSONArray actionAll() throws AbstractOXException {
+        final JSONArray jsonResponseArray = new JSONArray();
 
-		final com.openexchange.resource.Resource[] resources = ResourceServiceImpl.getInstance().searchResources(
-				STR_ALL, session.getContext());
-		if (resources.length > 0) {
-			long lastModified = Long.MIN_VALUE;
-			for (final com.openexchange.resource.Resource resource : resources) {
-				if (lastModified < resource.getLastModified().getTime()) {
-					lastModified = resource.getLastModified().getTime();
-				}
-				jsonResponseArray.put(resource.getIdentifier());
-			}
-			timestamp = new Date(lastModified);
-		} else {
-			timestamp = new Date(0);
-		}
+        final com.openexchange.resource.Resource[] resources = ResourceServiceImpl.getInstance().searchResources(
+                STR_ALL, session.getContext());
+        if (resources.length > 0) {
+            long lastModified = Long.MIN_VALUE;
+            for (final com.openexchange.resource.Resource resource : resources) {
+                if (lastModified < resource.getLastModified().getTime()) {
+                    lastModified = resource.getLastModified().getTime();
+                }
+                jsonResponseArray.put(resource.getIdentifier());
+            }
+            timestamp = new Date(lastModified);
+        } else {
+            timestamp = new Date(0);
+        }
 
-		return jsonResponseArray;
-	}
+        return jsonResponseArray;
+    }
 
-	/**
-	 * Gets the last-modified time stamp
-	 * 
-	 * @return The last-modified time stamp
-	 */
-	public Date getTimestamp() {
-		return timestamp;
-	}
-
+    /**
+     * Gets the last-modified time stamp
+     *
+     * @return The last-modified time stamp
+     */
+    public Date getTimestamp() {
+        return timestamp;
+    }
 }
