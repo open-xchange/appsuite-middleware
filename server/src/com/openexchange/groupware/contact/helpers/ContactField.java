@@ -66,7 +66,7 @@ import com.openexchange.groupware.contact.mappers.GermanOutlookMapper;
  * different names and IDs, then write a Switcher which will perform an
  * action (on one or more ContactObjects in most cases). 
  * 
- * The design pattern used has no widely acknowledged name (to my the best
+ * The design pattern used has no widely acknowledged name (to the best
  * of my knowledge) but is used in Hibernate under the name Switcher.
  * 
  * Note: This class was mostly generated automatically.
