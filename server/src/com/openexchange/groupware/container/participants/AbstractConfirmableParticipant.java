@@ -89,8 +89,8 @@ public abstract class AbstractConfirmableParticipant implements ConfirmableParti
         bStatus = true;
     }
 
-    public void setMessage(String confirmMessage) {
-        this.message = confirmMessage;
+    public void setMessage(String message) {
+        this.message = message;
         bMessage = true;
     }
 
