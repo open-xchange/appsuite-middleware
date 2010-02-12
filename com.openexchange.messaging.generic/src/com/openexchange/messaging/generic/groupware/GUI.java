@@ -61,12 +61,21 @@ import com.openexchange.groupware.settings.impl.SharedNode;
  */
 public class GUI implements PreferencesItemService {
 
+    private static final String NAME = "gui";
+
+    /**
+     * Default constructor.
+     */
+    public GUI() {
+        super();
+    }
+
     public String[] getPath() {
-        return new String[]{"modules", "messaging" , "gui"};
+        return new String[]{"modules", "messaging" , NAME};
     }
 
     public IValueHandler getSharedValue() {
-        return new SharedNode("gui", 11);
+        return new SharedNode(NAME, 12);
     }
 
 }
