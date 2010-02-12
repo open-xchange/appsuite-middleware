@@ -85,6 +85,7 @@ import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.helper.ParamContainer;
 import com.openexchange.ajax.parser.FolderParser;
+import com.openexchange.ajax.parser.MessagingFolderParser;
 import com.openexchange.ajax.writer.FolderWriter;
 import com.openexchange.ajax.writer.MessagingFolderWriter;
 import com.openexchange.ajax.writer.ResponseWriter;
@@ -125,6 +126,7 @@ import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
+import com.openexchange.messaging.DefaultMessagingFolder;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingAccountAccess;
 import com.openexchange.messaging.MessagingException;
@@ -1897,23 +1899,71 @@ public class Folder extends SessionServlet {
                     folderIdentifier,
                     Integer.valueOf(ctx.getContextId()));
             } else {
-                final MailServletInterface mailInterface = MailServletInterface.getInstance(session);
-                try {
-                    final MailFolder updateFolder = mailInterface.getFolder(folderIdentifier, true);
-                    if (updateFolder != null) {
-                        final MailFolderDescription mfd = new MailFolderDescription();
-                        mfd.setFullname(updateFolder.getFullname());
-                        mfd.setAccountId(MailFolderUtility.prepareMailFolderParam(folderIdentifier).getAccountId());
-                        mfd.setExists(updateFolder.exists());
-                        mfd.setSeparator(updateFolder.getSeparator());
-                        com.openexchange.mail.json.parser.FolderParser.parse(jsonObj, mfd, session, mailInterface.getAccountID());
-                        retval = mailInterface.saveFolder(mfd);
-                    }
-                } finally {
+                final MessagingFolderIdentifier mfi = MessagingFolderIdentifier.parseFQN(folderIdentifier);
+                if (null == mfi) {
+                    final MailServletInterface mailInterface = MailServletInterface.getInstance(session);
                     try {
-                        mailInterface.close(true);
-                    } catch (final MailException e) {
-                        LOG.error(e.getMessage(), e);
+                        final MailFolder updateFolder = mailInterface.getFolder(folderIdentifier, true);
+                        if (updateFolder != null) {
+                            final MailFolderDescription mfd = new MailFolderDescription();
+                            mfd.setFullname(updateFolder.getFullname());
+                            mfd.setAccountId(MailFolderUtility.prepareMailFolderParam(folderIdentifier).getAccountId());
+                            mfd.setExists(updateFolder.exists());
+                            mfd.setSeparator(updateFolder.getSeparator());
+                            com.openexchange.mail.json.parser.FolderParser.parse(jsonObj, mfd, session, mailInterface.getAccountID());
+                            retval = mailInterface.saveFolder(mfd);
+                        }
+                    } finally {
+                        try {
+                            mailInterface.close(true);
+                        } catch (final MailException e) {
+                            LOG.error(e.getMessage(), e);
+                        }
+                    }
+                } else {
+                    /*-
+                     * A messaging folder identifier
+                     * 
+                     * Check for move to another account
+                     */
+                    final int accountId = mfi.getAccountId();
+                    boolean done = false;
+                    if (jsonObj.has(FolderFields.FOLDER_ID)) {
+                        final MessagingFolderIdentifier pfi = new MessagingFolderIdentifier(jsonObj.getString(FolderFields.FOLDER_ID));
+                        if (accountId != pfi.getAccountId()) {
+                            /*
+                             * Move to another account... Use new folder storage API
+                             */
+                            final MessagingFolderParser.ParsedMessagingFolder pmf = new MessagingFolderParser.ParsedMessagingFolder();
+                            pmf.setID(mfi.toString());
+                            pmf.parse(jsonObj);
+                            final com.openexchange.folderstorage.internal.actions.UpdatePerformer up =
+                                new com.openexchange.folderstorage.internal.actions.UpdatePerformer(session);
+                            up.doUpdate(pmf, null);
+                            retval = mfi.toString();
+                            done = true;
+                        }
+                    }
+                    if (!done) {
+                        final String serviceId = mfi.getServiceId();
+                        final MessagingService messagingService = messagingServiceRegistry().getMessagingService(serviceId);
+                        final MessagingAccountAccess accountAccess = messagingService.getAccountAccess(accountId, session);
+                        accountAccess.connect();
+                        try {
+                            /*
+                             * Update
+                             */
+                            final MessagingFolder updateFolder = accountAccess.getFolderAccess().getFolder(mfi.getFullname());
+                            final DefaultMessagingFolder dmf = new DefaultMessagingFolder();
+                            dmf.setId(updateFolder.getId());
+                            dmf.setExists(true);
+                            dmf.setSeparator(updateFolder.getSeparator());
+                            com.openexchange.ajax.parser.MessagingFolderParser.parse(jsonObj, dmf, session);
+                            accountAccess.getFolderAccess().updateFolder(updateFolder.getId(), dmf);
+                            retval = mfi.toString();
+                        } finally {
+                            accountAccess.close();
+                        }
                     }
                 }
             }
@@ -1988,22 +2038,46 @@ public class Folder extends SessionServlet {
                     parentFolder,
                     Integer.valueOf(ctx.getContextId()));
             } else {
-                final MailServletInterface mailInterface = MailServletInterface.getInstance(session);
-                try {
-                    final FullnameArgument arg = MailFolderUtility.prepareMailFolderParam(parentFolder);
-                    final MailFolder parent = mailInterface.getFolder(parentFolder, true);
-                    final MailFolderDescription mfd = new MailFolderDescription();
-                    mfd.setParentFullname(arg.getFullname());
-                    mfd.setParentAccountId(arg.getAccountId());
-                    mfd.setSeparator(parent.getSeparator());
-                    com.openexchange.mail.json.parser.FolderParser.parse(jsonObj, mfd, session, arg.getAccountId());
-                    mfd.setExists(false);
-                    retval = mailInterface.saveFolder(mfd);
-                } finally {
+                final MessagingFolderIdentifier mfi = MessagingFolderIdentifier.parseFQN(parentFolder);
+                if (null == mfi) {
+                    final MailServletInterface mailInterface = MailServletInterface.getInstance(session);
                     try {
-                        mailInterface.close(true);
-                    } catch (final MailException e) {
-                        LOG.error(e.getMessage(), e);
+                        final FullnameArgument arg = MailFolderUtility.prepareMailFolderParam(parentFolder);
+                        final MailFolder parent = mailInterface.getFolder(parentFolder, true);
+                        final MailFolderDescription mfd = new MailFolderDescription();
+                        mfd.setParentFullname(arg.getFullname());
+                        mfd.setParentAccountId(arg.getAccountId());
+                        mfd.setSeparator(parent.getSeparator());
+                        com.openexchange.mail.json.parser.FolderParser.parse(jsonObj, mfd, session, arg.getAccountId());
+                        mfd.setExists(false);
+                        retval = mailInterface.saveFolder(mfd);
+                    } finally {
+                        try {
+                            mailInterface.close(true);
+                        } catch (final MailException e) {
+                            LOG.error(e.getMessage(), e);
+                        }
+                    }
+                } else {
+                    /*
+                     * A messaging folder identifier
+                     */
+                    final String serviceId = mfi.getServiceId();
+                    final MessagingService messagingService = messagingServiceRegistry().getMessagingService(serviceId);
+                    final int accountId = mfi.getAccountId();
+                    final MessagingAccountAccess accountAccess = messagingService.getAccountAccess(accountId, session);
+                    accountAccess.connect();
+                    try {
+                        final MessagingFolder parent = accountAccess.getFolderAccess().getFolder(mfi.getFullname());
+                        final DefaultMessagingFolder dmf = new DefaultMessagingFolder();
+                        dmf.setParentId(mfi.getFullname());
+                        dmf.setSeparator(parent.getSeparator());
+                        com.openexchange.ajax.parser.MessagingFolderParser.parse(jsonObj, dmf, session);
+                        dmf.setExists(false);
+                        final String newId = accountAccess.getFolderAccess().createFolder(dmf);
+                        retval = MessagingFolderIdentifier.getFQN(serviceId, accountId, newId);
+                    } finally {
+                        accountAccess.close();
                     }
                 }
             }
@@ -2101,13 +2175,25 @@ public class Folder extends SessionServlet {
                             deleteIdentifier,
                             Integer.valueOf(ctx.getContextId()));
                     } else {
-                        if (session.getUserConfiguration().hasWebMail()) {
-                            if (mailInterface == null) {
-                                mailInterface = MailServletInterface.getInstance(session);
+                        final MessagingFolderIdentifier mfi = MessagingFolderIdentifier.parseFQN(deleteIdentifier);
+                        if (null == mfi) {
+                            if (session.getUserConfiguration().hasWebMail()) {
+                                if (mailInterface == null) {
+                                    mailInterface = MailServletInterface.getInstance(session);
+                                }
+                                mailInterface.deleteFolder(deleteIdentifier);
+                            } else {
+                                jsonWriter.value(deleteIdentifier);
                             }
-                            mailInterface.deleteFolder(deleteIdentifier);
                         } else {
-                            jsonWriter.value(deleteIdentifier);
+                            final MessagingService messagingService = messagingServiceRegistry().getMessagingService(mfi.getServiceId());
+                            final MessagingAccountAccess accountAccess = messagingService.getAccountAccess(mfi.getAccountId(), session);
+                            accountAccess.connect();
+                            try {
+                                accountAccess.getFolderAccess().deleteFolder(mfi.getFullname());
+                            } finally {
+                                accountAccess.close();
+                            }
                         }
                     }
                 }
@@ -2229,10 +2315,8 @@ public class Folder extends SessionServlet {
                                 jsonWriter.value(deleteIdentifier);
                             }
                         } else {
-                            final String serviceId = mfi.getServiceId();
-                            final MessagingService messagingService = messagingServiceRegistry().getMessagingService(serviceId);
-                            final int accountId = mfi.getAccountId();
-                            final MessagingAccountAccess accountAccess = messagingService.getAccountAccess(accountId, session);
+                            final MessagingService messagingService = messagingServiceRegistry().getMessagingService(mfi.getServiceId());
+                            final MessagingAccountAccess accountAccess = messagingService.getAccountAccess(mfi.getAccountId(), session);
                             accountAccess.connect();
                             try {
                                 accountAccess.getFolderAccess().clearFolder(mfi.getFullname());
