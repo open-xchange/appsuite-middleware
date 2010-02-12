@@ -52,12 +52,11 @@ package com.openexchange.folder.json.osgi;
 import static com.openexchange.folder.json.services.ServiceRegistry.getInstance;
 import java.util.ArrayList;
 import java.util.List;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.folder.json.Constants;
 import com.openexchange.folder.json.multiple.FolderMultipleHandlerFactory;
 import com.openexchange.folder.json.preferences.GUI;
@@ -65,79 +64,136 @@ import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
+import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
 
 /**
  * {@link Activator} - Activator for JSON folder interface.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Activator implements BundleActivator {
+public class Activator extends DeferredActivator {
 
     private List<ServiceRegistration> serviceRegistrations;
 
     private List<ServiceTracker> trackers;
 
-    public void start(final BundleContext context) throws Exception {
-        try {
-			/*
-			 * Service trackers
-			 */
-			trackers = new ArrayList<ServiceTracker>(6);
-			trackers.add(new ServiceTracker(context, FolderService.class.getName(), new RegistryServiceTrackerCustomizer<FolderService>(
-			    context,
-			    getInstance(),
-			    FolderService.class)));
-			trackers.add(new ServiceTracker(context, HttpService.class.getName(), new ServletRegisterer(context)));
-			trackers.add(new ServiceTracker(
-			    context,
-			    ContentTypeDiscoveryService.class.getName(),
-			    new RegistryServiceTrackerCustomizer<ContentTypeDiscoveryService>(context, getInstance(), ContentTypeDiscoveryService.class)));
-			trackers.add(new ServiceTracker(context, AdditionalFolderField.class.getName(), new FolderFieldCollector(
-			    context,
-			    Constants.ADDITIONAL_FOLDER_FIELD_LIST)));
-			/*
-			 * Open trackers
-			 */
-			for (final ServiceTracker tracker : trackers) {
-			    tracker.open();
-			}
-			/*
-			 * Preference item
-			 */
-			serviceRegistrations = new ArrayList<ServiceRegistration>(2);
-			serviceRegistrations.add(context.registerService(PreferencesItemService.class.getName(), new GUI(), null));
-			serviceRegistrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new FolderMultipleHandlerFactory(), null));
-		} catch (Exception e) {
-			org.apache.commons.logging.LogFactory.getLog(Activator.class).error(e.getMessage(), e);
-			throw e;
-		}
+    private String module;
+
+    private String servletPath;
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ConfigurationService.class };
     }
 
-    public void stop(final BundleContext context) throws Exception {
+    @Override
+    protected void handleAvailability(final Class<?> clazz) {
+        apply((ConfigurationService) getService(clazz));
+    }
+
+    @Override
+    protected void handleUnavailability(final Class<?> clazz) {
+        restore();
+    }
+
+    @Override
+    public void startBundle() throws Exception {
         try {
-			if (null != trackers) {
-			    /*
-			     * Close trackers
-			     */
-			    while (!trackers.isEmpty()) {
-			        trackers.remove(0).close();
-			    }
-			    trackers = null;
-			}
-			if (null != serviceRegistrations) {
-			    /*
-			     * Unregister
-			     */
-			    while (!serviceRegistrations.isEmpty()) {
-			        serviceRegistrations.remove(0).unregister();
-			    }
-			    serviceRegistrations = null;
-			}
-		} catch (Exception e) {
-			org.apache.commons.logging.LogFactory.getLog(Activator.class).error(e.getMessage(), e);
-			throw e;
-		}
+            /*
+             * Configure
+             */
+            apply(getService(ConfigurationService.class));
+            /*
+             * Service trackers
+             */
+            trackers = new ArrayList<ServiceTracker>(6);
+            trackers.add(new ServiceTracker(context, FolderService.class.getName(), new RegistryServiceTrackerCustomizer<FolderService>(
+                context,
+                getInstance(),
+                FolderService.class)));
+            trackers.add(new ServiceTracker(context, HttpService.class.getName(), new ServletRegisterer(context)));
+            trackers.add(new ServiceTracker(
+                context,
+                ContentTypeDiscoveryService.class.getName(),
+                new RegistryServiceTrackerCustomizer<ContentTypeDiscoveryService>(context, getInstance(), ContentTypeDiscoveryService.class)));
+            trackers.add(new ServiceTracker(context, AdditionalFolderField.class.getName(), new FolderFieldCollector(
+                context,
+                Constants.ADDITIONAL_FOLDER_FIELD_LIST)));
+            /*
+             * Open trackers
+             */
+            for (final ServiceTracker tracker : trackers) {
+                tracker.open();
+            }
+            /*
+             * Preference item
+             */
+            serviceRegistrations = new ArrayList<ServiceRegistration>(2);
+            serviceRegistrations.add(context.registerService(PreferencesItemService.class.getName(), new GUI(), null));
+            serviceRegistrations.add(context.registerService(
+                MultipleHandlerFactoryService.class.getName(),
+                new FolderMultipleHandlerFactory(),
+                null));
+        } catch (final Exception e) {
+            org.apache.commons.logging.LogFactory.getLog(Activator.class).error(e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    @Override
+    public void stopBundle() throws Exception {
+        try {
+            if (null != trackers) {
+                /*
+                 * Close trackers
+                 */
+                while (!trackers.isEmpty()) {
+                    trackers.remove(0).close();
+                }
+                trackers = null;
+            }
+            if (null != serviceRegistrations) {
+                /*
+                 * Unregister
+                 */
+                while (!serviceRegistrations.isEmpty()) {
+                    serviceRegistrations.remove(0).unregister();
+                }
+                serviceRegistrations = null;
+            }
+            /*
+             * Restore
+             */
+            restore();
+        } catch (final Exception e) {
+            org.apache.commons.logging.LogFactory.getLog(Activator.class).error(e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    private void apply(final ConfigurationService configurationService) {
+        final String module = configurationService.getProperty("com.openexchange.folder.json.module");
+        if (null != module) {
+            this.module = Constants.getModule();
+            Constants.setModule(module);
+        }
+        final String servletPath = configurationService.getProperty("com.openexchange.folder.json.servletPath");
+        if (null != servletPath) {
+            this.servletPath = Constants.getServletPath();
+            Constants.setServletPath(servletPath);
+        }
+    }
+
+    private void restore() {
+        if (null != module) {
+            Constants.setModule(module);
+            module = null;
+        }
+        if (null != servletPath) {
+            Constants.setServletPath(servletPath);
+            servletPath = null;
+        }
     }
 
 }

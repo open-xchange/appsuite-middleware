@@ -62,12 +62,12 @@ public final class Constants {
     /**
      * The folder module identifier.
      */
-    public static final String MODULE = "folders";
+    private static volatile String module = "folders";
 
     /**
      * The folder servlet path.
      */
-    public static final String SERVLET_PATH = "/ajax/" + MODULE;
+    private static volatile String servletPath = "/ajax/" + module;
 
     /**
      * The list for additional folder fields.
@@ -80,4 +80,41 @@ public final class Constants {
     private Constants() {
         super();
     }
+
+    /**
+     * Gets the module string.
+     * 
+     * @return The module string
+     */
+    public static String getModule() {
+        return module;
+    }
+
+    /**
+     * Sets the module string.
+     * 
+     * @param module The module string
+     */
+    public static void setModule(final String module) {
+        Constants.module = module;
+    }
+
+    /**
+     * Gets the servlet path.
+     * 
+     * @return The servlet path
+     */
+    public static String getServletPath() {
+        return servletPath;
+    }
+
+    /**
+     * Sets the servlet path.
+     * 
+     * @param servletPath The servlet path
+     */
+    public static void setServletPath(final String servletPath) {
+        Constants.servletPath = servletPath;
+    }
+
 }

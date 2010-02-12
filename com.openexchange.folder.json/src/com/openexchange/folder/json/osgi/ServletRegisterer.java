@@ -71,6 +71,8 @@ public final class ServletRegisterer implements ServiceTrackerCustomizer {
 
     private final BundleContext context;
 
+    private boolean registered;
+
     /**
      * Initializes a new {@link ServletRegisterer}.
      * 
@@ -82,15 +84,19 @@ public final class ServletRegisterer implements ServiceTrackerCustomizer {
     }
 
     public Object addingService(final ServiceReference reference) {
-        final HttpService service = (HttpService) context.getService(reference);
-        try {
-            service.registerServlet(Constants.SERVLET_PATH, new FolderServlet(), null, null);
-        } catch (final ServletException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (final NamespaceException e) {
-            LOG.error(e.getMessage(), e);
+        if (!registered) {
+            final HttpService service = (HttpService) context.getService(reference);
+            try {
+                service.registerServlet(Constants.getServletPath(), new FolderServlet(), null, null);
+                registered = true;
+            } catch (final ServletException e) {
+                LOG.error(e.getMessage(), e);
+            } catch (final NamespaceException e) {
+                LOG.error(e.getMessage(), e);
+            }
+            return service;
         }
-        return service;
+        return null;
     }
 
     public void modifiedService(final ServiceReference reference, final Object service) {
@@ -98,9 +104,14 @@ public final class ServletRegisterer implements ServiceTrackerCustomizer {
     }
 
     public void removedService(final ServiceReference reference, final Object service) {
-        final HttpService httpService = (HttpService) service;
-        httpService.unregister(Constants.SERVLET_PATH);
-        context.ungetService(reference);
+        if (null != service) {
+            if (registered) {
+                final HttpService httpService = (HttpService) service;
+                httpService.unregister(Constants.getServletPath());
+                registered = false;
+            }
+            context.ungetService(reference);
+        }
     }
 
 }

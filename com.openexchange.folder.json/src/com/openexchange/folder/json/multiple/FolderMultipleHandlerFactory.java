@@ -71,6 +71,6 @@ public final class FolderMultipleHandlerFactory implements MultipleHandlerFactor
     }
 
     public String getSupportedModule() {
-        return Constants.MODULE;
+        return Constants.getModule();
     }
 }
