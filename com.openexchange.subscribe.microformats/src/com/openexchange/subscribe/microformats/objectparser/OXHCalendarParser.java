@@ -182,8 +182,7 @@ public class OXHCalendarParser implements ObjectParser<Appointment>{
     }
 
     private List<String> getClasses(Element node) {
-            Element element = (Element) node;
-            String[] classes = element.getAttribute("class").split("\\s+");
+            String[] classes = node.getAttribute("class").split("\\s+");
             List<String> keys = Arrays.asList(classes);
             if(keys.size() == 0) {
                 return null;
