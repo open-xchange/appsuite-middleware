@@ -55,7 +55,6 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONValue;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
@@ -85,17 +84,74 @@ public final class MessagingFolderWriter {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MessagingFolderWriter.class);
 
+    public interface JSONValuePutter {
+
+        void put(String key, Object value) throws JSONException;
+    }
+
+    public static final class JSONArrayPutter implements JSONValuePutter {
+
+        private JSONArray jsonArray;
+
+        public JSONArrayPutter() {
+            super();
+        }
+
+        public JSONArrayPutter(final JSONArray jsonArray) {
+            this();
+            this.jsonArray = jsonArray;
+        }
+
+        public JSONArrayPutter setJSONArray(final JSONArray jsonArray) {
+            this.jsonArray = jsonArray;
+            return this;
+        }
+
+        public void put(final String key, final Object value) throws JSONException {
+            jsonArray.put(value);
+        }
+
+    }
+
+    public static final class JSONObjectPutter implements JSONValuePutter {
+
+        private JSONObject jsonObject;
+
+        public JSONObjectPutter() {
+            super();
+        }
+
+        public JSONObjectPutter(final JSONObject jsonObject) {
+            this();
+            this.jsonObject = jsonObject;
+        }
+
+        public JSONObjectPutter setJSONObject(final JSONObject jsonObject) {
+            this.jsonObject = jsonObject;
+            return this;
+        }
+
+        public void put(final String key, final Object value) throws JSONException {
+            if ((null == value) || JSONObject.NULL.equals(value) || (null == key)) {
+                // Don't write NULL value
+                return;
+            }
+            jsonObject.put(key, value);
+        }
+
+    }
+
     public static abstract class MessagingFolderFieldWriter {
 
-        public void writeField(final JSONValue jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final boolean withKey) throws MessagingException {
-            writeField(jsonContainer, serviceId, accountId, folder, withKey, null, -1);
+        public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder) throws MessagingException {
+            writeField(jsonContainer, serviceId, accountId, folder, null, -1);
         }
 
-        public void writeField(final JSONValue jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final boolean withKey, final String name, final int hasSubfolders) throws MessagingException {
-            writeField(jsonContainer, serviceId, accountId, folder, withKey, name, hasSubfolders, null, -1, false);
+        public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders) throws MessagingException {
+            writeField(jsonContainer, serviceId, accountId, folder, name, hasSubfolders, null, -1, false);
         }
 
-        public abstract void writeField(JSONValue jsonContainer, String serviceId, int accountId, MessagingFolder folder, boolean withKey, String name, int hasSubfolders, String id, int module, boolean all) throws MessagingException;
+        public abstract void writeField(JSONValuePutter jsonContainer, String serviceId, int accountId, MessagingFolder folder, String name, int hasSubfolders, String id, int module, boolean all) throws MessagingException;
     }
 
     /**
@@ -107,19 +163,12 @@ public final class MessagingFolderWriter {
         WRITERS_MAP.put(Integer.valueOf(DataObject.OBJECT_ID), new MessagingFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValue jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
+            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
                 try {
-                    if (withKey) {
-                        ((JSONObject) jsonContainer).put(DataFields.ID, MessagingFolderIdentifier.getFQN(
+                    jsonContainer.put(DataFields.ID, MessagingFolderIdentifier.getFQN(
                             serviceId,
                             accountId,
                             id == null ? folder.getId() : id));
-                    } else {
-                        ((JSONArray) jsonContainer).put(MessagingFolderIdentifier.getFQN(
-                            serviceId,
-                            accountId,
-                            id == null ? folder.getId() : id));
-                    }
                 } catch (final JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
@@ -128,13 +177,9 @@ public final class MessagingFolderWriter {
         WRITERS_MAP.put(Integer.valueOf(DataObject.CREATED_BY), new MessagingFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValue jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
+            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
                 try {
-                    if (withKey) {
-                        ((JSONObject) jsonContainer).put(DataFields.CREATED_BY, -1);
-                    } else {
-                        ((JSONArray) jsonContainer).put(-1);
-                    }
+                    jsonContainer.put(DataFields.CREATED_BY, Integer.valueOf(-1));
                 } catch (final JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
@@ -143,13 +188,9 @@ public final class MessagingFolderWriter {
         WRITERS_MAP.put(Integer.valueOf(DataObject.MODIFIED_BY), new MessagingFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValue jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
+            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
                 try {
-                    if (withKey) {
-                        ((JSONObject) jsonContainer).put(DataFields.MODIFIED_BY, -1);
-                    } else {
-                        ((JSONArray) jsonContainer).put(-1);
-                    }
+                    jsonContainer.put(DataFields.MODIFIED_BY, Integer.valueOf(-1));
                 } catch (final JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
@@ -158,13 +199,9 @@ public final class MessagingFolderWriter {
         WRITERS_MAP.put(Integer.valueOf(DataObject.CREATION_DATE), new MessagingFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValue jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
+            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
                 try {
-                    if (withKey) {
-                        ((JSONObject) jsonContainer).put(DataFields.CREATION_DATE, 0);
-                    } else {
-                        ((JSONArray) jsonContainer).put(0);
-                    }
+                    jsonContainer.put(DataFields.CREATION_DATE,Integer.valueOf( 0));
                 } catch (final JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
@@ -173,13 +210,9 @@ public final class MessagingFolderWriter {
         WRITERS_MAP.put(Integer.valueOf(DataObject.LAST_MODIFIED), new MessagingFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValue jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
+            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
                 try {
-                    if (withKey) {
-                        ((JSONObject) jsonContainer).put(DataFields.LAST_MODIFIED, 0);
-                    } else {
-                        ((JSONArray) jsonContainer).put(0);
-                    }
+                    jsonContainer.put(DataFields.LAST_MODIFIED, Integer.valueOf(0));
                 } catch (final JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
@@ -188,7 +221,7 @@ public final class MessagingFolderWriter {
         WRITERS_MAP.put(Integer.valueOf(FolderChildObject.FOLDER_ID), new MessagingFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValue jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
+            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
                 try {
                     final Object parent;
                     if (null == folder.getParentId()) {
@@ -196,11 +229,7 @@ public final class MessagingFolderWriter {
                     } else {
                         parent = MessagingFolderIdentifier.getFQN(serviceId, accountId, folder.getParentId());
                     }
-                    if (withKey) {
-                        ((JSONObject) jsonContainer).put(FolderChildFields.FOLDER_ID, parent);
-                    } else {
-                        ((JSONArray) jsonContainer).put(parent);
-                    }
+                    jsonContainer.put(FolderChildFields.FOLDER_ID, parent);
                 } catch (final JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
@@ -209,13 +238,9 @@ public final class MessagingFolderWriter {
         WRITERS_MAP.put(Integer.valueOf(FolderObject.FOLDER_NAME), new MessagingFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValue jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
+            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
                 try {
-                    if (withKey) {
-                        ((JSONObject) jsonContainer).put(FolderFields.TITLE, name == null ? folder.getName() : name);
-                    } else {
-                        ((JSONArray) jsonContainer).put(name == null ? folder.getName() : name);
-                    }
+                    jsonContainer.put(FolderFields.TITLE, name == null ? folder.getName() : name);
                 } catch (final JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
@@ -224,15 +249,11 @@ public final class MessagingFolderWriter {
         WRITERS_MAP.put(Integer.valueOf(FolderObject.MODULE), new MessagingFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValue jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
+            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
                 try {
-                    if (withKey) {
-                        ((JSONObject) jsonContainer).put(FolderFields.MODULE, AJAXServlet.getModuleString(
+                    jsonContainer.put(FolderFields.MODULE, AJAXServlet.getModuleString(
                             module == -1 ? FolderObject.MESSAGING : module,
                             -1));
-                    } else {
-                        ((JSONArray) jsonContainer).put(AJAXServlet.getModuleString(module == -1 ? FolderObject.MESSAGING : module, -1));
-                    }
                 } catch (final JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
@@ -241,13 +262,9 @@ public final class MessagingFolderWriter {
         WRITERS_MAP.put(Integer.valueOf(FolderObject.TYPE), new MessagingFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValue jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
+            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
                 try {
-                    if (withKey) {
-                        ((JSONObject) jsonContainer).put(FolderFields.TYPE, FolderObject.MESSAGING);
-                    } else {
-                        ((JSONArray) jsonContainer).put(FolderObject.MESSAGING);
-                    }
+                    jsonContainer.put(FolderFields.TYPE, Integer.valueOf(FolderObject.MESSAGING));
                 } catch (final JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
@@ -256,7 +273,7 @@ public final class MessagingFolderWriter {
         WRITERS_MAP.put(Integer.valueOf(FolderObject.SUBFOLDERS), new MessagingFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValue jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
+            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
                 try {
                     final boolean boolVal;
                     if (hasSubfolders == -1) {
@@ -267,11 +284,7 @@ public final class MessagingFolderWriter {
                     /*
                      * Put value
                      */
-                    if (withKey) {
-                        ((JSONObject) jsonContainer).put(FolderFields.SUBFOLDERS, boolVal);
-                    } else {
-                        ((JSONArray) jsonContainer).put(boolVal);
-                    }
+                    jsonContainer.put(FolderFields.SUBFOLDERS, Boolean.valueOf(boolVal));
                 } catch (final JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
@@ -280,7 +293,7 @@ public final class MessagingFolderWriter {
         WRITERS_MAP.put(Integer.valueOf(FolderObject.OWN_RIGHTS), new MessagingFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValue jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
+            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
                 try {
                     final MessagingPermission mp;
                     if (folder.isRootFolder()) {
@@ -314,11 +327,7 @@ public final class MessagingFolderWriter {
                     /*
                      * Put value
                      */
-                    if (withKey) {
-                        ((JSONObject) jsonContainer).put(FolderFields.OWN_RIGHTS, permissionBits);
-                    } else {
-                        ((JSONArray) jsonContainer).put(permissionBits);
-                    }
+                    jsonContainer.put(FolderFields.OWN_RIGHTS, Integer.valueOf(permissionBits));
                 } catch (final JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
@@ -327,7 +336,7 @@ public final class MessagingFolderWriter {
         WRITERS_MAP.put(Integer.valueOf(FolderObject.PERMISSIONS_BITS), new MessagingFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValue jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
+            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
                 try {
                     final JSONArray ja = new JSONArray();
                     final List<MessagingPermission> perms = folder.getPermissions();
@@ -341,11 +350,7 @@ public final class MessagingFolderWriter {
                     /*
                      * Put value
                      */
-                    if (withKey) {
-                        ((JSONObject) jsonContainer).put(FolderFields.PERMISSIONS, ja);
-                    } else {
-                        ((JSONArray) jsonContainer).put(ja);
-                    }
+                    jsonContainer.put(FolderFields.PERMISSIONS, ja);
                 } catch (final JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
@@ -354,7 +359,7 @@ public final class MessagingFolderWriter {
         WRITERS_MAP.put(Integer.valueOf(FolderObject.SUMMARY), new MessagingFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValue jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
+            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
                 try {
                     /*
                      * Put value
@@ -362,11 +367,7 @@ public final class MessagingFolderWriter {
                     final String value =
                         folder.isRootFolder() ? "" : new StringBuilder(16).append('(').append(folder.getMessageCount()).append('/').append(
                             folder.getUnreadMessageCount()).append(')').toString();
-                    if (withKey) {
-                        ((JSONObject) jsonContainer).put(FolderFields.SUMMARY, value);
-                    } else {
-                        ((JSONArray) jsonContainer).put(value);
-                    }
+                    jsonContainer.put(FolderFields.SUMMARY, value);
                 } catch (final JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
@@ -375,18 +376,14 @@ public final class MessagingFolderWriter {
         WRITERS_MAP.put(Integer.valueOf(FolderObject.STANDARD_FOLDER), new MessagingFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValue jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
+            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
                 try {
                     /*
                      * Put value
                      */
-                    if (withKey) {
-                        ((JSONObject) jsonContainer).put(
+                    jsonContainer.put(
                             FolderFields.STANDARD_FOLDER,
-                            folder.containsDefaultFolderType() ? folder.isDefaultFolder() : false);
-                    } else {
-                        ((JSONArray) jsonContainer).put(folder.containsDefaultFolderType() ? folder.isDefaultFolder() : false);
-                    }
+                            Boolean.valueOf(folder.containsDefaultFolderType() ? folder.isDefaultFolder() : false));
                 } catch (final JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
@@ -395,16 +392,12 @@ public final class MessagingFolderWriter {
         WRITERS_MAP.put(Integer.valueOf(FolderObject.TOTAL), new MessagingFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValue jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
+            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
                 try {
                     /*
                      * Put value
                      */
-                    if (withKey) {
-                        ((JSONObject) jsonContainer).put(FolderFields.TOTAL, folder.getMessageCount());
-                    } else {
-                        ((JSONArray) jsonContainer).put(folder.getMessageCount());
-                    }
+                    jsonContainer.put(FolderFields.TOTAL, Integer.valueOf(folder.getMessageCount()));
                 } catch (final JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
@@ -413,16 +406,12 @@ public final class MessagingFolderWriter {
         WRITERS_MAP.put(Integer.valueOf(FolderObject.NEW), new MessagingFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValue jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
+            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
                 try {
                     /*
                      * Put value
                      */
-                    if (withKey) {
-                        ((JSONObject) jsonContainer).put(FolderFields.NEW, folder.getNewMessageCount());
-                    } else {
-                        ((JSONArray) jsonContainer).put(folder.getNewMessageCount());
-                    }
+                    jsonContainer.put(FolderFields.NEW, Integer.valueOf(folder.getNewMessageCount()));
                 } catch (final JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
@@ -431,16 +420,12 @@ public final class MessagingFolderWriter {
         WRITERS_MAP.put(Integer.valueOf(FolderObject.UNREAD), new MessagingFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValue jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
+            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
                 try {
                     /*
                      * Put value
                      */
-                    if (withKey) {
-                        ((JSONObject) jsonContainer).put(FolderFields.UNREAD, folder.getUnreadMessageCount());
-                    } else {
-                        ((JSONArray) jsonContainer).put(folder.getUnreadMessageCount());
-                    }
+                    jsonContainer.put(FolderFields.UNREAD, Integer.valueOf(folder.getUnreadMessageCount()));
                 } catch (final JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
@@ -449,16 +434,12 @@ public final class MessagingFolderWriter {
         WRITERS_MAP.put(Integer.valueOf(FolderObject.DELETED), new MessagingFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValue jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
+            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
                 try {
                     /*
                      * Put value
                      */
-                    if (withKey) {
-                        ((JSONObject) jsonContainer).put(FolderFields.DELETED, folder.getDeletedMessageCount());
-                    } else {
-                        ((JSONArray) jsonContainer).put(folder.getDeletedMessageCount());
-                    }
+                    jsonContainer.put(FolderFields.DELETED, Integer.valueOf(folder.getDeletedMessageCount()));
                 } catch (final JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
@@ -467,7 +448,7 @@ public final class MessagingFolderWriter {
         WRITERS_MAP.put(Integer.valueOf(FolderObject.SUBSCRIBED), new MessagingFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValue jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
+            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
                 try {
                     /*
                      * Put value
@@ -478,11 +459,7 @@ public final class MessagingFolderWriter {
                     } else {
                         boolVal = Boolean.TRUE;
                     }
-                    if (withKey) {
-                        ((JSONObject) jsonContainer).put(FolderFields.SUBSCRIBED, boolVal);
-                    } else {
-                        ((JSONArray) jsonContainer).put(boolVal);
-                    }
+                    jsonContainer.put(FolderFields.SUBSCRIBED, boolVal);
                 } catch (final JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
@@ -491,7 +468,7 @@ public final class MessagingFolderWriter {
         WRITERS_MAP.put(Integer.valueOf(FolderObject.SUBSCR_SUBFLDS), new MessagingFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValue jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
+            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
                 try {
                     final Object boolVal;
                     if (!folder.getCapabilities().contains(MessagingFolder.CAPABILITY_SUBSCRIPTION)) {
@@ -504,11 +481,7 @@ public final class MessagingFolderWriter {
                     /*
                      * Put value
                      */
-                    if (withKey) {
-                        ((JSONObject) jsonContainer).put(FolderFields.SUBSCR_SUBFLDS, boolVal);
-                    } else {
-                        ((JSONArray) jsonContainer).put(boolVal);
-                    }
+                    jsonContainer.put(FolderFields.SUBSCR_SUBFLDS, boolVal);
                 } catch (final JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
@@ -517,17 +490,13 @@ public final class MessagingFolderWriter {
         WRITERS_MAP.put(Integer.valueOf(FolderObject.CAPABILITIES), new MessagingFolderFieldWriter() {
 
             @Override
-            public void writeField(final JSONValue jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
+            public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
                 try {
                     /*
                      * Put value
                      */
                     final Integer caps = Integer.valueOf(MessagingFolderImpl.parseCaps(folder.getCapabilities()));
-                    if (withKey) {
-                        ((JSONObject) jsonContainer).put(FolderFields.CAPABILITIES, caps);
-                    } else {
-                        ((JSONArray) jsonContainer).put(caps);
-                    }
+                    jsonContainer.put(FolderFields.CAPABILITIES, caps);
                 } catch (final JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
@@ -554,11 +523,12 @@ public final class MessagingFolderWriter {
      * @return The written JSON object
      * @throws MessagingException
      */
-    public static JSONObject writeMailFolder(final String serviceId, final int accountId, final MessagingFolder folder, final ServerSession session) throws MessagingException {
+    public static JSONObject writeMessagingFolder(final String serviceId, final int accountId, final MessagingFolder folder, final ServerSession session) throws MessagingException {
         final JSONObject jsonObject = new JSONObject();
+        final JSONValuePutter putter = new JSONObjectPutter(jsonObject);
         final MessagingFolderFieldWriter[] writers = getMessagingFolderFieldWriter(ALL_FLD_FIELDS, session);
         for (final MessagingFolderFieldWriter writer : writers) {
-            writer.writeField(jsonObject, serviceId, accountId, folder, true);
+            writer.writeField(putter, serviceId, accountId, folder);
         }
         return jsonObject;
     }
@@ -600,10 +570,10 @@ public final class MessagingFolderWriter {
                 retval[i] = new MessagingFolderFieldWriter() {
 
                     @Override
-                    public void writeField(final JSONValue jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final boolean withKey, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
+                    public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
                         try {
                             /*
-                             * Proper MailFolder-2-FolderObject conversion
+                             * Proper MessagingFolder-2-FolderObject conversion
                              */
                             final FolderObject fo = new FolderObject();
                             fo.setFullName(folder.getId());
@@ -611,15 +581,7 @@ public final class MessagingFolderWriter {
                             fo.setModule(FolderObject.MESSAGING);
                             fo.setType(FolderObject.MESSAGING);
 
-                            if (withKey) {
-                                final String columnName = folderField.getColumnName();
-                                if (null == columnName) {
-                                    return;
-                                }
-                                ((JSONObject) jsonContainer).put(columnName, folderField.renderJSON(folderField.getValue(fo, session)));
-                            } else {
-                                ((JSONArray) jsonContainer).put(folderField.renderJSON(folderField.getValue(fo, session)));
-                            }
+                            jsonContainer.put(folderField.getColumnName(), folderField.renderJSON(folderField.getValue(fo, session)));
                         } catch (final JSONException e) {
                             throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                         }

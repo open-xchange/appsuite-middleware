@@ -1743,28 +1743,54 @@ public class Folder extends SessionServlet {
                 jsonWriter = new OXJSONWriter();
                 new FolderWriter(jsonWriter, session, ctx, timeZoneId, FIELDS).writeOXFolderFieldsAsObject(columns, fo, user.getLocale());
             } else {
-                MailServletInterface mailInterface = null;
-                try {
-                    mailInterface = MailServletInterface.getInstance(session);
-                    final MailFolder f = mailInterface.getFolder(folderIdentifier, true);
-                    final MailFolderFieldWriter[] writers =
-                        com.openexchange.mail.json.writer.FolderWriter.getMailFolderFieldWriter(
-                            columns,
-                            mailInterface.getMailConfig(),
-                            session);
-                    final JSONObject jo = new JSONObject();
-                    final com.openexchange.mail.json.writer.FolderWriter.JSONObjectPutter putter = newObjectPutter().setJSONObject(jo);
-                    for (final MailFolderFieldWriter writer : writers) {
-                        writer.writeField(putter, mailInterface.getAccountID(), f);
-                    }
-                    jsonWriter = new OXJSONWriter(jo);
-                } finally {
+                final MessagingFolderIdentifier mfi = MessagingFolderIdentifier.parseFQN(folderIdentifier);
+                if (null == mfi) {
+                    MailServletInterface mailInterface = null;
                     try {
-                        if (mailInterface != null) {
-                            mailInterface.close(true);
+                        mailInterface = MailServletInterface.getInstance(session);
+                        final MailFolder f = mailInterface.getFolder(folderIdentifier, true);
+                        final MailFolderFieldWriter[] writers =
+                            com.openexchange.mail.json.writer.FolderWriter.getMailFolderFieldWriter(
+                                columns,
+                                mailInterface.getMailConfig(),
+                                session);
+                        final JSONObject jo = new JSONObject();
+                        final com.openexchange.mail.json.writer.FolderWriter.JSONObjectPutter putter = newObjectPutter().setJSONObject(jo);
+                        for (final MailFolderFieldWriter writer : writers) {
+                            writer.writeField(putter, mailInterface.getAccountID(), f);
                         }
-                    } catch (final MailException e) {
-                        LOG.error(e.getMessage(), e);
+                        jsonWriter = new OXJSONWriter(jo);
+                    } finally {
+                        try {
+                            if (mailInterface != null) {
+                                mailInterface.close(true);
+                            }
+                        } catch (final MailException e) {
+                            LOG.error(e.getMessage(), e);
+                        }
+                    }
+                } else {
+                    /*
+                     * A messaging folder identifier
+                     */
+                    final String serviceId = mfi.getServiceId();
+                    final MessagingService messagingService = messagingServiceRegistry().getMessagingService(serviceId);
+                    final int accountId = mfi.getAccountId();
+                    final MessagingAccountAccess accountAccess = messagingService.getAccountAccess(accountId, session);
+                    accountAccess.connect();
+                    try {
+                        final MessagingFolder f = accountAccess.getFolderAccess().getFolder(mfi.getFullname());
+                        final MessagingFolderFieldWriter[] writers =
+                            com.openexchange.ajax.writer.MessagingFolderWriter.getMessagingFolderFieldWriter(columns, session);
+                        final JSONObject jo = new JSONObject();
+                        final com.openexchange.ajax.writer.MessagingFolderWriter.JSONObjectPutter putter =
+                            newMessagingObjectPutter().setJSONObject(jo);
+                        for (final MessagingFolderFieldWriter writer : writers) {
+                            writer.writeField(putter, mfi.getServiceId(), mfi.getAccountId(), f);
+                        }
+                        jsonWriter = new OXJSONWriter(jo);
+                    } finally {
+                        accountAccess.close();
                     }
                 }
             }
@@ -2527,6 +2553,10 @@ public class Folder extends SessionServlet {
 
     private static com.openexchange.mail.json.writer.FolderWriter.JSONObjectPutter newObjectPutter() {
         return new com.openexchange.mail.json.writer.FolderWriter.JSONObjectPutter();
+    }
+
+    private static com.openexchange.ajax.writer.MessagingFolderWriter.JSONObjectPutter newMessagingObjectPutter() {
+        return new com.openexchange.ajax.writer.MessagingFolderWriter.JSONObjectPutter();
     }
 
     private static MessagingServiceRegistry messagingServiceRegistry() throws ServiceException {

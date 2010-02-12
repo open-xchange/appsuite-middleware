@@ -76,6 +76,51 @@ public final class MessagingFolderIdentifier {
         return new StringBuilder(64).append(serviceId).append(DELIM).append(accountId).append('/').append(fullname).toString();
     }
 
+    /**
+     * Checks if given identifier is a valid fully qualified name.
+     * 
+     * @param identifier The identifier to check
+     * @return <code>true</code> if given identifier is a valid fully qualified name; otherwise <code>false</code>
+     */
+    public static boolean isFQN(final String identifier) {
+        if (null == identifier) {
+            return false;
+        }
+        int pos = identifier.indexOf(DELIM);
+        if (pos <= 0) {
+            return false;
+        }
+        final int prev = pos + DELIM.length();
+        pos = identifier.indexOf('/', prev);
+        if (pos <= 0) {
+            /*
+             * "/" character is missing, then expect root folder
+             */
+            if (getUnsignedInteger(identifier.substring(prev)) <= 0) {
+                return false;
+            }
+            return true;
+        }
+        if (getUnsignedInteger(identifier.substring(prev, pos)) <= 0) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Parses given identifier to a valid fully qualified name.
+     * 
+     * @param identifier The identifier to parse
+     * @return The parsed fully qualified name or <code>null</code> if not parseable
+     */
+    public static MessagingFolderIdentifier parseFQN(final String identifier) {
+        try {
+            return new MessagingFolderIdentifier(identifier);
+        } catch (final FolderException e) {
+            return null;
+        }
+    }
+
     private final String serviceId;
 
     private final int accountId;
