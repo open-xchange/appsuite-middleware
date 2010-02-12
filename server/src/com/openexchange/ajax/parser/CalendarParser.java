@@ -49,7 +49,9 @@
 
 package com.openexchange.ajax.parser;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -66,6 +68,7 @@ import com.openexchange.groupware.container.Participants;
 import com.openexchange.groupware.container.ResourceGroupParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 import com.openexchange.tools.servlet.OXJSONException;
 
 /**
@@ -176,7 +179,7 @@ public class CalendarParser extends CommonParser {
         if (jsonobject.has(CalendarFields.USERS)) {
             calendarobject.setUsers(parseUsers(jsonobject, participants));
         }
-
+        parseField(parseAll, calendarobject, timeZone, jsonobject);
         parseElementCommon(calendarobject, jsonobject);
     }
 
@@ -280,4 +283,43 @@ public class CalendarParser extends CommonParser {
             throw new OXConflictException("unknown value in " + CalendarFields.RECURRENCE_TYPE + ": " + value);
         }
     }
+
+    protected void parseField(boolean parseAlles, CalendarObject obj, TimeZone tz, JSONObject json) throws OXJSONException {
+        for (FieldParser<CalendarObject> parser : PARSERS) {
+            try {
+                parser.parse(parseAlles, obj, tz, json);
+            } catch (JSONException e) {
+                throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, e, e.getMessage());
+            }
+        }
+    }
+
+    static interface FieldParser<T> {
+        void parse(boolean parseAll, T obj, TimeZone timeZone, JSONObject json) throws JSONException;
+    }
+
+    private static final FieldParser<CalendarObject> CONFIRMATIONS_PARSER = new FieldParser<CalendarObject>() {
+        public void parse(boolean parseAll, CalendarObject obj, TimeZone timeZone, JSONObject json) throws JSONException {
+            if (!parseAll) {
+                return;
+            }
+            JSONArray confirmations = json.optJSONArray(CalendarFields.CONFIRMATIONS);
+            if (null == confirmations) {
+                return;
+            }
+            ParticipantParser parser = new ParticipantParser();
+            List<ConfirmableParticipant> participants = new ArrayList<ConfirmableParticipant>(confirmations.length());
+            for (int i = 0; i < confirmations.length(); i++) {
+                JSONObject jConfirmation = confirmations.optJSONObject(i);
+                if (null == jConfirmation) {
+                    continue;
+                }
+                participants.add(parser.parseConfirmation(parseAll, jConfirmation));
+            }
+            obj.setConfirmations(participants.toArray(new ConfirmableParticipant[participants.size()]));
+        }
+    };
+
+    @SuppressWarnings("unchecked")
+    private static final FieldParser<CalendarObject>[] PARSERS = new FieldParser[] { CONFIRMATIONS_PARSER };
 }
