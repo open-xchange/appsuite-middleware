@@ -133,13 +133,13 @@ public final class FacebookMessagingActivator extends DeferredActivator {
 
             /*
              * Register component
-             */
             componentRegistration =
                 new ComponentRegistration(
                     context,
                     FacebookMessagingException.COMPONENT,
                     "com.openexchange.messaging.facebook",
                     FacebookMessagingExceptionFactory.getInstance());
+             */ // Do this once we can register more than one app for a given component, otherwise this will not work with the basic messaging bundle.
 
             trackers = new ArrayList<ServiceTracker>();
             for (final ServiceTracker tracker : trackers) {
