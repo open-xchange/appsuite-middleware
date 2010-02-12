@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
@@ -128,7 +129,10 @@ public final class ImageServlet extends HttpServlet {
             if (uid == null) {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing URL parameter " + PARAMETER_UID);
             }
-            final Session[] sessions = getSessions(req, sessiondService);
+            final List<Session> sessions = getSessions(req, sessiondService);
+            if (sessions.isEmpty()) {
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Image not found");
+            }
             final ImageService imageService = ServerServiceRegistry.getInstance().getService(ImageService.class, true);
             for (final Session session : sessions) {
                 ImageData imageData = imageService.getImageData(session, uid);
@@ -259,11 +263,14 @@ public final class ImageServlet extends HttpServlet {
         }
     }
 
-    private static Session[] getSessions(final HttpServletRequest req, final SessiondService sessiondService) throws ContextException, LdapException {
-        final String[] sessionIds = getSessionIds(req);
+    private static List<Session> getSessions(final HttpServletRequest req, final SessiondService sessiondService) throws ContextException, LdapException {
+        final List<String> sessionIds = getSessionIds(req);
+        if (sessionIds.isEmpty()) {
+            return Collections.emptyList();
+        }
         final List<Session> sessions = new ArrayList<Session>(4);
-        for (int i = 0; i < sessionIds.length; i++) {
-            final Session session = sessiondService.getSession(sessionIds[i]);
+        for (final String sessionId : sessionIds) {
+            final Session session = sessiondService.getSession(sessionId);
             if (null != session) {
                 final Context ctx = ContextStorage.getStorageContext(session.getContextId());
                 if (ctx.isEnabled() && UserStorage.getInstance().getUser(session.getUserId(), ctx).isMailEnabled()) {
@@ -271,21 +278,19 @@ public final class ImageServlet extends HttpServlet {
                 }
             }
         }
-        return sessions.toArray(new Session[sessions.size()]);
+        return sessions;
     }
 
-    private static String[] getSessionIds(final HttpServletRequest req) {
+    private static List<String> getSessionIds(final HttpServletRequest req) {
         final Cookie[] cookies = req.getCookies();
-        final List<String> sessionIds = new ArrayList<String>(4);
         if (cookies != null) {
             for (final Cookie cookie : cookies) {
                 final String name = cookie.getName();
                 if (name != null && name.startsWith(Login.COOKIE_PREFIX, 0)) {
-                    sessionIds.add(cookie.getValue());
-                    break;
+                    return Collections.singletonList(cookie.getValue());
                 }
             }
         }
-        return sessionIds.toArray(new String[sessionIds.size()]);
+        return Collections.emptyList();
     }
 }
