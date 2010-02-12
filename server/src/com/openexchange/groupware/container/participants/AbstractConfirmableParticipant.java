@@ -68,6 +68,14 @@ public abstract class AbstractConfirmableParticipant implements ConfirmableParti
         super();
     }
 
+    protected AbstractConfirmableParticipant(ConfirmableParticipant copy) {
+        this();
+        status = copy.getStatus();
+        bStatus = copy.containsStatus();
+        message = copy.getMessage();
+        bMessage = copy.containsMessage();
+    }
+
     public final boolean containsStatus() {
         return bStatus;
     }
