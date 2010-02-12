@@ -116,7 +116,8 @@ CREATE TABLE dateExternal (
 	displayName VARCHAR(255),
 	confirm INT4 UNSIGNED NOT NULL,
 	reason VARCHAR(255),
-	PRIMARY KEY (cid, objectId, mailAddress)
+	PRIMARY KEY (cid,objectId,mailAddress),
+	FOREIGN KEY (cid,objectId) REFERENCES prg_dates(cid,intfield01)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE delDateExternal (
@@ -126,5 +127,6 @@ CREATE TABLE delDateExternal (
 	displayName VARCHAR(255),
 	confirm INT4 UNSIGNED NOT NULL,
 	reason VARCHAR(255),
-	PRIMARY KEY (cid, objectId, mailAddress)
+	PRIMARY KEY (cid,objectId,mailAddress),
+	FOREIGN KEY (cid,objectId) REFERENCES del_dates(cid,intfield01)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
