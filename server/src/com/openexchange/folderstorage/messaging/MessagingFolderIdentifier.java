@@ -55,7 +55,7 @@ import com.openexchange.messaging.MessagingFolder;
 
 /**
  * {@link MessagingFolderIdentifier} - A parsed messaging folder identifier:<br>
- * <code>(&lt;service-id&gt;://)?(&lt;account-id&gt;/)(&lt;fullname&gt;)</code>
+ * <code>(&lt;service-id&gt;)://(&lt;account-id&gt;)/(&lt;fullname&gt;)</code>
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -65,7 +65,7 @@ public final class MessagingFolderIdentifier {
 
     /**
      * Gets the fully qualified name:<br>
-     * <code>(&lt;service-id&gt;://)?(&lt;account-id&gt;/)(&lt;fullname&gt;)</code>
+     * <code>(&lt;service-id&gt;)://(&lt;account-id&gt;)/(&lt;fullname&gt;)</code>
      * 
      * @param serviceId The service identifier
      * @param accountId The account identifier
@@ -135,7 +135,7 @@ public final class MessagingFolderIdentifier {
      * Initializes a new {@link MessagingFolderIdentifier}.
      * 
      * @param identifier The identifier according to pattern:<br>
-     *            <code>(&lt;service-id&gt;://)?(&lt;account-id&gt;/)(&lt;fullname&gt;)</code>
+     *            <code>(&lt;service-id&gt;)://(&lt;account-id&gt;)/(&lt;fullname&gt;)</code>
      * @throws FolderException If identifier is <code>null</code> or invalid
      */
     public MessagingFolderIdentifier(final String identifier) throws FolderException {
