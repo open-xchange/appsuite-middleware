@@ -75,13 +75,13 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
  */
 public abstract class DeferredActivator implements BundleActivator {
 
-    private final class DeferredServiceTrackerCustomizer implements ServiceTrackerCustomizer {
+    private final class DeferredSTC implements ServiceTrackerCustomizer {
 
         private final Class<?> clazz;
 
         private final int index;
 
-        public DeferredServiceTrackerCustomizer(final Class<?> clazz, final int index) {
+        public DeferredSTC(final Class<?> clazz, final int index) {
             super();
             this.clazz = clazz;
             this.index = index;
@@ -95,8 +95,10 @@ public abstract class DeferredActivator implements BundleActivator {
                  * Signal availability
                  */
                 signalAvailability(index, clazz);
+                return addedService;
             }
-            return addedService;
+            context.ungetService(reference);
+            return null;
         }
 
         public void modifiedService(final ServiceReference reference, final Object service) {
@@ -104,19 +106,21 @@ public abstract class DeferredActivator implements BundleActivator {
         }
 
         public void removedService(final ServiceReference reference, final Object service) {
-            try {
-                if (clazz.isInstance(service)) {
-                    /*
-                     * Signal unavailability
-                     */
-                    signalUnavailability(index, clazz);
-                    /*
-                     * ... and remove from services
-                     */
-                    services.remove(clazz);
+            if (null != service) {
+                try {
+                    if (clazz.isInstance(service)) {
+                        /*
+                         * Signal unavailability
+                         */
+                        signalUnavailability(index, clazz);
+                        /*
+                         * ... and remove from services
+                         */
+                        services.remove(clazz);
+                    }
+                } finally {
+                    context.ungetService(reference);
                 }
-            } finally {
-                context.ungetService(reference);
             }
         }
     }
@@ -206,7 +210,7 @@ public abstract class DeferredActivator implements BundleActivator {
          * Initialize service trackers for needed services
          */
         for (int i = 0; i < len; i++) {
-            serviceTrackers[i] = new ServiceTracker(context, classes[i].getName(), new DeferredServiceTrackerCustomizer(classes[i], i));
+            serviceTrackers[i] = new ServiceTracker(context, classes[i].getName(), new DeferredSTC(classes[i], i));
             serviceTrackers[i].open();
         }
         if (len == 0) {
