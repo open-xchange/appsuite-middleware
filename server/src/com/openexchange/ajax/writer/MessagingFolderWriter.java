@@ -165,10 +165,9 @@ public final class MessagingFolderWriter {
             @Override
             public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
                 try {
-                    jsonContainer.put(DataFields.ID, MessagingFolderIdentifier.getFQN(
-                            serviceId,
-                            accountId,
-                            id == null ? folder.getId() : id));
+                    jsonContainer.put(
+                        DataFields.ID,
+                        null == id ? MessagingFolderIdentifier.getFQN(serviceId, accountId, folder.getId()) : id);
                 } catch (final JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
@@ -201,7 +200,7 @@ public final class MessagingFolderWriter {
             @Override
             public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
                 try {
-                    jsonContainer.put(DataFields.CREATION_DATE,Integer.valueOf( 0));
+                    jsonContainer.put(DataFields.CREATION_DATE, Integer.valueOf(0));
                 } catch (final JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
@@ -251,9 +250,7 @@ public final class MessagingFolderWriter {
             @Override
             public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
                 try {
-                    jsonContainer.put(FolderFields.MODULE, AJAXServlet.getModuleString(
-                            module == -1 ? FolderObject.MESSAGING : module,
-                            -1));
+                    jsonContainer.put(FolderFields.MODULE, AJAXServlet.getModuleString(module == -1 ? FolderObject.MESSAGING : module, -1));
                 } catch (final JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
@@ -382,8 +379,8 @@ public final class MessagingFolderWriter {
                      * Put value
                      */
                     jsonContainer.put(
-                            FolderFields.STANDARD_FOLDER,
-                            Boolean.valueOf(folder.containsDefaultFolderType() ? folder.isDefaultFolder() : false));
+                        FolderFields.STANDARD_FOLDER,
+                        Boolean.valueOf(folder.containsDefaultFolderType() ? folder.isDefaultFolder() : false));
                 } catch (final JSONException e) {
                     throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
                 }
