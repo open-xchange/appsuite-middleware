@@ -2218,13 +2218,27 @@ public class Folder extends SessionServlet {
                             deleteIdentifier,
                             Integer.valueOf(ctx.getContextId()));
                     } else {
-                        if (UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx).hasWebMail()) {
-                            if (mailInterface == null) {
-                                mailInterface = MailServletInterface.getInstance(session);
+                        final MessagingFolderIdentifier mfi = MessagingFolderIdentifier.parseFQN(deleteIdentifier);
+                        if (null == mfi) {
+                            if (UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx).hasWebMail()) {
+                                if (mailInterface == null) {
+                                    mailInterface = MailServletInterface.getInstance(session);
+                                }
+                                mailInterface.clearFolder(deleteIdentifier);
+                            } else {
+                                jsonWriter.value(deleteIdentifier);
                             }
-                            mailInterface.clearFolder(deleteIdentifier);
                         } else {
-                            jsonWriter.value(deleteIdentifier);
+                            final String serviceId = mfi.getServiceId();
+                            final MessagingService messagingService = messagingServiceRegistry().getMessagingService(serviceId);
+                            final int accountId = mfi.getAccountId();
+                            final MessagingAccountAccess accountAccess = messagingService.getAccountAccess(accountId, session);
+                            accountAccess.connect();
+                            try {
+                                accountAccess.getFolderAccess().clearFolder(mfi.getFullname());
+                            } finally {
+                                accountAccess.close();
+                            }
                         }
                     }
                 }
