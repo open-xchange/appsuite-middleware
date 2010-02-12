@@ -5,6 +5,7 @@
 * 2010-02-12 - thorben.betten@open-xchange.com
 
  - Bugfix #15350: Fixed retrieval of session from given cookies
+ - Bugfix #14946: No null values in response to client
 
 * 2010-02-11 - marcus.klein@open-xchange.com
 
