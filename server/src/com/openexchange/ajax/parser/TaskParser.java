@@ -81,8 +81,8 @@ public class TaskParser extends CalendarParser {
             parseElementTask(taskobject, jsonobject);
         } catch (final OXJSONException e) {
             throw e;
-        } catch (final Exception exc) {
-            throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, exc);
+        } catch (final Exception e) {
+            throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, e, e.getMessage());
         }
     }
 
