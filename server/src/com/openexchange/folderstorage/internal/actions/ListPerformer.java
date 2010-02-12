@@ -426,9 +426,11 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                             } else {
                                 userPermission = CalculatePermission.calculate(subfolder, getSession(), getAllowedContentTypes());
                             }
-                            final UserizedFolder userizedFolder =
-                                getUserizedFolder(subfolder, userPermission, treeId, all, true, newParameters, openedStorages);
-                            subfolders[index] = userizedFolder;
+                            if (userPermission.getFolderPermission() >= Permission.READ_FOLDER) {
+                                final UserizedFolder userizedFolder =
+                                    getUserizedFolder(subfolder, userPermission, treeId, all, true, newParameters, openedStorages);
+                                subfolders[index] = userizedFolder;
+                            }
                         }
                         for (final FolderStorage openedStorage : openedStorages) {
                             openedStorage.commitTransaction(newParameters);

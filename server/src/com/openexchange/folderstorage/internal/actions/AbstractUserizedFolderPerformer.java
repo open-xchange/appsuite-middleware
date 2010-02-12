@@ -74,7 +74,8 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link AbstractUserizedFolderPerformer} - Abstract super class for actions which return one or multiple instances of {@link UserizedFolder}.
+ * {@link AbstractUserizedFolderPerformer} - Abstract super class for actions which return one or multiple instances of
+ * {@link UserizedFolder}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -310,7 +311,16 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                         /*
                          * Found a storage which offers visible subfolder(s)
                          */
-                        visibleSubfolderIds.add(visibleIds[0].getId());
+                        for (int j = 0; visibleSubfolderIds.isEmpty() && j < visibleIds.length; j++) {
+                            final String id = visibleIds[0].getId();
+                            final Folder subfolder = curStorage.getFolder(treeId, id, storageParameters);
+                            if (all || subfolder.isSubscribed()) {
+                                final Permission p = CalculatePermission.calculate(subfolder, session, getAllowedContentTypes());
+                                if (p.getFolderPermission() > Permission.READ_FOLDER) {
+                                    visibleSubfolderIds.add(id);
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -335,7 +345,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                 } else {
                     subfolderPermission = CalculatePermission.calculate(subfolder, getSession(), getAllowedContentTypes());
                 }
-                if (subfolderPermission.getFolderPermission() > Permission.NO_PERMISSIONS && (all ? true : subfolder.isSubscribed())) {
+                if (subfolderPermission.getFolderPermission() > Permission.NO_PERMISSIONS && (all || subfolder.isSubscribed())) {
                     visibleSubfolderIds.add(id);
                 }
             }
