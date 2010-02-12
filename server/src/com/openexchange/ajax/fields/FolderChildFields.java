@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.fields;
 
+/**
+ * {@link FolderChildFields} - Constants for folder child fields.
+ */
 public interface FolderChildFields extends DataFields {
 
     public static final String FOLDER_ID = "folder_id";

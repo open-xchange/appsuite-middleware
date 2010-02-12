@@ -168,7 +168,7 @@ public final class FolderWriter {
     }
 
     /**
-     * Maps folder field constants to corresponding instance of {@link MailFolderFieldWriter}
+     * Maps folder field constants to corresponding instance of {@link MailFolderFieldWriter}.
      */
     private static final Map<Integer, MailFolderFieldWriter> WRITERS_MAP = new HashMap<Integer, MailFolderFieldWriter>(20);
 
