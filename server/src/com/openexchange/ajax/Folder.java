@@ -958,53 +958,78 @@ public class Folder extends SessionServlet {
                  * Determine if all folders, regardless of their subscription status, shall be included
                  */
                 final boolean all = (STRING_1.equals(paramContainer.getStringParam(PARAMETER_ALL)));
-                SearchIterator<MailFolder> it = null;
-                MailServletInterface mailInterface = null;
-                try {
-                    mailInterface = MailServletInterface.getInstance(session);
+                final MessagingFolderIdentifier mfi = MessagingFolderIdentifier.parseFQN(parentIdentifier);
+                if (null == mfi) {
+                    SearchIterator<MailFolder> it = null;
+                    MailServletInterface mailInterface = null;
+                    try {
+                        mailInterface = MailServletInterface.getInstance(session);
+                        /*
+                         * E-Mail folder
+                         */
+                        it = mailInterface.getChildFolders(parentIdentifier, all);
+                        final MailFolderFieldWriter[] writers =
+                            com.openexchange.mail.json.writer.FolderWriter.getMailFolderFieldWriter(
+                                columns,
+                                mailInterface.getMailConfig(),
+                                session);
+                        final int size = it.size();
+                        boolean inboxFound = false;
+                        final com.openexchange.mail.json.writer.FolderWriter.JSONArrayPutter putter = newArrayPutter();
+                        for (int i = 0; i < size; i++) {
+                            final MailFolder f = it.next();
+                            if (!inboxFound && STR_INBOX.equals(f.getFullname())) {
+                                inboxFound = true;
+                                final JSONArray ja = new JSONArray();
+                                putter.setJSONArray(ja);
+                                // TODO: Translation for INBOX?!
+                                for (int j = 0; j < writers.length; j++) {
+                                    writers[j].writeField(putter, mailInterface.getAccountID(), f, DEF_NAME_INBOX, -1, null, -1, all);
+                                }
+                                jsonWriter.value(ja);
+                            } else {
+                                final JSONArray ja = new JSONArray();
+                                putter.setJSONArray(ja);
+                                for (int j = 0; j < writers.length; j++) {
+                                    writers[j].writeField(putter, mailInterface.getAccountID(), f, null, -1, null, -1, all);
+                                }
+                                jsonWriter.value(ja);
+                            }
+                        }
+                    } finally {
+                        if (it != null) {
+                            it.close();
+                            it = null;
+                        }
+                        if (mailInterface != null) {
+                            try {
+                                mailInterface.close(true);
+                                mailInterface = null;
+                            } catch (final MailException e) {
+                                LOG.error(e.getMessage(), e);
+                            }
+                        }
+                    }
+                } else {
                     /*
-                     * E-Mail folder
+                     * A messaging folder identifier
                      */
-                    it = mailInterface.getChildFolders(parentIdentifier, all);
-                    final MailFolderFieldWriter[] writers =
-                        com.openexchange.mail.json.writer.FolderWriter.getMailFolderFieldWriter(
-                            columns,
-                            mailInterface.getMailConfig(),
-                            session);
-                    final int size = it.size();
-                    boolean inboxFound = false;
-                    final com.openexchange.mail.json.writer.FolderWriter.JSONArrayPutter putter = newArrayPutter();
-                    for (int i = 0; i < size; i++) {
-                        final MailFolder f = it.next();
-                        if (!inboxFound && STR_INBOX.equals(f.getFullname())) {
-                            inboxFound = true;
-                            final JSONArray ja = new JSONArray();
-                            putter.setJSONArray(ja);
-                            // TODO: Translation for INBOX?!
-                            for (int j = 0; j < writers.length; j++) {
-                                writers[j].writeField(putter, mailInterface.getAccountID(), f, DEF_NAME_INBOX, -1, null, -1, all);
-                            }
-                            jsonWriter.value(ja);
-                        } else {
-                            final JSONArray ja = new JSONArray();
-                            for (int j = 0; j < writers.length; j++) {
-                                writers[j].writeField(putter, mailInterface.getAccountID(), f, null, -1, null, -1, all);
-                            }
-                            jsonWriter.value(ja);
+                    final String serviceId = mfi.getServiceId();
+                    final MessagingService messagingService = messagingServiceRegistry().getMessagingService(serviceId);
+                    final int accountId = mfi.getAccountId();
+                    final MessagingAccountAccess accountAccess = messagingService.getAccountAccess(accountId, session);
+                    accountAccess.connect();
+                    try {
+                        final MessagingFolder[] subfolders = accountAccess.getFolderAccess().getSubfolders(mfi.getFullname(), all);
+                        final com.openexchange.ajax.writer.MessagingFolderWriter.JSONArrayPutter putter = newMessagingArrayPutter();
+                        for (int i = 0; i < subfolders.length; i++) {
+                            
+                            
                         }
-                    }
-                } finally {
-                    if (it != null) {
-                        it.close();
-                        it = null;
-                    }
-                    if (mailInterface != null) {
-                        try {
-                            mailInterface.close(true);
-                            mailInterface = null;
-                        } catch (final MailException e) {
-                            LOG.error(e.getMessage(), e);
-                        }
+                        
+                        
+                    } finally {
+                        accountAccess.close();
                     }
                 }
             }
