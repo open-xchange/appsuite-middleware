@@ -196,6 +196,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
+    private static final long ZERO = 0L;
+
     private static final String MIME_TEXT_HTML_CHARSET_UTF_8 = "text/html; charset=UTF-8";
 
     private static final String MIME_TEXT_PLAIN = "text/plain";
@@ -458,11 +460,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         final MailFieldWriter[] writers = MessageWriter.getMailFieldWriter(MailListField.getFields(columns));
                         for (final MailMessage mail : modified) {
                             final JSONArray ja = new JSONArray();
-                            if (mail == null) {
-                                for (int j = 0; j < writers.length; j++) {
-                                    ja.put(JSONObject.NULL);
-                                }
-                            } else {
+                            if (mail != null) {
                                 for (final MailFieldWriter writer : writers) {
                                     writer.writeField(ja, mail, 0, false, mailInterface.getAccountID(), userId, contextId);
                                 }
@@ -627,6 +625,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         /*
          * Start response
          */
+        final long start = DEBUG ? System.currentTimeMillis() : ZERO;
         jsonWriter.array();
         SearchIterator<MailMessage> it = null;
         try {
@@ -693,11 +692,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     for (int i = 0; i < size; i++) {
                         final MailMessage mail = it.next();
                         final JSONArray ja = new JSONArray();
-                        if (mail == null) {
-                            for (int j = 0; j < writers.length; j++) {
-                                ja.put(JSONObject.NULL);
-                            }
-                        } else {
+                        if (mail != null) {
                             for (final MailFieldWriter writer : writers) {
                                 writer.writeField(ja, mail, mail.getThreadLevel(), false, mailInterface.getAccountID(), userId, contextId);
                             }
@@ -715,11 +710,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     for (int i = 0; i < size; i++) {
                         final MailMessage mail = it.next();
                         final JSONArray ja = new JSONArray();
-                        if (mail == null) {
-                            for (int j = 0; j < writers.length; j++) {
-                                ja.put(JSONObject.NULL);
-                            }
-                        } else {
+                        if (mail != null) {
                             for (final MailFieldWriter writer : writers) {
                                 writer.writeField(ja, mail, 0, false, mailInterface.getAccountID(), userId, contextId);
                             }
@@ -751,6 +742,10 @@ public class Mail extends PermissionServlet implements UploadListener {
          * Close response and flush print writer
          */
         jsonWriter.endArray();
+        if (DEBUG) {
+            final long d = System.currentTimeMillis() - start;
+            LOG.debug(new StringBuilder(32).append("/ajax/mail?action=all performed in ").append(d).append("msec"));
+        }
         response.setData(jsonWriter.getObject());
         response.setTimestamp(null);
         return response;
@@ -982,7 +977,7 @@ public class Mail extends PermissionServlet implements UploadListener {
     }
 
     private final Response actionGetStructure(final ServerSession session, final ParamContainer paramContainer, final MailServletInterface mailInterfaceArg) {
-        final long s = DEBUG ? System.currentTimeMillis() : 0L;
+        final long s = DEBUG ? System.currentTimeMillis() : ZERO;
         /*
          * Some variables
          */
@@ -1162,7 +1157,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             /*
              * Get message
              */
-            final long s = DEBUG ? System.currentTimeMillis() : 0L;
+            final long s = DEBUG ? System.currentTimeMillis() : ZERO;
             MailServletInterface mailInterface = mailInterfaceArg;
             boolean closeMailInterface = false;
             try {
@@ -2797,6 +2792,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         /*
          * Start response
          */
+        final long start = DEBUG ? System.currentTimeMillis() : ZERO;
         jsonWriter.array();
         try {
             final int[] columns = paramContainer.checkIntArrayParam(PARAMETER_COLUMNS);
@@ -2876,6 +2872,10 @@ public class Mail extends PermissionServlet implements UploadListener {
          * Close response and flush print writer
          */
         jsonWriter.endArray();
+        if (DEBUG) {
+            final long d = System.currentTimeMillis() - start;
+            LOG.debug(new StringBuilder(32).append("/ajax/mail?action=list performed in ").append(d).append("msec"));
+        }
         response.setData(jsonWriter.getObject());
         response.setTimestamp(null);
         return response;
@@ -2921,14 +2921,11 @@ public class Mail extends PermissionServlet implements UploadListener {
     }
 
     private static String ensureString(final String key, final JSONObject jo) throws MailException {
-        final String value = jo.optString(key);
-        if (0 == value.length()) {
-            /*
-             * JSONObject.optString() returns an empty string if there is no such key.
-             */
+        final Object value = jo.opt(key);
+        if (null == value || JSONObject.NULL.equals(value)) {
             throw new MailException(MailException.Code.MISSING_PARAMETER, key);
         }
-        return value;
+        return value.toString();
     }
 
     public void actionPutDeleteMails(final ServerSession session, final JSONWriter writer, final JSONObject jsonObj, final MailServletInterface mi) throws JSONException {

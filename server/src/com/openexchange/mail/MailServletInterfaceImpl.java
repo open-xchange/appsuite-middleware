@@ -1147,7 +1147,17 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         } catch (final OXCachingException e) {
             LOG.error(e.getMessage(), e);
         }
-        return SearchIteratorAdapter.<MailMessage> createArrayIterator(mails);
+        if (null == mails) {
+            return SearchIteratorAdapter.createEmptyIterator();
+        }
+        final List<MailMessage> l = new ArrayList<MailMessage>(mails.length);
+        for (int i = 0; i < mails.length; i++) {
+            final MailMessage mm = mails[i];
+            if (null != mm) {
+                l.add(mm);
+            }
+        }
+        return new SearchIteratorDelegator<MailMessage>(l);
     }
 
     /**
