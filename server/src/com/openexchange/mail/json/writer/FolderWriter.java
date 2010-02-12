@@ -179,9 +179,9 @@ public final class FolderWriter {
             public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
                 try {
                     if (accountId >= 0) {
-                        putter.put(DataFields.ID, prepareFullname(accountId, fullName == null ? folder.getFullname() : fullName));
+                        putter.put(DataFields.ID, fullName == null ? prepareFullname(accountId, folder.getFullname()) : fullName);
                     } else {
-                        putter.put(DataFields.ID, fullName == null ? folder.getFullname() : fullName);
+                        putter.put(DataFields.ID, fullName == null ? prepareFullname(accountId, folder.getFullname()) : fullName);
                     }
                 } catch (final JSONException e) {
                     throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
