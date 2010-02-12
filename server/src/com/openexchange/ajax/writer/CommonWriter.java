@@ -109,7 +109,7 @@ public class CommonWriter extends FolderChildWriter {
         }
     }
 
-    protected static final FieldWriter<CommonObject> CATEGORIES_WRITER = new FieldWriter<CommonObject>() {
+    private static final FieldWriter<CommonObject> CATEGORIES_WRITER = new FieldWriter<CommonObject>() {
         public void write(CommonObject obj, TimeZone timeZone, JSONArray json) {
             writeValue(obj.getCategories(), json, obj.containsCategories());
         }
@@ -118,7 +118,7 @@ public class CommonWriter extends FolderChildWriter {
         }
     };
 
-    protected static final FieldWriter<CommonObject> PRIVATE_FLAG_WRITER = new FieldWriter<CommonObject>() {
+    private static final FieldWriter<CommonObject> PRIVATE_FLAG_WRITER = new FieldWriter<CommonObject>() {
         public void write(CommonObject obj, TimeZone timeZone, JSONArray json) {
             writeValue(obj.getPrivateFlag(), json, obj.containsPrivateFlag());
         }
@@ -127,7 +127,7 @@ public class CommonWriter extends FolderChildWriter {
         }
     };
 
-    protected static final FieldWriter<CommonObject> COLORLABEL_WRITER = new FieldWriter<CommonObject>() {
+    private static final FieldWriter<CommonObject> COLORLABEL_WRITER = new FieldWriter<CommonObject>() {
         public void write(CommonObject obj, TimeZone timeZone, JSONArray json) {
             writeValue(obj.getLabel(), json, obj.containsLabel());
         }
@@ -136,7 +136,7 @@ public class CommonWriter extends FolderChildWriter {
         }
     };
 
-    protected static final FieldWriter<CommonObject> NUMBER_OF_ATTACHMENTS_WRITER = new FieldWriter<CommonObject>() {
+    private static final FieldWriter<CommonObject> NUMBER_OF_ATTACHMENTS_WRITER = new FieldWriter<CommonObject>() {
         public void write(CommonObject obj, TimeZone timeZone, JSONArray json) {
             writeValue(obj.getNumberOfAttachments(), json, obj.containsNumberOfAttachments());
         }
@@ -145,7 +145,7 @@ public class CommonWriter extends FolderChildWriter {
         }
     };
 
-    protected static final FieldWriter<CommonObject> LAST_MODIFIED_OF_NEWEST_ATTACHMENT_UTC_WRITER = new FieldWriter<CommonObject>() {
+    private static final FieldWriter<CommonObject> LAST_MODIFIED_OF_NEWEST_ATTACHMENT_UTC_WRITER = new FieldWriter<CommonObject>() {
         public void write(CommonObject obj, TimeZone timeZone, JSONArray json) {
             writeValue(obj.getLastModifiedOfNewestAttachment(), UTC, json, obj.containsLastModifiedOfNewestAttachment());
         }
@@ -159,7 +159,7 @@ public class CommonWriter extends FolderChildWriter {
         }
     };
 
-    protected static final FieldWriter<CommonObject> NUMBER_OF_LINKS_WRITER = new FieldWriter<CommonObject>() {
+    private static final FieldWriter<CommonObject> NUMBER_OF_LINKS_WRITER = new FieldWriter<CommonObject>() {
         public void write(CommonObject obj, TimeZone timeZone, JSONArray json) {
             writeValue(obj.getNumberOfLinks(), json, obj.containsNumberOfLinks());
         }

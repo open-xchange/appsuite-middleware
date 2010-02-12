@@ -93,7 +93,7 @@ public class FolderChildWriter extends DataWriter {
         }
     }
 
-    protected static final FieldWriter<FolderChildObject> FOLDER_ID_WRITER = new FieldWriter<FolderChildObject>() {
+    private static final FieldWriter<FolderChildObject> FOLDER_ID_WRITER = new FieldWriter<FolderChildObject>() {
         public void write(FolderChildObject obj, TimeZone timeZone, JSONArray json) {
             writeValue(obj.getParentFolderID(), json, obj.containsParentFolderID());
         }

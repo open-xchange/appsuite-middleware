@@ -490,7 +490,7 @@ public class DataWriter {
         void write(T obj, TimeZone timeZone, JSONObject json) throws JSONException;
     }
 
-    protected static final FieldWriter<DataObject> OBJECT_ID_WRITER = new FieldWriter<DataObject>() {
+    private static final FieldWriter<DataObject> OBJECT_ID_WRITER = new FieldWriter<DataObject>() {
         public void write(DataObject obj, TimeZone timeZone, JSONArray json) {
             writeValue(obj.getObjectID(), json, obj.containsObjectID());
         }
@@ -499,7 +499,7 @@ public class DataWriter {
         }
     };
 
-    protected static final FieldWriter<DataObject> CREATED_BY_WRITER = new FieldWriter<DataObject>() {
+    private static final FieldWriter<DataObject> CREATED_BY_WRITER = new FieldWriter<DataObject>() {
         public void write(DataObject obj, TimeZone timeZone, JSONArray json) {
             writeValue(obj.getCreatedBy(), json, obj.containsCreatedBy());
         }
@@ -508,7 +508,7 @@ public class DataWriter {
         }
     };
 
-    protected static final FieldWriter<DataObject> CREATION_DATE_WRITER = new FieldWriter<DataObject>() {
+    private static final FieldWriter<DataObject> CREATION_DATE_WRITER = new FieldWriter<DataObject>() {
         public void write(DataObject obj, TimeZone timeZone, JSONArray json) {
             writeValue(obj.getCreationDate(), timeZone, json, obj.containsCreationDate());
         }
@@ -517,7 +517,7 @@ public class DataWriter {
         }
     };
 
-    protected static final FieldWriter<DataObject> MODIFIED_BY_WRITER = new FieldWriter<DataObject>() {
+    private static final FieldWriter<DataObject> MODIFIED_BY_WRITER = new FieldWriter<DataObject>() {
         public void write(DataObject obj, TimeZone timeZone, JSONArray json) {
             writeValue(obj.getModifiedBy(), json, obj.containsModifiedBy());
         }
@@ -526,7 +526,7 @@ public class DataWriter {
         }
     };
 
-    protected static final FieldWriter<DataObject> LAST_MODIFIED_WRITER = new FieldWriter<DataObject>() {
+    private static final FieldWriter<DataObject> LAST_MODIFIED_WRITER = new FieldWriter<DataObject>() {
         public void write(DataObject obj, TimeZone timeZone, JSONArray json) {
             writeValue(obj.getLastModified(), timeZone, json, obj.containsLastModified());
         }
@@ -535,7 +535,7 @@ public class DataWriter {
         }
     };
 
-    protected static final FieldWriter<DataObject> LAST_MODIFIED_UTC_WRITER = new FieldWriter<DataObject>() {
+    private static final FieldWriter<DataObject> LAST_MODIFIED_UTC_WRITER = new FieldWriter<DataObject>() {
         public void write(DataObject obj, TimeZone timeZone, JSONArray json) {
             writeValue(obj.getLastModified(), UTC, json, obj.containsLastModified());
         }

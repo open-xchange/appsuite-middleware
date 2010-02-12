@@ -227,7 +227,7 @@ public abstract class CalendarWriter extends CommonWriter {
         }
     }
 
-    protected static final FieldWriter<CalendarObject> CONFIRMATIONS_WRITER = new FieldWriter<CalendarObject>() {
+    private static final FieldWriter<CalendarObject> CONFIRMATIONS_WRITER = new FieldWriter<CalendarObject>() {
         public void write(CalendarObject obj, TimeZone timeZone, JSONArray json) throws JSONException {
             json.put(createConfirmationArray(obj));
         }
