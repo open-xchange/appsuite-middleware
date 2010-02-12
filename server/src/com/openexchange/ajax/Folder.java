@@ -1021,13 +1021,19 @@ public class Folder extends SessionServlet {
                     accountAccess.connect();
                     try {
                         final MessagingFolder[] subfolders = accountAccess.getFolderAccess().getSubfolders(mfi.getFullname(), all);
+                        final MessagingFolderFieldWriter[] writers =
+                            com.openexchange.ajax.writer.MessagingFolderWriter.getMessagingFolderFieldWriter(
+                                columns,
+                                session);
                         final com.openexchange.ajax.writer.MessagingFolderWriter.JSONArrayPutter putter = newMessagingArrayPutter();
                         for (int i = 0; i < subfolders.length; i++) {
-                            
-                            
+                            final JSONArray ja = new JSONArray();
+                            putter.setJSONArray(ja);
+                            for (int j = 0; j < writers.length; j++) {
+                                writers[j].writeField(putter, serviceId, accountId, subfolders[i], null, -1, null, -1, all);
+                            }
+                            jsonWriter.value(ja);
                         }
-                        
-                        
                     } finally {
                         accountAccess.close();
                     }
@@ -1811,7 +1817,7 @@ public class Folder extends SessionServlet {
                         final com.openexchange.ajax.writer.MessagingFolderWriter.JSONObjectPutter putter =
                             newMessagingObjectPutter().setJSONObject(jo);
                         for (final MessagingFolderFieldWriter writer : writers) {
-                            writer.writeField(putter, mfi.getServiceId(), mfi.getAccountId(), f);
+                            writer.writeField(putter, serviceId, accountId, f);
                         }
                         jsonWriter = new OXJSONWriter(jo);
                     } finally {
