@@ -60,6 +60,8 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.ExternalUserParticipant;
+import com.openexchange.groupware.container.participants.ConfirmStatus;
+import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 
 /**
  * Checks if the calendar component correctly fills the confirmations JSON appointment attributes.
@@ -72,6 +74,7 @@ public class ConfirmationsTest extends AbstractAJAXSession {
     private int folderId;
     private TimeZone tz;
     private Appointment appointment;
+    private ExternalUserParticipant participant;
 
     public ConfirmationsTest(String name) {
         super(name);
@@ -91,7 +94,9 @@ public class ConfirmationsTest extends AbstractAJAXSession {
         appointment.setEndDate(calendar.getTime());
         appointment.setParentFolderID(folderId);
         appointment.setIgnoreConflicts(true);
-        appointment.addParticipant(new ExternalUserParticipant("external1@example.com"));
+        participant = new ExternalUserParticipant("external1@example.com");
+        participant.setDisplayName("External user");
+        appointment.addParticipant(participant);
         client.execute(new InsertRequest(appointment, tz)).fillAppointment(appointment);
     }
 
@@ -104,6 +109,13 @@ public class ConfirmationsTest extends AbstractAJAXSession {
     public void testGet() throws Throwable {
         GetResponse response = client.execute(new GetRequest(appointment));
         Appointment test = response.getAppointment(tz);
-        assertNotNull(test.getConfirmations());
+        ConfirmableParticipant[] confirmations = test.getConfirmations();
+        assertNotNull(confirmations);
+        // Following expected must be 2 if internal user participants get its way into the confirmations array.
+        assertEquals("Number of external participant confirmations does not match.", 1, confirmations.length);
+        assertEquals("Mailaddress of external participant does not match.", participant.getEmailAddress(), confirmations[0].getEmailAddress());
+        assertEquals("Display name of external participant does not match.", participant.getDisplayName(), confirmations[0].getDisplayName());
+        assertEquals("Confirm status does not match.", ConfirmStatus.NONE, confirmations[0].getStatus());
+        assertEquals("Confirm message does not match.", participant.getMessage(), confirmations[0].getMessage());
     }
 }
