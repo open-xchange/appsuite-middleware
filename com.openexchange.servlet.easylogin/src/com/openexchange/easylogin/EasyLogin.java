@@ -111,6 +111,8 @@ public class EasyLogin extends HttpServlet {
     private static String authID;
     
     private static String errorPageTemplate = "<html><body><h1>ERROR_MESSAGE</h1></body></html>";
+    
+    private static String loadBalancer = "localhost";
 
     /**
      * Initializes a new {@link EasyLogin}
@@ -173,7 +175,7 @@ public class EasyLogin extends HttpServlet {
                 authID = req.getParameter(authIdParameter).trim();
             }
             // send login request via https
-            String urlString = "https://localhost" + AJAX_ROOT + "/login?action=login&name=" + login + "&password=" + password + "&" + authIdParameter + "=" + authID;
+            String urlString = "http://"+ loadBalancer + AJAX_ROOT + "/login?action=login&name=" + login + "&password=" + password + "&" + authIdParameter + "=" + authID;
             URL url = new URL(urlString);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setDoOutput(true);
@@ -332,6 +334,12 @@ public class EasyLogin extends HttpServlet {
                 }
             } else {
                 logError("No errorPage-template was specified, using default.");
+            }
+            if (config.getProperty("com.openexchange.easylogin.loadBalancer") != null) {
+                loadBalancer = config.getProperty("com.openexchange.easylogin.loadBalancer");
+                logInfo("Set loadBalancer to " + loadBalancer);
+            } else {
+                logError("Could not find parameter loadBalancer in properties-file, using default: " + loadBalancer);
             }
         }
     }
