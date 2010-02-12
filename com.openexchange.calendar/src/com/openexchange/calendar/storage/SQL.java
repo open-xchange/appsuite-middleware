@@ -60,6 +60,12 @@ public class SQL {
 
     public static final String SELECT_EXTERNAL = "SELECT mailAddress,displayName,confirm,reason FROM dateExternal WHERE cid=? AND objectId=?";
 
+    public static final String DELETE_EXTERNAL = "DELETE FROM dateExternal WHERE cid=? AND objectId=?";
+
+    public static final String DELETE_BACKUPED_EXTERNAL = "DELETE FROM delDateExternal WHERE cid=? AND objectId=?";
+
+    public static final String BACKUP_EXTERNAL = "INSERT INTO delDateExternal (cid,objectId,mailAddress,displayName,confirm,reason) SELECT cid,objectId,mailAddress,displayName,confirm,reason FROM dateExternal WHERE cid=? AND objectId=?";
+
     private SQL() {
         super();
     }

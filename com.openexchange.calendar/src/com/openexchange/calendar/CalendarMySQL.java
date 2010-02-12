@@ -77,6 +77,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.api2.ReminderSQLInterface;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.calendar.storage.ParticipantStorage;
+import com.openexchange.calendar.storage.SQL;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
@@ -1324,8 +1325,8 @@ public class CalendarMySQL implements CalendarSqlImp {
 
             insertParticipants(cdao, writecon);
             insertUserParticipants(cdao, writecon, so.getUserId());
-            ParticipantStorage.getInstance().insertParticipants(cdao.getContext(), writecon, cdao.getObjectID(), cdao.getParticipants());
             pst.executeUpdate();
+            ParticipantStorage.getInstance().insertParticipants(cdao.getContext(), writecon, cdao.getObjectID(), cdao.getParticipants());
         } finally {
             collection.closePreparedStatement(pst);
         }
@@ -4259,6 +4260,14 @@ public class CalendarMySQL implements CalendarSqlImp {
             stmt.close();
             stmt = null;
 
+            stmt = writecon.prepareStatement(SQL.DELETE_BACKUPED_EXTERNAL);
+            pos = 1;
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, oid);
+            stmt.executeUpdate();
+            stmt.close();
+            stmt = null;
+
             if (backup) {
                 stmt = writecon.prepareStatement(SQL_BACKUP_MEMBERS);
                 pos = 1;
@@ -4283,8 +4292,24 @@ public class CalendarMySQL implements CalendarSqlImp {
                 stmt.executeUpdate();
                 stmt.close();
                 stmt = null;
+
+                stmt = writecon.prepareStatement(SQL.BACKUP_EXTERNAL);
+                pos = 1;
+                stmt.setInt(pos++, cid);
+                stmt.setInt(pos++, oid);
+                stmt.executeUpdate();
+                stmt.close();
+                stmt = null;
             }
 
+            stmt = writecon.prepareStatement(SQL.DELETE_EXTERNAL);
+            pos = 1;
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, oid);
+            stmt.executeUpdate();
+            stmt.close();
+            stmt = null;
+            
             stmt = writecon.prepareStatement(SQL_DEL_WORKING_DATES);
             pos = 1;
             stmt.setInt(pos++, cid);
