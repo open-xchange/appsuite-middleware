@@ -62,7 +62,7 @@ public class ExternalUserParticipant extends AbstractConfirmableParticipant impl
 
     private String displayName;
 
-    private String emailaddress;
+    private final String emailaddress;
 
     private boolean ignoreNotification;
 
@@ -94,10 +94,6 @@ public class ExternalUserParticipant extends AbstractConfirmableParticipant impl
 
     public String getEmailAddress() {
         return emailaddress;
-    }
-
-    public void setEmailAddress(final String emailaddress) {
-        this.emailaddress = emailaddress;
     }
 
     public int getType() {
@@ -139,9 +135,6 @@ public class ExternalUserParticipant extends AbstractConfirmableParticipant impl
         return true;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public int compareTo(final Participant part) {
         final int retval;
         if (EXTERNAL_USER == part.getType()) {
@@ -164,9 +157,6 @@ public class ExternalUserParticipant extends AbstractConfirmableParticipant impl
         return retval;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();

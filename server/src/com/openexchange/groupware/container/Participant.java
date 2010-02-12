@@ -99,13 +99,6 @@ public interface Participant extends Cloneable {
     String getDisplayName();
 
     /**
-     * @deprecated Use explicit constructor. {@link ExternalUserParticipant#ExternalUserParticipant(String)},
-     *             {@link ExternalGroupParticipant#ExternalGroupParticipant(String)}
-     */
-    @Deprecated
-    void setEmailAddress(String emailaddress);
-
-    /**
      * Gets this participant's email address.
      * 
      * @return This participant's email address.
