@@ -22,6 +22,6 @@ CREATE TABLE report_revisions (
 
 CREATE TABLE report_reminder_whitelist (
       id BIGINT NOT NULL AUTO_INCREMENT,
-      ldb_login LONGTEXT NOT NULL,
-      PRIMARY KEY (id), UNIQUE (license_keys)
+      ldb_login VARCHAR(767) NOT NULL,
+      PRIMARY KEY (id), UNIQUE (ldb_login)
 ) ENGINE=InnoDB;
