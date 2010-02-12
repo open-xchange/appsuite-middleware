@@ -90,7 +90,7 @@ public class CommonWriter extends FolderChildWriter {
      * @throws JSONException If a JSON error occurs
      */
     public void writeCommonFields(final CommonObject commonObj, final JSONObject jsonObj) throws JSONException {
-        writeFields(commonObj, jsonObj);
+        writeFields(commonObj, timeZone, jsonObj);
     }
 
     protected boolean writeField(CommonObject obj, int column, TimeZone tz, JSONArray json) throws JSONException {
@@ -102,10 +102,10 @@ public class CommonWriter extends FolderChildWriter {
         return true;
     }
 
-    protected void writeFields(CommonObject obj, JSONObject json) throws JSONException {
-        super.writeFields(obj, json);
+    protected void writeFields(CommonObject obj, TimeZone tz, JSONObject json) throws JSONException {
+        super.writeFields(obj, tz, json);
         for (FieldWriter<CommonObject> writer : WRITER_MAP.values()) {
-            writer.write(obj, timeZone, json);
+            writer.write(obj, tz, json);
         }
     }
 

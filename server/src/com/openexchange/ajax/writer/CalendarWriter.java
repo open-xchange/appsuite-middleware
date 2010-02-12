@@ -220,10 +220,10 @@ public abstract class CalendarWriter extends CommonWriter {
         return true;
     }
 
-    protected void writeFields(CalendarObject obj, JSONObject json) throws JSONException {
-        super.writeFields(obj, json);
+    protected void writeFields(CalendarObject obj, TimeZone tz, JSONObject json) throws JSONException {
+        super.writeFields(obj, tz, json);
         for (FieldWriter<CalendarObject> writer : WRITER_MAP.values()) {
-            writer.write(obj, timeZone, json);
+            writer.write(obj, tz, json);
         }
     }
 

@@ -82,14 +82,14 @@ public class FolderChildWriter extends DataWriter {
         if (null == writer) {
             return super.writeField(obj, column, tz, json);
         }
-        writer.write(obj, timeZone, json);
+        writer.write(obj, tz, json);
         return true;
     }
 
-    protected void writeFields(FolderChildObject obj, JSONObject json) throws JSONException {
-        super.writeFields(obj, json);
+    protected void writeFields(FolderChildObject obj, TimeZone tz, JSONObject json) throws JSONException {
+        super.writeFields(obj, tz, json);
         for (FieldWriter<FolderChildObject> writer : WRITER_MAP.values()) {
-            writer.write(obj, timeZone, json);
+            writer.write(obj, tz, json);
         }
     }
 

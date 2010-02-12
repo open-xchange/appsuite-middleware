@@ -461,9 +461,9 @@ public class DataWriter {
         jsonArray.put(JSONObject.NULL);
     }
 
-    protected void writeFields(DataObject obj, JSONObject json) throws JSONException {
+    protected void writeFields(DataObject obj, TimeZone tz, JSONObject json) throws JSONException {
         for (FieldWriter<DataObject> writer : WRITER_MAP.values()) {
-            writer.write(obj, timeZone, json);
+            writer.write(obj, tz, json);
         }
     }
 

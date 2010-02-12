@@ -120,7 +120,7 @@ public class AppointmentWriter extends CalendarWriter {
     }
 
     public void writeAppointment(final Appointment appointmentObject, final JSONObject jsonObj) throws JSONException {
-        super.writeFields(appointmentObject, jsonObj);
+        super.writeFields(appointmentObject, timeZone, jsonObj);
         if (appointmentObject.containsTitle()) {
             writeParameter(AppointmentFields.TITLE, appointmentObject.getTitle(), jsonObj);
         }

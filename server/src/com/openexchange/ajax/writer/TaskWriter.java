@@ -90,7 +90,7 @@ public class TaskWriter extends CalendarWriter {
     }
 
     public void writeTask(final Task task, final JSONObject json) throws JSONException {
-        super.writeFields(task, json);
+        super.writeFields(task, timeZone, json);
         writeParameter(TaskFields.TITLE, task.getTitle(), json);
         writeParameter(TaskFields.START_DATE, task.getStartDate(), json);
         writeParameter(TaskFields.END_DATE, task.getEndDate(), json);
