@@ -50,6 +50,7 @@
 package com.openexchange.tools.iterator;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import com.openexchange.groupware.AbstractOXException;
@@ -95,6 +96,15 @@ public class SearchIteratorDelegator<T> implements SearchIterator<T> {
         delegate = iter;
         this.size = size;
         warnings = new ArrayList<AbstractOXException>(2);
+    }
+
+    /**
+     * Initializes a new {@link SearchIteratorDelegator}.
+     * 
+     * @param collection The collection to iterate
+     */
+    public SearchIteratorDelegator(final Collection<T> collection) {
+        this(collection.iterator(), collection.size());
     }
 
     public boolean hasNext() {
