@@ -1587,12 +1587,10 @@ public class CalendarTest extends TestCase {
 
         Participants participants = new Participants();
         final ExternalUserParticipant p1 = new ExternalUserParticipant(mail_address);
-        p1.setEmailAddress(mail_address);
         p1.setDisplayName(display_name);
         participants.add(p1);
         
         final ExternalUserParticipant p2 = new ExternalUserParticipant(mail_address2);
-        p2.setEmailAddress(mail_address2);
         p2.setDisplayName(display_name2);
         participants.add(p2);
         
@@ -1658,12 +1656,10 @@ public class CalendarTest extends TestCase {
         final Participants participants_update = new Participants();
         final ExternalUserParticipant p3 = new ExternalUserParticipant(update_new_mail_1);
         p3.setDisplayName(update_new_display_1);
-        p3.setEmailAddress(update_new_mail_1);
         participants_update.add(p3);
         
         final ExternalUserParticipant p4 = new ExternalUserParticipant(update_new_mail_2);
         p4.setDisplayName(update_new_display_2);
-        p4.setEmailAddress(update_new_mail_2);
         participants_update.add(p4);
         
         participants_update.add(p1);

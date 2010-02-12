@@ -397,9 +397,7 @@ public class ICalEmitterTest extends TestCase {
         j = 0;
         for(final String mail : external) {
             final ExternalUserParticipant p = new ExternalUserParticipant(mail);
-            p.setEmailAddress(mail);
             allParticipants[i++] = p;
-
         }
 
         calendarObject.setParticipants(allParticipants);
