@@ -383,7 +383,7 @@ public class AppointmentRequest {
                                 appointmentObj.setStartDate(new Date(recuResults.getRecurringResult(0).getStart()));
                                 appointmentObj.setEndDate(new Date(recuResults.getRecurringResult(0).getEnd()));
 
-                                appointmentWriter.writeArray(appointmentObj, columns, startUTC, endUTC, jsonResponseArray);
+                                appointmentWriter.writeArray(appointmentObj, columns, jsonResponseArray);
                             }
                         } else {
                             // Commented this because this is done in CalendarOperation.next():726 that calls extractRecurringInformation()
@@ -733,7 +733,7 @@ public class AppointmentRequest {
                             appointment.setStartDate(new Date(recuResults.getRecurringResult(0).getStart()));
                             appointment.setEndDate(new Date(recuResults.getRecurringResult(0).getEnd()));
 
-                            writer.writeArray(appointment, columns, startUTC, endUTC, jsonResponseArray);
+                            writer.writeArray(appointment, columns, jsonResponseArray);
                         } else {
                             LOG.warn("cannot load first recurring appointment from appointment object: " + +appointment.getRecurrenceType() + " / " + appointment.getObjectID() + "\n\n\n");
                         }
@@ -1011,13 +1011,13 @@ public class AppointmentRequest {
                                 recuResults = recColl.calculateFirstRecurring(appointment);
                             } catch (final OXException x) {
                                 LOG.error("Can not calculate recurrence " + appointment.getObjectID() + ":" + ctx.getContextId(), x);
-                                appointmentwriter.writeArray(appointment, columns, startUTC, endUTC, jsonResponseArray);
+                                appointmentwriter.writeArray(appointment, columns, jsonResponseArray);
                             }
                             if (recuResults != null && recuResults.size() == 1) {
                                 appointment.setStartDate(new Date(recuResults.getRecurringResult(0).getStart()));
                                 appointment.setEndDate(new Date(recuResults.getRecurringResult(0).getEnd()));
 
-                                appointmentwriter.writeArray(appointment, columns, startUTC, endUTC, jsonResponseArray);
+                                appointmentwriter.writeArray(appointment, columns, jsonResponseArray);
                             } else {
                                 LOG.warn("cannot load first recurring appointment from appointment object: " + +appointment.getRecurrenceType() + " / " + appointment.getObjectID() + "\n\n\n");
                             }

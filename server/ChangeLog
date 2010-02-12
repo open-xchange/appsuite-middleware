@@ -1,3 +1,7 @@
+* 2010-02-12 - martin.herfurth@open-xchange.com
+
+ - Bugfix #15074: Writing full time appointments even if the master is not in the requested time frame.
+
 * 2010-02-12 - thorben.betten@open-xchange.com
 
  - Bugfix #15350: Fixed retrieval of session from given cookies
