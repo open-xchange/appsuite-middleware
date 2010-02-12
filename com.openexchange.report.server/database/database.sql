@@ -19,3 +19,9 @@ CREATE TABLE report_revisions (
       report LONGTEXT NOT NULL, 
       PRIMARY KEY (id), UNIQUE (id, report_revision, reporter_id)
 ) ENGINE=InnoDB;
+
+CREATE TABLE report_reminder_whitelist (
+      id BIGINT NOT NULL AUTO_INCREMENT,
+      ldb_login LONGTEXT NOT NULL,
+      PRIMARY KEY (id), UNIQUE (license_keys)
+) ENGINE=InnoDB;
