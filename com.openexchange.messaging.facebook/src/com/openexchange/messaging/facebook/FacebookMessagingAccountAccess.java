@@ -144,6 +144,7 @@ public final class FacebookMessagingAccountAccess extends FacebookMessagingResou
     }
 
     public MessagingFolder getRootFolder() throws MessagingException {
+        connect();
         return getFolderAccess().getRootFolder();
     }
 
