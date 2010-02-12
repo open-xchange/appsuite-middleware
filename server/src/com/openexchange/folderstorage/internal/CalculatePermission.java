@@ -206,7 +206,7 @@ public final class CalculatePermission {
         return p;
     }
 
-    private static final class DummyPermission implements Permission {
+    public static final class DummyPermission implements Permission {
 
         private int system;
 
