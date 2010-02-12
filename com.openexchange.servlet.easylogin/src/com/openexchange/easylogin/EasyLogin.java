@@ -175,7 +175,7 @@ public class EasyLogin extends HttpServlet {
                 authID = req.getParameter(authIdParameter).trim();
             }
             // send login request via https
-            String urlString = "http://"+ loadBalancer + AJAX_ROOT + "/login?action=login&name=" + login + "&password=" + password + "&" + authIdParameter + "=" + authID;
+            String urlString = "https://"+ loadBalancer + AJAX_ROOT + "/login?action=login&name=" + login + "&password=" + password + "&" + authIdParameter + "=" + authID;
             URL url = new URL(urlString);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setDoOutput(true);
