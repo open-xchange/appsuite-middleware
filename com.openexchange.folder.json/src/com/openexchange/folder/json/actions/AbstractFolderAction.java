@@ -84,8 +84,17 @@ public abstract class AbstractFolderAction implements AJAXActionService {
      * 
      * @return The default tree identifier
      */
-    protected String getDefaultTreeIdentifier() {
+    protected static String getDefaultTreeIdentifier() {
         return FolderStorage.REAL_TREE_ID;
+    }
+
+    /**
+     * Gets the default allowed modules.
+     * 
+     * @return The default allowed modules
+     */
+    protected static List<ContentType> getDefaultAllowedModules() {
+        return Collections.emptyList();
     }
 
     private static final Pattern PAT = Pattern.compile(" *, *");
@@ -132,7 +141,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
     }
 
     /**
-     * Parses the optional content type array parameter.
+     * Parses the optional content type array parameter. Return {@link #getDefaultAllowedModules()} if not present.
      * 
      * @param parameterName The parameter name
      * @param request The request
@@ -142,7 +151,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
     protected static List<ContentType> parseOptionalContentTypeArrayParameter(final String parameterName, final AJAXRequestData request) throws AbstractOXException {
         final String tmp = request.getParameter(parameterName);
         if (null == tmp) {
-            return Collections.emptyList();
+            return getDefaultAllowedModules();
         }
         final String[] sa = PAT.split(tmp, 0);
         final List<ContentType> ret = new ArrayList<ContentType>(sa.length);
