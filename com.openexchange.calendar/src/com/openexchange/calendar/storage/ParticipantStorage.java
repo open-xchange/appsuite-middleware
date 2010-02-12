@@ -60,15 +60,15 @@ import com.openexchange.groupware.contexts.Context;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public abstract class ExternalParticipantStorage {
+public abstract class ParticipantStorage {
 
-    private static final ExternalParticipantStorage SINGLETON = new RdbExternalParticipantStorage();
+    private static final ParticipantStorage SINGLETON = new RdbParticipantStorage();
 
-    protected ExternalParticipantStorage() {
+    protected ParticipantStorage() {
         super();
     }
 
-    public static ExternalParticipantStorage getInstance() {
+    public static ParticipantStorage getInstance() {
         return SINGLETON;
     }
 
@@ -81,5 +81,7 @@ public abstract class ExternalParticipantStorage {
      * @throws OXCalendarException if some problem occurs.
      */
     public abstract void insertParticipants(Context ctx, Connection con, int appointmentId, Participant[] participants) throws OXCalendarException;
+
+    public abstract ExternalUserParticipant[] selectExternal(Context ctx, Connection con, int appointmentId) throws OXCalendarException;
 
 }

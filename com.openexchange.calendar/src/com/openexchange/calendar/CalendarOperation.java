@@ -68,6 +68,7 @@ import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
 import com.openexchange.calendar.api.CalendarCollection;
+import com.openexchange.calendar.storage.ParticipantStorage;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.AbstractOXException;
@@ -81,6 +82,7 @@ import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.Participants;
@@ -225,6 +227,9 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                     }
                 }
                 
+                ExternalUserParticipant[] externals = ParticipantStorage.getInstance().selectExternal(ctx, readcon, cdao.getObjectID());
+                cdao.setParticipants(ParticipantLogic.mergeFallback(cdao.getParticipants(), externals));
+                cdao.setConfirmations(ParticipantLogic.mergeConfirmations(externals, cdao.getParticipants()));
                 setAttachmentLastModified(readcon, ctx, cdao);
             } else {
                 final String text = "Object " + oid + " in context " + cdao.getContextID();

@@ -58,6 +58,8 @@ public class SQL {
 
     public static final String INSERT_EXTERNAL = "INSERT INTO dateExternal (cid,objectId,mailAddress,displayName,confirm,reason) VALUES (?,?,?,?,?,?)";
 
+    public static final String SELECT_EXTERNAL = "SELECT mailAddress,displayName,confirm,reason FROM dateExternal WHERE cid=? AND objectId=?";
+
     private SQL() {
         super();
     }

@@ -52,8 +52,11 @@ package com.openexchange.calendar.storage;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
+import java.util.List;
 import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.calendar.OXCalendarException.Code;
 import com.openexchange.groupware.container.ExternalUserParticipant;
@@ -65,9 +68,9 @@ import com.openexchange.groupware.contexts.Context;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class RdbExternalParticipantStorage extends ExternalParticipantStorage {
+public class RdbParticipantStorage extends ParticipantStorage {
 
-    public RdbExternalParticipantStorage() {
+    public RdbParticipantStorage() {
         super();
     }
 
@@ -113,5 +116,32 @@ public class RdbExternalParticipantStorage extends ExternalParticipantStorage {
         } finally {
             closeSQLStuff(stmt);
         }
+    }
+
+    @Override
+    public ExternalUserParticipant[] selectExternal(Context ctx, Connection con, int appointmentId) throws OXCalendarException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        final List<ExternalUserParticipant> retval;
+        try {
+            stmt = con.prepareStatement(SQL.SELECT_EXTERNAL);
+            stmt.setInt(1, ctx.getContextId());
+            stmt.setInt(2, appointmentId);
+            rs = stmt.executeQuery();
+            retval = new ArrayList<ExternalUserParticipant>();
+            while (rs.next()) {
+                int pos = 1;
+                ExternalUserParticipant participant = new ExternalUserParticipant(rs.getString(pos++));
+                participant.setDisplayName(rs.getString(pos++));
+                participant.setConfirm(rs.getInt(pos++));
+                participant.setMessage(rs.getString(pos++));
+                retval.add(participant);
+            }
+        } catch (SQLException e) {
+            throw new OXCalendarException(Code.SQL_ERROR, e, e.getMessage());
+        } finally {
+            closeSQLStuff(rs, stmt);
+        }
+        return retval.toArray(new ExternalUserParticipant[retval.size()]);
     }
 }

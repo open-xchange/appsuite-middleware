@@ -76,7 +76,7 @@ import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.ReminderSQLInterface;
 import com.openexchange.calendar.api.CalendarCollection;
-import com.openexchange.calendar.storage.ExternalParticipantStorage;
+import com.openexchange.calendar.storage.ParticipantStorage;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
@@ -1324,7 +1324,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
             insertParticipants(cdao, writecon);
             insertUserParticipants(cdao, writecon, so.getUserId());
-            ExternalParticipantStorage.getInstance().insertParticipants(cdao.getContext(), writecon, cdao.getObjectID(), cdao.getParticipants());
+            ParticipantStorage.getInstance().insertParticipants(cdao.getContext(), writecon, cdao.getObjectID(), cdao.getParticipants());
             pst.executeUpdate();
         } finally {
             collection.closePreparedStatement(pst);
