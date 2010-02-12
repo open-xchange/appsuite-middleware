@@ -1,3 +1,7 @@
+* 2010-02-12 - thorben.betten@open-xchange.com
+
+ - Bugfix #15350: Fixed retrieval of session from given cookies
+
 * 2010-02-11 - marcus.klein@open-xchange.com
 
  - Bugfix #15361: Added missing return statement when the attribute has been written.

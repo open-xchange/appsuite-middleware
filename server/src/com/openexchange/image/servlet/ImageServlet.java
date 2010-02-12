@@ -264,33 +264,27 @@ public final class ImageServlet extends HttpServlet {
     }
 
     private static List<Session> getSessions(final HttpServletRequest req, final SessiondService sessiondService) throws ContextException, LdapException {
-        final List<String> sessionIds = getSessionIds(req);
-        if (sessionIds.isEmpty()) {
+        final Cookie[] cookies = req.getCookies();
+        if (cookies == null) {
             return Collections.emptyList();
         }
         final List<Session> sessions = new ArrayList<Session>(4);
-        for (final String sessionId : sessionIds) {
-            final Session session = sessiondService.getSession(sessionId);
-            if (null != session) {
-                final Context ctx = ContextStorage.getStorageContext(session.getContextId());
-                if (ctx.isEnabled() && UserStorage.getInstance().getUser(session.getUserId(), ctx).isMailEnabled()) {
-                    sessions.add(session);
+        for (final Cookie cookie : cookies) {
+            final String name = cookie.getName();
+            if (name != null && name.startsWith(Login.COOKIE_PREFIX, 0)) {
+                final Session session = sessiondService.getSession(name.substring(Login.COOKIE_PREFIX.length())); // By session ID
+                if (null != session && cookie.getValue().equals(session.getSecret())) { // Ensure not null and secret equality
+                    final Context ctx = ContextStorage.getStorageContext(session.getContextId());
+                    if (ctx.isEnabled() && UserStorage.getInstance().getUser(session.getUserId(), ctx).isMailEnabled()) {
+                        /*
+                         * Both context and user are activated
+                         */
+                        sessions.add(session);
+                    }
                 }
             }
         }
         return sessions;
     }
 
-    private static List<String> getSessionIds(final HttpServletRequest req) {
-        final Cookie[] cookies = req.getCookies();
-        if (cookies != null) {
-            for (final Cookie cookie : cookies) {
-                final String name = cookie.getName();
-                if (name != null && name.startsWith(Login.COOKIE_PREFIX, 0)) {
-                    return Collections.singletonList(cookie.getValue());
-                }
-            }
-        }
-        return Collections.emptyList();
-    }
 }
