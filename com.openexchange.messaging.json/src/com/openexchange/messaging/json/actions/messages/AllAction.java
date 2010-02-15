@@ -91,41 +91,33 @@ public class AllAction extends AbstractMessagingAction {
     public AllAction(MessagingServiceRegistry registry, MessagingMessageWriter writer, MessagingMessageParser parser) {
         super(registry, writer, parser);
     }
-    
+
     public AllAction(MessagingServiceRegistry registry, MessagingMessageWriter writer, MessagingMessageParser parser, Cache cache) {
         super(registry, writer, parser, cache);
     }
 
-
-
     @Override
     protected AJAXRequestResult doIt(MessagingRequestData req, ServerSession session) throws AbstractOXException, JSONException {
 
-        req.getAccountAccess().connect();
-        try {
-            MessagingMessageAccess access = req.getMessageAccess();
+        MessagingMessageAccess access = req.getMessageAccess();
 
-            MessagingField sort = req.getSort();
-            OrderDirection order = null;
-            if (sort != null) {
-                order = req.getOrder();
-                if (order == null) {
-                    order = OrderDirection.ASC;
-                }
+        MessagingField sort = req.getSort();
+        OrderDirection order = null;
+        if (sort != null) {
+            order = req.getOrder();
+            if (order == null) {
+                order = OrderDirection.ASC;
             }
-
-            MessagingField[] columns = req.getColumns();
-            List<MessagingMessage> messages = access.getAllMessages(req.getFolderId(), IndexRange.NULL, sort, order, columns);
-            JSONArray results = new JSONArray();
-            for (MessagingMessage message : messages) {
-                JSONArray line = writer.writeFields(message, columns, req.getAccountAddress());
-                results.put(line);
-            }
-            return new AJAXRequestResult(results);
-        } finally {
-            req.getAccountAccess().close();
-
         }
+
+        MessagingField[] columns = req.getColumns();
+        List<MessagingMessage> messages = access.getAllMessages(req.getFolderId(), IndexRange.NULL, sort, order, columns);
+        JSONArray results = new JSONArray();
+        for (MessagingMessage message : messages) {
+            JSONArray line = writer.writeFields(message, columns, req.getAccountAddress());
+            results.put(line);
+        }
+        return new AJAXRequestResult(results);
 
     }
 

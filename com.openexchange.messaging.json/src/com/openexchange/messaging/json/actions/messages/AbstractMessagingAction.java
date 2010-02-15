@@ -89,12 +89,16 @@ public abstract class AbstractMessagingAction implements AJAXActionService {
     }
     
     public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws AbstractOXException {
+        MessagingRequestData req = new MessagingRequestData(request, session, registry, parser, cache);
         try {
-            return doIt(new MessagingRequestData(request, session, registry, parser, cache), session);
+            AJAXRequestResult result = doIt(req, session);
+            return result;
         } catch (JSONException e) {
             throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         } catch (IOException e) {
             throw MessagingExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } finally {
+            req.cleanUp();
         }
     }
 

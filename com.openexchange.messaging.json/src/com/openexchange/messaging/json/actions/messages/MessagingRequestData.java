@@ -52,6 +52,7 @@ package com.openexchange.messaging.json.actions.messages;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -96,6 +97,8 @@ public class MessagingRequestData {
 
     private MessagingMessageAccess messageAccess;
 
+    private Collection<MessagingAccountAccess> closeables = new LinkedList<MessagingAccountAccess>();
+
     public MessagingRequestData(AJAXRequestData request, ServerSession session, MessagingServiceRegistry registry, MessagingMessageParser parser, Cache cache) {
         this.request = request;
         this.registry = registry;
@@ -103,12 +106,24 @@ public class MessagingRequestData {
         this.parser = parser;
         this.cache = cache;
     }
-    
+
     public MessagingRequestData(AJAXRequestData request, ServerSession session, MessagingServiceRegistry registry, MessagingMessageParser parser) {
         this(request, session, registry, parser, null);
     }
-    
-    
+
+    public MessagingMessageAccess getMessageAccess(String messagingService, int account) throws MessagingException {
+        MessagingAccountAccess access = registry.getMessagingService(messagingService).getAccountAccess(account, session);
+        if (!access.isConnected()) {
+            access.connect();
+            mustClose(access);
+        }
+
+        return wrap(access.getMessageAccess(), messagingService, account);
+    }
+
+    private void mustClose(MessagingAccountAccess access) {
+        closeables.add(access);
+    }
 
     /**
      * Tries to get a message access for the messaging service and account ID as given in the request parameters
@@ -116,25 +131,32 @@ public class MessagingRequestData {
      * @throws MessagingException If parameters 'messagingService' or 'account' are missing
      */
     public MessagingMessageAccess getMessageAccess() throws MessagingException {
-        if(messageAccess != null) {
+        if (messageAccess != null) {
             return messageAccess;
         }
         MessagingMessageAccess access = getAccountAccess().getMessageAccess();
         return messageAccess = wrap(access, getMessagingServiceId(), getAccountID());
     }
-    
+
     public MessagingAccountAccess getAccountAccess() throws MessagingException {
-        if(accountAccess != null) {
+        if (accountAccess != null) {
             return accountAccess;
         }
-        return accountAccess = registry.getMessagingService(getMessagingServiceId()).getAccountAccess(getAccountID(), session);
+        accountAccess = registry.getMessagingService(getMessagingServiceId()).getAccountAccess(getAccountID(), session);
+
+        if (!accountAccess.isConnected()) {
+            accountAccess.connect();
+            mustClose(accountAccess);
+        }
+
+        return accountAccess;
     }
 
     public String getMessagingServiceId() throws MessagingException {
         if (hasLongFolder()) {
             return getLongFolder().getMessagingService();
         } else {
-            if(isset("messagingService")) {
+            if (isset("messagingService")) {
                 return request.getParameter("messagingService");
             }
             missingParameter("folder");
@@ -275,7 +297,6 @@ public class MessagingRequestData {
         }
     }
 
-
     /**
      * Retrieves the 'messageAction' parameter. Fails when 'messageAction' was not set.
      * 
@@ -319,14 +340,15 @@ public class MessagingRequestData {
 
     /**
      * Retrieves and parses the 'recipients' parameter. May return null, if no recipients were set.
-     * @throws MessagingException 
+     * 
+     * @throws MessagingException
      */
     public Collection<MessagingAddressHeader> getRecipients() throws MessagingException {
         String parameter = request.getParameter("recipients");
-        if(parameter == null) {
+        if (parameter == null) {
             return null;
         }
-        return new ArrayList<MessagingAddressHeader>( MimeAddressMessagingHeader.parseRFC822("", parameter));
+        return new ArrayList<MessagingAddressHeader>(MimeAddressMessagingHeader.parseRFC822("", parameter));
     }
 
     /**
@@ -360,9 +382,9 @@ public class MessagingRequestData {
             throw MessagingExceptionCodes.INVALID_PARAMETER.create("body", data.toString());
         }
         JSONArray idsJSON = (JSONArray) data;
-        
+
         List<MessageAddress> addresses = new ArrayList<MessageAddress>(idsJSON.length());
-        
+
         for (int i = 0, size = idsJSON.length(); i < size; i++) {
             JSONObject pair = idsJSON.getJSONObject(i);
             addresses.add(new MessageAddress(pair.getString("folder"), pair.getString("id")));
@@ -372,14 +394,20 @@ public class MessagingRequestData {
     }
 
     public String getAccountAddress() throws MessagingException {
-        return getMessagingServiceId()+"://"+getAccountID();
+        return getMessagingServiceId() + "://" + getAccountID();
     }
 
     public MessagingMessageAccess wrap(MessagingMessageAccess messageAccess2, String service, int account) {
-        if(cache == null) {
+        if (cache == null) {
             return messageAccess2;
         }
-        return new CacheingMessageAccess(messageAccess2, cache, service+"://"+account, session);
+        return new CacheingMessageAccess(messageAccess2, cache, service + "://" + account, session);
+    }
+
+    public void cleanUp() {
+        for (MessagingAccountAccess closeable : closeables) {
+            closeable.close();
+        }
     }
 
 }

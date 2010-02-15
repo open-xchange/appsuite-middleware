@@ -183,7 +183,9 @@ public class CacheingMessageAccess implements MessagingMessageAccess {
         String key = message.getId();
         
         try {
-            cache.putInGroup(key, groupName, message);
+            if(key != null) {
+                cache.putInGroup(key, groupName, message);
+            }
         } catch (CacheException e) {
             throw new MessagingException(e);
         }
