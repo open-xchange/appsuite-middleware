@@ -50,6 +50,7 @@
 package com.openexchange.server.osgiservice;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -81,16 +82,19 @@ public abstract class DeferredActivator implements BundleActivator {
 
         private final int index;
 
-        public DeferredSTC(final Class<?> clazz, final int index) {
+        private final Map<Class<?>, Object> stcServices;
+
+        public DeferredSTC(final Class<?> clazz, final int index, final Map<Class<?>, Object> services) {
             super();
             this.clazz = clazz;
             this.index = index;
+            this.stcServices = services;
         }
 
         public Object addingService(final ServiceReference reference) {
             final Object addedService = context.getService(reference);
             if (clazz.isInstance(addedService)) {
-                services.put(clazz, addedService);
+                stcServices.put(clazz, addedService);
                 /*
                  * Signal availability
                  */
@@ -116,7 +120,7 @@ public abstract class DeferredActivator implements BundleActivator {
                         /*
                          * ... and remove from services
                          */
-                        services.remove(clazz);
+                        stcServices.remove(clazz);
                     }
                 } finally {
                     context.ungetService(reference);
@@ -198,23 +202,30 @@ public abstract class DeferredActivator implements BundleActivator {
      */
     private final void init() throws Exception {
         final Class<?>[] classes = getNeededServices();
-        final int len = null == classes ? 0 : classes.length;
-        if (len > 0 && new HashSet<Class<?>>(Arrays.asList(classes)).size() != len) {
-            throw new IllegalArgumentException("Duplicate class/interface provided through getNeededServices()");
-        }
-        services = new ConcurrentHashMap<Class<?>, Object>(len);
-        serviceTrackers = new ServiceTracker[len];
-        availability = 0;
-        allAvailable = (1 << len) - 1;
-        /*
-         * Initialize service trackers for needed services
-         */
-        for (int i = 0; i < len; i++) {
-            serviceTrackers[i] = new ServiceTracker(context, classes[i].getName(), new DeferredSTC(classes[i], i));
-            serviceTrackers[i].open();
-        }
-        if (len == 0) {
+        if (null == classes) {
+            services = Collections.emptyMap();
+            serviceTrackers = new ServiceTracker[0];
+            availability = allAvailable = 0;
             startBundle();
+        } else {
+            final int len = classes.length;
+            if (len > 0 && new HashSet<Class<?>>(Arrays.asList(classes)).size() != len) {
+                throw new IllegalArgumentException("Duplicate class/interface provided through getNeededServices()");
+            }
+            services = new ConcurrentHashMap<Class<?>, Object>(len);
+            serviceTrackers = new ServiceTracker[len];
+            availability = 0;
+            allAvailable = (1 << len) - 1;
+            /*
+             * Initialize service trackers for needed services
+             */
+            for (int i = 0; i < len; i++) {
+                serviceTrackers[i] = new ServiceTracker(context, classes[i].getName(), new DeferredSTC(classes[i], i, services));
+                serviceTrackers[i].open();
+            }
+            if (len == 0) {
+                startBundle();
+            }
         }
     }
 
@@ -248,7 +259,7 @@ public abstract class DeferredActivator implements BundleActivator {
      * @param index The class' index
      * @param clazz The service's class
      */
-    private final void signalAvailability(final int index, final Class<?> clazz) {
+    final void signalAvailability(final int index, final Class<?> clazz) {
         availability |= (1 << index);
         if (started.get()) {
             /*
@@ -298,7 +309,13 @@ public abstract class DeferredActivator implements BundleActivator {
         }
     }
 
-    private static void shutDownBundle(final Bundle bundle, final StringBuilder errorBuilder) {
+    /**
+     * Shuts-down specified bundle.
+     * 
+     * @param bundle The bundle to shut-down
+     * @param errorBuilder The error string builder
+     */
+    static void shutDownBundle(final Bundle bundle, final StringBuilder errorBuilder) {
         try {
             /*
              * Stop with Bundle.STOP_TRANSIENT set to zero
@@ -323,7 +340,7 @@ public abstract class DeferredActivator implements BundleActivator {
      * @param index The class' index
      * @param clazz The service's class
      */
-    private final void signalUnavailability(final int index, final Class<?> clazz) {
+    final void signalUnavailability(final int index, final Class<?> clazz) {
         availability &= ~(1 << index);
         if (started.get()) {
             handleUnavailability(clazz);
@@ -407,14 +424,20 @@ public abstract class DeferredActivator implements BundleActivator {
      */
     protected final boolean allAvailable() {
         final Class<?>[] classes = getNeededServices();
-        final int len = classes == null ? 0 : classes.length;
+        if (null == classes) {
+            /*
+             * This deferred activator waits for no services
+             */
+            return true;
+        }
+        final int len = classes.length;
         if (len == 0) {
             /*
              * This deferred activator waits for no services
              */
             return true;
         }
-        for (int i = 0; i < classes.length; i++) {
+        for (int i = 0; i < len; i++) {
             if (!services.containsKey(classes[i])) {
                 return false;
             }
