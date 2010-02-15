@@ -47,39 +47,76 @@
  *
  */
 
-package com.openexchange.groupware.notify;
+package com.openexchange.groupware.notify.imip;
 
-import com.openexchange.groupware.notify.imip.IMipDeleteAppointmentTest;
-import com.openexchange.groupware.notify.imip.IMipNewAppointmentTest;
-import com.openexchange.groupware.notify.imip.IMipStatusChangeAppointmentTest;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.List;
+import com.openexchange.data.conversion.ical.ITipMethod;
+import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.session.Session;
 
 /**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * {@link IMipStatusChangeAppointmentTest}
+ * 
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class NotifyTestSuite {
+public class IMipStatusChangeAppointmentTest extends IMipTest {
 
-    public static Test suite() {
-        TestSuite tests = new TestSuite();
+    private Session so2;
 
-        tests.addTestSuite(NoSendTest.class);
-        tests.addTestSuite(ExternalTest.class);
-        tests.addTestSuite(Bug9950Test.class);
-        tests.addTestSuite(Bug9256Test.class);
-        tests.addTestSuite(Bug9204Test.class);
-        tests.addTestSuite(Bug7507Test.class);
-        tests.addTestSuite(Bug6524Test.class);
-        tests.addTestSuite(Bug12985Test.class);
-        tests.addTestSuite(ResourcesTest.class);
-        tests.addTestSuite(SimpleTest.class);
-        tests.addTestSuite(StateTest.class);
-        tests.addTestSuite(Bug13184Test.class);
-        //tests.addTestSuite(Bug14309Test.class); TODO: reactivate, if configuration on test machine can handle templates properly.
-        tests.addTestSuite(OverridingTypeTest.class);
-        tests.addTestSuite(IMipNewAppointmentTest.class);
-        tests.addTestSuite(IMipDeleteAppointmentTest.class);
-        tests.addTestSuite(IMipStatusChangeAppointmentTest.class);
-        return tests;
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.groupware.notify.imip.IMipTest#setUp()
+     */
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        so2 = contextTools.getSessionForUser(secondUser, ctx);
+        appointment = appointments.buildAppointmentWithUserParticipants(user, secondUser, thirdUser);
     }
+
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.groupware.notify.ParticipantNotifyTest#tearDown()
+     */
+    @Override
+    public void tearDown() throws Exception {
+        super.tearDown();
+
+    }
+    
+    public void testStatusChange() throws Exception {
+        mailForOwner(CalendarObject.ACCEPT);
+        mailForOwner(CalendarObject.DECLINE);
+        mailForOwner(CalendarObject.TENTATIVE);
+    }
+    
+    public void mailForOwner(int status) throws Exception {
+        
+        for (UserParticipant u : appointment.getUsers()) {
+            if (u.getIdentifier() == secondUserId) {
+                u.setConfirm(status);
+                u.setConfirmMessage("Message");
+            }
+        }
+        
+        notify.appointmentAccepted(appointment, so2);
+        List<Message> messages = notify.getMessages();
+        
+        boolean foundFirst = false;
+        
+        for (Message message : messages) {
+            if (message.addresses.contains(userMail)) {
+                checkState(message.message, ITipMethod.REPLY);
+                foundFirst = true;
+            } else if (message.addresses.contains(secondUserMail)) {
+                fail("Sender should not get a mail");
+            } else if (message.addresses.contains(thirdUserMail)) {
+                fail("Other participants should not get reply mails.");
+            }
+        }
+        
+        assertTrue("missing user", foundFirst);
+    }
+
 }

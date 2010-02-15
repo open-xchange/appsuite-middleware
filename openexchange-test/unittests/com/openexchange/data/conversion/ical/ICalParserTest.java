@@ -631,6 +631,30 @@ public class ICalParserTest extends TestCase {
         assertEquals(0, end.get(Calendar.MINUTE));
         assertEquals(0, end.get(Calendar.SECOND));
     }
+    
+    public void testAppUid() throws ConversionError {
+        Date start = D("24/02/1981 10:00");
+        Date end = D("24/02/1981 12:00");
+
+        TimeZone utc = TimeZone.getTimeZone("UTC");
+
+        String icalText = fixtures.veventWithSimpleProperties(start, end, "UID", "nrw3rn2983nxi");
+        Appointment appointment = parseAppointment(icalText, utc);
+
+        assertEquals("nrw3rn2983nxi", appointment.getUid());
+    }
+    
+    public void testAppOrganizer() throws ConversionError {
+        Date start = D("24/02/1981 10:00");
+        Date end = D("24/02/1981 12:00");
+
+        TimeZone utc = TimeZone.getTimeZone("UTC");
+
+        String icalText = fixtures.veventWithSimpleProperties(start, end, "ORGANIZER", "mailto:bla@example.invalid");
+        Appointment appointment = parseAppointment(icalText, utc);
+
+        assertEquals("bla@example.invalid", appointment.getOrganizer());
+    }
 
     // Tasks
 
@@ -1064,6 +1088,30 @@ public class ICalParserTest extends TestCase {
 
         assertEquals(D("24/02/1981 09:10"), task.getAlarm());
         assertTrue(task.getAlarmFlag());
+    }
+    
+    public void testTskUid() throws ConversionError {
+        Date start = D("24/02/1981 10:00");
+        Date end = D("24/02/1981 12:00");
+
+        TimeZone utc = TimeZone.getTimeZone("UTC");
+
+        String icalText = fixtures.vtodoWithSimpleProperties(start, end, "UID", "nrw3rn2983nxi");
+        Task task = parseTask(icalText, utc);
+
+        assertEquals("nrw3rn2983nxi", task.getUid());
+    }
+    
+    public void no_testTskOrganizer() throws ConversionError {
+        Date start = D("24/02/1981 10:00");
+        Date end = D("24/02/1981 12:00");
+
+        TimeZone utc = TimeZone.getTimeZone("UTC");
+
+        String icalText = fixtures.vtodoWithSimpleProperties(start, end, "ORGANIZER", "mailto:bla@example.invalid");
+        Task task = parseTask(icalText, utc);
+
+        assertEquals("bla@example.invalid", task.getOrganizer());
     }
 
 

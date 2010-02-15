@@ -95,6 +95,9 @@ public class ListTest extends AppointmentTest {
 		appointmentObj.setLabel(2);
 		appointmentObj.setNote("note");
 		appointmentObj.setCategories("testcat1,testcat2,testcat3");
+		appointmentObj.setOrganizer("someone else");
+		appointmentObj.setUid("1234567890abcdef");
+		appointmentObj.setSequence(5);
 		
 		final int userParticipantId = ContactTest.searchContact(getWebConversation(), userParticipant3, FolderObject.SYSTEM_LDAP_FOLDER_ID, new int[] { Contact.INTERNAL_USERID }, PROTOCOL + getHostName(), getSessionId())[0].getInternalUserId();
 		final int groupParticipantId = GroupTest.searchGroup(getWebConversation(), groupParticipant, getHostName(), getSessionId())[0].getIdentifier();
@@ -113,8 +116,9 @@ public class ListTest extends AppointmentTest {
 		appointmentObj.setParticipants(participants);
 		appointmentObj.setIgnoreConflicts(true);
 		
+		int objectId = 0;
 		try {
-			final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+			objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 			
 			final int[][] objectIdAndFolderId = { { objectId, appointmentFolderId } };
 			
@@ -138,9 +142,11 @@ public class ListTest extends AppointmentTest {
 			appointmentObj.setParentFolderID(appointmentFolderId);
 			compareObject(appointmentObj, loadAppointment, newStartTime, newEndTime);
 			
-			deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 		} catch (final OXConflictException exc) {
 			LOG.warn("Conflict Exception found. Maybe test result is wrong: " + exc);
+		} finally {
+		    if (objectId != 0)
+		        deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 		}
 	}
 

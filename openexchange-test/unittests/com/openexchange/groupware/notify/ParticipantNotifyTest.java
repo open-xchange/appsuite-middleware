@@ -321,7 +321,7 @@ public class ParticipantNotifyTest extends TestCase {
 	protected String[] getLines(final Message msg, final String from, final String to) {
 		boolean collect = false;
 		final List<String> collector = new ArrayList<String>();
-		final String[] allLines = msg.message.split("\n");
+		final String[] allLines = ((String) msg.message).split("\n");
 		for(String line : allLines) {
 			line = line.trim();
 			if(line.startsWith(to)) {
@@ -345,13 +345,13 @@ public class ParticipantNotifyTest extends TestCase {
 
 	protected static final class Message {
 		public String messageTitle;
-		public String message;
+		public Object message;
 		public List<String> addresses;
 		public int folderId;
         protected final boolean internal;
         public Type overrideType;
 
-        public Message(final String messageTitle, final String message, final List<String>addresses, final int folderId, final boolean internal, State.Type overrideType) {
+        public Message(final String messageTitle, final Object message, final List<String>addresses, final int folderId, final boolean internal, State.Type overrideType) {
 			this.messageTitle = messageTitle;
 			this.message = message;
 			this.addresses = addresses;
@@ -429,8 +429,8 @@ public class ParticipantNotifyTest extends TestCase {
 		}
 
 		@Override
-		protected void sendMessage(final String messageTitle, final String message, final List<String> name, final ServerSession session, final CalendarObject obj, final int folderId, final State state, final boolean suppressOXReminderHeader, final boolean internal, State.Type overrideType) {
-			messageCollector.add(new Message(messageTitle,message,name, folderId, internal, overrideType));
+		protected void sendMessage(MailMessage msg, final ServerSession session, final CalendarObject obj, final State state, final boolean suppressOXReminderHeader) {
+			messageCollector.add(new Message(msg.title, msg.message, msg.addresses, msg.folderId, msg.internal, msg.overrideType));
 		}
 
         @Override

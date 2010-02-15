@@ -47,71 +47,101 @@
  *
  */
 
-package com.openexchange.groupware.notify;
+package com.openexchange.groupware.notify.imip;
 
-import java.util.List;
+import javax.mail.BodyPart;
+import javax.mail.internet.MimeMultipart;
+import com.openexchange.data.conversion.ical.ITipMethod;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.tools.CommonAppointments;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.notify.ParticipantNotifyTest;
 import com.openexchange.session.Session;
 import com.openexchange.setuptools.TestConfig;
 import com.openexchange.setuptools.TestContextToolkit;
+import com.openexchange.setuptools.TestFolderToolkit;
 
 /**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * {@link IMipTest}
+ * 
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class Bug14309Test extends ParticipantNotifyTest {
+public abstract class IMipTest extends ParticipantNotifyTest {
 
-    private Context ctx;
+    protected TestFolderToolkit folders;
 
-    private String user;
+    protected Context ctx;
 
-    private String secondUser;
+    protected String user;
 
-    private int secondUserId;
+    protected String secondUser;
+    
+    protected String thirdUser;
 
-    private String secondUserMail;
+    protected int userId;
 
-    private CommonAppointments appointments;
+    protected int secondUserId;
+    
+    protected int thirdUserId;
 
-    private CalendarDataObject appointment;
+    protected String userMail;
 
-    private Session so;
+    protected String secondUserMail;
+    
+    protected String thirdUserMail;
+
+    protected Session so;
+
+    protected CommonAppointments appointments;
+
+    protected CalendarDataObject appointment;
+
+    protected TestContextToolkit contextTools;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        
-        final TestContextToolkit contextTools = new TestContextToolkit();
+
+        folders = new TestFolderToolkit();
+        contextTools = new TestContextToolkit();
         ctx = contextTools.getDefaultContext();
         final TestConfig config = new TestConfig();
         user = config.getUser();
         secondUser = config.getSecondUser();
+        thirdUser = config.getThirdUser();
+        userId = contextTools.resolveUser(user, ctx);
         secondUserId = contextTools.resolveUser(secondUser, ctx);
+        thirdUserId = contextTools.resolveUser(thirdUser, ctx);
+        userMail = contextTools.loadUser(userId, ctx).getMail();
         secondUserMail = contextTools.loadUser(secondUserId, ctx).getMail();
+        thirdUserMail = contextTools.loadUser(thirdUserId, ctx).getMail();
 
         so = contextTools.getSessionForUser(user, ctx);
 
         appointments = new CommonAppointments(ctx, user);
-        appointment = appointments.buildAppointmentWithUserParticipants(user, secondUser);
-        appointment.setObjectID(123);
 
         notify.realUsers = true;
     }
-
-    public void testBug14309() throws Exception {
-        notify.appointmentCreated(appointment, so);
-        List<Message> messages = notify.getMessages();
-        assertEquals("Wrong amount of notification messages.", 1, messages.size());
-        Message message = messages.get(0);
-
-        assertTrue("Wrong recipient.", message.addresses.contains(secondUserMail));
-        assertTrue("Message should contain a link to the apointment: " + message.toString(), ((String)message.message).contains("http://")); // TODO: Make more
-                                                                                                             // sophisticated.
+    
+    protected void checkState(Object message, ITipMethod method) throws Exception {
+        
+        assertTrue("message should be a multipart", MimeMultipart.class.isInstance(message));
+        MimeMultipart msg = (MimeMultipart) message;
+        assertTrue("wrong content type", msg.getContentType().startsWith("multipart/alternative"));
+        
+        BodyPart calendarPart = null;
+        for (int i = 0; i < msg.getCount(); i++) {
+            if (msg.getBodyPart(i).getContentType().startsWith("text/calendar")) {
+                calendarPart = msg.getBodyPart(i);
+                break;
+            }
+        }
+        
+        if (method == ITipMethod.NO_METHOD) {
+            assertFalse("method in content type", calendarPart.getContentType().contains("method"));
+        } else {
+            assertTrue("missing method in content type", calendarPart.getContentType().contains(method.getMethod()));
+        }
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
 }

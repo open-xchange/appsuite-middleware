@@ -439,6 +439,33 @@ public class ICalEmitterTest extends TestCase {
 
         assertProperty(ical, "EXDATE", "20090225T100000Z,20090228T120000Z");
     }
+    
+    public void testAppUid() throws IOException {
+        Appointment appointment = getDefault();
+        appointment.setUid("nexn787n478478onzwo87nwiuhi");
+        
+        ICalFile ical = serialize(appointment);
+        
+        assertProperty(ical, "UID", "nexn787n478478onzwo87nwiuhi");
+    }
+    
+    public void testAppOrganizer() throws IOException {
+        Appointment appointment = getDefault();
+        appointment.setOrganizer("organizer");
+        
+        ICalFile ical = serialize(appointment);
+        
+        assertProperty(ical, "ORGANIZER", "mailto:organizer");
+    }
+    
+    public void testAppSequence() throws IOException {
+        Appointment appointment = getDefault();
+        appointment.setSequence(5);
+        
+        ICalFile ical = serialize(appointment);
+        
+        assertProperty(ical, "SEQUENCE", "5");
+    }
 
     // Omitting: DURATION. This is all handled with DTStart and DTEnd in emitting
 
@@ -503,6 +530,24 @@ public class ICalEmitterTest extends TestCase {
         task.setEndDate(end);
         final ICalFile ical = serialize(task);
         assertStandardAppFields(ical, start, end);
+    }
+    
+    public void testTaskUid() throws IOException {
+        Task task = new Task();
+        task.setUid("nexn787n478478onzwo87nwiuhi");
+        
+        ICalFile ical = serialize(task);
+        
+        assertProperty(ical, "UID", "nexn787n478478onzwo87nwiuhi");
+    }
+    
+    public void no_testTaskOrganizer() throws IOException {
+        Task task = new Task();
+        task.setOrganizer("organizer");
+        
+        ICalFile ical = serialize(task);
+        
+        assertProperty(ical, "ORGANIZER", "mailto:organizer");
     }
 
     // SetUp

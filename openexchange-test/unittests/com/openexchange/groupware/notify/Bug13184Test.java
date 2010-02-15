@@ -52,6 +52,7 @@ package com.openexchange.groupware.notify;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
+import javax.mail.internet.MimeMultipart;
 import com.openexchange.api2.OXException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -127,7 +128,20 @@ public class Bug13184Test extends ParticipantNotifyTest {
         assertEquals("Wrong amount of notification messages.", 1, messages.size());
         final Message message = messages.get(0);
         assertTrue("Wrong recipient.", message.addresses.contains(secondUserMail));
-        assertFalse("Message should not contain a link to the apointment.", message.message.contains("http://")); //TODO: Make more sophisticated.
+        
+        String msg = "";
+        if (MimeMultipart.class.isInstance(message.message)) {
+            MimeMultipart mpart = (MimeMultipart) message.message;
+            for (int i = 0; i < mpart.getCount(); i++) {
+                if (mpart.getBodyPart(i).getContentType().startsWith("text/plain")) {
+                    msg = (String) mpart.getBodyPart(i).getContent();
+                    break;
+                }
+            }
+        } else {
+            msg = (String) message.message;
+        }
+        assertFalse("Message should not contain a link to the apointment.", msg.contains("http://")); //TODO: Make more sophisticated.
     }
 
     private FolderObject createPublicFolderFor() {

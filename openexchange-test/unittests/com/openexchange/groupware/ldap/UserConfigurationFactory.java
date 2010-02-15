@@ -38,6 +38,8 @@ public class UserConfigurationFactory {
 		UserSettingMail mailSetting = new UserSettingMail(user.getId(), ctx.getContextId());
 		mailSetting.setNotifyAppointments(true);
 		mailSetting.setNotifyTasks(true);
+        mailSetting.setNotifyAppointmentsConfirmOwner(true);
+        mailSetting.setNotifyAppointmentsConfirmParticipant(true);
 		//config.setUserSettingMail(mailSetting);
 		configs.put(1,config);
 		settings.put(1, mailSetting);
@@ -47,6 +49,8 @@ public class UserConfigurationFactory {
 		mailSetting = new UserSettingMail(user.getId(), ctx.getContextId());
 		mailSetting.setNotifyAppointments(true);
 		mailSetting.setNotifyTasks(true);
+        mailSetting.setNotifyAppointmentsConfirmOwner(true);
+        mailSetting.setNotifyAppointmentsConfirmParticipant(true);
 		//config.setUserSettingMail(mailSetting);
 		configs.put(2,config);
 		settings.put(2, mailSetting);
@@ -56,6 +60,8 @@ public class UserConfigurationFactory {
 		mailSetting = new UserSettingMail(user.getId(), ctx.getContextId());
 		mailSetting.setNotifyAppointments(true);
 		mailSetting.setNotifyTasks(true);
+        mailSetting.setNotifyAppointmentsConfirmOwner(true);
+        mailSetting.setNotifyAppointmentsConfirmParticipant(true);
 		//config.setUserSettingMail(mailSetting);
 		configs.put(3,config);
 		settings.put(3, mailSetting);
@@ -65,6 +71,8 @@ public class UserConfigurationFactory {
 		mailSetting = new UserSettingMail(user.getId(), ctx.getContextId());
 		mailSetting.setNotifyAppointments(true);
 		mailSetting.setNotifyTasks(true);
+        mailSetting.setNotifyAppointmentsConfirmOwner(true);
+        mailSetting.setNotifyAppointmentsConfirmParticipant(true);
 		//config.setUserSettingMail(mailSetting);
 		configs.put(4,config);
 		settings.put(4, mailSetting);
@@ -74,6 +82,8 @@ public class UserConfigurationFactory {
 		mailSetting = new UserSettingMail(user.getId(), ctx.getContextId());
 		mailSetting.setNotifyAppointments(false);
 		mailSetting.setNotifyTasks(true);
+        mailSetting.setNotifyAppointmentsConfirmOwner(true);
+        mailSetting.setNotifyAppointmentsConfirmParticipant(true);
 		//config.setUserSettingMail(mailSetting);
 		configs.put(5,config);
 		settings.put(5, mailSetting);
@@ -83,6 +93,8 @@ public class UserConfigurationFactory {
 		mailSetting = new UserSettingMail(user.getId(), ctx.getContextId());
 		mailSetting.setNotifyAppointments(true);
 		mailSetting.setNotifyTasks(false);
+		mailSetting.setNotifyAppointmentsConfirmOwner(true);
+        mailSetting.setNotifyAppointmentsConfirmParticipant(true);
 		//config.setUserSettingMail(mailSetting);
 		configs.put(6,config);
 		settings.put(6, mailSetting);
@@ -92,6 +104,8 @@ public class UserConfigurationFactory {
 		mailSetting = new UserSettingMail(user.getId(), ctx.getContextId());
 		mailSetting.setNotifyAppointments(true);
 		mailSetting.setNotifyTasks(true);
+        mailSetting.setNotifyAppointmentsConfirmOwner(true);
+        mailSetting.setNotifyAppointmentsConfirmParticipant(true);
 		//config.setUserSettingMail(mailSetting);
 		configs.put(7,config);
 		settings.put(7, mailSetting);
@@ -101,6 +115,8 @@ public class UserConfigurationFactory {
 		mailSetting = new UserSettingMail(user.getId(), ctx.getContextId());
 		mailSetting.setNotifyAppointments(true);
 		mailSetting.setNotifyTasks(true);
+        mailSetting.setNotifyAppointmentsConfirmOwner(true);
+        mailSetting.setNotifyAppointmentsConfirmParticipant(true);
 		//config.setUserSettingMail(mailSetting);
 		configs.put(8,config);
 		settings.put(8, mailSetting);
@@ -110,6 +126,8 @@ public class UserConfigurationFactory {
 		mailSetting = new UserSettingMail(user.getId(), ctx.getContextId());
 		mailSetting.setNotifyAppointments(true);
 		mailSetting.setNotifyTasks(true);
+        mailSetting.setNotifyAppointmentsConfirmOwner(true);
+        mailSetting.setNotifyAppointmentsConfirmParticipant(true);
 		//config.setUserSettingMail(mailSetting);
 		configs.put(9,config);
 		settings.put(9, mailSetting);
@@ -119,6 +137,8 @@ public class UserConfigurationFactory {
 		mailSetting = new UserSettingMail(user.getId(), ctx.getContextId());
 		mailSetting.setNotifyAppointments(true);
 		mailSetting.setNotifyTasks(true);
+        mailSetting.setNotifyAppointmentsConfirmOwner(true);
+        mailSetting.setNotifyAppointmentsConfirmParticipant(true);
 		//config.setUserSettingMail(mailSetting);
 		configs.put(10,config);
 		settings.put(10, mailSetting);

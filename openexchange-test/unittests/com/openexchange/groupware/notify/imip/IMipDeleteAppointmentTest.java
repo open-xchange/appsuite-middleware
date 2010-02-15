@@ -47,39 +47,54 @@
  *
  */
 
-package com.openexchange.groupware.notify;
+package com.openexchange.groupware.notify.imip;
 
-import com.openexchange.groupware.notify.imip.IMipDeleteAppointmentTest;
-import com.openexchange.groupware.notify.imip.IMipNewAppointmentTest;
-import com.openexchange.groupware.notify.imip.IMipStatusChangeAppointmentTest;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.List;
+import com.openexchange.data.conversion.ical.ITipMethod;
+
 
 /**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * {@link IMipDeleteAppointmentTest}
+ *
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class NotifyTestSuite {
+public class IMipDeleteAppointmentTest extends IMipTest {
 
-    public static Test suite() {
-        TestSuite tests = new TestSuite();
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.groupware.notify.imip.IMipTest#setUp()
+     */
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        
+        appointment = appointments.buildAppointmentWithUserParticipants(user, secondUser);
+    }
 
-        tests.addTestSuite(NoSendTest.class);
-        tests.addTestSuite(ExternalTest.class);
-        tests.addTestSuite(Bug9950Test.class);
-        tests.addTestSuite(Bug9256Test.class);
-        tests.addTestSuite(Bug9204Test.class);
-        tests.addTestSuite(Bug7507Test.class);
-        tests.addTestSuite(Bug6524Test.class);
-        tests.addTestSuite(Bug12985Test.class);
-        tests.addTestSuite(ResourcesTest.class);
-        tests.addTestSuite(SimpleTest.class);
-        tests.addTestSuite(StateTest.class);
-        tests.addTestSuite(Bug13184Test.class);
-        //tests.addTestSuite(Bug14309Test.class); TODO: reactivate, if configuration on test machine can handle templates properly.
-        tests.addTestSuite(OverridingTypeTest.class);
-        tests.addTestSuite(IMipNewAppointmentTest.class);
-        tests.addTestSuite(IMipDeleteAppointmentTest.class);
-        tests.addTestSuite(IMipStatusChangeAppointmentTest.class);
-        return tests;
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.groupware.notify.ParticipantNotifyTest#tearDown()
+     */
+    @Override
+    public void tearDown() throws Exception {
+        super.tearDown();
+    }
+    
+    public void testMailForParticipants() throws Exception {
+        notify.appointmentDeleted(appointment, so);
+        List<Message> messages = notify.getMessages();
+        
+        boolean foundSecond = false;
+        
+        for (Message message : messages) {
+            if (message.addresses.contains(userMail)) {
+                fail("owner should net get delete mail");
+            } else if (message.addresses.contains(secondUserMail)) {
+                foundSecond = true;
+                checkState(message.message, ITipMethod.CANCEL);
+            }
+        }
+        
+        assertTrue("missing user", foundSecond);
     }
 }
