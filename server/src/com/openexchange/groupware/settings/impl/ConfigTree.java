@@ -288,6 +288,7 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.modules.mailaccount.Module.class,
             com.openexchange.groupware.settings.tree.modules.passwordchange.Module.class,
             com.openexchange.groupware.settings.tree.modules.personaldata.Module.class,
+            com.openexchange.groupware.settings.tree.modules.personaldata.InternalUserEditEnabled.class,
             com.openexchange.groupware.settings.tree.modules.portal.GUI.class,
             com.openexchange.groupware.settings.tree.modules.portal.Module.class,
             com.openexchange.groupware.settings.tree.modules.tasks.GUI.class,
