@@ -268,10 +268,11 @@ public abstract class MailServletInterface {
      * 
      * @param destFolder The destination folder
      * @param msgs - The messages to append (<b>must</b> be completely pre-filled incl. content references)
+     * @param force <code>true</code> to enforce append and to omit checks; otherwise <code>false</code>
      * @return The corresponding mail IDs in destination folder
      * @throws MailException If messages cannot be appended.
      */
-    public abstract String[] appendMessages(String destFolder, MailMessage[] msgs) throws MailException;
+    public abstract String[] appendMessages(String destFolder, MailMessage[] msgs, boolean force) throws MailException;
 
     /**
      * Creates an instance of <code>JSONMessageObject</code> which contains the initial reply content of the message identifed through

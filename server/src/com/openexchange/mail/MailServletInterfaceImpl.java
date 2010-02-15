@@ -187,6 +187,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
     private Locale locale;
 
+    private User user;
+
     /**
      * Initializes a new {@link MailServletInterfaceImpl}.
      * 
@@ -195,22 +197,37 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     MailServletInterfaceImpl(final Session session) throws MailException {
         super();
         try {
-            this.ctx =
-                (session instanceof ServerSession) ? ((ServerSession) session).getContext() : ContextStorage.getInstance().getContext(
-                    session.getContextId());
-        } catch (final ContextException e) {
-            throw new MailException(e);
-        }
-        try {
-            if (!UserConfigurationStorage.getInstance().getUserConfiguration(session.getUserId(), ctx).hasWebMail()) {
-                throw new MailException(MailException.Code.NO_MAIL_ACCESS);
+            if (session instanceof ServerSession) {
+                final ServerSession serverSession = (ServerSession) session;
+                this.ctx = serverSession.getContext();
+                this.usm = serverSession.getUserSettingMail();
+                if (!serverSession.getUserConfiguration().hasWebMail()) {
+                    throw new MailException(MailException.Code.NO_MAIL_ACCESS);
+                }
+                this.user = serverSession.getUser();
+            } else {
+                this.ctx = ContextStorage.getInstance().getContext(session.getContextId());
+                usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
+                try {
+                    if (!UserConfigurationStorage.getInstance().getUserConfiguration(session.getUserId(), ctx).hasWebMail()) {
+                        throw new MailException(MailException.Code.NO_MAIL_ACCESS);
+                    }
+                } catch (final UserConfigurationException e) {
+                    throw new MailException(e);
+                }
             }
-        } catch (final UserConfigurationException e) {
+        } catch (final ContextException e) {
             throw new MailException(e);
         }
         this.session = session;
         this.contextId = session.getContextId();
-        usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
+    }
+
+    private User getUser() {
+        if (null == user) {
+            user = UserStorage.getStorageUser(session.getUserId(), session.getContextId());
+        }
+        return user;
     }
 
     private Locale getUserLocale() {
@@ -1182,9 +1199,37 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public String[] appendMessages(final String destFolder, final MailMessage[] mails) throws MailException {
+    public String[] appendMessages(final String destFolder, final MailMessage[] mails, final boolean force) throws MailException {
         if ((mails == null) || (mails.length == 0)) {
             return new String[0];
+        }
+        if (!force) {
+            /*
+             * Check for valid from address
+             */
+            try {
+                final Set<InternetAddress> validAddrs = new HashSet<InternetAddress>(4);
+                if (usm.getSendAddr() != null && usm.getSendAddr().length() > 0) {
+                    validAddrs.add(new QuotedInternetAddress(usm.getSendAddr()));
+                }
+                final User user = getUser();
+                validAddrs.add(new QuotedInternetAddress(user.getMail()));
+                final String[] aliases = user.getAliases();
+                for (final String alias : aliases) {
+                    validAddrs.add(new QuotedInternetAddress(alias));
+                }
+                for (final MailMessage mail : mails) {
+                    final InternetAddress[] from = mail.getFrom();
+                    final List<InternetAddress> froms = Arrays.asList(from);
+                    if (!validAddrs.containsAll(froms)) {
+                        throw new MailException(
+                            MailException.Code.INVALID_SENDER,
+                            froms.size() == 1 ? froms.get(0).toString() : Arrays.toString(from));
+                    }
+                }
+            } catch (final AddressException e) {
+                throw MIMEMailException.handleMessagingException(e);
+            }
         }
         final FullnameArgument argument = prepareMailFolderParam(destFolder);
         final int accountId = argument.getAccountId();
@@ -1999,7 +2044,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     if (usm.getSendAddr() != null && usm.getSendAddr().length() > 0) {
                         validAddrs.add(new QuotedInternetAddress(usm.getSendAddr()));
                     }
-                    final User user = UserStorage.getStorageUser(session.getUserId(), session.getContextId());
+                    final User user = getUser();
                     validAddrs.add(new QuotedInternetAddress(user.getMail()));
                     final String[] aliases = user.getAliases();
                     for (final String alias : aliases) {
