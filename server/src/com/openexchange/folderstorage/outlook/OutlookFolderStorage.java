@@ -171,11 +171,11 @@ public final class OutlookFolderStorage implements FolderStorage {
         if (!dedicatedFolderStorage.containsFolder(FolderStorage.REAL_TREE_ID, folderId, storageType, storageParameters)) {
             return false;
         }
-        
+
         // Exclude unsupported folders like infostore folders
         // final Folder folder = dedicatedFolderStorage.getFolder(FolderStorage.REAL_TREE_ID, folderId, storageType, storageParameters);
         // if (InfostoreContentType.getInstance().equals(folder.getContentType())) {
-        //     return false;
+        // return false;
         // }
         return true;
     }
@@ -496,18 +496,14 @@ public final class OutlookFolderStorage implements FolderStorage {
                 defIds.add(folderStorage.getDefaultFolderID(user, treeId, SpamContentType.getInstance(), storageParameters));
             }
             final SortableId[] inboxSubfolders = folderStorage.getSubfolders(realTreeId, PREPARED_FULLNAME_INBOX, storageParameters);
-            final boolean[] contained = Select.containsFolders(contextId, tree, storageParameters.getUserId(), inboxSubfolders, StorageType.WORKING);
+            final boolean[] contained =
+                Select.containsFolders(contextId, tree, storageParameters.getUserId(), inboxSubfolders, StorageType.WORKING);
             for (int i = 0; i < inboxSubfolders.length; i++) {
                 if (!contained[i]) {
                     final String id = inboxSubfolders[i].getId();
                     if (!defIds.contains(id)) {
                         final String localizedName = getLocalizedName(id, tree, locale, folderStorage, storageParameters);
-                        List<String> list = treeMap.get(localizedName);
-                        if (null == list) {
-                            list = new ArrayList<String>(2);
-                            treeMap.put(localizedName, list);
-                        }
-                        list.add(id);
+                        put2TreeMap(localizedName, id, treeMap);
                     }
                 }
             }
@@ -605,13 +601,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                 final SortableId[] ids = folderStorage.getSubfolders(realTreeId, parentId, storageParameters);
                 for (final SortableId sortableId : ids) {
                     final String id = sortableId.getId();
-                    final String localizedName = getLocalizedName(id, tree, locale, folderStorage, storageParameters);
-                    List<String> list = treeMap.get(localizedName);
-                    if (null == list) {
-                        list = new ArrayList<String>(2);
-                        treeMap.put(localizedName, list);
-                    }
-                    list.add(id);
+                    put2TreeMap(getLocalizedName(id, tree, locale, folderStorage, storageParameters), id, treeMap);
                 }
                 folderStorage.commitTransaction(storageParameters);
             } catch (final FolderException e) {
@@ -639,13 +629,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                 final SortableId[] mailIDs = folderStorage.getSubfolders(realTreeId, fullname, storageParameters);
                 for (final SortableId sortableId : mailIDs) {
                     final String id = sortableId.getId();
-                    final String localizedName = getLocalizedName(id, tree, locale, folderStorage, storageParameters);
-                    List<String> list = treeMap.get(localizedName);
-                    if (null == list) {
-                        list = new ArrayList<String>(2);
-                        treeMap.put(localizedName, list);
-                    }
-                    list.add(id);
+                    put2TreeMap(getLocalizedName(id, tree, locale, folderStorage, storageParameters), id, treeMap);
                 }
                 /*
                  * Add default folders: Trash, Sent, Drafts, ...
@@ -660,18 +644,13 @@ public final class OutlookFolderStorage implements FolderStorage {
                     defIds.add(folderStorage.getDefaultFolderID(user, treeId, SpamContentType.getInstance(), storageParameters));
                 }
                 final SortableId[] inboxSubfolders = folderStorage.getSubfolders(realTreeId, PREPARED_FULLNAME_INBOX, storageParameters);
-                final boolean[] contained = Select.containsFolders(contextId, tree, storageParameters.getUserId(), inboxSubfolders, StorageType.WORKING);
+                final boolean[] contained =
+                    Select.containsFolders(contextId, tree, storageParameters.getUserId(), inboxSubfolders, StorageType.WORKING);
                 for (int i = 0; i < inboxSubfolders.length; i++) {
                     if (!contained[i]) {
                         final String id = inboxSubfolders[i].getId();
                         if (defIds.contains(id)) {
-                            final String localizedName = getLocalizedName(id, tree, locale, folderStorage, storageParameters);
-                            List<String> list = treeMap.get(localizedName);
-                            if (null == list) {
-                                list = new ArrayList<String>(2);
-                                treeMap.put(localizedName, list);
-                            }
-                            list.add(id);
+                            put2TreeMap(getLocalizedName(id, tree, locale, folderStorage, storageParameters), id, treeMap);
                         }
                     }
                 }
@@ -690,13 +669,7 @@ public final class OutlookFolderStorage implements FolderStorage {
              */
             final List<String[]> l = Select.getSubfolderIds(contextId, tree, user.getId(), parentId, StorageType.WORKING);
             for (final String[] idAndName : l) {
-                final String localizedName = idAndName[1];
-                List<String> list = treeMap.get(localizedName);
-                if (null == list) {
-                    list = new ArrayList<String>(2);
-                    treeMap.put(localizedName, list);
-                }
-                list.add(idAndName[0]);
+                put2TreeMap(idAndName[1], idAndName[0], treeMap);
             }
         }
         {
@@ -713,13 +686,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                 for (int i = 0; i < subfolders.length; i++) {
                     final String id = subfolders[i].getId();
                     if (!FolderStorage.PRIVATE_ID.equals(id)) { // Exclude private folder
-                        final String localizedName = getLocalizedName(id, tree, locale, folderStorage, storageParameters);
-                        List<String> list = treeMap.get(localizedName);
-                        if (null == list) {
-                            list = new ArrayList<String>(2);
-                            treeMap.put(localizedName, list);
-                        }
-                        list.add(id);
+                        put2TreeMap(getLocalizedName(id, tree, locale, folderStorage, storageParameters), id, treeMap);
                     }
 
                     // if (FolderStorage.PUBLIC_ID.equals(id)) {
@@ -798,6 +765,15 @@ public final class OutlookFolderStorage implements FolderStorage {
             }
         }
         return ret;
+    }
+
+    private static void put2TreeMap(final String localizedName, final String id, final TreeMap<String, List<String>> treeMap) {
+        List<String> list = treeMap.get(localizedName);
+        if (null == list) {
+            list = new ArrayList<String>(2);
+            treeMap.put(localizedName, list);
+        }
+        list.add(id);
     }
 
     public ContentType[] getSupportedContentTypes() {
