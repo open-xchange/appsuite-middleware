@@ -3231,11 +3231,30 @@ public class Mail extends PermissionServlet implements UploadListener {
             final MailMessage[] mails;
             {
                 final String bodyStr = body.getString();
-                if (startsWith('[', bodyStr, true)) {
+                final JSONArray array = toJSONArray(bodyStr);
+                if (null == array) {
+                    fromAddresses = new InternetAddress[1];
+                    managedMessages = new ManagedMimeMessage[1];
+                    mails = new MailMessage[1];
+                    managedMessages[0] = new ManagedMimeMessage(MIMEDefaultSession.getDefaultSession(), bodyStr.getBytes("US-ASCII"));
+                    final String fromAddr = managedMessages[0].getHeader(MessageHeaders.HDR_FROM, null);
+                    try {
+                        if (isEmpty(fromAddr)) {
+                            // Add from address
+                            fromAddresses[0] = new QuotedInternetAddress(getDefaultSendAddress(session), true);
+                            managedMessages[0].setFrom(fromAddresses[0]);
+                            mails[0] = MIMEMessageConverter.convertMessage(managedMessages[0]);
+                        } else {
+                            fromAddresses[0] = new QuotedInternetAddress(fromAddr, true);
+                            mails[0] = MIMEMessageConverter.convertMessage(managedMessages[0]);
+                        }
+                    } catch (final AddressException e) {
+                        throw MIMEMailException.handleMessagingException(e);
+                    }
+                } else {
                     /*
-                     * Assume JSON array
+                     * A JSON array
                      */
-                    final JSONArray array = new JSONArray(bodyStr);
                     final int len = array.length();
                     fromAddresses = new InternetAddress[len];
                     managedMessages = new ManagedMimeMessage[len];
@@ -3258,25 +3277,6 @@ public class Mail extends PermissionServlet implements UploadListener {
                                 fromAddresses[i] = new QuotedInternetAddress(fromAddr, true);
                                 mails[i] = MIMEMessageConverter.convertMessage(managedMessages[i]);
                             }
-                        }
-                    } catch (final AddressException e) {
-                        throw MIMEMailException.handleMessagingException(e);
-                    }
-                } else {
-                    fromAddresses = new InternetAddress[1];
-                    managedMessages = new ManagedMimeMessage[1];
-                    mails = new MailMessage[1];
-                    managedMessages[0] = new ManagedMimeMessage(MIMEDefaultSession.getDefaultSession(), bodyStr.getBytes("US-ASCII"));
-                    final String fromAddr = managedMessages[0].getHeader(MessageHeaders.HDR_FROM, null);
-                    try {
-                        if (isEmpty(fromAddr)) {
-                            // Add from address
-                            fromAddresses[0] = new QuotedInternetAddress(getDefaultSendAddress(session), true);
-                            managedMessages[0].setFrom(fromAddresses[0]);
-                            mails[0] = MIMEMessageConverter.convertMessage(managedMessages[0]);
-                        } else {
-                            fromAddresses[0] = new QuotedInternetAddress(fromAddr, true);
-                            mails[0] = MIMEMessageConverter.convertMessage(managedMessages[0]);
                         }
                     } catch (final AddressException e) {
                         throw MIMEMailException.handleMessagingException(e);
@@ -4359,6 +4359,17 @@ public class Mail extends PermissionServlet implements UploadListener {
             return false;
         }
         return startingChar == toCheck.charAt(i);
+    }
+
+    private static JSONArray toJSONArray(final String toCheck) {
+        if (!startsWith('[', toCheck, true)) {
+            return null;
+        }
+        try {
+            return new JSONArray(toCheck);
+        } catch (final JSONException e) {
+            return null;
+        }
     }
 
     private static String getSimpleName(final String fullname) {
