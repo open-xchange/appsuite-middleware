@@ -181,18 +181,23 @@ public class Activator implements BundleActivator {
         if (config != null) {
             final ArrayList<CrawlerDescription> crawlers = getCrawlersFromFilesystem(config);
             for (final CrawlerDescription crawler : crawlers) {
-                final GenericSubscribeService subscribeService = new GenericSubscribeService(
-                    crawler.getDisplayName(),
-                    crawler.getId(),
-                    crawler.getModule(),
-                    crawler.getWorkflowString(),
-                    crawler.getPriority());
-                final ServiceRegistration serviceRegistration = bundleContext.registerService(
-                    SubscribeService.class.getName(),
-                    subscribeService,
-                    null);
-                services.add(serviceRegistration);
-                activeServices.put(crawler.getId(), serviceRegistration);
+                // only activate the crawler if it is configured in crawler.properties
+                if (Boolean.parseBoolean(config.getProperty(crawler.getId()))){
+                    final GenericSubscribeService subscribeService = new GenericSubscribeService(
+                        crawler.getDisplayName(),
+                        crawler.getId(),
+                        crawler.getModule(),
+                        crawler.getWorkflowString(),
+                        crawler.getPriority());
+                    final ServiceRegistration serviceRegistration = bundleContext.registerService(
+                        SubscribeService.class.getName(),
+                        subscribeService,
+                        null);
+                    services.add(serviceRegistration);
+                    activeServices.put(crawler.getId(), serviceRegistration);
+                } else {
+                    LOG.info("Crawler "+crawler.getId() + " is available but not activated via config-file.");
+                }
             }
         }
     }
@@ -204,26 +209,31 @@ public class Activator implements BundleActivator {
     }
     
     public void restartSingleCrawler(String crawlerIdToUpdate, ConfigurationService config){
-        ServiceRegistration serviceRegistration = activeServices.get(crawlerIdToUpdate);
-        if (serviceRegistration != null){
-            serviceRegistration.unregister();
-            activeServices.remove(crawlerIdToUpdate);
-        }
-        for (final CrawlerDescription crawler : getCrawlersFromFilesystem(config)){
-            if (crawler.getId().equals(crawlerIdToUpdate)){
-                final GenericSubscribeService subscribeService = new GenericSubscribeService(
-                    crawler.getDisplayName(),
-                    crawler.getId(),
-                    crawler.getModule(),
-                    crawler.getWorkflowString(),
-                    crawler.getPriority());
-                serviceRegistration = bundleContext.registerService(
-                    SubscribeService.class.getName(),
-                    subscribeService,
-                    null);
-                services.add(serviceRegistration);
-                activeServices.put(crawler.getId(), serviceRegistration);
+        // only activate the crawler if it is configured in crawler.properties
+        if (Boolean.parseBoolean(config.getProperty(crawlerIdToUpdate))){
+            ServiceRegistration serviceRegistration = activeServices.get(crawlerIdToUpdate);
+            if (serviceRegistration != null){
+                serviceRegistration.unregister();
+                activeServices.remove(crawlerIdToUpdate);
             }
+            for (final CrawlerDescription crawler : getCrawlersFromFilesystem(config)){
+                if (crawler.getId().equals(crawlerIdToUpdate)){
+                    final GenericSubscribeService subscribeService = new GenericSubscribeService(
+                        crawler.getDisplayName(),
+                        crawler.getId(),
+                        crawler.getModule(),
+                        crawler.getWorkflowString(),
+                        crawler.getPriority());
+                    serviceRegistration = bundleContext.registerService(
+                        SubscribeService.class.getName(),
+                        subscribeService,
+                        null);
+                    services.add(serviceRegistration);
+                    activeServices.put(crawler.getId(), serviceRegistration);
+                }
+            }
+        } else {
+            LOG.error("Crawler "+ crawlerIdToUpdate + " is not activated via config-file so it will not be (re)started.");
         }
     }
 
