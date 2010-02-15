@@ -60,5 +60,6 @@ Bundle-ClassPath: lib/nekohtml-1.9.13.jar,
  lib/org.microformats.hCard.jar
 Eclipse-RegisterBuddy: com.openexchange.xerces
 Export-Package: com.openexchange.subscribe.microformats,
- com.openexchange.subscribe.microformats.parser,
- com.openexchange.subscribe.microformats.datasources
+ com.openexchange.subscribe.microformats.datasources,
+ com.openexchange.subscribe.microformats.objectparser,
+ com.openexchange.subscribe.microformats.parser
