@@ -133,6 +133,26 @@ public final class FacebookMessagingUtility {
         }
     }
 
+    /**
+     * {@link FolderFiller} - The folder filler
+     *
+     * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+     * @since Open-Xchange v6.16
+     */
+    public static final class FolderFiller implements StaticFiller {
+
+        private final String folder;
+
+        public FolderFiller(final String folder) {
+            this.folder = folder;
+        }
+
+        public void fill(final FacebookMessagingMessage message) throws MessagingException {
+            message.setFolder(folder);
+        }
+
+    }
+
     private interface QueryAdder {
 
         void add2Query(Set<String> fieldNames);

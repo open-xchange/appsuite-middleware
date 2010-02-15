@@ -218,6 +218,7 @@ public final class FacebookMessagingMessageAccess implements MessagingMessageAcc
              * Static fillers
              */
             final List<StaticFiller> staticFillers = FacebookMessagingUtility.getStaticFillers(SET_FULL, this);
+            staticFillers.add(new FacebookMessagingUtility.FolderFiller(folder));
             /*
              * Query
              */
@@ -266,6 +267,9 @@ public final class FacebookMessagingMessageAccess implements MessagingMessageAcc
          * Static fillers
          */
         final List<StaticFiller> staticFillers = FacebookMessagingUtility.getStaticFillers(fieldSet, this);
+        if (fieldSet.contains(MessagingField.FOLDER_ID) || fieldSet.contains(MessagingField.FULL)) {
+            staticFillers.add(new FacebookMessagingUtility.FolderFiller(folder));
+        }
         /*
          * Query; Ensure post_id is contained to maintain order
          */
@@ -443,6 +447,9 @@ public final class FacebookMessagingMessageAccess implements MessagingMessageAcc
          */
         final MessagingField[] daFields = fieldSet.toArray(new MessagingField[fieldSet.size()]);
         final List<StaticFiller> staticFillers = FacebookMessagingUtility.getStaticFillers(daFields, this);
+        if (fieldSet.contains(MessagingField.FOLDER_ID) || fieldSet.contains(MessagingField.FULL)) {
+            staticFillers.add(new FacebookMessagingUtility.FolderFiller(folder));
+        }
         /*
          * Query; must not be null to determine proper number of wall posts
          */
