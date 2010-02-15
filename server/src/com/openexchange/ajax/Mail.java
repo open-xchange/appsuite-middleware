@@ -4297,7 +4297,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 
         private final HttpServletRequest req;
 
-        private String string;
+        // private String string;
 
         public HTTPRequestStringProvider(final HttpServletRequest req) {
             super();
