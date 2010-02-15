@@ -1,6 +1,7 @@
 * 2010-02-15 - thorben.betten@open-xchange.com
 
  - Bugfix #15365: Added admin daemon to build files
+ - Bugfix #15378: Auto-detection of proper content type if "name" parameter is present
 
 * 2010-02-12 - martin.herfurth@open-xchange.com
 
