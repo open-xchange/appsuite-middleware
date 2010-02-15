@@ -130,11 +130,20 @@ public class MessagingRequestData {
         return accountAccess = registry.getMessagingService(getMessagingServiceId()).getAccountAccess(getAccountID(), session);
     }
 
-    String getMessagingServiceId() throws MessagingException {
-        if (!isset("messagingService") && hasLongFolder()) {
+    public String getMessagingServiceId() throws MessagingException {
+        if (hasLongFolder()) {
             return getLongFolder().getMessagingService();
+        } else {
+            if(isset("messagingService")) {
+                return request.getParameter("messagingService");
+            }
+            missingParameter("folder");
+            return null;
         }
-        return requireParameter("messagingService");
+    }
+
+    private void missingParameter(String string) throws MessagingException {
+        throw MessagingExceptionCodes.MISSING_PARAMETER.create(string);
     }
 
     /**
@@ -143,7 +152,7 @@ public class MessagingRequestData {
     public String requireParameter(String string) throws MessagingException {
         String parameter = request.getParameter(string);
         if (parameter == null) {
-            throw MessagingExceptionCodes.MISSING_PARAMETER.create(string);
+            missingParameter(string);
         }
         return parameter;
     }
