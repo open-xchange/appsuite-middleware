@@ -57,6 +57,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.caching.Cache;
 import com.openexchange.messaging.MessagingAccountAccess;
 import com.openexchange.messaging.MessagingAccountTransport;
 import com.openexchange.messaging.MessagingAddressHeader;
@@ -69,6 +70,7 @@ import com.openexchange.messaging.OrderDirection;
 import com.openexchange.messaging.generic.internet.MimeAddressMessagingHeader;
 import com.openexchange.messaging.generic.internet.MimeMessagingMessage;
 import com.openexchange.messaging.json.MessagingMessageParser;
+import com.openexchange.messaging.json.cacheing.CacheingMessageAccess;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 
@@ -90,12 +92,23 @@ public class MessagingRequestData {
 
     private MessagingAccountAccess accountAccess;
 
-    public MessagingRequestData(AJAXRequestData request, ServerSession session, MessagingServiceRegistry registry, MessagingMessageParser parser) {
+    private Cache cache;
+
+    private MessagingMessageAccess messageAccess;
+
+    public MessagingRequestData(AJAXRequestData request, ServerSession session, MessagingServiceRegistry registry, MessagingMessageParser parser, Cache cache) {
         this.request = request;
         this.registry = registry;
         this.session = session;
         this.parser = parser;
+        this.cache = cache;
     }
+    
+    public MessagingRequestData(AJAXRequestData request, ServerSession session, MessagingServiceRegistry registry, MessagingMessageParser parser) {
+        this(request, session, registry, parser, null);
+    }
+    
+    
 
     /**
      * Tries to get a message access for the messaging service and account ID as given in the request parameters
@@ -103,7 +116,11 @@ public class MessagingRequestData {
      * @throws MessagingException If parameters 'messagingService' or 'account' are missing
      */
     public MessagingMessageAccess getMessageAccess() throws MessagingException {
-        return getAccountAccess().getMessageAccess();
+        if(messageAccess != null) {
+            return messageAccess;
+        }
+        MessagingMessageAccess access = getAccountAccess().getMessageAccess();
+        return messageAccess = wrap(access, getMessagingServiceId(), getAccountID());
     }
     
     public MessagingAccountAccess getAccountAccess() throws MessagingException {
@@ -347,6 +364,13 @@ public class MessagingRequestData {
 
     public String getAccountAddress() throws MessagingException {
         return getMessagingServiceId()+"://"+getAccountID();
+    }
+
+    public MessagingMessageAccess wrap(MessagingMessageAccess messageAccess2, String service, int account) {
+        if(cache == null) {
+            return messageAccess2;
+        }
+        return new CacheingMessageAccess(messageAccess2, cache, service+"://"+account, session);
     }
 
 }

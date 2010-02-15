@@ -54,6 +54,7 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.caching.Cache;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingField;
@@ -85,6 +86,12 @@ public class ListAction extends AbstractMessagingAction {
     public ListAction(MessagingServiceRegistry registry, MessagingMessageWriter writer, MessagingMessageParser parser) {
         super(registry, writer, parser);
     }
+    
+    public ListAction(MessagingServiceRegistry registry, MessagingMessageWriter writer, MessagingMessageParser parser, Cache cache) {
+        super(registry, writer, parser, cache);
+    }
+
+
 
     @Override
     protected AJAXRequestResult doIt(MessagingRequestData req, ServerSession session) throws AbstractOXException, JSONException {
@@ -110,7 +117,7 @@ public class ListAction extends AbstractMessagingAction {
             return new AJAXRequestResult(new JSONArray());
         }
         
-        MessagingMessageAccess messageAccess = registry.getMessagingService(folder.getMessagingService()).getAccountAccess(folder.getAccount(), session).getMessageAccess();
+        MessagingMessageAccess messageAccess = req.wrap(registry.getMessagingService(folder.getMessagingService()).getAccountAccess(folder.getAccount(), session).getMessageAccess(), folder.getMessagingService(), folder.getAccount());
         List<MessagingMessage> messages = messageAccess.getMessages(folder.getFolder(), ids.toArray(new String[ids.size()]), fields);
         
         for (MessagingMessage messagingMessage : messages) {

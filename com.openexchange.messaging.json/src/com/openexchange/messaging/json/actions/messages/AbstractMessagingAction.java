@@ -54,6 +54,7 @@ import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.caching.Cache;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.json.MessagingMessageParser;
@@ -74,16 +75,22 @@ public abstract class AbstractMessagingAction implements AJAXActionService {
     protected MessagingServiceRegistry registry;
     protected MessagingMessageWriter writer;
     protected MessagingMessageParser parser;
+    private Cache cache;
     
     public AbstractMessagingAction(MessagingServiceRegistry registry, MessagingMessageWriter writer, MessagingMessageParser parser) {
+        this(registry, writer, parser, null);
+    }
+    
+    public AbstractMessagingAction(MessagingServiceRegistry registry, MessagingMessageWriter writer, MessagingMessageParser parser, Cache cache) {
         this.registry = registry;
         this.writer = writer;
         this.parser = parser;
+        this.cache = cache;
     }
     
     public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws AbstractOXException {
         try {
-            return doIt(new MessagingRequestData(request, session, registry, parser), session);
+            return doIt(new MessagingRequestData(request, session, registry, parser, cache), session);
         } catch (JSONException e) {
             throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         } catch (IOException e) {
@@ -92,4 +99,9 @@ public abstract class AbstractMessagingAction implements AJAXActionService {
     }
 
     protected abstract AJAXRequestResult doIt(MessagingRequestData messagingRequestData, ServerSession session) throws AbstractOXException, JSONException, IOException;
+
+    
+    public void setCache(Cache cache) {
+        this.cache = cache;
+    }
 }

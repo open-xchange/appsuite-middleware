@@ -51,6 +51,7 @@ package com.openexchange.messaging.json.actions.messages;
 
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.caching.Cache;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.MessagingMessageAccess;
@@ -79,6 +80,12 @@ public class GetAction extends AbstractMessagingAction {
     public GetAction(MessagingServiceRegistry registry, MessagingMessageWriter writer, MessagingMessageParser parser) {
         super(registry, writer, parser);
     }
+    
+    public GetAction(MessagingServiceRegistry registry, MessagingMessageWriter writer, MessagingMessageParser parser, Cache cache) {
+        super(registry, writer, parser, cache);
+    }
+
+
 
     @Override
     protected AJAXRequestResult doIt(MessagingRequestData req, ServerSession session) throws AbstractOXException, JSONException {

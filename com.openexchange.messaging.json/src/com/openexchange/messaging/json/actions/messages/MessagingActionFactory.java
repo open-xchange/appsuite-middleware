@@ -53,6 +53,7 @@ import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.caching.Cache;
 import com.openexchange.messaging.json.MessagingMessageParser;
 import com.openexchange.messaging.json.MessagingMessageWriter;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
@@ -71,17 +72,17 @@ public class MessagingActionFactory implements AJAXActionServiceFactory {
     private Map<String, AJAXActionService> actions = null;
     
     
-    public MessagingActionFactory(MessagingServiceRegistry registry, MessagingMessageWriter writer, MessagingMessageParser parser) {
+    public MessagingActionFactory(MessagingServiceRegistry registry, MessagingMessageWriter writer, MessagingMessageParser parser, Cache cache) {
         super();
         actions = new HashMap<String, AJAXActionService>();
         
-        actions.put("all", new AllAction(registry, writer, parser));
-        actions.put("get", new GetAction(registry, writer, parser));
-        actions.put("list", new ListAction(registry, writer, parser));
-        actions.put("perform", new PerformAction(registry, writer, parser));
-        actions.put("send", new SendAction(registry, writer, parser));
-        actions.put("update", new UpdateAction(registry, writer, parser));
-        actions.put("updates", new UpdatesAction(registry, writer, parser));
+        actions.put("all", new AllAction(registry, writer, parser, cache));
+        actions.put("get", new GetAction(registry, writer, parser, cache));
+        actions.put("list", new ListAction(registry, writer, parser, cache));
+        actions.put("perform", new PerformAction(registry, writer, parser, cache));
+        actions.put("send", new SendAction(registry, writer, parser, cache));
+        actions.put("update", new UpdateAction(registry, writer, parser, cache));
+        actions.put("updates", new UpdatesAction(registry, writer, parser, cache));
     } 
     
     public AJAXActionService createActionService(String action) throws AjaxException {

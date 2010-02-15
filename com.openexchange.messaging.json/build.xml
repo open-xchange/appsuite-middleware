@@ -31,6 +31,7 @@
     <property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar"/>
     <property name="servletjar" value="javax.servlet_2.4.0.v200706111738.jar"/>
 
+    <property name="cachingjar" value="com.openexchange.caching.jar"/>
     <property name="genericonfjar" value="com.openexchange.datatypes.genericonf.jar"/>
     <property name="genericonfstoragejar" value="com.openexchange.datatypes.genericonf.storage.jar"/>
     <property name="globaljar" value="com.openexchange.global.jar"/>
@@ -49,6 +50,7 @@
         <pathelement location="${bundlesdir}/${commonsloggingjar}"/>
         <pathelement location="${bundlesdir}/${servletjar}"/>
 
+        <pathelement location="${bundlesdir}/${cachingjar}"/>
         <pathelement location="${bundlesdir}/${genericonfjar}"/>
         <pathelement location="${bundlesdir}/${genericonfstoragejar}"/>
         <pathelement location="${bundlesdir}/${globaljar}"/>

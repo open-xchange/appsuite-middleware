@@ -139,13 +139,7 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
     }
     
     private TwitterMessagingMessage get(long id) throws TwitterException {
-        TwitterMessagingMessage message = DummyMessageCache.get(id);
-        if(message != null) {
-            return message;
-        }
-        message = new TwitterMessagingMessage(twitterAccess.showStatus(id));
-        DummyMessageCache.store(message);
-        return message;
+        return new TwitterMessagingMessage(twitterAccess.showStatus(id));
     }
 
     public List<MessagingMessage> getMessages(final String folder, final String[] messageIds, final MessagingField[] fields) throws MessagingException {
@@ -226,7 +220,6 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
                 msgs = new ArrayList<MessagingMessage>(friendsTimeline.size());
                 for (final Status status : friendsTimeline) {
                     final TwitterMessagingMessage message = new TwitterMessagingMessage(status);
-                    DummyMessageCache.store(message);
                     if (searchTerm.matches(message)) {
                         msgs.add(message);
                     }
@@ -237,7 +230,6 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
                 for (final Status status : friendsTimeline) {
                     TwitterMessagingMessage message = new TwitterMessagingMessage(status);
                     msgs.add(message);
-                    DummyMessageCache.store(message);
                }
             }
             /*

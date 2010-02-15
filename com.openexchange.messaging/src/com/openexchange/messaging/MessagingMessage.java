@@ -49,6 +49,7 @@
 
 package com.openexchange.messaging;
 
+import java.io.Serializable;
 import java.util.Collection;
 
 /**
@@ -58,7 +59,7 @@ import java.util.Collection;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
-public interface MessagingMessage extends MessagingPart, MessagingContent {
+public interface MessagingMessage extends MessagingPart, MessagingContent, Serializable {
 
     /*-
      * ------------------- Flags ------------------------------

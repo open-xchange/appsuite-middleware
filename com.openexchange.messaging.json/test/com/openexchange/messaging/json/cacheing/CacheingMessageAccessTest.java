@@ -170,7 +170,7 @@ public class CacheingMessageAccessTest extends TestCase {
         private String clearedFolder;
 
         public TestCacheMessageAccess(MessagingMessageAccess delegate) {
-            super(delegate);
+            super(delegate, null, null, null);
         }
         
         public void forgetCachedAfterFirstHit() {

@@ -48,6 +48,7 @@
  */
 package com.openexchange.messaging.json.osgi;
 
+import java.io.ByteArrayInputStream;
 import java.util.LinkedList;
 import java.util.List;
 import javax.servlet.ServletException;
@@ -57,6 +58,9 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheException;
+import com.openexchange.caching.CacheService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.i18n.I18nTranslator;
 import com.openexchange.i18n.Translator;
@@ -81,7 +85,7 @@ import org.apache.commons.logging.LogFactory;
 public class Activator extends DeferredActivator {
 
     private static final Log LOG = LogFactory.getLog(Activator.class);
-    private static final Class[] NEEDED_SERVICES = new Class[]{MessagingServiceRegistry.class, HttpService.class};
+    private static final Class[] NEEDED_SERVICES = new Class[]{MessagingServiceRegistry.class, HttpService.class, CacheService.class};
     
     private List<ServiceTracker> trackers = new LinkedList<ServiceTracker>();
     private List<ServiceRegistration> registrations = new LinkedList<ServiceRegistration>();
@@ -89,6 +93,8 @@ public class Activator extends DeferredActivator {
     private MessagingServiceRegistry registry;
     private MessagingMessageParser parser;
     private MessagingMessageWriter writer;
+    private CacheService cacheService;
+    private boolean cacheConfigured;
 
     
     @Override
@@ -98,7 +104,11 @@ public class Activator extends DeferredActivator {
 
     @Override
     protected void handleAvailability(Class<?> clazz) {
-        register();
+        try {
+            register();
+        } catch (CacheException e) {
+            LOG.error(e.getMessage(), e);
+        }
     }
 
     @Override
@@ -143,18 +153,19 @@ public class Activator extends DeferredActivator {
         }
     }
 
-    private void register() {
+    private void register() throws CacheException {
 
         registry = getService(MessagingServiceRegistry.class);
         httpService = getService(HttpService.class);
-
-        if (null == registry || null == httpService ) {
+        cacheService = getService(CacheService.class);
+        
+        if (!allAvailable()) {
             return;
         }
-
-       
+        
+        
         AccountActionFactory.INSTANCE = new AccountActionFactory(registry);
-        MessagingActionFactory.INSTANCE = new MessagingActionFactory(registry, writer, parser);
+        MessagingActionFactory.INSTANCE = new MessagingActionFactory(registry, writer, parser, getCache());
         ServicesActionFactory.INSTANCE = new ServicesActionFactory(registry, Translator.EMPTY); // FIXME
 
         try {
@@ -171,6 +182,33 @@ public class Activator extends DeferredActivator {
         registrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new AccountMultipleHandler(), null));
         registrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new MessagesMultipleHandler(), null));
         registrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new ServicesMultipleHandler(), null));
+    }
+
+    /**
+     * @return
+     * @throws CacheException 
+     */
+    private Cache getCache() throws CacheException {
+        final String regionName = "com.openexchange.messaging.json.messageCache";
+        if(!cacheConfigured) {
+            cacheConfigured = true;
+            final byte[] ccf = ("jcs.region."+regionName+"=LTCP\n" + 
+                    "jcs.region."+regionName+".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" + 
+                    "jcs.region."+regionName+".cacheattributes.MaxObjects=10000000\n" + 
+                    "jcs.region."+regionName+".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" + 
+                    "jcs.region."+regionName+".cacheattributes.UseMemoryShrinker=true\n" + 
+                    "jcs.region."+regionName+".cacheattributes.MaxMemoryIdleTimeSeconds=180\n" + 
+                    "jcs.region."+regionName+".cacheattributes.ShrinkerIntervalSeconds=60\n" + 
+                    "jcs.region."+regionName+".elementattributes=org.apache.jcs.engine.ElementAttributes\n" + 
+                    "jcs.region."+regionName+".elementattributes.IsEternal=false\n" + 
+                    "jcs.region."+regionName+".elementattributes.MaxLifeSeconds=300\n" + 
+                    "jcs.region."+regionName+".elementattributes.IdleTime=180\n" + 
+                    "jcs.region."+regionName+".elementattributes.IsSpool=false\n" + 
+                    "jcs.region."+regionName+".elementattributes.IsRemote=false\n" + 
+                    "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
+            cacheService.loadConfiguration(new ByteArrayInputStream(ccf));
+        }
+        return cacheService.getCache(regionName);
     }
 
     @Override

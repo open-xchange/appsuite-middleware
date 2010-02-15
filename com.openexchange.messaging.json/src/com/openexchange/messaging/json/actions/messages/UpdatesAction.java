@@ -53,6 +53,7 @@ import java.io.IOException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.caching.Cache;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.messaging.json.MessagingMessageParser;
 import com.openexchange.messaging.json.MessagingMessageWriter;
@@ -70,6 +71,13 @@ public class UpdatesAction extends AbstractMessagingAction {
     public UpdatesAction(MessagingServiceRegistry registry, MessagingMessageWriter writer, MessagingMessageParser parser) {
         super(registry, writer, parser);
     }
+    
+    public UpdatesAction(MessagingServiceRegistry registry, MessagingMessageWriter writer, MessagingMessageParser parser, Cache cache) {
+        super(registry, writer, parser, cache);
+    }
+
+
+
     @Override
     protected AJAXRequestResult doIt(MessagingRequestData messagingRequestData, ServerSession session) throws AbstractOXException, JSONException, IOException {
         return new AJAXRequestResult(new JSONArray());

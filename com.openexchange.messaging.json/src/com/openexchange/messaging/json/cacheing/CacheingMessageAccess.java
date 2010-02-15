@@ -54,6 +54,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheException;
 import com.openexchange.messaging.IndexRange;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingField;
@@ -61,6 +63,7 @@ import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.MessagingMessageAccess;
 import com.openexchange.messaging.OrderDirection;
 import com.openexchange.messaging.SearchTerm;
+import com.openexchange.session.Session;
 
 /**
  * {@link CacheingMessageAccess}
@@ -70,9 +73,15 @@ import com.openexchange.messaging.SearchTerm;
 public class CacheingMessageAccess implements MessagingMessageAccess {
 
     private MessagingMessageAccess delegate;
+    private Cache cache;
+    private String folderPrefix;
+    private Session session;
 
-    public CacheingMessageAccess(MessagingMessageAccess delegate) {
+    public CacheingMessageAccess(MessagingMessageAccess delegate, Cache cache, String folderPrefix, Session session) {
         this.delegate = delegate;
+        this.cache = cache;
+        this.folderPrefix = folderPrefix;
+        this.session = session;
     }
 
     public void appendMessages(String folder, MessagingMessage[] messages) throws MessagingException {
@@ -134,7 +143,7 @@ public class CacheingMessageAccess implements MessagingMessageAccess {
         return messages;
     }
 
-    private List<MessagingMessage> remember(List<MessagingMessage> messages) {
+    private List<MessagingMessage> remember(List<MessagingMessage> messages) throws MessagingException {
         for (MessagingMessage messagingMessage : messages) {
             remember(messagingMessage);
         }
@@ -166,16 +175,29 @@ public class CacheingMessageAccess implements MessagingMessageAccess {
     }
 
     protected MessagingMessage get(String folder, String id) {
-        return null; // TODO
+        return (MessagingMessage) cache.getFromGroup(id, getGroupName(folder));
     }
 
-    protected MessagingMessage remember(MessagingMessage message) {
-        return message; // TODO
+    protected MessagingMessage remember(MessagingMessage message) throws MessagingException {
+        String groupName = getGroupName(message.getFolder());
+        String key = message.getId();
+        
+        try {
+            cache.putInGroup(key, groupName, message);
+        } catch (CacheException e) {
+            throw new MessagingException(e);
+        }
+        
+        return message;
     }
 
     protected void clear(String folderId) {
-        // TODO Auto-generated method stub
-        return;
+        cache.invalidateGroup(getGroupName(folderId));
+        
+    }
+
+    protected String getGroupName(String folderId) {
+        return session.getContextId()+"/"+folderPrefix+"/"+folderId;
     }
 
 }
