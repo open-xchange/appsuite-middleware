@@ -115,6 +115,7 @@ public class Workflow {
         final WebClient webClient = new WebClient(BrowserVersion.FIREFOX_2);
         // Javascript needs to be disabled for security reasons
         webClient.setJavaScriptEnabled(false);
+        webClient.setTimeout(60000);
         if (useThreadedRefreshHandler) {
             webClient.setRefreshHandler(new ThreadedRefreshHandler());
         }
