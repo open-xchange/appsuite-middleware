@@ -3373,8 +3373,10 @@ public class Mail extends PermissionServlet implements UploadListener {
                         if (flags != ParamContainer.NOT_FOUND) {
                             m.setFlags(flags);
                         }
-                        final String draftsFolder = mailAccess.getFolderStorage().getDraftsFolder();
-                        if (draftsFolder.equals(fullnameArgument.getFullname())) {
+                        if (mailAccess.getFolderStorage().getDraftsFolder().equals(fullnameArgument.getFullname())) {
+                            /*
+                             * Append to Drafts folder
+                             */
                             m.setFlag(MailMessage.FLAG_DRAFT, true);
                         }
                         final String id =
