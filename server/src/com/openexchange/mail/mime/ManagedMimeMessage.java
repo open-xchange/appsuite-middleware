@@ -134,15 +134,18 @@ public final class ManagedMimeMessage extends MimeMessage {
         if (null == managedFile) {
             return;
         }
-        final ManagedFileManagement management = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
-        if (null != management) {
-            try {
-                management.removeByID(managedFile.getID());
-            } catch (final ManagedFileException e) {
-                throw new MessagingException(e.getMessage(), e);
+        try {
+            final ManagedFileManagement management = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
+            if (null != management) {
+                try {
+                    management.removeByID(managedFile.getID());
+                } catch (final ManagedFileException e) {
+                    throw new MessagingException(e.getMessage(), e);
+                }
             }
+        } finally {
+            managedFile = null;
         }
-        managedFile = null;
     }
 
     /*-
