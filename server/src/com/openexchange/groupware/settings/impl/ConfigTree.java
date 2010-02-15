@@ -252,7 +252,6 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.modules.contacts.CharacterSearch.class,
             com.openexchange.groupware.settings.tree.modules.extras.Module.class,
             com.openexchange.groupware.settings.tree.modules.folder.GUI.class,
-            com.openexchange.groupware.settings.tree.modules.folder.InternalUserEditEnabled.class,
             com.openexchange.groupware.settings.tree.modules.folder.PublicFolders.class,
             com.openexchange.groupware.settings.tree.modules.folder.SharedFolders.class,
             com.openexchange.groupware.settings.tree.modules.infostore.GUI.class,
