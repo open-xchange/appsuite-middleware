@@ -1182,6 +1182,26 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
+    public String[] appendMessages(final String destFolder, final MailMessage[] mails) throws MailException {
+        if ((mails == null) || (mails.length == 0)) {
+            return new String[0];
+        }
+        final FullnameArgument argument = prepareMailFolderParam(destFolder);
+        final int accountId = argument.getAccountId();
+        initConnection(accountId);
+        final String fullname = argument.getFullname();
+        if (mailAccess.getFolderStorage().getDraftsFolder().equals(fullname)) {
+            /*
+             * Append to Drafts folder
+             */
+            for (final MailMessage mail : mails) {
+                mail.setFlag(MailMessage.FLAG_DRAFT, true);
+            }
+        }
+        return mailAccess.getMessageStorage().appendMessages(fullname, mails);
+    }
+
+    @Override
     public int getNewMessageCount(final String folder) throws MailException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int accountId = argument.getAccountId();

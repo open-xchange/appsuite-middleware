@@ -264,6 +264,16 @@ public abstract class MailServletInterface {
     public abstract String sendMessage(ComposedMailMessage transportMail, ComposeType sendType, int accountId) throws MailException;
 
     /**
+     * Appends given messages to given folder.
+     * 
+     * @param destFolder The destination folder
+     * @param msgs - The messages to append (<b>must</b> be completely pre-filled incl. content references)
+     * @return The corresponding mail IDs in destination folder
+     * @throws MailException If messages cannot be appended.
+     */
+    public abstract String[] appendMessages(String destFolder, MailMessage[] msgs) throws MailException;
+
+    /**
      * Creates an instance of <code>JSONMessageObject</code> which contains the initial reply content of the message identifed through
      * <code>replyMsgUID</code>. <code>replyToAll</code> defines whether to reply to all involved entities or just to main sender.
      * <b>NOTE:</b>This method is intended to support Open-Xchange GUI's display onyl and does not really send the reply.
