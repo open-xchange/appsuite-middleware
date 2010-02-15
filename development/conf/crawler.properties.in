@@ -4,3 +4,11 @@ com.openexchange.subscribe.crawler.updatedfile : http://software.open-xchange.co
 com.openexchange.subscribe.crawler.updateinterval : 86400000
 com.openexchange.subscribe.crawler.enableautoupdate : true
 com.openexchange.subscribe.crawler.onlyupdatealreadyinstalled : false
+com.openexchange.subscribe.crawler.yahoocom : true
+com.openexchange.subscribe.xing : true
+com.openexchange.subscribe.crawler.googlemail : true
+com.openexchange.subscribe.crawler.webde : true
+com.openexchange.subscribe.crawler.google.calendar : true
+com.openexchange.subscribe.crawler.facebook : true
+com.openexchange.subscribe.crawler.gmx : true
+com.openexchange.subscribe.linkedin : true
