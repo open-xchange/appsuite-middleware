@@ -84,7 +84,7 @@ public final class Title<T extends CalendarComponent, U extends CalendarObject> 
     /**
      * {@inheritDoc}
      */
-    public void emit(final int index, final U calendarObject, final T calendarComponent, final List<ConversionWarning> warnings, final Context ctx) {
+    public void emit(final int index, final U calendarObject, final T calendarComponent, final List<ConversionWarning> warnings, final Context ctx, Object... args) {
         calendarComponent.getProperties().add(new Summary(calendarObject.getTitle()));
     }
 

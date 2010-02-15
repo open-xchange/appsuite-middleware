@@ -74,11 +74,15 @@ public class CreatedBy<T extends CalendarComponent, U extends CalendarObject> ex
 
     public static UserResolver userResolver = UserResolver.EMPTY;
 
-    public void emit(int index, U calendar, T component, List<ConversionWarning> warnings, Context ctx) throws ConversionError {
+    public void emit(int index, U calendar, T component, List<ConversionWarning> warnings, Context ctx, Object... args) throws ConversionError {
         Organizer organizer = new Organizer();
         try {
-            User user = userResolver.loadUser(calendar.getCreatedBy(), ctx);
-            organizer.setValue("mailto:" + user.getMail());
+            if (calendar.containsOrganizer()) {
+                organizer.setValue("mailto:" + calendar.getOrganizer());
+            } else {
+                User user = userResolver.loadUser(calendar.getCreatedBy(), ctx);
+                organizer.setValue("mailto:" + user.getMail());
+            }
         } catch (URISyntaxException e) {
             warnings.add(new ConversionWarning(index, "URI problem.", e));
         } catch (UserException e) {
@@ -90,14 +94,15 @@ public class CreatedBy<T extends CalendarComponent, U extends CalendarObject> ex
     }
 
     public boolean hasProperty(T component) {
-        return null !=  component.getProperty(Property.ORGANIZER);
+        return null != component.getProperty(Property.ORGANIZER);
     }
 
     public boolean isSet(U calendar) {
-        return calendar.containsCreatedBy();
+        return calendar.containsOrganizer() || calendar.containsCreatedBy();
     }
 
     public void parse(int index, T component, U calendar, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
-        // Creator can not be set dynamically in OX.
+        String organizer = component.getProperty(Property.ORGANIZER).getValue();
+        calendar.setOrganizer(organizer.startsWith("mailto:") ? organizer.substring(7, organizer.length()) : organizer);
     }
 }

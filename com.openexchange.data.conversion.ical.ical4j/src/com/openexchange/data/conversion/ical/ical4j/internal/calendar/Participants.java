@@ -103,12 +103,12 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
         return cObj.containsParticipants();
     }
 
-    public void emit(final int index, final U cObj, final T component, final List<ConversionWarning> warnings, final Context ctx) throws ConversionError {
+    public void emit(final int index, final U cObj, final T component, final List<ConversionWarning> warnings, final Context ctx, Object... args) throws ConversionError {
         final List<ResourceParticipant> resources = new LinkedList<ResourceParticipant>();
         for(final Participant p : cObj.getParticipants()) {
             switch(p.getType()) {
                 case Participant.USER:
-                    addUserAttendee(index, (UserParticipant)p, ctx, component);
+                    addUserAttendee(index, (UserParticipant)p, ctx, component, cObj);
                     break;
                 case Participant.EXTERNAL_USER:
                     addExternalAttendee((ExternalUserParticipant)p, component);
@@ -144,7 +144,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
         component.getProperties().add(property);
     }
 
-    private void addExternalAttendee(final ExternalUserParticipant externalUserParticipant, final T component) {
+    protected void addExternalAttendee(final ExternalUserParticipant externalUserParticipant, final T component) {
         final Attendee attendee = new Attendee();
         try {
             attendee.setValue("mailto:" + externalUserParticipant.getEmailAddress());
@@ -159,20 +159,10 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
         }
     }
 
-    private void addUserAttendee(int index, UserParticipant userParticipant, Context ctx, T component) throws ConversionError {
+    protected void addUserAttendee(int index, UserParticipant userParticipant, Context ctx, T component, U obj) throws ConversionError {
         final Attendee attendee = new Attendee();
         try {
-            String address = userParticipant.getEmailAddress();
-            if (address == null) {
-                try {
-                    final User user = userResolver.loadUser(userParticipant.getIdentifier(), ctx);
-                    address = user.getMail();
-                } catch (UserException e) {
-                    throw new ConversionError(index, e);
-                } catch (ServiceException e) {
-                    throw new ConversionError(index, e);
-                }
-            }
+            String address = resolveUserMail(index, userParticipant, ctx);
             attendee.setValue("mailto:"+ address);
             ParameterList parameters = attendee.getParameters();
             parameters.add(Role.REQ_PARTICIPANT);
@@ -194,6 +184,21 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
         } catch (final URISyntaxException e) {
             LOG.error(e.getMessage(), e); // Shouldn't happen
         }
+    }
+
+    protected String resolveUserMail(int index, UserParticipant userParticipant, Context ctx) throws ConversionError {
+        String address = userParticipant.getEmailAddress();
+        if (address == null) {
+            try {
+                final User user = userResolver.loadUser(userParticipant.getIdentifier(), ctx);
+                address = user.getMail();
+            } catch (UserException e) {
+                throw new ConversionError(index, e);
+            } catch (ServiceException e) {
+                throw new ConversionError(index, e);
+            }
+        }
+        return address;
     }
 
     public boolean hasProperty(final T component) {

@@ -68,6 +68,7 @@ import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.calendar.CalendarConfig;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarFolderObject;
@@ -87,6 +88,9 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
+import com.openexchange.sql.builder.StatementBuilder;
+import com.openexchange.sql.grammar.EQUALS;
+import com.openexchange.sql.grammar.SELECT;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.encoding.Charsets;
 import com.openexchange.tools.exceptions.SimpleTruncatedAttribute;
@@ -1332,6 +1336,13 @@ public class CalendarSql implements AppointmentSQLInterface {
     private static final String wrapParenthesis(final int i) {
         final String str = String.valueOf(i);
         return new StringBuilder(str.length() + 2).append('(').append(str).append(')').toString();
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.api2.AppointmentSQLInterface#resolveUid(java.lang.String)
+     */
+    public int resolveUid(String uid) throws OXException {
+        return cimp.resolveUid(session, uid);
     }
 
 }

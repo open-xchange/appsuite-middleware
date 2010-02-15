@@ -68,7 +68,7 @@ public class Duration<T extends CalendarComponent, U extends CalendarObject> ext
         return false; // Always emitting endDate
     }
 
-    public void emit(final int index, final U u, final T t, final List<ConversionWarning> warnings, final Context ctx) throws ConversionError {
+    public void emit(final int index, final U u, final T t, final List<ConversionWarning> warnings, final Context ctx, Object... args) throws ConversionError {
         return; // Always emitting endDate
     }
 

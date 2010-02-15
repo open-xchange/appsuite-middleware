@@ -107,8 +107,14 @@ public abstract class CalendarObject extends CommonObject {
      * Attribute number indicating the times an object in a recurrence has to occur.
      */
     public static final int RECURRENCE_COUNT = 222;
+    
+    public static final int UID = 223;
 
-    public static final int CONFIRMATIONS = 225;
+    public static final int ORGANIZER = 224;
+    
+    public static final int SEQUENCE = 225;
+
+    public static final int CONFIRMATIONS = 226;
 
     public static final int NONE = 0;
 
@@ -201,6 +207,12 @@ public abstract class CalendarObject extends CommonObject {
     protected int confirm;
 
     protected String confirmMessage;
+    
+    protected String uid;
+    
+    protected String organizer;
+    
+    protected int sequence;
 
     protected boolean b_title;
 
@@ -250,6 +262,12 @@ public abstract class CalendarObject extends CommonObject {
     protected boolean b_confirmMessage;
 
     protected boolean b_occurrence;
+    
+    protected boolean b_uid;
+    
+    protected boolean b_organizer;
+    
+    protected boolean b_sequence;
 
     // GET METHODS
     public String getTitle() {
@@ -338,6 +356,18 @@ public abstract class CalendarObject extends CommonObject {
 
     public int getOccurrence() {
         return occurrence;
+    }
+    
+    public String getUid() {
+        return uid;
+    }
+    
+    public String getOrganizer() {
+        return organizer;
+    }
+    
+    public int getSequence() {
+        return this.sequence;
     }
 
     // SET METHODS
@@ -461,6 +491,21 @@ public abstract class CalendarObject extends CommonObject {
         this.occurrence = occurrence;
         b_occurrence = true;
     }
+    
+    public void setUid(String uid) {
+        this.uid = uid;
+        b_uid = true;
+    }
+    
+    public void setOrganizer(String organizer) {
+        this.organizer = organizer;
+        b_organizer = true;
+    }
+    
+    public void setSequence(int sequence) {
+        this.sequence = sequence;
+        b_sequence = true;
+    }
 
     // REMOVE METHODS
     public void removeTitle() {
@@ -557,6 +602,21 @@ public abstract class CalendarObject extends CommonObject {
         occurrence = 0;
         b_occurrence = false;
     }
+    
+    public void removeUid() {
+        uid = null;
+        b_uid = false;
+    }
+    
+    public void removeOrganizer() {
+        organizer = null;
+        b_organizer = false;
+    }
+    
+    public void removeSequence() {
+        sequence = 0;
+        b_sequence = false;
+    }
 
     // CONTAINS METHODS
     public boolean containsTitle() {
@@ -638,6 +698,18 @@ public abstract class CalendarObject extends CommonObject {
     public void setParticipants(final Participant[] participants) {
         this.participants = participants;
         b_participants = true;
+    }
+    
+    public boolean containsUid() {
+        return b_uid;
+    }
+    
+    public boolean containsOrganizer() {
+        return b_organizer;
+    }
+    
+    public boolean containsSequence() {
+        return b_sequence;
     }
 
     public void setParticipants(final List<? extends Participant> participants) {
@@ -733,6 +805,9 @@ public abstract class CalendarObject extends CommonObject {
         users = null;
         confirmations = null;
         occurrence = 0;
+        uid = null;
+        organizer = null;
+        sequence = 0;
 
         b_title = false;
         b_start_date = false;
@@ -751,6 +826,9 @@ public abstract class CalendarObject extends CommonObject {
         b_participants = false;
         b_users = false;
         b_occurrence = false;
+        b_uid = false;
+        b_organizer = false;
+        b_sequence = false;
     }
 
     /**
@@ -945,6 +1023,19 @@ public abstract class CalendarObject extends CommonObject {
             other.getUsers())))) {
             differingFields.add(USERS);
         }
+        
+        if ((!containsUid() && other.containsUid()) || (containsUid() && other.containsUid() && getUid() != other.getUid() && (getUid() == null || !getUid().equals(other.getUid())))) {
+            differingFields.add(UID);
+        }
+        
+        if ((!containsOrganizer() && other.containsOrganizer()) || (containsOrganizer() && other.containsOrganizer() && getOrganizer() != other.getOrganizer() && (getOrganizer() == null || !getOrganizer().equals(other.getOrganizer())))) {
+            differingFields.add(ORGANIZER);
+        }
+        
+        if ((!containsSequence() && other.containsSequence()) || (containsSequence() && other.containsSequence() && getSequence() != other.getSequence())) {
+            differingFields.add(SEQUENCE);
+        }
+
 
         return differingFields;
     }
@@ -1094,6 +1185,15 @@ public abstract class CalendarObject extends CommonObject {
         case DELETE_EXCEPTIONS:
             setDeleteExceptions((Date[]) value);
             break;
+        case UID:
+            setUid((String) value);
+            break;
+        case ORGANIZER:
+            setOrganizer((String) value);
+            break;
+        case SEQUENCE:
+            setSequence((Integer) value);
+            break;
         default:
             super.set(field, value);
         }
@@ -1149,6 +1249,12 @@ public abstract class CalendarObject extends CommonObject {
             return getChangeException();
         case DELETE_EXCEPTIONS:
             return getDeleteException();
+        case UID:
+            return getUid();
+        case ORGANIZER:
+            return getOrganizer();
+        case SEQUENCE:
+            return getSequence();
         default:
             return super.get(field);
         }
@@ -1201,6 +1307,12 @@ public abstract class CalendarObject extends CommonObject {
             return containsDeleteExceptions();
         case RECURRENCE_CALCULATOR:
             return true;
+        case UID:
+            return containsUid();
+        case ORGANIZER:
+            return containsOrganizer();
+        case SEQUENCE:
+            return containsSequence();
         default:
             return super.contains(field);
         }
@@ -1271,6 +1383,15 @@ public abstract class CalendarObject extends CommonObject {
             removeDeleteExceptions();
         case RECURRENCE_CALCULATOR:
             return;
+        case UID:
+            removeUid();
+            break;
+        case ORGANIZER:
+            removeOrganizer();
+            break;
+        case SEQUENCE:
+            removeSequence();
+            break;
         default:
             super.remove(field);
 

@@ -88,7 +88,7 @@ public class DateCompleted extends AbstractVerifyingAttributeConverter<VToDo, Ta
      * {@inheritDoc}
      */
     public void emit(final int index, final Task task, final VToDo vToDo,
-                     final List<ConversionWarning> warnings, final Context ctx) throws ConversionError {
+                     final List<ConversionWarning> warnings, final Context ctx, Object... args) throws ConversionError {
         final Completed completed = new Completed(EmitterTools.toDateTime(task.getDateCompleted()));
         vToDo.getProperties().add(completed);
     }

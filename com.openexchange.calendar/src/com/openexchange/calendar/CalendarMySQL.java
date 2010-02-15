@@ -66,6 +66,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.UUID;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api.OXConflictException;
@@ -115,10 +116,14 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
+import com.openexchange.sql.builder.StatementBuilder;
+import com.openexchange.sql.grammar.EQUALS;
+import com.openexchange.sql.grammar.SELECT;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link CalendarMySQL} - The MySQL implementation of {@link CalendarSqlImp}.
@@ -1232,7 +1237,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     public final String loadAppointment(final int oid, final Context c) throws SQLException {
         final StringBuilder sb = new StringBuilder(384);
-        sb.append("SELECT creating_date, created_from, changing_date, changed_from, fid, pflag, timestampfield01, timestampfield02, timezone, ").append(" intfield02, intfield03, field01, field02, intfield06, intfield08, field04, intfield07, field09, intfield04, intfield05, field06, field07, field08 FROM prg_dates  WHERE cid = ");
+        sb.append("SELECT creating_date, created_from, changing_date, changed_from, fid, pflag, timestampfield01, timestampfield02, timezone, ").append(" intfield02, intfield03, field01, field02, intfield06, intfield08, field04, intfield07, field09, organizer, uid, sequence, intfield04, intfield05, field06, field07, field08 FROM prg_dates  WHERE cid = ");
         sb.append(c.getContextId());
         sb.append(DATES_IDENTIFIER_IS);
         sb.append(oid);
@@ -1248,8 +1253,9 @@ public class CalendarMySQL implements CalendarSqlImp {
         int i = 1;
         PreparedStatement pst = null;
         try {
-            pst = writecon.prepareStatement("insert into prg_dates (creating_date, created_from, changing_date, changed_from," + "fid, pflag, cid, timestampfield01, timestampfield02, timezone, intfield01, intfield03, intfield06, intfield07, intfield08, " + "field01, field02, field04, field09, intfield02, intfield04, intfield05, field06, field07, field08) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+            pst = writecon.prepareStatement("insert into prg_dates (creating_date, created_from, changing_date, changed_from," + "fid, pflag, cid, timestampfield01, timestampfield02, timezone, intfield01, intfield03, intfield06, intfield07, intfield08, " + "field01, field02, field04, field09, organizer, uid, sequence, intfield02, intfield04, intfield05, field06, field07, field08) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
             cdao.setObjectID(IDGenerator.getId(cdao.getContext(), Types.APPOINTMENT, writecon));
+            handleUid(cdao, so, !notify);
 
             pst.setTimestamp(i++, new Timestamp(cdao.getCreationDate().getTime()));
             if (!cdao.containsLastModified()) {
@@ -1292,6 +1298,21 @@ public class CalendarMySQL implements CalendarSqlImp {
             } else {
                 pst.setNull(i++, java.sql.Types.VARCHAR);
             }
+            
+            if (cdao.containsOrganizer())
+                pst.setString(i++, cdao.getOrganizer());
+            else
+                pst.setNull(i++, java.sql.Types.VARCHAR);
+            
+            if (cdao.containsUid())
+                pst.setString(i++, cdao.getUid());
+            else
+                pst.setNull(i++, java.sql.Types.VARCHAR);
+            
+            if (cdao.containsSequence())
+                pst.setInt(i++, cdao.getSequence());
+            else
+                pst.setNull(i++, java.sql.Types.INTEGER);
 
             if (cdao.isSequence(true)) {
                 if (!cdao.containsRecurrenceID()) {
@@ -1336,6 +1357,20 @@ public class CalendarMySQL implements CalendarSqlImp {
 			collection.triggerEvent(so, CalendarOperation.INSERT, cdao);
 		}
 		return null;
+    }
+
+    private void handleUid(final CalendarDataObject cdao, final Session so, boolean exceptionCreate) throws OXException, OXCalendarException {
+        if (exceptionCreate) {
+            return;
+        }
+        if (cdao.containsUid()) {
+            int resolvedUid = resolveUid(so, cdao.getUid());
+            if (resolvedUid > 0) {
+                throw new OXCalendarException(OXCalendarException.Code.UID_ALREDY_EXISTS);
+            }
+        } else {
+            cdao.setUid(UUID.randomUUID().toString());
+        }
     }
 
     private static final String SQL_INSERT_PARTICIPANT = "INSERT INTO prg_date_rights (object_id, cid, id, type, dn, ma) VALUES (?, ?, ?, ?, ?, ?)";
@@ -2085,6 +2120,11 @@ public class CalendarMySQL implements CalendarSqlImp {
                 clone.setLastModified(new Date(lastModified));
                 clone.setNumberOfAttachments(0);
                 clone.setNumberOfLinks(0);
+                
+                if (!clone.containsUid()) {
+                    clone.setUid(edao.getUid());
+                }
+                
                 // Insert without triggering event
                 insertAppointment0(clone, writecon, so, false);
                 // Trigger NEW event for new (user) participants only
@@ -3900,7 +3940,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                         edao.setRecurrenceID(edao.getObjectID());
                         edao.removeObjectID();
                         try {
-                            insertAppointment(edao, writecon, so);
+                            insertAppointment0(edao, writecon, so, false);
                         } catch (final LdapException le) {
                             throw new OXException(le);
                         } catch (final Exception e) {
@@ -4554,6 +4594,38 @@ public class CalendarMySQL implements CalendarSqlImp {
         for (final Integer oid : oids) {
             deleteAppointment(writecon, so.getContextId(), oid.intValue(), so.getUserId(), backup);
         }
+    }
+    
+    public int resolveUid(Session session, String uid) throws OXException {
+        Context ctx = Tools.getContext(session);
+        
+        SELECT s = new SELECT("intfield01").
+            FROM("prg_dates").
+            WHERE(new EQUALS("uid", uid).
+                AND(new EQUALS("cid", ctx.getContextId())));
+        
+        String command = new StatementBuilder().buildCommand(s);
+        
+        Connection connection = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        
+        try {
+            connection = DBPool.pickup(ctx);
+            stmt = connection.prepareStatement(command);
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, e);
+        } catch (DBPoolingException e) {
+            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, e);
+        } finally {
+            DBUtils.closeResources(rs, stmt, null, true, ctx);
+            DBPool.push(connection);
+        }
+        return 0;
     }
 
 //    private final void deleteAllReminderEntries(CalendarDataObject edao, final int oid, final int inFolder, final Session so, final Context ctx, Connection readcon) throws SQLException, OXMandatoryFieldException, OXConflictException, OXException {

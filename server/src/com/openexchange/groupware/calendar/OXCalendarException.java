@@ -275,8 +275,9 @@ public class OXCalendarException extends OXException {
         UNNECESSARY_RECURRENCE_INFORMATION("Unnecessary recurrence information (%1$s) for type %2$s", 97, Category.USER_INPUT),
         UNABLE_TO_CALCULATE_POSITION("Unable to calculate given position. Seems to be a delete exception or outside range", 98, Category.USER_INPUT),
         CHANGE_EXCEPTION_TO_RECURRENCE("Changing an exception into a series is not supported.", 99, Category.USER_INPUT),
+        UID_ALREDY_EXISTS("Can not insert appointment with this uid. Uid already exists.", 100, Category.USER_INPUT),
         /** SQL Problem: "%s". */
-        SQL_ERROR("SQL Problem: \"%s\".", 100, Category.CODE_ERROR);
+        SQL_ERROR("SQL Problem: \"%s\".", 101, Category.CODE_ERROR);
 
         /**
          * Message of the exception.

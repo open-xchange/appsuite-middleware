@@ -49,20 +49,13 @@
 
 package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 
-import java.net.SocketException;
 import java.util.List;
 import java.util.TimeZone;
-
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.CalendarComponent;
-import net.fortuna.ical4j.util.UidGenerator;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
-import com.openexchange.data.conversion.ical.ConversionWarning.Code;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
@@ -88,24 +81,16 @@ public final class Uid<T extends CalendarComponent, U extends CalendarObject> ex
     /**
      * {@inheritDoc}
      */
-    public boolean isSet(final CalendarObject calendar) {
-        // Must be true. Otherwise emit() is not called. 
-        return true;
+    public boolean isSet(final U calendar) {
+        return isSet(calendar, CalendarObject.UID) && calendar.getUid().length() != 0;
     }
 
     /**
      * {@inheritDoc}
      */
     public void emit(final int index, final U calendar, final T component,
-        final List<ConversionWarning> warnings, final Context ctx) throws ConversionError {
-        final UidGenerator generator;
-        try {
-            generator = new UidGenerator(String.valueOf(Thread.currentThread().getId()));
-        } catch (final SocketException e) {
-            LOG.error(e.getMessage(), e);
-            throw new ConversionError(index, Code.CANT_GENERATE_UID, e);
-        }
-        component.getProperties().add(generator.generateUid());
+        final List<ConversionWarning> warnings, final Context ctx, Object... args) {
+        component.getProperties().add(new net.fortuna.ical4j.model.property.Uid(calendar.getUid()));
     }
 
     /**
@@ -119,7 +104,7 @@ public final class Uid<T extends CalendarComponent, U extends CalendarObject> ex
      * {@inheritDoc}
      */
     public void parse(final int index, final T component, final U calendar, final TimeZone timeZone,
-        final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
-        // Nothing to parse.
+        final Context ctx, final List<ConversionWarning> warnings) {
+        calendar.setUid(component.getProperty(Property.UID).getValue());
     }
 }

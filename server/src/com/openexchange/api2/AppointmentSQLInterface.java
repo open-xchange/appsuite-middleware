@@ -53,6 +53,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Date;
 import com.openexchange.api.OXObjectNotFoundException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
@@ -343,4 +344,12 @@ public interface AppointmentSQLInterface {
      */
     SearchIterator<Appointment> getAppointmentsBetween(int user_uid, Date start, Date end, int cols[], int orderBy, String orderDir) throws OXException, SQLException;
 
+    /**
+     * Resolves the given uid.
+     * 
+     * @param uid
+     * @return the object id of the corresponding object, if it exists, 0 otherwise.
+     * @throws OXException
+     */
+    public int resolveUid(String uid) throws OXException;
 }

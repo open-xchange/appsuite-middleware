@@ -86,6 +86,8 @@ import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -132,7 +134,7 @@ public class AppointmentRequest {
         CalendarObject.START_DATE, CalendarObject.END_DATE, CalendarObject.NOTE, CalendarObject.RECURRENCE_TYPE,
         CalendarObject.RECURRENCE_CALCULATOR, CalendarObject.RECURRENCE_ID, CalendarObject.RECURRENCE_POSITION,
         CalendarObject.PARTICIPANTS, CalendarObject.USERS, Appointment.SHOWN_AS, Appointment.DELETE_EXCEPTIONS,
-        Appointment.CHANGE_EXCEPTIONS, Appointment.FULL_TIME, Appointment.COLOR_LABEL, Appointment.TIMEZONE };
+        Appointment.CHANGE_EXCEPTIONS, Appointment.FULL_TIME, Appointment.COLOR_LABEL, Appointment.TIMEZONE, Appointment.ORGANIZER, Appointment.UID, Appointment.SEQUENCE };
 
     private final ServerSession session;
 
@@ -202,9 +204,23 @@ public class AppointmentRequest {
             return actionFreeBusy(jsonObject);
         } else if (AJAXServlet.ACTION_COPY.equalsIgnoreCase(action)) {
             return actionCopy(jsonObject);
+        } else if (AJAXServlet.ACTION_RESOLVE_UID.equalsIgnoreCase(action)) {
+            return actionResolveUid(jsonObject);
         } else {
             throw new AjaxException(AjaxException.Code.UnknownAction, action);
         }
+    }
+    
+    private JSONObject actionResolveUid(JSONObject jsonObj) throws JSONException, OXException {
+        AppointmentSQLInterface appointmentSql = appointmentFactory.createAppointmentSql(session);
+        JSONObject json = new JSONObject();
+        String uid = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_UID);
+        int id = appointmentSql.resolveUid(uid);
+        if (id == 0) {
+            throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, EnumComponent.APPOINTMENT, "");
+        }
+        json.put("id", id);
+        return json;
     }
 
     public JSONObject actionNew(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXConflictException, OXException, AjaxException {
@@ -1304,6 +1320,7 @@ public class AppointmentRequest {
         }
 
         appointmentObj.removeObjectID();
+        appointmentObj.removeUid();
         appointmentObj.setParentFolderID(folderId);
         appointmentObj.setIgnoreConflicts(ignoreConflicts);
         final Appointment[] conflicts = appointmentSql.insertAppointmentObject(appointmentObj);

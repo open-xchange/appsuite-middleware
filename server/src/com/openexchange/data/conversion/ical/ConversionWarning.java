@@ -165,7 +165,11 @@ public class ConversionWarning extends AbstractOXException {
         /**
          * Empty "CLASS" element.
          */
-        EMPTY_CLASS("Empty \"CLASS\" element.", Category.USER_INPUT, 17);
+        EMPTY_CLASS("Empty \"CLASS\" element.", Category.USER_INPUT, 17),
+        /**
+         * 
+         */
+        INSUFFICIENT_INFORMATION("Insufficient information for parsing/writing this element.",Category.CODE_ERROR, 18);
 
         /**
          * Message of the exception.

@@ -72,7 +72,7 @@ public interface AttributeConverter<T extends CalendarComponent, U extends Calen
      */
     boolean isSet(U u);
 
-    void emit(int index, U u, T t, List<ConversionWarning> warnings, Context ctx) throws ConversionError;
+    void emit(int index, U u, T t, List<ConversionWarning> warnings, Context ctx, Object... args) throws ConversionError;
 
     boolean hasProperty(T t);
 

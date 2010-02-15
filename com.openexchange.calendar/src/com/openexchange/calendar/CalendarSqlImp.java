@@ -152,5 +152,7 @@ public interface CalendarSqlImp {
     PreparedStatement getSearchQuery(String select,  int uid, int groups[], UserConfiguration uc, int orderBy, String orderDir, AppointmentSearchObject searchobject, Context c, Connection readcon, CalendarFolderObject cfo) throws SQLException, OXException;
 
     PreparedStatement getActiveAppointments(Context c, int uid, Date d1, Date d2, String select, Connection readcon) throws SQLException;
+    
+    public int resolveUid(Session session, String uid) throws OXException;
 
 }

@@ -65,10 +65,14 @@ public interface ICalEmitter {
     // TODO: What about mixed exports?Tasks and Appointments
     public String writeAppointments(List<Appointment> appointmentObjects, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
 
+    public String writeAppointmentRequest(Appointment appointment, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
+
     public String writeTasks(List<Task> tasks, List<ConversionError> errors, List<ConversionWarning> warnings, Context ctx) throws ConversionError;
 
     public ICalSession createSession();
 
+    public ICalItem writeAppointment(ICalSession session, Appointment appointment, Context ctx, ITipContainer iTip, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
+    
     /**
      * @throws ConversionError if a wrong session is given that is not created with this implementations {@link #createSession()} method.
      */

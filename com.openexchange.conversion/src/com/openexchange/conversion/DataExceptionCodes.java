@@ -57,6 +57,7 @@ import static com.openexchange.conversion.DataExceptionMessages.TRUNCATED_MSG;
 import static com.openexchange.conversion.DataExceptionMessages.TYPE_NOT_SUPPORTED_MSG;
 import static com.openexchange.conversion.DataExceptionMessages.UNKNOWN_DATA_HANDLER_MSG;
 import static com.openexchange.conversion.DataExceptionMessages.UNKNOWN_DATA_SOURCE_MSG;
+import static com.openexchange.conversion.DataExceptionMessages.UNABLE_TO_CHANGE_DATA_MSG;
 import com.openexchange.conversion.exception.DataExceptionFactory;
 import com.openexchange.exceptions.OXErrorMessage;
 import com.openexchange.groupware.AbstractOXException.Category;
@@ -99,8 +100,13 @@ public enum DataExceptionCodes implements OXErrorMessage {
     /**
      * The following field(s) are too long: %1$s
      */
-    TRUNCATED(TRUNCATED_MSG, Category.TRUNCATED, 8);
-
+    TRUNCATED(TRUNCATED_MSG, Category.TRUNCATED, 8),
+    
+    /**
+     * Unable to change data. (%1$s)
+     */
+    UNABLE_TO_CHANGE_DATA(UNABLE_TO_CHANGE_DATA_MSG, Category.USER_INPUT, 9);
+    
     private final Category category;
 
     private final int detailNumber;

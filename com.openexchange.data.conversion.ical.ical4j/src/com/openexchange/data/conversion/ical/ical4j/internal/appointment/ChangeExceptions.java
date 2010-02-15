@@ -87,7 +87,7 @@ public class ChangeExceptions extends AbstractVerifyingAttributeConverter<VEvent
         return appointment.isException();
     }
 
-    public void emit(final int index, final Appointment appointment, final VEvent vEvent, final List<ConversionWarning> warnings, final Context ctx) throws ConversionError {
+    public void emit(final int index, final Appointment appointment, final VEvent vEvent, final List<ConversionWarning> warnings, final Context ctx, Object... args) throws ConversionError {
         final java.util.Date changeException = appointment.getRecurrenceDatePosition();
         if (null == changeException) {
             return;

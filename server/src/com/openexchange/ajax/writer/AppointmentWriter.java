@@ -404,6 +404,21 @@ public class AppointmentWriter extends CalendarWriter {
                 writeValue(appointmentObject.getRecurrenceCalculator(), jsonArray);
             }
         });
+        m.put(I(Appointment.ORGANIZER), new AppointmentFieldWriter() {
+            public void write(final Appointment appointmentObject, final JSONArray jsonArray) {
+                writeValue(appointmentObject.getOrganizer(), jsonArray, appointmentObject.containsOrganizer());
+            }
+        });
+        m.put(I(Appointment.UID), new AppointmentFieldWriter() {
+            public void write(final Appointment appointmentObject, final JSONArray jsonArray) {
+                writeValue(appointmentObject.getUid(), jsonArray, appointmentObject.containsUid());
+            }
+        });
+        m.put(I(Appointment.SEQUENCE), new AppointmentFieldWriter() {
+            public void write(final Appointment appointmentObject, final JSONArray jsonArray) {
+                writeValue(appointmentObject.getSequence(), jsonArray, appointmentObject.containsSequence());
+            }
+        });
         WRITER_MAP = Collections.unmodifiableMap(m);
     }
 }

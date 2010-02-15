@@ -83,4 +83,6 @@ public final class ICal4jSession implements ICalSession {
     public int getAndIncreaseIndex() {
         return index++;
     }
+    
+    
 }

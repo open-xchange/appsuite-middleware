@@ -67,7 +67,7 @@ public class Location extends AbstractVerifyingAttributeConverter<VEvent, Appoin
         return appointmentObject.containsLocation() && null != appointmentObject.getLocation() && appointmentObject.getLocation().length() != 0;
     }
 
-    public void emit(final int index, final Appointment appointmentObject, final VEvent event, final List<ConversionWarning> warnings, final Context ctx) throws ConversionError {
+    public void emit(final int index, final Appointment appointmentObject, final VEvent event, final List<ConversionWarning> warnings, final Context ctx, Object... args) throws ConversionError {
         final net.fortuna.ical4j.model.property.Location location = new net.fortuna.ical4j.model.property.Location(appointmentObject.getLocation());
         event.getProperties().add(location);
     }

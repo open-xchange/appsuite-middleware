@@ -85,7 +85,7 @@ public final class Start<T extends CalendarComponent, U extends CalendarObject> 
     /**
      * {@inheritDoc}
      */
-    public void emit(final int index, final U calendar, final T component, final List<ConversionWarning> warnings, final Context ctx) {
+    public void emit(final int index, final U calendar, final T component, final List<ConversionWarning> warnings, final Context ctx, Object... args) {
         final DtStart start = new DtStart();
         final net.fortuna.ical4j.model.Date date = (needsDate(calendar)) ? toDate(calendar.getStartDate()) : toDateTime(calendar.getStartDate());
         start.setDate(date);

@@ -68,6 +68,8 @@ import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalItem;
 import com.openexchange.data.conversion.ical.ICalSession;
+import com.openexchange.data.conversion.ical.ITipContainer;
+import com.openexchange.data.conversion.ical.ITipMethod;
 import com.openexchange.data.conversion.ical.ConversionWarning.Code;
 import com.openexchange.data.conversion.ical.ical4j.internal.AppointmentConverters;
 import com.openexchange.data.conversion.ical.ical4j.internal.AttributeConverter;
@@ -92,6 +94,14 @@ public class ICal4JEmitter implements ICalEmitter {
         return calendar.toString();
     }
 
+    public String writeAppointmentRequest(Appointment appointment, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
+        Calendar calendar = new Calendar();
+        initCalendar(calendar);
+        VEvent event = createEvent(0, appointment, ctx, errors, warnings);
+        calendar.getComponents().add(event);
+        return calendar.toString();
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -112,14 +122,32 @@ public class ICal4JEmitter implements ICalEmitter {
         }
         return calendar.toString();
     }
-
+    
     private VEvent createEvent(final int index, final Appointment appointment, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) {
+        return createEvent(index, appointment, ctx, errors, warnings, new ITipContainer());
+    }
+
+    private VEvent createEvent(final int index, final Appointment appointment, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings, ITipContainer iTip) {
 
         final VEvent vevent = new VEvent();
-        for (final AttributeConverter<VEvent, Appointment> converter : AppointmentConverters.ALL) {
+        AttributeConverter<VEvent, Appointment>[] converters = null;
+        switch (iTip.getMethod()) {
+        case NO_METHOD:
+            converters = AppointmentConverters.ALL; break;
+        case REQUEST:
+            converters = AppointmentConverters.REQUEST; break;
+        case REPLY:
+            converters = AppointmentConverters.REPLY; break;
+        case CANCEL:
+            converters = AppointmentConverters.CANCEL; break;
+        default:
+            converters = AppointmentConverters.ALL;
+        }
+        
+        for (final AttributeConverter<VEvent, Appointment> converter : converters) {
             if (converter.isSet(appointment)) {
                 try {
-                    converter.emit(index, appointment, vevent, warnings, ctx);
+                    converter.emit(index, appointment, vevent, warnings, ctx, iTip);
                 } catch (final ConversionError conversionError) {
                     errors.add( conversionError );
                 }
@@ -149,15 +177,35 @@ public class ICal4JEmitter implements ICalEmitter {
         initCalendar(retval.getCalendar());
         return retval;
     }
+    
+    public ICalItem writeAppointment(ICalSession session, Appointment appointment, Context ctx, ITipContainer iTip, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
+        final Calendar calendar = getCalendar(session);
+        
+        switch (iTip.getMethod()) {
+        case REPLY:
+            calendar.getProperties().remove(Method.REQUEST);
+            calendar.getProperties().add(Method.REPLY);
+            break;
+        case CANCEL:
+            calendar.getProperties().remove(Method.REQUEST);
+            calendar.getProperties().add(Method.CANCEL);
+            appointment.setSequence(appointment.getSequence() + 1);
+            break;
+        default:
+            break;
+        }
+        
+        final VEvent event = createEvent(getAndIncreaseIndex(session), appointment,ctx, errors, warnings, iTip);
+        calendar.getComponents().add(event);
+        return new ICal4jItem(event);
+    }
 
     public ICalItem writeAppointment(final ICalSession session,
         final Appointment appointment, final Context ctx,
         final List<ConversionError> errors, final List<ConversionWarning> warnings)
         throws ConversionError {
-        final Calendar calendar = getCalendar(session);
-        final VEvent event = createEvent(getAndIncreaseIndex(session), appointment,ctx, errors, warnings);
-        calendar.getComponents().add(event);
-        return new ICal4jItem(event);
+        
+        return writeAppointment(session, appointment, ctx, new ITipContainer(), errors, warnings);
     }
 
 

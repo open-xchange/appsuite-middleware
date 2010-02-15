@@ -192,6 +192,9 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 cdao.setNote(setString(i++, load_resultset));
                 cdao.setFullTime(setBooleanToInt(i++, load_resultset));
                 cdao.setCategories(setString(i++, load_resultset));
+                cdao.setOrganizer(setString(i++, load_resultset));
+                cdao.setUid(setString(i++, load_resultset));
+                cdao.setSequence(setInt(i++, load_resultset));
                 cdao.setUsers(cimp.getUserParticipants(cdao, readcon, so.getUserId()).getUsers());
                 cdao.setParticipants(cimp.getParticipants(cdao, readcon).getList());
                 if (check_permissions && cdao.getEffectiveFolderId() != inFolder) {
@@ -1653,6 +1656,26 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                         throws SQLException {
                     final long recurring_start = rs.getLong(columnCount);
                     cdao.setRecurringStart(recurring_start);
+                }
+            });
+            put(Integer.valueOf(Appointment.ORGANIZER), new FieldFiller() {
+                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs)
+                        throws SQLException {
+                    final String organizer = rs.getString(columnCount);
+                    cdao.setOrganizer(organizer);
+                }
+            });
+            put(Integer.valueOf(Appointment.UID), new FieldFiller() {
+                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs)
+                        throws SQLException {
+                    final String uid = rs.getString(columnCount);
+                    cdao.setUid(uid);
+                }
+            });
+            put(Integer.valueOf(Appointment.SEQUENCE), new FieldFiller() {
+                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs)
+                        throws SQLException {
+                    cdao.setSequence(rs.getInt(columnCount));
                 }
             });
 

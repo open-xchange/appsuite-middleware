@@ -84,7 +84,7 @@ public final class IgnoreConflicts extends AbstractVerifyingAttributeConverter<V
      * {@inheritDoc}
      */
     public void emit(final int index, final Appointment appointment, final VEvent vEvent,
-        final List<ConversionWarning> warnings, final Context ctx) {
+        final List<ConversionWarning> warnings, final Context ctx, Object... args) {
         // Ignore this always on output.
     }
 

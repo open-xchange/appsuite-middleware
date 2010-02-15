@@ -49,36 +49,22 @@
 
 package com.openexchange.groupware.datahandler;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.fields.CalendarFields;
-import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
-import com.openexchange.api2.TasksSQLInterface;
-import com.openexchange.configuration.ServerConfig;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataException;
 import com.openexchange.conversion.DataExceptionCodes;
-import com.openexchange.conversion.DataHandler;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalParser;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.contexts.Context;
@@ -86,13 +72,10 @@ import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.OXJSONException;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link ICalInsertDataHandler} - The data handler to insert appointments and
@@ -100,10 +83,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ICalInsertDataHandler implements DataHandler {
-
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-            .getLog(ICalInsertDataHandler.class);
+public final class ICalInsertDataHandler extends ICalDataHandler {
 
     private static final String[] ARGS = { "com.openexchange.groupware.calendar.folder",
             "com.openexchange.groupware.task.folder" };
@@ -139,6 +119,9 @@ public final class ICalInsertDataHandler implements DataHandler {
         } catch (final NumberFormatException e) {
             throw DataExceptionCodes.INVALID_ARGUMENT.create(ARGS[1], e, dataArguments.get(ARGS[1]));
         }
+        
+        Confirm confirm = parseConfirmation(dataArguments);
+        
         final Context ctx;
         try {
             ctx = ContextStorage.getStorageContext(session);
@@ -204,7 +187,7 @@ public final class ICalInsertDataHandler implements DataHandler {
              * Insert parsed appointments into denoted calendar folder
              */
             try {
-                insertAppointments(session, calendarFolder, ctx, appointments, folderAndIdArray);
+                insertAppointments(session, calendarFolder, ctx, appointments, confirm, folderAndIdArray);
             } catch (final OXException e) {
                 throw new DataException(e);
             } catch (final JSONException e) {
@@ -226,155 +209,16 @@ public final class ICalInsertDataHandler implements DataHandler {
         return folderAndIdArray;
     }
 
-    private void insertTasks(final Session session, final int taskFolder, final List<Task> tasks,
-            final JSONArray folderAndIdArray) throws OXException, JSONException {
-        final TasksSQLInterface taskSql = new TasksSQLImpl(session);
-        for (final Task task : tasks) {
-            task.setParentFolderID(taskFolder);
-            taskSql.insertTaskObject(task);
-            folderAndIdArray.put(new JSONObject().put(CalendarFields.FOLDER_ID, taskFolder).put(CalendarFields.ID,
-                    task.getObjectID()));
-        }
-    }
-
-    private void insertAppointments(final Session session, final int calendarFolder, final Context ctx,
-            final List<CalendarDataObject> appointments, final JSONArray folderAndIdArray) throws OXException,
-            JSONException {
-        final AppointmentSQLInterface appointmentSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
-        for (final CalendarDataObject appointment : appointments) {
-            appointment.setParentFolderID(calendarFolder);
-            appointment.setContext(ctx);
-            appointment.setIgnoreConflicts(true);
-            appointmentSql.insertAppointmentObject(appointment);
-            folderAndIdArray.put(new JSONObject().put(CalendarFields.FOLDER_ID, calendarFolder).put(CalendarFields.ID,
-                    appointment.getObjectID()));
-        }
-    }
-
-    private List<CalendarDataObject> parseAppointmentStream(final Context ctx, final ICalParser iCalParser,
-            final InputStreamCopy inputStreamCopy, final List<ConversionError> conversionErrors,
-            final List<ConversionWarning> conversionWarnings, final TimeZone defaultZone) throws IOException,
-            ConversionError {
-        final InputStream inputStream = inputStreamCopy.getInputStream();
-        try {
-            return iCalParser.parseAppointments(inputStream, defaultZone, ctx, conversionErrors, conversionWarnings);
-        } finally {
-            try {
-                inputStream.close();
-            } catch (final IOException e) {
-                LOG.error("Error closing input stream", e);
+    private Confirm parseConfirmation(final DataArguments dataArguments) {
+        int confirmStatus = -1;
+        String confirmMessage = null;
+        if (dataArguments.containsKey("confirmstatus")) {
+            confirmStatus = Integer.parseInt(dataArguments.get("confirmstatus"));
+            if (dataArguments.containsKey("confirmmessage")) {
+                confirmMessage = dataArguments.get("confirmmessage");
             }
+            return new Confirm(confirmStatus, confirmMessage);
         }
-    }
-
-    private List<Task> parseTaskStream(final Context ctx, final ICalParser iCalParser,
-            final InputStreamCopy inputStreamCopy, final List<ConversionError> conversionErrors,
-            final List<ConversionWarning> conversionWarnings, final TimeZone defaultZone) throws IOException,
-            ConversionError {
-        final InputStream inputStream = inputStreamCopy.getInputStream();
-        try {
-            return iCalParser.parseTasks(inputStream, defaultZone, ctx, conversionErrors, conversionWarnings);
-        } finally {
-            try {
-                inputStream.close();
-            } catch (final IOException e) {
-                LOG.error("Error closing input stream", e);
-            }
-        }
-    }
-
-    private static final int LIMIT = 1048576;
-
-    private static InputStreamCopy copyStream(final InputStream orig, final long size) throws DataException {
-        try {
-            return new InputStreamCopy(orig, (size <= 0 || size > LIMIT));
-        } catch (final IOException e) {
-            throw DataExceptionCodes.ERROR.create(e, e.getMessage());
-        }
-    }
-
-    private static final class InputStreamCopy {
-
-        private static final int DEFAULT_BUF_SIZE = 0x2000;
-
-        private static final String FILE_PREFIX = "openexchange";
-
-        private byte[] bytes;
-
-        private File file;
-
-        private final long size;
-
-        public InputStreamCopy(final InputStream orig, final boolean createFile) throws IOException {
-            super();
-            if (createFile) {
-                size = copy2File(orig);
-            } else {
-                size = copy2ByteArr(orig);
-            }
-        }
-
-        public InputStream getInputStream() throws IOException {
-            return bytes == null ? (file == null ? null : (new BufferedInputStream(new FileInputStream(file),
-                    DEFAULT_BUF_SIZE))) : (new UnsynchronizedByteArrayInputStream(bytes));
-        }
-
-        public long getSize() {
-            return size;
-        }
-
-        public void close() {
-            if (file != null) {
-                if (file.exists()) {
-                    file.delete();
-                }
-                file = null;
-            }
-            if (bytes != null) {
-                bytes = null;
-            }
-        }
-
-        private int copy2ByteArr(final InputStream in) throws IOException {
-            final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_BUF_SIZE << 1);
-            final byte[] bbuf = new byte[DEFAULT_BUF_SIZE];
-            int len;
-            while ((len = in.read(bbuf)) != -1) {
-                out.write(bbuf, 0, len);
-            }
-            out.flush();
-            this.bytes = out.toByteArray();
-            return bytes.length;
-        }
-
-        private long copy2File(final InputStream in) throws IOException {
-            long totalBytes = 0;
-            {
-                final File tmpFile = File.createTempFile(FILE_PREFIX, null, new File(ServerConfig
-                        .getProperty(ServerConfig.Property.UploadDirectory)));
-                tmpFile.deleteOnExit();
-                OutputStream out = null;
-                try {
-                    out = new BufferedOutputStream(new FileOutputStream(tmpFile), DEFAULT_BUF_SIZE);
-                    final byte[] bbuf = new byte[DEFAULT_BUF_SIZE];
-                    int len;
-                    while ((len = in.read(bbuf)) != -1) {
-                        out.write(bbuf, 0, len);
-                        totalBytes += len;
-                    }
-                    out.flush();
-                } finally {
-                    if (out != null) {
-                        try {
-                            out.close();
-                        } catch (final IOException e) {
-                            LOG.error(e.getMessage(), e);
-                        }
-                    }
-                }
-                file = tmpFile;
-            }
-            return totalBytes;
-        }
+        return null;
     }
 }

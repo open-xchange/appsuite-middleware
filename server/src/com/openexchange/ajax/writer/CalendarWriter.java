@@ -60,8 +60,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONWriter;
 import com.openexchange.ajax.fields.CalendarFields;
+import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.ParticipantsFields;
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.participants.ConfirmableParticipant;
@@ -247,10 +249,40 @@ public abstract class CalendarWriter extends CommonWriter {
             return confirmations;
         }
     };
+    
+    protected static final FieldWriter<CalendarObject> ORGANIZER_WRITER = new FieldWriter<CalendarObject>() {
+        public void write(CalendarObject obj, TimeZone timeZone, JSONArray json) {
+            writeValue(obj.getOrganizer(), json, obj.containsOrganizer());
+        }
+        public void write(CalendarObject obj, TimeZone timeZone, JSONObject json) throws JSONException {
+            writeParameter(CalendarFields.ORGANIZER, obj.getOrganizer(), json, obj.containsOrganizer());
+        }
+    };
+    
+    protected static final FieldWriter<CalendarObject> UID_WRITER = new FieldWriter<CalendarObject>() {
+        public void write(CalendarObject obj, TimeZone timeZone, JSONArray json) {
+            writeValue(obj.getUid(), json, obj.containsUid());
+        }
+        public void write(CalendarObject obj, TimeZone timeZone, JSONObject json) throws JSONException {
+            writeParameter(CalendarFields.UID, obj.getUid(), json, obj.containsUid());
+        }
+    };
+    
+    protected static final FieldWriter<CalendarObject> SEQUENCE_WRITER = new FieldWriter<CalendarObject>() {
+        public void write(CalendarObject obj, TimeZone timeZone, JSONArray json) {
+            writeValue(obj.getSequence(), json, obj.containsSequence());
+        }
+        public void write(CalendarObject obj, TimeZone timeZone, JSONObject json) throws JSONException {
+            writeParameter(CalendarFields.SEQUENCE, obj.getSequence(), json, obj.containsSequence());
+        }
+    };
 
     static {
         Map<Integer, FieldWriter<CalendarObject>> m = new HashMap<Integer, FieldWriter<CalendarObject>>(1, 1);
         m.put(I(CalendarObject.CONFIRMATIONS), CONFIRMATIONS_WRITER);
+        m.put(I(CalendarObject.ORGANIZER), ORGANIZER_WRITER);
+        m.put(I(CalendarObject.UID), UID_WRITER);
+        m.put(I(CalendarObject.SEQUENCE), SEQUENCE_WRITER);
         WRITER_MAP = Collections.unmodifiableMap(m);
     }
 

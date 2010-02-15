@@ -113,7 +113,7 @@ public class MailObject {
 
     private String subject;
 
-    private String text;
+    private Object text;
 
     private String contentType;
 
@@ -380,7 +380,7 @@ public class MailObject {
              * Examine message's content type
              */
             if (!"text".equalsIgnoreCase(ct.getPrimaryType())) {
-                throw new MailException(MailException.Code.UNSUPPORTED_MIME_TYPE, ct.toString());
+                //throw new MailException(MailException.Code.UNSUPPORTED_MIME_TYPE, ct.toString());
             }
             /*
              * Set content and its type
@@ -390,10 +390,12 @@ public class MailObject {
                     msg.setContent(text, ct.toString());
                 } else if ("plain".equalsIgnoreCase(ct.getSubType()) || "enriched".equalsIgnoreCase(ct.getSubType())) {
                     if (!ct.containsCharsetParameter()) {
-                        msg.setText(text);
+                        msg.setText((String) text);
                     } else {
-                        msg.setText(text, ct.getCharsetParameter());
+                        msg.setText((String) text, ct.getCharsetParameter());
                     }
+                } else if (ct.startsWith("multipart/")) {
+                    msg.setContent((Multipart) text);
                 } else {
                     throw new MailException(MailException.Code.UNSUPPORTED_MIME_TYPE, ct.toString());
                 }
@@ -403,10 +405,12 @@ public class MailObject {
                     textPart.setContent(text, ct.toString());
                 } else if ("plain".equalsIgnoreCase(ct.getSubType()) || "enriched".equalsIgnoreCase(ct.getSubType())) {
                     if (!ct.containsCharsetParameter()) {
-                        textPart.setText(text);
+                        textPart.setText((String) text);
                     } else {
-                        textPart.setText(text, ct.getCharsetParameter());
+                        textPart.setText((String) text, ct.getCharsetParameter());
                     }
+                } else if (ct.startsWith("multipart/")) {
+                    textPart.setContent((Multipart) text);
                 } else {
                     throw new MailException(MailException.Code.UNSUPPORTED_MIME_TYPE, ct.toString());
                 }
@@ -547,11 +551,11 @@ public class MailObject {
         this.fromAddr = fromAddr;
     }
 
-    public String getText() {
+    public Object getText() {
         return text;
     }
 
-    public void setText(final String text) {
+    public void setText(final Object text) {
         this.text = text;
     }
 

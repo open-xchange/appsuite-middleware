@@ -70,6 +70,9 @@ import com.openexchange.data.conversion.ical.ical4j.internal.calendar.LastModifi
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Note;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Recurrence;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.ReplyParticipants;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.RequestParticipants;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Sequence;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Start;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Title;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Uid;
@@ -80,6 +83,12 @@ import com.openexchange.groupware.container.Appointment;
  */
 public final class AppointmentConverters {
     public static final AttributeConverter<VEvent, Appointment>[] ALL;
+
+    public static final AttributeConverter<VEvent, Appointment>[] REQUEST;
+
+    public static final AttributeConverter<VEvent, Appointment>[] REPLY;
+    
+    public static final AttributeConverter<VEvent, Appointment>[] CANCEL;
 
     /**
      * Prevent instantiation.
@@ -108,10 +117,6 @@ public final class AppointmentConverters {
         tmp.add(new Location());
         tmp.add(new Transparency());
 
-        final Participants<VEvent, Appointment> participants = new Participants<VEvent, Appointment>();
-        participants.setVerifier(new PrivateAppointmentsHaveNoParticipants());
-        tmp.add(participants);
-
         tmp.add(new Categories<VEvent, Appointment>());
 
         tmp.add(new Recurrence<VEvent, Appointment>());
@@ -126,7 +131,27 @@ public final class AppointmentConverters {
         tmp.add(new LastModified<VEvent, Appointment>());
 
         tmp.add(new CreatedBy<VEvent, Appointment>());
+        
+        // All standard converters
+        List<AttributeConverter<VEvent, Appointment>> all = new ArrayList<AttributeConverter<VEvent, Appointment>>(tmp);
+        Participants<VEvent, Appointment> participants = new Participants<VEvent, Appointment>();
+        participants.setVerifier(new PrivateAppointmentsHaveNoParticipants());
+        all.add(participants);
+        Sequence<VEvent, Appointment> sequence = new Sequence<VEvent, Appointment>();
+        all.add(sequence);
+        ALL = all.toArray(new AttributeConverter[all.size()]);
+        
+        // Special Participant Converters for IMip
+        List<AttributeConverter<VEvent, Appointment>> request = new ArrayList<AttributeConverter<VEvent, Appointment>>(tmp);
+        RequestParticipants<VEvent, Appointment> requestParticipants = new RequestParticipants<VEvent, Appointment>();
+        request.add(requestParticipants);
+        REQUEST = request.toArray(new AttributeConverter[request.size()]);
+        
+        List<AttributeConverter<VEvent, Appointment>> reply = new ArrayList<AttributeConverter<VEvent, Appointment>>(tmp);
+        ReplyParticipants<VEvent, Appointment> replyParticipants = new ReplyParticipants<VEvent, Appointment>();
+        reply.add(replyParticipants);
+        REPLY = reply.toArray(new AttributeConverter[reply.size()]);
 
-        ALL = tmp.toArray(new AttributeConverter[tmp.size()]);
+        CANCEL = ALL;
     }
 }

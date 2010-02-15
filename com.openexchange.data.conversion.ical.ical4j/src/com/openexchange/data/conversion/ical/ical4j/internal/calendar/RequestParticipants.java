@@ -46,54 +46,51 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.TimeZone;
-
-import net.fortuna.ical4j.model.PropertyList;
+import java.net.URISyntaxException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import net.fortuna.ical4j.model.ParameterList;
 import net.fortuna.ical4j.model.component.CalendarComponent;
-
+import net.fortuna.ical4j.model.parameter.CuType;
+import net.fortuna.ical4j.model.parameter.PartStat;
+import net.fortuna.ical4j.model.parameter.Role;
+import net.fortuna.ical4j.model.parameter.Rsvp;
+import net.fortuna.ical4j.model.property.Attendee;
 import com.openexchange.data.conversion.ical.ConversionError;
-import com.openexchange.data.conversion.ical.ConversionWarning;
-import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 
 /**
- * @author Francisco Laguna <francisco.laguna@open-xchange.com>
+ * {@link RequestParticipants}
+ * 
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class Categories<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T,U> {
-    public boolean isSet(final U calendar) {
-        return calendar.containsCategories();
-    }
+public class RequestParticipants<T extends CalendarComponent, U extends CalendarObject> extends Participants<T, U> {
 
-    public void emit(final int index, final U u, final T t, final List<ConversionWarning> warnings, final Context ctx, Object... args) throws ConversionError {
-        final String categories = u.getCategories();
-        if(null == categories){
-            return;
-        }
-        t.getProperties().add(new net.fortuna.ical4j.model.property.Categories(categories));
-    }
+    private static Log LOG = LogFactory.getLog(RequestParticipants.class);
 
-    public boolean hasProperty(final T t) {
-        final PropertyList categoriesList = t.getProperties("CATEGORIES");
-        return categoriesList.size() > 0;
-    }
-
-    public void parse(final int index, final T component, final U cObj, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
-       final PropertyList categoriesList = component.getProperties("CATEGORIES");
-        final StringBuilder bob = new StringBuilder();
-        for(int i = 0, size = categoriesList.size(); i < size; i++) {
-            final net.fortuna.ical4j.model.property.Categories categories = (net.fortuna.ical4j.model.property.Categories) categoriesList.get(i);
-            for(final Iterator<Object> catObjects = categories.getCategories().iterator(); catObjects.hasNext();) {
-                bob.append(catObjects.next()).append(",");
+    @Override
+    protected void addUserAttendee(int index, UserParticipant userParticipant, Context ctx, T component, U cObj) throws ConversionError {
+        if (userParticipant.getIdentifier() == cObj.getCreatedBy()) {
+            super.addUserAttendee(index, userParticipant, ctx, component, cObj);
+        } else {
+            final Attendee attendee = new Attendee();
+            try {
+                attendee.setValue("mailto:" + resolveUserMail(index, userParticipant, ctx));
+                ParameterList parameters = attendee.getParameters();
+                parameters.add(CuType.INDIVIDUAL);
+                parameters.add(PartStat.NEEDS_ACTION);
+                parameters.add(Role.REQ_PARTICIPANT);
+                parameters.add(Rsvp.TRUE);
+                component.getProperties().add(attendee);
+            } catch (final URISyntaxException e) {
+                LOG.error(e);
             }
         }
-        if(bob.length() > 0) {
-            bob.setLength(bob.length()-1);
-        }
-        cObj.setCategories(bob.toString());
     }
+
 }

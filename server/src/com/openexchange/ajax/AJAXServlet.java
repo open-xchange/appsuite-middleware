@@ -232,6 +232,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     public static final String ACTION_CLEAR = "clear";
 
     public static final String ACTION_KEEPALIVE = "keepalive";
+    
+    public static final String ACTION_RESOLVE_UID = "resolveuid";
 
     /**
      * The parameter 'from' specifies index of starting entry in list of objects dependent on given order criteria and folder id
@@ -325,6 +327,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     public static final String PARAMETER_USER = "user";
 
     public static final String PARAMETER_TEMPLATE = "template";
+    
+    public static final String PARAMETER_UID = "uid";
 
     /**
      * The content type if the response body contains javascript data. Set it with

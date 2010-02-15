@@ -216,6 +216,10 @@ public final class CalendarCollection implements CalendarCollectionService {
         
         fieldMap.put(Integer.valueOf(Appointment.FOLDER_ID), "fid");
         fieldMap.put(Integer.valueOf(CalendarDataObject.TIMEZONE), "timezone");
+
+        fieldMap.put(Integer.valueOf(CalendarDataObject.ORGANIZER), "organizer");
+        fieldMap.put(Integer.valueOf(CalendarDataObject.UID), "uid");
+        fieldMap.put(Integer.valueOf(CalendarDataObject.SEQUENCE), "sequence");
     }
     
     /**

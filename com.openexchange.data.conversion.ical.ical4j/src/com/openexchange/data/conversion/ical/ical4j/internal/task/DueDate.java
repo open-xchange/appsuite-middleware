@@ -83,7 +83,7 @@ public class DueDate extends AbstractVerifyingAttributeConverter<VToDo, Task> {
         return false;  // EndDate only
     }
 
-    public void emit(final int index, final Task task, final VToDo vToDo, final List<ConversionWarning> warnings, final Context ctx) throws ConversionError {
+    public void emit(final int index, final Task task, final VToDo vToDo, final List<ConversionWarning> warnings, final Context ctx, Object... args) throws ConversionError {
        return; // EndDate only
     }
 

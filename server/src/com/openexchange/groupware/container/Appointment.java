@@ -77,7 +77,7 @@ public class Appointment extends CalendarObject implements Cloneable {
         // From CalendarObject
         TITLE, START_DATE, END_DATE, NOTE, ALARM, RECURRENCE_ID, RECURRENCE_POSITION, RECURRENCE_DATE_POSITION, RECURRENCE_TYPE,
         CHANGE_EXCEPTIONS, DELETE_EXCEPTIONS, DAYS, DAY_IN_MONTH, MONTH, INTERVAL, UNTIL, NOTIFICATION, RECURRENCE_CALCULATOR,
-        PARTICIPANTS, USERS, RECURRENCE_COUNT,
+        PARTICIPANTS, USERS, RECURRENCE_COUNT, UID, ORGANIZER, SEQUENCE,
         // From CommonObject
         CATEGORIES, PRIVATE_FLAG,
         COLOR_LABEL, NUMBER_OF_LINKS, NUMBER_OF_ATTACHMENTS,
@@ -331,6 +331,12 @@ public class Appointment extends CalendarObject implements Cloneable {
             }
             if (containsTimezone()) {
                 appointmentobject.setTimezone(getTimezoneFallbackUTC());
+            }
+            if (containsUid()) {
+                appointmentobject.setUid(getUid());
+            }
+            if (containsOrganizer()) {
+                appointmentobject.setOrganizer(getOrganizer());
             }
             return appointmentobject;
         } catch (final CloneNotSupportedException e) {

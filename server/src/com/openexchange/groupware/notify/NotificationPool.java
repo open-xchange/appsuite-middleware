@@ -291,6 +291,8 @@ public final class NotificationPool {
                 if (Participant.USER == p.type) {
                     mmsg =
                         ParticipantNotify.createUserMessage(
+                            cur.getSession(),
+                            calendarObject,
                             p,
                             (ParticipantNotify.userCanReadObject(p, calendarObject, cur.getSession())),
                             cur.getTitle(),
@@ -303,6 +305,8 @@ public final class NotificationPool {
                 } else {
                     mmsg =
                         ParticipantNotify.createParticipantMessage(
+                            cur.getSession(),
+                            calendarObject,
                             p,
                             cur.getTitle(),
                             cur.getState().getAction(),
