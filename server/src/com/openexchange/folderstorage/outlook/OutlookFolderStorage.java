@@ -593,7 +593,7 @@ public final class OutlookFolderStorage implements FolderStorage {
             /*
              * Get real folder storage
              */
-            final FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, parentId);
+            final FolderStorage folderStorage = folderStorageRegistry.getDedicatedFolderStorage(realTreeId, parentId);
             if (null == folderStorage) {
                 throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, parentId);
             }
