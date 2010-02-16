@@ -93,21 +93,14 @@ public abstract class ParticipantStorage {
 
     public abstract Map<Integer, ExternalUserParticipant[]> selectExternal(Context ctx, Connection con, int[] appointments) throws OXCalendarException;
 
-    public void selectExternal(Context ctx, Connection con, List<CalendarDataObject> cdaos, int[] ids) throws OXCalendarException {
-        for (int id : ids) {
-            CalendarDataObject cdao = null;
-            for (CalendarDataObject test : cdaos) {
-                if (id == test.getObjectID()) {
-                    cdao = test;
-                    break;
-                }
+    public void selectExternal(Context ctx, Connection con, List<CalendarDataObject> cdaos, int[] appointmentIds) throws OXCalendarException {
+        Map<Integer, ExternalUserParticipant[]> externals = selectExternal(ctx, con, appointmentIds);
+        for (CalendarDataObject cdao : cdaos) {
+            ExternalUserParticipant[] external = externals.get(I(cdao.getObjectID()));
+            if (null != external) {
+                cdao.setParticipants(ParticipantLogic.mergeFallback(cdao.getParticipants(), external));
+                cdao.setConfirmations(ParticipantLogic.mergeConfirmations(external, cdao.getParticipants()));
             }
-            if (null == cdao) {
-                continue;
-            }
-            ExternalUserParticipant[] externals = selectExternal(ctx, con, cdao.getObjectID());
-            cdao.setParticipants(ParticipantLogic.mergeFallback(cdao.getParticipants(), externals));
-            cdao.setConfirmations(ParticipantLogic.mergeConfirmations(externals, cdao.getParticipants()));
         }
     }
 }

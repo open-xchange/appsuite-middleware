@@ -125,15 +125,18 @@ public class RdbParticipantStorage extends ParticipantStorage {
     }
 
     @Override
-    public Map<Integer, ExternalUserParticipant[]> selectExternal(Context ctx, Connection con, int[] appointments) throws OXCalendarException {
+    public Map<Integer, ExternalUserParticipant[]> selectExternal(Context ctx, Connection con, int[] appointmentIds) throws OXCalendarException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        final Map<Integer, List<ExternalUserParticipant>> retval = new HashMap<Integer, List<ExternalUserParticipant>>(appointments.length, 1);
+        final Map<Integer, List<ExternalUserParticipant>> retval = new HashMap<Integer, List<ExternalUserParticipant>>(appointmentIds.length, 1);
+        for (int appointmentId : appointmentIds) {
+            retval.put(I(appointmentId), new ArrayList<ExternalUserParticipant>());
+        }
         try {
-            stmt = con.prepareStatement(getIN(SQL.SELECT_EXTERNAL, appointments.length));
+            stmt = con.prepareStatement(getIN(SQL.SELECT_EXTERNAL, appointmentIds.length));
             int pos = 1;
             stmt.setInt(pos++, ctx.getContextId());
-            for (int appointmentId : appointments) {
+            for (int appointmentId : appointmentIds) {
                 stmt.setInt(pos++, appointmentId);
             }
             rs = stmt.executeQuery();
@@ -145,10 +148,6 @@ public class RdbParticipantStorage extends ParticipantStorage {
                 participant.setConfirm(rs.getInt(pos++));
                 participant.setMessage(rs.getString(pos++));
                 List<ExternalUserParticipant> participants = retval.get(I(appointmentId));
-                if (null == participants) {
-                    participants = new ArrayList<ExternalUserParticipant>();
-                    retval.put(I(appointmentId), participants);
-                }
                 participants.add(participant);
             }
         } catch (SQLException e) {
