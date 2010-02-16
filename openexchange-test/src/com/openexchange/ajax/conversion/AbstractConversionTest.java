@@ -98,4 +98,26 @@ public abstract class AbstractConversionTest extends AbstractAJAXSession {
 	protected TimeZone getTimeZone() throws AjaxException, IOException, SAXException, JSONException {
 		return getClient().getValues().getTimeZone();
 	}
+
+    protected String parseMailId(String input) {
+        try {
+            Long.parseLong(input);
+        } catch (final NumberFormatException e) {
+            int pos = input.lastIndexOf('/');
+            if (pos == -1) {
+                pos = input.lastIndexOf('.');
+                if (pos == -1) {
+                    fail("UNKNOWN FORMAT FOR MAIL ID: " + input);
+                }
+            }
+            final String substr = input.substring(pos + 1);
+            try {
+                Long.parseLong(substr);
+            } catch (final NumberFormatException e1) {
+                fail("UNKNOWN FORMAT FOR MAIL ID: " + input);
+            }
+            return substr;
+        }
+        return input;
+    }
 }

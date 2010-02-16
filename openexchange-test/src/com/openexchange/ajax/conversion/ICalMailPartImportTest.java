@@ -50,6 +50,7 @@
 package com.openexchange.ajax.conversion;
 
 import java.io.InputStream;
+import java.util.UUID;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -75,11 +76,11 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class ICalMailPartImportTest extends AbstractConversionTest {
+public class ICalMailPartImportTest extends AbstractConversionTest {
 
 	private static final byte[] ICAL_BYTES = String.valueOf(
 			"BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\n" + "DTSTART;VALUE=DATE:20061221\n" + "DTEND;VALUE=DATE:20070106\n"
-					+ "SUMMARY:Weihnachtsferien\n" + "UID:4A47CF83-9AC8-4B4F-A082-DB84A877D9A2\n" + "SEQUENCE:8\n"
+					+ "SUMMARY:Weihnachtsferien\n" + "UID:" + UUID.randomUUID().toString() + "\n" + "SEQUENCE:8\n"
 					+ "DTSTAMP:20060520T163834Z\n" + "END:VEVENT\n" + "END:VCALENDAR").getBytes();
 
 	/**
@@ -140,24 +141,7 @@ public final class ICalMailPartImportTest extends AbstractConversionTest {
 				}
 			}
 
-			try {
-				Long.parseLong(mailFolderAndMailID[1]);
-			} catch (final NumberFormatException e) {
-				int pos = mailFolderAndMailID[1].lastIndexOf('/');
-				if (pos == -1) {
-					pos = mailFolderAndMailID[1].lastIndexOf('.');
-					if (pos == -1) {
-						fail("UNKNOWN FORMAT FOR MAIL ID: " + mailFolderAndMailID[1]);
-					}
-				}
-				final String substr = mailFolderAndMailID[1].substring(pos + 1);
-				try {
-					Long.parseLong(substr);
-				} catch (final NumberFormatException e1) {
-					fail("UNKNOWN FORMAT FOR MAIL ID: " + mailFolderAndMailID[1]);
-				}
-				mailFolderAndMailID[1] = substr;
-			}
+			mailFolderAndMailID[1] = parseMailId(mailFolderAndMailID[1]);
 
 			try {
 				/*
@@ -208,6 +192,5 @@ public final class ICalMailPartImportTest extends AbstractConversionTest {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-
 	}
 }
