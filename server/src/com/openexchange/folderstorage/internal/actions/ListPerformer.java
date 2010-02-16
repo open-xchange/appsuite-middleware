@@ -396,7 +396,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
             final org.apache.commons.logging.Log logger = LOG;
             completionService.submit(new Callable<Object>() {
 
-                public Object call() throws Exception {
+                public Object call() throws FolderException {
                     final SortableId sortableId = allSubfolderIds.get(index);
                     final String id = sortableId.getId();
                     final StorageParameters newParameters = newStorageParameters();
@@ -436,11 +436,16 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                             openedStorage.commitTransaction(newParameters);
                         }
                         return null;
-                    } catch (final Exception e) {
+                    } catch (final FolderException e) {
                         for (final FolderStorage openedStorage : openedStorages) {
                             openedStorage.rollback(newParameters);
                         }
                         throw e;
+                    } catch (final Exception e) {
+                        for (final FolderStorage openedStorage : openedStorages) {
+                            openedStorage.rollback(newParameters);
+                        }
+                        throw FolderException.newUnexpectedException(e);
                     }
                 }
             });
