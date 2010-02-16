@@ -196,7 +196,7 @@ public final class ManagedMimeMessage extends MimeMessage {
         if (pos >= 0) {
             // Double CRLF found
             final byte[] a = new byte[pos];
-            final int endPos = pos + 4;
+            final int endPos = pos + DOUBLE_CRLF.length;
             final byte[] b = new byte[sourceBytes.length - endPos];
             System.arraycopy(sourceBytes, 0, a, 0, a.length);
             System.arraycopy(sourceBytes, endPos, b, 0, b.length);
@@ -207,7 +207,7 @@ public final class ManagedMimeMessage extends MimeMessage {
         if (pos >= 0) {
             // Double LF found
             final byte[] a = new byte[pos];
-            final int endPos = pos + 2;
+            final int endPos = pos + DOUBLE_LF.length;
             final byte[] b = new byte[sourceBytes.length - endPos];
             System.arraycopy(sourceBytes, 0, a, 0, a.length);
             System.arraycopy(sourceBytes, endPos, b, 0, b.length);
