@@ -1,3 +1,7 @@
+* 2010-02-16 - thorben.betten@open-xchange.com
+
+ - Bugfix #15378: Auto-detection of proper content type if "name" parameter is present
+
 * 2010-02-10 - thorben.betten@open-xchange.com
 
  - Bugfix #15128: Display of broken multipart/alternative mail
