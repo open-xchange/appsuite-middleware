@@ -120,7 +120,7 @@ public final class OutlookId implements SortableId {
 
     @Override
     public String toString() {
-        return new StringBuilder(32).append("folderId=").append(folderId).append(", ordinal=").append(ordinal).toString();
+        return new StringBuilder(32).append("{folderId=").append(folderId).append(", ordinal=").append(ordinal).append('}').toString();
     }
 
 }

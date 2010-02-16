@@ -128,4 +128,9 @@ public final class CacheSortableId implements SortableId {
         return true;
     }
 
+    @Override
+    public String toString() {
+        return new StringBuilder(32).append("{folderId=").append(folderId).append(", ordinal=").append(ordinal).append('}').toString();
+    }
+
 }
