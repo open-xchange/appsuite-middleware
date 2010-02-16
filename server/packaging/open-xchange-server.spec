@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 17
+%define		ox_release 18
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -459,6 +459,8 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Tue Feb 16 2010 - thorben.betten@open-xchange.com
+ - Bugfix #15378: Auto-detection of proper content type if "name" parameter is present
 * Thu Jan 28 2010 - thorben.betten@open-xchange.com
  - Bugfix #15269: If decoding with Java Charset fails due to buffer overflow decoding is tried again with bigger buffer and text to decode
    is logged.
