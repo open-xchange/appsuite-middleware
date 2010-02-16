@@ -427,9 +427,8 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                                 userPermission = CalculatePermission.calculate(subfolder, getSession(), getAllowedContentTypes());
                             }
                             if (userPermission.getFolderPermission() >= Permission.READ_FOLDER) {
-                                final UserizedFolder userizedFolder =
+                                subfolders[index] =
                                     getUserizedFolder(subfolder, userPermission, treeId, all, true, newParameters, openedStorages);
-                                subfolders[index] = userizedFolder;
                             }
                         }
                         for (final FolderStorage openedStorage : openedStorages) {
