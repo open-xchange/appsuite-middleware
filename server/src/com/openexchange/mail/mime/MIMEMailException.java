@@ -50,40 +50,20 @@
 package com.openexchange.mail.mime;
 
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
-import java.net.BindException;
-import java.net.ConnectException;
-import java.net.NoRouteToHostException;
-import java.net.PortUnreachableException;
 import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Locale;
 import javax.mail.Address;
-import javax.mail.AuthenticationFailedException;
 import javax.mail.Folder;
-import javax.mail.FolderClosedException;
-import javax.mail.FolderNotFoundException;
-import javax.mail.IllegalWriteException;
-import javax.mail.MessageRemovedException;
 import javax.mail.MessagingException;
-import javax.mail.MethodNotSupportedException;
-import javax.mail.NoSuchProviderException;
-import javax.mail.ReadOnlyFolderException;
 import javax.mail.SendFailedException;
-import javax.mail.StoreClosedException;
 import javax.mail.internet.AddressException;
-import javax.mail.internet.ParseException;
-import javax.mail.search.SearchException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.session.Session;
-import com.sun.mail.iap.BadCommandException;
-import com.sun.mail.iap.CommandFailedException;
-import com.sun.mail.iap.ConnectionException;
-import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.smtp.SMTPSendFailedException;
 
 /**
@@ -389,7 +369,7 @@ public class MIMEMailException extends MailException {
      */
     public static MIMEMailException handleMessagingException(final MessagingException e, final MailConfig mailConfig, final Session session) {
         try {
-            if ((e instanceof AuthenticationFailedException) || ((e.getMessage() != null) && (e.getMessage().toLowerCase(Locale.ENGLISH).indexOf(
+            if ((e instanceof javax.mail.AuthenticationFailedException) || ((e.getMessage() != null) && (e.getMessage().toLowerCase(Locale.ENGLISH).indexOf(
                 ERR_AUTH_FAILED) != -1))) {
                 final boolean temporary = (e.getMessage() != null) && ERR_TMP.equals(e.getMessage().toLowerCase(Locale.ENGLISH));
                 if (temporary) {
@@ -414,8 +394,8 @@ public class MIMEMailException extends MailException {
                     e,
                     mailConfig == null ? STR_EMPTY : mailConfig.getServer(),
                     e.getMessage());
-            } else if (e instanceof FolderClosedException) {
-                final Folder f = ((FolderClosedException) e).getFolder();
+            } else if (e instanceof javax.mail.FolderClosedException) {
+                final Folder f = ((javax.mail.FolderClosedException) e).getFolder();
                 if (null != mailConfig && null != session) {
                     return new MIMEMailException(
                         Code.FOLDER_CLOSED_EXT,
@@ -427,8 +407,8 @@ public class MIMEMailException extends MailException {
                         Integer.valueOf(session.getContextId()));
                 }
                 return new MIMEMailException(Code.FOLDER_CLOSED, e, null == f ? e.getMessage() : f.getFullName());
-            } else if (e instanceof FolderNotFoundException) {
-                final Folder f = ((FolderNotFoundException) e).getFolder();
+            } else if (e instanceof javax.mail.FolderNotFoundException) {
+                final Folder f = ((javax.mail.FolderNotFoundException) e).getFolder();
                 if (null != mailConfig && null != session) {
                     return new MIMEMailException(
                         Code.FOLDER_NOT_FOUND_EXT,
@@ -440,21 +420,21 @@ public class MIMEMailException extends MailException {
                         Integer.valueOf(session.getContextId()));
                 }
                 return new MIMEMailException(Code.FOLDER_NOT_FOUND, e, null == f ? e.getMessage() : f.getFullName());
-            } else if (e instanceof IllegalWriteException) {
+            } else if (e instanceof javax.mail.IllegalWriteException) {
                 return new MIMEMailException(Code.ILLEGAL_WRITE, e, e.getMessage());
-            } else if (e instanceof MessageRemovedException) {
+            } else if (e instanceof javax.mail.MessageRemovedException) {
                 return new MIMEMailException(Code.MESSAGE_REMOVED, e, e.getMessage());
-            } else if (e instanceof MethodNotSupportedException) {
+            } else if (e instanceof javax.mail.MethodNotSupportedException) {
                 return new MIMEMailException(Code.METHOD_NOT_SUPPORTED, e, e.getMessage());
-            } else if (e instanceof NoSuchProviderException) {
+            } else if (e instanceof javax.mail.NoSuchProviderException) {
                 return new MIMEMailException(Code.NO_SUCH_PROVIDER, e, e.getMessage());
-            } else if (e instanceof ParseException) {
-                if (e instanceof AddressException) {
+            } else if (e instanceof javax.mail.internet.ParseException) {
+                if (e instanceof javax.mail.internet.AddressException) {
                     final String ref = ((AddressException) e).getRef() == null ? STR_EMPTY : ((AddressException) e).getRef();
                     return new MIMEMailException(Code.INVALID_EMAIL_ADDRESS, e, ref);
                 }
                 return new MIMEMailException(Code.PARSE_ERROR, e, e.getMessage());
-            } else if (e instanceof ReadOnlyFolderException) {
+            } else if (e instanceof javax.mail.ReadOnlyFolderException) {
                 if (null != mailConfig && null != session) {
                     return new MIMEMailException(
                         Code.READ_ONLY_FOLDER_EXT,
@@ -466,9 +446,9 @@ public class MIMEMailException extends MailException {
                         Integer.valueOf(session.getContextId()));
                 }
                 return new MIMEMailException(Code.READ_ONLY_FOLDER, e, e.getMessage());
-            } else if (e instanceof SearchException) {
+            } else if (e instanceof javax.mail.search.SearchException) {
                 return new MIMEMailException(Code.SEARCH_ERROR, e, e.getMessage());
-            } else if (e instanceof SMTPSendFailedException) {
+            } else if (e instanceof com.sun.mail.smtp.SMTPSendFailedException) {
                 final SMTPSendFailedException exc = (SMTPSendFailedException) e;
                 if ((exc.getReturnCode() == 552) || (exc.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_MSG_TOO_LARGE) > -1)) {
                     return new MIMEMailException(Code.MESSAGE_TOO_LARGE, exc, new Object[0]);
@@ -479,13 +459,13 @@ public class MIMEMailException extends MailException {
                     return new MIMEMailException(Code.SEND_FAILED_MSG, exc, exc.getMessage());
                 }
                 return new MIMEMailException(Code.SEND_FAILED, exc, Arrays.toString(exc.getInvalidAddresses()));
-            } else if (e instanceof SendFailedException) {
+            } else if (e instanceof javax.mail.SendFailedException) {
                 final SendFailedException exc = (SendFailedException) e;
                 if (exc.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_MSG_TOO_LARGE) > -1) {
                     return new MIMEMailException(Code.MESSAGE_TOO_LARGE, exc, new Object[0]);
                 }
                 return new MIMEMailException(Code.SEND_FAILED, exc, Arrays.toString(exc.getInvalidAddresses()));
-            } else if (e instanceof StoreClosedException) {
+            } else if (e instanceof javax.mail.StoreClosedException) {
                 if (null != mailConfig && null != session) {
                     return new MIMEMailException(
                         Code.STORE_CLOSED_EXT,
@@ -513,16 +493,16 @@ public class MIMEMailException extends MailException {
             /*
              * Messaging exception has a nested exception
              */
-            if (nextException instanceof BindException) {
+            if (nextException instanceof java.net.BindException) {
                 return new MIMEMailException(Code.BIND_ERROR, e, mailConfig == null ? STR_EMPTY : Integer.valueOf(mailConfig.getPort()));
-            } else if (nextException instanceof ConnectionException) {
+            } else if (nextException instanceof com.sun.mail.iap.ConnectionException) {
                 mailInterfaceMonitor.changeNumBrokenConnections(true);
                 return new MIMEMailException(
                     Code.CONNECT_ERROR,
                     e,
                     mailConfig == null ? STR_EMPTY : mailConfig.getServer(),
                     mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
-            } else if (nextException instanceof ConnectException) {
+            } else if (nextException instanceof java.net.ConnectException) {
                 /*
                  * Most modern IP stack implementations sense connection idleness, and abort the connection attempt, resulting in a
                  * java.net.ConnectionException
@@ -537,14 +517,14 @@ public class MIMEMailException extends MailException {
             } else if (nextException.getClass().getName().endsWith(EXC_CONNECTION_RESET_EXCEPTION)) {
                 mailInterfaceMonitor.changeNumBrokenConnections(true);
                 return new MIMEMailException(Code.CONNECTION_RESET, e, new Object[0]);
-            } else if (nextException instanceof NoRouteToHostException) {
+            } else if (nextException instanceof java.net.NoRouteToHostException) {
                 return new MIMEMailException(Code.NO_ROUTE_TO_HOST, e, mailConfig == null ? STR_EMPTY : mailConfig.getServer());
-            } else if (nextException instanceof PortUnreachableException) {
+            } else if (nextException instanceof java.net.PortUnreachableException) {
                 return new MIMEMailException(
                     Code.PORT_UNREACHABLE,
                     e,
                     mailConfig == null ? STR_EMPTY : Integer.valueOf(mailConfig.getPort()));
-            } else if (nextException instanceof SocketException) {
+            } else if (nextException instanceof java.net.SocketException) {
                 /*
                  * Treat dependent on message
                  */
@@ -554,9 +534,16 @@ public class MIMEMailException extends MailException {
                     return new MIMEMailException(Code.BROKEN_CONNECTION, e, mailConfig == null ? STR_EMPTY : mailConfig.getServer());
                 }
                 return new MIMEMailException(Code.SOCKET_ERROR, e, e.getMessage());
-            } else if (nextException instanceof UnknownHostException) {
+            } else if (nextException instanceof java.net.UnknownHostException) {
                 return new MIMEMailException(Code.UNKNOWN_HOST, e, e.getMessage());
-            } else if (nextException instanceof CommandFailedException) {
+            } else if (nextException instanceof java.net.SocketTimeoutException) {
+                mailInterfaceMonitor.changeNumBrokenConnections(true);
+                return new MIMEMailException(
+                    Code.CONNECT_ERROR,
+                    e,
+                    mailConfig == null ? STR_EMPTY : mailConfig.getServer(),
+                    mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
+            } else if (nextException instanceof com.sun.mail.iap.CommandFailedException) {
                 if (null != mailConfig && null != session) {
                     return new MIMEMailException(
                         Code.COMMAND_FAILED_EXT,
@@ -568,7 +555,7 @@ public class MIMEMailException extends MailException {
                         nextException.getMessage());
                 }
                 return new MIMEMailException(Code.COMMAND_FAILED, e, nextException.getMessage());
-            } else if (nextException instanceof BadCommandException) {
+            } else if (nextException instanceof com.sun.mail.iap.BadCommandException) {
                 if (null != mailConfig && null != session) {
                     return new MIMEMailException(
                         Code.BAD_COMMAND_EXT,
@@ -580,7 +567,7 @@ public class MIMEMailException extends MailException {
                         nextException.getMessage());
                 }
                 return new MIMEMailException(Code.BAD_COMMAND, e, nextException.getMessage());
-            } else if (nextException instanceof ProtocolException) {
+            } else if (nextException instanceof com.sun.mail.iap.ProtocolException) {
                 if (null != mailConfig && null != session) {
                     return new MIMEMailException(
                         Code.PROTOCOL_ERROR_EXT,
