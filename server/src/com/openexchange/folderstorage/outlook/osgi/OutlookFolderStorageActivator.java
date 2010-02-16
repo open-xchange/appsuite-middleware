@@ -63,6 +63,7 @@ import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link OutlookFolderStorageActivator} - {@link BundleActivator Activator} for MS outlook folder storage.
@@ -87,7 +88,7 @@ public class OutlookFolderStorageActivator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, MailAccountStorageService.class };
+        return new Class<?>[] { DatabaseService.class, MailAccountStorageService.class, ThreadPoolService.class };
     }
 
     @Override

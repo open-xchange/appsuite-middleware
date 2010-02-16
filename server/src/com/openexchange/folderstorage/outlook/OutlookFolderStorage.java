@@ -61,6 +61,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.Map.Entry;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
@@ -71,6 +74,7 @@ import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StoragePriority;
 import com.openexchange.folderstorage.StorageType;
+import com.openexchange.folderstorage.internal.StorageParametersImpl;
 import com.openexchange.folderstorage.internal.Tools;
 import com.openexchange.folderstorage.mail.contentType.DraftsContentType;
 import com.openexchange.folderstorage.mail.contentType.SentContentType;
@@ -87,6 +91,12 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
+import com.openexchange.server.ServiceException;
+import com.openexchange.session.Session;
+import com.openexchange.threadpool.ThreadPoolCompletionService;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link OutlookFolderStorage} - The MS Outlook folder storage.
@@ -95,7 +105,19 @@ import com.openexchange.mailaccount.UnifiedINBOXManagement;
  */
 public final class OutlookFolderStorage implements FolderStorage {
 
-    private static final String PREPARED_FULLNAME_INBOX = MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, "INBOX");
+    static final String PREPARED_FULLNAME_INBOX = MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, "INBOX");
+
+    private static final ThreadPools.ExpectedExceptionFactory<FolderException> FACTORY =
+        new ThreadPools.ExpectedExceptionFactory<FolderException>() {
+
+            public Class<FolderException> getType() {
+                return FolderException.class;
+            }
+
+            public FolderException newUnexpectedError(final Throwable t) {
+                return FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(t, t.getMessage());
+            }
+        };
 
     /**
      * The reserved tree identifier for MS Outlook folder tree: <code>"1"</code>.
@@ -115,7 +137,7 @@ public final class OutlookFolderStorage implements FolderStorage {
     /**
      * The real tree identifier.
      */
-    private final String realTreeId;
+    final String realTreeId;
 
     /**
      * This storage's folder type.
@@ -125,7 +147,7 @@ public final class OutlookFolderStorage implements FolderStorage {
     /**
      * The folder storage registry.
      */
-    private final OutlookFolderStorageRegistry folderStorageRegistry;
+    final OutlookFolderStorageRegistry folderStorageRegistry;
 
     /**
      * Initializes a new {@link OutlookFolderStorage}.
@@ -583,141 +605,210 @@ public final class OutlookFolderStorage implements FolderStorage {
         return ret;
     }
 
-    private SortableId[] getPrivateFolderSubfolders(final String parentId, final int tree, final StorageParameters storageParameters, final User user, final Locale locale, final int contextId) throws FolderException {
-        final TreeMap<String, List<String>> treeMap = new TreeMap<String, List<String>>(new FolderNameComparator(locale));
-        {
-            /*
-             * Get real folder storage
-             */
-            final FolderStorage folderStorage = folderStorageRegistry.getDedicatedFolderStorage(realTreeId, parentId);
-            if (null == folderStorage) {
-                throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, parentId);
-            }
-            folderStorage.startTransaction(storageParameters, false);
-            try {
-                /*
-                 * Get folder
-                 */
-                final SortableId[] ids = folderStorage.getSubfolders(realTreeId, parentId, storageParameters);
-                for (final SortableId sortableId : ids) {
-                    final String id = sortableId.getId();
-                    put2TreeMap(getLocalizedName(id, tree, locale, folderStorage, storageParameters), id, treeMap);
-                }
-                folderStorage.commitTransaction(storageParameters);
-            } catch (final FolderException e) {
-                folderStorage.rollback(storageParameters);
-                throw e;
-            } catch (final Exception e) {
-                folderStorage.rollback(storageParameters);
-                throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
-            }
+    private SortableId[] getPrivateFolderSubfolders(final String parentId, final int tree, final StorageParameters parameters, final User user, final Locale locale, final int contextId) throws FolderException {
+        final CompletionService<TreeMap<String, List<String>>> completionService;
+        try {
+            completionService =
+                new ThreadPoolCompletionService<TreeMap<String, List<String>>>(OutlookServiceRegistry.getServiceRegistry().getService(
+                    ThreadPoolService.class,
+                    true));
+        } catch (final ServiceException e) {
+            throw new FolderException(e);
         }
-        {
-            /*
-             * Get real folder storage for primary mail folder
-             */
-            final String fullname = MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, MailFolder.DEFAULT_FOLDER_ID);
-            final FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, fullname);
-            if (null == folderStorage) {
-                throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, fullname);
-            }
-            folderStorage.startTransaction(storageParameters, false);
-            try {
+        int taskCount = 0;
+        final FolderNameComparator comparator = new FolderNameComparator(locale);
+        /*
+         * Callable for real folder storage
+         */
+        completionService.submit(new Callable<TreeMap<String, List<String>>>() {
+
+            public TreeMap<String, List<String>> call() throws FolderException {
                 /*
-                 * Get IDs
+                 * Get real folder storage
                  */
-                final SortableId[] mailIDs = folderStorage.getSubfolders(realTreeId, fullname, storageParameters);
-                for (final SortableId sortableId : mailIDs) {
-                    final String id = sortableId.getId();
-                    put2TreeMap(getLocalizedName(id, tree, locale, folderStorage, storageParameters), id, treeMap);
+                final FolderStorage folderStorage = folderStorageRegistry.getDedicatedFolderStorage(realTreeId, parentId);
+                if (null == folderStorage) {
+                    throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, parentId);
                 }
-                /*
-                 * Add default folders: Trash, Sent, Drafts, ...
-                 */
-                final Set<String> defIds;
-                {
-                    defIds = new HashSet<String>(6);
-                    final String treeId = String.valueOf(tree);
-                    defIds.add(folderStorage.getDefaultFolderID(user, treeId, TrashContentType.getInstance(), storageParameters));
-                    defIds.add(folderStorage.getDefaultFolderID(user, treeId, DraftsContentType.getInstance(), storageParameters));
-                    defIds.add(folderStorage.getDefaultFolderID(user, treeId, SentContentType.getInstance(), storageParameters));
-                    defIds.add(folderStorage.getDefaultFolderID(user, treeId, SpamContentType.getInstance(), storageParameters));
-                }
-                final SortableId[] inboxSubfolders = folderStorage.getSubfolders(realTreeId, PREPARED_FULLNAME_INBOX, storageParameters);
-                final boolean[] contained =
-                    Select.containsFolders(contextId, tree, storageParameters.getUserId(), inboxSubfolders, StorageType.WORKING);
-                for (int i = 0; i < inboxSubfolders.length; i++) {
-                    if (!contained[i]) {
-                        final String id = inboxSubfolders[i].getId();
-                        if (defIds.contains(id)) {
-                            put2TreeMap(getLocalizedName(id, tree, locale, folderStorage, storageParameters), id, treeMap);
-                        }
-                    }
-                }
-                folderStorage.commitTransaction(storageParameters);
-            } catch (final FolderException e) {
-                folderStorage.rollback(storageParameters);
-                throw e;
-            } catch (final Exception e) {
-                folderStorage.rollback(storageParameters);
-                throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
-            }
-        }
-        {
-            /*
-             * Get the ones from virtual table
-             */
-            final List<String[]> l = Select.getSubfolderIds(contextId, tree, user.getId(), parentId, StorageType.WORKING);
-            for (final String[] idAndName : l) {
-                put2TreeMap(idAndName[1], idAndName[0], treeMap);
-            }
-        }
-        {
-            // Get other top-level folders: shared + public
-            final FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, parentId);
-            if (null == folderStorage) {
-                throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, parentId);
-            }
-            folderStorage.startTransaction(storageParameters, false);
-            try {
-                // Get subfolders
-                final SortableId[] subfolders =
-                    folderStorage.getSubfolders(FolderStorage.REAL_TREE_ID, FolderStorage.ROOT_ID, storageParameters);
-                for (int i = 0; i < subfolders.length; i++) {
-                    final String id = subfolders[i].getId();
-                    if (!FolderStorage.PRIVATE_ID.equals(id)) { // Exclude private folder
+                final StorageParameters storageParameters = newStorageParameters(parameters);
+                folderStorage.startTransaction(storageParameters, false);
+                try {
+                    /*
+                     * Get folder
+                     */
+                    final SortableId[] ids = folderStorage.getSubfolders(realTreeId, parentId, storageParameters);
+                    final TreeMap<String, List<String>> treeMap = new TreeMap<String, List<String>>(comparator);
+                    for (final SortableId sortableId : ids) {
+                        final String id = sortableId.getId();
                         put2TreeMap(getLocalizedName(id, tree, locale, folderStorage, storageParameters), id, treeMap);
                     }
-
-                    // if (FolderStorage.PUBLIC_ID.equals(id)) {
-                    // final String localizedName = getLocalizedName(id, tree, locale, folderStorage, storageParameters);
-                    // List<String> list = treeMap.get(localizedName);
-                    // if (null == list) {
-                    // list = new ArrayList<String>(2);
-                    // treeMap.put(localizedName, list);
-                    // }
-                    // list.add(id);
-                    // } else if (FolderStorage.SHARED_ID.equals(id)) {
-                    // final String localizedName = getLocalizedName(id, tree, locale, folderStorage, storageParameters);
-                    // List<String> list = treeMap.get(localizedName);
-                    // if (null == list) {
-                    // list = new ArrayList<String>(2);
-                    // treeMap.put(localizedName, list);
-                    // }
-                    // list.add(id);
-                    // }
+                    folderStorage.commitTransaction(storageParameters);
+                    return treeMap;
+                } catch (final FolderException e) {
+                    folderStorage.rollback(storageParameters);
+                    throw e;
+                } catch (final Exception e) {
+                    folderStorage.rollback(storageParameters);
+                    throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
                 }
-                folderStorage.commitTransaction(storageParameters);
-            } catch (final FolderException e) {
-                folderStorage.rollback(storageParameters);
-                throw e;
-            } catch (final Exception e) {
-                folderStorage.rollback(storageParameters);
-                throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
-        }
+        });
+        taskCount++;
+        /*
+         * Callable for primary mail folder
+         */
+        completionService.submit(new Callable<TreeMap<String, List<String>>>() {
+
+            public TreeMap<String, List<String>> call() throws FolderException {
+                /*
+                 * Get real folder storage for primary mail folder
+                 */
+                final String fullname = MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, MailFolder.DEFAULT_FOLDER_ID);
+                final FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, fullname);
+                if (null == folderStorage) {
+                    throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, fullname);
+                }
+                final StorageParameters storageParameters = newStorageParameters(parameters);
+                folderStorage.startTransaction(storageParameters, false);
+                try {
+                    /*
+                     * Get IDs
+                     */
+                    final SortableId[] mailIDs = folderStorage.getSubfolders(realTreeId, fullname, storageParameters);
+                    final TreeMap<String, List<String>> treeMap = new TreeMap<String, List<String>>(comparator);
+                    for (final SortableId sortableId : mailIDs) {
+                        final String id = sortableId.getId();
+                        put2TreeMap(getLocalizedName(id, tree, locale, folderStorage, storageParameters), id, treeMap);
+                    }
+                    /*
+                     * Add default folders: Trash, Sent, Drafts, ...
+                     */
+                    final Set<String> defIds;
+                    {
+                        defIds = new HashSet<String>(6);
+                        final String treeId = String.valueOf(tree);
+                        defIds.add(folderStorage.getDefaultFolderID(user, treeId, TrashContentType.getInstance(), storageParameters));
+                        defIds.add(folderStorage.getDefaultFolderID(user, treeId, DraftsContentType.getInstance(), storageParameters));
+                        defIds.add(folderStorage.getDefaultFolderID(user, treeId, SentContentType.getInstance(), storageParameters));
+                        defIds.add(folderStorage.getDefaultFolderID(user, treeId, SpamContentType.getInstance(), storageParameters));
+                    }
+                    final SortableId[] inboxSubfolders =
+                        folderStorage.getSubfolders(realTreeId, PREPARED_FULLNAME_INBOX, storageParameters);
+                    final boolean[] contained =
+                        Select.containsFolders(contextId, tree, storageParameters.getUserId(), inboxSubfolders, StorageType.WORKING);
+                    for (int i = 0; i < inboxSubfolders.length; i++) {
+                        if (!contained[i]) {
+                            final String id = inboxSubfolders[i].getId();
+                            if (defIds.contains(id)) {
+                                put2TreeMap(getLocalizedName(id, tree, locale, folderStorage, storageParameters), id, treeMap);
+                            }
+                        }
+                    }
+                    folderStorage.commitTransaction(storageParameters);
+                    return treeMap;
+                } catch (final FolderException e) {
+                    folderStorage.rollback(storageParameters);
+                    throw e;
+                } catch (final Exception e) {
+                    folderStorage.rollback(storageParameters);
+                    throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+                }
+            }
+        });
+        taskCount++;
+        /*
+         * Callable for the ones from virtual table
+         */
+        completionService.submit(new Callable<TreeMap<String, List<String>>>() {
+
+            public TreeMap<String, List<String>> call() throws FolderException {
+                /*
+                 * Get the ones from virtual table
+                 */
+                final List<String[]> l = Select.getSubfolderIds(contextId, tree, user.getId(), parentId, StorageType.WORKING);
+                final TreeMap<String, List<String>> treeMap = new TreeMap<String, List<String>>(comparator);
+                for (final String[] idAndName : l) {
+                    put2TreeMap(idAndName[1], idAndName[0], treeMap);
+                }
+                return treeMap;
+            }
+        });
+        taskCount++;
+        /*
+         * Callable for other top-level folders: shared + public
+         */
+        completionService.submit(new Callable<TreeMap<String, List<String>>>() {
+
+            public TreeMap<String, List<String>> call() throws FolderException {
+                // Get other top-level folders: shared + public
+                final FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, parentId);
+                if (null == folderStorage) {
+                    throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, parentId);
+                }
+                final StorageParameters storageParameters = newStorageParameters(parameters);
+                folderStorage.startTransaction(storageParameters, false);
+                try {
+                    // Get subfolders
+                    final SortableId[] subfolders =
+                        folderStorage.getSubfolders(FolderStorage.REAL_TREE_ID, FolderStorage.ROOT_ID, storageParameters);
+                    final TreeMap<String, List<String>> treeMap = new TreeMap<String, List<String>>(comparator);
+                    for (int i = 0; i < subfolders.length; i++) {
+                        final String id = subfolders[i].getId();
+                        if (!FolderStorage.PRIVATE_ID.equals(id)) { // Exclude private folder
+                            put2TreeMap(getLocalizedName(id, tree, locale, folderStorage, storageParameters), id, treeMap);
+                        }
+
+                        // if (FolderStorage.PUBLIC_ID.equals(id)) {
+                        // final String localizedName = getLocalizedName(id, tree, locale, folderStorage, storageParameters);
+                        // List<String> list = treeMap.get(localizedName);
+                        // if (null == list) {
+                        // list = new ArrayList<String>(2);
+                        // treeMap.put(localizedName, list);
+                        // }
+                        // list.add(id);
+                        // } else if (FolderStorage.SHARED_ID.equals(id)) {
+                        // final String localizedName = getLocalizedName(id, tree, locale, folderStorage, storageParameters);
+                        // List<String> list = treeMap.get(localizedName);
+                        // if (null == list) {
+                        // list = new ArrayList<String>(2);
+                        // treeMap.put(localizedName, list);
+                        // }
+                        // list.add(id);
+                        // }
+                    }
+                    folderStorage.commitTransaction(storageParameters);
+                    return treeMap;
+                } catch (final FolderException e) {
+                    folderStorage.rollback(storageParameters);
+                    throw e;
+                } catch (final Exception e) {
+                    folderStorage.rollback(storageParameters);
+                    throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+                }
+            }
+        });
+        taskCount++;
+        /*
+         * Wait for completion
+         */
         final List<String> sortedIDs;
         {
+            final List<TreeMap<String, List<String>>> taken = ThreadPools.takeCompletionService(completionService, taskCount, FACTORY);
+            final TreeMap<String, List<String>> treeMap = new TreeMap<String, List<String>>(comparator);
+            for (final TreeMap<String, List<String>> tm : taken) {
+                for (final Entry<String, List<String>> entry : tm.entrySet()) {
+                    final String key = entry.getKey();
+                    final List<String> list = treeMap.get(key);
+                    if (null == list) {
+                        treeMap.put(key, entry.getValue());
+                    } else {
+                        list.addAll(entry.getValue());
+                    }
+                }
+            }
+            /*
+             * Get sorted values
+             */
             final Collection<List<String>> values = treeMap.values();
             sortedIDs = new ArrayList<String>(values.size());
             for (final List<String> list : values) {
@@ -767,13 +858,24 @@ public final class OutlookFolderStorage implements FolderStorage {
         return ret;
     }
 
-    private static void put2TreeMap(final String localizedName, final String id, final TreeMap<String, List<String>> treeMap) {
+    static void put2TreeMap(final String localizedName, final String id, final TreeMap<String, List<String>> treeMap) {
         List<String> list = treeMap.get(localizedName);
         if (null == list) {
             list = new ArrayList<String>(2);
             treeMap.put(localizedName, list);
         }
         list.add(id);
+    }
+
+    /**
+     * Creates a new storage parameter instance.
+     */
+    static StorageParameters newStorageParameters(final StorageParameters source) {
+        final Session session = source.getSession();
+        if (null == session) {
+            return new StorageParametersImpl(source.getUser(), source.getContext());
+        }
+        return new StorageParametersImpl((ServerSession) session);
     }
 
     public ContentType[] getSupportedContentTypes() {
@@ -865,7 +967,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         return idList.toArray(new String[idList.size()]);
     }
 
-    private String getLocalizedName(final String id, final int tree, final Locale locale, final FolderStorage folderStorage, final StorageParameters storageParameters) throws FolderException {
+    String getLocalizedName(final String id, final int tree, final Locale locale, final FolderStorage folderStorage, final StorageParameters storageParameters) throws FolderException {
         final String name =
             Select.getFolderName(storageParameters.getContextId(), tree, storageParameters.getUserId(), id, StorageType.WORKING);
         if (null != name) {
