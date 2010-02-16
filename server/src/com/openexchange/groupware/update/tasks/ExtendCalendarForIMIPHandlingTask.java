@@ -56,13 +56,13 @@ import static com.openexchange.tools.update.Tools.tableExists;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
 
 /**
  * Alters calendar tables and add tables for external participants to support iCal handling with external participants: iMIP.
@@ -71,13 +71,8 @@ import com.openexchange.groupware.update.UpdateTaskAdapter;
  */
 public class ExtendCalendarForIMIPHandlingTask extends UpdateTaskAdapter {
 
-    private List<String> ALTERS = new ArrayList<String>() {
-        private static final long serialVersionUID = -608244184446189852L;
-        {
-            add("ALTER TABLE prg_dates ADD uid VARCHAR(255), ADD organizer VARCHAR(255), ADD sequence INT4 UNSIGNED");
-            add("ALTER TABLE del_dates ADD uid VARCHAR(255), ADD organizer VARCHAR(255), ADD sequence INT4 UNSIGNED");
-        }
-    };
+    private String[] TABLES = { "prg_dates", "del_dates" };
+    private Column[] COLUMNS = { new Column("uid", "VARCHAR(255)"), new Column("organizer", "VARCHAR(255)"), new Column("sequence", "INT4 UNSIGNED") };
 
     private static final String DATES_EXTERNAL_CREATE = 
         "CREATE TABLE dateExternal (" +
@@ -123,14 +118,8 @@ public class ExtendCalendarForIMIPHandlingTask extends UpdateTaskAdapter {
     }
 
     private void innerPerform(Connection con) throws SQLException {
-        for (String alter : ALTERS) {
-            Statement stmt = null;
-            try {
-                stmt = con.createStatement();
-                stmt.execute(alter);
-            } finally {
-                closeSQLStuff(stmt);
-            }
+        for (String tableName : TABLES) {
+            Tools.addColumns(con, tableName, COLUMNS);
         }
         if (!tableExists(con, "dateExternal")) {
             Statement stmt = null;

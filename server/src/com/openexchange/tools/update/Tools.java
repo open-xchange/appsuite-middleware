@@ -539,16 +539,12 @@ public final class Tools {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT 1 FROM " + sequenceTable + " WHERE cid = "+ctxId);
+            stmt = con.prepareStatement("SELECT 1 FROM " + sequenceTable + " WHERE cid=?");
+            stmt.setInt(1, ctxId);
             rs = stmt.executeQuery();
             return rs.next();
         } finally {
-            if(rs != null) {
-                rs.close();
-            }
-            if(stmt != null) {
-                stmt.close();
-            }
+            closeSQLStuff(rs, stmt);
         }
     }
 
@@ -564,29 +560,48 @@ public final class Tools {
             }
             return contextIds;
         } finally {
-            if(rs != null) {
-                rs.close();
-            }
-            if(stmt != null) {
-                stmt.close();
-            }
+            closeSQLStuff(rs, stmt);
         }
     }
 
     public static void exec(final Connection con, final String sql, final Object...args) throws SQLException {
-        PreparedStatement statement = null;
+        PreparedStatement stmt = null;
         try {
-            statement = con.prepareStatement(sql);
+            stmt = con.prepareStatement(sql);
             int i = 1;
             for(final Object arg : args) {
-                statement.setObject(i++, arg);
+                stmt.setObject(i++, arg);
             }
-            statement.execute();
+            stmt.execute();
         } finally {
-            if(statement != null) {
-                statement.close();
+            closeSQLStuff(stmt);
+        }
+    }
+
+    public static void addColumns(Connection con, String tableName, Column... cols) throws SQLException {
+        StringBuffer sql = new StringBuffer("ALTER TABLE ");
+        sql.append(tableName);
+        for (Column column : cols) {
+            if (!columnExists(con, tableName, column.getName())) {
+                sql.append(" ADD ");
+                sql.append(column.getName());
+                sql.append(' ');
+                sql.append(column.getDefinition());
+                sql.append(',');
             }
         }
-        
+        if (sql.charAt(sql.length() - 1) == ',') {
+            sql.setLength(sql.length() - 1);
+        }
+        if (sql.length() == 12 + tableName.length()) {
+            return;
+        }
+        Statement stmt = null;
+        try {
+            stmt = con.createStatement();
+            stmt.execute(sql.toString());
+        } finally {
+            closeSQLStuff(stmt);
+        }
     }
 }
