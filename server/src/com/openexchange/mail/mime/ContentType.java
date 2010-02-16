@@ -88,6 +88,8 @@ public final class ContentType extends ParameterizedHeader {
      */
     private static final char DELIMITER = '/';
 
+    private static final String DEFAULT_PRIMTYPE = "APPLICATION";
+
     private static final String DEFAULT_SUBTYPE = "OCTET-STREAM";
 
     private static final String PARAM_CHARSET = "charset";
@@ -181,18 +183,41 @@ public final class ContentType extends ParameterizedHeader {
             return;
         }
         final String contentType = prepareParameterizedHeader(contentTypeArg);
-        final Matcher ctMatcher = PATTERN_CONTENT_TYPE.matcher(contentType);
-        if (!ctMatcher.find() || (ctMatcher.start() != 0)) {
-            throw new MailException(MailException.Code.INVALID_CONTENT_TYPE, contentTypeArg);
-        }
-        primaryType = ctMatcher.group(1);
-        subType = ctMatcher.group(2);
-        if ((subType == null) || (subType.length() == 0)) {
-            subType = DEFAULT_SUBTYPE;
-        }
-        baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
-        if (paramList) {
-            parameterList = new ParameterList(contentType.substring(ctMatcher.end()));
+        final int pos = contentType.indexOf(';');
+        final Matcher ctMatcher = PATTERN_CONTENT_TYPE.matcher(pos < 0 ? contentType : contentType.substring(0, pos));
+        if (ctMatcher.find() ) {
+            if (ctMatcher.start() != 0) {
+                throw new MailException(MailException.Code.INVALID_CONTENT_TYPE, contentTypeArg);
+            }
+            primaryType = ctMatcher.group(1);
+            subType = ctMatcher.group(2);
+            if ((subType == null) || (subType.length() == 0)) {
+                subType = DEFAULT_SUBTYPE;
+            }
+            baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
+            if (paramList) {
+                parameterList = new ParameterList(contentType.substring(ctMatcher.end()));
+            }
+        } else {
+            primaryType = "text";
+            subType = "plain";
+            baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
+            if (paramList) {
+                parameterList = new ParameterList(pos < 0 ? contentType : contentType.substring(pos));
+                final String name = parameterList.getParameter("name");
+                if (null != name) {
+                    final String byName = MIMEType2ExtMap.getContentType(name);
+                    if (null != byName) {
+                        final int slash = byName.indexOf('/');
+                        primaryType = byName.substring(0, slash);
+                        subType = byName.substring(slash + 1);
+                        if ((subType == null) || (subType.length() == 0)) {
+                            subType = DEFAULT_SUBTYPE;
+                        }
+                        baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
+                    }
+                }
+            }
         }
     }
 
