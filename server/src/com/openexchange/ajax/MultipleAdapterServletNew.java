@@ -146,8 +146,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
                 throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, PARAMETER_ACTION);
             }
             final AJAXRequestData data = parseRequest(req, preferStream);
-            final AJAXActionService actionService = factory.createActionService(action);
-            final AJAXRequestResult result = actionService.perform(data, getSessionObject(req));
+            final AJAXRequestResult result = factory.createActionService(action).perform(data, getSessionObject(req));
             response.setData(result.getResultObject());
             response.setTimestamp(result.getTimestamp());
             final Collection<AbstractOXException> warnings = result.getWarnings();

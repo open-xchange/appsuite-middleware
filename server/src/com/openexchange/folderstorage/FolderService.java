@@ -105,7 +105,7 @@ public interface FolderService {
      * @return All visible folders
      * @throws FolderException If folders cannot be returned
      */
-    UserizedFolder[] getAllVisibleFolders(String treeId, FolderFilter filter, User user, Context context, FolderServiceDecorator decorator) throws FolderException;
+    FolderResponse<UserizedFolder[]> getAllVisibleFolders(String treeId, FolderFilter filter, User user, Context context, FolderServiceDecorator decorator) throws FolderException;
 
     /**
      * Gets all visible folders located in given tree for given session's user.
@@ -117,7 +117,7 @@ public interface FolderService {
      * @return All visible folders
      * @throws FolderException If folders cannot be returned
      */
-    UserizedFolder[] getAllVisibleFolders(String treeId, FolderFilter filter, Session session, FolderServiceDecorator decorator) throws FolderException;
+    FolderResponse<UserizedFolder[]> getAllVisibleFolders(String treeId, FolderFilter filter, Session session, FolderServiceDecorator decorator) throws FolderException;
 
     /**
      * Gets this storage's default folder for specified user.
@@ -241,7 +241,7 @@ public interface FolderService {
      * @return The path from given folder to specified tree's root folder
      * @throws FolderException If path cannot be returned
      */
-    UserizedFolder[] getPath(String treeId, String folderId, User user, Context context, FolderServiceDecorator decorator) throws FolderException;
+    FolderResponse<UserizedFolder[]> getPath(String treeId, String folderId, User user, Context context, FolderServiceDecorator decorator) throws FolderException;
 
     /**
      * Gets the path from given folder to specified tree's root folder.
@@ -253,7 +253,7 @@ public interface FolderService {
      * @return The path from given folder to specified tree's root folder
      * @throws FolderException If path cannot be returned
      */
-    UserizedFolder[] getPath(String treeId, String folderId, Session session, FolderServiceDecorator decorator) throws FolderException;
+    FolderResponse<UserizedFolder[]> getPath(String treeId, String folderId, Session session, FolderServiceDecorator decorator) throws FolderException;
 
     /**
      * Gets all new, modified and deleted folders since given time stamp.
@@ -268,7 +268,7 @@ public interface FolderService {
      * @return All new, modified and deleted folders since given time stamp
      * @throws FolderException If path cannot be returned
      */
-    UserizedFolder[][] getUpdates(String treeId, Date timeStamp, boolean ignoreDeleted, ContentType[] includeContentTypes, User user, Context context, FolderServiceDecorator decorator) throws FolderException;
+    FolderResponse<UserizedFolder[][]> getUpdates(String treeId, Date timeStamp, boolean ignoreDeleted, ContentType[] includeContentTypes, User user, Context context, FolderServiceDecorator decorator) throws FolderException;
 
     /**
      * Gets all new, modified and deleted folders since given time stamp.
@@ -282,7 +282,7 @@ public interface FolderService {
      * @return All new, modified and deleted folders since given time stamp
      * @throws FolderException If path cannot be returned
      */
-    UserizedFolder[][] getUpdates(String treeId, Date timeStamp, boolean ignoreDeleted, ContentType[] includeContentTypes, Session session, FolderServiceDecorator decorator) throws FolderException;
+    FolderResponse<UserizedFolder[][]> getUpdates(String treeId, Date timeStamp, boolean ignoreDeleted, ContentType[] includeContentTypes, Session session, FolderServiceDecorator decorator) throws FolderException;
 
     /**
      * Deletes the specified folder in given tree.

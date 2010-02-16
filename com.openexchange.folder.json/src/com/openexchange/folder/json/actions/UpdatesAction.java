@@ -62,6 +62,7 @@ import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folder.json.writer.FolderWriter;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
+import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -121,7 +122,7 @@ public final class UpdatesAction extends AbstractFolderAction {
          * Request subfolders from folder service
          */
         final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
-        final UserizedFolder[][] result =
+        final FolderResponse<UserizedFolder[][]> resultObject =
             folderService.getUpdates(
                 treeId,
                 timestamp,
@@ -133,6 +134,7 @@ public final class UpdatesAction extends AbstractFolderAction {
         /*
          * Determine last-modified time stamp
          */
+        final UserizedFolder[][] result = resultObject.getResponse();
         long lastModified = timestamp.getTime();
         for (final UserizedFolder userizedFolder : result[0]) {
             final Date modified = userizedFolder.getLastModifiedUTC();
@@ -169,7 +171,7 @@ public final class UpdatesAction extends AbstractFolderAction {
         /*
          * Return appropriate result
          */
-        return new AJAXRequestResult(resultArray, 0 == lastModified ? null : new Date(lastModified));
+        return new AJAXRequestResult(resultArray, 0 == lastModified ? null : new Date(lastModified)).addWarnings(resultObject.getWarnings());
     }
 
 }

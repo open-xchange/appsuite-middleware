@@ -147,25 +147,29 @@ public final class FolderServiceImpl implements FolderService {
         }
     }
 
-    public UserizedFolder[] getAllVisibleFolders(final String treeId, final FolderFilter filter, final User user, final Context context, final FolderServiceDecorator decorator) throws FolderException {
-        return new AllVisibleFoldersPerformer(user, context, decorator).doAllVisibleFolders(treeId, filter);
+    public FolderResponse<UserizedFolder[]> getAllVisibleFolders(final String treeId, final FolderFilter filter, final User user, final Context context, final FolderServiceDecorator decorator) throws FolderException {
+        final AllVisibleFoldersPerformer performer = new AllVisibleFoldersPerformer(user, context, decorator);
+        return FolderResponseImpl.newFolderResponse(performer.doAllVisibleFolders(treeId, filter), performer.getWarnings());
     }
 
-    public UserizedFolder[] getAllVisibleFolders(final String treeId, final FolderFilter filter, final Session session, final FolderServiceDecorator decorator) throws FolderException {
+    public FolderResponse<UserizedFolder[]> getAllVisibleFolders(final String treeId, final FolderFilter filter, final Session session, final FolderServiceDecorator decorator) throws FolderException {
         try {
-            return new AllVisibleFoldersPerformer(new ServerSessionAdapter(session), decorator).doAllVisibleFolders(treeId, filter);
+            final AllVisibleFoldersPerformer performer = new AllVisibleFoldersPerformer(new ServerSessionAdapter(session), decorator);
+            return FolderResponseImpl.newFolderResponse(performer.doAllVisibleFolders(treeId, filter), performer.getWarnings());
         } catch (final ContextException e) {
             throw new FolderException(e);
         }
     }
 
-    public UserizedFolder[] getPath(final String treeId, final String folderId, final User user, final Context context, final FolderServiceDecorator decorator) throws FolderException {
-        return new PathPerformer(user, context, decorator).doPath(treeId, folderId, true);
+    public FolderResponse<UserizedFolder[]> getPath(final String treeId, final String folderId, final User user, final Context context, final FolderServiceDecorator decorator) throws FolderException {
+        final PathPerformer performer = new PathPerformer(user, context, decorator);
+        return FolderResponseImpl.newFolderResponse(performer.doPath(treeId, folderId, true), performer.getWarnings());
     }
 
-    public UserizedFolder[] getPath(final String treeId, final String folderId, final Session session, final FolderServiceDecorator decorator) throws FolderException {
+    public FolderResponse<UserizedFolder[]> getPath(final String treeId, final String folderId, final Session session, final FolderServiceDecorator decorator) throws FolderException {
         try {
-            return new PathPerformer(new ServerSessionAdapter(session), decorator).doPath(treeId, folderId, true);
+            final PathPerformer performer = new PathPerformer(new ServerSessionAdapter(session), decorator);
+            return FolderResponseImpl.newFolderResponse(performer.doPath(treeId, folderId, true), performer.getWarnings());
         } catch (final ContextException e) {
             throw new FolderException(e);
         }
@@ -185,17 +189,19 @@ public final class FolderServiceImpl implements FolderService {
         }
     }
 
-    public UserizedFolder[][] getUpdates(final String treeId, final Date timeStamp, final boolean ignoreDeleted, final ContentType[] includeContentTypes, final User user, final Context context, final FolderServiceDecorator decorator) throws FolderException {
-        return new UpdatesPerformer(user, context, decorator).doUpdates(treeId, timeStamp, ignoreDeleted, includeContentTypes);
+    public FolderResponse<UserizedFolder[][]> getUpdates(final String treeId, final Date timeStamp, final boolean ignoreDeleted, final ContentType[] includeContentTypes, final User user, final Context context, final FolderServiceDecorator decorator) throws FolderException {
+        final UpdatesPerformer performer = new UpdatesPerformer(user, context, decorator);
+        return FolderResponseImpl.newFolderResponse(
+            performer.doUpdates(treeId, timeStamp, ignoreDeleted, includeContentTypes),
+            performer.getWarnings());
     }
 
-    public UserizedFolder[][] getUpdates(final String treeId, final Date timeStamp, final boolean ignoreDeleted, final ContentType[] includeContentTypes, final Session session, final FolderServiceDecorator decorator) throws FolderException {
+    public FolderResponse<UserizedFolder[][]> getUpdates(final String treeId, final Date timeStamp, final boolean ignoreDeleted, final ContentType[] includeContentTypes, final Session session, final FolderServiceDecorator decorator) throws FolderException {
         try {
-            return new UpdatesPerformer(new ServerSessionAdapter(session), decorator).doUpdates(
-                treeId,
-                timeStamp,
-                ignoreDeleted,
-                includeContentTypes);
+            final UpdatesPerformer performer = new UpdatesPerformer(new ServerSessionAdapter(session), decorator);
+            return FolderResponseImpl.newFolderResponse(
+                performer.doUpdates(treeId, timeStamp, ignoreDeleted, includeContentTypes),
+                performer.getWarnings());
         } catch (final ContextException e) {
             throw new FolderException(e);
         }
