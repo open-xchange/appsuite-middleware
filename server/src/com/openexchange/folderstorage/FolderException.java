@@ -115,4 +115,14 @@ public class FolderException extends AbstractOXException {
         setMessageArgs(messageArguments);
     }
 
+    /**
+     * Throws a {@link FolderException} for specified unexpected error.
+     * 
+     * @param t The unexpected error
+     * @throws FolderException The thrown exception
+     */
+    public static void throwUnexpectedException(final Throwable t) throws FolderException {
+        throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(t, t.getMessage());
+    }
+
 }
