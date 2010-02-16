@@ -60,9 +60,6 @@ import com.openexchange.server.services.ServerServiceRegistry;
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  */
 public class CalendarDataObject extends Appointment {
-
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-            .getLog(CalendarDataObject.class);
     
     private static CalendarCollectionService calColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
 
@@ -89,11 +86,11 @@ public class CalendarDataObject extends Appointment {
         if (until != null) {
             final long mod = until.getTime() % Constants.MILLI_DAY;
             if (mod != 0) {
-            	if (calColl.exceedsHourOfDay(until.getTime(), getTimezoneFallbackUTC())) {
-					until.setTime((((until.getTime() - mod) + Constants.MILLI_DAY)));
-				} else {
-					until.setTime(until.getTime() - mod);
-				}
+                if (calColl.exceedsHourOfDay(until.getTime(), getTimezoneFallbackUTC())) {
+                    until.setTime((((until.getTime() - mod) + Constants.MILLI_DAY)));
+                } else {
+                    until.setTime(until.getTime() - mod);
+                }
 //                until = new Date(((until.getTime()-mod)+CalendarRecurringCollection.MILLI_DAY));
             }
             super.setUntil(until);
@@ -348,7 +345,7 @@ public class CalendarDataObject extends Appointment {
             clone.setCreatedBy(getCreatedBy());
         }
         if (containsCreationDate()) {
-        	clone.setCreationDate((Date) getCreationDate().clone());
+            clone.setCreationDate((Date) getCreationDate().clone());
         }
         if (containsLastModified()) {
             clone.setLastModified(getLastModified());
@@ -387,7 +384,7 @@ public class CalendarDataObject extends Appointment {
             clone.setRecurrenceType(getRecurrenceType());
         }
         if (containsRecurringStart()) {
-        	clone.setRecurringStart(getRecurringStart());
+            clone.setRecurringStart(getRecurringStart());
         }
         if (containsInterval()) {
             clone.setInterval(getInterval());
@@ -408,13 +405,13 @@ public class CalendarDataObject extends Appointment {
             clone.setOccurrence(getOccurrence());
         }
         if (containsChangeExceptions()) {
-        	clone.setChangeExceptions(copy(getChangeException()));
+            clone.setChangeExceptions(copy(getChangeException()));
         }
         if (containsDeleteExceptions()) {
-        	clone.setDeleteExceptions(copy(getDeleteException()));
+            clone.setDeleteExceptions(copy(getDeleteException()));
         }
         if (containsNotification()) {
-        	clone.setNotification(getNotification());
+            clone.setNotification(getNotification());
         }
         clone.setIgnoreConflicts(ignoreConflicts);
         clone.setUsers(getUsers());
@@ -440,15 +437,15 @@ public class CalendarDataObject extends Appointment {
     }
 
     private static final Date[] copy(final Date[] copyMe) {
-    	if (copyMe == null) {
-    		return null;
-    	}
-    	final Date[] clone = new Date[copyMe.length];
-    	for (int i = 0; i < clone.length; i++) {
-    		final Date cur = copyMe[i];
-    		clone[i] = (Date) (cur == null ? null : cur.clone());
-		}
-    	return clone;
+        if (copyMe == null) {
+            return null;
+        }
+        final Date[] clone = new Date[copyMe.length];
+        for (int i = 0; i < clone.length; i++) {
+            final Date cur = copyMe[i];
+            clone[i] = (Date) (cur == null ? null : cur.clone());
+        }
+        return clone;
     }
 
     private static final String STR_DELIM = " - ";
