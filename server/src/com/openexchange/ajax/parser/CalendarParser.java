@@ -91,117 +91,118 @@ public class CalendarParser extends CommonParser {
     }
 
     protected void parseElementCalendar(final CalendarObject calendarobject, final JSONObject jsonobject) throws JSONException, OXConflictException, OXJSONException {
-		if (jsonobject.has(CalendarFields.TITLE)) {
-			calendarobject.setTitle(parseString(jsonobject, CalendarFields.TITLE));
-		}
-		
-		if (jsonobject.has(CalendarFields.NOTE)) {
-			calendarobject.setNote(parseString(jsonobject, CalendarFields.NOTE));
-		}
-		
-		if (jsonobject.has(CalendarFields.RECURRENCE_ID)) {
-			calendarobject.setRecurrenceID(parseInt(jsonobject, CalendarFields.RECURRENCE_ID));
-		}
-		
-		if (jsonobject.has(CalendarFields.RECURRENCE_POSITION)) {
-			calendarobject.setRecurrencePosition(parseInt(jsonobject, CalendarFields.RECURRENCE_POSITION));
-		}
-		
-		if (jsonobject.has(CalendarFields.RECURRENCE_DATE_POSITION)) {
-			calendarobject.setRecurrenceDatePosition(parseDate(jsonobject, CalendarFields.RECURRENCE_DATE_POSITION));
-		}
-		
-		if (jsonobject.has(CalendarFields.RECURRENCE_TYPE)) {
-			calendarobject.setRecurrenceType(parseInt(jsonobject, CalendarFields.RECURRENCE_TYPE));
-		}
-		
-		if (jsonobject.has(CalendarFields.DAYS)) {
-		    int days = parseInt(jsonobject, CalendarFields.DAYS);
-		        calendarobject.setDays(days);
-		}
-		
-		if (jsonobject.has(CalendarFields.DAY_IN_MONTH)) {
-			int dayInMonth = parseInt(jsonobject, CalendarFields.DAY_IN_MONTH);
-			if (dayInMonth == -1) {
-				dayInMonth = 5;
-			}
-			calendarobject.setDayInMonth(dayInMonth);
-		}
-		
-		if (jsonobject.has(CalendarFields.MONTH)) {
-			calendarobject.setMonth(parseInt(jsonobject, CalendarFields.MONTH));
-		}
-		
-		if (jsonobject.has(CalendarFields.INTERVAL)) {
-			calendarobject.setInterval(parseInt(jsonobject, CalendarFields.INTERVAL));
-		}
-		
-		if (jsonobject.has(CalendarFields.UNTIL) && jsonobject.has(CalendarFields.OCCURRENCES)) {
-		    if(jsonobject.isNull(CalendarFields.UNTIL) != (jsonobject.isNull(CalendarFields.OCCURRENCES) || Integer.parseInt(jsonobject.getString(CalendarFields.OCCURRENCES)) == 0)) {
-	            throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, "Illegal combination of until and occurrences value.");
-		    }
-		}
-		
-		if (jsonobject.has(CalendarFields.UNTIL)) {
-		    if (jsonobject.isNull(CalendarFields.UNTIL)) {
-		        calendarobject.setUntil(null);
-		    } else {
-		        calendarobject.setUntil(parseDate(jsonobject, CalendarFields.UNTIL));
-		    }
-		}
-		
-		if (jsonobject.has(CalendarFields.OCCURRENCES)) {
-		    if (jsonobject.isNull(CalendarFields.OCCURRENCES)) {
-		        calendarobject.setOccurrence(0);
-		    } else {
-		        calendarobject.setOccurrence(parseInt(jsonobject, CalendarFields.OCCURRENCES));
-		    }
-		}
-		
-		if (jsonobject.has(CalendarFields.NOTIFICATION)) {
-			calendarobject.setNotification(parseBoolean(jsonobject, CalendarFields.NOTIFICATION));
-		}
-		
-		if (jsonobject.has(ParticipantsFields.CONFIRMATION)) {
-			calendarobject.setConfirm(parseInt(jsonobject, ParticipantsFields.CONFIRMATION));
-		}
-		
-		if (jsonobject.has(ParticipantsFields.CONFIRM_MESSAGE)) {
-			calendarobject.setConfirmMessage(parseString(jsonobject, ParticipantsFields.CONFIRM_MESSAGE));
-		}
-		
-		final Participants participants = new Participants();
-		
-		if (jsonobject.has(CalendarFields.PARTICIPANTS)) {
-			calendarobject.setParticipants(parseParticipants(jsonobject, participants));
-		}
-		
-		if (jsonobject.has(CalendarFields.USERS)) {
-			calendarobject.setUsers(parseUsers(jsonobject, participants));
-		}
-		
-		if (jsonobject.has(CalendarFields.ORGANIZER)) {
-		    calendarobject.setOrganizer(parseString(jsonobject, CalendarFields.ORGANIZER));
-		}
-        
+        if (jsonobject.has(CalendarFields.TITLE)) {
+            calendarobject.setTitle(parseString(jsonobject, CalendarFields.TITLE));
+        }
+
+        if (jsonobject.has(CalendarFields.NOTE)) {
+            calendarobject.setNote(parseString(jsonobject, CalendarFields.NOTE));
+        }
+
+        if (jsonobject.has(CalendarFields.RECURRENCE_ID)) {
+            calendarobject.setRecurrenceID(parseInt(jsonobject, CalendarFields.RECURRENCE_ID));
+        }
+
+        if (jsonobject.has(CalendarFields.RECURRENCE_POSITION)) {
+            calendarobject.setRecurrencePosition(parseInt(jsonobject, CalendarFields.RECURRENCE_POSITION));
+        }
+
+        if (jsonobject.has(CalendarFields.RECURRENCE_DATE_POSITION)) {
+            calendarobject.setRecurrenceDatePosition(parseDate(jsonobject, CalendarFields.RECURRENCE_DATE_POSITION));
+        }
+
+        if (jsonobject.has(CalendarFields.RECURRENCE_TYPE)) {
+            calendarobject.setRecurrenceType(parseInt(jsonobject, CalendarFields.RECURRENCE_TYPE));
+        }
+
+        if (jsonobject.has(CalendarFields.DAYS)) {
+            int days = parseInt(jsonobject, CalendarFields.DAYS);
+                calendarobject.setDays(days);
+        }
+
+        if (jsonobject.has(CalendarFields.DAY_IN_MONTH)) {
+            int dayInMonth = parseInt(jsonobject, CalendarFields.DAY_IN_MONTH);
+            if (dayInMonth == -1) {
+                dayInMonth = 5;
+            }
+            calendarobject.setDayInMonth(dayInMonth);
+        }
+
+        if (jsonobject.has(CalendarFields.MONTH)) {
+            calendarobject.setMonth(parseInt(jsonobject, CalendarFields.MONTH));
+        }
+
+        if (jsonobject.has(CalendarFields.INTERVAL)) {
+            calendarobject.setInterval(parseInt(jsonobject, CalendarFields.INTERVAL));
+        }
+
+        if (jsonobject.has(CalendarFields.UNTIL) && jsonobject.has(CalendarFields.OCCURRENCES)) {
+            if(jsonobject.isNull(CalendarFields.UNTIL) != (jsonobject.isNull(CalendarFields.OCCURRENCES) || Integer.parseInt(jsonobject.getString(CalendarFields.OCCURRENCES)) == 0)) {
+                throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, "Illegal combination of until and occurrences value.");
+            }
+        }
+
+        if (jsonobject.has(CalendarFields.UNTIL)) {
+            if (jsonobject.isNull(CalendarFields.UNTIL)) {
+                calendarobject.setUntil(null);
+            } else {
+                calendarobject.setUntil(parseDate(jsonobject, CalendarFields.UNTIL));
+            }
+        }
+
+        if (jsonobject.has(CalendarFields.OCCURRENCES)) {
+            if (jsonobject.isNull(CalendarFields.OCCURRENCES)) {
+                calendarobject.setOccurrence(0);
+            } else {
+                calendarobject.setOccurrence(parseInt(jsonobject, CalendarFields.OCCURRENCES));
+            }
+        }
+
+        if (jsonobject.has(CalendarFields.NOTIFICATION)) {
+            calendarobject.setNotification(parseBoolean(jsonobject, CalendarFields.NOTIFICATION));
+        }
+
+        if (jsonobject.has(ParticipantsFields.CONFIRMATION)) {
+            calendarobject.setConfirm(parseInt(jsonobject, ParticipantsFields.CONFIRMATION));
+        }
+
+        if (jsonobject.has(ParticipantsFields.CONFIRM_MESSAGE)) {
+            calendarobject.setConfirmMessage(parseString(jsonobject, ParticipantsFields.CONFIRM_MESSAGE));
+        }
+
+        final Participants participants = new Participants();
+
+        if (jsonobject.has(CalendarFields.PARTICIPANTS)) {
+            calendarobject.setParticipants(parseParticipants(jsonobject, participants));
+        }
+
+        if (jsonobject.has(CalendarFields.USERS)) {
+            calendarobject.setUsers(parseUsers(jsonobject, participants));
+        }
+
+        if (jsonobject.has(CalendarFields.ORGANIZER)) {
+            calendarobject.setOrganizer(parseString(jsonobject, CalendarFields.ORGANIZER));
+        }
+
         if (jsonobject.has(CalendarFields.UID)) {
             calendarobject.setUid(parseString(jsonobject, CalendarFields.UID));
         }
-        
+
         if (jsonobject.has(CalendarFields.SEQUENCE)) {
             calendarobject.setSequence(parseInt(jsonobject, CalendarFields.SEQUENCE));
         }
-		
-		parseElementCommon(calendarobject, jsonobject);
-	}
-	
-	public static Participant[] parseParticipants(final JSONObject jsonObj, final Participants participants) throws JSONException, OXConflictException, OXJSONException {
-		final JSONArray jparticipants = jsonObj.getJSONArray(CalendarFields.PARTICIPANTS);
-		final Participant[] participant = new Participant[jparticipants.length()];
-		for (int i = 0; i < jparticipants.length(); i++) {
-			final JSONObject jparticipant = jparticipants.getJSONObject(i);
-			final int type = jparticipant.getInt(ParticipantsFields.TYPE);
-			int id;
+
+        parseField(parseAll, calendarobject, timeZone, jsonobject);
+        parseElementCommon(calendarobject, jsonobject);
+    }
+
+    public static Participant[] parseParticipants(final JSONObject jsonObj, final Participants participants) throws JSONException, OXConflictException, OXJSONException {
+        final JSONArray jparticipants = jsonObj.getJSONArray(CalendarFields.PARTICIPANTS);
+        final Participant[] participant = new Participant[jparticipants.length()];
+        for (int i = 0; i < jparticipants.length(); i++) {
+            final JSONObject jparticipant = jparticipants.getJSONObject(i);
+            final int type = jparticipant.getInt(ParticipantsFields.TYPE);
+            int id;
             try {
                 id = jparticipant.getInt(ParticipantsFields.ID);
             } catch (final JSONException e) {
@@ -279,22 +280,22 @@ public class CalendarParser extends CommonParser {
 
         return participants.getUsers();
     }
-	
-	public static int parseRecurrenceType(final String value) throws OXConflictException {
-		if ("none".equals(value)) {
-			return CalendarObject.NONE;
-		} else if ("daily".equals(value)) {
-			return CalendarObject.DAILY;
-		} else if ("weekly".equals(value)) {
-			return CalendarObject.WEEKLY;
-		} else if ("monthly".equals(value)) {
-			return CalendarObject.MONTHLY;
-		} else if ("yearly".equals(value)) {
-			return CalendarObject.YEARLY;
-		} else {
-			throw new OXConflictException("unknown value in " + CalendarFields.RECURRENCE_TYPE + ": " + value);
-		}
-	}
+
+    public static int parseRecurrenceType(final String value) throws OXConflictException {
+        if ("none".equals(value)) {
+            return CalendarObject.NONE;
+        } else if ("daily".equals(value)) {
+            return CalendarObject.DAILY;
+        } else if ("weekly".equals(value)) {
+            return CalendarObject.WEEKLY;
+        } else if ("monthly".equals(value)) {
+            return CalendarObject.MONTHLY;
+        } else if ("yearly".equals(value)) {
+            return CalendarObject.YEARLY;
+        } else {
+            throw new OXConflictException("unknown value in " + CalendarFields.RECURRENCE_TYPE + ": " + value);
+        }
+    }
 
     protected void parseField(boolean parseAlles, CalendarObject obj, TimeZone tz, JSONObject json) throws OXJSONException {
         for (FieldParser<CalendarObject> parser : PARSERS) {
