@@ -68,6 +68,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.ajax.writer.TaskWriter;
+import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.conversion.Data;
@@ -79,6 +80,7 @@ import com.openexchange.conversion.DataProperties;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalParser;
+import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.OXCalendarException;
@@ -177,6 +179,7 @@ public final class ICalJSONDataHandler implements DataHandler {
                  * Start parsing appointments
                  */
                 appointments = parseAppointmentStream(ctx, iCalParser, inputStreamCopy, conversionErrors, conversionWarnings, timeZone);
+                resolveUid(appointments, dataArguments, session);
                 // TODO: Handle errors/warnings
                 conversionErrors.clear();
                 conversionWarnings.clear();
@@ -281,6 +284,32 @@ public final class ICalJSONDataHandler implements DataHandler {
             }
         }
         return objects;
+    }
+
+    /**
+     * @param appointments
+     * @param dataArguments
+     * @param session
+     * @throws DataException 
+     */
+    private void resolveUid(List<CalendarDataObject> appointments, DataArguments dataArguments, Session session) throws DataException {
+        String key = "com.openexchange.groupware.calendar.searchobject";
+        if (dataArguments.containsKey(key) && Boolean.parseBoolean(dataArguments.get(key))) {
+            AppointmentSQLInterface appointmentSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
+            
+            for (CalendarDataObject calendarData : appointments) {
+                if (calendarData.containsUid()) {
+                    try {
+                        int temp = appointmentSql.resolveUid(calendarData.getUid());
+                        if (temp != 0) {
+                            calendarData.setObjectID(temp);
+                        }
+                    } catch (OXException e) {
+                        throw new DataException(e);
+                    }
+                }
+            }
+        }
     }
 
     /*-
