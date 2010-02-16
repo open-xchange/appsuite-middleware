@@ -204,18 +204,18 @@ public final class ContentType extends ParameterizedHeader {
             baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
             if (paramList) {
                 parameterList = new ParameterList(pos < 0 ? contentType : contentType.substring(pos));
-            }
-            final String name = parameterList.getParameter("name");
-            if (null != name) {
-                final String byName = MIMEType2ExtMap.getContentType(name);
-                if (null != byName) {
-                    final int slash = byName.indexOf('/');
-                    primaryType = byName.substring(0, slash);
-                    subType = byName.substring(slash + 1);
-                    if ((subType == null) || (subType.length() == 0)) {
-                        subType = DEFAULT_SUBTYPE;
+                final String name = parameterList.getParameter("name");
+                if (null != name) {
+                    final String byName = MIMEType2ExtMap.getContentType(name);
+                    if (null != byName) {
+                        final int slash = byName.indexOf('/');
+                        primaryType = byName.substring(0, slash);
+                        subType = byName.substring(slash + 1);
+                        if ((subType == null) || (subType.length() == 0)) {
+                            subType = DEFAULT_SUBTYPE;
+                        }
+                        baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
                     }
-                    baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
                 }
             }
         }
