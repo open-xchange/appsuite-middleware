@@ -357,16 +357,19 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
             for (final FolderStorage neededStorage : neededStorages) {
                 completionService.submit(new Callable<List<SortableId>>() {
 
-                    public List<SortableId> call() throws Exception {
+                    public List<SortableId> call() throws FolderException {
                         final StorageParameters newParameters = newStorageParameters();
                         neededStorage.startTransaction(newParameters, false);
                         try {
                             final List<SortableId> l = Arrays.asList(neededStorage.getSubfolders(treeId, parentId, newParameters));
                             neededStorage.commitTransaction(newParameters);
                             return l;
-                        } catch (final Exception e) {
+                        } catch (final FolderException e) {
                             neededStorage.rollback(newParameters);
                             throw e;
+                        } catch (final Exception e) {
+                            neededStorage.rollback(newParameters);
+                            throw FolderException.newUnexpectedException(e);
                         }
                     }
                 });
