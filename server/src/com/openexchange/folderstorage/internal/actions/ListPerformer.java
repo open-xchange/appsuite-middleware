@@ -471,7 +471,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
             }
 
             public FolderException newUnexpectedError(final Throwable t) {
-                return FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(t, t.getMessage());
+                return FolderException.newUnexpectedException(t);
             }
         };
 
