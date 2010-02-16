@@ -282,17 +282,15 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
     private void hasVisibleSubfolderIDs(final Folder folder, final String treeId, final boolean all, final UserizedFolder userizedFolder, final boolean nullIsPublicAccess, final StorageParameters storageParameters, final java.util.Collection<FolderStorage> openedStorages) throws FolderException {
         // Subfolders
         final String[] subfolders = folder.getSubfolderIDs();
-        final java.util.List<String> visibleSubfolderIds;
+        final java.util.List<String> visibleSubfolderIds = new ArrayList<String>(1);
         if (null == subfolders) {
             if (nullIsPublicAccess) {
                 // A null value hints to a special folder; e.g. a system folder which contains subfolder for all users
-                visibleSubfolderIds = new ArrayList<String>(1);
                 visibleSubfolderIds.add("dummyId");
             } else {
                 // Get appropriate storages and start transaction
                 final String folderId = folder.getID();
                 final FolderStorage[] ss = folderStorageDiscoverer.getFolderStoragesForParent(treeId, folderId);
-                visibleSubfolderIds = new ArrayList<String>(1);
                 for (int i = 0; visibleSubfolderIds.isEmpty() && i < ss.length; i++) {
                     final FolderStorage curStorage = ss[i];
                     boolean alreadyOpened = false;
@@ -325,7 +323,6 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                 }
             }
         } else {
-            visibleSubfolderIds = new ArrayList<String>(1);
             /*
              * Check until first visible subfolder found
              */
