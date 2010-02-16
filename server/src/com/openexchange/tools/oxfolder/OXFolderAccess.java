@@ -373,7 +373,7 @@ public class OXFolderAccess {
      */
     public final boolean canDeleteAllObjectsInFolder(final FolderObject fo, final Session session, final Context ctx) throws OXException {
         final int userId = session.getUserId();
-        final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx);
+        final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(userId, ctx);
         try {
             /*
              * Check user permission on folder
@@ -391,65 +391,80 @@ public class OXFolderAccess {
                  */
                 return true;
             }
-            final int module = fo.getModule();
             if (oclPerm.canDeleteOwnObjects()) {
                 /*
                  * User may only delete own objects. Check if folder contains foreign objects which must not be deleted.
                  */
-                switch (module) {
-                case FolderObject.TASK:
-                    final Tasks tasks = Tasks.getInstance();
-                    if (null == readCon) {
-                        Connection rc = null;
-                        try {
-                            rc = DBPool.pickup(ctx);
-                            return !tasks.containsNotSelfCreatedTasks(session, rc, fo.getObjectID());
-                        } catch (final DBPoolingException e) {
-                            throw new OXException(e);
-                        } finally {
-                            if (null != rc) {
-                                DBPool.closeReaderSilent(ctx, rc);
-                            }
-                        }
-                    }
-                    return !tasks.containsNotSelfCreatedTasks(session, readCon, fo.getObjectID());
-                case FolderObject.CALENDAR:
-                    final AppointmentSQLInterface calSql =
-                        ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
-                    return readCon == null ? !calSql.checkIfFolderContainsForeignObjects(userId, fo.getObjectID()) : !calSql.checkIfFolderContainsForeignObjects(
-                        userId,
-                        fo.getObjectID(),
-                        readCon);
-                case FolderObject.CONTACT:
-                    return readCon == null ? !Contacts.containsForeignObjectInFolder(fo.getObjectID(), userId, session) : !Contacts.containsForeignObjectInFolder(
-                        fo.getObjectID(),
-                        userId,
-                        session,
-                        readCon);
-                case FolderObject.PROJECT:
-                    break;
-                case FolderObject.INFOSTORE:
-                    final InfostoreFacade db =
-                        new InfostoreFacadeImpl(readCon == null ? new DBPoolProvider() : new StaticDBPoolProvider(readCon));
-                    return !db.hasFolderForeignObjects(
-                        fo.getObjectID(),
-                        ctx,
-                        UserStorage.getStorageUser(session.getUserId(), ctx),
-                        userConfig);
-                default:
-                    throw new OXFolderException(FolderCode.UNKNOWN_MODULE, folderModule2String(module), Integer.valueOf(ctx.getContextId()));
-                }
-            } else {
-                /*
-                 * No delete permission: Return true if folder is empty
-                 */
-                return isEmpty(fo, session, ctx);
+                return !containsForeignObjects(fo, session, ctx);
             }
-            return false;
+            /*
+             * No delete permission: Return true if folder is empty
+             */
+            return isEmpty(fo, session, ctx);
         } catch (final SQLException e) {
             throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
         } catch (final DBPoolingException e) {
             throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
+        } catch (final Throwable t) {
+            throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, Integer.valueOf(ctx.getContextId()));
+        }
+    }
+
+    /**
+     * Checks if given folder contains session-user-foreign objects.
+     * 
+     * @param fo The folder to check
+     * @param session The session
+     * @param ctx The context
+     * @return <code>true</code> if given folder contains session-user-foreign objects; otherwise <code>false</code>
+     * @throws OXException If check fails
+     */
+    public final boolean containsForeignObjects(final FolderObject fo, final Session session, final Context ctx) throws OXException {
+        try {
+            final int userId = session.getUserId();
+            final int module = fo.getModule();
+            if (module == FolderObject.TASK) {
+                final Tasks tasks = Tasks.getInstance();
+                if (null == readCon) {
+                    Connection rc = null;
+                    try {
+                        rc = DBPool.pickup(ctx);
+                        return tasks.containsNotSelfCreatedTasks(session, rc, fo.getObjectID());
+                    } catch (final DBPoolingException e) {
+                        throw new OXException(e);
+                    } finally {
+                        if (null != rc) {
+                            DBPool.closeReaderSilent(ctx, rc);
+                        }
+                    }
+                }
+                return tasks.containsNotSelfCreatedTasks(session, readCon, fo.getObjectID());
+            } else if (module == FolderObject.CALENDAR) {
+                final AppointmentSQLInterface calSql =
+                    ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
+                if (readCon == null) {
+                    return calSql.checkIfFolderContainsForeignObjects(userId, fo.getObjectID());
+                }
+                return calSql.checkIfFolderContainsForeignObjects(userId, fo.getObjectID(), readCon);
+            } else if (module == FolderObject.CONTACT) {
+                if (readCon == null) {
+                    return Contacts.containsForeignObjectInFolder(fo.getObjectID(), userId, session);
+                }
+                return Contacts.containsForeignObjectInFolder(fo.getObjectID(), userId, session, readCon);
+            } else if (module == FolderObject.PROJECT) {
+                return false;
+            } else if (module == FolderObject.INFOSTORE) {
+                final InfostoreFacade db =
+                    new InfostoreFacadeImpl(readCon == null ? new DBPoolProvider() : new StaticDBPoolProvider(readCon));
+                final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(userId, ctx);
+                return db.hasFolderForeignObjects(fo.getObjectID(), ctx, UserStorage.getStorageUser(session.getUserId(), ctx), userConfig);
+            } else {
+                throw new OXFolderException(FolderCode.UNKNOWN_MODULE, folderModule2String(module), Integer.valueOf(ctx.getContextId()));
+            }
+        } catch (final DBPoolingException e) {
+            throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
+        } catch (final SQLException e) {
+            throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
         } catch (final Throwable t) {
             throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, Integer.valueOf(ctx.getContextId()));
         }
@@ -494,6 +509,8 @@ public class OXFolderAccess {
             }
         } catch (final SQLException e) {
             throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
+        } catch (final Throwable t) {
+            throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, Integer.valueOf(ctx.getContextId()));
         }
     }
 
