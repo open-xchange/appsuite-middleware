@@ -247,10 +247,14 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         }
          */
         userizedFolder.setLocale(getLocale());
-        // Permissions
+        /*
+         *  Permissions
+         */
         userizedFolder.setOwnPermission(ownPermission);
         CalculatePermission.calculateUserPermissions(userizedFolder, getContext());
-        // Type
+        /*
+         * Type
+         */
         final boolean isShared;
         if (userizedFolder.getCreatedBy() != getUserId() && PrivateType.getInstance().equals(userizedFolder.getType())) {
             userizedFolder.setType(SharedType.getInstance());
@@ -259,7 +263,9 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         } else {
             isShared = false;
         }
-        // Time zone offset and last-modified in UTC
+        /*
+         *  Time zone offset and last-modified in UTC
+         */
         {
             final Date cd = folder.getCreationDate();
             if (null != cd) {
@@ -280,15 +286,21 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
     }
 
     private void hasVisibleSubfolderIDs(final Folder folder, final String treeId, final boolean all, final UserizedFolder userizedFolder, final boolean nullIsPublicAccess, final StorageParameters storageParameters, final java.util.Collection<FolderStorage> openedStorages) throws FolderException {
-        // Subfolders
+        /*
+         * Subfolders
+         */
         final String[] subfolders = folder.getSubfolderIDs();
         final java.util.List<String> visibleSubfolderIds = new ArrayList<String>(1);
         if (null == subfolders) {
             if (nullIsPublicAccess) {
-                // A null value hints to a special folder; e.g. a system folder which contains subfolder for all users
+                /*
+                 *  A null value hints to a special folder; e.g. a system folder which contains subfolder for all users
+                 */
                 visibleSubfolderIds.add("dummyId");
             } else {
-                // Get appropriate storages and start transaction
+                /*
+                 *  Get appropriate storages and start transaction
+                 */
                 final String folderId = folder.getID();
                 final FolderStorage[] ss = folderStorageDiscoverer.getFolderStoragesForParent(treeId, folderId);
                 for (int i = 0; visibleSubfolderIds.isEmpty() && i < ss.length; i++) {
