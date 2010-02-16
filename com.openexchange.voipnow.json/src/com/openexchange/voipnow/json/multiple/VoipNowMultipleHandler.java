@@ -112,10 +112,7 @@ public final class VoipNowMultipleHandler implements MultipleHandler {
     }
 
     public Collection<AbstractOXException> getWarnings() {
-        if (null == result) {
-            return Collections.<AbstractOXException> emptySet();
-        }
-        return result.getWarnings();
+        return Collections.<AbstractOXException> emptySet();
     }
 
 }
