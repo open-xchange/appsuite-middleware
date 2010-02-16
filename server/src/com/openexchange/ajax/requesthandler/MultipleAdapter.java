@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.requesthandler;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Map.Entry;
 import org.json.JSONException;
@@ -112,4 +114,12 @@ public class MultipleAdapter implements MultipleHandler {
     public void close() {
         result = null;
     }
+
+    public Collection<AbstractOXException> getWarnings() {
+        if (null == result) {
+            return Collections.<AbstractOXException> emptySet();
+        }
+        return result.getWarnings();
+    }
+
 }

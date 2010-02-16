@@ -178,13 +178,15 @@ public final class AJAXRequestResult {
      * Sets the warnings.
      * 
      * @param warnings The warnings to set
+     * @return This request result with specified warnings added
      */
-    public void addWarnings(final Collection<AbstractOXException> warnings) {
+    public AJAXRequestResult addWarnings(final Collection<AbstractOXException> warnings) {
         if (null == warnings) {
             this.warnings = new HashSet<AbstractOXException>(warnings);
         } else {
             this.warnings.addAll(warnings);
         }
+        return this;
     }
 
     @Override
