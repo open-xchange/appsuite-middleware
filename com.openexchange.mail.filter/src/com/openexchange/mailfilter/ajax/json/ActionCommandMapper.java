@@ -101,7 +101,7 @@ final class ActionCommandMapper implements Mapper<Rule> {
         final JSONArray jarray = (JSONArray) obj;
         final IfCommand ifCommand = rule.getIfCommand();
         if (null == ifCommand) {
-            throw new SieveException("There no if command where the action command can be applied to in rule " + rule);
+            throw new SieveException("There is no if command where the action command can be applied to in rule " + rule);
         }
         // Delete all existing actions, this is especially needed if this is used by update
         ifCommand.setActioncommands(null);
