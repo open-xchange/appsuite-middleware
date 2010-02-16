@@ -198,7 +198,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
         return new TagArgument(token);
     }
 
-    private static TagArgument createTagArg(final String string) {
+    public static TagArgument createTagArg(final String string) {
         final Token token = new Token();
         token.image = ":" + string;
         return new TagArgument(token);
@@ -430,13 +430,13 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                     if (TestCommand.Commands.ADDRESS.equals(testCommand.getCommand())) {
                         tmp.put(GeneralFields.ID, TestCommand.Commands.ADDRESS.getCommandname());
                         tmp.put(AddressEnvelopeAndHeaderTestFields.COMPARISON, testCommand.getMatchtype().substring(1));
-                        tmp.put(AddressEnvelopeAndHeaderTestFields.HEADERS, new JSONArray((List) testCommand.getArguments().get(1)));
-                        tmp.put(AddressEnvelopeAndHeaderTestFields.VALUES, new JSONArray((List) testCommand.getArguments().get(2)));
+                        tmp.put(AddressEnvelopeAndHeaderTestFields.HEADERS, new JSONArray((List) testCommand.getArguments().get(testCommand.getTagarguments().size())));
+                        tmp.put(AddressEnvelopeAndHeaderTestFields.VALUES, new JSONArray((List) testCommand.getArguments().get(testCommand.getTagarguments().size()+1)));
                     } else if (TestCommand.Commands.ENVELOPE.equals(testCommand.getCommand())) {
                         tmp.put(GeneralFields.ID, TestCommand.Commands.ENVELOPE.getCommandname());
                         tmp.put(AddressEnvelopeAndHeaderTestFields.COMPARISON, testCommand.getMatchtype().substring(1));
-                        tmp.put(AddressEnvelopeAndHeaderTestFields.HEADERS, new JSONArray((List) testCommand.getArguments().get(1)));
-                        tmp.put(AddressEnvelopeAndHeaderTestFields.VALUES, new JSONArray((List) testCommand.getArguments().get(2)));
+                        tmp.put(AddressEnvelopeAndHeaderTestFields.HEADERS, new JSONArray((List) testCommand.getArguments().get(testCommand.getTagarguments().size())));
+                        tmp.put(AddressEnvelopeAndHeaderTestFields.VALUES, new JSONArray((List) testCommand.getArguments().get(testCommand.getTagarguments().size()+1)));
                     } else if (TestCommand.Commands.TRUE.equals(testCommand.getCommand())) {
                         tmp.put(GeneralFields.ID, TestCommand.Commands.TRUE.getCommandname());
                     } else if (TestCommand.Commands.NOT.equals(testCommand.getCommand())) {
@@ -451,8 +451,8 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                     } else if (TestCommand.Commands.HEADER.equals(testCommand.getCommand())) {
                         tmp.put(GeneralFields.ID, TestCommand.Commands.HEADER.getCommandname());
                         tmp.put(AddressEnvelopeAndHeaderTestFields.COMPARISON, testCommand.getMatchtype().substring(1));
-                        tmp.put(AddressEnvelopeAndHeaderTestFields.HEADERS, new JSONArray((List)testCommand.getArguments().get(1)));
-                        tmp.put(AddressEnvelopeAndHeaderTestFields.VALUES, new JSONArray((List)testCommand.getArguments().get(2)));
+                        tmp.put(AddressEnvelopeAndHeaderTestFields.HEADERS, new JSONArray((List)testCommand.getArguments().get(testCommand.getTagarguments().size())));
+                        tmp.put(AddressEnvelopeAndHeaderTestFields.VALUES, new JSONArray((List)testCommand.getArguments().get(testCommand.getTagarguments().size()+1)));
                     } else if (TestCommand.Commands.BODY.equals(testCommand.getCommand())) {
                         tmp.put(GeneralFields.ID, TestCommand.Commands.BODY.getCommandname());
                         tmp.put(BodyTestFields.COMPARISON, testCommand.getMatchtype().substring(1));

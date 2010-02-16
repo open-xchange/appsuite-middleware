@@ -52,7 +52,9 @@ package com.openexchange.mailfilter.ajax.actions;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -74,9 +76,11 @@ import com.openexchange.jsieve.SieveTextFilter;
 import com.openexchange.jsieve.SieveTextFilter.ClientRulesAndRequire;
 import com.openexchange.jsieve.SieveTextFilter.RuleListAndNextUid;
 import com.openexchange.jsieve.commands.ActionCommand;
+import com.openexchange.jsieve.commands.IfCommand;
 import com.openexchange.jsieve.commands.Rule;
 import com.openexchange.jsieve.commands.RuleComment;
 import com.openexchange.jsieve.commands.TestCommand;
+import com.openexchange.jsieve.commands.TestCommand.Commands;
 import com.openexchange.jsieve.exceptions.OXSieveHandlerException;
 import com.openexchange.jsieve.exceptions.OXSieveHandlerInvalidCredentialsException;
 import com.openexchange.mailfilter.ajax.Parameter;
@@ -323,6 +327,9 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             final String body = request.getBody();
             final JSONObject json = new JSONObject(body);
             final Rule newrule = CONVERTER.parse(json);
+            
+            changeVacationRule(newrule);
+            
             // Now find the right position inside the array
             int position = newrule.getPosition();
             final ArrayList<Rule> clientrules = clientrulesandrequire.getRules();
@@ -469,6 +476,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                 final RuleAndPosition rightRule = getRightRuleForUniqueId(clientrules, uniqueid, credentials
                         .getRightUsername(), credentials.getContextString());
                 CONVERTER.parse(rightRule.getRule(), json);
+                changeVacationRule(rightRule.getRule());
             } else {
                 throw new OXMailfilterException(Code.ID_MISSING);
             }
@@ -510,11 +518,6 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                 }
             }
         }
-    }
-
-    private String fixParsingError(final String script) {
-        final String pattern = ":addresses\\s+:";
-        return script.replaceAll(pattern, ":addresses \"\" :");
     }
 
     @Override
@@ -700,6 +703,29 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         return sieveHandler;
     }
 
+    private void changeVacationRule(final Rule newrule) throws SieveException {
+        final ConfigurationService config = MailFilterServletServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+        final String vacationdomains = config.getProperty(MailFilterProperties.Values.VACATION_DOMAINS.property);
+    
+        if (null != vacationdomains && 0 != vacationdomains.length()) {
+            final IfCommand ifCommand = newrule.getIfCommand();
+            if (ActionCommand.Commands.VACATION.equals(ifCommand.getActioncommands().get(0).getCommand())) {
+                final List<Object> argList = new ArrayList<Object>();
+                argList.add(Rule2JSON2Rule.createTagArg("is"));
+                argList.add(Rule2JSON2Rule.createTagArg("domain"));
+    
+                final ArrayList<String> header = new ArrayList<String>();
+                header.add("From");
+                
+                final String[] split = vacationdomains.split(",");
+                
+                argList.add(header);
+                argList.add(Arrays.asList(split));
+                ifCommand.setTestcommand(new TestCommand(Commands.ADDRESS, argList, new ArrayList<TestCommand>()));
+            }
+        }
+    }
+
     private JSONArray getActionArray(final ArrayList<String> sieve) {
         final JSONArray actionarray = new JSONArray();
         for (final ActionCommand.Commands command : ActionCommand.Commands.values()) {
@@ -779,6 +805,11 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             }
         }
         throw new OXMailfilterException(OXMailfilterException.Code.MISSING_PARAMETER, "id");
+    }
+
+    private String fixParsingError(final String script) {
+        final String pattern = ":addresses\\s+:";
+        return script.replaceAll(pattern, ":addresses \"\" :");
     }
 
     private void setUidInRule(final Rule newrule, final int uid) {
