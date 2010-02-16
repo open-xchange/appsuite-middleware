@@ -81,7 +81,8 @@ public class ImportExportStandaloneSuite extends TestSuite {
 		tests.addTest( CSVContactImportTest.suite() );
 		tests.addTest( CSVContactExportTest.suite() );
 		tests.addTest( OutlookCSVContactImportTest.suite() );
-		
+        tests.addTestSuite(com.openexchange.groupware.importexport.importers.CannotImportAppleContactsWithInlineImage.class);
+        
 		//ICAL
 		tests.addTest( ICalImportTest.suite() );
 
