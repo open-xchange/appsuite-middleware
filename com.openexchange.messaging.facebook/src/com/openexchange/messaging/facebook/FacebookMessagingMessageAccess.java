@@ -413,6 +413,7 @@ public final class FacebookMessagingMessageAccess implements MessagingMessageAcc
             try {
                 final StringContent content = FacebookMessagingUtility.checkContent(StringContent.class, message);
                 facebookRestClient.users_setStatus(content.getData());
+                return null;
             } catch (final FacebookException e) {
                 throw FacebookMessagingException.create(e);
             }
@@ -422,6 +423,7 @@ public final class FacebookMessagingMessageAccess implements MessagingMessageAcc
                 Collections.<MessagingAddressHeader> emptyList(),
                 facebookRestClient,
                 facebookUserId);
+            return null;
         }
         throw MessagingExceptionCodes.UNKNOWN_ACTION.create(action);
     }
