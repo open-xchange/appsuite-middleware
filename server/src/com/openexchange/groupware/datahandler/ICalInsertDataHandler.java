@@ -212,10 +212,10 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
     private Confirm parseConfirmation(final DataArguments dataArguments) {
         int confirmStatus = -1;
         String confirmMessage = null;
-        if (dataArguments.containsKey("confirmstatus")) {
-            confirmStatus = Integer.parseInt(dataArguments.get("confirmstatus"));
-            if (dataArguments.containsKey("confirmmessage")) {
-                confirmMessage = dataArguments.get("confirmmessage");
+        if (dataArguments.containsKey("com.openexchange.groupware.calendar.confirmstatus")) {
+            confirmStatus = Integer.parseInt(dataArguments.get("com.openexchange.groupware.calendar.confirmstatus"));
+            if (dataArguments.containsKey("com.openexchange.groupware.calendar.confirmmessage")) {
+                confirmMessage = dataArguments.get("com.openexchange.groupware.calendar.confirmmessage");
             }
             return new Confirm(confirmStatus, confirmMessage);
         }

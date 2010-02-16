@@ -79,6 +79,7 @@ import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
@@ -168,11 +169,14 @@ public abstract class ICalDataHandler implements DataHandler {
      * @param confirm
      */
     private void setConfirmation(Session session, CalendarDataObject appointment, Confirm confirm) {
-        for (UserParticipant user : appointment.getUsers()) {
-            if (user.getIdentifier() == session.getUserId()) {
-                user.setConfirm(confirm.getConfirm());
-                if (confirm.getConfirmMessage() != null) {
-                    user.setConfirmMessage(confirm.getConfirmMessage());
+        for (Participant participant : appointment.getParticipants()) {
+            if (participant.getType() == Participant.USER) {
+                UserParticipant user = (UserParticipant) participant;
+                if (user.getIdentifier() == session.getUserId()) {
+                    user.setConfirm(confirm.getConfirm());
+                    if (confirm.getConfirmMessage() != null) {
+                        user.setConfirmMessage(confirm.getConfirmMessage());
+                    }
                 }
             }
         }
