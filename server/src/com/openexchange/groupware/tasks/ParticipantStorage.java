@@ -99,9 +99,7 @@ abstract class ParticipantStorage {
      * participants as value.
      * @throws TaskException if an error occurs.
      */
-    protected abstract Map<Integer, Set<InternalParticipant>>
-        selectInternal(Context ctx, Connection con, int[] tasks,
-        StorageType type) throws TaskException;
+    protected abstract Map<Integer, Set<InternalParticipant>> selectInternal(Context ctx, Connection con, int[] tasks, StorageType type) throws TaskException;
 
     /**
      * Reads the internal participants of a task.
