@@ -49,9 +49,8 @@
 
 package com.openexchange.group.internal;
 
+import gnu.trove.TIntHashSet;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupException;
 import com.openexchange.group.GroupStorage;
@@ -210,12 +209,12 @@ public final class Logic {
         }
         try {
             final UserStorage storage = UserStorage.getInstance();
-            final Set<Integer> set = new HashSet<Integer>();
+            final TIntHashSet set = new TIntHashSet();
             for (final int userId : storage.listAllUser(ctx)) {
-                set.add(Integer.valueOf(userId));
+                set.add(userId);
             }
             for (final int userId : group.getMember()) {
-                if (!set.contains(Integer.valueOf(userId))) {
+                if (!set.contains(userId)) {
                     throw new GroupException(Code.NOT_EXISTING_MEMBER, Integer
                         .valueOf(userId));
                 }

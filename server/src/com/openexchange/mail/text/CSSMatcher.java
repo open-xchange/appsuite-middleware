@@ -49,8 +49,8 @@
 
 package com.openexchange.mail.text;
 
+import gnu.trove.TIntHashSet;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -200,11 +200,11 @@ public final class CSSMatcher {
         /*
          * Ensure to check against pattern first
          */
-        final Set<Integer> patIndices = new HashSet<Integer>(2);
+        final TIntHashSet patIndices = new TIntHashSet(2);
         for (int i = 0; i < size; i++) {
             final String allowedValue = allowedValues[i];
             if (PATTERN_IS_PATTERN.matcher(allowedValue).matches()) {
-                patIndices.add(Integer.valueOf(i));
+                patIndices.add(i);
                 final char[] chars = allowedValue.toCharArray();
                 Arrays.sort(chars);
                 if (Arrays.binarySearch(chars, 'd') >= 0) {
@@ -225,7 +225,7 @@ public final class CSSMatcher {
          */
         boolean retval = false;
         for (int i = 0; i < size && !retval; i++) {
-            if (!patIndices.contains(Integer.valueOf(i))) {
+            if (!patIndices.contains(i)) {
                 /*
                  * Check against non-pattern allowed value
                  */

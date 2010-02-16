@@ -50,12 +50,11 @@
 package com.openexchange.group.internal;
 
 import static com.openexchange.java.Autoboxing.I;
+import gnu.trove.TIntHashSet;
+import gnu.trove.TIntIterator;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DBPoolingException;
@@ -112,12 +111,12 @@ final class Update {
     /**
      * Added members.
      */
-    private final Set<Integer> addedMembers = new HashSet<Integer>();
+    private final TIntHashSet addedMembers = new TIntHashSet();
 
     /**
      * Removed members.
      */
-    private final Set<Integer> removedMembers = new HashSet<Integer>();
+    private final TIntHashSet removedMembers = new TIntHashSet();
 
     /**
      * Default constructor.
@@ -214,14 +213,14 @@ final class Update {
         }
         if (changed.isMemberSet()) {
             for (final int member : changed.getMember()) {
-                addedMembers.add(Integer.valueOf(member));
+                addedMembers.add(member);
             }
             for (final int member : getOrig().getMember()) {
-                addedMembers.remove(Integer.valueOf(member));
-                removedMembers.add(Integer.valueOf(member));
+                addedMembers.remove(member);
+                removedMembers.add(member);
             }
             for (final int member : changed.getMember()) {
-                removedMembers.remove(Integer.valueOf(member));
+                removedMembers.remove(member);
             }
         } else {
             changed.setMember(getOrig().getMember());
@@ -268,15 +267,15 @@ final class Update {
     public void update(final Connection con) throws GroupException {
         storage.updateGroup(ctx, con, changed, lastRead);
         int[] tmp = new int[addedMembers.size()];
-        Iterator<Integer> iter = addedMembers.iterator();
+        TIntIterator iter = addedMembers.iterator();
         for (int i = 0; iter.hasNext(); i++) {
-            tmp[i] = iter.next().intValue();
+            tmp[i] = iter.next();
         }
         storage.insertMember(ctx, con, changed, tmp);
         tmp = new int[removedMembers.size()];
         iter = removedMembers.iterator();
         for (int i = 0; iter.hasNext(); i++) {
-            tmp[i] = iter.next().intValue();
+            tmp[i] = iter.next();
         }
         storage.deleteMember(ctx, con, changed, tmp);
     }
@@ -287,19 +286,19 @@ final class Update {
      */
     private void propagate() throws GroupException {
         final int[] tmp = new int[addedMembers.size() + removedMembers.size()];
-        Iterator<Integer> iter = addedMembers.iterator();
+        TIntIterator iter = addedMembers.iterator();
         int i = 0;
         while (iter.hasNext()) {
-            tmp[i++] = iter.next().intValue();
+            tmp[i++] = iter.next();
         }
         iter = removedMembers.iterator();
         while (iter.hasNext()) {
-            tmp[i++] = iter.next().intValue();
+            tmp[i++] = iter.next();
         }
-        UserStorage storage = UserStorage.getInstance();
+        final UserStorage storage = UserStorage.getInstance();
         try {
             storage.invalidateUser(ctx, tmp);
-        } catch (UserException e) {
+        } catch (final UserException e) {
             throw new GroupException(e);
         }
         // The time stamp of folder must be increased. The GUI the reloads the

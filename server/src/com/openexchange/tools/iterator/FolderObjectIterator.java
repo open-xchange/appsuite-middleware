@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.iterator;
 
+import gnu.trove.TIntHashSet;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -56,11 +57,9 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import java.util.Set;
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderCacheNotEnabledException;
@@ -138,7 +137,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
     private final boolean closeCon;
 
-    private final Set<Integer> folderIds;
+    private final TIntHashSet folderIds;
 
     private FolderObject next;
 
@@ -189,7 +188,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
     /**
      * Initializes a new {@link FolderObjectIterator}
      */
-    private FolderObjectIterator() {
+    FolderObjectIterator() {
         closeCon = false;
         resideInCache = false;
         ctx = null;
@@ -237,7 +236,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         if (OXFolderProperties.isEnableDBGrouping()) {
             folderIds = null;
         } else {
-            folderIds = new HashSet<Integer>();
+            folderIds = new TIntHashSet();
         }
         warnings = new ArrayList<AbstractOXException>(2);
         this.rs = rs;
@@ -305,10 +304,10 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         // fname, fuid, module, type, creator
         final int folderId = rs.getInt(1);
         if (!OXFolderProperties.isEnableDBGrouping()) {
-            if (folderIds.contains(Integer.valueOf(folderId))) {
+            if (folderIds.contains(folderId)) {
                 return null;
             }
-            folderIds.add(Integer.valueOf(folderId));
+            folderIds.add(folderId);
         }
         /*
          * Look up cache

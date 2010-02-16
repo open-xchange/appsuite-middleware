@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.request;
 
+import gnu.trove.TIntHashSet;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -796,13 +797,13 @@ public class InfostoreRequest extends CommonRequest {
 
                 notDeleted = infostore.removeDocument(ids, timestamp, session);
 
-                final Set<Integer> notDeletedSet = new HashSet<Integer>();
+                final TIntHashSet notDeletedSet = new TIntHashSet();
                 for (final int nd : notDeleted) {
                     notDeletedSet.add(nd);
                 }
 
                 for (final int id : ids) {
-                    if (!notDeletedSet.contains(Integer.valueOf(id))) {
+                    if (!notDeletedSet.contains(id)) {
                         searchEngine.unIndex0r(id, ctx, user, userConfiguration);
                     }
                 }
@@ -841,7 +842,7 @@ public class InfostoreRequest extends CommonRequest {
                 final int nd = notDeleted[i];
                 w.value(nd);
                 w.key("folder");
-                w.value(folderMapping.get(nd));
+                w.value(folderMapping.get(Integer.valueOf(nd)));
                 w.endObject();
             }
             w.endArray();

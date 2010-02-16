@@ -50,6 +50,7 @@
 package com.openexchange.mail.text;
 
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
+import gnu.trove.TIntHashSet;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
@@ -63,6 +64,7 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -222,25 +224,25 @@ public final class HTMLProcessing {
             "<a\\s+href[^>]+>.*?</a>|((?:https?://|ftp://|mailto:|news\\.|www\\.)(?:[-\\p{L}0-9+@#/%?=~_|!:,.;]|&amp;|&(?![\\p{L}_0-9]+;))*(?:[-\\p{L}0-9+@#/%=~_|]|&amp;|&(?![\\p{L}_0-9]+;)))",
             Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
 
-    private static int[][] getHrefPositions(final String content) {
+    private static List<Range> getHrefPositions(final String content) {
         try {
             final Matcher m = PATTERN_HREF.matcher(content);
             if (m.find()) {
-                final List<int[]> positions = new ArrayList<int[]>();
+                final List<Range> positions = new ArrayList<Range>();
                 do {
                     final String nonHtmlLink = m.group(1);
                     if (null != nonHtmlLink) {
-                        positions.add(new int[] { m.start(1), m.end(1) });
+                        positions.add(new Range(m.start(1), m.end(1)));
                     }
                 } while (m.find());
-                return positions.toArray(new int[positions.size()][]);
+                return positions;
             }
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
         } catch (final StackOverflowError error) {
             LOG.error(StackOverflowError.class.getName(), error);
         }
-        return new int[0][];
+        return Collections.emptyList();
     }
 
     /**
@@ -1264,17 +1266,28 @@ public final class HTMLProcessing {
         return null;
     }
 
-    private static String escape(final String s, final boolean withQuote, final int[][] ignoreRanges) {
+    private static String escape(final String s, final boolean withQuote, final List<Range> ignoreRanges) {
         final int len = s.length();
         final StringBuilder sb = new StringBuilder(len);
         /*
          * Escape
          */
+        final TIntHashSet ignorePositions;
+        if (null == ignoreRanges || ignoreRanges.isEmpty()) {
+            ignorePositions = new TIntHashSet(0);
+        } else {
+            ignorePositions = new TIntHashSet(ignoreRanges.size() * 16);
+            for (final Range ignoreRange : ignoreRanges) {
+                for (int i = ignoreRange.start; i < ignoreRange.end; i++) {
+                    ignorePositions.add(i);
+                }
+            }
+        }
         final char[] chars = s.toCharArray();
         if (withQuote) {
             for (int i = 0; i < chars.length; i++) {
                 final char c = chars[i];
-                if (ignore(i, ignoreRanges)) {
+                if (ignorePositions.contains(i)) {
                     sb.append(c);
                 } else {
                     final String entity = getHTMLChar2EntityMap().get(Character.valueOf(c));
@@ -1288,7 +1301,7 @@ public final class HTMLProcessing {
         } else {
             for (int i = 0; i < chars.length; i++) {
                 final char c = chars[i];
-                if (ignore(i, ignoreRanges) || ('"' == c)) {
+                if (ignorePositions.contains(i) || ('"' == c)) {
                     sb.append(c);
                 } else {
                     final String entity = getHTMLChar2EntityMap().get(Character.valueOf(c));
@@ -1331,7 +1344,7 @@ public final class HTMLProcessing {
      * @param ignoreRanges The ranges to ignore; leave to <code>null</code> to format whole text
      * @return properly escaped HTML content
      */
-    private static String htmlFormat(final String plainText, final boolean withQuote, final int[][] ignoreRanges) {
+    private static String htmlFormat(final String plainText, final boolean withQuote, final List<Range> ignoreRanges) {
         return PATTERN_CRLF.matcher(escape(plainText, withQuote, ignoreRanges)).replaceAll(HTML_BR);
     }
 
@@ -1344,7 +1357,7 @@ public final class HTMLProcessing {
      * @return properly escaped HTML content
      */
     public static String htmlFormat(final String plainText, final boolean withQuote) {
-        return PATTERN_CRLF.matcher(escape(plainText, withQuote, null)).replaceAll(HTML_BR);
+        return PATTERN_CRLF.matcher(escape(plainText, withQuote, Collections.<Range> emptyList())).replaceAll(HTML_BR);
     }
 
     /**
@@ -1622,6 +1635,20 @@ public final class HTMLProcessing {
             LOG.error(e.getMessage(), e);
             return text;
         }
+    }
+
+    private static final class Range {
+
+        public final int start;
+
+        public final int end;
+
+        public Range(final int start, final int end) {
+            super();
+            this.start = start;
+            this.end = end;
+        }
+
     }
 
     /**
