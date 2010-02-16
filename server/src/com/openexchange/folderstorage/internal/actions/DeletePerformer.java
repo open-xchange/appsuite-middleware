@@ -186,27 +186,33 @@ public final class DeletePerformer extends AbstractPerformer {
     private void deleteVirtualFolder(final String folderId, final String treeId, final FolderStorage folderStorage, final List<FolderStorage> openedStorages) throws FolderException {
         final Folder folder = folderStorage.getFolder(treeId, folderId, storageParameters);
         {
-            final Permission parentPermission;
+            final Permission permission;
             if (null == getSession()) {
-                parentPermission = CalculatePermission.calculate(folder, getUser(), getContext(), ALL_ALLOWED);
+                permission = CalculatePermission.calculate(folder, getUser(), getContext(), ALL_ALLOWED);
             } else {
-                parentPermission = CalculatePermission.calculate(folder, getSession(), ALL_ALLOWED);
+                permission = CalculatePermission.calculate(folder, getSession(), ALL_ALLOWED);
             }
-            if (parentPermission.getFolderPermission() <= Permission.NO_PERMISSIONS) {
+            if (permission.getFolderPermission() <= Permission.NO_PERMISSIONS) {
                 throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
                     folder.getLocalizedName(session.getUser().getLocale()),
                     getUser().getDisplayName(),
                     Integer.valueOf(getContextId()));
             }
-            if (!parentPermission.isAdmin()) {
+            if (!permission.isAdmin()) {
                 throw FolderExceptionErrorMessage.FOLDER_NOT_DELETEABLE.create(
                     folder.getLocalizedName(session.getUser().getLocale()),
                     getUser().getDisplayName(),
                     Integer.valueOf(getContextId()));
             }
             /*
-             * Delete permissions are checked when deleting from real storage
+             * Delete permissions
              */
+            if (!canDeleteAllObjects(permission, folderId, treeId, folderStorage)) {
+                throw FolderExceptionErrorMessage.FOLDER_NOT_DELETEABLE.create(
+                    folderId,
+                    Integer.valueOf(user.getId()),
+                    Integer.valueOf(context.getContextId()));
+            }
         }
         final SortableId[] subfolders = folderStorage.getSubfolders(treeId, folderId, storageParameters);
         for (int i = 0; i < subfolders.length; i++) {
@@ -239,6 +245,26 @@ public final class DeletePerformer extends AbstractPerformer {
          * And now from virtual storage
          */
         folderStorage.deleteFolder(treeId, folderId, storageParameters);
+    }
+
+    private boolean canDeleteAllObjects(final Permission permission, final String folderId, final String treeId, final FolderStorage folderStorage) throws FolderException {
+        final int deletePermission = permission.getDeletePermission();
+        if (deletePermission >= Permission.DELETE_ALL_OBJECTS) {
+            /*
+             * Can delete all objects
+             */
+            return true;
+        }
+        if (deletePermission >= Permission.DELETE_OWN_OBJECTS) {
+            /*
+             * User may only delete own objects. Check if folder contains foreign objects which must not be deleted.
+             */
+            return !folderStorage.containsForeignObjects(user, treeId, folderId, storageParameters);
+        }
+        /*
+         * No delete permission: Return true if folder is empty
+         */
+        return folderStorage.isEmpty(treeId, folderId, storageParameters);
     }
 
     private void checkOpenedStorage(final FolderStorage storage, final List<FolderStorage> openedStorages) throws FolderException {
