@@ -248,7 +248,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
          */
         userizedFolder.setLocale(getLocale());
         /*
-         *  Permissions
+         * Permissions
          */
         userizedFolder.setOwnPermission(ownPermission);
         CalculatePermission.calculateUserPermissions(userizedFolder, getContext());
@@ -264,7 +264,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
             isShared = false;
         }
         /*
-         *  Time zone offset and last-modified in UTC
+         * Time zone offset and last-modified in UTC
          */
         {
             final Date cd = folder.getCreationDate();
@@ -294,12 +294,12 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         if (null == subfolders) {
             if (nullIsPublicAccess) {
                 /*
-                 *  A null value hints to a special folder; e.g. a system folder which contains subfolder for all users
+                 * A null value hints to a special folder; e.g. a system folder which contains subfolder for all users
                  */
                 visibleSubfolderIds.add("dummyId");
             } else {
                 /*
-                 *  Get appropriate storages and start transaction
+                 * Get appropriate storages and start transaction
                  */
                 final String folderId = folder.getID();
                 final FolderStorage[] ss = folderStorageDiscoverer.getFolderStoragesForParent(treeId, folderId);
@@ -335,31 +335,34 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                 }
             }
         } else {
-            /*
-             * Check until first visible subfolder found
-             */
-            for (int i = 0; visibleSubfolderIds.isEmpty() && i < subfolders.length; i++) {
-                final String id = subfolders[i];
-                final FolderStorage tmp = getOpenedStorage(id, treeId, storageParameters, openedStorages);
+            final int length = subfolders.length;
+            if (length > 0) {
                 /*
-                 * Get subfolder from appropriate storage
+                 * Check until first visible subfolder found
                  */
-                final Folder subfolder = tmp.getFolder(treeId, id, storageParameters);
-                /*
-                 * Check for access rights and subscribed status dependent on parameter "all"
-                 */
-                final Permission subfolderPermission;
-                if (null == getSession()) {
-                    subfolderPermission = CalculatePermission.calculate(subfolder, getUser(), getContext(), getAllowedContentTypes());
-                } else {
-                    subfolderPermission = CalculatePermission.calculate(subfolder, getSession(), getAllowedContentTypes());
-                }
-                if (subfolderPermission.getFolderPermission() > Permission.NO_PERMISSIONS && (all || subfolder.isSubscribed())) {
-                    visibleSubfolderIds.add(id);
+                for (int i = 0; visibleSubfolderIds.isEmpty() && i < length; i++) {
+                    final String id = subfolders[i];
+                    final FolderStorage tmp = getOpenedStorage(id, treeId, storageParameters, openedStorages);
+                    /*
+                     * Get subfolder from appropriate storage
+                     */
+                    final Folder subfolder = tmp.getFolder(treeId, id, storageParameters);
+                    /*
+                     * Check for access rights and subscribed status dependent on parameter "all"
+                     */
+                    final Permission subfolderPermission;
+                    if (null == getSession()) {
+                        subfolderPermission = CalculatePermission.calculate(subfolder, getUser(), getContext(), getAllowedContentTypes());
+                    } else {
+                        subfolderPermission = CalculatePermission.calculate(subfolder, getSession(), getAllowedContentTypes());
+                    }
+                    if (subfolderPermission.getFolderPermission() > Permission.NO_PERMISSIONS && (all || subfolder.isSubscribed())) {
+                        visibleSubfolderIds.add(id);
+                    }
                 }
             }
         }
-        userizedFolder.setSubfolderIDs(visibleSubfolderIds.toArray(new String[visibleSubfolderIds.size()]));
+        userizedFolder.setSubfolderIDs(visibleSubfolderIds.isEmpty() ? new String[0] : new String[] { visibleSubfolderIds.get(0) });
     }
 
     private static long addTimeZoneOffset(final long date, final TimeZone timeZone) {
