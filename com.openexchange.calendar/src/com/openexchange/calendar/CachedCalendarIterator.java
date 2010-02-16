@@ -49,17 +49,15 @@
 
 package com.openexchange.calendar;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
+import com.openexchange.calendar.storage.ParticipantStorage;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.database.DBPoolingException;
@@ -93,13 +91,11 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
     private int[][] oids;
     private int cc;
     private boolean oxonfe;
-    
+
     public static boolean CACHED_ITERATOR_FAST_FETCH = true;
     public static int MAX_PRE_FETCH = 20;
     private int pre_fetch;
-    
-    private static final Log LOG = LogFactory.getLog(CachedCalendarIterator.class);
-    
+
     public CachedCalendarIterator(final SearchIterator<CalendarDataObject> non_cached_iterator, final Context c, final int uid) throws SearchIteratorException, OXException {
     	this.warnings =  new ArrayList<AbstractOXException>(2);
     	list = new ArrayList<CalendarDataObject>(16);
@@ -113,7 +109,7 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
             fillCachedResultSet();
         }
     }
-    
+
     public CachedCalendarIterator(final SearchIterator<CalendarDataObject> non_cached_iterator, final Context c, final int uid, final int[][] oids) throws SearchIteratorException, OXException {
     	this.warnings =  new ArrayList<AbstractOXException>(2);
     	if (non_cached_iterator.hasWarnings()) {
@@ -131,7 +127,7 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
             fillCachedResultSet();
         }
     }
-    
+
     public boolean hasNext() {
         if (!cache) {
             return non_cached_iterator.hasNext();
@@ -145,7 +141,7 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
 		}
         return false;
     }
-    
+
     public CalendarDataObject next() throws SearchIteratorException, OXException {
         if (!oxonfe) {
             if (!cache) {
@@ -169,7 +165,7 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
         }
         return null;
     }
-    
+
     public final void close() throws SearchIteratorException {
         if (closed) {
             return;
@@ -177,11 +173,11 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
         closed = true;
         non_cached_iterator.close();
     }
-    
+
     public int size() {
         return non_cached_iterator.size();
     }
-    
+
     public boolean hasSize() {
         return non_cached_iterator.hasSize();
     }
@@ -197,7 +193,7 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
 	public boolean hasWarnings() {
 		return !warnings.isEmpty();
 	}
-    
+
     private final void fillCachedResultSet() throws SearchIteratorException, OXException {
         try {
             while (non_cached_iterator.hasNext()) {
@@ -207,56 +203,58 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
             close();
         }
     }
-    
+
     private final CalendarDataObject getPreFilledResult() throws SearchIteratorException, OXException {
         Connection readcon = null;
         CalendarDataObject cdao;
-        CalendarDataObject temp;
         try {
             cdao = list.get(counter++);
             if (CACHED_ITERATOR_FAST_FETCH && pre_fetch < counter) {
-			    if ((cdao.fillParticipants() || cdao.fillUserParticipants() || (cdao.fillFolderID()))) {
+			    if ((cdao.fillParticipants() || cdao.fillUserParticipants() || cdao.fillFolderID() || cdao.fillConfirmations())) {
 			        try {
 			            readcon = DBPool.pickup(c);
 			        } catch (final DBPoolingException ex) {
 			            throw new OXException(ex);
 			        }
 			    }
-			    
+			
 			    int mn = MAX_PRE_FETCH;
 			    if (mn+pre_fetch > list.size()) {
 			        mn = list.size()%MAX_PRE_FETCH;
 			    }
 			    final int arr[] = new int[mn];
-			    
+			
 			    for (int a = 0; a < mn; a++) {
-			        temp = list.get(pre_fetch++);
+			        CalendarDataObject temp = list.get(pre_fetch++);
 			        arr[a] = temp.getObjectID();
 			    }
-			    
+			
 			    final String sqlin = StringCollection.getSqlInString(arr);
 			    if  (cdao.fillUserParticipants() || cdao.fillFolderID()) {
 			        try {
 			            new CalendarMySQL().getUserParticipantsSQLIn(list, readcon, c.getContextId(), uid, sqlin);
 			        } catch (final SQLException ex) {
-			            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, ex, Integer.valueOf(202));
+			            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, ex, I(202));
 			        }
 			    }
-			    
+			
 			    if (cdao.fillParticipants()) {
 			        try {
 			            new CalendarMySQL().getParticipantsSQLIn(list, readcon, cdao.getContextID(), sqlin);
 			        } catch (final SQLException ex) {
-			            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, ex, Integer.valueOf(203));
+			            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, ex, I(203));
 			        }
 			    }
+			    if (cdao.fillConfirmations()) {
+	                ParticipantStorage.getInstance().selectExternal(c, readcon, list, arr);
+			    }
 			}
-            
+
             if (cdao.fillFolderID()) {
                 cdao.setGlobalFolderID(cdao.getEffectiveFolderId());
             }
-            
-            // Security check for bug 10836 
+
+            // Security check for bug 10836
             if (CACHED_ITERATOR_FAST_FETCH && (cdao.getFolderType() == FolderObject.PRIVATE || cdao.getFolderType() == FolderObject.SHARED)) {
             	final UserParticipant up[] = cdao.getUsers();
             	boolean found = false;
@@ -270,7 +268,7 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
             		throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.LOAD_PERMISSION_EXCEPTION_5));
             	}
             }
-            
+
         } finally {
             if (readcon != null) {
                 DBPool.push(c, readcon);
@@ -279,5 +277,4 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
         }
         return cdao;
     }
-    
 }

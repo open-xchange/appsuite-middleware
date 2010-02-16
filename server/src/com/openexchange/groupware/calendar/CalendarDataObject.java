@@ -80,6 +80,7 @@ public class CalendarDataObject extends Appointment {
     private boolean fill_participants;
     private boolean fill_user_participants;
     private boolean fill_folder_id;
+    private boolean fillConfirmations;
 
     @Override
     public final void setUntil(final Date until) {
@@ -305,6 +306,14 @@ public class CalendarDataObject extends Appointment {
 
      public boolean fillParticipants() {
         return fill_participants;
+    }
+
+    public void setFillConfirmations() {
+        fillConfirmations = true;
+    }
+
+    public boolean fillConfirmations() {
+        return fillConfirmations;
     }
 
      public void setFillUserParticipants() {

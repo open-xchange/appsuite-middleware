@@ -1670,7 +1670,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         ResultSet rs = null;
         try {
             final StringBuilder query = new StringBuilder(128);
-            query.append("SELECT id, type, dn, ma from prg_date_rights WHERE cid = ");
+            query.append("SELECT id, type, dn, ma FROM prg_date_rights WHERE cid=");
             query.append(cdao.getContextID());
             query.append(PARTICIPANTS_IDENTIFIER_IS);
             query.append(cdao.getObjectID());

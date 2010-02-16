@@ -50,6 +50,9 @@
 package com.openexchange.calendar.storage;
 
 import java.sql.Connection;
+import java.util.List;
+import com.openexchange.calendar.ParticipantLogic;
+import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.Participant;
@@ -84,4 +87,21 @@ public abstract class ParticipantStorage {
 
     public abstract ExternalUserParticipant[] selectExternal(Context ctx, Connection con, int appointmentId) throws OXCalendarException;
 
+    public void selectExternal(Context ctx, Connection con, List<CalendarDataObject> cdaos, int[] ids) throws OXCalendarException {
+        for (int id : ids) {
+            CalendarDataObject cdao = null;
+            for (CalendarDataObject test : cdaos) {
+                if (id == test.getObjectID()) {
+                    cdao = test;
+                    break;
+                }
+            }
+            if (null == cdao) {
+                continue;
+            }
+            ExternalUserParticipant[] externals = selectExternal(ctx, con, cdao.getObjectID());
+            cdao.setParticipants(ParticipantLogic.mergeFallback(cdao.getParticipants(), externals));
+            cdao.setConfirmations(ParticipantLogic.mergeConfirmations(externals, cdao.getParticipants()));
+        }
+    }
 }

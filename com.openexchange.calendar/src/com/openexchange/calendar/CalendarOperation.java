@@ -50,6 +50,7 @@
 package com.openexchange.calendar;
 
 import static com.openexchange.groupware.EnumComponent.APPOINTMENT;
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -705,6 +706,14 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                                 final Participants participants = cimp.getParticipants(cdao, readcon);
                                 cdao.setParticipants(participants.getList());
                             }
+                        } else if (Appointment.CONFIRMATIONS == cols[a]) {
+                            if (CachedCalendarIterator.CACHED_ITERATOR_FAST_FETCH) {
+                                cdao.setFillConfirmations();
+                            } else {
+                                ExternalUserParticipant[] externals = ParticipantStorage.getInstance().selectExternal(cdao.getContext(), readcon, cdao.getObjectID());
+                                cdao.setParticipants(ParticipantLogic.mergeFallback(cdao.getParticipants(), externals));
+                                cdao.setConfirmations(ParticipantLogic.mergeConfirmations(externals, cdao.getParticipants()));
+                            }
                         } else if (Appointment.FOLDER_ID == cols[a]) {
                             if (recColl.getFieldName(Appointment.FOLDER_ID) != null) {
                                 if (oids == null) {
@@ -743,8 +752,9 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                             }
                         } else {
                             throw new SearchIteratorException(
-                                    SearchIteratorException.SearchIteratorCode.NOT_IMPLEMENTED,
-                                    APPOINTMENT, Integer.valueOf(cols[a]));
+                                SearchIteratorException.SearchIteratorCode.NOT_IMPLEMENTED,
+                                APPOINTMENT,
+                                I(cols[a]));
                         }
                     } else {
                         ff.fillField(cdao, g++, co_rs);
