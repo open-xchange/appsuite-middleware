@@ -110,7 +110,7 @@ public class ConfirmationsTest extends AbstractAJAXSession {
         GetResponse response = client.execute(new GetRequest(appointment));
         Appointment test = response.getAppointment(tz);
         ConfirmableParticipant[] confirmations = test.getConfirmations();
-        assertNotNull(confirmations);
+        assertNotNull("Appointment of GET request does not contain any confirmations.", confirmations);
         // Following expected must be 2 if internal user participants get its way into the confirmations array.
         assertEquals("Number of external participant confirmations does not match.", 1, confirmations.length);
         assertEquals("Mailaddress of external participant does not match.", participant.getEmailAddress(), confirmations[0].getEmailAddress());
