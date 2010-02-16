@@ -53,16 +53,17 @@ import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * {@link AJAXActionServiceFactory} a factory for creating action services.
- *
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public interface AJAXActionServiceFactory {
 
     /**
-     * Creates the action service for performing the request. 
-     * @param action the name of the action
-     * @return the action service implementation and never <code>null</code>.
-     * @throws AjaxException if an action service can not be created for the given name.
+     * Creates the action service for performing the request.
+     * 
+     * @param action The name of the action
+     * @return The action service implementation and never <code>null</code>.
+     * @throws AjaxException If an action service can not be created for the given name.
      */
     AJAXActionService createActionService(String action) throws AjaxException;
 
