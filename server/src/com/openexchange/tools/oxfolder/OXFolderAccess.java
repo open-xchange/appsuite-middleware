@@ -443,34 +443,7 @@ public class OXFolderAccess {
                 /*
                  * No delete permission: Return true if folder is empty
                  */
-                switch (module) {
-                case FolderObject.TASK:
-                    final Tasks tasks = Tasks.getInstance();
-                    return readCon == null ? tasks.isFolderEmpty(ctx, fo.getObjectID()) : tasks.isFolderEmpty(
-                        ctx,
-                        readCon,
-                        fo.getObjectID());
-                case FolderObject.CALENDAR:
-                    final AppointmentSQLInterface calSql =
-                        ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
-                    return readCon == null ? calSql.isFolderEmpty(userId, fo.getObjectID()) : calSql.isFolderEmpty(
-                        userId,
-                        fo.getObjectID(),
-                        readCon);
-                case FolderObject.CONTACT:
-                    return readCon == null ? !Contacts.containsAnyObjectInFolder(fo.getObjectID(), ctx) : !Contacts.containsAnyObjectInFolder(
-                        fo.getObjectID(),
-                        readCon,
-                        ctx);
-                case FolderObject.PROJECT:
-                    break;
-                case FolderObject.INFOSTORE:
-                    final InfostoreFacade db =
-                        new InfostoreFacadeImpl(readCon == null ? new DBPoolProvider() : new StaticDBPoolProvider(readCon));
-                    return db.isFolderEmpty(fo.getObjectID(), ctx);
-                default:
-                    throw new OXFolderException(FolderCode.UNKNOWN_MODULE, folderModule2String(module), Integer.valueOf(ctx.getContextId()));
-                }
+                return isEmpty(fo, session, ctx);
             }
             return false;
         } catch (final SQLException e) {
