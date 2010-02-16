@@ -49,6 +49,8 @@
 
 package com.openexchange.multiple.handlers;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -102,6 +104,10 @@ public final class AppointmentFactoryService implements MultipleHandlerFactorySe
             final JSONValue retval = appointmentRequest.action(action, jsonObject);
             timestamp = appointmentRequest.getTimestamp();
             return retval;
+        }
+
+        public Collection<AbstractOXException> getWarnings() {
+            return Collections.<AbstractOXException> emptySet();
         }
 
     }

@@ -50,6 +50,7 @@
 package com.openexchange.ajax;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
 import javax.servlet.ServletException;
@@ -111,7 +112,7 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
             }
             final Object response = handler.performRequest(action, request, getSessionObject(req), req.isSecure());
             final Date timestamp = handler.getTimestamp();
-            writeResponseSafely(response, timestamp, resp);       
+            writeResponseSafely(response, timestamp, handler.getWarnings(), resp);       
         } catch (final AbstractOXException x) {
             writeException(x, resp);
         } catch (final Throwable t) {
@@ -129,11 +130,14 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
         return false;
     }
 
-    private void writeResponseSafely(final Object data, final Date timestamp, final HttpServletResponse resp) {
+    private void writeResponseSafely(final Object data, final Date timestamp, final Collection<AbstractOXException> warnings, final HttpServletResponse resp) {
         final Response response = new Response();
         response.setData(data);
         if(null != timestamp) {
             response.setTimestamp(timestamp);
+        }
+        if (null != warnings && !warnings.isEmpty()) {
+            response.setWarning(warnings.iterator().next());
         }
         try {
             writeResponse(response, resp);

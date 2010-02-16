@@ -51,6 +51,7 @@ package com.openexchange.ajax;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.Set;
 import java.util.Map.Entry;
 import javax.servlet.ServletException;
@@ -149,6 +150,10 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
             final AJAXRequestResult result = actionService.perform(data, getSessionObject(req));
             response.setData(result.getResultObject());
             response.setTimestamp(result.getTimestamp());
+            final Collection<AbstractOXException> warnings = result.getWarnings();
+            if (null != warnings && !warnings.isEmpty()) {
+                response.setWarning(warnings.iterator().next());
+            }
         } catch (final AbstractOXException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);

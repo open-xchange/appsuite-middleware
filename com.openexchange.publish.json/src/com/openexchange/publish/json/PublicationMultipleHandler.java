@@ -86,11 +86,11 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class PublicationMultipleHandler implements MultipleHandler {
 
-    private PublicationTargetDiscoveryService discovery;
+    private final PublicationTargetDiscoveryService discovery;
 
-    private Map<String, EntityType> entities;
+    private final Map<String, EntityType> entities;
 
-    public PublicationMultipleHandler(PublicationTargetDiscoveryService discovery, Map<String, EntityType> entities) {
+    public PublicationMultipleHandler(final PublicationTargetDiscoveryService discovery, final Map<String, EntityType> entities) {
         this.discovery = discovery;
         this.entities = entities;
     }
@@ -113,7 +113,7 @@ public class PublicationMultipleHandler implements MultipleHandler {
     }};
 
 
-    public Object performRequest(String action, JSONObject request, ServerSession session, boolean secure) throws AbstractOXException, JSONException {
+    public Object performRequest(final String action, final JSONObject request, final ServerSession session, final boolean secure) throws AbstractOXException, JSONException {
         try {
             if (null == action) {
                 throw MISSING_PARAMETER.create("action");
@@ -132,54 +132,54 @@ public class PublicationMultipleHandler implements MultipleHandler {
             } else {
                 throw UNKNOWN_ACTION.create(action);
             }
-        } catch (AbstractOXException x) {
+        } catch (final AbstractOXException x) {
             throw x;
-        } catch (JSONException x) {
+        } catch (final JSONException x) {
             throw x;
-        } catch (Throwable t) {
+        } catch (final Throwable t) {
             throw wrapThrowable(t);
         }
     }
 
-    private Object listPublications(JSONObject request, ServerSession session) throws JSONException, PublicationException, PublicationJSONException {
-        JSONArray ids = request.getJSONArray(ResponseFields.DATA);
-        Context context = session.getContext();
-        List<Publication> publications = new ArrayList<Publication>(ids.length());
+    private Object listPublications(final JSONObject request, final ServerSession session) throws JSONException, PublicationException, PublicationJSONException {
+        final JSONArray ids = request.getJSONArray(ResponseFields.DATA);
+        final Context context = session.getContext();
+        final List<Publication> publications = new ArrayList<Publication>(ids.length());
         for (int i = 0, size = ids.length(); i < size; i++) {
-            int id = ids.getInt(i);
-            PublicationTarget target = discovery.getTarget(context, id);
+            final int id = ids.getInt(i);
+            final PublicationTarget target = discovery.getTarget(context, id);
             if(target != null) {
-                PublicationService publicationService = target.getPublicationService();
-                Publication publication = publicationService.load(context, id);
+                final PublicationService publicationService = target.getPublicationService();
+                final Publication publication = publicationService.load(context, id);
                 if (publication != null) {
                     publications.add(publication);
                 }
             }
             
         }
-        String[] basicColumns = getBasicColumns(request);
-        Map<String, String[]> dynamicColumns = getDynamicColumns(request);
-        List<String> dynamicColumnOrder = getDynamicColumnOrder(request);
+        final String[] basicColumns = getBasicColumns(request);
+        final Map<String, String[]> dynamicColumns = getDynamicColumns(request);
+        final List<String> dynamicColumnOrder = getDynamicColumnOrder(request);
 
         return createList(publications, basicColumns, dynamicColumns, dynamicColumnOrder);
     }
 
-    private Object loadAllPublicationsForEntity(JSONObject request, ServerSession session) throws PublicationJSONException, JSONException, PublicationException {
+    private Object loadAllPublicationsForEntity(final JSONObject request, final ServerSession session) throws PublicationJSONException, JSONException, PublicationException {
         if (!request.has("entityModule")) {
             throw MISSING_PARAMETER.create("entityModule");
         }
-        String module = request.optString("entityModule");
-        EntityType entityType = entities.get(module);
+        final String module = request.optString("entityModule");
+        final EntityType entityType = entities.get(module);
         if (null == entityType) {
             throw UNKOWN_ENTITY_MODULE.create(module);
         }
-        String entityId = entityType.toEntityID(request);
-        Context context = session.getContext();
-        List<Publication> publications = loadAllPublicationsForEntity(context, entityId, module);
+        final String entityId = entityType.toEntityID(request);
+        final Context context = session.getContext();
+        final List<Publication> publications = loadAllPublicationsForEntity(context, entityId, module);
 
-        String[] basicColumns = getBasicColumns(request);
-        Map<String, String[]> dynamicColumns = getDynamicColumns(request);
-        List<String> dynamicColumnOrder = getDynamicColumnOrder(request);
+        final String[] basicColumns = getBasicColumns(request);
+        final Map<String, String[]> dynamicColumns = getDynamicColumns(request);
+        final List<String> dynamicColumnOrder = getDynamicColumnOrder(request);
 
         return createList(publications, basicColumns, dynamicColumns, dynamicColumnOrder);
     }
@@ -195,11 +195,11 @@ public class PublicationMultipleHandler implements MultipleHandler {
     };
 
 
-    private Map<String, String[]> getDynamicColumns(JSONObject request) throws JSONException {
-        List<String> identifiers = getDynamicColumnOrder(request);
-        Map<String, String[]> dynamicColumns = new HashMap<String, String[]>();
-        for (String identifier : identifiers) {
-            String columns = request.optString(identifier);
+    private Map<String, String[]> getDynamicColumns(final JSONObject request) throws JSONException {
+        final List<String> identifiers = getDynamicColumnOrder(request);
+        final Map<String, String[]> dynamicColumns = new HashMap<String, String[]>();
+        for (final String identifier : identifiers) {
+            final String columns = request.optString(identifier);
             if (columns != null && ! columns.equals("")) {
                 dynamicColumns.put(identifier, columns.split("\\s*,\\s*"));
             }
@@ -207,37 +207,37 @@ public class PublicationMultipleHandler implements MultipleHandler {
         return dynamicColumns;
     }
 
-    private List<String> getDynamicColumnOrder(JSONObject request) throws JSONException {
+    private List<String> getDynamicColumnOrder(final JSONObject request) throws JSONException {
         if (request.has("dynamicColumnPlugins")) {
             return Arrays.asList(request.getString("dynamicColumnPlugins").split("\\s*,\\s*"));
         }
 
-        List<String> dynamicColumnIdentifiers = new ArrayList<String>();
-        for (String paramName : request.keySet()) {
+        final List<String> dynamicColumnIdentifiers = new ArrayList<String>();
+        for (final String paramName : request.keySet()) {
             if (!KNOWN_PARAMS.contains(paramName) && paramName.contains(".")) {
                 dynamicColumnIdentifiers.add(paramName);
             }
         }
-        String order = request.optString("__query");
+        final String order = request.optString("__query");
         Collections.sort(dynamicColumnIdentifiers, new QueryStringPositionComparator(order));
         return dynamicColumnIdentifiers;
     }
 
-    private String[] getBasicColumns(JSONObject request) throws JSONException {
-        String columns = request.optString("columns");
+    private String[] getBasicColumns(final JSONObject request) throws JSONException {
+        final String columns = request.optString("columns");
         if (columns == null || columns.equals("")) {
             return new String[] { "id", "entityId", "entityModule", "target" };
         }
         return columns.split("\\s*,\\s*");
     }
 
-    private List<Publication> loadAllPublicationsForEntity(Context context, String entityId, String module) throws PublicationException {
-        List<Publication> publications = new LinkedList<Publication>();
-        Collection<PublicationTarget> targetsForEntityType = discovery.getTargetsForEntityType(module);
-        for (PublicationTarget target : targetsForEntityType) {
+    private List<Publication> loadAllPublicationsForEntity(final Context context, final String entityId, final String module) throws PublicationException {
+        final List<Publication> publications = new LinkedList<Publication>();
+        final Collection<PublicationTarget> targetsForEntityType = discovery.getTargetsForEntityType(module);
+        for (final PublicationTarget target : targetsForEntityType) {
             if (target.isResponsibleFor(module)) {
-                PublicationService publicationService = target.getPublicationService();
-                Collection<Publication> allPublicationsForEntity = publicationService.getAllPublications(context, entityId);
+                final PublicationService publicationService = target.getPublicationService();
+                final Collection<Publication> allPublicationsForEntity = publicationService.getAllPublications(context, entityId);
                 if (allPublicationsForEntity != null) {
                     publications.addAll(allPublicationsForEntity);
                 }
@@ -246,15 +246,15 @@ public class PublicationMultipleHandler implements MultipleHandler {
         return publications;
     }
 
-    private Object loadPublication(JSONObject request, ServerSession session) throws JSONException, AbstractOXException {
-        int id = request.getInt("id");
-        String target = request.optString("target");
-        Context context = session.getContext();
-        Publication publication = loadPublication(id, context, target);
+    private Object loadPublication(final JSONObject request, final ServerSession session) throws JSONException, AbstractOXException {
+        final int id = request.getInt("id");
+        final String target = request.optString("target");
+        final Context context = session.getContext();
+        final Publication publication = loadPublication(id, context, target);
         return createResponse(publication, request.optString("__serverURL"));
     }
 
-    private Publication loadPublication(int id, Context context, String target) throws AbstractOXException {
+    private Publication loadPublication(final int id, final Context context, final String target) throws AbstractOXException {
         PublicationService service = null;
         if (target != null && !target.equals("")) {
             service = discovery.getTarget(target).getPublicationService();
@@ -267,17 +267,17 @@ public class PublicationMultipleHandler implements MultipleHandler {
         return service.load(context, id);
     }
 
-    private Object deletePublication(JSONObject request, ServerSession session) throws PublicationException, JSONException {
-        JSONArray ids = request.getJSONArray(ResponseFields.DATA);
-        Context context = session.getContext();
+    private Object deletePublication(final JSONObject request, final ServerSession session) throws PublicationException, JSONException {
+        final JSONArray ids = request.getJSONArray(ResponseFields.DATA);
+        final Context context = session.getContext();
         for (int i = 0, size = ids.length(); i < size; i++) {
-            int id = ids.getInt(i);
-            PublicationTarget target = discovery.getTarget(context, id);
+            final int id = ids.getInt(i);
+            final PublicationTarget target = discovery.getTarget(context, id);
             if(target == null) {
                 continue;
             }
-            PublicationService publisher = target.getPublicationService();
-            Publication publication = new Publication();
+            final PublicationService publisher = target.getPublicationService();
+            final Publication publication = new Publication();
             publication.setContext(context);
             publication.setId(id);
             publication.setUserId(session.getUserId());
@@ -286,8 +286,8 @@ public class PublicationMultipleHandler implements MultipleHandler {
         return 1;
     }
 
-    private Object updatePublication(JSONObject request, ServerSession session) throws JSONException, PublicationException, PublicationJSONException {
-        Publication publication = getPublication(request, session);
+    private Object updatePublication(final JSONObject request, final ServerSession session) throws JSONException, PublicationException, PublicationJSONException {
+        final Publication publication = getPublication(request, session);
 
         publication.update();
 
@@ -295,8 +295,8 @@ public class PublicationMultipleHandler implements MultipleHandler {
 
     }
 
-    private Object createPublication(JSONObject request, ServerSession session) throws PublicationException, PublicationJSONException, JSONException {
-        Publication publication = getPublication(request, session);
+    private Object createPublication(final JSONObject request, final ServerSession session) throws PublicationException, PublicationJSONException, JSONException {
+        final Publication publication = getPublication(request, session);
         publication.setId(-1);
 
         publication.create();
@@ -305,11 +305,11 @@ public class PublicationMultipleHandler implements MultipleHandler {
 
     }
 
-    private Object createList(List<Publication> publications, String[] basicColumns, Map<String, String[]> dynamicColumns, List<String> dynamicColumnOrder) throws PublicationJSONException, JSONException {
-        JSONArray rows = new JSONArray();
-        PublicationWriter writer = new PublicationWriter();
-        for (Publication publication : publications) {
-            JSONArray row = writer.writeArray(
+    private Object createList(final List<Publication> publications, final String[] basicColumns, final Map<String, String[]> dynamicColumns, final List<String> dynamicColumnOrder) throws PublicationJSONException, JSONException {
+        final JSONArray rows = new JSONArray();
+        final PublicationWriter writer = new PublicationWriter();
+        for (final Publication publication : publications) {
+            final JSONArray row = writer.writeArray(
                 publication,
                 basicColumns,
                 dynamicColumns,
@@ -320,21 +320,25 @@ public class PublicationMultipleHandler implements MultipleHandler {
         return rows;
     }
 
-    private Object createResponse(Publication publication, String urlPrefix) throws JSONException, PublicationJSONException {
-        JSONObject asJson = new PublicationWriter().write(publication, urlPrefix);
+    private Object createResponse(final Publication publication, final String urlPrefix) throws JSONException, PublicationJSONException {
+        final JSONObject asJson = new PublicationWriter().write(publication, urlPrefix);
         return asJson;
     }
 
-    private Publication getPublication(JSONObject request, ServerSession session) throws JSONException, PublicationException, PublicationJSONException {
-        JSONObject object = request.getJSONObject(ResponseFields.DATA);
-        Publication publication = new PublicationParser(discovery).parse(object);
+    private Publication getPublication(final JSONObject request, final ServerSession session) throws JSONException, PublicationException, PublicationJSONException {
+        final JSONObject object = request.getJSONObject(ResponseFields.DATA);
+        final Publication publication = new PublicationParser(discovery).parse(object);
         publication.setUserId(session.getUserId());
         publication.setContext(session.getContext());
         if (publication.getTarget() == null && publication.getId() > 0) {
-            PublicationTarget target = discovery.getTarget(publication.getContext(), publication.getId());
+            final PublicationTarget target = discovery.getTarget(publication.getContext(), publication.getId());
             publication.setTarget(target);
         }
         return publication;
+    }
+
+    public Collection<AbstractOXException> getWarnings() {
+        return Collections.<AbstractOXException> emptySet();
     }
 
 }

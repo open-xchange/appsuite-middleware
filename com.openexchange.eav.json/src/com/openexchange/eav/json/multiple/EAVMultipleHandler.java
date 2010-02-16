@@ -49,6 +49,8 @@
 
 package com.openexchange.eav.json.multiple;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -119,11 +121,11 @@ public class EAVMultipleHandler implements MultipleHandler {
         return null;
     }
 
-    public Object performRequest(String action, JSONObject jsonObject, ServerSession session, boolean secure) throws AbstractOXException, JSONException {
+    public Object performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws AbstractOXException, JSONException {
         this.action = action;
         parse(jsonObject, session.getUser());
         
-        Context ctx = session.getContext();
+        final Context ctx = session.getContext();
         
         if(action.equals("new")) {
             if(parsedNodes == null) {
@@ -138,7 +140,7 @@ public class EAVMultipleHandler implements MultipleHandler {
             if(parsedNodes == null) {
                 throw EAVJsonExceptionMessage.MissingParameter.create("body");
             }
-            EAVTypeMetadataNode savedTypes = storage.getTypes(ctx, path.parent(), parsedNodes);
+            final EAVTypeMetadataNode savedTypes = storage.getTypes(ctx, path.parent(), parsedNodes);
             if(types != null) {
                 types = savedTypes.mergeWith(types);
             } else {
@@ -155,9 +157,9 @@ public class EAVMultipleHandler implements MultipleHandler {
             if(setTransformation == null) {
                 throw EAVJsonExceptionMessage.MissingParameter.create("body");
             }
-            EAVNode structure = TreeTools.copyStructure(new EAVNode(), setTransformation);
+            final EAVNode structure = TreeTools.copyStructure(new EAVNode(), setTransformation);
             
-            EAVTypeMetadataNode savedTypes = storage.getTypes(ctx, path.parent(), structure);
+            final EAVTypeMetadataNode savedTypes = storage.getTypes(ctx, path.parent(), structure);
             if(types != null) {
                 types = savedTypes.mergeWith(types);
             } else {
@@ -174,7 +176,7 @@ public class EAVMultipleHandler implements MultipleHandler {
             storage.delete(ctx, path);
             return 1;
         } else if (action.equals("get")) {
-            EAVNode loaded = (loadBinaries == null) ? storage.get(ctx, path, allBinaries) : storage.get(ctx, path, loadBinaries);
+            final EAVNode loaded = (loadBinaries == null) ? storage.get(ctx, path, allBinaries) : storage.get(ctx, path, loadBinaries);
             if(jsonObject.has("binaryEncoding") && raw && !loaded.isLeaf()) {
                 throw EAVJsonExceptionMessage.BinariesInTreesMustBeBase64Encoded.create();
             }
@@ -197,22 +199,22 @@ public class EAVMultipleHandler implements MultipleHandler {
         
     }
 
-    private void parse(JSONObject jsonObject, User user) throws JSONException, EAVJsonException {
+    private void parse(final JSONObject jsonObject, final User user) throws JSONException, EAVJsonException {
         if(!jsonObject.has("path")) {
             throw EAVJsonExceptionMessage.MissingParameter.create("path");
         }
         path = EAVPath.parse(jsonObject.getString("path"));
         parsedNodes = null;
         if(jsonObject.has(ResponseFields.DATA)) {
-            Object payload = jsonObject.get(ResponseFields.DATA);
+            final Object payload = jsonObject.get(ResponseFields.DATA);
             
             if(JSONObject.class.isInstance(payload)) {
-                JSONObject data = (JSONObject) payload;
+                final JSONObject data = (JSONObject) payload;
                 if(data.has("data") || data.has("types")) {
                     types = new JSONTypeMetadataParser(data.getJSONObject("types")).getNode();
                     
                     if(data.has("data")) {
-                        Object definitiveData = data.get("data");
+                        final Object definitiveData = data.get("data");
                         if(JSONObject.class.isInstance(definitiveData)) {
                             if(!action.equals("updateSets")) {
                                 parsedNodes = new JSONParser(path.last(), (JSONObject) definitiveData).getNode();
@@ -221,7 +223,7 @@ public class EAVMultipleHandler implements MultipleHandler {
                             }
                             parsedNodes = new JSONParser(path.last(), (JSONObject) definitiveData).getNode();
                         } else {
-                            JSONObject toParse = new JSONObject();
+                            final JSONObject toParse = new JSONObject();
                             toParse.put(path.last(), definitiveData);
                             parsedNodes = new JSONParser(path.last(), toParse).getNode().getChildByName(path.last());
                             parsedNodes.setParent(null);
@@ -232,18 +234,18 @@ public class EAVMultipleHandler implements MultipleHandler {
                     if(!action.equals("updateSets")) {
                         parsedNodes = new JSONParser(path.last(), data).getNode();
                     } else {
-                        setTransformation = new JSONArrayUpdateParser(path.last(), (JSONObject) data).getNode();
+                        setTransformation = new JSONArrayUpdateParser(path.last(), data).getNode();
                     }
                     parsedNodes = new JSONParser(path.last(), data).getNode();
                 }
             } else {
-                JSONObject toParse = new JSONObject();
+                final JSONObject toParse = new JSONObject();
                 toParse.put(path.last(), payload);
                 if(!action.equals("updateSets")) {
                     parsedNodes = new JSONParser(path.last(), toParse).getNode().getChildByName(path.last());
                     parsedNodes.setParent(null);
                 } else {
-                    setTransformation = new JSONArrayUpdateParser(path.last(), (JSONObject) toParse).getNode().getChildByName(path.last());
+                    setTransformation = new JSONArrayUpdateParser(path.last(), toParse).getNode().getChildByName(path.last());
                     setTransformation.setParent(null);
                 }
                 parsedNodes = new JSONParser(path.last(), toParse).getNode().getChildByName(path.last());
@@ -255,13 +257,13 @@ public class EAVMultipleHandler implements MultipleHandler {
         }
         
         if(action.equals("get") && jsonObject.has(ResponseFields.DATA)) {
-            JSONObject metadata = jsonObject.getJSONObject(ResponseFields.DATA);
+            final JSONObject metadata = jsonObject.getJSONObject(ResponseFields.DATA);
             if(metadata.has("loadBinaries")) {
-                Object loadBin = metadata.get("loadBinaries");
+                final Object loadBin = metadata.get("loadBinaries");
                 if(!JSONArray.class.isInstance(loadBin)) {
                     throw EAVJsonExceptionMessage.InvalidLoadBinaries.create();
                 }
-                JSONArray namedBinaries = (JSONArray) loadBin;
+                final JSONArray namedBinaries = (JSONArray) loadBin;
                 loadBinaries = new HashSet<EAVPath>();
                 for(int i = 0, size = namedBinaries.length(); i < size; i++) {
                     loadBinaries.add(EAVPath.parse(namedBinaries.getString(i)));
@@ -269,7 +271,7 @@ public class EAVMultipleHandler implements MultipleHandler {
             }
         }
         if(jsonObject.has("binaryEncoding")) {
-            String binEncoding = jsonObject.getString("binaryEncoding");
+            final String binEncoding = jsonObject.getString("binaryEncoding");
             if("base64".equalsIgnoreCase(binEncoding)) {
                 raw = false;
             } else if ("raw".equalsIgnoreCase(binEncoding)) {
@@ -294,9 +296,12 @@ public class EAVMultipleHandler implements MultipleHandler {
         }
     }
 
-    public void setStorage(EAVStorage storage) {
+    public void setStorage(final EAVStorage storage) {
         this.storage = storage;
     }
 
-   
+    public Collection<AbstractOXException> getWarnings() {
+        return Collections.<AbstractOXException> emptySet();
+    }
+
 }

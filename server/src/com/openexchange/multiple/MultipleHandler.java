@@ -49,6 +49,7 @@
 
 package com.openexchange.multiple;
 
+import java.util.Collection;
 import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -87,6 +88,13 @@ public interface MultipleHandler {
      * @return The time stamp associated with performed request or <code>null</code> if none available
      */
     public Date getTimestamp();
+
+    /**
+     * Gets the warnings.
+     * 
+     * @return The warnings
+     */
+    public Collection<AbstractOXException> getWarnings();
 
     /**
      * Closes/frees all associated resources.

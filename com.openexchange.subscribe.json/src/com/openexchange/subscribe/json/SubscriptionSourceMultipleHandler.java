@@ -49,9 +49,10 @@
 
 package com.openexchange.subscribe.json;
 
+import static com.openexchange.subscribe.json.MultipleHandlerTools.wrapThrowable;
 import static com.openexchange.subscribe.json.SubscriptionJSONErrorMessages.MISSING_PARAMETER;
 import static com.openexchange.subscribe.json.SubscriptionJSONErrorMessages.UNKNOWN_ACTION;
-import static com.openexchange.subscribe.json.MultipleHandlerTools.wrapThrowable;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -79,10 +80,10 @@ public class SubscriptionSourceMultipleHandler implements MultipleHandler {
     public static final int CLASS_ID = 1;
     public static final Set<String> ACTIONS_REQUIRING_BODY = Collections.emptySet();
 
-    private SubscriptionSourceDiscoveryService discoverer;
-    private SubscriptionSourceJSONWriterInterface writer = new SubscriptionSourceJSONWriter();
+    private final SubscriptionSourceDiscoveryService discoverer;
+    private final SubscriptionSourceJSONWriterInterface writer = new SubscriptionSourceJSONWriter();
     
-    public SubscriptionSourceMultipleHandler(SubscriptionSourceDiscoveryService discoverer) {
+    public SubscriptionSourceMultipleHandler(final SubscriptionSourceDiscoveryService discoverer) {
         super();
         this.discoverer = discoverer;
     }
@@ -95,7 +96,11 @@ public class SubscriptionSourceMultipleHandler implements MultipleHandler {
         return null;
     }
 
-    public JSONValue performRequest(String action, JSONObject request, ServerSession session, boolean secure) throws AbstractOXException, JSONException {
+    public Collection<AbstractOXException> getWarnings() {
+        return Collections.<AbstractOXException> emptySet();
+    }
+
+    public JSONValue performRequest(final String action, final JSONObject request, final ServerSession session, final boolean secure) throws AbstractOXException, JSONException {
         try {
             if(null == action) {
                 MISSING_PARAMETER.throwException("action");
@@ -108,43 +113,43 @@ public class SubscriptionSourceMultipleHandler implements MultipleHandler {
                 UNKNOWN_ACTION.throwException(action);
                 return null;
             }
-        } catch (AbstractOXException x) {
+        } catch (final AbstractOXException x) {
             throw x;
-        } catch (JSONException x) {
+        } catch (final JSONException x) {
             throw x;
-        } catch (Throwable t) {
+        } catch (final Throwable t) {
             throw wrapThrowable(t);
         }
     }
 
-    protected JSONValue listSources(JSONObject req, ServerSession session) throws AbstractOXException, JSONException  {
-        int module = getModule(req);
-        List<SubscriptionSource> sources = discoverer.getSources(module);
-        String[] columns = getColumns(req);
-        JSONArray json = writer.writeJSONArray(sources, columns);
+    protected JSONValue listSources(final JSONObject req, final ServerSession session) throws AbstractOXException, JSONException  {
+        final int module = getModule(req);
+        final List<SubscriptionSource> sources = discoverer.getSources(module);
+        final String[] columns = getColumns(req);
+        final JSONArray json = writer.writeJSONArray(sources, columns);
         return json;
     }
     
-    private String[] getColumns(JSONObject req) {
-        String columns = req.optString("columns");
+    private String[] getColumns(final JSONObject req) {
+        final String columns = req.optString("columns");
         if(columns == null) {
             return new String[]{"id", "displayName", "module", "icon",  "formDescription"};
         }
         return columns.split("\\s*,\\s*"); 
     }
 
-    protected JSONValue getSource(JSONObject req, ServerSession session) throws AbstractOXException, JSONException {
-        String identifier = req.getString("id");
+    protected JSONValue getSource(final JSONObject req, final ServerSession session) throws AbstractOXException, JSONException {
+        final String identifier = req.getString("id");
         if(identifier == null) {
             MISSING_PARAMETER.throwException("id");
         }
-        SubscriptionSource source = discoverer.getSource(identifier);
-        JSONObject data = writer.writeJSON(source);
+        final SubscriptionSource source = discoverer.getSource(identifier);
+        final JSONObject data = writer.writeJSON(source);
         return data;
     }
     
-    protected int getModule(JSONObject req) throws AbstractOXException {
-        String moduleAsString = req.optString("module");
+    protected int getModule(final JSONObject req) throws AbstractOXException {
+        final String moduleAsString = req.optString("module");
         if(moduleAsString == null) {
             return -1;
         }

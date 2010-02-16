@@ -49,6 +49,7 @@
 
 package com.openexchange.publish.json;
 
+import static com.openexchange.publish.json.MultipleHandlerTools.wrapThrowable;
 import static com.openexchange.publish.json.PublicationJSONErrorMessage.MISSING_PARAMETER;
 import static com.openexchange.publish.json.PublicationJSONErrorMessage.UNKNOWN_ACTION;
 import static com.openexchange.publish.json.PublicationJSONErrorMessage.UNKNOWN_TARGET;
@@ -70,7 +71,6 @@ import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.tools.session.ServerSession;
-import static com.openexchange.publish.json.MultipleHandlerTools.*;
 
 /**
  * {@link PublicationTargetMultipleHandler}
@@ -83,7 +83,7 @@ public class PublicationTargetMultipleHandler implements MultipleHandler {
 
     private PublicationTargetDiscoveryService discoverer = null;
 
-    public PublicationTargetMultipleHandler(PublicationTargetDiscoveryService discoverer) {
+    public PublicationTargetMultipleHandler(final PublicationTargetDiscoveryService discoverer) {
         super();
         this.discoverer = discoverer;
     }
@@ -95,7 +95,7 @@ public class PublicationTargetMultipleHandler implements MultipleHandler {
         return null;
     }
 
-    public JSONValue performRequest(String action, JSONObject request, ServerSession session, boolean secure) throws AbstractOXException, JSONException {
+    public JSONValue performRequest(final String action, final JSONObject request, final ServerSession session, final boolean secure) throws AbstractOXException, JSONException {
         try {
             if (null == action) {
                 throw MISSING_PARAMETER.create("action");
@@ -106,39 +106,43 @@ public class PublicationTargetMultipleHandler implements MultipleHandler {
             } else {
                 throw UNKNOWN_ACTION.create(action);
             }
-        } catch (Throwable t) {
+        } catch (final Throwable t) {
             throw wrapThrowable(t);
         }
     }
 
-    private JSONValue getTarget(JSONObject request, ServerSession session) throws PublicationJSONException, PublicationException, JSONException {
-        String identifier = request.optString("id");
+    public Collection<AbstractOXException> getWarnings() {
+        return Collections.<AbstractOXException> emptySet();
+    }
+
+    private JSONValue getTarget(final JSONObject request, final ServerSession session) throws PublicationJSONException, PublicationException, JSONException {
+        final String identifier = request.optString("id");
         if (identifier == null) {
             throw MISSING_PARAMETER.create("id");
         }
-        PublicationTarget target = discoverer.getTarget(identifier);
+        final PublicationTarget target = discoverer.getTarget(identifier);
         if(target == null) {
             throw UNKNOWN_TARGET.create(identifier);
         }
-        JSONObject data = new PublicationTargetWriter(createTranslator(session)).write(target, session.getUser(), session.getUserConfiguration());
+        final JSONObject data = new PublicationTargetWriter(createTranslator(session)).write(target, session.getUser(), session.getUserConfiguration());
         return data;
     }
 
-    private Translator createTranslator(ServerSession session) {
-        Locale locale = session.getUser().getLocale();
-        I18nService service = I18n.getInstance().get(locale);
+    private Translator createTranslator(final ServerSession session) {
+        final Locale locale = session.getUser().getLocale();
+        final I18nService service = I18n.getInstance().get(locale);
         return null == service ? Translator.EMPTY : new I18nTranslator(service);
     }
 
-    private JSONValue listTargets(JSONObject request, ServerSession session) throws JSONException, PublicationJSONException, PublicationException {
-        Collection<PublicationTarget> targets = discoverer.listTargets();
-        String[] columns = getColumns(request);
-        JSONArray json = new PublicationTargetWriter(createTranslator(session)).writeJSONArray(targets, columns, session.getUser(), session.getUserConfiguration());
+    private JSONValue listTargets(final JSONObject request, final ServerSession session) throws JSONException, PublicationJSONException, PublicationException {
+        final Collection<PublicationTarget> targets = discoverer.listTargets();
+        final String[] columns = getColumns(request);
+        final JSONArray json = new PublicationTargetWriter(createTranslator(session)).writeJSONArray(targets, columns, session.getUser(), session.getUserConfiguration());
         return json;
     }
 
-    private String[] getColumns(JSONObject req) {
-        String columns = req.optString("columns");
+    private String[] getColumns(final JSONObject req) {
+        final String columns = req.optString("columns");
         if (columns == null) {
             return new String[] { "id", "displayName", "module", "icon", "formDescription" };
         }

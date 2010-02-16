@@ -49,6 +49,8 @@
 
 package com.openexchange.sso.multiple;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Map.Entry;
 import org.json.JSONException;
@@ -108,4 +110,9 @@ public final class SSOMultipleHandler implements MultipleHandler {
     public void close() {
         result = null;
     }
+
+    public Collection<AbstractOXException> getWarnings() {
+        return Collections.<AbstractOXException> emptySet();
+    }
+
 }

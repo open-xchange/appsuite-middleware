@@ -49,6 +49,8 @@
 
 package com.openexchange.multiple;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Map.Entry;
 import org.json.JSONException;
@@ -61,20 +63,21 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * Gleamed from the UserMultipleHandler
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AJAXActionServiceAdapterHandler implements MultipleHandler, MultipleHandlerFactoryService {
-    
+
     private AJAXActionServiceFactory factory = null;
+
     private AJAXRequestResult result;
-    private String module;
-    
-    public AJAXActionServiceAdapterHandler(AJAXActionServiceFactory factory, String module) {
+
+    private final String module;
+
+    public AJAXActionServiceAdapterHandler(final AJAXActionServiceFactory factory, final String module) {
         this.factory = factory;
         this.module = module;
     }
@@ -91,8 +94,14 @@ public class AJAXActionServiceAdapterHandler implements MultipleHandler, Multipl
         return null == timestamp ? null : new Date(timestamp.getTime());
     }
 
-    
-    public Object performRequest(String action, JSONObject jsonObject, ServerSession session, boolean secure) throws AbstractOXException, JSONException {
+    public Collection<AbstractOXException> getWarnings() {
+        if (null == result) {
+            return Collections.<AbstractOXException> emptySet();
+        }
+        return result.getWarnings();
+    }
+
+    public Object performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws AbstractOXException, JSONException {
         final AJAXActionService actionService = factory.createActionService(action);
         if (null == actionService) {
             throw new AjaxException(AjaxException.Code.UnknownAction, action);

@@ -51,6 +51,7 @@ package com.openexchange.ajax;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Collection;
 import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -210,6 +211,10 @@ public class Multiple extends SessionServlet {
                     final Date timestamp = multipleHandler.getTimestamp();
                     if (null != timestamp) {
                         jsonWriter.key(ResponseFields.TIMESTAMP).value(timestamp.getTime());
+                    }
+                    final Collection<AbstractOXException> warnings = multipleHandler.getWarnings();
+                    if (null != warnings && !warnings.isEmpty()) {
+                        ResponseWriter.writeException(warnings.iterator().next(), jsonWriter);
                     }
                 } catch (final AbstractOXException e) {
                     LL.log(e);

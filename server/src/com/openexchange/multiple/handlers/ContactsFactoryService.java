@@ -49,6 +49,8 @@
 
 package com.openexchange.multiple.handlers;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -104,10 +106,15 @@ public final class ContactsFactoryService implements MultipleHandlerFactoryServi
                 timestamp = request.getTimestamp();
                 return retval;
             } catch (final AbstractOXException e) {
-                final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(ContactsFactoryService.ContactsHandler.class);
+                final org.apache.commons.logging.Log log =
+                    org.apache.commons.logging.LogFactory.getLog(ContactsFactoryService.ContactsHandler.class);
                 log.error(e.getMessage(), e);
                 throw e;
             }
+        }
+
+        public Collection<AbstractOXException> getWarnings() {
+            return Collections.<AbstractOXException> emptySet();
         }
 
     }

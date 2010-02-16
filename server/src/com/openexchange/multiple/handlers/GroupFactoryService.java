@@ -49,6 +49,8 @@
 
 package com.openexchange.multiple.handlers;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -101,6 +103,10 @@ public final class GroupFactoryService implements MultipleHandlerFactoryService 
             final Object retval = request.action(action, jsonObject);
             timestamp = request.getTimestamp();
             return retval;
+        }
+
+        public Collection<AbstractOXException> getWarnings() {
+            return Collections.<AbstractOXException> emptySet();
         }
 
     }
