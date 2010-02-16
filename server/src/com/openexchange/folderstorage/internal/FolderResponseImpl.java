@@ -62,6 +62,17 @@ import com.openexchange.groupware.AbstractOXException;
  */
 public final class FolderResponseImpl<R> implements FolderResponse<R> {
 
+    /**
+     * Generates a new {@link FolderResponse}.
+     * 
+     * @param response The response object
+     * @param warnings The warnings
+     * @return A new {@link FolderResponse}
+     */
+    public static <R> FolderResponse<R> newFolderResponse(final R response, final Collection<AbstractOXException> warnings) {
+        return new FolderResponseImpl<R>(response, warnings);
+    }
+
     private final R response;
 
     private final Collection<AbstractOXException> warnings;
@@ -72,7 +83,7 @@ public final class FolderResponseImpl<R> implements FolderResponse<R> {
      * @param response The response object
      * @param warnings The warnings
      */
-    public FolderResponseImpl(final R response, final Collection<AbstractOXException> warnings) {
+    private FolderResponseImpl(final R response, final Collection<AbstractOXException> warnings) {
         super();
         this.response = response;
         this.warnings = null == warnings ? Collections.<AbstractOXException> emptySet() : warnings;

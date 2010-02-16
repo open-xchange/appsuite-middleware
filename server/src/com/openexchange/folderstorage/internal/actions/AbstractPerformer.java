@@ -50,7 +50,9 @@
 package com.openexchange.folderstorage.internal.actions;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -59,6 +61,8 @@ import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.internal.FolderStorageRegistry;
 import com.openexchange.folderstorage.internal.StorageParametersImpl;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
@@ -85,6 +89,8 @@ public abstract class AbstractPerformer {
 
     protected StorageParameters storageParameters;
 
+    private final Set<AbstractOXException> warnings;
+
     /**
      * Initializes a new {@link AbstractPerformer} from given session.
      * 
@@ -109,6 +115,7 @@ public abstract class AbstractPerformer {
         user = session.getUser();
         context = session.getContext();
         storageParameters = new StorageParametersImpl(session);
+        warnings = new HashSet<AbstractOXException>(2);
     }
 
     /**
@@ -135,7 +142,27 @@ public abstract class AbstractPerformer {
         this.user = user;
         this.context = context;
         storageParameters = new StorageParametersImpl(user, context);
-    };
+        warnings = new HashSet<AbstractOXException>(2);
+    }
+
+    /**
+     * Adds a warning to this performer. Sets category to {@link Category#WARNING} if not done, yet.
+     * 
+     * @param warning The warning to add
+     */
+    protected void addWarning(final AbstractOXException warning) {
+        warning.setCategory(Category.WARNING);
+        warnings.add(warning);
+    }
+
+    /**
+     * Gets the warnings of this performer as an unmodifiable {@link Set set}.
+     * 
+     * @return The warnings as an unmodifiable set
+     */
+    public Set<AbstractOXException> getWarnings() {
+        return Collections.unmodifiableSet(warnings);
+    }
 
     /**
      * Creates a new storage parameter instance.

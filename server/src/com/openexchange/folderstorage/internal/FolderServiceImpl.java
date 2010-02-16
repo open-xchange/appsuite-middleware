@@ -55,6 +55,7 @@ import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderFilter;
+import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -170,13 +171,15 @@ public final class FolderServiceImpl implements FolderService {
         }
     }
 
-    public UserizedFolder[] getSubfolders(final String treeId, final String parentId, final boolean all, final User user, final Context context, final FolderServiceDecorator decorator) throws FolderException {
-        return new ListPerformer(user, context, decorator).doList(treeId, parentId, all);
+    public FolderResponse<UserizedFolder[]> getSubfolders(final String treeId, final String parentId, final boolean all, final User user, final Context context, final FolderServiceDecorator decorator) throws FolderException {
+        final ListPerformer listPerformer = new ListPerformer(user, context, decorator);
+        return FolderResponseImpl.newFolderResponse(listPerformer.doList(treeId, parentId, all), listPerformer.getWarnings());
     }
 
-    public UserizedFolder[] getSubfolders(final String treeId, final String parentId, final boolean all, final Session session, final FolderServiceDecorator decorator) throws FolderException {
+    public FolderResponse<UserizedFolder[]> getSubfolders(final String treeId, final String parentId, final boolean all, final Session session, final FolderServiceDecorator decorator) throws FolderException {
         try {
-            return new ListPerformer(new ServerSessionAdapter(session), decorator).doList(treeId, parentId, all);
+            final ListPerformer listPerformer = new ListPerformer(new ServerSessionAdapter(session), decorator);
+            return FolderResponseImpl.newFolderResponse(listPerformer.doList(treeId, parentId, all), listPerformer.getWarnings());
         } catch (final ContextException e) {
             throw new FolderException(e);
         }

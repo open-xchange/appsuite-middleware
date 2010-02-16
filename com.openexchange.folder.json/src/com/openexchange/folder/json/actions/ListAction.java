@@ -59,6 +59,7 @@ import com.openexchange.folder.json.Tools;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folder.json.writer.FolderWriter;
 import com.openexchange.folderstorage.ContentType;
+import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -105,13 +106,14 @@ public final class ListAction extends AbstractFolderAction {
          * Request subfolders from folder service
          */
         final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
-        final UserizedFolder[] subfolders =
+        final FolderResponse<UserizedFolder[]> subfoldersResponse =
             folderService.getSubfolders(treeId, parentId, all, session, new FolderServiceDecorator().setTimeZone(
                 Tools.getTimeZone(timeZoneId)).setAllowedContentTypes(allowedContentTypes));
         /*
          * Determine max. last-modified time stamp
          */
         long lastModified = 0;
+        final UserizedFolder[] subfolders = subfoldersResponse.getResponse();
         for (final UserizedFolder userizedFolder : subfolders) {
             final Date modified = userizedFolder.getLastModifiedUTC();
             if (modified != null) {
@@ -126,7 +128,7 @@ public final class ListAction extends AbstractFolderAction {
         /*
          * Return appropriate result
          */
-        return new AJAXRequestResult(jsonArray, 0 == lastModified ? null : new Date(lastModified));
+        return new AJAXRequestResult(jsonArray, 0 == lastModified ? null : new Date(lastModified)).addWarnings(subfoldersResponse.getWarnings());
     }
 
 }

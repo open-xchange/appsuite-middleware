@@ -413,6 +413,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                             logger.warn(new StringBuilder(128).append("The folder with ID \"").append(id).append("\" in tree \"").append(
                                 treeId).append("\" could not be fetched from storage \"").append(tmp.getClass().getSimpleName()).append(
                                 "\"").toString(), e);
+                            addWarning(e);
                             return null;
                         }
                         /*

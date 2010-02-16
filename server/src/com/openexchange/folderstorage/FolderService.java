@@ -214,7 +214,7 @@ public interface FolderService {
      * @return The subfolders
      * @throws FolderException If subfolders cannot be returned
      */
-    UserizedFolder[] getSubfolders(String treeId, String parentId, boolean all, User user, Context context, FolderServiceDecorator decorator) throws FolderException;
+    FolderResponse<UserizedFolder[]> getSubfolders(String treeId, String parentId, boolean all, User user, Context context, FolderServiceDecorator decorator) throws FolderException;
 
     /**
      * Gets the subfolders of specified parent in given tree.
@@ -228,7 +228,7 @@ public interface FolderService {
      * @return The subfolders
      * @throws FolderException If subfolders cannot be returned
      */
-    UserizedFolder[] getSubfolders(String treeId, String parentId, boolean all, Session session, FolderServiceDecorator decorator) throws FolderException;
+    FolderResponse<UserizedFolder[]> getSubfolders(String treeId, String parentId, boolean all, Session session, FolderServiceDecorator decorator) throws FolderException;
 
     /**
      * Gets the path from given folder to specified tree's root folder.
