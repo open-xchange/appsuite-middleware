@@ -391,11 +391,12 @@ public class OXFolderAccess {
                  */
                 return true;
             }
+            final int module = fo.getModule();
             if (oclPerm.canDeleteOwnObjects()) {
                 /*
                  * User may only delete own objects. Check if folder contains foreign objects which must not be deleted.
                  */
-                switch (fo.getModule()) {
+                switch (module) {
                 case FolderObject.TASK:
                     final Tasks tasks = Tasks.getInstance();
                     if (null == readCon) {
@@ -413,7 +414,8 @@ public class OXFolderAccess {
                     }
                     return !tasks.containsNotSelfCreatedTasks(session, readCon, fo.getObjectID());
                 case FolderObject.CALENDAR:
-                    final AppointmentSQLInterface calSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
+                    final AppointmentSQLInterface calSql =
+                        ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
                     return readCon == null ? !calSql.checkIfFolderContainsForeignObjects(userId, fo.getObjectID()) : !calSql.checkIfFolderContainsForeignObjects(
                         userId,
                         fo.getObjectID(),
@@ -427,24 +429,21 @@ public class OXFolderAccess {
                 case FolderObject.PROJECT:
                     break;
                 case FolderObject.INFOSTORE:
-                    final InfostoreFacade db = new InfostoreFacadeImpl(readCon == null ? new DBPoolProvider() : new StaticDBPoolProvider(
-                        readCon));
+                    final InfostoreFacade db =
+                        new InfostoreFacadeImpl(readCon == null ? new DBPoolProvider() : new StaticDBPoolProvider(readCon));
                     return !db.hasFolderForeignObjects(
                         fo.getObjectID(),
                         ctx,
                         UserStorage.getStorageUser(session.getUserId(), ctx),
                         userConfig);
                 default:
-                    throw new OXFolderException(
-                        FolderCode.UNKNOWN_MODULE,
-                        folderModule2String(fo.getModule()),
-                        Integer.valueOf(ctx.getContextId()));
+                    throw new OXFolderException(FolderCode.UNKNOWN_MODULE, folderModule2String(module), Integer.valueOf(ctx.getContextId()));
                 }
             } else {
                 /*
                  * No delete permission: Return true if folder is empty
                  */
-                switch (fo.getModule()) {
+                switch (module) {
                 case FolderObject.TASK:
                     final Tasks tasks = Tasks.getInstance();
                     return readCon == null ? tasks.isFolderEmpty(ctx, fo.getObjectID()) : tasks.isFolderEmpty(
@@ -452,7 +451,8 @@ public class OXFolderAccess {
                         readCon,
                         fo.getObjectID());
                 case FolderObject.CALENDAR:
-                    final AppointmentSQLInterface calSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
+                    final AppointmentSQLInterface calSql =
+                        ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
                     return readCon == null ? calSql.isFolderEmpty(userId, fo.getObjectID()) : calSql.isFolderEmpty(
                         userId,
                         fo.getObjectID(),
@@ -465,14 +465,11 @@ public class OXFolderAccess {
                 case FolderObject.PROJECT:
                     break;
                 case FolderObject.INFOSTORE:
-                    final InfostoreFacade db = new InfostoreFacadeImpl(readCon == null ? new DBPoolProvider() : new StaticDBPoolProvider(
-                        readCon));
+                    final InfostoreFacade db =
+                        new InfostoreFacadeImpl(readCon == null ? new DBPoolProvider() : new StaticDBPoolProvider(readCon));
                     return db.isFolderEmpty(fo.getObjectID(), ctx);
                 default:
-                    throw new OXFolderException(
-                        FolderCode.UNKNOWN_MODULE,
-                        folderModule2String(fo.getModule()),
-                        Integer.valueOf(ctx.getContextId()));
+                    throw new OXFolderException(FolderCode.UNKNOWN_MODULE, folderModule2String(module), Integer.valueOf(ctx.getContextId()));
                 }
             }
             return false;
@@ -482,6 +479,48 @@ public class OXFolderAccess {
             throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
         } catch (final Throwable t) {
             throw new OXFolderException(FolderCode.RUNTIME_ERROR, t, Integer.valueOf(ctx.getContextId()));
+        }
+    }
+
+    /**
+     * Checks if given folder is empty.
+     * 
+     * @param fo The folder to check
+     * @param session The session
+     * @param ctx The context
+     * @return <code>true</code> if given folder is empty; otherwise <code>false</code>
+     * @throws OXException If checking emptiness fails
+     */
+    public final boolean isEmpty(final FolderObject fo, final Session session, final Context ctx) throws OXException {
+        try {
+            final int userId = session.getUserId();
+            final int module = fo.getModule();
+            if (FolderObject.TASK == module) {
+                final Tasks tasks = Tasks.getInstance();
+                return readCon == null ? tasks.isFolderEmpty(ctx, fo.getObjectID()) : tasks.isFolderEmpty(ctx, readCon, fo.getObjectID());
+            } else if (FolderObject.CALENDAR == module) {
+                final AppointmentSQLInterface calSql =
+                    ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
+                return readCon == null ? calSql.isFolderEmpty(userId, fo.getObjectID()) : calSql.isFolderEmpty(
+                    userId,
+                    fo.getObjectID(),
+                    readCon);
+            } else if (FolderObject.CONTACT == module) {
+                return readCon == null ? !Contacts.containsAnyObjectInFolder(fo.getObjectID(), ctx) : !Contacts.containsAnyObjectInFolder(
+                    fo.getObjectID(),
+                    readCon,
+                    ctx);
+            } else if (FolderObject.PROJECT == module) {
+                return true;
+            } else if (FolderObject.INFOSTORE == module) {
+                final InfostoreFacade db =
+                    new InfostoreFacadeImpl(readCon == null ? new DBPoolProvider() : new StaticDBPoolProvider(readCon));
+                return db.isFolderEmpty(fo.getObjectID(), ctx);
+            } else {
+                throw new OXFolderException(FolderCode.UNKNOWN_MODULE, folderModule2String(module), Integer.valueOf(ctx.getContextId()));
+            }
+        } catch (final SQLException e) {
+            throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
         }
     }
 
