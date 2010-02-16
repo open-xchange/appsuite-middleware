@@ -49,8 +49,10 @@
 
 package com.openexchange.calendar.storage;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.calendar.ParticipantLogic;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.OXCalendarException;
@@ -85,7 +87,11 @@ public abstract class ParticipantStorage {
      */
     public abstract void insertParticipants(Context ctx, Connection con, int appointmentId, Participant[] participants) throws OXCalendarException;
 
-    public abstract ExternalUserParticipant[] selectExternal(Context ctx, Connection con, int appointmentId) throws OXCalendarException;
+    public final ExternalUserParticipant[] selectExternal(Context ctx, Connection con, int appointmentId) throws OXCalendarException {
+        return selectExternal(ctx, con, new int[] { appointmentId }).get(I(appointmentId));
+    }
+
+    public abstract Map<Integer, ExternalUserParticipant[]> selectExternal(Context ctx, Connection con, int[] appointments) throws OXCalendarException;
 
     public void selectExternal(Context ctx, Connection con, List<CalendarDataObject> cdaos, int[] ids) throws OXCalendarException {
         for (int id : ids) {

@@ -58,7 +58,7 @@ public class SQL {
 
     public static final String INSERT_EXTERNAL = "INSERT INTO dateExternal (cid,objectId,mailAddress,displayName,confirm,reason) VALUES (?,?,?,?,?,?)";
 
-    public static final String SELECT_EXTERNAL = "SELECT mailAddress,displayName,confirm,reason FROM dateExternal WHERE cid=? AND objectId=?";
+    public static final String SELECT_EXTERNAL = "SELECT objectId,mailAddress,displayName,confirm,reason FROM dateExternal WHERE cid=? AND objectId IN (";
 
     public static final String DELETE_EXTERNAL = "DELETE FROM dateExternal WHERE cid=? AND objectId=?";
 
