@@ -113,6 +113,13 @@ public class PropertyDefinition {
             if (paramName.length() == 0) {
                 return null;
             }
+            if( paramName.equalsIgnoreCase("BASE64")){
+                //ugly work-around for Apple devs who consider BASE64 to be equal to ENCODING=b
+                Parameter encoding = new Parameter("ENCODING");
+                encoding.addValue(new ParameterValue("b"));
+                property.addParameter(encoding);
+                continue;
+            }
             final Parameter param = getParameter(paramName).parse(s, paramName);
             if (param == null) {
                 return null;
