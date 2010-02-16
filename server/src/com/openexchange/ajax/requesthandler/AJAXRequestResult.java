@@ -182,6 +182,9 @@ public final class AJAXRequestResult {
      */
     public AJAXRequestResult addWarnings(final Collection<AbstractOXException> warnings) {
         if (null == warnings) {
+            return this;
+        }
+        if (null == this.warnings) {
             this.warnings = new HashSet<AbstractOXException>(warnings);
         } else {
             this.warnings.addAll(warnings);
