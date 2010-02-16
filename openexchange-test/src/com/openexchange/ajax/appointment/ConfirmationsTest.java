@@ -49,14 +49,21 @@
 
 package com.openexchange.ajax.appointment;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.TimeZone;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.CommonAllResponse;
+import com.openexchange.ajax.parser.ParticipantParser;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.ExternalUserParticipant;
@@ -70,6 +77,7 @@ import com.openexchange.groupware.container.participants.ConfirmableParticipant;
  */
 public class ConfirmationsTest extends AbstractAJAXSession {
 
+    private static final int[] COLUMNS = { Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.CONFIRMATIONS };
     private AJAXClient client;
     private int folderId;
     private TimeZone tz;
@@ -117,5 +125,31 @@ public class ConfirmationsTest extends AbstractAJAXSession {
         assertEquals("Display name of external participant does not match.", participant.getDisplayName(), confirmations[0].getDisplayName());
         assertEquals("Confirm status does not match.", ConfirmStatus.NONE, confirmations[0].getStatus());
         assertEquals("Confirm message does not match.", participant.getMessage(), confirmations[0].getMessage());
+    }
+
+    public void testAll() throws Throwable {
+        CommonAllResponse response = client.execute(new AllRequest(folderId, COLUMNS, appointment.getStartDate(), appointment.getEndDate(), tz));
+        int objectIdPos = response.getColumnPos(Appointment.OBJECT_ID);
+        int confirmationsPos = response.getColumnPos(Appointment.CONFIRMATIONS);
+        JSONArray jsonConfirmations = null;
+        for (Object[] tmp : response) {
+            if (appointment.getObjectID() == ((Integer) tmp[objectIdPos]).intValue()) {
+                jsonConfirmations = (JSONArray) tmp[confirmationsPos];
+            }
+        }
+        assertNotNull("ALL response does not contain confirmations.", jsonConfirmations);
+        ParticipantParser parser = new ParticipantParser();
+        List<ConfirmableParticipant> confirmations = new ArrayList<ConfirmableParticipant>();
+        @SuppressWarnings("null")
+        int length = jsonConfirmations.length();
+        for (int i = 0; i < length; i++) {
+            JSONObject jsonConfirmation = jsonConfirmations.getJSONObject(i);
+            confirmations.add(parser.parseConfirmation(true, jsonConfirmation));
+        }
+        assertEquals("Number of external participant confirmations does not match.", 1, confirmations.size());
+        assertEquals("Mailaddress of external participant does not match.", participant.getEmailAddress(), confirmations.get(0).getEmailAddress());
+        assertEquals("Display name of external participant does not match.", participant.getDisplayName(), confirmations.get(0).getDisplayName());
+        assertEquals("Confirm status does not match.", ConfirmStatus.NONE, confirmations.get(0).getStatus());
+        assertEquals("Confirm message does not match.", participant.getMessage(), confirmations.get(0).getMessage());
     }
 }
