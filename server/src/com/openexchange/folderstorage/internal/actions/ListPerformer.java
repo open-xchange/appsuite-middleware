@@ -223,7 +223,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                 /*
                  * Need to get user-visible subfolders from appropriate storage
                  */
-                ret = getSubfoldersFromMultipleStorages(treeId, parentId, all);
+                ret = getSubfoldersFromStorages(treeId, parentId, all);
             } else {
                 /*
                  * The subfolders can be completely fetched from parent's folder storage
@@ -324,7 +324,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
         return ret;
     }
 
-    private UserizedFolder[] getSubfoldersFromMultipleStorages(final String treeId, final String parentId, final boolean all) throws FolderException {
+    private UserizedFolder[] getSubfoldersFromStorages(final String treeId, final String parentId, final boolean all) throws FolderException {
         /*
          * Determine needed storages for given parent
          */
