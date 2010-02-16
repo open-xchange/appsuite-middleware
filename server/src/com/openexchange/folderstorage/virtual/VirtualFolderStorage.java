@@ -124,6 +124,42 @@ public final class VirtualFolderStorage implements FolderStorage {
         }
     }
 
+    public boolean containsForeignObjects(final User user, final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+        /*
+         * Get real folder storage
+         */
+        final FolderStorage realFolderStorage = getRealFolderStorage(folderId, storageParameters, false);
+        try {
+            final boolean containsForeignObjects = realFolderStorage.containsForeignObjects(user, treeId, folderId, storageParameters);
+            realFolderStorage.commitTransaction(storageParameters);
+            return containsForeignObjects;
+        } catch (final FolderException e) {
+            realFolderStorage.rollback(storageParameters);
+            throw e;
+        } catch (final Exception e) {
+            realFolderStorage.rollback(storageParameters);
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    public boolean isEmpty(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+        /*
+         * Get real folder storage
+         */
+        final FolderStorage realFolderStorage = getRealFolderStorage(folderId, storageParameters, false);
+        try {
+            final boolean isEmpty = realFolderStorage.isEmpty(treeId, folderId, storageParameters);
+            realFolderStorage.commitTransaction(storageParameters);
+            return isEmpty;
+        } catch (final FolderException e) {
+            realFolderStorage.rollback(storageParameters);
+            throw e;
+        } catch (final Exception e) {
+            realFolderStorage.rollback(storageParameters);
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
     public Folder getFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
         return getFolder(treeId, folderId, StorageType.WORKING, storageParameters);
     }

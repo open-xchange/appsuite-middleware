@@ -417,6 +417,76 @@ public final class MessagingFolderStorage implements FolderStorage {
         }
     }
 
+    public boolean containsForeignObjects(final User user, final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+        try {
+            @SuppressWarnings("unchecked") final ConcurrentMap<Key, MessagingAccountAccess> accesses =
+                (ConcurrentMap<Key, MessagingAccountAccess>) storageParameters.getParameter(
+                    MessagingFolderType.getInstance(),
+                    MessagingParameterConstants.PARAM_MESSAGING_ACCESS);
+            if (null == accesses) {
+                throw new FolderException(new MailException(
+                    MailException.Code.MISSING_PARAM,
+                    MessagingParameterConstants.PARAM_MESSAGING_ACCESS));
+            }
+
+            final MessagingFolderIdentifier mfi = new MessagingFolderIdentifier(folderId);
+            final String serviceId = mfi.getServiceId();
+            final int accountId = mfi.getAccountId();
+            final String fullname = mfi.getFullname();
+
+            final MessagingAccountAccess accountAccess =
+                getMessagingAccessForAccount(serviceId, accountId, storageParameters.getSession(), accesses);
+
+            if (!MessagingFolder.ROOT_FULLNAME.equals(fullname)) {
+                openMessagingAccess(accountAccess);
+                if (!accountAccess.getFolderAccess().exists(fullname)) {
+                    throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(
+                        fullname,
+                        Integer.valueOf(accountId),
+                        serviceId,
+                        Integer.valueOf(storageParameters.getUserId()),
+                        Integer.valueOf(storageParameters.getContextId()));
+                }
+            }
+            return false;
+        } catch (final MessagingException e) {
+            throw new FolderException(e);
+        }
+    }
+
+    public boolean isEmpty(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+        try {
+            @SuppressWarnings("unchecked") final ConcurrentMap<Key, MessagingAccountAccess> accesses =
+                (ConcurrentMap<Key, MessagingAccountAccess>) storageParameters.getParameter(
+                    MessagingFolderType.getInstance(),
+                    MessagingParameterConstants.PARAM_MESSAGING_ACCESS);
+            if (null == accesses) {
+                throw new FolderException(new MailException(
+                    MailException.Code.MISSING_PARAM,
+                    MessagingParameterConstants.PARAM_MESSAGING_ACCESS));
+            }
+
+            final MessagingFolderIdentifier mfi = new MessagingFolderIdentifier(folderId);
+            final String serviceId = mfi.getServiceId();
+            final int accountId = mfi.getAccountId();
+            final String fullname = mfi.getFullname();
+
+            final MessagingAccountAccess accountAccess =
+                getMessagingAccessForAccount(serviceId, accountId, storageParameters.getSession(), accesses);
+
+            if (MessagingFolder.ROOT_FULLNAME.equals(fullname)) {
+                return 0 == accountAccess.getRootFolder().getMessageCount();
+            }
+            /*
+             * Non-root folder
+             */
+            openMessagingAccess(accountAccess);
+            return 0 == accountAccess.getFolderAccess().getFolder(fullname).getMessageCount();
+        } catch (final MessagingException e) {
+            throw new FolderException(e);
+        }
+    }
+
     public Folder getFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
         return getFolder(treeId, folderId, StorageType.WORKING, storageParameters);
     }

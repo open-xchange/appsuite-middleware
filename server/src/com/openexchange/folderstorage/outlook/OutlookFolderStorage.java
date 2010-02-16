@@ -278,6 +278,50 @@ public final class OutlookFolderStorage implements FolderStorage {
         return new String[0];
     }
 
+    public boolean containsForeignObjects(final User user, final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+        /*
+         * Get real folder storage
+         */
+        final FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, folderId);
+        if (null == folderStorage) {
+            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, folderId);
+        }
+        folderStorage.startTransaction(storageParameters, false);
+        try {
+            final boolean containsForeignObjects = folderStorage.containsForeignObjects(user, treeId, folderId, storageParameters);
+            folderStorage.commitTransaction(storageParameters);
+            return containsForeignObjects;
+        } catch (final FolderException e) {
+            folderStorage.rollback(storageParameters);
+            throw e;
+        } catch (final Exception e) {
+            folderStorage.rollback(storageParameters);
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    public boolean isEmpty(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+        /*
+         * Get real folder storage
+         */
+        final FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, folderId);
+        if (null == folderStorage) {
+            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, folderId);
+        }
+        folderStorage.startTransaction(storageParameters, false);
+        try {
+            final boolean isEmpty = folderStorage.isEmpty(treeId, folderId, storageParameters);
+            folderStorage.commitTransaction(storageParameters);
+            return isEmpty;
+        } catch (final FolderException e) {
+            folderStorage.rollback(storageParameters);
+            throw e;
+        } catch (final Exception e) {
+            folderStorage.rollback(storageParameters);
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
     public Folder getFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
         return getFolder(treeId, folderId, StorageType.WORKING, storageParameters);
     }

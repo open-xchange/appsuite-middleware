@@ -120,6 +120,29 @@ public interface FolderStorage {
     ContentType getDefaultContentType();
 
     /**
+     * Checks if denoted folder is empty.
+     * 
+     * @param treeId The tree identifier
+     * @param folderId The folder identifier
+     * @param storageParameters The storage parameters
+     * @return <code>true</code> if denoted folder is empty; otherwise <code>false</code>
+     * @throws FolderException If checking folder content fails
+     */
+    boolean isEmpty(String treeId, String folderId, StorageParameters storageParameters) throws FolderException;
+
+    /**
+     * Checks if denoted folder contains user-foreign objects.
+     * 
+     * @param user The user whose default folder shall be returned
+     * @param treeId The tree identifier
+     * @param folderId The folder identifier
+     * @param storageParameters The storage parameters
+     * @return <code>true</code> if folder contains user-foreign objects; otherwise <code>false</code>
+     * @throws FolderException
+     */
+    boolean containsForeignObjects(User user, String treeId, String folderId, StorageParameters storageParameters) throws FolderException;
+
+    /**
      * Checks if the folder denoted by specified folder ID exists in this folder storage.
      * 
      * @param treeId The tree identifier

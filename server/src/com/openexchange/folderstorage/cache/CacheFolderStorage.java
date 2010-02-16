@@ -367,6 +367,50 @@ public final class CacheFolderStorage implements FolderStorage {
         return folderId;
     }
 
+    public boolean containsForeignObjects(final User user, final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+        /*
+         * Get folder storage
+         */
+        final FolderStorage storage = registry.getFolderStorage(treeId, folderId);
+        if (null == storage) {
+            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
+        }
+        storage.startTransaction(storageParameters, false);
+        try {
+            final boolean containsForeignObjects = storage.containsForeignObjects(user, treeId, folderId, storageParameters);
+            storage.commitTransaction(storageParameters);
+            return containsForeignObjects;
+        } catch (final FolderException e) {
+            storage.rollback(storageParameters);
+            throw e;
+        } catch (final Exception e) {
+            storage.rollback(storageParameters);
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    public boolean isEmpty(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+        /*
+         * Get folder storage
+         */
+        final FolderStorage storage = registry.getFolderStorage(treeId, folderId);
+        if (null == storage) {
+            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
+        }
+        storage.startTransaction(storageParameters, false);
+        try {
+            final boolean isEmpty = storage.isEmpty(treeId, folderId, storageParameters);
+            storage.commitTransaction(storageParameters);
+            return isEmpty;
+        } catch (final FolderException e) {
+            storage.rollback(storageParameters);
+            throw e;
+        } catch (final Exception e) {
+            storage.rollback(storageParameters);
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
     public Folder getFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
         return getFolder(treeId, folderId, StorageType.WORKING, storageParameters);
     }

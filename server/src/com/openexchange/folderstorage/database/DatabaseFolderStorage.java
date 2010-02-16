@@ -355,6 +355,106 @@ public final class DatabaseFolderStorage implements FolderStorage {
         }
     }
 
+    public boolean containsForeignObjects(final User user, final String treeId, final String folderIdentifier, final StorageParameters storageParameters) throws FolderException {
+        try {
+            final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
+            final Context ctx = storageParameters.getContext();
+            /*
+             * A numeric folder identifier
+             */
+            final int folderId = getUnsignedInteger(folderIdentifier);
+            if (folderId < 0) {
+                throw new OXFolderNotFoundException(folderIdentifier, ctx);
+            }
+            if (FolderObject.SYSTEM_ROOT_FOLDER_ID == folderId) {
+                return false;
+            } else if (FolderObject.SYSTEM_SHARED_FOLDER_ID == folderId) {
+                /*
+                 * The system shared folder
+                 */
+                return false;
+            } else if (FolderObject.SYSTEM_PUBLIC_FOLDER_ID == folderId) {
+                /*
+                 * The system public folder
+                 */
+                return false;
+            } else if (FolderObject.SYSTEM_INFOSTORE_FOLDER_ID == folderId) {
+                /*
+                 * The system infostore folder
+                 */
+                return false;
+            } else if (FolderObject.SYSTEM_PRIVATE_FOLDER_ID == folderId) {
+                /*
+                 * The system private folder
+                 */
+                return false;
+            } else if (Arrays.binarySearch(VIRTUAL_IDS, folderId) >= 0) {
+                /*
+                 * A virtual database folder
+                 */
+                return true;
+            } else {
+                /*
+                 * A non-virtual database folder
+                 */
+                final FolderObject fo = FolderObject.loadFolderObjectFromDB(folderId, ctx, con);
+                return getFolderAccess(storageParameters, getFolderType()).containsForeignObjects(fo, storageParameters.getSession(), ctx);
+            }
+        } catch (final OXException e) {
+            throw new FolderException(e);
+        }
+    }
+
+    public boolean isEmpty(final String treeId, final String folderIdentifier, final StorageParameters storageParameters) throws FolderException {
+        try {
+            final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
+            final Context ctx = storageParameters.getContext();
+            /*
+             * A numeric folder identifier
+             */
+            final int folderId = getUnsignedInteger(folderIdentifier);
+            if (folderId < 0) {
+                throw new OXFolderNotFoundException(folderIdentifier, ctx);
+            }
+            if (FolderObject.SYSTEM_ROOT_FOLDER_ID == folderId) {
+                return true;
+            } else if (FolderObject.SYSTEM_SHARED_FOLDER_ID == folderId) {
+                /*
+                 * The system shared folder
+                 */
+                return true;
+            } else if (FolderObject.SYSTEM_PUBLIC_FOLDER_ID == folderId) {
+                /*
+                 * The system public folder
+                 */
+                return true;
+            } else if (FolderObject.SYSTEM_INFOSTORE_FOLDER_ID == folderId) {
+                /*
+                 * The system infostore folder
+                 */
+                return true;
+            } else if (FolderObject.SYSTEM_PRIVATE_FOLDER_ID == folderId) {
+                /*
+                 * The system private folder
+                 */
+                return true;
+            } else if (Arrays.binarySearch(VIRTUAL_IDS, folderId) >= 0) {
+                /*
+                 * A virtual database folder
+                 */
+                return false;
+            } else {
+                /*
+                 * A non-virtual database folder
+                 */
+                final FolderObject fo = FolderObject.loadFolderObjectFromDB(folderId, ctx, con);
+                return getFolderAccess(storageParameters, getFolderType()).isEmpty(fo, storageParameters.getSession(), ctx);
+            }
+        } catch (final OXException e) {
+            throw new FolderException(e);
+        }
+    }
+
     public Folder getFolder(final String treeId, final String folderIdentifier, final StorageParameters storageParameters) throws FolderException {
         return getFolder(treeId, folderIdentifier, StorageType.WORKING, storageParameters);
     }

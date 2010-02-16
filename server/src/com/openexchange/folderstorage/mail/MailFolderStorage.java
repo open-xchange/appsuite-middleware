@@ -364,6 +364,63 @@ public final class MailFolderStorage implements FolderStorage {
         }
     }
 
+    public boolean containsForeignObjects(final User user, final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+        try {
+            @SuppressWarnings("unchecked") final ConcurrentMap<Integer, MailAccess<?, ?>> accesses =
+                (ConcurrentMap<Integer, MailAccess<?, ?>>) storageParameters.getParameter(
+                    MailFolderType.getInstance(),
+                    MailParameterConstants.PARAM_MAIL_ACCESS);
+            if (null == accesses) {
+                throw new FolderException(new MailException(MailException.Code.MISSING_PARAM, MailParameterConstants.PARAM_MAIL_ACCESS));
+            }
+
+            final FullnameArgument argument = prepareMailFolderParam(folderId);
+            final int accountId = argument.getAccountId();
+            final String fullname = argument.getFullname();
+
+            final MailAccess<?, ?> mailAccess = getMailAccessForAccount(accountId, storageParameters.getSession(), accesses);
+
+            openMailAccess(mailAccess);
+            if (!MailFolder.DEFAULT_FOLDER_ID.equals(fullname)) {
+                openMailAccess(mailAccess);
+                if (!mailAccess.getFolderStorage().exists(fullname)) {
+                    throw new MailException(MailException.Code.FOLDER_NOT_FOUND, fullname);
+                }
+            }
+            return false;
+        } catch (final MailException e) {
+            throw new FolderException(e);
+        }
+    }
+
+    public boolean isEmpty(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+        try {
+            @SuppressWarnings("unchecked") final ConcurrentMap<Integer, MailAccess<?, ?>> accesses =
+                (ConcurrentMap<Integer, MailAccess<?, ?>>) storageParameters.getParameter(
+                    MailFolderType.getInstance(),
+                    MailParameterConstants.PARAM_MAIL_ACCESS);
+            if (null == accesses) {
+                throw new FolderException(new MailException(MailException.Code.MISSING_PARAM, MailParameterConstants.PARAM_MAIL_ACCESS));
+            }
+            final FullnameArgument argument = prepareMailFolderParam(folderId);
+            final int accountId = argument.getAccountId();
+            final String fullname = argument.getFullname();
+
+            final MailAccess<?, ?> mailAccess = getMailAccessForAccount(accountId, storageParameters.getSession(), accesses);
+
+            if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname)) {
+                return 0 == mailAccess.getRootFolder().getMessageCount();
+            }
+            /*
+             * Non-root folder
+             */
+            openMailAccess(mailAccess);
+            return 0 == mailAccess.getFolderStorage().getFolder(fullname).getMessageCount();
+        } catch (final MailException e) {
+            throw new FolderException(e);
+        }
+    }
+
     public Folder getFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
         return getFolder(treeId, folderId, StorageType.WORKING, storageParameters);
     }
