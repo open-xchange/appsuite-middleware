@@ -282,11 +282,19 @@ public final class CacheFolderStorage implements FolderStorage {
             global = deleteMe.isGlobalID();
             parentId = deleteMe.getParentID();
             if (!FolderStorage.REAL_TREE_ID.equals(treeId)) {
-                realParentId =
-                    registry.getFolderStorage(FolderStorage.REAL_TREE_ID, folderId).getFolder(
-                        FolderStorage.REAL_TREE_ID,
-                        folderId,
-                        storageParameters).getParentID();
+                final StorageParameters parameters = newStorageParameters(storageParameters);
+                final FolderStorage folderStorage = registry.getFolderStorage(FolderStorage.REAL_TREE_ID, folderId);
+                folderStorage.startTransaction(parameters, false);
+                try {
+                    realParentId = folderStorage.getFolder(FolderStorage.REAL_TREE_ID, folderId, parameters).getParentID();
+                    folderStorage.commitTransaction(parameters);
+                } catch (final FolderException e) {
+                    folderStorage.rollback(parameters);
+                    throw e;
+                } catch (final Exception e) {
+                    folderStorage.rollback(parameters);
+                    throw FolderException.newUnexpectedException(e);
+                }
             } else {
                 realParentId = null;
             }
