@@ -146,7 +146,8 @@ public abstract class AbstractPerformer {
     }
 
     /**
-     * Adds a warning to this performer. Sets category to {@link Category#WARNING} if not done, yet.
+     * Adds a warning to this performer. <br>
+     * <b><small>NOTE</small></b>: Category is set to {@link Category#WARNING} if not done, yet.
      * 
      * @param warning The warning to add
      */
