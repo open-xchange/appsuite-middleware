@@ -74,7 +74,11 @@ public final class HeaderName implements Serializable, Cloneable, Comparable<Hea
         CACHE.put("Bcc", HeaderName.valueOf("Bcc"));
         CACHE.put("Cc", HeaderName.valueOf("Cc"));
         CACHE.put("Content-Disposition", HeaderName.valueOf("Content-Disposition"));
-        CACHE.put("Content-ID", HeaderName.valueOf("Content-ID"));
+        {
+            final HeaderName headerName = HeaderName.valueOf("Content-ID");
+            CACHE.put("Content-ID", headerName);
+            CACHE.put("Content-Id", headerName);
+        }
         CACHE.put("Content-Transfer-Encoding", HeaderName.valueOf("Content-Transfer-Encoding"));
         CACHE.put("Content-Type", HeaderName.valueOf("Content-Type"));
         CACHE.put("Date", HeaderName.valueOf("Date"));
@@ -83,7 +87,11 @@ public final class HeaderName implements Serializable, Cloneable, Comparable<Hea
         CACHE.put("From", HeaderName.valueOf("From"));
         CACHE.put("ReplyTo", HeaderName.valueOf("ReplyTo"));
         CACHE.put("In-Reply-To", HeaderName.valueOf("In-Reply-To"));
-        CACHE.put("Message-ID", HeaderName.valueOf("Message-ID"));
+        {
+            final HeaderName headerName = HeaderName.valueOf("Message-ID");
+            CACHE.put("Message-ID", headerName);
+            CACHE.put("Message-Id", headerName);
+        }
         CACHE.put("MIME-Version", HeaderName.valueOf("MIME-Version"));
         CACHE.put("Organization", HeaderName.valueOf("Organization"));
         CACHE.put("Received", HeaderName.valueOf("Received"));
@@ -97,11 +105,15 @@ public final class HeaderName implements Serializable, Cloneable, Comparable<Hea
         CACHE.put("X-OXMsgref", HeaderName.valueOf("X-OXMsgref"));
         CACHE.put("X-Priority", HeaderName.valueOf("X-Priority"));
         CACHE.put("X-Spam-Flag", HeaderName.valueOf("X-Spam-Flag"));
+        CACHE.put("Return-Path", HeaderName.valueOf("Return-Path"));
+        CACHE.put("X-OX-VCard-Attached", HeaderName.valueOf("X-OX-VCard-Attached"));
+        CACHE.put("X-OX-Notification", HeaderName.valueOf("X-OX-Notification"));
         /*
          * User flags
          */
         CACHE.put("$Forwarded", new HeaderName("$Forwarded"));
         CACHE.put("$MDNSent", new HeaderName("$MDNSent"));
+        CACHE.put("NonJunk", new HeaderName("NonJunk"));
         /*
          * Some charsets
          */
