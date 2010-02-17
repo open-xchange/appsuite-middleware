@@ -47,7 +47,6 @@
  *
  */
 
-
 package com.openexchange.mail.json.parser;
 
 import static com.openexchange.groupware.upload.impl.UploadUtility.getSize;
@@ -81,6 +80,7 @@ import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.MailException;
@@ -160,11 +160,12 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
             if (uploadQuotaPerFile > 0 && size > uploadQuotaPerFile) {
                 if (LOG.isDebugEnabled()) {
                     final String fileName = attachment.getFileName();
-                    final MailException e = new MailException(
-                        MailException.Code.UPLOAD_QUOTA_EXCEEDED_FOR_FILE,
-                        Long.valueOf(uploadQuotaPerFile),
-                        null == fileName ? "" : fileName,
-                        Long.valueOf(size));
+                    final MailException e =
+                        new MailException(
+                            MailException.Code.UPLOAD_QUOTA_EXCEEDED_FOR_FILE,
+                            Long.valueOf(uploadQuotaPerFile),
+                            null == fileName ? "" : fileName,
+                            Long.valueOf(size));
                     LOG.debug(new StringBuilder(64).append("Per-file quota (").append(getSize(uploadQuotaPerFile, 2, false, true)).append(
                         ") exceeded. Message is going to be sent with links to publishing infostore folder.").toString(), e);
                 }
@@ -218,9 +219,8 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
             /*
              * Get discovery service
              */
-            final PublicationTargetDiscoveryService discoveryService = ServerServiceRegistry.getInstance().getService(
-                PublicationTargetDiscoveryService.class,
-                true);
+            final PublicationTargetDiscoveryService discoveryService =
+                ServerServiceRegistry.getInstance().getService(PublicationTargetDiscoveryService.class, true);
             /*
              * Get discovery service's target
              */
@@ -316,12 +316,13 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
             if (null == user) {
                 // External user
                 if (null == externalMessage) {
-                    externalMessage = generateExternalVersion(
-                        source,
-                        ctx,
-                        links,
-                        TransportProperties.getInstance().isProvideLinksInAttachment(),
-                        elapsedDate);
+                    externalMessage =
+                        generateExternalVersion(
+                            source,
+                            ctx,
+                            links,
+                            TransportProperties.getInstance().isProvideLinksInAttachment(),
+                            elapsedDate);
                 }
                 externalMessage.addRecipient(address);
             } else {
@@ -329,13 +330,14 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                 final Locale locale = user.getLocale();
                 ComposedMailMessage localedMessage = internalMessages.get(locale);
                 if (null == localedMessage) {
-                    localedMessage = generateInternalVersion(
-                        source,
-                        ctx,
-                        links,
-                        TransportProperties.getInstance().isProvideLinksInAttachment(),
-                        elapsedDate,
-                        locale);
+                    localedMessage =
+                        generateInternalVersion(
+                            source,
+                            ctx,
+                            links,
+                            TransportProperties.getInstance().isProvideLinksInAttachment(),
+                            elapsedDate,
+                            locale);
                     internalMessages.put(locale, localedMessage);
                 }
                 localedMessage.addRecipient(address);
@@ -349,6 +351,18 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         if (null != externalMessage) {
             mails.add(externalMessage);
         }
+        /*
+         * Any version available?
+         */
+        if (mails.isEmpty()) {
+            mails.add(generateInternalVersion(
+                source,
+                ctx,
+                links,
+                TransportProperties.getInstance().isProvideLinksInAttachment(),
+                elapsedDate,
+                getSessionUser().getLocale()));
+        }
         return mails.toArray(new ComposedMailMessage[mails.size()]);
     }
 
@@ -359,6 +373,17 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         try {
             return ContextStorage.getStorageContext(session.getContextId());
         } catch (final ContextException e) {
+            throw new MailException(e);
+        }
+    }
+
+    private User getSessionUser() throws MailException {
+        if (session instanceof ServerSession) {
+            return ((ServerSession) session).getUser();
+        }
+        try {
+            return UserStorage.getInstance().getUser(session.getUserId(), getContext());
+        } catch (final LdapException e) {
             throw new MailException(e);
         }
     }
@@ -497,9 +522,13 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
             final MimeBodyPart bodyPart = new MimeBodyPart();
             bodyPart.setText(getConformHTML(text, "UTF-8"), "UTF-8", "html");
             bodyPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-            bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType("text/html; charset=UTF-8; name=links.html"));
+            bodyPart.setHeader(
+                MessageHeaders.HDR_CONTENT_TYPE,
+                MIMEMessageUtility.foldContentType("text/html; charset=UTF-8; name=links.html"));
             bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, "base64");
-            bodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MIMEMessageUtility.foldContentDisposition("attachment; filename=links.html"));
+            bodyPart.setHeader(
+                MessageHeaders.HDR_CONTENT_DISPOSITION,
+                MIMEMessageUtility.foldContentDisposition("attachment; filename=links.html"));
             return convertPart(bodyPart, false);
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);
@@ -546,7 +575,8 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                     final int pos = name.lastIndexOf('.');
                     final String newName;
                     if (pos >= 0) {
-                        newName = hlp.append(name.substring(0, pos)).append("_(").append(++count).append(')').append(name.substring(pos)).toString();
+                        newName =
+                            hlp.append(name.substring(0, pos)).append("_(").append(++count).append(')').append(name.substring(pos)).toString();
                     } else {
                         newName = hlp.append(name).append("_(").append(++count).append(')').toString();
                     }

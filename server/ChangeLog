@@ -1,3 +1,7 @@
+* 2010-02-17 - thorben.betten@open-xchange.com
+
+ - Bugfix #15410: Proper parsed message if no recipients specified
+
 * 2010-02-17 - francisco.laguna@open-xchange.com
 
  - Bugfix 14919 - Reflect automatic participant status changes in cdao for events
