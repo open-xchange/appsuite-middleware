@@ -180,7 +180,7 @@ public final class MailFolderStorage implements FolderStorage {
     }
 
     public void commitTransaction(final StorageParameters params) throws FolderException {
-        final TIntObjectHashMap<MailAccess<?, ?>> accesses =
+        final @SuppressWarnings("unchecked") TIntObjectHashMap<MailAccess<?, ?>> accesses =
             (TIntObjectHashMap<MailAccess<?, ?>>) params.getParameter(
                 MailFolderType.getInstance(),
                 MailParameterConstants.PARAM_MAIL_ACCESS);
@@ -195,7 +195,7 @@ public final class MailFolderStorage implements FolderStorage {
 
     public void createFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
         try {
-            final TIntObjectHashMap<MailAccess<?, ?>> accesses =
+            final @SuppressWarnings("unchecked") TIntObjectHashMap<MailAccess<?, ?>> accesses =
                 (TIntObjectHashMap<MailAccess<?, ?>>) storageParameters.getParameter(
                     MailFolderType.getInstance(),
                     MailParameterConstants.PARAM_MAIL_ACCESS);
@@ -249,7 +249,7 @@ public final class MailFolderStorage implements FolderStorage {
 
     public void clearFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
         try {
-            final TIntObjectHashMap<MailAccess<?, ?>> accesses =
+            final @SuppressWarnings("unchecked") TIntObjectHashMap<MailAccess<?, ?>> accesses =
                 (TIntObjectHashMap<MailAccess<?, ?>>) storageParameters.getParameter(
                     MailFolderType.getInstance(),
                     MailParameterConstants.PARAM_MAIL_ACCESS);
@@ -285,7 +285,7 @@ public final class MailFolderStorage implements FolderStorage {
 
     public void deleteFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
         try {
-            final TIntObjectHashMap<MailAccess<?, ?>> accesses =
+            final @SuppressWarnings("unchecked") TIntObjectHashMap<MailAccess<?, ?>> accesses =
                 (TIntObjectHashMap<MailAccess<?, ?>>) storageParameters.getParameter(
                     MailFolderType.getInstance(),
                     MailParameterConstants.PARAM_MAIL_ACCESS);
@@ -710,7 +710,7 @@ public final class MailFolderStorage implements FolderStorage {
     }
 
     public void rollback(final StorageParameters params) {
-        final TIntObjectHashMap<MailAccess<?, ?>> accesses =
+        final @SuppressWarnings("unchecked") TIntObjectHashMap<MailAccess<?, ?>> accesses =
             (TIntObjectHashMap<MailAccess<?, ?>>) params.getParameter(
                 MailFolderType.getInstance(),
                 MailParameterConstants.PARAM_MAIL_ACCESS);
@@ -761,7 +761,7 @@ public final class MailFolderStorage implements FolderStorage {
             return false;
         }
         try {
-            final TIntObjectHashMap<MailAccess<?, ?>> accesses =
+            final @SuppressWarnings("unchecked") TIntObjectHashMap<MailAccess<?, ?>> accesses =
                 (TIntObjectHashMap<MailAccess<?, ?>>) storageParameters.getParameter(
                     MailFolderType.getInstance(),
                     MailParameterConstants.PARAM_MAIL_ACCESS);
@@ -802,7 +802,7 @@ public final class MailFolderStorage implements FolderStorage {
 
     public void updateFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
         try {
-            final TIntObjectHashMap<MailAccess<?, ?>> accesses =
+            final @SuppressWarnings("unchecked") TIntObjectHashMap<MailAccess<?, ?>> accesses =
                 (TIntObjectHashMap<MailAccess<?, ?>>) storageParameters.getParameter(
                     MailFolderType.getInstance(),
                     MailParameterConstants.PARAM_MAIL_ACCESS);
