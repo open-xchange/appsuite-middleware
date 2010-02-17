@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.service;
 
+import gnu.trove.TIntObjectHashMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -69,15 +70,14 @@ public class SpecificServiceChooser<T> {
     
     private final SortedSet<WeightedRegistration<T>> general = new TreeSet<WeightedRegistration<T>>();
 
-    private final Map<Integer, SortedSet<WeightedRegistration<T>>> contextSpecific = new HashMap<Integer, SortedSet<WeightedRegistration<T>>>();
+    private final TIntObjectHashMap<SortedSet<WeightedRegistration<T>>> contextSpecific = new TIntObjectHashMap<SortedSet<WeightedRegistration<T>>>();
 
     private final Map<String, SortedSet<WeightedRegistration<T>>> folderSpecific = new HashMap<String, SortedSet<WeightedRegistration<T>>>();
 
-    private final Map<Integer, Map<String, SortedSet<WeightedRegistration<T>>>> contextAndFolderSpecific = new HashMap<Integer, Map<String, SortedSet<WeightedRegistration<T>>>>();
+    private final TIntObjectHashMap<Map<String, SortedSet<WeightedRegistration<T>>>> contextAndFolderSpecific = new TIntObjectHashMap<Map<String, SortedSet<WeightedRegistration<T>>>>();
 
     public SpecificServiceChooser() {
         super();
-
     }
 
     public synchronized void registerForEverything(final T serviceInstance, final int ranking) throws ServicePriorityConflictException {
