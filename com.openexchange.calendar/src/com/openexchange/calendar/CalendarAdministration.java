@@ -49,25 +49,26 @@
 
 package com.openexchange.calendar;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
+import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.Types;
-import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.groupware.calendar.CalendarAdministrationService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
@@ -215,7 +216,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
         final Context ctx = downgradeEvent.getContext();
         final int userId = userConfig.getUserId();
 
-        final List<PreparedStatement> statements = new LinkedList<PreparedStatement>();
+        final List<Statement> statements = new LinkedList<Statement>();
         ResultSet rs = null;
 
 
@@ -253,6 +254,9 @@ public class CalendarAdministration implements CalendarAdministrationService {
                 builder.append(" AND cid = ").append(ctx.getContextId());
 
                 final String oids = builder.toString();
+                Statement deleteFromDateExternal = con.createStatement();
+                statements.add(deleteFromDateExternal);
+                deleteFromDateExternal.execute("DELETE FROM dateExternal WHERE objectId " + oids);
                 final PreparedStatement deleteFromDates = con.prepareStatement("DELETE FROM "+CalendarSql.DATES_TABLE_NAME+" WHERE intfield01 "+oids);
                 statements.add(deleteFromDates);
 
@@ -275,8 +279,8 @@ public class CalendarAdministration implements CalendarAdministrationService {
             throw new DowngradeFailedException(DowngradeFailedException.Code.SQL_ERROR, e, e.getMessage());
         } finally {
             CalendarCollection collection = new CalendarCollection();
-            for(final PreparedStatement stmt : statements) {
-                collection.closePreparedStatement(stmt);
+            for(final Statement stmt : statements) {
+                collection.closeStatement(stmt);
             }
             collection.closeResultSet(rs);
         }
@@ -332,14 +336,14 @@ public class CalendarAdministration implements CalendarAdministrationService {
             rightsResultSet = rightsStatement.executeQuery();
             while (rightsResultSet.next()) {
                 if (rightsResultSet.getInt(2) == Participant.USER) {
-                    usersInRightsTable.add(rightsResultSet.getInt(1));
+                    usersInRightsTable.add(I(rightsResultSet.getInt(1)));
                 } else if (rightsResultSet.getInt(2) == Participant.GROUP) {
                     if (rightsResultSet.getInt(1) == deleteEvent.getId()) {
                         continue;
                     }
                     Group group = GroupStorage.getInstance().getGroup(rightsResultSet.getInt(1), deleteEvent.getContext());
                     for (int memberUid : group.getMember()) {
-                        usersInRightsTable.add(memberUid);
+                        usersInRightsTable.add(I(memberUid));
                     }
                 }
             }
@@ -355,7 +359,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
         return usersInRightsTable;
     }
     
-    private final Set<Integer> getUsers(final int objectId, final Context ctx, final int type, final Connection readcon) throws SQLException {
+    private final Set<Integer> getUsers(final int objectId, final Context ctx, final Connection readcon) throws SQLException {
         PreparedStatement membersStatement = null;
         ResultSet membersResultSet = null;
         Set<Integer> usersInMembersTable = new HashSet<Integer>();
@@ -372,7 +376,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
             
             membersResultSet = membersStatement.executeQuery();
             while (membersResultSet.next()) {
-                usersInMembersTable.add(membersResultSet.getInt(1));
+                usersInMembersTable.add(I(membersResultSet.getInt(1)));
             }
         } finally {
             if (membersResultSet != null) {
@@ -391,7 +395,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
             return;
         }
         
-        if (handledObjects.contains(objectId)) {
+        if (handledObjects.contains(I(objectId))) {
             return;
         }
         
@@ -399,7 +403,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
         Set<Integer> usersToAdd = new HashSet<Integer>();
         
         try {
-            usersToAdd.addAll(getUsers(objectId, deleteEvent.getContext(), type, readcon));
+            usersToAdd.addAll(getUsers(objectId, deleteEvent.getContext(), readcon));
             usersToAdd.removeAll(resolveMembersOfGroups(objectId, deleteEvent, type, readcon));
             
             StringBuilder sb = new StringBuilder();
@@ -429,7 +433,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
             }
         }
         
-        handledObjects.add(objectId);
+        handledObjects.add(I(objectId));
     }
     
     private final void deleteObjects(final DeleteEvent deleteEvent, final Connection readcon, final Connection writecon, final String table, final int type) throws DeleteFailedException, SQLException {
@@ -462,12 +466,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
         } catch (LdapException e) {
             throw new DeleteFailedException(e);
         } finally {
-            if (rs != null) {
-                rs.close();
-            }
-            if (rs != null) {
-                pst.close();
-            }
+            closeSQLStuff(rs, pst);
         }
     }
 
@@ -478,6 +477,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
         PreparedStatement del_rights = null;
         PreparedStatement del_members = null;
         PreparedStatement del_dates = null;
+        PreparedStatement dateExternal = null;
 
         try {
             final StringBuilder sb = new StringBuilder(128);
@@ -497,6 +497,9 @@ public class CalendarAdministration implements CalendarAdministrationService {
             pst = con.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
             rs = new CalendarMySQL().getResultSet(pst);
             while (rs.next()) {
+                if (null == dateExternal) {
+                    dateExternal = con.prepareStatement("DELETE FROM dateExternal WHERE cid=? AND objectId=?");
+                }
                 if (del_rights == null) {
                     del_rights = con.prepareStatement("delete from prg_date_rights WHERE cid = ? AND object_id = ?");
                 }
@@ -507,6 +510,9 @@ public class CalendarAdministration implements CalendarAdministrationService {
                     del_dates = con.prepareStatement("delete FROM prg_dates WHERE cid = ? AND intfield01 = ?");
                 }
                 final int object_id = rs.getInt(1);
+                dateExternal.setInt(1, ctx.getContextId());
+                dateExternal.setInt(2, object_id);
+                dateExternal.addBatch();
                 del_dates.setInt(1, ctx.getContextId());
                 del_dates.setInt(2, object_id);
                 del_dates.addBatch();
@@ -516,10 +522,11 @@ public class CalendarAdministration implements CalendarAdministrationService {
                 del_rights.setInt(1, ctx.getContextId());
                 del_rights.setInt(2, object_id);
                 del_rights.addBatch();
-
-
                 eventHandling(object_id, 0, ctx, session, CalendarOperation.DELETE, con);
 
+            }
+            if (dateExternal != null) {
+                dateExternal.executeBatch();
             }
             if (del_dates != null) {
                 del_dates.executeBatch();
