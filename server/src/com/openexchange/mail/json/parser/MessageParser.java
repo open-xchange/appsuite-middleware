@@ -236,46 +236,50 @@ public final class MessageParser {
              * Attached data sources
              */
             if (jsonObj.hasAndNotNull(MailJSONField.DATASOURCES.getKey())) {
-                final ConversionService conversionService = ServerServiceRegistry.getInstance().getService(ConversionService.class);
-                if (conversionService == null) {
-                    throw new MailException(new ServiceException(
-                        ServiceException.Code.SERVICE_UNAVAILABLE,
-                        ConversionService.class.getName()));
-                }
                 final JSONArray datasourceArray = jsonObj.getJSONArray(MailJSONField.DATASOURCES.getKey());
                 final int length = datasourceArray.length();
-                final Set<Class<?>> types = new HashSet<Class<?>>(4);
-                for (int i = 0; i < length; i++) {
-                    final JSONObject dataSourceObject = datasourceArray.getJSONObject(i);
-                    if (!dataSourceObject.hasAndNotNull(JSON_IDENTIFIER)) {
-                        throw new MailException(MailException.Code.MISSING_PARAM, JSON_IDENTIFIER);
+                if (length > 0) {
+                    final ConversionService conversionService = ServerServiceRegistry.getInstance().getService(ConversionService.class);
+                    if (conversionService == null) {
+                        throw new MailException(new ServiceException(
+                            ServiceException.Code.SERVICE_UNAVAILABLE,
+                            ConversionService.class.getName()));
                     }
-                    final DataSource dataSource = conversionService.getDataSource(dataSourceObject.getString(JSON_IDENTIFIER));
-                    if (dataSource == null) {
-                        throw new MailException(DataExceptionCodes.UNKNOWN_DATA_SOURCE.create(dataSourceObject.getString(JSON_IDENTIFIER)));
-                    }
-                    if (!types.isEmpty()) {
-                        types.clear();
-                    }
-                    types.addAll(Arrays.asList(dataSource.getTypes()));
-                    final Data<?> data;
-                    if (types.contains(InputStream.class)) {
-                        try {
-                            data = dataSource.getData(InputStream.class, parseDataSourceArguments(dataSourceObject), session);
-                        } catch (final DataException e) {
-                            throw new MailException(e);
+                    final Set<Class<?>> types = new HashSet<Class<?>>(4);
+                    for (int i = 0; i < length; i++) {
+                        final JSONObject dataSourceObject = datasourceArray.getJSONObject(i);
+                        if (!dataSourceObject.hasAndNotNull(JSON_IDENTIFIER)) {
+                            throw new MailException(MailException.Code.MISSING_PARAM, JSON_IDENTIFIER);
                         }
-                    } else if (types.contains(byte[].class)) {
-                        try {
-                            data = dataSource.getData(byte[].class, parseDataSourceArguments(dataSourceObject), session);
-                        } catch (final DataException e) {
-                            throw new MailException(e);
+                        final DataSource dataSource = conversionService.getDataSource(dataSourceObject.getString(JSON_IDENTIFIER));
+                        if (dataSource == null) {
+                            throw new MailException(
+                                DataExceptionCodes.UNKNOWN_DATA_SOURCE.create(dataSourceObject.getString(JSON_IDENTIFIER)));
                         }
-                    } else {
-                        throw new MailException(MailException.Code.UNSUPPORTED_DATASOURCE);
+                        if (!types.isEmpty()) {
+                            types.clear();
+                        }
+                        types.addAll(Arrays.asList(dataSource.getTypes()));
+                        final Data<?> data;
+                        if (types.contains(InputStream.class)) {
+                            try {
+                                data = dataSource.getData(InputStream.class, parseDataSourceArguments(dataSourceObject), session);
+                            } catch (final DataException e) {
+                                throw new MailException(e);
+                            }
+                        } else if (types.contains(byte[].class)) {
+                            try {
+                                data = dataSource.getData(byte[].class, parseDataSourceArguments(dataSourceObject), session);
+                            } catch (final DataException e) {
+                                throw new MailException(e);
+                            }
+                        } else {
+                            throw new MailException(MailException.Code.UNSUPPORTED_DATASOURCE);
+                        }
+                        final DataMailPart dataMailPart =
+                            provider.getNewDataPart(data.getData(), data.getDataProperties().toMap(), session);
+                        attachmentHandler.addAttachment(dataMailPart);
                     }
-                    final DataMailPart dataMailPart = provider.getNewDataPart(data.getData(), data.getDataProperties().toMap(), session);
-                    attachmentHandler.addAttachment(dataMailPart);
                 }
             }
             /*
