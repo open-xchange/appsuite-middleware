@@ -49,17 +49,15 @@
 
 package com.openexchange.groupware.userconfiguration;
 
-import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.sql.DBUtils.closeResources;
 import static com.openexchange.tools.sql.DBUtils.getIN;
+import gnu.trove.TIntObjectHashMap;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import com.openexchange.api2.OXException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.AbstractOXException;
@@ -121,12 +119,12 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
     }
 
     @Override
-    public UserConfiguration[] getUserConfiguration(Context ctx, User[] users) throws UserConfigurationException {
+    public UserConfiguration[] getUserConfiguration(final Context ctx, final User[] users) throws UserConfigurationException {
         try {
             return loadUserConfiguration(ctx, null, users);
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             throw new UserConfigurationException(e);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new UserConfigurationException(UserConfigurationCode.SQL_ERROR, e, e.getMessage());
         }
     }
@@ -440,7 +438,7 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
         }
     }
 
-    public static UserConfiguration[] loadUserConfiguration(Context ctx, Connection conArg, User[] users) throws DBPoolingException, SQLException {
+    public static UserConfiguration[] loadUserConfiguration(final Context ctx, final Connection conArg, final User[] users) throws DBPoolingException, SQLException {
         if (0 == users.length) {
             return new UserConfiguration[0];
         }
@@ -455,19 +453,19 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
         }
         PreparedStatement stmt = null;
         ResultSet result = null;
-        List<UserConfiguration> retval = new ArrayList<UserConfiguration>(users.length);
+        final List<UserConfiguration> retval = new ArrayList<UserConfiguration>(users.length);
         try {
             stmt = con.prepareStatement(getIN(LOAD_SOME_USER_CONFIGURATIONS, users.length));
             int pos = 1;
             stmt.setInt(pos++, ctx.getContextId());
-            Map<Integer, User> userMap = new HashMap<Integer, User>(users.length, 1);
-            for (User user : users) {
+            final TIntObjectHashMap<User> userMap = new TIntObjectHashMap<User>(users.length, 1);
+            for (final User user : users) {
                 stmt.setInt(pos++, user.getId());
-                userMap.put(I(user.getId()), user);
+                userMap.put(user.getId(), user);
             }
             result = stmt.executeQuery();
             while (result.next()) {
-                User user = userMap.get(I(result.getInt(1)));
+                final User user = userMap.get(result.getInt(1));
                 retval.add(new UserConfiguration(result.getInt(2), user.getId(), user.getGroups(), ctx));
             }
         } finally {

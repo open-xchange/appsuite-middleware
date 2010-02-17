@@ -50,8 +50,7 @@
 package com.openexchange.mail.json.writer;
 
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
-import java.util.HashMap;
-import java.util.Map;
+import gnu.trove.TIntObjectHashMap;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -170,10 +169,10 @@ public final class FolderWriter {
     /**
      * Maps folder field constants to corresponding instance of {@link MailFolderFieldWriter}.
      */
-    private static final Map<Integer, MailFolderFieldWriter> WRITERS_MAP = new HashMap<Integer, MailFolderFieldWriter>(20);
+    private static final TIntObjectHashMap<MailFolderFieldWriter> WRITERS_MAP = new TIntObjectHashMap<MailFolderFieldWriter>(20);
 
     static {
-        WRITERS_MAP.put(Integer.valueOf(DataObject.OBJECT_ID), new MailFolderFieldWriter() {
+        WRITERS_MAP.put(DataObject.OBJECT_ID, new MailFolderFieldWriter() {
 
             @Override
             public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
@@ -192,7 +191,7 @@ public final class FolderWriter {
                 }
             }
         });
-        WRITERS_MAP.put(Integer.valueOf(DataObject.CREATED_BY), new MailFolderFieldWriter() {
+        WRITERS_MAP.put(DataObject.CREATED_BY, new MailFolderFieldWriter() {
 
             @Override
             public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
@@ -203,7 +202,7 @@ public final class FolderWriter {
                 }
             }
         });
-        WRITERS_MAP.put(Integer.valueOf(DataObject.MODIFIED_BY), new MailFolderFieldWriter() {
+        WRITERS_MAP.put(DataObject.MODIFIED_BY, new MailFolderFieldWriter() {
 
             @Override
             public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
@@ -214,7 +213,7 @@ public final class FolderWriter {
                 }
             }
         });
-        WRITERS_MAP.put(Integer.valueOf(DataObject.CREATION_DATE), new MailFolderFieldWriter() {
+        WRITERS_MAP.put(DataObject.CREATION_DATE, new MailFolderFieldWriter() {
 
             @Override
             public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
@@ -225,7 +224,7 @@ public final class FolderWriter {
                 }
             }
         });
-        WRITERS_MAP.put(Integer.valueOf(DataObject.LAST_MODIFIED), new MailFolderFieldWriter() {
+        WRITERS_MAP.put(DataObject.LAST_MODIFIED, new MailFolderFieldWriter() {
 
             @Override
             public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
@@ -236,7 +235,7 @@ public final class FolderWriter {
                 }
             }
         });
-        WRITERS_MAP.put(Integer.valueOf(FolderChildObject.FOLDER_ID), new MailFolderFieldWriter() {
+        WRITERS_MAP.put(FolderChildObject.FOLDER_ID, new MailFolderFieldWriter() {
 
             @Override
             public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
@@ -253,7 +252,7 @@ public final class FolderWriter {
                 }
             }
         });
-        WRITERS_MAP.put(Integer.valueOf(FolderObject.FOLDER_NAME), new MailFolderFieldWriter() {
+        WRITERS_MAP.put(FolderObject.FOLDER_NAME, new MailFolderFieldWriter() {
 
             @Override
             public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
@@ -264,7 +263,7 @@ public final class FolderWriter {
                 }
             }
         });
-        WRITERS_MAP.put(Integer.valueOf(FolderObject.MODULE), new MailFolderFieldWriter() {
+        WRITERS_MAP.put(FolderObject.MODULE, new MailFolderFieldWriter() {
 
             @Override
             public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
@@ -275,7 +274,7 @@ public final class FolderWriter {
                 }
             }
         });
-        WRITERS_MAP.put(Integer.valueOf(FolderObject.TYPE), new MailFolderFieldWriter() {
+        WRITERS_MAP.put(FolderObject.TYPE, new MailFolderFieldWriter() {
 
             @Override
             public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
@@ -286,7 +285,7 @@ public final class FolderWriter {
                 }
             }
         });
-        WRITERS_MAP.put(Integer.valueOf(FolderObject.SUBFOLDERS), new MailFolderFieldWriter() {
+        WRITERS_MAP.put(FolderObject.SUBFOLDERS, new MailFolderFieldWriter() {
 
             @Override
             public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
@@ -306,7 +305,7 @@ public final class FolderWriter {
                 }
             }
         });
-        WRITERS_MAP.put(Integer.valueOf(FolderObject.OWN_RIGHTS), new MailFolderFieldWriter() {
+        WRITERS_MAP.put(FolderObject.OWN_RIGHTS, new MailFolderFieldWriter() {
 
             @Override
             public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
@@ -351,7 +350,7 @@ public final class FolderWriter {
                 }
             }
         });
-        WRITERS_MAP.put(Integer.valueOf(FolderObject.PERMISSIONS_BITS), new MailFolderFieldWriter() {
+        WRITERS_MAP.put(FolderObject.PERMISSIONS_BITS, new MailFolderFieldWriter() {
 
             @Override
             public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
@@ -376,7 +375,7 @@ public final class FolderWriter {
                 }
             }
         });
-        WRITERS_MAP.put(Integer.valueOf(FolderObject.SUMMARY), new MailFolderFieldWriter() {
+        WRITERS_MAP.put(FolderObject.SUMMARY, new MailFolderFieldWriter() {
 
             @Override
             public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
@@ -393,7 +392,7 @@ public final class FolderWriter {
                 }
             }
         });
-        WRITERS_MAP.put(Integer.valueOf(FolderObject.STANDARD_FOLDER), new MailFolderFieldWriter() {
+        WRITERS_MAP.put(FolderObject.STANDARD_FOLDER, new MailFolderFieldWriter() {
 
             @Override
             public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
@@ -409,7 +408,7 @@ public final class FolderWriter {
                 }
             }
         });
-        WRITERS_MAP.put(Integer.valueOf(FolderObject.TOTAL), new MailFolderFieldWriter() {
+        WRITERS_MAP.put(FolderObject.TOTAL, new MailFolderFieldWriter() {
 
             @Override
             public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
@@ -423,7 +422,7 @@ public final class FolderWriter {
                 }
             }
         });
-        WRITERS_MAP.put(Integer.valueOf(FolderObject.NEW), new MailFolderFieldWriter() {
+        WRITERS_MAP.put(FolderObject.NEW, new MailFolderFieldWriter() {
 
             @Override
             public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
@@ -437,7 +436,7 @@ public final class FolderWriter {
                 }
             }
         });
-        WRITERS_MAP.put(Integer.valueOf(FolderObject.UNREAD), new MailFolderFieldWriter() {
+        WRITERS_MAP.put(FolderObject.UNREAD, new MailFolderFieldWriter() {
 
             @Override
             public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
@@ -451,7 +450,7 @@ public final class FolderWriter {
                 }
             }
         });
-        WRITERS_MAP.put(Integer.valueOf(FolderObject.DELETED), new MailFolderFieldWriter() {
+        WRITERS_MAP.put(FolderObject.DELETED, new MailFolderFieldWriter() {
 
             @Override
             public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
@@ -465,7 +464,7 @@ public final class FolderWriter {
                 }
             }
         });
-        WRITERS_MAP.put(Integer.valueOf(FolderObject.SUBSCRIBED), new MailFolderFieldWriter() {
+        WRITERS_MAP.put(FolderObject.SUBSCRIBED, new MailFolderFieldWriter() {
 
             @Override
             public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
@@ -485,7 +484,7 @@ public final class FolderWriter {
                 }
             }
         });
-        WRITERS_MAP.put(Integer.valueOf(FolderObject.SUBSCR_SUBFLDS), new MailFolderFieldWriter() {
+        WRITERS_MAP.put(FolderObject.SUBSCR_SUBFLDS, new MailFolderFieldWriter() {
 
             @Override
             public void writeField(final JSONValuePutter putter, final int accountId, final MailFolder folder, final String name, final int hasSubfolders, final String fullName, final int module, final boolean all) throws MailException {
@@ -566,7 +565,7 @@ public final class FolderWriter {
         final MailFolderFieldWriter[] retval = new MailFolderFieldWriter[fields.length];
         for (int i = 0; i < retval.length; i++) {
             final int curField = fields[i];
-            final MailFolderFieldWriter mffw = WRITERS_MAP.get(Integer.valueOf(curField));
+            final MailFolderFieldWriter mffw = WRITERS_MAP.get(curField);
             if (mffw == null) {
                 if (FolderObject.CAPABILITIES == curField) {
                     retval[i] = new ExtendedMailFolderFieldWriter(mailConfig) {
