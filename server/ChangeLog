@@ -1,3 +1,7 @@
+* 2010-02-17 - francisco.laguna@open-xchange.com
+
+ - Bugfix 14919 - Reflect automatic participant status changes in cdao for events
+
 * 2010-02-15 - thorben.betten@open-xchange.com
 
  - Bugfix #15365: Added admin daemon to build files

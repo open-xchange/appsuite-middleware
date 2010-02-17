@@ -3342,7 +3342,7 @@ public final class CalendarCollection implements CalendarCollectionService {
     /* (non-Javadoc)
      * @see com.openexchange.calendar.CalendarCommonCollectionInterface#fillEventInformation(com.openexchange.calendar.CalendarDataObject, com.openexchange.calendar.CalendarDataObject, com.openexchange.groupware.container.UserParticipant[], com.openexchange.groupware.container.UserParticipant[], com.openexchange.groupware.container.UserParticipant[], com.openexchange.groupware.container.Participant[], com.openexchange.groupware.container.Participant[], com.openexchange.groupware.container.Participant[])
      */
-    public void fillEventInformation(final CalendarDataObject cdao, final CalendarDataObject edao, UserParticipant up_event[], final UserParticipant[] new_userparticipants, final UserParticipant[] deleted_userparticipants, Participant p_event[], final Participant new_participants[], final Participant deleted_participants[]) {
+    public void fillEventInformation(final CalendarDataObject cdao, final CalendarDataObject edao, UserParticipant up_event[], final UserParticipant[] new_userparticipants, final UserParticipant[] deleted_userparticipants,final UserParticipant[] modified_userparticipants, Participant p_event[], final Participant new_participants[], final Participant deleted_participants[], Participant[] modified_participants) {
         final Participants pu = new Participants();
         final Participants p = new Participants();
         final UserParticipant oup[] = edao.getUsers();
@@ -3386,6 +3386,20 @@ public final class CalendarCollection implements CalendarCollectionService {
                 }
             }
         }
+        
+        // Apply changes
+        if(modified_userparticipants != null && modified_userparticipants.length > 0) {
+            for (UserParticipant participant : modified_userparticipants) {
+                if(participant.getType() == Participant.USER) {
+                    for(int i = 0; i < up_event.length; i++) {
+                        if(up_event[i].getIdentifier() == participant.getIdentifier()) {
+                            up_event[i] =  participant;
+                        }
+                    }
+                }
+            }
+        }
+        
         p_event = p.getList();
         if (deleted_participants != null && deleted_participants.length > 0) {
             Arrays.sort(p_event);

@@ -404,7 +404,7 @@ public interface CalendarCollectionService {
      */
     public int resolveFolderIDForUser(final int oid, final int uid, final Context c) throws OXException;
 
-    public void fillEventInformation(final CalendarDataObject cdao, final CalendarDataObject edao, UserParticipant up_event[], final UserParticipant[] new_userparticipants, final UserParticipant[] deleted_userparticipants, Participant p_event[], final Participant new_participants[], final Participant deleted_participants[]);
+    public void fillEventInformation(final CalendarDataObject cdao, final CalendarDataObject edao, UserParticipant up_event[], final UserParticipant[] new_userparticipants, final UserParticipant[] deleted_userparticipants, UserParticipant[] modified_userparticipants, Participant p_event[], final Participant new_participants[], final Participant deleted_participants[], final Participant modified_participants[]);
 
     /**
      * Gets the calendar data object from specified list whose ID matches given

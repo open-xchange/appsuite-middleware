@@ -3116,7 +3116,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             }
         }
 
-        collection.fillEventInformation(cdao, edao, edao.getUsers(), new_userparticipants, deleted_userparticipants, edao.getParticipants(), new_participants, deleted_participants);
+        collection.fillEventInformation(cdao, edao, edao.getUsers(), new_userparticipants, deleted_userparticipants, modified_userparticipants, edao.getParticipants(), new_participants, deleted_participants, null);
 
         return retval;
     }
