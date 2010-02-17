@@ -60,14 +60,11 @@ import junit.framework.TestSuite;
  */
 public final class MailTestSuite extends TestSuite {
 
-	/**
-	 * Initializes a new {@link MailTestSuite}
-	 */
-	private MailTestSuite() {
-		super();
-	}
+    private MailTestSuite() {
+        super();
+    }
 
-	 /**
+    /**
      * @return a test suite containing smoke tests.
      */
     public static Test suite() {

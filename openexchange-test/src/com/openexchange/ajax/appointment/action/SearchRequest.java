@@ -56,7 +56,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.SearchFields;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.request.AppointmentRequest;
 import com.openexchange.java.Strings;
 
@@ -71,11 +70,16 @@ public class SearchRequest extends AbstractAppointmentRequest<SearchResponse> {
 
     private final List<Parameter> params = new ArrayList<Parameter>();
 
+    public SearchRequest(String pattern, int folderId, int[] columns) {
+        this(pattern, folderId, columns, true);
+    }
+
     public SearchRequest(final String pattern, final int inFolder, final int[] columns, final boolean failOnError) {
         this(pattern, inFolder, null, null, columns, -1, null, false, failOnError);
     }
 
     public SearchRequest(final String pattern, final int inFolder, final Date startDate, final Date endDate, final int[] columns, final int orderBy, final String orderDir, final boolean recurrenceMaster, final boolean failOnError) {
+        super();
         searchParser = new SearchParser(failOnError, columns);
 
         param(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_SEARCH);
@@ -123,13 +127,11 @@ public class SearchRequest extends AbstractAppointmentRequest<SearchResponse> {
         return params.toArray(new Parameter[params.size()]);
     }
 
-    public AbstractAJAXParser<SearchResponse> getParser() {
+    public SearchParser getParser() {
         return searchParser;
     }
 
-    public Object getBody() throws JSONException {
+    public Object getBody() {
         return body;
     }
-
-
 }
