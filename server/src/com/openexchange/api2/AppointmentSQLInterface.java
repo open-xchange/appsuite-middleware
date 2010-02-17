@@ -352,4 +352,13 @@ public interface AppointmentSQLInterface {
      * @throws OXException
      */
     public int resolveUid(String uid) throws OXException;
+    
+    /**
+     * Returns the folder in which this appointment is located for the current user.
+     * 
+     * @param objectId
+     * @return
+     * @throws OXException
+     */
+    public int getFolder(int objectId) throws OXException;
 }

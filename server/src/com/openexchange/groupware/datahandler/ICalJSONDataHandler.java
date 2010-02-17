@@ -294,20 +294,28 @@ public final class ICalJSONDataHandler implements DataHandler {
      */
     private void resolveUid(List<CalendarDataObject> appointments, DataArguments dataArguments, Session session) throws DataException {
         String key = "com.openexchange.groupware.calendar.searchobject";
-        if (dataArguments.containsKey(key) && Boolean.parseBoolean(dataArguments.get(key))) {
-            AppointmentSQLInterface appointmentSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
+        if (!(dataArguments.containsKey(key) && Boolean.parseBoolean(dataArguments.get(key)))) {
+            return;
+        }
+        
+        AppointmentSQLInterface appointmentSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
+        
+        for (CalendarDataObject calendarData : appointments) {
+            if (calendarData.containsUid()) {
+                continue;
+            }
             
-            for (CalendarDataObject calendarData : appointments) {
-                if (calendarData.containsUid()) {
-                    try {
-                        int temp = appointmentSql.resolveUid(calendarData.getUid());
-                        if (temp != 0) {
-                            calendarData.setObjectID(temp);
-                        }
-                    } catch (OXException e) {
-                        throw new DataException(e);
+            try {
+                int id = appointmentSql.resolveUid(calendarData.getUid());
+                if (id != 0) {
+                    int folder = appointmentSql.getFolder(id);
+                    if (folder != 0) {
+                        calendarData.setParentFolderID(folder);
                     }
+                    calendarData.setObjectID(id);
                 }
+            } catch (OXException e) {
+                throw new DataException(e);
             }
         }
     }

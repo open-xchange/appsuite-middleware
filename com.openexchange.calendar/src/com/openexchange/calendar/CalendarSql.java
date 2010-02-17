@@ -59,6 +59,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.omg.CORBA.CTX_RESTRICT_SCOPE;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.AppointmentSQLInterface;
@@ -1339,6 +1340,13 @@ public class CalendarSql implements AppointmentSQLInterface {
      */
     public int resolveUid(String uid) throws OXException {
         return cimp.resolveUid(session, uid);
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.api2.AppointmentSQLInterface#getFolder(int)
+     */
+    public int getFolder(int objectId) throws OXException {
+        return cimp.getFolder(session, objectId);
     }
 
 }

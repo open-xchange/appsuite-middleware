@@ -155,4 +155,6 @@ public interface CalendarSqlImp {
     
     public int resolveUid(Session session, String uid) throws OXException;
 
+    int getFolder(Session session, int objectId) throws OXException;
+
 }

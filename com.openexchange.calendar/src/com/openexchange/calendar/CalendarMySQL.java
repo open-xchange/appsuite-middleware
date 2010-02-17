@@ -4628,6 +4628,44 @@ public class CalendarMySQL implements CalendarSqlImp {
         return 0;
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.calendar.CalendarSqlImp#getFolder(com.openexchange.session.Session, int)
+     */
+    public int getFolder(Session session, int objectId) throws OXException {
+        Context ctx = Tools.getContext(session);
+        
+        SELECT s = new SELECT("pfid")
+            .FROM("prg_dates_members")
+            .WHERE(new EQUALS("cid", ctx.getContextId())
+                .AND(new EQUALS("object_id", objectId)
+                .AND(new EQUALS("member_uid", session.getUserId())
+            ))
+        );
+        
+        String command = new StatementBuilder().buildCommand(s);
+        
+        Connection connection = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        
+        try {
+            connection = DBPool.pickup(ctx);
+            stmt = connection.prepareStatement(command);
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, e);
+        } catch (DBPoolingException e) {
+            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, e);
+        } finally {
+            DBUtils.closeResources(rs, stmt, null, true, ctx);
+            DBPool.push(connection);
+        }
+        return 0;
+    }
+
 //    private final void deleteAllReminderEntries(CalendarDataObject edao, final int oid, final int inFolder, final Session so, final Context ctx, Connection readcon) throws SQLException, OXMandatoryFieldException, OXConflictException, OXException {
 //        UserParticipant up[] = null;
 //        boolean close_read = false;
