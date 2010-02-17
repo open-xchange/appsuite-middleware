@@ -110,8 +110,8 @@ public class ParticipantParser {
     };
     private static final FieldParser<ConfirmableParticipant> MESSAGE_PARSER = new FieldParser<ConfirmableParticipant>() {
         public void parse(boolean parseAll, ConfirmableParticipant obj, TimeZone timeZone, JSONObject json) {
-            if (json.has(ParticipantsFields.CONFIRM_MESSAGE)) {
-                obj.setMessage(json.optString(ParticipantsFields.CONFIRM_MESSAGE));
+            if (json.has(ParticipantsFields.MESSAGE)) {
+                obj.setMessage(json.optString(ParticipantsFields.MESSAGE));
             }
         }
     };

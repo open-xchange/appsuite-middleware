@@ -61,6 +61,8 @@ public final class ParticipantsFields {
 
     public static final String STATUS = "status";
 
+    public static final String MESSAGE = "message";
+
     public static final String CONFIRMATION = "confirmation";
 
     public static final String CONFIRM_MESSAGE = "confirmmessage";

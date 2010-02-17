@@ -124,7 +124,7 @@ public class ParticipantWriter {
             throw new UnsupportedOperationException("JSON array writing is not supported for participants.");
         }
         public void write(ConfirmableParticipant obj, TimeZone timeZone, JSONObject json) throws JSONException {
-            writeParameter(ParticipantsFields.CONFIRM_MESSAGE, obj.getMessage(), json, obj.containsMessage());
+            writeParameter(ParticipantsFields.MESSAGE, obj.getMessage(), json, obj.containsMessage());
         }
     };
 
