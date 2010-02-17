@@ -50,10 +50,9 @@
 package com.openexchange.ajax.writer;
 
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
+import gnu.trove.TIntObjectHashMap;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -146,10 +145,10 @@ public final class FolderWriter extends DataWriter {
         public abstract void writeField(JSONWriter jsonwriter, FolderObject fo, boolean withKey, String name, int hasSubfolders) throws JSONException, SQLException, AbstractOXException;
     }
 
-    private static final Map<Integer, FolderFieldWriter> STATIC_WRITERS_MAP = new HashMap<Integer, FolderFieldWriter>(15);
+    private static final TIntObjectHashMap<FolderFieldWriter> STATIC_WRITERS_MAP = new TIntObjectHashMap<FolderFieldWriter>(15);
 
     static {
-        STATIC_WRITERS_MAP.put(Integer.valueOf(FolderObject.OBJECT_ID), new FolderFieldWriter() {
+        STATIC_WRITERS_MAP.put(FolderObject.OBJECT_ID, new FolderFieldWriter() {
 
             @Override
             public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey, final String name, final int hasSubfolders) throws JSONException {
@@ -170,7 +169,7 @@ public final class FolderWriter extends DataWriter {
                 jsonwriter.value(fo.getObjectID());
             }
         });
-        STATIC_WRITERS_MAP.put(Integer.valueOf(FolderObject.CREATED_BY), new FolderFieldWriter() {
+        STATIC_WRITERS_MAP.put(FolderObject.CREATED_BY, new FolderFieldWriter() {
 
             @Override
             public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey, final String name, final int hasSubfolders) throws JSONException {
@@ -184,7 +183,7 @@ public final class FolderWriter extends DataWriter {
                 }
             }
         });
-        STATIC_WRITERS_MAP.put(Integer.valueOf(FolderObject.MODIFIED_BY), new FolderFieldWriter() {
+        STATIC_WRITERS_MAP.put(FolderObject.MODIFIED_BY, new FolderFieldWriter() {
 
             @Override
             public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey, final String name, final int hasSubfolders) throws JSONException {
@@ -198,7 +197,7 @@ public final class FolderWriter extends DataWriter {
                 }
             }
         });
-        STATIC_WRITERS_MAP.put(Integer.valueOf(FolderObject.FOLDER_ID), new FolderFieldWriter() {
+        STATIC_WRITERS_MAP.put(FolderObject.FOLDER_ID, new FolderFieldWriter() {
 
             @Override
             public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey, final String name, final int hasSubfolders) throws JSONException {
@@ -212,7 +211,7 @@ public final class FolderWriter extends DataWriter {
                 }
             }
         });
-        STATIC_WRITERS_MAP.put(Integer.valueOf(FolderObject.FOLDER_NAME), new FolderFieldWriter() {
+        STATIC_WRITERS_MAP.put(FolderObject.FOLDER_NAME, new FolderFieldWriter() {
 
             @Override
             public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey, final String name, final int hasSubfolders) throws JSONException {
@@ -226,7 +225,7 @@ public final class FolderWriter extends DataWriter {
                 }
             }
         });
-        STATIC_WRITERS_MAP.put(Integer.valueOf(FolderObject.MODULE), new FolderFieldWriter() {
+        STATIC_WRITERS_MAP.put(FolderObject.MODULE, new FolderFieldWriter() {
 
             @Override
             public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey, final String name, final int hasSubfolders) throws JSONException {
@@ -240,7 +239,7 @@ public final class FolderWriter extends DataWriter {
                 }
             }
         });
-        STATIC_WRITERS_MAP.put(Integer.valueOf(FolderObject.SUMMARY), new FolderFieldWriter() {
+        STATIC_WRITERS_MAP.put(FolderObject.SUMMARY, new FolderFieldWriter() {
 
             @Override
             public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey, final String name, final int hasSubfolders) throws JSONException {
@@ -250,7 +249,7 @@ public final class FolderWriter extends DataWriter {
                 jsonwriter.value("");
             }
         });
-        STATIC_WRITERS_MAP.put(Integer.valueOf(FolderObject.STANDARD_FOLDER), new FolderFieldWriter() {
+        STATIC_WRITERS_MAP.put(FolderObject.STANDARD_FOLDER, new FolderFieldWriter() {
 
             @Override
             public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey, final String name, final int hasSubfolders) throws JSONException {
@@ -264,7 +263,7 @@ public final class FolderWriter extends DataWriter {
                 }
             }
         });
-        STATIC_WRITERS_MAP.put(Integer.valueOf(FolderObject.TOTAL), new FolderFieldWriter() {
+        STATIC_WRITERS_MAP.put(FolderObject.TOTAL, new FolderFieldWriter() {
 
             @Override
             public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey, final String name, final int hasSubfolders) throws JSONException {
@@ -274,7 +273,7 @@ public final class FolderWriter extends DataWriter {
                 jsonwriter.value(JSONObject.NULL);
             }
         });
-        STATIC_WRITERS_MAP.put(Integer.valueOf(FolderObject.NEW), new FolderFieldWriter() {
+        STATIC_WRITERS_MAP.put(FolderObject.NEW, new FolderFieldWriter() {
 
             @Override
             public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey, final String name, final int hasSubfolders) throws JSONException {
@@ -284,7 +283,7 @@ public final class FolderWriter extends DataWriter {
                 jsonwriter.value(JSONObject.NULL);
             }
         });
-        STATIC_WRITERS_MAP.put(Integer.valueOf(FolderObject.UNREAD), new FolderFieldWriter() {
+        STATIC_WRITERS_MAP.put(FolderObject.UNREAD, new FolderFieldWriter() {
 
             @Override
             public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey, final String name, final int hasSubfolders) throws JSONException {
@@ -294,7 +293,7 @@ public final class FolderWriter extends DataWriter {
                 jsonwriter.value(JSONObject.NULL);
             }
         });
-        STATIC_WRITERS_MAP.put(Integer.valueOf(FolderObject.DELETED), new FolderFieldWriter() {
+        STATIC_WRITERS_MAP.put(FolderObject.DELETED, new FolderFieldWriter() {
 
             @Override
             public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey, final String name, final int hasSubfolders) throws JSONException {
@@ -304,7 +303,7 @@ public final class FolderWriter extends DataWriter {
                 jsonwriter.value(JSONObject.NULL);
             }
         });
-        STATIC_WRITERS_MAP.put(Integer.valueOf(FolderObject.CAPABILITIES), new FolderFieldWriter() {
+        STATIC_WRITERS_MAP.put(FolderObject.CAPABILITIES, new FolderFieldWriter() {
 
             @Override
             public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey, final String name, final int hasSubfolders) throws JSONException {
@@ -314,7 +313,7 @@ public final class FolderWriter extends DataWriter {
                 jsonwriter.value(JSONObject.NULL);
             }
         });
-        STATIC_WRITERS_MAP.put(Integer.valueOf(FolderObject.SUBSCRIBED), new FolderFieldWriter() {
+        STATIC_WRITERS_MAP.put(FolderObject.SUBSCRIBED, new FolderFieldWriter() {
 
             @Override
             public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey, final String name, final int hasSubfolders) throws JSONException {
@@ -324,7 +323,7 @@ public final class FolderWriter extends DataWriter {
                 jsonwriter.value(JSONObject.NULL);
             }
         });
-        STATIC_WRITERS_MAP.put(Integer.valueOf(FolderObject.SUBSCR_SUBFLDS), new FolderFieldWriter() {
+        STATIC_WRITERS_MAP.put(FolderObject.SUBSCR_SUBFLDS, new FolderFieldWriter() {
 
             @Override
             public void writeField(final JSONWriter jsonwriter, final FolderObject fo, final boolean withKey, final String name, final int hasSubfolders) throws JSONException {
@@ -479,7 +478,7 @@ public final class FolderWriter extends DataWriter {
             /*
              * Check if current field can be handled by a static writer implementation
              */
-            final FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(Integer.valueOf(field));
+            final FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(field);
             if (ffw == null) {
                 /*
                  * No static writer available, generate a new one

@@ -50,7 +50,6 @@
 package com.openexchange.ajax.writer;
 
 import gnu.trove.TIntObjectHashMap;
-import gnu.trove.TObjectProcedure;
 import java.util.Date;
 import java.util.TimeZone;
 import org.json.JSONArray;
@@ -72,33 +71,6 @@ import com.openexchange.groupware.container.participants.ConfirmableParticipant;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public abstract class CalendarWriter extends CommonWriter {
-
-    private final class WriterProcedure implements TObjectProcedure<FieldWriter<CalendarObject>> {
-
-        public JSONException error;
-
-        private final CalendarObject obj;
-
-        private final JSONObject json;
-
-        private final TimeZone tz;
-
-        public WriterProcedure(final CalendarObject obj, final JSONObject json, final TimeZone tz) {
-            this.obj = obj;
-            this.json = json;
-            this.tz = tz;
-        }
-
-        public boolean execute(final FieldWriter<CalendarObject> writer) {
-            try {
-                writer.write(obj, tz, json);
-                return true;
-            } catch (final JSONException e) {
-                error = e;
-                return false;
-            }
-        }
-    }
 
     protected CalendarWriter(final TimeZone timeZone, final JSONWriter jsonWriter) {
         super(timeZone, jsonWriter);
@@ -247,9 +219,9 @@ public abstract class CalendarWriter extends CommonWriter {
 
     protected void writeFields(final CalendarObject obj, final TimeZone tz, final JSONObject json) throws JSONException {
         super.writeFields(obj, tz, json);
-        final WriterProcedure procedure = new WriterProcedure(obj, json, tz);
+        final WriterProcedure<CalendarObject> procedure = new WriterProcedure<CalendarObject>(obj, json, tz);
         if (!WRITER_MAP.forEachValue(procedure)) {
-            final JSONException je = procedure.error;
+            final JSONException je = procedure.getError();
             if (null != je) {
                 throw je;
             }

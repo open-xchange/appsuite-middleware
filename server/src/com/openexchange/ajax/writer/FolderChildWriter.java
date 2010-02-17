@@ -49,10 +49,7 @@
 
 package com.openexchange.ajax.writer;
 
-import static com.openexchange.java.Autoboxing.I;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import gnu.trove.TIntObjectHashMap;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -73,12 +70,12 @@ public class FolderChildWriter extends DataWriter {
      * @param timeZone
      * @param writer
      */
-    public FolderChildWriter(TimeZone timeZone, JSONWriter writer) {
+    public FolderChildWriter(final TimeZone timeZone, final JSONWriter writer) {
         super(timeZone, writer);
     }
 
-    protected boolean writeField(FolderChildObject obj, int column, TimeZone tz, JSONArray json) throws JSONException {
-        FieldWriter<FolderChildObject> writer = WRITER_MAP.get(I(column));
+    protected boolean writeField(final FolderChildObject obj, final int column, final TimeZone tz, final JSONArray json) throws JSONException {
+        final FieldWriter<FolderChildObject> writer = WRITER_MAP.get(column);
         if (null == writer) {
             return super.writeField(obj, column, tz, json);
         }
@@ -86,28 +83,32 @@ public class FolderChildWriter extends DataWriter {
         return true;
     }
 
-    protected void writeFields(FolderChildObject obj, TimeZone tz, JSONObject json) throws JSONException {
+    protected void writeFields(final FolderChildObject obj, final TimeZone tz, final JSONObject json) throws JSONException {
         super.writeFields(obj, tz, json);
-        for (FieldWriter<FolderChildObject> writer : WRITER_MAP.values()) {
-            writer.write(obj, tz, json);
+        final WriterProcedure<FolderChildObject> procedure = new WriterProcedure<FolderChildObject>(obj, json, tz);
+        if (!WRITER_MAP.forEachValue(procedure)) {
+            final JSONException je = procedure.getError();
+            if (null != je) {
+                throw je;
+            }
         }
     }
 
     private static final FieldWriter<FolderChildObject> FOLDER_ID_WRITER = new FieldWriter<FolderChildObject>() {
-        public void write(FolderChildObject obj, TimeZone timeZone, JSONArray json) {
+        public void write(final FolderChildObject obj, final TimeZone timeZone, final JSONArray json) {
             writeValue(obj.getParentFolderID(), json, obj.containsParentFolderID());
         }
-        public void write(FolderChildObject obj, TimeZone timeZone, JSONObject json) throws JSONException {
+        public void write(final FolderChildObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
             writeParameter(FolderChildFields.FOLDER_ID, obj.getParentFolderID(), json, obj.containsParentFolderID());
         }
     };
 
     static {
-        final Map<Integer, FieldWriter<FolderChildObject>> m = new HashMap<Integer, FieldWriter<FolderChildObject>>(1, 1);
-        m.put(I(FolderChildObject.FOLDER_ID), FOLDER_ID_WRITER);
-        WRITER_MAP = Collections.unmodifiableMap(m);
+        final TIntObjectHashMap<FieldWriter<FolderChildObject>> m = new TIntObjectHashMap<FieldWriter<FolderChildObject>>(1, 1);
+        m.put(FolderChildObject.FOLDER_ID, FOLDER_ID_WRITER);
+        WRITER_MAP = m;
     }
 
-    private static final Map<Integer, FieldWriter<FolderChildObject>> WRITER_MAP;
+    private static final TIntObjectHashMap<FieldWriter<FolderChildObject>> WRITER_MAP;
 
 }

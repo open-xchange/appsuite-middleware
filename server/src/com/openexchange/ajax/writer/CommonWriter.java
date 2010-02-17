@@ -49,10 +49,7 @@
 
 package com.openexchange.ajax.writer;
 
-import static com.openexchange.java.Autoboxing.I;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import gnu.trove.TIntObjectHashMap;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -93,8 +90,8 @@ public class CommonWriter extends FolderChildWriter {
         writeFields(commonObj, timeZone, jsonObj);
     }
 
-    protected boolean writeField(CommonObject obj, int column, TimeZone tz, JSONArray json) throws JSONException {
-        FieldWriter<CommonObject> writer = WRITER_MAP.get(I(column));
+    protected boolean writeField(final CommonObject obj, final int column, final TimeZone tz, final JSONArray json) throws JSONException {
+        final FieldWriter<CommonObject> writer = WRITER_MAP.get(column);
         if (null == writer) {
             return super.writeField(obj, column, tz, json);
         }
@@ -102,54 +99,58 @@ public class CommonWriter extends FolderChildWriter {
         return true;
     }
 
-    protected void writeFields(CommonObject obj, TimeZone tz, JSONObject json) throws JSONException {
+    protected void writeFields(final CommonObject obj, final TimeZone tz, final JSONObject json) throws JSONException {
         super.writeFields(obj, tz, json);
-        for (FieldWriter<CommonObject> writer : WRITER_MAP.values()) {
-            writer.write(obj, tz, json);
+        final WriterProcedure<CommonObject> procedure = new WriterProcedure<CommonObject>(obj, json, tz);
+        if (!WRITER_MAP.forEachValue(procedure)) {
+            final JSONException je = procedure.getError();
+            if (null != je) {
+                throw je;
+            }
         }
     }
 
     private static final FieldWriter<CommonObject> CATEGORIES_WRITER = new FieldWriter<CommonObject>() {
-        public void write(CommonObject obj, TimeZone timeZone, JSONArray json) {
+        public void write(final CommonObject obj, final TimeZone timeZone, final JSONArray json) {
             writeValue(obj.getCategories(), json, obj.containsCategories());
         }
-        public void write(CommonObject obj, TimeZone timeZone, JSONObject json) throws JSONException {
+        public void write(final CommonObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
             writeParameter(CommonFields.CATEGORIES, obj.getCategories(), json, obj.containsCategories());
         }
     };
 
     private static final FieldWriter<CommonObject> PRIVATE_FLAG_WRITER = new FieldWriter<CommonObject>() {
-        public void write(CommonObject obj, TimeZone timeZone, JSONArray json) {
+        public void write(final CommonObject obj, final TimeZone timeZone, final JSONArray json) {
             writeValue(obj.getPrivateFlag(), json, obj.containsPrivateFlag());
         }
-        public void write(CommonObject obj, TimeZone timeZone, JSONObject json) throws JSONException {
+        public void write(final CommonObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
             writeParameter(CommonFields.PRIVATE_FLAG, obj.getPrivateFlag(), json, obj.containsPrivateFlag());
         }
     };
 
     private static final FieldWriter<CommonObject> COLORLABEL_WRITER = new FieldWriter<CommonObject>() {
-        public void write(CommonObject obj, TimeZone timeZone, JSONArray json) {
+        public void write(final CommonObject obj, final TimeZone timeZone, final JSONArray json) {
             writeValue(obj.getLabel(), json, obj.containsLabel());
         }
-        public void write(CommonObject obj, TimeZone timeZone, JSONObject json) throws JSONException {
+        public void write(final CommonObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
             writeParameter(CommonFields.COLORLABEL, obj.getLabel(), json, obj.containsLabel());
         }
     };
 
     private static final FieldWriter<CommonObject> NUMBER_OF_ATTACHMENTS_WRITER = new FieldWriter<CommonObject>() {
-        public void write(CommonObject obj, TimeZone timeZone, JSONArray json) {
+        public void write(final CommonObject obj, final TimeZone timeZone, final JSONArray json) {
             writeValue(obj.getNumberOfAttachments(), json, obj.containsNumberOfAttachments());
         }
-        public void write(CommonObject obj, TimeZone timeZone, JSONObject json) throws JSONException {
+        public void write(final CommonObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
             writeParameter(CommonFields.NUMBER_OF_ATTACHMENTS, obj.getNumberOfAttachments(), json, obj.containsNumberOfAttachments());
         }
     };
 
     private static final FieldWriter<CommonObject> LAST_MODIFIED_OF_NEWEST_ATTACHMENT_UTC_WRITER = new FieldWriter<CommonObject>() {
-        public void write(CommonObject obj, TimeZone timeZone, JSONArray json) {
+        public void write(final CommonObject obj, final TimeZone timeZone, final JSONArray json) {
             writeValue(obj.getLastModifiedOfNewestAttachment(), UTC, json, obj.containsLastModifiedOfNewestAttachment());
         }
-        public void write(CommonObject obj, TimeZone timeZone, JSONObject json) throws JSONException {
+        public void write(final CommonObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
             writeParameter(
                 CommonFields.LAST_MODIFIED_OF_NEWEST_ATTACHMENT_UTC,
                 obj.getLastModifiedOfNewestAttachment(),
@@ -160,23 +161,23 @@ public class CommonWriter extends FolderChildWriter {
     };
 
     private static final FieldWriter<CommonObject> NUMBER_OF_LINKS_WRITER = new FieldWriter<CommonObject>() {
-        public void write(CommonObject obj, TimeZone timeZone, JSONArray json) {
+        public void write(final CommonObject obj, final TimeZone timeZone, final JSONArray json) {
             writeValue(obj.getNumberOfLinks(), json, obj.containsNumberOfLinks());
         }
-        public void write(CommonObject obj, TimeZone timeZone, JSONObject json) {
+        public void write(final CommonObject obj, final TimeZone timeZone, final JSONObject json) {
             // This value is nowhere written to a JSON object.
         }
     };
     static {
-        final Map<Integer, FieldWriter<CommonObject>> m = new HashMap<Integer, FieldWriter<CommonObject>>(6, 1);
-        m.put(I(CommonObject.CATEGORIES), CATEGORIES_WRITER);
-        m.put(I(CommonObject.PRIVATE_FLAG), PRIVATE_FLAG_WRITER);
-        m.put(I(CommonObject.COLOR_LABEL), COLORLABEL_WRITER);
-        m.put(I(CommonObject.NUMBER_OF_ATTACHMENTS), NUMBER_OF_ATTACHMENTS_WRITER);
-        m.put(I(CommonObject.LAST_MODIFIED_OF_NEWEST_ATTACHMENT), LAST_MODIFIED_OF_NEWEST_ATTACHMENT_UTC_WRITER);
-        m.put(I(CommonObject.NUMBER_OF_LINKS), NUMBER_OF_LINKS_WRITER);
-        WRITER_MAP = Collections.unmodifiableMap(m);
+        final TIntObjectHashMap<FieldWriter<CommonObject>> m = new TIntObjectHashMap<FieldWriter<CommonObject>>(6, 1);
+        m.put(CommonObject.CATEGORIES, CATEGORIES_WRITER);
+        m.put(CommonObject.PRIVATE_FLAG, PRIVATE_FLAG_WRITER);
+        m.put(CommonObject.COLOR_LABEL, COLORLABEL_WRITER);
+        m.put(CommonObject.NUMBER_OF_ATTACHMENTS, NUMBER_OF_ATTACHMENTS_WRITER);
+        m.put(CommonObject.LAST_MODIFIED_OF_NEWEST_ATTACHMENT, LAST_MODIFIED_OF_NEWEST_ATTACHMENT_UTC_WRITER);
+        m.put(CommonObject.NUMBER_OF_LINKS, NUMBER_OF_LINKS_WRITER);
+        WRITER_MAP = m;
     }
 
-    private static final Map<Integer, FieldWriter<CommonObject>> WRITER_MAP;
+    private static final TIntObjectHashMap<FieldWriter<CommonObject>> WRITER_MAP;
 }
