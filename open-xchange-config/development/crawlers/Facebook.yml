@@ -7,7 +7,7 @@ workflowString: |
   --- !com.openexchange.subscribe.crawler.Workflow
   steps: 
     - !com.openexchange.subscribe.crawler.LoginPageByFormActionRegexStep
-      actionOfLoginForm: "https:\\/\\/(m|login)\\.facebook\\.com\\/login\\.php?.*"
+      actionOfLoginForm: "/login\\.php.*"
       baseUrl: "http://m.facebook.com"
       description: Login to facebook.com
       linkAvailableAfterLogin: "(\\/friends.*)"
