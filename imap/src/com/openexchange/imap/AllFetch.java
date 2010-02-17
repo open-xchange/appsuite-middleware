@@ -472,17 +472,10 @@ public final class AllFetch {
      *         references are <code>null</code>, or returns <code>null</code> if both references are not <code>null</code>
      */
     static Integer compareReferences(final Object o1, final Object o2) {
-        if ((o1 == null) && (o2 != null)) {
-            return Integer.valueOf(-1);
-        } else if ((o1 != null) && (o2 == null)) {
-            return Integer.valueOf(1);
-        } else if ((o1 == null) && (o2 == null)) {
-            return Integer.valueOf(0);
+        if ((o1 == null)) {
+            return (o2 == null) ? /*both null*/Integer.valueOf(0) : Integer.valueOf(-1);
         }
-        /*
-         * Both references are not null
-         */
-        return null;
+        return (o2 == null) ? Integer.valueOf(1) : /*both not null*/null;
     }
 
     /**
