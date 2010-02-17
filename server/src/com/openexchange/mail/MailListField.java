@@ -49,8 +49,7 @@
 
 package com.openexchange.mail;
 
-import java.util.HashMap;
-import java.util.Map;
+import gnu.trove.TIntObjectHashMap;
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
@@ -188,12 +187,12 @@ public enum MailListField {
 
     private static final MailListField[] EMPTY_FIELDS = new MailListField[0];
 
-    private static final Map<Integer, MailListField> FIELDS_MAP = new HashMap<Integer, MailListField>(25);
+    private static final TIntObjectHashMap<MailListField> FIELDS_MAP = new TIntObjectHashMap<MailListField>(25);
 
     static {
         final MailListField[] fields = MailListField.values();
         for (final MailListField listField : fields) {
-            FIELDS_MAP.put(Integer.valueOf(listField.field), listField);
+            FIELDS_MAP.put(listField.field, listField);
         }
     }
 
@@ -221,7 +220,7 @@ public enum MailListField {
      * @return The corresponding {@link MailListField} constant
      */
     public static final MailListField getField(final int field) {
-        return FIELDS_MAP.get(Integer.valueOf(field));
+        return FIELDS_MAP.get(field);
     }
 
     /**

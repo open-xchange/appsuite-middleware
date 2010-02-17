@@ -49,13 +49,12 @@
 
 package com.openexchange.mail;
 
+import gnu.trove.TIntObjectHashMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import com.openexchange.mail.search.SearchTerm;
 
@@ -169,7 +168,7 @@ public enum MailField {
 
     private static final EnumMap<MailListField, MailField> LIST_FIELDS_MAP = new EnumMap<MailListField, MailField>(MailListField.class);
 
-    private static final Map<Integer, MailField> FIELDS_MAP = new HashMap<Integer, MailField>(25);
+    private static final TIntObjectHashMap<MailField> FIELDS_MAP = new TIntObjectHashMap<MailField>(25);
 
     static {
         final MailField[] fields = MailField.values();
@@ -177,7 +176,7 @@ public enum MailField {
             final MailListField listField = mailField.getListField();
             if (listField != null) {
                 LIST_FIELDS_MAP.put(listField, mailField);
-                FIELDS_MAP.put(Integer.valueOf(listField.getField()), mailField);
+                FIELDS_MAP.put(listField.getField(), mailField);
             }
         }
         LIST_FIELDS_MAP.put(MailListField.FLAG_SEEN, MailField.FLAGS);
@@ -314,7 +313,7 @@ public enum MailField {
         if (field < 0) {
             return MailField.BODY;
         }
-        return FIELDS_MAP.get(Integer.valueOf(field));
+        return FIELDS_MAP.get(field);
     }
 
     /**

@@ -49,10 +49,9 @@
 
 package com.openexchange.mailaccount;
 
+import gnu.trove.TIntObjectHashMap;
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 import com.openexchange.mailaccount.servlet.fields.MailAccountFields;
 
@@ -213,15 +212,22 @@ public enum Attribute {
         return id;
     }
 
-    private static Map<Integer, Attribute> byId = new HashMap<Integer, Attribute>();
+    private static TIntObjectHashMap<Attribute> byId = new TIntObjectHashMap<Attribute>();
 
     static {
         for (final Attribute attribute : Attribute.values()) {
-            byId.put(Integer.valueOf(attribute.getId()), attribute);
+            byId.put(attribute.getId(), attribute);
         }
     }
 
+    /**
+     * Gets the attribute by given field identifier.
+     * 
+     * @param col The field identifier
+     * @return The attribute by given field identifier or <code>null</code> if no such attribute is present
+     */
     public static Attribute getById(final int col) {
-        return byId.get(Integer.valueOf(col));
+        return byId.get(col);
     }
+
 }

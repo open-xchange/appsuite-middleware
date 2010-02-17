@@ -49,6 +49,7 @@
 
 package com.openexchange.mail;
 
+import gnu.trove.TIntObjectHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.session.Session;
@@ -123,14 +124,14 @@ public final class MailSessionCache {
      * ##################################### MEMBER STUFF #####################################
      */
 
-    private final ConcurrentMap<Integer, ConcurrentMap<String, Object>> map;
+    private final TIntObjectHashMap<ConcurrentMap<String, Object>> map;
 
     /**
      * Initializes a new {@link MailSessionCache}.
      */
     private MailSessionCache() {
         super();
-        map = new ConcurrentHashMap<Integer, ConcurrentMap<String, Object>>();
+        map = new TIntObjectHashMap<ConcurrentMap<String, Object>>();
     }
 
     /*-
@@ -157,7 +158,7 @@ public final class MailSessionCache {
      * @return The parameter or <code>null</code>
      */
     public <T extends Object> T getParameter(final int accountId, final String parameterName) {
-        final ConcurrentMap<String, Object> accountMap = map.get(Integer.valueOf(accountId));
+        final ConcurrentMap<String, Object> accountMap = map.get(accountId);
         if (null == accountMap) {
             return null;
         }
@@ -177,7 +178,7 @@ public final class MailSessionCache {
      * @return <code>true</code> if a parameter is associated with given account ID and parameter name; otherwise <code>false</code>
      */
     public boolean containsParameter(final int accountId, final String parameterName) {
-        final ConcurrentMap<String, Object> accountMap = map.get(Integer.valueOf(accountId));
+        final ConcurrentMap<String, Object> accountMap = map.get(accountId);
         if (null == accountMap) {
             return false;
         }
@@ -192,11 +193,10 @@ public final class MailSessionCache {
      * @param parameterValue The parameter value
      */
     public void putParameter(final int accountId, final String parameterName, final Object parameterValue) {
-        final Integer ik = Integer.valueOf(accountId);
-        ConcurrentMap<String, Object> accountMap = map.get(ik);
+        ConcurrentMap<String, Object> accountMap = map.get(accountId);
         if (null == accountMap) {
             final ConcurrentMap<String, Object> newInst = new ConcurrentHashMap<String, Object>();
-            accountMap = map.putIfAbsent(ik, newInst);
+            accountMap = map.putIfAbsent(accountId, newInst);
             if (null == accountMap) {
                 accountMap = newInst;
             }
@@ -218,11 +218,10 @@ public final class MailSessionCache {
      * @return The parameter value previously associated with given account ID and parameter name
      */
     public Object putParameterIfAbsent(final int accountId, final String parameterName, final Object parameterValue) {
-        final Integer ik = Integer.valueOf(accountId);
-        ConcurrentMap<String, Object> accountMap = map.get(ik);
+        ConcurrentMap<String, Object> accountMap = map.get(accountId);
         if (null == accountMap) {
             final ConcurrentMap<String, Object> newInst = new ConcurrentHashMap<String, Object>();
-            accountMap = map.putIfAbsent(ik, newInst);
+            accountMap = map.putIfAbsent(accountId, newInst);
             if (null == accountMap) {
                 accountMap = newInst;
             }
@@ -241,7 +240,7 @@ public final class MailSessionCache {
      * @return The parameter previously associated with given account ID and parameter name or <code>null</code>
      */
     public Object removeParameter(final int accountId, final String parameterName) {
-        final ConcurrentMap<String, Object> accountMap = map.get(Integer.valueOf(accountId));
+        final ConcurrentMap<String, Object> accountMap = map.get(accountId);
         if (null == accountMap) {
             return null;
         }
@@ -254,7 +253,7 @@ public final class MailSessionCache {
      * @param accountId The account ID
      */
     public void removeAccountParameters(final int accountId) {
-        final ConcurrentMap<String, Object> removed = map.remove(Integer.valueOf(accountId));
+        final ConcurrentMap<String, Object> removed = map.remove(accountId);
         if (null != removed) {
             removed.clear();
         }
