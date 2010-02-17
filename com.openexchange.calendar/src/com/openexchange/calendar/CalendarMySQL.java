@@ -50,6 +50,7 @@
 package com.openexchange.calendar;
 
 import static com.openexchange.groupware.EnumComponent.APPOINTMENT;
+import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
@@ -117,6 +118,7 @@ import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
 import com.openexchange.sql.builder.StatementBuilder;
+import com.openexchange.sql.grammar.Constant;
 import com.openexchange.sql.grammar.EQUALS;
 import com.openexchange.sql.grammar.SELECT;
 import com.openexchange.tools.StringCollection;
@@ -4601,10 +4603,12 @@ public class CalendarMySQL implements CalendarSqlImp {
         
         SELECT s = new SELECT("intfield01").
             FROM("prg_dates").
-            WHERE(new EQUALS("uid", uid).
-                AND(new EQUALS("cid", ctx.getContextId())));
+            WHERE(new EQUALS("uid", PLACEHOLDER).
+                AND(new EQUALS("cid", PLACEHOLDER)));
         
-        String command = new StatementBuilder().buildCommand(s);
+        List<Object> params = new ArrayList<Object>();
+        params.add(uid);
+        params.add(ctx.getContextId());
         
         Connection connection = null;
         PreparedStatement stmt = null;
@@ -4612,7 +4616,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         
         try {
             connection = DBPool.pickup(ctx);
-            stmt = connection.prepareStatement(command);
+            stmt = new StatementBuilder().prepareStatement(connection, s, params);
             rs = stmt.executeQuery();
             if (rs.next()) {
                 return rs.getInt(1);
@@ -4636,13 +4640,16 @@ public class CalendarMySQL implements CalendarSqlImp {
         
         SELECT s = new SELECT("pfid")
             .FROM("prg_dates_members")
-            .WHERE(new EQUALS("cid", ctx.getContextId())
-                .AND(new EQUALS("object_id", objectId)
-                .AND(new EQUALS("member_uid", session.getUserId())
+            .WHERE(new EQUALS("cid", PLACEHOLDER)
+                .AND(new EQUALS("object_id", PLACEHOLDER)
+                .AND(new EQUALS("member_uid", PLACEHOLDER)
             ))
         );
         
-        String command = new StatementBuilder().buildCommand(s);
+        List<Object> params = new ArrayList<Object>();
+        params.add(ctx.getContextId());
+        params.add(objectId);
+        params.add(session.getUserId());
         
         Connection connection = null;
         PreparedStatement stmt = null;
@@ -4650,7 +4657,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         
         try {
             connection = DBPool.pickup(ctx);
-            stmt = connection.prepareStatement(command);
+            stmt = new StatementBuilder().prepareStatement(connection, s, params);
             rs = stmt.executeQuery();
             if (rs.next()) {
                 return rs.getInt(1);
