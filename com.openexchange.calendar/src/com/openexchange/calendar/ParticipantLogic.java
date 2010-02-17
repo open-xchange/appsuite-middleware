@@ -75,33 +75,41 @@ public class ParticipantLogic {
      */
     public static Participant[] mergeFallback(Participant[] participants, ExternalUserParticipant[] externals) {
         // Sets and contains may not work because old external user participants get an identifier.
-        List<Participant> retval = new ArrayList<Participant>(participants.length + externals.length);
-        for (Participant participant : participants) {
-            retval.add(participant);
-        }
-        for (ExternalUserParticipant participant : externals) {
-            Participant contained = get(retval, participant);
-            if (null == contained) {
+        List<Participant> retval = new ArrayList<Participant>();
+        if (null != participants) {
+            for (Participant participant : participants) {
                 retval.add(participant);
-            } else {
-                extendData(participant, contained);
+            }
+        }
+        if (null != externals) {
+            for (ExternalUserParticipant participant : externals) {
+                Participant contained = get(retval, participant);
+                if (null == contained) {
+                    retval.add(participant);
+                } else {
+                    extendData(participant, contained);
+                }
             }
         }
         return retval.toArray(new Participant[retval.size()]);
     }
 
     public static ConfirmableParticipant[] mergeConfirmations(ExternalUserParticipant[] externals, Participant[] participants) {
-        List<ConfirmableParticipant> retval = new ArrayList<ConfirmableParticipant>(externals.length + participants.length);
-        for (ExternalUserParticipant external : externals) {
-            retval.add(external);
-        }
-        for (Participant participant : participants) {
-            if (!(participant instanceof ConfirmableParticipant)) {
-                continue;
+        List<ConfirmableParticipant> retval = new ArrayList<ConfirmableParticipant>();
+        if (null != externals) {
+            for (ExternalUserParticipant external : externals) {
+                retval.add(external);
             }
-            ConfirmableParticipant confirmable = (ConfirmableParticipant) participant;
-            if (!contains(retval, confirmable)) {
-                retval.add(confirmable);
+        }
+        if (null != participants) {
+            for (Participant participant : participants) {
+                if (!(participant instanceof ConfirmableParticipant)) {
+                    continue;
+                }
+                ConfirmableParticipant confirmable = (ConfirmableParticipant) participant;
+                if (!contains(retval, confirmable)) {
+                    retval.add(confirmable);
+                }
             }
         }
         return retval.toArray(new ConfirmableParticipant[retval.size()]);
