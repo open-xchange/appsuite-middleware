@@ -818,7 +818,7 @@ public final class MessagingFolderStorage implements FolderStorage {
         parameters.putParameterIfAbsent(
             MessagingFolderType.getInstance(),
             MessagingParameterConstants.PARAM_MESSAGING_ACCESS,
-            new ConcurrentHashMap<Integer, MessagingAccountAccess>());
+            new ConcurrentHashMap<Key, MessagingAccountAccess>());
         return parameters;
     }
 
