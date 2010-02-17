@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.customizer.folder;
 
+import gnu.trove.TIntObjectHashMap;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.logging.Log;
@@ -68,7 +69,7 @@ public class AdditionalFolderFieldList {
 
     private static final Log LOG = LogFactory.getLog(AdditionalFolderFieldList.class);
 
-    private final Map<Integer, AdditionalFolderField> byColId = new HashMap<Integer, AdditionalFolderField>();
+    private final TIntObjectHashMap<AdditionalFolderField> byColId = new TIntObjectHashMap<AdditionalFolderField>();
     private final Map<String, AdditionalFolderField> byName = new HashMap<String, AdditionalFolderField>();
 
     /**
@@ -77,7 +78,7 @@ public class AdditionalFolderFieldList {
      * @param field The additional folder field
      */
     public synchronized void addField(final AdditionalFolderField field) {
-        final Integer key = Integer.valueOf(field.getColumnID());
+        final int key = field.getColumnID();
         if (byColId.containsKey(key) || byName.containsKey(field.getColumnName())) {
             warnAboutCollision(field);
             return;
@@ -97,7 +98,7 @@ public class AdditionalFolderFieldList {
      * @return The additional folder field associated with specified column number or a neutral <code>null</code> field
      */
     public AdditionalFolderField get(final int col) {
-        final AdditionalFolderField additionalFolderField = byColId.get(Integer.valueOf(col));
+        final AdditionalFolderField additionalFolderField = byColId.get(col);
         return null == additionalFolderField ? new NullField(col) : additionalFolderField;
     }
 
@@ -118,7 +119,7 @@ public class AdditionalFolderFieldList {
      * @return <code>true</code> if an additional folder field is associated with specified column number; otherwise <code>false</code>
      */
     public boolean knows(final int col) {
-        return byColId.containsKey(Integer.valueOf(col));
+        return byColId.containsKey(col);
     }
 
     /**
@@ -142,7 +143,7 @@ public class AdditionalFolderFieldList {
         }
         final AdditionalFolderField f = get(colId);
         byName.remove(f.getColumnName());
-        byColId.remove(Integer.valueOf(colId));
+        byColId.remove(colId);
     }
 
     /**

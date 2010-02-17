@@ -49,10 +49,7 @@
 
 package com.openexchange.ajax.writer;
 
-import static com.openexchange.java.Autoboxing.I;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import gnu.trove.TIntObjectHashMap;
 import java.util.TimeZone;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -83,7 +80,7 @@ public class TaskWriter extends CalendarWriter {
 
     public void writeArray(final Task taskObject, final int[] columns, final JSONArray jsonArray) throws JSONException {
         final JSONArray jsonTaskArray = new JSONArray();
-        for (int column : columns) {
+        for (final int column : columns) {
             writeField(taskObject, column, timeZone, jsonTaskArray);
         }
         jsonArray.put(jsonTaskArray);
@@ -131,8 +128,8 @@ public class TaskWriter extends CalendarWriter {
         writeParameter(TaskFields.DAYS, task.getDays(), json, task.containsDays());
     }
 
-    protected void writeField(Task task, int column, TimeZone tz, JSONArray json) throws JSONException {
-        TaskFieldWriter writer = WRITER_MAP.get(I(column));
+    protected void writeField(final Task task, final int column, final TimeZone tz, final JSONArray json) throws JSONException {
+        final TaskFieldWriter writer = WRITER_MAP.get(column);
         if (null != writer) {
             writer.write(task, json);
             return;
@@ -170,135 +167,135 @@ public class TaskWriter extends CalendarWriter {
      * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      */
 
-    private static final Map<Integer, TaskFieldWriter> WRITER_MAP;
+    private static final TIntObjectHashMap<TaskFieldWriter> WRITER_MAP;
 
     static {
-        final Map<Integer, TaskFieldWriter> m = new HashMap<Integer, TaskFieldWriter>(25, 1);
-        m.put(I(Task.TITLE), new TaskFieldWriter() {
+        final TIntObjectHashMap<TaskFieldWriter> m = new TIntObjectHashMap<TaskFieldWriter>(25, 1);
+        m.put(Task.TITLE, new TaskFieldWriter() {
             public void write(final Task taskObject, final JSONArray jsonArray) {
                 writeValue(taskObject.getTitle(), jsonArray);
             }
         });
-        m.put(I(Task.START_DATE), new TaskFieldWriter() {
+        m.put(Task.START_DATE, new TaskFieldWriter() {
             public void write(final Task taskObject, final JSONArray jsonArray) {
                 writeValue(taskObject.getStartDate(), jsonArray);
             }
         });
-        m.put(I(Task.END_DATE), new TaskFieldWriter() {
+        m.put(Task.END_DATE, new TaskFieldWriter() {
             public void write(final Task taskObject, final JSONArray jsonArray) {
                 writeValue(taskObject.getEndDate(), jsonArray);
             }
         });
-        m.put(I(Task.NOTE), new TaskFieldWriter() {
+        m.put(Task.NOTE, new TaskFieldWriter() {
             public void write(final Task taskObject, final JSONArray jsonArray) {
                 writeValue(taskObject.getNote(), jsonArray);
             }
         });
-        m.put(I(Task.ACTUAL_COSTS), new TaskFieldWriter() {
+        m.put(Task.ACTUAL_COSTS, new TaskFieldWriter() {
             public void write(final Task taskObject, final JSONArray jsonArray) {
                 writeValue(taskObject.getActualCosts(), jsonArray, taskObject.containsActualCosts());
             }
         });
-        m.put(I(Task.ACTUAL_DURATION), new TaskFieldWriter() {
+        m.put(Task.ACTUAL_DURATION, new TaskFieldWriter() {
             public void write(final Task taskObject, final JSONArray jsonArray) {
                 writeValue(taskObject.getActualDuration(), jsonArray, taskObject.containsActualDuration());
             }
         });
-        m.put(I(Task.BILLING_INFORMATION), new TaskFieldWriter() {
+        m.put(Task.BILLING_INFORMATION, new TaskFieldWriter() {
             public void write(final Task taskObject, final JSONArray jsonArray) {
                 writeValue(taskObject.getBillingInformation(), jsonArray);
             }
         });
-        m.put(I(Task.COMPANIES), new TaskFieldWriter() {
+        m.put(Task.COMPANIES, new TaskFieldWriter() {
             public void write(final Task taskObject, final JSONArray jsonArray) {
                 writeValue(taskObject.getCompanies(), jsonArray);
             }
         });
-        m.put(I(Task.CURRENCY), new TaskFieldWriter() {
+        m.put(Task.CURRENCY, new TaskFieldWriter() {
             public void write(final Task taskObject, final JSONArray jsonArray) {
                 writeValue(taskObject.getCurrency(), jsonArray);
             }
         });
-        m.put(I(Task.DATE_COMPLETED), new TaskFieldWriter() {
+        m.put(Task.DATE_COMPLETED, new TaskFieldWriter() {
             public void write(final Task taskObject, final JSONArray jsonArray) {
                 writeValue(taskObject.getDateCompleted(), jsonArray);
             }
         });
-        m.put(I(Task.PERCENT_COMPLETED), new TaskFieldWriter() {
+        m.put(Task.PERCENT_COMPLETED, new TaskFieldWriter() {
             public void write(final Task taskObject, final JSONArray jsonArray) {
                 writeValue(taskObject.getPercentComplete(), jsonArray, taskObject.containsPercentComplete());
             }
         });
-        m.put(I(Task.PRIORITY), new TaskFieldWriter() {
+        m.put(Task.PRIORITY, new TaskFieldWriter() {
             public void write(final Task taskObject, final JSONArray jsonArray) {
                 writeValue(taskObject.getPriority(), jsonArray, taskObject.containsPriority());
             }
         });
-        m.put(I(Task.STATUS), new TaskFieldWriter() {
+        m.put(Task.STATUS, new TaskFieldWriter() {
             public void write(final Task taskObject, final JSONArray jsonArray) {
                 writeValue(taskObject.getStatus(), jsonArray, taskObject.containsStatus());
             }
         });
-        m.put(I(Task.TARGET_COSTS), new TaskFieldWriter() {
+        m.put(Task.TARGET_COSTS, new TaskFieldWriter() {
             public void write(final Task taskObject, final JSONArray jsonArray) {
                 writeValue(taskObject.getTargetCosts(), jsonArray, taskObject.containsTargetCosts());
             }
         });
-        m.put(I(Task.TARGET_DURATION), new TaskFieldWriter() {
+        m.put(Task.TARGET_DURATION, new TaskFieldWriter() {
             public void write(final Task taskObject, final JSONArray jsonArray) {
                 writeValue(taskObject.getTargetDuration(), jsonArray, taskObject.containsTargetDuration());
             }
         });
-        m.put(I(Task.TRIP_METER), new TaskFieldWriter() {
+        m.put(Task.TRIP_METER, new TaskFieldWriter() {
             public void write(final Task taskObject, final JSONArray jsonArray) {
                 writeValue(taskObject.getTripMeter(), jsonArray);
             }
         });
-        m.put(I(Task.RECURRENCE_TYPE), new TaskFieldWriter() {
+        m.put(Task.RECURRENCE_TYPE, new TaskFieldWriter() {
             public void write(final Task taskObject, final JSONArray jsonArray) {
                 writeValue(taskObject.getRecurrenceType(), jsonArray, taskObject.containsRecurrenceType());
             }
         });
-        m.put(I(Task.PARTICIPANTS), new TaskFieldWriter() {
+        m.put(Task.PARTICIPANTS, new TaskFieldWriter() {
             public void write(final Task taskObject, final JSONArray jsonArray) throws JSONException {
                 jsonArray.put(getParticipantsAsJSONArray(taskObject));
             }
         });
-        m.put(I(Task.USERS), new TaskFieldWriter() {
+        m.put(Task.USERS, new TaskFieldWriter() {
             public void write(final Task taskObject, final JSONArray jsonArray) throws JSONException {
                 jsonArray.put(getUsersAsJSONArray(taskObject));
             }
         });
-        m.put(I(Task.DAYS), new TaskFieldWriter() {
+        m.put(Task.DAYS, new TaskFieldWriter() {
             public void write(final Task taskObject, final JSONArray jsonArray) {
                 writeValue(taskObject.getDays(), jsonArray, taskObject.containsDays());
             }
         });
-        m.put(I(Task.DAY_IN_MONTH), new TaskFieldWriter() {
+        m.put(Task.DAY_IN_MONTH, new TaskFieldWriter() {
             public void write(final Task taskObject, final JSONArray jsonArray) {
                 writeValue(taskObject.getDayInMonth(), jsonArray, taskObject.containsDayInMonth());
             }
         });
-        m.put(I(Task.MONTH), new TaskFieldWriter() {
+        m.put(Task.MONTH, new TaskFieldWriter() {
             public void write(final Task taskObject, final JSONArray jsonArray) {
                 writeValue(taskObject.getMonth(), jsonArray, taskObject.containsMonth());
             }
         });
-        m.put(I(Task.INTERVAL), new TaskFieldWriter() {
+        m.put(Task.INTERVAL, new TaskFieldWriter() {
             public void write(final Task taskObject, final JSONArray jsonArray) {
                 writeValue(taskObject.getInterval(), jsonArray, taskObject.containsInterval());
             }
         });
-        m.put(I(Task.UNTIL), new TaskFieldWriter() {
+        m.put(Task.UNTIL, new TaskFieldWriter() {
             public void write(final Task taskObject, final JSONArray jsonArray) {
                 writeValue(taskObject.getUntil(), jsonArray, taskObject.containsUntil());
             }
         });
-        m.put(I(Task.RECURRENCE_COUNT), new TaskFieldWriter() {
+        m.put(Task.RECURRENCE_COUNT, new TaskFieldWriter() {
             public void write(final Task task, final JSONArray json) {
                 writeValue(task.getOccurrence(), json, task.containsOccurrence());
             }
         });
-        WRITER_MAP = Collections.unmodifiableMap(m);
+        WRITER_MAP = m;
     }
 }

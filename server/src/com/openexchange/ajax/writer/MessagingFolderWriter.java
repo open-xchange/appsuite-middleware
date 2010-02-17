@@ -49,9 +49,8 @@
 
 package com.openexchange.ajax.writer;
 
-import java.util.HashMap;
+import gnu.trove.TIntObjectHashMap;
 import java.util.List;
-import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -157,10 +156,10 @@ public final class MessagingFolderWriter {
     /**
      * Maps folder field constants to corresponding instance of {@link MessagingFolderFieldWriter}
      */
-    private static final Map<Integer, MessagingFolderFieldWriter> WRITERS_MAP = new HashMap<Integer, MessagingFolderFieldWriter>(20);
+    private static final TIntObjectHashMap<MessagingFolderFieldWriter> WRITERS_MAP = new TIntObjectHashMap<MessagingFolderFieldWriter>(20);
 
     static {
-        WRITERS_MAP.put(Integer.valueOf(DataObject.OBJECT_ID), new MessagingFolderFieldWriter() {
+        WRITERS_MAP.put(DataObject.OBJECT_ID, new MessagingFolderFieldWriter() {
 
             @Override
             public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
@@ -173,7 +172,7 @@ public final class MessagingFolderWriter {
                 }
             }
         });
-        WRITERS_MAP.put(Integer.valueOf(DataObject.CREATED_BY), new MessagingFolderFieldWriter() {
+        WRITERS_MAP.put(DataObject.CREATED_BY, new MessagingFolderFieldWriter() {
 
             @Override
             public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
@@ -184,7 +183,7 @@ public final class MessagingFolderWriter {
                 }
             }
         });
-        WRITERS_MAP.put(Integer.valueOf(DataObject.MODIFIED_BY), new MessagingFolderFieldWriter() {
+        WRITERS_MAP.put(DataObject.MODIFIED_BY, new MessagingFolderFieldWriter() {
 
             @Override
             public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
@@ -195,7 +194,7 @@ public final class MessagingFolderWriter {
                 }
             }
         });
-        WRITERS_MAP.put(Integer.valueOf(DataObject.CREATION_DATE), new MessagingFolderFieldWriter() {
+        WRITERS_MAP.put(DataObject.CREATION_DATE, new MessagingFolderFieldWriter() {
 
             @Override
             public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
@@ -206,7 +205,7 @@ public final class MessagingFolderWriter {
                 }
             }
         });
-        WRITERS_MAP.put(Integer.valueOf(DataObject.LAST_MODIFIED), new MessagingFolderFieldWriter() {
+        WRITERS_MAP.put(DataObject.LAST_MODIFIED, new MessagingFolderFieldWriter() {
 
             @Override
             public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
@@ -217,7 +216,7 @@ public final class MessagingFolderWriter {
                 }
             }
         });
-        WRITERS_MAP.put(Integer.valueOf(FolderChildObject.FOLDER_ID), new MessagingFolderFieldWriter() {
+        WRITERS_MAP.put(FolderChildObject.FOLDER_ID, new MessagingFolderFieldWriter() {
 
             @Override
             public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
@@ -234,7 +233,7 @@ public final class MessagingFolderWriter {
                 }
             }
         });
-        WRITERS_MAP.put(Integer.valueOf(FolderObject.FOLDER_NAME), new MessagingFolderFieldWriter() {
+        WRITERS_MAP.put(FolderObject.FOLDER_NAME, new MessagingFolderFieldWriter() {
 
             @Override
             public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
@@ -245,7 +244,7 @@ public final class MessagingFolderWriter {
                 }
             }
         });
-        WRITERS_MAP.put(Integer.valueOf(FolderObject.MODULE), new MessagingFolderFieldWriter() {
+        WRITERS_MAP.put(FolderObject.MODULE, new MessagingFolderFieldWriter() {
 
             @Override
             public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
@@ -256,7 +255,7 @@ public final class MessagingFolderWriter {
                 }
             }
         });
-        WRITERS_MAP.put(Integer.valueOf(FolderObject.TYPE), new MessagingFolderFieldWriter() {
+        WRITERS_MAP.put(FolderObject.TYPE, new MessagingFolderFieldWriter() {
 
             @Override
             public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
@@ -267,7 +266,7 @@ public final class MessagingFolderWriter {
                 }
             }
         });
-        WRITERS_MAP.put(Integer.valueOf(FolderObject.SUBFOLDERS), new MessagingFolderFieldWriter() {
+        WRITERS_MAP.put(FolderObject.SUBFOLDERS, new MessagingFolderFieldWriter() {
 
             @Override
             public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
@@ -287,7 +286,7 @@ public final class MessagingFolderWriter {
                 }
             }
         });
-        WRITERS_MAP.put(Integer.valueOf(FolderObject.OWN_RIGHTS), new MessagingFolderFieldWriter() {
+        WRITERS_MAP.put(FolderObject.OWN_RIGHTS, new MessagingFolderFieldWriter() {
 
             @Override
             public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
@@ -330,7 +329,7 @@ public final class MessagingFolderWriter {
                 }
             }
         });
-        WRITERS_MAP.put(Integer.valueOf(FolderObject.PERMISSIONS_BITS), new MessagingFolderFieldWriter() {
+        WRITERS_MAP.put(FolderObject.PERMISSIONS_BITS, new MessagingFolderFieldWriter() {
 
             @Override
             public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
@@ -353,7 +352,7 @@ public final class MessagingFolderWriter {
                 }
             }
         });
-        WRITERS_MAP.put(Integer.valueOf(FolderObject.SUMMARY), new MessagingFolderFieldWriter() {
+        WRITERS_MAP.put(FolderObject.SUMMARY, new MessagingFolderFieldWriter() {
 
             @Override
             public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
@@ -370,7 +369,7 @@ public final class MessagingFolderWriter {
                 }
             }
         });
-        WRITERS_MAP.put(Integer.valueOf(FolderObject.STANDARD_FOLDER), new MessagingFolderFieldWriter() {
+        WRITERS_MAP.put(FolderObject.STANDARD_FOLDER, new MessagingFolderFieldWriter() {
 
             @Override
             public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
@@ -386,7 +385,7 @@ public final class MessagingFolderWriter {
                 }
             }
         });
-        WRITERS_MAP.put(Integer.valueOf(FolderObject.TOTAL), new MessagingFolderFieldWriter() {
+        WRITERS_MAP.put(FolderObject.TOTAL, new MessagingFolderFieldWriter() {
 
             @Override
             public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
@@ -400,7 +399,7 @@ public final class MessagingFolderWriter {
                 }
             }
         });
-        WRITERS_MAP.put(Integer.valueOf(FolderObject.NEW), new MessagingFolderFieldWriter() {
+        WRITERS_MAP.put(FolderObject.NEW, new MessagingFolderFieldWriter() {
 
             @Override
             public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
@@ -414,7 +413,7 @@ public final class MessagingFolderWriter {
                 }
             }
         });
-        WRITERS_MAP.put(Integer.valueOf(FolderObject.UNREAD), new MessagingFolderFieldWriter() {
+        WRITERS_MAP.put(FolderObject.UNREAD, new MessagingFolderFieldWriter() {
 
             @Override
             public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
@@ -428,7 +427,7 @@ public final class MessagingFolderWriter {
                 }
             }
         });
-        WRITERS_MAP.put(Integer.valueOf(FolderObject.DELETED), new MessagingFolderFieldWriter() {
+        WRITERS_MAP.put(FolderObject.DELETED, new MessagingFolderFieldWriter() {
 
             @Override
             public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
@@ -442,7 +441,7 @@ public final class MessagingFolderWriter {
                 }
             }
         });
-        WRITERS_MAP.put(Integer.valueOf(FolderObject.SUBSCRIBED), new MessagingFolderFieldWriter() {
+        WRITERS_MAP.put(FolderObject.SUBSCRIBED, new MessagingFolderFieldWriter() {
 
             @Override
             public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
@@ -462,7 +461,7 @@ public final class MessagingFolderWriter {
                 }
             }
         });
-        WRITERS_MAP.put(Integer.valueOf(FolderObject.SUBSCR_SUBFLDS), new MessagingFolderFieldWriter() {
+        WRITERS_MAP.put(FolderObject.SUBSCR_SUBFLDS, new MessagingFolderFieldWriter() {
 
             @Override
             public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
@@ -484,7 +483,7 @@ public final class MessagingFolderWriter {
                 }
             }
         });
-        WRITERS_MAP.put(Integer.valueOf(FolderObject.CAPABILITIES), new MessagingFolderFieldWriter() {
+        WRITERS_MAP.put(FolderObject.CAPABILITIES, new MessagingFolderFieldWriter() {
 
             @Override
             public void writeField(final JSONValuePutter jsonContainer, final String serviceId, final int accountId, final MessagingFolder folder, final String name, final int hasSubfolders, final String id, final int module, final boolean all) throws MessagingException {
@@ -557,7 +556,7 @@ public final class MessagingFolderWriter {
         final MessagingFolderFieldWriter[] retval = new MessagingFolderFieldWriter[fields.length];
         for (int i = 0; i < retval.length; i++) {
             final int curField = fields[i];
-            final MessagingFolderFieldWriter mffw = WRITERS_MAP.get(Integer.valueOf(curField));
+            final MessagingFolderFieldWriter mffw = WRITERS_MAP.get(curField);
             if (mffw == null) {
                 if (!additionalFields.knows(curField) && LOG.isWarnEnabled()) {
                     LOG.warn("Unknown folder field: " + curField);
