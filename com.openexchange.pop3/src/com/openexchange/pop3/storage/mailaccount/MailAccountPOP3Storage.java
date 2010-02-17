@@ -105,11 +105,11 @@ public class MailAccountPOP3Storage implements POP3Storage {
 
     private final POP3StorageProperties properties;
 
-    private final String path;
+    private String path;
 
     private final POP3Access pop3Access;
 
-    private final MailAccess<?, ?> defaultMailAccess;
+    private final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> defaultMailAccess;
 
     private final int pop3AccountId;
 
@@ -211,7 +211,8 @@ public class MailAccountPOP3Storage implements POP3Storage {
         defaultMailAccess.connect(false);
         try {
             // Check path existence
-            if (!defaultMailAccess.getFolderStorage().exists(path)) {
+            final IMailFolderStorage fs = defaultMailAccess.getFolderStorage();
+            if (!fs.exists(path)) {
                 final MailFolderDescription toCreate = new MailFolderDescription();
 
                 final MailPermission mp = new DefaultMailPermission();
@@ -220,19 +221,57 @@ public class MailAccountPOP3Storage implements POP3Storage {
 
                 toCreate.addPermission(mp);
                 toCreate.setExists(false);
+                
+                /*
+                 * Determine where to create
+                 */
 
                 final char separator = defaultMailAccess.getFolderStorage().getFolder("INBOX").getSeparator();
 
                 final String[] parentAndName = parseFullname(path, separator);
-                toCreate.setName(parentAndName[1]);
-                toCreate.setParentFullname(parentAndName[0]);
-                toCreate.setSeparator(separator);
+                /*
+                 * Check CREATE permission
+                 */
+                final MailPermission ownPermission = fs.getFolder(parentAndName[0]).getOwnPermission();
+                if (ownPermission.canCreateSubfolders()) {
+                    /*
+                     * Set parent to current path's parent
+                     */
+                    toCreate.setParentFullname(parentAndName[0]);
+                } else {
+                    /*
+                     * Path is invalid! Change path
+                     */
+                    final String newParentFullname;
+                    {
+                        final String[] trashParentAndName = parseFullname(fs.getTrashFolder(), separator);
+                        newParentFullname = trashParentAndName[0];
+                    }
+                    toCreate.setParentFullname(newParentFullname);
+                    /*
+                     * Compose new path
+                     */
+                    final StringBuilder sb = new StringBuilder();
+                    if (!MailFolder.DEFAULT_FOLDER_ID.equals(newParentFullname)) {
+                        sb.append(newParentFullname);
+                    }
+                    sb.append(separator);
+                    sb.append(parentAndName[1]);
+                    path = sb.toString();
+                    // Update in properties
+                    properties.addProperty(POP3StoragePropertyNames.PROPERTY_PATH, path);
+                    if (fs.exists(path)) {
+                        return;
+                    }
+                }
+                toCreate.setName(parentAndName[1]); // Set name
+                toCreate.setSeparator(separator); // Set separator
 
                 // Unsubscribe
                 toCreate.setSubscribed(false);
 
                 try {
-                    defaultMailAccess.getFolderStorage().createFolder(toCreate);
+                    fs.createFolder(toCreate);
                 } catch (final MailException e) {
                     throw new POP3Exception(POP3Exception.Code.ILLEGAL_PATH, e, path, Integer.valueOf(session.getUserId()),
                         Integer.valueOf(session.getContextId()));

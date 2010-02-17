@@ -2,6 +2,7 @@
 
  - Bugfix #15410: Proper parsed message if no recipients specified
  - Bugfix #15367: Reliably deleting existing user data in MAL Poll tables
+ - Bugfix #15406: Auto-detect proper POP3 storage's path
 
 * 2010-02-17 - francisco.laguna@open-xchange.com
 
