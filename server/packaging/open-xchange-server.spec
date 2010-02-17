@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 3
+%define		ox_release 4
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -490,6 +490,20 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Mon Feb 15 2010 - thorben.betten@open-xchange.com
+ - Bugfix #15365: Added admin daemon to build files
+ - Bugfix #15378: Auto-detection of proper content type if "name" parameter is present
+* Fri Feb 12 2010 - thorben.betten@open-xchange.com
+ - Bugfix #15350: Fixed retrieval of session from given cookies
+ - Bugfix #14946: No null values in response to client
+* Fri Feb 12 2010 - martin.herfurth@open-xchange.com
+ - Bugfix #15074: Writing full time appointments even if the master is not in the requested time frame.
+* Thu Feb 11 2010 - francisco.laguna@open-xchange.com
+ - Bugfix #15257: Don't get servlet writer after having selected an output stream.
+ - Bugfix #15228: Gracefully handle missing infostore permissions for publications and templating
+ - Bugfix #14597: Maintain a full set of properties for each property file
+* Thu Feb 11 2010 - marcus.klein@open-xchange.com
+ - Bugfix #15361: Added missing return statement when the attribute has been written.
 * Tue Feb 09 2010 - marcus.klein@open-xchange.com
  - Bugfix #15354: Updating user attributes inside a transaction to prevent loss of aliases.
 * Wed Feb 03 2010 - marcus.klein@open-xchange.com
