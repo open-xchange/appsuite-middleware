@@ -50,14 +50,13 @@
 package com.openexchange.ajax.request;
 
 import gnu.trove.TIntHashSet;
+import gnu.trove.TIntIntHashMap;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -212,7 +211,7 @@ public class InfostoreRequest extends CommonRequest {
                     return true;
                 }
                 final Object toDelete = req.getBody();
-                final Map<Integer, Integer> folderMapping = new HashMap<Integer, Integer>();
+                final TIntIntHashMap folderMapping = new TIntIntHashMap();
                 final int[] ids = parseIDList(toDelete, folderMapping);
                 final long timestamp = Long.parseLong(req.getParameter(AJAXServlet.PARAMETER_TIMESTAMP));
                 delete(ids, folderMapping, timestamp);
@@ -333,7 +332,7 @@ public class InfostoreRequest extends CommonRequest {
         }
     }
 
-    protected int[] parseIDList(final Object toDelete, final Map<Integer, Integer> folderMapping) throws JSONException {
+    protected int[] parseIDList(final Object toDelete, final TIntIntHashMap folderMapping) throws JSONException {
         if(JSONArray.class.isAssignableFrom(toDelete.getClass())) {
             final JSONArray array = (JSONArray) toDelete;
             final int[] ids = new int[array.length()];
@@ -353,7 +352,7 @@ public class InfostoreRequest extends CommonRequest {
                     } catch (final JSONException x) {
                         folder = Integer.parseInt("folder");
                     }
-                    folderMapping.put(Integer.valueOf(ids[i]), Integer.valueOf(folder));
+                    folderMapping.put(ids[i], folder);
                 }
             }
 
@@ -784,7 +783,7 @@ public class InfostoreRequest extends CommonRequest {
         }
     }
 
-    protected void delete(final int[] ids, final Map<Integer, Integer> folderMapping, final long timestamp) {
+    protected void delete(final int[] ids, final TIntIntHashMap folderMapping, final long timestamp) {
         final InfostoreFacade infostore = getInfostore();
         final SearchEngine searchEngine = getSearchEngine();
 
@@ -842,7 +841,7 @@ public class InfostoreRequest extends CommonRequest {
                 final int nd = notDeleted[i];
                 w.value(nd);
                 w.key("folder");
-                w.value(folderMapping.get(Integer.valueOf(nd)));
+                w.value(folderMapping.get(nd));
                 w.endObject();
             }
             w.endArray();

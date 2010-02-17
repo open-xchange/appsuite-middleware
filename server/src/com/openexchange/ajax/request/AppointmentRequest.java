@@ -49,17 +49,15 @@
 
 package com.openexchange.ajax.request;
 
-import static com.openexchange.tools.Collections.newHashMap;
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
+import gnu.trove.TIntIntHashMap;
+import gnu.trove.TIntObjectHashMap;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
@@ -86,7 +84,6 @@ import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -211,11 +208,11 @@ public class AppointmentRequest {
         }
     }
     
-    private JSONObject actionResolveUid(JSONObject jsonObj) throws JSONException, OXException {
-        AppointmentSQLInterface appointmentSql = appointmentFactory.createAppointmentSql(session);
-        JSONObject json = new JSONObject();
-        String uid = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_UID);
-        int id = appointmentSql.resolveUid(uid);
+    private JSONObject actionResolveUid(final JSONObject jsonObj) throws JSONException, OXException {
+        final AppointmentSQLInterface appointmentSql = appointmentFactory.createAppointmentSql(session);
+        final JSONObject json = new JSONObject();
+        final String uid = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_UID);
+        final int id = appointmentSql.resolveUid(uid);
         if (id == 0) {
             throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, EnumComponent.APPOINTMENT, "");
         }
@@ -517,7 +514,7 @@ public class AppointmentRequest {
 
         SearchIterator<Appointment> it = null;
 
-        final HashMap<Integer, ArrayList<Integer>> recurrencePositionMap = newHashMap();
+        final TIntObjectHashMap<ArrayList<Integer>> recurrencePositionMap = new TIntObjectHashMap<ArrayList<Integer>>();
 
         final String[] sColumns = split(DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS));
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
@@ -530,13 +527,13 @@ public class AppointmentRequest {
 
         final boolean bRecurrenceMaster = DataParser.parseBoolean(jsonObj, RECURRENCE_MASTER);
 
-        final HashMap<Integer, Integer> objectIdMap = newHashMap();
+        final TIntIntHashMap objectIdMap = new TIntIntHashMap();
         for (int a = 0; a < jData.length(); a++) {
             final JSONObject jObject = jData.getJSONObject(a);
             final int objectId = DataParser.checkInt(jObject, AJAXServlet.PARAMETER_ID);
             final int folderId = DataParser.checkInt(jObject, AJAXServlet.PARAMETER_FOLDERID);
 
-            objectIdMap.put(Integer.valueOf(objectId), Integer.valueOf(folderId));
+            objectIdMap.put(objectId, folderId);
 
             // for backward compatibility supporting both recurrence position parameters
             int tempRecurrencePosition = DataParser.parseInt(jObject, CalendarFields.RECURRENCE_POSITION);
@@ -551,24 +548,24 @@ public class AppointmentRequest {
             if (tempRecurrencePosition > 0) {
                 final int recurrencePosition = tempRecurrencePosition;
                 ArrayList<Integer> recurrencePosList = null;
-                if (recurrencePositionMap.containsKey(Integer.valueOf(objectId))) {
-                    recurrencePosList = recurrencePositionMap.get(Integer.valueOf(objectId));
+                if (recurrencePositionMap.containsKey(objectId)) {
+                    recurrencePosList = recurrencePositionMap.get(objectId);
                 } else {
                     recurrencePosList = new ArrayList<Integer>();
                 }
                 recurrencePosList.add(Integer.valueOf(recurrencePosition));
-                recurrencePositionMap.put(Integer.valueOf(objectId), recurrencePosList);
+                recurrencePositionMap.put(objectId, recurrencePosList);
             }
         }
 
         final int size = objectIdMap.size();
         final int[][] objectIdAndFolderId = new int[size][2];
-
-        final Iterator<Map.Entry<Integer, Integer>> iterator = objectIdMap.entrySet().iterator();
-        for (int i = 0; i < size; i++) {
-            final Map.Entry<Integer, Integer> entry = iterator.next();
-            objectIdAndFolderId[i][0] = entry.getKey().intValue();
-            objectIdAndFolderId[i][1] = entry.getValue().intValue();
+        {
+            int i = 0;
+            for (final int objectId : objectIdMap.keys()) {
+                objectIdAndFolderId[i][0] = objectId;
+                objectIdAndFolderId[i++][1] = objectIdMap.get(objectId);
+            }
         }
 
         final AppointmentSQLInterface appointmentsql = appointmentFactory.createAppointmentSql(session);
@@ -608,8 +605,8 @@ public class AppointmentRequest {
                     } else {
                         // Commented this because this is done in CalendarOperation.next():726 that calls extractRecurringInformation()
                         // appointment.calculateRecurrence();
-                        if (recurrencePositionMap.containsKey(Integer.valueOf(appointment.getObjectID()))) {
-                            final ArrayList<Integer> recurrencePosList = recurrencePositionMap.get(Integer.valueOf(appointment.getObjectID()));
+                        if (recurrencePositionMap.containsKey(appointment.getObjectID())) {
+                            final ArrayList<Integer> recurrencePosList = recurrencePositionMap.get(appointment.getObjectID());
 
                             for (int a = 0; a < recurrencePosList.size(); a++) {
                                 appointment.setStartDate(startDate);
