@@ -130,6 +130,7 @@ import com.openexchange.messaging.DefaultMessagingFolder;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingAccountAccess;
 import com.openexchange.messaging.MessagingException;
+import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingFolder;
 import com.openexchange.messaging.MessagingFolderAccess;
 import com.openexchange.messaging.MessagingService;
@@ -2587,6 +2588,10 @@ public class Folder extends SessionServlet {
                 arrays[index] = null;
                 logger.error(e.getMessage(), e);
                 throw e;
+            } catch (final Exception e) {
+                arrays[index] = null;
+                logger.error(e.getMessage(), e);
+                throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
             try {
                 final MessagingFolderFieldWriter[] writers = MessagingFolderWriter.getMessagingFolderFieldWriter(columns, session);
