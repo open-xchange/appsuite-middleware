@@ -204,10 +204,20 @@ public enum Attribute {
         }
     }
 
+    /**
+     * Gets the attribute name.
+     * 
+     * @return The name
+     */
     public String getName() {
         return attrName;
     }
 
+    /**
+     * Gets the field identifier associated with this attribute.
+     * 
+     * @return The field identifier
+     */
     public int getId() {
         return id;
     }
