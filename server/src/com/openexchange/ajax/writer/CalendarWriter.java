@@ -49,21 +49,17 @@
 
 package com.openexchange.ajax.writer;
 
-import static com.openexchange.java.Autoboxing.I;
-import java.util.Collections;
+import gnu.trove.TIntObjectHashMap;
+import gnu.trove.TObjectProcedure;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONWriter;
 import com.openexchange.ajax.fields.CalendarFields;
-import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.ParticipantsFields;
 import com.openexchange.groupware.container.CalendarObject;
-import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.participants.ConfirmableParticipant;
@@ -77,6 +73,33 @@ import com.openexchange.groupware.container.participants.ConfirmableParticipant;
  */
 public abstract class CalendarWriter extends CommonWriter {
 
+    private final class WriterProcedure implements TObjectProcedure<FieldWriter<CalendarObject>> {
+
+        public JSONException error;
+
+        private final CalendarObject obj;
+
+        private final JSONObject json;
+
+        private final TimeZone tz;
+
+        public WriterProcedure(final CalendarObject obj, final JSONObject json, final TimeZone tz) {
+            this.obj = obj;
+            this.json = json;
+            this.tz = tz;
+        }
+
+        public boolean execute(final FieldWriter<CalendarObject> writer) {
+            try {
+                writer.write(obj, tz, json);
+                return true;
+            } catch (final JSONException e) {
+                error = e;
+                return false;
+            }
+        }
+    }
+
     protected CalendarWriter(final TimeZone timeZone, final JSONWriter jsonWriter) {
         super(timeZone, jsonWriter);
     }
@@ -86,7 +109,7 @@ public abstract class CalendarWriter extends CommonWriter {
 
         final Participant[] participants = calendarObj.getParticipants();
         if (participants != null) {
-            for (Participant p : participants) {
+            for (final Participant p : participants) {
                 final JSONObject jsonObj = getParticipantAsJSONObject(p);
                 jsonArray.put(jsonObj);
             }
@@ -213,8 +236,8 @@ public abstract class CalendarWriter extends CommonWriter {
         return jsonObj;
     }
 
-    protected boolean writeField(CalendarObject obj, int column, TimeZone tz, JSONArray json) throws JSONException {
-        FieldWriter<CalendarObject> writer = WRITER_MAP.get(I(column));
+    protected boolean writeField(final CalendarObject obj, final int column, final TimeZone tz, final JSONArray json) throws JSONException {
+        final FieldWriter<CalendarObject> writer = WRITER_MAP.get(column);
         if (null == writer) {
             return super.writeField(obj, column, tz, json);
         }
@@ -222,26 +245,30 @@ public abstract class CalendarWriter extends CommonWriter {
         return true;
     }
 
-    protected void writeFields(CalendarObject obj, TimeZone tz, JSONObject json) throws JSONException {
+    protected void writeFields(final CalendarObject obj, final TimeZone tz, final JSONObject json) throws JSONException {
         super.writeFields(obj, tz, json);
-        for (FieldWriter<CalendarObject> writer : WRITER_MAP.values()) {
-            writer.write(obj, tz, json);
+        final WriterProcedure procedure = new WriterProcedure(obj, json, tz);
+        if (!WRITER_MAP.forEachValue(procedure)) {
+            final JSONException je = procedure.error;
+            if (null != je) {
+                throw je;
+            }
         }
     }
 
     private static final FieldWriter<CalendarObject> CONFIRMATIONS_WRITER = new FieldWriter<CalendarObject>() {
-        public void write(CalendarObject obj, TimeZone timeZone, JSONArray json) throws JSONException {
+        public void write(final CalendarObject obj, final TimeZone timeZone, final JSONArray json) throws JSONException {
             json.put(createConfirmationArray(obj));
         }
-        public void write(CalendarObject obj, TimeZone timeZone, JSONObject json) throws JSONException {
+        public void write(final CalendarObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
             json.put(CalendarFields.CONFIRMATIONS, createConfirmationArray(obj));
         }
-        private JSONArray createConfirmationArray(CalendarObject obj) throws JSONException {
-            JSONArray confirmations = new JSONArray();
+        private JSONArray createConfirmationArray(final CalendarObject obj) throws JSONException {
+            final JSONArray confirmations = new JSONArray();
             if (obj.containsConfirmations()) {
-                ParticipantWriter writer = new ParticipantWriter();
-                for (ConfirmableParticipant participant : obj.getConfirmations()) {
-                    JSONObject jParticipant = new JSONObject();
+                final ParticipantWriter writer = new ParticipantWriter();
+                for (final ConfirmableParticipant participant : obj.getConfirmations()) {
+                    final JSONObject jParticipant = new JSONObject();
                     writer.write(participant, jParticipant);
                     confirmations.put(jParticipant);
                 }
@@ -251,40 +278,40 @@ public abstract class CalendarWriter extends CommonWriter {
     };
     
     protected static final FieldWriter<CalendarObject> ORGANIZER_WRITER = new FieldWriter<CalendarObject>() {
-        public void write(CalendarObject obj, TimeZone timeZone, JSONArray json) {
+        public void write(final CalendarObject obj, final TimeZone timeZone, final JSONArray json) {
             writeValue(obj.getOrganizer(), json, obj.containsOrganizer());
         }
-        public void write(CalendarObject obj, TimeZone timeZone, JSONObject json) throws JSONException {
+        public void write(final CalendarObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
             writeParameter(CalendarFields.ORGANIZER, obj.getOrganizer(), json, obj.containsOrganizer());
         }
     };
     
     protected static final FieldWriter<CalendarObject> UID_WRITER = new FieldWriter<CalendarObject>() {
-        public void write(CalendarObject obj, TimeZone timeZone, JSONArray json) {
+        public void write(final CalendarObject obj, final TimeZone timeZone, final JSONArray json) {
             writeValue(obj.getUid(), json, obj.containsUid());
         }
-        public void write(CalendarObject obj, TimeZone timeZone, JSONObject json) throws JSONException {
+        public void write(final CalendarObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
             writeParameter(CalendarFields.UID, obj.getUid(), json, obj.containsUid());
         }
     };
     
     protected static final FieldWriter<CalendarObject> SEQUENCE_WRITER = new FieldWriter<CalendarObject>() {
-        public void write(CalendarObject obj, TimeZone timeZone, JSONArray json) {
+        public void write(final CalendarObject obj, final TimeZone timeZone, final JSONArray json) {
             writeValue(obj.getSequence(), json, obj.containsSequence());
         }
-        public void write(CalendarObject obj, TimeZone timeZone, JSONObject json) throws JSONException {
+        public void write(final CalendarObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
             writeParameter(CalendarFields.SEQUENCE, obj.getSequence(), json, obj.containsSequence());
         }
     };
 
     static {
-        Map<Integer, FieldWriter<CalendarObject>> m = new HashMap<Integer, FieldWriter<CalendarObject>>(1, 1);
-        m.put(I(CalendarObject.CONFIRMATIONS), CONFIRMATIONS_WRITER);
-        m.put(I(CalendarObject.ORGANIZER), ORGANIZER_WRITER);
-        m.put(I(CalendarObject.UID), UID_WRITER);
-        m.put(I(CalendarObject.SEQUENCE), SEQUENCE_WRITER);
-        WRITER_MAP = Collections.unmodifiableMap(m);
+        final TIntObjectHashMap<FieldWriter<CalendarObject>> m = new TIntObjectHashMap<FieldWriter<CalendarObject>>(1, 1);
+        m.put(CalendarObject.CONFIRMATIONS, CONFIRMATIONS_WRITER);
+        m.put(CalendarObject.ORGANIZER, ORGANIZER_WRITER);
+        m.put(CalendarObject.UID, UID_WRITER);
+        m.put(CalendarObject.SEQUENCE, SEQUENCE_WRITER);
+        WRITER_MAP = m;
     }
 
-    private static final Map<Integer, FieldWriter<CalendarObject>> WRITER_MAP;
+    private static final TIntObjectHashMap<FieldWriter<CalendarObject>> WRITER_MAP;
 }
