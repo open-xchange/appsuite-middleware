@@ -81,6 +81,7 @@ public final class HeaderName implements Serializable, Cloneable, Comparable<Hea
         CACHE.put("Disposition-Notification-To", HeaderName.valueOf("Disposition-Notification-To"));
         CACHE.put("Content-Disposition", HeaderName.valueOf("Content-Disposition"));
         CACHE.put("From", HeaderName.valueOf("From"));
+        CACHE.put("ReplyTo", HeaderName.valueOf("ReplyTo"));
         CACHE.put("In-Reply-To", HeaderName.valueOf("In-Reply-To"));
         CACHE.put("Message-ID", HeaderName.valueOf("Message-ID"));
         CACHE.put("MIME-Version", HeaderName.valueOf("MIME-Version"));
