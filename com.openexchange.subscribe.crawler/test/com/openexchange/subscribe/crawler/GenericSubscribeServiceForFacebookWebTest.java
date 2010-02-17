@@ -87,7 +87,7 @@ public class GenericSubscribeServiceForFacebookWebTest extends GenericSubscribeS
             "http://m.facebook.com/",
             "",
             "",
-            "https:\\/\\/(m|login)\\.facebook\\.com\\/login\\.php?.*",
+            "/login\\.php.*",
             "email",
             "pass",
             "(\\/friends.*)",
