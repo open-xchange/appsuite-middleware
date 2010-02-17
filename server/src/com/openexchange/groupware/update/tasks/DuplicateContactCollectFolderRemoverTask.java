@@ -52,6 +52,8 @@ package com.openexchange.groupware.update.tasks;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
+import gnu.trove.TIntObjectHashMap;
+import gnu.trove.TIntObjectProcedure;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -127,29 +129,32 @@ public final class DuplicateContactCollectFolderRemoverTask extends UpdateTaskAd
         /*
          * Get all contexts with contained users
          */
-        final Map<Integer, List<Integer>> m = new HashMap<Integer, List<Integer>>();
+        final TIntObjectHashMap<List<Integer>> m = new TIntObjectHashMap<List<Integer>>();
         final int total = getAllUsers(params.getContextId(), m);
         status.setTotal(total);
         /*
          * Iterate per context
          */
         final Map<Locale, String> names = new HashMap<Locale, String>(4);
-        for (final Map.Entry<Integer, List<Integer>> me : m.entrySet()) {
-            final int currentContextId = me.getKey().intValue();
-            try {
-                iterateUsersPerContext(me.getValue(), names, currentContextId, status, log);
-            } catch (final AbstractOXException e) {
-                final StringBuilder sb = new StringBuilder(128);
-                sb.append("DuplicateContactCollectFolderRemoverTask experienced an error while removing duplicate contact collect folders for users in context ");
-                sb.append(currentContextId);
-                sb.append(":\n");
-                sb.append(e.getMessage());
-                log.error(sb.toString(), e);
+        m.forEachEntry(new TIntObjectProcedure<List<Integer>>() {
+            
+            public boolean execute(final int currentContextId, final List<Integer> list) {
+                try {
+                    iterateUsersPerContext(list, names, currentContextId, status, log);
+                } catch (final AbstractOXException e) {
+                    final StringBuilder sb = new StringBuilder(128);
+                    sb.append("DuplicateContactCollectFolderRemoverTask experienced an error while removing duplicate contact collect folders for users in context ");
+                    sb.append(currentContextId);
+                    sb.append(":\n");
+                    sb.append(e.getMessage());
+                    log.error(sb.toString(), e);
+                }
+                return true;
             }
-        }
+        });
     }
 
-    private static int getAllUsers(final int contextId, final Map<Integer, List<Integer>> m) throws UpdateException {
+    private static int getAllUsers(final int contextId, final TIntObjectHashMap<List<Integer>> m) throws UpdateException {
         final Connection con;
         try {
             con = Database.getNoTimeout(contextId, true);
@@ -166,7 +171,7 @@ public final class DuplicateContactCollectFolderRemoverTask extends UpdateTaskAd
             }
             int total = 0;
             do {
-                final Integer cid = Integer.valueOf(rs.getInt(1));
+                final int cid = rs.getInt(1);
                 final Integer user = Integer.valueOf(rs.getInt(2));
                 final List<Integer> l;
                 if (!m.containsKey(cid)) {
@@ -187,7 +192,7 @@ public final class DuplicateContactCollectFolderRemoverTask extends UpdateTaskAd
         }
     }
 
-    private static void iterateUsersPerContext(final List<Integer> users, final Map<Locale, String> names, final int contextId, final ProgressState status, final Log log) throws UpdateException {
+    static void iterateUsersPerContext(final List<Integer> users, final Map<Locale, String> names, final int contextId, final ProgressState status, final Log log) throws UpdateException {
         /*
          * Create context instance
          */

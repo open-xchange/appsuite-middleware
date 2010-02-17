@@ -49,8 +49,7 @@
 
 package com.openexchange.groupware.upload.impl;
 
-import java.util.HashMap;
-import java.util.Map;
+import gnu.trove.TIntObjectHashMap;
 
 /**
  * {@link UploadUtility} - Utility class for uploads.
@@ -59,23 +58,23 @@ import java.util.Map;
  */
 public final class UploadUtility {
 
-    private static final Map<Integer, String> M = new HashMap<Integer, String>(13);
+    private static final TIntObjectHashMap<String> M = new TIntObjectHashMap<String>(13);
 
     static {
         int pos = 0;
-        M.put(Integer.valueOf(pos++), "");
-        M.put(Integer.valueOf(pos++), "Kilo");
-        M.put(Integer.valueOf(pos++), "Mega");
-        M.put(Integer.valueOf(pos++), "Giga");
-        M.put(Integer.valueOf(pos++), "Tera");
-        M.put(Integer.valueOf(pos++), "Peta");
-        M.put(Integer.valueOf(pos++), "Exa");
-        M.put(Integer.valueOf(pos++), "Zetta");
-        M.put(Integer.valueOf(pos++), "Yotta");
-        M.put(Integer.valueOf(pos++), "Xenna");
-        M.put(Integer.valueOf(pos++), "W-");
-        M.put(Integer.valueOf(pos++), "Vendeka");
-        M.put(Integer.valueOf(pos++), "U-");
+        M.put(pos++, "");
+        M.put(pos++, "Kilo");
+        M.put(pos++, "Mega");
+        M.put(pos++, "Giga");
+        M.put(pos++, "Tera");
+        M.put(pos++, "Peta");
+        M.put(pos++, "Exa");
+        M.put(pos++, "Zetta");
+        M.put(pos++, "Yotta");
+        M.put(pos++, "Xenna");
+        M.put(pos++, "W-");
+        M.put(pos++, "Vendeka");
+        M.put(pos++, "U-");
     }
 
     /**
@@ -119,7 +118,7 @@ public final class UploadUtility {
     }
 
     private static String getSizePrefix(final int pos) {
-        final String prefix = M.get(Integer.valueOf(pos));
+        final String prefix = M.get(pos);
         if (prefix != null) {
             return prefix;
         }
