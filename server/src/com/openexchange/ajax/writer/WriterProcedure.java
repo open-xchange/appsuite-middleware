@@ -93,7 +93,7 @@ public class WriterProcedure<T extends SystemObject> implements TObjectProcedure
     }
 
     /**
-     * Gets the possible JSON error
+     * Gets the possible JSON error if {@link #execute(FieldWriter)} returned <code>false</code>.
      * 
      * @return The JSON error or <code>null</code>
      */
