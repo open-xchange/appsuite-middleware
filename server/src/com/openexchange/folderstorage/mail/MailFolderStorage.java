@@ -52,10 +52,11 @@ package com.openexchange.folderstorage.mail;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
+import gnu.trove.TIntObjectHashMap;
+import gnu.trove.TObjectProcedure;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -66,7 +67,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import com.openexchange.cache.OXCachingException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
@@ -134,16 +134,15 @@ public final class MailFolderStorage implements FolderStorage {
         super();
     }
 
-    private MailAccess<?, ?> getMailAccessForAccount(final int accountId, final Session session, final ConcurrentMap<Integer, MailAccess<?, ?>> accesses) throws FolderException {
-        final Integer key = Integer.valueOf(accountId);
-        MailAccess<?, ?> ma = accesses.get(key);
+    private MailAccess<?, ?> getMailAccessForAccount(final int accountId, final Session session, final TIntObjectHashMap<MailAccess<?, ?>> accesses) throws FolderException {
+        MailAccess<?, ?> ma = accesses.get(accountId);
         if (null == ma) {
             try {
                 ma = MailAccess.getInstance(session, accountId);
             } catch (final MailException e) {
                 throw new FolderException(e);
             }
-            final MailAccess<?, ?> prev = accesses.putIfAbsent(key, ma);
+            final MailAccess<?, ?> prev = accesses.putIfAbsent(accountId, ma);
             if (null != prev) {
                 ma = prev;
             }
@@ -182,16 +181,13 @@ public final class MailFolderStorage implements FolderStorage {
     }
 
     public void commitTransaction(final StorageParameters params) throws FolderException {
-        final ConcurrentMap<Integer, MailAccess<?, ?>> accesses =
-            (ConcurrentMap<Integer, MailAccess<?, ?>>) params.getParameter(
+        final TIntObjectHashMap<MailAccess<?, ?>> accesses =
+            (TIntObjectHashMap<MailAccess<?, ?>>) params.getParameter(
                 MailFolderType.getInstance(),
                 MailParameterConstants.PARAM_MAIL_ACCESS);
         if (null != accesses) {
             try {
-                final Collection<MailAccess<?, ?>> values = accesses.values();
-                for (final MailAccess<?, ?> mailAccess : values) {
-                    mailAccess.close(true);
-                }
+                accesses.forEachValue(ACCESS_PROCEDURE);
             } finally {
                 params.putParameter(MailFolderType.getInstance(), MailParameterConstants.PARAM_MAIL_ACCESS, null);
             }
@@ -200,8 +196,8 @@ public final class MailFolderStorage implements FolderStorage {
 
     public void createFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
         try {
-            final ConcurrentMap<Integer, MailAccess<?, ?>> accesses =
-                (ConcurrentMap<Integer, MailAccess<?, ?>>) storageParameters.getParameter(
+            final TIntObjectHashMap<MailAccess<?, ?>> accesses =
+                (TIntObjectHashMap<MailAccess<?, ?>>) storageParameters.getParameter(
                     MailFolderType.getInstance(),
                     MailParameterConstants.PARAM_MAIL_ACCESS);
             if (null == accesses) {
@@ -254,8 +250,8 @@ public final class MailFolderStorage implements FolderStorage {
 
     public void clearFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
         try {
-            final ConcurrentMap<Integer, MailAccess<?, ?>> accesses =
-                (ConcurrentMap<Integer, MailAccess<?, ?>>) storageParameters.getParameter(
+            final TIntObjectHashMap<MailAccess<?, ?>> accesses =
+                (TIntObjectHashMap<MailAccess<?, ?>>) storageParameters.getParameter(
                     MailFolderType.getInstance(),
                     MailParameterConstants.PARAM_MAIL_ACCESS);
             if (null == accesses) {
@@ -290,8 +286,8 @@ public final class MailFolderStorage implements FolderStorage {
 
     public void deleteFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
         try {
-            final ConcurrentMap<Integer, MailAccess<?, ?>> accesses =
-                (ConcurrentMap<Integer, MailAccess<?, ?>>) storageParameters.getParameter(
+            final TIntObjectHashMap<MailAccess<?, ?>> accesses =
+                (TIntObjectHashMap<MailAccess<?, ?>>) storageParameters.getParameter(
                     MailFolderType.getInstance(),
                     MailParameterConstants.PARAM_MAIL_ACCESS);
             if (null == accesses) {
@@ -333,8 +329,8 @@ public final class MailFolderStorage implements FolderStorage {
             return prepareFullname(MailAccount.DEFAULT_ID, "INBOX");
         }
         try {
-            @SuppressWarnings("unchecked") final ConcurrentMap<Integer, MailAccess<?, ?>> accesses =
-                (ConcurrentMap<Integer, MailAccess<?, ?>>) storageParameters.getParameter(
+            @SuppressWarnings("unchecked") final TIntObjectHashMap<MailAccess<?, ?>> accesses =
+                (TIntObjectHashMap<MailAccess<?, ?>>) storageParameters.getParameter(
                     MailFolderType.getInstance(),
                     MailParameterConstants.PARAM_MAIL_ACCESS);
             if (null == accesses) {
@@ -366,8 +362,8 @@ public final class MailFolderStorage implements FolderStorage {
 
     public boolean containsForeignObjects(final User user, final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
         try {
-            @SuppressWarnings("unchecked") final ConcurrentMap<Integer, MailAccess<?, ?>> accesses =
-                (ConcurrentMap<Integer, MailAccess<?, ?>>) storageParameters.getParameter(
+            @SuppressWarnings("unchecked") final TIntObjectHashMap<MailAccess<?, ?>> accesses =
+                (TIntObjectHashMap<MailAccess<?, ?>>) storageParameters.getParameter(
                     MailFolderType.getInstance(),
                     MailParameterConstants.PARAM_MAIL_ACCESS);
             if (null == accesses) {
@@ -395,8 +391,8 @@ public final class MailFolderStorage implements FolderStorage {
 
     public boolean isEmpty(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
         try {
-            @SuppressWarnings("unchecked") final ConcurrentMap<Integer, MailAccess<?, ?>> accesses =
-                (ConcurrentMap<Integer, MailAccess<?, ?>>) storageParameters.getParameter(
+            @SuppressWarnings("unchecked") final TIntObjectHashMap<MailAccess<?, ?>> accesses =
+                (TIntObjectHashMap<MailAccess<?, ?>>) storageParameters.getParameter(
                     MailFolderType.getInstance(),
                     MailParameterConstants.PARAM_MAIL_ACCESS);
             if (null == accesses) {
@@ -430,8 +426,8 @@ public final class MailFolderStorage implements FolderStorage {
             throw FolderExceptionErrorMessage.UNSUPPORTED_STORAGE_TYPE.create(storageType);
         }
         try {
-            @SuppressWarnings("unchecked") final ConcurrentMap<Integer, MailAccess<?, ?>> accesses =
-                (ConcurrentMap<Integer, MailAccess<?, ?>>) storageParameters.getParameter(
+            @SuppressWarnings("unchecked") final TIntObjectHashMap<MailAccess<?, ?>> accesses =
+                (TIntObjectHashMap<MailAccess<?, ?>>) storageParameters.getParameter(
                     MailFolderType.getInstance(),
                     MailParameterConstants.PARAM_MAIL_ACCESS);
             if (null == accesses) {
@@ -634,8 +630,8 @@ public final class MailFolderStorage implements FolderStorage {
             }
 
             // A mail folder denoted by fullname
-            @SuppressWarnings("unchecked") final ConcurrentMap<Integer, MailAccess<?, ?>> accesses =
-                (ConcurrentMap<Integer, MailAccess<?, ?>>) storageParameters.getParameter(
+            @SuppressWarnings("unchecked") final TIntObjectHashMap<MailAccess<?, ?>> accesses =
+                (TIntObjectHashMap<MailAccess<?, ?>>) storageParameters.getParameter(
                     MailFolderType.getInstance(),
                     MailParameterConstants.PARAM_MAIL_ACCESS);
             if (null == accesses) {
@@ -715,21 +711,26 @@ public final class MailFolderStorage implements FolderStorage {
     }
 
     public void rollback(final StorageParameters params) {
-        final ConcurrentMap<Integer, MailAccess<?, ?>> accesses =
-            (ConcurrentMap<Integer, MailAccess<?, ?>>) params.getParameter(
+        final TIntObjectHashMap<MailAccess<?, ?>> accesses =
+            (TIntObjectHashMap<MailAccess<?, ?>>) params.getParameter(
                 MailFolderType.getInstance(),
                 MailParameterConstants.PARAM_MAIL_ACCESS);
         if (null != accesses) {
             try {
-                final Collection<MailAccess<?, ?>> values = accesses.values();
-                for (final MailAccess<?, ?> mailAccess : values) {
-                    mailAccess.close(true);
-                }
+                accesses.forEachValue(ACCESS_PROCEDURE);
             } finally {
                 params.putParameter(MailFolderType.getInstance(), MailParameterConstants.PARAM_MAIL_ACCESS, null);
             }
         }
     }
+
+    private static final TObjectProcedure<MailAccess<?, ?>> ACCESS_PROCEDURE = new TObjectProcedure<MailAccess<?, ?>>() {
+
+        public boolean execute(final MailAccess<?, ?> access) {
+            access.close(true);
+            return true;
+        }
+    };
 
     public StorageParameters startTransaction(final StorageParameters parameters, final boolean modify) throws FolderException {
         /*
@@ -761,8 +762,8 @@ public final class MailFolderStorage implements FolderStorage {
             return false;
         }
         try {
-            final ConcurrentMap<Integer, MailAccess<?, ?>> accesses =
-                (ConcurrentMap<Integer, MailAccess<?, ?>>) storageParameters.getParameter(
+            final TIntObjectHashMap<MailAccess<?, ?>> accesses =
+                (TIntObjectHashMap<MailAccess<?, ?>>) storageParameters.getParameter(
                     MailFolderType.getInstance(),
                     MailParameterConstants.PARAM_MAIL_ACCESS);
             if (null == accesses) {
@@ -802,8 +803,8 @@ public final class MailFolderStorage implements FolderStorage {
 
     public void updateFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
         try {
-            final ConcurrentMap<Integer, MailAccess<?, ?>> accesses =
-                (ConcurrentMap<Integer, MailAccess<?, ?>>) storageParameters.getParameter(
+            final TIntObjectHashMap<MailAccess<?, ?>> accesses =
+                (TIntObjectHashMap<MailAccess<?, ?>>) storageParameters.getParameter(
                     MailFolderType.getInstance(),
                     MailParameterConstants.PARAM_MAIL_ACCESS);
             if (null == accesses) {
