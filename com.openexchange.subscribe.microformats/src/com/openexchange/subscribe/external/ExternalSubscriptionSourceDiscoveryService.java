@@ -184,10 +184,10 @@ public class ExternalSubscriptionSourceDiscoveryService implements SubscriptionS
             return subscribeService;
         } catch (HttpException e) {
             LOG.error(e.getMessage(), e);
-            throw OXMFSubscriptionErrorMessage.HttpException.create(e.getMessage(), e);
+            throw OXMFSubscriptionErrorMessage.HttpException.create(e.getMessage(), externalAddress, e);
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
-            throw OXMFSubscriptionErrorMessage.IOException.create(e.getMessage(), e);
+            throw OXMFSubscriptionErrorMessage.IOException.create(e.getMessage(), externalAddress, e);
         }
     }
 
