@@ -51,10 +51,8 @@ package com.openexchange.ajax.appointment;
 
 import java.util.Date;
 import java.util.TimeZone;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
@@ -62,7 +60,6 @@ import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
-import com.openexchange.ajax.framework.Executor;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 
@@ -72,41 +69,49 @@ import com.openexchange.groupware.container.Appointment;
  */
 public final class FunambolTest extends AbstractAJAXSession {
 
-    /**
-     * Logger.
-     */
     private static final Log LOG = LogFactory.getLog(FunambolTest.class);
-
     private static final int MAX_DIFFERENCE = 1000; // 1 second
 
-    /**
-     * @param name
-     */
+    private AJAXClient client;
+    private int folderId;
+    private TimeZone timeZone;
+    private Appointment appointment;
+
     public FunambolTest(final String name) {
         super(name);
     }
 
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        client = getClient();
+        folderId = client.getValues().getPrivateAppointmentFolder();
+        timeZone = client.getValues().getTimeZone();
+        appointment = new Appointment();
+        appointment.setParentFolderID(folderId);
+        appointment.setTitle("TestCreationTime");
+        appointment.setStartDate(new Date(TimeTools.getHour(0, timeZone)));
+        appointment.setEndDate(new Date(TimeTools.getHour(1, timeZone)));
+        appointment.setIgnoreConflicts(true);
+        final CommonInsertResponse response = client.execute(new InsertRequest(appointment, timeZone));
+        response.fillObject(appointment);
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        client.execute(new DeleteRequest(appointment));
+        super.tearDown();
+    }
+
     public void testAppointmentCreationTime() throws Throwable {
-        final AJAXClient client = getClient();
-        final int folder = client.getValues().getPrivateAppointmentFolder();
-        final TimeZone tz = client.getValues().getTimeZone();
-        final Appointment app = new Appointment();
-        app.setParentFolderID(folder);
-        app.setTitle("TestCreationTime");
-        app.setStartDate(new Date(TimeTools.getHour(0)));
-        app.setEndDate(new Date(TimeTools.getHour(1)));
-        app.setIgnoreConflicts(true);
         final Date serverTime = client.getValues().getServerTime();
-        final CommonInsertResponse insertR = Executor.execute(
-            client, new InsertRequest(app, tz));
-        final GetResponse getR = Executor.execute(client,
-            new GetRequest(folder, insertR));
-        final Appointment reload = getR.getAppointment(tz);
+
+        final GetResponse response = client.execute(new GetRequest(appointment));
+        final Appointment reload = response.getAppointment(timeZone);
         final Date creationDate = reload.getCreationDate();
-        final Date modified = reload.getLastModified();
+        
         final long difference = Math.abs(serverTime.getTime() - creationDate.getTime());
         LOG.debug("Time difference: " + difference);
-        Executor.execute(client, new DeleteRequest(insertR.getId(), folder, modified));
         assertTrue("Too big time difference: ", difference < MAX_DIFFERENCE);
     }
 }
