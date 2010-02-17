@@ -25,6 +25,13 @@ postFix() {
 
   GLOBIGNORE='*'
 
+  # SoftwareChange_Request-228
+  # -----------------------------------------------------------------------
+  local pfile=/opt/open-xchange/etc/groupware/mailfilter.properties
+  if ! ox_exists_property VACATION_DOMAINS $pfile; then
+      ox_set_property VACATION_DOMAINS "" $pfile
+  fi
+
   # SoftwareChange_Request-191
   # -----------------------------------------------------------------------
   local pfile=/opt/open-xchange/etc/groupware/mailfilter.properties
