@@ -105,7 +105,7 @@ public final class FunambolTest extends AbstractAJAXSession {
         final Date creationDate = reload.getCreationDate();
         final Date modified = reload.getLastModified();
         final long difference = Math.abs(serverTime.getTime() - creationDate.getTime());
-        LOG.info("Time difference: " + difference);
+        LOG.debug("Time difference: " + difference);
         Executor.execute(client, new DeleteRequest(insertR.getId(), folder, modified));
         assertTrue("Too big time difference: ", difference < MAX_DIFFERENCE);
     }
