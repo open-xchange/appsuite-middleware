@@ -49,25 +49,25 @@
 
 package com.openexchange.webdav.protocol;
 
+import gnu.trove.TIntObjectHashMap;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class Multistatus<T> implements Iterable<WebdavStatus<T>>{
 	
 	private final List<WebdavStatus<T>> stadi = new ArrayList<WebdavStatus<T>>();
-	private final Map<Integer, List<WebdavStatus<T>>> rcMap = new HashMap<Integer, List<WebdavStatus<T>>>();
+	private final TIntObjectHashMap<List<WebdavStatus<T>>> rcMap = new TIntObjectHashMap<List<WebdavStatus<T>>>();
 	
 	public Multistatus(){
-		
+		super();
 	}
-	
-	public Multistatus(final WebdavMultistatusException x){
+
+    public Multistatus(final WebdavMultistatusException x){
 		for(final WebdavProtocolException e : x.getExceptions()) {
-			addStatus((WebdavStatus<T>) e);
+		    @SuppressWarnings("unchecked")
+            final WebdavStatus<T> status = (WebdavStatus<T>) e;
+            addStatus(status);
 		}
 	}
 	
@@ -89,7 +89,7 @@ public class Multistatus<T> implements Iterable<WebdavStatus<T>>{
 		return rcMap.get(status);
 	}
 	
-	public Set<Integer> getStatusCodes(){
-		return rcMap.keySet();
+	public int[] getStatusCodes(){
+		return rcMap.keys();
 	}
 }
