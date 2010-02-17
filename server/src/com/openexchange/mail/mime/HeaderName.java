@@ -102,6 +102,29 @@ public final class HeaderName implements Serializable, Cloneable, Comparable<Hea
          */
         CACHE.put("$Forwarded", new HeaderName("$Forwarded"));
         CACHE.put("$MDNSent", new HeaderName("$MDNSent"));
+        /*
+         * Some charsets
+         */
+        {
+            final HeaderName headerName = new HeaderName("us-ascii");
+            CACHE.put("us-ascii", headerName);
+            CACHE.put("US-ASCII", headerName);
+        }
+        {
+            final HeaderName headerName = new HeaderName("utf-8");
+            CACHE.put("utf-8", headerName);
+            CACHE.put("UTF-8", headerName);
+        }
+        {
+            final HeaderName headerName = new HeaderName("iso-8859-1");
+            CACHE.put("iso-8859-1", headerName);
+            CACHE.put("ISO-8859-1", headerName);
+        }
+        {
+            final HeaderName headerName = new HeaderName("windows-1258");
+            CACHE.put("windows-1258", headerName);
+            CACHE.put("WINDOWS-1258", headerName);
+        }
     }
 
     /**
