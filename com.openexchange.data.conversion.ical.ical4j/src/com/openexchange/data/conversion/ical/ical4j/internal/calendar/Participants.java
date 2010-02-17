@@ -51,9 +51,12 @@ package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 import net.fortuna.ical4j.model.Parameter;
 import net.fortuna.ical4j.model.ParameterList;
@@ -66,6 +69,7 @@ import net.fortuna.ical4j.model.parameter.PartStat;
 import net.fortuna.ical4j.model.parameter.Role;
 import net.fortuna.ical4j.model.parameter.Rsvp;
 import net.fortuna.ical4j.model.property.Attendee;
+import net.fortuna.ical4j.model.property.Comment;
 import net.fortuna.ical4j.model.property.Resources;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -209,8 +213,10 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
 
     public void parse(final int index, final T component, final U cObj, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
         final PropertyList properties = component.getProperties(Property.ATTENDEE);
-        final List<String> mails = new LinkedList<String>();
+        final Map<String, ICalParticipant> mails = new HashMap<String, ICalParticipant>();
         final List<String> resourceNames = new LinkedList<String>();
+        
+        String comment = component.getProperty(Property.COMMENT) == null ? null : component.getProperty(Property.COMMENT).getValue();
 
         for(int i = 0, size = properties.size(); i < size; i++) {
             final Attendee attendee = (Attendee) properties.get(i);
@@ -223,7 +229,8 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
                 final URI uri = attendee.getCalAddress();
                 if("mailto".equalsIgnoreCase(uri.getScheme())) {
                     final String mail = uri.getSchemeSpecificPart();
-                    mails.add(mail);
+                    ICalParticipant icalP = createIcalParticipant(attendee, mail, comment);
+                    mails.put(mail, icalP);
                 }
             }
 
@@ -231,7 +238,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
 
         List<User> users;
         try {
-            users = userResolver.findUsers(mails, ctx);
+            users = userResolver.findUsers(new ArrayList<String>(mails.keySet()), ctx);
         } catch (final UserException e) {
             throw new ConversionError(index, e);
         } catch (final ServiceException e) {
@@ -239,13 +246,32 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
         }
 
         for(final User user : users) {
+            UserParticipant up = new UserParticipant(user.getId());
+            ICalParticipant icalP = mails.get(user.getMail());
+            
+            if (icalP.message != null)
+                up.setConfirmMessage(icalP.message);
+            if (icalP.status != -1)
+                up.setConfirm(icalP.status);
+            
             cObj.addParticipant( new UserParticipant(user.getId()) );
             mails.remove(user.getMail());
         }
 
-        for(final String mail : mails) {
+        for(final String mail : mails.keySet()) {
             final ExternalUserParticipant external = new ExternalUserParticipant(mail);
             external.setDisplayName(null);
+
+            ICalParticipant icalP = mails.get(mail);
+            
+            if (icalP.message != null)
+                external.setMessage(icalP.message);
+            if (icalP.status != -1)
+                external.setConfirm(icalP.status);
+            
+            if (comment != null)
+                external.setMessage(comment);
+            
             cObj.addParticipant(external);
         }
 
@@ -274,6 +300,40 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             final ConversionWarning warning = new ConversionWarning(index,
                 Code.CANT_RESOLVE_RESOURCE, resourceName);
             warnings.add(warning);
+        }
+    }
+    
+    /**
+     * @param attendee
+     * @return
+     */
+    private ICalParticipant createIcalParticipant(Attendee attendee, String mail, String message) {
+        ICalParticipant retval = new ICalParticipant(mail, -1, message);
+
+        Parameter parameter = attendee.getParameter(Parameter.PARTSTAT);
+        if (parameter != null) {
+            if (parameter.equals(PartStat.ACCEPTED)) {
+                retval.status = CalendarObject.ACCEPT;
+            } else if (parameter.equals(PartStat.DECLINED)) {
+                retval.status = CalendarObject.DECLINE;
+            } else if (parameter.equals(PartStat.TENTATIVE)) {
+                retval.status = CalendarObject.TENTATIVE;
+            } else {
+                retval.status = CalendarObject.NONE;
+            }
+        }
+        return retval;
+    }
+
+    private class ICalParticipant {
+        public String mail;
+        public int status;
+        public String message;
+        
+        public ICalParticipant(String mail, int status, String message) {
+            this.mail = mail;
+            this.status = status;
+            this.message = message;
         }
     }
 }
