@@ -49,6 +49,8 @@
 
 package com.openexchange.webdav;
 
+import gnu.trove.TIntObjectHashMap;
+import gnu.trove.TObjectProcedure;
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.Connection;
@@ -58,9 +60,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
@@ -207,10 +207,10 @@ public final class ical extends PermissionServlet {
             final List<ConversionError> errors = new ArrayList<ConversionError>();
 
             final AppointmentSQLInterface appointmentSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(sessionObj);
-            CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
+            final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
             SearchIterator<Appointment> iter = null;
             try {
-                final Map<Integer, SeriesUIDPatcher> patchers = new HashMap<Integer, SeriesUIDPatcher>();
+                final TIntObjectHashMap<SeriesUIDPatcher> patchers = new TIntObjectHashMap<SeriesUIDPatcher>();
                 iter = appointmentSql.getModifiedAppointmentsInFolder(calendarfolderId, APPOINTMENT_FIELDS, new Date(0), true);
                 while (iter.hasNext()) {
                     final Appointment appointment = iter.next();
@@ -232,7 +232,7 @@ public final class ical extends PermissionServlet {
                     // }
                     // Patch UID if change exceptions to be the same ID as of the series.
                     if (appointment.isMaster() || appointment.isException()) {
-                        final Integer recurrenceId = Integer.valueOf(appointment.getRecurrenceID());
+                        final int recurrenceId = appointment.getRecurrenceID();
                         SeriesUIDPatcher patcher = patchers.get(recurrenceId);
                         if (null == patcher) {
                             patcher = new SeriesUIDPatcher();
@@ -245,9 +245,7 @@ public final class ical extends PermissionServlet {
                         }
                     }
                 }
-                for (final SeriesUIDPatcher patcher : patchers.values()) {
-                    patcher.patchUIDs();
-                }
+                patchers.forEachValue(PATCH_PROCEDURE);
             } catch (final SearchIteratorException e) {
                 LOG.error(e.getMessage(), e);
             } catch (final OXException e) {
@@ -335,6 +333,14 @@ public final class ical extends PermissionServlet {
             doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
+
+    private static final TObjectProcedure<SeriesUIDPatcher> PATCH_PROCEDURE = new TObjectProcedure<SeriesUIDPatcher>() {
+        
+        public boolean execute(final SeriesUIDPatcher patcher) {
+            patcher.patchUIDs();
+            return true;
+        }
+    };
 
     private static final class SeriesUIDPatcher {
 

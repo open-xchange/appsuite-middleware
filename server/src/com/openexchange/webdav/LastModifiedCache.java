@@ -49,9 +49,8 @@
 
 package com.openexchange.webdav;
 
+import gnu.trove.TIntObjectHashMap;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * {@link LastModifiedCache} - Simple cache for last-modified time stamps.
@@ -60,13 +59,13 @@ import java.util.Map;
  */
 public class LastModifiedCache {
 
-    private final Map<Integer, LastModifiedMemory> storage;
+    private final TIntObjectHashMap<LastModifiedMemory> storage;
 
     /**
      * Initializes a new {@link LastModifiedCache}.
      */
     public LastModifiedCache() {
-        storage = new HashMap<Integer, LastModifiedMemory>();
+        storage = new TIntObjectHashMap<LastModifiedMemory>();
     }
 
     /**
@@ -78,9 +77,8 @@ public class LastModifiedCache {
      * @return The current valid last-modified time stamp for the given objectId
      */
     public long getLastModified(final int objectId, final long lastModified) {
-        final Integer key = Integer.valueOf(objectId);
-        if (storage.containsKey(key)) {
-            final LastModifiedMemory memory = storage.get(key);
+        if (storage.containsKey(objectId)) {
+            final LastModifiedMemory memory = storage.get(objectId);
             if (lastModified >= memory.getOriginal()) {
                 return memory.getCurrent();
             }
@@ -101,20 +99,18 @@ public class LastModifiedCache {
         }
 
         if (recurrenceId != 0) {
-            final Integer key = Integer.valueOf(recurrenceId);
-            if (storage.containsKey(key)) {
-                storage.get(key).setCurrent(lastModified.getTime());
+            if (storage.containsKey(recurrenceId)) {
+                storage.get(recurrenceId).setCurrent(lastModified.getTime());
             } else {
-                storage.put(key, new LastModifiedMemory(lastModified.getTime(), lastModified.getTime()));
+                storage.put(recurrenceId, new LastModifiedMemory(lastModified.getTime(), lastModified.getTime()));
             }
         }
 
         if (objectId != 0) {
-            final Integer key = Integer.valueOf(objectId);
-            if (storage.containsKey(key)) {
-                storage.get(key).setCurrent(lastModified.getTime());
+            if (storage.containsKey(objectId)) {
+                storage.get(objectId).setCurrent(lastModified.getTime());
             } else {
-                storage.put(key, new LastModifiedMemory(lastModified.getTime(), lastModified.getTime()));
+                storage.put(objectId, new LastModifiedMemory(lastModified.getTime(), lastModified.getTime()));
             }
         }
     }
