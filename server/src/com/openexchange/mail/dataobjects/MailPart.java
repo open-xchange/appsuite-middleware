@@ -175,15 +175,11 @@ public abstract class MailPart implements Serializable, Cloneable {
      */
     protected MailPart() {
         super();
-        try {
-            contentType = new ContentType("text/plain; charset=us-ascii");
-            contentDisposition = new ContentDisposition();
-        } catch (final MailException e) {
-            /*
-             * Cannot occur
-             */
-            LOG.error(e.getMessage(), e);
-        }
+        contentType = new ContentType();
+        contentType.setPrimaryType("text");
+        contentType.setSubType("plain");
+        contentType.setCharsetParameter("us-ascii");
+        contentDisposition = new ContentDisposition();
     }
 
     /**
