@@ -50,17 +50,14 @@
 package com.openexchange.mail.dataobjects;
 
 import static com.openexchange.mail.mime.utils.MIMEMessageUtility.decodeMultiEncodedHeader;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.mime.HeaderName;
@@ -981,10 +978,19 @@ public abstract class MailMessage extends MailPart {
     /**
      * Gets the received date which represents the internal timestamp set by mail server on arrival.
      * 
-     * @return the received date
+     * @return The received date
      */
     public Date getReceivedDate() {
         return receivedDate == null ? null : new Date(receivedDate.getTime());
+    }
+
+    /**
+     * Gets the received date directly which represents the internal timestamp set by mail server on arrival.
+     * 
+     * @return The received date
+     */
+    public Date getReceivedDateDirect() {
+        return receivedDate;
     }
 
     /**
