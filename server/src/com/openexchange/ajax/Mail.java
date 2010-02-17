@@ -2921,11 +2921,10 @@ public class Mail extends PermissionServlet implements UploadListener {
     }
 
     private static String ensureString(final String key, final JSONObject jo) throws MailException {
-        final Object value = jo.opt(key);
-        if (null == value || JSONObject.NULL.equals(value)) {
+        if (!jo.hasAndNotNull(key)) {
             throw new MailException(MailException.Code.MISSING_PARAMETER, key);
         }
-        return value.toString();
+        return jo.optString(key);
     }
 
     public void actionPutDeleteMails(final ServerSession session, final JSONWriter writer, final JSONObject jsonObj, final MailServletInterface mi) throws JSONException {
