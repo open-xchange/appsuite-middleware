@@ -214,7 +214,12 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
             if (forceRegistration) {
                 final ServletQueue previous = servletPool.put(path, servletQueue);
                 if (null != previous) {
-                    configLoader.removeConfig(previous.dequeue().getClass().getCanonicalName());
+                    final String canonicalName = previous.get().getClass().getCanonicalName();
+                    configLoader.removeConfig(canonicalName);
+                    if (LOG.isInfoEnabled()) {
+                        LOG.info(new StringBuilder(64).append("Previous servlet \"").append(canonicalName).append("\" unregistered from \"").append(
+                            path).append('"'));
+                    }
                 }
             } else {
                 if (servletPool.putIfAbsent(path, servletQueue) != null) {
@@ -241,15 +246,14 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
                 LOG.error("Aborting servlet un-registration: HTTP service has not been initialized since default servlet configuration loader is null.");
                 return;
             }
-            final ServletQueue servletQueue = servletPool.get(path);
+            final ServletQueue servletQueue = servletPool.remove(path);
             if (null == servletQueue) {
                 if (LOG.isWarnEnabled()) {
                     LOG.warn("Servlet un-registration failed. No servlet is bound to path: " + path);
                 }
                 return;
             }
-            configLoader.removeConfig(servletQueue.dequeue().getClass().getCanonicalName());
-            servletPool.remove(path);
+            configLoader.removeConfig(servletQueue.get().getClass().getCanonicalName());
         } catch (final URISyntaxException e) {
             final ServletException se = new ServletException("Servlet path is not a valid URI", e);
             se.initCause(e);
