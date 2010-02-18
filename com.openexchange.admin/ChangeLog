@@ -1,5 +1,9 @@
 * 2010-01-11 - choeger@open-xchange.com
 
+ - Bugfix #14977:  Reset autocommit on connections before returning them.
+
+* 2010-01-11 - choeger@open-xchange.com
+
  - Bugfix #15174:  Empty directory /opt/open-xchange/libexec is useless
 
 * 2009-12-18 - marcus.klein@open-xchange.com
