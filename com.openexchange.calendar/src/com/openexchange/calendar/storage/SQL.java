@@ -60,7 +60,9 @@ public class SQL {
 
     public static final String SELECT_EXTERNAL = "SELECT objectId,mailAddress,displayName,confirm,reason FROM dateExternal WHERE cid=? AND objectId IN (";
 
-    public static final String DELETE_EXTERNAL = "DELETE FROM dateExternal WHERE cid=? AND objectId=?";
+    public static final String DELETE_EXTERNAL_FOR_APPOINTMENT = "DELETE FROM dateExternal WHERE cid=? AND objectId=?";
+
+    public static final String DELETE_EXTERNAL = DELETE_EXTERNAL_FOR_APPOINTMENT + " AND mailAddress=?";
 
     public static final String DELETE_BACKUPED_EXTERNAL = "DELETE FROM delDateExternal WHERE cid=? AND objectId=?";
 

@@ -51,6 +51,7 @@ package com.openexchange.calendar.storage;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.calendar.ParticipantLogic;
@@ -73,27 +74,11 @@ public abstract class ParticipantStorage {
         super();
     }
 
-    public static ParticipantStorage getInstance() {
+    public static final ParticipantStorage getInstance() {
         return SINGLETON;
     }
 
-    /**
-     * Stores external participants and only external in the new calendar tables for external participants.
-     * @param ctx Context.
-     * @param con writable database connection. It should already be inside a transaction.
-     * @param appointmentId unique identifier of the corresponding appointment.
-     * @param participants participants. Only the {@link ExternalUserParticipant ExternalUserParticipants} while be stored.
-     * @throws OXCalendarException if some problem occurs.
-     */
-    public abstract void insertParticipants(Context ctx, Connection con, int appointmentId, Participant[] participants) throws OXCalendarException;
-
-    public final ExternalUserParticipant[] selectExternal(Context ctx, Connection con, int appointmentId) throws OXCalendarException {
-        return selectExternal(ctx, con, new int[] { appointmentId }).get(I(appointmentId));
-    }
-
-    public abstract Map<Integer, ExternalUserParticipant[]> selectExternal(Context ctx, Connection con, int[] appointments) throws OXCalendarException;
-
-    public void selectExternal(Context ctx, Connection con, List<CalendarDataObject> cdaos, int[] appointmentIds) throws OXCalendarException {
+    public final void selectExternal(Context ctx, Connection con, List<CalendarDataObject> cdaos, int[] appointmentIds) throws OXCalendarException {
         Map<Integer, ExternalUserParticipant[]> externals = selectExternal(ctx, con, appointmentIds);
         for (CalendarDataObject cdao : cdaos) {
             ExternalUserParticipant[] external = externals.get(I(cdao.getObjectID()));
@@ -103,4 +88,34 @@ public abstract class ParticipantStorage {
             }
         }
     }
+
+    public static final ExternalUserParticipant[] extractExternal(Participant[] participants) {
+        List<ExternalUserParticipant> retval = new ArrayList<ExternalUserParticipant>();
+        if (null != participants) {
+            for (Participant participant : participants) {
+                if (participant instanceof ExternalUserParticipant) {
+                    retval.add((ExternalUserParticipant) participant);
+                }
+            }
+        }
+        return retval.toArray(new ExternalUserParticipant[retval.size()]);
+    }
+
+    /**
+     * Stores external participants and only external in the new calendar tables for external participants.
+     * @param ctx Context.
+     * @param con writable database connection. It should already be inside a transaction.
+     * @param appointmentId unique identifier of the corresponding appointment.
+     * @param participants participants.
+     * @throws OXCalendarException if some problem occurs.
+     */
+    public abstract void insertParticipants(Context ctx, Connection con, int appointmentId, ExternalUserParticipant[] participants) throws OXCalendarException;
+
+    public final ExternalUserParticipant[] selectExternal(Context ctx, Connection con, int appointmentId) throws OXCalendarException {
+        return selectExternal(ctx, con, new int[] { appointmentId }).get(I(appointmentId));
+    }
+
+    public abstract Map<Integer, ExternalUserParticipant[]> selectExternal(Context ctx, Connection con, int[] appointments) throws OXCalendarException;
+
+    public abstract void deleteParticipants(Context ctx, Connection con, int appointmentId, ExternalUserParticipant[] participants) throws OXCalendarException;
 }

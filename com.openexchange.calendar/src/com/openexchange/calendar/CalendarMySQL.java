@@ -118,7 +118,6 @@ import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
 import com.openexchange.sql.builder.StatementBuilder;
-import com.openexchange.sql.grammar.Constant;
 import com.openexchange.sql.grammar.EQUALS;
 import com.openexchange.sql.grammar.SELECT;
 import com.openexchange.tools.StringCollection;
@@ -1349,7 +1348,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             insertParticipants(cdao, writecon);
             insertUserParticipants(cdao, writecon, so.getUserId());
             pst.executeUpdate();
-            ParticipantStorage.getInstance().insertParticipants(cdao.getContext(), writecon, cdao.getObjectID(), cdao.getParticipants());
+            ParticipantStorage.getInstance().insertParticipants(cdao.getContext(), writecon, cdao.getObjectID(), ParticipantStorage.extractExternal(cdao.getParticipants()));
         } finally {
             collection.closePreparedStatement(pst);
         }
@@ -3115,6 +3114,9 @@ public class CalendarMySQL implements CalendarSqlImp {
                 collection.closePreparedStatement(ddu);
             }
         }
+        ParticipantStorage participantStorage = ParticipantStorage.getInstance();
+        participantStorage.deleteParticipants(cdao.getContext(), writecon, cdao.getObjectID(), ParticipantStorage.extractExternal(deleted_participants));
+        participantStorage.insertParticipants(cdao.getContext(), writecon, cdao.getObjectID(), ParticipantStorage.extractExternal(new_participants));
 
         collection.fillEventInformation(cdao, edao, edao.getUsers(), new_userparticipants, deleted_userparticipants, modified_userparticipants, edao.getParticipants(), new_participants, deleted_participants, null);
 
@@ -4344,7 +4346,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 stmt = null;
             }
 
-            stmt = writecon.prepareStatement(SQL.DELETE_EXTERNAL);
+            stmt = writecon.prepareStatement(SQL.DELETE_EXTERNAL_FOR_APPOINTMENT);
             pos = 1;
             stmt.setInt(pos++, cid);
             stmt.setInt(pos++, oid);

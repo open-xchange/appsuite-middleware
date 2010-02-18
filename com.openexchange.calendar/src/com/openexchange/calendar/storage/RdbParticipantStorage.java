@@ -66,7 +66,6 @@ import java.util.Map.Entry;
 import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.calendar.OXCalendarException.Code;
 import com.openexchange.groupware.container.ExternalUserParticipant;
-import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.contexts.Context;
 
 /**
@@ -81,7 +80,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
     }
 
     @Override
-    public void insertParticipants(Context ctx, Connection con, int appointmentId, Participant[] participants) throws OXCalendarException {
+    public void insertParticipants(Context ctx, Connection con, int appointmentId, ExternalUserParticipant[] participants) throws OXCalendarException {
         if (null == participants || 0 == participants.length) {
             return;
         }
@@ -91,11 +90,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
             int pos = 1;
             stmt.setInt(pos++, ctx.getContextId());
             stmt.setInt(pos++, appointmentId);
-            for (Participant participant : participants) {
-                if (Participant.EXTERNAL_USER != participant.getType() || !(participant instanceof ExternalUserParticipant)) {
-                    continue;
-                }
-                ExternalUserParticipant externalParticipant = (ExternalUserParticipant) participant;
+            for (ExternalUserParticipant participant : participants) {
                 pos = 3;
                 stmt.setString(pos++, participant.getEmailAddress());
                 String displayName = participant.getDisplayName();
@@ -104,8 +99,8 @@ public class RdbParticipantStorage extends ParticipantStorage {
                 } else {
                     stmt.setString(pos++, displayName);
                 }
-                stmt.setInt(pos++, externalParticipant.getConfirm());
-                String message = externalParticipant.getMessage();
+                stmt.setInt(pos++, participant.getConfirm());
+                String message = participant.getMessage();
                 if (null == message) {
                     stmt.setNull(pos++, Types.VARCHAR);
                 } else {
@@ -161,5 +156,33 @@ public class RdbParticipantStorage extends ParticipantStorage {
             retval2.put(entry.getKey(), participants.toArray(new ExternalUserParticipant[participants.size()]));
         }
         return Collections.unmodifiableMap(retval2);
+    }
+
+    @Override
+    public void deleteParticipants(Context ctx, Connection con, int appointmentId, ExternalUserParticipant[] participants) throws OXCalendarException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement(SQL.DELETE_EXTERNAL);
+            int pos = 1;
+            stmt.setInt(pos++, ctx.getContextId());
+            stmt.setInt(pos++, appointmentId);
+            for (ExternalUserParticipant participant : participants) {
+                stmt.setString(pos, participant.getEmailAddress());
+                stmt.addBatch();
+            }
+            int[] rowss = stmt.executeBatch();
+            if (rowss.length != participants.length) {
+                throw new OXCalendarException(Code.WRONG_ROW_COUNT, I(participants.length), I(rowss.length));
+            }
+            for (int rows : rowss) {
+                if (1 != rows) {
+                    throw new OXCalendarException(Code.WRONG_ROW_COUNT, I(1), I(rows));
+                }
+            }
+        } catch (SQLException e) {
+            throw new OXCalendarException(Code.SQL_ERROR, e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+        }
     }
 }
