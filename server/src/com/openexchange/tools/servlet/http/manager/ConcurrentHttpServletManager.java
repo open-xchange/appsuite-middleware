@@ -278,7 +278,8 @@ public final class ConcurrentHttpServletManager extends AbstractHttpServletManag
         writeLock.lock();
         try {
             final String path = new URI(prependSlash(id)).normalize().toString();
-            if (servletPool.containsKey(path)) {
+            if (servletPool.containsKey(path) && ((null == initParams) || initParams.isEmpty() || !Boolean.valueOf(
+                initParams.get(HTTP_REGISTER_FORCE)).booleanValue())) {
                 throw new ServletException(new StringBuilder(256).append("A servlet with alias \"").append(path).append(
                     "\" has already been registered before.").toString());
             }
@@ -287,8 +288,12 @@ public final class ConcurrentHttpServletManager extends AbstractHttpServletManag
                 throw new ServletException(
                     "Aborting servlet registration: HTTP service has not been initialized since default servlet configuration loader is null.");
             }
+            final boolean forceRegistration;
             if ((null != initParams) && !initParams.isEmpty()) {
                 configLoader.setConfig(servlet.getClass().getCanonicalName(), initParams);
+                forceRegistration = Boolean.valueOf(initParams.get(HTTP_REGISTER_FORCE)).booleanValue();
+            } else {
+                forceRegistration = false;
             }
             /*
              * Try to determine default constructor for later instantiations
@@ -314,9 +319,13 @@ public final class ConcurrentHttpServletManager extends AbstractHttpServletManag
             /*
              * Put into servlet pool for being accessible
              */
-            if (servletPool.putIfAbsent(path, servletQueue) != null) {
-                throw new ServletException(new StringBuilder(256).append("A servlet with alias \"").append(path).append(
-                    "\" has already been registered before.").toString());
+            if (forceRegistration) {
+                servletPool.put(path, servletQueue);
+            } else {
+                if (servletPool.putIfAbsent(path, servletQueue) != null) {
+                    throw new ServletException(new StringBuilder(256).append("A servlet with alias \"").append(path).append(
+                        "\" has already been registered before.").toString());
+                }
             }
             implierCache.clear();
             if (LOG.isInfoEnabled()) {
