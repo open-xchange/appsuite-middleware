@@ -641,7 +641,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
                 new StringBuilder(32).append("Expected ").append(length).append(" FETCH responses but got ").append(index).append(
                     " from IMAP folder \"").append(imapFolder.getFullName()).append("\" on server \"").append(server).append("\".").toString());
         }
-        if (!checkers.isEmpty()) {
+        if ((null != retval) && !checkers.isEmpty()) {
             for (final ExistenceChecker ec : checkers) {
                 ec.check(retval);
             }
