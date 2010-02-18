@@ -192,6 +192,7 @@ public class ConfirmationsTest extends AbstractAJAXSession {
         updated.setParentFolderID(appointment.getParentFolderID());
         updated.setLastModified(appointment.getLastModified());
         updated.setTitle("Updated test appointment for testing confirmations");
+        updated.setIgnoreConflicts(true);
         participant = new ExternalUserParticipant("external1@example.com");
         participant.setDisplayName("External user");
         updated.addParticipant(participant);
@@ -209,4 +210,6 @@ public class ConfirmationsTest extends AbstractAJAXSession {
         SearchResponse response5 = client.execute(new SearchRequest("*", folderId, COLUMNS));
         checkConfirmations(extractExternal(updated.getParticipants()), findConfirmations(response5));
     }
+
+    
 }
