@@ -77,6 +77,7 @@ import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.parser.AppointmentParser;
 import com.openexchange.ajax.parser.CalendarParser;
 import com.openexchange.ajax.parser.DataParser;
+import com.openexchange.ajax.parser.ParticipantParser;
 import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXMandatoryFieldException;
@@ -96,7 +97,9 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
+import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.Participants;
+import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.AppointmentSearchObject;
@@ -898,15 +901,26 @@ public class AppointmentRequest {
         final int objectId = DataParser.checkInt(jsonObj, DataFields.ID);
         final int folderId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
         final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
+        DataParser.checkInt(jData, ParticipantsFields.CONFIRMATION);
+        
+        ConfirmableParticipant participant = new ParticipantParser().parseConfirmation(true, jData);
+        
         int userId = user.getId();
         if (jData.has(AJAXServlet.PARAMETER_ID)) {
             userId = DataParser.checkInt(jData, AJAXServlet.PARAMETER_ID);
         }
-        final String confirmMessage = jData.has(ParticipantsFields.CONFIRM_MESSAGE) && !jData.isNull(ParticipantsFields.CONFIRM_MESSAGE) ? jData.getString(ParticipantsFields.CONFIRM_MESSAGE) : null;
-        final int confirmStatus = DataParser.checkInt(jData, ParticipantsFields.CONFIRMATION);
+        final String confirmMessage = participant.getMessage();
+        final int confirmStatus = participant.getConfirm();
 
         final AppointmentSQLInterface appointmentSql = appointmentFactory.createAppointmentSql(session);
-        timestamp = appointmentSql.setUserConfirmation(objectId, folderId, userId, confirmStatus, confirmMessage);
+        timestamp = null;
+        if (participant.getType() == Participant.USER || participant.getType() == 0) {
+            timestamp = appointmentSql.setUserConfirmation(objectId, folderId, userId, confirmStatus, confirmMessage);
+        } else if (participant.getType() == Participant.EXTERNAL_USER) {
+            timestamp = appointmentSql.setExternalConfirmation(objectId, folderId, participant.getEmailAddress(), confirmStatus, confirmMessage);
+        } else {
+            throw new AjaxException(AjaxException.Code.InvalidParameterValue, AJAXServlet.PARAMETER_TYPE, jData.get(AJAXServlet.PARAMETER_TYPE));
+        }
 
         return new JSONObject();
     }

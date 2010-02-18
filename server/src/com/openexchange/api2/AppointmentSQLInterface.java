@@ -290,6 +290,19 @@ public interface AppointmentSQLInterface {
      * @throws OXException
      */
     Date setUserConfirmation(int object_id, int folderId, int user_id, int confirm, String confirm_message) throws OXException;
+    
+    /**
+     * Sets the confirmation of an appointment for an external user, identified with his mail address.
+     * 
+     * @param oid
+     * @param folderId
+     * @param mail
+     * @param confirm
+     * @param message
+     * @return
+     * @throws OXException
+     */
+    public Date setExternalConfirmation(int oid, int folderId, String mail, int confirm, String message) throws OXException;
 
     /**
      * Method to attach or detach attachments

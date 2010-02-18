@@ -3266,6 +3266,66 @@ public class CalendarMySQL implements CalendarSqlImp {
         collection.triggerEvent(so, getConfirmAction(confirm), cdao);
         return changeTimestamp;
     }
+    
+    public Date setExternalConfirmation(int oid, int folderId, String mail, int confirm, String message, Session so, Context ctx) throws OXException {
+        checkConfirmPermission(folderId, -1, so, ctx);
+        
+        String update = "UPDATE dateExternal SET confirm = ?, reason = ? WHERE objectId = ? AND cid = ? and mailAddress = ?";
+        String updateAppointment = "UPDATE prg_dates SET changing_date = ?, changed_from = ? WHERE intfield01 = ? AND cid = ?";
+        
+        Connection con = null;
+        PreparedStatement stmtUpdate = null;
+        PreparedStatement stmtUpdateAppointment = null;
+        Date changeTimestamp = new Date();
+        
+        try {
+            con = DBPool.pickupWriteable(ctx);
+            con.setAutoCommit(false);
+            stmtUpdate = con.prepareStatement(update);
+            stmtUpdate.setInt(1, confirm);
+            if (message == null) {
+                stmtUpdate.setNull(2, java.sql.Types.VARCHAR);
+            } else {
+                stmtUpdate.setString(2, message);
+            }
+            stmtUpdate.setInt(3, oid);
+            stmtUpdate.setInt(4, so.getContextId());
+            stmtUpdate.setString(5, mail);
+            final int changes = stmtUpdate.executeUpdate();
+            if (changes > 0) {
+                stmtUpdateAppointment = con.prepareStatement(updateAppointment);
+                stmtUpdateAppointment.setLong(1, changeTimestamp.getTime());
+                stmtUpdateAppointment.setInt(2, so.getUserId());
+                stmtUpdateAppointment.setInt(3, oid);
+                stmtUpdateAppointment.setInt(4, so.getContextId());
+                stmtUpdateAppointment.executeUpdate();
+                con.commit();
+            } else {
+                con.rollback();
+                OXObjectNotFoundException e = new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, EnumComponent.APPOINTMENT, "");
+                LOG.error(e.getMessage(), e);
+                throw e;
+            }
+        } catch (final DBPoolingException dbpe) {
+            throw new OXException(dbpe);
+        } catch (final SQLException sqle) {
+            throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+        } finally {
+            collection.closePreparedStatement(stmtUpdate);
+            collection.closePreparedStatement(stmtUpdateAppointment);
+            if (con != null) {
+                try {
+                    con.setAutoCommit(true);
+                } catch (final SQLException sqle) {
+                    LOG.error("setUserConfirmation (writecon) error while setAutoCommit(true) ", sqle);
+                    throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+                } finally {
+                    DBPool.closeWriterSilent(ctx, con);
+                }
+            }
+        }
+        return changeTimestamp;
+    }
 
     private void checkConfirmPermission(final int folderId, final int uid, final Session so, final Context ctx) throws OXException, OXPermissionException {
         if (uid != so.getUserId()) {

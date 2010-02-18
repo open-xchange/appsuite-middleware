@@ -85,7 +85,9 @@ public class ParticipantParser {
 
     private static final FieldParser<JSONParticipant> TYPE_PARSER = new FieldParser<JSONParticipant>() {
         public void parse(boolean parseAll, JSONParticipant obj, TimeZone timeZone, JSONObject json) throws JSONException {
-            obj.setType(json.getInt(ParticipantsFields.TYPE));
+            if (json.has(ParticipantsFields.TYPE)) {
+                obj.setType(json.getInt(ParticipantsFields.TYPE));
+            }
         }
     };
     private static final FieldParser<JSONParticipant> MAIL_PARSER = new FieldParser<JSONParticipant>() {
@@ -106,12 +108,16 @@ public class ParticipantParser {
         public void parse(boolean parseAll, ConfirmableParticipant obj, TimeZone timeZone, JSONObject json) {
             if (json.has(ParticipantsFields.STATUS)) {
                 obj.setStatus(ConfirmStatus.byId(json.optInt(ParticipantsFields.STATUS)));
+            } else if (json.has(ParticipantsFields.CONFIRMATION)) {
+                obj.setStatus(ConfirmStatus.byId(json.optInt(ParticipantsFields.CONFIRMATION)));
             }
         }
     };
     private static final FieldParser<ConfirmableParticipant> MESSAGE_PARSER = new FieldParser<ConfirmableParticipant>() {
         public void parse(boolean parseAll, ConfirmableParticipant obj, TimeZone timeZone, JSONObject json) {
-            if (json.has(ParticipantsFields.MESSAGE)) {
+            if (json.has(ParticipantsFields.CONFIRM_MESSAGE)) {
+                obj.setMessage(json.optString(ParticipantsFields.CONFIRM_MESSAGE));
+            } else if (json.has(ParticipantsFields.MESSAGE)) {
                 obj.setMessage(json.optString(ParticipantsFields.MESSAGE));
             }
         }

@@ -271,6 +271,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     public static final String PARAMETER_INFOLDER = "folder";
 
     public static final String PARAMETER_MODULE = "module";
+    
+    public static final String PARAMETER_MAIL = "mail";
 
     /**
      * The parameter 'sort' specifies the field which is used as order source and can be compared to SQL'S 'Order By' statement

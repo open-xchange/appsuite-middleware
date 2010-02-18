@@ -1000,6 +1000,21 @@ public class CalendarSql implements AppointmentSQLInterface {
         }
         return cimp.setUserConfirmation(oid, folderId, uid, confirm, confirm_message, session, ctx);
     }
+    
+    public Date setExternalConfirmation(int oid, int folderId, String mail, int confirm, String message) throws OXException {
+        if (session == null) {
+            throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
+        }
+        final Context ctx = Tools.getContext(session);
+        if (message != null) {
+            String error = null;
+            error = Check.containsInvalidChars(message);
+            if (error != null) {
+                throw new OXCalendarException(OXCalendarException.Code.INVALID_CHARACTER, "Confirm Message", error);
+            }
+        }
+        return cimp.setExternalConfirmation(oid, folderId, mail, confirm, message, session, ctx);
+    }
 
     public SearchIterator<Appointment> getObjectsById(final int[][] oids, int[] cols) throws OXException {
         if (session == null) {
