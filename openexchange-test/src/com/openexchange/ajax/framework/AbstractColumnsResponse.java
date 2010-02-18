@@ -85,6 +85,22 @@ public abstract class AbstractColumnsResponse extends AbstractAJAXResponse imple
         return array[row][getColumnPos(attributeId)];
     }
 
+    public Iterator<Object> iterator(final int attributeId) {
+        final int columnPos = getColumnPos(attributeId);
+        return new Iterator<Object>() {
+            int pos = 0;
+            public boolean hasNext() {
+                return pos < getArray().length;
+            }
+            public Object next() {
+                return getArray()[pos++][columnPos];
+            }
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+        };
+    }
+
     public int getColumnPos(final int attributeId) {
         for (int i = 0; i < columns.length; i++) {
             if (columns[i] == attributeId) {

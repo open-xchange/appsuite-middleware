@@ -49,91 +49,15 @@
 
 package com.openexchange.ajax.framework;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-
 import com.openexchange.ajax.container.Response;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class CommonSearchResponse extends AbstractAJAXResponse implements
-    Iterable<Object[]> {
+public class CommonSearchResponse extends AbstractColumnsResponse {
 
-    private int[] columns;
-
-    private Object[][] array;
-
-    /**
-     * @param response
-     */
     public CommonSearchResponse(final Response response) {
         super(response);
-    }
-
-    /**
-     * @return the array
-     */
-    public Object[][] getArray() {
-        return array;
-    }
-
-    /**
-     * @param array the array to set
-     */
-    void setArray(final Object[][] array) {
-        this.array = array;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Iterator<Object[]> iterator() {
-        return Collections.unmodifiableList(Arrays.asList(array)).iterator();
-    }
-
-    public Object getValue(final int row, final int attributeId) {
-        return array[row][getColumnPos(attributeId)];
-    }
-
-    public Iterator<Object> iterator(final int attributeId) {
-        final int columnPos = getColumnPos(attributeId);
-        return new Iterator<Object>() {
-            int pos = 0;
-            public boolean hasNext() {
-                return pos < array.length;
-            }
-            public Object next() {
-                return array[pos++][columnPos];
-            }
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
-        };
-    }
-
-    public int getColumnPos(final int attributeId) {
-        for (int i = 0; i < columns.length; i++) {
-            if (columns[i] == attributeId) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    /**
-     * @return the columns
-     */
-    public int[] getColumns() {
-        return columns;
-    }
-
-    /**
-     * @param columns the columns to set
-     */
-    public void setColumns(final int[] columns) {
-        this.columns = columns;
     }
 }

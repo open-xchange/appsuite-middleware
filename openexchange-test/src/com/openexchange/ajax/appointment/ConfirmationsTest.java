@@ -49,7 +49,9 @@
 
 package com.openexchange.ajax.appointment;
 
+import static com.openexchange.calendar.storage.ParticipantStorage.extractExternal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 import java.util.TimeZone;
@@ -68,6 +70,7 @@ import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.AbstractColumnsResponse;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.ListIDs;
@@ -75,7 +78,6 @@ import com.openexchange.ajax.parser.ParticipantParser;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.ExternalUserParticipant;
-import com.openexchange.groupware.container.participants.ConfirmStatus;
 import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 
 /**
@@ -113,6 +115,9 @@ public class ConfirmationsTest extends AbstractAJAXSession {
         participant = new ExternalUserParticipant("external1@example.com");
         participant.setDisplayName("External user");
         appointment.addParticipant(participant);
+        participant = new ExternalUserParticipant("external2@example.com");
+        participant.setDisplayName("External user 2");
+        appointment.addParticipant(participant);
         client.execute(new InsertRequest(appointment, tz)).fillAppointment(appointment);
     }
 
@@ -125,22 +130,29 @@ public class ConfirmationsTest extends AbstractAJAXSession {
     public void testGet() throws Throwable {
         GetResponse response = client.execute(new GetRequest(appointment));
         Appointment test = response.getAppointment(tz);
-        ConfirmableParticipant[] confirmations = test.getConfirmations();
-        checkConfirmations(confirmations);
+        checkConfirmations(extractExternal(appointment.getParticipants()), test.getConfirmations());
     }
 
-    private void checkConfirmations(ConfirmableParticipant[] confirmations) {
-        assertNotNull("Response does not contain any confirmations.", confirmations);
-        // Following expected must be 2 if internal user participants get its way into the confirmations array.
-        assertEquals("Number of external participant confirmations does not match.", 1, confirmations.length);
-        assertEquals("Mailaddress of external participant does not match.", participant.getEmailAddress(), confirmations[0].getEmailAddress());
-        assertEquals("Display name of external participant does not match.", participant.getDisplayName(), confirmations[0].getDisplayName());
-        assertEquals("Confirm status does not match.", ConfirmStatus.NONE, confirmations[0].getStatus());
-        assertEquals("Confirm message does not match.", participant.getMessage(), confirmations[0].getMessage());
+    private void checkConfirmations(ExternalUserParticipant[] expected, ConfirmableParticipant[] actual) {
+        assertNotNull("Response does not contain any confirmations.", actual);
+        // Following expected must be one more if internal user participants get its way into the confirmations array.
+        assertEquals("Number of external participant confirmations does not match.", expected.length, actual.length);
+        Arrays.sort(expected);
+        Arrays.sort(actual);
+        for (int i = 0; i < expected.length; i++) {
+            assertEquals("Mailaddress of external participant does not match.", expected[i].getEmailAddress(), actual[i].getEmailAddress());
+            assertEquals("Display name of external participant does not match.", expected[i].getDisplayName(), actual[i].getDisplayName());
+            assertEquals("Confirm status does not match.", expected[i].getStatus(), actual[i].getStatus());
+            assertEquals("Confirm message does not match.", expected[i].getMessage(), actual[i].getMessage());
+        }
     }
 
     public void testAll() throws Throwable {
         CommonAllResponse response = client.execute(new AllRequest(folderId, COLUMNS, appointment.getStartDate(), appointment.getEndDate(), tz));
+        checkConfirmations(extractExternal(appointment.getParticipants()), findConfirmations(response));
+    }
+
+    private JSONArray findConfirmations(AbstractColumnsResponse response) {
         int objectIdPos = response.getColumnPos(Appointment.OBJECT_ID);
         int confirmationsPos = response.getColumnPos(Appointment.CONFIRMATIONS);
         JSONArray jsonConfirmations = null;
@@ -149,36 +161,20 @@ public class ConfirmationsTest extends AbstractAJAXSession {
                 jsonConfirmations = (JSONArray) tmp[confirmationsPos];
             }
         }
-        checkConfirmations(jsonConfirmations);
+        return jsonConfirmations;
     }
 
     public void testList() throws Throwable {
         CommonListResponse response = client.execute(new ListRequest(ListIDs.l(new int[] { folderId, appointment.getObjectID() }), COLUMNS));
-        int objectIdPos = response.getColumnPos(Appointment.OBJECT_ID);
-        int confirmationsPos = response.getColumnPos(Appointment.CONFIRMATIONS);
-        JSONArray jsonConfirmations = null;
-        for (Object[] tmp : response) {
-            if (appointment.getObjectID() == ((Integer) tmp[objectIdPos]).intValue()) {
-                jsonConfirmations = (JSONArray) tmp[confirmationsPos];
-            }
-        }
-        checkConfirmations(jsonConfirmations);
+        checkConfirmations(extractExternal(appointment.getParticipants()), findConfirmations(response));
     }
 
     public void testSearch() throws Throwable {
         SearchResponse response = client.execute(new SearchRequest("*", folderId, COLUMNS));
-        int objectIdPos = response.getColumnPos(Appointment.OBJECT_ID);
-        int confirmationsPos = response.getColumnPos(Appointment.CONFIRMATIONS);
-        JSONArray jsonConfirmations = null;
-        for (Object[] tmp : response) {
-            if (appointment.getObjectID() == ((Integer) tmp[objectIdPos]).intValue()) {
-                jsonConfirmations = (JSONArray) tmp[confirmationsPos];
-            }
-        }
-        checkConfirmations(jsonConfirmations);
+        checkConfirmations(extractExternal(appointment.getParticipants()), findConfirmations(response));
     }
 
-    private void checkConfirmations(JSONArray jsonConfirmations) throws JSONException {
+    private void checkConfirmations(ExternalUserParticipant[] expected, JSONArray jsonConfirmations) throws JSONException {
         assertNotNull("Response does not contain confirmations.", jsonConfirmations);
         ParticipantParser parser = new ParticipantParser();
         List<ConfirmableParticipant> confirmations = new ArrayList<ConfirmableParticipant>();
@@ -187,7 +183,7 @@ public class ConfirmationsTest extends AbstractAJAXSession {
             JSONObject jsonConfirmation = jsonConfirmations.getJSONObject(i);
             confirmations.add(parser.parseConfirmation(true, jsonConfirmation));
         }
-        checkConfirmations(confirmations.toArray(new ConfirmableParticipant[confirmations.size()]));
+        checkConfirmations(expected, confirmations.toArray(new ConfirmableParticipant[confirmations.size()]));
     }
 
     public void testUpdate() throws Throwable {
@@ -199,12 +195,18 @@ public class ConfirmationsTest extends AbstractAJAXSession {
         participant = new ExternalUserParticipant("external1@example.com");
         participant.setDisplayName("External user");
         updated.addParticipant(participant);
-        participant = new ExternalUserParticipant("external2@example.com");
-        participant.setDisplayName("External user 2");
+        participant = new ExternalUserParticipant("external3@example.com");
+        participant.setDisplayName("External user 3");
         updated.addParticipant(participant);
         UpdateResponse response = client.execute(new UpdateRequest(updated, tz));
         appointment.setLastModified(response.getTimestamp());
         GetResponse response2 = client.execute(new GetRequest(appointment));
-        checkConfirmations(response2.getAppointment(tz).getConfirmations());
+        checkConfirmations(extractExternal(updated.getParticipants()), response2.getAppointment(tz).getConfirmations());
+        CommonAllResponse response3 = client.execute(new AllRequest(folderId, COLUMNS, appointment.getStartDate(), appointment.getEndDate(), tz));
+        checkConfirmations(extractExternal(updated.getParticipants()), findConfirmations(response3));
+        CommonListResponse response4 = client.execute(new ListRequest(ListIDs.l(new int[] { folderId, appointment.getObjectID() }), COLUMNS));
+        checkConfirmations(extractExternal(updated.getParticipants()), findConfirmations(response4));
+        SearchResponse response5 = client.execute(new SearchRequest("*", folderId, COLUMNS));
+        checkConfirmations(extractExternal(updated.getParticipants()), findConfirmations(response5));
     }
 }
