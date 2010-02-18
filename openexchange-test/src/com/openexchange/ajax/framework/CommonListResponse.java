@@ -55,7 +55,7 @@ import com.openexchange.ajax.container.Response;
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class CommonListResponse extends AbstractListResponse {
+public class CommonListResponse extends AbstractColumnsResponse {
 
     /**
      * @param response

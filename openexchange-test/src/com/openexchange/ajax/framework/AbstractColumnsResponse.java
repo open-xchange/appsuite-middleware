@@ -59,37 +59,24 @@ import com.openexchange.ajax.container.Response;
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class AbstractAllResponse extends AbstractAJAXResponse implements
-    Iterable<Object[]> {
+public abstract class AbstractColumnsResponse extends AbstractAJAXResponse implements Iterable<Object[]> {
 
     private int[] columns;
 
     private Object[][] array;
 
-    /**
-     * @param response
-     */
-    public AbstractAllResponse(final Response response) {
+    protected AbstractColumnsResponse(final Response response) {
         super(response);
     }
 
-    /**
-     * @return the array
-     */
     public Object[][] getArray() {
         return array;
     }
 
-    /**
-     * @param array the array to set
-     */
     void setArray(final Object[][] array) {
         this.array = array;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Iterator<Object[]> iterator() {
         return Collections.unmodifiableList(Arrays.asList(array)).iterator();
     }
@@ -107,16 +94,10 @@ public abstract class AbstractAllResponse extends AbstractAJAXResponse implement
         return -1;
     }
 
-    /**
-     * @return the columns
-     */
     public int[] getColumns() {
         return columns;
     }
 
-    /**
-     * @param columns the columns to set
-     */
     public void setColumns(final int[] columns) {
         this.columns = columns;
     }

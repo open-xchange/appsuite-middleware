@@ -51,7 +51,6 @@ package com.openexchange.ajax.framework;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.groupware.search.Order;
@@ -59,7 +58,7 @@ import com.openexchange.groupware.search.Order;
 /**
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class AbstractAllRequest<T extends AbstractAllResponse> implements AJAXRequest<T> {
+public abstract class AbstractAllRequest<T extends AbstractColumnsResponse> implements AJAXRequest<T> {
 
     protected final String servletPath;
 
@@ -77,9 +76,6 @@ public abstract class AbstractAllRequest<T extends AbstractAllResponse> implemen
 
     protected int rightHandLimit = -1;
 
-    /**
-     * Default constructor.
-     */
     public AbstractAllRequest(final String servletPath, final int folderId, final int[] columns, final int sort, final Order order, final boolean failOnError) {
         super();
         this.servletPath = servletPath;
@@ -90,9 +86,6 @@ public abstract class AbstractAllRequest<T extends AbstractAllResponse> implemen
         this.failOnError = failOnError;
     }
 
-    /**
-     * Default constructor.
-     */
     public AbstractAllRequest(final String servletPath, final String folderPath, final int[] columns, final int sort, final Order order, final boolean failOnError) {
         super();
         this.servletPath = servletPath;
@@ -103,30 +96,18 @@ public abstract class AbstractAllRequest<T extends AbstractAllResponse> implemen
         this.failOnError = failOnError;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String getServletPath() {
         return servletPath;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public Object getBody() throws JSONException {
+    public Object getBody() {
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Method getMethod() {
         return Method.GET;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Parameter[] getParameters() {
         final List<Parameter> params = new ArrayList<Parameter>();
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL));
@@ -143,21 +124,12 @@ public abstract class AbstractAllRequest<T extends AbstractAllResponse> implemen
         return params.toArray(new Parameter[params.size()]);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public abstract AbstractAllParser<T> getParser();
 
-    /**
-     * @return the columns
-     */
     public int[] getColumns() {
         return columns;
     }
 
-    /**
-     * @return the failOnError
-     */
     protected boolean isFailOnError() {
         return failOnError;
     }

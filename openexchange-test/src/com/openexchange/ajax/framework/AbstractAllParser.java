@@ -58,21 +58,15 @@ import com.openexchange.ajax.container.Response;
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class AbstractAllParser<T extends AbstractAllResponse> extends AbstractAJAXParser<T> {
+public abstract class AbstractAllParser<T extends AbstractColumnsResponse> extends AbstractAJAXParser<T> {
 
     private final int[] columns;
 
-    /**
-     * Default constructor.
-     */
     protected AbstractAllParser(final boolean failOnError, final int[] columns) {
         super(failOnError);
         this.columns = columns;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected T createResponse(final Response response)
         throws JSONException {
@@ -85,11 +79,11 @@ public abstract class AbstractAllParser<T extends AbstractAllResponse> extends A
                 final JSONArray inner = array.getJSONArray(i);
                 values[i] = new Object[inner.length()];
                 for (int j = 0; j < inner.length(); j++) {
-                	if(inner.isNull(j)) {
-                		values[i][j] = null;
-                	} else {
-                		values[i][j] = inner.get(j);
-                	}
+                    if (inner.isNull(j)) {
+                        values[i][j] = null;
+                    } else {
+                        values[i][j] = inner.get(j);
+                    }
                 }
             }
             retval.setArray(values);
