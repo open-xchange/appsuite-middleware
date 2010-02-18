@@ -61,6 +61,7 @@ import java.util.zip.ZipInputStream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
+import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.UnexpectedPage;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.openexchange.data.conversion.ical.ConversionError;
@@ -75,14 +76,14 @@ import com.openexchange.subscribe.crawler.internal.AbstractStep;
  * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class GoogleCalendarICalStep extends AbstractStep<CalendarDataObject[], UnexpectedPage>{
+public class GoogleCalendarICalStep extends AbstractStep<CalendarDataObject[], UnexpectedPage> {
 
     private String url;
 
     private static final Log LOG = LogFactory.getLog(GoogleCalendarICalStep.class);
 
     public GoogleCalendarICalStep() {
-
+        super();
     }
 
     public GoogleCalendarICalStep(String description, String url) {
@@ -90,13 +91,14 @@ public class GoogleCalendarICalStep extends AbstractStep<CalendarDataObject[], U
         this.url = url;
     }
 
+    @Override
     public void execute(WebClient webClient) {
         ArrayList<CalendarDataObject> tempEvents = new ArrayList<CalendarDataObject>();
         ArrayList<CalendarDataObject> events = new ArrayList<CalendarDataObject>();
 
         try {
-
-            byte[] bytes = webClient.getPage(url).getWebResponse().getContentAsBytes();
+            Page page = webClient.getPage(url);
+            byte[] bytes = page.getWebResponse().getContentAsBytes();
 
             // Unzip
             int BUFFER = 1024;
@@ -145,15 +147,11 @@ public class GoogleCalendarICalStep extends AbstractStep<CalendarDataObject[], U
 
         output = new CalendarDataObject[events.size()];
         for (int i = 0; i < events.size() && i < output.length; i++) {
-            output[i] = (CalendarDataObject) events.get(i);
+            output[i] = events.get(i);
         }
         executedSuccessfully = true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.subscribe.crawler.internal.LoginStep#getBaseUrl()
-     */
     public String getBaseUrl() {
         return "";
     }    
