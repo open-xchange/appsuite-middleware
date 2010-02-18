@@ -58,6 +58,7 @@ public class RecurrenceTestSuite extends TestSuite{
         final TestSuite tests = new TestSuite();
         tests.addTestSuite(DailyRecurrenceTest.class);
         tests.addTestSuite(WeeklyRecurrenceTest.class);
+        tests.addTestSuite(ConfirmationsSeriesTest.class);
 
         tests.addTestSuite(Bug9497Test.class);
         tests.addTestSuite(Bug9742Test.class);
