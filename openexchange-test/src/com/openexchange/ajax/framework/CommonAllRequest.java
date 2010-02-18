@@ -57,27 +57,14 @@ import com.openexchange.groupware.search.Order;
  */
 public class CommonAllRequest extends AbstractAllRequest<CommonAllResponse> {
 
-    /**
-     * Default constructor.
-     */
-    public CommonAllRequest(final String servletPath, final int folderId,
-        final int[] columns, final int sort, final Order order,
-        final boolean failOnError) {
+    public CommonAllRequest(final String servletPath, final int folderId, final int[] columns, final int sort, final Order order, final boolean failOnError) {
         super(servletPath, folderId, columns, sort, order, failOnError);
     }
 
-    /**
-     * Default constructor.
-     */
-    public CommonAllRequest(final String servletPath, final String folderPath,
-        final int[] columns, final int sort, final Order order,
-        final boolean failOnError) {
+    public CommonAllRequest(final String servletPath, final String folderPath, final int[] columns, final int sort, final Order order, final boolean failOnError) {
         super(servletPath, folderPath, columns, sort, order, failOnError);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public CommonAllParser getParser() {
         return new CommonAllParser(isFailOnError(), getColumns());
