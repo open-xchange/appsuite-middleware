@@ -52,6 +52,7 @@ package com.openexchange.ajax.appointment;
 import static com.openexchange.ajax.folder.Create.ocl;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import com.openexchange.ajax.appointment.action.ConfirmRequest;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
@@ -67,8 +68,12 @@ import com.openexchange.ajax.participant.ParticipantTools;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.container.participants.ConfirmableParticipant;
+import com.openexchange.groupware.tasks.ExternalParticipant;
 import com.openexchange.server.impl.OCLPermission;
 
 /**
@@ -122,6 +127,8 @@ public class ConfirmOthers extends AbstractAJAXSession {
                 OCLPermission.ADMIN_PERMISSION,
                 OCLPermission.ADMIN_PERMISSION) });
 
+        Participant external = new ExternalUserParticipant("test@example.invalid");
+        
         CommonInsertResponse response = clientA.execute(new com.openexchange.ajax.folder.actions.UpdateRequest(folder));
         response.fillObject(folder);
 
@@ -130,7 +137,9 @@ public class ConfirmOthers extends AbstractAJAXSession {
         appointment.setParentFolderID(clientC.getValues().getPrivateAppointmentFolder());
         appointment.setStartDate(Calendar.getInstance().getTime());
         appointment.setEndDate(new Date(appointment.getStartDate().getTime() + 3600000));
-        appointment.setParticipants(ParticipantTools.createParticipants(userIdA, userIdC));
+        List<Participant> participants = ParticipantTools.createParticipants(userIdA, userIdC);
+        participants.add(external);
+        appointment.setParticipants(participants);
         appointment.setIgnoreConflicts(true);
         InsertRequest request = new InsertRequest(appointment, clientC.getValues().getTimeZone(), false);
         response = clientC.execute(request);
@@ -164,6 +173,19 @@ public class ConfirmOthers extends AbstractAJAXSession {
             if (user.getIdentifier() == userIdA) {
                 assertEquals("Wrong confirm status.", Appointment.NONE, user.getConfirm());
                 assertEquals("Wrong confirm message.", null, user.getConfirmMessage());
+            }
+        }
+    }
+    
+    public void testConfirmExternal() throws Exception {
+        clientC.execute(new ConfirmRequest(clientC.getValues().getPrivateAppointmentFolder(), appointment.getObjectID(), Appointment.TENTATIVE, "maybe", "test@example.invalid", false));
+        GetResponse getResponse = clientC.execute(new GetRequest(clientC.getValues().getPrivateAppointmentFolder(), appointment.getObjectID()));
+        Appointment loadedAppointment = getResponse.getAppointment(clientA.getValues().getTimeZone());
+        appointment.setLastModified(getResponse.getTimestamp());
+        for (ConfirmableParticipant p : loadedAppointment.getConfirmations()) {
+            if (p.getEmailAddress().equals("test@example.invalid")) {
+                assertEquals("Wrong confirm status.", Appointment.TENTATIVE, p.getConfirm());
+                assertEquals("Wrong confirm message.", "maybe", p.getMessage());
             }
         }
     }

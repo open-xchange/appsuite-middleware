@@ -56,6 +56,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.ParticipantsFields;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.groupware.container.Participant;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -73,7 +74,44 @@ public class ConfirmRequest extends AbstractAppointmentRequest<ConfirmResponse> 
     private int user;
 
     private boolean failOnError;
+    
+    private String mail;
+    
+    private int type;
 
+    /**
+     * For external users
+     * 
+     * Initializes a new {@link ConfirmRequest}.
+     * @param folderId
+     * @param objectId
+     * @param confirmStatus
+     * @param confirmMessage
+     * @param mail
+     * @param failOnError
+     */
+    public ConfirmRequest(int folderId, int objectId, int confirmStatus, String confirmMessage, String mail, boolean failOnError) {
+        super();
+        this.folderId = folderId;
+        this.objectId = objectId;
+        this.confirmStatus = confirmStatus;
+        this.confirmMessage = confirmMessage;
+        this.mail = mail;
+        this.failOnError = failOnError;
+        this.type = Participant.EXTERNAL_USER;
+    }
+
+    /**
+     * For internal users
+     * 
+     * Initializes a new {@link ConfirmRequest}.
+     * @param folderId
+     * @param objectId
+     * @param confirmStatus
+     * @param confirmMessage
+     * @param user
+     * @param failOnError
+     */
     public ConfirmRequest(int folderId, int objectId, int confirmStatus, String confirmMessage, int user, boolean failOnError) {
         super();
         this.folderId = folderId;
@@ -82,6 +120,7 @@ public class ConfirmRequest extends AbstractAppointmentRequest<ConfirmResponse> 
         this.confirmMessage = confirmMessage;
         this.user = user;
         this.failOnError = failOnError;
+        this.type = Participant.USER;
     }
 
     public ConfirmRequest(int folderId, int objectId, int confirmStatus, String confirmMessage, boolean failOnError) {
@@ -92,8 +131,12 @@ public class ConfirmRequest extends AbstractAppointmentRequest<ConfirmResponse> 
         JSONObject json = new JSONObject();
         json.put(ParticipantsFields.CONFIRM_MESSAGE, confirmMessage);
         json.put(ParticipantsFields.CONFIRMATION, confirmStatus);
+        json.put(ParticipantsFields.TYPE, type);
         if (user != 0) {
             json.put(AJAXServlet.PARAMETER_ID, user);
+        }
+        if (mail != null) {
+            json.put(AJAXServlet.PARAMETER_MAIL, mail);
         }
         return json;
     }
