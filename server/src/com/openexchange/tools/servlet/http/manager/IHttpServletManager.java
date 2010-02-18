@@ -61,6 +61,11 @@ import javax.servlet.http.HttpServlet;
 public interface IHttpServletManager {
 
     /**
+     * The init parameter which indicates to enforce servlet registration even though another servlet is associated with same path.
+     */
+    public static final String HTTP_REGISTER_FORCE = "org.osgi.service.http.register.force";
+
+    /**
      * Determines the instance of {@link HttpServlet} that corresponds to given path; e.g. <code>/servlet/path</code>
      * 
      * @param path The servlet path to lookup
