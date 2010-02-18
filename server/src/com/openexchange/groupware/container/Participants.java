@@ -61,7 +61,6 @@ import java.util.Set;
  * 
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  */
-
 public class Participants {
 
     private List<Participant> participants = new ArrayList<Participant>();
@@ -69,7 +68,7 @@ public class Participants {
     private Set<UserParticipant> h_users = new HashSet<UserParticipant>();
 
     public Participants() {
-
+        super();
     }
 
     public Participants(final UserParticipant[] users) {
@@ -136,11 +135,11 @@ public class Participants {
     public boolean containsUserParticipant(final UserParticipant up) {
         if (participants != null) {
             final int participantsSize = participants.size();
-            final Iterator i = participants.iterator();
+            final Iterator<Participant> i = participants.iterator();
             for (int k = 0; k < participantsSize; k++) {
-                final Object o = i.next();
-                if (o instanceof UserParticipant) {
-                    final UserParticipant cup = (UserParticipant) o;
+                final Participant p = i.next();
+                if (p instanceof UserParticipant) {
+                    final UserParticipant cup = (UserParticipant) p;
                     if (cup.getIdentifier() == up.getIdentifier()) {
                         return true;
                     }
