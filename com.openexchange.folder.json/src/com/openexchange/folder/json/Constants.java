@@ -97,6 +97,7 @@ public final class Constants {
      */
     public static void setModule(final String module) {
         Constants.module = module;
+        Constants.servletPath = "/ajax/" + module;
     }
 
     /**

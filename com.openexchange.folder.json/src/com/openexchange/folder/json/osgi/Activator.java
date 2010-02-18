@@ -175,13 +175,25 @@ public class Activator extends DeferredActivator {
     private void apply(final ConfigurationService configurationService) {
         final String module = configurationService.getProperty("com.openexchange.folder.json.module");
         if (null != module) {
-            this.module = Constants.getModule();
-            Constants.setModule(module);
+            final String cmod = Constants.getModule();
+            if (!cmod.equals(module)) {
+                /*
+                 * Remember old module and apply new one
+                 */
+                this.module = cmod;
+                Constants.setModule(module);
+            }
         }
         final String servletPath = configurationService.getProperty("com.openexchange.folder.json.servletPath");
         if (null != servletPath) {
-            this.servletPath = Constants.getServletPath();
-            Constants.setServletPath(servletPath);
+            final String cpath = Constants.getServletPath();
+            if (!cpath.equals(servletPath)) {
+                /*
+                 * Remember old path and apply new one
+                 */
+                this.servletPath = cpath;
+                Constants.setServletPath(servletPath);
+            }
         }
     }
 
