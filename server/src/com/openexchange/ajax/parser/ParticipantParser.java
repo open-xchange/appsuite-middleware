@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.parser;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -120,7 +121,7 @@ public class ParticipantParser {
     private static final FieldParser<Participant>[] PARSERS = new FieldParser[] {
         TYPE_PARSER, MAIL_PARSER, DISPLAY_NAME_PARSER, STATUS_PARSER, MESSAGE_PARSER };
 
-    private static final class JSONParticipant extends AbstractConfirmableParticipant {
+    private static final class JSONParticipant extends AbstractConfirmableParticipant implements Comparable<Participant> {
 
         private int type;
         private int identifier;
@@ -183,6 +184,56 @@ public class ParticipantParser {
 
         public void setType(int type) {
             this.type = type;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((emailAddress == null) ? 0 : emailAddress.hashCode());
+            result = prime * result + type;
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            JSONParticipant other = (JSONParticipant) obj;
+            if (emailAddress == null) {
+                if (other.emailAddress != null)
+                    return false;
+            } else if (!emailAddress.equals(other.emailAddress))
+                return false;
+            if (type != other.type)
+                return false;
+            return true;
+        }
+
+        public int compareTo(Participant part) {
+            final int retval;
+            if (EXTERNAL_USER == part.getType()) {
+                if (null == getEmailAddress()) {
+                    if (null == part.getEmailAddress()) {
+                        retval = 0;
+                    } else {
+                        retval = -1;
+                    }
+                } else {
+                    if (null == part.getEmailAddress()) {
+                        retval = 1;
+                    } else {
+                        retval = getEmailAddress().compareTo(part.getEmailAddress());
+                    }
+                }
+            } else {
+                retval = I(EXTERNAL_USER).compareTo(I(part.getType()));
+            }
+            return retval;
         }
     }
 }
