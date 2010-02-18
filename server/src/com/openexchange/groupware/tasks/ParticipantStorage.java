@@ -453,13 +453,9 @@ abstract class ParticipantStorage {
         return retval;
     }
 
-    void insertParticipants(final Context ctx, final Connection con,
-        final int taskId, final Set<TaskParticipant> participants,
-        final StorageType type) throws TaskException {
-        final Set<InternalParticipant> internals =
-            ParticipantStorage.extractInternal(participants);
-        final Set<ExternalParticipant> externals =
-            ParticipantStorage.extractExternal(participants);
+    void insertParticipants(Context ctx, Connection con, int taskId, Set<TaskParticipant> participants, StorageType type) throws TaskException {
+        Set<InternalParticipant> internals = extractInternal(participants);
+        Set<ExternalParticipant> externals = extractExternal(participants);
         insertInternals(ctx, con, taskId, internals, type);
         insertExternals(ctx, con, taskId, externals, type);
     }
@@ -472,10 +468,8 @@ abstract class ParticipantStorage {
         Set<ExternalParticipant> participants, StorageType type)
         throws TaskException;
 
-    static Set<ExternalParticipant> extractExternal(
-        final Set<TaskParticipant> participants) {
-        final Set<ExternalParticipant> retval =
-            new HashSet<ExternalParticipant>();
+    final static Set<ExternalParticipant> extractExternal(Set<TaskParticipant> participants) {
+        Set<ExternalParticipant> retval = new HashSet<ExternalParticipant>();
         for (final TaskParticipant participant : participants) {
             if (Type.EXTERNAL == participant.getType()) {
                 retval.add((ExternalParticipant) participant);
