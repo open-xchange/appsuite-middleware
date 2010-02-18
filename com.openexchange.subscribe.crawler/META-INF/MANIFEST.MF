@@ -7,11 +7,13 @@ Bundle-Activator: com.openexchange.subscribe.crawler.osgi.Activator
 Bundle-Vendor: OPENEXCHANGE
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Import-Package: com.openexchange.config,
+ com.openexchange.data.conversion.ical,
  com.openexchange.datatypes.genericonf,
  com.openexchange.groupware,
  com.openexchange.groupware.calendar,
  com.openexchange.groupware.container,
  com.openexchange.groupware.contexts,
+ com.openexchange.groupware.contexts.impl,
  com.openexchange.i18n,
  com.openexchange.management,
  com.openexchange.management.console,

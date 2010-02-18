@@ -54,6 +54,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ho.yaml.Yaml;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
+import com.gargoylesoftware.htmlunit.NicelyResynchronizingAjaxController;
 import com.gargoylesoftware.htmlunit.ThreadedRefreshHandler;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.openexchange.groupware.container.Contact;
@@ -65,6 +66,7 @@ import com.openexchange.subscribe.crawler.internal.LoginStep;
 import com.openexchange.subscribe.crawler.internal.LogoutStep;
 import com.openexchange.subscribe.crawler.internal.NeedsLoginStepString;
 import com.openexchange.subscribe.crawler.internal.Step;
+import com.openexchange.subscribe.crawler.osgi.Activator;
 
 /**
  * A crawling workflow. This holds the individual Steps and the session information (WebClient instance).
@@ -84,6 +86,10 @@ public class Workflow {
     private boolean useThreadedRefreshHandler;
     
     private static final Log LOG = LogFactory.getLog(Workflow.class);
+    
+    private Activator activator;
+    
+    private boolean enableJavascript;
 
     public Workflow() {
 
@@ -113,9 +119,10 @@ public class Workflow {
 
         // emulate a known client, hopefully keeping our profile low
         final WebClient webClient = new WebClient(BrowserVersion.FIREFOX_2);
-        // Javascript needs to be disabled for security reasons
-        webClient.setJavaScriptEnabled(false);
+        // Javascript is disable by default for security reasons but may be activated for single crawlers
+        webClient.setJavaScriptEnabled(enableJavascript);
         webClient.setTimeout(60000);
+        webClient.setAjaxController(new NicelyResynchronizingAjaxController());
         if (useThreadedRefreshHandler) {
             webClient.setRefreshHandler(new ThreadedRefreshHandler());
         }
@@ -179,4 +186,25 @@ public class Workflow {
         this.useThreadedRefreshHandler = useThreadedRefreshHandler;
     }
 
+    
+    public Activator getActivator() {
+        return activator;
+    }
+
+    
+    public void setActivator(Activator activator) {
+        this.activator = activator;
+    }
+
+    
+    public boolean isEnableJavascript() {
+        return enableJavascript;
+    }
+
+    
+    public void setEnableJavascript(boolean enableJavascript) {
+        this.enableJavascript = enableJavascript;
+    }
+
+    
 }

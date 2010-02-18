@@ -56,13 +56,13 @@ import java.util.Collection;
 import java.util.Map;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
-import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.crawler.Workflow;
+import com.openexchange.subscribe.crawler.osgi.Activator;
 
 /**
  * {@link GenericSubscribeService}
@@ -80,8 +80,12 @@ public class GenericSubscribeService extends AbstractSubscribeService {
     private final DynamicFormDescription FORM = new DynamicFormDescription();
 
     private final String workflowString;
+    
+    private final Activator activator;
+    
+    private boolean enableJavascript;
 
-    public GenericSubscribeService(final String displayName, final String id, final int module, final String workflowString, final int priority) {
+    public GenericSubscribeService(final String displayName, final String id, final int module, final String workflowString, final int priority, Activator activator, boolean enableJavascript) {
         FORM.add(FormElement.input(LOGIN, FORM_LABEL_LOGIN)).add(FormElement.password("password", FORM_LABEL_PASSWORD));
 
         SOURCE.setDisplayName(displayName);
@@ -91,6 +95,8 @@ public class GenericSubscribeService extends AbstractSubscribeService {
         SOURCE.setFolderModule(module);
         SOURCE.setPriority(priority);
         this.workflowString = workflowString;
+        this.activator = activator;
+        this.enableJavascript = enableJavascript;
     }
 
     public SubscriptionSource getSubscriptionSource() {
@@ -105,6 +111,7 @@ public class GenericSubscribeService extends AbstractSubscribeService {
 
         final Workflow workflow = getWorkflow();
         workflow.setSubscription(subscription);
+        workflow.setEnableJavascript(enableJavascript);
         final Map<String, Object> configuration = subscription.getConfiguration();
         return Arrays.asList(workflow.execute((String) configuration.get("login"), (String) configuration.get("password")));
     }
@@ -115,7 +122,8 @@ public class GenericSubscribeService extends AbstractSubscribeService {
             workflow = WorkflowFactory.createWorkflowByString(workflowString);
         } catch (final SubscriptionException e) {
         }
-
+        workflow.setActivator(activator);
+        
         return workflow;
     }
 

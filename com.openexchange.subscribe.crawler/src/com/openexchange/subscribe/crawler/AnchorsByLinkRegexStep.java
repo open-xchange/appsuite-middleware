@@ -166,8 +166,15 @@ public class AnchorsByLinkRegexStep extends AbstractStep<List<HtmlAnchor>, HtmlP
                     }
                 }
             }
-
-            executedSuccessfully = true;
+            if (output != null && output.size() != 0){
+                executedSuccessfully = true;                
+            } else {
+                LOG.error("No links matching the criteria were found.");
+                LOG.info(input.getWebResponse().getContentAsString());
+                for (HtmlAnchor link : input.getAnchors()){
+                    LOG.info("Link available on the first page : " + link.getHrefAttribute());
+                }
+            }
 
         } catch (final FailingHttpStatusCodeException e) {
             exception = e;

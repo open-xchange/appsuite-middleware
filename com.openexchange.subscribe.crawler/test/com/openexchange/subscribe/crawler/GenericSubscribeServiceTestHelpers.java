@@ -75,6 +75,7 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
     
     private HashMap<String, String> map;
     ArrayList<CrawlerDescription> crawlers;
+    private Activator activator;
     
     public GenericSubscribeServiceTestHelpers() {
         super();
@@ -101,15 +102,19 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
         //test with the real crawlers (switch for automated tests (Hudson) / local tests)
         config.stringProperties.put("com.openexchange.subscribe.crawler.path", System.getProperty("crawlersConf"));
         // config.stringProperties.put("com.openexchange.subscribe.crawler.path", "conf/crawlers/");
-        Activator activator = new Activator();
+        activator = new Activator();
         crawlers = activator.getCrawlersFromFilesystem(config);
     }
     
     protected void findOutIfThereAreContactsForThisConfiguration(final String username, final String password, final CrawlerDescription crawler) {
-        findOutIfThereAreContactsForThisConfiguration(username, password, crawler, false);
+        findOutIfThereAreContactsForThisConfiguration(username, password, crawler, false, false);
     }
     
     protected void findOutIfThereAreContactsForThisConfiguration(final String username, final String password, final CrawlerDescription crawler, final boolean verbose) {
+        findOutIfThereAreContactsForThisConfiguration(username, password, crawler, verbose, false);
+    }
+    
+    protected void findOutIfThereAreContactsForThisConfiguration(final String username, final String password, final CrawlerDescription crawler, final boolean verbose, final boolean enableJavascript) {
         Calendar rightNow = Calendar.getInstance();
         final long before = rightNow.getTime().getTime();
         // create a GenericSubscribeService that uses this CrawlerDescription
@@ -118,7 +123,9 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
             crawler.getId(),
             crawler.getModule(),
             crawler.getWorkflowString(),
-            crawler.getPriority());
+            crawler.getPriority(),
+            activator,
+            enableJavascript);
 
         final Workflow testWorkflow = service.getWorkflow();
         Contact[] contacts = new Contact[0];
@@ -161,7 +168,7 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
         System.out.println("Time : " + Long.toString((after - before) / 1000) + " seconds");
     }
     
-    protected void findOutIfThereAreEventsForThisConfiguration(final String username, final String password, final CrawlerDescription crawler, final boolean verbose) {
+    protected void findOutIfThereAreEventsForThisConfiguration(final String username, final String password, final CrawlerDescription crawler, final boolean verbose, final boolean enableJavascript) {
         Calendar rightNow = Calendar.getInstance();
         final long before = rightNow.getTime().getTime();
         // create a GenericSubscribeService that uses this CrawlerDescription
@@ -170,7 +177,9 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
             crawler.getId(),
             crawler.getModule(),
             crawler.getWorkflowString(),
-            crawler.getPriority());
+            crawler.getPriority(),
+            activator,
+            enableJavascript);
 
         final Workflow testWorkflow = service.getWorkflow();
         Appointment[] events = new Appointment[0];
@@ -197,7 +206,7 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
     }
 
     /**
-     * Create a file of this CrawlerDescription for later use
+     * Create files for this CrawlerDescription that will be used by the live system
      * 
      * @param crawler
      */

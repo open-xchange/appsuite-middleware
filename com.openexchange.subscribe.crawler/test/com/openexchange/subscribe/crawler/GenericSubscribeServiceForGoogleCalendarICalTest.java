@@ -55,14 +55,14 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.subscribe.crawler.internal.Step;
 
 /**
- * {@link GenericSubscribeServiceForGoogleCalendarAPITest}
+ * {@link GenericSubscribeServiceForGoogleCalendarICalTest}
  * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class GenericSubscribeServiceForGoogleCalendarAPITest extends GenericSubscribeServiceTestHelpers {
+public class GenericSubscribeServiceForGoogleCalendarICalTest extends GenericSubscribeServiceTestHelpers {
 
-    public void testGoogleCalendarAPI() {
-        
+    public void testGoogleCalendarICal() {
+
         // insert valid credentials here
         String username = "";
         String password = "";
@@ -71,16 +71,27 @@ public class GenericSubscribeServiceForGoogleCalendarAPITest extends GenericSubs
         crawler.setId("com.openexchange.subscribe.crawler.google.calendar");
         crawler.setModule(FolderObject.CALENDAR);
         crawler.setCrawlerApiVersion(616);
-        
+        // crawler.setJavascriptEnabled(true);
+
         ArrayList<Step> steps = new ArrayList<Step>();
-        steps.add(new GoogleCalendarAPIStep());
-        
+        steps.add(new LoginPageByFormActionStep(
+            "Log into Google Calendar",
+            "https://calendar.google.com",
+            "",
+            "",
+            "https://www.google.com/accounts/ServiceLoginAuth?service=cl",
+            "Email",
+            "Passwd",
+            "https:\\/\\/www\\.google\\.com\\/calendar\\/htmlembed.*",
+            1,
+            "https://calendar.google.com"));      
+        steps.add(new GoogleCalendarICalStep("Call the url to get the calendar-export-file", "https://www.google.com/calendar/exporticalzip"));
+
         Workflow workflow = new Workflow(steps);
         crawler.setWorkflowString(Yaml.dump(workflow));
-        
-        findOutIfThereAreEventsForThisConfiguration(username, password, crawler, true);
+
+        findOutIfThereAreEventsForThisConfiguration(username, password, crawler, true, true);
         // uncomment this if the if the crawler description was updated to get the new config-files
         // dumpThis(crawler, crawler.getDisplayName());
-    }
-
+    }    
 }

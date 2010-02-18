@@ -49,93 +49,87 @@
 
 package com.openexchange.subscribe.crawler;
 
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.subscribe.crawler.osgi.Activator;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
+import com.gargoylesoftware.htmlunit.UnexpectedPage;
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.openexchange.subscribe.SubscriptionErrorMessage;
+import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.subscribe.crawler.internal.AbstractStep;
 
 /**
+ * This Step gets a page reachable via Url in the current context (WebClient).
+ * The UnexpectedPage output-type is what is returned by HTMLUnit when a file is found at an URL, so this can be used to pass on files to the next Step.
+ * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class CrawlerDescription {
+public class UnexpectedPageByUrlStep extends AbstractStep<UnexpectedPage, Object> {
 
-    private String displayName, id, workflowString;
-    
-    private int priority = 0;
-    
-    private int crawlerApiVersion = 614;
-    
-    // set the default module to CONTACT to be compatible with API-Version 614
-    private int module = FolderObject.CONTACT;
-    
-    private boolean javascriptEnabled = false;
+    private String url;
 
-    public CrawlerDescription() {
+    private Exception exception;
+
+    private boolean executedSuccessfully;
+
+    public UnexpectedPageByUrlStep() {
 
     }
 
-    public String getDisplayName() {
-        return displayName;
+    public UnexpectedPageByUrlStep(final String description, final String url) {
+        this.description = description;
+        this.url = url;
     }
 
-    public void setDisplayName(final String displayName) {
-        this.displayName = displayName;
+    @Override
+    public void execute(final WebClient webClient) throws SubscriptionException {
+        try {
+            final UnexpectedPage pageByUrl = webClient.getPage(url);
+            output = pageByUrl;
+            executedSuccessfully = true;
+        } catch (final FailingHttpStatusCodeException e) {
+            throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
+        } catch (final MalformedURLException e) {
+            throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
+        } catch (final IOException e) {
+            throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
+        }
     }
 
-    public String getId() {
-        return id;
+    @Override
+    public boolean executedSuccessfully() {
+        return executedSuccessfully;
     }
 
-    public void setId(final String id) {
-        this.id = id;
+    @Override
+    public Exception getException() {
+        return exception;
     }
 
-    public String getWorkflowString() {
-        return workflowString;
+    @Override
+    public void setInput(final Object input) {
+        // this needs to do nothing
     }
 
-    public void setWorkflowString(final String workflowString) {
-        this.workflowString = workflowString;
+    public String getUrl() {
+        return url;
     }
 
-    
-    public int getPriority() {
-        return priority;
+    public void setUrl(final String url) {
+        this.url = url;
     }
 
-    
-    public void setPriority(final int priority) {
-        this.priority = priority;
+    public boolean isExecutedSuccessfully() {
+        return executedSuccessfully;
     }
 
-    
-    public int getCrawlerApiVersion() {
-        return crawlerApiVersion;
+    public void setExecutedSuccessfully(final boolean executedSuccessfully) {
+        this.executedSuccessfully = executedSuccessfully;
     }
 
-    
-    public void setCrawlerApiVersion(int crawlerApiVersion) {
-        this.crawlerApiVersion = crawlerApiVersion;
+    public void setException(final Exception exception) {
+        this.exception = exception;
     }
 
-    
-    public int getModule() {
-        return module;
-    }
-
-    
-    public void setModule(int module) {
-        this.module = module;
-    }
-
-    
-    public boolean isJavascriptEnabled() {
-        return javascriptEnabled;
-    }
-
-    
-    public void setJavascriptEnabled(boolean javascriptEnabled) {
-        this.javascriptEnabled = javascriptEnabled;
-    }
-
-    
-    
 }
