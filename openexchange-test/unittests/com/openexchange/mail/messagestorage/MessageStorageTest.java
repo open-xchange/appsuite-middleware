@@ -399,9 +399,12 @@ public abstract class MessageStorageTest extends AbstractMailTest {
         // a request for the to field
         if (full || set.contains(MailField.TO) || headers) {
             assertTrue("Missing To in " + mailname, mail.containsTo());
-        } else {
-            assertTrue("To set in " + mailname + " although not requested", !mail.containsTo());
         }
+        // Don't complain about an extra field
+        // else {
+        //    assertTrue("To set in " + mailname + " although not requested", !mail.containsTo());
+        // }
+
         // If headers are requested there's no need to check the contains methods because they will
         // completely depend on the values which are stored in the message headers, and for the
         // following headers which are not mandatory we can't say for sure
