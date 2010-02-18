@@ -160,8 +160,8 @@ public class ExternalUserParticipant extends AbstractConfirmableParticipant impl
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
-        sb.append("ExternalUserParticipant,mail:");
-        sb.append(emailaddress);
+        sb.append("Extern mail:");
+        sb.append(getEmailAddress());
         return sb.toString();
     }
 
