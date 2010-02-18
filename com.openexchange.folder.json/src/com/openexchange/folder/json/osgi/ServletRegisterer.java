@@ -49,6 +49,8 @@
 
 package com.openexchange.folder.json.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import javax.servlet.ServletException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -87,7 +89,9 @@ public final class ServletRegisterer implements ServiceTrackerCustomizer {
         if (!registered) {
             final HttpService service = (HttpService) context.getService(reference);
             try {
-                service.registerServlet(Constants.getServletPath(), new FolderServlet(), null, null);
+                final Dictionary<String, String> dictionary = new Hashtable<String, String>(1);
+                dictionary.put("org.osgi.service.http.register.force", "true");
+                service.registerServlet(Constants.getServletPath(), new FolderServlet(), dictionary, null);
                 registered = true;
             } catch (final ServletException e) {
                 LOG.error(e.getMessage(), e);
