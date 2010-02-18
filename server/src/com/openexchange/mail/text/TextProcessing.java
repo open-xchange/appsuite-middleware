@@ -49,9 +49,6 @@
 
 package com.openexchange.mail.text;
 
-import static com.openexchange.mail.text.HTMLProcessing.PATTERN_HREF;
-import java.util.regex.Matcher;
-import com.openexchange.tools.Collections.SmartIntArray;
 
 /**
  * {@link TextProcessing} - Various methods for text processing
@@ -233,32 +230,6 @@ public final class TextProcessing {
         return sb.toString();
         // final Matcher m = PATTERN_QP.matcher(line);
         // return m.matches() ? new StringBuilder(m.group(1)).append(m.group(2)).toString() : null;
-    }
-
-    private static int[] getHrefIndices(final String line) {
-        final SmartIntArray sia = new SmartIntArray(10);
-        try {
-            final Matcher m = PATTERN_HREF.matcher(line);
-            while (m.find()) {
-                sia.append(m.start());
-                sia.append(m.end());
-            }
-        } catch (final StackOverflowError error) {
-            org.apache.commons.logging.LogFactory.getLog(TextProcessing.class).error(StackOverflowError.class.getName(), error);
-        }
-        return sia.toArray();
-    }
-
-    private static int[] isLineBreakInsideHref(final int[] hrefIndices, final int linewrap) {
-        for (int i = 0; i < hrefIndices.length; i += 2) {
-            if ((hrefIndices[i] <= linewrap) && (hrefIndices[i + 1] > linewrap)) {
-                return new int[] { hrefIndices[i], hrefIndices[i + 1] };
-            }
-        }
-        /*
-         * Not inside a href declaration
-         */
-        return null;
     }
 
     /**
