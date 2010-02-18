@@ -198,10 +198,10 @@ public class ConfirmationsTest extends AbstractAJAXSession {
         updated.setTitle("Updated test appointment for testing confirmations");
         participant = new ExternalUserParticipant("external1@example.com");
         participant.setDisplayName("External user");
-        appointment.addParticipant(participant);
+        updated.addParticipant(participant);
         participant = new ExternalUserParticipant("external2@example.com");
         participant.setDisplayName("External user 2");
-        appointment.addParticipant(participant);
+        updated.addParticipant(participant);
         UpdateResponse response = client.execute(new UpdateRequest(updated, tz));
         appointment.setLastModified(response.getTimestamp());
         GetResponse response2 = client.execute(new GetRequest(appointment));
