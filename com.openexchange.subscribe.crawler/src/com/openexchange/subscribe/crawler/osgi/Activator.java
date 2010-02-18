@@ -65,6 +65,7 @@ import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.crawler.CrawlerDescription;
 import com.openexchange.subscribe.crawler.internal.GenericSubscribeService;
@@ -100,13 +101,15 @@ public class Activator implements BundleActivator {
 
     // This assures that every time the server/bundle is restarted it will check for updates
     private Long LAST_TIME_CHECKED = new Long("0");
+    
+    private ICalParser iCalParser = null;
 
     public void start(final BundleContext context) throws Exception {
 
         bundleContext = context;
         services = new ArrayList<ServiceRegistration>();
         
-        // react dynamically to the appearance/disappearance of ConfigurationService and TimerService
+        // react dynamically to the appearance/disappearance of ConfigurationService, TimerService, ManagementService and iCalParserService
         trackers.push(new ServiceTracker(
             context,
             ConfigurationService.class.getName(),
@@ -117,6 +120,10 @@ public class Activator implements BundleActivator {
         final Filter filter2 = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ConfigurationService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + ManagementService.class.getName() + "))");
         ServiceTracker configAndManagementTracker = new ServiceTracker(context, filter2, new CrawlerMBeanRegisterer(context, this));
         trackers.push(configAndManagementTracker);
+        trackers.push(new ServiceTracker(
+            context,
+            ICalParser.class.getName(),
+            new ICalParserRegisterer(context, this)));
         for (final ServiceTracker tracker : trackers) {
             tracker.open();
         }
@@ -188,13 +195,16 @@ public class Activator implements BundleActivator {
                         crawler.getId(),
                         crawler.getModule(),
                         crawler.getWorkflowString(),
-                        crawler.getPriority());
+                        crawler.getPriority(),
+                        this,
+                        crawler.isJavascriptEnabled());
                     final ServiceRegistration serviceRegistration = bundleContext.registerService(
                         SubscribeService.class.getName(),
                         subscribeService,
                         null);
                     services.add(serviceRegistration);
                     activeServices.put(crawler.getId(), serviceRegistration);
+                    LOG.info("Crawler "+crawler.getId() + " was started.");
                 } else {
                     LOG.info("Crawler "+crawler.getId() + " is available but not activated via config-file.");
                 }
@@ -223,7 +233,9 @@ public class Activator implements BundleActivator {
                         crawler.getId(),
                         crawler.getModule(),
                         crawler.getWorkflowString(),
-                        crawler.getPriority());
+                        crawler.getPriority(),
+                        this,
+                        crawler.isJavascriptEnabled());
                     serviceRegistration = bundleContext.registerService(
                         SubscribeService.class.getName(),
                         subscribeService,
@@ -232,6 +244,7 @@ public class Activator implements BundleActivator {
                     activeServices.put(crawler.getId(), serviceRegistration);
                 }
             }
+            LOG.info("Crawler "+ crawlerIdToUpdate + " was restarted.");
         } else {
             LOG.error("Crawler "+ crawlerIdToUpdate + " is not activated via config-file so it will not be (re)started.");
         }
@@ -247,6 +260,14 @@ public class Activator implements BundleActivator {
 
     public static int getCRAWLER_API_VERSION() {
         return CRAWLER_API_VERSION;
+    }
+    
+    public void setICalParser(ICalParser iCalParser){
+        this.iCalParser = iCalParser;
+    }
+    
+    public ICalParser getICalParser(){
+        return iCalParser;
     }
 
     // THESE METHODS SHOULD ONLY BE USED FOR TESTING
