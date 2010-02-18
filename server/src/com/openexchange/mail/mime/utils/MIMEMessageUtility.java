@@ -113,6 +113,8 @@ public final class MIMEMessageUtility {
 
     private static final Set<HeaderName> ENCODINGS;
 
+    private static final MailDateFormat MAIL_DATE_FORMAT;
+
     static {
         final Set<HeaderName> tmp = new HashSet<HeaderName>(4);
         tmp.add(HeaderName.valueOf("iso-8859-1"));
@@ -120,6 +122,9 @@ public final class MIMEMessageUtility {
         tmp.add(HeaderName.valueOf("UTF-8"));
         tmp.add(HeaderName.valueOf("us-ascii"));
         ENCODINGS = java.util.Collections.unmodifiableSet(tmp);
+        final MailDateFormat mdf = new MailDateFormat();
+        mdf.setTimeZone(TimeZoneUtils.getTimeZone("UTC"));
+        MAIL_DATE_FORMAT = mdf;
     }
 
     private static final ConcurrentMap<String, Future<MailDateFormat>> MDF_MAP = new ConcurrentHashMap<String, Future<MailDateFormat>>();
@@ -129,6 +134,27 @@ public final class MIMEMessageUtility {
      */
     private MIMEMessageUtility() {
         super();
+    }
+
+    /**
+     * Gets the default {@link MailDateFormat}.
+     * <p>
+     * Note that returned instance of {@link MailDateFormat} is shared, therefore use a surrounding synchronized block to preserve thread
+     * safety:
+     * 
+     * <pre>
+     * ...
+     * final MailDateFormat mdf = MIMEMessageUtility.getMailDateFormat(session);
+     * synchronized(mdf) {
+     *  mimeMessage.setHeader(&quot;Date&quot;, mdf.format(sendDate));
+     * }
+     * ...
+     * </pre>
+     * 
+     * @return The {@link MailDateFormat} for specified session
+     */
+    public static MailDateFormat getDefaultMailDateFormat() {
+        return MAIL_DATE_FORMAT;
     }
 
     /**
