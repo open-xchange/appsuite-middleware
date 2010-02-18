@@ -1863,6 +1863,26 @@ public final class MIMEMessageConverter {
         }
     }
 
+    /**
+     * Gets the address header from given address header value.
+     * 
+     * @param addresses The address header value
+     * @return The parsed addresses
+     */
+    public static InternetAddress[] getAddressHeader(final String addresses) {
+        try {
+            return QuotedInternetAddress.parseHeader(addresses, true);
+        } catch (final AddressException e) {
+            if (DEBUG) {
+                LOG.debug(
+                    new StringBuilder(128).append("Internet addresses could not be properly parsed: \"").append(e.getMessage()).append(
+                        "\". Using plain addresses' string representation instead.").toString(),
+                    e);
+            }
+            return new InternetAddress[] { new PlainTextAddress(addresses) };
+        }
+    }
+
     private static InternetAddress[] getAddressesOnParseError(final String[] addrs) {
         final InternetAddress[] retval = new InternetAddress[addrs.length];
         for (int i = 0; i < addrs.length; i++) {
