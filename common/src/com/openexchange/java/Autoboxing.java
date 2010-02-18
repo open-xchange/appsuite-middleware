@@ -74,6 +74,15 @@ public final class Autoboxing {
     }
 
     /**
+     * Short method name for unboxing an {@link Integer} object.
+     * @param integer {@link Integer} to unbox.
+     * @return the int value
+     */
+    public static int i(final Integer integer) {
+        return integer.intValue();
+    }
+
+    /**
      * Short method name for {@link Long#valueOf(long)} that uses cached instances for small values of long.
      * @param l long value to be converted to a Long object.
      * @return Long object.
