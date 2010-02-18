@@ -301,7 +301,7 @@ public final class ICalJSONDataHandler implements DataHandler {
         AppointmentSQLInterface appointmentSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
         
         for (CalendarDataObject calendarData : appointments) {
-            if (calendarData.containsUid()) {
+            if (!calendarData.containsUid()) {
                 continue;
             }
             
