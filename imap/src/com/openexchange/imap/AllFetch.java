@@ -455,8 +455,8 @@ public final class AllFetch {
     static final Comparator<MailMessage> DESC_COMP = new Comparator<MailMessage>() {
 
         public int compare(final MailMessage m1, final MailMessage m2) {
-            final Date d1 = m1.getReceivedDate();
-            final Date d2 = m2.getReceivedDate();
+            final Date d1 = m1.getReceivedDateDirect();
+            final Date d2 = m2.getReceivedDateDirect();
             final Integer refComp = compareReferences(d1, d2);
             return (refComp == null ? d1.compareTo(d2) : refComp.intValue()) * (-1);
         }

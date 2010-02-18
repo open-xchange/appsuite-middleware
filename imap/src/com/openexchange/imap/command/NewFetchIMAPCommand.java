@@ -249,7 +249,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
      *            only; otherwise <code>false</code>
      * @return This FETCH IMAP command with value applied
      */
-    public NewFetchIMAPCommand setDetermineAttachmentyHeader(final boolean determineAttachmentByHeader) {
+    public NewFetchIMAPCommand setDetermineAttachmentByHeader(final boolean determineAttachmentByHeader) {
         this.determineAttachmentByHeader = determineAttachmentByHeader;
         return this;
     }

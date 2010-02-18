@@ -302,7 +302,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         final MailMessage[] submessages;
         if (ignoreBodystructure) {
             submessages =
-                new NewFetchIMAPCommand(imapFolder, isRev1, subarr, FetchIMAPCommand.getSafeFetchProfile(fetchProfile), false, true, body).setDetermineAttachmentyHeader(
+                new NewFetchIMAPCommand(imapFolder, isRev1, subarr, FetchIMAPCommand.getSafeFetchProfile(fetchProfile), false, true, body).setDetermineAttachmentByHeader(
                     true).doCommand();
         } else {
             submessages = new NewFetchIMAPCommand(imapFolder, isRev1, subarr, fetchProfile, false, true, body).doCommand();
