@@ -89,8 +89,8 @@ import com.sun.mail.imap.protocol.RFC822SIZE;
 import com.sun.mail.imap.protocol.UID;
 
 /**
- * {@link NewFetchIMAPCommand} - performs a prefetch of messages in given folder with only those fields set that need to be present for display
- * and sorting. A corresponding instance of <code>javax.mail.FetchProfile</code> is going to be generated from given fields.
+ * {@link NewFetchIMAPCommand} - performs a prefetch of messages in given folder with only those fields set that need to be present for
+ * display and sorting. A corresponding instance of <code>javax.mail.FetchProfile</code> is going to be generated from given fields.
  * <p>
  * This method avoids calling JavaMail's fetch() methods which implicitly requests whole message envelope (FETCH 1:* (ENVELOPE INTERNALDATE
  * RFC822.SIZE)) when later working on returned <code>javax.mail.Message</code> objects.
@@ -266,11 +266,11 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
             if (0 == length) {
                 returnDefaultValue = true;
             } else {
-                args = isSequential ? new String[] { new StringBuilder(32).append(seqNums[0]).append(':').append(
-                    seqNums[seqNums.length - 1]).toString() } : IMAPNumArgSplitter.splitSeqNumArg(
-                    seqNums,
-                    keepOrder,
-                    LENGTH + command.length());
+                args =
+                    isSequential ? new String[] { new StringBuilder(32).append(seqNums[0]).append(':').append(seqNums[seqNums.length - 1]).toString() } : IMAPNumArgSplitter.splitSeqNumArg(
+                        seqNums,
+                        keepOrder,
+                        LENGTH + command.length());
                 seqNumFetcher = keepOrder ? new IntSeqNumFetcher(seqNums) : null;
             }
         } else if (arr instanceof long[]) {
@@ -284,11 +284,12 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
                 if (0 == length) {
                     returnDefaultValue = true;
                 } else {
-                    args = isSequential ? new String[] { new StringBuilder(32).append(seqNums[0]).append(':').append(
-                        seqNums[seqNums.length - 1]).toString() } : IMAPNumArgSplitter.splitSeqNumArg(
-                        seqNums,
-                        true,
-                        LENGTH + command.length());
+                    args =
+                        isSequential ? new String[] { new StringBuilder(32).append(seqNums[0]).append(':').append(
+                            seqNums[seqNums.length - 1]).toString() } : IMAPNumArgSplitter.splitSeqNumArg(
+                            seqNums,
+                            true,
+                            LENGTH + command.length());
                     seqNumFetcher = new IntSeqNumFetcher(seqNums);
                 }
             } else {
@@ -298,10 +299,11 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
                 if (0 == length) {
                     returnDefaultValue = true;
                 } else {
-                    args = isSequential ? new String[] { new StringBuilder(32).append(uids[0]).append(':').append(uids[uids.length - 1]).toString() } : IMAPNumArgSplitter.splitUIDArg(
-                        uids,
-                        false,
-                        LENGTH_WITH_UID + command.length());
+                    args =
+                        isSequential ? new String[] { new StringBuilder(32).append(uids[0]).append(':').append(uids[uids.length - 1]).toString() } : IMAPNumArgSplitter.splitUIDArg(
+                            uids,
+                            false,
+                            LENGTH_WITH_UID + command.length());
                     seqNumFetcher = null;
                 }
             }
@@ -312,11 +314,12 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
             if (0 == length) {
                 returnDefaultValue = true;
             } else {
-                args = isSequential ? new String[] { new StringBuilder(64).append(msgs[0].getMessageNumber()).append(':').append(
-                    msgs[msgs.length - 1].getMessageNumber()).toString() } : IMAPNumArgSplitter.splitMessageArg(
-                    msgs,
-                    keepOrder,
-                    LENGTH + command.length());
+                args =
+                    isSequential ? new String[] { new StringBuilder(64).append(msgs[0].getMessageNumber()).append(':').append(
+                        msgs[msgs.length - 1].getMessageNumber()).toString() } : IMAPNumArgSplitter.splitMessageArg(
+                        msgs,
+                        keepOrder,
+                        LENGTH + command.length());
                 seqNumFetcher = keepOrder ? new MsgSeqNumFetcher(msgs) : null;
             }
         } else {
@@ -511,8 +514,9 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
             /*
              * Discard corrupt message
              */
-            LOG.error(new StringBuilder(128).append("Message #").append(mail.getSeqnum()).append(" discarded: ").append(
-                e.getMessage()).toString(), e);
+            LOG.error(
+                new StringBuilder(128).append("Message #").append(mail.getSeqnum()).append(" discarded: ").append(e.getMessage()).toString(),
+                e);
             error = true;
         }
         if (!error) {
@@ -647,11 +651,13 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
         public abstract void handleItem(final Item item, final IDMailMessage msg, final org.apache.commons.logging.Log logger) throws MessagingException, MailException;
     }
 
-    private static final class HeaderFetchItemHandler implements FetchItemHandler {
+    private static final String MULTI_SUBTYPE_MIXED = "MIXED";
 
-        public HeaderFetchItemHandler() {
-            super();
-        }
+    /*-
+     * ++++++++++++++ Item handlers ++++++++++++++
+     */
+
+    private static final FetchItemHandler HEADER_ITEM_HANDLER = new FetchItemHandler() {
 
         public void handleItem(final Item item, final IDMailMessage msg, final org.apache.commons.logging.Log logger) throws MessagingException, MailException {
             final InternetHeaders h;
@@ -692,14 +698,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
                  */
             }
         }
-
-    } // End of HeaderFetchItemHandler
-
-    private static final String MULTI_SUBTYPE_MIXED = "MIXED";
-
-    /*-
-     * ++++++++++++++ Item handlers ++++++++++++++
-     */
+    };
 
     private static final FetchItemHandler FLAGS_ITEM_HANDLER = new FetchItemHandler() {
 
@@ -864,8 +863,6 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
             msg.setMailId(String.valueOf(((UID) item).uid));
         }
     };
-
-    private static final FetchItemHandler HEADER_ITEM_HANDLER = new HeaderFetchItemHandler();
 
     private static final Map<Class<? extends Item>, FetchItemHandler> MAP;
 
