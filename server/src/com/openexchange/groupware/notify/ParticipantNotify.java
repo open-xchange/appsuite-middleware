@@ -831,7 +831,14 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 }
                 msg.message = generateMessageMultipart(session, cal, textMessage, state.getModule(), state.getType(), ITipMethod.REQUEST);
             } else if (EnumSet.of(State.Type.ACCEPTED, State.Type.DECLINED, State.Type.TENTATIVELY_ACCEPTED).contains(state.getType())) {
-                msg.message = generateMessageMultipart(session, cal, createTemplate.render(p.getLocale(), renderMap), state.getModule(), state.getType(), ITipMethod.REPLY);
+                String textMessage = "";
+                if ((p.type == Participant.EXTERNAL_USER || p.type == Participant.RESOURCE)) {
+                    final String template = strings.getString(Types.APPOINTMENT == state.getModule() ? Notifications.APPOINTMENT_CONFIRMATION_MAIL_EXT : Notifications.TASK_CONFIRMATION_MAIL_EXT);
+                    textMessage = new StringTemplate(template).render(p.getLocale(), renderMap);
+                } else {
+                    textMessage = createTemplate.render(p.getLocale(), renderMap);
+                }
+                msg.message = generateMessageMultipart(session, cal, textMessage, state.getModule(), state.getType(), ITipMethod.REPLY);
             } else  if (state.getType() == State.Type.DELETED) {
                 msg.message = generateMessageMultipart(session, cal, createTemplate.render(p.getLocale(), renderMap), state.getModule(), state.getType(), ITipMethod.CANCEL);
             } else {

@@ -440,11 +440,72 @@ public class Notifications implements LocalizableStrings {
         "\n" + 
         "\n" + 
         "==========================================";
+    
+    public static final String APPOINTMENT_CONFIRMATION_MAIL_EXT = 
+        "[changed_by] has [confirmation_action] this appointment.\n" +
+        "\n" + 
+        "Appointment\n" + 
+        "===========\n" + 
+        "Created by: [created_by]\n" + 
+        "Created at: [creation_datetime]\n" + 
+        "[title]\n" + 
+        "[location]" + 
+        "[folder_name]\n" + 
+        "\n" + 
+        "[start]\n" + 
+        "[end]\n" + 
+        "[series]" + 
+        "[delete_exceptions]" + 
+        "[change_exceptions]" + 
+        "\n" + 
+        "[description]" + 
+        "\n" + 
+        "Participants\n" + 
+        "============\n" + 
+        "[participants]" +
+        "\n" + 
+        "\n" + 
+        "Resources\n" + 
+        "=========\n" + 
+        "[resources]" +
+        "\n" + 
+        "\n" + 
+        "==========================================";
 
     public static final String TASK_CONFIRMATION_MAIL = 
         "[changed_by] has [confirmation_action] this task.\n" +
         "You can check this task in your tasks:\n" +
         "[link]\n" + 
+        "\n" + 
+        "Task\n" + 
+        "====\n" + 
+        "Created by: [created_by]\n" + 
+        "Created at: [creation_datetime]\n" + 
+        "[title]\n" + 
+        "[folder_name]\n" + 
+        "[priority]\n" +
+        "[task_status]\n" +
+        "\n" + 
+        "[start]\n" + 
+        "[end]\n" + 
+        "[series]" + 
+        "\n" + 
+        "[description]" + 
+        "\n" + 
+        "Participants\n" + 
+        "============\n" + 
+        "[participants]" +
+        "\n" + 
+        "\n" + 
+        "Resources\n" + 
+        "=========\n" + 
+        "[resources]" +
+        "\n" + 
+        "\n" + 
+        "==========================================";
+    
+    public static final String TASK_CONFIRMATION_MAIL_EXT = 
+        "[changed_by] has [confirmation_action] this task.\n" +
         "\n" + 
         "Task\n" + 
         "====\n" + 
