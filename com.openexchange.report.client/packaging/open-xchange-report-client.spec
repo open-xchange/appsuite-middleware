@@ -72,8 +72,11 @@ ant -Dlib.dir=/opt/open-xchange/lib -Ddestdir=%{buildroot} -Dprefix=/opt/open-xc
 
 %files
 %defattr(-,root,root)
+%config(noreplace) /opt/open-xchange/etc/groupware/reportclient.properties
+%dir /opt/open-xchange/etc/groupware/
 %dir /opt/open-xchange/bundles/
 %dir /opt/open-xchange/sbin/
+/opt/open-xchange/etc/groupware/*
 /opt/open-xchange/bundles/*
 /opt/open-xchange/sbin/*
 %changelog

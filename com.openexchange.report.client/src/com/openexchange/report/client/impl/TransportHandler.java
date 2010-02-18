@@ -85,7 +85,7 @@ public class TransportHandler {
     	JSONObject metadata = buildJSONObject(totals, contextDetails, versions);
     	
     	ReportConfiguration reportConfiguration = new ReportConfiguration();
-
+    	
         StringBuffer report = new StringBuffer();
         report.append(POST_CLIENT_AUTHENTICATION_STRING_KEY);
         report.append("=");
@@ -99,6 +99,16 @@ public class TransportHandler {
         report.append("=");
         report.append(URLEncoder.encode(metadata.toString(), URL_ENCODING));
 
+        if ("true".equals(reportConfiguration.getUseProxy().trim())) {
+        	System.setProperty("https.proxyHost", reportConfiguration.getProxyAddress().trim());
+        	System.setProperty("https.proxyPort", reportConfiguration.getProxyPort().trim());
+
+            if ("true".equals(reportConfiguration.getProxyAuthRequired().trim())) {
+            	System.setProperty("https.proxyUser", reportConfiguration.getProxyUsername().trim());
+            	System.setProperty("https.proxyPassword", reportConfiguration.getProxyPassword().trim());
+            }
+        }
+       
         HttpsURLConnection httpsURLConnection = (HttpsURLConnection) new URL("https://"+REPORT_SERVER_URL+"/").openConnection();
         httpsURLConnection.setUseCaches(false);
         httpsURLConnection.setDoOutput(true);

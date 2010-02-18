@@ -72,6 +72,12 @@
 	</target>
 
 	<!-- Install targets -->
+	<target name="installConfig">
+		<copy todir="${destdir}/${prefix}/etc/groupware/" overwrite="true">
+			<fileset dir="conf"/>
+		</copy>
+	</target>
+	
 	<target name="installJar" depends="jar">
 		<mkdir dir="${destdir}/${bundlesdir}" />
 		<copy todir="${destdir}/${bundlesdir}">
@@ -91,7 +97,7 @@
         </chmod>
     </target>
 	
-    <target name="install" depends="installJar,installBin"/>
+    <target name="install" depends="installConfig,installJar,installBin"/>
 
 	<!-- Replace targets -->	
     <target name="replacer">

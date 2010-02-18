@@ -70,6 +70,7 @@ test -z "$JAVA_XTRAOPTS" && JAVA_XTRAOPTS="-Xms20M -Xmx280M"
 
 JAVA_OPTS="${JAVA_XTRAOPTS} \
 -Djava.awt.headless=true \
+-Dopenexchange.propfile=$SYSTEMPROPERTIES \
 -Dopenexchange.propdir2=$COMMONPROPERTIESDIR"
 
 CLASSPATH="-classpath $BUNDLELIBPATH/json.jar:$OXBUNDLES/com.openexchange.server.jar:$OXBUNDLES/com.openexchange.admin.jar:$OXBUNDLES/open_xchange_admin_plugin_hosting.jar:$OXBUNDLES/com.openexchange.report.client.jar:$OXBUNDLES/org.apache.commons.cli_1.0.0.v20080604-1500.jar"
