@@ -922,23 +922,21 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
     }
 
     static final Participant[] getNewParticipants(final Participant np[], final Participant op[]) {
-        final Participants p = new Participants();
-        for (int a = 0; a < np.length; a++ ) {
-            if (Arrays.binarySearch(op, np[a]) < 0) {
-                p.add(np[a]);
-            }
-        }
-        return p.getList();
+        return getNotContainedParticipants(np, op).getList();
     }
 
     static final Participant[] getDeletedParticipants(final Participant np[], final Participant op[]) {
+        return getNotContainedParticipants(np, op).getList();
+    }
+
+    static final Participants getNotContainedParticipants(Participant[] toCheck, Participant[] participants) {
         final Participants p = new Participants();
-        for (int a = 0; a < np.length; a++ ) {
-            if (Arrays.binarySearch(op, np[a]) < 0) {
-                p.add(np[a]);
+        for (Participant newParticipant : toCheck) {
+            if (Arrays.binarySearch(participants, newParticipant) < 0) {
+                p.add(newParticipant);
             }
         }
-        return p.getList();
+        return p;
     }
 
     /**
