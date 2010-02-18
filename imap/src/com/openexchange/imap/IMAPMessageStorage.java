@@ -271,6 +271,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             if (lastPos < pos) {
                 fetchValidSeqNumsWithFallback(lastPos, pos - lastPos, seqNums, messages, fetchProfile, isRev1, false);
             }
+            /*
+             * Check field existence
+             */
+            MIMEMessageConverter.checkFieldExistence(messages, mailFields);
             if (fieldSet.contains(MailField.ACCOUNT_NAME) || fieldSet.contains(MailField.FULL)) {
                 return setAccountInfo(messages);
             }

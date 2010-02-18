@@ -59,6 +59,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.Enumeration;
@@ -117,18 +118,43 @@ public final class MIMEMessageConverter {
     private static final EnumSet<MailField> ENUM_SET_FULL =
         EnumSet.complementOf(EnumSet.of(MailField.BODY, MailField.FULL, MailField.ACCOUNT_NAME));
 
+    /**
+     * {@link ExistenceChecker} - A checker to ensure existence of a certain field.
+     * 
+     * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+     * @since Open-Xchange v6.16
+     */
+    private interface ExistenceChecker {
+
+        /**
+         * Checks existence of a certain field in given mails.
+         * 
+         * @param mailMessages The mails to check
+         */
+        void check(MailMessage... mailMessages);
+
+        /**
+         * Checks existence of a certain field in given mails.
+         * 
+         * @param mailMessages The mail to check
+         */
+        void check(Collection<MailMessage> mailMessages);
+    }
+
     private static interface MailMessageFieldFiller {
 
-        public static final String[] NON_MATCHING_HEADERS = { MessageHeaders.HDR_FROM, MessageHeaders.HDR_TO, MessageHeaders.HDR_CC,
-                MessageHeaders.HDR_BCC, MessageHeaders.HDR_DISP_NOT_TO, MessageHeaders.HDR_REPLY_TO, MessageHeaders.HDR_SUBJECT,
-                MessageHeaders.HDR_DATE, MessageHeaders.HDR_X_PRIORITY, MessageHeaders.HDR_MESSAGE_ID, MessageHeaders.HDR_IN_REPLY_TO,
+        public static final String[] NON_MATCHING_HEADERS =
+            {
+                MessageHeaders.HDR_FROM, MessageHeaders.HDR_TO, MessageHeaders.HDR_CC, MessageHeaders.HDR_BCC,
+                MessageHeaders.HDR_DISP_NOT_TO, MessageHeaders.HDR_REPLY_TO, MessageHeaders.HDR_SUBJECT, MessageHeaders.HDR_DATE,
+                MessageHeaders.HDR_X_PRIORITY, MessageHeaders.HDR_MESSAGE_ID, MessageHeaders.HDR_IN_REPLY_TO,
                 MessageHeaders.HDR_REFERENCES, MessageHeaders.HDR_X_OX_VCARD, MessageHeaders.HDR_X_OX_NOTIFICATION };
 
-        public static final String[] ALREADY_INSERTED_HEADERS = { MessageHeaders.HDR_MESSAGE_ID, MessageHeaders.HDR_REPLY_TO,
-                MessageHeaders.HDR_REFERENCES };
+        public static final String[] ALREADY_INSERTED_HEADERS =
+            { MessageHeaders.HDR_MESSAGE_ID, MessageHeaders.HDR_REPLY_TO, MessageHeaders.HDR_REFERENCES };
 
-        public static final org.apache.commons.logging.Log LOG1 = org.apache.commons.logging.LogFactory
-                .getLog(MailMessageFieldFiller.class);
+        public static final org.apache.commons.logging.Log LOG1 =
+            org.apache.commons.logging.LogFactory.getLog(MailMessageFieldFiller.class);
 
         /**
          * Fills a fields from source instance of {@link Message} in given destination instance of {@link MailMessage}.
@@ -511,8 +537,176 @@ public final class MIMEMessageConverter {
     private static final EnumMap<MailField, MailMessageFieldFiller> FILLER_MAP_EXT =
         new EnumMap<MailField, MailMessageFieldFiller>(MailField.class);
 
+    private static final EnumMap<MailField, ExistenceChecker> CHECKER_MAP;
+
     static {
         final org.apache.commons.logging.Log logger = LOG;
+
+        CHECKER_MAP = new EnumMap<MailField, ExistenceChecker>(MailField.class);
+        final InternetAddress empty = null;
+        CHECKER_MAP.put(MailField.FROM, new ExistenceChecker() {
+
+            public void check(final MailMessage... mailMessages) {
+                for (final MailMessage mailMessage : mailMessages) {
+                    if (null != mailMessage && !mailMessage.containsFrom()) {
+                        mailMessage.addFrom(empty);
+                    }
+                }
+            }
+
+            public void check(final Collection<MailMessage> mailMessages) {
+                for (final MailMessage mailMessage : mailMessages) {
+                    if (null != mailMessage && !mailMessage.containsFrom()) {
+                        mailMessage.addFrom(empty);
+                    }
+                }
+            }
+        });
+        CHECKER_MAP.put(MailField.TO, new ExistenceChecker() {
+
+            public void check(final MailMessage... mailMessages) {
+                for (final MailMessage mailMessage : mailMessages) {
+                    if (null != mailMessage && !mailMessage.containsTo()) {
+                        mailMessage.addTo(empty);
+                    }
+                }
+            }
+
+            public void check(final Collection<MailMessage> mailMessages) {
+                for (final MailMessage mailMessage : mailMessages) {
+                    if (null != mailMessage && !mailMessage.containsTo()) {
+                        mailMessage.addTo(empty);
+                    }
+                }
+            }
+        });
+        CHECKER_MAP.put(MailField.CC, new ExistenceChecker() {
+
+            public void check(final MailMessage... mailMessages) {
+                for (final MailMessage mailMessage : mailMessages) {
+                    if (null != mailMessage && !mailMessage.containsCc()) {
+                        mailMessage.addCc(empty);
+                    }
+                }
+            }
+
+            public void check(final Collection<MailMessage> mailMessages) {
+                for (final MailMessage mailMessage : mailMessages) {
+                    if (null != mailMessage && !mailMessage.containsCc()) {
+                        mailMessage.addCc(empty);
+                    }
+                }
+            }
+        });
+        CHECKER_MAP.put(MailField.BCC, new ExistenceChecker() {
+
+            public void check(final MailMessage... mailMessages) {
+                for (final MailMessage mailMessage : mailMessages) {
+                    if (null != mailMessage && !mailMessage.containsBcc()) {
+                        mailMessage.addBcc(empty);
+                    }
+                }
+            }
+
+            public void check(final Collection<MailMessage> mailMessages) {
+                for (final MailMessage mailMessage : mailMessages) {
+                    if (null != mailMessage && !mailMessage.containsBcc()) {
+                        mailMessage.addBcc(empty);
+                    }
+                }
+            }
+        });
+        CHECKER_MAP.put(MailField.SUBJECT, new ExistenceChecker() {
+
+            public void check(final MailMessage... mailMessages) {
+                for (final MailMessage mailMessage : mailMessages) {
+                    if (null != mailMessage && !mailMessage.containsSubject()) {
+                        mailMessage.setSubject(null);
+                    }
+                }
+            }
+
+            public void check(final Collection<MailMessage> mailMessages) {
+                for (final MailMessage mailMessage : mailMessages) {
+                    if (null != mailMessage && !mailMessage.containsSubject()) {
+                        mailMessage.setSubject(null);
+                    }
+                }
+            }
+        });
+        CHECKER_MAP.put(MailField.SENT_DATE, new ExistenceChecker() {
+
+            public void check(final MailMessage... mailMessages) {
+                for (final MailMessage mailMessage : mailMessages) {
+                    if (null != mailMessage && !mailMessage.containsSentDate()) {
+                        mailMessage.setSentDate(null);
+                    }
+                }
+            }
+
+            public void check(final Collection<MailMessage> mailMessages) {
+                for (final MailMessage mailMessage : mailMessages) {
+                    if (null != mailMessage && !mailMessage.containsSentDate()) {
+                        mailMessage.setSentDate(null);
+                    }
+                }
+            }
+        });
+        CHECKER_MAP.put(MailField.DISPOSITION_NOTIFICATION_TO, new ExistenceChecker() {
+
+            public void check(final MailMessage... mailMessages) {
+                for (final MailMessage mailMessage : mailMessages) {
+                    if (null != mailMessage && !mailMessage.containsDispositionNotification()) {
+                        mailMessage.setDispositionNotification(null);
+                    }
+                }
+            }
+
+            public void check(final Collection<MailMessage> mailMessages) {
+                for (final MailMessage mailMessage : mailMessages) {
+                    if (null != mailMessage && !mailMessage.containsDispositionNotification()) {
+                        mailMessage.setDispositionNotification(null);
+                    }
+                }
+            }
+        });
+        CHECKER_MAP.put(MailField.PRIORITY, new ExistenceChecker() {
+
+            public void check(final MailMessage... mailMessages) {
+                for (final MailMessage mailMessage : mailMessages) {
+                    if (null != mailMessage && !mailMessage.containsPriority()) {
+                        mailMessage.setPriority(MailMessage.PRIORITY_NORMAL);
+                    }
+                }
+            }
+
+            public void check(final Collection<MailMessage> mailMessages) {
+                for (final MailMessage mailMessage : mailMessages) {
+                    if (null != mailMessage && !mailMessage.containsPriority()) {
+                        mailMessage.setPriority(MailMessage.PRIORITY_NORMAL);
+                    }
+                }
+            }
+        });
+        CHECKER_MAP.put(MailField.THREAD_LEVEL, new ExistenceChecker() {
+
+            public void check(final MailMessage... mailMessages) {
+                for (final MailMessage mailMessage : mailMessages) {
+                    if (null != mailMessage && !mailMessage.containsThreadLevel()) {
+                        mailMessage.setThreadLevel(0);
+                    }
+                }
+            }
+
+            public void check(final Collection<MailMessage> mailMessages) {
+                for (final MailMessage mailMessage : mailMessages) {
+                    if (null != mailMessage && !mailMessage.containsThreadLevel()) {
+                        mailMessage.setThreadLevel(0);
+                    }
+                }
+            }
+        });
+
         FILLER_MAP_EXT.put(MailField.HEADERS, new MailMessageFieldFiller() {
 
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
@@ -1071,6 +1265,24 @@ public final class MIMEMessageConverter {
                 }
             }
         });
+    }
+
+    /**
+     * Checks field existence.
+     * 
+     * @param mails The mails to checks
+     * @param fields The field to check for
+     */
+    public static void checkFieldExistence(final MailMessage[] mails, final MailField[] fields) {
+        if (null == mails) {
+            return;
+        }
+        for (final MailField field : fields) {
+            final ExistenceChecker checker = CHECKER_MAP.get(field);
+            if (null != checker) {
+                checker.check(mails);
+            }
+        }
     }
 
     /**

@@ -51,13 +51,10 @@ package com.openexchange.imap.command;
 
 import java.io.InputStream;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.mail.FetchProfile;
@@ -164,185 +161,6 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
         }
     }
 
-    /**
-     * {@link ExistenceChecker} - A checker to ensure existence of a certain field.
-     * 
-     * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
-     * @since Open-Xchange v6.16
-     */
-    private interface ExistenceChecker {
-
-        /**
-         * Checks existence of a certain field in given mails.
-         * 
-         * @param mailMessages The mails to check
-         */
-        void check(MailMessage... mailMessages);
-
-        /**
-         * Checks existence of a certain field in given mails.
-         * 
-         * @param mailMessages The mail to check
-         */
-        void check(Collection<MailMessage> mailMessages);
-    }
-
-    private static final Map<String, ExistenceChecker> CHECKER_MAP;
-
-    static {
-        /*
-         * Static fillers
-         */
-        CHECKER_MAP = new HashMap<String, ExistenceChecker>(8);
-        final InternetAddress empty = null;
-        CHECKER_MAP.put("From", new ExistenceChecker() {
-
-            public void check(final MailMessage... mailMessages) {
-                for (final MailMessage mailMessage : mailMessages) {
-                    if (null != mailMessage && !mailMessage.containsFrom()) {
-                        mailMessage.addFrom(empty);
-                    }
-                }
-            }
-
-            public void check(final Collection<MailMessage> mailMessages) {
-                for (final MailMessage mailMessage : mailMessages) {
-                    if (null != mailMessage && !mailMessage.containsFrom()) {
-                        mailMessage.addFrom(empty);
-                    }
-                }
-            }
-        });
-        CHECKER_MAP.put("To", new ExistenceChecker() {
-
-            public void check(final MailMessage... mailMessages) {
-                for (final MailMessage mailMessage : mailMessages) {
-                    if (null != mailMessage && !mailMessage.containsTo()) {
-                        mailMessage.addTo(empty);
-                    }
-                }
-            }
-
-            public void check(final Collection<MailMessage> mailMessages) {
-                for (final MailMessage mailMessage : mailMessages) {
-                    if (null != mailMessage && !mailMessage.containsTo()) {
-                        mailMessage.addTo(empty);
-                    }
-                }
-            }
-        });
-        CHECKER_MAP.put("Cc", new ExistenceChecker() {
-
-            public void check(final MailMessage... mailMessages) {
-                for (final MailMessage mailMessage : mailMessages) {
-                    if (null != mailMessage && !mailMessage.containsCc()) {
-                        mailMessage.addCc(empty);
-                    }
-                }
-            }
-
-            public void check(final Collection<MailMessage> mailMessages) {
-                for (final MailMessage mailMessage : mailMessages) {
-                    if (null != mailMessage && !mailMessage.containsCc()) {
-                        mailMessage.addCc(empty);
-                    }
-                }
-            }
-        });
-        CHECKER_MAP.put("Bcc", new ExistenceChecker() {
-
-            public void check(final MailMessage... mailMessages) {
-                for (final MailMessage mailMessage : mailMessages) {
-                    if (null != mailMessage && !mailMessage.containsBcc()) {
-                        mailMessage.addBcc(empty);
-                    }
-                }
-            }
-
-            public void check(final Collection<MailMessage> mailMessages) {
-                for (final MailMessage mailMessage : mailMessages) {
-                    if (null != mailMessage && !mailMessage.containsBcc()) {
-                        mailMessage.addBcc(empty);
-                    }
-                }
-            }
-        });
-        CHECKER_MAP.put("Subject", new ExistenceChecker() {
-
-            public void check(final MailMessage... mailMessages) {
-                for (final MailMessage mailMessage : mailMessages) {
-                    if (null != mailMessage && !mailMessage.containsSubject()) {
-                        mailMessage.setSubject(null);
-                    }
-                }
-            }
-
-            public void check(final Collection<MailMessage> mailMessages) {
-                for (final MailMessage mailMessage : mailMessages) {
-                    if (null != mailMessage && !mailMessage.containsSubject()) {
-                        mailMessage.setSubject(null);
-                    }
-                }
-            }
-        });
-        CHECKER_MAP.put("Date", new ExistenceChecker() {
-
-            public void check(final MailMessage... mailMessages) {
-                for (final MailMessage mailMessage : mailMessages) {
-                    if (null != mailMessage && !mailMessage.containsSentDate()) {
-                        mailMessage.setSentDate(null);
-                    }
-                }
-            }
-
-            public void check(final Collection<MailMessage> mailMessages) {
-                for (final MailMessage mailMessage : mailMessages) {
-                    if (null != mailMessage && !mailMessage.containsSentDate()) {
-                        mailMessage.setSentDate(null);
-                    }
-                }
-            }
-        });
-        CHECKER_MAP.put("Disposition-Notification-To", new ExistenceChecker() {
-
-            public void check(final MailMessage... mailMessages) {
-                for (final MailMessage mailMessage : mailMessages) {
-                    if (null != mailMessage && !mailMessage.containsDispositionNotification()) {
-                        mailMessage.setDispositionNotification(null);
-                    }
-                }
-            }
-
-            public void check(final Collection<MailMessage> mailMessages) {
-                for (final MailMessage mailMessage : mailMessages) {
-                    if (null != mailMessage && !mailMessage.containsDispositionNotification()) {
-                        mailMessage.setDispositionNotification(null);
-                    }
-                }
-            }
-        });
-        CHECKER_MAP.put("X-Priority", new ExistenceChecker() {
-
-            public void check(final MailMessage... mailMessages) {
-                for (final MailMessage mailMessage : mailMessages) {
-                    if (null != mailMessage && !mailMessage.containsPriority()) {
-                        mailMessage.setPriority(MailMessage.PRIORITY_NORMAL);
-                    }
-                }
-            }
-
-            public void check(final Collection<MailMessage> mailMessages) {
-                for (final MailMessage mailMessage : mailMessages) {
-                    if (null != mailMessage && !mailMessage.containsPriority()) {
-                        mailMessage.setPriority(MailMessage.PRIORITY_NORMAL);
-                    }
-                }
-            }
-        });
-    }
-
-    private final Collection<ExistenceChecker> checkers;
-
     private final char separator;
 
     private String[] args;
@@ -404,23 +222,6 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
         command = getFetchCommand(isRev1, fp, loadBody);
         set(arr, isSequential, keepOrder);
         fullname = imapFolder.getFullName();
-        checkers = byFetchProfile(fp);
-    }
-
-    private static Collection<ExistenceChecker> byFetchProfile(final FetchProfile fp) {
-        final String[] headerNames = fp.getHeaderNames();
-        if (null == headerNames) {
-            return Collections.emptyList();
-        }
-        final int len = headerNames.length;
-        final List<ExistenceChecker> list = new ArrayList<ExistenceChecker>(len);
-        for (int i = 0; i < len; i++) {
-            final ExistenceChecker o = CHECKER_MAP.get(headerNames[i]);
-            if (null != o) {
-                list.add(o);
-            }
-        }
-        return list;
     }
 
     /**
@@ -575,7 +376,6 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
         retval = new MailMessage[length];
         index = 0;
         fullname = imapFolder.getFullName();
-        checkers = byFetchProfile(fp);
     }
 
     @Override
@@ -640,11 +440,6 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
             throw new MessagingException(
                 new StringBuilder(32).append("Expected ").append(length).append(" FETCH responses but got ").append(index).append(
                     " from IMAP folder \"").append(imapFolder.getFullName()).append("\" on server \"").append(server).append("\".").toString());
-        }
-        if ((null != retval) && !checkers.isEmpty()) {
-            for (final ExistenceChecker ec : checkers) {
-                ec.check(retval);
-            }
         }
         return retval;
     }
