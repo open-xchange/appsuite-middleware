@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.text;
 
-import static com.openexchange.mail.text.HTMLProcessing.PATTERN_HREF;
+import static com.openexchange.mail.text.HTMLProcessing.PATTERN_URL;
 import static com.openexchange.mail.text.HTMLProcessing.getHTMLEntity;
 import java.io.IOException;
 import java.io.Reader;
@@ -416,7 +416,7 @@ public final class Html2TextConverter {
             }
             matcher = PATTERN_SRC_CONTENT.matcher(t);
             try {
-                if (matcher.find() && PATTERN_HREF.matcher(matcher.group(1)).matches()) {
+                if (matcher.find() && PATTERN_URL.matcher(matcher.group(1)).matches()) {
                     sb.append(' ').append('[').append(matcher.group(1)).append(']');
                 }
             } catch (final StackOverflowError error) {
@@ -437,7 +437,7 @@ public final class Html2TextConverter {
             }
         } else if (isTag(t, "/a") && (href.length() > 0)) {
             final String anchorTitle = anchorBuilder.toString();
-            if (!PATTERN_HREF.matcher(anchorTitle).matches() && !href.equalsIgnoreCase(anchorTitle)) {
+            if (!PATTERN_URL.matcher(anchorTitle).matches() && !href.equalsIgnoreCase(anchorTitle)) {
                 result = new StringBuilder(100).append(' ').append('[').append(href).append(']').toString();
             }
             href = STR_EMPTY;

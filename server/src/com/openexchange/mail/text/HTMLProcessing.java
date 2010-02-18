@@ -217,23 +217,65 @@ public final class HTMLProcessing {
     /**
      * The regular expression to match links inside both plain text and HTML content.
      * <p>
-     * <b>WARNING</b>: May throw a {@link StackOverflowError} if a matched link is too large. Usages should handle this case.
+     * <b>WARNING</b>: May throw a {@link StackOverflowError} if a matched link is too large. Usages should handle this case. public static
+     * final Pattern PATTERN_HREF = Pattern.compile("<a\\s+href[^>]+>.*?</a>|((?:https?://|ftp://|mailto:|news\\.|www\\.)(?:[-\\p{L}0-9+@#/%?=~_|!:,.;]|&amp;|&(?![\\p{L}_0-9]+;))*(?:[-\\p{L}0-9+@#/%=~_|]|&amp;|&(?![\\p{L}_0-9]+;)))"
+     * , Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
      */
-    public static final Pattern PATTERN_HREF =
-        Pattern.compile(
-            "<a\\s+href[^>]+>.*?</a>|((?:https?://|ftp://|mailto:|news\\.|www\\.)(?:[-\\p{L}0-9+@#/%?=~_|!:,.;]|&amp;|&(?![\\p{L}_0-9]+;))*(?:[-\\p{L}0-9+@#/%=~_|]|&amp;|&(?![\\p{L}_0-9]+;)))",
-            Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+
+    private static final String REGEX_ANCHOR = "<a\\s+href[^>]+>.*?</a>";
+
+    private static final String REGEX_URL =
+        "\\(?\\b(?:https?://|ftp://|mailto:|news\\.|www\\.)[-A-Za-z0-9+&@#/%?=~_()|!:,.;]*[-A-Za-z0-9+&@#/%=~_()|]";
+
+    /**
+     * The regular expression to match URLs inside text:<br>
+     * <code>\(?\b(?:https?://|ftp://|mailto:|news\\.|www\.)[-A-Za-z0-9+&@#/%?=~_()|!:,.;]*[-A-Za-z0-9+&@#/%=~_()|]</code>
+     * <p>
+     * Parentheses, if present, are allowed in the URL -- The leading one is absorbed, too.
+     * 
+     * <pre>
+     * String s = matcher.group();
+     * int mlen = s.length() - 1;
+     * if (mlen &gt; 0 &amp;&amp; '(' == s.charAt(0) &amp;&amp; ')' == s.charAt(mlen)) {
+     *     s = s.substring(1, mlen);
+     * }
+     * </pre>
+     */
+    public static final Pattern PATTERN_URL = Pattern.compile(REGEX_URL);
+
+    /**
+     * The regular expression to match URLs and anchors inside text.
+     * 
+     * <pre>
+     * String s = matcher.group();
+     * int mlen = s.length() - 1;
+     * if (mlen &gt; 0 &amp;&amp; '(' == s.charAt(0) &amp;&amp; ')' == s.charAt(mlen)) {
+     *     s = s.substring(1, mlen);
+     * }
+     * </pre>
+     */
+    public static final Pattern PATTERN_LINK = Pattern.compile(REGEX_ANCHOR + '|' + REGEX_URL);
+
+    /**
+     * The regular expression to match URLs and anchors inside text. The URLs are matched in capturing group #1.
+     * 
+     * <pre>
+     * String s = matcher.group(1);
+     * int mlen = s.length() - 1;
+     * if (mlen &gt; 0 &amp;&amp; '(' == s.charAt(0) &amp;&amp; ')' == s.charAt(mlen)) {
+     *     s = s.substring(1, mlen);
+     * }
+     * </pre>
+     */
+    public static final Pattern PATTERN_LINK_WITH_GROUP = Pattern.compile(REGEX_ANCHOR + "|(" + REGEX_URL + ')');
 
     private static List<Range> getHrefPositions(final String content) {
         try {
-            final Matcher m = PATTERN_HREF.matcher(content);
+            final Matcher m = PATTERN_URL.matcher(content);
             if (m.find()) {
                 final List<Range> positions = new ArrayList<Range>();
                 do {
-                    final String nonHtmlLink = m.group(1);
-                    if (null != nonHtmlLink) {
-                        positions.add(new Range(m.start(1), m.end(1)));
-                    }
+                    positions.add(new Range(m.start(), m.end()));
                 } while (m.find());
                 return positions;
             }
@@ -256,19 +298,24 @@ public final class HTMLProcessing {
      */
     public static String formatHrefLinks(final String content) {
         try {
-            final Matcher m = PATTERN_HREF.matcher(content);
+            final Matcher m = PATTERN_LINK_WITH_GROUP.matcher(content);
             final MatcherReplacer mr = new MatcherReplacer(m, content);
             final StringBuilder sb = new StringBuilder(content.length());
             final StringBuilder tmp = new StringBuilder(256);
             while (m.find()) {
-                final String nonHtmlLink = m.group(1);
-                if ((nonHtmlLink == null) || (isSrcAttr(content, m.start(1)))) {
+                String url = m.group(1);
+                if ((url == null) || (isSrcAttr(content, m.start(1)))) {
                     mr.appendLiteralReplacement(sb, checkTarget(m.group()));
                 } else {
+                    final int mlen = url.length() - 1;
+                    if (mlen > 0 && '(' == url.charAt(0) && ')' == url.charAt(mlen)) {
+                        url = url.substring(1, mlen);
+                    }
                     tmp.setLength(0);
-                    mr.appendReplacement(sb, tmp.append("<a href=\"").append(
-                        (nonHtmlLink.startsWith("www") || nonHtmlLink.startsWith("news") ? "http://" : "")).append(
-                        "$1\" target=\"_blank\">$1</a>").toString());
+                    mr.appendReplacement(
+                        sb,
+                        tmp.append("<a href=\"").append((url.startsWith("www") || url.startsWith("news") ? "http://" : "")).append(
+                            "$1\" target=\"_blank\">$1</a>").toString());
                 }
             }
             mr.appendTail(sb);
