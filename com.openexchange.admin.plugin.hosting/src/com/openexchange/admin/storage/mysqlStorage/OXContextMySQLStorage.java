@@ -670,6 +670,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         } finally {
             if (ox_db_write_con != null) {
                 try {
+                    if(!ox_db_write_con.getAutoCommit()) {
+                        ox_db_write_con.setAutoCommit(true);
+                    }
                     cache.pushWRITEConnectionForPoolId(source_database_id, ox_db_write_con);
                 } catch (final Exception ex) {
                     LOG.error("Error pushing connection", ex);
@@ -677,6 +680,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
             if (configdb_write_con != null) {
                 try {
+                    if(!configdb_write_con.getAutoCommit()) {
+                        configdb_write_con.setAutoCommit(true);
+                    }
                     cache.pushConnectionForConfigDB(configdb_write_con);
                 } catch (final Exception ex) {
                     LOG.error("Error pushing connection", ex);
@@ -691,6 +697,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
             if (target_ox_db_con != null) {
                 try {
+                    if(!target_ox_db_con.getAutoCommit()) {
+                        target_ox_db_con.setAutoCommit(true);
+                    }
                     cache.pushWRITEConnectionForPoolId(target_database_id.getId(), target_ox_db_con);
                 } catch (final Exception ex) {
                     LOG.error("Error pushing connection", ex);
