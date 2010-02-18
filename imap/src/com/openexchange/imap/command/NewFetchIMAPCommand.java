@@ -165,7 +165,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
     }
 
     /**
-     * {@link ExistenceChecker} - A checker to ensure existence of certain field.
+     * {@link ExistenceChecker} - A checker to ensure existence of a certain field.
      * 
      * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
      * @since Open-Xchange v6.16
@@ -173,14 +173,14 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
     private interface ExistenceChecker {
 
         /**
-         * Checks existence of certain field in given mails.
+         * Checks existence of a certain field in given mails.
          * 
          * @param mailMessages The mails to check
          */
         void check(MailMessage... mailMessages);
 
         /**
-         * Checks existence of certain field in given mails.
+         * Checks existence of a certain field in given mails.
          * 
          * @param mailMessages The mail to check
          */
