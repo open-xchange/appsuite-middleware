@@ -9,6 +9,7 @@
 
     <!-- Constants -->
     <property name="tmp.dir" value="tmp"/>
+    <property name="conf.dir" value="conf"/>
 
     <property file="META-INF/MANIFEST.MF"/>
     <property file="build.properties"/>
