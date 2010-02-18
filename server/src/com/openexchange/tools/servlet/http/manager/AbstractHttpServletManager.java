@@ -52,11 +52,13 @@ package com.openexchange.tools.servlet.http.manager;
 import java.lang.reflect.Constructor;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Dictionary;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 import javax.servlet.SingleThreadModel;
 import javax.servlet.http.HttpServlet;
 import com.openexchange.ajp13.AJPv13Config;
@@ -72,6 +74,17 @@ import com.openexchange.tools.servlet.http.SingletonServletQueue;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractHttpServletManager implements IHttpServletManager {
+
+    /**
+     * The logger.
+     */
+    protected static final org.apache.commons.logging.Log LOG =
+        org.apache.commons.logging.LogFactory.getLog(AbstractHttpServletManager.class);
+
+    /**
+     * The empty class array.
+     */
+    protected final static Class<?>[] CLASS_ARR = new Class[] {};
 
     protected final ConcurrentMap<String, ServletQueue> servletPool;
 
@@ -151,6 +164,96 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
         }
         if (log.isInfoEnabled()) {
             log.info("All Servlet Instances created & initialized");
+        }
+    }
+
+    protected final void registerServlet0(final String id, final HttpServlet servlet, final Dictionary<String, String> initParams) throws ServletException {
+        try {
+            final String path = new URI(prependSlash(id)).normalize().toString();
+            if (servletPool.containsKey(path) && ((null == initParams) || initParams.isEmpty() || !Boolean.valueOf(
+                initParams.get(HTTP_REGISTER_FORCE)).booleanValue())) {
+                throw new ServletException(new StringBuilder(256).append("A servlet with alias \"").append(path).append(
+                    "\" has already been registered before.").toString());
+            }
+            final ServletConfigLoader configLoader = ServletConfigLoader.getDefaultInstance();
+            if (null == configLoader) {
+                throw new ServletException(
+                    "Aborting servlet registration: HTTP service has not been initialized since default servlet configuration loader is null.");
+            }
+            final boolean forceRegistration;
+            if ((null != initParams) && !initParams.isEmpty()) {
+                configLoader.setConfig(servlet.getClass().getCanonicalName(), initParams);
+                forceRegistration = Boolean.valueOf(initParams.get(HTTP_REGISTER_FORCE)).booleanValue();
+            } else {
+                forceRegistration = false;
+            }
+            /*
+             * Try to determine default constructor for later instantiations
+             */
+            final FiFoServletQueue servletQueue;
+            try {
+                servletQueue =
+                    new FiFoServletQueue(1, servlet.getClass().getConstructor(CLASS_ARR), !(servlet instanceof SingleThreadModel), path);
+            } catch (final SecurityException e) {
+                final ServletException se =
+                    new ServletException("Default constructor could not be found for servlet class: " + servlet.getClass().getName(), e);
+                se.initCause(e);
+                throw se;
+            } catch (final NoSuchMethodException e) {
+                final ServletException se =
+                    new ServletException("Default constructor could not be found for servlet class: " + servlet.getClass().getName(), e);
+                se.initCause(e);
+                throw se;
+            }
+            final ServletConfig conf = configLoader.getConfig(servlet.getClass().getCanonicalName(), path);
+            servlet.init(conf);
+            servletQueue.enqueue(servlet);
+            /*
+             * Put into servlet pool for being accessible
+             */
+            if (forceRegistration) {
+                final ServletQueue previous = servletPool.put(path, servletQueue);
+                if (null != previous) {
+                    configLoader.removeConfig(previous.dequeue().getClass().getCanonicalName());
+                }
+            } else {
+                if (servletPool.putIfAbsent(path, servletQueue) != null) {
+                    throw new ServletException(new StringBuilder(256).append("A servlet with alias \"").append(path).append(
+                        "\" has already been registered before.").toString());
+                }
+            }
+            if (LOG.isInfoEnabled()) {
+                LOG.info(new StringBuilder(64).append("New servlet \"").append(servlet.getClass().getCanonicalName()).append(
+                    "\" successfully registered to \"").append(path).append('"'));
+            }
+        } catch (final URISyntaxException e) {
+            final ServletException se = new ServletException("Servlet path is not a valid URI", e);
+            se.initCause(e);
+            throw se;
+        }
+    }
+
+    protected final void unregisterServlet0(final String id) {
+        try {
+            final String path = new URI(prependSlash(id)).normalize().toString();
+            final ServletConfigLoader configLoader = ServletConfigLoader.getDefaultInstance();
+            if (null == configLoader) {
+                LOG.error("Aborting servlet un-registration: HTTP service has not been initialized since default servlet configuration loader is null.");
+                return;
+            }
+            final ServletQueue servletQueue = servletPool.get(path);
+            if (null == servletQueue) {
+                if (LOG.isWarnEnabled()) {
+                    LOG.warn("Servlet un-registration failed. No servlet is bound to path: " + path);
+                }
+                return;
+            }
+            configLoader.removeConfig(servletQueue.dequeue().getClass().getCanonicalName());
+            servletPool.remove(path);
+        } catch (final URISyntaxException e) {
+            final ServletException se = new ServletException("Servlet path is not a valid URI", e);
+            se.initCause(e);
+            LOG.error("Unregistering servlet failed. Servlet path is not a valid URI: " + id, se);
         }
     }
 
