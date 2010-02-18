@@ -50,10 +50,14 @@
 package com.openexchange.imap.command;
 
 import java.io.InputStream;
+import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.mail.FetchProfile;
@@ -64,6 +68,7 @@ import javax.mail.MessagingException;
 import javax.mail.UIDFolder;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.InternetHeaders;
+import javax.mail.internet.MailDateFormat;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailListField;
@@ -74,6 +79,7 @@ import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
@@ -158,6 +164,185 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
         }
     }
 
+    /**
+     * {@link ExistenceChecker} - A checker to ensure existence of certain field.
+     * 
+     * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+     * @since Open-Xchange v6.16
+     */
+    private interface ExistenceChecker {
+
+        /**
+         * Checks existence of certain field in given mails.
+         * 
+         * @param mailMessages The mails to check
+         */
+        void check(MailMessage... mailMessages);
+
+        /**
+         * Checks existence of certain field in given mails.
+         * 
+         * @param mailMessages The mail to check
+         */
+        void check(Collection<MailMessage> mailMessages);
+    }
+
+    private static final Map<String, ExistenceChecker> CHECKER_MAP;
+
+    static {
+        /*
+         * Static fillers
+         */
+        CHECKER_MAP = new HashMap<String, ExistenceChecker>(8);
+        final InternetAddress empty = null;
+        CHECKER_MAP.put("From", new ExistenceChecker() {
+
+            public void check(final MailMessage... mailMessages) {
+                for (final MailMessage mailMessage : mailMessages) {
+                    if (null != mailMessage && !mailMessage.containsFrom()) {
+                        mailMessage.addFrom(empty);
+                    }
+                }
+            }
+
+            public void check(final Collection<MailMessage> mailMessages) {
+                for (final MailMessage mailMessage : mailMessages) {
+                    if (null != mailMessage && !mailMessage.containsFrom()) {
+                        mailMessage.addFrom(empty);
+                    }
+                }
+            }
+        });
+        CHECKER_MAP.put("To", new ExistenceChecker() {
+
+            public void check(final MailMessage... mailMessages) {
+                for (final MailMessage mailMessage : mailMessages) {
+                    if (null != mailMessage && !mailMessage.containsTo()) {
+                        mailMessage.addTo(empty);
+                    }
+                }
+            }
+
+            public void check(final Collection<MailMessage> mailMessages) {
+                for (final MailMessage mailMessage : mailMessages) {
+                    if (null != mailMessage && !mailMessage.containsTo()) {
+                        mailMessage.addTo(empty);
+                    }
+                }
+            }
+        });
+        CHECKER_MAP.put("Cc", new ExistenceChecker() {
+
+            public void check(final MailMessage... mailMessages) {
+                for (final MailMessage mailMessage : mailMessages) {
+                    if (null != mailMessage && !mailMessage.containsCc()) {
+                        mailMessage.addCc(empty);
+                    }
+                }
+            }
+
+            public void check(final Collection<MailMessage> mailMessages) {
+                for (final MailMessage mailMessage : mailMessages) {
+                    if (null != mailMessage && !mailMessage.containsCc()) {
+                        mailMessage.addCc(empty);
+                    }
+                }
+            }
+        });
+        CHECKER_MAP.put("Bcc", new ExistenceChecker() {
+
+            public void check(final MailMessage... mailMessages) {
+                for (final MailMessage mailMessage : mailMessages) {
+                    if (null != mailMessage && !mailMessage.containsBcc()) {
+                        mailMessage.addBcc(empty);
+                    }
+                }
+            }
+
+            public void check(final Collection<MailMessage> mailMessages) {
+                for (final MailMessage mailMessage : mailMessages) {
+                    if (null != mailMessage && !mailMessage.containsBcc()) {
+                        mailMessage.addBcc(empty);
+                    }
+                }
+            }
+        });
+        CHECKER_MAP.put("Subject", new ExistenceChecker() {
+
+            public void check(final MailMessage... mailMessages) {
+                for (final MailMessage mailMessage : mailMessages) {
+                    if (null != mailMessage && !mailMessage.containsSubject()) {
+                        mailMessage.setSubject(null);
+                    }
+                }
+            }
+
+            public void check(final Collection<MailMessage> mailMessages) {
+                for (final MailMessage mailMessage : mailMessages) {
+                    if (null != mailMessage && !mailMessage.containsSubject()) {
+                        mailMessage.setSubject(null);
+                    }
+                }
+            }
+        });
+        CHECKER_MAP.put("Date", new ExistenceChecker() {
+
+            public void check(final MailMessage... mailMessages) {
+                for (final MailMessage mailMessage : mailMessages) {
+                    if (null != mailMessage && !mailMessage.containsSentDate()) {
+                        mailMessage.setSentDate(null);
+                    }
+                }
+            }
+
+            public void check(final Collection<MailMessage> mailMessages) {
+                for (final MailMessage mailMessage : mailMessages) {
+                    if (null != mailMessage && !mailMessage.containsSentDate()) {
+                        mailMessage.setSentDate(null);
+                    }
+                }
+            }
+        });
+        CHECKER_MAP.put("Disposition-Notification-To", new ExistenceChecker() {
+
+            public void check(final MailMessage... mailMessages) {
+                for (final MailMessage mailMessage : mailMessages) {
+                    if (null != mailMessage && !mailMessage.containsDispositionNotification()) {
+                        mailMessage.setDispositionNotification(null);
+                    }
+                }
+            }
+
+            public void check(final Collection<MailMessage> mailMessages) {
+                for (final MailMessage mailMessage : mailMessages) {
+                    if (null != mailMessage && !mailMessage.containsDispositionNotification()) {
+                        mailMessage.setDispositionNotification(null);
+                    }
+                }
+            }
+        });
+        CHECKER_MAP.put("X-Priority", new ExistenceChecker() {
+
+            public void check(final MailMessage... mailMessages) {
+                for (final MailMessage mailMessage : mailMessages) {
+                    if (null != mailMessage && !mailMessage.containsPriority()) {
+                        mailMessage.setPriority(MailMessage.PRIORITY_NORMAL);
+                    }
+                }
+            }
+
+            public void check(final Collection<MailMessage> mailMessages) {
+                for (final MailMessage mailMessage : mailMessages) {
+                    if (null != mailMessage && !mailMessage.containsPriority()) {
+                        mailMessage.setPriority(MailMessage.PRIORITY_NORMAL);
+                    }
+                }
+            }
+        });
+    }
+
+    private final Collection<ExistenceChecker> checkers;
+
     private final char separator;
 
     private String[] args;
@@ -219,6 +404,23 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
         command = getFetchCommand(isRev1, fp, loadBody);
         set(arr, isSequential, keepOrder);
         fullname = imapFolder.getFullName();
+        checkers = byFetchProfile(fp);
+    }
+
+    private static Collection<ExistenceChecker> byFetchProfile(final FetchProfile fp) {
+        final String[] headerNames = fp.getHeaderNames();
+        if (null == headerNames) {
+            return Collections.emptyList();
+        }
+        final int len = headerNames.length;
+        final List<ExistenceChecker> list = new ArrayList<ExistenceChecker>(len);
+        for (int i = 0; i < len; i++) {
+            final ExistenceChecker o = CHECKER_MAP.get(headerNames[i]);
+            if (null != o) {
+                list.add(o);
+            }
+        }
+        return list;
     }
 
     /**
@@ -373,6 +575,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
         retval = new MailMessage[length];
         index = 0;
         fullname = imapFolder.getFullName();
+        checkers = byFetchProfile(fp);
     }
 
     @Override
@@ -437,6 +640,11 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
             throw new MessagingException(
                 new StringBuilder(32).append("Expected ").append(length).append(" FETCH responses but got ").append(index).append(
                     " from IMAP folder \"").append(imapFolder.getFullName()).append("\" on server \"").append(server).append("\".").toString());
+        }
+        if (!checkers.isEmpty()) {
+            for (final ExistenceChecker ec : checkers) {
+                ec.check(retval);
+            }
         }
         return retval;
     }
@@ -657,7 +865,73 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
      * ++++++++++++++ Item handlers ++++++++++++++
      */
 
+    private interface HeaderHandler {
+
+        void handle(Header hdr, IDMailMessage mailMessage) throws MailException;
+    }
+
     private static final FetchItemHandler HEADER_ITEM_HANDLER = new FetchItemHandler() {
+
+        private final Map<String, HeaderHandler> hh = new HashMap<String, HeaderHandler>() {
+
+            {
+                put(MessageHeaders.HDR_FROM, new HeaderHandler() {
+
+                    public void handle(final Header hdr, final IDMailMessage mailMessage) throws MailException {
+                        mailMessage.addFrom(MIMEMessageConverter.getAddressHeader(hdr.getValue()));
+                    }
+                });
+                put(MessageHeaders.HDR_TO, new HeaderHandler() {
+
+                    public void handle(final Header hdr, final IDMailMessage mailMessage) throws MailException {
+                        mailMessage.addTo(MIMEMessageConverter.getAddressHeader(hdr.getValue()));
+                    }
+                });
+                put(MessageHeaders.HDR_CC, new HeaderHandler() {
+
+                    public void handle(final Header hdr, final IDMailMessage mailMessage) throws MailException {
+                        mailMessage.addCc(MIMEMessageConverter.getAddressHeader(hdr.getValue()));
+                    }
+                });
+                put(MessageHeaders.HDR_BCC, new HeaderHandler() {
+
+                    public void handle(final Header hdr, final IDMailMessage mailMessage) throws MailException {
+                        mailMessage.addBcc(MIMEMessageConverter.getAddressHeader(hdr.getValue()));
+                    }
+                });
+                put(MessageHeaders.HDR_DISP_NOT_TO, new HeaderHandler() {
+
+                    public void handle(final Header hdr, final IDMailMessage mailMessage) throws MailException {
+                        mailMessage.setDispositionNotification(MIMEMessageConverter.getAddressHeader(hdr.getValue())[0]);
+                    }
+                });
+                put(MessageHeaders.HDR_SUBJECT, new HeaderHandler() {
+
+                    public void handle(final Header hdr, final IDMailMessage mailMessage) throws MailException {
+                        mailMessage.setSubject(MIMEMessageUtility.decodeMultiEncodedHeader(hdr.getValue()));
+                    }
+                });
+                put(MessageHeaders.HDR_DATE, new HeaderHandler() {
+
+                    public void handle(final Header hdr, final IDMailMessage mailMessage) throws MailException {
+                        final MailDateFormat mdf = MIMEMessageUtility.getDefaultMailDateFormat();
+                        synchronized (mdf) {
+                            try {
+                                mailMessage.setSentDate(mdf.parse(hdr.getValue()));
+                            } catch (final ParseException e) {
+                                LOG.error(e.getMessage(), e);
+                            }
+                        }
+                    }
+                });
+                put(MessageHeaders.HDR_X_PRIORITY, new HeaderHandler() {
+
+                    public void handle(final Header hdr, final IDMailMessage mailMessage) throws MailException {
+                        mailMessage.setPriority(MIMEMessageConverter.parsePriority(hdr.getValue()));
+                    }
+                });
+            }
+        };
 
         public void handleItem(final Item item, final IDMailMessage msg, final org.apache.commons.logging.Log logger) throws MessagingException, MailException {
             final InternetHeaders h;
@@ -686,7 +960,14 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
             }
             for (final Enumeration<?> e = h.getAllHeaders(); e.hasMoreElements();) {
                 final Header hdr = (Header) e.nextElement();
-                msg.addHeader(hdr.getName(), hdr.getValue());
+                final String name = hdr.getName();
+                {
+                    final HeaderHandler headerHandler = hh.get(name);
+                    if (null != headerHandler) {
+                        headerHandler.handle(hdr, msg);
+                    }
+                }
+                msg.addHeader(name, hdr.getValue());
                 /*-
                  * 
                 final HeaderHandler hdrHandler = hdrHandlers.get(hdr.getName());
