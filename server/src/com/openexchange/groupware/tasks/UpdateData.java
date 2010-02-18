@@ -384,25 +384,25 @@ class UpdateData {
         }
         // Ensure only one folder mapping for one user.
         for (final Iterator<Folder> iter = addedFolder.iterator(); iter.hasNext();) {
-            final Folder added = iter.next();
+            final Folder testFolder = iter.next();
             for (final Folder origFolder : getOrigFolder()) {
-                if (added.getUser() == origFolder.getUser() && !removedFolder.contains(origFolder)) {
+                if (testFolder.getUser() == origFolder.getUser() && !removedFolder.contains(origFolder)) {
                     iter.remove();
                 }
             }
         }
         // Do not use #getUpdatedFolder() here because modifications may be done on added and removed folder.
-        final Set<Folder> updated = new HashSet<Folder>();
-        updated.addAll(getOrigFolder());
-        updated.addAll(addedFolder);
-        updated.removeAll(removedFolder);
+        final Set<Folder> empty = new HashSet<Folder>();
+        empty.addAll(getOrigFolder());
+        empty.addAll(addedFolder);
+        empty.removeAll(removedFolder);
         // Check if updated folders will be empty - last participant has been removed.
-        if (updated.isEmpty()) {
+        if (empty.isEmpty()) {
             // add current user folder mapping
             addedFolder.add(FolderStorage.extractFolderOfUser(getOrigFolder(), getUserId()));
         }
         // Check if delegating user removed himself from the participant list.
-        if (getUserId() == getOrigTask().getCreatedBy() && null == FolderStorage.extractFolderOfUser(updated, getUserId()) && FolderObject.PRIVATE == destType) {
+        if (getUserId() == getOrigTask().getCreatedBy() && null == FolderStorage.extractFolderOfUser(empty, getUserId()) && FolderObject.PRIVATE == destType) {
             Folder delegatorFolder = FolderStorage.extractFolderOfUser(getOrigFolder(), getUserId());
             if (null == delegatorFolder) {
                 delegatorFolder = new Folder(Tools.getUserTaskStandardFolder(ctx, getUserId()), getUserId());
