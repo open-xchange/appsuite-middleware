@@ -135,6 +135,9 @@ public final class TransportLoginHandler implements LoginHandlerService {
             /*
              * Check for elapsed documents inside infostore folder
              */
+            if(!TransportProperties.getInstance().publishedDocumentsExpire()) {
+                return;
+            }
             final InfostoreFacade infostoreFacade = Infostore.FACADE;
             final ServerSession serverSession;
             if (session instanceof ServerSession) {

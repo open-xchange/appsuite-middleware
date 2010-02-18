@@ -286,7 +286,10 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         /*
          * Iterate recipients and split them to internal vs. external recipients
          */
-        final Date elapsedDate = new Date(System.currentTimeMillis() + TransportProperties.getInstance().getPublishedDocumentTimeToLive());
+        Date elapsedDate = null;
+        if(TransportProperties.getInstance().publishedDocumentsExpire()) {
+            elapsedDate = new Date(System.currentTimeMillis() + TransportProperties.getInstance().getPublishedDocumentTimeToLive());
+        }
         final UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class);
         final Map<Locale, ComposedMailMessage> internalMessages = new HashMap<Locale, ComposedMailMessage>(addresses.size());
         ComposedMailMessage externalMessage = null;
@@ -407,9 +410,11 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
             final StringBuilder textBuilder = new StringBuilder(text.length() + 512);
             textBuilder.append(htmlFormat(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_PREFIX))).append("<br />");
             appendLinks(links, textBuilder);
-            textBuilder.append(
-                htmlFormat(PATTERN_DATE.matcher(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_APPENDIX)).replaceFirst(
-                    DateFormat.getDateInstance(DateFormat.LONG, locale).format(elapsedDate)))).append("<br /><br />");
+            if(elapsedDate != null) {
+                textBuilder.append(
+                    htmlFormat(PATTERN_DATE.matcher(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_APPENDIX)).replaceFirst(
+                        DateFormat.getDateInstance(DateFormat.LONG, locale).format(elapsedDate)))).append("<br /><br />");
+            }
             textBuilder.append(text);
             textPart.setText(textBuilder.toString());
             internalVersion.setBodyPart(textPart);
@@ -441,9 +446,11 @@ final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                 final StringBuilder textBuilder = new StringBuilder(text.length() + 512);
                 textBuilder.append(htmlFormat(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_PREFIX))).append("<br />");
                 appendLinks(links, textBuilder);
-                textBuilder.append(
-                    htmlFormat(PATTERN_DATE.matcher(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_APPENDIX)).replaceFirst(
-                        DateFormat.getDateInstance(DateFormat.LONG, locale).format(elapsedDate)))).append("<br /><br />");
+                if(elapsedDate != null) {
+                    textBuilder.append(
+                        htmlFormat(PATTERN_DATE.matcher(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_APPENDIX)).replaceFirst(
+                            DateFormat.getDateInstance(DateFormat.LONG, locale).format(elapsedDate)))).append("<br /><br />");
+                }
                 textBuilder.append(text);
                 textPart.setText(textBuilder.toString());
                 externalVersion.setBodyPart(textPart);

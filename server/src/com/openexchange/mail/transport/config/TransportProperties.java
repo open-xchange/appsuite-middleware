@@ -312,6 +312,13 @@ public final class TransportProperties implements ITransportProperties {
     public long getPublishedDocumentTimeToLive() {
         return publishedDocumentTimeToLive;
     }
+    
+    /**
+     * Determines if published documents should expire.
+     */
+    public boolean publishedDocumentsExpire() {
+        return publishedDocumentTimeToLive > 0;
+    }
 
     /**
      * Gets the locale to use when composing text sent to external recipients.
