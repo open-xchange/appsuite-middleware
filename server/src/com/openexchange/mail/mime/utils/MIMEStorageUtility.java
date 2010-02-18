@@ -374,7 +374,7 @@ public final class MIMEStorageUtility {
                 arr = fields;
             }
         }
-        final FetchProfile retval = new FetchProfile();
+        final FetchProfile fetchProfile = new FetchProfile();
         /*
          * Use a set to avoid duplicate entries
          */
@@ -404,7 +404,7 @@ public final class MIMEStorageUtility {
             /*
              * Add ENVELOPE since set of fields has changed
              */
-            retval.add(FetchProfile.Item.ENVELOPE);
+            fetchProfile.add(FetchProfile.Item.ENVELOPE);
             /*
              * Remove header names covered by ENVELOPE
              */
@@ -445,44 +445,44 @@ public final class MIMEStorageUtility {
              * Iterate fields
              */
             for (final MailField mailField : set) {
-                addFetchItem(retval, mailField);
+                addFetchItem(fetchProfile, mailField);
             }
             /*
              * Iterate header names
              */
             for (final HeaderName headerName : names) {
-                retval.add(headerName.toString());
+                fetchProfile.add(headerName.toString());
             }
         }
-        return retval;
+        return fetchProfile;
     }
 
-    private static final EnumMap<MailField, FetchProfile.Item> field2item;
+    private static final EnumMap<MailField, FetchProfile.Item> FIELD2ITEM;
 
-    private static final EnumMap<MailField, String> field2string;
+    private static final EnumMap<MailField, String> FIELD2STRING;
 
     static {
         /*
          * Item map
          */
-        field2item = new EnumMap<MailField, FetchProfile.Item>(MailField.class);
-        field2item.put(MailField.HEADERS, IMAPFolder.FetchProfileItem.HEADERS);
-        field2item.put(MailField.ID, UIDFolder.FetchProfileItem.UID);
-        field2item.put(MailField.CONTENT_TYPE, FetchProfile.Item.CONTENT_INFO);
-        field2item.put(MailField.SIZE, IMAPFolder.FetchProfileItem.SIZE);
-        field2item.put(MailField.FLAGS, FetchProfile.Item.FLAGS);
+        FIELD2ITEM = new EnumMap<MailField, FetchProfile.Item>(MailField.class);
+        FIELD2ITEM.put(MailField.HEADERS, IMAPFolder.FetchProfileItem.HEADERS);
+        FIELD2ITEM.put(MailField.ID, UIDFolder.FetchProfileItem.UID);
+        FIELD2ITEM.put(MailField.CONTENT_TYPE, FetchProfile.Item.CONTENT_INFO);
+        FIELD2ITEM.put(MailField.SIZE, IMAPFolder.FetchProfileItem.SIZE);
+        FIELD2ITEM.put(MailField.FLAGS, FetchProfile.Item.FLAGS);
         /*
          * String map
          */
-        field2string = new EnumMap<MailField, String>(MailField.class);
-        field2string.put(MailField.FROM, MessageHeaders.HDR_FROM);
-        field2string.put(MailField.TO, MessageHeaders.HDR_TO);
-        field2string.put(MailField.CC, MessageHeaders.HDR_CC);
-        field2string.put(MailField.BCC, MessageHeaders.HDR_BCC);
-        field2string.put(MailField.SUBJECT, MessageHeaders.HDR_SUBJECT);
-        field2string.put(MailField.SENT_DATE, MessageHeaders.HDR_DATE);
-        field2string.put(MailField.DISPOSITION_NOTIFICATION_TO, MessageHeaders.HDR_DISP_NOT_TO);
-        field2string.put(MailField.PRIORITY, MessageHeaders.HDR_X_PRIORITY);
+        FIELD2STRING = new EnumMap<MailField, String>(MailField.class);
+        FIELD2STRING.put(MailField.FROM, MessageHeaders.HDR_FROM);
+        FIELD2STRING.put(MailField.TO, MessageHeaders.HDR_TO);
+        FIELD2STRING.put(MailField.CC, MessageHeaders.HDR_CC);
+        FIELD2STRING.put(MailField.BCC, MessageHeaders.HDR_BCC);
+        FIELD2STRING.put(MailField.SUBJECT, MessageHeaders.HDR_SUBJECT);
+        FIELD2STRING.put(MailField.SENT_DATE, MessageHeaders.HDR_DATE);
+        FIELD2STRING.put(MailField.DISPOSITION_NOTIFICATION_TO, MessageHeaders.HDR_DISP_NOT_TO);
+        FIELD2STRING.put(MailField.PRIORITY, MessageHeaders.HDR_X_PRIORITY);
     }
 
     private static void addFetchItem(final FetchProfile fp, final MailField field) {
@@ -492,12 +492,12 @@ public final class MIMEStorageUtility {
             }
             return;
         }
-        final Item item = field2item.get(field);
+        final Item item = FIELD2ITEM.get(field);
         if (null != item) {
             fp.add(item);
             return;
         }
-        final String string = field2string.get(field);
+        final String string = FIELD2STRING.get(field);
         if (null != string) {
             fp.add(string);
         }
