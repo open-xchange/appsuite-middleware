@@ -220,7 +220,11 @@ public class InMemoryAttachmentBase implements AttachmentBase{
         return deletions.get(ctx);
     }
 
-    public Date getNewestCreationDate(int attachedId, int moduleId, Context ctx) {
+    public Date getNewestCreationDate(Context ctx, int moduleId, int attachedId) {
+        throw new UnsupportedOperationException();
+    }
+
+    public Map<Integer, Date> getNewestCreationDates(Context ctx, int moduleId, int[] attachedIds) {
         throw new UnsupportedOperationException();
     }
 }
