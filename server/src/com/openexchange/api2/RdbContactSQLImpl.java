@@ -999,14 +999,17 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
 
     @OXThrowsMultiple(category = {
         Category.CODE_ERROR, Category.CONCURRENT_MODIFICATION, Category.CODE_ERROR, Category.PERMISSION, Category.PERMISSION, Category.SOCKET_CONNECTION,
-        Category.CODE_ERROR, Category.SOCKET_CONNECTION, Category.PERMISSION, Category.CODE_ERROR }, desc = {
-        "39", "40", "41", "42", "58", "43", "44", "45", "46", "56" }, exceptionId = { 39, 40, 41, 42, 58, 43, 44, 45, 46, 56 }, msg = {
+        Category.CODE_ERROR, Category.SOCKET_CONNECTION, Category.PERMISSION, Category.CODE_ERROR, Category.PERMISSION }, desc = {
+        "39", "40", "41", "42", "58", "43", "44", "45", "46", "56", "60" }, exceptionId = { 39, 40, 41, 42, 58, 43, 44, 45, 46, 56, 60 }, msg = {
         "Unable to delete this contact. Object not found. Context %1$d Folder %2$d User %3$d Object %4$d",
         ContactException.OBJECT_HAS_CHANGED_MSG + " Context %1$d Folder %2$d User %3$d Object %4$d",
         ContactException.NON_CONTACT_FOLDER_MSG, ContactException.NO_DELETE_PERMISSION_MSG, ContactException.NO_DELETE_PERMISSION_MSG,
         ContactException.INIT_CONNECTION_FROM_DBPOOL, "Unable to delete contact object. Context %1$d Folder %2$d User %3$d Object %4$d",
-        ContactException.INIT_CONNECTION_FROM_DBPOOL, ContactException.NO_DELETE_PERMISSION_MSG, ContactException.EVENT_QUEUE })
+        ContactException.INIT_CONNECTION_FROM_DBPOOL, ContactException.NO_DELETE_PERMISSION_MSG, ContactException.EVENT_QUEUE, "User contacts can not be deleted." })
     public void deleteContactObject(final int oid, final int fuid, final Date client_date) throws OXObjectNotFoundException, OXConflictException, OXException {
+        if (FolderObject.SYSTEM_LDAP_FOLDER_ID == fuid) {
+            throw EXCEPTIONS.createOXPermissionException(60);
+        }
         Connection writecon = null;
         Connection readcon = null;
         EffectivePermission oclPerm = null;
@@ -1017,18 +1020,16 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
         try {
             readcon = DBPool.pickup(ctx);
 
-            int fid = 0;
             boolean pflag = false;
             Date changing_date = null;
             final ContactSql cs = new ContactMySql(session, ctx);
             smt = readcon.createStatement();
             rs = smt.executeQuery(cs.iFdeleteContactObject(oid, ctx.getContextId()));
             if (rs.next()) {
-                fid = rs.getInt(1);
                 created_from = rs.getInt(2);
 
                 co.setCreatedBy(created_from);
-                co.setParentFolderID(fid);
+                co.setParentFolderID(fuid);
                 co.setObjectID(oid);
 
                 final long xx = rs.getLong(3);
@@ -1038,100 +1039,38 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
                     pflag = true;
                 }
             } else {
-                throw EXCEPTIONS.createOXObjectNotFoundException(
-                    39,
-                    I(ctx.getContextId()),
-                    I(fuid),
-                    I(userId),
-                    I(oid));
-                // throw new OXObjectNotFoundException();
+                throw EXCEPTIONS.createOXObjectNotFoundException(39, I(ctx.getContextId()), I(fuid), I(userId), I(oid));
             }
 
-            // try{
             if ((client_date != null && client_date.getTime() >= 0) && (client_date.before(changing_date))) {
-                throw EXCEPTIONS.createOXConcurrentModificationException(
-                    40,
-                    I(ctx.getContextId()),
-                    I(fuid),
-                    I(userId),
-                    I(oid));
-                // throw new
-                // OXConflictException("CONTACT HAS CHANGED ON SERVER SIDE SINCE THE LAST VISIT (cid="+sessionobject.getContext().getContextId()+" fid="+fuid+" oid="+oid+')');
+                throw EXCEPTIONS.createOXConcurrentModificationException(40, I(ctx.getContextId()), I(fuid), I(userId), I(oid));
             }
-            /*
-             * } catch (Exception np3){ LOG.error("UNABLE TO PERFORM CONTACT DELETE LAST-MODIFY-TEST", np3); }
-             */
             final OXFolderAccess folderAccess = new OXFolderAccess(readcon, ctx);
-            final FolderObject contactFolder = folderAccess.getFolderObject(fid);
+            final FolderObject contactFolder = folderAccess.getFolderObject(fuid);
             if (contactFolder.getModule() != FolderObject.CONTACT) {
-                throw EXCEPTIONS.createOXConflictException(
-                    41,
-                    I(fuid),
-                    I(ctx.getContextId()),
-                    I(userId));
-                // throw new
-                // OXException("deleteContactObject called with a non-Contact-Folder! (cid="+sessionobject.getContext().getContextId()+" fid="+fid+" oid="+oid+')');
+                throw EXCEPTIONS.createOXConflictException(41, I(fuid), I(ctx.getContextId()), I(userId));
             }
-
             if ((contactFolder.getType() != FolderObject.PRIVATE) && pflag) {
                 LOG.debug(new StringBuilder("Here is a contact in a non PRIVATE folder with a set private flag -> (cid=").append(
-                    ctx.getContextId()).append(" fid=").append(fid).append(" oid=").append(oid).append(')'));
+                    ctx.getContextId()).append(" fid=").append(fuid).append(" oid=").append(oid).append(')'));
             } else if ((contactFolder.getType() == FolderObject.PRIVATE) && pflag && created_from != userId) {
-                throw EXCEPTIONS.createOXPermissionException(
-                    42,
-                    I(fuid),
-                    I(ctx.getContextId()),
-                    I(userId));
-                // throw new
-                // OXConflictException("NOT ALLOWED TO DELETE FOLDER OBJECTS CONTACT CUZ IT IS PRIVATE (cid="+sessionobject.getContext().getContextId()+" fid="+fid+" oid="+oid+')');
+                throw EXCEPTIONS.createOXPermissionException(42, I(fuid), I(ctx.getContextId()), I(userId));
             }
 
-            oclPerm = folderAccess.getFolderPermission(fid, userId, userConfiguration);
+            oclPerm = folderAccess.getFolderPermission(fuid, userId, userConfiguration);
             if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
-                throw EXCEPTIONS.createOXPermissionException(
-                    58,
-                    I(fuid),
-                    I(ctx.getContextId()),
-                    I(userId));
-                // throw new
-                // OXConflictException("NOT ALLOWED TO DELETE FOLDER OBJECTS (cid="+sessionobject.getContext().getContextId()+" fid="+fid+" oid="+oid+')');
+                throw EXCEPTIONS.createOXPermissionException(58, I(fuid), I(ctx.getContextId()), I(userId));
             }
         } catch (final DBPoolingException xe) {
             throw EXCEPTIONS.create(43, xe);
-            // throw new
-            // OXConflictException("NOT ALLOWED TO DELETE FOLDER OBJECT (cid="+sessionobject.getContext().getContextId()+" fid="+fuid+" oid="+oid+')',
-            // xe);
         } catch (final OXObjectNotFoundException xe) {
             throw xe;
-            // throw new
-            // OXObjectNotFoundException("NOT ALLOWED TO DELETE FOLDER OBJECTS CUZ NO OBJECT FOUND (cid="+sessionobject.getContext().getContextId()+" fid="+fuid+" oid="+oid+')',xe);
         } catch (final SQLException e) {
-            throw EXCEPTIONS.create(
-                44,
-                e,
-                I(ctx.getContextId()),
-                I(fuid),
-                I(userId),
-                I(oid));
-            // throw new
-            // OXConflictException("NOT ALLOWED TO DELETE FOLDER OBJECT (cid="+sessionobject.getContext().getContextId()+" fid="+fuid+" oid="+oid+')',
-            // e);
+            throw EXCEPTIONS.create(44, e, I(ctx.getContextId()), I(fuid), I(userId), I(oid));
         } catch (final OXException e) {
             throw e;
-            // throw new
-            // OXConflictException("NOT ALLOWED TO DELETE FOLDER OBJECT (cid="+sessionobject.getContext().getContextId()+" fid="+fuid+" oid="+oid+')',
-            // e);
         } finally {
-            try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (smt != null) {
-                    smt.close();
-                }
-            } catch (final SQLException sxe) {
-                LOG.error("Unable to close Statement or ResultSet", sxe);
-            }
+            DBUtils.closeSQLStuff(rs, smt);
             try {
                 if (readcon != null) {
                     DBPool.closeReaderSilent(ctx, readcon);
@@ -1152,11 +1091,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
                 Contacts.deleteContact(oid, ctx.getContextId(), writecon);
             } else {
                 if ((deletePermission < OCLPermission.DELETE_OWN_OBJECTS) || created_from != userId) {
-                    throw EXCEPTIONS.createOXConflictException(
-                        46,
-                        I(fuid),
-                        I(ctx.getContextId()),
-                        I(userId));
+                    throw EXCEPTIONS.createOXConflictException(46, I(fuid), I(ctx.getContextId()), I(userId));
                 }
                 /*
                  * May delete own contact
@@ -1173,9 +1108,6 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
             throw EXCEPTIONS.create(45, xe);
         } catch (final OXException e) {
             throw e;
-            // throw new
-            // OXConflictException("NOT ALLOWED TO DELETE FOLDER OBJECT (cid="+sessionobject.getContext().getContextId()+" fid="+fuid+" oid="+oid+')',
-            // e);
         } finally {
             if (writecon != null) {
                 DBPool.closeWriterSilent(ctx, writecon);

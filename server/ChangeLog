@@ -1,6 +1,7 @@
 * 2010-02-19 - marcus.klein@open-xchange.com
 
  - Bugfix #15225: Optimized tables and update tasks for push malpoll component.
+ - Bugfix #15317: Denying delete of user contacts even if folder permission permits that.
 
 * 2010-02-19 - martin.herfurth@open-xchange.com
 
