@@ -65,27 +65,17 @@ public class GetParser extends AbstractAJAXParser<GetResponse> {
 
     private final int userId;
 
-    /**
-     * Default constructor.
-     * @param userId 
-     */
-    public GetParser(boolean failOnError, int userId, TimeZone timeZone) {
+    GetParser(boolean failOnError, int userId, TimeZone timeZone) {
         super(failOnError);
         this.userId = userId;
         this.timeZone = timeZone;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    protected GetResponse createResponse(final Response response) throws JSONException {
+    protected GetResponse createResponse(final Response response) {
         return new GetResponse(response);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public GetResponse parse(final String body) throws JSONException {
         final GetResponse retval = super.parse(body);

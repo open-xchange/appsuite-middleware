@@ -50,7 +50,6 @@
 package com.openexchange.ajax.user.actions;
 
 import java.util.TimeZone;
-import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 
 /**
@@ -60,53 +59,27 @@ import com.openexchange.ajax.AJAXServlet;
  */
 public class GetRequest extends AbstractUserRequest<GetResponse> {
 
-    /**
-     * Unique identifier of the user.
-     */
     private final int userId;
-
-    /**
-     * Needed for correcting time stamps from JSON.
-     */
     private final TimeZone timeZone;
 
-    /**
-     * Default constructor.
-     * 
-     * @param userId The unique identifier of the user.
-     * @param timeZone The time zone
-     */
     public GetRequest(int userId, TimeZone timeZone) {
         super();
         this.userId = userId;
         this.timeZone = timeZone;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public Object getBody() throws JSONException {
+    public Object getBody() {
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Method getMethod() {
         return Method.GET;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, "get"), new Parameter(AJAXServlet.PARAMETER_ID, userId) };
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, "get"), new Parameter(AJAXServlet.PARAMETER_ID, userId) };
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public GetParser getParser() {
         return new GetParser(true, userId, timeZone);
     }
