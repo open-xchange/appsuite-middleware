@@ -2607,7 +2607,7 @@ public class Folder extends SessionServlet {
                         accountId,
                         rootFolder,
                         displayName,
-                        1,
+                        -1,
                         fqn,
                         FolderObject.MESSAGING,
                         false);
