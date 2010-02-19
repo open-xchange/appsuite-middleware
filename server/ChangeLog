@@ -1,3 +1,7 @@
+* 2010-02-19 - martin.herfurth@open-xchange.com
+
+ - Bugfix #15420: Confirm status for creator.
+
 * 2010-02-18 - thorben.betten@open-xchange.com
 
  - Bugfix #15380: Using faster URL detection throughout mail module

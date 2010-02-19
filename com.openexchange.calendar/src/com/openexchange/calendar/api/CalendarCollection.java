@@ -1850,7 +1850,11 @@ public final class CalendarCollection implements CalendarCollectionService {
         if (cdao.getParticipants() != null) {
             for (Participant p : cdao.getParticipants()) {
                 if (p.getType() == Participant.USER && p.getIdentifier() == up.getIdentifier()) {
-                    up = (UserParticipant) p;
+                    UserParticipant userFromParticipant = (UserParticipant) p;
+                    if (userFromParticipant.containsConfirm())
+                        up.setConfirm(userFromParticipant.getConfirm());
+                    if (userFromParticipant.containsConfirmMessage())
+                        up.setConfirmMessage(userFromParticipant.getConfirmMessage());
                 }
             }
         }
