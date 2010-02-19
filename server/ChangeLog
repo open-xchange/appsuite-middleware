@@ -1,3 +1,7 @@
+* 2010-02-19 - marcus.klein@open-xchange.com
+
+ - Bugfix #15225: Optimized tables and update tasks for push malpoll component.
+
 * 2010-02-19 - martin.herfurth@open-xchange.com
 
  - Bugfix #15420: Confirm status for creator.

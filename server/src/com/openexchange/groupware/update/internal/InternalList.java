@@ -297,9 +297,6 @@ public final class InternalList {
         // Version 100
         // Adds necessary indexes to improve shared folder search for a user
         new com.openexchange.groupware.update.tasks.FolderAddIndex4SharedFolderSearch(),
-        // Version 102
-        // Adds necessary tables to support MAL-based poll
-        new com.openexchange.groupware.update.tasks.MALPollCreateTableTask(),
 
         // +++++++++++++++++++++++++++++++++ Version 6.16 starts here. +++++++++++++++++++++++++++++++++
 
@@ -319,9 +316,6 @@ public final class InternalList {
 
         // Creates necessary tables for mail header cache
         new com.openexchange.groupware.update.tasks.HeaderCacheCreateTableTask(),
-
-        // Modifies tables needed for MAL Poll
-        new com.openexchange.groupware.update.tasks.MALPollModifyTableTask(),
 
         // Extends the calendar tables and create table to store the confirmation data for external participants.
         new com.openexchange.groupware.update.tasks.ExtendCalendarForIMIPHandlingTask()

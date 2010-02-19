@@ -58,18 +58,22 @@ import java.util.concurrent.Executor;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
 import com.openexchange.push.PushException;
 import com.openexchange.push.PushManagerService;
+import com.openexchange.push.malpoll.MALPollCreateTableTask;
 import com.openexchange.push.malpoll.MALPollDeleteListener;
 import com.openexchange.push.malpoll.MALPollMailAccountDeleteListener;
 import com.openexchange.push.malpoll.MALPollPushListener;
 import com.openexchange.push.malpoll.MALPollPushListenerRegistry;
 import com.openexchange.push.malpoll.MALPollPushListenerRunnable;
 import com.openexchange.push.malpoll.MALPollPushManagerService;
+import com.openexchange.push.malpoll.UpdateTaskPublisher;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
@@ -205,6 +209,8 @@ public final class MALPollActivator extends DeferredActivator {
              * Register push manager
              */
             serviceRegistrations = new ArrayList<ServiceRegistration>(4);
+            serviceRegistrations.add(context.registerService(CreateTableService.class.getName(), new MALPollCreateTableTask(), null));
+            serviceRegistrations.add(context.registerService(UpdateTaskProviderService.class.getName(), new UpdateTaskPublisher(), null));
             serviceRegistrations.add(context.registerService(PushManagerService.class.getName(), new MALPollPushManagerService(), null));
             serviceRegistrations.add(context.registerService(
                 MailAccountDeleteListener.class.getName(),

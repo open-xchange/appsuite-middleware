@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.groupware.update.tasks;
+package com.openexchange.push.malpoll;
 
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;

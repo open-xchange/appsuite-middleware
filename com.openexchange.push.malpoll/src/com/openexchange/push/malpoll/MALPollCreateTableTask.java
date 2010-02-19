@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.groupware.update.tasks;
+package com.openexchange.push.malpoll;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
@@ -88,22 +88,23 @@ public final class MALPollCreateTableTask extends AbstractCreateTableImpl implem
 
     private static String getCreateHashTable() {
         return "CREATE TABLE malPollHash (" + 
-        " cid INT4 unsigned NOT NULL," + 
-        " user INT4 unsigned NOT NULL," + 
-        " id INT4 unsigned NOT NULL," + 
+        " cid INT4 UNSIGNED NOT NULL," + 
+        " user INT4 UNSIGNED NOT NULL," + 
+        " id INT4 UNSIGNED NOT NULL," + 
         " fullname VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
-        " hash VARCHAR(33) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
-        " PRIMARY KEY (cid, user, id, fullname)," + 
-        " FOREIGN KEY (cid, user) REFERENCES user (cid, id)," + 
-        " FOREIGN KEY (cid, user, id) REFERENCES user_mail_account (cid, user, id)" + 
+        " hash BINARY(16) NOT NULL," + 
+        " PRIMARY KEY (cid,user,id,fullname)," +
+        " FOREIGN KEY (cid,user) REFERENCES user(cid,id)," + 
+        " FOREIGN KEY (cid,user,id) REFERENCES user_mail_account(cid,user,id)" + 
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
     }
 
     private static final String getCreateUIDsTable() {
-        return "CREATE TABLE malPollUid (" + 
-        " hash VARCHAR(33) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
+        return "CREATE TABLE malPollUid (" +
+        " cid INT4 UNSIGNED NOT NULL," +
+        " hash BINARY(16) NOT NULL," +
         " uid VARCHAR(70) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
-        " PRIMARY KEY (hash, uid(64))" + 
+        " PRIMARY KEY (cid,hash,uid(32))," +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
     }
 

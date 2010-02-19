@@ -126,7 +126,6 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.osgi.WhiteboardDBProvider;
-import com.openexchange.groupware.update.tasks.MALPollCreateTableTask;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.image.ImageService;
 import com.openexchange.login.LoginHandlerService;
@@ -502,7 +501,6 @@ public final class ServerActivator extends DeferredActivator {
         registrationList.add(context.registerService(LoginHandlerService.class.getName(), new TransportLoginHandler(), null));
         // Register table creation for mail account storage.
         registrationList.add(context.registerService(CreateTableService.class.getName(), new CreateMailAccountTables(), null));
-        registrationList.add(context.registerService(CreateTableService.class.getName(), new MALPollCreateTableTask(), null));
         // TODO: Register server's mail account storage here until its encapsulated in an own bundle
         registrationList.add(context.registerService(
             MailAccountStorageService.class.getName(),
