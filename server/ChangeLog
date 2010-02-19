@@ -1,6 +1,7 @@
 * 2010-02-19 - martin.herfurth@open-xchange.com
 
  - Bugfix #15420: Confirm status for creator.
+ - Bugfix #15419: Allow null value for contact collect folder.
 
 * 2010-02-18 - thorben.betten@open-xchange.com
 

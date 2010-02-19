@@ -93,11 +93,14 @@ public class ContactCollectFolder implements PreferencesItemService {
             }
 
             public void writeValue(final Session session, final Context ctx, final User user, final Setting setting) throws SettingException {
-                final Integer value;
+                Integer value;
                 try {
-                    value = new Integer(String.valueOf(setting.getSingleValue()));
+                    if (setting.getSingleValue() == null)
+                        value = null;
+                    else
+                        value = new Integer(String.valueOf(setting.getSingleValue()));
                 } catch (final NumberFormatException e) {
-                    throw new SettingException(Code.INVALID_VALUE, e, setting.getSingleValue() == null ? "null" : setting.getSingleValue().toString(), "contactCollectFolder");
+                    throw new SettingException(Code.INVALID_VALUE, e, setting.getSingleValue(), "contactCollectFolder");
                 }
                 ServerUserSetting.getDefaultInstance().setIContactCollectionFolder(ctx.getContextId(), user.getId(), value);
             }
