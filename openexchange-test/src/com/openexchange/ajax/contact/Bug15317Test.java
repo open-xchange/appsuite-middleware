@@ -49,26 +49,46 @@
 
 package com.openexchange.ajax.contact;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.TimeZone;
+import com.openexchange.ajax.config.actions.Tree;
+import com.openexchange.ajax.contact.action.DeleteRequest;
+import com.openexchange.ajax.contact.action.GetRequest;
+import com.openexchange.ajax.contact.action.GetResponse;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.CommonDeleteResponse;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.FolderObject;
 
-public final class ContactBugTestSuite extends TestSuite {
 
-    /**
-     * Prevent instantiation.
-     */
-    private ContactBugTestSuite() {
-        super();
+/**
+ * {@link Bug15317Test}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
+public class Bug15317Test extends AbstractAJAXSession {
+
+    private AJAXClient client;
+    private TimeZone tz;
+    private Contact userContact;
+    private int contactId;
+
+    public Bug15317Test(String name) {
+        super(name);
     }
 
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(Bug4409Test.class);
-        tests.addTestSuite(Bug6335Test.class);
-        tests.addTestSuite(Bug12716Test.class);
-        tests.addTestSuite(Bug13931Test.class);
-        tests.addTestSuite(Bug15317Test.class);
-        tests.addTestSuite(Bug15315Test.class);
-        return tests;
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        client = getClient();
+        tz = client.getValues().getTimeZone();
+        contactId = client.execute(new com.openexchange.ajax.config.actions.GetRequest(Tree.ContactID)).getInteger();
+        GetResponse response = client.execute(new GetRequest(FolderObject.SYSTEM_LDAP_FOLDER_ID, contactId, tz));
+        userContact = response.getContact();
+    }
+
+    public void testDeleteUserContact() throws Throwable {
+        CommonDeleteResponse response = client.execute(new DeleteRequest(userContact, false));
+        assertTrue("Delete was not denied.", response.hasError());
     }
 }
