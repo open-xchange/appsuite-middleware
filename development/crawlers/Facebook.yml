@@ -2,19 +2,19 @@
 crawlerApiVersion: 616
 displayName: Facebook
 id: com.openexchange.subscribe.crawler.facebook
-priority: 5
+priority: 6
 workflowString: |
   --- !com.openexchange.subscribe.crawler.Workflow
   steps: 
     - !com.openexchange.subscribe.crawler.LoginPageByFormActionRegexStep
-      actionOfLoginForm: "/login\\.php.*"
+      actionOfLoginForm: ".*login.*"
       baseUrl: "http://m.facebook.com"
       description: Login to facebook.com
-      linkAvailableAfterLogin: "(\\/friends.*)"
+      linkAvailableAfterLogin: "(.*friends.*)"
       nameOfPasswordField: pass
       nameOfUserField: email
       numberOfForm: 1
-      pageTitleAfterLogin: "(\\/friends.*)"
+      pageTitleAfterLogin: "(.*friends.*)"
       password: ""
       url: "http://m.facebook.com/"
       username: ""
