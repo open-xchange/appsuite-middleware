@@ -164,7 +164,7 @@ public final class FacebookSessionRegistry {
     }
 
     /**
-     * Purges specified user's facebook sessions.
+     * Purges specified user's facebook session.
      * 
      * @param contextId The context identifier
      * @param userId The user identifier
