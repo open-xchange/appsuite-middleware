@@ -98,7 +98,7 @@ public class CacheingMessageAccess implements MessagingMessageAccess {
 
     public List<MessagingMessage> getAllMessages(String folder, IndexRange indexRange, MessagingField sortField, OrderDirection order, MessagingField... fields) throws MessagingException {
         clear(folder);
-        return remember(delegate.getAllMessages(folder, indexRange, sortField, order, fields));
+        return delegate.getAllMessages(folder, indexRange, sortField, order, fields);
     }
 
     public MessagingMessage getMessage(String folder, String id, boolean peek) throws MessagingException {
@@ -127,7 +127,7 @@ public class CacheingMessageAccess implements MessagingMessageAccess {
             List<MessagingMessage> messages = delegate.getMessages(folder, idsToLoad.toArray(new String[idsToLoad.size()]), fields);
             remember(messages);
             if(allMessages.isEmpty()) {
-                return messages;
+                return remember(messages);
             }
             for (MessagingMessage messagingMessage : messages) {
                 allMessages.put(messagingMessage.getId(), messagingMessage);
@@ -140,7 +140,7 @@ public class CacheingMessageAccess implements MessagingMessageAccess {
             messages.add(allMessages.get(id));
         }
         
-        return messages;
+        return remember(messages);
     }
 
     private List<MessagingMessage> remember(List<MessagingMessage> messages) throws MessagingException {
