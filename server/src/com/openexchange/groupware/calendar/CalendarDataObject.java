@@ -81,6 +81,7 @@ public class CalendarDataObject extends Appointment {
     private boolean fill_user_participants;
     private boolean fill_folder_id;
     private boolean fillConfirmations;
+    private boolean fillLastModifiedOfNewestAttachment;
 
     @Override
     public final void setUntil(final Date until) {
@@ -329,6 +330,14 @@ public class CalendarDataObject extends Appointment {
 
      public boolean fillFolderID() {
         return fill_folder_id;
+    }
+
+    public boolean isFillLastModifiedOfNewestAttachment() {
+        return fillLastModifiedOfNewestAttachment;
+    }
+
+    public void setFillLastModifiedOfNewestAttachment(boolean fillLastModifiedOfNewestAttachment) {
+        this.fillLastModifiedOfNewestAttachment = fillLastModifiedOfNewestAttachment;
     }
 
     @Override

@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.attach.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -1154,13 +1155,17 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         }
     }
 
+    public Date getNewestCreationDate(Context ctx, int moduleId, int attachedId) throws AttachmentException {
+        return getNewestCreationDates(ctx, moduleId, new int[] { attachedId }).get(I(attachedId));
+    }
+
     @OXThrowsMultiple(
         category = { Category.CODE_ERROR },
         desc = { "" },
         exceptionId = { 19 },
         msg = { "SQL Problem: %1$s" }
     )
-    public Date getNewestCreationDate(int attachedId, int moduleId, Context ctx) throws AttachmentException {
+    public Map<Integer, Date> getNewestCreationDates(Context ctx, int moduleId, int[] attachedIds) throws AttachmentException {
         final Connection con;
         try {
             con = getReadConnection(ctx);
@@ -1169,18 +1174,18 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         }
         PreparedStatement stmt = null;
         ResultSet result = null;
-        final Date retval;
+        Map<Integer, Date> retval = new HashMap<Integer, Date>();
         try {
-            stmt = con.prepareStatement(QUERIES.getSelectNewestCreationDate());
+            stmt = con.prepareStatement(DBUtils.getIN(QUERIES.getSelectNewestCreationDate(), attachedIds.length) + " GROUP BY attached");
             int pos = 1;
             stmt.setInt(pos++, ctx.getContextId());
-            stmt.setInt(pos++, attachedId);
             stmt.setInt(pos++, moduleId);
+            for (int attachedId : attachedIds) {
+                stmt.setInt(pos++, attachedId);
+            }
             result = stmt.executeQuery();
-            if (result.next()) {
-                retval = new Date(result.getLong(1));
-            } else {
-                retval = null;
+            while (result.next()) {
+                retval.put(I(result.getInt(1)), new Date(result.getLong(2)));
             }
         } catch (SQLException e) {
             throw EXCEPTIONS.create(19, e, e.getMessage());

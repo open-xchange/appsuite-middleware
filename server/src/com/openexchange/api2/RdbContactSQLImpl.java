@@ -702,7 +702,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
             if (!performSecurityReadCheck(fid, co.getCreatedBy(), userId, memberInGroups, session, con, ctx)) {
                 throw EXCEPTIONS.createOXConflictException(28, I(fid), I(ctx.getContextId()), I(userId));
             }
-            final Date creationDate = Attachments.getInstance(new SimpleDBProvider(con, null)).getNewestCreationDate(objectId, Types.CONTACT, ctx);
+            final Date creationDate = Attachments.getInstance(new SimpleDBProvider(con, null)).getNewestCreationDate(ctx, Types.CONTACT, objectId);
             if (null != creationDate) {
                 co.setLastModifiedOfNewestAttachment(creationDate);
             }
@@ -1372,7 +1372,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
                 }
             }
             if (Arrays.contains(cols, Contact.LAST_MODIFIED_OF_NEWEST_ATTACHMENT)) {
-                final Date creationDate = Attachments.getInstance(new SimpleDBProvider(con, null)).getNewestCreationDate(co.getObjectID(), Types.CONTACT, ctx);
+                final Date creationDate = Attachments.getInstance(new SimpleDBProvider(con, null)).getNewestCreationDate(ctx, Types.CONTACT, co.getObjectID());
                 if (null != creationDate) {
                     co.setLastModifiedOfNewestAttachment(creationDate);
                 }

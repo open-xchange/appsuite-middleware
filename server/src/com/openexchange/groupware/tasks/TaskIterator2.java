@@ -307,10 +307,15 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
     }
 
     private void addLastModifiedOfNewestAttachment(List<Task> tasks) throws SearchIteratorException {
+        final int[] ids = new int[tasks.size()];
+        for (int i = 0; i < tasks.size(); i++) {
+            ids[i] = tasks.get(i).getObjectID();
+        }
         AttachmentBase attachmentBase = Attachments.getInstance();
         try {
+            Map<Integer, Date> dates = attachmentBase.getNewestCreationDates(ctx, Types.TASK, ids);
             for (Task task : tasks) {
-                Date newestCreationDate = attachmentBase.getNewestCreationDate(task.getObjectID(), Types.TASK, ctx);
+                Date newestCreationDate = dates.get(I(task.getObjectID()));
                 if (null != newestCreationDate) {
                     task.setLastModifiedOfNewestAttachment(newestCreationDate);
                 }
@@ -319,10 +324,7 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
             throw new SearchIteratorException(e);
         }
     }
-    
-    /**
-     * {@inheritDoc}
-     */
+
     public int size() {
         throw new UnsupportedOperationException("Method not implemented");
     }

@@ -51,6 +51,7 @@ package com.openexchange.groupware.attach;
 
 import java.io.InputStream;
 import java.util.Date;
+import java.util.Map;
 import java.util.SortedSet;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -139,5 +140,7 @@ public interface AttachmentBase extends Service {
      * @return the last modified date of the newest attachment or <code>null</code> if no attachments exist.
      * @throws AttachmentException if some problem occurs.
      */
-    public abstract Date getNewestCreationDate(int attachedId, int moduleId, Context ctx) throws AttachmentException;
+    public abstract Date getNewestCreationDate(Context ctx, int moduleId, int attachedId) throws AttachmentException;
+
+    public abstract Map<Integer, Date> getNewestCreationDates(Context ctx, int moduleId, int[] attachedIds) throws AttachmentException;
 }

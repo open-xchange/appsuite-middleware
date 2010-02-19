@@ -750,6 +750,12 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                                     g++;
                                 }
                             }
+                        } else if (Appointment.LAST_MODIFIED_OF_NEWEST_ATTACHMENT == cols[a]) {
+                            if (CachedCalendarIterator.CACHED_ITERATOR_FAST_FETCH) {
+                                cdao.setFillLastModifiedOfNewestAttachment(true);
+                            } else {
+                                setAttachmentLastModified(readcon, c, cdao);
+                            }
                         } else {
                             throw new SearchIteratorException(
                                 SearchIteratorException.SearchIteratorCode.NOT_IMPLEMENTED,
@@ -759,8 +765,6 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                     } else {
                         ff.fillField(cdao, g++, co_rs);
                     }
-                    
-                    setAttachmentLastModified(readcon, c, cdao);
                 }
             } catch(final SQLException sqle) {
                 throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
@@ -1490,7 +1494,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         AttachmentBase attachmentBase = Attachments.getInstance(new SimpleDBProvider(myCon, null));
         Date date = null;
         try {
-            date = attachmentBase.getNewestCreationDate(cdao.getObjectID(), Types.APPOINTMENT, ctx);
+            date = attachmentBase.getNewestCreationDate(ctx, Types.APPOINTMENT, cdao.getObjectID());
         } catch (AttachmentException e) {
             LOG.error(e.getMessage(), e);
         }

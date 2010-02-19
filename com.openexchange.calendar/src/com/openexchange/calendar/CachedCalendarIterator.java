@@ -54,8 +54,11 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
 import com.openexchange.calendar.storage.ParticipantStorage;
@@ -63,13 +66,17 @@ import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.Types;
+import com.openexchange.groupware.attach.AttachmentBase;
+import com.openexchange.groupware.attach.AttachmentException;
+import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.calendar.CalendarConfig;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.OXCalendarException;
-import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.tx.SimpleDBProvider;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -81,6 +88,8 @@ import com.openexchange.tools.iterator.SearchIteratorException;
  */
 
 public class CachedCalendarIterator implements SearchIterator<CalendarDataObject> {
+
+    private static final Log LOG = LogFactory.getLog(CachedCalendarIterator.class);
 
 	private final List<AbstractOXException> warnings;
     private final List<CalendarDataObject> list;
@@ -250,6 +259,9 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
 			    if (cdao.fillConfirmations()) {
 			        ParticipantStorage.getInstance().selectExternal(c, readcon, list, arr);
 			    }
+			    if (cdao.isFillLastModifiedOfNewestAttachment()) {
+			        setAttachmentLastModified(c, readcon, list, arr);
+			    }
 			}
 
             if (cdao.fillFolderID()) {
@@ -278,5 +290,22 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
             close();
         }
         return cdao;
+    }
+
+    private static void setAttachmentLastModified(Context ctx, Connection readcon, List<CalendarDataObject> list, int[] arr) {
+        AttachmentBase attachmentBase = Attachments.getInstance(new SimpleDBProvider(readcon, null));
+        final Map<Integer, Date> dates;
+        try {
+            dates = attachmentBase.getNewestCreationDates(ctx, Types.APPOINTMENT, arr);
+        } catch (AttachmentException e) {
+            LOG.error(e.getMessage(), e);
+            return;
+        }
+        for (CalendarDataObject cdao : list) {
+            Date date = dates.get(I(cdao.getObjectID()));
+            if (null != date) {
+                cdao.setLastModifiedOfNewestAttachment(date);
+            }
+        }
     }
 }

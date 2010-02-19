@@ -281,7 +281,7 @@ public final class GetTask {
         }
         Date lastModifiedOfNewestAttachment = null;
         try {
-            lastModifiedOfNewestAttachment = attachmentBase.getNewestCreationDate(task.getObjectID(), Types.TASK, ctx);
+            lastModifiedOfNewestAttachment = attachmentBase.getNewestCreationDate(ctx, Types.TASK, task.getObjectID());
         } catch (AttachmentException e) {
             LOG.error(e.getMessage(), e);
         }
