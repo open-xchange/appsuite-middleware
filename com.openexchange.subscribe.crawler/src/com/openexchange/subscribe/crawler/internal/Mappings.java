@@ -51,6 +51,7 @@ package com.openexchange.subscribe.crawler.internal;
 
 import java.util.Calendar;
 import java.util.Map;
+import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
@@ -197,20 +198,44 @@ public class Mappings {
             contact.setInstantMessenger2(map.get("instant_messenger2"));
         }
         // handle birthdays
-        if (map.containsKey("birthday_month_string")){
+        if (map.containsKey("birthday_month_string")) {
             String month = map.get("birthday_month_string");
-            if (month.matches("(Januar|January|janvier|enero)")) {map.put("birthday_month", "0");}
-            if (month.matches("(Februar|February|f\u00e9vrier|febrero)")) {map.put("birthday_month", "1");}
-            if (month.matches("(M\u00e4rz|March|mars|marzo)")) {map.put("birthday_month", "2");}
-            if (month.matches("(April|April|avril|abril)")) {map.put("birthday_month", "3");}
-            if (month.matches("(Mai|May|mai|mayo)")) {map.put("birthday_month", "4");}
-            if (month.matches("(Juni|June|juin|junio)")) {map.put("birthday_month", "5");}
-            if (month.matches("(Juli|July|juillet|julio)")) {map.put("birthday_month", "6");}
-            if (month.matches("(August|August|ao\u00fbt|agosto)")) {map.put("birthday_month", "7");}
-            if (month.matches("(September|September|septembre|septiembre)")) {map.put("birthday_month", "8");}
-            if (month.matches("(Oktober|October|octobre|octubre)")) {map.put("birthday_month", "9");}
-            if (month.matches("(November|November|novembre|noviembre)")) {map.put("birthday_month", "10");}
-            if (month.matches("(Dezember|December|d\u00e9cembre|diciembre)")) {map.put("birthday_month", "11");}
+            if (month.matches("(Januar|January|janvier|enero)")) {
+                map.put("birthday_month", "0");
+            }
+            if (month.matches("(Februar|February|f\u00e9vrier|febrero)")) {
+                map.put("birthday_month", "1");
+            }
+            if (month.matches("(M\u00e4rz|March|mars|marzo)")) {
+                map.put("birthday_month", "2");
+            }
+            if (month.matches("(April|April|avril|abril)")) {
+                map.put("birthday_month", "3");
+            }
+            if (month.matches("(Mai|May|mai|mayo)")) {
+                map.put("birthday_month", "4");
+            }
+            if (month.matches("(Juni|June|juin|junio)")) {
+                map.put("birthday_month", "5");
+            }
+            if (month.matches("(Juli|July|juillet|julio)")) {
+                map.put("birthday_month", "6");
+            }
+            if (month.matches("(August|August|ao\u00fbt|agosto)")) {
+                map.put("birthday_month", "7");
+            }
+            if (month.matches("(September|September|septembre|septiembre)")) {
+                map.put("birthday_month", "8");
+            }
+            if (month.matches("(Oktober|October|octobre|octubre)")) {
+                map.put("birthday_month", "9");
+            }
+            if (month.matches("(November|November|novembre|noviembre)")) {
+                map.put("birthday_month", "10");
+            }
+            if (month.matches("(Dezember|December|d\u00e9cembre|diciembre)")) {
+                map.put("birthday_month", "11");
+            }
         }
         Calendar cal = null;
         if (map.containsKey("birthday_day") && map.containsKey("birthday_month")) {
@@ -233,4 +258,37 @@ public class Mappings {
         return contact;
     }
 
+    public static CalendarDataObject translateMapToCalendarDataObject(final Map<String, String> map){
+        
+        CalendarDataObject oxEvent = new CalendarDataObject();
+         
+        if (map.containsKey("title")){
+            oxEvent.setTitle(map.get("title"));
+        }
+        if (map.containsKey("note")){
+            oxEvent.setNote(map.get("note"));
+        }
+        if (map.containsKey("timezone")){
+            oxEvent.setTimezone(map.get("timezone"));
+        }
+        String[] dateTypes = new String[]{"start_date_","end_date_"};
+        Calendar cal = null;
+        for (String dateType : dateTypes){
+            cal = Calendar.getInstance();
+            if (map.containsKey(dateType+"day") && map.containsKey(dateType+"month") && map.containsKey(dateType+"year") && map.containsKey(dateType+"hour") && map.containsKey(dateType+"minute")){
+                int year = Integer.parseInt(map.get("year"));
+                int month = Integer.parseInt(map.get("month"));
+                int date = Integer.parseInt("day");
+                int hour = Integer.parseInt(map.get("hour"));
+                int minute = Integer.parseInt(map.get("minute"));
+                cal.set(year, month, date, hour, minute);
+                if (dateType.equals("start_date_")){
+                    oxEvent.setStartDate(cal.getTime());
+                } else if (dateType.equals("end_date_")){
+                    oxEvent.setEndDate(cal.getTime());
+                }
+            }                     
+        }        
+        return oxEvent;
+    }
 }

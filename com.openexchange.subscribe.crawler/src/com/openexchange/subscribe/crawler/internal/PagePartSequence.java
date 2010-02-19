@@ -50,6 +50,7 @@
 package com.openexchange.subscribe.crawler.internal;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -81,6 +82,27 @@ public class PagePartSequence {
     public HashMap<String, String> retrieveInformation() {
         final HashMap<String, String> retrievedInformation = new HashMap<String, String>();
 
+        extractInformationOnce(retrievedInformation);
+
+        return retrievedInformation;
+    }
+    
+    public Collection<HashMap<String, String>> retrieveMultipleInformation() {
+        HashMap<String, String> retrievedInformation = null;
+        ArrayList<HashMap<String, String>> multiple = new ArrayList<HashMap<String, String>>();
+        
+        final Pattern pattern = Pattern.compile(pageParts.get(1).getRegex());
+        Matcher matcher = pattern.matcher(page);
+        while (matcher.find()){
+            retrievedInformation = new HashMap<String, String>();
+            extractInformationOnce(retrievedInformation);
+            multiple.add(retrievedInformation);
+        }
+        
+        return multiple;
+    }
+
+    private void extractInformationOnce(final HashMap<String, String> retrievedInformation) {
         for (final PagePart pagePart : pageParts) {
             final Pattern pattern = Pattern.compile(pagePart.getRegex());
             final Matcher matcher = pattern.matcher(page);
@@ -100,8 +122,6 @@ public class PagePartSequence {
                 page = page.substring(indexOfPageRest);
             }
         }
-
-        return retrievedInformation;
     }
 
     public ArrayList<PagePart> getPageParts() {

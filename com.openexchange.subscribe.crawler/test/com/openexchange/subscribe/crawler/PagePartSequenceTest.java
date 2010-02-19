@@ -144,4 +144,30 @@ public class PagePartSequenceTest extends TestCase {
         assertEquals("Leverkusen", map.get("city_home"));
         assertEquals("Germany", map.get("country_home"));
     }
+    
+    public void testRetrieveMultipleInformation(){
+        String page ="<FIRST_NAME>Peter</FIRST_NAME><LAST_NAME>Mueller</LAST_NAME>\n"
+            +"<FIRST_NAME>Hans-Georg</FIRST_NAME><LAST_NAME>Walter</LAST_NAME>";
+        ArrayList<PagePart> pageParts = new ArrayList<PagePart>();
+        pageParts.add(new PagePart("(<FIRST_NAME>)([a-zA-Z\u00e4\u00f6\u00fc\\-]*)(<\\/FIRST_NAME>)", "first_name"));
+        pageParts.add(new PagePart("(<LAST_NAME>)([a-zA-Z\u00e4\u00f6\u00fc\\-]*)(<\\/LAST_NAME>)", "last_name"));
+        
+        PagePartSequence sequence = new PagePartSequence(pageParts, page);
+        ArrayList<HashMap<String, String>> results = (ArrayList<HashMap<String, String>>) sequence.retrieveMultipleInformation();
+        boolean peterFound = false;
+        boolean hansGeorgFound = false;
+        
+        for (HashMap<String, String> result : results){
+            if (result.containsKey("first_name") && result.containsKey("last_name")){
+                if (result.get("first_name").equals("Peter") && result.get("last_name").equals("Mueller")){
+                    peterFound = true;
+                } else if (result.get("first_name").equals("Hans-Georg") && result.get("last_name").equals("Walter")){
+                    hansGeorgFound = true;
+                }
+            }
+        }
+        
+        assertTrue("contact Peter Mueller was not retrieved", peterFound);
+        assertTrue("contact Hans-Georg Walter was not retrieved", hansGeorgFound);
+    }
 }
