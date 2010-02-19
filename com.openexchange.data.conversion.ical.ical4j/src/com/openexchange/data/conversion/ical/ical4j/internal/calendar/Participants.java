@@ -85,6 +85,7 @@ import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
@@ -258,6 +259,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             mails.remove(user.getMail());
         }
 
+        List<ConfirmableParticipant> confirmableParticipants = new ArrayList<ConfirmableParticipant>();
         for(final String mail : mails.keySet()) {
             final ExternalUserParticipant external = new ExternalUserParticipant(mail);
             external.setDisplayName(null);
@@ -273,6 +275,11 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
                 external.setMessage(comment);
             
             cObj.addParticipant(external);
+            confirmableParticipants.add(external);
+        }
+        
+        if (confirmableParticipants.size() > 0) {
+            cObj.setConfirmations(confirmableParticipants.toArray(new ConfirmableParticipant[confirmableParticipants.size()]));
         }
 
         final PropertyList resourcesList = component.getProperties(Property.RESOURCES);
