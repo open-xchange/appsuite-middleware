@@ -51,8 +51,12 @@ package com.openexchange.messaging.facebook.osgi;
 
 import static com.openexchange.messaging.facebook.services.FacebookMessagingServiceRegistry.getServiceRegistry;
 import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.List;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
@@ -63,8 +67,11 @@ import com.openexchange.messaging.facebook.FacebookConstants;
 import com.openexchange.messaging.facebook.FacebookMessagingException;
 import com.openexchange.messaging.facebook.FacebookMessagingService;
 import com.openexchange.messaging.facebook.exception.FacebookMessagingExceptionFactory;
+import com.openexchange.messaging.facebook.session.FacebookEventHandler;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.sessiond.SessiondEventConstants;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.user.UserService;
 
 /**
@@ -89,7 +96,7 @@ public final class FacebookMessagingActivator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, ContextService.class, UserService.class };
+        return new Class<?>[] { ConfigurationService.class, ContextService.class, UserService.class, SessiondService.class };
     }
 
     @Override
@@ -127,12 +134,11 @@ public final class FacebookMessagingActivator extends DeferredActivator {
                     }
                 }
             }
-
+            /*
+             * Some init stuff
+             */
             FacebookConstants.init();
             FacebookConfiguration.getInstance().configure(getService(ConfigurationService.class));
-
-            // Do this once we can register more than one app for a given component, otherwise this will not work with the basic messaging
-            // bundle.
             /*
              * Register component
              */
@@ -147,9 +153,17 @@ public final class FacebookMessagingActivator extends DeferredActivator {
             for (final ServiceTracker tracker : trackers) {
                 tracker.open();
             }
-
-            registrations = new ArrayList<ServiceRegistration>();
+            /*
+             * Register services
+             */
+            registrations = new ArrayList<ServiceRegistration>(2);
             registrations.add(context.registerService(MessagingService.class.getName(), new FacebookMessagingService(), null));
+            /*
+             * Register event handler to detect removed sessions
+             */
+            final Dictionary<Object, Object> serviceProperties = new Hashtable<Object, Object>(1);
+            serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
+            registrations.add(context.registerService(EventHandler.class.getName(), new FacebookEventHandler(), serviceProperties));
 
             try {
                 // new StartUpTest().test();

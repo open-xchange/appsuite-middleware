@@ -47,89 +47,69 @@
  *
  */
 
-package com.openexchange.messaging.facebook;
+package com.openexchange.messaging.facebook.session;
 
-import com.openexchange.messaging.MessagingAccount;
-import com.openexchange.messaging.MessagingException;
-import com.openexchange.messaging.MessagingResource;
-import com.openexchange.messaging.facebook.session.FacebookSession;
+import java.text.MessageFormat;
+import java.util.Map;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondEventConstants;
 
 /**
- * {@link FacebookMessagingResource}
+ * {@link FacebookEventHandler} - The {@link EventHandler event handler} for mail push bundle to track newly created and removed sessions.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since Open-Xchange v6.16
  */
-public class FacebookMessagingResource implements MessagingResource {
-
-    protected static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(FacebookMessagingResource.class);
-
-    protected static final boolean DEBUG = LOG.isDebugEnabled();
+public final class FacebookEventHandler implements EventHandler {
 
     /**
-     * The messaging account.
+     * The logger constant.
      */
-    protected final MessagingAccount messagingAccount;
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(FacebookEventHandler.class);
 
     /**
-     * The facebook session.
+     * Whether logger allows debug.
      */
-    protected FacebookSession facebookSession;
+    private static final boolean DEBUG = LOG.isDebugEnabled();
 
     /**
-     * The session.
+     * Initializes a new {@link FacebookEventHandler}.
      */
-    protected final Session session;
-
-    /**
-     * Initializes a new {@link FacebookMessagingResource}.
-     * 
-     * @param messagingAccount The facebook account
-     */
-    public FacebookMessagingResource(final MessagingAccount messagingAccount, final Session session) {
+    public FacebookEventHandler() {
         super();
-        this.messagingAccount = messagingAccount;
-        this.session = session;
-        facebookSession = FacebookSession.sessionFor(messagingAccount, session);
     }
 
-    /**
-     * Initializes a new {@link FacebookMessagingResource} for test purpose.
-     * 
-     * @param login The facebook login
-     * @param password The facebook password
-     * @param apiKey The API key
-     * @param secretKey The secret key
-     */
-    public FacebookMessagingResource(final String login, final String password, final String apiKey, final String secretKey) {
-        super();
-        this.messagingAccount = null;
-        this.session = null;
-        facebookSession = new FacebookSession(login, password, apiKey, secretKey);
-    }
-
-    public void close() {
-        /*
-         * Close is performed when last session gone by FacebookEventHandler
-         */
-        // facebookSession.close();
-    }
-
-    public void connect() throws MessagingException {
-        facebookSession.connect();
-    }
-
-    public boolean isConnected() {
-        return facebookSession.isConnected();
-    }
-
-    public boolean ping() throws MessagingException {
-        return facebookSession.ping();
-    }
-
-    public boolean cacheable() {
-        return false;
+    public void handleEvent(final Event event) {
+        final String topic = event.getTopic();
+        try {
+            if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
+                /*
+                 * A single session was removed
+                 */
+                final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
+                FacebookSessionRegistry.getInstance().removeSessionIfLast(session.getContextId(), session.getUserId());
+            } else if (SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
+                /*
+                 * A session container was removed
+                 */
+                @SuppressWarnings("unchecked") final Map<String, Session> sessionContainer =
+                    (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
+                /*
+                 * For each session
+                 */
+                for (final Session session : sessionContainer.values()) {
+                    FacebookSessionRegistry.getInstance().removeSessionIfLast(session.getContextId(), session.getUserId());
+                }
+            } else if (SessiondEventConstants.TOPIC_ADD_SESSION.equals(topic)) {
+                // final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
+                /*
+                 * Nothing to do for an added session
+                 */
+            }
+        } catch (final Exception e) {
+            LOG.error(MessageFormat.format("Error while handling SessionD event \"{0}\": {1}", topic, e.getMessage()), e);
+        }
     }
 
 }

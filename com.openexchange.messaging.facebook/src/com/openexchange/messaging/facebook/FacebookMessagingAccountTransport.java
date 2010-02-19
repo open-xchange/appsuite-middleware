@@ -76,19 +76,13 @@ import com.openexchange.session.Session;
 public final class FacebookMessagingAccountTransport extends FacebookMessagingResource implements MessagingAccountTransport {
 
     /**
-     * The session.
-     */
-    private final Session session;
-
-    /**
      * Initializes a new {@link FacebookMessagingAccountTransport}.
      * 
      * @param messagingAccount The facebook account
      * @param session The session
      */
     public FacebookMessagingAccountTransport(final MessagingAccount messagingAccount, final Session session) {
-        super(messagingAccount);
-        this.session = session;
+        super(messagingAccount, session);
     }
 
     /**
@@ -101,11 +95,10 @@ public final class FacebookMessagingAccountTransport extends FacebookMessagingRe
      */
     public FacebookMessagingAccountTransport(final String login, final String password, final String apiKey, final String secretKey) {
         super(login, password, apiKey, secretKey);
-        session = null;
     }
 
     public void transport(final MessagingMessage message, final Collection<MessagingAddressHeader> recipients) throws MessagingException {
-        transport(message, recipients, facebookRestClient, facebookUserId);
+        transport(message, recipients, facebookSession.getFacebookRestClient(), facebookSession.getFacebookUserId());
     }
 
     /**

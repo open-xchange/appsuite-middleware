@@ -68,11 +68,6 @@ import com.openexchange.session.Session;
 public final class FacebookMessagingAccountAccess extends FacebookMessagingResource implements MessagingAccountAccess {
 
     /**
-     * The session.
-     */
-    private final Session session;
-
-    /**
      * The folder access.
      */
     private volatile FacebookMessagingFolderAccess folderAccess;
@@ -89,8 +84,7 @@ public final class FacebookMessagingAccountAccess extends FacebookMessagingResou
      * @param session The session
      */
     public FacebookMessagingAccountAccess(final MessagingAccount messagingAccount, final Session session) {
-        super(messagingAccount);
-        this.session = session;
+        super(messagingAccount, session);
     }
 
     /**
@@ -103,7 +97,6 @@ public final class FacebookMessagingAccountAccess extends FacebookMessagingResou
      */
     public FacebookMessagingAccountAccess(final String login, final String password, final String apiKey, final String secretKey) {
         super(login, password, apiKey, secretKey);
-        session = null;
     }
 
     /**
@@ -112,7 +105,7 @@ public final class FacebookMessagingAccountAccess extends FacebookMessagingResou
      * @return The facebook REST client
      */
     public IFacebookRestClient<Object> getFacebookRestClient() {
-        return facebookRestClient;
+        return facebookSession.getFacebookRestClient();
     }
 
     public int getAccountId() {
@@ -120,25 +113,37 @@ public final class FacebookMessagingAccountAccess extends FacebookMessagingResou
     }
 
     public MessagingFolderAccess getFolderAccess() throws MessagingException {
-        if (!connected) {
+        if (!facebookSession.isConnected()) {
             throw MessagingExceptionCodes.NOT_CONNECTED.create();
         }
         FacebookMessagingFolderAccess tmp = folderAccess;
         if (null == tmp) {
             folderAccess =
-                tmp = new FacebookMessagingFolderAccess(facebookRestClient, messagingAccount, session, facebookUserId, facebookSession);
+                tmp =
+                    new FacebookMessagingFolderAccess(
+                        facebookSession.getFacebookRestClient(),
+                        messagingAccount,
+                        session,
+                        facebookSession.getFacebookUserId(),
+                        facebookSession.getFacebookSession());
         }
         return tmp;
     }
 
     public MessagingMessageAccess getMessageAccess() throws MessagingException {
-        if (!connected) {
+        if (!facebookSession.isConnected()) {
             throw MessagingExceptionCodes.NOT_CONNECTED.create();
         }
         FacebookMessagingMessageAccess tmp = messageAccess;
         if (null == tmp) {
             messageAccess =
-                tmp = new FacebookMessagingMessageAccess(facebookRestClient, messagingAccount, session, facebookUserId, facebookSession);
+                tmp =
+                    new FacebookMessagingMessageAccess(
+                        facebookSession.getFacebookRestClient(),
+                        messagingAccount,
+                        session,
+                        facebookSession.getFacebookUserId(),
+                        facebookSession.getFacebookSession());
         }
         return tmp;
     }
