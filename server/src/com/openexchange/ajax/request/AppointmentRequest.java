@@ -901,7 +901,7 @@ public class AppointmentRequest {
         final int objectId = DataParser.checkInt(jsonObj, DataFields.ID);
         final int folderId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
         final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
-        DataParser.checkInt(jData, ParticipantsFields.CONFIRMATION);
+        //DataParser.checkInt(jData, ParticipantsFields.CONFIRMATION);
         
         ConfirmableParticipant participant = new ParticipantParser().parseConfirmation(true, jData);
         
