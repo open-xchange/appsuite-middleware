@@ -97,6 +97,7 @@ import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -110,6 +111,7 @@ import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
 import com.openexchange.groupware.notify.State.Type;
+import com.openexchange.groupware.tasks.ExternalParticipant;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.userconfiguration.RdbUserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -565,6 +567,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             final List<EmailableParticipant> participants = entry.getValue();
             for (final EmailableParticipant p : participants) {
                 TimeZone tz = TimeZone.getDefault();
+                boolean reply = EnumSet.of(State.Type.ACCEPTED, State.Type.DECLINED, State.Type.TENTATIVELY_ACCEPTED).contains(state.getType());
                 boolean sendMail = true;
 
                 if (p.type != Participant.EXTERNAL_USER && allUserIds.contains(Integer.valueOf(p.id))) {
@@ -575,11 +578,12 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                             p.id,
                             session.getUserId()) && ((!newObj.containsNotification() || newObj.getNotification()) || (forceNotifyOthers && p.id != session.getUserId()));
                         tz = p.timeZone;
+                        sendMail = sendMail && !reply;
                     } catch (final AbstractOXException e) {
                         LL.log(e);
                     }
                 } else {
-                    sendMail = !p.ignoreNotification && (!newObj.containsNotification() || newObj.getNotification()) || (newObj.getModifiedBy() != p.id && forceNotifyOthers);
+                    sendMail = !p.ignoreNotification && (!newObj.containsNotification() || newObj.getNotification()) || (newObj.getModifiedBy() != p.id && forceNotifyOthers) && !reply;
                     if (p.timeZone != null) {
                         tz = p.timeZone;
                     }
@@ -965,7 +969,8 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 resourceSet,
                 receivers,
                 session,
-                all);
+                all,
+                newObj.getOrganizer());
         }
         /*
          * Generate a render map
@@ -1214,17 +1219,21 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         }
     }
 
-    private void sortExternalParticipantsAndResources(final Participant[] oldParticipants, final Participant[] newParticipants, final Set<EmailableParticipant> participantSet, final Set<EmailableParticipant> resourceSet, final Map<Locale, List<EmailableParticipant>> receivers, final ServerSession session, final Map<String, EmailableParticipant> all) {
+    private void sortExternalParticipantsAndResources(final Participant[] oldParticipants, final Participant[] newParticipants, final Set<EmailableParticipant> participantSet, final Set<EmailableParticipant> resourceSet, final Map<Locale, List<EmailableParticipant>> receivers, final ServerSession session, final Map<String, EmailableParticipant> all, String organizer) {
         sortNewExternalParticipantsAndResources(newParticipants, participantSet, resourceSet, receivers, session, all, oldParticipants);
-        sortOldExternalParticipantsAndResources(oldParticipants, participantSet, resourceSet, receivers, all, session, newParticipants);
+        sortOldExternalParticipantsAndResources(oldParticipants, participantSet, resourceSet, receivers, all, session, newParticipants, organizer);
     }
 
-    private void sortOldExternalParticipantsAndResources(final Participant[] oldParticipants, final Set<EmailableParticipant> participantSet, final Set<EmailableParticipant> resourceSet, final Map<Locale, List<EmailableParticipant>> receivers, final Map<String, EmailableParticipant> all, final ServerSession session, final Participant[] newParticipants) {
+    private void sortOldExternalParticipantsAndResources(final Participant[] oldParticipants, final Set<EmailableParticipant> participantSet, final Set<EmailableParticipant> resourceSet, final Map<Locale, List<EmailableParticipant>> receivers, final Map<String, EmailableParticipant> all, final ServerSession session, final Participant[] newParticipants, String organizer) {
         if (oldParticipants == null) {
             return;
         }
         final Context ctx = session.getContext();
-        for (final Participant participant : oldParticipants) {
+        List<Participant> mergedWithOrganizer = new ArrayList<Participant>(Arrays.asList(oldParticipants));
+        if (organizer != null && !organizer.trim().equals(""))
+            mergedWithOrganizer.add(new ExternalUserParticipant(organizer));
+        
+        for (final Participant participant : mergedWithOrganizer) {
             switch (participant.getType()) {
             case Participant.USER:
                 break;

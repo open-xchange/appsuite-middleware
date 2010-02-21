@@ -108,6 +108,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.reminder.ReminderException;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
@@ -1354,10 +1355,33 @@ public class CalendarMySQL implements CalendarSqlImp {
         }
         writecon.commit();
         cdao.setParentFolderID(cdao.getActionFolder());
-        if (notify) {
+        if (notify && userIsOrganizer(so.getUserId(), cdao)) {
 			collection.triggerEvent(so, CalendarOperation.INSERT, cdao);
+		} else if (notify && !userIsOrganizer(so.getUserId(), cdao)) {
+		    int confirmOfUser = 0;
+		    for (UserParticipant user : cdao.getUsers()) {
+		        if (user.getIdentifier() == so.getUserId())
+		            confirmOfUser = user.getConfirm();
+		    }
+		    collection.triggerEvent(so, getConfirmAction(confirmOfUser), cdao);
 		}
 		return null;
+    }
+    
+    private boolean userIsOrganizer(int user, CalendarDataObject cal) throws OXCalendarException {
+        if (!cal.containsOrganizer())
+            return true;
+        
+        String mail;
+        try {
+            mail = UserStorage.getInstance().getUser(user, cal.getContext()).getMail();
+            if (cal.getOrganizer().equals(mail))
+                return true;
+        } catch (LdapException e) {
+            throw new OXCalendarException(OXCalendarException.Code.EVENT_ERROR);
+        }
+        
+        return false;
     }
 
     private void handleUid(final CalendarDataObject cdao, final Session so, boolean exceptionCreate) throws OXException, OXCalendarException {
@@ -4245,7 +4269,8 @@ public class CalendarMySQL implements CalendarSqlImp {
         }
         ao.setObjectID(oid);
         ao.setParentFolderID(fid);
-        collection.triggerEvent(so, CalendarOperation.DELETE, ao);
+        if (userIsOrganizer(so.getUserId(), ao))
+            collection.triggerEvent(so, CalendarOperation.DELETE, ao);
         // deleteAllReminderEntries(edao, oid, fid, so, readcon);
         final ReminderSQLInterface rsql = new ReminderHandler(ctx);
         try {

@@ -103,6 +103,6 @@ public class CreatedBy<T extends CalendarComponent, U extends CalendarObject> ex
 
     public void parse(int index, T component, U calendar, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
         String organizer = component.getProperty(Property.ORGANIZER).getValue();
-        calendar.setOrganizer(organizer.startsWith("mailto:") ? organizer.substring(7, organizer.length()) : organizer);
+        calendar.setOrganizer(organizer.toLowerCase().startsWith("mailto:") ? organizer.substring(7, organizer.length()) : organizer);
     }
 }
