@@ -117,7 +117,7 @@ public class ContactObjectsByPageAndPagePartSequenceStep extends AbstractStep<Co
         
 
         if (!executedSuccessfully && input != null){
-            openPageInBrowser(input);
+            
         }
         output = contactObjects.toArray(new Contact[contactObjects.size()]);
     }
