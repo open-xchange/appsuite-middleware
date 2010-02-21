@@ -73,6 +73,7 @@ public class IMipStatusChangeAppointmentTest extends IMipTest {
         super.setUp();
         so2 = contextTools.getSessionForUser(secondUser, ctx);
         appointment = appointments.buildAppointmentWithUserParticipants(user, secondUser, thirdUser);
+        appointment.setOrganizer("123@example.invalid");
     }
 
     /*
@@ -86,12 +87,12 @@ public class IMipStatusChangeAppointmentTest extends IMipTest {
     }
     
     public void testStatusChange() throws Exception {
-        mailForOwner(CalendarObject.ACCEPT);
-        mailForOwner(CalendarObject.DECLINE);
-        mailForOwner(CalendarObject.TENTATIVE);
+        mailForOrganizer(CalendarObject.ACCEPT);
+        mailForOrganizer(CalendarObject.DECLINE);
+        mailForOrganizer(CalendarObject.TENTATIVE);
     }
     
-    public void mailForOwner(int status) throws Exception {
+    public void mailForOrganizer(int status) throws Exception {
         
         for (UserParticipant u : appointment.getUsers()) {
             if (u.getIdentifier() == secondUserId) {
@@ -106,9 +107,11 @@ public class IMipStatusChangeAppointmentTest extends IMipTest {
         boolean foundFirst = false;
         
         for (Message message : messages) {
-            if (message.addresses.contains(userMail)) {
+            if (message.addresses.contains("123@example.invalid")) {
                 checkState(message.message, ITipMethod.REPLY);
                 foundFirst = true;
+            } else if (message.addresses.contains(userMail)) {
+                fail("Owner (not organizer) should not get a mail");
             } else if (message.addresses.contains(secondUserMail)) {
                 fail("Sender should not get a mail");
             } else if (message.addresses.contains(thirdUserMail)) {
