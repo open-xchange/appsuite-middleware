@@ -136,9 +136,9 @@ public final class GetTimeIntervalAction extends AbstractVoipNowSOAPAction<PBXPo
             
             final TimeIntervalBlock timeIntervalBlock = getTimeIntervalBlocksResponseType.getTimeIntervalBlock()[0];
             
-            final Integer intervals = timeIntervalBlock.getIntervals();
+            final PositiveInteger id = timeIntervalBlock.getID();
             
-            return new AJAXRequestResult(intervals.getInteger());
+            return new AJAXRequestResult(id.getPositiveInteger());
         } catch (final AxisFault e) {
             throw VoipNowExceptionCodes.SOAP_FAULT.create(e, e.getMessage());
         } catch (final RemoteException e) {

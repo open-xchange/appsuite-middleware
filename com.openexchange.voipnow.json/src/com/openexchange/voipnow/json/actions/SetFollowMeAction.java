@@ -233,7 +233,7 @@ public final class SetFollowMeAction extends AbstractVoipNowSOAPAction<Extension
                     }
                     transferToString.setString(sb.toString());
                     callRuleInfo.setTransferTo(transferToString);
-                    final boolean requestInterval = false;
+                    final boolean requestInterval = true;
                     /*
                      * interval
                      */
