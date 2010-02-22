@@ -35,6 +35,7 @@
 	<property name="configreadjar" value="com.openexchange.configread.jar" />
 
     <property name="jsonjar" value="json.jar"/>
+	<property name="trovejar" value="trove-2.1.0.jar" />
     <property name="commonjar" value="common.jar"/>
 
     <!-- Classpath -->
@@ -48,6 +49,7 @@
 	    <pathelement location="${bundlesdir}/${serverjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${jsonjar}"/>
+    	<pathelement location="${bundlesdir}/${commonBundle}/lib/${trovejar}"/>
     </path>
 
     <!-- Compile -->
