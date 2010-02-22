@@ -49,10 +49,9 @@
 
 package com.openexchange.groupware;
 
+import gnu.trove.TIntObjectHashMap;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.AbstractOXException.Category;
@@ -65,7 +64,7 @@ public abstract class AbstractOXExceptionFactory<T> {
 
     private static final Log LOG = LogFactory.getLog(AbstractOXExceptionFactory.class);
 
-    private final Map<Integer, ExceptionInfo> throwsMap = new HashMap<Integer, ExceptionInfo>();
+    private final TIntObjectHashMap<ExceptionInfo> throwsMap = new TIntObjectHashMap<ExceptionInfo>();
 
     private static final class ExceptionInfo {
 
@@ -143,22 +142,22 @@ public abstract class AbstractOXExceptionFactory<T> {
     private void addMultiple(final OXThrowsMultiple multiple, final Class<?> clazz) {
         if (multiple != null) {
             for (int i = 0; i < multiple.exceptionId().length; i++) {
-                if (throwsMap.containsKey(Integer.valueOf(multiple.exceptionId()[i]))) {
+                if (throwsMap.containsKey(multiple.exceptionId()[i])) {
                     LOG.fatal("Exception ID " + multiple.exceptionId()[i] + " is used twice in " + clazz.getName());
                     throw new IllegalArgumentException("Exception ID " + multiple.exceptionId()[i] + " is used twice in " + clazz.getName());
                 }
-                throwsMap.put(Integer.valueOf(multiple.exceptionId()[i]), new ExceptionInfo(multiple, i));
+                throwsMap.put(multiple.exceptionId()[i], new ExceptionInfo(multiple, i));
             }
         }
     }
 
     private void addThrows(final OXThrows throwsInfo, final Class<?> clazz) {
         if (throwsInfo != null) {
-            if (throwsMap.containsKey(Integer.valueOf(throwsInfo.exceptionId()))) {
+            if (throwsMap.containsKey(throwsInfo.exceptionId())) {
                 LOG.fatal("Exception ID " + throwsInfo.exceptionId() + " is used twice in " + clazz.getName());
                 throw new IllegalArgumentException("Exception ID " + throwsInfo.exceptionId() + " is used twice in " + clazz.getName());
             }
-            throwsMap.put(Integer.valueOf(throwsInfo.exceptionId()), new ExceptionInfo(throwsInfo));
+            throwsMap.put(throwsInfo.exceptionId(), new ExceptionInfo(throwsInfo));
         }
     }
 
@@ -167,7 +166,7 @@ public abstract class AbstractOXExceptionFactory<T> {
     }
 
     public T createException(final int id, final Throwable cause, final Object... msgParams) {
-        final ExceptionInfo throwsInfo = throwsMap.get(Integer.valueOf(id));
+        final ExceptionInfo throwsInfo = throwsMap.get(id);
         if (throwsInfo == null) {
             return buildException(component, Category.CODE_ERROR, getClassId() * 100, "Missing OXException annotation " + id, cause);
         }

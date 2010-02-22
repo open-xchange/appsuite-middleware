@@ -34,6 +34,7 @@
     <property name="commonjar" value="common.jar"/>
 	<property name="mailjar" value="mail-1.4.2.jar"/>
     <property name="activationjar" value="activation-1.1.1.jar"/>
+	<property name="trovejar" value="trove-2.1.0.jar" />
 	<!-- <property name="highscalejar" value="high-scale-lib-1.1.2.jar" /> -->
 
     <!-- Classpath -->
@@ -47,6 +48,7 @@
         <pathelement location="${bundlesdir}/${cachingjar}"/>
 	    <pathelement location="${bundlesdir}/${serverjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${mailjar}"/>
+    	<pathelement location="${bundlesdir}/${commonBundle}/lib/${trovejar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
         <pathelement location="${bundlesdir}/${activationBundle}/lib/${activationjar}"/>
 		<!-- <pathelement location="${bundlesdir}/${commonBundle}/lib/${highscalejar}"/> -->
