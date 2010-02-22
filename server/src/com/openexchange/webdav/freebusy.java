@@ -56,8 +56,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.TimeZone;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -74,13 +72,13 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.java.util.TimeZones;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
-import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 
@@ -90,25 +88,20 @@ import com.openexchange.tools.iterator.SearchIteratorException;
  */
 public class freebusy extends HttpServlet {
 
-    /**
-     * serialVersionUID
-     */
     private static final long serialVersionUID = 6336387126907903347L;
 
     private static final Log LOG = LogFactory.getLog(freebusy.class);
 
     private static final DateFormat inputFormat = new SimpleDateFormat("yyyyMMdd");
 
-    private static final TimeZone utc = TimeZoneUtils.getTimeZone("UTC");
-
     private static final DateFormat outputFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
 
     static {
-        outputFormat.setTimeZone(utc);
+        outputFormat.setTimeZone(TimeZones.UTC);
     }
 
     @Override
-    protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {
+    protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
         final Context context = getContext(request);
         if (null == context) {
             response.sendError(HttpServletResponse.SC_CONFLICT, "Unable to determine context.");
@@ -178,7 +171,7 @@ public class freebusy extends HttpServlet {
         
         response.setContentType("text/calendar");
         final PrintWriter printWriter = response.getWriter();
-        writeVCalendar(context, start, end, mailAddress, principalId, type, request.getRemoteHost(), printWriter);
+        writeVCalendar(context, start, end, mailAddress, principalId, type, printWriter);
     }
 
     private String getMailAddress(final HttpServletRequest request) {
@@ -220,7 +213,7 @@ public class freebusy extends HttpServlet {
         return end;
     }
 
-    private Context getContext(final HttpServletRequest request) throws IOException {
+    private Context getContext(final HttpServletRequest request) {
         if (request.getParameter("contextid") == null) {
             return null;
         }
@@ -257,7 +250,7 @@ public class freebusy extends HttpServlet {
         return period;
     }
 
-    private void writeVCalendar(final Context context, final Date start, final Date end, final String mailAddress, final int principalId, final int type, final String remoteHost, final PrintWriter printWriter) {
+    private void writeVCalendar(final Context context, final Date start, final Date end, final String mailAddress, final int principalId, final int type, final PrintWriter printWriter) {
         printWriter.println("BEGIN:VCALENDAR");
         printWriter.println("PRODID:-//www.open-xchange.org//");
         printWriter.println("VERSION:2.0");
@@ -295,6 +288,9 @@ public class freebusy extends HttpServlet {
     }
 
     private void writeFreeBusy(final Appointment appointment, final PrintWriter pw, final DateFormat format) {
+        if (Appointment.FREE == appointment.getShownAs()) {
+            return;
+        }
         pw.print("FREEBUSY;");
         switch (appointment.getShownAs()) {
         case Appointment.ABSENT:
@@ -305,9 +301,6 @@ public class freebusy extends HttpServlet {
             break;
         case Appointment.TEMPORARY:
             pw.print("FBTYPE=BUSY-UNAVAILABLE:");
-            break;
-        case Appointment.FREE:
-            pw.print("FBTYPE=FREE:");
             break;
         default:
             pw.print("FBTYPE=BUSY:");
