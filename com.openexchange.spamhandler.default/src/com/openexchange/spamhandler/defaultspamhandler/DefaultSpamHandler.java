@@ -49,6 +49,7 @@
 
 package com.openexchange.spamhandler.defaultspamhandler;
 
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.service.MailService;
@@ -107,6 +108,42 @@ public final class DefaultSpamHandler extends SpamHandler {
         } finally {
             mailAccess.close(true);
         }
+    }
+
+    @Override
+    public boolean isCreateConfirmedSpam() {
+        final ConfigurationService configurationService = ConfigurationServiceSupplier.getInstance().getConfigurationService();
+        if (null == configurationService) {
+            /*
+             * Return default
+             */
+            return true;
+        }
+        return configurationService.getBoolProperty("com.openexchange.spamhandler.defaultspamhandler.createConfirmedSpam", true);
+    }
+
+    @Override
+    public boolean isCreateConfirmedHam() {
+        final ConfigurationService configurationService = ConfigurationServiceSupplier.getInstance().getConfigurationService();
+        if (null == configurationService) {
+            /*
+             * Return default
+             */
+            return true;
+        }
+        return configurationService.getBoolProperty("com.openexchange.spamhandler.defaultspamhandler.createConfirmedHam", true);
+    }
+
+    @Override
+    public boolean isUnsubscribeSpamFolders() {
+        final ConfigurationService configurationService = ConfigurationServiceSupplier.getInstance().getConfigurationService();
+        if (null == configurationService) {
+            /*
+             * Return default
+             */
+            return true;
+        }
+        return configurationService.getBoolProperty("com.openexchange.spamhandler.defaultspamhandler.unsubscribeSpamFolders", true);
     }
 
 }

@@ -53,9 +53,11 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.ServiceRegistration;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.spamhandler.SpamHandler;
+import com.openexchange.spamhandler.defaultspamhandler.ConfigurationServiceSupplier;
 import com.openexchange.spamhandler.defaultspamhandler.DefaultSpamHandler;
 import com.openexchange.spamhandler.defaultspamhandler.MailServiceSupplier;
 
@@ -66,9 +68,8 @@ import com.openexchange.spamhandler.defaultspamhandler.MailServiceSupplier;
  */
 public final class DefaultSpamHandlerActivator extends DeferredActivator {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(DefaultSpamHandlerActivator.class);
-
-    private static final Class<?>[] NEEDED_SERVICES = new Class<?>[] { MailService.class };
+    private static final org.apache.commons.logging.Log LOG =
+        org.apache.commons.logging.LogFactory.getLog(DefaultSpamHandlerActivator.class);
 
     private final Dictionary<String, String> dictionary;
 
@@ -85,7 +86,7 @@ public final class DefaultSpamHandlerActivator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED_SERVICES;
+        return new Class<?>[] { MailService.class, ConfigurationService.class };
     }
 
     @Override
@@ -106,6 +107,7 @@ public final class DefaultSpamHandlerActivator extends DeferredActivator {
     protected void startBundle() throws Exception {
         try {
             MailServiceSupplier.getInstance().setMailService(getService(MailService.class));
+            ConfigurationServiceSupplier.getInstance().setConfigurationService(getService(ConfigurationService.class));
             serviceRegistration = context.registerService(SpamHandler.class.getName(), DefaultSpamHandler.getInstance(), dictionary);
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
@@ -122,6 +124,7 @@ public final class DefaultSpamHandlerActivator extends DeferredActivator {
                 serviceRegistration = null;
             }
             MailServiceSupplier.getInstance().setMailService(null);
+            ConfigurationServiceSupplier.getInstance().setConfigurationService(null);
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
