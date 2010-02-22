@@ -49,8 +49,8 @@
 
 package com.openexchange.exceptions;
 
-import gnu.trove.TIntObjectHashMap;
-import gnu.trove.TObjectProcedure;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import com.openexchange.groupware.AbstractOXException;
@@ -61,22 +61,8 @@ import com.openexchange.groupware.Component;
  */
 public abstract class Exceptions<T extends AbstractOXException> {
 
-    private static final class TObjectProcedureImpl implements TObjectProcedure<ErrorMessage> {
-
-        private final SortedSet<ErrorMessage> ret;
-
-        public TObjectProcedureImpl(final SortedSet<ErrorMessage> ret) {
-            super();
-            this.ret = ret;
-        }
-
-        public boolean execute(final ErrorMessage errorMessage) {
-            ret.add(errorMessage);
-            return true;
-        }
-    }
-
-    private final TIntObjectHashMap<ErrorMessage> errors = new TIntObjectHashMap<ErrorMessage>();
+    
+    private final Map<Integer, ErrorMessage> errors = new HashMap<Integer, ErrorMessage>();
 
     private Component component;
 
@@ -110,11 +96,11 @@ public abstract class Exceptions<T extends AbstractOXException> {
     }
 
     protected void declare(final int code, final AbstractOXException.Category category, final String message, final String help) {
-        errors.put(code, new ErrorMessage(code, component, applicationId, category, message, help));
+        errors.put(Integer.valueOf(code), new ErrorMessage(code, component, applicationId, category, message, help));
     }
 
     protected void declare(final OXErrorMessage error) {
-        errors.put(error.getDetailNumber(), new ErrorMessage(error, component, applicationId));
+        errors.put(Integer.valueOf(error.getDetailNumber()), new ErrorMessage(error, component, applicationId));
     }
 
     protected void declareAll(final OXErrorMessage[] errors) {
@@ -139,15 +125,16 @@ public abstract class Exceptions<T extends AbstractOXException> {
     protected abstract T createException(ErrorMessage message, Throwable cause, Object... args);
 
     public T create(final int code, final Throwable cause, final Object... args) {
-        final ErrorMessage errorMessage = errors.get(code);
+        final ErrorMessage errorMessage = errors.get(Integer.valueOf(code));
         if (errorMessage == null) {
             if(initialized) {
                 throw new UndeclaredErrorCodeException(code, getApplicationId(), getComponent());
+            } else {
+                System.err.println("Apparently this exception factory was not registered.: "+this);
+                setComponent(new StringComponent("???"));
+                setApplicationId("unset");
+                return create(code, cause, args);
             }
-            System.err.println("Apparently this exception factory was not registered.: "+this);
-            setComponent(new StringComponent("???"));
-            setApplicationId("unset");
-            return create(code, cause, args);
         }
         return createException(errorMessage, cause, args);
     }
@@ -181,13 +168,11 @@ public abstract class Exceptions<T extends AbstractOXException> {
     }
 
     public SortedSet<ErrorMessage> getMessages() {
-        final SortedSet<ErrorMessage> ret = new TreeSet<ErrorMessage>();
-        errors.forEachValue(new TObjectProcedureImpl(ret));
-        return ret;
+        return new TreeSet<ErrorMessage>(errors.values());
     }
 
     public ErrorMessage findMessage(final int code) {
-        return errors.get(code);
+        return errors.get(Integer.valueOf(code));
     }
 
     public OXErrorMessage findOXErrorMessage(final int code) {
