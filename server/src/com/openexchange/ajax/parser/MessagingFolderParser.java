@@ -221,7 +221,11 @@ public final class MessagingFolderParser {
                 throw MessagingExceptionCodes.MISSING_PARAMETER.create(FolderFields.MODULE);
             }
             if (jsonObj.hasAndNotNull(FolderFields.SUBSCRIBED)) {
-                messagingFolder.setSubscribed(jsonObj.getInt(FolderFields.SUBSCRIBED) > 0);
+                try {
+                    messagingFolder.setSubscribed(jsonObj.getInt(FolderFields.SUBSCRIBED) > 0);
+                } catch (final JSONException e) {
+                    messagingFolder.setSubscribed(jsonObj.getBoolean(FolderFields.SUBSCRIBED));
+                }
             }
             if (jsonObj.hasAndNotNull(FolderFields.PERMISSIONS)) {
                 final JSONArray jsonArr = jsonObj.getJSONArray(FolderFields.PERMISSIONS);
