@@ -115,6 +115,23 @@ public final class JSONMessageHandler implements MailMessageHandler {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(JSONMessageHandler.class);
 
+    private static final class PlainTextContent {
+
+        final String id;
+
+        final String contentType;
+
+        final String content;
+
+        public PlainTextContent(final String id, final String contentType, final String content) {
+            super();
+            this.id = id;
+            this.contentType = contentType;
+            this.content = content;
+        }
+
+    }
+
     private final Session session;
 
     private final Context ctx;
@@ -148,6 +165,8 @@ public final class JSONMessageHandler implements MailMessageHandler {
     private boolean textWasEmpty;
 
     private final boolean[] modified;
+
+    private PlainTextContent plainText;
 
     /**
      * Initializes a new {@link JSONMessageHandler}
@@ -537,10 +556,20 @@ public final class JSONMessageHandler implements MailMessageHandler {
     // private static final RTF2HtmlConverter RTFCONV = new RTF2HtmlConverter();
 
     public boolean handleInlinePlainText(final String plainTextContentArg, final ContentType contentType, final long size, final String fileName, final String id) throws MailException {
-        if (isAlternative && usm.isDisplayHtmlInlineContent() && (DisplayMode.RAW.getMode() < displayMode.getMode()) && contentType.isMimeType(MIMETypes.MIME_TEXT_PLAIN)) {
+        if (isAlternative && usm.isDisplayHtmlInlineContent() && (DisplayMode.RAW.getMode() < displayMode.getMode()) && contentType.startsWith(MIMETypes.MIME_TEXT_PLAIN)) {
             /*
              * User wants to see message's alternative content
              */
+            if (null == plainText) {
+                /*
+                 * Remember plain-text content
+                 */
+                plainText =
+                    new PlainTextContent(id, contentType.getBaseType(), HTMLProcessing.formatTextForDisplay(
+                        plainTextContentArg,
+                        usm,
+                        displayMode));
+            }
             /* textAppended = true; */
             return true;
         }
@@ -698,6 +727,12 @@ public final class JSONMessageHandler implements MailMessageHandler {
          * Since we obviously touched message's content, mark its corresponding message object as seen
          */
         mail.setFlags(mail.getFlags() | MailMessage.FLAG_SEEN);
+        if (!textAppended && plainText != null) {
+            /*
+             * No text present
+             */
+            asRawContent(plainText.id, plainText.contentType, plainText.content);
+        }
         /*-
          *
         if (!textAppended) {
