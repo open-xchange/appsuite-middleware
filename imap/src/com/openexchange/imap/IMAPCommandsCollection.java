@@ -50,6 +50,7 @@
 package com.openexchange.imap;
 
 import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;
+import gnu.trove.TIntLongHashMap;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1648,18 +1649,17 @@ public final class IMAPCommandsCollection {
      * @return A map resolving corresponding sequence numbers to specified UIDs
      * @throws MessagingException If a messaging error occurs
      */
-    @SuppressWarnings("unchecked")
-    public static Map<Integer, Long> seqNums2uidsMap(final IMAPFolder imapFolder, final long[] uids) throws MessagingException {
+    public static TIntLongHashMap seqNums2uidsMap(final IMAPFolder imapFolder, final long[] uids) throws MessagingException {
         if (imapFolder.getMessageCount() == 0) {
             /*
              * Empty folder...
              */
-            return Collections.emptyMap();
+            return new TIntLongHashMap(0);
         }
-        return (Map<Integer, Long>) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+        return (TIntLongHashMap) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-                final Map<Integer, Long> m = new HashMap<Integer, Long>(uids.length);
+                final TIntLongHashMap m = new TIntLongHashMap(uids.length);
                 final String[] args = IMAPNumArgSplitter.splitUIDArg(uids, true, 16); // "UID FETCH <uids> (UID)"
                 for (int k = 0; k < args.length; k++) {
                     /*-
@@ -1683,7 +1683,7 @@ public final class IMAPCommandsCollection {
                                 final FetchResponse fr = (FetchResponse) r[j];
                                 final UID uidItem = getItemOf(UID.class, fr);
                                 if (uidItem != null) {
-                                    m.put(Integer.valueOf(fr.getNumber()), Long.valueOf(uidItem.uid));
+                                    m.put(fr.getNumber(), uidItem.uid);
                                 }
                                 r[j] = null;
                             }

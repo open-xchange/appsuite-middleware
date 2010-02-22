@@ -49,9 +49,9 @@
 
 package com.openexchange.imap.command;
 
+import gnu.trove.TIntArrayList;
+import gnu.trove.TLongArrayList;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import javax.mail.Message;
 
@@ -185,12 +185,12 @@ public final class IMAPNumArgSplitter {
      * @return an appropriate array of command arguments
      */
     public static String[] getSeqNumArg(final int[] arr, final boolean keepOrder, final boolean split, final int consumed) {
-        final List<Integer> l = new ArrayList<Integer>(arr.length);
+        final TIntArrayList l = new TIntArrayList(arr.length);
         for (int i = 0; i < arr.length; i++) {
-            l.add(Integer.valueOf(arr[i]));
+            l.add(arr[i]);
         }
         if (!keepOrder) {
-            Collections.sort(l);
+            l.sort();
         }
         return split ? split(
             getNumArg(l),
@@ -209,12 +209,12 @@ public final class IMAPNumArgSplitter {
      * @return an appropriate array of command arguments
      */
     public static String[] splitMessageArg(final Message[] arr, final boolean keepOrder, final int consumed) {
-        final List<Integer> l = new ArrayList<Integer>(arr.length);
+        final TIntArrayList l = new TIntArrayList(arr.length);
         for (int i = 0; i < arr.length; i++) {
-            l.add(Integer.valueOf(arr[i].getMessageNumber()));
+            l.add(arr[i].getMessageNumber());
         }
         if (!keepOrder) {
-            Collections.sort(l);
+            l.sort();
         }
         return split(getNumArg(l), (-1 == consumed ? MAX_IMAP_COMMAND_LENGTH_WITH_DEFAULT_CONSUMED : MAX_IMAP_COMMAND_LENGTH - consumed));
     }
@@ -231,12 +231,12 @@ public final class IMAPNumArgSplitter {
      * @return an appropriate array of command arguments
      */
     public static String[] splitUIDArg(final long[] arr, final boolean keepOrder, final int consumed) {
-        final List<Long> l = new ArrayList<Long>(arr.length);
+        final TLongArrayList l = new TLongArrayList(arr.length);
         for (int i = 0; i < arr.length; i++) {
-            l.add(Long.valueOf(arr[i]));
+            l.add(arr[i]);
         }
         if (!keepOrder) {
-            Collections.sort(l);
+            l.sort();
         }
         return split(getNumArg(l), (-1 == consumed ? MAX_IMAP_COMMAND_LENGTH_WITH_DEFAULT_CONSUMED : MAX_IMAP_COMMAND_LENGTH - consumed));
     }
@@ -254,18 +254,62 @@ public final class IMAPNumArgSplitter {
      * @param numbers The list of numbers; either sequence numbers or UIDs
      * @return The number argument or an empty string if specified numbers are empty
      */
-    public static String getNumArg(final List<? extends Number> numbers) {
+    public static String getNumArg(final TIntArrayList numbers) {
         final int size = numbers.size();
         if (0 == size) {
             return "";
         }
-        final Iterator<? extends Number> iter = numbers.iterator();
-        long prev = iter.next().longValue();
+        int prev = numbers.getQuick(0);
         boolean contiguous = false;
         final StringBuilder sb = new StringBuilder(size << 2);
         sb.append(prev);
         for (int i = 1; i < size; i++) {
-            final long current = iter.next().longValue();
+            final int current = numbers.getQuick(i);
+            if (prev + 1 == current) {
+                prev++;
+                contiguous = true;
+            } else if (contiguous) {
+                sb.append(':').append(prev);
+                sb.append(',');
+                sb.append(current);
+                prev = current;
+                contiguous = false;
+            } else {
+                sb.append(',');
+                sb.append(current);
+                prev = current;
+            }
+        }
+        if (contiguous) {
+            sb.append(':').append(prev);
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Generates a number argument valid for IMAP commands expecting message's sequence numbers or UIDs. That is contiguous numbers may be
+     * abbreviated as a sequence representation e.g. <code>5:24</code> meaning all numbers beginning from 5 ending with 24. Non-contiguous
+     * numbers must be delimited using a comma.
+     * <p>
+     * <b>NOTE:</b> This routine does not take care if the resulting argument in addition to rest of IMAP command exceeds the max. length of
+     * 8000 bytes
+     * <p>
+     * A resulting string can look like this: <code>10031:10523,10525:11020,11022:11027,11030:11047,11050:11051,11053,11055:11558</code>
+     * 
+     * @param numbers The list of numbers; either sequence numbers or UIDs
+     * @return The number argument or an empty string if specified numbers are empty
+     */
+    public static String getNumArg(final TLongArrayList numbers) {
+        final int size = numbers.size();
+        if (0 == size) {
+            return "";
+        }
+        long prev = numbers.getQuick(0);
+        boolean contiguous = false;
+        final StringBuilder sb = new StringBuilder(size << 2);
+        sb.append(prev);
+        for (int i = 1; i < size; i++) {
+            final long current = numbers.getQuick(i);
             if (prev + 1 == current) {
                 prev++;
                 contiguous = true;

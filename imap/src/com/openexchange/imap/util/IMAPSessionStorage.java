@@ -49,10 +49,10 @@
 
 package com.openexchange.imap.util;
 
+import gnu.trove.TLongHashSet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -153,44 +153,44 @@ final class IMAPSessionStorage {
                     dataMap.put(key, sessionData);
                 }
                 // Generate UID sets
-                final Set<Long> actualUIDs = data2UIDSet(actualData);
-                final Set<Long> dbUIDs = data2UIDSet(sessionData);
-                final Set<Long> deleted;
+                final TLongHashSet actualUIDs = data2UIDSet(actualData);
+                final TLongHashSet dbUIDs = data2UIDSet(sessionData);
+                final TLongHashSet deleted;
                 if (((mode & 2) > 0)) {
-                    deleted = new HashSet<Long>(dbUIDs.size());
+                    deleted = new TLongHashSet(dbUIDs.size());
                     /*
                      * Detect deleted UIDs
                      */
-                    deleted.addAll(dbUIDs);
-                    deleted.removeAll(actualUIDs);
+                    deleted.addAll(dbUIDs.toArray());
+                    deleted.removeAll(actualUIDs.toArray());
                     /*
                      * Retain all which occur in session storage
                      */
                     final Set<IMAPUpdateableData> deletedData = new HashSet<IMAPUpdateableData>(Arrays.asList(filterByUIDs(
                         deleted,
                         sessionData)));
-                    deleted.retainAll(data2UIDSet(deletedData));
+                    deleted.retainAll(data2UIDSet(deletedData).toArray());
                     /*
                      * Remove deleted ones from session??? If yes, this routine's result are only yielded per call and thus are not
                      * reproduceable
                      */
                     for (final Iterator<IMAPUpdateableData> iter = sessionData.iterator(); iter.hasNext();) {
                         final IMAPUpdateableData tmp = iter.next();
-                        if (deleted.contains(Long.valueOf(tmp.getUid()))) {
+                        if (deleted.contains(tmp.getUid())) {
                             iter.remove();
                         }
                     }
                 } else {
-                    deleted = Collections.emptySet();
+                    deleted = new TLongHashSet(0);
                 }
-                final Set<Long> newAndModified;
+                final TLongHashSet newAndModified;
                 if (((mode & 1) > 0)) {
-                    newAndModified = new HashSet<Long>(actualUIDs.size());
+                    newAndModified = new TLongHashSet(actualUIDs.size());
                     /*
                      * Detect new UIDs
                      */
-                    final Set<Long> newUIDs = new HashSet<Long>(actualUIDs);
-                    newUIDs.removeAll(dbUIDs);
+                    final TLongHashSet newUIDs = new TLongHashSet(actualUIDs);
+                    newUIDs.removeAll(dbUIDs.toArray());
                     /*
                      * Insert new ones to session storage??? If yes, this routine's result are only yielded per call and thus are not
                      * reproduceable
@@ -199,13 +199,13 @@ final class IMAPSessionStorage {
                     /*
                      * ... and add their UIDs to appropriate set
                      */
-                    newAndModified.addAll(newUIDs);
+                    newAndModified.addAll(newUIDs.toArray());
 
                     /*
                      * Detect UIDs of changed messages
                      */
-                    final Set<Long> existing = new HashSet<Long>(dbUIDs);
-                    existing.retainAll(actualUIDs);
+                    final TLongHashSet existing = new TLongHashSet(dbUIDs);
+                    existing.retainAll(actualUIDs.toArray());
                     if (!existing.isEmpty()) {
                         final Set<IMAPUpdateableData> changedSessionData = new HashSet<IMAPUpdateableData>(Arrays.asList(filterByUIDs(
                             existing,
@@ -215,15 +215,15 @@ final class IMAPSessionStorage {
                             /*
                              * Add UIDs of changed messages to appropriate set
                              */
-                            final Set<Long> changedUIDs = data2UIDSet(changedSessionData);
-                            newAndModified.addAll(changedUIDs);
+                            final TLongHashSet changedUIDs = data2UIDSet(changedSessionData);
+                            newAndModified.addAll(changedUIDs.toArray());
                             /*
                              * Write changes to DB storage??? If yes, this routine's result are only yielded per call and thus are not
                              * reproduceable
                              */
                             for (final Iterator<IMAPUpdateableData> iter = sessionData.iterator(); iter.hasNext();) {
                                 final IMAPUpdateableData tmp = iter.next();
-                                if (changedUIDs.contains(Long.valueOf(tmp.getUid()))) {
+                                if (changedUIDs.contains(tmp.getUid())) {
                                     iter.remove();
                                 }
                             }
@@ -231,7 +231,7 @@ final class IMAPSessionStorage {
                         }
                     }
                 } else {
-                    newAndModified = Collections.emptySet();
+                    newAndModified = new TLongHashSet(0);
                 }
                 /*
                  * Update caches if a change has been detected
@@ -246,7 +246,7 @@ final class IMAPSessionStorage {
                 /*
                  * Return collected UIDs
                  */
-                return new long[][] { collection2array(newAndModified), collection2array(deleted) };
+                return new long[][] { newAndModified.toArray(), deleted.toArray() };
             } catch (final MessagingException e) {
                 throw MIMEMailException.handleMessagingException(e);
             }
@@ -316,50 +316,41 @@ final class IMAPSessionStorage {
      * ############################ HELPER METHODS ############################
      */
 
-    private static Set<Long> data2UIDSet(final IMAPUpdateableData[] updateableDatas) {
-        final Set<Long> uids = new HashSet<Long>(updateableDatas.length);
+    private static TLongHashSet data2UIDSet(final IMAPUpdateableData[] updateableDatas) {
+        final TLongHashSet uids = new TLongHashSet(updateableDatas.length);
         for (int i = 0; i < updateableDatas.length; i++) {
-            uids.add(Long.valueOf(updateableDatas[i].getUid()));
+            uids.add(updateableDatas[i].getUid());
         }
         return uids;
     }
 
-    private static Set<Long> data2UIDSet(final Collection<IMAPUpdateableData> updateableDatas) {
-        final Set<Long> uids = new HashSet<Long>(updateableDatas.size());
+    private static TLongHashSet data2UIDSet(final Collection<IMAPUpdateableData> updateableDatas) {
+        final TLongHashSet uids = new TLongHashSet(updateableDatas.size());
         for (final IMAPUpdateableData updateableData : updateableDatas) {
-            uids.add(Long.valueOf(updateableData.getUid()));
+            uids.add(updateableData.getUid());
         }
         return uids;
     }
 
-    private static IMAPUpdateableData[] filterByUIDs(final Set<Long> uids, final IMAPUpdateableData[] updateableDatas) {
+    private static IMAPUpdateableData[] filterByUIDs(final TLongHashSet uids, final IMAPUpdateableData[] updateableDatas) {
         final List<IMAPUpdateableData> tmp = new ArrayList<IMAPUpdateableData>(uids.size());
         for (int i = 0; i < updateableDatas.length; i++) {
             final IMAPUpdateableData updateableData = updateableDatas[i];
-            if (uids.contains(Long.valueOf(updateableData.getUid()))) {
+            if (uids.contains(updateableData.getUid())) {
                 tmp.add(updateableData);
             }
         }
         return tmp.toArray(new IMAPUpdateableData[tmp.size()]);
     }
 
-    private static IMAPUpdateableData[] filterByUIDs(final Set<Long> uids, final Collection<IMAPUpdateableData> updateableDatas) {
+    private static IMAPUpdateableData[] filterByUIDs(final TLongHashSet uids, final Collection<IMAPUpdateableData> updateableDatas) {
         final List<IMAPUpdateableData> tmp = new ArrayList<IMAPUpdateableData>(uids.size());
         for (final IMAPUpdateableData updateableData : updateableDatas) {
-            if (uids.contains(Long.valueOf(updateableData.getUid()))) {
+            if (uids.contains(updateableData.getUid())) {
                 tmp.add(updateableData);
             }
         }
         return tmp.toArray(new IMAPUpdateableData[tmp.size()]);
-    }
-
-    private static long[] collection2array(final Collection<Long> collection) {
-        final long[] longs = new long[collection.size()];
-        int i = 0;
-        for (final Long lg : collection) {
-            longs[i++] = lg.longValue();
-        }
-        return longs;
     }
 
     /*-
