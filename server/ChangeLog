@@ -2,6 +2,7 @@
 
  - Bugfix #15413: Checking account name prior to insertion
  - Bugfix #15313: Added properties file to define handling of confirmed-spam/confirmed-ham folders
+ - Bugfix #15337: Fixed parsing of "subscribed" folder JSON field
 
 * 2010-02-19 - marcus.klein@open-xchange.com
 
