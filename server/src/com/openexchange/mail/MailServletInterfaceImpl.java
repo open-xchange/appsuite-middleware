@@ -1134,13 +1134,16 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             onlyFolderAndID = onlyFolderAndID(useFields);
         }
         /*
-         * Extract IDs
+         * More than ID and folder requested?
          */
-        final String[] mailIds = new String[mails.length];
-        for (int i = 0; i < mailIds.length; i++) {
-            mailIds[i] = mails[i].getMailId();
-        }
         if (!onlyFolderAndID) {
+            /*
+             * Extract IDs
+             */
+            final String[] mailIds = new String[mails.length];
+            for (int i = 0; i < mailIds.length; i++) {
+                mailIds[i] = mails[i].getMailId();
+            }
             /*
              * Fetch identified messages by their IDs and pre-fill them according to specified fields
              */
