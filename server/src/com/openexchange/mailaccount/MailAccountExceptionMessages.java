@@ -120,7 +120,7 @@ public enum MailAccountExceptionMessages implements OXErrorMessage {
      */
     CONFLICT_ADDR(MailAccountExceptionStrings.CONFLICT_ADDR_MSG, Category.CODE_ERROR, 15),
     /**
-     * Invalid name: %1$s
+     * Invalid mail account name: %1$s
      */
     INVALID_NAME(MailAccountExceptionStrings.INVALID_NAME_MSG, Category.CODE_ERROR, 16);
     

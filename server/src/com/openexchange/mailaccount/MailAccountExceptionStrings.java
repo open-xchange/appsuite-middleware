@@ -103,8 +103,8 @@ public final class MailAccountExceptionStrings implements LocalizableStrings {
     // Multiple mail accounts not enabled for user %1$s in context %2$s.
     public static final String NOT_ENABLED_MSG = "Multiple mail accounts not enabled for user %1$s in context %2$s.";
 
-    // Invalid name: %1$s
-    public static final String INVALID_NAME_MSG = "Invalid name: %1$s";
+    // Invalid mail account name: %1$s
+    public static final String INVALID_NAME_MSG = "Invalid mail account name: %1$s";
 
     /**
      * Initializes a new {@link MailAccountExceptionStrings}.
