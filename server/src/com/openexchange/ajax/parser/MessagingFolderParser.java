@@ -135,6 +135,9 @@ public final class MessagingFolderParser {
                     try {
                         setSubscribed(folderJsonObject.getInt(FolderFields.SUBSCRIBED) > 0);
                     } catch (final JSONException e) {
+                        /*
+                         * Not an integer value
+                         */
                         setSubscribed(folderJsonObject.getBoolean(FolderFields.SUBSCRIBED));
                     }
                 } else {

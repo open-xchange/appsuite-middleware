@@ -114,6 +114,9 @@ public final class FolderParser {
                 try {
                     mailFolder.setSubscribed(jsonObj.getInt(FolderFields.SUBSCRIBED) > 0);
                 } catch (final JSONException e) {
+                    /*
+                     * Not an integer value
+                     */
                     mailFolder.setSubscribed(jsonObj.getBoolean(FolderFields.SUBSCRIBED));
                 }
             }
