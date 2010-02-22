@@ -155,13 +155,18 @@ public final class StringCollection {
             "\\*",
             quoteReplacement("%")).replaceAll("\\?", quoteReplacement("_"));
         if (surroundWithWildcard) {
-            if (value.charAt(0) != '%') {
-                // Prepend '%' character
-                value = new StringBuilder(value.length() + 1).append('%').append(value).toString();
-            }
-            if (value.charAt(value.length() - 1) != '%' || (value.length() > 1 && value.charAt(value.length() - 2) == '\\')) {
-                // Append '%' character
-                value = new StringBuilder(value.length() + 1).append(value).append('%').toString();
+            if (value.length() > 0) {
+                if (value.charAt(0) != '%') {
+                    // Prepend '%' character
+                    value = new StringBuilder(value.length() + 1).append('%').append(value).toString();
+                }
+                final int length = value.length();
+                if (value.charAt(length - 1) != '%' || (length > 1 && value.charAt(length - 2) == '\\')) {
+                    // Append '%' character
+                    value = new StringBuilder(length + 1).append(value).append('%').toString();
+                }
+            } else {
+                value = "%";
             }
         }
         return value;
@@ -201,15 +206,25 @@ public final class StringCollection {
             "\\*",
             quoteReplacement("%")).replaceAll("\\?", quoteReplacement("_"));
         if (prependWildcard) {
-            if (value.charAt(0) != '%') {
-                // Prepend '%' character
-                value = new StringBuilder(value.length() + 1).append('%').append(value).toString();
+            final int length = value.length();
+            if (length > 0) {
+                if (value.charAt(0) != '%') {
+                    // Prepend '%' character
+                    value = new StringBuilder(length + 1).append('%').append(value).toString();
+                }
+            } else {
+                value = "%";
             }
         }
         if (appendWildcard) {
-            if (value.charAt(value.length() - 1) != '%' || (value.length() > 1 && value.charAt(value.length() - 2) == '\\')) {
-                // Append '%' character
-                value = new StringBuilder(value.length() + 1).append(value).append('%').toString();
+            final int length = value.length();
+            if (length > 0) {
+                if (value.charAt(length - 1) != '%' || (length > 1 && value.charAt(length - 2) == '\\')) {
+                    // Append '%' character
+                    value = new StringBuilder(length + 1).append(value).append('%').toString();
+                }
+            } else {
+                value = "%";
             }
         }
         return value;
