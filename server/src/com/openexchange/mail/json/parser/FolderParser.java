@@ -110,8 +110,12 @@ public final class FolderParser {
 
                 throw new MailException(MailException.Code.MISSING_PARAMETER, FolderFields.MODULE);
             }
-            if (jsonObj.has(FolderFields.SUBSCRIBED) && !jsonObj.isNull(FolderFields.SUBSCRIBED)) {
-                mailFolder.setSubscribed(jsonObj.getInt(FolderFields.SUBSCRIBED) > 0);
+            if (jsonObj.hasAndNotNull(FolderFields.SUBSCRIBED)) {
+                try {
+                    mailFolder.setSubscribed(jsonObj.getInt(FolderFields.SUBSCRIBED) > 0);
+                } catch (final JSONException e) {
+                    mailFolder.setSubscribed(jsonObj.getBoolean(FolderFields.SUBSCRIBED));
+                }
             }
             if (jsonObj.has(FolderFields.PERMISSIONS) && !jsonObj.isNull(FolderFields.PERMISSIONS)) {
                 final JSONArray jsonArr = jsonObj.getJSONArray(FolderFields.PERMISSIONS);
