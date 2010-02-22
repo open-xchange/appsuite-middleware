@@ -121,9 +121,6 @@ public final class NewCallAction extends AbstractVoipNowHTTPAction<GetMethod> {
                     }
                 }
             }
-            if (null != jsonArray && 0 < jsonArray.length()) {
-                // TODO:
-            }
             final VoipNowServerSetting setting = getVoipNowServerSetting(session, true);
             /*
              * Compose and apply query string without starting '?' character
@@ -131,6 +128,12 @@ public final class NewCallAction extends AbstractVoipNowHTTPAction<GetMethod> {
             final StringBuilder builder = new StringBuilder(256);
             builder.append("PhoneNumberToCall=").append(urlEncode(receiverNumber));
             builder.append('&').append("FromExtension=").append(urlEncode(callerNumber));
+            if (null != jsonArray) {
+                final int len = jsonArray.length();
+                for (int i = 0; i < len; i++) {
+                    builder.append('&').append("FromExtension=").append(urlEncode(jsonArray.getString(i)));
+                }
+            }
             builder.append('&').append("CallerID=").append(urlEncode(receiverDisplayName));
             builder.append('&').append("WaitForPickup=").append(timeout);
             builder.append('&').append("Account=").append(urlEncode(setting.getLogin()));
@@ -155,6 +158,8 @@ public final class NewCallAction extends AbstractVoipNowHTTPAction<GetMethod> {
             throw VoipNowExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
             throw VoipNowExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (final JSONException e) {
+            throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
         }
     }
 
