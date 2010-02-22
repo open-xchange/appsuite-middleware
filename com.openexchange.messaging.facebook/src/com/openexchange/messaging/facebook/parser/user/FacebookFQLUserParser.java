@@ -98,6 +98,13 @@ public final class FacebookFQLUserParser {
                 }
             });
 
+            m.put("pic_small", new ItemHandler() {
+
+                public void handleItem(final Node item, final FacebookUser user) throws MessagingException {
+                    user.setPicSmall(item.getTextContent());
+                }
+            });
+
             /*
              * TODO: Add other useful item handler
              */

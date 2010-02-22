@@ -134,7 +134,7 @@ public final class FacebookFQLStreamParser {
                 public void handleItem(final Node item, final FacebookMessagingMessage message) {
                     final String content = item.getTextContent();
                     message.setId(content);
-                    message.setPostId(FacebookMessagingUtility.parseUnsignedLong(content));
+                    // message.setPostId(FacebookMessagingUtility.parseUnsignedLong(content));
                 }
             });
             m.put("actor_id", new ItemHandler() {

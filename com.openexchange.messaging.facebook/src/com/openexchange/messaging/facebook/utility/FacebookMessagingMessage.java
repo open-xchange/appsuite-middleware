@@ -61,7 +61,7 @@ public final class FacebookMessagingMessage extends MimeMessagingMessage {
 
     private long fromUserId;
 
-    private long postId;
+    // private long postId;
 
     /**
      * Initializes a new {@link FacebookMessagingMessage}.
@@ -89,21 +89,19 @@ public final class FacebookMessagingMessage extends MimeMessagingMessage {
     }
 
     /**
-     * Gets the post identifier.
-     * 
-     * @return The post identifier
+     * // * Gets the post identifier. // * // * @return The post identifier //
      */
-    public long getPostId() {
-        return postId;
-    }
-
-    /**
-     * Sets the post identifier.
-     * 
-     * @param postId The post identifier to set
-     */
-    public void setPostId(final long postId) {
-        this.postId = postId;
-    }
+    // public long getPostId() {
+    // return postId;
+    // }
+    //
+    // /**
+    // * Sets the post identifier.
+    // *
+    // * @param postId The post identifier to set
+    // */
+    // public void setPostId(final long postId) {
+    // this.postId = postId;
+    // }
 
 }

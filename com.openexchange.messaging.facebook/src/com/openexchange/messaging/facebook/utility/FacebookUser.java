@@ -59,6 +59,8 @@ public final class FacebookUser {
 
     private String name;
 
+    private String picSmall;
+
     private long uid;
 
     /**
@@ -66,6 +68,28 @@ public final class FacebookUser {
      */
     public FacebookUser() {
         super();
+    }
+
+    /**
+     * Gets the URL to the small-sized profile picture.
+     * <p>
+     * The image can have a maximum width of 50px and a maximum height of 150px.
+     * 
+     * @return The URL to the small-sized profile picture
+     */
+    public String getPicSmall() {
+        return picSmall;
+    }
+
+    /**
+     * Sets the URL to the small-sized profile picture.
+     * <p>
+     * The image can have a maximum width of 50px and a maximum height of 150px.
+     * 
+     * @param picSmall The URL to the small-sized profile picture
+     */
+    public void setPicSmall(final String picSmall) {
+        this.picSmall = picSmall;
     }
 
     /**

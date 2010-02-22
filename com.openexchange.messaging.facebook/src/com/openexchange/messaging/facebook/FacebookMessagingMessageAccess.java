@@ -51,6 +51,7 @@ package com.openexchange.messaging.facebook;
 
 import static com.openexchange.messaging.facebook.services.FacebookMessagingServiceRegistry.getServiceRegistry;
 import static com.openexchange.messaging.facebook.utility.FacebookMessagingUtility.fireFQLQuery;
+import gnu.trove.TLongObjectHashMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -217,7 +218,7 @@ public final class FacebookMessagingMessageAccess implements MessagingMessageAcc
             /*
              * Static fillers
              */
-            final List<StaticFiller> staticFillers = FacebookMessagingUtility.getStaticFillers(SET_FULL, this);
+            final List<StaticFiller> staticFillers = FacebookMessagingUtility.getStreamStaticFillers(SET_FULL, this);
             staticFillers.add(new FacebookMessagingUtility.FolderFiller(folder));
             /*
              * Query
@@ -263,10 +264,12 @@ public final class FacebookMessagingMessageAccess implements MessagingMessageAcc
             return Collections.emptyList();
         }
         final EnumSet<MessagingField> fieldSet = EnumSet.copyOf(Arrays.asList(fields));
+        final EnumSet<MessagingField> userFieldSet = EnumSet.copyOf(fieldSet);
+        userFieldSet.retainAll(FacebookMessagingUtility.getUserQueryableFields());
         /*
          * Static fillers
          */
-        final List<StaticFiller> staticFillers = FacebookMessagingUtility.getStaticFillers(fieldSet, this);
+        final List<StaticFiller> staticFillers = FacebookMessagingUtility.getStreamStaticFillers(fieldSet, this);
         if (fieldSet.contains(MessagingField.FOLDER_ID) || fieldSet.contains(MessagingField.FULL)) {
             staticFillers.add(new FacebookMessagingUtility.FolderFiller(folder));
         }
@@ -284,7 +287,7 @@ public final class FacebookMessagingMessageAccess implements MessagingMessageAcc
         }
         final List<MessagingMessage> messages;
         if (null != query) {
-            final Map<Long, FacebookMessagingMessage> m;
+            final TLongObjectHashMap<List<FacebookMessagingMessage>> m;
             {
                 final List<Object> results = FacebookMessagingUtility.fireFQLQuery(query.getCharSequence(), facebookRestClient);
                 final int size = results.size();
@@ -292,25 +295,30 @@ public final class FacebookMessagingMessageAccess implements MessagingMessageAcc
                     throw new IllegalStateException("Size mismatch.");
                 }
                 final Iterator<Object> iterator = results.iterator();
-                final Map<Long, FacebookMessagingMessage> orderMap = new HashMap<Long, FacebookMessagingMessage>(size);
-                if (fieldSet.contains(MessagingField.FROM)) {
-                    m = new HashMap<Long, FacebookMessagingMessage>(size);
+                final Map<String, FacebookMessagingMessage> orderMap = new HashMap<String, FacebookMessagingMessage>(size);
+                if (userFieldSet.isEmpty()) {
+                    m = new TLongObjectHashMap<List<FacebookMessagingMessage>>(0);
                     for (int i = 0; i < size; i++) {
                         final FacebookMessagingMessage message = parseFromElement(staticFillers, (Element) iterator.next());
                         /*
                          * Add to list/map
                          */
-                        orderMap.put(Long.valueOf(message.getPostId()), message);
-                        m.put(Long.valueOf(message.getFromUserId()), message);
+                        orderMap.put(message.getId(), message);
                     }
-                } else {
-                    m = Collections.emptyMap();
+                } else { // Contains any
+                    m = new TLongObjectHashMap<List<FacebookMessagingMessage>>(size);
                     for (int i = 0; i < size; i++) {
                         final FacebookMessagingMessage message = parseFromElement(staticFillers, (Element) iterator.next());
                         /*
                          * Add to list/map
                          */
-                        orderMap.put(Long.valueOf(message.getId()), message);
+                        orderMap.put(message.getId(), message);
+                        List<FacebookMessagingMessage> l = m.get(message.getFromUserId());
+                        if (null == l) {
+                            l = new ArrayList<FacebookMessagingMessage>(4);
+                            m.put(message.getFromUserId(), l);
+                        }
+                        l.add(message);
                     }
                 }
                 /*
@@ -318,7 +326,7 @@ public final class FacebookMessagingMessageAccess implements MessagingMessageAcc
                  */
                 messages = new ArrayList<MessagingMessage>(size);
                 for (int i = 0; i < messageIds.length; i++) {
-                    messages.add(orderMap.get(Long.valueOf(messageIds[i])));
+                    messages.add(orderMap.get(messageIds[i]));
                 }
             }
             /*
@@ -326,28 +334,23 @@ public final class FacebookMessagingMessageAccess implements MessagingMessageAcc
              */
             if (!m.isEmpty()) {
                 final int size = m.size();
-                final StringBuilder sql = new StringBuilder(size * 16).append("SELECT uid, name FROM user WHERE uid IN ");
-                sql.append('(');
-                {
-                    final Iterator<Long> iter = m.keySet().iterator();
-                    sql.append(iter.next().toString());
-                    for (int i = 1; i < size; i++) {
-                        sql.append(',').append(iter.next().toString());
-                    }
-                }
-                sql.append(')');
+                final Query userQuery =
+                    FacebookMessagingUtility.composeFQLUserQueryFor(userFieldSet.toArray(new MessagingField[userFieldSet.size()]), m.keys());
                 /*
                  * Fire FQL query
                  */
-                final List<Object> results = fireFQLQuery(sql.toString(), facebookRestClient);
+                final List<Object> results = FacebookMessagingUtility.fireFQLQuery(userQuery.getCharSequence(), facebookRestClient);
                 if (size != results.size()) {
                     throw new IllegalStateException("result size mismatch!");
                 }
                 final Iterator<Object> iterator = results.iterator();
                 for (int i = 0; i < size; i++) {
                     final FacebookUser facebookUser = FacebookFQLUserParser.parseUserDOMElement((Element) iterator.next());
-                    m.get(Long.valueOf(facebookUser.getUid())).setHeader(
-                        MimeAddressMessagingHeader.valueOfPlain(FROM, facebookUser.getName(), String.valueOf(facebookUser.getUid())));
+                    final String userIdStr = String.valueOf(facebookUser.getUid());
+                    for (final FacebookMessagingMessage message : m.get(facebookUser.getUid())) {
+                        message.setHeader(MimeAddressMessagingHeader.valueOfPlain(FROM, facebookUser.getName(), userIdStr));
+                        message.setPicture(facebookUser.getPicSmall());
+                    }
                 }
             }
         } else {
@@ -441,6 +444,8 @@ public final class FacebookMessagingMessageAccess implements MessagingMessageAcc
             return Collections.emptyList();
         }
         final EnumSet<MessagingField> fieldSet = EnumSet.copyOf(Arrays.asList(fields));
+        final EnumSet<MessagingField> userFieldSet = EnumSet.copyOf(fieldSet);
+        userFieldSet.retainAll(FacebookMessagingUtility.getUserQueryableFields());
         if (null != searchTerm) {
             searchTerm.addMessagingField(fieldSet);
         }
@@ -448,7 +453,7 @@ public final class FacebookMessagingMessageAccess implements MessagingMessageAcc
          * Static fillers
          */
         final MessagingField[] daFields = fieldSet.toArray(new MessagingField[fieldSet.size()]);
-        final List<StaticFiller> staticFillers = FacebookMessagingUtility.getStaticFillers(daFields, this);
+        final List<StaticFiller> staticFillers = FacebookMessagingUtility.getStreamStaticFillers(daFields, this);
         if (fieldSet.contains(MessagingField.FOLDER_ID) || fieldSet.contains(MessagingField.FULL)) {
             staticFillers.add(new FacebookMessagingUtility.FolderFiller(folder));
         }
@@ -456,36 +461,41 @@ public final class FacebookMessagingMessageAccess implements MessagingMessageAcc
          * Query; must not be null to determine proper number of wall posts
          */
         final Query query;
-        if (EnumSet.copyOf(fieldSet).removeAll(FacebookMessagingUtility.getQueryableFields())) { // Contains any
+        if (EnumSet.copyOf(fieldSet).removeAll(FacebookMessagingUtility.getStreamQueryableFields())) { // Contains any
             query = FacebookMessagingUtility.composeFQLStreamQueryFor(daFields, sortField, order, facebookUserId);
         } else {
             query = FacebookMessagingUtility.composeFQLStreamQueryFor(FIELDS_ID, sortField, order, facebookUserId);
         }
         final List<MessagingMessage> messages;
-        final Map<Long, FacebookMessagingMessage> m;
+        final TLongObjectHashMap<List<FacebookMessagingMessage>> m;
         {
             final List<Object> results = FacebookMessagingUtility.fireFQLQuery(query.getCharSequence(), facebookRestClient);
             final int size = results.size();
             final Iterator<Object> iterator = results.iterator();
             messages = new ArrayList<MessagingMessage>(size);
-            if (fieldSet.contains(MessagingField.FROM)) {
-                m = new HashMap<Long, FacebookMessagingMessage>(size);
+            if (userFieldSet.isEmpty()) {
+                m = new TLongObjectHashMap<List<FacebookMessagingMessage>>(0);
                 for (int i = 0; i < size; i++) {
                     final FacebookMessagingMessage message = parseFromElement(staticFillers, (Element) iterator.next());
                     /*
                      * Add to list/map
                      */
                     messages.add(message);
-                    m.put(Long.valueOf(message.getFromUserId()), message);
                 }
-            } else {
-                m = Collections.emptyMap();
+            } else { // Contains any
+                m = new TLongObjectHashMap<List<FacebookMessagingMessage>>(size);
                 for (int i = 0; i < size; i++) {
                     final FacebookMessagingMessage message = parseFromElement(staticFillers, (Element) iterator.next());
                     /*
                      * Add to list/map
                      */
                     messages.add(message);
+                    List<FacebookMessagingMessage> l = m.get(message.getFromUserId());
+                    if (null == l) {
+                        l = new ArrayList<FacebookMessagingMessage>(4);
+                        m.put(message.getFromUserId(), l);
+                    }
+                    l.add(message);
                 }
             }
         }
@@ -500,28 +510,23 @@ public final class FacebookMessagingMessageAccess implements MessagingMessageAcc
          */
         if (!m.isEmpty()) {
             final int size = m.size();
-            final StringBuilder sql = new StringBuilder(size * 16).append("SELECT uid, name FROM user WHERE uid IN ");
-            sql.append('(');
-            {
-                final Iterator<Long> iter = m.keySet().iterator();
-                sql.append(iter.next().toString());
-                for (int i = 1; i < size; i++) {
-                    sql.append(',').append(iter.next().toString());
-                }
-            }
-            sql.append(')');
+            final Query userQuery =
+                FacebookMessagingUtility.composeFQLUserQueryFor(userFieldSet.toArray(new MessagingField[userFieldSet.size()]), m.keys());
             /*
              * Fire FQL query
              */
-            final List<Object> results = fireFQLQuery(sql.toString(), facebookRestClient);
+            final List<Object> results = FacebookMessagingUtility.fireFQLQuery(userQuery.getCharSequence(), facebookRestClient);
             if (size != results.size()) {
                 throw new IllegalStateException("result size mismatch!");
             }
             final Iterator<Object> iterator = results.iterator();
             for (int i = 0; i < size; i++) {
                 final FacebookUser facebookUser = FacebookFQLUserParser.parseUserDOMElement((Element) iterator.next());
-                m.get(Long.valueOf(facebookUser.getUid())).setHeader(
-                    MimeAddressMessagingHeader.valueOfPlain(FROM, facebookUser.getName(), String.valueOf(facebookUser.getUid())));
+                final String userIdStr = String.valueOf(facebookUser.getUid());
+                for (final FacebookMessagingMessage message : m.get(facebookUser.getUid())) {
+                    message.setHeader(MimeAddressMessagingHeader.valueOfPlain(FROM, facebookUser.getName(), userIdStr));
+                    message.setPicture(facebookUser.getPicSmall());
+                }
             }
         }
         /*

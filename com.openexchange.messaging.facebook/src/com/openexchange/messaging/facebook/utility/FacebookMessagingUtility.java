@@ -135,7 +135,7 @@ public final class FacebookMessagingUtility {
 
     /**
      * {@link FolderFiller} - The folder filler
-     *
+     * 
      * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
      * @since Open-Xchange v6.16
      */
@@ -161,11 +161,13 @@ public final class FacebookMessagingUtility {
 
     }
 
-    private static final Map<MessagingField, QueryAdder> FH;
+    private static final Map<MessagingField, QueryAdder> ADDERS_STREAM;
+
+    private static final Map<MessagingField, QueryAdder> ADDERS_USER;
 
     static {
         {
-            final EnumMap<MessagingField, QueryAdder> m = new EnumMap<MessagingField, QueryAdder>(MessagingField.class);
+            EnumMap<MessagingField, QueryAdder> m = new EnumMap<MessagingField, QueryAdder>(MessagingField.class);
 
             m.put(MessagingField.BODY, new QueryAdder() {
 
@@ -297,17 +299,57 @@ public final class FacebookMessagingUtility {
                 }
             });
 
-            FH = Collections.unmodifiableMap(m);
+            ADDERS_STREAM = Collections.unmodifiableMap(m);
+
+            /*
+             * ----------------------------------------------
+             */
+
+            m = new EnumMap<MessagingField, QueryAdder>(MessagingField.class);
+
+            m.put(MessagingField.FROM, new QueryAdder() {
+
+                public void add2Query(final Set<String> fieldNames) {
+                    fieldNames.add("uid");
+                    fieldNames.add("name");
+                }
+
+                public String getOrderBy() {
+                    return "name";
+                }
+            });
+
+            m.put(MessagingField.PICTURE, new QueryAdder() {
+
+                public void add2Query(final Set<String> fieldNames) {
+                    fieldNames.add("pic_small");
+                }
+
+                public String getOrderBy() {
+                    return null;
+                }
+            });
+
+            ADDERS_USER = Collections.unmodifiableMap(m);
         }
     }
 
     /**
-     * Gets the query-able fields.
+     * Gets the stream query-able fields.
      * 
-     * @return The query-able fields
+     * @return The stream query-able fields
      */
-    public static EnumSet<MessagingField> getQueryableFields() {
-        return EnumSet.copyOf(FH.keySet());
+    public static EnumSet<MessagingField> getStreamQueryableFields() {
+        return EnumSet.copyOf(ADDERS_STREAM.keySet());
+    }
+
+    /**
+     * Gets the user query-able fields.
+     * 
+     * @return The user query-able fields
+     */
+    public static EnumSet<MessagingField> getUserQueryableFields() {
+        return EnumSet.copyOf(ADDERS_USER.keySet());
     }
 
     /**
@@ -318,8 +360,8 @@ public final class FacebookMessagingUtility {
      * @return The fillers
      * @throws MessagingException If a messaging error occurs
      */
-    public static List<StaticFiller> getStaticFillers(final MessagingField[] fields, final FacebookMessagingMessageAccess access) throws MessagingException {
-        return getStaticFillers(EnumSet.copyOf(Arrays.asList(fields)), access);
+    public static List<StaticFiller> getStreamStaticFillers(final MessagingField[] fields, final FacebookMessagingMessageAccess access) throws MessagingException {
+        return getStreamStaticFillers(EnumSet.copyOf(Arrays.asList(fields)), access);
     }
 
     /**
@@ -330,7 +372,7 @@ public final class FacebookMessagingUtility {
      * @return The fillers
      * @throws MessagingException If a messaging error occurs
      */
-    public static List<StaticFiller> getStaticFillers(final EnumSet<MessagingField> fieldSet, final FacebookMessagingMessageAccess access) throws MessagingException {
+    public static List<StaticFiller> getStreamStaticFillers(final EnumSet<MessagingField> fieldSet, final FacebookMessagingMessageAccess access) throws MessagingException {
         final List<StaticFiller> ret = new ArrayList<StaticFiller>(fieldSet.size());
         if (fieldSet.contains(MessagingField.ACCOUNT_NAME) || fieldSet.contains(MessagingField.FULL)) {
             ret.add(new AccountNameFiller(access.getMessagingAccount().getDisplayName()));
@@ -522,7 +564,7 @@ public final class FacebookMessagingUtility {
     private static Query composeFQLStreamQueryFor0(final MessagingField[] fields, final MessagingField sortField, final OrderDirection order, final String[] postIds, final long facebookUserId) {
         final Set<String> fieldNames = new HashSet<String>(fields.length);
         for (int i = 0; i < fields.length; i++) {
-            final QueryAdder queryAdder = FH.get(fields[i]);
+            final QueryAdder queryAdder = ADDERS_STREAM.get(fields[i]);
             if (null != queryAdder) {
                 queryAdder.add2Query(fieldNames);
             }
@@ -532,10 +574,12 @@ public final class FacebookMessagingUtility {
         }
         final int size = fieldNames.size();
         final StringBuilder query = new StringBuilder(size << 5).append("SELECT ");
-        final Iterator<String> iter = fieldNames.iterator();
-        query.append(iter.next());
-        for (int i = 1; i < size; i++) {
-            query.append(", ").append(iter.next());
+        {
+            final Iterator<String> iter = fieldNames.iterator();
+            query.append(iter.next());
+            for (int i = 1; i < size; i++) {
+                query.append(", ").append(iter.next());
+            }
         }
         query.append(" FROM stream WHERE source_id = ").append(facebookUserId);
         if (null != postIds && 0 < postIds.length) {
@@ -560,7 +604,85 @@ public final class FacebookMessagingUtility {
             return new Query(query, false);
         }
         boolean containsOrderBy = false;
-        final QueryAdder adder = FH.get(sortField);
+        final QueryAdder adder = ADDERS_STREAM.get(sortField);
+        if (null != adder) {
+            final String orderBy = adder.getOrderBy();
+            if (null != orderBy) {
+                query.append(" ORDER BY ").append(orderBy).append(OrderDirection.DESC.equals(order) ? " DESC" : " ASC");
+                containsOrderBy = true;
+            }
+        }
+        return new Query(query, containsOrderBy);
+    }
+
+    /**
+     * Composes the FQL user query for given fields.
+     * 
+     * @param fields The fields
+     * @param userIds The user identifiers
+     * @return The FQL user query or <code>null</code> if fields require no query
+     */
+    public static Query composeFQLUserQueryFor(final MessagingField[] fields, final long[] userIds) {
+        return composeFQLUserQueryFor0(fields, null, null, userIds);
+    }
+
+    /**
+     * Composes the FQL user query for given fields.
+     * 
+     * @param fields The fields
+     * @param sortField The sort field; may be <code>null</code>
+     * @param order The order direction
+     * @param userIds The user identifiers
+     * @return The FQL user query or <code>null</code> if fields require no query
+     */
+    public static Query composeFQLUserQueryFor(final MessagingField[] fields, final MessagingField sortField, final OrderDirection order, final long[] userIds) {
+        return composeFQLUserQueryFor0(fields, sortField, order, userIds);
+    }
+
+    private static Query composeFQLUserQueryFor0(final MessagingField[] fields, final MessagingField sortField, final OrderDirection order, final long[] userIds) {
+        final Set<String> fieldNames = new HashSet<String>(fields.length);
+        for (int i = 0; i < fields.length; i++) {
+            final QueryAdder queryAdder = ADDERS_USER.get(fields[i]);
+            if (null != queryAdder) {
+                queryAdder.add2Query(fieldNames);
+            }
+        }
+        if (fieldNames.isEmpty()) {
+            return null;
+        }
+        final int size = fieldNames.size();
+        final StringBuilder query = new StringBuilder(size << 5).append("SELECT ");
+        {
+            final Iterator<String> iter = fieldNames.iterator();
+            query.append(iter.next());
+            for (int i = 1; i < size; i++) {
+                query.append(", ").append(iter.next());
+            }
+        }
+        query.append(" FROM user WHERE");
+        if (null != userIds && 0 < userIds.length) {
+            if (1 == userIds.length) {
+                query.append(" uid = '").append(userIds[0]).append('\'');
+            } else {
+                query.append(" uid IN ");
+                query.append('(');
+                {
+                    query.append('\'').append(userIds[0]).append('\'');
+                    for (int i = 1; i < userIds.length; i++) {
+                        query.append(',').append('\'').append(userIds[i]).append('\'');
+                    }
+                }
+                query.append(')');
+            }
+        }
+        /*
+         * Check sort field
+         */
+        if (null == sortField) {
+            return new Query(query, false);
+        }
+        boolean containsOrderBy = false;
+        final QueryAdder adder = ADDERS_STREAM.get(sortField);
         if (null != adder) {
             final String orderBy = adder.getOrderBy();
             if (null != orderBy) {
