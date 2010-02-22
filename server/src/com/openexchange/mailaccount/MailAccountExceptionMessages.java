@@ -118,7 +118,12 @@ public enum MailAccountExceptionMessages implements OXErrorMessage {
     /**
      * Found two mail accounts with same email address %1$s for user %2$s in context %3$s.
      */
-    CONFLICT_ADDR(MailAccountExceptionStrings.CONFLICT_ADDR_MSG, Category.CODE_ERROR, 15);
+    CONFLICT_ADDR(MailAccountExceptionStrings.CONFLICT_ADDR_MSG, Category.CODE_ERROR, 15),
+    /**
+     * Invalid name: %1$s
+     */
+    INVALID_NAME(MailAccountExceptionStrings.INVALID_NAME_MSG, Category.CODE_ERROR, 16);
+    
 
     /**
      * Message of the exception.
