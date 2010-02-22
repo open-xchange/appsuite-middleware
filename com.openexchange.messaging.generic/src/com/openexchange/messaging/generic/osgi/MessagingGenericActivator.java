@@ -60,6 +60,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.caching.CacheService;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
+import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.groupware.delete.DeleteListener;
@@ -162,12 +163,13 @@ public class MessagingGenericActivator extends DeferredActivator {
             }
 
             registrations = new ArrayList<ServiceRegistration>();
+            final MessagingGenericCreateTableTask createTableTask = new MessagingGenericCreateTableTask();
             registrations.add(context.registerService(UpdateTaskProviderService.class.getName(), new UpdateTaskProviderService() {
-
                 public Collection<UpdateTask> getUpdateTasks() {
-                    return Arrays.asList(((UpdateTask) new MessagingGenericCreateTableTask()));
+                    return Arrays.asList(((UpdateTask) createTableTask));
                 }
             }, null));
+            registrations.add(context.registerService(CreateTableService.class.getName(), createTableTask, null));
             registrations.add(context.registerService(DeleteListener.class.getName(), new MessagingGenericDeleteListener(), null));
             registrations.add(context.registerService(PreferencesItemService.class.getName(), new Enabled(), null));
             registrations.add(context.registerService(PreferencesItemService.class.getName(), new GUI(), null));
