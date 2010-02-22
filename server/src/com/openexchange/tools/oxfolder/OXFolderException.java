@@ -502,7 +502,11 @@ public class OXFolderException extends OXException {
         /**
          * No individual user permissions are allowed for folder %1$s in context %2$s.
          */
-        NO_INDIVIDUAL_PERMISSION("No individual user permissions are allowed for folder %1$s in context %2$s.", Category.PERMISSION, 83);
+        NO_INDIVIDUAL_PERMISSION("No individual user permissions are allowed for folder %1$s in context %2$s.", Category.PERMISSION, 83),
+        /**
+         * Folder module must not be updated.
+         */
+        DENY_FOLDER_MODULE_UPDATE("Folder module must not be updated.", Category.USER_INPUT, 84);
 
         /**
          * Message of the exception.
