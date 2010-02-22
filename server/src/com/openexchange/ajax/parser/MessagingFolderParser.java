@@ -132,7 +132,11 @@ public final class MessagingFolderParser {
                 setContentType(MessagingContentType.getInstance());
 
                 if (folderJsonObject.hasAndNotNull(FolderFields.SUBSCRIBED)) {
-                    setSubscribed(folderJsonObject.getInt(FolderFields.SUBSCRIBED) > 0);
+                    try {
+                        setSubscribed(folderJsonObject.getInt(FolderFields.SUBSCRIBED) > 0);
+                    } catch (final JSONException e) {
+                        setSubscribed(folderJsonObject.getBoolean(FolderFields.SUBSCRIBED));
+                    }
                 } else {
                     // If not present consider as subscribed
                     setSubscribed(true);
