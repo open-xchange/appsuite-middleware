@@ -1578,18 +1578,17 @@ public final class IMAPCommandsCollection {
      * @return A map resolving specified UIDs to current corresponding sequence numbers
      * @throws MessagingException If a messaging error occurs
      */
-    @SuppressWarnings("unchecked")
-    public static Map<Long, Integer> uids2SeqNumsMap(final IMAPFolder imapFolder, final long[] uids) throws MessagingException {
+    public static TLongIntHashMap uids2SeqNumsMap(final IMAPFolder imapFolder, final long[] uids) throws MessagingException {
         if (imapFolder.getMessageCount() == 0) {
             /*
              * Empty folder...
              */
-            return Collections.emptyMap();
+            return new TLongIntHashMap(0);
         }
-        return (Map<Long, Integer>) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+        return (TLongIntHashMap) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-                final Map<Long, Integer> m = new HashMap<Long, Integer>(uids.length);
+                final TLongIntHashMap m = new TLongIntHashMap(uids.length);
                 final String[] args = IMAPNumArgSplitter.splitUIDArg(uids, true, 16); // "UID FETCH <uids> (UID)"
                 final long start = System.currentTimeMillis();
                 for (int k = 0; k < args.length; k++) {
@@ -1613,7 +1612,7 @@ public final class IMAPCommandsCollection {
                             if (STR_FETCH.equals(((IMAPResponse) r[j]).getKey())) {
                                 final FetchResponse fr = (FetchResponse) r[j];
                                 final UID uidItem = getItemOf(UID.class, fr, STR_UID);
-                                m.put(Long.valueOf(uidItem.uid), Integer.valueOf(fr.getNumber()));
+                                m.put(uidItem.uid, fr.getNumber());
                                 r[j] = null;
                             }
                         }

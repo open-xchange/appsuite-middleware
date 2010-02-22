@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.infostore.facade.impl;
 
+import gnu.trove.TLongObjectHashMap;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -958,7 +959,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
                 set.setValue(metadata.doSwitch(get));
                 metadata.doSwitch(set);
             }
-            OXFolderAccess ofa = new OXFolderAccess(sessionObj.getContext());
+            final OXFolderAccess ofa = new OXFolderAccess(sessionObj.getContext());
             int folderId = (int) oldDocument.getFolderId();
             if(updatedCols.contains(Metadata.FOLDER_ID_LITERAL)) {
                 folderId = (int) docForEvent.getFolderId();
@@ -1138,7 +1139,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
             idSet.add(Integer.valueOf(i));
         }
 
-        final Map<Long, EffectivePermission> perms = new HashMap<Long, EffectivePermission>();
+        final TLongObjectHashMap<EffectivePermission> perms = new TLongObjectHashMap<EffectivePermission>();
 
         final List<DocumentMetadata> toDeleteDocs = new ArrayList<DocumentMetadata>();
         final List<DocumentMetadata> toDeleteVersions = new ArrayList<DocumentMetadata>();
@@ -1146,11 +1147,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         if (allDocuments != null) {
             for (final DocumentMetadata m : allDocuments) {
                 idSet.remove(Integer.valueOf(m.getId()));
-                EffectivePermission p = perms.get(Long.valueOf(m.getFolderId()));
+                EffectivePermission p = perms.get(m.getFolderId());
                 if (p == null) {
                     p = security.getFolderPermission(m.getFolderId(), sessionObj
                             .getContext(), getUser(sessionObj), getUserConfiguration(sessionObj));
-                    perms.put(Long.valueOf(m.getFolderId()), p);
+                    perms.put(m.getFolderId(), p);
                 }
                 final EffectiveInfostorePermission infoPerm = new EffectiveInfostorePermission(
                         p, m, getUser(sessionObj));

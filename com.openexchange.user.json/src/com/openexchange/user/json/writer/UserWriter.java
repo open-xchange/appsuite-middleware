@@ -49,10 +49,9 @@
 
 package com.openexchange.user.json.writer;
 
+import gnu.trove.TIntObjectHashMap;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -231,54 +230,54 @@ public final class UserWriter {
         }
     };
 
-    private static final Map<Integer, UserFieldWriter> STATIC_WRITERS_MAP;
+    private static final TIntObjectHashMap<UserFieldWriter> STATIC_WRITERS_MAP;
 
     private static final int[] ALL_FIELDS;
 
     static {
-        final Map<Integer, UserFieldWriter> m = new HashMap<Integer, UserFieldWriter>();
-        m.put(Integer.valueOf(UserField.ID.getColumn()), new UserFieldWriter() {
+        final TIntObjectHashMap<UserFieldWriter> m = new TIntObjectHashMap<UserFieldWriter>();
+        m.put(UserField.ID.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 jsonPutter.put(UserField.ID.getName(), Integer.valueOf(user.getId()));
             }
         });
-        m.put(Integer.valueOf(UserField.CREATED_BY.getColumn()), new UserFieldWriter() {
+        m.put(UserField.CREATED_BY.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final int createdBy = contact.getCreatedBy();
                 jsonPutter.put(UserField.CREATED_BY.getName(), -1 == createdBy ? JSONObject.NULL : Integer.valueOf(createdBy));
             }
         });
-        m.put(Integer.valueOf(UserField.MODIFIED_BY.getColumn()), new UserFieldWriter() {
+        m.put(UserField.MODIFIED_BY.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final int modifiedBy = contact.getModifiedBy();
                 jsonPutter.put(UserField.MODIFIED_BY.getName(), -1 == modifiedBy ? JSONObject.NULL : Integer.valueOf(modifiedBy));
             }
         });
-        m.put(Integer.valueOf(UserField.CREATION_DATE.getColumn()), new UserFieldWriter() {
+        m.put(UserField.CREATION_DATE.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final Date d = contact.getCreationDate();
                 jsonPutter.put(UserField.CREATION_DATE.getName(), null == d ? JSONObject.NULL : Long.valueOf(Utility.addTimeZoneOffset(d.getTime(), user.getTimeZone())));
             }
         });
-        m.put(Integer.valueOf(UserField.LAST_MODIFIED.getColumn()), new UserFieldWriter() {
+        m.put(UserField.LAST_MODIFIED.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final Date d = contact.getLastModified();
                 jsonPutter.put(UserField.LAST_MODIFIED.getName(), null == d ? JSONObject.NULL : Long.valueOf(Utility.addTimeZoneOffset(d.getTime(), user.getTimeZone())));
             }
         });
-        m.put(Integer.valueOf(UserField.LAST_MODIFIED_UTC.getColumn()), new UserFieldWriter() {
+        m.put(UserField.LAST_MODIFIED_UTC.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final Date d = contact.getLastModified();
                 jsonPutter.put(UserField.LAST_MODIFIED_UTC.getName(), null == d ? JSONObject.NULL : Long.valueOf(d.getTime()));
             }
         });
-        m.put(Integer.valueOf(UserField.FOLDER_ID.getColumn()), new UserFieldWriter() {
+        m.put(UserField.FOLDER_ID.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final int pid = contact.getParentFolderID();
@@ -288,26 +287,26 @@ public final class UserWriter {
         
         // ######################### COMMON ATTRIBUTES ###########################################
         
-        m.put(Integer.valueOf(UserField.CATEGORIES.getColumn()), new UserFieldWriter() {
+        m.put(UserField.CATEGORIES.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getCategories();
                 jsonPutter.put(UserField.CATEGORIES.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.PRIVATE_FLAG.getColumn()), new UserFieldWriter() {
+        m.put(UserField.PRIVATE_FLAG.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 jsonPutter.put(UserField.PRIVATE_FLAG.getName(), Boolean.valueOf(contact.getPrivateFlag()));
             }
         });
-        m.put(Integer.valueOf(UserField.COLOR_LABEL.getColumn()), new UserFieldWriter() {
+        m.put(UserField.COLOR_LABEL.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 jsonPutter.put(UserField.COLOR_LABEL.getName(), Integer.valueOf(contact.getLabel()));
             }
         });
-        m.put(Integer.valueOf(UserField.NUMBER_OF_ATTACHMENTS.getColumn()), new UserFieldWriter() {
+        m.put(UserField.NUMBER_OF_ATTACHMENTS.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 jsonPutter.put(UserField.NUMBER_OF_ATTACHMENTS.getName(), Integer.valueOf(contact.getNumberOfAttachments()));
@@ -316,650 +315,650 @@ public final class UserWriter {
         
         // ######################### CONTACT ATTRIBUTES ###########################################
 
-        m.put(Integer.valueOf(UserField.DISPLAY_NAME.getColumn()), new UserFieldWriter() {
+        m.put(UserField.DISPLAY_NAME.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String name = contact.getDisplayName();
                 jsonPutter.put(UserField.DISPLAY_NAME.getName(), name);
             }
         });
-        m.put(Integer.valueOf(UserField.FIRST_NAME.getColumn()), new UserFieldWriter() {
+        m.put(UserField.FIRST_NAME.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getGivenName();
                 jsonPutter.put(UserField.FIRST_NAME.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.LAST_NAME.getColumn()), new UserFieldWriter() {
+        m.put(UserField.LAST_NAME.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getSurName();
                 jsonPutter.put(UserField.LAST_NAME.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.SECOND_NAME.getColumn()), new UserFieldWriter() {
+        m.put(UserField.SECOND_NAME.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getMiddleName();
                 jsonPutter.put(UserField.SECOND_NAME.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.SUFFIX.getColumn()), new UserFieldWriter() {
+        m.put(UserField.SUFFIX.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getSuffix();
                 jsonPutter.put(UserField.SUFFIX.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.TITLE.getColumn()), new UserFieldWriter() {
+        m.put(UserField.TITLE.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getTitle();
                 jsonPutter.put(UserField.TITLE.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.STREET_HOME.getColumn()), new UserFieldWriter() {
+        m.put(UserField.STREET_HOME.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getStreetHome();
                 jsonPutter.put(UserField.STREET_HOME.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.POSTAL_CODE_HOME.getColumn()), new UserFieldWriter() {
+        m.put(UserField.POSTAL_CODE_HOME.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getPostalCodeHome();
                 jsonPutter.put(UserField.POSTAL_CODE_HOME.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.CITY_HOME.getColumn()), new UserFieldWriter() {
+        m.put(UserField.CITY_HOME.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getCityHome();
                 jsonPutter.put(UserField.CITY_HOME.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.STATE_HOME.getColumn()), new UserFieldWriter() {
+        m.put(UserField.STATE_HOME.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getStateHome();
                 jsonPutter.put(UserField.STATE_HOME.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.COUNTRY_HOME.getColumn()), new UserFieldWriter() {
+        m.put(UserField.COUNTRY_HOME.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getCountryHome();
                 jsonPutter.put(UserField.COUNTRY_HOME.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.BIRTHDAY.getColumn()), new UserFieldWriter() {
+        m.put(UserField.BIRTHDAY.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final Date d = contact.getBirthday();
                 jsonPutter.put(UserField.BIRTHDAY.getName(), null == d ? JSONObject.NULL : Long.valueOf(d.getTime()));
             }
         });
-        m.put(Integer.valueOf(UserField.MARITAL_STATUS.getColumn()), new UserFieldWriter() {
+        m.put(UserField.MARITAL_STATUS.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getMaritalStatus();
                 jsonPutter.put(UserField.MARITAL_STATUS.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.NUMBER_OF_CHILDREN.getColumn()), new UserFieldWriter() {
+        m.put(UserField.NUMBER_OF_CHILDREN.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getNumberOfChildren();
                 jsonPutter.put(UserField.NUMBER_OF_CHILDREN.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.PROFESSION.getColumn()), new UserFieldWriter() {
+        m.put(UserField.PROFESSION.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getProfession();
                 jsonPutter.put(UserField.PROFESSION.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.NICKNAME.getColumn()), new UserFieldWriter() {
+        m.put(UserField.NICKNAME.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getNickname();
                 jsonPutter.put(UserField.NICKNAME.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.SPOUSE_NAME.getColumn()), new UserFieldWriter() {
+        m.put(UserField.SPOUSE_NAME.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getSpouseName();
                 jsonPutter.put(UserField.SPOUSE_NAME.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.ANNIVERSARY.getColumn()), new UserFieldWriter() {
+        m.put(UserField.ANNIVERSARY.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final Date d = contact.getAnniversary();
                 jsonPutter.put(UserField.ANNIVERSARY.getName(), null == d ? JSONObject.NULL : Long.valueOf(d.getTime()));
             }
         });
-        m.put(Integer.valueOf(UserField.NOTE.getColumn()), new UserFieldWriter() {
+        m.put(UserField.NOTE.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getNote();
                 jsonPutter.put(UserField.NOTE.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.DEFAULT_ADDRESS.getColumn()), new UserFieldWriter() {
+        m.put(UserField.DEFAULT_ADDRESS.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final int i = contact.getDefaultAddress();
                 jsonPutter.put(UserField.DEFAULT_ADDRESS.getName(), Integer.valueOf(i));
             }
         });
-        m.put(Integer.valueOf(UserField.DEPARTMENT.getColumn()), new UserFieldWriter() {
+        m.put(UserField.DEPARTMENT.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getDepartment();
                 jsonPutter.put(UserField.DEPARTMENT.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.POSITION.getColumn()), new UserFieldWriter() {
+        m.put(UserField.POSITION.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getPosition();
                 jsonPutter.put(UserField.POSITION.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.EMPLOYEE_TYPE.getColumn()), new UserFieldWriter() {;
+        m.put(UserField.EMPLOYEE_TYPE.getColumn(), new UserFieldWriter() {;
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getEmployeeType();
                 jsonPutter.put(UserField.EMPLOYEE_TYPE.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.ROOM_NUMBER.getColumn()), new UserFieldWriter() {;
+        m.put(UserField.ROOM_NUMBER.getColumn(), new UserFieldWriter() {;
 
         public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
             final String s = contact.getRoomNumber();
             jsonPutter.put(UserField.ROOM_NUMBER.getName(), null == s ? JSONObject.NULL : s);
         }
     });
-        m.put(Integer.valueOf(UserField.STREET_BUSINESS.getColumn()), new UserFieldWriter() {
+        m.put(UserField.STREET_BUSINESS.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getStreetBusiness();
                 jsonPutter.put(UserField.STREET_BUSINESS.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.POSTAL_CODE_BUSINESS.getColumn()), new UserFieldWriter() {
+        m.put(UserField.POSTAL_CODE_BUSINESS.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getPostalCodeBusiness();
                 jsonPutter.put(UserField.POSTAL_CODE_BUSINESS.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.CITY_BUSINESS.getColumn()), new UserFieldWriter() {
+        m.put(UserField.CITY_BUSINESS.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getCityBusiness();
                 jsonPutter.put(UserField.CITY_BUSINESS.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.INTERNAL_USERID.getColumn()), new UserFieldWriter() {
+        m.put(UserField.INTERNAL_USERID.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 jsonPutter.put(UserField.INTERNAL_USERID.getName(), Integer.valueOf(user.getId()));
             }
         });
-        m.put(Integer.valueOf(UserField.STATE_BUSINESS.getColumn()), new UserFieldWriter() {
+        m.put(UserField.STATE_BUSINESS.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getStateBusiness();
                 jsonPutter.put(UserField.STATE_BUSINESS.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.COUNTRY_BUSINESS.getColumn()), new UserFieldWriter() {
+        m.put(UserField.COUNTRY_BUSINESS.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getCountryBusiness();
                 jsonPutter.put(UserField.COUNTRY_BUSINESS.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.NUMBER_OF_EMPLOYEE.getColumn()), new UserFieldWriter() {
+        m.put(UserField.NUMBER_OF_EMPLOYEE.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getNumberOfEmployee();
                 jsonPutter.put(UserField.NUMBER_OF_EMPLOYEE.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.SALES_VOLUME.getColumn()), new UserFieldWriter() {
+        m.put(UserField.SALES_VOLUME.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getSalesVolume();
                 jsonPutter.put(UserField.SALES_VOLUME.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.TAX_ID.getColumn()), new UserFieldWriter() {
+        m.put(UserField.TAX_ID.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getTaxID();
                 jsonPutter.put(UserField.TAX_ID.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.COMMERCIAL_REGISTER.getColumn()), new UserFieldWriter() {
+        m.put(UserField.COMMERCIAL_REGISTER.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getCommercialRegister();
                 jsonPutter.put(UserField.COMMERCIAL_REGISTER.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.BRANCHES.getColumn()), new UserFieldWriter() {
+        m.put(UserField.BRANCHES.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getBranches();
                 jsonPutter.put(UserField.BRANCHES.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.BUSINESS_CATEGORY.getColumn()), new UserFieldWriter() {
+        m.put(UserField.BUSINESS_CATEGORY.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getBusinessCategory();
                 jsonPutter.put(UserField.BUSINESS_CATEGORY.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.INFO.getColumn()), new UserFieldWriter() {
+        m.put(UserField.INFO.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getInfo();
                 jsonPutter.put(UserField.INFO.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.MANAGER_NAME.getColumn()), new UserFieldWriter() {
+        m.put(UserField.MANAGER_NAME.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getManagerName();
                 jsonPutter.put(UserField.MANAGER_NAME.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.ASSISTANT_NAME.getColumn()), new UserFieldWriter() {
+        m.put(UserField.ASSISTANT_NAME.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getAssistantName();
                 jsonPutter.put(UserField.ASSISTANT_NAME.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.STREET_OTHER.getColumn()), new UserFieldWriter() {
+        m.put(UserField.STREET_OTHER.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getStreetOther();
                 jsonPutter.put(UserField.STREET_OTHER.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.CITY_OTHER.getColumn()), new UserFieldWriter() {
+        m.put(UserField.CITY_OTHER.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getCityOther();
                 jsonPutter.put(UserField.CITY_OTHER.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.STATE_OTHER.getColumn()), new UserFieldWriter() {
+        m.put(UserField.STATE_OTHER.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getStateOther();
                 jsonPutter.put(UserField.STATE_OTHER.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.POSTAL_CODE_OTHER.getColumn()), new UserFieldWriter() {
+        m.put(UserField.POSTAL_CODE_OTHER.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getPostalCodeOther();
                 jsonPutter.put(UserField.POSTAL_CODE_OTHER.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.COUNTRY_OTHER.getColumn()), new UserFieldWriter() {
+        m.put(UserField.COUNTRY_OTHER.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getCountryOther();
                 jsonPutter.put(UserField.COUNTRY_OTHER.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.TELEPHONE_BUSINESS1.getColumn()), new UserFieldWriter() {
+        m.put(UserField.TELEPHONE_BUSINESS1.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getTelephoneBusiness1();
                 jsonPutter.put(UserField.TELEPHONE_BUSINESS1.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.TELEPHONE_BUSINESS2.getColumn()), new UserFieldWriter() {
+        m.put(UserField.TELEPHONE_BUSINESS2.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getTelephoneBusiness2();
                 jsonPutter.put(UserField.TELEPHONE_BUSINESS2.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.FAX_BUSINESS.getColumn()), new UserFieldWriter() {
+        m.put(UserField.FAX_BUSINESS.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getFaxBusiness();
                 jsonPutter.put(UserField.FAX_BUSINESS.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.TELEPHONE_CALLBACK.getColumn()), new UserFieldWriter() {
+        m.put(UserField.TELEPHONE_CALLBACK.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getTelephoneCallback();
                 jsonPutter.put(UserField.TELEPHONE_CALLBACK.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.TELEPHONE_CAR.getColumn()), new UserFieldWriter() {
+        m.put(UserField.TELEPHONE_CAR.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getTelephoneCar();
                 jsonPutter.put(UserField.TELEPHONE_CAR.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.TELEPHONE_COMPANY.getColumn()), new UserFieldWriter() {
+        m.put(UserField.TELEPHONE_COMPANY.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getTelephoneCompany();
                 jsonPutter.put(UserField.TELEPHONE_COMPANY.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.TELEPHONE_HOME1.getColumn()), new UserFieldWriter() {
+        m.put(UserField.TELEPHONE_HOME1.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getTelephoneHome1();
                 jsonPutter.put(UserField.TELEPHONE_HOME1.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.TELEPHONE_HOME2.getColumn()), new UserFieldWriter() {
+        m.put(UserField.TELEPHONE_HOME2.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getTelephoneHome2();
                 jsonPutter.put(UserField.TELEPHONE_HOME2.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.FAX_HOME.getColumn()), new UserFieldWriter() {
+        m.put(UserField.FAX_HOME.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getFaxHome();
                 jsonPutter.put(UserField.FAX_HOME.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.CELLULAR_TELEPHONE1.getColumn()), new UserFieldWriter() {
+        m.put(UserField.CELLULAR_TELEPHONE1.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getCellularTelephone1();
                 jsonPutter.put(UserField.CELLULAR_TELEPHONE1.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.CELLULAR_TELEPHONE2.getColumn()), new UserFieldWriter() {
+        m.put(UserField.CELLULAR_TELEPHONE2.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getCellularTelephone2();
                 jsonPutter.put(UserField.CELLULAR_TELEPHONE2.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.TELEPHONE_OTHER.getColumn()), new UserFieldWriter() {
+        m.put(UserField.TELEPHONE_OTHER.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getTelephoneOther();
                 jsonPutter.put(UserField.TELEPHONE_OTHER.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.FAX_OTHER.getColumn()), new UserFieldWriter() {
+        m.put(UserField.FAX_OTHER.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getFaxOther();
                 jsonPutter.put(UserField.FAX_OTHER.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.EMAIL1.getColumn()), new UserFieldWriter() {
+        m.put(UserField.EMAIL1.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getEmail1();
                 jsonPutter.put(UserField.EMAIL1.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.EMAIL2.getColumn()), new UserFieldWriter() {
+        m.put(UserField.EMAIL2.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getEmail2();
                 jsonPutter.put(UserField.EMAIL2.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.EMAIL3.getColumn()), new UserFieldWriter() {
+        m.put(UserField.EMAIL3.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getEmail3();
                 jsonPutter.put(UserField.EMAIL3.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.TELEPHONE_ISDN.getColumn()), new UserFieldWriter() {
+        m.put(UserField.TELEPHONE_ISDN.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getTelephoneISDN();
                 jsonPutter.put(UserField.TELEPHONE_ISDN.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.TELEPHONE_PAGER.getColumn()), new UserFieldWriter() {
+        m.put(UserField.TELEPHONE_PAGER.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getTelephonePager();
                 jsonPutter.put(UserField.TELEPHONE_PAGER.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.TELEPHONE_PRIMARY.getColumn()), new UserFieldWriter() {
+        m.put(UserField.TELEPHONE_PRIMARY.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getTelephonePrimary();
                 jsonPutter.put(UserField.TELEPHONE_PRIMARY.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.TELEPHONE_TELEX.getColumn()), new UserFieldWriter() {
+        m.put(UserField.TELEPHONE_TELEX.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getTelephoneTelex();
                 jsonPutter.put(UserField.TELEPHONE_TELEX.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.TELEPHONE_RADIO.getColumn()), new UserFieldWriter() {
+        m.put(UserField.TELEPHONE_RADIO.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getTelephoneRadio();
                 jsonPutter.put(UserField.TELEPHONE_RADIO.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.TELEPHONE_TTYTDD.getColumn()), new UserFieldWriter() {
+        m.put(UserField.TELEPHONE_TTYTDD.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getTelephoneTTYTTD();
                 jsonPutter.put(UserField.TELEPHONE_TTYTDD.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.INSTANT_MESSENGER1.getColumn()), new UserFieldWriter() {
+        m.put(UserField.INSTANT_MESSENGER1.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getInstantMessenger1();
                 jsonPutter.put(UserField.INSTANT_MESSENGER1.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.INSTANT_MESSENGER2.getColumn()), new UserFieldWriter() {
+        m.put(UserField.INSTANT_MESSENGER2.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getInstantMessenger2();
                 jsonPutter.put(UserField.INSTANT_MESSENGER2.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.TELEPHONE_IP.getColumn()), new UserFieldWriter() {
+        m.put(UserField.TELEPHONE_IP.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getTelephoneIP();
                 jsonPutter.put(UserField.TELEPHONE_IP.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.TELEPHONE_ASSISTANT.getColumn()), new UserFieldWriter() {
+        m.put(UserField.TELEPHONE_ASSISTANT.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getTelephoneAssistant();
                 jsonPutter.put(UserField.TELEPHONE_ASSISTANT.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.COMPANY.getColumn()), new UserFieldWriter() {
+        m.put(UserField.COMPANY.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getCompany();
                 jsonPutter.put(UserField.COMPANY.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.IMAGE1.getColumn()), new UserFieldWriter() {
+        m.put(UserField.IMAGE1.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 // final byte[] s = contact.getImage1();
                 jsonPutter.put(UserField.IMAGE1.getName(), JSONObject.NULL);
             }
         });
-        m.put(Integer.valueOf(UserField.USERFIELD01.getColumn()), new UserFieldWriter() {
+        m.put(UserField.USERFIELD01.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getUserField01();
                 jsonPutter.put(UserField.USERFIELD01.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.USERFIELD02.getColumn()), new UserFieldWriter() {
+        m.put(UserField.USERFIELD02.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getUserField02();
                 jsonPutter.put(UserField.USERFIELD02.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.USERFIELD03.getColumn()), new UserFieldWriter() {
+        m.put(UserField.USERFIELD03.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getUserField03();
                 jsonPutter.put(UserField.USERFIELD03.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.USERFIELD04.getColumn()), new UserFieldWriter() {
+        m.put(UserField.USERFIELD04.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getUserField04();
                 jsonPutter.put(UserField.USERFIELD04.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.USERFIELD05.getColumn()), new UserFieldWriter() {
+        m.put(UserField.USERFIELD05.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getUserField05();
                 jsonPutter.put(UserField.USERFIELD05.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.USERFIELD06.getColumn()), new UserFieldWriter() {
+        m.put(UserField.USERFIELD06.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getUserField06();
                 jsonPutter.put(UserField.USERFIELD06.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.USERFIELD07.getColumn()), new UserFieldWriter() {
+        m.put(UserField.USERFIELD07.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getUserField07();
                 jsonPutter.put(UserField.USERFIELD07.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.USERFIELD08.getColumn()), new UserFieldWriter() {
+        m.put(UserField.USERFIELD08.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getUserField08();
                 jsonPutter.put(UserField.USERFIELD08.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.USERFIELD09.getColumn()), new UserFieldWriter() {
+        m.put(UserField.USERFIELD09.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getUserField09();
                 jsonPutter.put(UserField.USERFIELD09.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.USERFIELD10.getColumn()), new UserFieldWriter() {
+        m.put(UserField.USERFIELD10.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getUserField10();
                 jsonPutter.put(UserField.USERFIELD10.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.USERFIELD11.getColumn()), new UserFieldWriter() {
+        m.put(UserField.USERFIELD11.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getUserField11();
                 jsonPutter.put(UserField.USERFIELD11.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.USERFIELD12.getColumn()), new UserFieldWriter() {
+        m.put(UserField.USERFIELD12.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getUserField12();
                 jsonPutter.put(UserField.USERFIELD12.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.USERFIELD13.getColumn()), new UserFieldWriter() {
+        m.put(UserField.USERFIELD13.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getUserField13();
                 jsonPutter.put(UserField.USERFIELD13.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.USERFIELD14.getColumn()), new UserFieldWriter() {
+        m.put(UserField.USERFIELD14.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getUserField14();
                 jsonPutter.put(UserField.USERFIELD14.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.USERFIELD15.getColumn()), new UserFieldWriter() {
+        m.put(UserField.USERFIELD15.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getUserField15();
                 jsonPutter.put(UserField.USERFIELD15.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.USERFIELD16.getColumn()), new UserFieldWriter() {
+        m.put(UserField.USERFIELD16.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getUserField16();
                 jsonPutter.put(UserField.USERFIELD16.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.USERFIELD17.getColumn()), new UserFieldWriter() {
+        m.put(UserField.USERFIELD17.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getUserField17();
                 jsonPutter.put(UserField.USERFIELD17.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.USERFIELD18.getColumn()), new UserFieldWriter() {
+        m.put(UserField.USERFIELD18.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getUserField18();
                 jsonPutter.put(UserField.USERFIELD18.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.USERFIELD19.getColumn()), new UserFieldWriter() {
+        m.put(UserField.USERFIELD19.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getUserField19();
                 jsonPutter.put(UserField.USERFIELD19.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.USERFIELD20.getColumn()), new UserFieldWriter() {
+        m.put(UserField.USERFIELD20.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getUserField20();
                 jsonPutter.put(UserField.USERFIELD20.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.LINKS.getColumn()), new UserFieldWriter() {
+        m.put(UserField.LINKS.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final LinkEntryObject[] links = contact.getLinks();
@@ -981,7 +980,7 @@ public final class UserWriter {
                 }
             }
         });
-        m.put(Integer.valueOf(UserField.DISTRIBUTIONLIST.getColumn()), new UserFieldWriter() {
+        m.put(UserField.DISTRIBUTIONLIST.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final DistributionListEntryObject[] distributionList = contact.getDistributionList();
@@ -1016,7 +1015,7 @@ public final class UserWriter {
                 }
             }
         });
-        m.put(Integer.valueOf(UserField.MARK_AS_DISTRIBUTIONLIST.getColumn()), new UserFieldWriter() {
+        m.put(UserField.MARK_AS_DISTRIBUTIONLIST.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 if (contact.containsMarkAsDistributionlist()) {
@@ -1026,26 +1025,26 @@ public final class UserWriter {
                 }
             }
         });
-        m.put(Integer.valueOf(UserField.URL.getColumn()), new UserFieldWriter() {
+        m.put(UserField.URL.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = contact.getURL();
                 jsonPutter.put(UserField.URL.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.USE_COUNT.getColumn()), new UserFieldWriter() {
+        m.put(UserField.USE_COUNT.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 jsonPutter.put(UserField.USE_COUNT.getName(), Integer.valueOf(contact.getUseCount()));
             }
         });
-        m.put(Integer.valueOf(UserField.NUMBER_OF_LINKS.getColumn()), new UserFieldWriter() {
+        m.put(UserField.NUMBER_OF_LINKS.getColumn(), new UserFieldWriter() {
             
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 jsonPutter.put(UserField.NUMBER_OF_LINKS.getName(), Integer.valueOf(contact.getNumberOfLinks()));
             }
         });
-        m.put(Integer.valueOf(UserField.NUMBER_OF_DISTRIBUTIONLIST.getColumn()), new UserFieldWriter() {
+        m.put(UserField.NUMBER_OF_DISTRIBUTIONLIST.getColumn(), new UserFieldWriter() {
             
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 jsonPutter.put(UserField.NUMBER_OF_DISTRIBUTIONLIST.getName(), Integer.valueOf(contact.getNumberOfDistributionLists()));
@@ -1054,7 +1053,7 @@ public final class UserWriter {
 
         // ######################### USER ATTRIBUTES ###########################################
 
-        m.put(Integer.valueOf(UserField.ALIASES.getColumn()), new UserFieldWriter() {
+        m.put(UserField.ALIASES.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String[] aliases = user.getAliases();
@@ -1069,21 +1068,21 @@ public final class UserWriter {
                 }
             }
         });
-        m.put(Integer.valueOf(UserField.TIME_ZONE.getColumn()), new UserFieldWriter() {
+        m.put(UserField.TIME_ZONE.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = user.getTimeZone();
                 jsonPutter.put(UserField.TIME_ZONE.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        m.put(Integer.valueOf(UserField.LOCALE.getColumn()), new UserFieldWriter() {
+        m.put(UserField.LOCALE.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final Locale l = user.getLocale();
                 jsonPutter.put(UserField.LOCALE.getName(), null == l ? JSONObject.NULL : l.toString());
             }
         });
-        m.put(Integer.valueOf(UserField.GROUPS.getColumn()), new UserFieldWriter() {
+        m.put(UserField.GROUPS.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final int[] groups = user.getGroups();
@@ -1098,20 +1097,20 @@ public final class UserWriter {
                 }
             }
         });
-        m.put(Integer.valueOf(UserField.CONTACT_ID.getColumn()), new UserFieldWriter() {
+        m.put(UserField.CONTACT_ID.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 jsonPutter.put(UserField.CONTACT_ID.getName(), Integer.valueOf(user.getContactId()));
             }
         });
-        m.put(Integer.valueOf(UserField.LOGIN_INFO.getColumn()), new UserFieldWriter() {
+        m.put(UserField.LOGIN_INFO.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 final String s = user.getLoginInfo();
                 jsonPutter.put(UserField.LOGIN_INFO.getName(), null == s ? JSONObject.NULL : s);
             }
         });
-        STATIC_WRITERS_MAP = Collections.unmodifiableMap(m);
+        STATIC_WRITERS_MAP = m;
 
         ALL_FIELDS = new int[UserField.ALL_FIELDS.length];
         int i = 0;
@@ -1122,7 +1121,7 @@ public final class UserWriter {
 
     private static UserFieldWriter getUserFieldWriter(final int field, final String timeZoneId) {
         if (null == timeZoneId) {
-            return STATIC_WRITERS_MAP.get(Integer.valueOf(field));
+            return STATIC_WRITERS_MAP.get(field);
         }
         /*
          * Check for time zone sensitive fields
@@ -1148,7 +1147,7 @@ public final class UserWriter {
         /*
          * Return static instance
          */
-        return STATIC_WRITERS_MAP.get(Integer.valueOf(field));
+        return STATIC_WRITERS_MAP.get(field);
     }
 
     private static final String ALL = "*";
