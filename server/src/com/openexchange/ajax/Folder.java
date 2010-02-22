@@ -1025,9 +1025,7 @@ public class Folder extends SessionServlet {
                     try {
                         final MessagingFolder[] subfolders = accountAccess.getFolderAccess().getSubfolders(mfi.getFullname(), all);
                         final MessagingFolderFieldWriter[] writers =
-                            com.openexchange.ajax.writer.MessagingFolderWriter.getMessagingFolderFieldWriter(
-                                columns,
-                                session);
+                            com.openexchange.ajax.writer.MessagingFolderWriter.getMessagingFolderFieldWriter(columns, session);
                         final com.openexchange.ajax.writer.MessagingFolderWriter.JSONArrayPutter putter = newMessagingArrayPutter();
                         for (int i = 0; i < subfolders.length; i++) {
                             final JSONArray ja = new JSONArray();
@@ -1273,7 +1271,8 @@ public class Folder extends SessionServlet {
                             folder = folderAccess.getFolder(parentId);
                             path.add(folder);
                         }
-                        final MessagingFolderFieldWriter[] writers = com.openexchange.ajax.writer.MessagingFolderWriter.getMessagingFolderFieldWriter(columns, session);
+                        final MessagingFolderFieldWriter[] writers =
+                            com.openexchange.ajax.writer.MessagingFolderWriter.getMessagingFolderFieldWriter(columns, session);
                         final com.openexchange.ajax.writer.MessagingFolderWriter.JSONArrayPutter putter = newMessagingArrayPutter();
                         for (final MessagingFolder messagingFolder : path) {
                             final JSONArray ja = new JSONArray();
@@ -1293,16 +1292,7 @@ public class Folder extends SessionServlet {
                             final String fqn = MessagingFolderIdentifier.getFQN(serviceId, accountId, MessagingFolder.ROOT_FULLNAME);
                             final String name = messagingService.getAccountManager().getAccount(accountId, session).getDisplayName();
                             for (final MessagingFolderFieldWriter w : writers) {
-                                w.writeField(
-                                    putter,
-                                    serviceId,
-                                    accountId,
-                                    rootFolder,
-                                    name,
-                                    1,
-                                    fqn,
-                                    FolderObject.MESSAGING,
-                                    false);
+                                w.writeField(putter, serviceId, accountId, rootFolder, name, 1, fqn, FolderObject.MESSAGING, false);
                             }
                             jsonWriter.value(ja);
                         }
@@ -1988,14 +1978,14 @@ public class Folder extends SessionServlet {
     }
 
     public void actionPutInsertFolder(final ServerSession session, final JSONWriter w, final JSONObject requestObj) throws JSONException {
-        ResponseWriter.write(actionPutInsertFolder(session, requestObj.getString(ResponseFields.DATA), ParamContainer.getInstance(
+        ResponseWriter.write(actionPutInsertFolder(session, requestObj.getJSONObject(ResponseFields.DATA), ParamContainer.getInstance(
             requestObj,
             EnumComponent.FOLDER)), w);
     }
 
     private final void actionPutInsertFolder(final HttpServletRequest req, final HttpServletResponse resp) throws IOException, ServletException {
         try {
-            ResponseWriter.write(actionPutInsertFolder(getSessionObject(req), getBody(req), ParamContainer.getInstance(
+            ResponseWriter.write(actionPutInsertFolder(getSessionObject(req), new JSONObject(getBody(req)), ParamContainer.getInstance(
                 req,
                 EnumComponent.FOLDER,
                 resp)), resp.getWriter());
@@ -2009,7 +1999,7 @@ public class Folder extends SessionServlet {
         }
     }
 
-    private final Response actionPutInsertFolder(final ServerSession session, final String body, final ParamContainer paramContainer) {
+    private final Response actionPutInsertFolder(final ServerSession session, final JSONObject jsonObj, final ParamContainer paramContainer) {
         /*
          * Some variables
          */
@@ -2022,7 +2012,6 @@ public class Folder extends SessionServlet {
         try {
             final Context ctx = session.getContext();
             final String parentFolder = paramContainer.checkStringParam(FolderFields.FOLDER_ID);
-            final JSONObject jsonObj = new JSONObject(body);
             int parentFolderId = -1;
             if ((parentFolderId = getUnsignedInteger(parentFolder)) >= 0) {
                 final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session);
@@ -2601,16 +2590,7 @@ public class Folder extends SessionServlet {
                 final String displayName = messagingAccount.getDisplayName();
                 final String fqn = MessagingFolderIdentifier.getFQN(serviceId, accountId, MessagingFolder.ROOT_FULLNAME);
                 for (int i = 0; i < writers.length; i++) {
-                    writers[i].writeField(
-                        putter,
-                        serviceId,
-                        accountId,
-                        rootFolder,
-                        displayName,
-                        -1,
-                        fqn,
-                        FolderObject.MESSAGING,
-                        false);
+                    writers[i].writeField(putter, serviceId, accountId, rootFolder, displayName, -1, fqn, FolderObject.MESSAGING, false);
                 }
                 arrays[index] = ja;
                 return null;
