@@ -49,11 +49,9 @@
 
 package com.openexchange.folder.json.writer;
 
+import gnu.trove.TIntObjectHashMap;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -152,90 +150,90 @@ public final class FolderWriter {
         }
     };
 
-    private static final Map<Integer, FolderFieldWriter> STATIC_WRITERS_MAP;
+    private static final TIntObjectHashMap<FolderFieldWriter> STATIC_WRITERS_MAP;
 
     private static final int[] ALL_FIELDS;
 
     static {
-        final Map<Integer, FolderFieldWriter> m = new HashMap<Integer, FolderFieldWriter>();
-        m.put(Integer.valueOf(FolderField.ID.getColumn()), new FolderFieldWriter() {
+        final TIntObjectHashMap<FolderFieldWriter> m = new TIntObjectHashMap<FolderFieldWriter>(32);
+        m.put(FolderField.ID.getColumn(), new FolderFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final String id = folder.getID();
                 jsonPutter.put(FolderField.ID.getName(), id);
             }
         });
-        m.put(Integer.valueOf(FolderField.CREATED_BY.getColumn()), new FolderFieldWriter() {
+        m.put(FolderField.CREATED_BY.getColumn(), new FolderFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final int createdBy = folder.getCreatedBy();
                 jsonPutter.put(FolderField.CREATED_BY.getName(), -1 == createdBy ? JSONObject.NULL : Integer.valueOf(createdBy));
             }
         });
-        m.put(Integer.valueOf(FolderField.MODIFIED_BY.getColumn()), new FolderFieldWriter() {
+        m.put(FolderField.MODIFIED_BY.getColumn(), new FolderFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final int modifiedBy = folder.getModifiedBy();
                 jsonPutter.put(FolderField.MODIFIED_BY.getName(), -1 == modifiedBy ? JSONObject.NULL : Integer.valueOf(modifiedBy));
             }
         });
-        m.put(Integer.valueOf(FolderField.CREATION_DATE.getColumn()), new FolderFieldWriter() {
+        m.put(FolderField.CREATION_DATE.getColumn(), new FolderFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final Date d = folder.getCreationDate();
                 jsonPutter.put(FolderField.CREATION_DATE.getName(), null == d ? JSONObject.NULL : Long.valueOf(d.getTime()));
             }
         });
-        m.put(Integer.valueOf(FolderField.LAST_MODIFIED.getColumn()), new FolderFieldWriter() {
+        m.put(FolderField.LAST_MODIFIED.getColumn(), new FolderFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final Date d = folder.getLastModified();
                 jsonPutter.put(FolderField.LAST_MODIFIED.getName(), null == d ? JSONObject.NULL : Long.valueOf(d.getTime()));
             }
         });
-        m.put(Integer.valueOf(FolderField.LAST_MODIFIED_UTC.getColumn()), new FolderFieldWriter() {
+        m.put(FolderField.LAST_MODIFIED_UTC.getColumn(), new FolderFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final Date d = folder.getLastModifiedUTC();
                 jsonPutter.put(FolderField.LAST_MODIFIED_UTC.getName(), null == d ? JSONObject.NULL : Long.valueOf(d.getTime()));
             }
         });
-        m.put(Integer.valueOf(FolderField.FOLDER_ID.getColumn()), new FolderFieldWriter() {
+        m.put(FolderField.FOLDER_ID.getColumn(), new FolderFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final String pid = folder.getParentID();
                 jsonPutter.put(FolderField.FOLDER_ID.getName(), pid);
             }
         });
-        m.put(Integer.valueOf(FolderField.FOLDER_NAME.getColumn()), new FolderFieldWriter() {
+        m.put(FolderField.FOLDER_NAME.getColumn(), new FolderFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final String name = folder.getLocalizedName(folder.getLocale());
                 jsonPutter.put(FolderField.FOLDER_NAME.getName(), name);
             }
         });
-        m.put(Integer.valueOf(FolderField.MODULE.getColumn()), new FolderFieldWriter() {
+        m.put(FolderField.MODULE.getColumn(), new FolderFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final ContentType obj = folder.getContentType();
                 jsonPutter.put(FolderField.MODULE.getName(), null == obj ? JSONObject.NULL : obj.toString());
             }
         });
-        m.put(Integer.valueOf(FolderField.TYPE.getColumn()), new FolderFieldWriter() {
+        m.put(FolderField.TYPE.getColumn(), new FolderFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final Type obj = folder.getType();
                 jsonPutter.put(FolderField.TYPE.getName(), null == obj ? JSONObject.NULL : Integer.valueOf(obj.getType()));
             }
         });
-        m.put(Integer.valueOf(FolderField.SUBFOLDERS.getColumn()), new FolderFieldWriter() {
+        m.put(FolderField.SUBFOLDERS.getColumn(), new FolderFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final String[] obj = folder.getSubfolderIDs();
                 jsonPutter.put(FolderField.SUBFOLDERS.getName(), null == obj ? JSONObject.NULL : Boolean.valueOf(obj.length > 0));
             }
         });
-        m.put(Integer.valueOf(FolderField.OWN_RIGHTS.getColumn()), new FolderFieldWriter() {
+        m.put(FolderField.OWN_RIGHTS.getColumn(), new FolderFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final Permission obj = folder.getOwnPermission();
@@ -247,7 +245,7 @@ public final class FolderWriter {
                     obj.isAdmin())));
             }
         });
-        m.put(Integer.valueOf(FolderField.PERMISSIONS_BITS.getColumn()), new FolderFieldWriter() {
+        m.put(FolderField.PERMISSIONS_BITS.getColumn(), new FolderFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final JSONArray ja;
@@ -269,74 +267,74 @@ public final class FolderWriter {
                 jsonPutter.put(FolderField.PERMISSIONS_BITS.getName(), null == ja ? JSONObject.NULL : ja);
             }
         });
-        m.put(Integer.valueOf(FolderField.SUMMARY.getColumn()), new FolderFieldWriter() {
+        m.put(FolderField.SUMMARY.getColumn(), new FolderFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final String obj = folder.getSummary();
                 jsonPutter.put(FolderField.SUMMARY.getName(), null == obj ? JSONObject.NULL : obj);
             }
         });
-        m.put(Integer.valueOf(FolderField.STANDARD_FOLDER.getColumn()), new FolderFieldWriter() {
+        m.put(FolderField.STANDARD_FOLDER.getColumn(), new FolderFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 jsonPutter.put(FolderField.STANDARD_FOLDER.getName(), Boolean.valueOf(folder.isDefault()));
             }
         });
-        m.put(Integer.valueOf(FolderField.STANDARD_FOLDER_TYPE.getColumn()), new FolderFieldWriter() {
+        m.put(FolderField.STANDARD_FOLDER_TYPE.getColumn(), new FolderFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
-                jsonPutter.put(FolderField.STANDARD_FOLDER_TYPE.getName(), folder.getDefaultType());
+                jsonPutter.put(FolderField.STANDARD_FOLDER_TYPE.getName(), Integer.valueOf(folder.getDefaultType()));
             }
         });
-        m.put(Integer.valueOf(FolderField.TOTAL.getColumn()), new FolderFieldWriter() {
+        m.put(FolderField.TOTAL.getColumn(), new FolderFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final int obj = folder.getTotal();
                 jsonPutter.put(FolderField.TOTAL.getName(), -1 == obj ? JSONObject.NULL : Integer.valueOf(obj));
             }
         });
-        m.put(Integer.valueOf(FolderField.NEW.getColumn()), new FolderFieldWriter() {
+        m.put(FolderField.NEW.getColumn(), new FolderFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final int obj = folder.getNew();
                 jsonPutter.put(FolderField.NEW.getName(), -1 == obj ? JSONObject.NULL : Integer.valueOf(obj));
             }
         });
-        m.put(Integer.valueOf(FolderField.UNREAD.getColumn()), new FolderFieldWriter() {
+        m.put(FolderField.UNREAD.getColumn(), new FolderFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final int obj = folder.getUnread();
                 jsonPutter.put(FolderField.UNREAD.getName(), -1 == obj ? JSONObject.NULL : Integer.valueOf(obj));
             }
         });
-        m.put(Integer.valueOf(FolderField.DELETED.getColumn()), new FolderFieldWriter() {
+        m.put(FolderField.DELETED.getColumn(), new FolderFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final int obj = folder.getDeleted();
                 jsonPutter.put(FolderField.DELETED.getName(), -1 == obj ? JSONObject.NULL : Integer.valueOf(obj));
             }
         });
-        m.put(Integer.valueOf(FolderField.SUBSCRIBED.getColumn()), new FolderFieldWriter() {
+        m.put(FolderField.SUBSCRIBED.getColumn(), new FolderFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 jsonPutter.put(FolderField.SUBSCRIBED.getName(), Boolean.valueOf(folder.isSubscribed()));
             }
         });
-        m.put(Integer.valueOf(FolderField.SUBSCR_SUBFLDS.getColumn()), new FolderFieldWriter() {
+        m.put(FolderField.SUBSCR_SUBFLDS.getColumn(), new FolderFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final String[] obj = folder.getSubfolderIDs();
                 jsonPutter.put(FolderField.SUBSCR_SUBFLDS.getName(), null == obj ? JSONObject.NULL : Boolean.valueOf(obj.length > 0));
             }
         });
-        m.put(Integer.valueOf(FolderField.CAPABILITIES.getColumn()), new FolderFieldWriter() {
+        m.put(FolderField.CAPABILITIES.getColumn(), new FolderFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final int caps = folder.getCapabilities();
                 jsonPutter.put(FolderField.CAPABILITIES.getName(), -1 == caps ? JSONObject.NULL : Integer.valueOf(caps));
             }
         });
-        STATIC_WRITERS_MAP = Collections.unmodifiableMap(m);
+        STATIC_WRITERS_MAP = m;
 
         final FolderField[] all = FolderField.values();
         final int[] allFields = new int[all.length];
@@ -363,7 +361,7 @@ public final class FolderWriter {
         final int[] cols = null == fields ? ALL_FIELDS : fields;
         final FolderFieldWriter[] ffws = new FolderFieldWriter[cols.length];
         for (int i = 0; i < ffws.length; i++) {
-            FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(Integer.valueOf(cols[i]));
+            FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(cols[i]);
             if (null == ffw) {
                 if (LOG.isWarnEnabled()) {
                     LOG.warn("Unknown field: " + cols[i], new Throwable());
@@ -397,7 +395,7 @@ public final class FolderWriter {
         final FolderFieldWriter[] ffws = new FolderFieldWriter[cols.length];
         for (int i = 0; i < ffws.length; i++) {
             final int curCol = cols[i];
-            FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(Integer.valueOf(curCol));
+            FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(curCol);
             if (null == ffw) {
                 if (additionalFolderFieldList.knows(curCol)) {
                     final AdditionalFolderField additionalFolderField = additionalFolderFieldList.get(curCol);
@@ -455,7 +453,7 @@ public final class FolderWriter {
         final int[] cols = null == fields ? ALL_FIELDS : fields;
         final FolderFieldWriter[] ffws = new FolderFieldWriter[cols.length];
         for (int i = 0; i < ffws.length; i++) {
-            FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(Integer.valueOf(cols[i]));
+            FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(cols[i]);
             if (null == ffw) {
                 if (LOG.isWarnEnabled()) {
                     LOG.warn("Unknown field: " + cols[i], new Throwable());
@@ -493,7 +491,7 @@ public final class FolderWriter {
         final int[] cols = null == fields ? ALL_FIELDS : fields;
         final FolderFieldWriter[] ffws = new FolderFieldWriter[cols.length];
         for (int i = 0; i < ffws.length; i++) {
-            FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(Integer.valueOf(cols[i]));
+            FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(cols[i]);
             if (null == ffw) {
                 if (LOG.isWarnEnabled()) {
                     LOG.warn("Unknown field: " + cols[i], new Throwable());
@@ -526,7 +524,7 @@ public final class FolderWriter {
         final int[] cols = null == fields ? ALL_FIELDS : fields;
         final FolderFieldWriter[] ffws = new FolderFieldWriter[cols.length];
         for (int i = 0; i < ffws.length; i++) {
-            FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(Integer.valueOf(cols[i]));
+            FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(cols[i]);
             if (null == ffw) {
                 if (LOG.isWarnEnabled()) {
                     LOG.warn("Unknown field: " + cols[i], new Throwable());
