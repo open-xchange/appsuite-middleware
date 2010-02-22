@@ -1,3 +1,7 @@
+* 2010-02-22 - thorben.betten@open-xchange.com
+
+ - Bugfix #15413: Checking account name prior to insertion
+
 * 2010-02-19 - marcus.klein@open-xchange.com
 
  - Bugfix #15225: Optimized tables and update tasks for push malpoll component.

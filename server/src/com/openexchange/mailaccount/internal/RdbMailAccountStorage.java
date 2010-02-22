@@ -62,6 +62,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
@@ -1095,6 +1096,11 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 I(user),
                 I(cid));
         }
+        // Check name
+        final String name = mailAccount.getName();
+        if (!isValid(name)) {
+            throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.INVALID_NAME, name);
+        }
         // Get ID
         final int id;
         if (mailAccount.isDefaultFlag()) {
@@ -1140,7 +1146,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 stmt.setLong(pos++, cid);
                 stmt.setLong(pos++, id);
                 stmt.setLong(pos++, user);
-                stmt.setString(pos++, mailAccount.getName());
+                stmt.setString(pos++, name);
                 stmt.setString(pos++, mailAccount.generateMailServerURL());
                 stmt.setString(pos++, mailAccount.getLogin());
                 if (mailAccount.isDefaultFlag()) {
@@ -1196,7 +1202,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
                 stmt.setLong(pos++, cid);
                 stmt.setLong(pos++, id);
                 stmt.setLong(pos++, user);
-                stmt.setString(pos++, mailAccount.getName());
+                stmt.setString(pos++, name);
                 stmt.setString(pos++, transportURL);
                 stmt.setString(pos++, mailAccount.getTransportLogin());
                 if (mailAccount.isDefaultFlag()) {
@@ -1352,6 +1358,35 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             isWhitespace = Character.isWhitespace(chars[i]);
         }
         return isWhitespace;
+    }
+
+    /**
+     * Binary-sorted invalid characters: No control <code>\t\n\f\r</code> or punctuation <code>!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~</code> except <code>'-'</code> and
+     * <code>'_'</code>.
+     */
+    private static final char[] CHARS_INVALID =
+        {
+            '\t', '\n', '\f', '\r', '!', '"', '#', '$', '%', '&', '\'', '(', ')', '*', '+', ',', '.', '/', ':', ';', '<', '=', '>', '?',
+            '@', '[', '\\', ']', '^', '`', '{', '|', '}', '~' };
+
+    /**
+     * Checks if specified name contains an invalid character.
+     * 
+     * @param name The name to check
+     * @return <code>true</code> if name contains an invalid character; otherwsie <code>false</code>
+     */
+    private static boolean isValid(final String name) {
+        if (null == name || 0 == name.length()) {
+            return false;
+        }
+        final char[] chars = name.toCharArray();
+        boolean valid = true;
+        boolean isWhitespace = true;
+        for (int i = 0; valid && i < chars.length; i++) {
+            valid = (Arrays.binarySearch(CHARS_INVALID, chars[i]) < 0);
+            isWhitespace &= Character.isWhitespace(chars[i]);
+        }
+        return !isWhitespace && valid;
     }
 
 }
