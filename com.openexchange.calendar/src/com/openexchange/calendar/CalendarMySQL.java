@@ -1375,7 +1375,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         String mail;
         try {
             mail = UserStorage.getInstance().getUser(user, cal.getContext()).getMail();
-            if (cal.getOrganizer().equals(mail))
+            if (cal.getOrganizer() != null && cal.getOrganizer().equals(mail))
                 return true;
         } catch (LdapException e) {
             throw new OXCalendarException(OXCalendarException.Code.EVENT_ERROR);
