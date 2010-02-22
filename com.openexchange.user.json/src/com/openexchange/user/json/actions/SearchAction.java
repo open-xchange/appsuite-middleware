@@ -225,6 +225,8 @@ public final class SearchAction extends AbstractUserAction {
             /*
              * Write users as JSON arrays to JSON array
              */
+            censor(session, contacts);
+            censor(session, users);
             final JSONArray jsonArray = UserWriter.writeMultiple2Array(columns, attributeParameters, users, contacts, timeZoneId);
             /*
              * Return appropriate result

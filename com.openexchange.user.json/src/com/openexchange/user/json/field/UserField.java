@@ -616,7 +616,22 @@ public enum UserField {
         }
         return null;
     }
+    
+    public static boolean isUserOnlyField(final int field) {
+        return null != getUserOnlyField(field);
+    }
 
+    public static final EnumSet<UserField> UNPROTECTED_FIELDS = EnumSet.of(ID, DISPLAY_NAME, FIRST_NAME, LAST_NAME, SECOND_NAME, SUFFIX);
+    
+    public static boolean isProtected(int field) {
+        for (UserField uf : UNPROTECTED_FIELDS) {
+            if(uf.getColumn() == field) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
     /**
      * The constant describing all fields of a user object.
      */

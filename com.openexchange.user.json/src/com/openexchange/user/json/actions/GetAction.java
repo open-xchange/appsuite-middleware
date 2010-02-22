@@ -105,7 +105,8 @@ public final class GetAction extends AbstractUserAction {
         /*
          * Write user as JSON object
          */
-        final JSONObject jsonObject = UserWriter.writeSingle2Object(null, null, user, userContact, timeZoneId);
+        censor(session, userContact);
+        final JSONObject jsonObject = UserWriter.writeSingle2Object(null, null, censor(session, user), userContact, timeZoneId);
         /*
          * Return appropriate result
          */

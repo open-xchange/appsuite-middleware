@@ -1,3 +1,6 @@
+* 2010-02-22 - francisco.laguna@open-xchange.com
+ - Bugfix #15040: Censor user data, when global address book is deactivated
+
 * 2010-02-22 - thorben.betten@open-xchange.com
 
  - Bugfix #15413: Checking account name prior to insertion

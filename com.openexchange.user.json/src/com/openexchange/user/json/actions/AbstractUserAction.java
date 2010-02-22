@@ -60,7 +60,20 @@ import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.server.impl.EffectivePermission;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.json.filter.ContactCensorship;
+import com.openexchange.user.json.filter.DoNothingCensorship;
+import com.openexchange.user.json.filter.DoNothingUserCensorship;
+import com.openexchange.user.json.filter.NoGlobalAdressBookContactCensorship;
+import com.openexchange.user.json.filter.NoGlobalAdressBookUserCensorship;
+import com.openexchange.user.json.filter.UserCensorship;
 
 /**
  * {@link AbstractUserAction} - An abstract user action.
@@ -207,6 +220,12 @@ public abstract class AbstractUserAction implements AJAXActionService {
     }
 
     private static final Pattern PAT = Pattern.compile(" *, *");
+    
+    private static final ContactCensorship DO_NOTHING_CENSORSHIP = new DoNothingCensorship();
+    private static final ContactCensorship NO_GLOBAL_ADDRESSBOOK_CENSORSHIP = new NoGlobalAdressBookContactCensorship();
+
+    private static final UserCensorship DO_NOTHING_USER_CENSORSHIP = new DoNothingUserCensorship();
+    private static final UserCensorship NO_GLOBAL_ADDRESSBOOK_USER_CENSORSHIP = new NoGlobalAdressBookUserCensorship();
 
     /**
      * Parses specified parameter into an array of <code>int</code>.
@@ -248,5 +267,57 @@ public abstract class AbstractUserAction implements AJAXActionService {
         }
         return columns;
     }
+    
+    protected static void censor(ServerSession session, Contact...contacts) throws OXException {
+        ContactCensorship censorship = getContactCensorship(session);
+        
+        for (Contact contact : contacts) {
+            if(contact.getInternalUserId() == session.getUserId()) {
+                continue;
+            }
+            censorship.censor(contact);
+        }
+        
+    }
+    
+    protected static void censor(ServerSession session, User[] user) throws OXException {
+        UserCensorship censorship = getUserCensorship(session);
+        for(int i = 0; i < user.length; i++) {
+            if(user[i].getId() == session.getUserId()) {
+                continue;
+            }
+            user[i] = censorship.censor(user[i]);
+        }
+    }
+    
+    protected static User censor(ServerSession session, User user) throws OXException {
+        if(user.getId() == session.getUserId()) {
+            return user;
+        }
+        UserCensorship censorship = getUserCensorship(session);
+        return censorship.censor(user);
+    }
+    
 
+
+    protected static ContactCensorship getContactCensorship(ServerSession session) throws OXException {
+        if( canSeeGlobalAddressBook(session) ) {
+            return DO_NOTHING_CENSORSHIP;
+        }
+        return NO_GLOBAL_ADDRESSBOOK_CENSORSHIP;
+    }
+    
+    protected static UserCensorship getUserCensorship(ServerSession session) throws OXException {
+         if( canSeeGlobalAddressBook(session) ) {
+             return DO_NOTHING_USER_CENSORSHIP;
+         }
+         
+         return NO_GLOBAL_ADDRESSBOOK_USER_CENSORSHIP;
+    }
+
+    private static boolean canSeeGlobalAddressBook(ServerSession session) throws OXException {
+        OXFolderAccess folderAccess = new OXFolderAccess(session.getContext());
+        EffectivePermission folderPermission = folderAccess.getFolderPermission(FolderObject.SYSTEM_LDAP_FOLDER_ID, session.getUserId(), session.getUserConfiguration());
+        return folderPermission.canReadAllObjects() && folderPermission.isFolderVisible();
+    }
 }
