@@ -128,8 +128,6 @@ public final class attachments extends OXServlet {
 
     @Override
     public void doPut(final HttpServletRequest req, final HttpServletResponse resp) {
-        log("PUT");
-
         String client_id = null;
 
         int objectId = 0;
@@ -260,8 +258,6 @@ public final class attachments extends OXServlet {
 
     @Override
     public void doGet(final HttpServletRequest req, final HttpServletResponse resp) {
-        log("GET");
-
         int target_id = 0;
         int object_id = 0;
         int folder_id = 0;
