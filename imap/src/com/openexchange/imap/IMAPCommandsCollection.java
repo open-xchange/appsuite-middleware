@@ -51,6 +51,7 @@ package com.openexchange.imap;
 
 import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;
 import gnu.trove.TIntLongHashMap;
+import gnu.trove.TLongIntHashMap;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1511,7 +1512,7 @@ public final class IMAPCommandsCollection {
         return (int[]) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-                final Map<Long, Integer> m = new HashMap<Long, Integer>(length);
+                final TLongIntHashMap m = new TLongIntHashMap(length);
                 final String[] args = IMAPNumArgSplitter.splitUIDArg(uids, true, 16); // "UID FETCH <uids> (UID)"
                 final long start = System.currentTimeMillis();
                 for (int k = 0; k < args.length; k++) {
@@ -1535,7 +1536,7 @@ public final class IMAPCommandsCollection {
                             if (STR_FETCH.equals(((IMAPResponse) r[j]).getKey())) {
                                 final FetchResponse fr = (FetchResponse) r[j];
                                 final UID uidItem = getItemOf(UID.class, fr, STR_UID);
-                                m.put(Long.valueOf(uidItem.uid), Integer.valueOf(fr.getNumber()));
+                                m.put(uidItem.uid, fr.getNumber());
                                 r[j] = null;
                             }
                         }
@@ -1561,8 +1562,8 @@ public final class IMAPCommandsCollection {
                 }
                 final int[] retval = new int[length];
                 for (int i = 0; i < retval.length; i++) {
-                    final Integer seqNum = m.get(Long.valueOf(uids[i]));
-                    retval[i] = null == seqNum ? -1 : seqNum.intValue();
+                    final int seqNum = m.get(uids[i]);
+                    retval[i] = 0 == seqNum ? -1 : seqNum;
                 }
                 return retval;
             }
