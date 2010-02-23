@@ -70,6 +70,7 @@
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${mailjar}"/>
     	<pathelement location="${bundlesdir}/${commonBundle}/lib/${trovejar}" />
 
+        <pathelement location="${bundlesdir}/${threadpooljar}"/>
         <pathelement location="${bundlesdir}/${globaljar}"/>
         <pathelement location="${bundlesdir}/${configreadjar}"/>
         <pathelement location="${bundlesdir}/${genericonfjar}"/>
