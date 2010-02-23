@@ -681,7 +681,7 @@ public final class SMTPTransport extends MailTransport {
                 /*
                  * Sanitize Content-Type header
                  */
-                final String cts = sanitizer.toString();
+                final String cts = sanitizer.toString(true);
                 try {
                     new javax.mail.internet.ContentType(cts);
                 } catch (final javax.mail.internet.ParseException pe) {
