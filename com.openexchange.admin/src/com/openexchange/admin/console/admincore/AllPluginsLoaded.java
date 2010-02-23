@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.console.admincore;
 
 import java.net.MalformedURLException;
@@ -57,15 +58,18 @@ import com.openexchange.admin.console.BasicCommandlineOptions;
 import com.openexchange.admin.rmi.OXAdminCoreInterface;
 
 public class AllPluginsLoaded extends BasicCommandlineOptions {
-    public static void main(final String[] args) {
-        new AllPluginsLoaded(args);
+
+    private AllPluginsLoaded() {
+        super();
     }
 
-    public AllPluginsLoaded(final String[] args2) {
+    public static void main(final String[] args) {
+        new AllPluginsLoaded().internalMain();
+    }
 
+    private void internalMain() {
         try {
             final OXAdminCoreInterface oxadmincore = (OXAdminCoreInterface) Naming.lookup(RMI_HOSTNAME+OXAdminCoreInterface.RMI_NAME);
-
             if (oxadmincore.allPluginsLoaded()) {
                 sysexit(0);
             } else {
