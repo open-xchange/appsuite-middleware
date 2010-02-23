@@ -1,5 +1,7 @@
-* 2010-02-23
+* 2010-02-23 francisco.laguna@open-xchange.com
+
  - Bugfix #15180: Move Strings around for translation
+ - Bugfix #15040: Don't skip permission checks for internal users
 
 * 2010-02-23 - thorben.betten@open-xchange.com
 

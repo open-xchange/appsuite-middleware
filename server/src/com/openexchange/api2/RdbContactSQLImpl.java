@@ -1291,17 +1291,15 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
                 }
             }
 
-            if (!co.containsInternalUserId()) {
-                if (check && !performSecurityReadCheck(
-                    co.getParentFolderID(),
-                    co.getCreatedBy(),
-                    userId,
-                    memberInGroups,
-                    session,
-                    con,
-                    ctx)) {
-                    throw EXCEPTIONS.createOXConflictException(50, I(ctx.getContextId()), I(userId));
-                }
+            if (check && !performSecurityReadCheck(
+                co.getParentFolderID(),
+                co.getCreatedBy(),
+                userId,
+                memberInGroups,
+                session,
+                con,
+                ctx)) {
+                throw EXCEPTIONS.createOXConflictException(50, I(ctx.getContextId()), I(userId));
             }
             if (Arrays.contains(cols, Contact.LAST_MODIFIED_OF_NEWEST_ATTACHMENT)) {
                 final Date creationDate = Attachments.getInstance(new SimpleDBProvider(con, null)).getNewestCreationDate(ctx, Types.CONTACT, co.getObjectID());
