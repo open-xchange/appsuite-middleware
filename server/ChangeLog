@@ -6,6 +6,7 @@
 * 2010-02-23 - thorben.betten@open-xchange.com
 
  - Bugfix #14593: A default folder's module must not be changed
+ - Bugfix #15446: Skipping empty parameters when sanitizing Content-Type header on mail transport
 
 * 2010-02-22 - marcus.klein@open-xchange.com
 
