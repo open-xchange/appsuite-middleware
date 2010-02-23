@@ -272,7 +272,7 @@ public class CommonAppointments {
         try {
             writeCon = DBPool.pickupWriteable(ctx);
             stmt = writeCon.createStatement();
-            for(final String tablename : new String[]{"prg_dates", "prg_dates_members", "prg_date_rights"}) {
+            for(final String tablename : new String[]{"dateExternal", "prg_dates", "prg_dates_members", "prg_date_rights"}) {
                 stmt.executeUpdate("DELETE FROM "+tablename+" WHERE cid = "+ctx.getContextId());
             }
         } finally {
