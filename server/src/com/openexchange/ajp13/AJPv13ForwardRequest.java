@@ -49,7 +49,7 @@
 
 package com.openexchange.ajp13;
 
-import static com.openexchange.tools.Collections.newHashMap;
+import gnu.trove.TIntObjectHashMap;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -58,7 +58,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -94,9 +93,9 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
             "ACL", "REPORT", "VERSION-CONTROL", "CHECKIN", "CHECKOUT", "UNCHECKOUT", "SEARCH", "MKWORKSPACE", "UPDATE", "LABEL", "MERGE",
             "BASELINE_CONTROL", "MKACTIVITY" };
 
-    private static final Map<Integer, String> httpHeaderMapping;
+    private static final TIntObjectHashMap<String> httpHeaderMapping;
 
-    private static final Map<Integer, String> attributeMapping;
+    private static final TIntObjectHashMap<String> attributeMapping;
 
     /**
      * A "set" to keep track of known JSESSIONIDs
@@ -125,37 +124,37 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
     private static final int REQUEST_TERMINATOR = 0xFF;
 
     static {
-        httpHeaderMapping = newHashMap(14);
-        httpHeaderMapping.put(Integer.valueOf(0x01), "accept");
-        httpHeaderMapping.put(Integer.valueOf(0x02), "accept-charset");
-        httpHeaderMapping.put(Integer.valueOf(0x03), "accept-encoding");
-        httpHeaderMapping.put(Integer.valueOf(0x04), "accept-language");
-        httpHeaderMapping.put(Integer.valueOf(0x05), "authorization");
-        httpHeaderMapping.put(Integer.valueOf(0x06), "connection");
-        httpHeaderMapping.put(Integer.valueOf(0x07), HDR_CONTENT_TYPE);
-        httpHeaderMapping.put(Integer.valueOf(0x08), HDR_CONTENT_LENGTH);
-        httpHeaderMapping.put(Integer.valueOf(0x09), "cookie");
-        httpHeaderMapping.put(Integer.valueOf(0x0a), "cookie2");
-        httpHeaderMapping.put(Integer.valueOf(0x0b), "host");
-        httpHeaderMapping.put(Integer.valueOf(0x0c), "pragma");
-        httpHeaderMapping.put(Integer.valueOf(0x0d), "referer");
-        httpHeaderMapping.put(Integer.valueOf(0x0e), "user-agent");
+        httpHeaderMapping = new TIntObjectHashMap<String>(14);
+        httpHeaderMapping.put(0x01, "accept");
+        httpHeaderMapping.put(0x02, "accept-charset");
+        httpHeaderMapping.put(0x03, "accept-encoding");
+        httpHeaderMapping.put(0x04, "accept-language");
+        httpHeaderMapping.put(0x05, "authorization");
+        httpHeaderMapping.put(0x06, "connection");
+        httpHeaderMapping.put(0x07, HDR_CONTENT_TYPE);
+        httpHeaderMapping.put(0x08, HDR_CONTENT_LENGTH);
+        httpHeaderMapping.put(0x09, "cookie");
+        httpHeaderMapping.put(0x0a, "cookie2");
+        httpHeaderMapping.put(0x0b, "host");
+        httpHeaderMapping.put(0x0c, "pragma");
+        httpHeaderMapping.put(0x0d, "referer");
+        httpHeaderMapping.put(0x0e, "user-agent");
 
-        attributeMapping = newHashMap(14);
-        attributeMapping.put(Integer.valueOf(0x01), "context");
-        attributeMapping.put(Integer.valueOf(0x02), "servlet_path");
-        attributeMapping.put(Integer.valueOf(0x03), "remote_user");
-        attributeMapping.put(Integer.valueOf(0x04), "auth_type");
-        attributeMapping.put(Integer.valueOf(0x05), ATTR_QUERY_STRING);
-        attributeMapping.put(Integer.valueOf(0x06), "jvm_route");
-        attributeMapping.put(Integer.valueOf(0x07), "ssl_cert");
-        attributeMapping.put(Integer.valueOf(0x08), "ssl_cipher");
-        attributeMapping.put(Integer.valueOf(0x09), "ssl_session");
-        attributeMapping.put(Integer.valueOf(0x0a), "req_attribute");
-        attributeMapping.put(Integer.valueOf(0x0b), ATTR_SSL_KEY_SIZE);
-        attributeMapping.put(Integer.valueOf(0x0c), "secret_attribute");
-        attributeMapping.put(Integer.valueOf(0x0d), ATTR_STORED_METHOD);
-        attributeMapping.put(Integer.valueOf(REQUEST_TERMINATOR), "are_done");
+        attributeMapping = new TIntObjectHashMap<String>(14);
+        attributeMapping.put(0x01, "context");
+        attributeMapping.put(0x02, "servlet_path");
+        attributeMapping.put(0x03, "remote_user");
+        attributeMapping.put(0x04, "auth_type");
+        attributeMapping.put(0x05, ATTR_QUERY_STRING);
+        attributeMapping.put(0x06, "jvm_route");
+        attributeMapping.put(0x07, "ssl_cert");
+        attributeMapping.put(0x08, "ssl_cipher");
+        attributeMapping.put(0x09, "ssl_session");
+        attributeMapping.put(0x0a, "req_attribute");
+        attributeMapping.put(0x0b, ATTR_SSL_KEY_SIZE);
+        attributeMapping.put(0x0c, "secret_attribute");
+        attributeMapping.put(0x0d, ATTR_STORED_METHOD);
+        attributeMapping.put(REQUEST_TERMINATOR, "are_done");
     }
 
     /**
@@ -418,7 +417,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
                     /*
                      * Header name is encoded as an integer value.
                      */
-                    headerName = httpHeaderMapping.get(Integer.valueOf(secondByte));
+                    headerName = httpHeaderMapping.get(secondByte);
                     if (!contentTypeSet && (secondByte == 0x07)) {
                         servletRequest.setContentType(parseString());
                         contentTypeSet = true;
@@ -628,7 +627,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
                  */
                 servletRequest.setAttribute(parseString(), parseString());
             } else {
-                final String attributeName = attributeMapping.get(Integer.valueOf(attrNum));
+                final String attributeName = attributeMapping.get(attrNum);
                 if (attributeName == null) {
                     throw new AJPv13Exception(AJPCode.NO_ATTRIBUTE_NAME, true, Integer.valueOf(attrNum));
                 }
