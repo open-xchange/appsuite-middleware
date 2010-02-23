@@ -77,7 +77,7 @@ public class ReminderException extends OXException {
     }
 
     public ReminderException(final Code code, final Throwable cause, final Object... messageArgs) {
-        super(EnumComponent.REMINDER, code.category, code.detailNumber, code.message, cause);
+        super(EnumComponent.REMINDER, code.getCategory(), code.getDetailNumber(), code.getMessage(), cause);
         setMessageArgs(messageArgs);
     }
 
@@ -99,7 +99,8 @@ public class ReminderException extends OXException {
         DELETE_EXCEPTION("Unable to delete reminder", 6, Category.CODE_ERROR),
         LOAD_EXCEPTION("Unable to load reminder", 7, Category.CODE_ERROR),
         LIST_EXCEPTION("Unable to list reminder", 8, Category.CODE_ERROR),
-        NOT_FOUND("Cannot find reminder (identifier %d). Context %d.", 9, Category.CODE_ERROR),
+        /** Can not find reminder with identifier %1$d in context %2$d. */
+        NOT_FOUND("Can not find reminder with identifier %1$d in context %2$d.", 9, Category.CODE_ERROR),
         /**
          * Folder of the object is missing.
          */
@@ -112,10 +113,10 @@ public class ReminderException extends OXException {
          * Updated too many reminders.
          */
         TOO_MANY("Updated too many reminders.", 12, Category.CODE_ERROR),
-        /**
-         * SQL Problem: "%1$s".
-         */
-        SQL_ERROR("SQL Problem: \"%1$s\"", 13, Category.CODE_ERROR);
+        /** SQL Problem: %1$s. */
+        SQL_ERROR("SQL Problem: \"%1$s\"", 13, Category.CODE_ERROR),
+        /** No target service is registered for module %1$d. */
+        NO_TARGET_SERVICE("No target service is registered for module %1$d.", 14, Category.CODE_ERROR);
 
         /**
          * Message of the exception.

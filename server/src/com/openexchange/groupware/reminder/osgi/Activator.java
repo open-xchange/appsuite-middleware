@@ -47,33 +47,32 @@
  *
  */
 
-package com.openexchange.server.osgi;
+package com.openexchange.groupware.reminder.osgi;
 
 import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.groupware.reminder.TargetService;
 
 /**
- * {@link Activator} combines several activators in the server bundle that have been prepared to split up the server bundle into several
- * bundles. Currently this is not done to keep number of packages low.
+ * {@link Activator}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Activator extends CompositeBundleActivator {
+public class Activator implements BundleActivator {
 
-    private final BundleActivator[] activators = {
-        new com.openexchange.database.osgi.Activator(),
-        new com.openexchange.groupware.update.osgi.Activator(),
-        new com.openexchange.groupware.reminder.osgi.Activator(),
-        new com.openexchange.server.osgi.ServerActivator(),
-        new com.openexchange.groupware.tasks.osgi.Activator()
-    };
+    private ServiceTracker targetTracker;
 
     public Activator() {
         super();
     }
 
-    @Override
-    protected BundleActivator[] getActivators() {
-        return activators;
+    public void start(BundleContext context) throws Exception {
+        targetTracker = new ServiceTracker(context, TargetService.class.getName(), new TargetRegistryCustomizer(context));
+        targetTracker.open();
+    }
+
+    public void stop(BundleContext context) throws Exception {
+        targetTracker.close();
     }
 }

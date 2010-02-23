@@ -47,43 +47,65 @@
  *
  */
 
-package com.openexchange.groupware.reminder;
+package com.openexchange.groupware.reminder.osgi;
 
-import java.sql.Connection;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.contexts.Context;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.groupware.reminder.TargetService;
+import com.openexchange.groupware.reminder.internal.TargetRegistry;
+import com.openexchange.java.Autoboxing;
 
 /**
- * This interface must be implemented to remove reminder information from
- * objects if the reminder is deleted. Additionally the last modified timestamp
- * on the object should be actualized.
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ * {@link TargetRegistryCustomizer}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public interface ReminderDeleteInterface {
+public class TargetRegistryCustomizer implements ServiceTrackerCustomizer {
 
-    /**
-     * All reminder information for every participant must be removed.
-     * @param ctx Context.
-     * @param con writable database connection.
-     * @param targetId identifier of the object to actualize.
-     * @throws AbstractOXException if some problem occurs actualizing the object.
-     */
-    void updateTargetObject(Context ctx, Connection con, int targetId)
-        throws AbstractOXException;
+    private static final Log LOG = LogFactory.getLog(TargetRegistryCustomizer.class);
 
-    /**
-     * The reminder information for a specific participant must be removed.
-     * @param ctx Context.
-     * @param con writeable database connection.
-     * @param targetId identifier of the object to actualize.
-     * @param userId identifier of the user that deleted his reminder.
-     * @throws AbstractOXException if some problem occurs actualizing the object.
-     */
-    void updateTargetObject(Context ctx, Connection con, int targetId,
-        int userId) throws AbstractOXException;    
+    private final BundleContext context;
+
+    public TargetRegistryCustomizer(BundleContext context) {
+        super();
+        this.context = context;
+    }
+
+    public Object addingService(ServiceReference reference) {
+        TargetService targetService = (TargetService) context.getService(reference);
+        final int module = parseModule(reference);
+        if (-1 == module) {
+            LOG.error("Registration of service " + targetService.getClass().getName() + " is missing property defining the module.");
+            context.ungetService(reference);
+            return null;
+        }
+        TargetRegistry.getInstance().addService(module, targetService);
+        return targetService;
+    }
+
+    public void modifiedService(ServiceReference reference, Object service) {
+        // Nothing to do.
+    }
+
+    public void removedService(ServiceReference reference, Object service) {
+        if (null == service) {
+            return;
+        }
+        TargetRegistry.getInstance().removeService(parseModule(reference));
+        context.ungetService(reference);
+    }
+
+    private int parseModule(ServiceReference reference) {
+        Object obj = reference.getProperty(TargetService.MODULE_PROPERTY);
+        final int retval;
+        if (obj instanceof Integer) {
+            retval = Autoboxing.i((Integer) obj);
+        } else {
+            retval = -1;
+        }
+        return retval;
+    }
 }
-
-
-
-
-

@@ -47,33 +47,38 @@
  *
  */
 
-package com.openexchange.server.osgi;
+package com.openexchange.groupware.tasks.osgi;
 
+import static com.openexchange.java.Autoboxing.I;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+import com.openexchange.groupware.Types;
+import com.openexchange.groupware.reminder.TargetService;
+import com.openexchange.groupware.tasks.ModifyThroughDependant;
 
 /**
- * {@link Activator} combines several activators in the server bundle that have been prepared to split up the server bundle into several
- * bundles. Currently this is not done to keep number of packages low.
+ * {@link Activator}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Activator extends CompositeBundleActivator {
+public class Activator implements BundleActivator {
 
-    private final BundleActivator[] activators = {
-        new com.openexchange.database.osgi.Activator(),
-        new com.openexchange.groupware.update.osgi.Activator(),
-        new com.openexchange.groupware.reminder.osgi.Activator(),
-        new com.openexchange.server.osgi.ServerActivator(),
-        new com.openexchange.groupware.tasks.osgi.Activator()
-    };
+    private ServiceRegistration reminderService;
 
     public Activator() {
         super();
     }
 
-    @Override
-    protected BundleActivator[] getActivators() {
-        return activators;
+    public void start(BundleContext context) throws Exception {
+        Dictionary<String, Integer> props = new Hashtable<String, Integer>(1, 1);
+        props.put(TargetService.MODULE_PROPERTY, I(Types.TASK));
+        reminderService = context.registerService(TargetService.class.getName(), new ModifyThroughDependant(), props);
+    }
+
+    public void stop(BundleContext context) throws Exception {
+        reminderService.unregister();
     }
 }

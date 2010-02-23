@@ -57,17 +57,17 @@ import java.sql.Types;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.reminder.ReminderDeleteInterface;
+import com.openexchange.groupware.reminder.TargetService;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
- * {@link CalendarReminderDelete} - The {@link ReminderDeleteInterface}
+ * {@link CalendarReminderDelete} - The {@link TargetService}
  * implementation for calendar module.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class CalendarReminderDelete implements ReminderDeleteInterface {
+public final class CalendarReminderDelete implements TargetService {
 
 	/**
 	 * Initializes a new {@link CalendarReminderDelete}

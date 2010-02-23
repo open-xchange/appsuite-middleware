@@ -89,4 +89,20 @@ public abstract class ReminderStorage {
     }
 
     public abstract ReminderObject[] selectReminder(Context ctx, Connection con, User user, Date end) throws ReminderException;
+
+    public void deleteReminder(Context ctx, ReminderObject reminder) throws ReminderException {
+        final Connection con;
+        try {
+            con = Database.get(ctx, true);
+        } catch (DBPoolingException e) {
+            throw new ReminderException(e);
+        }
+        try {
+            deleteReminder(con, ctx.getContextId(), reminder.getObjectId());
+        } finally {
+            Database.back(ctx, true, con);
+        }
+    }
+
+    public abstract void deleteReminder(Connection con, int ctxId, int reminderId) throws ReminderException;
 }

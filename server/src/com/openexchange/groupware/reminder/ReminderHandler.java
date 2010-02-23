@@ -75,24 +75,22 @@ import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.reminder.ReminderException.Code;
 import com.openexchange.groupware.reminder.internal.GetArisingReminder;
 import com.openexchange.groupware.reminder.internal.SQL;
-import com.openexchange.server.ServiceException;
+import com.openexchange.groupware.reminder.internal.TargetRegistry;
 import com.openexchange.server.impl.DBPool;
-import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.sql.DBUtils;
-import com.openexchange.user.UserService;
 
 /**
  * ReminderHandler
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public class ReminderHandler implements Types, ReminderService {
+public class ReminderHandler implements ReminderService {
 
     /**
      * Logger.
@@ -101,20 +99,9 @@ public class ReminderHandler implements Types, ReminderService {
 
     final Context context;
 
-    private ReminderDeleteInterface reminderDeleteInterface;
-
     public ReminderHandler(final Context context) {
+        super();
         this.context = context;
-        reminderDeleteInterface = new EmptyReminderDeleteImpl();
-    }
-
-    public ReminderHandler(final Context context, final ReminderDeleteInterface reminderDeleteInterface) {
-        this.context = context;
-        this.reminderDeleteInterface = reminderDeleteInterface;
-    }
-
-    public void setReminderDeleteInterface(final ReminderDeleteInterface reminderDeleteInterface) {
-        this.reminderDeleteInterface = reminderDeleteInterface;
     }
 
     public int insertReminder( final ReminderObject reminderObj) throws OXException {
@@ -284,14 +271,14 @@ public class ReminderHandler implements Types, ReminderService {
         try {
             writeCon = DBPool.pickupWriteable(context);
             int a = 0;
-            ps = writeCon.prepareStatement(SQL.sqlDeleteWithId);
+            ps = writeCon.prepareStatement(SQL.DELETE_WITH_ID);
             ps.setInt(++a, contextId);
             ps.setInt(++a, reminder.getObjectId());
             final int deleted = ps.executeUpdate();
             if (deleted == 0) {
                 throw new ReminderException(Code.NOT_FOUND, reminder, I(contextId));
             }
-            reminderDeleteInterface.updateTargetObject(context, writeCon, reminder.getTargetId(), reminder.getUser());
+            TargetRegistry.getInstance().getService(reminder.getModule()).updateTargetObject(context, writeCon, reminder.getTargetId(), reminder.getUser());
         } catch (final SQLException exc) {
             throw new ReminderException(Code.DELETE_EXCEPTION, exc);
         } catch (final DBPoolingException exc) {
@@ -341,7 +328,7 @@ public class ReminderHandler implements Types, ReminderService {
         }
     }
 
-    public void deleteReminder(int targetId, int userId, int module, Connection con) throws OXMandatoryFieldException, OXConflictException, OXException {
+    public void deleteReminder(int targetId, int userId, int module, Connection con) throws OXException {
         final int contextId = context.getContextId();
         if (userId == 0) {
             throw new ReminderException(Code.MANDATORY_FIELD_USER, "missing user id");
@@ -357,7 +344,7 @@ public class ReminderHandler implements Types, ReminderService {
             if (0 == stmt.executeUpdate()) {
                 throw new ReminderException(Code.NOT_FOUND, I(targetId), I(contextId));
             }
-            reminderDeleteInterface.updateTargetObject(context, con, targetId, userId);
+            TargetRegistry.getInstance().getService(module).updateTargetObject(context, con, targetId, userId);
         } catch (SQLException e) {
             throw new ReminderException(Code.DELETE_EXCEPTION, e);
         } catch (ReminderException e) {
@@ -389,7 +376,7 @@ public class ReminderHandler implements Types, ReminderService {
         }
     }
 
-    public void deleteReminder(int targetId, int module, Connection con) throws OXMandatoryFieldException, OXConflictException, OXException {
+    public void deleteReminder(int targetId, int module, Connection con) throws OXException {
         final int contextId = context.getContextId();
         PreparedStatement stmt = null;
         try {
@@ -401,7 +388,7 @@ public class ReminderHandler implements Types, ReminderService {
             if (0 == stmt.executeUpdate()) {
                 throw new ReminderException(Code.NOT_FOUND, I(targetId), I(contextId));
             }
-            reminderDeleteInterface.updateTargetObject(context, con, targetId);
+            TargetRegistry.getInstance().getService(module).updateTargetObject(context, con, targetId);
         } catch (SQLException e) {
             throw new ReminderException(Code.SQL_ERROR, e, e.getMessage());
         } catch (ReminderException e) {
@@ -627,20 +614,8 @@ public class ReminderHandler implements Types, ReminderService {
         }
     }
 
-    public SearchIterator<ReminderObject> getArisingReminder(Context ctx, final int userId, final Date end) throws OXException {
-        final UserService userService;
-        try {
-            userService = ServerServiceRegistry.getInstance().getService(UserService.class, true);
-        } catch (ServiceException e) {
-            throw new ReminderException(e);
-        }
-        final User user;
-        try {
-            user = userService.getUser(userId, ctx);
-        } catch (UserException e) {
-            throw new ReminderException(e);
-        }
-        GetArisingReminder arising = new GetArisingReminder(ctx, user, end);
+    public SearchIterator<ReminderObject> getArisingReminder(Session session, Context ctx, final User user, final Date end) throws OXException {
+        GetArisingReminder arising = new GetArisingReminder(session, ctx, user, end);
         return arising.loadWithIterator();
     }
 

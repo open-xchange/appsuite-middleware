@@ -49,12 +49,27 @@
 
 package com.openexchange.groupware.reminder.internal;
 
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import com.openexchange.api.OXObjectNotFoundException;
+import com.openexchange.api2.AppointmentSQLInterface;
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.Types;
+import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
+import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.reminder.ReminderException;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.reminder.ReminderStorage;
+import com.openexchange.groupware.reminder.ReminderException.Code;
+import com.openexchange.server.ServiceException;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.ArrayIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 
@@ -65,14 +80,17 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public class GetArisingReminder {
 
+    private static final Log LOG = LogFactory.getLog(GetArisingReminder.class);
     private static final ReminderStorage storage = ReminderStorage.getInstance();
 
+    private final Session session;
     private final Context ctx;
     private final User user;
     private final Date end;
 
-    public GetArisingReminder(Context ctx, User user, Date end) {
+    public GetArisingReminder(Session session, Context ctx, User user, Date end) {
         super();
+        this.session = session;
         this.ctx = ctx;
         this.user = user;
         this.end = (Date) end.clone();
@@ -80,7 +98,45 @@ public class GetArisingReminder {
 
     public SearchIterator<ReminderObject> loadWithIterator() throws ReminderException {
         ReminderObject[] reminders = storage.selectReminder(ctx, user, end);
+        reminders = removeAppointments(reminders);
         return new ArrayIterator<ReminderObject>(reminders);
     }
 
+    public ReminderObject[] removeAppointments(ReminderObject[] reminders) throws ReminderException {
+        AppointmentSqlFactoryService factoryService;
+        try {
+            factoryService = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class, true);
+        } catch (ServiceException e) {
+            throw new ReminderException(e);
+        }
+        AppointmentSQLInterface appointmentSql = factoryService.createAppointmentSql(session);
+        List<ReminderObject> retval = new ArrayList<ReminderObject>(reminders.length);
+        for (ReminderObject reminder : reminders) {
+            if (Types.APPOINTMENT == reminder.getModule()) {
+                final CalendarDataObject appointment;
+                try {
+                    appointment = appointmentSql.getObjectById(reminder.getTargetId(), reminder.getFolder());
+                } catch (OXObjectNotFoundException e) {
+                    storage.deleteReminder(ctx, reminder);
+                    continue;
+                } catch (OXException e) {
+                    ReminderException re = new ReminderException(e);
+                    LOG.error(re.getMessage(), re);
+                    continue;
+                } catch (SQLException e) {
+                    ReminderException re = new ReminderException(Code.SQL_ERROR, e, e.getMessage());
+                    LOG.error(re.getMessage(), re);
+                    continue;
+                }
+                if (appointment.getEndDate().after(new Date())) {
+                    retval.add(reminder);
+                } else {
+                    new DeleteReminder(ctx, reminder).perform();
+                }
+            } else {
+                retval.add(reminder);
+            }
+        }
+        return retval.toArray(new ReminderObject[retval.size()]);
+    }
 }

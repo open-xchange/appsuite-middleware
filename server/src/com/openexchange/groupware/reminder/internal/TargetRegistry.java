@@ -47,33 +47,53 @@
  *
  */
 
-package com.openexchange.server.osgi;
+package com.openexchange.groupware.reminder.internal;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import static com.openexchange.java.Autoboxing.I;
+import gnu.trove.TIntObjectHashMap;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import com.openexchange.groupware.reminder.ReminderException;
+import com.openexchange.groupware.reminder.TargetService;
+import com.openexchange.groupware.reminder.ReminderException.Code;
 
 /**
- * {@link Activator} combines several activators in the server bundle that have been prepared to split up the server bundle into several
- * bundles. Currently this is not done to keep number of packages low.
+ * Registry for the {@link TargetService} instances.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Activator extends CompositeBundleActivator {
+public class TargetRegistry {
 
-    private final BundleActivator[] activators = {
-        new com.openexchange.database.osgi.Activator(),
-        new com.openexchange.groupware.update.osgi.Activator(),
-        new com.openexchange.groupware.reminder.osgi.Activator(),
-        new com.openexchange.server.osgi.ServerActivator(),
-        new com.openexchange.groupware.tasks.osgi.Activator()
-    };
+    private static final Log LOG = LogFactory.getLog(TargetRegistry.class);
+    private static final TargetRegistry SINGLETON = new TargetRegistry();
 
-    public Activator() {
+    private final TIntObjectHashMap<TargetService> registry = new TIntObjectHashMap<TargetService>();
+
+    private TargetRegistry() {
         super();
     }
 
-    @Override
-    protected BundleActivator[] getActivators() {
-        return activators;
+    public static final TargetRegistry getInstance() {
+        return SINGLETON;
+    }
+
+    public TargetService getService(int module) throws ReminderException {
+        TargetService retval = registry.get(module);
+        if (null == retval) {
+            throw new ReminderException(Code.NO_TARGET_SERVICE, I(module));
+        }
+        return retval;
+    }
+
+    public void addService(int module, TargetService targetService) {
+        TargetService previous = registry.putIfAbsent(module, targetService);
+        if (null == previous) {
+            return;
+        }
+        LOG.error("Duplicate registration of a reminder target service for module " + module + " with implementation " + targetService.getClass().getName() + ".");
+    }
+
+    public void removeService(int module) {
+        registry.remove(module);
     }
 }

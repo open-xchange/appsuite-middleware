@@ -78,11 +78,8 @@ import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.reminder.EmptyReminderDeleteImpl;
-import com.openexchange.groupware.reminder.ReminderDeleteInterface;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
-import com.openexchange.groupware.tasks.ModifyThroughDependant;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
@@ -162,21 +159,7 @@ public final class ReminderRequest {
         final JSONArray jsonArray = new JSONArray();
         try {
             final ReminderService reminderSql = new ReminderHandler(session.getContext());
-
             final ReminderObject reminder = reminderSql.loadReminder(id);
-            final ReminderDeleteInterface reminderDeleteInterface;
-            final int module = reminder.getModule();
-            switch (module) {
-            case Types.APPOINTMENT:
-                reminderDeleteInterface = ServerServiceRegistry.getInstance().getService(ReminderDeleteInterface.class);
-                break;
-            case Types.TASK:
-                reminderDeleteInterface = new ModifyThroughDependant();
-                break;
-            default:
-                reminderDeleteInterface = new EmptyReminderDeleteImpl();
-            }
-            reminderSql.setReminderDeleteInterface(reminderDeleteInterface);
 
             if (reminder.isRecurrenceAppointment()) {
                 final ReminderObject nextReminder = getNextRecurringReminder(session, tz, reminder);
@@ -266,7 +249,7 @@ public final class ReminderRequest {
         try {
             final ReminderService reminderSql = new ReminderHandler(session.getContext());
             final JSONArray jsonResponseArray = new JSONArray();
-            final SearchIterator<ReminderObject> it = reminderSql.getArisingReminder(session.getContext(), userObj.getId(), end);
+            final SearchIterator<ReminderObject> it = reminderSql.getArisingReminder(session, session.getContext(), userObj, end);
             try {
                 while (it.hasNext()) {
                     final ReminderObject reminder = it.next();

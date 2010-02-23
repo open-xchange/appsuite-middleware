@@ -49,6 +49,9 @@
 
 package com.openexchange.calendar.osgi;
 
+import static com.openexchange.java.Autoboxing.I;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -56,10 +59,11 @@ import com.openexchange.calendar.CalendarAdministration;
 import com.openexchange.calendar.CalendarReminderDelete;
 import com.openexchange.calendar.api.AppointmentSqlFactory;
 import com.openexchange.calendar.api.CalendarCollection;
+import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarAdministrationService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
-import com.openexchange.groupware.reminder.ReminderDeleteInterface;
+import com.openexchange.groupware.reminder.TargetService;
 
 public class Activator implements BundleActivator {
     
@@ -76,7 +80,9 @@ public class Activator implements BundleActivator {
 	    appointmentSqlFactoryRegistration = context.registerService(AppointmentSqlFactoryService.class.getName(), new AppointmentSqlFactory(), null);
 	    calendarCollectionRegistration = context.registerService(CalendarCollectionService.class.getName(), new CalendarCollection(), null);
 	    calendarAdministrationRegistration = context.registerService(CalendarAdministrationService.class.getName(), new CalendarAdministration(), null);
-	    calendarReminderDeleteRegistration = context.registerService(ReminderDeleteInterface.class.getName(), new CalendarReminderDelete(), null);
+        Dictionary<String, Integer> props = new Hashtable<String, Integer>(1, 1);
+        props.put(TargetService.MODULE_PROPERTY, I(Types.APPOINTMENT));
+        calendarReminderDeleteRegistration = context.registerService(TargetService.class.getName(), new CalendarReminderDelete(), props);
 	}
 
 	/*

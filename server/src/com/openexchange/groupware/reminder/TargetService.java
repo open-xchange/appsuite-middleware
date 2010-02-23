@@ -47,33 +47,53 @@
  *
  */
 
-package com.openexchange.server.osgi;
+package com.openexchange.groupware.reminder;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import java.sql.Connection;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.contexts.Context;
 
 /**
- * {@link Activator} combines several activators in the server bundle that have been prepared to split up the server bundle into several
- * bundles. Currently this is not done to keep number of packages low.
- *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * This interface must be implemented to remove reminder information from
+ * objects if the reminder is deleted. Additionally the last modified timestamp
+ * on the object should be actualized.
+ * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public class Activator extends CompositeBundleActivator {
+public interface TargetService {
 
-    private final BundleActivator[] activators = {
-        new com.openexchange.database.osgi.Activator(),
-        new com.openexchange.groupware.update.osgi.Activator(),
-        new com.openexchange.groupware.reminder.osgi.Activator(),
-        new com.openexchange.server.osgi.ServerActivator(),
-        new com.openexchange.groupware.tasks.osgi.Activator()
+    String MODULE_PROPERTY = "MODULE";
+
+    TargetService EMPTY = new TargetService() {
+        public void updateTargetObject(Context ctx, Connection con, int targetId, int userId) {
+            // Nothing to do.
+        }
+        public void updateTargetObject(Context ctx, Connection con, int targetId) {
+            // Nothing to do.
+        }
     };
 
-    public Activator() {
-        super();
-    }
+    /**
+     * All reminder information for every participant must be removed.
+     * @param ctx Context.
+     * @param con writable database connection.
+     * @param targetId identifier of the object to actualize.
+     * @throws AbstractOXException if some problem occurs actualizing the object.
+     */
+    void updateTargetObject(Context ctx, Connection con, int targetId) throws AbstractOXException;
 
-    @Override
-    protected BundleActivator[] getActivators() {
-        return activators;
-    }
+    /**
+     * The reminder information for a specific participant must be removed.
+     * @param ctx Context.
+     * @param con writeable database connection.
+     * @param targetId identifier of the object to actualize.
+     * @param userId identifier of the user that deleted his reminder.
+     * @throws AbstractOXException if some problem occurs actualizing the object.
+     */
+    void updateTargetObject(Context ctx, Connection con, int targetId, int userId) throws AbstractOXException;
+
 }
+
+
+
+
+

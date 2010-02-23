@@ -67,8 +67,7 @@ public final class SQL {
         "UPDATE reminder SET alarm=?,recurrence=?,description=?,last_modified=?,"
         + "folder=? WHERE cid=? AND target_id=? AND module=? AND userid=?";
 
-    public static final String sqlDeleteWithId =
-        "DELETE FROM reminder WHERE cid=? AND object_id=?";
+    public static final String DELETE_WITH_ID = "DELETE FROM reminder WHERE cid=? AND object_id=?";
 
     public static final String sqlDelete =
         "DELETE FROM reminder WHERE cid=? AND target_id=? AND module=? AND userid=?";

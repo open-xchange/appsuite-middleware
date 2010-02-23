@@ -54,9 +54,10 @@ import java.util.Date;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.reminder.ReminderDeleteInterface;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.reminder.ReminderException;
 import com.openexchange.groupware.reminder.ReminderObject;
+import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 
 /**
@@ -66,8 +67,6 @@ import com.openexchange.tools.iterator.SearchIterator;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public interface ReminderService {
-
-    public void setReminderDeleteInterface(ReminderDeleteInterface reminderDeleteInterface);
 
     public int insertReminder(ReminderObject reminderObj) throws OXMandatoryFieldException, OXConflictException, OXException;
 
@@ -115,13 +114,14 @@ public interface ReminderService {
 
     /**
      * Fetches the list of reminder that should pop up in the time frame starting now and ending at the given end date.
-     * @param ctx TODO
-     * @param userId reminder should be for this user.
+     * @param session the session.
+     * @param ctx the context.
+     * @param user reminder should be for this user.
      * @param end end of the wanted time frame.
      * @return a list of reminder that should pop up.
      * @throws OXException if loading the reminder failes in some way.
      */
-    SearchIterator<ReminderObject> getArisingReminder(Context ctx, int userId, Date end) throws OXException;
+    SearchIterator<ReminderObject> getArisingReminder(Session session, Context ctx, User user, Date end) throws OXException;
 
     public SearchIterator listModifiedReminder(int userId, Date lastModified) throws OXException;
 

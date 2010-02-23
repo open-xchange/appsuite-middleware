@@ -136,7 +136,7 @@ public final class RemoveBrokenReminder implements UpdateTask {
     private void deleteBroken(final Connection con, final ReminderObject[] brokens) throws ReminderException {
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement(SQL.sqlDeleteWithId);
+            stmt = con.prepareStatement(SQL.DELETE_WITH_ID);
             for (final ReminderObject broken : brokens) {
                 // Abuse target identifier for context identifier.
                 stmt.setInt(1, broken.getTargetId());

@@ -54,13 +54,13 @@ import java.sql.Connection;
 import java.util.Date;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.reminder.ReminderDeleteInterface;
+import com.openexchange.groupware.reminder.TargetService;
 
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class ModifyThroughDependant implements ReminderDeleteInterface {
+public final class ModifyThroughDependant implements TargetService {
 
     /**
      * Attributes of a task that must be updated if an attachment is added or

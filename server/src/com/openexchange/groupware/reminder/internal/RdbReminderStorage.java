@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.reminder.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -63,6 +64,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.reminder.ReminderException;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.reminder.ReminderStorage;
+import com.openexchange.groupware.reminder.ReminderException.Code;
 
 /**
  * {@link RdbReminderStorage}
@@ -92,11 +94,30 @@ public class RdbReminderStorage extends ReminderStorage {
                 retval.add(reminder);
             }
         } catch (SQLException e) {
-            throw new ReminderException(ReminderException.Code.SQL_ERROR, e, e.getMessage());
+            throw new ReminderException(Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
         }
         return retval.toArray(new ReminderObject[retval.size()]);
+    }
+
+    @Override
+    public void deleteReminder(Connection con, int ctxId, int reminderId) throws ReminderException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement(SQL.DELETE_WITH_ID);
+            int pos = 1;
+            stmt.setInt(pos++, ctxId);
+            stmt.setInt(pos++, reminderId);
+            int deleted = stmt.executeUpdate();
+            if (deleted == 0) {
+                throw new ReminderException(Code.NOT_FOUND, I(reminderId), I(ctxId));
+            }
+        } catch (final SQLException exc) {
+            throw new ReminderException(Code.DELETE_EXCEPTION, exc);
+        } finally {
+            closeSQLStuff(stmt);
+        }
     }
 
     private static void readResult(ResultSet result, ReminderObject reminder) throws SQLException {

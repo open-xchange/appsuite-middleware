@@ -47,33 +47,68 @@
  *
  */
 
-package com.openexchange.server.osgi;
+package com.openexchange.groupware.reminder.internal;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.rollback;
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.databaseold.Database;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.reminder.ReminderException;
+import com.openexchange.groupware.reminder.ReminderObject;
+import com.openexchange.groupware.reminder.ReminderStorage;
+import com.openexchange.groupware.reminder.ReminderException.Code;
 
 /**
- * {@link Activator} combines several activators in the server bundle that have been prepared to split up the server bundle into several
- * bundles. Currently this is not done to keep number of packages low.
+ * {@link DeleteReminder}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Activator extends CompositeBundleActivator {
+public class DeleteReminder {
 
-    private final BundleActivator[] activators = {
-        new com.openexchange.database.osgi.Activator(),
-        new com.openexchange.groupware.update.osgi.Activator(),
-        new com.openexchange.groupware.reminder.osgi.Activator(),
-        new com.openexchange.server.osgi.ServerActivator(),
-        new com.openexchange.groupware.tasks.osgi.Activator()
-    };
+    private static final ReminderStorage storage = ReminderStorage.getInstance();
 
-    public Activator() {
+    private Context ctx;
+
+    private final ReminderObject reminder;
+
+    public DeleteReminder(Context ctx, ReminderObject reminder) {
         super();
+        this.ctx = ctx;
+        this.reminder = reminder;
     }
 
-    @Override
-    protected BundleActivator[] getActivators() {
-        return activators;
+    public void perform() throws ReminderException {
+        final Connection con;
+        try {
+            con = Database.get(ctx, true);
+        } catch (DBPoolingException e) {
+            throw new ReminderException(e);
+        }
+        try {
+            con.setAutoCommit(false);
+            delete(con);
+            con.commit();
+        } catch (SQLException e) {
+            throw new ReminderException(Code.SQL_ERROR, e, e.getMessage());
+        } catch (ReminderException e) {
+            rollback(con);
+            throw e;
+        } finally {
+            autocommit(con);
+            Database.back(ctx, true, con);
+        }
+    }
+
+    private void delete(Connection con) throws ReminderException {
+        try {
+            storage.deleteReminder(con, ctx.getContextId(), reminder.getObjectId());
+            TargetRegistry.getInstance().getService(reminder.getModule()).updateTargetObject(ctx, con, reminder.getTargetId(), reminder.getUser());
+        } catch (AbstractOXException e) {
+            throw new ReminderException(e);
+        }
     }
 }

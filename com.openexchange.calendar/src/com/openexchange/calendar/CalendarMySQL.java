@@ -2044,7 +2044,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 if (oids.length > 0) {
                     deleteAllRecurringExceptions(oids, so, writecon, false);
                     for (int a = 0; a < exceptions.size(); a++) {
-                        triggerDeleteEvent(exceptions.get(a).intValue(), inFolder, so, ctx, null);
+                        triggerDeleteEvent(writecon, exceptions.get(a).intValue(), inFolder, so, ctx, null);
                     }
                 }
             }
@@ -2057,7 +2057,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 if (oids.length > 0) {
                     deleteAllRecurringExceptions(oids, so, writecon);
                     for (int a = 0; a < exceptions.size(); a++) {
-                        triggerDeleteEvent(exceptions.get(a).intValue(), inFolder, so, ctx, null);
+                        triggerDeleteEvent(writecon, exceptions.get(a).intValue(), inFolder, so, ctx, null);
                     }
                 }
             }
@@ -2090,7 +2090,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 						final int objectID2Delete = objectIDs2Delete[i].intValue();
 						final CalendarDataObject toDelete = calendarSql.getObjectById(objectID2Delete, inFolder);
 						deleteAppointment(writecon, so.getContextId(), objectID2Delete, so.getUserId());
-						triggerDeleteEvent(objectID2Delete, inFolder, so, ctx, toDelete);
+						triggerDeleteEvent(writecon, objectID2Delete, inFolder, so, ctx, toDelete);
 					}
 				}
 				// Remove deleted change exceptions from list
@@ -4169,11 +4169,11 @@ public class CalendarMySQL implements CalendarSqlImp {
                             final long modified = deleteAppointment(writecon, cid, oid, uid);
 
                             if (edao == null) {
-                                triggerDeleteEvent(oid, fid, so, ctx, null);
+                                triggerDeleteEvent(writecon, oid, fid, so, ctx, null);
                             } else {
                                 edao.setModifiedBy(uid);
                                 edao.setLastModified(new Date(modified));
-                                triggerDeleteEvent(oid, fid, so, ctx, edao);
+                                triggerDeleteEvent(writecon, oid, fid, so, ctx, edao);
                             }
                         } catch (final LdapException le) {
                             throw new OXException(le);
@@ -4236,7 +4236,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                     deleteAllRecurringExceptions(oids, so, writecon);
                 }
                 for (int a = 0; a < al.size(); a++) {
-                    triggerDeleteEvent(al.get(a).intValue(), fid, so, ctx, null);
+                    triggerDeleteEvent(writecon, al.get(a).intValue(), fid, so, ctx, null);
                 }
             }
             oid = edao.getRecurrenceID();
@@ -4252,15 +4252,15 @@ public class CalendarMySQL implements CalendarSqlImp {
         final long modified = deleteAppointment(writecon, cid, oid, uid);
 
         if (edao == null) {
-            triggerDeleteEvent(oid, fid, so, ctx, null);
+            triggerDeleteEvent(writecon, oid, fid, so, ctx, null);
         } else {
             edao.setModifiedBy(uid);
             edao.setLastModified(new Date(modified));
-            triggerDeleteEvent(oid, fid, so, ctx, edao);
+            triggerDeleteEvent(writecon, oid, fid, so, ctx, edao);
         }
     }
 
-    private final void triggerDeleteEvent(final int oid, final int fid, final Session so, final Context ctx, final CalendarDataObject edao) throws OXException {
+    private final void triggerDeleteEvent(Connection con, final int oid, final int fid, final Session so, final Context ctx, final CalendarDataObject edao) throws OXException {
         final CalendarDataObject ao;
         if (edao == null) {
             ao = new CalendarDataObject();
@@ -4274,7 +4274,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         // deleteAllReminderEntries(edao, oid, fid, so, readcon);
         final ReminderService rsql = new ReminderHandler(ctx);
         try {
-            rsql.deleteReminder(oid, Types.APPOINTMENT);
+            rsql.deleteReminder(oid, Types.APPOINTMENT, con);
         } catch (final AbstractOXException oxe) {
             // this is wanted if Code = Code.NOT_FOUND
             if (oxe.getDetailNumber() != Code.NOT_FOUND.getDetailNumber()) {
