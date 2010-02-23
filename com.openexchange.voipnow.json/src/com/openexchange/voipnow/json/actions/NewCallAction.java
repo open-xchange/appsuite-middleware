@@ -127,11 +127,17 @@ public final class NewCallAction extends AbstractVoipNowHTTPAction<GetMethod> {
              */
             final StringBuilder builder = new StringBuilder(256);
             builder.append("PhoneNumberToCall=").append(urlEncode(receiverNumber));
-            builder.append('&').append("FromExtension=").append(urlEncode(callerNumber));
-            if (null != jsonArray) {
+            if (null == jsonArray) {
+                builder.append('&').append("FromExtension=").append(urlEncode(callerNumber));
+            } else {
                 final int len = jsonArray.length();
-                for (int i = 0; i < len; i++) {
-                    builder.append('&').append("FromExtension=").append(urlEncode(jsonArray.getString(i)));
+                if (len > 0) {
+                    builder.append('&').append(urlEncode("FromExtension[]")).append('=').append(urlEncode(callerNumber));
+                    for (int i = 0; i < len; i++) {
+                        builder.append('&').append(urlEncode("FromExtension[]")).append('=').append(urlEncode(jsonArray.getString(i)));
+                    }
+                } else {
+                    builder.append('&').append("FromExtension=").append(urlEncode(callerNumber));
                 }
             }
             builder.append('&').append("CallerID=").append(urlEncode(receiverDisplayName));
