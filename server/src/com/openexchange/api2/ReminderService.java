@@ -53,6 +53,7 @@ import java.sql.Connection;
 import java.util.Date;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXMandatoryFieldException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.reminder.ReminderDeleteInterface;
 import com.openexchange.groupware.reminder.ReminderException;
 import com.openexchange.groupware.reminder.ReminderObject;
@@ -114,12 +115,13 @@ public interface ReminderService {
 
     /**
      * Fetches the list of reminder that should pop up in the time frame starting now and ending at the given end date.
+     * @param ctx TODO
      * @param userId reminder should be for this user.
      * @param end end of the wanted time frame.
      * @return a list of reminder that should pop up.
      * @throws OXException if loading the reminder failes in some way.
      */
-    SearchIterator<ReminderObject> listReminder(int userId, Date end) throws OXException;
+    SearchIterator<ReminderObject> getArisingReminder(Context ctx, int userId, Date end) throws OXException;
 
     public SearchIterator listModifiedReminder(int userId, Date lastModified) throws OXException;
 

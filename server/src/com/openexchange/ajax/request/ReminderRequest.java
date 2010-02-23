@@ -266,7 +266,7 @@ public final class ReminderRequest {
         try {
             final ReminderService reminderSql = new ReminderHandler(session.getContext());
             final JSONArray jsonResponseArray = new JSONArray();
-            final SearchIterator<ReminderObject> it = reminderSql.listReminder(userObj.getId(), end);
+            final SearchIterator<ReminderObject> it = reminderSql.getArisingReminder(session.getContext(), userObj.getId(), end);
             try {
                 while (it.hasNext()) {
                     final ReminderObject reminder = it.next();

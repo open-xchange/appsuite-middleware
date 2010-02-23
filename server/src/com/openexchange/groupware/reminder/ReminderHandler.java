@@ -74,12 +74,18 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.reminder.ReminderException.Code;
+import com.openexchange.groupware.reminder.internal.GetArisingReminder;
 import com.openexchange.groupware.reminder.internal.SQL;
+import com.openexchange.server.ServiceException;
 import com.openexchange.server.impl.DBPool;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.user.UserService;
 
 /**
  * ReminderHandler
@@ -621,26 +627,21 @@ public class ReminderHandler implements Types, ReminderService {
         }
     }
 
-    public ReminderSearchIterator listReminder(final int userId, final Date end) throws OXException {
-        Connection readCon = null;
-
+    public SearchIterator<ReminderObject> getArisingReminder(Context ctx, final int userId, final Date end) throws OXException {
+        final UserService userService;
         try {
-            readCon = DBPool.pickup(context);
-
-            final PreparedStatement ps = readCon.prepareStatement(SQL.sqlRange);
-            ps.setInt(1, context.getContextId());
-            ps.setInt(2, userId);
-            ps.setTimestamp(3, new Timestamp(end.getTime()));
-
-            final ResultSet rs = ps.executeQuery();
-            return new ReminderSearchIterator(context, ps, rs, readCon);
-        } catch (final SearchIteratorException exc) {
-            throw new OXException(exc);
-        } catch (final SQLException exc) {
-            throw new OXException(EnumComponent.REMINDER, Category.CODE_ERROR, -1, "SQL Problem.", exc);
-        } catch (final DBPoolingException exc) {
-            throw new OXException(exc);
+            userService = ServerServiceRegistry.getInstance().getService(UserService.class, true);
+        } catch (ServiceException e) {
+            throw new ReminderException(e);
         }
+        final User user;
+        try {
+            user = userService.getUser(userId, ctx);
+        } catch (UserException e) {
+            throw new ReminderException(e);
+        }
+        GetArisingReminder arising = new GetArisingReminder(ctx, user, end);
+        return arising.loadWithIterator();
     }
 
     public SearchIterator<ReminderObject> listModifiedReminder(final int userId, final Date lastModified) throws OXException {

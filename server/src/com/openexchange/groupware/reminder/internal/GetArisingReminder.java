@@ -47,46 +47,40 @@
  *
  */
 
-package com.openexchange.groupware.reminder;
+package com.openexchange.groupware.reminder.internal;
 
-import java.sql.Connection;
 import java.util.Date;
-import com.openexchange.database.DBPoolingException;
-import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.reminder.internal.RdbReminderStorage;
+import com.openexchange.groupware.reminder.ReminderException;
+import com.openexchange.groupware.reminder.ReminderObject;
+import com.openexchange.groupware.reminder.ReminderStorage;
+import com.openexchange.tools.iterator.ArrayIterator;
+import com.openexchange.tools.iterator.SearchIterator;
 
 /**
- * {@link ReminderStorage}
+ * Retrieves the arising reminder for a user.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public abstract class ReminderStorage {
+public class GetArisingReminder {
 
-    private static final ReminderStorage SINGLETON = new RdbReminderStorage();
+    private static final ReminderStorage storage = ReminderStorage.getInstance();
 
-    protected ReminderStorage() {
+    private final Context ctx;
+    private final User user;
+    private final Date end;
+
+    public GetArisingReminder(Context ctx, User user, Date end) {
         super();
+        this.ctx = ctx;
+        this.user = user;
+        this.end = (Date) end.clone();
     }
 
-    public static ReminderStorage getInstance() {
-        return SINGLETON;
+    public SearchIterator<ReminderObject> loadWithIterator() throws ReminderException {
+        ReminderObject[] reminders = storage.selectReminder(ctx, user, end);
+        return new ArrayIterator<ReminderObject>(reminders);
     }
 
-    public ReminderObject[] selectReminder(Context ctx, User user, Date end) throws ReminderException {
-        final Connection con;
-        try {
-            con = Database.get(ctx, false);
-        } catch (DBPoolingException e) {
-            throw new ReminderException(e);
-        }
-        try {
-            return selectReminder(ctx, con, user, end);
-        } finally {
-            Database.back(ctx, false, con);
-        }
-    }
-
-    public abstract ReminderObject[] selectReminder(Context ctx, Connection con, User user, Date end) throws ReminderException;
 }

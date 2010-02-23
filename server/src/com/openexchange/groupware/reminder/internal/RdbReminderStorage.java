@@ -47,46 +47,69 @@
  *
  */
 
-package com.openexchange.groupware.reminder;
+package com.openexchange.groupware.reminder.internal;
 
+import static com.openexchange.tools.Arrays.toArray;
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
-import com.openexchange.database.DBPoolingException;
-import com.openexchange.databaseold.Database;
+import java.util.List;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.reminder.internal.RdbReminderStorage;
+import com.openexchange.groupware.reminder.ReminderException;
+import com.openexchange.groupware.reminder.ReminderObject;
+import com.openexchange.groupware.reminder.ReminderStorage;
 
 /**
- * {@link ReminderStorage}
+ * {@link RdbReminderStorage}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public abstract class ReminderStorage {
+public class RdbReminderStorage extends ReminderStorage {
 
-    private static final ReminderStorage SINGLETON = new RdbReminderStorage();
-
-    protected ReminderStorage() {
+    public RdbReminderStorage() {
         super();
     }
 
-    public static ReminderStorage getInstance() {
-        return SINGLETON;
-    }
-
-    public ReminderObject[] selectReminder(Context ctx, User user, Date end) throws ReminderException {
-        final Connection con;
+    @Override
+    public ReminderObject[] selectReminder(Context ctx, Connection con, User user, Date end) throws ReminderException {
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        List<ReminderObject> retval = new ArrayList<ReminderObject>();
         try {
-            con = Database.get(ctx, false);
-        } catch (DBPoolingException e) {
-            throw new ReminderException(e);
-        }
-        try {
-            return selectReminder(ctx, con, user, end);
+            stmt = con.prepareStatement(SQL.SELECT_RANGE);
+            stmt.setInt(1, ctx.getContextId());
+            stmt.setInt(2, user.getId());
+            stmt.setTimestamp(3, new Timestamp(end.getTime()));
+            result = stmt.executeQuery();
+            while (result.next()) {
+                ReminderObject reminder = new ReminderObject();
+                readResult(result, reminder);
+                retval.add(reminder);
+            }
+        } catch (SQLException e) {
+            throw new ReminderException(ReminderException.Code.SQL_ERROR, e, e.getMessage());
         } finally {
-            Database.back(ctx, false, con);
+            closeSQLStuff(result, stmt);
         }
+        return toArray(retval);
     }
 
-    public abstract ReminderObject[] selectReminder(Context ctx, Connection con, User user, Date end) throws ReminderException;
+    private static void readResult(ResultSet result, ReminderObject reminder) throws SQLException {
+        int pos = 1;
+        reminder.setObjectId(result.getInt(pos++));
+        reminder.setTargetId(result.getInt(pos++));
+        reminder.setModule(result.getInt(pos++));
+        reminder.setUser(result.getInt(pos++));
+        reminder.setDate(result.getTimestamp(pos++));
+        reminder.setRecurrenceAppointment(result.getBoolean(pos++));
+        reminder.setDescription(result.getString(pos++));
+        reminder.setFolder(result.getInt(pos++));
+        reminder.setLastModified(new Date(result.getLong(pos++)));
+    }
 }

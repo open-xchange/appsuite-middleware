@@ -94,9 +94,7 @@ public final class SQL {
         "SELECT object_id,target_id,module,userid,alarm,recurrence,description,"
         + "folder,last_modified FROM reminder WHERE cid=? AND module=? AND target_id=?";
 
-    public static final String sqlRange =
-        "SELECT object_id,target_id,module,userid,alarm,recurrence,description,"
-        + "folder,last_modified FROM reminder WHERE cid=? AND userid=? AND alarm<=?";
+    public static final String SELECT_RANGE = "SELECT object_id,target_id,module,userid,alarm,recurrence,description,folder,last_modified FROM reminder WHERE cid=? AND userid=? AND alarm<=?";
 
     public static final String sqlModified =
         "SELECT object_id,target_id,module,userid,alarm,recurrence,description,"
