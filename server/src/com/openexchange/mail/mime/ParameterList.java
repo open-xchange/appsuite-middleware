@@ -222,9 +222,9 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
             int pos = parameterList.indexOf(';');
             while (pos >= 0) {
                 final int delim = parameterList.indexOf('=', pos);
-                final String name = parameterList.substring(pos+1, delim).trim();
+                final String name = parameterList.substring(pos + 1, delim).trim();
                 pos = parameterList.indexOf(';', pos + 1);
-                final String value =  pos < 0 ? parameterList.substring(delim + 1) : parameterList.substring(delim + 1, pos);
+                final String value = pos < 0 ? parameterList.substring(delim + 1) : parameterList.substring(delim + 1, pos);
                 parseParameter(name.toLowerCase(Locale.ENGLISH), value);
             }
         }
@@ -396,13 +396,38 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
         return parameters.keySet().iterator();
     }
 
-    public void appendUnicodeString(final StringBuilder sb) {
+    /**
+     * Appends the RFC2045 style (ASCII-only) string representation of this parameter list including empty parameters.
+     * 
+     * @param sb The string builder to append to
+     * @see #appendRFC2045String(StringBuilder, boolean)
+     */
+    public void appendRFC2045String(final StringBuilder sb) {
+        appendRFC2045String(sb, false);
+    }
+
+    /**
+     * Appends the RFC2045 style (ASCII-only) string representation of this parameter list.
+     * 
+     * @param sb The string builder to append to
+     * @param skipEmptyParam <code>true</code> to skip empty parameters; otherwise <code>false</code>
+     */
+    public void appendRFC2045String(final StringBuilder sb, final boolean skipEmptyParam) {
         final int size = parameters.size();
         final List<String> names = new ArrayList<String>(size);
         names.addAll(parameters.keySet());
         Collections.sort(names);
-        for (final String name : names) {
-            parameters.get(name).appendUnicodeString(sb);
+        if (skipEmptyParam) {
+            for (final String name : names) {
+                final Parameter parameter = parameters.get(name);
+                if (!parameter.contiguousValues.isEmpty()) {
+                    parameter.appendRFC2045String(sb);
+                }
+            }
+        } else {
+            for (final String name : names) {
+                parameters.get(name).appendRFC2045String(sb);
+            }
         }
 
         // final Iterator<Parameter> iter = parameters.values().iterator();
@@ -422,7 +447,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
         names.addAll(parameters.keySet());
         Collections.sort(names);
         for (final String name : names) {
-            parameters.get(name).appendUnicodeString(sb);
+            parameters.get(name).appendRFC2045String(sb);
         }
 
         // final Iterator<Parameter> iter = parameters.values().iterator();
@@ -698,7 +723,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
             return value;
         }
 
-        public void appendUnicodeString(final StringBuilder sb) {
+        public void appendRFC2045String(final StringBuilder sb) {
             final int size = contiguousValues.size();
             if (size == 0) {
                 sb.append("; ").append(name);
@@ -834,5 +859,6 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
             }
         }
 
-    }
+    } // End of class Parameter
+
 }
