@@ -1,3 +1,6 @@
+* 2010-02-23
+ - Bugfix #15180: Move Strings around for translation
+
 * 2010-02-23 - thorben.betten@open-xchange.com
 
  - Bugfix #14593: A default folder's module must not be changed

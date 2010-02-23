@@ -64,28 +64,28 @@ public enum SubscriptionErrorMessage implements OXErrorMessage {
     /**
      * A SQL Error occurred.
      */
-    SQLException(Category.CODE_ERROR, 1, "Please try again later.", "A SQL Error occurred."),
+    SQLException(Category.CODE_ERROR, 1, SubscriptionErrorStrings.TRY_AGAIN, SubscriptionErrorStrings.SQL_ERROR),
     /**
      * A parsing error occurred: %1$s.
      */
-    ParseException(Category.CODE_ERROR, 2, "Provide well-formed HTML.", "A parsing error occurred: %1$s."),
+    ParseException(Category.CODE_ERROR, 2, SubscriptionErrorStrings.WELL_FORMED, SubscriptionErrorStrings.PARSING_ERROR),
     /**
      * Can not save a given ID.
      */
-    IDGiven(Category.CODE_ERROR, 3, "Do not set a ID when saving a publication", "Unable to save a given ID."),
+    IDGiven(Category.CODE_ERROR, 3, SubscriptionErrorStrings.DONT_SET_ID, SubscriptionErrorStrings.CANT_SAVE_ID),
     /**
      * Could not find Subscription (according ID and Context).
      */
-    SubscriptionNotFound(Category.USER_INPUT, 5, "Provide a valid id.", "Could not find this Subscription"),
+    SubscriptionNotFound(Category.USER_INPUT, 5, SubscriptionErrorStrings.PROVIDE_VALID_ID, SubscriptionErrorStrings.CANT_FIND_SUBSCRIPTION),
     /**
      * Parsing error.
      */
-    ParsingError(Category.CODE_ERROR, 6, "Check value to parse.", "Parsing error."),
+    ParsingError(Category.CODE_ERROR, 6, SubscriptionErrorStrings.CHECK_VALUE, SubscriptionErrorStrings.PARSING_ERROR2),
     
-    INVALID_LOGIN(Category.USER_INPUT, 7, "Please correct the password and try again", "The password you entered was wrong"),
-    COMMUNICATION_PROBLEM(Category.SUBSYSTEM_OR_SERVICE_DOWN, 8, "Make sure, that the Service is still available, and there are no major changes on the website", "Service unavailable"),
-    INVALID_WORKFLOW(Category.SETUP_ERROR, 9, "Please correct the steps of this workflow so that output of one step and input of the next step match", "The steps of this crawling workflow do not fit together"),
-    INACTIVE_SOURCE(Category.SETUP_ERROR, 10, "Ask an administrator to check the available subscription sources", "The subscription source this subscription belongs to is currently inactive, and cannot provide data.");
+    INVALID_LOGIN(Category.USER_INPUT, 7, SubscriptionErrorStrings.CORRECT_PASSWORD, SubscriptionErrorStrings.WRONG_PASSWORD),
+    COMMUNICATION_PROBLEM(Category.SUBSYSTEM_OR_SERVICE_DOWN, 8, SubscriptionErrorStrings.CHECK_WEBSITE, SubscriptionErrorStrings.SERVICE_UNAVAILABLE),
+    INVALID_WORKFLOW(Category.SETUP_ERROR, 9, SubscriptionErrorStrings.OUTPUT_MUST_MATCH_INPUT, SubscriptionErrorStrings.INCONSISTENT_WORKFLOW),
+    INACTIVE_SOURCE(Category.SETUP_ERROR, 10, SubscriptionErrorStrings.INACTIVE_SOURCE, SubscriptionErrorStrings.SUBSCRIPTION_SOURCE_CANT_PROVIDE_DATA);
 
     private Category category;
     private int errorCode;
