@@ -57,6 +57,7 @@ import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingException;
+import com.openexchange.groupware.settings.SharedNode;
 import com.openexchange.groupware.settings.SettingException.Code;
 
 /**

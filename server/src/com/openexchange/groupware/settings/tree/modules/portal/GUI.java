@@ -51,7 +51,7 @@ package com.openexchange.groupware.settings.tree.modules.portal;
 
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.groupware.settings.impl.SharedNode;
+import com.openexchange.groupware.settings.SharedNode;
 
 /**
  * Setup for the preference that stores the GUI configuration for the portal

@@ -1,6 +1,7 @@
 * 2010-02-23 - marcus.klein@open-xchange.com
 
  - Bugfix #15001: Removing reminder if the according appointment ends in the past.
+ - Bugfix #15364: Moved messaging preferences items to messaging JSON bundle.
 
 * 2010-02-23 francisco.laguna@open-xchange.com
 

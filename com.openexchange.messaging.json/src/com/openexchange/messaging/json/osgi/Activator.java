@@ -46,24 +46,26 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.messaging.json.osgi;
 
 import java.io.ByteArrayInputStream;
 import java.util.LinkedList;
 import java.util.List;
 import javax.servlet.ServletException;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
+import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheService;
-import com.openexchange.i18n.I18nService;
-import com.openexchange.i18n.I18nTranslator;
+import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.i18n.Translator;
+import com.openexchange.messaging.json.Enabled;
+import com.openexchange.messaging.json.GUI;
 import com.openexchange.messaging.json.MessagingMessageParser;
 import com.openexchange.messaging.json.MessagingMessageWriter;
 import com.openexchange.messaging.json.actions.accounts.AccountActionFactory;
@@ -76,11 +78,8 @@ import com.openexchange.messaging.json.servlets.AccountServlet;
 import com.openexchange.messaging.json.servlets.MessagesServlet;
 import com.openexchange.messaging.json.servlets.ServicesServlet;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
-import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.server.osgiservice.DeferredActivator;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 public class Activator extends DeferredActivator {
 
@@ -182,6 +181,8 @@ public class Activator extends DeferredActivator {
         registrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new AccountMultipleHandler(), null));
         registrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new MessagesMultipleHandler(), null));
         registrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new ServicesMultipleHandler(), null));
+        registrations.add(context.registerService(PreferencesItemService.class.getName(), new Enabled(), null));
+        registrations.add(context.registerService(PreferencesItemService.class.getName(), new GUI(), null));
     }
 
     /**

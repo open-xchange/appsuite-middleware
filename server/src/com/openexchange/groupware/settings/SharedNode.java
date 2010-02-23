@@ -47,46 +47,71 @@
  *
  */
 
-package com.openexchange.messaging.generic.groupware;
+package com.openexchange.groupware.settings;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.settings.IValueHandler;
-import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.groupware.settings.ReadOnlyValue;
-import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 
-
 /**
- * {@link Enabled}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class Enabled implements PreferencesItemService {
+public final class SharedNode implements IValueHandler {
 
-    public String[] getPath() {
-        return new String[] { "modules", "messaging", "module" };
+    private final String name;
+
+    private final int id;
+
+    /**
+     * Default constructor.
+     */
+    public SharedNode(final String name) {
+        this(name, -1);
     }
 
-    public IValueHandler getSharedValue() {
-        return new ReadOnlyValue() {
+    public SharedNode(final String name, final int id) {
+        super();
+        this.name = name;
+        this.id = id;
+    }
 
-            /**
-             * {@inheritDoc}
-             */
-            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws SettingException {
-                setting.setSingleValue(Boolean.valueOf(true));
-            }
+    /**
+     * {@inheritDoc}
+     */
+    public void getValue(final Session session, final Context ctx,
+        final User user, final UserConfiguration userConfig,
+        final Setting setting) throws SettingException {
+        throw new SettingException(SettingException.Code.NOT_LEAF, name);
+    }
 
-            /**
-             * {@inheritDoc}
-             */
-            public boolean isAvailable(final UserConfiguration userConfig) {
-                return true;
-            }
-        };
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isAvailable(final UserConfiguration userConfig) {
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isWritable() {
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void writeValue(final Session session, final Context ctx, final User user,
+        final Setting setting) throws SettingException {
+        throw new SettingException(SettingException.Code.NO_WRITE, name);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public int getId() {
+        return id;
     }
 }

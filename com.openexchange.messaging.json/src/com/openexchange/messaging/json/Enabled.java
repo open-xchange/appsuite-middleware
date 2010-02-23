@@ -47,36 +47,41 @@
  *
  */
 
-package com.openexchange.messaging.generic.groupware;
+package com.openexchange.messaging.json;
 
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.groupware.settings.impl.SharedNode;
+import com.openexchange.groupware.settings.ReadOnlyValue;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.session.Session;
 
 /**
- * {@link GUI}
+ * {@link Enabled}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since Open-Xchange v6.16
  */
-public class GUI implements PreferencesItemService {
+public class Enabled implements PreferencesItemService {
 
-    private static final String NAME = "gui";
-
-    /**
-     * Default constructor.
-     */
-    public GUI() {
+    public Enabled() {
         super();
     }
 
     public String[] getPath() {
-        return new String[]{"modules", "messaging" , NAME};
+        return new String[] { "modules", "messaging", "module" };
     }
 
     public IValueHandler getSharedValue() {
-        return new SharedNode(NAME, 12);
-    }
+        return new ReadOnlyValue() {
+            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) {
+                setting.setSingleValue(Boolean.valueOf(true));
+            }
 
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return true;
+            }
+        };
+    }
 }
