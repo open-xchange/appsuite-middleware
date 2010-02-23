@@ -93,6 +93,12 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
             "ACL", "REPORT", "VERSION-CONTROL", "CHECKIN", "CHECKOUT", "UNCHECKOUT", "SEARCH", "MKWORKSPACE", "UPDATE", "LABEL", "MERGE",
             "BASELINE_CONTROL", "MKACTIVITY" };
 
+    private static final int BYTE_FIRST = 0xA0;
+
+    private static final int BYTE_CONTENT_TYPE = 0x07;
+
+    private static final int BYTE_COOKIE = 0x09;
+
     private static final TIntObjectHashMap<String> httpHeaderMapping;
 
     private static final TIntObjectHashMap<String> attributeMapping;
@@ -131,9 +137,9 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
         httpHeaderMapping.put(0x04, "accept-language");
         httpHeaderMapping.put(0x05, "authorization");
         httpHeaderMapping.put(0x06, "connection");
-        httpHeaderMapping.put(0x07, HDR_CONTENT_TYPE);
+        httpHeaderMapping.put(BYTE_CONTENT_TYPE, HDR_CONTENT_TYPE);
         httpHeaderMapping.put(0x08, HDR_CONTENT_LENGTH);
-        httpHeaderMapping.put(0x09, "cookie");
+        httpHeaderMapping.put(BYTE_COOKIE, "cookie");
         httpHeaderMapping.put(0x0a, "cookie2");
         httpHeaderMapping.put(0x0b, "host");
         httpHeaderMapping.put(0x0c, "pragma");
@@ -413,17 +419,17 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
             {
                 final int firstByte = nextByte();
                 final int secondByte = nextByte();
-                if (firstByte == 0xA0) {
+                if (firstByte == BYTE_FIRST) {
                     /*
                      * Header name is encoded as an integer value.
                      */
                     headerName = httpHeaderMapping.get(secondByte);
-                    if (!contentTypeSet && (secondByte == 0x07)) {
+                    if (!contentTypeSet && (BYTE_CONTENT_TYPE == secondByte)) {
                         servletRequest.setContentType(parseString());
                         contentTypeSet = true;
                         continue NextHeader;
                     }
-                    isCookie = (secondByte == 0x09);
+                    isCookie = (BYTE_COOKIE == secondByte);
                 } else {
                     headerName = parseString(firstByte, secondByte);
                     if (!contentTypeSet && HDR_CONTENT_TYPE.equalsIgnoreCase(headerName)) {

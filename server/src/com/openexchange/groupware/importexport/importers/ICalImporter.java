@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.importexport.importers;
 
+import gnu.trove.TIntObjectHashMap;
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -255,13 +256,13 @@ public class ICalImporter extends AbstractImporter {
                 errorMap.put(Integer.valueOf(error.getIndex()), error);
             }
 
-            final Map<Integer, List<ConversionWarning>> warningMap = new HashMap<Integer, List<ConversionWarning>>();
+            final TIntObjectHashMap<List<ConversionWarning>> warningMap = new  TIntObjectHashMap<List<ConversionWarning>>();
 
             for (final ConversionWarning warning : warnings) {
-                List<ConversionWarning> warningList = warningMap.get(Integer.valueOf(warning.getIndex()));
+                List<ConversionWarning> warningList = warningMap.get(warning.getIndex());
                 if (warningList == null) {
                     warningList = new LinkedList<ConversionWarning>();
-                    warningMap.put(Integer.valueOf(warning.getIndex()), warningList);
+                    warningMap.put(warning.getIndex(), warningList);
                 }
                 warningList.add(warning);
             }
@@ -294,7 +295,7 @@ public class ICalImporter extends AbstractImporter {
                         LOG.error(e.getMessage(), e);
                         importResult.setException(e);
                     }
-                    final List<ConversionWarning> warningList = warningMap.get(Integer.valueOf(index));
+                    final List<ConversionWarning> warningList = warningMap.get(index);
                     if (warningList != null) {
                         importResult.addWarnings(warningList);
                         importResult.setException(EXCEPTIONS.create(14, Integer.valueOf(warningList.size())));
