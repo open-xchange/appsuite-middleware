@@ -414,8 +414,6 @@ public abstract class MessageStorageTest extends AbstractMailTest {
             }
             if (full || set.contains(MailField.BCC)) {
                 assertTrue("Missing Bcc in " + mailname, mail.containsBcc());
-            } else {
-                assertTrue("Bcc set in " + mailname + " although not requested", !mail.containsBcc());
             }
             if (full || set.contains(MailField.CONTENT_TYPE)) {
                 assertTrue("Missing content type in " + mailname, mail.containsContentType());
