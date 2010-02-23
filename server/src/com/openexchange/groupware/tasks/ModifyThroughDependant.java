@@ -62,40 +62,39 @@ import com.openexchange.groupware.reminder.TargetService;
  */
 public final class ModifyThroughDependant implements TargetService {
 
-    /**
-     * Attributes of a task that must be updated if an attachment is added or
-     * removed.
-     */
-    private static final int[] UPDATE_FIELDS = new int[] { Task.LAST_MODIFIED,
-        Task.MODIFIED_BY };
+    private static final int[] UPDATE_FIELDS = new int[] { Task.LAST_MODIFIED, Task.MODIFIED_BY };
 
     private static final TaskStorage stor = TaskStorage.getInstance();
 
-    /**
-     * Default constructor.
-     */
     public ModifyThroughDependant() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public void updateTargetObject(final Context ctx, final Connection con,
-        final int targetId) throws AbstractOXException {
-        final Task task = stor.selectTask(ctx, con, targetId, ACTIVE);
+    public void updateTargetObject(final Context ctx, final Connection con, final int targetId) throws AbstractOXException {
+        final Task task;
+        try {
+            task = stor.selectTask(ctx, con, targetId, ACTIVE);
+        } catch (TaskException e) {
+            if (TaskException.Code.TASK_NOT_FOUND.getNumber() == e.getDetailNumber()) {
+                return;
+            }
+            throw e;
+        }
         final Date lastModified = task.getLastModified();
         task.setLastModified(new Date());
-        stor.updateTask(ctx, con, task, lastModified,
-            new int[] { Task.LAST_MODIFIED }, ACTIVE);
+        stor.updateTask(ctx, con, task, lastModified, new int[] { Task.LAST_MODIFIED }, ACTIVE);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public void updateTargetObject(final Context ctx, final Connection con,
-        final int targetId, final int userId) throws AbstractOXException {
-        final Task task = stor.selectTask(ctx, con, targetId, ACTIVE);
+    public void updateTargetObject(final Context ctx, final Connection con, final int targetId, final int userId) throws AbstractOXException {
+        final Task task;
+        try {
+            task = stor.selectTask(ctx, con, targetId, ACTIVE);
+        } catch (TaskException e) {
+            if (TaskException.Code.TASK_NOT_FOUND.getNumber() == e.getDetailNumber()) {
+                return;
+            }
+            throw e;
+        }
         final Date lastModified = task.getLastModified();
         task.setLastModified(new Date());
         task.setModifiedBy(userId);
