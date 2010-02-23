@@ -506,7 +506,11 @@ public class OXFolderException extends OXException {
         /**
          * Folder module must not be updated.
          */
-        DENY_FOLDER_MODULE_UPDATE("Folder module must not be updated.", Category.USER_INPUT, 84);
+        DENY_FOLDER_MODULE_UPDATE("Folder module must not be updated.", Category.USER_INPUT, 84),
+        /**
+         * The module of a default folder must not be changed.
+         */
+        NO_DEFAULT_FOLDER_MODULE_UPDATE("The module of a default folder must not be changed.", Category.USER_INPUT, 85);
 
         /**
          * Message of the exception.
