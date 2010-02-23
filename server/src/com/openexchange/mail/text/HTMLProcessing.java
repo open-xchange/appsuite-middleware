@@ -1331,13 +1331,14 @@ public final class HTMLProcessing {
             }
         }
         final char[] chars = s.toCharArray();
+        final Map<Character, String> htmlChar2EntityMap = getHTMLChar2EntityMap();
         if (withQuote) {
             for (int i = 0; i < chars.length; i++) {
                 final char c = chars[i];
                 if (ignorePositions.contains(i)) {
                     sb.append(c);
                 } else {
-                    final String entity = getHTMLChar2EntityMap().get(Character.valueOf(c));
+                    final String entity = htmlChar2EntityMap.get(Character.valueOf(c));
                     if (entity == null) {
                         sb.append(c);
                     } else {
@@ -1351,7 +1352,7 @@ public final class HTMLProcessing {
                 if (ignorePositions.contains(i) || ('"' == c)) {
                     sb.append(c);
                 } else {
-                    final String entity = getHTMLChar2EntityMap().get(Character.valueOf(c));
+                    final String entity = htmlChar2EntityMap.get(Character.valueOf(c));
                     if (entity == null) {
                         sb.append(c);
                     } else {
