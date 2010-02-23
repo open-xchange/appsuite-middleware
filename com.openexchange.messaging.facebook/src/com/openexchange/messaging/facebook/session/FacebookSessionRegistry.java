@@ -194,6 +194,15 @@ public final class FacebookSessionRegistry {
         return Collections.unmodifiableIterator(map.values().iterator());
     }
 
+    /**
+     * Gets a {@link Iterator iterator} over the facebook sessions in this registry.
+     * 
+     * @return A {@link Iterator iterator} over the facebook sessions in this registry.
+     */
+    Iterator<FacebookSession> iterator() {
+        return map.values().iterator();
+    }
+
     private static final class SimpleKey {
 
         public static SimpleKey valueOf(final int cid, final int user) {

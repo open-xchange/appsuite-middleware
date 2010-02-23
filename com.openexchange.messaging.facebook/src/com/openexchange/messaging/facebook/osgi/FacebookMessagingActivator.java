@@ -68,10 +68,13 @@ import com.openexchange.messaging.facebook.FacebookMessagingException;
 import com.openexchange.messaging.facebook.FacebookMessagingService;
 import com.openexchange.messaging.facebook.exception.FacebookMessagingExceptionFactory;
 import com.openexchange.messaging.facebook.session.FacebookEventHandler;
+import com.openexchange.messaging.facebook.session.FacebookSessionRenewalTask;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
 
 /**
@@ -87,6 +90,8 @@ public final class FacebookMessagingActivator extends DeferredActivator {
 
     private ComponentRegistration componentRegistration;
 
+    private ScheduledTimerTask scheduledTimerTask;
+
     /**
      * Initializes a new {@link FacebookMessagingActivator}.
      */
@@ -96,7 +101,8 @@ public final class FacebookMessagingActivator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, ContextService.class, UserService.class, SessiondService.class };
+        return new Class<?>[] {
+            ConfigurationService.class, ContextService.class, UserService.class, SessiondService.class, TimerService.class };
     }
 
     @Override
@@ -105,7 +111,11 @@ public final class FacebookMessagingActivator extends DeferredActivator {
         if (logger.isInfoEnabled()) {
             logger.info("Re-available service: " + clazz.getName());
         }
-        getServiceRegistry().addService(clazz, getService(clazz));
+        final Object service = getService(clazz);
+        getServiceRegistry().addService(clazz, service);
+        if (TimerService.class.equals(clazz)) {
+            scheduleTimerTask((TimerService) service);
+        }
     }
 
     @Override
@@ -113,6 +123,9 @@ public final class FacebookMessagingActivator extends DeferredActivator {
         final org.apache.commons.logging.Log logger = org.apache.commons.logging.LogFactory.getLog(FacebookMessagingActivator.class);
         if (logger.isWarnEnabled()) {
             logger.warn("Absent service: " + clazz.getName());
+        }
+        if (TimerService.class.equals(clazz)) {
+            dropTimerTask((TimerService) getService(clazz));
         }
         getServiceRegistry().removeService(clazz);
     }
@@ -164,6 +177,10 @@ public final class FacebookMessagingActivator extends DeferredActivator {
             final Dictionary<Object, Object> serviceProperties = new Hashtable<Object, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
             registrations.add(context.registerService(EventHandler.class.getName(), new FacebookEventHandler(), serviceProperties));
+            /*
+             * Schedule timer task
+             */
+            scheduleTimerTask(getService(TimerService.class));
 
             try {
                 // new StartUpTest().test();
@@ -180,6 +197,10 @@ public final class FacebookMessagingActivator extends DeferredActivator {
     @Override
     protected void stopBundle() throws Exception {
         try {
+            /*
+             * Drop scheduled timer task
+             */
+            dropTimerTask(getService(TimerService.class));
             /*
              * Unregister component
              */
@@ -210,6 +231,44 @@ public final class FacebookMessagingActivator extends DeferredActivator {
         } catch (final Exception e) {
             org.apache.commons.logging.LogFactory.getLog(FacebookMessagingActivator.class).error(e.getMessage(), e);
             throw e;
+        }
+    }
+
+    /**
+     * Schedules timer task
+     * 
+     * @param timerService The timer service
+     */
+    private void scheduleTimerTask(final TimerService timerService) {
+        if (null != timerService) {
+            /*
+             * Drop previous if present
+             */
+            dropTimerTask(timerService);
+            /*
+             * Schedule new one
+             */
+            final ConfigurationService configurationService = getService(ConfigurationService.class);
+            scheduledTimerTask =
+                timerService.scheduleWithFixedDelay(
+                    new FacebookSessionRenewalTask(),
+                    1000,
+                    null == configurationService ? 300000 : configurationService.getIntProperty(
+                        "com.openexchange.messaging.facebook.renewalFrequence",
+                        300000));
+        }
+    }
+
+    /**
+     * Drops scheduled timer task
+     */
+    private void dropTimerTask(final TimerService timerService) {
+        if (null != scheduledTimerTask) {
+            scheduledTimerTask.cancel();
+            scheduledTimerTask = null;
+            if (null != timerService) {
+                timerService.purge();
+            }
         }
     }
 

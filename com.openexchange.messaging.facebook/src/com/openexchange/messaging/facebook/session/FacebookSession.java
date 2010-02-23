@@ -52,6 +52,7 @@ package com.openexchange.messaging.facebook.session;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.text.MessageFormat;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
@@ -77,6 +78,7 @@ import com.google.code.facebookapi.FacebookException;
 import com.google.code.facebookapi.FacebookJaxbRestClient;
 import com.google.code.facebookapi.IFacebookRestClient;
 import com.google.code.facebookapi.Permission;
+import com.google.code.facebookapi.ProfileField;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.facebook.FacebookConfiguration;
@@ -115,7 +117,7 @@ public final class FacebookSession {
                 facebookSession = newInstance;
             }
         }
-        return facebookSession;
+        return facebookSession.touchLastAccessed();
     }
 
     /**
@@ -202,7 +204,7 @@ public final class FacebookSession {
         this.login = accountConfiguration.get(FacebookConstants.FACEBOOK_LOGIN).toString();
         this.password = accountConfiguration.get(FacebookConstants.FACEBOOK_PASSWORD).toString();
         facebookUserId = -1L;
-        lastAccessed = System.currentTimeMillis();
+        // lastAccessed = System.currentTimeMillis();
     }
 
     /**
@@ -226,7 +228,7 @@ public final class FacebookSession {
         this.password = password;
         facebookUserId = -1L;
         performWebLogout = true;
-        lastAccessed = System.currentTimeMillis();
+        // lastAccessed = System.currentTimeMillis();
     }
 
     /**
@@ -235,7 +237,21 @@ public final class FacebookSession {
      * @return This session with last-accessed time stamp touched
      */
     public FacebookSession touchLastAccessed() {
-        lastAccessed = System.currentTimeMillis();
+        if (!connected) {
+            return this;
+        }
+        try {
+            /*
+             * Perform a simple, fast operation
+             */
+            facebookRestClient.users_getStandardInfo(
+                Collections.singleton(Long.valueOf(facebookUserId)),
+                Collections.singleton(ProfileField.UID));
+            lastAccessed = System.currentTimeMillis();
+        } catch (final FacebookException e) {
+            LOG.error(e.getMessage(), e);
+            close();
+        }
         return this;
     }
 
@@ -246,6 +262,40 @@ public final class FacebookSession {
      */
     public long getLastAccessed() {
         return lastAccessed;
+    }
+
+    /**
+     * Performs a dummy request to facebook REST server to keep session alive.
+     * 
+     * @throws FacebookMessagingException If dummy request fails
+     */
+    public void renewSession() throws FacebookMessagingException {
+        if (!connected) {
+            return;
+        }
+        try {
+            /*
+             * Perform a simple, fast operation with a new client constructed with current session ID
+             */
+            // final long s = System.currentTimeMillis();
+            final IFacebookRestClient<Object> client = facebookRestClient;
+            final FacebookJaxbRestClient secondClient =
+                new FacebookJaxbRestClient(client.getApiKey(), client.getSecret(), client.getCacheSessionKey());
+            final long uid = secondClient.users_getLoggedInUser();
+            if (uid == facebookUserId) {
+                secondClient.events_get(Long.valueOf(uid), null, null, null);
+                // secondClient.users_getStandardInfo(Collections.singleton(Long.valueOf(uid)), Collections.singleton(ProfileField.UID));
+            } else {
+                client.events_get(Long.valueOf(facebookUserId), null, null, null);
+                // client.users_getStandardInfo(Collections.singleton(Long.valueOf(facebookUserId)),
+                // Collections.singleton(ProfileField.UID));
+            }
+            // final long d = System.currentTimeMillis() - s;
+            // System.out.println("Renewal took " + d + "msec.");
+            lastAccessed = System.currentTimeMillis();
+        } catch (final FacebookException e) {
+            throw FacebookMessagingException.create(e);
+        }
     }
 
     @Override
