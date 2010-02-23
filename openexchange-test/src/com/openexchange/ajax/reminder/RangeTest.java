@@ -62,6 +62,7 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.reminder.actions.RangeRequest;
+import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.reminder.ReminderObject;
 
@@ -80,12 +81,7 @@ public class RangeTest extends AbstractAJAXSession {
         final int userId = client.getValues().getUserId();
         final TimeZone timeZone = client.getValues().getTimeZone();
 
-        final Calendar c = Calendar.getInstance();
-        c.setTimeZone(timeZone);
-        c.set(Calendar.HOUR_OF_DAY, 8);
-        c.set(Calendar.MINUTE, 0);
-        c.set(Calendar.SECOND, 0);
-        c.set(Calendar.MILLISECOND, 0);
+        final Calendar c = TimeTools.createCalendar(timeZone);
 
         final int folderId = client.getValues().getPrivateAppointmentFolder();
 

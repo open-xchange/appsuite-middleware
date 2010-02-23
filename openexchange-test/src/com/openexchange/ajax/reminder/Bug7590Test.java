@@ -128,9 +128,8 @@ public class Bug7590Test extends AbstractAJAXSession {
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testBug7590");
 
-        calendar.set(Calendar.HOUR_OF_DAY, 8);
         appointmentObj.setStartDate(calendar.getTime());
-        calendar.add(Calendar.HOUR_OF_DAY, 1);
+        calendar.add(Calendar.HOUR, 1);
         appointmentObj.setEndDate(calendar.getTime());
         appointmentObj.setAlarm(alarmMinutes);
 
