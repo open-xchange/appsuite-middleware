@@ -136,7 +136,7 @@ public final class NewCallAction extends AbstractVoipNowHTTPAction<GetMethod> {
                 final int len = jsonArray.length();
                 if (len > 0) {
                     /*
-                     * Multiple "FromExtension" parameters
+                     * Multiple "FromExtension" parameters; add brackets
                      */
                     builder.append('&').append(urlEncode("FromExtension[]")).append('=').append(urlEncode(callerNumber));
                     for (int i = 0; i < len; i++) {
