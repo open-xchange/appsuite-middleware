@@ -50,7 +50,7 @@
 package com.openexchange.groupware.calendar.calendarsqltests;
 
 import java.util.Date;
-import com.openexchange.api2.ReminderSQLInterface;
+import com.openexchange.api2.ReminderService;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.reminder.ReminderHandler;
@@ -74,7 +74,7 @@ public class Bug13068Test extends CalendarSqlTest {
         appointments.save(appointment);
         clean.add(appointment);
         
-        final ReminderSQLInterface reminderInterface = new ReminderHandler(ctx);
+        final ReminderService reminderInterface = new ReminderHandler(ctx);
         SearchIterator<?> iterator = reminderInterface.listReminder(Types.APPOINTMENT, appointment.getObjectID());
         
         assertTrue("Reminder expected", iterator.hasNext());

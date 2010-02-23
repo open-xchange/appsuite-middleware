@@ -6,7 +6,7 @@ import java.util.Properties;
 
 import junit.framework.TestCase;
 
-import com.openexchange.api2.ReminderSQLInterface;
+import com.openexchange.api2.ReminderService;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
@@ -16,7 +16,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 
 public class ReminderTest extends TestCase {
 
-	private ReminderSQLInterface reminderSql = null;
+	private ReminderService reminderSql = null;
 	
 	protected Properties reminderProps = null;
 	

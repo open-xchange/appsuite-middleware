@@ -59,7 +59,7 @@ import java.util.TimeZone;
 import junit.framework.TestCase;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
-import com.openexchange.api2.ReminderSQLInterface;
+import com.openexchange.api2.ReminderService;
 import com.openexchange.calendar.CalendarOperation;
 import com.openexchange.calendar.CalendarSql;
 import com.openexchange.calendar.CalendarSqlImp;
@@ -507,7 +507,7 @@ public class CalendarTest extends TestCase {
         
         csql.deleteAppointmentObject(testobject2, fid, new Date());
         
-        final ReminderSQLInterface rsql = new ReminderHandler(context);
+        final ReminderService rsql = new ReminderHandler(context);
         assertTrue("Check if reminder has been deleted", rsql.existsReminder(object_id, userid, Types.APPOINTMENT) == false);
         
         
@@ -1491,7 +1491,7 @@ public class CalendarTest extends TestCase {
         assertTrue("Alarm should be set", testobject2.containsAlarm());
         assertEquals("Test correct alarm value", 15, testobject2.getAlarm());
         
-        final ReminderSQLInterface rsql = new ReminderHandler(ContextStorage.getInstance().getContext(so.getContextId()));
+        final ReminderService rsql = new ReminderHandler(ContextStorage.getInstance().getContext(so.getContextId()));
         ReminderObject ro = rsql.loadReminder(object_id, userid, Types.APPOINTMENT);
         long check_date = new Date((testobject2.getStartDate().getTime() - (15*60*1000))).getTime();
         assertEquals("Check correct alam in reminder object" , check_date, ro.getDate().getTime());
