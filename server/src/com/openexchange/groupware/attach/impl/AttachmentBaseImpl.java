@@ -459,10 +459,11 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
     }
 
     private List<AttachmentAuthorization> getAuthorizors(final int moduleId){
-        List<AttachmentAuthorization> authorizors = moduleAuthorizors.get(Integer.valueOf(moduleId));
+        final Integer key = Integer.valueOf(moduleId);
+        List<AttachmentAuthorization> authorizors = moduleAuthorizors.get(key);
         if(authorizors == null) {
             authorizors = new ArrayList<AttachmentAuthorization>();
-            moduleAuthorizors.put(Integer.valueOf(moduleId),authorizors);
+            moduleAuthorizors.put(key,authorizors);
         }
         return authorizors;
     }
@@ -490,10 +491,11 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
     }
 
     private List<AttachmentListener> getListeners(final int moduleId) {
-        List<AttachmentListener> listener = moduleListeners.get(Integer.valueOf(moduleId));
+        final Integer key = Integer.valueOf(moduleId);
+        List<AttachmentListener> listener = moduleListeners.get(key);
         if(listener == null){
             listener = new ArrayList<AttachmentListener>();
-            moduleListeners.put(Integer.valueOf(moduleId),listener);
+            moduleListeners.put(key,listener);
         }
         return listener;
     }
@@ -1155,7 +1157,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         }
     }
 
-    public Date getNewestCreationDate(Context ctx, int moduleId, int attachedId) throws AttachmentException {
+    public Date getNewestCreationDate(final Context ctx, final int moduleId, final int attachedId) throws AttachmentException {
         return getNewestCreationDates(ctx, moduleId, new int[] { attachedId }).get(I(attachedId));
     }
 
@@ -1165,29 +1167,29 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         exceptionId = { 19 },
         msg = { "SQL Problem: %1$s" }
     )
-    public Map<Integer, Date> getNewestCreationDates(Context ctx, int moduleId, int[] attachedIds) throws AttachmentException {
+    public Map<Integer, Date> getNewestCreationDates(final Context ctx, final int moduleId, final int[] attachedIds) throws AttachmentException {
         final Connection con;
         try {
             con = getReadConnection(ctx);
-        } catch (TransactionException e) {
+        } catch (final TransactionException e) {
             throw new AttachmentException(e);
         }
         PreparedStatement stmt = null;
         ResultSet result = null;
-        Map<Integer, Date> retval = new HashMap<Integer, Date>();
+        final Map<Integer, Date> retval = new HashMap<Integer, Date>();
         try {
             stmt = con.prepareStatement(DBUtils.getIN(QUERIES.getSelectNewestCreationDate(), attachedIds.length) + " GROUP BY attached");
             int pos = 1;
             stmt.setInt(pos++, ctx.getContextId());
             stmt.setInt(pos++, moduleId);
-            for (int attachedId : attachedIds) {
+            for (final int attachedId : attachedIds) {
                 stmt.setInt(pos++, attachedId);
             }
             result = stmt.executeQuery();
             while (result.next()) {
                 retval.put(I(result.getInt(1)), new Date(result.getLong(2)));
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw EXCEPTIONS.create(19, e, e.getMessage());
         } finally {
             close(stmt, result);
