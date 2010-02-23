@@ -58,17 +58,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedList;
-import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api2.OXException;
-import com.openexchange.api2.ReminderSQLInterface;
+import com.openexchange.api2.ReminderService;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
@@ -81,7 +79,6 @@ import com.openexchange.groupware.reminder.internal.SQL;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
-import com.openexchange.tools.iterator.SearchIteratorException.SearchIteratorCode;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -89,14 +86,14 @@ import com.openexchange.tools.sql.DBUtils;
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public class ReminderHandler implements Types, ReminderSQLInterface {
+public class ReminderHandler implements Types, ReminderService {
 
     /**
      * Logger.
      */
     private static final Log LOG = LogFactory.getLog(ReminderHandler.class);
 
-    private final Context context;
+    final Context context;
 
     private ReminderDeleteInterface reminderDeleteInterface;
 
@@ -455,7 +452,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
             stmt.setInt(pos++, module);
             stmt.setInt(pos++, userId);
             result = stmt.executeQuery();
-            return result2Object(result, stmt, false);
+            return result2Object(context, result, stmt, false);
         } catch (SQLException e) {
             throw new ReminderException(Code.LOAD_EXCEPTION, e);
         } finally {
@@ -567,7 +564,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
             ps.setInt(++a, objectId);
 
             final ResultSet rs = ps.executeQuery();
-            final ReminderObject reminderObj = result2Object(rs, ps, true);
+            final ReminderObject reminderObj = result2Object(context, rs, ps, true);
 
             if (reminderObj != null) {
                 return reminderObj;
@@ -578,7 +575,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
         }
     }
 
-    public ReminderObject result2Object(ResultSet result, PreparedStatement stmt, boolean closeStatements) throws SQLException, ReminderException {
+    public static ReminderObject result2Object(Context ctx, ResultSet result, PreparedStatement stmt, boolean closeStatements) throws SQLException, ReminderException {
         try {
             if (result.next()) {
                 int pos = 1;
@@ -594,7 +591,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
                 reminderObj.setLastModified(new Date(result.getLong(pos++)));
                 return reminderObj;
             }
-            throw new ReminderException(Code.NOT_FOUND, I(-1), I(context.getContextId()));
+            throw new ReminderException(Code.NOT_FOUND, I(-1), I(ctx.getContextId()));
         } finally {
             if (closeStatements) {
                 closeSQLStuff(result, stmt);
@@ -616,7 +613,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
             ps.setInt(pos++, module);
             ps.setString(pos++, String.valueOf(targetId));
             final ResultSet rs = ps.executeQuery();
-            return new ReminderSearchIterator(rs, ps, con);
+            return new ReminderSearchIterator(context, ps, rs, con);
         } catch (SQLException e) {
             throw new ReminderException(Code.SQL_ERROR, e, e.getMessage());
         } catch (SearchIteratorException e) {
@@ -636,7 +633,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
             ps.setTimestamp(3, new Timestamp(end.getTime()));
 
             final ResultSet rs = ps.executeQuery();
-            return new ReminderSearchIterator(rs, ps, readCon);
+            return new ReminderSearchIterator(context, ps, rs, readCon);
         } catch (final SearchIteratorException exc) {
             throw new OXException(exc);
         } catch (final SQLException exc) {
@@ -658,92 +655,13 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
             ps.setTimestamp(3, new Timestamp(lastModified.getTime()));
 
             final ResultSet rs = ps.executeQuery();
-                return new ReminderSearchIterator(rs, ps, readCon);
+                return new ReminderSearchIterator(context, ps, rs, readCon);
         } catch (final SearchIteratorException exc) {
             throw new OXException(exc);
         } catch (final SQLException exc) {
             throw new OXException(EnumComponent.REMINDER, Category.CODE_ERROR, -1, "SQL Problem.", exc);
         } catch (final DBPoolingException exc) {
             throw new OXException(exc);
-        }
-    }
-
-    private class ReminderSearchIterator implements SearchIterator<ReminderObject> {
-
-        private ReminderObject next;
-
-        private final ResultSet rs;
-
-        private final PreparedStatement preparedStatement;
-
-        private final Connection readCon;
-
-        private final List<AbstractOXException> warnings;
-
-        private ReminderSearchIterator(final ResultSet rs, final PreparedStatement preparedStatement, final Connection readCon) throws SearchIteratorException {
-            this.warnings =  new ArrayList<AbstractOXException>(2);
-            this.rs = rs;
-            this.readCon = readCon;
-            this.preparedStatement = preparedStatement;
-            try {
-                next = result2Object(rs, preparedStatement, false);
-            } catch (final ReminderException exc) {
-                next = null;
-            } catch (final SQLException exc) {
-                throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR, exc, EnumComponent.REMINDER);
-            }
-        }
-
-        public boolean hasNext() {
-            return next != null;
-        }
-
-        public ReminderObject next() throws SearchIteratorException {
-            final ReminderObject reminderObj = next;
-            try {
-                next = result2Object(rs, preparedStatement, false);
-            } catch (final ReminderException exc) {
-                next = null;
-            } catch (final SQLException exc) {
-                throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR, exc, EnumComponent.REMINDER);
-            }
-            return reminderObj;
-        }
-
-        public void close() throws SearchIteratorException {
-            try {
-                if (rs != null) {
-                    rs.close();
-                }
-
-                if (preparedStatement != null) {
-                    preparedStatement.close();
-                }
-
-                DBPool.closeReaderSilent(context,readCon);
-            } catch (final SQLException exc) {
-                throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR, exc, EnumComponent.REMINDER);
-            }
-        }
-
-        public int size() {
-            throw new UnsupportedOperationException("Method size() not implemented");
-        }
-
-        public boolean hasSize() {
-            return false;
-        }
-
-        public void addWarning(final AbstractOXException warning) {
-            warnings.add(warning);
-        }
-
-        public AbstractOXException[] getWarnings() {
-            return warnings.isEmpty() ? null : warnings.toArray(new AbstractOXException[warnings.size()]);
-        }
-
-        public boolean hasWarnings() {
-            return !warnings.isEmpty();
         }
     }
 }

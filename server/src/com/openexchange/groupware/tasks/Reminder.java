@@ -57,7 +57,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
-import com.openexchange.api2.ReminderSQLInterface;
+import com.openexchange.api2.ReminderService;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -98,14 +98,14 @@ final class Reminder {
         remind.setTargetId(task.getObjectID());
         remind.setFolder(task.getParentFolderID());
         remind.setUser(task.getCreatedBy());
-        final ReminderSQLInterface reminder = new ReminderHandler(ctx);
+        final ReminderService reminder = new ReminderHandler(ctx);
         reminder.insertReminder(remind);
     }
 
     static void fixAlarm(final Context ctx, final Task task,
         final Set<TaskParticipant> removed, final Set<Folder> folders)
         throws OXException {
-        final ReminderSQLInterface reminder = new ReminderHandler(ctx);
+        final ReminderService reminder = new ReminderHandler(ctx);
         final int taskId = task.getObjectID();
         for (final InternalParticipant participant : ParticipantStorage
             .extractInternal(removed)) {
@@ -142,7 +142,7 @@ final class Reminder {
     static void updateAlarm(final Context ctx,
         final Task task, final User user)
         throws OXException {
-        final ReminderSQLInterface reminder = new ReminderHandler(ctx);
+        final ReminderService reminder = new ReminderHandler(ctx);
         final int taskId = task.getObjectID();
         final int userId = user.getId();
         if (null == task.getAlarm()) {
@@ -173,7 +173,7 @@ final class Reminder {
      */
     static void loadReminder(final Context ctx, final int userId,
         final Collection<Task> tasks) throws TaskException {
-        final ReminderSQLInterface remStor = new ReminderHandler(ctx);
+        final ReminderService remStor = new ReminderHandler(ctx);
         final Map<Integer, Task> tmp = new HashMap<Integer, Task>();
         for (final Task task : tasks) {
             tmp.put(Integer.valueOf(task.getObjectID()), task);
@@ -200,7 +200,7 @@ final class Reminder {
      */
     static void loadReminder(final Context ctx, final int userId,
         final Task task) throws TaskException {
-        final ReminderSQLInterface reminder = new ReminderHandler(ctx);
+        final ReminderService reminder = new ReminderHandler(ctx);
         final int taskId = task.getObjectID();
         try {
             if (reminder.existsReminder(taskId, userId, Types.TASK)) {
@@ -214,7 +214,7 @@ final class Reminder {
     }
 
     static void deleteReminder(Context ctx, Connection con, Task task) throws TaskException {
-        final ReminderSQLInterface reminder = new ReminderHandler(ctx);
+        final ReminderService reminder = new ReminderHandler(ctx);
         try {
             reminder.deleteReminder(task.getObjectID(), Types.TASK, con);
         } catch (ReminderException e) {

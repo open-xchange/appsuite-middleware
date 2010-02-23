@@ -59,44 +59,45 @@ import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.tools.iterator.SearchIterator;
 
 /**
- * ReminderSQLInterface
+ * This is the central interface to the reminder component.
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public interface ReminderSQLInterface {
-	
-	public void setReminderDeleteInterface(ReminderDeleteInterface reminderDeleteInterface);
-	
-	public int insertReminder(ReminderObject reminderObj) throws OXMandatoryFieldException, OXConflictException, OXException;
+public interface ReminderService {
 
-	public int insertReminder(ReminderObject reminderObj, Connection writeCon) throws OXMandatoryFieldException, OXConflictException, OXException;
-	
-	void updateReminder(ReminderObject reminder) throws ReminderException;
+    public void setReminderDeleteInterface(ReminderDeleteInterface reminderDeleteInterface);
 
-	/**
-	 * This method updates a reminder.
-	 * @param reminder object with new values for the reminder.
-	 * @param con writable database connection.
-	 * @throws ReminderException TODO
-	 */
-	void updateReminder(ReminderObject reminder, Connection con)
+    public int insertReminder(ReminderObject reminderObj) throws OXMandatoryFieldException, OXConflictException, OXException;
+
+    public int insertReminder(ReminderObject reminderObj, Connection writeCon) throws OXMandatoryFieldException, OXConflictException, OXException;
+
+    void updateReminder(ReminderObject reminder) throws ReminderException;
+
+    /**
+     * This method updates a reminder.
+     * @param reminder object with new values for the reminder.
+     * @param con writable database connection.
+     * @throws ReminderException TODO
+     */
+    void updateReminder(ReminderObject reminder, Connection con)
         throws ReminderException;
-	
-	public void deleteReminder(ReminderObject reminder) throws OXException;
-	
-	public void deleteReminder(int targetId, int module) throws OXException;
 
-	public void deleteReminder(int targetId, int module, Connection writeCon) throws OXException;
+    public void deleteReminder(ReminderObject reminder) throws OXException;
 
-	public void deleteReminder(int targetId, int userId, int module) throws OXException;
+    public void deleteReminder(int targetId, int module) throws OXException;
 
-	public void deleteReminder(int targetId, int userId, int module, Connection writeCon) throws OXException;
-	
-	public boolean existsReminder(int targetId, int userId, int module) throws OXException;
-	
-	public ReminderObject loadReminder(int targetId, int userId, int module) throws OXException;
-	
-	public ReminderObject loadReminder(int objectId) throws OXMandatoryFieldException, OXConflictException, OXException;
+    public void deleteReminder(int targetId, int module, Connection writeCon) throws OXException;
+
+    public void deleteReminder(int targetId, int userId, int module) throws OXException;
+
+    public void deleteReminder(int targetId, int userId, int module, Connection writeCon) throws OXException;
+
+    public boolean existsReminder(int targetId, int userId, int module) throws OXException;
+
+    public ReminderObject loadReminder(int targetId, int userId, int module) throws OXException;
+
+    public ReminderObject loadReminder(int objectId) throws OXMandatoryFieldException, OXConflictException, OXException;
 
     /**
      * This method loads the reminder for several target objects.
@@ -109,10 +110,17 @@ public interface ReminderSQLInterface {
     ReminderObject[] loadReminder(int[] targetIds, int userId, int module)
         throws OXException;
 
-	public SearchIterator listReminder(int module, int targetId) throws OXException;
-	
-	public SearchIterator<ReminderObject> listReminder(int userId, Date end) throws OXException;
-	
-	public SearchIterator listModifiedReminder(int userId, Date lastModified) throws OXException;
+    public SearchIterator listReminder(int module, int targetId) throws OXException;
+
+    /**
+     * Fetches the list of reminder that should pop up in the time frame starting now and ending at the given end date.
+     * @param userId reminder should be for this user.
+     * @param end end of the wanted time frame.
+     * @return a list of reminder that should pop up.
+     * @throws OXException if loading the reminder failes in some way.
+     */
+    SearchIterator<ReminderObject> listReminder(int userId, Date end) throws OXException;
+
+    public SearchIterator listModifiedReminder(int userId, Date lastModified) throws OXException;
 
 }

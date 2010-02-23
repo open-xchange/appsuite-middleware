@@ -73,7 +73,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.OXException;
-import com.openexchange.api2.ReminderSQLInterface;
+import com.openexchange.api2.ReminderService;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.caching.CacheException;
 import com.openexchange.calendar.CachedCalendarIterator;
@@ -2125,7 +2125,7 @@ public final class CalendarCollection implements CalendarCollectionService {
      * @see com.openexchange.calendar.CalendarCommonCollectionInterface#existsReminder(com.openexchange.groupware.contexts.Context, int, int)
      */
     public boolean existsReminder(final Context c, final int oid, final int uid) {
-        final ReminderSQLInterface rsql = new ReminderHandler(c);
+        final ReminderService rsql = new ReminderHandler(c);
         try {
             return rsql.existsReminder(oid, uid, Types.APPOINTMENT);
         } catch (final OXException ex) {

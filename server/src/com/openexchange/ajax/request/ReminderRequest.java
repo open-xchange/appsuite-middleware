@@ -67,7 +67,7 @@ import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
-import com.openexchange.api2.ReminderSQLInterface;
+import com.openexchange.api2.ReminderService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.Types;
@@ -161,7 +161,7 @@ public final class ReminderRequest {
         final TimeZone tz = TimeZoneUtils.getTimeZone(userObj.getTimeZone());
         final JSONArray jsonArray = new JSONArray();
         try {
-            final ReminderSQLInterface reminderSql = new ReminderHandler(session.getContext());
+            final ReminderService reminderSql = new ReminderHandler(session.getContext());
 
             final ReminderObject reminder = reminderSql.loadReminder(id);
             final ReminderDeleteInterface reminderDeleteInterface;
@@ -214,7 +214,7 @@ public final class ReminderRequest {
         SearchIterator<?> it = null;
 
         try {
-            final ReminderSQLInterface reminderSql = new ReminderHandler(session.getContext());
+            final ReminderService reminderSql = new ReminderHandler(session.getContext());
             it = reminderSql.listModifiedReminder(userObj.getId(), timestamp);
 
             while (it.hasNext()) {
@@ -264,7 +264,7 @@ public final class ReminderRequest {
         
         final ReminderWriter reminderWriter = new ReminderWriter(timeZone);
         try {
-            final ReminderSQLInterface reminderSql = new ReminderHandler(session.getContext());
+            final ReminderService reminderSql = new ReminderHandler(session.getContext());
             final JSONArray jsonResponseArray = new JSONArray();
             final SearchIterator<ReminderObject> it = reminderSql.listReminder(userObj.getId(), end);
             try {

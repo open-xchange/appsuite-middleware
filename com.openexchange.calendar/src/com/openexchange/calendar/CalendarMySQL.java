@@ -76,7 +76,7 @@ import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.OXException;
-import com.openexchange.api2.ReminderSQLInterface;
+import com.openexchange.api2.ReminderService;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.calendar.storage.ParticipantStorage;
 import com.openexchange.calendar.storage.SQL;
@@ -2319,7 +2319,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             /*
              * Update reminders' folder ID on move operation
              */
-            final ReminderSQLInterface reminderInterface = new ReminderHandler(ctx);
+            final ReminderService reminderInterface = new ReminderHandler(ctx);
             final SearchIterator<?> it = reminderInterface.listReminder(Types.APPOINTMENT, cdao.getObjectID());
             final List<ReminderObject> toUpdate = new ArrayList<ReminderObject>();
             try {
@@ -3775,7 +3775,7 @@ public class CalendarMySQL implements CalendarSqlImp {
     }
 
     private static final void changeReminder(final int oid, final int uid, final int fid, final Context c, final boolean sequence, final java.util.Date end_date, final java.util.Date reminder_date, final int action, final boolean recurrenceChange) throws OXMandatoryFieldException, OXConflictException, OXException {
-        final ReminderSQLInterface rsql = new ReminderHandler(c);
+        final ReminderService rsql = new ReminderHandler(c);
         if (action == CalendarOperation.DELETE || action == CalendarOperation.UPDATE && collection.isInThePast(end_date)) {
         //if (action == CalendarOperation.DELETE) {
             if (rsql.existsReminder(oid, uid, Types.APPOINTMENT)) {
@@ -4272,7 +4272,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         if (userIsOrganizer(so.getUserId(), ao))
             collection.triggerEvent(so, CalendarOperation.DELETE, ao);
         // deleteAllReminderEntries(edao, oid, fid, so, readcon);
-        final ReminderSQLInterface rsql = new ReminderHandler(ctx);
+        final ReminderService rsql = new ReminderHandler(ctx);
         try {
             rsql.deleteReminder(oid, Types.APPOINTMENT);
         } catch (final AbstractOXException oxe) {
