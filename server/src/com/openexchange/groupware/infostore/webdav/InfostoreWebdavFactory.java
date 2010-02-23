@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.infostore.webdav;
 
+import gnu.trove.TIntObjectHashMap;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -113,8 +114,8 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 		public final Map<WebdavPath, OXWebdavResource> lockNull = new HashMap<WebdavPath, OXWebdavResource>();
 		
 		
-		public final Map<Integer, FolderCollection> collectionsById = new HashMap<Integer, FolderCollection>();
-		public final Map<Integer, DocumentMetadataResource> resourcesById = new HashMap<Integer, DocumentMetadataResource>();
+		public final TIntObjectHashMap<FolderCollection> collectionsById = new TIntObjectHashMap<FolderCollection>();
+		public final TIntObjectHashMap<DocumentMetadataResource> resourcesById = new TIntObjectHashMap<DocumentMetadataResource>();
 		
 		public void addResource(final OXWebdavResource res) {
 			if(res.isCollection()) {
@@ -126,12 +127,12 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 
 		public void addResource(final DocumentMetadataResource resource) {
 			resources.put(resource.getUrl(), resource);
-			resourcesById.put(Integer.valueOf(resource.getId()), resource);
+			resourcesById.put(resource.getId(), resource);
 		}
 
 		public void addCollection(final FolderCollection collection) {
 			folders.put(collection.getUrl(), collection);
-			collectionsById.put(Integer.valueOf(collection.getId()), collection);
+			collectionsById.put(collection.getId(), collection);
 		}
 		
 		public void invalidate(final WebdavPath url, final int id, final Type type) {
@@ -141,12 +142,12 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 			case COLLECTION:
 				folders.remove(url);
 				newFolders.remove(url);
-				collectionsById.remove(Integer.valueOf(id));
+				collectionsById.remove(id);
 				return;
 			case RESOURCE:
 				resources.remove(url);
 				newResources.remove(url);
-				resourcesById.remove(Integer.valueOf(id));
+				resourcesById.remove(id);
 				return;
 			default :
 				throw new IllegalArgumentException("Unkown Type "+type);
@@ -164,9 +165,9 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 		
 		public void registerNew(final OXWebdavResource resource) throws WebdavProtocolException {
 			if(resource.isCollection()) {
-				collectionsById.put(Integer.valueOf(resource.getId()), (FolderCollection) resource);
+				collectionsById.put(resource.getId(), (FolderCollection) resource);
 			} else {
-				resourcesById.put(Integer.valueOf(resource.getId()), (DocumentMetadataResource) resource);
+				resourcesById.put(resource.getId(), (DocumentMetadataResource) resource);
 			}
 			final int id = resource.getParentId();
 			final FolderCollection coll = getFolder(id);
@@ -179,7 +180,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 		}
 
 		private FolderCollection getFolder(final int id) {
-			return collectionsById.get(Integer.valueOf(id));
+			return collectionsById.get(id);
 		}
 
 		public void addNewResource(final OXWebdavResource res) {
@@ -463,8 +464,8 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 		final Set<Integer> toLoad = new HashSet<Integer>(subfolderIds);
 		final List<OXWebdavResource> retVal = new ArrayList<OXWebdavResource>(subfolderIds.size());
 		for(final int id : subfolderIds) {
-			if(toLoad.contains(Integer.valueOf(id)) && s.collectionsById.containsKey(Integer.valueOf(id))) {
-				retVal.add(s.collectionsById.get(Integer.valueOf(id)));
+			if(toLoad.contains(Integer.valueOf(id)) && s.collectionsById.containsKey(id)) {
+				retVal.add(s.collectionsById.get(id));
 				toLoad.remove(Integer.valueOf(id));
 			}
 		}
@@ -509,7 +510,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 			if(null == docMeta.getFileName() || docMeta.getFileName().equals("")) {
 				continue;
 			}
-			DocumentMetadataResource res = s.resourcesById.get(Integer.valueOf(docMeta.getId()));
+			DocumentMetadataResource res = s.resourcesById.get(docMeta.getId());
 			if(res == null) {
 				res = new DocumentMetadataResource(collection.getUrl().dup().append(docMeta.getFileName()), docMeta, this);
 				s.addResource(res);

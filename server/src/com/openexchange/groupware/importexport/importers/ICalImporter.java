@@ -50,11 +50,11 @@
 package com.openexchange.groupware.importexport.importers;
 
 import gnu.trove.TIntObjectHashMap;
+import gnu.trove.TObjectProcedure;
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -250,10 +250,10 @@ public class ICalImporter extends AbstractImporter {
             } catch (final ConversionError conversionError) {
                 throw new ImportExportException(conversionError);
             }
-            final Map<Integer, ConversionError> errorMap = new HashMap<Integer, ConversionError>();
+            final TIntObjectHashMap<ConversionError> errorMap = new TIntObjectHashMap<ConversionError>();
 
             for (final ConversionError error : errors) {
-                errorMap.put(Integer.valueOf(error.getIndex()), error);
+                errorMap.put(error.getIndex(), error);
             }
 
             final TIntObjectHashMap<List<ConversionWarning>> warningMap = new  TIntObjectHashMap<List<ConversionWarning>>();
@@ -271,9 +271,9 @@ public class ICalImporter extends AbstractImporter {
             final Iterator<CalendarDataObject> iter = appointments.iterator();
             while (iter.hasNext()) {
                 final ImportResult importResult = new ImportResult();
-                final ConversionError error = errorMap.get(Integer.valueOf(index));
+                final ConversionError error = errorMap.get(index);
                 if (error != null) {
-                    errorMap.remove(Integer.valueOf(index));
+                    errorMap.remove(index);
                     importResult.setException(new ImportExportException(error));
                 } else {
                     final CalendarDataObject appointmentObj = iter.next();
@@ -306,11 +306,17 @@ public class ICalImporter extends AbstractImporter {
                 list.add(importResult);
                 index++;
             }
-            for (final ConversionError error : errorMap.values()) {
-                final ImportResult importResult = new ImportResult();
-                importResult.setEntryNumber(error.getIndex());
-                importResult.setException(new ImportExportException(error));
-                list.add(importResult);
+            if (!errorMap.isEmpty()) {
+                errorMap.forEachValue(new TObjectProcedure<ConversionError>() {
+
+                    public boolean execute(final ConversionError error) {
+                        final ImportResult importResult = new ImportResult();
+                        importResult.setEntryNumber(error.getIndex());
+                        importResult.setException(new ImportExportException(error));
+                        list.add(importResult);
+                        return true;
+                    }
+                });
             }
         }
         if (importTask) {
@@ -320,19 +326,19 @@ public class ICalImporter extends AbstractImporter {
             } catch (final ConversionError conversionError) {
                 throw new ImportExportException(conversionError);
             }
-            final Map<Integer, ConversionError> errorMap = new HashMap<Integer, ConversionError>();
+            final TIntObjectHashMap<ConversionError> errorMap = new TIntObjectHashMap<ConversionError>();
 
             for (final ConversionError error : errors) {
-                errorMap.put(Integer.valueOf(error.getIndex()), error);
+                errorMap.put(error.getIndex(), error);
             }
 
-            final Map<Integer, List<ConversionWarning>> warningMap = new HashMap<Integer, List<ConversionWarning>>();
+            final TIntObjectHashMap<List<ConversionWarning>> warningMap = new TIntObjectHashMap<List<ConversionWarning>>();
 
             for (final ConversionWarning warning : warnings) {
-                List<ConversionWarning> warningList = warningMap.get(Integer.valueOf(warning.getIndex()));
+                List<ConversionWarning> warningList = warningMap.get(warning.getIndex());
                 if (warningList == null) {
                     warningList = new LinkedList<ConversionWarning>();
-                    warningMap.put(Integer.valueOf(warning.getIndex()), warningList);
+                    warningMap.put(warning.getIndex(), warningList);
                 }
                 warningList.add(warning);
             }
@@ -341,9 +347,9 @@ public class ICalImporter extends AbstractImporter {
             final Iterator<Task> iter = tasks.iterator();
             while (iter.hasNext()) {
                 final ImportResult importResult = new ImportResult();
-                final ConversionError error = errorMap.get(Integer.valueOf(index));
+                final ConversionError error = errorMap.get(index);
                 if (error != null) {
-                    errorMap.remove(Integer.valueOf(index));
+                    errorMap.remove(index);
                     importResult.setException(new ImportExportException(error));
                 } else {
                     // IGNORE WARNINGS. Protocol doesn't allow for warnings. TODO: Verify This
@@ -359,7 +365,7 @@ public class ICalImporter extends AbstractImporter {
                         importResult.setException(e);
                     }
 
-                    final List<ConversionWarning> warningList = warningMap.get(Integer.valueOf(index));
+                    final List<ConversionWarning> warningList = warningMap.get(index);
                     if (warningList != null) {
                         importResult.addWarnings(warningList);
                         importResult.setException(EXCEPTIONS.create(14, Integer.valueOf(warningList.size())));
@@ -369,11 +375,17 @@ public class ICalImporter extends AbstractImporter {
                 list.add(importResult);
                 index++;
             }
-            for (final ConversionError error : errorMap.values()) {
-                final ImportResult importResult = new ImportResult();
-                importResult.setEntryNumber(error.getIndex());
-                importResult.setException(new ImportExportException(error));
-                list.add(importResult);
+            if (!errorMap.isEmpty()) {
+                errorMap.forEachValue(new TObjectProcedure<ConversionError>() {
+
+                    public boolean execute(final ConversionError error) {
+                        final ImportResult importResult = new ImportResult();
+                        importResult.setEntryNumber(error.getIndex());
+                        importResult.setException(new ImportExportException(error));
+                        list.add(importResult);
+                        return true;
+                    }
+                });
             }
         }
 
