@@ -129,4 +129,10 @@ public final class Arrays {
         return retval;
     }
 
+    public static <T> T[] clone(T[] toClone) {
+        @SuppressWarnings("unchecked")
+        T[] retval = (T[]) Array.newInstance(toClone.getClass().getComponentType(), toClone.length);
+        System.arraycopy(toClone, 0, retval, 0, toClone.length);
+        return retval;
+    }
 }
