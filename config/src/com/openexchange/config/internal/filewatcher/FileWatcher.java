@@ -128,10 +128,12 @@ public final class FileWatcher {
      * Drops the associated timer thread.
      */
     public static void dropTimer() {
-        synchronized (FileWatcher.class) {
-            if (null != fileWatcherTimer) {
-                fileWatcherTimer.cancel();
-                fileWatcherTimer = null;
+        if (null != fileWatcherTimer) {
+            synchronized (FileWatcher.class) {
+                if (null != fileWatcherTimer) {
+                    fileWatcherTimer.cancel();
+                    fileWatcherTimer = null;
+                }
             }
         }
     }
