@@ -1,3 +1,7 @@
+* 2010-02-23 - thorben.betten@open-xchange.com
+
+ - Bugfix #14593: A default folder's module must not be changed
+
 * 2010-02-22 - marcus.klein@open-xchange.com
 
  - Bugfix #15259: Removed free marked appointments from free/busy data. Was marked there as free but all clients seem to ignore this.
