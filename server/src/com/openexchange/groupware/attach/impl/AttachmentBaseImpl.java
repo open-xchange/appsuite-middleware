@@ -1098,7 +1098,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             if(delegate != null) {
                 return delegate.size();
             }
-            throw new UnsupportedOperationException("Mehtod size() not implemented");
+            throw new UnsupportedOperationException("Method size() is not implemented");
         }
 
         public boolean hasSize() {
