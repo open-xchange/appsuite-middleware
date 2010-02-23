@@ -119,6 +119,10 @@ final class OXFolderManagerImpl extends OXFolderManager {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(OXFolderManagerImpl.class);
 
+    private static final int OPTION_NONE = 0;
+
+    private static final int OPTION_DENY_MODULE_UPDATE = 1;
+
     private static final String TABLE_OXFOLDER_TREE = "oxfolder_tree";
 
     private final Connection readCon;
@@ -521,7 +525,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
             if (performMove) {
                 move(fo.getObjectID(), fo.getParentFolderID(), lastModified);
             }
-            update(fo, lastModified);
+            update(fo, OPTION_DENY_MODULE_UPDATE, lastModified);
         } else if (fo.containsFolderName()) {
             if (performMove) {
                 move(fo.getObjectID(), fo.getParentFolderID(), lastModified);
@@ -584,7 +588,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
         }
     }
 
-    private void update(final FolderObject folderObj, final long lastModified) throws OXException {
+    private void update(final FolderObject folderObj, final int options, final long lastModified) throws OXException {
         if (folderObj.getObjectID() <= 0) {
             throw new OXFolderException(FolderCode.INVALID_OBJECT_ID, OXFolderUtility.getFolderName(folderObj));
         }
@@ -644,8 +648,21 @@ final class OXFolderManagerImpl extends OXFolderManager {
                     OXFolderUtility.folderModule2String(folderObj.getModule()),
                     Integer.valueOf(ctx.getContextId()));
             }
-            if (!isFolderEmpty(storageObj.getObjectID(), storageObj.getModule())) {
+            if ((options & OPTION_DENY_MODULE_UPDATE) > 0) {
+                /*
+                 * Folder module must not be updated
+                 */
                 throw new OXFolderException(FolderCode.NO_FOLDER_MODULE_UPDATE);
+            } else if (storageObj.isDefaultFolder()) {
+                /*
+                 * A default folder's module must not be changed
+                 */
+                throw new OXFolderException(FolderCode.NO_DEFAULT_FOLDER_MODULE_UPDATE);
+            } else if (!isFolderEmpty(storageObj.getObjectID(), storageObj.getModule())) {
+                /*
+                 * Module cannot be updated since folder already contains elements
+                 */
+                throw new OXFolderException(FolderCode.DENY_FOLDER_MODULE_UPDATE);
             }
             final FolderObject parent = getFolderFromMaster(storageObj.getParentFolderID());
             if (!OXFolderUtility.checkFolderModuleAgainstParentModule(
