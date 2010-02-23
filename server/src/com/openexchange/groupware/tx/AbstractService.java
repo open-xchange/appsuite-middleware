@@ -49,14 +49,13 @@
 
 package com.openexchange.groupware.tx;
 
-import java.util.HashMap;
-import java.util.Map;
+import gnu.trove.TLongObjectHashMap;
 
 public abstract class AbstractService implements Service {
 	
-	private final Map<Long,Object> txIds = new HashMap<Long,Object>();
-	private final Map<Long,StackTraceElement[]> startedTx = new HashMap<Long,StackTraceElement[]>();
-	
+	private final TLongObjectHashMap<Object> txIds = new TLongObjectHashMap<Object>();
+	private final TLongObjectHashMap<StackTraceElement[]> startedTx = new TLongObjectHashMap<StackTraceElement[]>();
+
 	protected abstract Object createTransaction()throws TransactionException;
 	protected abstract void commit(Object transaction) throws TransactionException;
 	protected abstract void rollback(Object transaction)throws TransactionException;
@@ -66,15 +65,15 @@ public abstract class AbstractService implements Service {
     public void startTransaction() throws TransactionException {
 		final long id = Thread.currentThread().getId();
 		
-		if(txIds.containsKey(Long.valueOf(id))){
-			throw new TransactionException("There is already a transaction active at this moment", startedTx.get(Long.valueOf(id)));
+		if(txIds.containsKey(id)){
+			throw new TransactionException("There is already a transaction active at this moment", startedTx.get(id));
 		}
 		
 		final Object txId = createTransaction();
 		
-		txIds.put(Long.valueOf(id),txId);
+		txIds.put(id,txId);
 		if(rememberStacks) {
-            startedTx.put(Long.valueOf(id),Thread.currentThread().getStackTrace());
+            startedTx.put(id,Thread.currentThread().getStackTrace());
 	    }
     }
 	
@@ -87,13 +86,13 @@ public abstract class AbstractService implements Service {
 	}
 	
 	protected Object getActiveTransaction(){
-		return txIds.get(Long.valueOf(Thread.currentThread().getId()));
+		return txIds.get(Thread.currentThread().getId());
 	}
 	
 	public void finish() throws TransactionException{
-		txIds.remove(Long.valueOf(Thread.currentThread().getId()));
+		txIds.remove(Thread.currentThread().getId());
 		if(rememberStacks) {
-            startedTx.remove(Long.valueOf(Thread.currentThread().getId()));
+            startedTx.remove(Thread.currentThread().getId());
         }
 	}
 	
