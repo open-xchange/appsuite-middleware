@@ -392,8 +392,6 @@ public abstract class MessageStorageTest extends AbstractMailTest {
         // a request for the from field
         if (full || set.contains(MailField.FROM) || headers) {
             assertTrue("Missing From in " + mailname, mail.containsFrom());
-        } else {
-            assertTrue("From set in " + mailname + " although not requested", !mail.containsFrom());
         }
         // If headers are requested the to part is automatically filled so we handle the request for headers like
         // a request for the to field
