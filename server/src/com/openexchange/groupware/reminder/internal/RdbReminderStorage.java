@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.reminder.internal;
 
-import static com.openexchange.tools.Arrays.toArray;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -97,7 +96,7 @@ public class RdbReminderStorage extends ReminderStorage {
         } finally {
             closeSQLStuff(result, stmt);
         }
-        return toArray(retval);
+        return retval.toArray(new ReminderObject[retval.size()]);
     }
 
     private static void readResult(ResultSet result, ReminderObject reminder) throws SQLException {

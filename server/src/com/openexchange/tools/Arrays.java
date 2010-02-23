@@ -51,7 +51,6 @@ package com.openexchange.tools;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.lang.reflect.Array;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -115,18 +114,6 @@ public final class Arrays {
         System.arraycopy(toExtend, 0, tmp, 0, toExtend.length);
         System.arraycopy(other, 0, tmp, toExtend.length, other.length);
         return tmp;
-    }
-
-    /**
-     * Gets a newly allocated array containing all of the elements in specified collection.
-     * 
-     * @param c The collection whose elements shall be contained in returned array.
-     * @return A newly allocated array containing all elements
-     */
-    public static <T> T[] toArray(final Collection<T> c) {
-        @SuppressWarnings("unchecked")
-        T[] retval = (T[]) c.toArray(new Object[c.size()]);
-        return retval;
     }
 
     public static <T> T[] clone(T[] toClone) {

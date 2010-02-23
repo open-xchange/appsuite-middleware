@@ -49,7 +49,6 @@
 
 package com.openexchange.tools.iterator;
 
-import static com.openexchange.tools.Arrays.toArray;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.groupware.AbstractOXException;
@@ -103,7 +102,7 @@ public class ArrayIterator<T> implements SearchIterator<T> {
     }
 
     public AbstractOXException[] getWarnings() {
-        return warnings.isEmpty() ? null : toArray(warnings);
+        return warnings.isEmpty() ? null : warnings.toArray(new AbstractOXException[warnings.size()]);
     }
 
     public boolean hasWarnings() {
