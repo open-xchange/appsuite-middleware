@@ -63,6 +63,7 @@ import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.internal.JCSCacheService;
 import com.openexchange.caching.internal.JCSCacheServiceInit;
+import com.openexchange.calendar.CalendarReminderDelete;
 import com.openexchange.calendar.api.AppointmentSqlFactory;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.charset.CollectionCharsetProvider;
@@ -108,6 +109,7 @@ import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.contact.datahandler.ContactInsertDataHandler;
 import com.openexchange.groupware.contact.internal.ContactInterfaceDiscoveryInitialization;
 import com.openexchange.groupware.contact.internal.ContactInterfaceDiscoveryServiceImpl;
+import com.openexchange.groupware.reminder.internal.TargetRegistry;
 import com.openexchange.groupware.update.internal.InternalList;
 import com.openexchange.groupware.update.internal.SchemaExceptionFactory;
 import com.openexchange.i18n.impl.I18nImpl;
@@ -391,6 +393,7 @@ public final class Init {
     private static void startAndInjectCalendarServices() {
         ServerServiceRegistry.getInstance().addService(CalendarCollectionService.class, new CalendarCollection());
         ServerServiceRegistry.getInstance().addService(AppointmentSqlFactoryService.class, new AppointmentSqlFactory());
+        TargetRegistry.getInstance().addService(Types.APPOINTMENT, new CalendarReminderDelete());
     }
 
     private static void startAndInjectXMLServices() {
