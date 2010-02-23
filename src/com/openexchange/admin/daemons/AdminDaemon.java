@@ -89,7 +89,7 @@ import com.openexchange.admin.tools.PropertyHandler;
 
 public class AdminDaemon {
 
-    private static final Log LOG = LogFactory.getLog(AdminDaemon.class);
+    static final Log LOG = LogFactory.getLog(AdminDaemon.class);
 
     private static PropertyHandler prop = null;
     private AdminCache cache = null;
@@ -99,7 +99,7 @@ public class AdminDaemon {
      * delivers events in order and not concurrently. So there's no need to deal with
      * concurrency here
      */
-    private static ArrayList<Bundle> bundlelist = new ArrayList<Bundle>();
+    static ArrayList<Bundle> bundlelist = new ArrayList<Bundle>();
 
     private static com.openexchange.admin.rmi.impl.OXUser oxuser_v2 = null;
     private static com.openexchange.admin.rmi.impl.OXGroup oxgrp_v2 = null;
@@ -113,16 +113,15 @@ public class AdminDaemon {
         public ServerSocket createServerSocket(final int port) throws IOException {
             final String hostname_property = ClientAdminThread.cache.getProperties().getProp("BIND_ADDRESS", "localhost");
             if (hostname_property.equalsIgnoreCase("0")) {
-                if(LOG.isInfoEnabled()){
+                if (LOG.isInfoEnabled()){
                     LOG.info("Admindaemon will listen on all network devices!");
                 }
                 return new ServerSocket(port, 0, null);
-            } else {
-                if(LOG.isInfoEnabled()){
-                    LOG.info("Admindaemon will listen on "+hostname_property+"!");
-                }
-                return new ServerSocket(port, 0, InetAddress.getByName(hostname_property));
             }
+            if (LOG.isInfoEnabled()){
+                LOG.info("Admindaemon will listen on "+hostname_property+"!");
+            }
+            return new ServerSocket(port, 0, InetAddress.getByName(hostname_property));
         }
     }
 
