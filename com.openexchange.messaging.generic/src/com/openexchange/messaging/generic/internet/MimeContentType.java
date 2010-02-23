@@ -475,7 +475,8 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
         final StringBuilder sb = new StringBuilder(64);
         sb.append(getBaseType());
         if (null != parameterList) {
-            parameterList.appendUnicodeString(sb);
+            // FIXME check if correct method is called.
+            parameterList.appendRFC2045String(sb);
         }
         return sb.toString();
     }

@@ -260,7 +260,8 @@ public final class MimeContentDisposition extends ParameterizedHeader implements
         final StringBuilder sb = new StringBuilder(64);
         sb.append(disposition);
         if (null != parameterList) {
-            parameterList.appendUnicodeString(sb);
+            // FIXME please check if this method call is correct.
+            parameterList.appendRFC2045String(sb);
         }
         return sb.toString();
     }
