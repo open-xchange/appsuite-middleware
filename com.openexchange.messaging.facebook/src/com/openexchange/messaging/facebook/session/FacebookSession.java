@@ -180,6 +180,11 @@ public final class FacebookSession {
     private String facebookSession;
 
     /**
+     * The last-accessed time stamp.
+     */
+    private volatile long lastAccessed;
+
+    /**
      * Initializes a new {@link FacebookMessagingResource}.
      * 
      * @param messagingAccount The facebook messaging account providing credentials and settings
@@ -197,6 +202,7 @@ public final class FacebookSession {
         this.login = accountConfiguration.get(FacebookConstants.FACEBOOK_LOGIN).toString();
         this.password = accountConfiguration.get(FacebookConstants.FACEBOOK_PASSWORD).toString();
         facebookUserId = -1L;
+        lastAccessed = System.currentTimeMillis();
     }
 
     /**
@@ -220,6 +226,26 @@ public final class FacebookSession {
         this.password = password;
         facebookUserId = -1L;
         performWebLogout = true;
+        lastAccessed = System.currentTimeMillis();
+    }
+
+    /**
+     * Touches this session's last-accessed time stamp.
+     * 
+     * @return This session with last-accessed time stamp touched
+     */
+    public FacebookSession touchLastAccessed() {
+        lastAccessed = System.currentTimeMillis();
+        return this;
+    }
+
+    /**
+     * Gets the last-accessed time stamp.
+     * 
+     * @return The last-accessed time stamp
+     */
+    public long getLastAccessed() {
+        return lastAccessed;
     }
 
     @Override
