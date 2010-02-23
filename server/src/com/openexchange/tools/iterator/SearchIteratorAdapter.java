@@ -49,7 +49,6 @@
 
 package com.openexchange.tools.iterator;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -95,11 +94,12 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
         return delegate.hasNext();
     }
 
-    public T next() throws SearchIteratorException {
+    public T next() {
         return delegate.next();
     }
 
     public void close() {
+        // delegate does not provide a close method.
     }
 
     public int size() {
@@ -130,10 +130,11 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
             public boolean hasNext() {
                 return false;
             }
-            public T next() throws SearchIteratorException, OXException {
+            public T next() {
                 return null;
             }
-            public void close() throws SearchIteratorException {
+            public void close() {
+                // empty must not be closed.
             }
             public int size() {
                 return 0;
@@ -142,6 +143,7 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
                 return true;
             }
             public void addWarning(final AbstractOXException warning) {
+                throw new UnsupportedOperationException("Method is not implemented");
             }
             public AbstractOXException[] getWarnings() {
                 return null;
@@ -156,64 +158,7 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
         if (null == array) {
             return createEmptyIterator();
         }
-        /*
-         * Tiny iterator implementation for arrays
-         */
-        class ArrayIterator implements SearchIterator<T> {
-
-            private final int size;
-
-            private int cursor;
-
-            private final T[] arr;
-
-            private final List<AbstractOXException> warnings;
-
-            ArrayIterator(final T[] array) {
-                super();
-                this.arr = array;
-                size = Array.getLength(array);
-                warnings = new ArrayList<AbstractOXException>(2);
-            }
-
-            @SuppressWarnings("unused")
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
-
-            public boolean hasNext() {
-                return (cursor < size);
-            }
-
-            public T next() {
-                return arr[cursor++];
-            }
-
-            public void close() throws SearchIteratorException {
-            }
-
-            public int size() {
-                return Array.getLength(arr);
-            }
-
-            public boolean hasSize() {
-                return true;
-            }
-
-            public void addWarning(final AbstractOXException warning) {
-                warnings.add(warning);
-            }
-
-            public AbstractOXException[] getWarnings() {
-                return warnings.isEmpty() ? null : warnings.toArray(new AbstractOXException[warnings.size()]);
-            }
-
-            public boolean hasWarnings() {
-                return !warnings.isEmpty();
-            }
-
-        }
-        return new ArrayIterator(array);
+        return new ArrayIterator<T>(array);
     }
 
     public static <T> Iterable<T> toIterable(final SearchIterator<T> iterator) {

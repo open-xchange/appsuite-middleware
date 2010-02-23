@@ -49,7 +49,11 @@
 
 package com.openexchange.tools.iterator;
 
+import static com.openexchange.tools.Arrays.toArray;
+import java.util.ArrayList;
+import java.util.List;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.tools.Arrays;
 
 /**
  * {@link ArrayIterator} - A {@link SearchIterator} implementation backed by an array.
@@ -62,6 +66,8 @@ public class ArrayIterator<T> implements SearchIterator<T> {
 
     private final T[] array;
 
+    private final List<AbstractOXException> warnings = new ArrayList<AbstractOXException>();
+
     /**
      * Initializes a new {@link ArrayIterator}
      * 
@@ -69,16 +75,14 @@ public class ArrayIterator<T> implements SearchIterator<T> {
      */
     public ArrayIterator(final T[] array) {
         super();
-        // Solution to create a generic array copied from java.util.ArrayList.
-        this.array = (T[]) java.lang.reflect.Array.newInstance(array.getClass().getComponentType(), array.length);
-        System.arraycopy(array, 0, this.array, 0, array.length);
+        this.array = Arrays.clone(array);
     }
 
     public boolean hasNext() {
         return index < array.length;
     }
 
-    public T next() throws SearchIteratorException {
+    public T next() {
         return array[index++];
     }
 
@@ -95,14 +99,14 @@ public class ArrayIterator<T> implements SearchIterator<T> {
     }
 
     public void addWarning(final AbstractOXException warning) {
-        // Does not apply to array-backed iterator
+        warnings.add(warning);
     }
 
     public AbstractOXException[] getWarnings() {
-        return null;
+        return warnings.isEmpty() ? null : toArray(warnings);
     }
 
     public boolean hasWarnings() {
-        return false;
+        return !warnings.isEmpty();
     }
 }
