@@ -118,7 +118,7 @@ public final class FileWatcher {
             synchronized (FileWatcher.class) {
                 tmp = fileWatcherTimer;
                 if (null == tmp) {
-                    tmp = fileWatcherTimer = new Timer("FileWatcherTimer");
+                    fileWatcherTimer = tmp = new Timer("FileWatcherTimer");
                 }
             }
         }
