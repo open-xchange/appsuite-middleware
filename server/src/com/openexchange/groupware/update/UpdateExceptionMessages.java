@@ -68,7 +68,7 @@ public final class UpdateExceptionMessages implements LocalizableStrings {
 
     public static final String UNKNOWN_CONCURRENCY_MSG = "Update task %1$s returned an unknown concurrency level. Running as blocking task.";
 
-    public static final String RESET_FORBIDDEN_MSG = "Version can not be set back if update task handling has been migrated to remembered update tasks concept on schema %1$s.";
+    public static final String RESET_FORBIDDEN_MSG = "The version can not be set back if the update tasks handling has been migrated to the Remember Executed Update Tasks concept on schema %1$s.";
 
     public static final String UNRESOLVABLE_DEPENDENCIES_MSG = "Unable to determine next update task to execute. Executed: %1$s. Enqueued: %2$s. Scheduled: %3$s.";
 
