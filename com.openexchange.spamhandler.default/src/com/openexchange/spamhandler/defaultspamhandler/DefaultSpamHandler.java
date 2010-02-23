@@ -63,7 +63,10 @@ import com.openexchange.spamhandler.SpamHandler;
  */
 public final class DefaultSpamHandler extends SpamHandler {
 
-    private static final ConfigurationServiceSupplier CSP = ConfigurationServiceSupplier.getInstance();
+    /**
+     * The configuration service supplier.
+     */
+    private static final ConfigurationServiceSupplier SUPPLIER = ConfigurationServiceSupplier.getInstance();
 
     private static final String NAME = "DefaultSpamHandler";
 
@@ -114,7 +117,7 @@ public final class DefaultSpamHandler extends SpamHandler {
 
     @Override
     public boolean isCreateConfirmedSpam() {
-        final ConfigurationService configurationService = CSP.getConfigurationService();
+        final ConfigurationService configurationService = SUPPLIER.getConfigurationService();
         if (null == configurationService) {
             /*
              * Return default
@@ -126,7 +129,7 @@ public final class DefaultSpamHandler extends SpamHandler {
 
     @Override
     public boolean isCreateConfirmedHam() {
-        final ConfigurationService configurationService = CSP.getConfigurationService();
+        final ConfigurationService configurationService = SUPPLIER.getConfigurationService();
         if (null == configurationService) {
             /*
              * Return default
@@ -138,7 +141,7 @@ public final class DefaultSpamHandler extends SpamHandler {
 
     @Override
     public boolean isUnsubscribeSpamFolders() {
-        final ConfigurationService configurationService = CSP.getConfigurationService();
+        final ConfigurationService configurationService = SUPPLIER.getConfigurationService();
         if (null == configurationService) {
             /*
              * Return default
