@@ -165,11 +165,7 @@ public final class NewCallAction extends AbstractVoipNowHTTPAction<GetMethod> {
             }
         } catch (final UnsupportedEncodingException e) {
             throw new AjaxException(AjaxException.Code.UnexpectedError, e, e.getMessage());
-        }
-        // catch (final NoSuchAlgorithmException e) {
-        // throw new AjaxException(AjaxException.Code.UnexpectedError, e, e.getMessage());
-        // }
-        catch (final HttpException e) {
+        } catch (final HttpException e) {
             throw VoipNowExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
             throw VoipNowExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
