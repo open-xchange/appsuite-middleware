@@ -52,6 +52,7 @@ package com.openexchange.groupware.importexport;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import com.openexchange.groupware.importexport.importers.ExpressiveErrorMessageWhileParsingVCard;
 import com.openexchange.groupware.vcard.BracketedNicknameTest;
 import com.openexchange.groupware.vcard.MissingAddressesAfterImportTest;
 import com.openexchange.groupware.vcard.VCardMimeTypeTest;
@@ -89,6 +90,7 @@ public class ImportExportStandaloneSuite extends TestSuite {
 		//VCARD
 		tests.addTest( VCardImportTest.suite() );
 		tests.addTestSuite( BracketedNicknameTest.class );
+		tests.addTestSuite(ExpressiveErrorMessageWhileParsingVCard.class);
 		
 		//separate tests for reported bugs
 		tests.addTest( Bug7732Test.suite() );
