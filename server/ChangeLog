@@ -1,3 +1,7 @@
+* 2010-02-24 - matthias.biggeleben@open-xchange.com
+
+ - Bugfix #15038: [L3] print week-view within firefox: 2.nd page no vertical lines.
+ 
 * 2010-02-24 - tobias.prinz@open-xchange.com
 
  - Bugfix #13557: Error message when importing broken VCards gives line and column information now.
