@@ -1,4 +1,4 @@
-* 2010-02-24 - thorben.betten@open-xchange.com
+* 2010-02-24 - tobias.prinz@open-xchange.com
 
  - Bugfix #13557: Error message when importing broken VCards gives line and column information now.
  
@@ -60,6 +60,10 @@
 
  - Bugfix 14919 - Reflect automatic participant status changes in cdao for events
  - Bugfix #15083: No link to OX for external participants on confirmation change
+ 
+ * 2010-02-16 - tobias.prinz@open-xchange.com
+
+ - Bugfix #15241 - VCards by Apple Addressbook with inline images are imported now
  
 * 2010-02-15 - thorben.betten@open-xchange.com
 
