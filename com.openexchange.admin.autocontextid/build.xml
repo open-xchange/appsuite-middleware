@@ -8,16 +8,14 @@
     <property file="META-INF/MANIFEST.MF"/>
     <property name="version" value="${Bundle-Version}"/>
     <property name="bundle.name" value="${Bundle-SymbolicName}.jar"/>
-	<property name="service.name"   value="open-xchange-admin-reseller-soap" />
 
 	<!-- Dots are not allowed so we cannot use Bundle-SymbolicName here as it may contain some -->
-	<property name="composite.name" value="open-xchange-admin-plugin-reseller-${version}"/>
-    <property name="project.name" value="open-xchange-admin-plugin-reseller" />
+	<property name="composite.name" value="open-xchange-admin-plugin-autocontextid-${version}"/>
+    <property name="project.name" value="open-xchange-admin-plugin-autocontextid" />
 	<property name="oxconfdir" value="etc/admindaemon"/>
 	<property name="serverconfdir" value="etc/groupware"/>
     <property name="admin.classpath" value="../open-xchange-admin/classes"/>
     <property name="adminhosting.classpath" value="../open-xchange-admin-plugin-hosting/classes"/>
-	<property name="client.jar" value="ox_admin_reseller_rmiclient.jar"/>
     <property name="bundle.d" value="${prefix}/${oxconfdir}/osgi/bundle.d"/>
     <property name="libdir"       value="${prefix}/lib"/>
     <property name="configdir"    value="${prefix}/etc/admindaemon/plugin"/>
@@ -52,7 +50,6 @@
 	<property name="jdom"               value="jdom-1.1.jar"/>
 	<property name="adminRMI"           value="ox_admin_rmiclient.jar"/>
 	<property name="adminHostingRMI"    value="ox_admin_hosting_rmiclient.jar"/>
-	<property name="adminResellerRMI"   value="ox_admin_reseller_rmiclient.jar"/>
 
 	<path id="project.classpath">
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${commons-io}"/>
@@ -116,55 +113,9 @@
 		</manifest>
 	</target>
 
-	<target name="aar" depends="compile,manifest">
-    	<mkdir dir="jar"/>
-        <jar jarfile="jar/${service.name}.aar"
-        	manifest="classes/META-INF/MANIFEST.MF"
-        	basedir="classes"
-        	includes="com/openexchange/admin/reseller/soap/,com/openexchange/admin/reseller/rmi/,META-INF/**"/>
-    	<delete dir="classes/META-INF"/>
-    </target>
-
-	<target name="client" depends="compile">
-        <mkdir dir="jar"/>
-        <copy todir="classes">
-            <fileset refid="metainf"/>
-        </copy>
-        <jar jarfile="jar/${client.jar}"
-         includes="com/openexchange/admin/reseller/rmi/,com/openexchange/admin/rmi/,com/openexchange/admin/reseller/console/,META-INF/**"
-         excludes="com/openexchange/admin/reseller/rmi/impl/"
-         basedir="classes"/>
-    	<delete dir="classes/META-INF"/>
-    </target>
-
     <target name="clean">
         <delete dir="classes"/>
         <delete dir="jar"/>
-    </target>
-
-    <target name="doc">
-    	<mkdir dir="doc"/>
-    	<copy todir="doc/resources" file="javadoc/OX_Logo.jpg"/>
-        <javadoc
-            failonerror="true"
-			sourcepath="src"
-        	destdir="doc"
-            author="true"
-            public="true"
-            Windowtitle="ox_admin_reseller_interface">
-        	<Header><![CDATA[<img src="{@docRoot}/resources/OX_Logo.jpg">]]></Header>
-            <classpath>
-                <path refid="project.classpath"/>
-            </classpath>
-            <fileset dir="src/com/openexchange/admin/reseller/rmi" defaultexcludes="yes">
-				<include name="*Interface*"/>
-				<include name="dataobjects/*"/>
-            </fileset>
-            <fileset dir="src/com/openexchange/admin/reseller/rmi/exceptions" defaultexcludes="yes">
-            </fileset>
-        	<link href="http://java.sun.com/j2se/1.5.0/docs/api/"/>
-        	<link href="${doccorelink}"/>
-        </javadoc>
     </target>
 
     <target name="dist" depends="clean">
@@ -185,26 +136,7 @@
     	<delete dir="${dist-package}"/>
     </target>
 
-	<target name="install-client" depends="client">
-        <mkdir dir="${destdir}/${prefix}/lib"/>
-        <copy file="jar/${client.jar}" todir="${destdir}/${prefix}/lib"/>
-    </target>
-
-	<target name="install-soap" depends="aar">
-        <mkdir dir="${destdir}/${axis.services.dir}"/>
-    	<copy todir="${destdir}/${axis.services.dir}" overwrite="true">
-            <fileset file="jar/${service.name}.aar"/>
-        </copy>
-    </target>
-
-	<target name="install-doc" depends="doc">
-        <mkdir dir="${destdir}/${prefix}/doc/oxadmin-reseller"/>
-        <copy todir="${destdir}/${prefix}/doc/oxadmin-reseller">
-            <fileset dir="doc"/>
-        </copy>
-    </target>
-
-    <target name="install" depends="jar,doc,replacer">
+    <target name="install" depends="jar,replacer">
         <mkdir dir="${destdir}/${prefix}/sbin"/>
         <mkdir dir="${destdir}/${bundlesdir}"/>
         <copy todir="${destdir}/${bundlesdir}" file="jar/${bundle.name}" overwrite="true"/>

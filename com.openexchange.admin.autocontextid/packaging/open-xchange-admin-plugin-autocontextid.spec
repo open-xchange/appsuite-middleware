@@ -65,8 +65,7 @@ Authors:
 ant -Dadmin.classpath=%{oxprefix}/bundles/%{adminbundle} \
     -Ddestdir=%{buildroot} -Dprefix=%{oxprefix} \
     -Dadminhosting.classpath=%{oxprefix}/bundles/%{adminhostingbundle} \
-    -Ddoccorelink=/usr/share/doc/packages/open-xchange-admin-doc/javadoc/doc \
-    doc install install-client 
+    install 
 mv doc javadoc
 
 

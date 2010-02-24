@@ -9,9 +9,8 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-pkgname=open-xchange-admin-plugin-reseller
+pkgname=open-xchange-admin-plugin-autocontextid
 pkgroot=$(CURDIR)/debian/$(pkgname)
-soaproot=$(CURDIR)/debian/open-xchange-admin-plugin-reseller-soap
 oxprefix=/opt/open-xchange
 adminbundle=com.openexchange.admin.jar
 adminhostingbundle=open_xchange_admin_plugin_hosting.jar
@@ -61,12 +60,7 @@ install: build
 	ant -Dadmin.classpath=$(oxprefix)/bundles/$(adminbundle) \
 	 	-Dadminhosting.classpath=$(oxprefix)/bundles/$(adminhostingbundle) \
 		-Dprefix=$(oxprefix) \
-		-Ddestdir=$(pkgroot) doc install install-client
-	ant -Dadmin.classpath=$(oxprefix)/bundles/$(adminbundle) \
-	 	-Dadminhosting.classpath=$(oxprefix)/bundles/$(adminhostingbundle) \
-		-Dprefix=$(oxprefix) \
-		-Ddestdir=$(soaproot) install-soap
-	mv doc javadoc
+		-Ddestdir=$(pkgroot) install
 
 # Build architecture-independent files here.
 binary-indep: build install
