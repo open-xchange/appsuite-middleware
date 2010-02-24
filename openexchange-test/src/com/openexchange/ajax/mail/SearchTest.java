@@ -117,26 +117,35 @@ public final class SearchTest extends AbstractMailTest {
         /*
          * Insert <numOfMails> mails through a send request
          */
-         final int numOfMails = 25;
-         LOG.info("Sending " + numOfMails + " mails to fill emptied INBOX");
-         for (int i = 0; i < numOfMails; i++) {
-         getClient().execute(new SendRequest(mailObject_25kb));
-         LOG.info("Sent " + (i + 1) + ". mail of " + numOfMails);
-         }
+        final int numOfMails = 25;
+        LOG.info("Sending " + numOfMails + " mails to fill emptied INBOX");
+        for (int i = 0; i < numOfMails; i++) {
+            getClient().execute(new SendRequest(mailObject_25kb));
+            LOG.info("Sent " + (i + 1) + ". mail of " + numOfMails);
+        }
         /*
          * Perform search request
          */
-        final JSONObject searchExpression = new JSONObject("{\"operation\":\"equals\",\"operands\":[{\"type\":\"column\",\"value\":\"from\"},\""+getSendAddress()+"\"]}");
+        final JSONObject searchExpression =
+            new JSONObject(
+                "{\"operation\":\"equals\",\"operands\":[{\"type\":\"column\",\"value\":\"from\"},\"" + getSendAddress() + "\"]}");
         final JSONObject searchObject = new JSONObject().put("filter", searchExpression);
 
-        final SearchResponse searchR = Executor.execute(getSession(), new SearchRequest(searchObject, getInboxFolder(), COLUMNS_DEFAULT_LIST, MailSortField.RECEIVED_DATE.getField(), Order.DESCENDING, true));
+        final SearchResponse searchR =
+            Executor.execute(getSession(), new SearchRequest(
+                searchObject,
+                getInboxFolder(),
+                COLUMNS_DEFAULT_LIST,
+                MailSortField.RECEIVED_DATE.getField(),
+                Order.DESCENDING,
+                true));
         if (searchR.hasError()) {
             fail(searchR.getException().toString());
         }
-        
+
         final JSONArray array = (JSONArray) searchR.getData();
         assertEquals("Unexpected number of search results.", numOfMails, array.length());
-        
+
         // final Object[][] array = searchR.getArray();
         // assertNotNull("Array of all request is null.", array);
         // assertEquals("All request shows different number of mails.", numOfMails, array.length);
@@ -161,24 +170,69 @@ public final class SearchTest extends AbstractMailTest {
         /*
          * Perform search request
          */
-        final JSONObject searchExpression1 = new JSONObject("{\"operation\":\"equals\",\"operands\":[{\"type\":\"column\",\"value\":\"from\"},\""+getSendAddress()+"\"]}");
-        final JSONObject searchExpression2 = new JSONObject("{\"operation\":\"gt\",\"operands\":[{\"type\":\"column\",\"value\":\"size\"},\"16\"]}");
-        final JSONObject searchExpression = new JSONObject().put("operation", "or").put("operands", new JSONArray().put(searchExpression1).put(searchExpression2));
+        final JSONObject searchExpression1 =
+            new JSONObject(
+                "{\"operation\":\"equals\",\"operands\":[{\"type\":\"column\",\"value\":\"from\"},\"" + getSendAddress() + "\"]}");
+        final JSONObject searchExpression2 =
+            new JSONObject("{\"operation\":\"gt\",\"operands\":[{\"type\":\"column\",\"value\":\"size\"},\"16\"]}");
+        final JSONObject searchExpression =
+            new JSONObject().put("operation", "or").put("operands", new JSONArray().put(searchExpression1).put(searchExpression2));
 
         final JSONObject searchObject = new JSONObject().put("filter", searchExpression);
 
-        final SearchResponse searchR = Executor.execute(getSession(), new SearchRequest(searchObject, getInboxFolder(), COLUMNS_DEFAULT_LIST, MailSortField.RECEIVED_DATE.getField(), Order.DESCENDING, true));
+        final SearchResponse searchR =
+            Executor.execute(getSession(), new SearchRequest(
+                searchObject,
+                getInboxFolder(),
+                COLUMNS_DEFAULT_LIST,
+                MailSortField.RECEIVED_DATE.getField(),
+                Order.DESCENDING,
+                true));
         if (searchR.hasError()) {
             fail(searchR.getException().toString());
         }
 
         final JSONArray array = (JSONArray) searchR.getData();
         assertEquals("Unexpected number of search results.", numOfMails, array.length());
-        
+
         // final Object[][] array = searchR.getArray();
         // assertNotNull("Array of all request is null.", array);
         // assertEquals("All request shows different number of mails.", numOfMails, array.length);
         // assertEquals("Number of columns differs from request ones.", COLUMNS_DEFAULT_LIST.length, array[0].length);
+    }
+
+    public void testNestedComplexSearch() throws Throwable {
+        /*
+         * Insert <numOfMails> mails through a send request
+         */
+        final int numOfMails = 25;
+        LOG.info("Sending " + numOfMails + " mails to fill emptied INBOX");
+        for (int i = 0; i < numOfMails; i++) {
+            getClient().execute(new SendRequest(mailObject_25kb));
+            LOG.info("Sent " + (i + 1) + ". mail of " + numOfMails);
+        }
+        /*
+         * Perform search request
+         */
+        final long recDate = System.currentTimeMillis() - 86400000L; // minus 1 day
+        final JSONObject searchExpression = new JSONObject("{\"operation\":\"and\",\"operands\":[{\"operation\":\"gt\",\"operands\":[{\"type\":\"column\",\"value\":\"received_date\"},\""+recDate+"\"]},{\"operation\":\"not\",\"operands\":[{\"operation\":\"equals\",\"operands\":[{\"type\":\"column\",\"value\":\"flags\"},\"32\"]}]}]}}");
+
+        final JSONObject searchObject = new JSONObject().put("filter", searchExpression);
+
+        final SearchResponse searchR =
+            Executor.execute(getSession(), new SearchRequest(
+                searchObject,
+                getInboxFolder(),
+                COLUMNS_DEFAULT_LIST,
+                MailSortField.RECEIVED_DATE.getField(),
+                Order.DESCENDING,
+                true));
+        if (searchR.hasError()) {
+            fail(searchR.getException().toString());
+        }
+
+        final JSONArray array = (JSONArray) searchR.getData();
+        assertEquals("Unexpected number of search results.", numOfMails, array.length());
     }
 
 }
