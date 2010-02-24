@@ -49,15 +49,12 @@
 
 package com.openexchange.messaging.generic.internet;
 
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Locale;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import com.openexchange.mail.mime.ParameterList;
+import java.util.List;
+import com.openexchange.mail.MailException;
 import com.openexchange.messaging.ContentDisposition;
 import com.openexchange.messaging.MessagingException;
-import com.openexchange.messaging.MessagingExceptionCodes;
-import com.openexchange.messaging.MessagingPart;
 import com.openexchange.messaging.generic.internal.ParameterizedHeader;
 
 /**
@@ -79,23 +76,14 @@ public final class MimeContentDisposition extends ParameterizedHeader implements
         return CONTENT_DISPOSITION;
     }
 
-    private static final long serialVersionUID = 310827213193290169L;
-
-    private static final Pattern PATTERN_CONTENT_DISP = Pattern.compile("(?:inline|attachment)", Pattern.CASE_INSENSITIVE);
-
-    private static final String DEFAULT_CONTENT_DISP = MessagingPart.INLINE.toUpperCase(Locale.ENGLISH);
-
-    private static final String PARAM_FILENAME = "filename";
-
-    private String disposition;
+    private final com.openexchange.mail.mime.ContentDisposition cdo;
 
     /**
      * Initializes a new {@link MimeContentDisposition}
      */
     public MimeContentDisposition() {
-        super();
-        disposition = DEFAULT_CONTENT_DISP;
-        parameterList = new ParameterList();
+        super(new com.openexchange.mail.mime.ContentDisposition());
+        cdo = (com.openexchange.mail.mime.ContentDisposition) delegate;
     }
 
     /**
@@ -105,8 +93,16 @@ public final class MimeContentDisposition extends ParameterizedHeader implements
      * @throws MessagingException If content disposition cannot be parsed
      */
     public MimeContentDisposition(final String contentDisp) throws MessagingException {
-        super();
-        parseContentDisp(contentDisp);
+        super(toContentDisposition(contentDisp));
+        cdo = (com.openexchange.mail.mime.ContentDisposition) delegate;
+    }
+
+    private static com.openexchange.mail.mime.ContentDisposition toContentDisposition(final String contentDisposition) throws MessagingException {
+        try {
+            return new com.openexchange.mail.mime.ContentDisposition(contentDisposition);
+        } catch (final MailException e) {
+            throw new MessagingException(e);
+        }
     }
 
     @Override
@@ -125,10 +121,7 @@ public final class MimeContentDisposition extends ParameterizedHeader implements
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + ((disposition == null) ? 0 : disposition.toLowerCase(Locale.ENGLISH).hashCode());
-        return result;
+        return cdo.hashCode();
     }
 
     @Override
@@ -143,43 +136,14 @@ public final class MimeContentDisposition extends ParameterizedHeader implements
             return false;
         }
         final MimeContentDisposition other = (MimeContentDisposition) obj;
-        if (disposition == null) {
-            if (other.disposition != null) {
+        if (cdo == null) {
+            if (other.cdo != null) {
                 return false;
             }
-        } else if (!disposition.equalsIgnoreCase(other.disposition)) {
+        } else if (!cdo.equals(other.cdo)) {
             return false;
         }
         return true;
-    }
-
-    private void parseContentDisp(final String contentDisp) throws MessagingException {
-        parseContentDisp(contentDisp, true);
-    }
-
-    private void parseContentDisp(final String contentDispArg, final boolean paramList) throws MessagingException {
-        if ((null == contentDispArg) || (contentDispArg.length() == 0)) {
-            /*
-             * Nothing to parse
-             */
-            disposition = DEFAULT_CONTENT_DISP;
-            parameterList = new ParameterList();
-            return;
-        }
-        final String contentDisp = prepareParameterizedHeader(contentDispArg);
-        final Matcher cdMatcher = PATTERN_CONTENT_DISP.matcher(contentDisp);
-        if (!cdMatcher.find()) {
-            disposition = DEFAULT_CONTENT_DISP;
-            parameterList = new ParameterList();
-            return;
-        }
-        if (cdMatcher.start() != 0) {
-            throw MessagingExceptionCodes.INVALID_HEADER.create(CONTENT_DISPOSITION, contentDispArg);
-        }
-        disposition = cdMatcher.group().toUpperCase(Locale.ENGLISH);
-        if (paramList) {
-            parameterList = new ParameterList(contentDisp.substring(cdMatcher.end()));
-        }
     }
 
     /**
@@ -187,54 +151,57 @@ public final class MimeContentDisposition extends ParameterizedHeader implements
      * 
      * @param contentDisp The content disposition to apply
      */
-    public void setContentType(final MimeContentDisposition contentDisp) {
+    public void setContentDisposition(final MimeContentDisposition contentDisp) {
         if (contentDisp == this) {
             return;
         }
-        disposition = contentDisp.disposition;
-        parameterList = (ParameterList) contentDisp.parameterList.clone();
+        cdo.setContentType(contentDisp.cdo);
     }
 
     /**
      * @return disposition
      */
     public String getDisposition() {
-        return disposition;
+        return cdo.getDisposition();
     }
 
     /**
      * Sets disposition
      */
     public void setDisposition(final String disposition) {
-        this.disposition = disposition;
+        cdo.setDisposition(disposition);
     }
 
     /**
      * Sets filename parameter
      */
     public void setFilenameParameter(final String filename) {
-        setParameter(PARAM_FILENAME, filename);
+        cdo.setFilenameParameter(filename);
     }
 
     /**
      * @return the filename value or <code>null</code> if not present
      */
     public String getFilenameParameter() {
-        return getParameter(PARAM_FILENAME);
+        return cdo.getFilenameParameter();
     }
 
     /**
      * @return <code>true</code> if filename parameter is present, <code>false</code> otherwise
      */
     public boolean containsFilenameParameter() {
-        return containsParameter(PARAM_FILENAME);
+        return cdo.containsFilenameParameter();
     }
 
     /**
      * Sets Content-Disposition
      */
     public void setContentDisposition(final String contentDisp) throws MessagingException {
-        parseContentDisp(contentDisp);
+        try {
+            cdo.setContentDisposition(contentDisp);
+        } catch (final MailException e) {
+            throw new MessagingException(e);
+        }
     }
 
     /**
@@ -243,7 +210,7 @@ public final class MimeContentDisposition extends ParameterizedHeader implements
      * @return <code>true</code> if disposition is inline; otherwise <code>false</code>
      */
     public boolean isInline() {
-        return MessagingPart.INLINE.equalsIgnoreCase(disposition);
+        return cdo.isInline();
     }
 
     /**
@@ -252,12 +219,12 @@ public final class MimeContentDisposition extends ParameterizedHeader implements
      * @return <code>true</code> if disposition is attachment; otherwise <code>false</code>
      */
     public boolean isAttachment() {
-        return MessagingPart.ATTACHMENT.equalsIgnoreCase(disposition);
+        return cdo.isAttachment();
     }
 
     @Override
     public String toString() {
-        return toString(false);
+        return cdo.toString();
     }
 
     /**
@@ -267,23 +234,30 @@ public final class MimeContentDisposition extends ParameterizedHeader implements
      * @return A RFC2045 style (ASCII-only) string representation of this content disposition
      */
     public String toString(final boolean skipEmptyParams) {
-        final StringBuilder sb = new StringBuilder(64);
-        sb.append(disposition);
-        if (null != parameterList) {
-            parameterList.appendRFC2045String(sb, skipEmptyParams);
-        }
-        return sb.toString();
+        return cdo.toString(skipEmptyParams);
     }
 
     public void setContentDispositio(final ContentDisposition contentDisp) {
         if (contentDisp == this) {
             return;
         }
-        this.disposition = contentDisp.getDisposition();
-        parameterList = new ParameterList();
-        for (final Iterator<String> parameterNames = contentDisp.getParameterNames(); parameterNames.hasNext();) {
-            final String parameterName = parameterNames.next();
-            setParameter(parameterName, contentDisp.getParameter(parameterName));
+        if (contentDisp instanceof MimeContentDisposition) {
+            cdo.setContentType(((MimeContentDisposition) contentDisp).cdo);
+        } else {
+            cdo.setDisposition(contentDisp.getDisposition());
+            {
+                final List<String> tmp = new ArrayList<String>(4);
+                for (final Iterator<String> it = cdo.getParameterNames(); it.hasNext();) {
+                    tmp.add(it.next());
+                }
+                for (final String name : tmp) {
+                    cdo.removeParameter(name);
+                }
+            }
+            for (final Iterator<String> it = contentDisp.getParameterNames(); it.hasNext();) {
+                final String name = it.next();
+                cdo.addParameter(name, contentDisp.getParameter(name));
+            }
         }
     }
 
@@ -294,4 +268,5 @@ public final class MimeContentDisposition extends ParameterizedHeader implements
     public String getValue() {
         return toString();
     }
+
 }

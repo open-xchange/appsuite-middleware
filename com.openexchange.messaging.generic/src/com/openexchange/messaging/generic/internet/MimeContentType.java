@@ -49,15 +49,12 @@
 
 package com.openexchange.messaging.generic.internet;
 
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Locale;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import com.openexchange.mail.mime.ParameterList;
-import com.openexchange.mail.mime.utils.MIMEMessageUtility;
+import java.util.List;
+import com.openexchange.mail.MailException;
 import com.openexchange.messaging.ContentType;
 import com.openexchange.messaging.MessagingException;
-import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.generic.internal.ParameterizedHeader;
 
 /**
@@ -82,47 +79,22 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
     }
 
     /**
-     * The default content type: <code>text/plain; charset=us-ascii</code>
+     * The (unmodifiable) default content type: <code>text/plain; charset=us-ascii</code>
      */
     public static final MimeContentType DEFAULT_CONTENT_TYPE;
 
     static {
-        DEFAULT_CONTENT_TYPE = new MimeContentType();
-        DEFAULT_CONTENT_TYPE.setPrimaryType("text");
-        DEFAULT_CONTENT_TYPE.setSubType("plain");
-        DEFAULT_CONTENT_TYPE.setCharsetParameter("us-ascii");
+        DEFAULT_CONTENT_TYPE = new MimeContentType(com.openexchange.mail.mime.ContentType.DEFAULT_CONTENT_TYPE);
     }
 
-    /**
-     * The regular expression that should match whole content type
-     */
-    private static final Pattern PATTERN_CONTENT_TYPE = Pattern.compile("(?:([\\p{ASCII}&&[^/;\\s\"]]+)(?:/([\\p{ASCII}&&[^;\\s\"]]+))?)");
-
-    /**
-     * The MIME type delimiter
-     * 
-     * @value /
-     */
-    private static final char DELIMITER = '/';
-
-    private static final String DEFAULT_SUBTYPE = "OCTET-STREAM";
-
-    private static final String PARAM_CHARSET = "charset";
-
-    private static final String PARAM_NAME = "name";
-
-    private String primaryType;
-
-    private String subType;
-
-    private volatile String baseType;
+    private final com.openexchange.mail.mime.ContentType cto;
 
     /**
      * Initializes a new {@link MimeContentType}
      */
     public MimeContentType() {
-        super();
-        parameterList = new ParameterList();
+        super(new com.openexchange.mail.mime.ContentType());
+        cto = (com.openexchange.mail.mime.ContentType) delegate;
     }
 
     /**
@@ -132,8 +104,21 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
      * @throws MessagingException If content type cannot be parsed
      */
     public MimeContentType(final String contentType) throws MessagingException {
-        super();
-        parseContentType(contentType);
+        super(toContentType(contentType));
+        cto = (com.openexchange.mail.mime.ContentType) delegate;
+    }
+
+    private MimeContentType(final com.openexchange.mail.mime.ContentType cto) {
+        super(cto);
+        this.cto = cto;
+    }
+
+    private static com.openexchange.mail.mime.ContentType toContentType(final String contentType) throws MessagingException {
+        try {
+            return new com.openexchange.mail.mime.ContentType(contentType);
+        } catch (final MailException e) {
+            throw new MessagingException(e);
+        }
     }
 
     @Override
@@ -152,11 +137,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + ((primaryType == null) ? 0 : primaryType.toLowerCase(Locale.ENGLISH).hashCode());
-        result = prime * result + ((subType == null) ? 0 : subType.toLowerCase(Locale.ENGLISH).hashCode());
-        return result;
+        return cto.hashCode();
     }
 
     @Override
@@ -171,67 +152,39 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
             return false;
         }
         final MimeContentType other = (MimeContentType) obj;
-        if (primaryType == null) {
-            if (other.primaryType != null) {
+        if (cto == null) {
+            if (other.cto != null) {
                 return false;
             }
-        } else if (!primaryType.equalsIgnoreCase(other.primaryType)) {
-            return false;
-        }
-        if (subType == null) {
-            if (other.subType != null) {
-                return false;
-            }
-        } else if (!subType.equalsIgnoreCase(other.subType)) {
+        } else if (!cto.equals(other.cto)) {
             return false;
         }
         return true;
-    }
-
-    private void parseContentType(final String contentType) throws MessagingException {
-        parseContentType(contentType, true);
-    }
-
-    private void parseContentType(final String contentTypeArg, final boolean paramList) throws MessagingException {
-        if ((null == contentTypeArg) || (contentTypeArg.length() == 0)) {
-            setContentType(DEFAULT_CONTENT_TYPE);
-            return;
-        }
-        final String contentType = prepareParameterizedHeader(contentTypeArg);
-        final Matcher ctMatcher = PATTERN_CONTENT_TYPE.matcher(contentType);
-        if (!ctMatcher.find() || (ctMatcher.start() != 0)) {
-            throw MessagingExceptionCodes.INVALID_HEADER.create(CONTENT_TYPE, contentTypeArg);
-        }
-        primaryType = toLowerCase(ctMatcher.group(1));
-        subType = toLowerCase(ctMatcher.group(2));
-        if ((subType == null) || (subType.length() == 0)) {
-            subType = DEFAULT_SUBTYPE;
-        }
-        baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
-        if (paramList) {
-            parameterList = new ParameterList(contentType.substring(ctMatcher.end()));
-        }
-    }
-
-    private void parseBaseType(final String baseType) throws MessagingException {
-        parseContentType(baseType, false);
-        if (parameterList == null) {
-            parameterList = new ParameterList();
-        }
     }
 
     public void setContentType(final ContentType contentType) {
         if (contentType == this) {
             return;
         }
-        primaryType = contentType.getPrimaryType();
-        subType = contentType.getSubType();
-        parameterList = new ParameterList();
-        for (final Iterator<String> parameterNames = contentType.getParameterNames(); parameterNames.hasNext();) {
-            final String parameterName = parameterNames.next();
-            setParameter(parameterName, contentType.getParameter(parameterName));
+        if (contentType instanceof MimeContentType) {
+            cto.setContentType(((MimeContentType) contentType).cto);
+        } else {
+            cto.setPrimaryType(contentType.getPrimaryType());
+            cto.setSubType(contentType.getSubType());
+            {
+                final List<String> tmp = new ArrayList<String>(4);
+                for (final Iterator<String> it = cto.getParameterNames(); it.hasNext();) {
+                    tmp.add(it.next());
+                }
+                for (final String name : tmp) {
+                    cto.removeParameter(name);
+                }
+            }
+            for (final Iterator<String> it = contentType.getParameterNames(); it.hasNext();) {
+                final String name = it.next();
+                cto.addParameter(name, contentType.getParameter(name));
+            }
         }
-        baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
     }
 
     public String getName() {
@@ -251,79 +204,74 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
         if (contentType == this) {
             return;
         }
-        primaryType = contentType.getPrimaryType();
-        subType = contentType.getSubType();
-        parameterList = (ParameterList) contentType.parameterList.clone();
-        baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
+        cto.setContentType(contentType.cto);
     }
 
     /**
      * @return primary type
      */
     public String getPrimaryType() {
-        return primaryType;
+        return cto.getPrimaryType();
     }
 
     /**
      * Sets primary type
      */
     public void setPrimaryType(final String primaryType) {
-        this.primaryType = primaryType == null ? null : toLowerCase(primaryType);
-        baseType = null;
+        cto.setPrimaryType(primaryType);
     }
 
     /**
      * @return sub-type
      */
     public String getSubType() {
-        return subType;
+        return cto.getSubType();
     }
 
     /**
      * Sets sub-type
      */
     public void setSubType(final String subType) {
-        this.subType = subType == null ? null : toLowerCase(subType);
-        baseType = null;
+        cto.setSubType(subType);
     }
 
     /**
      * @return base type (e.g. text/plain)
      */
     public String getBaseType() {
-        String tmp = baseType;
-        if (null == tmp) {
-            baseType = tmp = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
-        }
-        return tmp;
+        return cto.getBaseType();
     }
 
     /**
      * Sets base type (e.g. text/plain)
      */
     public void setBaseType(final String baseType) throws MessagingException {
-        parseBaseType(baseType);
+        try {
+            cto.setBaseType(baseType);
+        } catch (final MailException e) {
+            throw new MessagingException(e);
+        }
     }
 
     /**
      * Sets charset parameter
      */
     public void setCharsetParameter(final String charset) {
-        setParameter(PARAM_CHARSET, charset);
+        cto.setCharsetParameter(charset);
     }
 
     /**
      * @return the charset value or <code>null</code> if not present
      */
     public String getCharsetParameter() {
-        return getParameter(PARAM_CHARSET);
+        return cto.getCharsetParameter();
     }
 
     /**
      * @return <code>true</code> if charset parameter is present, <code>false</code> otherwise
      */
     public boolean containsCharsetParameter() {
-        return containsParameter(PARAM_CHARSET);
+        return cto.containsCharsetParameter();
     }
 
     /**
@@ -332,28 +280,32 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
      * @param filename The name parameter
      */
     public void setNameParameter(final String filename) {
-        setParameter(PARAM_NAME, filename);
+        cto.setNameParameter(filename);
     }
 
     /**
      * @return the name value or <code>null</code> if not present
      */
     public String getNameParameter() {
-        return getParameter(PARAM_NAME);
+        return cto.getNameParameter();
     }
 
     /**
      * @return <code>true</code> if name parameter is present, <code>false</code> otherwise
      */
     public boolean containsNameParameter() {
-        return containsParameter(PARAM_NAME);
+        return cto.containsNameParameter();
     }
 
     /**
      * Sets Content-Type
      */
     public void setContentType(final String contentType) throws MessagingException {
-        parseContentType(contentType);
+        try {
+            cto.setContentType(contentType);
+        } catch (final MailException e) {
+            throw new MessagingException(e);
+        }
     }
 
     /**
@@ -362,7 +314,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
      * @return <code>true</code> if Content-Type's base type matches given pattern, <code>false</code> otherwise
      */
     public boolean isMimeType(final String pattern) {
-        return Pattern.compile(wildcardToRegex(pattern), Pattern.CASE_INSENSITIVE).matcher(getBaseType()).matches();
+        return cto.isMimeType(pattern);
     }
 
     /**
@@ -373,10 +325,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
      * @throws IllegalArgumentException If specified prefix is <code>null</code>
      */
     public boolean startsWith(final String prefix) {
-        if (null == prefix) {
-            throw new IllegalArgumentException("Prefix is null");
-        }
-        return getBaseType().startsWith(toLowerCase(prefix), 0);
+        return cto.startsWith(prefix);
     }
 
     /**
@@ -387,7 +336,11 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
      * @throws MessagingException If parsing content-type string fails
      */
     public static String prepareContentTypeString(final String contentType) throws MessagingException {
-        return MIMEMessageUtility.foldContentType(new MimeContentType(contentType).toString());
+        try {
+            return com.openexchange.mail.mime.ContentType.prepareContentTypeString(contentType);
+        } catch (final MailException e) {
+            throw new MessagingException(e);
+        }
     }
 
     /**
@@ -400,11 +353,11 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
      * @throws MessagingException If parsing content-type string fails
      */
     public static String prepareContentTypeString(final String contentType, final String name) throws MessagingException {
-        final MimeContentType ct = new MimeContentType(contentType);
-        if (name != null && !ct.containsNameParameter()) {
-            ct.setNameParameter(name);
+        try {
+            return com.openexchange.mail.mime.ContentType.prepareContentTypeString(contentType, name);
+        } catch (final MailException e) {
+            throw new MessagingException(e);
         }
-        return MIMEMessageUtility.foldContentType(ct.toString());
     }
 
     /**
@@ -416,7 +369,11 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
      * @throws MessagingException If an invalid MIME type is detected
      */
     public static boolean isMimeType(final String mimeType, final String pattern) throws MessagingException {
-        return Pattern.compile(wildcardToRegex(pattern), Pattern.CASE_INSENSITIVE).matcher(getBaseType(mimeType)).matches();
+        try {
+            return com.openexchange.mail.mime.ContentType.isMimeType(mimeType, pattern);
+        } catch (final MailException e) {
+            throw new MessagingException(e);
+        }
     }
 
     /**
@@ -427,52 +384,16 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
      * @throws MessagingException If an invalid MIME type is detected
      */
     public static String getBaseType(final String mimeType) throws MessagingException {
-        final Matcher m = PATTERN_CONTENT_TYPE.matcher(mimeType);
-        if (m.find()) {
-            String subType = m.group(2);
-            if ((subType == null) || (subType.length() == 0)) {
-                subType = DEFAULT_SUBTYPE;
-            }
-            return new StringBuilder(32).append(m.group(1)).append('/').append(subType).toString();
+        try {
+            return com.openexchange.mail.mime.ContentType.getBaseType(mimeType);
+        } catch (final MailException e) {
+            throw new MessagingException(e);
         }
-        throw MessagingExceptionCodes.INVALID_HEADER.create(CONTENT_TYPE, mimeType);
-    }
-
-    private static final String toLowerCase(final String str) {
-        final char[] chars = str.toCharArray();
-        for (int i = 0; i < chars.length; i++) {
-            chars[i] = Character.toLowerCase(chars[i]);
-        }
-        return new String(chars);
-    }
-
-    /**
-     * Converts specified wildcard string to a regular expression
-     * 
-     * @param wildcard The wildcard string to convert
-     * @return An appropriate regular expression ready for being used in a {@link Pattern pattern}
-     */
-    private static String wildcardToRegex(final String wildcard) {
-        final StringBuilder s = new StringBuilder(wildcard.length());
-        s.append('^');
-        final int len = wildcard.length();
-        for (int i = 0; i < len; i++) {
-            final char c = wildcard.charAt(i);
-            if (c == '*') {
-                s.append(".*");
-            } else if (c == '?') {
-                s.append('.');
-            } else {
-                s.append(c);
-            }
-        }
-        s.append('$');
-        return (s.toString());
     }
 
     @Override
     public String toString() {
-        return toString(false);
+        return cto.toString();
     }
 
     /**
@@ -482,12 +403,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
      * @return A RFC2045 style (ASCII-only) string representation of this content type
      */
     public String toString(final boolean skipEmptyParams) {
-        final StringBuilder sb = new StringBuilder(64);
-        sb.append(primaryType).append(DELIMITER).append(subType);
-        if (null != parameterList) {
-            parameterList.appendRFC2045String(sb, skipEmptyParams);
-        }
-        return sb.toString();
+        return cto.toString(skipEmptyParams);
     }
 
 }

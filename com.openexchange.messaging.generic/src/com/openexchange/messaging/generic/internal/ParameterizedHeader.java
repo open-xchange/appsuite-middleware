@@ -49,10 +49,8 @@
 
 package com.openexchange.messaging.generic.internal;
 
-import static com.openexchange.mail.mime.utils.MIMEMessageUtility.unfold;
 import java.io.Serializable;
 import java.util.Iterator;
-import com.openexchange.mail.mime.ParameterList;
 
 /**
  * {@link ParameterizedHeader} - Super class for headers which can hold a parameter list such as <code>Content-Type</code>.
@@ -67,36 +65,29 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
      */
     private static final long serialVersionUID = -1094716342843794294L;
 
-    protected ParameterList parameterList;
+    /**
+     * The delegatee.
+     */
+    protected final com.openexchange.mail.mime.ParameterizedHeader delegate;
 
     /**
      * Initializes a new {@link ParameterizedHeader}
      */
-    protected ParameterizedHeader() {
+    protected ParameterizedHeader(final com.openexchange.mail.mime.ParameterizedHeader delegate) {
         super();
+        this.delegate = delegate;
     }
 
     public int compareTo(final ParameterizedHeader other) {
         if (this == other) {
             return 0;
         }
-        if (parameterList == null) {
-            if (other.parameterList != null) {
-                return -1;
-            }
-            return 0;
-        } else if (other.parameterList == null) {
-            return 1;
-        }
-        return parameterList.compareTo(other.parameterList);
+        return delegate.compareTo(other.delegate);
     }
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((parameterList == null) ? 0 : parameterList.hashCode());
-        return result;
+        return delegate.hashCode();
     }
 
     @Override
@@ -111,11 +102,11 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
             return false;
         }
         final ParameterizedHeader other = (ParameterizedHeader) obj;
-        if (parameterList == null) {
-            if (other.parameterList != null) {
+        if (delegate == null) {
+            if (other.delegate != null) {
                 return false;
             }
-        } else if (!parameterList.equals(other.parameterList)) {
+        } else if (!delegate.equals(other.delegate)) {
             return false;
         }
         return true;
@@ -127,8 +118,8 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
      * @param key The parameter name
      * @param value The parameter value to add
      */
-    public void addParameter(final String key, final String value) {
-        parameterList.addParameter(key, value);
+    public final void addParameter(final String key, final String value) {
+        delegate.addParameter(key, value);
     }
 
     /**
@@ -137,8 +128,8 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
      * @param key The parameter name
      * @param value The parameter value
      */
-    public void setParameter(final String key, final String value) {
-        parameterList.setParameter(key, value);
+    public final void setParameter(final String key, final String value) {
+        delegate.setParameter(key, value);
     }
 
     /**
@@ -147,8 +138,8 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
      * @param key The parameter name
      * @return The parameter's value or <code>null</code> if not existing
      */
-    public String getParameter(final String key) {
-        return parameterList.getParameter(key);
+    public final String getParameter(final String key) {
+        return delegate.getParameter(key);
     }
 
     /**
@@ -157,8 +148,8 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
      * @param key The parameter name
      * @return The parameter's value or <code>null</code> if not existing
      */
-    public String removeParameter(final String key) {
-        return parameterList.removeParameter(key);
+    public final String removeParameter(final String key) {
+        return delegate.removeParameter(key);
     }
 
     /**
@@ -167,8 +158,8 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
      * @param key the parameter name
      * @return <code>true</code> if parameter is present; otherwise <code>false</code>
      */
-    public boolean containsParameter(final String key) {
-        return parameterList.containsParameter(key);
+    public final boolean containsParameter(final String key) {
+        return delegate.containsParameter(key);
     }
 
     /**
@@ -176,36 +167,8 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
      * 
      * @return All parameter names wrapped in an {@link Iterator}
      */
-    public Iterator<String> getParameterNames() {
-        return parameterList.getParameterNames();
+    public final Iterator<String> getParameterNames() {
+        return delegate.getParameterNames();
     }
 
-    //private static final Pattern PATTERN_CORRECT = Pattern.compile("\\s*=\\s*");
-
-    /**
-     * Prepares parameterized header's string representation:
-     * <ol>
-     * <li>Unfolds the header's string representation</li>
-     * <li>Trims starting/ending whitespace characters</li>
-     * <li>Removes ending ";" character</li>
-     * </ol>
-     * 
-     * @param paramHdrArg The parameterized header string argument
-     * @return The prepared parameterized header's string.
-     */
-    protected static final String prepareParameterizedHeader(final String paramHdrArg) {
-        if (paramHdrArg == null) {
-            return paramHdrArg;
-        }
-        // String paramHdr = PATTERN_CORRECT.matcher(unfold(paramHdrArg.trim())).replaceAll("=");
-        String paramHdr = unfold(paramHdrArg.trim());
-        final int length = paramHdr.length();
-        if (length > 0) {
-            final int lastPos = length - 1;
-            if (paramHdr.charAt(lastPos) == ';') {
-                paramHdr = paramHdr.substring(0, lastPos);
-            }
-        }
-        return paramHdr;
-    }
 }
