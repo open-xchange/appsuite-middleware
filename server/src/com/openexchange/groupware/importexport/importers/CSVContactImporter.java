@@ -251,10 +251,10 @@ public class CSVContactImporter extends AbstractImporter {
         final ImportResult result = new ImportResult();
         result.setFolder(folder);
         try{
-            boolean atLeastOneFieldInserted = false;
+            boolean[] atLeastOneFieldInserted = new boolean[]{false};
             final Contact contactObj= convertCsvToContact(fields, entry, conSet, lineNumber, result, atLeastOneFieldInserted);
             contactObj.setParentFolderID(Integer.parseInt( folder.trim() ));
-            if(atLeastOneFieldInserted){
+            if(atLeastOneFieldInserted[0]){
                 final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
                     ContactInterfaceDiscoveryService.class).newContactInterface(contactObj.getParentFolderID(), session);
                 contactInterface.insertContactObject(contactObj);
@@ -274,7 +274,7 @@ public class CSVContactImporter extends AbstractImporter {
     }
 
 
-    public Contact convertCsvToContact(final List<String> fields, final List<String> entry, final ContactSwitcher conSet, final int lineNumber, final ImportResult result, boolean atLeastOneFieldInserted) throws ContactException {
+    public Contact convertCsvToContact(final List<String> fields, final List<String> entry, final ContactSwitcher conSet, final int lineNumber, final ImportResult result, boolean[] atLeastOneFieldInserted) throws ContactException {
         final Contact contactObj = new Contact();        
         final List<String> wrongFields = new LinkedList<String>();
         boolean atLeastOneFieldWithWrongName = false;
@@ -288,7 +288,7 @@ public class CSVContactImporter extends AbstractImporter {
                 if(! currEntry.equals("")){
                     currField.doSwitch(conSet, contactObj, currEntry);
                 }
-                atLeastOneFieldInserted = true;
+                atLeastOneFieldInserted[0] = true;
             }
         }
         if(atLeastOneFieldWithWrongName){
