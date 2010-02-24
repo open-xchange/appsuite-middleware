@@ -526,7 +526,14 @@ public final class FacebookSession {
             /*
              * Check for proper pager after login
              */
-            facebookSession = client.auth_getSession(token);
+            try {
+                facebookSession = client.auth_getSession(token);
+            } catch (final FacebookException e) {
+                /*
+                 * Missing setting in user account
+                 */
+                throw FacebookMessagingExceptionCodes.MISSING_APPLICATION_PERMISSION.create(apiKey);
+            }
             facebookUserId = client.users_getLoggedInUser();
             /*
              * Check if expected link after login is available
