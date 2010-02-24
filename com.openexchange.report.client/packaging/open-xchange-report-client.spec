@@ -38,7 +38,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:        @OXVERSION@
-%define         ox_release 4
+%define         ox_release 5
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -80,6 +80,8 @@ ant -Dlib.dir=/opt/open-xchange/lib -Ddestdir=%{buildroot} -Dprefix=/opt/open-xc
 /opt/open-xchange/bundles/*
 /opt/open-xchange/sbin/*
 %changelog
+* Thu Feb 18 2010 - benjamin.otterbach@open-xchange.com
+  - Added support for using a proxy server
 * Thu Dec 03 2009 - dennis.sieben@open-xchange.com
   - Bugfix #15016: Open-Xchange6 report client fails with java exception
     - Added missing jar for common-cli 

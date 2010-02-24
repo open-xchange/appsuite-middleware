@@ -1,3 +1,9 @@
+open-xchange-publish-infostore-online (6.15.0.0-5) unstable; urgency=low
+
+  * first build for 6.15-rev6
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 24 Feb 2010 14:09:51 +0100
+
 open-xchange-publish-infostore-online (6.15.0.0-4) unstable; urgency=low
 
   * first build for 6.15-rev5
