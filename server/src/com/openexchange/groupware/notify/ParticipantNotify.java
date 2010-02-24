@@ -1262,7 +1262,8 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             }
         }
         
-        addSingleParticipant(getExternalParticipant(new ExternalUserParticipant(organizer), session), participantSet, resourceSet, receivers, all, false);
+        if (organizer != null)
+            addSingleParticipant(getExternalParticipant(new ExternalUserParticipant(organizer), session), participantSet, resourceSet, receivers, all, false);
     }
 
     private void sortNewExternalParticipantsAndResources(final Participant[] newParticipants, final Set<EmailableParticipant> participantSet, final Set<EmailableParticipant> resourceSet, final Map<Locale, List<EmailableParticipant>> receivers, final ServerSession session, final Map<String, EmailableParticipant> all, final Participant[] oldParticipants) {

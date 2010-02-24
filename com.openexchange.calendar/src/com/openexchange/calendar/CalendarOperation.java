@@ -193,7 +193,9 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 cdao.setNote(setString(i++, load_resultset));
                 cdao.setFullTime(setBooleanToInt(i++, load_resultset));
                 cdao.setCategories(setString(i++, load_resultset));
-                cdao.setOrganizer(setString(i++, load_resultset));
+                String organizer = setString(i++, load_resultset);
+                if (organizer != null)
+                    cdao.setOrganizer(organizer);
                 cdao.setUid(setString(i++, load_resultset));
                 cdao.setSequence(setInt(i++, load_resultset));
                 cdao.setUsers(cimp.getUserParticipants(cdao, readcon, so.getUserId()).getUsers());

@@ -1369,7 +1369,7 @@ public class CalendarMySQL implements CalendarSqlImp {
     }
     
     private boolean userIsOrganizer(int user, CalendarDataObject cal) throws OXCalendarException {
-        if (!cal.containsOrganizer())
+        if (!cal.containsOrganizer() || cal.getOrganizer() == null)
             return true;
         
         String mail;
