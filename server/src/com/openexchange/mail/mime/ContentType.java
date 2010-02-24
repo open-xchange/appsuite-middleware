@@ -291,9 +291,12 @@ public final class ContentType extends ParameterizedHeader {
 
     /**
      * Sets base type (e.g. text/plain)
+     * 
+     * @return This content type with new base type applied
      */
-    public void setBaseType(final String baseType) throws MailException {
+    public ContentType setBaseType(final String baseType) throws MailException {
         parseBaseType(baseType);
+        return this;
     }
 
     /**
