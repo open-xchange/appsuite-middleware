@@ -96,12 +96,14 @@ import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
 @OXExceptionSource(classId = ImportExportExceptionClasses.VCARDIMPORTER, component = EnumComponent.IMPORT_EXPORT)
 @OXThrowsMultiple(category = { Category.PERMISSION, Category.SUBSYSTEM_OR_SERVICE_DOWN, Category.USER_INPUT,
 		Category.CODE_ERROR, Category.CODE_ERROR, Category.USER_INPUT, Category.CODE_ERROR, Category.PERMISSION,
-		Category.USER_INPUT }, desc = { "", "", "", "", "", "", "", "", "" }, exceptionId = { 0, 1, 2, 3, 4, 5, 6, 7, 8 }, msg = {
+		Category.USER_INPUT, Category.USER_INPUT, Category.USER_INPUT  }, desc = { "", "", "", "", "", "", "", "", "", "", "" }, exceptionId = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }, msg = {
 		"Could not import into the folder %s.", "Subsystem down", "User input error %s",
 		"Programming error - folder %s", "Could not load folder %s",
 		"Could not recognize format of the following data: %s", "Could not use UTF-8 encoding.",
 		"Module Contacts is not enabled for this user, cannot store contacts contained in VCard.",
-		"No VCard to import found." })
+		"No VCard to import found.",
+		"Problem while parsing the vcard, reason: %s",
+		"Problem while converting the vcard to a contact, reason: %s"})
 /*
  * This importer translates VCards into contacts for the OX.
  * 
@@ -254,10 +256,12 @@ public class VCardImporter extends AbstractImporter {
 						importResult.setDate(contactObj.getLastModified());
 					} catch (final ConverterException exc) {
 						LOG.error("cannot convert contact object", exc);
-						importResult.setException(new OXException(EnumComponent.IMPORT_EXPORT, Category.USER_INPUT, -1, "Cannot convert vcard object, reason: %s", exc, exc.toString()));
+						importResult.setException(importExportExceptionFactory.create(10, exc, exc.getMessage()));
+						//importResult.setException(new OXException(EnumComponent.IMPORT_EXPORT, Category.USER_INPUT, -1, "Cannot convert vcard object, reason: %s", exc, exc.toString()));
 					} catch (final VersitException exc) {
 						LOG.error("cannot parse contact object", exc);
-						importResult.setException(new OXException(EnumComponent.IMPORT_EXPORT, Category.USER_INPUT, -1, "Cannot parse vcard object, reason: %s", exc, exc.toString()));
+						importResult.setException(importExportExceptionFactory.create(9, exc, exc.getMessage()));
+						//importResult.setException(new OXException(EnumComponent.IMPORT_EXPORT, Category.USER_INPUT, -1, "Cannot parse vcard object, reason: %s", exc, exc.toString()));
 					}
 				}
 				list.add(importResult);
