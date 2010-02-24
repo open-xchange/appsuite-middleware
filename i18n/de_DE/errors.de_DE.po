@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2010-02-23 15:29+0100\n"
+"PO-Revision-Date: 2010-02-24 13:47+0100\n"
 "Last-Translator: Antje Faber <antje.faber@open-xchange.com>\n"
 "Language-Team: deutsch <de@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -467,6 +467,9 @@ msgstr "Kalender-Aktion: Kein Kontext gesetzt"
 msgid "Can not create recurrence rule: %s"
 msgstr "Erstellen der Serien-Regel fehlgeschlagen: %s"
 
+msgid "Can not find reminder with identifier %1$d in context %2$d."
+msgstr "Erinnerung mit ID %1$d konnte nicht im Kontext %2$d gefunden werden."
+
 msgid "Can not generate uid."
 msgstr "UID konnte nicht generiert werden"
 
@@ -556,9 +559,6 @@ msgstr "Gruppe mit ID %1$s konnte nicht im Kontext %2$d gefunden werden."
 
 msgid "Cannot find property %s."
 msgstr "Eigenschaft %s nicht gefunden"
-
-msgid "Cannot find reminder (identifier %d). Context %d."
-msgstr "Reminder (ID %d) konnte nicht gefunden werden. Kontext %d."
 
 msgid "Cannot find resource group with identifier %1$d."
 msgstr "Ressourcengruppe mit ID %1$d konnte nicht gefunden werden."
@@ -2008,6 +2008,9 @@ msgstr ""
 msgid "No such element."
 msgstr "Kein solches Element"
 
+msgid "No target service is registered for module %1$d."
+msgstr "Kein Ziel-Dienst für Modul %1$d registriert."
+
 msgid "No transport provider could be found for protocol/URL \"%1$s\""
 msgstr "Kein Transport-Provider für Protokoll/Url \"%1$s\" gefunden."
 
@@ -2164,8 +2167,14 @@ msgstr "Problem beim Setzen von Auto-Commit auf den Wert true"
 msgid "Problem while communicating with external authorization."
 msgstr "Problem beim Kommunizieren mit externer Autorisierung"
 
+msgid "Problem while converting the vcard to a contact, reason: %s"
+msgstr "Probleme beim Konvertieren der vcard in einen Kontakt, Grund: %s"
+
 msgid "Problem while initialising configuration tree."
 msgstr "Problem beim Initialisieren des Konfigurationsbaums"
+
+msgid "Problem while parsing the vcard, reason: %s"
+msgstr "Problem beim Analysieren der vcard, Grund: %s"
 
 msgid "Problem while reading ICal file: %s."
 msgstr "Problem beim Lesen der ICal-Datei: %s."
@@ -3726,7 +3735,9 @@ msgstr "Das von Ihnen eingegebene Passwort ist falsch."
 msgid ""
 "Make sure, that the Service is still available, and there are no major "
 "changes on the website"
-msgstr "Stellen Sie sicher, dass der Dienst noch verfügbar ist und es keine größeren Änderungen auf der Website gab."
+msgstr ""
+"Stellen Sie sicher, dass der Dienst noch verfügbar ist und es keine größeren "
+"Änderungen auf der Website gab."
 
 #. Service unavailable
 msgid "Service unavailable"
@@ -3736,7 +3747,9 @@ msgstr "Dienst ist nicht verfügbar"
 msgid ""
 "Please correct the steps of this workflow so that output of one step and "
 "input of the next step match"
-msgstr "Korrigieren Sie die Schritte dieses Workflows, so dass die Ausgabe des einen Schrittes mit der Eingabe des nächsten Schrittes übereinstimmt."
+msgstr ""
+"Korrigieren Sie die Schritte dieses Workflows, so dass die Ausgabe des einen "
+"Schrittes mit der Eingabe des nächsten Schrittes übereinstimmt."
 
 #. The steps of this crawling workflow do not fit together
 msgid "The steps of this crawling workflow do not fit together"
@@ -3744,13 +3757,17 @@ msgstr ""
 
 #. Ask an administrator to check the available subscription sources
 msgid "Ask an administrator to check the available subscription sources"
-msgstr "Wenden Sie sich an den Administrator zum Prüfen der verfügbaren Abonnement-Quellen."
+msgstr ""
+"Wenden Sie sich an den Administrator zum Prüfen der verfügbaren Abonnement-"
+"Quellen."
 
 #. The subscription source this subscription belongs to is currently inactive, and cannot provide data.
 msgid ""
 "The subscription source this subscription belongs to is currently inactive, "
 "and cannot provide data."
-msgstr "Die Quelle dieses Abonnements ist derzeit nicht aktiv und kann keine Daten bereitstellen."
+msgstr ""
+"Die Quelle dieses Abonnements ist derzeit nicht aktiv und kann keine Daten "
+"bereitstellen."
 
 #. Missing main extension attribute for user %1$s in context %2$s.
 msgid "Missing main extension attribute for user %1$s in context %2$s."
@@ -4081,8 +4098,8 @@ msgstr ""
 "Sie wird als blockierende Aufgabe ausgeführt."
 
 msgid ""
-"Version can not be set back if update task handling has been migrated to "
-"remembered update tasks concept on schema %1$s."
+"The version can not be set back if the update tasks handling has been "
+"migrated to the Remember Executed Update Tasks concept on schema %1$s."
 msgstr ""
 
 msgid ""
