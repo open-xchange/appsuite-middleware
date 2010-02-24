@@ -66,6 +66,12 @@ public class ContentType extends ParameterizedHeader {
 
     private static final long serialVersionUID = -9197784872892324694L;
 
+    /**
+     * {@link UnmodifiableContentType} - An unmodifiable content type.
+     *
+     * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+     * @since Open-Xchange v6.16
+     */
     public static final class UnmodifiableContentType extends ContentType {
 
         private static final long serialVersionUID = 2473639344400699520L;
