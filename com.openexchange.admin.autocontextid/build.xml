@@ -149,16 +149,6 @@
                 <include name="**"/>
             </fileset>
         </chmod>-->
-        <copy todir="${destdir}/${prefix}/sbin" overwrite="true">
-            <fileset dir="sbin" excludes="*.in,linkhelper,admincltlist" followsymlinks="true"/>
-        </copy>
-    	<chmod perm="755" file="${basedir}/sbin/linkhelper"/>
-    	<exec executable="${basedir}/sbin/linkhelper" dir="${basedir}/sbin">
-			<arg value="${destdir}/${prefix}/sbin"/>
-		</exec>
-    	<chmod perm="755">
-            <fileset dir="${destdir}/${prefix}/sbin" includes="*"/>
-        </chmod>
 		<!-- generate config.ini registry snippet -->
     	<mkdir dir="${destdir}/${bundle.d}"/>
     	<echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini"
