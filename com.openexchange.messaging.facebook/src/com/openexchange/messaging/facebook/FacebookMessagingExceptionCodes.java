@@ -101,7 +101,12 @@ public enum FacebookMessagingExceptionCodes implements OXErrorMessage {
     /**
      * An error occurred during the processing of a script.
      */
-    SCRIPT_ERROR(FacebookMessagingExceptionMessages.SCRIPT_ERROR_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 10);
+    SCRIPT_ERROR(FacebookMessagingExceptionMessages.SCRIPT_ERROR_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 10),
+    /**
+     * Missing permission for the application associated with configured Facebook API key: %1$s<br>
+     * Please grant access for that application in your Facebook account settings.
+     */
+    MISSING_APPLICATION_PERMISSION(FacebookMessagingExceptionMessages.MISSING_APPLICATION_PERMISSION_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 10);
 
     private final Category category;
 

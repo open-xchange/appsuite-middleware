@@ -84,10 +84,16 @@ public final class FacebookMessagingExceptionMessages implements LocalizableStri
     public static final String ELEMENT_NOT_FOUND_MSG = "Element with attribute %1$s not found on page %2$s.";
 
     // Missing permission "%1$s". Please copy following URL to your browser, login (if not done yet) and grant access: %2$s
-    public static final String MISSING_PERMISSION_MSG = "Missing permission \"%1$s\". Please copy following URL to your browser, login (if not done yet) and grant access:\n%2$s";
+    public static final String MISSING_PERMISSION_MSG =
+        "Missing permission \"%1$s\". Please copy following URL to your browser, login (if not done yet) and grant access:\n%2$s";
 
     // An error occurred during the processing of a script.
     public static final String SCRIPT_ERROR_MSG = "An error occurred during the processing of a script.";
+
+    // Missing permission for the application associated with configured Facebook API key: %1$s
+    // Please grant access for that application in your Facebook account settings.
+    public static final String MISSING_APPLICATION_PERMISSION_MSG =
+        "Missing permission for the application associated with configured Facebook API key: %1$s\n" + "Please grant access for that application in your Facebook account settings.";
 
     /**
      * Initializes a new {@link FacebookMessagingExceptionMessages}.
