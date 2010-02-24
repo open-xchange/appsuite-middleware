@@ -49,13 +49,12 @@
 
 package com.openexchange.i18n;
 
+import static com.openexchange.java.Autoboxing.i;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-
 import junit.framework.TestCase;
-
 import com.openexchange.exceptions.StringComponent;
 import com.openexchange.i18n.parsing.I18NErrorMessages;
 import com.openexchange.i18n.parsing.I18NException;
@@ -66,6 +65,10 @@ import com.openexchange.i18n.parsing.Translations;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class GettextParserTest extends TestCase {
+
+    public GettextParserTest() {
+        super();
+    }
 
     @Override
     public void setUp() {
@@ -267,7 +270,7 @@ public class GettextParserTest extends TestCase {
             final Object[] messageArgs = x.getMessageArgs();
             final String incorrectToken = (String) messageArgs[0];
             final String filename = (String) messageArgs[1];
-            final int line = (Integer) messageArgs[2];
+            final int line = i((Integer) messageArgs[2]);
             final String expectedList = (String) messageArgs[3];
 
             assertEquals("BLUPP! \"I am another message.\"", incorrectToken);
@@ -296,7 +299,7 @@ public class GettextParserTest extends TestCase {
             final Object[] messageArgs = x.getMessageArgs();
             final String incorrectToken = (String) messageArgs[0];
             final String filename = (String) messageArgs[1];
-            final int line = (Integer) messageArgs[2];
+            final int line = i((Integer) messageArgs[2]);
             final String expectedList = (String) messageArgs[3];
 
             assertEquals("msgid", incorrectToken);
@@ -322,7 +325,7 @@ public class GettextParserTest extends TestCase {
             final Object[] messageArgs = x.getMessageArgs();
             final String incorrectToken = (String) messageArgs[0];
             final String filename = (String) messageArgs[1];
-            final int line = (Integer) messageArgs[2];
+            final int line = i((Integer) messageArgs[2]);
 
             assertEquals("Blupp", incorrectToken);
             assertEquals("test.po", filename);
@@ -347,7 +350,7 @@ public class GettextParserTest extends TestCase {
             final String incorrectToken = (String) messageArgs[0];
             final String expected = (String) messageArgs[1];
             final String filename = (String) messageArgs[2];
-            final int line = (Integer) messageArgs[3];
+            final int line = i((Integer) messageArgs[3]);
 
             assertEquals("T", incorrectToken);
             assertEquals("r", expected);
@@ -392,7 +395,7 @@ public class GettextParserTest extends TestCase {
         assertEquals(expectedTranslation, actualTranslation);
     }
 
-    private static final class ExceptionThrowingInputStream extends InputStream {
+    static final class ExceptionThrowingInputStream extends InputStream {
 
         @Override
         public int read() throws IOException {
@@ -400,7 +403,8 @@ public class GettextParserTest extends TestCase {
         }
 
         @Override
-        public void close() throws IOException {
+        public void close() {
+            // Nothing to close.
         }
     }
 

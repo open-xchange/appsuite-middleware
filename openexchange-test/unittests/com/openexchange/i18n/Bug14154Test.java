@@ -47,53 +47,55 @@
  *
  */
 
-package com.openexchange.test;
+package com.openexchange.i18n;
 
-import java.lang.reflect.Field;
 import java.util.Locale;
-import com.openexchange.i18n.Bug14154Test;
-import com.openexchange.i18n.TranslatedSingleTest;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import com.openexchange.groupware.Init;
+import com.openexchange.groupware.i18n.MailStrings;
+import com.openexchange.server.services.I18nServices;
+import junit.framework.TestCase;
 
 /**
- * Tests if everything is translated into all languages.
+ * {@link Bug14154Test}
  *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class I18nTests {
+public class Bug14154Test extends TestCase {
 
-    private static final Locale[] locales = new Locale[] {
-        Locale.GERMANY,
-        Locale.FRANCE
-    };
+    private static final Pattern pattern = Pattern.compile("(#.*?#)");
 
-    private static final Class<?>[] i18nClasses = new Class<?>[] {
-        com.openexchange.groupware.i18n.FolderStrings.class,
-        com.openexchange.groupware.i18n.Groups.class,
-        com.openexchange.groupware.i18n.MailStrings.class,
-        com.openexchange.groupware.i18n.Notifications.class,
-        com.openexchange.publish.microformats.MicroformatStrings.class,
-        com.openexchange.publish.microformats.FormStrings.class
-    };
+    private final Locale locale;
 
-    private I18nTests() {
-        super();
+    public Bug14154Test(String name, Locale locale) {
+        super(name);
+        this.locale = locale;
     }
 
-    public static Test suite() throws InstantiationException, IllegalAccessException {
-        final TestSuite tests = new TestSuite();
-        for (final Locale locale : locales) {
-            for (final Class<?> clazz : i18nClasses) {
-                final Object instance = clazz.newInstance();
-                for (final Field field : clazz.getFields()) {
-                    if (String.class.isAssignableFrom(field.getType())) {
-                         tests.addTest(new TranslatedSingleTest("testTranslation", locale, (String) field.get(instance)));
-                    }
-                }
-            }
-            tests.addTest(new Bug14154Test("testContainingPattern", locale));
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        Init.injectProperty();
+        Init.startAndInjectConfigBundle();
+        Init.startAndInjectI18NBundle();
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        Init.stopServer();
+        super.tearDown();
+    }
+
+    public void testContainingPattern() {
+        final I18nService i18nService = I18nServices.getInstance().getService(locale);
+        assertNotNull("Can't get i18n service for " + locale.toString(), i18nService);
+        final String translation = i18nService.getLocalized(MailStrings.FORWARD_PREFIX);
+        assertNotNull("Mail forwarding template is not translated.", translation);
+        Matcher matcher = pattern.matcher(MailStrings.FORWARD_PREFIX);
+        while (matcher.find()) {
+            String replacer = matcher.group();
+            assertTrue("Translation does not contain the pattern " + replacer + ".", translation.indexOf(replacer) >= 0);
         }
-        return tests;
     }
 }

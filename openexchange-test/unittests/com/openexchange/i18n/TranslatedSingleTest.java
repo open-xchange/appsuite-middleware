@@ -65,19 +65,12 @@ public class TranslatedSingleTest extends TestCase {
 
     private final String key;
 
-    /**
-     * Initializes a new {@link TranslatedSingleTest}.
-     * @param name
-     */
     public TranslatedSingleTest(final String name, final Locale locale, final String key) {
         super(name);
         this.locale = locale;
         this.key = key;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void setUp() throws Exception {
         super.setUp();
@@ -86,9 +79,6 @@ public class TranslatedSingleTest extends TestCase {
         Init.startAndInjectI18NBundle();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void tearDown() throws Exception {
         Init.stopServer();
