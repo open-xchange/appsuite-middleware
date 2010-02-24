@@ -254,10 +254,10 @@ public class VCardImporter extends AbstractImporter {
 						importResult.setDate(contactObj.getLastModified());
 					} catch (final ConverterException exc) {
 						LOG.error("cannot convert contact object", exc);
-						importResult.setException(new OXException("Cannot convert vcard object", exc));
+						importResult.setException(new OXException(EnumComponent.IMPORT_EXPORT, Category.USER_INPUT, -1, "Cannot convert vcard object, reason: %s", exc, exc.toString()));
 					} catch (final VersitException exc) {
 						LOG.error("cannot parse contact object", exc);
-						importResult.setException(new OXException("Cannot parse vcard object", exc));
+						importResult.setException(new OXException(EnumComponent.IMPORT_EXPORT, Category.USER_INPUT, -1, "Cannot parse vcard object, reason: %s", exc, exc.toString()));
 					}
 				}
 				list.add(importResult);
