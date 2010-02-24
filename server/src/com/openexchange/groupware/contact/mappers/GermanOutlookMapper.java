@@ -54,332 +54,305 @@ import java.util.HashMap;
 import com.openexchange.groupware.contact.helpers.ContactField;
 
 /**
- * This class maps names of fields found Outlook's CSV files to names used by OX
- * and vice versa. This class has been generated automatically from i18n files.
+ * This class maps names of fields found Outlook's CSV files to names used by OX and vice versa. This class has been generated automatically
+ * from i18n files.
  * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
- *
  */
-public class GermanOutlookMapper implements ContactFieldMapper {
-    protected final HashMap<String,ContactField> german2field = new HashMap<String, ContactField>();
-    protected final HashMap<ContactField, String> field2german = new HashMap<ContactField, String>();
+public class GermanOutlookMapper extends AbstractOutlookMapper {
 
-    public GermanOutlookMapper(){
-        german2field.put("Anrede" , ContactField.TITLE);
-        field2german.put(ContactField.TITLE , "Anrede");
+    public GermanOutlookMapper() {
+        outlook2ox.put("Anrede", ContactField.TITLE);
+        ox2outlook.put(ContactField.TITLE, "Anrede");
 
-        german2field.put("Vorname" , ContactField.GIVEN_NAME);
-        field2german.put(ContactField.GIVEN_NAME , "Vorname");
+        outlook2ox.put("Vorname", ContactField.GIVEN_NAME);
+        ox2outlook.put(ContactField.GIVEN_NAME, "Vorname");
 
-        german2field.put("Weitere Vornamen" , ContactField.MIDDLE_NAME);
-        field2german.put(ContactField.MIDDLE_NAME , "Weitere Vornamen");
+        outlook2ox.put("Weitere Vornamen", ContactField.MIDDLE_NAME);
+        ox2outlook.put(ContactField.MIDDLE_NAME, "Weitere Vornamen");
 
-        german2field.put("Nachname" , ContactField.SUR_NAME);
-        field2german.put(ContactField.SUR_NAME , "Nachname");
+        outlook2ox.put("Nachname", ContactField.SUR_NAME);
+        ox2outlook.put(ContactField.SUR_NAME, "Nachname");
 
-        german2field.put("Suffix" , ContactField.SUFFIX);
-        field2german.put(ContactField.SUFFIX , "Suffix");
+        outlook2ox.put("Suffix", ContactField.SUFFIX);
+        ox2outlook.put(ContactField.SUFFIX, "Suffix");
 
-        german2field.put("Firma" , ContactField.COMPANY);
-        field2german.put(ContactField.COMPANY , "Firma");
+        outlook2ox.put("Firma", ContactField.COMPANY);
+        ox2outlook.put(ContactField.COMPANY, "Firma");
 
-        german2field.put("Abteilung" , ContactField.DEPARTMENT);
-        field2german.put(ContactField.DEPARTMENT , "Abteilung");
+        outlook2ox.put("Abteilung", ContactField.DEPARTMENT);
+        ox2outlook.put(ContactField.DEPARTMENT, "Abteilung");
 
-        german2field.put("Anrede" , ContactField.TITLE); //company???
-        field2german.put(ContactField.TITLE , "Anrede"); //company???
+        outlook2ox.put("Anrede", ContactField.TITLE); // company???
+        ox2outlook.put(ContactField.TITLE, "Anrede"); // company???
 
-        german2field.put("Stra\u00dfe gesch\u00e4ftlich" , ContactField.STREET_BUSINESS);
-        field2german.put(ContactField.STREET_BUSINESS , "Stra\u00dfe gesch\u00e4ftlich");
+        outlook2ox.put("Stra\u00dfe gesch\u00e4ftlich", ContactField.STREET_BUSINESS);
+        ox2outlook.put(ContactField.STREET_BUSINESS, "Stra\u00dfe gesch\u00e4ftlich");
 
-        //french2field.put("Stra\u00dfe gesch\u00e4ftlich 2" , ContactField.);
-        //field2french.put(ContactField. , "Stra\u00dfe gesch\u00e4ftlich 2");
+        // french2field.put("Stra\u00dfe gesch\u00e4ftlich 2" , ContactField.);
+        // field2french.put(ContactField. , "Stra\u00dfe gesch\u00e4ftlich 2");
 
-        //french2field.put("Stra\u00dfe gesch\u00e4ftlich 3" , ContactField.);
-        //field2french.put(ContactField. , "Stra\u00dfe gesch\u00e4ftlich 3");
+        // french2field.put("Stra\u00dfe gesch\u00e4ftlich 3" , ContactField.);
+        // field2french.put(ContactField. , "Stra\u00dfe gesch\u00e4ftlich 3");
 
-        german2field.put("Ort gesch\u00e4ftlich" , ContactField.CITY_BUSINESS);
-        field2german.put(ContactField.CITY_BUSINESS , "Ort gesch\u00e4ftlich");
+        outlook2ox.put("Ort gesch\u00e4ftlich", ContactField.CITY_BUSINESS);
+        ox2outlook.put(ContactField.CITY_BUSINESS, "Ort gesch\u00e4ftlich");
 
-        german2field.put("Region gesch\u00e4ftlich" , ContactField.STATE_BUSINESS);
-        field2german.put(ContactField.STATE_BUSINESS , "Region gesch\u00e4ftlich");
+        outlook2ox.put("Region gesch\u00e4ftlich", ContactField.STATE_BUSINESS);
+        ox2outlook.put(ContactField.STATE_BUSINESS, "Region gesch\u00e4ftlich");
 
-        german2field.put("Postleitzahl gesch\u00e4ftlich" , ContactField.POSTAL_CODE_BUSINESS);
-        field2german.put(ContactField.POSTAL_CODE_BUSINESS , "Postleitzahl gesch\u00e4ftlich");
+        outlook2ox.put("Postleitzahl gesch\u00e4ftlich", ContactField.POSTAL_CODE_BUSINESS);
+        ox2outlook.put(ContactField.POSTAL_CODE_BUSINESS, "Postleitzahl gesch\u00e4ftlich");
 
-        german2field.put("Land gesch\u00e4ftlich" , ContactField.COUNTRY_BUSINESS);
-        field2german.put(ContactField.COUNTRY_BUSINESS , "Land gesch\u00e4ftlich");
+        outlook2ox.put("Land gesch\u00e4ftlich", ContactField.COUNTRY_BUSINESS);
+        ox2outlook.put(ContactField.COUNTRY_BUSINESS, "Land gesch\u00e4ftlich");
 
-        german2field.put("Stra\u00dfe privat" , ContactField.STREET_HOME);
-        field2german.put(ContactField.STREET_HOME , "Stra\u00dfe privat");
+        outlook2ox.put("Stra\u00dfe privat", ContactField.STREET_HOME);
+        ox2outlook.put(ContactField.STREET_HOME, "Stra\u00dfe privat");
 
-        //french2field.put("Stra\u00dfe privat 2" , ContactField.);
-        //field2french.put(ContactField. , "Stra\u00dfe privat 2");
+        // french2field.put("Stra\u00dfe privat 2" , ContactField.);
+        // field2french.put(ContactField. , "Stra\u00dfe privat 2");
 
-        //french2field.put("Stra\u00dfe privat 3" , ContactField.);
-        //field2french.put(ContactField. , "Stra\u00dfe privat 3");
+        // french2field.put("Stra\u00dfe privat 3" , ContactField.);
+        // field2french.put(ContactField. , "Stra\u00dfe privat 3");
 
-        german2field.put("Ort privat" , ContactField.CITY_HOME);
-        field2german.put(ContactField.CITY_HOME , "Ort privat");
+        outlook2ox.put("Ort privat", ContactField.CITY_HOME);
+        ox2outlook.put(ContactField.CITY_HOME, "Ort privat");
 
-        german2field.put("Region privat" , ContactField.STATE_HOME);
-        field2german.put(ContactField.STATE_HOME , "Region privat");
+        outlook2ox.put("Region privat", ContactField.STATE_HOME);
+        ox2outlook.put(ContactField.STATE_HOME, "Region privat");
 
-        german2field.put("Postleitzahl privat" , ContactField.POSTAL_CODE_HOME);
-        field2german.put(ContactField.POSTAL_CODE_HOME , "Postleitzahl privat");
+        outlook2ox.put("Postleitzahl privat", ContactField.POSTAL_CODE_HOME);
+        ox2outlook.put(ContactField.POSTAL_CODE_HOME, "Postleitzahl privat");
 
-        german2field.put("Land privat" , ContactField.COUNTRY_HOME);
-        field2german.put(ContactField.COUNTRY_HOME , "Land privat");
+        outlook2ox.put("Land privat", ContactField.COUNTRY_HOME);
+        ox2outlook.put(ContactField.COUNTRY_HOME, "Land privat");
 
-        german2field.put("Weitere Stra\u00dfe" , ContactField.STREET_OTHER);
-        field2german.put(ContactField.STREET_OTHER , "Weitere Stra\u00dfe");
+        outlook2ox.put("Weitere Stra\u00dfe", ContactField.STREET_OTHER);
+        ox2outlook.put(ContactField.STREET_OTHER, "Weitere Stra\u00dfe");
 
-        //french2field.put("Weitere Stra\u00dfe 2" , ContactField.);
-        //field2french.put(ContactField. , "Weitere Stra\u00dfe 2");
+        // french2field.put("Weitere Stra\u00dfe 2" , ContactField.);
+        // field2french.put(ContactField. , "Weitere Stra\u00dfe 2");
 
-        //french2field.put("Weitere Stra\u00dfe 3" , ContactField.);
-        //field2french.put(ContactField. , "Weitere Stra\u00dfe 3");
+        // french2field.put("Weitere Stra\u00dfe 3" , ContactField.);
+        // field2french.put(ContactField. , "Weitere Stra\u00dfe 3");
 
-        german2field.put("Weiterer Ort" , ContactField.CITY_OTHER);
-        field2german.put(ContactField.CITY_OTHER , "Weiterer Ort");
+        outlook2ox.put("Weiterer Ort", ContactField.CITY_OTHER);
+        ox2outlook.put(ContactField.CITY_OTHER, "Weiterer Ort");
 
-        german2field.put("Weitere Region" , ContactField.STATE_OTHER);
-        field2german.put(ContactField.STATE_OTHER , "Weitere Region");
+        outlook2ox.put("Weitere Region", ContactField.STATE_OTHER);
+        ox2outlook.put(ContactField.STATE_OTHER, "Weitere Region");
 
-        german2field.put("Weitere Postleitzahl" , ContactField.POSTAL_CODE_OTHER);
-        field2german.put(ContactField.POSTAL_CODE_OTHER , "Weitere Postleitzahl");
+        outlook2ox.put("Weitere Postleitzahl", ContactField.POSTAL_CODE_OTHER);
+        ox2outlook.put(ContactField.POSTAL_CODE_OTHER, "Weitere Postleitzahl");
 
-        german2field.put("Weiteres Land" , ContactField.COUNTRY_OTHER);
-        field2german.put(ContactField.COUNTRY_OTHER , "Weiteres Land");
+        outlook2ox.put("Weiteres Land", ContactField.COUNTRY_OTHER);
+        ox2outlook.put(ContactField.COUNTRY_OTHER, "Weiteres Land");
 
-        german2field.put("Telefon Assistent" , ContactField.TELEPHONE_ASSISTANT);
-        field2german.put(ContactField.TELEPHONE_ASSISTANT , "Telefon Assistent");
+        outlook2ox.put("Telefon Assistent", ContactField.TELEPHONE_ASSISTANT);
+        ox2outlook.put(ContactField.TELEPHONE_ASSISTANT, "Telefon Assistent");
 
-        german2field.put("Fax gesch\u00e4ftlich" , ContactField.FAX_BUSINESS);
-        field2german.put(ContactField.FAX_BUSINESS , "Fax gesch\u00e4ftlich");
+        outlook2ox.put("Fax gesch\u00e4ftlich", ContactField.FAX_BUSINESS);
+        ox2outlook.put(ContactField.FAX_BUSINESS, "Fax gesch\u00e4ftlich");
 
-        german2field.put("Telefon gesch\u00e4ftlich" , ContactField.TELEPHONE_BUSINESS1);
-        field2german.put(ContactField.TELEPHONE_BUSINESS1 , "Telefon gesch\u00e4ftlich");
+        outlook2ox.put("Telefon gesch\u00e4ftlich", ContactField.TELEPHONE_BUSINESS1);
+        ox2outlook.put(ContactField.TELEPHONE_BUSINESS1, "Telefon gesch\u00e4ftlich");
 
-        german2field.put("Telefon gesch\u00e4ftlich 2" , ContactField.TELEPHONE_BUSINESS2);
-        field2german.put(ContactField.TELEPHONE_BUSINESS2 , "Telefon gesch\u00e4ftlich 2");
+        outlook2ox.put("Telefon gesch\u00e4ftlich 2", ContactField.TELEPHONE_BUSINESS2);
+        ox2outlook.put(ContactField.TELEPHONE_BUSINESS2, "Telefon gesch\u00e4ftlich 2");
 
-        german2field.put("R\u00fcckmeldung" , ContactField.TELEPHONE_CALLBACK);
-        field2german.put(ContactField.TELEPHONE_CALLBACK , "R\u00fcckmeldung");
+        outlook2ox.put("R\u00fcckmeldung", ContactField.TELEPHONE_CALLBACK);
+        ox2outlook.put(ContactField.TELEPHONE_CALLBACK, "R\u00fcckmeldung");
 
-        german2field.put("Autotelefon" , ContactField.TELEPHONE_CAR);
-        field2german.put(ContactField.TELEPHONE_CAR , "Autotelefon");
+        outlook2ox.put("Autotelefon", ContactField.TELEPHONE_CAR);
+        ox2outlook.put(ContactField.TELEPHONE_CAR, "Autotelefon");
 
-        german2field.put("Telefon Firma" , ContactField.TELEPHONE_COMPANY);
-        field2german.put(ContactField.TELEPHONE_COMPANY , "Telefon Firma");
+        outlook2ox.put("Telefon Firma", ContactField.TELEPHONE_COMPANY);
+        ox2outlook.put(ContactField.TELEPHONE_COMPANY, "Telefon Firma");
 
-        german2field.put("Fax privat" , ContactField.FAX_HOME);
-        field2german.put(ContactField.FAX_HOME , "Fax privat");
+        outlook2ox.put("Fax privat", ContactField.FAX_HOME);
+        ox2outlook.put(ContactField.FAX_HOME, "Fax privat");
 
-        german2field.put("Telefon privat" , ContactField.TELEPHONE_HOME1);
-        field2german.put(ContactField.TELEPHONE_HOME1 , "Telefon privat");
+        outlook2ox.put("Telefon privat", ContactField.TELEPHONE_HOME1);
+        ox2outlook.put(ContactField.TELEPHONE_HOME1, "Telefon privat");
 
-        german2field.put("Telefon privat 2" , ContactField.TELEPHONE_HOME2);
-        field2german.put(ContactField.TELEPHONE_HOME2 , "Telefon privat 2");
+        outlook2ox.put("Telefon privat 2", ContactField.TELEPHONE_HOME2);
+        ox2outlook.put(ContactField.TELEPHONE_HOME2, "Telefon privat 2");
 
-        german2field.put("ISDN" , ContactField.TELEPHONE_ISDN);
-        field2german.put(ContactField.TELEPHONE_ISDN , "ISDN");
+        outlook2ox.put("ISDN", ContactField.TELEPHONE_ISDN);
+        ox2outlook.put(ContactField.TELEPHONE_ISDN, "ISDN");
 
-        german2field.put("Mobiltelefon" , ContactField.CELLULAR_TELEPHONE1); 
-        field2german.put(ContactField.CELLULAR_TELEPHONE1 , "Mobiltelefon"); 
+        outlook2ox.put("Mobiltelefon", ContactField.CELLULAR_TELEPHONE1);
+        ox2outlook.put(ContactField.CELLULAR_TELEPHONE1, "Mobiltelefon");
 
-        german2field.put("Weiteres Fax" , ContactField.FAX_OTHER);
-        field2german.put(ContactField.FAX_OTHER , "Weiteres Fax");
+        outlook2ox.put("Weiteres Fax", ContactField.FAX_OTHER);
+        ox2outlook.put(ContactField.FAX_OTHER, "Weiteres Fax");
 
-        german2field.put("Weiteres Telefon" , ContactField.TELEPHONE_OTHER);
-        field2german.put(ContactField.TELEPHONE_OTHER , "Weiteres Telefon");
+        outlook2ox.put("Weiteres Telefon", ContactField.TELEPHONE_OTHER);
+        ox2outlook.put(ContactField.TELEPHONE_OTHER, "Weiteres Telefon");
 
-        german2field.put("Pager" , ContactField.TELEPHONE_PAGER);
-        field2german.put(ContactField.TELEPHONE_PAGER , "Pager");
+        outlook2ox.put("Pager", ContactField.TELEPHONE_PAGER);
+        ox2outlook.put(ContactField.TELEPHONE_PAGER, "Pager");
 
-        german2field.put("Haupttelefon" , ContactField.TELEPHONE_PRIMARY);
-        field2german.put(ContactField.TELEPHONE_PRIMARY , "Haupttelefon");
+        outlook2ox.put("Haupttelefon", ContactField.TELEPHONE_PRIMARY);
+        ox2outlook.put(ContactField.TELEPHONE_PRIMARY, "Haupttelefon");
 
-        german2field.put("Mobiltelefon 2" , ContactField.TELEPHONE_RADIO);
-        field2german.put(ContactField.TELEPHONE_RADIO , "Mobiltelefon 2");
+        outlook2ox.put("Mobiltelefon 2", ContactField.TELEPHONE_RADIO);
+        ox2outlook.put(ContactField.TELEPHONE_RADIO, "Mobiltelefon 2");
 
-        german2field.put("Telefon f\u00fcr H\u00f6rbehinderte" , ContactField.TELEPHONE_TTYTDD);
-        field2german.put(ContactField.TELEPHONE_TTYTDD , "Telefon f\u00fcr H\u00f6rbehinderte");
+        outlook2ox.put("Telefon f\u00fcr H\u00f6rbehinderte", ContactField.TELEPHONE_TTYTDD);
+        ox2outlook.put(ContactField.TELEPHONE_TTYTDD, "Telefon f\u00fcr H\u00f6rbehinderte");
 
-        german2field.put("Telex" , ContactField.TELEPHONE_TELEX);
-        field2german.put(ContactField.TELEPHONE_TELEX , "Telex");
+        outlook2ox.put("Telex", ContactField.TELEPHONE_TELEX);
+        ox2outlook.put(ContactField.TELEPHONE_TELEX, "Telex");
 
-        german2field.put("E-Mail-Adresse" , ContactField.EMAIL1);
-        field2german.put(ContactField.EMAIL1 , "E-Mail-Adresse");
+        outlook2ox.put("E-Mail-Adresse", ContactField.EMAIL1);
+        ox2outlook.put(ContactField.EMAIL1, "E-Mail-Adresse");
 
-        //french2field.put("E-Mail-Typ" , ContactField.);
-        //field2french.put(ContactField. , "E-Mail-Typ");
+        // french2field.put("E-Mail-Typ" , ContactField.);
+        // field2french.put(ContactField. , "E-Mail-Typ");
 
-        //french2field.put("E-Mail: Angezeigter Name" , ContactField.);
-        //field2french.put(ContactField. , "E-Mail: Angezeigter Name");
+        // french2field.put("E-Mail: Angezeigter Name" , ContactField.);
+        // field2french.put(ContactField. , "E-Mail: Angezeigter Name");
 
-        german2field.put("E-Mail 2: Adresse" , ContactField.EMAIL2);
-        field2german.put(ContactField.EMAIL2 , "E-Mail 2: Adresse");
+        outlook2ox.put("E-Mail 2: Adresse", ContactField.EMAIL2);
+        ox2outlook.put(ContactField.EMAIL2, "E-Mail 2: Adresse");
 
-        //french2field.put("E-Mail 2: Typ" , ContactField.);
-        //field2french.put(ContactField. , "E-Mail 2: Typ");
+        // french2field.put("E-Mail 2: Typ" , ContactField.);
+        // field2french.put(ContactField. , "E-Mail 2: Typ");
 
-        //french2field.put("E-Mail 2: Angezeigter Name" , ContactField.);
-        //field2french.put(ContactField. , "E-Mail 2: Angezeigter Name");
+        // french2field.put("E-Mail 2: Angezeigter Name" , ContactField.);
+        // field2french.put(ContactField. , "E-Mail 2: Angezeigter Name");
 
-        german2field.put("E-Mail 3: Adresse " , ContactField.EMAIL3);
-        field2german.put(ContactField.EMAIL3 , "E-Mail 3: Adresse ");
+        outlook2ox.put("E-Mail 3: Adresse ", ContactField.EMAIL3);
+        ox2outlook.put(ContactField.EMAIL3, "E-Mail 3: Adresse ");
 
-        //french2field.put("E-Mail 3: Typ" , ContactField.);
-        //field2french.put(ContactField. , "E-Mail 3: Typ");
+        // french2field.put("E-Mail 3: Typ" , ContactField.);
+        // field2french.put(ContactField. , "E-Mail 3: Typ");
 
-        //french2field.put("Nom complet de l'adresse de messagerie 3" , ContactField.);
-        //field2french.put(ContactField. , "Nom complet de l'adresse de messagerie 3");
+        // french2field.put("Nom complet de l'adresse de messagerie 3" , ContactField.);
+        // field2french.put(ContactField. , "Nom complet de l'adresse de messagerie 3");
 
-        german2field.put("Geburtstag" , ContactField.BIRTHDAY);
-        field2german.put(ContactField.BIRTHDAY , "Geburtstag");
+        outlook2ox.put("Geburtstag", ContactField.BIRTHDAY);
+        ox2outlook.put(ContactField.BIRTHDAY, "Geburtstag");
 
-        german2field.put("Jahrestag" , ContactField.ANNIVERSARY);
-        field2german.put(ContactField.ANNIVERSARY , "Jahrestag");
+        outlook2ox.put("Jahrestag", ContactField.ANNIVERSARY);
+        ox2outlook.put(ContactField.ANNIVERSARY, "Jahrestag");
 
-        //french2field.put("Weiteres Postfach" , ContactField.);
-        //field2french.put(ContactField. , "Weiteres Postfach");
+        // french2field.put("Weiteres Postfach" , ContactField.);
+        // field2french.put(ContactField. , "Weiteres Postfach");
 
-        //french2field.put("Postfach gesch\u00e4ftlich" , ContactField.);
-        //field2french.put(ContactField. , "Postfach gesch\u00e4ftlich");
+        // french2field.put("Postfach gesch\u00e4ftlich" , ContactField.);
+        // field2french.put(ContactField. , "Postfach gesch\u00e4ftlich");
 
-        //french2field.put("Postfach privat" , ContactField.);
-        //field2french.put(ContactField. , "Postfach privat");
+        // french2field.put("Postfach privat" , ContactField.);
+        // field2french.put(ContactField. , "Postfach privat");
 
-        //french2field.put("B\u00fcro" , ContactField.);
-        //field2french.put(ContactField. , "B\u00fcro");
+        // french2field.put("B\u00fcro" , ContactField.);
+        // field2french.put(ContactField. , "B\u00fcro");
 
-        german2field.put("Kategorien" , ContactField.CATEGORIES);
-        field2german.put(ContactField.CATEGORIES , "Kategorien");
+        outlook2ox.put("Kategorien", ContactField.CATEGORIES);
+        ox2outlook.put(ContactField.CATEGORIES, "Kategorien");
 
-        //french2field.put("Regierungs-Nr. " , ContactField.);
-        //field2french.put(ContactField. , "Regierungs-Nr. ");
+        // french2field.put("Regierungs-Nr. " , ContactField.);
+        // field2french.put(ContactField. , "Regierungs-Nr. ");
 
-        //french2field.put("Konto" , ContactField.); //=account
-        //field2french.put(ContactField. , "Konto"); //=account
+        // french2field.put("Konto" , ContactField.); //=account
+        // field2french.put(ContactField. , "Konto"); //=account
 
-        german2field.put("Partner" , ContactField.SPOUSE_NAME);
-        field2german.put(ContactField.SPOUSE_NAME , "Partner");
+        outlook2ox.put("Partner", ContactField.SPOUSE_NAME);
+        ox2outlook.put(ContactField.SPOUSE_NAME, "Partner");
 
-        german2field.put("Vertraulichkeit" , ContactField.PRIVATE_FLAG);
-        field2german.put(ContactField.PRIVATE_FLAG , "Vertraulichkeit");
+        outlook2ox.put("Vertraulichkeit", ContactField.PRIVATE_FLAG);
+        ox2outlook.put(ContactField.PRIVATE_FLAG, "Vertraulichkeit");
 
-        //french2field.put("Internet-Frei/Gebucht" , ContactField.); //=internet free/busy
-        //field2french.put(ContactField. , "Internet-Frei/Gebucht"); //=internet free/busy
+        // french2field.put("Internet-Frei/Gebucht" , ContactField.); //=internet free/busy
+        // field2french.put(ContactField. , "Internet-Frei/Gebucht"); //=internet free/busy
 
-        //french2field.put("Ort " , ContactField.); //= location
-        //field2french.put(ContactField. , "Ort "); //= location
+        // french2field.put("Ort " , ContactField.); //= location
+        // field2french.put(ContactField. , "Ort "); //= location
 
-        german2field.put("Kinder" , ContactField.NUMBER_OF_CHILDREN); //guessed
-        field2german.put(ContactField.NUMBER_OF_CHILDREN , "Kinder"); //guessed
+        outlook2ox.put("Kinder", ContactField.NUMBER_OF_CHILDREN); // guessed
+        ox2outlook.put(ContactField.NUMBER_OF_CHILDREN, "Kinder"); // guessed
 
-        //french2field.put("Abrechnungsinformation" , ContactField.); // = billing information
-        //field2french.put(ContactField. , "Abrechnungsinformation"); // = billing information
+        // french2field.put("Abrechnungsinformation" , ContactField.); // = billing information
+        // field2french.put(ContactField. , "Abrechnungsinformation"); // = billing information
 
-        //french2field.put("Initialen" , ContactField.); // = initials
-        //field2french.put(ContactField. , "Initialen"); // = initials
+        // french2field.put("Initialen" , ContactField.); // = initials
+        // field2french.put(ContactField. , "Initialen"); // = initials
 
-        //french2field.put("Reisekilometer" , ContactField.); //= mileage
-        //field2french.put(ContactField. , "Reisekilometer"); //= mileage
+        // french2field.put("Reisekilometer" , ContactField.); //= mileage
+        // field2french.put(ContactField. , "Reisekilometer"); //= mileage
 
-        //french2field.put("Sprache" , ContactField.); // = language
-        //field2french.put(ContactField. , "Sprache"); // = language
+        // french2field.put("Sprache" , ContactField.); // = language
+        // field2french.put(ContactField. , "Sprache"); // = language
 
-        //french2field.put("Stichw\u00f6rter" , ContactField.); // = keywords
-        //field2french.put(ContactField. , "Stichw\u00f6rter"); // = keywords
+        // french2field.put("Stichw\u00f6rter" , ContactField.); // = keywords
+        // field2french.put(ContactField. , "Stichw\u00f6rter"); // = keywords
 
-        german2field.put("Name Assistent" , ContactField.ASSISTANT_NAME);
-        field2german.put(ContactField.ASSISTANT_NAME , "Name Assistent");
+        outlook2ox.put("Name Assistent", ContactField.ASSISTANT_NAME);
+        ox2outlook.put(ContactField.ASSISTANT_NAME, "Name Assistent");
 
-        german2field.put("Notizen" , ContactField.NOTE);
-        field2german.put(ContactField.NOTE , "Notizen");
+        outlook2ox.put("Notizen", ContactField.NOTE);
+        ox2outlook.put(ContactField.NOTE, "Notizen");
 
-        german2field.put("Organisations-Nr." , ContactField.COMMERCIAL_REGISTER); //guessed
-        field2german.put(ContactField.COMMERCIAL_REGISTER , "Organisations-Nr."); //guessed
+        outlook2ox.put("Organisations-Nr.", ContactField.COMMERCIAL_REGISTER); // guessed
+        ox2outlook.put(ContactField.COMMERCIAL_REGISTER, "Organisations-Nr."); // guessed
 
-        german2field.put("Webseite" , ContactField.URL); //guessed
-        field2german.put(ContactField.URL , "Webseite"); //guessed
+        outlook2ox.put("Webseite", ContactField.URL); // guessed
+        ox2outlook.put(ContactField.URL, "Webseite"); // guessed
 
-        //french2field.put("Hobby " , ContactField.); //= hobby
-        //field2french.put(ContactField. , "Hobby "); //= hobby
+        // french2field.put("Hobby " , ContactField.); //= hobby
+        // field2french.put(ContactField. , "Hobby "); //= hobby
 
-        //french2field.put("Priorit\u00e4t " , ContactField.); //= priority
-        //field2french.put(ContactField. , "Priorit\u00e4t "); //= priority
+        // french2field.put("Priorit\u00e4t " , ContactField.); //= priority
+        // field2french.put(ContactField. , "Priorit\u00e4t "); //= priority
 
-        //french2field.put("Privat" , ContactField.); // = private
-        //field2french.put(ContactField. , "Privat"); // = private
+        // french2field.put("Privat" , ContactField.); // = private
+        // field2french.put(ContactField. , "Privat"); // = private
 
-        german2field.put("Beruf" , ContactField.PROFESSION);
-        field2german.put(ContactField.PROFESSION , "Beruf");
+        outlook2ox.put("Beruf", ContactField.PROFESSION);
+        ox2outlook.put(ContactField.PROFESSION, "Beruf");
 
-        //french2field.put("Empfohlen von " , ContactField.); // = referred by
-        //field2french.put(ContactField. , "Empfohlen von "); // = referred by
+        // french2field.put("Empfohlen von " , ContactField.); // = referred by
+        // field2french.put(ContactField. , "Empfohlen von "); // = referred by
 
-        german2field.put("Name des/der Vorgesetzten" , ContactField.MANAGER_NAME); //guessed (by Antje)
-        field2german.put(ContactField.MANAGER_NAME , "Name des/der Vorgesetzten"); //guessed (by Antje)
+        outlook2ox.put("Name des/der Vorgesetzten", ContactField.MANAGER_NAME); // guessed (by Antje)
+        ox2outlook.put(ContactField.MANAGER_NAME, "Name des/der Vorgesetzten"); // guessed (by Antje)
 
-        //french2field.put("Verzeichnisserver" , ContactField.); // = directory server
-        //field2french.put(ContactField. , "Verzeichnisserver"); // = directory server
+        // french2field.put("Verzeichnisserver" , ContactField.); // = directory server
+        // field2french.put(ContactField. , "Verzeichnisserver"); // = directory server
 
-        //french2field.put("Geschlecht" , ContactField.); // = gender
-        //field2french.put(ContactField. , "Geschlecht"); // = gender
+        // french2field.put("Geschlecht" , ContactField.); // = gender
+        // field2french.put(ContactField. , "Geschlecht"); // = gender
 
-        //french2field.put("Benutzer 1" , ContactField.);
-        //field2french.put(ContactField. , "Benutzer 1");
+        // french2field.put("Benutzer 1" , ContactField.);
+        // field2french.put(ContactField. , "Benutzer 1");
 
-        //french2field.put("Benutzer 2" , ContactField.);
-        //field2french.put(ContactField. , "Benutzer 2");
+        // french2field.put("Benutzer 2" , ContactField.);
+        // field2french.put(ContactField. , "Benutzer 2");
 
-        //french2field.put("Benutzer 3" , ContactField.);
-        //field2french.put(ContactField. , "Benutzer 3");
+        // french2field.put("Benutzer 3" , ContactField.);
+        // field2french.put(ContactField. , "Benutzer 3");
 
-        //french2field.put("Benutzer 4" , ContactField.);
-        //field2french.put(ContactField. , "Utilisateur 4");
-        
+        // french2field.put("Benutzer 4" , ContactField.);
+        // field2french.put(ContactField. , "Utilisateur 4");
+
         /*
-         * Changes since bug 9367: Fields that Outlook 2007 is exporting
-         * either new or with a different name than 2003.
-         * 
-         * We can be pretty tolerant when importing these, because only one
-         * of the fields will be set (either the old one or the new one),
-         * but it does not work in the other direction.
-         * 
-         * TODO: Split the mapper between Outlook 2003 and 2007 
-         * because different fields need to be set.
+         * Changes since bug 9367: Fields that Outlook 2007 is exporting either new or with a different name than 2003. We can be pretty
+         * tolerant when importing these, because only one of the fields will be set (either the old one or the new one), but it does not
+         * work in the other direction. TODO: Split the mapper between Outlook 2003 and 2007 because different fields need to be set.
          */
-        german2field.put("Land/Region gesch\u00e4ftlich" , ContactField.STATE_BUSINESS);
-        german2field.put("E-Mail-Adresse" , ContactField.EMAIL1); //this is the second asignment for EMAIL1. One should only occur in 2003, the other only in 2007
-        german2field.put("Position" , ContactField.POSITION);
-        german2field.put("B\u00fcro" , ContactField.ROOM_NUMBER);
-        german2field.put("Bundesland/Kanton privat" , ContactField.STATE_HOME);
-        german2field.put("Land/Region privat" , ContactField.COUNTRY_HOME);
-        german2field.put("Weiteres/r Bundesland/Kanton" , ContactField.STATE_OTHER);
-        german2field.put("Weiteres/e Land/Region" , ContactField.COUNTRY_OTHER);
-        german2field.put("E-Mail 3: Adresse" , ContactField.EMAIL3);        
+        outlook2ox.put("Land/Region gesch\u00e4ftlich", ContactField.STATE_BUSINESS);
+        outlook2ox.put("E-Mail-Adresse", ContactField.EMAIL1); // this is the second asignment for EMAIL1. One should only occur in 2003,
+                                                               // the other only in 2007
+        outlook2ox.put("Position", ContactField.POSITION);
+        outlook2ox.put("B\u00fcro", ContactField.ROOM_NUMBER);
+        outlook2ox.put("Bundesland/Kanton privat", ContactField.STATE_HOME);
+        outlook2ox.put("Land/Region privat", ContactField.COUNTRY_HOME);
+        outlook2ox.put("Weiteres/r Bundesland/Kanton", ContactField.STATE_OTHER);
+        outlook2ox.put("Weiteres/e Land/Region", ContactField.COUNTRY_OTHER);
+        outlook2ox.put("E-Mail 3: Adresse", ContactField.EMAIL3);
     }
-    
-    	/*
-    	 * Accessors (and stuff)
-    	 */
 
-        public ContactField getFieldByName(final String name){
-                return german2field.get(name);
-        }
-
-        public String getNameOfField(final ContactField field){
-            return field2german.get(field);
-        }
-
-        public Collection<String> getNamesOfFields(){
-            return field2german.values();
-        }
-
-        public Collection<ContactField> getSupportedFields(){
-            return german2field.values(); 
-        }
-    }
+}

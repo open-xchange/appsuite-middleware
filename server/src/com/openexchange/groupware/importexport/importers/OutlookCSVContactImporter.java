@@ -50,6 +50,7 @@
 package com.openexchange.groupware.importexport.importers;
 
 import java.text.SimpleDateFormat;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import com.openexchange.api2.OXException;
@@ -64,6 +65,7 @@ import com.openexchange.groupware.contact.helpers.ContactSwitcher;
 import com.openexchange.groupware.contact.helpers.ContactSwitcherForBooleans;
 import com.openexchange.groupware.contact.helpers.ContactSwitcherForSimpleDateFormat;
 import com.openexchange.groupware.contact.mappers.ContactFieldMapper;
+import com.openexchange.groupware.contact.mappers.DutchOutlookMapper;
 import com.openexchange.groupware.contact.mappers.EnglishOutlookMapper;
 import com.openexchange.groupware.contact.mappers.FrenchOutlookMapper;
 import com.openexchange.groupware.contact.mappers.GermanOutlookMapper;
@@ -90,12 +92,35 @@ import com.openexchange.server.services.ServerServiceRegistry;
  *
  */
 public class OutlookCSVContactImporter extends CSVContactImporter {
-	
-	protected ContactFieldMapper fieldMapper;
-	
-	@Override
+	private List<ContactFieldMapper> fieldMappers;
+	private ContactFieldMapper fieldMapper;
+    
+    public List<ContactFieldMapper> getFieldMappers() {
+        if(fieldMappers == null){
+            fieldMappers = new LinkedList<ContactFieldMapper>();
+            fieldMappers.add( new GermanOutlookMapper()); 
+            fieldMappers.add( new FrenchOutlookMapper());
+            fieldMappers.add( new EnglishOutlookMapper());
+            fieldMappers.add( new DutchOutlookMapper());
+        }
+        return fieldMappers;
+    }
+
+    public void setFieldMappers(List<ContactFieldMapper> fieldMappers) {
+        this.fieldMappers = fieldMappers;
+    }
+    
+    public ContactFieldMapper getFieldMapper() {
+        return fieldMapper;
+    }
+    
+    public void setFieldMapper(ContactFieldMapper fieldMapper) {
+        this.fieldMapper = fieldMapper;
+    }
+
+    @Override
 	protected ContactField getRelevantField(final String name) {
-		return fieldMapper.getFieldByName(name);
+		return getFieldMapper().getFieldByName(name);
 	}
 
 	@Override
@@ -128,29 +153,21 @@ public class OutlookCSVContactImporter extends CSVContactImporter {
 	 */
 	@Override
 	protected boolean checkFields(final List<String> fields) {
-		int de = 0, fr = 0, en = 0;
-		final ContactFieldMapper 	deMap = new GermanOutlookMapper(), 
-									frMap = new FrenchOutlookMapper(), 
-									enMap = new EnglishOutlookMapper();
-		for(final String name: fields){
-			if(deMap.getFieldByName(name) != null){
-				de++;
-			}
-			if(enMap.getFieldByName(name) != null){
-				en++;
-			}
-			if(frMap.getFieldByName(name) != null){
-				fr++;
-			}
+		int highestAmountOfMappedFields = 0;
+
+		for(ContactFieldMapper mapper : getFieldMappers()){
+		    int mappedFields = 0;
+		    for(final String name: fields){
+		        if(mapper.getFieldByName(name) != null){
+		            mappedFields++;
+		        }
+		    }
+		    if(mappedFields > highestAmountOfMappedFields){
+		        fieldMapper = mapper;
+		    }
+		    
 		}
-		fieldMapper = enMap;
-		if(de > en){
-			fieldMapper = deMap;
-		}
-		if(fr > de){
-			fieldMapper = frMap;
-		}
-		return de > 0 || fr > 0 || en > 0;
+		return fieldMapper != null;
 	}
 
 	@Override
@@ -182,6 +199,6 @@ public class OutlookCSVContactImporter extends CSVContactImporter {
 		if(field == null){
 			return String.valueOf( id );
 		}
-		return fieldMapper.getNameOfField(field);
+		return getFieldMapper().getNameOfField(field);
 	}
 }
