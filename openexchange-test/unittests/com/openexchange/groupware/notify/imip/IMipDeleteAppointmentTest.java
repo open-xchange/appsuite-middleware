@@ -88,7 +88,7 @@ public class IMipDeleteAppointmentTest extends IMipTest {
         
         for (Message message : messages) {
             if (message.addresses.contains(userMail)) {
-                fail("owner should net get delete mail");
+                fail("owner should not get delete mail");
             } else if (message.addresses.contains(secondUserMail)) {
                 foundSecond = true;
                 checkState(message.message, ITipMethod.CANCEL);
