@@ -1,7 +1,7 @@
 
 # norootforbuild
 
-Name:           open-xchange-admin-plugin-reseller
+Name:           open-xchange-admin-plugin-autocontextid
 BuildArch:	noarch
 BuildRequires:  ant open-xchange-admin-plugin-hosting-lib >= @OXVERSION@ open-xchange-admin-soap
 %if 0%{?suse_version}
@@ -43,21 +43,9 @@ Summary:        Open Xchange Admin Context Restore Plugin
 Requires:       open-xchange-admin-client >= @OXVERSION@
 Requires:       open-xchange-admin-plugin-hosting >= @OXVERSION@
 #
-%package -n	open-xchange-admin-plugin-reseller-soap
-Group:          Applications/Productivity
-Summary:	The Open Xchange Admin Reseller SOAP client
-Requires:       open-xchange-admin-plugin-reseller
-Requires:       open-xchange-admin-soap
 
 %description
-Open Xchange Admin Reseller Plugin
-
-Authors:
---------
-    Open-Xchange
-
-%description -n open-xchange-admin-plugin-reseller-soap
-Open Xchange Admin Reseller Plugin
+Open Xchange Admin Auto Context ID Plugin
 
 Authors:
 --------
@@ -78,14 +66,12 @@ ant -Dadmin.classpath=%{oxprefix}/bundles/%{adminbundle} \
     -Ddestdir=%{buildroot} -Dprefix=%{oxprefix} \
     -Dadminhosting.classpath=%{oxprefix}/bundles/%{adminhostingbundle} \
     -Ddoccorelink=/usr/share/doc/packages/open-xchange-admin-doc/javadoc/doc \
-    doc install install-client install-soap
+    doc install install-client 
 mv doc javadoc
 
 
 %clean
 %{__rm} -rf %{buildroot}
-
-
 
 %files
 %defattr(-,root,root)
@@ -101,10 +87,5 @@ mv doc javadoc
 /opt/open-xchange/sbin/*
 /opt/open-xchange/lib/*
 %config(noreplace) /opt/open-xchange/etc/admindaemon/plugin/*
-
-%files -n open-xchange-admin-plugin-reseller-soap
-%defattr(-,root,root)
-%dir /opt/open-xchange/bundles/com.openexchange.axis2/services
-/opt/open-xchange/bundles/com.openexchange.axis2/services/*
 
 %changelog
