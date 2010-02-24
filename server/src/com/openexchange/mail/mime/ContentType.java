@@ -300,51 +300,60 @@ public final class ContentType extends ParameterizedHeader {
     }
 
     /**
-     * Sets charset parameter
+     * Sets <code>"charset"</code> parameter
+     * 
+     * @param charset The charset parameter value; e.g. <code>"UTF-8"</code>
+     * @return This content type with new <code>"charset"</code> parameter applied
      */
-    public void setCharsetParameter(final String charset) {
+    public ContentType setCharsetParameter(final String charset) {
         setParameter(PARAM_CHARSET, charset);
+        return this;
     }
 
     /**
-     * @return the charset value or <code>null</code> if not present
+     * @return the <code>"charset"</code> value or <code>null</code> if not present
      */
     public String getCharsetParameter() {
         return getParameter(PARAM_CHARSET);
     }
 
     /**
-     * @return <code>true</code> if charset parameter is present, <code>false</code> otherwise
+     * @return <code>true</code> if <code>"charset"</code> parameter is present, <code>false</code> otherwise
      */
     public boolean containsCharsetParameter() {
         return containsParameter(PARAM_CHARSET);
     }
 
     /**
-     * Sets name parameter
+     * Sets <code>"name"</code> parameter
      * 
      * @param filename The name parameter
+     * @return This content type with new <code>"name"</code> parameter applied
      */
-    public void setNameParameter(final String filename) {
+    public ContentType setNameParameter(final String filename) {
         setParameter(PARAM_NAME, filename);
+        return this;
     }
 
     /**
-     * @return the name value or <code>null</code> if not present
+     * @return the <code>"name"</code> value or <code>null</code> if not present
      */
     public String getNameParameter() {
         return getParameter(PARAM_NAME);
     }
 
     /**
-     * @return <code>true</code> if name parameter is present, <code>false</code> otherwise
+     * @return <code>true</code> if <code>"name"</code> parameter is present, <code>false</code> otherwise
      */
     public boolean containsNameParameter() {
         return containsParameter(PARAM_NAME);
     }
 
     /**
-     * Sets Content-Type
+     * Sets the content type to specified content type string; e.g. "text/plain; charset=US-ASCII"
+     * 
+     * @param contentType The content type string
+     * @throws MailException If specified content type string cannot be parsed
      */
     public void setContentType(final String contentType) throws MailException {
         parseContentType(contentType);
