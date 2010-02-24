@@ -532,7 +532,10 @@ public final class FacebookSession {
                 /*
                  * Missing setting in user account
                  */
-                throw FacebookMessagingExceptionCodes.MISSING_APPLICATION_PERMISSION.create(e, apiKey);
+                if ("Invalid parameter".equals(e.getMessage())) {
+                    throw FacebookMessagingExceptionCodes.MISSING_APPLICATION_PERMISSION.create(e, apiKey);
+                }
+                throw e;
             }
             facebookUserId = client.users_getLoggedInUser();
             /*
