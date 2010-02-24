@@ -106,7 +106,7 @@ public class CSVImportExportServletTest extends AbstractImportExportServletTest 
 			final CSVParser parser2 = new CSVParser(resultingCSV);
 			final List<List<String>> res1 = parser1.parse();
 			final List<List<String>> res2 = parser2.parse();
-			assertEquals("input == output ? "+res1+" "+res2 , res1, res2);
+			assertEquals("input == output ? "+res1+" // "+res2 , res1, res2);
 		} finally {
 			//clean up
 			removeFolder(folderId);

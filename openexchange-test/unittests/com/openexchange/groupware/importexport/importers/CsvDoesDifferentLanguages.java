@@ -145,7 +145,7 @@ public class CsvDoesDifferentLanguages extends TestCase {
         List<String> data = list.get(1);
         
         CSVContactImporter importer = new OutlookCSVContactImporter();
-        boolean atLeastOneFieldInserted = false;
+        boolean[] atLeastOneFieldInserted = new boolean[]{false};
         ContactSwitcher conSet = importer.getContactSwitcher();
         ImportResult result = new ImportResult();
         
