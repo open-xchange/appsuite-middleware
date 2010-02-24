@@ -109,6 +109,7 @@ public final class MIMEDefaultSession {
                     p.put(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT, "true");
                     p.put(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, "true");
                     p.put(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, "false");
+                    p.put(MIMESessionPropertyNames.PROP_MAIL_MIME_MULTIPART_ALLOWEMPTY, "true");
                     final MailProperties mailProperties = MailProperties.getInstance();
                     final String defaultMimeCharset = mailProperties.getDefaultMimeCharset();
                     if (null == defaultMimeCharset) {

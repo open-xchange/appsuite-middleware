@@ -54,7 +54,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.mail.MessagingException;
@@ -92,9 +95,7 @@ public final class MIMEMultipartMailPart extends MailPart {
 
     private static final String STR_BD_START = "--";
 
-    private byte[] data;
-
-    private DataSource dataSource;
+    private final DataAccess dataAccess;
 
     private byte[] boundaryBytes;
 
@@ -130,42 +131,7 @@ public final class MIMEMultipartMailPart extends MailPart {
         } else {
             setContentType(contentType);
         }
-        this.dataSource = dataSource;
-    }
-
-    /**
-     * Initializes a new {@link MIMEMultipartMailPart}.
-     * 
-     * @param inputStream The input stream
-     * @throws MailException If reading input stream fails
-     */
-    public MIMEMultipartMailPart(final InputStream inputStream) throws MailException {
-        this(null, inputStream);
-    }
-
-    /**
-     * Initializes a new {@link MIMEMultipartMailPart}.
-     * 
-     * @param contentType The content type; may be <code>null</code>
-     * @param inputStream The input stream
-     * @throws MailException If reading input stream fails
-     */
-    public MIMEMultipartMailPart(final ContentType contentType, final InputStream inputStream) throws MailException {
-        super();
-        if (contentType == null) {
-            try {
-                setContentType(extractHeader(STR_CONTENT_TYPE, inputStream, false));
-            } catch (final IOException e) {
-                throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
-            }
-        } else {
-            setContentType(contentType);
-        }
-        try {
-            data = copyStream(inputStream);
-        } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
-        }
+        dataAccess = new DataSourceDataAccess(dataSource);
     }
 
     /**
@@ -196,7 +162,7 @@ public final class MIMEMultipartMailPart extends MailPart {
         } else {
             setContentType(contentType);
         }
-        data = inputData;
+        dataAccess = new BytaArrayDataAccess(inputData);
     }
 
     @Override
@@ -217,7 +183,7 @@ public final class MIMEMultipartMailPart extends MailPart {
         final byte[] boundaryBytes = getBoundaryBytes();
         final byte[] dataBytes;
         try {
-            dataBytes = getInputBytes();
+            dataBytes = dataAccess.full();
         } catch (final IOException e) {
             throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
         }
@@ -282,9 +248,9 @@ public final class MIMEMultipartMailPart extends MailPart {
                  */
                 int hbLen = -1;
                 int bodyStart;
-                if ((bodyStart = indexOf(dataBytes, DELIM1, 0, dataBytes.length, null)) >= 0) {
+                if ((bodyStart = indexOf(dataBytes, DELIM1, 0, dataBytes.length)) >= 0) {
                     hbLen = DELIM1.length;
-                } else if ((bodyStart = indexOf(dataBytes, DELIM2, 0, dataBytes.length, null)) >= 0) {
+                } else if ((bodyStart = indexOf(dataBytes, DELIM2, 0, dataBytes.length)) >= 0) {
                     hbLen = DELIM2.length;
                 }
                 positions[count++] = bodyStart < 0 ? 0 : bodyStart + hbLen;
@@ -327,9 +293,9 @@ public final class MIMEMultipartMailPart extends MailPart {
     private static final byte[] DELIM1 = "\n\r\n".getBytes();
 
     private static int getHeaderEnd(final byte[] dataBytes) {
-        int headerEnd = indexOf(dataBytes, DELIM1, 0, dataBytes.length, null);
+        int headerEnd = indexOf(dataBytes, DELIM1, 0, dataBytes.length);
         if (-1 == headerEnd) {
-            headerEnd = indexOf(dataBytes, DELIM2, 0, dataBytes.length, null);
+            headerEnd = indexOf(dataBytes, DELIM2, 0, dataBytes.length);
         }
         return headerEnd;
     }
@@ -358,66 +324,58 @@ public final class MIMEMultipartMailPart extends MailPart {
         if (index < 0 || index >= count) {
             throw new IndexOutOfBoundsException(String.valueOf(index));
         }
-        final byte[] dataBytes;
         try {
-            dataBytes = getInputBytes();
-        } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
-        }
-        int i = index;
-        int startIndex = positions[i++];
-        if (startIndex >= dataBytes.length) {
+            int i = index;
+            int startIndex = positions[i++];
+            if (startIndex >= dataAccess.length()) {
+                /*
+                 * Empty (text) body
+                 */
+                return createTextPart();
+            }
+            if ('\r' == dataAccess.read(startIndex)) {
+                startIndex += (getBoundaryBytes().length + 1);
+            } else {
+                startIndex += (getBoundaryBytes().length);
+            }
             /*
-             * Empty (text) body
+             * Omit starting CR?LF
              */
-            return createTextPart();
-        }
-        if ('\r' == dataBytes[startIndex]) {
-            startIndex += (getBoundaryBytes().length + 1);
-        } else {
-            startIndex += (getBoundaryBytes().length);
-        }
-        /*
-         * Omit starting CR?LF
-         */
-        if ('\r' == dataBytes[startIndex] && '\n' == dataBytes[startIndex + 1]) {
-            startIndex += 2;
-        } else if ('\n' == dataBytes[startIndex]) {
-            startIndex++;
-        }
-        final int endIndex = i >= positions.length ? dataBytes.length : positions[i];
-        final byte[] subArr = new byte[endIndex - startIndex];
-        System.arraycopy(dataBytes, startIndex, subArr, 0, subArr.length);
-        /*
-         * Has headers?
-         */
-        if (getHeaderEnd(subArr) < 0) {
-            try {
-                return createTextPart(subArr, CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(subArr)));
-            } catch (final UnsupportedEncodingException e) {
+            if ('\r' == dataAccess.read(startIndex) && '\n' == dataAccess.read(startIndex + 1)) {
+                startIndex += 2;
+            } else if ('\n' == dataAccess.read(startIndex)) {
+                startIndex++;
+            }
+            final int endIndex = i >= positions.length ? dataAccess.length() : positions[i];
+            final byte[] subArr = dataAccess.subarray(startIndex, endIndex - startIndex);
+            /*
+             * Has headers?
+             */
+            if (getHeaderEnd(subArr) < 0) {
                 try {
-                    return createTextPart(subArr, "US-ASCII");
-                } catch (final UnsupportedEncodingException e1) {
-                    // Cannot occur
-                    LOG.error(e1.getMessage(), e1);
+                    return createTextPart(subArr, CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(subArr)));
+                } catch (final UnsupportedEncodingException e) {
+                    try {
+                        return createTextPart(subArr, "US-ASCII");
+                    } catch (final UnsupportedEncodingException e1) {
+                        // Cannot occur
+                        LOG.error(e1.getMessage(), e1);
+                    }
                 }
             }
-        }
-        /*
-         * Get content-type
-         */
-        final ContentType ct;
-        try {
-            ct = new ContentType(extractHeader(STR_CONTENT_TYPE, new UnsynchronizedByteArrayInputStream(subArr), false));
+            /*
+             * Get content-type
+             */
+            final ContentType ct = new ContentType(extractHeader(STR_CONTENT_TYPE, new UnsynchronizedByteArrayInputStream(subArr), false));
+            if (ct.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
+                return new MIMEMultipartMailPart(ct, subArr);
+            } else if (ct.startsWith(MIMETypes.MIME_MESSAGE_RFC822)) {
+                return MIMEMessageConverter.convertMessage(subArr);
+            } else {
+                return MIMEMessageConverter.convertPart(subArr);
+            }
         } catch (final IOException e) {
             throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
-        }
-        if (ct.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
-            return new MIMEMultipartMailPart(ct, subArr);
-        } else if (ct.startsWith(MIMETypes.MIME_MESSAGE_RFC822)) {
-            return MIMEMessageConverter.convertMessage(subArr);
-        } else {
-            return MIMEMessageConverter.convertPart(subArr);
         }
     }
 
@@ -454,12 +412,8 @@ public final class MIMEMultipartMailPart extends MailPart {
 
     @Override
     public void loadContent() throws MailException {
-        if (data != null) {
-            return;
-        }
         try {
-            data = copyStream(dataSource.getInputStream());
-            dataSource = null;
+            dataAccess.load();
         } catch (final IOException e) {
             throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
         }
@@ -467,34 +421,15 @@ public final class MIMEMultipartMailPart extends MailPart {
 
     @Override
     public void prepareForCaching() {
-        dataSource = null;
+        dataAccess.prepareForCaching();
     }
 
     @Override
     public void writeTo(final OutputStream out) throws MailException {
-        final InputStream in;
         try {
-            in = dataSource == null ? (data == null ? null : new UnsynchronizedByteArrayInputStream(data)) : dataSource.getInputStream();
+            dataAccess.writeTo(out);
         } catch (final IOException e) {
             throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
-        }
-        if (null == in) {
-            throw new MailException(MailException.Code.NO_CONTENT);
-        }
-        try {
-            final byte[] buf = new byte[8192];
-            int count = -1;
-            while ((count = in.read(buf, 0, buf.length)) != -1) {
-                out.write(buf, 0, count);
-            }
-        } catch (final IOException e) {
-            throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
-        } finally {
-            try {
-                in.close();
-            } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
-            }
         }
     }
 
@@ -516,16 +451,6 @@ public final class MIMEMultipartMailPart extends MailPart {
     }
 
     /**
-     * Gets the input bytes either from data source or data array.
-     * 
-     * @return The input bytes either from data source or data array.
-     * @throws IOException If accessing data source's input stream fails
-     */
-    private byte[] getInputBytes() throws IOException {
-        return dataSource == null ? (data == null ? null : data) : copyStream(dataSource.getInputStream());
-    }
-
-    /**
      * The readObject method is responsible for reading from the stream and restoring the classes fields.
      * 
      * @param in The object input stream
@@ -537,7 +462,6 @@ public final class MIMEMultipartMailPart extends MailPart {
          * Restore common fields
          */
         in.defaultReadObject();
-        dataSource = null;
     }
 
     /**
@@ -572,7 +496,7 @@ public final class MIMEMultipartMailPart extends MailPart {
      * @return The newly created byte array containing input stream's bytes
      * @throws IOException If reading input stream fails
      */
-    private static byte[] copyStream(final InputStream inputStream) throws IOException {
+    static byte[] copyStream(final InputStream inputStream) throws IOException {
         try {
             final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream(SIZE);
             final byte[] buf = new byte[BUFSIZE];
@@ -616,12 +540,16 @@ public final class MIMEMultipartMailPart extends MailPart {
      * @param pattern The byte pattern to search for
      * @param beginIndex The beginning index, inclusive.
      * @param endIndex The ending index, exclusive.
-     * @param computedFailures The computed failures where the pattern matches against itself; leave to <code>null</code> to compute from
-     *            within
+     * @param computedFailures The computed failures where the pattern matches against itself
      * @return The index of the first occurrence of the pattern in the byte array starting from given index or <code>-1</code> if none
      *         found.
+     * @throws IndexOutOfBoundsException If <code>beginIndex</code> and/or <code>endIndex</code> is invalid
+     * @throws IllegalArgumentException If given pattern is <code>null</code>
      */
     private static int indexOf(final byte[] data, final byte[] pattern, final int beginIndex, final int endIndex, final int[] computedFailures) {
+        if (null == pattern) {
+            throw new IllegalArgumentException("pattern is null");
+        }
         if ((beginIndex < 0) || (beginIndex > data.length)) {
             throw new IndexOutOfBoundsException(String.valueOf(beginIndex));
         }
@@ -632,14 +560,54 @@ public final class MIMEMultipartMailPart extends MailPart {
             throw new IndexOutOfBoundsException(String.valueOf(endIndex - beginIndex));
         }
 
-        final int[] failure;
-        if (computedFailures == null) {
-            failure = computeFailure(pattern);
-            if (failure == null) {
-                throw new IllegalArgumentException("pattern is null");
+        int j = 0;
+        if (data.length == 0) {
+            return -1;
+        }
+
+        for (int i = beginIndex; i < endIndex; i++) {
+            while (j > 0 && pattern[j] != data[i]) {
+                j = computedFailures[j - 1];
             }
-        } else {
-            failure = computedFailures;
+            if (pattern[j] == data[i]) {
+                j++;
+            }
+            if (j == pattern.length) {
+                return i - pattern.length + 1;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Finds the first occurrence of the pattern in the byte (sub-)array using KMP algorithm.
+     * <p>
+     * The sub-array to search in begins at the specified <code>beginIndex</code> and extends to the byte at index <code>endIndex - 1</code>
+     * . Thus the length of the sub-array is <code>endIndex-beginIndex</code>.
+     * 
+     * @param data The byte array to search in
+     * @param pattern The byte pattern to search for
+     * @param beginIndex The beginning index, inclusive.
+     * @param endIndex The ending index, exclusive.
+     * @return The index of the first occurrence of the pattern in the byte array starting from given index or <code>-1</code> if none
+     *         found.
+     * @throws IndexOutOfBoundsException If <code>beginIndex</code> and/or <code>endIndex</code> is invalid
+     * @throws IllegalArgumentException If given pattern is <code>null</code>
+     */
+    private static int indexOf(final byte[] data, final byte[] pattern, final int beginIndex, final int endIndex) {
+        if ((beginIndex < 0) || (beginIndex > data.length)) {
+            throw new IndexOutOfBoundsException(String.valueOf(beginIndex));
+        }
+        if ((endIndex < 0) || (endIndex > data.length)) {
+            throw new IndexOutOfBoundsException(String.valueOf(endIndex));
+        }
+        if ((beginIndex > endIndex)) {
+            throw new IndexOutOfBoundsException(String.valueOf(endIndex - beginIndex));
+        }
+
+        final int[] failure = computeFailure(pattern);
+        if (failure == null) {
+            throw new IllegalArgumentException("pattern is null");
         }
 
         int j = 0;
@@ -684,6 +652,190 @@ public final class MIMEMultipartMailPart extends MailPart {
             failure[i] = j;
         }
         return failure;
+    }
+
+    private interface DataAccess {
+
+        int length() throws IOException;
+
+        int read(int index) throws IOException;
+
+        byte[] subarray(int off, int len) throws IOException;
+
+        byte[] full() throws IOException;
+
+        void load() throws IOException;
+
+        void prepareForCaching();
+
+        void writeTo(final OutputStream out) throws IOException;
+    }
+
+    private static final class BytaArrayDataAccess implements DataAccess {
+
+        private final byte[] data;
+
+        public BytaArrayDataAccess(final byte[] data) {
+            super();
+            this.data = data;
+        }
+
+        public byte[] full() {
+            return data;
+        }
+
+        public int length() {
+            return data.length;
+        }
+
+        public int read(final int index) {
+            return (data[index] & 0xff); // As unsigned integer
+        }
+
+        public byte[] subarray(final int off, final int len) {
+            final byte[] ret = new byte[len];
+            System.arraycopy(data, off, ret, 0, len);
+            return ret;
+        }
+
+        public void load() throws IOException {
+            // Nothing to do
+        }
+
+        public void prepareForCaching() {
+            // Nothing to do
+        }
+
+        public void writeTo(final OutputStream out) throws IOException {
+            out.write(data, 0, data.length);
+        }
+
+    }
+
+    private static final class RandomAccessDataAccess implements DataAccess {
+
+        private RandomAccessFile randomAccess;
+
+        private ByteBuffer roBuf;
+
+        private int length;
+
+        public RandomAccessDataAccess(final RandomAccessFile randomAccess) {
+            super();
+            this.randomAccess = randomAccess;
+            length = -1;
+        }
+
+        public byte[] full() throws IOException {
+            final ByteBuffer roBuf = getByteBuffer();
+            final int size = length();
+            final byte[] bytes = new byte[size];
+            roBuf.get(bytes, 0, size);
+            return bytes;
+        }
+
+        private ByteBuffer getByteBuffer() throws IOException {
+            if (null == roBuf) {
+                final int size = length();
+                roBuf = randomAccess.getChannel().map(FileChannel.MapMode.READ_ONLY, 0, size);
+            }
+            return roBuf;
+        }
+
+        public int length() throws IOException {
+            if (length < 0) {
+                length = (int) randomAccess.length();
+            }
+            return length;
+        }
+
+        public int read(final int index) throws IOException {
+            return (getByteBuffer().get(index) & 0xff); // As unsigned integer
+        }
+
+        public byte[] subarray(final int off, final int len) throws IOException {
+            final byte[] ret = new byte[len];
+            getByteBuffer().get(ret, off, len);
+            return ret;
+        }
+
+        public void load() throws IOException {
+            getByteBuffer();
+        }
+
+        public void prepareForCaching() {
+            randomAccess = null;
+            roBuf = null;
+        }
+
+        public void writeTo(final OutputStream out) throws IOException {
+            out.write(full());
+        }
+
+    }
+
+    private static final class DataSourceDataAccess implements DataAccess {
+
+        private DataSource dataSource;
+
+        private DataAccess delegate;
+
+        public DataSourceDataAccess(final DataSource dataSource) {
+            super();
+            this.dataSource = dataSource;
+        }
+
+        private DataAccess getDelegate() throws IOException {
+            if (null == delegate) {
+                delegate = new BytaArrayDataAccess(copyStream(dataSource.getInputStream()));
+            }
+            return delegate;
+        }
+
+        public byte[] full() throws IOException {
+            return getDelegate().full();
+        }
+
+        public int length() throws IOException {
+            return getDelegate().length();
+        }
+
+        public int read(final int index) throws IOException {
+            return getDelegate().read(index);
+        }
+
+        public byte[] subarray(final int off, final int len) throws IOException {
+            return getDelegate().subarray(off, len);
+        }
+
+        public void load() throws IOException {
+            getDelegate();
+        }
+
+        public void prepareForCaching() {
+            dataSource = null;
+        }
+
+        public void writeTo(final OutputStream out) throws IOException {
+            final InputStream in = dataSource.getInputStream();
+            if (null == in) {
+                return;
+            }
+            try {
+                final byte[] buf = new byte[8192];
+                int count = -1;
+                while ((count = in.read(buf, 0, buf.length)) != -1) {
+                    out.write(buf, 0, count);
+                }
+            } finally {
+                try {
+                    in.close();
+                } catch (final IOException e) {
+                    org.apache.commons.logging.LogFactory.getLog(MIMEMultipartMailPart.DataSourceDataAccess.class).error(e.getMessage(), e);
+                }
+            }
+        }
+
     }
 
 }

@@ -153,11 +153,28 @@ public final class MIMEMailPart extends MailPart {
     private String serializedContentType;
 
     /**
+     * Whether to handle "Missing start boundary" <code>javax.mail.MessagingException</code>.
+     */
+    private boolean handleMissingStartBoundary;
+
+    /**
      * Constructor - Only applies specified part, but does not set any attributes.
      */
     public MIMEMailPart(final Part part) {
         super();
         applyPart(part);
+    }
+
+    /**
+     * Set whether to handle <i>"Missing start boundary"</i> <code>javax.mail.MessagingException</code>.
+     * <p>
+     * <b>Note</b>: Set only to <code>true</code> if JavaMail property <code>"mail.mime.multipart.allowempty"</code> is set to
+     * <code>"false"</code>.
+     * 
+     * @param handleMissingStartBoundary <code>true</code> to handle <i>"Missing start boundary"</i> error; otherwise <code>false</code>
+     */
+    public void setHandleMissingStartBoundary(final boolean handleMissingStartBoundary) {
+        this.handleMissingStartBoundary = handleMissingStartBoundary;
     }
 
     /**
@@ -210,7 +227,8 @@ public final class MIMEMailPart extends MailPart {
     public Object getContent() throws MailException {
         if (null == part) {
             throw new IllegalStateException(ERR_NULL_PART);
-        } else if (isMulti) {
+        }
+        if (isMulti) {
             return null;
         }
         try {
@@ -237,7 +255,8 @@ public final class MIMEMailPart extends MailPart {
     public DataHandler getDataHandler() throws MailException {
         if (null == part) {
             throw new IllegalStateException(ERR_NULL_PART);
-        } else if (isMulti) {
+        }
+        if (isMulti) {
             return null;
         }
         try {
@@ -251,7 +270,8 @@ public final class MIMEMailPart extends MailPart {
     public InputStream getInputStream() throws MailException {
         if (null == part) {
             throw new IllegalStateException(ERR_NULL_PART);
-        } else if (isMulti) {
+        }
+        if (isMulti) {
             return null;
         }
         try {
@@ -301,7 +321,8 @@ public final class MIMEMailPart extends MailPart {
     public MailPart getEnclosedMailPart(final int index) throws MailException {
         if (null == part) {
             throw new IllegalStateException(ERR_NULL_PART);
-        } else if (isMulti) {
+        }
+        if (isMulti) {
             return getMultipartWrapper().getMailPart(index);
         }
         return null;
@@ -311,10 +332,50 @@ public final class MIMEMailPart extends MailPart {
     public int getEnclosedCount() throws MailException {
         if (null == part) {
             throw new IllegalStateException(ERR_NULL_PART);
-        } else if (isMulti) {
+        }
+        if (isMulti) {
+            if (handleMissingStartBoundary) {
+                final MultipartWrapper wrapper = getMultipartWrapper();
+                try {
+                    return wrapper.getCount();
+                } catch (final MailException e) {
+                    return handleMissingStartBoundary(e);
+                }
+            }
+            /*
+             * No handling
+             */
             return getMultipartWrapper().getCount();
         }
         return NO_ENCLOSED_PARTS;
+    }
+
+    private int handleMissingStartBoundary(final MailException e) throws MailException {
+        final Throwable cause = e.getCause();
+        if (!(cause instanceof MessagingException) || !"Missing start boundary".equals(((MessagingException) cause).getMessage())) {
+            throw e;
+        }
+        try {
+            /*
+             * Retry with other non-stream-based MultipartWrapper implementation
+             */
+            final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(8192);
+            part.writeTo(out);
+            multipart = new MIMEMultipartWrapper(new MIMEMultipartMailPart(getContentType(), part.getDataHandler().getDataSource()));
+            return multipart.getCount();
+        } catch (final IOException e1) {
+            LOG.error(e1.getMessage(), e1);
+            /*
+             * Throw original mail exception
+             */
+            throw e;
+        } catch (final MessagingException e1) {
+            LOG.error(e1.getMessage(), e1);
+            /*
+             * Throw original mail exception
+             */
+            throw e;
+        }
     }
 
     @Override
@@ -353,7 +414,8 @@ public final class MIMEMailPart extends MailPart {
     public void loadContent() throws MailException {
         if (null == part) {
             throw new IllegalStateException(ERR_NULL_PART);
-        } else if (contentLoaded) {
+        }
+        if (contentLoaded) {
             /*
              * Already loaded...
              */
@@ -654,7 +716,7 @@ public final class MIMEMailPart extends MailPart {
                     multipart = new MIMEMultipartWrapper(new MIMEMultipartMailPart(getContentType(), out.toByteArray()));
                 } else {
                     /*
-                     * If size is unknwon or exceeds 1MB, use the stream-based implementation
+                     * If size is unknown or exceeds 1MB, use the stream-based implementation
                      */
                     multipart = new JavaMailMultipartWrapper((Multipart) part.getContent());
                 }

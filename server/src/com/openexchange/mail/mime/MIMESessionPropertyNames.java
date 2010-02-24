@@ -122,4 +122,12 @@ public final class MIMESessionPropertyNames {
      */
     public static final String PROP_MAIL_DEBUG = "mail.debug";
 
+    /**
+     * Normally, when writing out a MimeMultipart that contains no body parts, or when trying to parse a multipart message with no body
+     * parts, a MessagingException is thrown. The MIME spec does not allow multipart content with no body parts. This System property may be
+     * set to "true" to override this behavior. When writing out such a MimeMultipart, a single empty part will be included. When reading
+     * such a multipart, a MimeMultipart will be created with no body parts. The default value of this property is false.
+     */
+    public static final Object PROP_MAIL_MIME_MULTIPART_ALLOWEMPTY = "mail.mime.multipart.allowempty";
+
 }
