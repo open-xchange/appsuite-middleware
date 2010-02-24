@@ -94,9 +94,6 @@ import com.openexchange.webdav.xml.fields.DataFields;
  */
 public abstract class XmlServlet<I> extends PermissionServlet {
 
-    /**
-     * 
-     */
     private static final long serialVersionUID = -2484534357141516623L;
 
     public static final AttachmentBase attachmentBase = Attachments.getInstance();
@@ -159,19 +156,13 @@ public abstract class XmlServlet<I> extends PermissionServlet {
 
     private static transient final Log LOG = LogFactory.getLog(XmlServlet.class);
 
-    public void oxinit() /* throws ServletException */{
-        // Nothing to do
-    }
-
     @Override
-    public void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
-            IOException {
+    public void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException {
         doPropPatch(req, resp);
     }
 
     @Override
-    public void doPropPatch(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
-            IOException {
+    public void doPropPatch(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException {
         if (LOG.isDebugEnabled()) {
             LOG.debug("PROPPATCH");
         }
