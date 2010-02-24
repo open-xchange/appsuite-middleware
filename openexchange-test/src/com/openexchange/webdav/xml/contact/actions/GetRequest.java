@@ -47,32 +47,39 @@
  *
  */
 
-package com.openexchange.webdav.xml.appointment.actions;
+package com.openexchange.webdav.xml.contact.actions;
 
-import org.jdom.Document;
-
-import com.openexchange.groupware.Types;
-import com.openexchange.webdav.xml.framework.AbstractInsertParser;
-import com.openexchange.webdav.xml.types.Response;
+import java.io.IOException;
+import org.apache.commons.httpclient.methods.RequestEntity;
+import com.openexchange.api2.OXException;
 
 /**
+ * {@link GetRequest}
  *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class InsertParser extends AbstractInsertParser<InsertResponse> {
+public class GetRequest extends AbstractContactRequest<GetResponse> {
 
-    public InsertParser() {
+    private final int folderId;
+    private final int objectId;
+
+    public GetRequest(int folderId, int objectId) {
         super();
+        this.folderId = folderId;
+        this.objectId = objectId;
+    }
+    
+    public RequestEntity getEntity() throws OXException, IOException {
+        // TODO Auto-generated method stub
+        return null;
     }
 
-    @Override
-    protected int getType() {
-        return Types.APPOINTMENT;
+    public Method getMethod() {
+        return Method.PROPFIND;
     }
 
-    @Override
-    protected InsertResponse instantiateResponse(final Document document,
-        final Response[] responses) {
-        return new InsertResponse(document, responses);
+    public GetParser getParser() {
+        return new GetParser();
     }
+
 }

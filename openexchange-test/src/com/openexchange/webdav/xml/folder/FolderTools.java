@@ -70,7 +70,8 @@ public final class FolderTools {
     private final WebDAVClient client;
 
     private FolderObject defaultAppointmentFolder;
-
+    private FolderObject defaultContactFolder;
+    
     /**
      * Default constructor.
      */
@@ -79,21 +80,17 @@ public final class FolderTools {
         this.client = client;
     }
 
-    public FolderObject getDefaultAppointmentFolder() throws IOException,
-        JDOMException, OXException, TestException {
+    public FolderObject getDefaultAppointmentFolder() throws IOException, JDOMException, OXException, TestException {
         return getDefaultAppointmentFolder(null);
     }
 
-    public FolderObject getDefaultAppointmentFolder(final String host) throws IOException,
-        JDOMException, OXException, TestException {
+    public FolderObject getDefaultAppointmentFolder(final String host) throws IOException, JDOMException, OXException, TestException {
         if (null == defaultAppointmentFolder) {
             final ListRequest request = new ListRequest(new Date(0));
             final ListResponse response = client.execute(host, request);
             final int userId = client.getGroupUserTools().getUserId(host);
             for (final FolderObject folder : response) {
-                if (folder.isDefaultFolder()
-                    && folder.getModule() == FolderObject.CALENDAR
-                    && folder.getCreatedBy() == userId) {
+                if (folder.isDefaultFolder() && folder.getModule() == FolderObject.CALENDAR && folder.getCreatedBy() == userId) {
                     defaultAppointmentFolder = folder;
                     break;
                 }
@@ -103,5 +100,27 @@ public final class FolderTools {
             }
         }
         return defaultAppointmentFolder;
+    }
+
+    public FolderObject getDefaultContactFolder() throws OXException, IOException, JDOMException, TestException {
+        return getDefaultContactFolder(null);
+    }
+
+    public FolderObject getDefaultContactFolder(String host) throws OXException, IOException, JDOMException, TestException {
+        if (null == defaultContactFolder) {
+            final ListRequest request = new ListRequest(new Date(0));
+            final ListResponse response = client.execute(host, request);
+            final int userId = client.getGroupUserTools().getUserId(host);
+            for (final FolderObject folder : response) {
+                if (folder.isDefaultFolder() && folder.getModule() == FolderObject.CONTACT && folder.getCreatedBy() == userId) {
+                    defaultContactFolder = folder;
+                    break;
+                }
+            }
+            if (null == defaultContactFolder) {
+                throw new TestException("Unable to find default contact folder.");
+            }
+        }
+        return defaultContactFolder;
     }
 }

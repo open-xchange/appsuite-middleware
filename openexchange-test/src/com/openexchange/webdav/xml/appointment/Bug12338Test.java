@@ -79,17 +79,10 @@ public final class Bug12338Test extends AbstractWebDAVSession {
 
     private static final Log LOG = LogFactory.getLog(Bug12338Test.class);
 
-    /**
-     * Default constructor.
-     * @param name test name
-     */
     public Bug12338Test(final String name) {
         super(name);
     }
 
-    /**
-     * TODO try to insert an appointment that triggers 500 internal server error.
-     */
     public void testStrangeExternal() throws Throwable {
         final WebDAVClient client = getClient();
         final FolderObject folder = client.getFolderTools().getDefaultAppointmentFolder();
@@ -127,9 +120,6 @@ public final class Bug12338Test extends AbstractWebDAVSession {
             this.userId = userId;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         protected Element createProp() throws OXException, IOException {
             final Element eProp = super.createProp();

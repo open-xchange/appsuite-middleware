@@ -47,32 +47,65 @@
  *
  */
 
-package com.openexchange.webdav.xml.appointment.actions;
+package com.openexchange.webdav.xml.contact.actions;
 
+import static com.openexchange.webdav.xml.framework.Constants.NS_DAV;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import javax.mail.internet.AddressException;
+import org.apache.commons.httpclient.methods.ByteArrayRequestEntity;
+import org.apache.commons.httpclient.methods.RequestEntity;
 import org.jdom.Document;
-
-import com.openexchange.groupware.Types;
-import com.openexchange.webdav.xml.framework.AbstractInsertParser;
-import com.openexchange.webdav.xml.types.Response;
+import org.jdom.Element;
+import org.jdom.output.XMLOutputter;
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.webdav.xml.ContactWriter;
+import com.openexchange.webdav.xml.framework.RequestTools;
 
 /**
+ * {@link InsertRequest}
  *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class InsertParser extends AbstractInsertParser<InsertResponse> {
+public class InsertRequest extends AbstractContactRequest<InsertResponse> {
 
-    public InsertParser() {
+    private final Contact contact;
+
+    public InsertRequest(Contact contact) {
         super();
+        this.contact = contact;
     }
 
-    @Override
-    protected int getType() {
-        return Types.APPOINTMENT;
+    public RequestEntity getEntity() throws OXException, IOException {
+        final Document doc = RequestTools.createPropertyUpdate(createProp());
+        final XMLOutputter xo = new XMLOutputter();
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        xo.output(doc, baos);
+        return new ByteArrayRequestEntity(baos.toByteArray());
     }
 
-    @Override
-    protected InsertResponse instantiateResponse(final Document document,
-        final Response[] responses) {
-        return new InsertResponse(document, responses);
+    private Element createProp() throws OXException, IOException {
+        contact.removeObjectID();
+        final Element eProp = new Element("prop", NS_DAV);
+
+        final ContactWriter contactWriter = new ContactWriter();
+        try {
+            contactWriter.addContent2PropElement(eProp, contact, false, true);
+        } catch (final SearchIteratorException e) {
+            throw new OXException(e);
+        } catch (AddressException e) {
+            throw new OXException(e);
+        }
+        return eProp;
+    }
+
+    public Method getMethod() {
+        return Method.PUT;
+    }
+
+    public InsertParser getParser() {
+       return new InsertParser();
     }
 }

@@ -63,18 +63,12 @@ public abstract class AbstractWebDAVResponse {
 
     private final Response[] responses;
 
-    /**
-     * Default constructor.
-     */
     protected AbstractWebDAVResponse(final Document document, final Response[] responses) {
         super();
         this.document = document;
         this.responses = responses;
     }
 
-    /**
-     * @return the responses
-     */
     public final Response[] getResponses() {
         return responses;
     }

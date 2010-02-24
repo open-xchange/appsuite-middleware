@@ -89,8 +89,8 @@ public class WebDAVClient {
     public WebDAVClient(final User user) throws ConfigurationException {
         this(new WebDAVSession());
         WebDAVConfig.init();
-        final String login = WebDAVConfig.getProperty(user.login);
-        final String password = WebDAVConfig.getProperty(user.password);
+        final String login = WebDAVConfig.getProperty(user.getLogin());
+        final String password = WebDAVConfig.getProperty(user.getPassword());
         setAuth(login, password);
     }
 
@@ -107,19 +107,21 @@ public class WebDAVClient {
     public enum User {
         User1(Property.LOGIN, Property.PASSWORD),
         User2(Property.SECONDUSER, Property.PASSWORD);
+
         private Property login;
         private Property password;
+
         private User(final Property login, final Property password) {
             this.login = login;
             this.password = password;
         }
-        
+
         public Property getLogin() {
-        	return login;
+            return login;
         }
         
         public Property getPassword() {
-        	return password;
+            return password;
         }
     }
 

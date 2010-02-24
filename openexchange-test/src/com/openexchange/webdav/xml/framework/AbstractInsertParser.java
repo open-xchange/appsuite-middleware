@@ -52,10 +52,7 @@ package com.openexchange.webdav.xml.framework;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdom.Document;
-
-import com.openexchange.api.OXConflictException;
 import com.openexchange.groupware.container.DataObject;
-import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.types.Response;
 
 /**
@@ -66,19 +63,12 @@ public abstract class AbstractInsertParser<T extends CommonInsertResponse> exten
 
     private static final Log LOG = LogFactory.getLog(AbstractInsertParser.class);
 
-    /**
-     * Default constructor.
-     */
     protected AbstractInsertParser() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    protected T createResponse(final Document document, final Response[] responses)
-        throws OXConflictException, TestException {
+    protected T createResponse(final Document document, final Response[] responses) {
         final T retval = instantiateResponse(document, responses);
         if (responses.length == 1) {
             if (responses[0].hasError()) {

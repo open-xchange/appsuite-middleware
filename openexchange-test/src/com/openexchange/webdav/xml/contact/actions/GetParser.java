@@ -47,32 +47,30 @@
  *
  */
 
-package com.openexchange.webdav.xml.appointment.actions;
+package com.openexchange.webdav.xml.contact.actions;
 
 import org.jdom.Document;
-
+import com.openexchange.api.OXConflictException;
 import com.openexchange.groupware.Types;
-import com.openexchange.webdav.xml.framework.AbstractInsertParser;
+import com.openexchange.test.TestException;
+import com.openexchange.webdav.xml.framework.AbstractWebDAVParser;
 import com.openexchange.webdav.xml.types.Response;
 
 /**
+ * {@link GetParser}
  *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class InsertParser extends AbstractInsertParser<InsertResponse> {
+public class GetParser extends AbstractWebDAVParser<GetResponse> {
 
-    public InsertParser() {
-        super();
+    @Override
+    protected GetResponse createResponse(Document document, Response[] responses) throws OXConflictException, TestException {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     @Override
     protected int getType() {
-        return Types.APPOINTMENT;
-    }
-
-    @Override
-    protected InsertResponse instantiateResponse(final Document document,
-        final Response[] responses) {
-        return new InsertResponse(document, responses);
+        return Types.CONTACT;
     }
 }

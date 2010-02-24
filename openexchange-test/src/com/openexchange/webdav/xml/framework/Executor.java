@@ -69,9 +69,6 @@ import com.openexchange.webdav.xml.request.PropFindMethod;
  */
 public final class Executor {
 
-    /**
-     * Prevent instantation.
-     */
     private Executor() {
         super();
     }

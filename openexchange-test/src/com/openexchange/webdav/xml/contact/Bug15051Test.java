@@ -47,32 +47,56 @@
  *
  */
 
-package com.openexchange.webdav.xml.appointment.actions;
+package com.openexchange.webdav.xml.contact;
 
-import org.jdom.Document;
+import com.openexchange.ajax.contact.action.DeleteRequest;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.webdav.AbstractWebDAVSession;
+import com.openexchange.webdav.xml.contact.actions.InsertRequest;
+import com.openexchange.webdav.xml.contact.actions.InsertResponse;
+import com.openexchange.webdav.xml.framework.WebDAVClient;
 
-import com.openexchange.groupware.Types;
-import com.openexchange.webdav.xml.framework.AbstractInsertParser;
-import com.openexchange.webdav.xml.types.Response;
 
 /**
+ * {@link Bug15051Test}
  *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class InsertParser extends AbstractInsertParser<InsertResponse> {
+public class Bug15051Test extends AbstractWebDAVSession {
 
-    public InsertParser() {
-        super();
+    private WebDAVClient client;
+    private FolderObject folder;
+    private AJAXClient client2;
+    private Contact contact;
+
+    public Bug15051Test(String name) {
+        super(name);
     }
 
     @Override
-    protected int getType() {
-        return Types.APPOINTMENT;
+    protected void setUp() throws Exception {
+        super.setUp();
+        client = getClient();
+        folder = client.getFolderTools().getDefaultContactFolder();
+        client2 = new AJAXClient(User.User1);
+        contact = new Contact();
+        contact.setParentFolderID(folder.getObjectID());
+        contact.setDisplayName("Test for bug 15051");
+        contact.setNote("Zeile 1\nZeile 2");
+        InsertResponse response = client.execute(new InsertRequest(contact));
+        response.fillObject(contact);
     }
 
     @Override
-    protected InsertResponse instantiateResponse(final Document document,
-        final Response[] responses) {
-        return new InsertResponse(document, responses);
+    protected void tearDown() throws Exception {
+        client2.execute(new DeleteRequest(contact));
+        super.tearDown();
+    }
+
+    public void testNewLine() throws Throwable {
+        assertTrue(true);
     }
 }

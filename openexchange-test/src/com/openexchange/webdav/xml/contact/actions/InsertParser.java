@@ -47,19 +47,19 @@
  *
  */
 
-package com.openexchange.webdav.xml.appointment.actions;
+package com.openexchange.webdav.xml.contact.actions;
 
 import org.jdom.Document;
-
 import com.openexchange.groupware.Types;
 import com.openexchange.webdav.xml.framework.AbstractInsertParser;
 import com.openexchange.webdav.xml.types.Response;
 
 /**
+ * {@link InsertParser}
  *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class InsertParser extends AbstractInsertParser<InsertResponse> {
+public class InsertParser extends AbstractInsertParser<InsertResponse> {
 
     public InsertParser() {
         super();
@@ -67,12 +67,11 @@ public final class InsertParser extends AbstractInsertParser<InsertResponse> {
 
     @Override
     protected int getType() {
-        return Types.APPOINTMENT;
+        return Types.CONTACT;
     }
 
     @Override
-    protected InsertResponse instantiateResponse(final Document document,
-        final Response[] responses) {
+    protected InsertResponse instantiateResponse(Document document, Response[] responses) {
         return new InsertResponse(document, responses);
     }
 }

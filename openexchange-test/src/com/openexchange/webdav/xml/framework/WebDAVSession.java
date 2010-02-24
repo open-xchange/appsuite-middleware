@@ -68,9 +68,6 @@ public class WebDAVSession {
         this.client = client;
     }
 
-    /**
-     * @return the conversation
-     */
     public HttpClient getClient() {
         return client;
     }
