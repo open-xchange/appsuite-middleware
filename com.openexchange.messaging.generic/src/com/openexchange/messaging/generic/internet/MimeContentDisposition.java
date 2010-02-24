@@ -257,10 +257,20 @@ public final class MimeContentDisposition extends ParameterizedHeader implements
 
     @Override
     public String toString() {
+        return toString(false);
+    }
+
+    /**
+     * Returns a RFC2045 style (ASCII-only) string representation of this content disposition.
+     * 
+     * @param skipEmptyParams <code>true</code> to skip empty parameters; otherwise <code>false</code>
+     * @return A RFC2045 style (ASCII-only) string representation of this content disposition
+     */
+    public String toString(final boolean skipEmptyParams) {
         final StringBuilder sb = new StringBuilder(64);
         sb.append(disposition);
         if (null != parameterList) {
-            parameterList.appendRFC2045String(sb);
+            parameterList.appendRFC2045String(sb, skipEmptyParams);
         }
         return sb.toString();
     }

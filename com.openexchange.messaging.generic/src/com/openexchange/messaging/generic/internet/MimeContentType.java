@@ -472,10 +472,20 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
 
     @Override
     public String toString() {
+        return toString(false);
+    }
+
+    /**
+     * Returns a RFC2045 style (ASCII-only) string representation of this content type.
+     * 
+     * @param skipEmptyParams <code>true</code> to skip empty parameters; otherwise <code>false</code>
+     * @return A RFC2045 style (ASCII-only) string representation of this content type
+     */
+    public String toString(final boolean skipEmptyParams) {
         final StringBuilder sb = new StringBuilder(64);
-        sb.append(getBaseType());
+        sb.append(primaryType).append(DELIMITER).append(subType);
         if (null != parameterList) {
-            parameterList.appendRFC2045String(sb);
+            parameterList.appendRFC2045String(sb, skipEmptyParams);
         }
         return sb.toString();
     }
