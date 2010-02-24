@@ -170,7 +170,7 @@ public final class ContentDisposition extends ParameterizedHeader {
      * 
      * @param contentDisp The content disposition to apply
      */
-    public void setContentType(final ContentDisposition contentDisp) {
+    public void setContentDisposition(final ContentDisposition contentDisp) {
         if (contentDisp == this) {
             return;
         }

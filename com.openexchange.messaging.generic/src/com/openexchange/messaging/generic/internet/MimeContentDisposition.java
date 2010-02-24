@@ -155,7 +155,7 @@ public final class MimeContentDisposition extends ParameterizedHeader implements
         if (contentDisp == this) {
             return;
         }
-        cdo.setContentType(contentDisp.cdo);
+        cdo.setContentDisposition(contentDisp.cdo);
     }
 
     /**
@@ -242,7 +242,7 @@ public final class MimeContentDisposition extends ParameterizedHeader implements
             return;
         }
         if (contentDisp instanceof MimeContentDisposition) {
-            cdo.setContentType(((MimeContentDisposition) contentDisp).cdo);
+            cdo.setContentDisposition(((MimeContentDisposition) contentDisp).cdo);
         } else {
             cdo.setDisposition(contentDisp.getDisposition());
             {
