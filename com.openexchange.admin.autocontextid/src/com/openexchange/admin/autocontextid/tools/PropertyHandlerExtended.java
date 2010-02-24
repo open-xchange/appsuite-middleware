@@ -77,7 +77,7 @@ public class PropertyHandlerExtended extends PropertyHandler {
         configfile.append(File.separatorChar);
         configfile.append("plugin");
         configfile.append(File.separatorChar);
-        configfile.append("reseller.properties");
+        configfile.append("autocid.properties");
         try {
             addpropsfromfile(configfile.toString());
         } catch (final FileNotFoundException e) {
