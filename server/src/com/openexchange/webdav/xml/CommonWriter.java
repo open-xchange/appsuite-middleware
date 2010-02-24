@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.webdav.xml;
 
 import java.io.UnsupportedEncodingException;
@@ -67,72 +65,67 @@ import com.openexchange.tools.iterator.SearchIteratorException;
  *
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
-
 public abstract class CommonWriter extends FolderChildWriter {
-	
-	protected void writeCommonElements(final CommonObject commonobject, final Element e_prop) throws OXException, SearchIteratorException, UnsupportedEncodingException {
-		
-		if (commonobject.containsParentFolderID() && commonobject.getParentFolderID() == 0) {
-			addElement("personal_folder_id", commonobject.getParentFolderID(), e_prop);
-			commonobject.setParentFolderID(-1);
-		}
-		
-		if (commonobject.getNumberOfAttachments() > 0) {
-			writeElementAttachments(commonobject, e_prop);
-		}
-		
-		writeFolderChildElements(commonobject, e_prop);
-		
-		addElement("categories", commonobject.getCategories(), e_prop);
-		addElement("private_flag", commonobject.getPrivateFlag(), e_prop);
-	}
-	
-	protected void writeElementAttachments(final CommonObject commonobject, final Element e_prop) throws OXException, SearchIteratorException, UnsupportedEncodingException {
-		final Element e_attachments = new Element("attachments", XmlServlet.NS);
-		SearchIterator it = null;
-		try {
-			XmlServlet.attachmentBase.startTransaction();
-			final TimedResult tResult = XmlServlet.attachmentBase.getAttachments(commonobject.getParentFolderID(),
-					commonobject.getObjectID(), getModule(), ctx, userObj,
-					UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
-							ctx));
-			
-			it = tResult.results();
-			
-			while (it.hasNext()) {
-				final AttachmentMetadata attachmentMeta = (AttachmentMetadata)it.next();
-				
-				final Element e = new Element("attachment", XmlServlet.NS);
-				
-				String filename = attachmentMeta.getFilename();
-				
-				if (filename != null) {
-					filename = URLEncoder.encode(filename, "UTF-8");
-				}
-				
-				e.addContent(correctCharacterData(filename));
-				e.setAttribute("id", String.valueOf(attachmentMeta.getId()), XmlServlet.NS);
-				e.setAttribute("last_modified", String.valueOf(attachmentMeta.getCreationDate().getTime()), XmlServlet.NS);
-				e.setAttribute("mimetype", attachmentMeta.getFileMIMEType(), XmlServlet.NS);
-				e.setAttribute("rtf_flag", String.valueOf(attachmentMeta.getRtfFlag()), XmlServlet.NS);
-				
-				e_attachments.addContent(e);
-			}
-		} finally {
-			if(it != null) {
-				it.close();
-			} 
-			
-			XmlServlet.attachmentBase.commit();
-			XmlServlet.attachmentBase.finish();
-		}
-		
-		e_prop.addContent(e_attachments);
-	}
-	
-	protected abstract int getModule();
+
+    protected void writeCommonElements(final CommonObject commonobject, final Element e_prop) throws OXException, SearchIteratorException, UnsupportedEncodingException {
+
+        if (commonobject.containsParentFolderID() && commonobject.getParentFolderID() == 0) {
+            addElement("personal_folder_id", commonobject.getParentFolderID(), e_prop);
+            commonobject.setParentFolderID(-1);
+        }
+
+        if (commonobject.getNumberOfAttachments() > 0) {
+            writeElementAttachments(commonobject, e_prop);
+        }
+
+        writeFolderChildElements(commonobject, e_prop);
+
+        addElement("categories", commonobject.getCategories(), e_prop);
+        addElement("private_flag", commonobject.getPrivateFlag(), e_prop);
+    }
+
+    protected void writeElementAttachments(final CommonObject commonobject, final Element e_prop) throws OXException, SearchIteratorException, UnsupportedEncodingException {
+        final Element e_attachments = new Element("attachments", XmlServlet.NS);
+        SearchIterator it = null;
+        try {
+            XmlServlet.attachmentBase.startTransaction();
+            final TimedResult tResult = XmlServlet.attachmentBase.getAttachments(commonobject.getParentFolderID(),
+                    commonobject.getObjectID(), getModule(), ctx, userObj,
+                    UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
+                            ctx));
+
+            it = tResult.results();
+
+            while (it.hasNext()) {
+                final AttachmentMetadata attachmentMeta = (AttachmentMetadata)it.next();
+
+                final Element e = new Element("attachment", XmlServlet.NS);
+
+                String filename = attachmentMeta.getFilename();
+
+                if (filename != null) {
+                    filename = URLEncoder.encode(filename, "UTF-8");
+                }
+
+                e.addContent(correctCharacterData(filename));
+                e.setAttribute("id", String.valueOf(attachmentMeta.getId()), XmlServlet.NS);
+                e.setAttribute("last_modified", String.valueOf(attachmentMeta.getCreationDate().getTime()), XmlServlet.NS);
+                e.setAttribute("mimetype", attachmentMeta.getFileMIMEType(), XmlServlet.NS);
+                e.setAttribute("rtf_flag", String.valueOf(attachmentMeta.getRtfFlag()), XmlServlet.NS);
+
+                e_attachments.addContent(e);
+            }
+        } finally {
+            if(it != null) {
+                it.close();
+            }
+
+            XmlServlet.attachmentBase.commit();
+            XmlServlet.attachmentBase.finish();
+        }
+
+        e_prop.addContent(e_attachments);
+    }
+
+    protected abstract int getModule();
 }
-
-
-
-
