@@ -237,14 +237,17 @@ ol ol ol li                                       { background: none; padding: 0
             </tr>
             <#list 0..23 as hour>
             <tr>
-              <td class="time"> 
-                ${hour}
-              </td>
+              <#if hour % 2 == 0 >
+                <#assign inlineStyle = "border-right: 1px solid #C0C0C1;">
+              <#else>
+                <#assign inlineStyle = "">
+              </#if>
+              <td class="time" style="${inlineStyle}">${hour}</td>
               <#list days as day>
               <#if day.weekEnd>
-              <td class="appointmentsWeekEnd" style="width: ${columnWidth}%; ">
+                <td class="appointmentsWeekEnd" style="width: ${columnWidth}%; ${inlineStyle}">
               <#else>
-              <td class="appointments" style="width: ${columnWidth}%; ">
+                <td class="appointments" style="width: ${columnWidth}%; ${inlineStyle}">
               </#if>
                 <div style="position: relative; ">
                   <#assign appointmentWidth = 100 / day.columns?size>

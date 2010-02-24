@@ -234,14 +234,19 @@ ol ol ol li                                       { background: none; padding: 0
             <#if day.firstDayOfWeek>
             <tr>
             </#if>
-              <#if day.today>
-              <td id="currentDate">
-              <#elseif day.outOfRange>
-              <td class="outDate">
-              <#elseif day.weekEnd>
-              <td class="weekEndDay">
+              <#if day_index % 2 == 0>
+                <#assign inlineStyle = "border-left: 1px solid #C0C0C1;">
               <#else>
-              <td class="normalDay">
+                <#assign inlineStyle = "">
+              </#if>
+              <#if day.today>
+                <td id="currentDate" style="${inlineStyle}">
+              <#elseif day.outOfRange>
+                <td class="outDate" style="${inlineStyle}">
+              <#elseif day.weekEnd>
+                <td class="weekEndDay" style="${inlineStyle}">
+              <#else>
+                <td class="normalDay" style="${inlineStyle}">
               </#if>
                 <ol>
                   <li>
