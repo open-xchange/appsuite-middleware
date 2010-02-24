@@ -74,6 +74,7 @@ Import-Package: com.openexchange.config,
  org.w3c.dom,
  org.w3c.dom.css,
  org.w3c.dom.ranges,
+ org.w3c.dom.stylesheets,
  org.xml.sax,
  org.xml.sax.ext,
  org.xml.sax.helpers
