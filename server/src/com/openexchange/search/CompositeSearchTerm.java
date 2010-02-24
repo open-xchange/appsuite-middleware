@@ -227,7 +227,7 @@ public class CompositeSearchTerm implements SearchTerm<SearchTerm<?>> {
     }
 
     public SearchTerm<?>[] getOperands() {
-        return operands.toArray(new SingleSearchTerm[operands.size()]);
+        return operands.toArray(new SearchTerm[operands.size()]);
     }
 
     public Operation getOperation() {
