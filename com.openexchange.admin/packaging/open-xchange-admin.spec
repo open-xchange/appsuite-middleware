@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 4
+%define		ox_release 5
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -337,6 +337,8 @@ fi
 %changelog
 * Mon Jan 11 2010 - choeger@open-xchange.com
  - Bugfix #15174:  Empty directory /opt/open-xchange/libexec is useless
+* Mon Jan 11 2010 - choeger@open-xchange.com
+ - Bugfix #14977:  Reset autocommit on connections before returning them.
 * Fri Dec 18 2009 - marcus.klein@open-xchange.com
  - Bugfix #15077: Increased default max object count for some user related caches to increase performance in large contexts.
 * Mon Dec 14 2009 - marcus.klein@open-xchange.com
