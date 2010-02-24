@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2010-02-18 15:36+0100\n"
+"PO-Revision-Date: 2010-02-23 15:29+0100\n"
 "Last-Translator: Antje Faber <antje.faber@open-xchange.com>\n"
 "Language-Team: deutsch <de@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -471,7 +471,9 @@ msgid "Can not generate uid."
 msgstr "UID konnte nicht generiert werden"
 
 msgid "Can not insert appointment with this uid. Uid already exists."
-msgstr "Termin mit dieser UID kann nicht eingefügt werden. Die UID ist bereits vorhanden."
+msgstr ""
+"Termin mit dieser UID kann nicht eingefügt werden. Die UID ist bereits "
+"vorhanden."
 
 msgid "Can not resolve resource: %1$s"
 msgstr "Fehler beim Auflösen der Ressource: %1$s"
@@ -1263,6 +1265,9 @@ msgstr "Der Ordner ist nicht vom Typ Kalender"
 msgid "Folder module cannot be updated since folder is not empty"
 msgstr "Ordner-Modul kann nicht aktualisiert werden, da der Ordner nicht leer ist."
 
+msgid "Folder module must not be updated."
+msgstr "Das Ordnermodul darf nicht aktualisiert werden."
+
 msgid "Folder of the object is missing."
 msgstr "Fehlender Ordner für das Objekt"
 
@@ -1294,6 +1299,8 @@ msgid ""
 "Found duplicate used authentication identifier. Login of existing session: %1"
 "$s. Current denied login request: %2$s."
 msgstr ""
+"Doppelt verwendete Authentifikations-ID gefunden. Login der bestehenden "
+"Session: %1$s. Aktuell verweigerte Login-Anfrage: %2$s."
 
 msgid "Found resource groups with same identifier %1$d."
 msgstr "Ressourcengruppen mit gleicher ID %1$d gefunden"
@@ -2328,6 +2335,8 @@ msgstr "Sitzung versucht, Instanz für nicht vorhandenen Provider zu erstellen: 
 
 msgid "Session secret is different. Given %1$s differs from %2$s in session."
 msgstr ""
+"Session Secret ist nicht identisch. Angegebener %1$s unterscheidet sich von %"
+"2$s in der Session."
 
 msgid "SessionObject not initialized"
 msgstr "SessionObject nicht initialisiert"
@@ -2543,6 +2552,9 @@ msgid ""
 msgstr ""
 "Der Teil der Nachricht mit der Sequenz-ID %1$s konnte nicht in der Nachricht "
 "%2$s im Ordner %3$s gefunden werden."
+
+msgid "The module of a default folder must not be changed."
+msgstr "Das Modul eines Standardordners darf nicht geändert werden."
 
 msgid ""
 "The name you entered is not available. Choose another display name. Context %"
@@ -3215,6 +3227,9 @@ msgstr "Benutzerkonfiguration konnte nicht in den Cache gelegt werden: %1$s"
 msgid "User configuration could not be removed from cache: %1$s"
 msgstr "Entfernen der Benutzerkonfiguration aus dem Cache fehlgeschlagen: %1$s"
 
+msgid "User contacts can not be deleted."
+msgstr "Benutzerkontakte können nicht gelöscht werden."
+
 msgid "User input error %s"
 msgstr "Benutzer-Eingabefehler: %s"
 
@@ -3255,6 +3270,9 @@ msgstr "Ungültiger Dateispeicher %1$d für Kontext %2$d benötigt Dateispeicher
 
 msgid "Wrong message header: %1$s"
 msgstr "Ungültiger Nachrichten-Header: %1$s"
+
+msgid "Wrong number of rows changed. Expected %1$d but was %2$d."
+msgstr "Falsche Anzahl von Zeilen geändert. %1$d erwartet, jedoch %2$d geändert."
 
 msgid ""
 "Wrong or missing login data to access server %1$s with login %2$s (user=%3"
@@ -3656,6 +3674,84 @@ msgstr "Fehlende Eigenschaft: %1$s"
 msgid "Invalid property value in property \"%1$s\": %2$s"
 msgstr "Ungültiger Eigenschafts-Wert in Eigenschaft \"%1$s\": %2$s"
 
+#. Please try again later.
+msgid "Please try again later."
+msgstr "Bitte später erneut versuchen."
+
+#. A SQL Error occurred.
+msgid "A SQL Error occurred."
+msgstr "Es trat ein SQL-Fehler auf."
+
+#. Provide well-formed HTML.
+msgid "Provide well-formed HTML."
+msgstr "Liefern Sie wohlgeformtes HTML."
+
+#. A parsing error occurred: %1$s.
+msgid "A parsing error occurred: %1$s."
+msgstr "Es trat ein Analyse-Fehler auf: %1$s."
+
+#. Parsing error.
+msgid "Parsing error."
+msgstr "Analyse-Fehler."
+
+#. Do not set a ID when saving a publication
+msgid "Do not set a ID when saving a publication"
+msgstr "Setzen Sie beim Speichern einer Veröffentlichung keine ID."
+
+#. Unable to save a given ID.
+msgid "Unable to save a given ID."
+msgstr "Angegebene ID kann nicht gespeichert werden."
+
+#. Provide a valid id.
+msgid "Provide a valid id."
+msgstr "Geben Sie eine gültige ID an."
+
+#. Could not find this Subscription
+msgid "Could not find this Subscription"
+msgstr "Abonnement konnte nicht gefunden werden"
+
+#. Check value to parse.
+msgid "Check value to parse."
+msgstr "Prüfen Sie den zu analysierenden Wert."
+
+#. Please correct the password and try again
+msgid "Please correct the password and try again"
+msgstr "Korrigieren Sie das Passwort und versuchen Sie es erneut."
+
+#. The password you entered was wrong
+msgid "The password you entered was wrong"
+msgstr "Das von Ihnen eingegebene Passwort ist falsch."
+
+#. Make sure, that the Service is still available, and there are no major changes on the website
+msgid ""
+"Make sure, that the Service is still available, and there are no major "
+"changes on the website"
+msgstr "Stellen Sie sicher, dass der Dienst noch verfügbar ist und es keine größeren Änderungen auf der Website gab."
+
+#. Service unavailable
+msgid "Service unavailable"
+msgstr "Dienst ist nicht verfügbar"
+
+#. Please correct the steps of this workflow so that output of one step and input of the next step match
+msgid ""
+"Please correct the steps of this workflow so that output of one step and "
+"input of the next step match"
+msgstr "Korrigieren Sie die Schritte dieses Workflows, so dass die Ausgabe des einen Schrittes mit der Eingabe des nächsten Schrittes übereinstimmt."
+
+#. The steps of this crawling workflow do not fit together
+msgid "The steps of this crawling workflow do not fit together"
+msgstr ""
+
+#. Ask an administrator to check the available subscription sources
+msgid "Ask an administrator to check the available subscription sources"
+msgstr "Wenden Sie sich an den Administrator zum Prüfen der verfügbaren Abonnement-Quellen."
+
+#. The subscription source this subscription belongs to is currently inactive, and cannot provide data.
+msgid ""
+"The subscription source this subscription belongs to is currently inactive, "
+"and cannot provide data."
+msgstr "Die Quelle dieses Abonnements ist derzeit nicht aktiv und kann keine Daten bereitstellen."
+
 #. Missing main extension attribute for user %1$s in context %2$s.
 msgid "Missing main extension attribute for user %1$s in context %2$s."
 msgstr "Fehlendes Haupterweiterungsattribut für Benutzer %1$s im Kontext %2$s."
@@ -3957,7 +4053,9 @@ msgstr "Ungültige Ordner-ID: %1$s."
 
 #. Folder "%1$s" must not be deleted by user "%2$s" in context "%3$s".
 msgid "Folder \"%1$s\" must not be deleted by user \"%2$s\" in context \"%3$s\"."
-msgstr "Ordner \"%1$s\" darf im Kontext \"%3$s\" vom Benutzer \"%2$s\" nicht gelöscht werden."
+msgstr ""
+"Ordner \"%1$s\" darf im Kontext \"%3$s\" vom Benutzer \"%2$s\" nicht "
+"gelöscht werden."
 
 msgid ""
 "Current version number %1$s is already lower than or equal to desired "
@@ -3979,6 +4077,8 @@ msgid ""
 "Update task %1$s returned an unknown concurrency level. Running as blocking "
 "task."
 msgstr ""
+"Update-Aufgabe %1$s gab einen unbekannten Gleichzeitigkeits-Level zurück. "
+"Sie wird als blockierende Aufgabe ausgeführt."
 
 msgid ""
 "Version can not be set back if update task handling has been migrated to "
@@ -4006,6 +4106,8 @@ msgid ""
 "Blocking tasks (%1$s) must be executed before background tasks can be "
 "executed (%2$s)."
 msgstr ""
+"Bevor Hintergrundaufgaben ausgeführt werden können (%2$s) müssen "
+"blockierende Aufgaben (%1$s) ausgeführt werden,"
 
 msgid "No row found in table version in schema %1$s."
 msgstr "Keine Zeile in Tabellen-Version in Schema %1$s gefunden."
@@ -4110,6 +4212,10 @@ msgstr "Überprüfen des E-Mail-Accounts fehlgeschlagen"
 #. Multiple mail accounts not enabled for user %1$s in context %2$s.
 msgid "Multiple mail accounts not enabled for user %1$s in context %2$s."
 msgstr "Multiple E-Mail-Accounts nicht für Benutzer %1$s im Kontext %2$s aktiviert"
+
+#. Invalid mail account name: %1$s
+msgid "Invalid mail account name: %1$s"
+msgstr "Ungültiger Mail-Account-Name: %1$s"
 
 #. Search failed: %1$s.
 msgid "Search failed: %1$s."
