@@ -50,6 +50,7 @@
 package com.openexchange.webdav.xml;
 
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -63,6 +64,7 @@ import org.jdom.Namespace;
 import org.jdom.Text;
 import org.jdom.output.XMLOutputter;
 import com.openexchange.api.OXObjectNotFoundException;
+import com.openexchange.api2.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
@@ -79,6 +81,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.encoding.Base64;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.webdav.xml.fields.ContactFields;
 
 /**
@@ -232,7 +235,7 @@ public class ContactWriter extends CommonWriter {
         addContent2PropElement(e, contactobject, delete, false);
     }
 
-    protected void addContent2PropElement(final Element e, final Contact contactobject, final boolean delete, final boolean externalUser) throws Exception {
+    public void addContent2PropElement(final Element e, final Contact contactobject, final boolean delete, final boolean externalUser) throws OXException, SearchIteratorException, UnsupportedEncodingException, AddressException {
         if (delete) {
             addElement(ContactFields.OBJECT_ID, contactobject.getObjectID(), e);
             addElement(ContactFields.LAST_MODIFIED, contactobject.getLastModified(), e);
@@ -259,11 +262,11 @@ public class ContactWriter extends CommonWriter {
         }
     }
 
-    protected void writeContactElement(final Contact contactobject, final Element e) throws Exception {
+    protected void writeContactElement(final Contact contactobject, final Element e) throws AddressException {
         writeContactElement(contactobject, e, null);
     }
 
-    protected void writeContactElement(final Contact contactobject, final Element e, final Set<InternetAddress> internalAddresses) throws Exception {
+    protected void writeContactElement(final Contact contactobject, final Element e, final Set<InternetAddress> internalAddresses) throws AddressException {
         addElement("object_status", "CREATE", e);
         addElement(ContactFields.LAST_NAME, contactobject.getSurName(), e);
         addElement(ContactFields.FIRST_NAME, contactobject.getGivenName(), e);
@@ -411,7 +414,7 @@ public class ContactWriter extends CommonWriter {
         }
     }
 
-    protected void writeLinks(final Contact contactobject, final Element e_prop) throws Exception {
+    protected void writeLinks(final Contact contactobject, final Element e_prop) {
         final Element e_links = new Element(ContactFields.LINKS, XmlServlet.NS);
 
         final LinkEntryObject[] links = contactobject.getLinks();
@@ -432,7 +435,7 @@ public class ContactWriter extends CommonWriter {
         e_prop.addContent(e_links);
     }
 
-    protected void writeDistributionList(final Contact contactobject, final Element e_prop) throws Exception {
+    protected void writeDistributionList(final Contact contactobject, final Element e_prop) {
         final Element e_distributionlist = new Element(ContactFields.DISTRIBUTIONLIST, XmlServlet.NS);
 
         final DistributionListEntryObject[] distributionlist = contactobject.getDistributionList();
