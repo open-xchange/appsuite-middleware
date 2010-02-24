@@ -63,7 +63,7 @@ public class PropertyHandlerExtended extends PropertyHandler {
     private final static Log log = LogFactory.getLog(PropertyHandlerExtended.class);
     
     // The following lines define the property values for the database implementations
-    public static final String RESELLER_STORAGE = "RESELLER_STORAGE";
+    public static final String AUTOCID_STORAGE = "AUTOCID_STORAGE";
 
     @SuppressWarnings("unused")
     private PropertyHandlerExtended() {

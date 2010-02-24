@@ -91,7 +91,7 @@ public abstract class OXAutoCIDStorageInterface {
             if (null == implementingClass) {
                 cache = ClientAdminThreadExtended.cache;
                 prop = cache.getProperties();
-                final String className = prop.getProp(PropertyHandlerExtended.RESELLER_STORAGE, null);
+                final String className = prop.getProp(PropertyHandlerExtended.AUTOCID_STORAGE, null);
                 if (null != className) {
                     try {
                         implementingClass = Class.forName(className).asSubclass(OXAutoCIDStorageInterface.class);
