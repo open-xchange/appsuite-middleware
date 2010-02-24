@@ -118,9 +118,6 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 )
 public class ImportServlet extends ImportExport {
     
-    /**
-     * Logger.
-     */
     private static final Log LOG = LogFactory.getLog(ImportServlet.class);
 
     private final static ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(ImportServlet.class);
@@ -129,17 +126,10 @@ public class ImportServlet extends ImportExport {
 
     private static final long serialVersionUID = -4691910391290394603L;
 
-    /**
-     * Default constructor.
-     */
     public ImportServlet() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @SuppressWarnings("unchecked")
     @Override 
     protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         final Response resObj = new Response();
