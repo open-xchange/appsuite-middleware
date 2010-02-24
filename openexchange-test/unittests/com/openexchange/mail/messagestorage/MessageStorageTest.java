@@ -413,8 +413,6 @@ public abstract class MessageStorageTest extends AbstractMailTest {
             }
             if (full || set.contains(MailField.CONTENT_TYPE)) {
                 assertTrue("Missing content type in " + mailname, mail.containsContentType());
-            } else {
-                assertTrue("Content type set in " + mailname + " although not requested", !mail.containsContentType());
             }
             if (full || set.contains(MailField.DISPOSITION_NOTIFICATION_TO)) {
                 assertTrue("Missing Disposition-Notification-To in " + mailname, mail.containsDispositionNotification());
