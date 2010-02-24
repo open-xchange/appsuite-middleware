@@ -56,7 +56,6 @@ import junit.framework.TestSuite;
  * {@link MailTestSuite}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
  */
 public final class MailTestSuite extends TestSuite {
 
@@ -64,27 +63,25 @@ public final class MailTestSuite extends TestSuite {
         super();
     }
 
-    /**
-     * @return a test suite containing smoke tests.
-     */
     public static Test suite() {
         final TestSuite mailSuite = new TestSuite();
-        mailSuite.addTestSuite(com.openexchange.ajax.mail.AllTest.class);
-        mailSuite.addTestSuite(com.openexchange.ajax.mail.ListTest.class);
-        mailSuite.addTestSuite(com.openexchange.ajax.mail.GetTest.class);
-        mailSuite.addTestSuite(com.openexchange.ajax.mail.SendTest.class);
-        mailSuite.addTestSuite(com.openexchange.ajax.mail.CountMailTest.class);
-        mailSuite.addTestSuite(com.openexchange.ajax.mail.MailSearchTest.class);
-        mailSuite.addTestSuite(com.openexchange.ajax.mail.ForwardMailTest.class);
-        mailSuite.addTestSuite(com.openexchange.ajax.mail.ReplyAllTest.class);
-        mailSuite.addTestSuite(com.openexchange.ajax.mail.ReplyTest.class);
-        mailSuite.addTestSuite(com.openexchange.ajax.mail.UpdateMailTest.class);
-        mailSuite.addTestSuite(com.openexchange.ajax.mail.MoveMailTest.class);
-        mailSuite.addTestSuite(com.openexchange.ajax.mail.ClearTest.class);
-        mailSuite.addTestSuite(com.openexchange.ajax.mail.CopyMailTest.class);
-        mailSuite.addTestSuite(com.openexchange.ajax.mail.ViewTest.class);
-        mailSuite.addTestSuite(com.openexchange.ajax.mail.MultipleAttachmentTest.class);
-        /*mailSuite.addTestSuite(com.openexchange.ajax.mail.AlwaysTest.class);*/
+        mailSuite.addTestSuite(AllTest.class);
+        mailSuite.addTestSuite(ListTest.class);
+        mailSuite.addTestSuite(GetTest.class);
+        mailSuite.addTestSuite(SendTest.class);
+        mailSuite.addTestSuite(CountMailTest.class);
+        mailSuite.addTestSuite(MailSearchTest.class);
+        mailSuite.addTestSuite(ForwardMailTest.class);
+        mailSuite.addTestSuite(ReplyAllTest.class);
+        mailSuite.addTestSuite(ReplyTest.class);
+        mailSuite.addTestSuite(UpdateMailTest.class);
+        mailSuite.addTestSuite(MoveMailTest.class);
+        mailSuite.addTestSuite(ClearTest.class);
+        mailSuite.addTestSuite(CopyMailTest.class);
+        mailSuite.addTestSuite(ViewTest.class);
+        mailSuite.addTestSuite(MultipleAttachmentTest.class);
+        mailSuite.addTestSuite(SearchTest.class);
+        /*mailSuite.addTestSuite(AlwaysTest.class);*/
         return mailSuite;
     }
 }
