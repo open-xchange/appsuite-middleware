@@ -50,18 +50,15 @@
 package com.openexchange.mail.mime.dataobjects;
 
 import static com.openexchange.mail.mime.utils.MIMEMessageUtility.extractHeader;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeBodyPart;
-
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
@@ -84,8 +81,8 @@ public final class MIMEMultipartMailPart extends MailPart {
 
     private static final long serialVersionUID = -3130161956976376243L;
 
-    private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-            .getLog(MIMEMultipartMailPart.class);
+    private static final transient org.apache.commons.logging.Log LOG =
+        org.apache.commons.logging.LogFactory.getLog(MIMEMultipartMailPart.class);
 
     private static final int BUFSIZE = 8192; // 8K
 
@@ -262,8 +259,8 @@ public final class MIMEMultipartMailPart extends MailPart {
             }
         } catch (final ArrayIndexOutOfBoundsException e) {
             throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, new StringBuilder(64).append(
-                    "Illegal access to multipart data at index ").append(e.getMessage()).append(", but total length is ").append(
-                    dataBytes.length).toString());
+                "Illegal access to multipart data at index ").append(e.getMessage()).append(", but total length is ").append(
+                dataBytes.length).toString());
         }
         if (!endingBoundaryFound) {
             if (0 == count) {
@@ -369,6 +366,12 @@ public final class MIMEMultipartMailPart extends MailPart {
         }
         int i = index;
         int startIndex = positions[i++];
+        if (startIndex >= dataBytes.length) {
+            /*
+             * Empty (text) body
+             */
+            return createTextPart();
+        }
         if ('\r' == dataBytes[startIndex]) {
             startIndex += (getBoundaryBytes().length + 1);
         } else {
@@ -377,10 +380,10 @@ public final class MIMEMultipartMailPart extends MailPart {
         /*
          * Omit starting CR?LF
          */
-        if ('\n' == dataBytes[startIndex]) {
-            startIndex++;
-        } else if ('\r' == dataBytes[startIndex] && '\n' == dataBytes[startIndex + 1]) {
+        if ('\r' == dataBytes[startIndex] && '\n' == dataBytes[startIndex + 1]) {
             startIndex += 2;
+        } else if ('\n' == dataBytes[startIndex]) {
+            startIndex++;
         }
         final int endIndex = i >= positions.length ? dataBytes.length : positions[i];
         final byte[] subArr = new byte[endIndex - startIndex];
@@ -418,13 +421,26 @@ public final class MIMEMultipartMailPart extends MailPart {
         }
     }
 
+    private static MailPart createTextPart() throws MailException {
+        try {
+            final MimeBodyPart mbp = new MimeBodyPart();
+            mbp.setText("", "US-ASCII");
+            mbp.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
+            mbp.setHeader(MessageHeaders.HDR_CONTENT_TYPE, "text/plain; charset=\"US-ASCII\"");
+            return MIMEMessageConverter.convertPart(mbp);
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e);
+        }
+    }
+
     private static MailPart createTextPart(final byte[] subArr, final String charset) throws UnsupportedEncodingException, MailException {
         try {
             final MimeBodyPart mbp = new MimeBodyPart();
             mbp.setText(new String(subArr, charset), charset);
             mbp.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-            mbp.setHeader(MessageHeaders.HDR_CONTENT_TYPE, new StringBuilder("text/plain; charset=\"").append(charset).append('"')
-                    .toString());
+            mbp.setHeader(
+                MessageHeaders.HDR_CONTENT_TYPE,
+                new StringBuilder("text/plain; charset=\"").append(charset).append('"').toString());
             return MIMEMessageConverter.convertPart(mbp);
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);
@@ -495,8 +511,8 @@ public final class MIMEMultipartMailPart extends MailPart {
         if (boundary == null || boundary.length() == 0) {
             throw new IllegalStateException("Missing boundary in multipart content-type");
         }
-        return (boundaryBytes = getBytes(new StringBuilder(boundary.length() + 3).append('\n').append(STR_BD_START).append(boundary)
-                .toString()));
+        return (boundaryBytes =
+            getBytes(new StringBuilder(boundary.length() + 3).append('\n').append(STR_BD_START).append(boundary).toString()));
     }
 
     /**
@@ -605,8 +621,7 @@ public final class MIMEMultipartMailPart extends MailPart {
      * @return The index of the first occurrence of the pattern in the byte array starting from given index or <code>-1</code> if none
      *         found.
      */
-    private static int indexOf(final byte[] data, final byte[] pattern, final int beginIndex, final int endIndex,
-            final int[] computedFailures) {
+    private static int indexOf(final byte[] data, final byte[] pattern, final int beginIndex, final int endIndex, final int[] computedFailures) {
         if ((beginIndex < 0) || (beginIndex > data.length)) {
             throw new IndexOutOfBoundsException(String.valueOf(beginIndex));
         }
