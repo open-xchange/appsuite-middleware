@@ -252,10 +252,13 @@ public final class ContentType extends ParameterizedHeader {
 
     /**
      * Sets primary type
+     * 
+     * @return This content type with new primary type applied
      */
-    public void setPrimaryType(final String primaryType) {
+    public ContentType setPrimaryType(final String primaryType) {
         this.primaryType = primaryType;
         baseType = null;
+        return this;
     }
 
     /**
@@ -267,10 +270,13 @@ public final class ContentType extends ParameterizedHeader {
 
     /**
      * Sets sub-type
+     * 
+     * @return This content type with new sub-type applied
      */
-    public void setSubType(final String subType) {
+    public ContentType setSubType(final String subType) {
         this.subType = subType;
         baseType = null;
+        return this;
     }
 
     /**
