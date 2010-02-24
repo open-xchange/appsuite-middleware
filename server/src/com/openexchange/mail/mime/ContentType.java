@@ -49,31 +49,187 @@
 
 package com.openexchange.mail.mime;
 
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
+import com.openexchange.tools.Collections;
 
 /**
  * {@link ContentType} - Parses value of MIME header <code>Content-Type</code>
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ContentType extends ParameterizedHeader {
+public class ContentType extends ParameterizedHeader {
 
     private static final long serialVersionUID = -9197784872892324694L;
 
+    public static final class UnmodifiableContentType extends ContentType {
+
+        private static final long serialVersionUID = 2473639344400699520L;
+
+        private final ContentType contentType;
+
+        /**
+         * Initializes a new {@link UnmodifiableContentType}.
+         * 
+         * @param contentType The backing content type
+         */
+        public UnmodifiableContentType(final ContentType contentType) {
+            super();
+            this.contentType = contentType;
+        }
+
+        @Override
+        public void addParameter(final String key, final String value) {
+            throw new UnsupportedOperationException("ContentType.UnmodifiableContentType.addParameter()");
+        }
+
+        @Override
+        public int compareTo(final ParameterizedHeader other) {
+            return contentType.compareTo(other);
+        }
+
+        @Override
+        public boolean containsCharsetParameter() {
+            return contentType.containsCharsetParameter();
+        }
+
+        @Override
+        public boolean containsNameParameter() {
+            return contentType.containsNameParameter();
+        }
+
+        @Override
+        public boolean containsParameter(final String key) {
+            return contentType.containsParameter(key);
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            return contentType.equals(obj);
+        }
+
+        @Override
+        public String getBaseType() {
+            return contentType.getBaseType();
+        }
+
+        @Override
+        public String getCharsetParameter() {
+            return contentType.getCharsetParameter();
+        }
+
+        @Override
+        public String getNameParameter() {
+            return contentType.getNameParameter();
+        }
+
+        @Override
+        public String getParameter(final String key) {
+            return contentType.getParameter(key);
+        }
+
+        @Override
+        public Iterator<String> getParameterNames() {
+            return Collections.unmodifiableIterator(contentType.getParameterNames());
+        }
+
+        @Override
+        public String getPrimaryType() {
+            return contentType.getPrimaryType();
+        }
+
+        @Override
+        public String getSubType() {
+            return contentType.getSubType();
+        }
+
+        @Override
+        public int hashCode() {
+            return contentType.hashCode();
+        }
+
+        @Override
+        public boolean isMimeType(final String pattern) {
+            return contentType.isMimeType(pattern);
+        }
+
+        @Override
+        public String removeParameter(final String key) {
+            throw new UnsupportedOperationException("ContentType.UnmodifiableContentType.removeParameter()");
+        }
+
+        @Override
+        public ContentType setBaseType(final String baseType) throws MailException {
+            throw new UnsupportedOperationException("ContentType.UnmodifiableContentType.setCharsetParameter()");
+        }
+
+        @Override
+        public ContentType setCharsetParameter(final String charset) {
+            throw new UnsupportedOperationException("ContentType.UnmodifiableContentType.setCharsetParameter()");
+        }
+
+        @Override
+        public void setContentType(final ContentType contentType) {
+            throw new UnsupportedOperationException("ContentType.UnmodifiableContentType.setContentType()");
+        }
+
+        @Override
+        public void setContentType(final String contentType) throws MailException {
+            throw new UnsupportedOperationException("ContentType.UnmodifiableContentType.setContentType()");
+        }
+
+        @Override
+        public ContentType setNameParameter(final String filename) {
+            throw new UnsupportedOperationException("ContentType.UnmodifiableContentType.setNameParameter()");
+        }
+
+        @Override
+        public void setParameter(final String key, final String value) {
+            throw new UnsupportedOperationException("ContentType.UnmodifiableContentType.setParameter()");
+        }
+
+        @Override
+        public ContentType setPrimaryType(final String primaryType) {
+            throw new UnsupportedOperationException("ContentType.UnmodifiableContentType.setPrimaryType()");
+        }
+
+        @Override
+        public ContentType setSubType(final String subType) {
+            throw new UnsupportedOperationException("ContentType.UnmodifiableContentType.setSubType()");
+        }
+
+        @Override
+        public boolean startsWith(final String prefix) {
+            return contentType.startsWith(prefix);
+        }
+
+        @Override
+        public String toString() {
+            return contentType.toString();
+        }
+
+        @Override
+        public String toString(final boolean skipEmptyParams) {
+            return contentType.toString(skipEmptyParams);
+        }
+
+    } // End of UnmodifiableContentType
+
     /**
-     * The default content type: <code>text/plain; charset=us-ascii</code>
+     * The (unmodifiable) default content type: <code>text/plain; charset=us-ascii</code>
      */
     public static final ContentType DEFAULT_CONTENT_TYPE;
 
     static {
-        DEFAULT_CONTENT_TYPE = new ContentType();
-        DEFAULT_CONTENT_TYPE.setPrimaryType("text");
-        DEFAULT_CONTENT_TYPE.setSubType("plain");
-        DEFAULT_CONTENT_TYPE.setCharsetParameter("us-ascii");
+        final ContentType tmp = new ContentType();
+        tmp.setPrimaryType("text");
+        tmp.setSubType("plain");
+        tmp.setCharsetParameter("us-ascii");
+        DEFAULT_CONTENT_TYPE = new UnmodifiableContentType(tmp);
     }
 
     /**
@@ -88,7 +244,7 @@ public final class ContentType extends ParameterizedHeader {
      */
     private static final char DELIMITER = '/';
 
-    private static final String DEFAULT_PRIMTYPE = "APPLICATION";
+    // private static final String DEFAULT_PRIMTYPE = "APPLICATION";
 
     private static final String DEFAULT_SUBTYPE = "OCTET-STREAM";
 
