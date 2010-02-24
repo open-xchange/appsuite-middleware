@@ -52,6 +52,7 @@ package com.openexchange.groupware.importexport;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import com.openexchange.groupware.importexport.importers.CsvDoesDifferentLanguages;
 import com.openexchange.groupware.importexport.importers.ExpressiveErrorMessageWhileParsingVCard;
 import com.openexchange.groupware.vcard.BracketedNicknameTest;
 import com.openexchange.groupware.vcard.MissingAddressesAfterImportTest;
@@ -83,6 +84,7 @@ public class ImportExportStandaloneSuite extends TestSuite {
 		tests.addTest( CSVContactExportTest.suite() );
 		tests.addTest( OutlookCSVContactImportTest.suite() );
         tests.addTestSuite(com.openexchange.groupware.importexport.importers.CannotImportAppleContactsWithInlineImage.class);
+        tests.addTestSuite(CsvDoesDifferentLanguages.class);
         
 		//ICAL
 		tests.addTest( ICalImportTest.suite() );
