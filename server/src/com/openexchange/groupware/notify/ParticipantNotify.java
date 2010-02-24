@@ -1229,11 +1229,11 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             return;
         }
         final Context ctx = session.getContext();
-        List<Participant> mergedWithOrganizer = new ArrayList<Participant>(Arrays.asList(oldParticipants));
-        if (organizer != null && !organizer.trim().equals(""))
-            mergedWithOrganizer.add(new ExternalUserParticipant(organizer));
+//        List<Participant> mergedWithOrganizer = new ArrayList<Participant>(Arrays.asList(oldParticipants));
+//        if (organizer != null && !organizer.trim().equals(""))
+//            mergedWithOrganizer.add(new ExternalUserParticipant(organizer));
         
-        for (final Participant participant : mergedWithOrganizer) {
+        for (final Participant participant : oldParticipants) {
             switch (participant.getType()) {
             case Participant.USER:
                 break;
@@ -1261,6 +1261,8 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 throw new IllegalArgumentException("Unknown Participant Type: " + participant.getType());
             }
         }
+        
+        addSingleParticipant(getExternalParticipant(new ExternalUserParticipant(organizer), session), participantSet, resourceSet, receivers, all, false);
     }
 
     private void sortNewExternalParticipantsAndResources(final Participant[] newParticipants, final Set<EmailableParticipant> participantSet, final Set<EmailableParticipant> resourceSet, final Map<Locale, List<EmailableParticipant>> receivers, final ServerSession session, final Map<String, EmailableParticipant> all, final Participant[] oldParticipants) {
