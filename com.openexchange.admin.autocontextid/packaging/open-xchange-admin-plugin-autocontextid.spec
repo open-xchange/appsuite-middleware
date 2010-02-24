@@ -66,8 +66,6 @@ ant -Dadmin.classpath=%{oxprefix}/bundles/%{adminbundle} \
     -Ddestdir=%{buildroot} -Dprefix=%{oxprefix} \
     -Dadminhosting.classpath=%{oxprefix}/bundles/%{adminhostingbundle} \
     install 
-mv doc javadoc
-
 
 %clean
 %{__rm} -rf %{buildroot}
