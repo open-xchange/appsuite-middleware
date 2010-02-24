@@ -416,8 +416,6 @@ public abstract class MessageStorageTest extends AbstractMailTest {
             }
             if (full || set.contains(MailField.DISPOSITION_NOTIFICATION_TO)) {
                 assertTrue("Missing Disposition-Notification-To in " + mailname, mail.containsDispositionNotification());
-            } else {
-                assertTrue("Disposition-Notification-To set in " + mailname + " although not requested", !mail.containsDispositionNotification());
             }
             if (full || set.contains(MailField.PRIORITY)) {
                 assertTrue("Missing priority in " + mailname, mail.containsPriority());
