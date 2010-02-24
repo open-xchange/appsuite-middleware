@@ -419,8 +419,6 @@ public abstract class MessageStorageTest extends AbstractMailTest {
             }
             if (full || set.contains(MailField.PRIORITY)) {
                 assertTrue("Missing priority in " + mailname, mail.containsPriority());
-            } else {
-                assertTrue("Priority set in " + mailname + " although not requested", !mail.containsPriority());
             }
         }
         if (full || set.contains(MailField.COLOR_LABEL)) {
