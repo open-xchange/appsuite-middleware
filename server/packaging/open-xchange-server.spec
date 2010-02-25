@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 5
+%define		ox_release 6
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -490,6 +490,49 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed Feb 24 2010 - thorben.betten@open-xchange.com
+ - Bugfix #15448: Fixed wrong array type in complex search term
+ - Bugfix #15433: Less strict parsing of multipart/* parts within JavaMail routines
+* Wed Feb 24 2010 - tobias.prinz@open-xchange.com
+ - Bugfix #13557: Error message when importing broken VCards gives line and column information now.
+ - Bugfix #15231 (partial): Can now import most data from Dutch Outlook CSV files
+* Wed Feb 24 2010 - matthias.biggeleben@open-xchange.com
+ - Bugfix #15038: [L3] print week-view within firefox: 2.nd page no vertical lines.
+* Tue Feb 23 2010 - thorben.betten@open-xchange.com
+ - Bugfix #14593: A default folder's module must not be changed
+ - Bugfix #15446: Skipping empty parameters when sanitizing Content-Type header on mail transport
+* Tue Feb 23 2010 francisco.laguna@open-xchange.com
+ - Bugfix #15180: Move Strings around for translation
+ - Bugfix #15040: Don't skip permission checks for internal users
+* Tue Feb 23 2010 - marcus.klein@open-xchange.com
+ - Bugfix #15001: Removing reminder if the according appointment ends in the past.
+ - Bugfix #15364: Moved messaging preferences items to messaging JSON bundle.
+* Mon Feb 22 2010 - thorben.betten@open-xchange.com
+ - Bugfix #15413: Checking account name prior to insertion
+ - Bugfix #15313: Added properties file to define handling of confirmed-spam/confirmed-ham folders
+ - Bugfix #15337: Fixed parsing of "subscribed" folder JSON field
+ - Bugfix #15324: Proper display of plain-text content of a multipart/alternative mail
+* Mon Feb 22 2010 - francisco.laguna@open-xchange.com
+ - Bugfix #15040: Censor user data, when global address book is deactivated
+* Mon Feb 22 2010 - marcus.klein@open-xchange.com
+ - Bugfix #15259: Removed free marked appointments from free/busy data. Was marked there as free but all clients seem to ignore this.
+* Fri Feb 19 2010 - martin.herfurth@open-xchange.com
+ - Bugfix #15420: Confirm status for creator.
+ - Bugfix #15419: Allow null value for contact collect folder.
+* Fri Feb 19 2010 - marcus.klein@open-xchange.com
+ - Bugfix #15225: Optimized tables and update tasks for push malpoll component.
+ - Bugfix #15317: Denying delete of user contacts even if folder permission permits that.
+* Thu Feb 18 2010 - thorben.betten@open-xchange.com
+ - Bugfix #15380: Using faster URL detection throughout mail module
+* Wed Feb 17 2010 - francisco.laguna@open-xchange.com
+ - Bugfix 14919 - Reflect automatic participant status changes in cdao for events
+ - Bugfix #15083: No link to OX for external participants on confirmation change
+* Wed Feb 17 2010 - thorben.betten@open-xchange.com
+ - Bugfix #15410: Proper parsed message if no recipients specified
+ - Bugfix #15367: Reliably deleting existing user data in MAL Poll tables
+ - Bugfix #15406: Auto-detect proper POP3 storage's path
+* Tue Feb 16 2010 - tobias.prinz@open-xchange.com
+ - Bugfix #15241 - VCards by Apple Addressbook with inline images are imported now
 * Mon Feb 15 2010 - thorben.betten@open-xchange.com
  - Bugfix #15365: Added admin daemon to build files
  - Bugfix #15378: Auto-detection of proper content type if "name" parameter is present

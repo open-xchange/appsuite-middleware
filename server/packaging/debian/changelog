@@ -1,3 +1,9 @@
+open-xchange-server (6.15.0.0-6) unstable; urgency=low
+
+  * second build for 6.15-rev6
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 25 Feb 2010 08:25:52 +0100
+
 open-xchange-server (6.15.0.0-5) unstable; urgency=low
 
   * first build for 6.15-rev6
