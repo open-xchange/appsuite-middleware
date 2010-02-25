@@ -1,3 +1,7 @@
+* 2010-02-25 - tobias.prinz@open-xchange.com
+
+ - Bugfix #15247: Outlook CSV field "Account" is not set as first e-mail address anymore.
+
 * 2010-02-25 - marcus.klein@open-xchange.com
 
  - Bugfix #15463: Added missing imports for javax.swing components needed for HTML parsing of emails.
