@@ -509,10 +509,10 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
                 }
             }
         } catch (final MessagingException e) {
+            /*
+             * Discard corrupt message
+             */
             if (WARN) {
-                /*
-                 * Discard corrupt message
-                 */
                 final MailException imapExc = MIMEMailException.handleMessagingException(e);
                 LOG.warn(new StringBuilder(128).append("Message #").append(mail.getSeqnum()).append(" discarded: ").append(
                     imapExc.getMessage()).toString(), imapExc);
