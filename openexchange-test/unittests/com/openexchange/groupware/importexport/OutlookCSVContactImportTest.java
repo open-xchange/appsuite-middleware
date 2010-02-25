@@ -50,6 +50,7 @@
 package com.openexchange.groupware.importexport;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.UnsupportedEncodingException;
@@ -201,7 +202,6 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
 		assertEquals("Only one result" , (Integer) 1 , (Integer) results.size() );
 		final ImportResult res = results.get(0);
 		final Contact conObj = getEntry( Integer.parseInt( res.getObjectId() ) );
-		assertEquals("email@geschaeftlich.tld", conObj.getEmail1() );
 		assertEquals("Position", conObj.getPosition() );
 		assertEquals("Raumnummer", conObj.getRoomNumber() );
 		assertEquals("Bundesland", conObj.getStateHome() );
@@ -210,6 +210,7 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
 		assertEquals("Land (weiteres)", conObj.getCountryOther() );
 		assertEquals("E-Mail (weitere)", conObj.getEmail3() );
 		assertEquals("Land", conObj.getStateBusiness() );
+		assertEquals("email@geschaeftlich.tld", conObj.getEmail1() );
 	}
 	
 	//disabled, waiting for new bug report with English data
@@ -251,6 +252,19 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
 		assertEquals("E-Mail (weitere)", conObj.getEmail3() );
 		assertEquals("Land", conObj.getStateBusiness() );
 	}
+	
+    /*
+     * Account field was made an e-mail address
+     */
+    @Test public void bug15247() throws Exception{
+        final String file = "First Name, Last Name, Account\nTobias, Prinz, fails!";
+        final List<ImportResult> results = importStuff(file);
+        assertTrue("Only one result", 1 == results.size());
+        final ImportResult res = results.get(0);
+        final Contact conObj = getEntry( Integer.parseInt( res.getObjectId() ) );
+        assertFalse("Should not set e-mail address", conObj.containsEmail1());
+        assertEquals("Should only criticize that 'Account' cannot be translated", "I_E-0803" , res.getException().getErrorCode());
+    }
 	
 	public void assertDateEquals(final Date date1 , final Date date2){
 		final Calendar c1 = new GregorianCalendar(), c2 = new GregorianCalendar();
