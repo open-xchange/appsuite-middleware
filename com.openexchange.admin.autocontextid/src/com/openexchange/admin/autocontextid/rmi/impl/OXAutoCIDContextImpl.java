@@ -49,7 +49,6 @@
 
 package com.openexchange.admin.autocontextid.rmi.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.admin.autocontextid.storage.interfaces.OXAutoCIDStorageInterface;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
@@ -185,7 +184,7 @@ public class OXAutoCIDContextImpl implements OXContextPluginInterface {
      * com.openexchange.admin.rmi.dataobjects.Credentials)
      */
     public List<OXCommonExtension> getData(final List<Context> ctxs, final Credentials auth) throws PluginException {
-        return new ArrayList<OXCommonExtension>();
+        return null;
     }
 
     /*
