@@ -94,6 +94,7 @@ ant -Dadmin.classpath=%{oxprefix}/bundles/%{adminbundle} \
 %config(noreplace) /opt/open-xchange/etc/admindaemon/plugin/*
 
 %files -n open-xchange-admin-plugin-autocontextid-client
+%defattr(-,root,root)
 %dir /opt/open-xchange/lib
 /opt/open-xchange/lib/*
 
