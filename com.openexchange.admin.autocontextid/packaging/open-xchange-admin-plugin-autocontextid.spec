@@ -49,7 +49,7 @@ Group:          Applications/Productivity
 Summary:        The Open Xchange Admin Auto Context ID plugin client library
 Requires:       open-xchange-admin-client >= @OXVERSION@ open-xchange-admin-plugin-hosting-client >= @OXVERSION@
 
-%description -n open-xchange-admin-plugin-hosting-client
+%description -n open-xchange-admin-plugin-autocontextid-client
 The Open Xchange Admin Auto Context ID plugin client library
 
 Authors:
