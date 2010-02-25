@@ -164,6 +164,7 @@ public class OutlookCSVContactImporter extends CSVContactImporter {
 		    }
 		    if(mappedFields > highestAmountOfMappedFields){
 		        fieldMapper = mapper;
+		        highestAmountOfMappedFields = mappedFields;
 		    }
 		    
 		}

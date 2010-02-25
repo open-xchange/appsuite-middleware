@@ -49,8 +49,6 @@
 
 package com.openexchange.groupware.contact.mappers;
 
-import java.util.Collection;
-import java.util.HashMap;
 import com.openexchange.groupware.contact.helpers.ContactField;
 
 /**
@@ -69,7 +67,7 @@ public class GermanOutlookMapper extends AbstractOutlookMapper {
         store(ContactField.SUFFIX, "Suffix");
         store(ContactField.COMPANY, "Firma");
         store(ContactField.DEPARTMENT, "Abteilung");
-        store(ContactField.TITLE, "Anrede"); // company???
+        store(ContactField.TITLE, "Anrede");
         store(ContactField.STREET_BUSINESS, "Stra\u00dfe gesch\u00e4ftlich");
         store(ContactField.CITY_BUSINESS, "Ort gesch\u00e4ftlich");
         store(ContactField.STATE_BUSINESS, "Region gesch\u00e4ftlich");
