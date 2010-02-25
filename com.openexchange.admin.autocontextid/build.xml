@@ -120,8 +120,7 @@
             <fileset refid="metainf"/>
         </copy>
         <jar jarfile="jar/${client.jar}"
-         includes="com/openexchange/admin/reseller/rmi/,com/openexchange/admin/rmi/,com/openexchange/admin/reseller/console/,META-INF/**"
-         excludes="com/openexchange/admin/reseller/rmi/impl/"
+         includes="com/openexchange/admin/autocontextid/console/,META-INF/**"
          basedir="classes"/>
         <delete dir="classes/META-INF" />
     </target>
