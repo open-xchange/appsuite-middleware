@@ -109,10 +109,11 @@ public final class FacebookSession {
      */
     public static FacebookSession sessionFor(final MessagingAccount messagingAccount, final Session session) {
         final FacebookSessionRegistry registry = FacebookSessionRegistry.getInstance();
-        FacebookSession facebookSession = registry.getSession(session.getContextId(), session.getUserId());
+        final int accountId = messagingAccount.getId();
+        FacebookSession facebookSession = registry.getSession(session.getContextId(), session.getUserId(), accountId);
         if (null == facebookSession) {
             final FacebookSession newInstance = new FacebookSession(messagingAccount);
-            facebookSession = registry.addSession(session.getContextId(), session.getUserId(), newInstance);
+            facebookSession = registry.addSession(session.getContextId(), session.getUserId(), accountId, newInstance);
             if (null == facebookSession) {
                 facebookSession = newInstance;
             }
@@ -526,6 +527,9 @@ public final class FacebookSession {
             /*
              * Check for proper pager after login
              */
+            if (client.isDesktop()) {
+                System.out.println("Application is set to \"Desktop\", but should be \"Web\".");
+            }
             try {
                 facebookSession = client.auth_getSession(token);
             } catch (final FacebookException e) {

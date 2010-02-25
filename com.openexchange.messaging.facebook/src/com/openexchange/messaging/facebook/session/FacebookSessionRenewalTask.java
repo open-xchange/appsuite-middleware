@@ -51,6 +51,7 @@ package com.openexchange.messaging.facebook.session;
 
 import static com.openexchange.messaging.facebook.session.FacebookSessionRegistry.getInstance;
 import java.util.Iterator;
+import java.util.concurrent.ConcurrentMap;
 import com.openexchange.messaging.facebook.FacebookMessagingException;
 
 /**
@@ -73,18 +74,21 @@ public final class FacebookSessionRenewalTask implements Runnable {
 
     public void run() {
         try {
-            for (final Iterator<FacebookSession> iter = getInstance().iterator(); iter.hasNext();) {
-                final FacebookSession session = iter.next();
-                try {
-                    session.renewSession();
-                } catch (final FacebookMessagingException e) {
-                    LOG.error("Renewal of facebook session failed.", e);
-                    iter.remove();
-                    session.close();
-                } catch (final Exception e) {
-                    LOG.error("Renewal of facebook session failed.", e);
-                    iter.remove();
-                    session.close();
+            for (final Iterator<ConcurrentMap<Integer, FacebookSession>> iter = getInstance().iterator(); iter.hasNext();) {
+                final ConcurrentMap<Integer, FacebookSession> sessions = iter.next();
+                for (final Iterator<FacebookSession> sesIter = sessions.values().iterator(); sesIter.hasNext();) {
+                    final FacebookSession session = sesIter.next();
+                    try {
+                        session.renewSession();
+                    } catch (final FacebookMessagingException e) {
+                        LOG.error("Renewal of facebook session failed.", e);
+                        sesIter.remove();
+                        session.close();
+                    } catch (final Exception e) {
+                        LOG.error("Renewal of facebook session failed.", e);
+                        sesIter.remove();
+                        session.close();
+                    }
                 }
             }
         } catch (final Exception e) {

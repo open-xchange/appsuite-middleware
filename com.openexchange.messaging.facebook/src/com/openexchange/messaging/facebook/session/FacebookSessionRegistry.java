@@ -49,14 +49,11 @@
 
 package com.openexchange.messaging.facebook.session;
 
-import java.text.MessageFormat;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.facebook.services.FacebookMessagingServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.tools.Collections;
 
 /**
  * {@link FacebookSessionRegistry}
@@ -77,40 +74,14 @@ public final class FacebookSessionRegistry {
         return INSTANCE;
     }
 
-    private final ConcurrentMap<SimpleKey, FacebookSession> map;
+    private final ConcurrentMap<SimpleKey, ConcurrentMap<Integer, FacebookSession>> map;
 
     /**
      * Initializes a new {@link FacebookSessionRegistry}.
      */
     private FacebookSessionRegistry() {
         super();
-        map = new ConcurrentHashMap<SimpleKey, FacebookSession>();
-    }
-
-    /**
-     * Closes all sessions contained in this registry.
-     */
-    public void closeAll() {
-        for (final Iterator<FacebookSession> i = map.values().iterator(); i.hasNext();) {
-            i.next().close();
-        }
-    }
-
-    /**
-     * Opens all sessions contained in this registry.
-     */
-    public void openAll() {
-        for (final Iterator<FacebookSession> i = map.values().iterator(); i.hasNext();) {
-            final FacebookSession ses = i.next();
-            try {
-                ses.connect();
-            } catch (final MessagingException e) {
-                org.apache.commons.logging.LogFactory.getLog(FacebookSessionRegistry.class).error(
-                    MessageFormat.format("Connecting facebook session failed. Removing session from registry: {0}", ses.toString()),
-                    e);
-                i.remove();
-            }
-        }
+        map = new ConcurrentHashMap<SimpleKey, ConcurrentMap<Integer, FacebookSession>>();
     }
 
     /**
@@ -118,11 +89,21 @@ public final class FacebookSessionRegistry {
      * 
      * @param contextId The context identifier
      * @param userId The user identifier
+     * @param accountId The account identifier
      * @param facebookSession The facebook session to add
      * @return The previous associated session, or <code>null</code> if there was no session.
      */
-    public FacebookSession addSession(final int contextId, final int userId, final FacebookSession facebookSession) {
-        return map.putIfAbsent(SimpleKey.valueOf(contextId, userId), facebookSession);
+    public FacebookSession addSession(final int contextId, final int userId, final int accountId, final FacebookSession facebookSession) {
+        final SimpleKey key = SimpleKey.valueOf(contextId, userId);
+        ConcurrentMap<Integer, FacebookSession> inner = map.get(key);
+        if (null == inner) {
+            final ConcurrentMap<Integer, FacebookSession> tmp = new ConcurrentHashMap<Integer, FacebookSession>();
+            inner = map.putIfAbsent(key, tmp);
+            if (null == inner) {
+                inner = tmp;
+            }
+        }
+        return inner.putIfAbsent(Integer.valueOf(accountId), facebookSession);
     }
 
     /**
@@ -130,10 +111,12 @@ public final class FacebookSessionRegistry {
      * 
      * @param contextId The context identifier
      * @param userId The user identifier
+     * @param accountId The account identifier
      * @return <code>true</code> if such a facebook session is present; otherwise <code>false</code>
      */
-    public boolean containsSession(final int contextId, final int userId) {
-        return map.containsKey(SimpleKey.valueOf(contextId, userId));
+    public boolean containsSession(final int contextId, final int userId, final int accountId) {
+        final ConcurrentMap<Integer, FacebookSession> inner = map.get(SimpleKey.valueOf(contextId, userId));
+        return null != inner && inner.containsKey(Integer.valueOf(accountId));
     }
 
     /**
@@ -141,10 +124,12 @@ public final class FacebookSessionRegistry {
      * 
      * @param contextId The context identifier
      * @param userId The user identifier
+     * @param accountId The account identifier
      * @return The facebook session or <code>null</code>
      */
-    public FacebookSession getSession(final int contextId, final int userId) {
-        return map.get(SimpleKey.valueOf(contextId, userId));
+    public FacebookSession getSession(final int contextId, final int userId, final int accountId) {
+        final ConcurrentMap<Integer, FacebookSession> inner = map.get(SimpleKey.valueOf(contextId, userId));
+        return null == inner ? null : inner.get(Integer.valueOf(accountId));
     }
 
     /**
@@ -153,12 +138,20 @@ public final class FacebookSessionRegistry {
      * 
      * @param contextId The context identifier
      * @param userId The user identifier
+     * @param accountId The account identifier
      * @return <code>true</code> if a facebook session for given user-context-pair was found and removed; otherwise <code>false</code>
      */
     public boolean removeSessionIfLast(final int contextId, final int userId) {
         final SessiondService sessiondService = FacebookMessagingServiceRegistry.getServiceRegistry().getService(SessiondService.class);
         if (null == sessiondService || 0 == sessiondService.getUserSessions(userId, contextId)) {
-            return removeSession(SimpleKey.valueOf(contextId, userId));
+            final ConcurrentMap<Integer, FacebookSession> inner = map.remove(SimpleKey.valueOf(contextId, userId));
+            if (null == inner || inner.isEmpty()) {
+                return false;
+            }
+            for (final FacebookSession ses : inner.values()) {
+                ses.close();
+            }
+            return true;
         }
         return false;
     }
@@ -168,30 +161,24 @@ public final class FacebookSessionRegistry {
      * 
      * @param contextId The context identifier
      * @param userId The user identifier
+     * @param accountId The account identifier
      * @return <code>true</code> if a facebook session for given user-context-pair was found and purged; otherwise <code>false</code>
      */
-    public boolean purgeUserSession(final int contextId, final int userId) {
-        return removeSession(SimpleKey.valueOf(contextId, userId));
-    }
-
-    private boolean removeSession(final SimpleKey key) {
-        final FacebookSession ses = map.remove(key);
-        if (null != ses) {
-            ses.close();
-            return true;
+    public boolean purgeUserSession(final int contextId, final int userId, final int accountId) {
+        final SimpleKey key = SimpleKey.valueOf(contextId, userId);
+        final ConcurrentMap<Integer, FacebookSession> inner = map.get(key);
+        if (null == inner) {
+            return false;
         }
-        return false;
-    }
-
-    /**
-     * Gets a read-only {@link Iterator iterator} over the facebook sessions in this registry.
-     * <p>
-     * Invoking {@link Iterator#remove() remove} will throw an {@link UnsupportedOperationException}.
-     * 
-     * @return A read-only {@link Iterator iterator} over the facebook sessions in this registry.
-     */
-    public Iterator<FacebookSession> getSessions() {
-        return Collections.unmodifiableIterator(map.values().iterator());
+        final FacebookSession ses = inner.remove(Integer.valueOf(accountId));
+        if (null == ses) {
+            return false;
+        }
+        ses.close();
+        if (inner.isEmpty()) {
+            map.remove(key);
+        }
+        return true;
     }
 
     /**
@@ -199,7 +186,7 @@ public final class FacebookSessionRegistry {
      * 
      * @return A {@link Iterator iterator} over the facebook sessions in this registry.
      */
-    Iterator<FacebookSession> iterator() {
+    Iterator<ConcurrentMap<Integer, FacebookSession>> iterator() {
         return map.values().iterator();
     }
 
@@ -212,7 +199,6 @@ public final class FacebookSessionRegistry {
         final int cid;
 
         final int user;
-
         private final int hash;
 
         private SimpleKey(final int cid, final int user) {
