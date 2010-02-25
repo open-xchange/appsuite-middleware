@@ -50,10 +50,13 @@
 package com.openexchange.messaging.json.cacheing;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
 import com.openexchange.messaging.IndexRange;
@@ -98,7 +101,20 @@ public class CacheingMessageAccess implements MessagingMessageAccess {
 
     public List<MessagingMessage> getAllMessages(String folder, IndexRange indexRange, MessagingField sortField, OrderDirection order, MessagingField... fields) throws MessagingException {
         clear(folder);
-        return delegate.getAllMessages(folder, indexRange, sortField, order, fields);
+        return remember(delegate.getAllMessages(folder, indexRange, sortField, order, addDefaultFields(fields)));
+    }
+
+    private MessagingField[] addDefaultFields(MessagingField[] fields) {
+        Set<MessagingField> allFields = new HashSet<MessagingField>(Arrays.asList(fields));
+        allFields.add(MessagingField.FOLDER_ID);
+        allFields.add(MessagingField.ID);
+        allFields.add(MessagingField.SUBJECT);
+        allFields.add(MessagingField.FROM);
+        allFields.add(MessagingField.RECEIVED_DATE);
+        allFields.add(MessagingField.BODY);
+        allFields.add(MessagingField.HEADERS);
+        allFields.add(MessagingField.PICTURE);
+        return allFields.toArray(new MessagingField[allFields.size()]);
     }
 
     public MessagingMessage getMessage(String folder, String id, boolean peek) throws MessagingException {
