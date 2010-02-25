@@ -77,7 +77,7 @@ Authors:
 ant -Dadmin.classpath=%{oxprefix}/bundles/%{adminbundle} \
     -Ddestdir=%{buildroot} -Dprefix=%{oxprefix} \
     -Dadminhosting.classpath=%{oxprefix}/bundles/%{adminhostingbundle} \
-    install 
+    install install-client
 
 %clean
 %{__rm} -rf %{buildroot}
