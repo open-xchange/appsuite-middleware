@@ -413,7 +413,7 @@ public class AbstractContactTest {
     public static void initialize() throws Exception {
         Init.startServer();
         final UserStorage uStorage = UserStorage.getInstance();
-        final Context ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext"));
+        final Context ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId(AjaxInit.getAJAXProperty("contextName")));
         userId = uStorage.getUserId(AjaxInit.getAJAXProperty("login"), ctx);
         sessObj = ServerSessionFactory.createServerSession(userId, ctx, "csv-tests");
         folderId = createTestFolder(FolderObject.CONTACT, sessObj, ctx, "csvContactTestFolder");
