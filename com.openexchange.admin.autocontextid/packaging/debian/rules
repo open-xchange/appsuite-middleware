@@ -11,6 +11,7 @@
 
 pkgname=open-xchange-admin-plugin-autocontextid
 pkgroot=$(CURDIR)/debian/$(pkgname)
+clientroot=$(CURDIR)/debian/$(pkgname)-client
 oxprefix=/opt/open-xchange
 adminbundle=com.openexchange.admin.jar
 adminhostingbundle=open_xchange_admin_plugin_hosting.jar
@@ -61,6 +62,10 @@ install: build
 	 	-Dadminhosting.classpath=$(oxprefix)/bundles/$(adminhostingbundle) \
 		-Dprefix=$(oxprefix) \
 		-Ddestdir=$(pkgroot) install
+	ant -Dadmin.classpath=$(oxprefix)/bundles/$(adminbundle) \
+	 	-Dadminhosting.classpath=$(oxprefix)/bundles/$(adminhostingbundle) \
+		-Dprefix=$(oxprefix) \
+		-Ddestdir=$(clientroot) install-client
 
 # Build architecture-independent files here.
 binary-indep: build install

@@ -9,4 +9,11 @@ Standards-Version: 3.6.1
 Package: open-xchange-admin-plugin-autocontextid
 Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}, open-xchange-admin-client (>= @OXVERSION@), open-xchange-admin-plugin-hosting (>= @OXVERSION@)
-Description: Open Xchange Admin Auto Context ID Plugin
+Description: The Open Xchange Admin Auto Context ID plugin
+
+Package: open-xchange-admin-plugin-autocontextid-client
+Architecture: all
+Section: libs
+Depends: ${shlibs:Depends}, ${misc:Depends}, open-xchange-admin-client (>= @OXVERSION@), open-xchange-admin-plugin-hosting (>= @OXVERSION@)
+Description: The Open Xchange Admin Auto Context ID plugin client library
+
