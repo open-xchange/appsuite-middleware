@@ -57,8 +57,6 @@ import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
@@ -528,16 +526,16 @@ public final class FacebookSession {
              * Check for proper pager after login
              */
             if (client.isDesktop()) {
-                System.out.println("Application is set to \"Desktop\", but should be \"Web\".");
+                LOG.warn("Application is set to \"Desktop\", but should be \"Web\".");
             }
             try {
                 facebookSession = client.auth_getSession(token);
             } catch (final FacebookException e) {
                 /*
-                 * Missing setting in user account
+                 * Failed login?
                  */
                 if ("Invalid parameter".equals(e.getMessage())) {
-                    throw FacebookMessagingExceptionCodes.MISSING_APPLICATION_PERMISSION.create(e, apiKey);
+                    throw FacebookMessagingExceptionCodes.FAILED_LOGIN.create(login);
                 }
                 throw e;
             }
@@ -589,7 +587,7 @@ public final class FacebookSession {
                 final Permission statusUpdate = Permission.STATUS_UPDATE;
                 if (!client.users_hasAppPermission(statusUpdate)) {
                     if (!autoClick) {
-                        throw FacebookMessagingExceptionCodes.MISSING_PERMISSION.create(statusUpdate.getName(), getPromptURL(statusUpdate));
+                        throw FacebookMessagingExceptionCodes.MISSING_PERMISSION.create(statusUpdate.getName(), login, getPromptURL(statusUpdate));
                     }
                     perms.add(statusUpdate);
                 }
@@ -598,7 +596,7 @@ public final class FacebookSession {
                 final Permission readStream = Permission.READ_STREAM;
                 if (!client.users_hasAppPermission(readStream)) {
                     if (!autoClick) {
-                        throw FacebookMessagingExceptionCodes.MISSING_PERMISSION.create(readStream.getName(), getPromptURL(readStream));
+                        throw FacebookMessagingExceptionCodes.MISSING_PERMISSION.create(readStream.getName(), login, getPromptURL(readStream));
                     }
                     perms.add(readStream);
                 }
@@ -609,6 +607,7 @@ public final class FacebookSession {
                     if (!autoClick) {
                         throw FacebookMessagingExceptionCodes.MISSING_PERMISSION.create(
                             publishStream.getName(),
+                            login,
                             getPromptURL(publishStream));
                     }
                     perms.add(publishStream);
@@ -652,7 +651,7 @@ public final class FacebookSession {
         } catch (final ScriptException e) {
             if (!perms.isEmpty()) {
                 final Permission p = perms.iterator().next();
-                throw FacebookMessagingExceptionCodes.MISSING_PERMISSION.create(e, p.getName(), getPromptURL(p));
+                throw FacebookMessagingExceptionCodes.MISSING_PERMISSION.create(e, p.getName(), login, getPromptURL(p));
             }
             throw FacebookMessagingExceptionCodes.COMMUNICATION_ERROR.create(e, e.getMessage());
         } catch (final FacebookException e) {
@@ -682,22 +681,15 @@ public final class FacebookSession {
         return page;
     }
 
-    private boolean checkLinkExistence(final List<HtmlAnchor> anchors) throws FacebookMessagingException {
+    private boolean checkLinkExistence(final List<HtmlAnchor> anchors) {
         final int size = anchors.size();
         final Iterator<HtmlAnchor> iterator = anchors.iterator();
-        final Pattern linkAfterLoginPattern = FacebookConfiguration.getInstance().getLinkAfterLoginPattern();
         for (int i = 0; i < size; i++) {
-            final Matcher m = linkAfterLoginPattern.matcher(iterator.next().getHrefAttribute());
-            if (m.matches()) {
-                if (1 == m.groupCount()) {
-                    if (!m.group(1).equals(String.valueOf(facebookUserId))) {
-                        /*
-                         * User identifier mismatch
-                         */
-                        throw FacebookMessagingExceptionCodes.FAILED_LOGIN.create(login);
-                    }
-                    return true;
-                }
+            final String hrefAttribute = iterator.next().getHrefAttribute();
+            if (hrefAttribute.startsWith("http://www.facebook.com/logout.php?h=")) {
+                /*
+                 * Found logout link
+                 */
                 return true;
             }
         }

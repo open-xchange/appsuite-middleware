@@ -94,8 +94,8 @@ public enum FacebookMessagingExceptionCodes implements OXErrorMessage {
      */
     ELEMENT_NOT_FOUND(FacebookMessagingExceptionMessages.ELEMENT_NOT_FOUND_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 8),
     /**
-     * Missing permission "%1$s". Please copy following URL to your browser, login (if not done yet) and grant access:<br>
-     * %2$s
+     * Missing permission "%1$s" in facebook login %2$s. Please copy following URL to your browser, login as %2$s (if not done yet) and grant access:<br>
+     * %3$s
      */
     MISSING_PERMISSION(FacebookMessagingExceptionMessages.MISSING_PERMISSION_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 9),
     /**
