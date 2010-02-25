@@ -108,7 +108,6 @@ public class EnglishOutlookMapper extends AbstractOutlookMapper {
         store(ContactField.TELEPHONE_RADIO, "Radio Phone");
         store(ContactField.TELEPHONE_TTYTDD, "TTY/TDD Phone");
         store(ContactField.TELEPHONE_TELEX, "Telex");
-        store(ContactField.EMAIL1, "Account");
         store(ContactField.EMAIL1, "E-mail Address");
         // store(ContactField. , "E-mail Type");
         // store(ContactField. , "E-mail Display Name");
