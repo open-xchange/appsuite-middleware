@@ -51,13 +51,20 @@ package com.openexchange.messaging.twitter.osgi;
 
 import static com.openexchange.messaging.twitter.services.TwitterMessagingServiceRegistry.getServiceRegistry;
 import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.List;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.twitter.TwitterMessagingService;
+import com.openexchange.messaging.twitter.session.TwitterEventHandler;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.sessiond.SessiondEventConstants;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.twitter.TwitterService;
 
 
@@ -82,7 +89,7 @@ public final class TwitterMessagingActivator extends DeferredActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         // TODO Auto-generated method stub
-        return new Class<?>[] {TwitterService.class};
+        return new Class<?>[] {TwitterService.class, SessiondService.class};
     }
 
     @Override
@@ -126,8 +133,14 @@ public final class TwitterMessagingActivator extends DeferredActivator {
                 tracker.open();
             }
 
-            registrations = new ArrayList<ServiceRegistration>();
+            registrations = new ArrayList<ServiceRegistration>(2);
             registrations.add(context.registerService(MessagingService.class.getName(), new TwitterMessagingService(), null));
+            /*
+             * Register event handler to detect removed sessions
+             */
+            final Dictionary<Object, Object> serviceProperties = new Hashtable<Object, Object>(1);
+            serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
+            registrations.add(context.registerService(EventHandler.class.getName(), new TwitterEventHandler(), serviceProperties));
 
         } catch (final Exception e) {
             org.apache.commons.logging.LogFactory.getLog(TwitterMessagingActivator.class).error(e.getMessage(), e);

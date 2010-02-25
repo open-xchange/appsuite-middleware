@@ -56,6 +56,7 @@ import com.openexchange.messaging.MessagingFolder;
 import com.openexchange.messaging.MessagingFolderAccess;
 import com.openexchange.messaging.MessagingMessageAccess;
 import com.openexchange.messaging.twitter.services.TwitterMessagingServiceRegistry;
+import com.openexchange.messaging.twitter.session.TwitterSessionRegistry;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.twitter.Paging;
@@ -95,12 +96,23 @@ public final class TwitterMessagingAccountAccess implements MessagingAccountAcce
         this.account = account;
         try {
             twitterService = TwitterMessagingServiceRegistry.getServiceRegistry().getService(TwitterService.class, true);
-            final String login = (String) account.getConfiguration().get(TwitterConstants.TWITTER_LOGIN);
-            final String password = (String) account.getConfiguration().get(TwitterConstants.TWITTER_PASSWORD);
-            twitterAccess = twitterService.getTwitterAccess(login, password);
         } catch (final ServiceException e) {
             throw new MessagingException(e);
         }
+        final int contextId = session.getContextId();
+        final int userId = session.getUserId();
+        final int accountId = account.getId();
+        TwitterAccess tmp = TwitterSessionRegistry.getInstance().getSession(contextId, userId, accountId);
+        if (null == tmp) {
+            final String login = (String) account.getConfiguration().get(TwitterConstants.TWITTER_LOGIN);
+            final String password = (String) account.getConfiguration().get(TwitterConstants.TWITTER_PASSWORD);
+            final TwitterAccess newTwitterAccess = twitterService.getTwitterAccess(login, password);
+            tmp = TwitterSessionRegistry.getInstance().addAccess(contextId, userId, accountId, newTwitterAccess);
+            if (null == tmp) {
+                tmp = newTwitterAccess;
+            }
+        }
+        twitterAccess = tmp;
     }
 
     public int getAccountId() {

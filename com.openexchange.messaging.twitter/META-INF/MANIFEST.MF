@@ -13,8 +13,10 @@ Import-Package: com.openexchange.datatypes.genericonf,
  com.openexchange.server,
  com.openexchange.server.osgiservice,
  com.openexchange.session,
+ com.openexchange.sessiond,
  com.openexchange.twitter,
  org.apache.commons.logging;version="1.0.4",
  org.osgi.framework;version="1.3.0",
+ org.osgi.service.event,
  org.osgi.util.tracker;version="1.3.3"
 Bundle-Activator: com.openexchange.messaging.twitter.osgi.TwitterMessagingActivator

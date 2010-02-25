@@ -60,6 +60,7 @@ import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.StringContent;
 import com.openexchange.messaging.twitter.services.TwitterMessagingServiceRegistry;
+import com.openexchange.messaging.twitter.session.TwitterSessionRegistry;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.twitter.Paging;
@@ -96,12 +97,23 @@ public final class TwitterMessagingAccountTransport implements MessagingAccountT
         this.account = account;
         try {
             twitterService = TwitterMessagingServiceRegistry.getServiceRegistry().getService(TwitterService.class, true);
-            final String login = (String) account.getConfiguration().get(TwitterConstants.TWITTER_LOGIN);
-            final String password = (String) account.getConfiguration().get(TwitterConstants.TWITTER_PASSWORD);
-            twitterAccess = twitterService.getTwitterAccess(login, password);
         } catch (final ServiceException e) {
             throw new MessagingException(e);
         }
+        final int contextId = session.getContextId();
+        final int userId = session.getUserId();
+        final int accountId = account.getId();
+        TwitterAccess tmp = TwitterSessionRegistry.getInstance().getSession(contextId, userId, accountId);
+        if (null == tmp) {
+            final String login = (String) account.getConfiguration().get(TwitterConstants.TWITTER_LOGIN);
+            final String password = (String) account.getConfiguration().get(TwitterConstants.TWITTER_PASSWORD);
+            final TwitterAccess newTwitterAccess = twitterService.getTwitterAccess(login, password);
+            tmp = TwitterSessionRegistry.getInstance().addAccess(contextId, userId, accountId, newTwitterAccess);
+            if (null == tmp) {
+                tmp = newTwitterAccess;
+            }
+        }
+        twitterAccess = tmp;
     }
 
     public void transport(final MessagingMessage message, final Collection<MessagingAddressHeader> recipients) throws MessagingException {
