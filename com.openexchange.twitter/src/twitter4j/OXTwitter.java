@@ -47,37 +47,37 @@
  *
  */
 
-package com.openexchange.twitter.internal;
+package twitter4j;
 
-import com.openexchange.twitter.Paging;
-import com.openexchange.twitter.TwitterAccess;
-import com.openexchange.twitter.TwitterService;
+import twitter4j.Status;
+import twitter4j.TwitterException;
+
 
 /**
- * {@link TwitterServiceImpl} - The twitter service implementation based on <a
- * href="http://repo1.maven.org/maven2/net/homeip/yusuke/twitter4j/">twitter4j</a>.
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link OXTwitter}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public final class TwitterServiceImpl implements TwitterService {
-
-    /**
-     * Initializes a new {@link TwitterServiceImpl}.
-     */
-    public TwitterServiceImpl() {
+public class OXTwitter extends twitter4j.Twitter{
+    
+    public OXTwitter() {
         super();
     }
 
-    public TwitterAccess getTwitterAccess(final String twitterId, final String password) {
-        return new TwitterAccessImpl(new twitter4j.OXTwitter(twitterId, password));
+    public OXTwitter(String id, String password, String baseURL) {
+        super(id, password, baseURL);
     }
 
-    public TwitterAccess getUnauthenticatedTwitterAccess() {
-        return new TwitterAccessImpl(new twitter4j.OXTwitter());
+    public OXTwitter(String id, String password) {
+        super(id, password);
     }
 
-    public Paging newPaging() {
-        return new PagingImpl(new twitter4j.Paging());
+    public OXTwitter(String baseURL) {
+        super(baseURL);
     }
 
+    public Status showStatusAuthenticated(long id) throws TwitterException {
+        return new Status(get(getBaseURL() + "statuses/show/" + id + ".xml",null, true), this);
+    }
+    
 }

@@ -51,6 +51,7 @@ package com.openexchange.twitter.internal;
 
 import java.util.ArrayList;
 import java.util.List;
+import twitter4j.OXTwitter;
 import com.openexchange.twitter.DirectMessage;
 import com.openexchange.twitter.Paging;
 import com.openexchange.twitter.Status;
@@ -67,7 +68,7 @@ import com.openexchange.twitter.User;
  */
 public final class TwitterAccessImpl implements TwitterAccess {
 
-    private final twitter4j.Twitter twitter4jTwitter;
+    private final OXTwitter twitter4jTwitter;
 
     private volatile User user;
 
@@ -77,7 +78,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
      * @param twitter4jTwitter The authenticated <code>twitter4j.Twitter</code> instance
      * @throws IllegalArgumentException If specified <code>twitter4jTwitter</code> argument is <code>null</code>
      */
-    public TwitterAccessImpl(final twitter4j.Twitter twitter4jTwitter) {
+    public TwitterAccessImpl(final OXTwitter twitter4jTwitter) {
         super();
         if (null == twitter4jTwitter) {
             throw new IllegalArgumentException("twitter4jTwitter is null.");
@@ -226,7 +227,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
 
     public Status showStatus(final long statusId) throws TwitterException {
         try {
-            return new StatusImpl(twitter4jTwitter.showStatus(statusId));
+            return new StatusImpl(twitter4jTwitter.showStatusAuthenticated(statusId));
         } catch (final twitter4j.TwitterException e) {
             throw TwitterExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
