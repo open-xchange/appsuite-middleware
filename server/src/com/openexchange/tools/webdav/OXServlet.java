@@ -131,7 +131,6 @@ public abstract class OXServlet extends WebDavServlet {
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             final ServletException se = new ServletException(e.getMessage(), e);
-            se.initCause(e);
             throw se;
         }
     }

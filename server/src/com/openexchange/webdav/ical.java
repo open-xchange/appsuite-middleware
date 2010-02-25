@@ -61,6 +61,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
@@ -364,7 +365,11 @@ public final class ical extends PermissionServlet {
             if (null == series) {
                 return;
             }
-            final String uid = series.getUID();
+            String uid = series.getUID();
+            if (null == uid) {
+                uid = UUID.randomUUID().toString();
+                series.setUID(uid);
+            }
             for (final ICalItem changeException : changeExceptions) {
                 changeException.setUID(uid);
             }

@@ -10,6 +10,7 @@
 * 2010-02-25 - marcus.klein@open-xchange.com
 
  - Bugfix #15463: Added missing imports for javax.swing components needed for HTML parsing of emails.
+ - Bugfix #15467: Patching of change exceptions uid now works if the series master has no uid set.
 
 * 2010-02-24 - matthias.biggeleben@open-xchange.com
 

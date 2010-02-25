@@ -56,7 +56,7 @@ package com.openexchange.data.conversion.ical;
 public interface ICalItem {
 
     /**
-     * @return the unique client object identifier.
+     * @return the unique client object identifier or <code>null</code> if it is currently not defined.
      */
     String getUID();
 

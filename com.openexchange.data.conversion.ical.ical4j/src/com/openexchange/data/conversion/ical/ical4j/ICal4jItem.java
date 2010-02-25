@@ -63,26 +63,21 @@ public final class ICal4jItem implements ICalItem {
 
     private final CalendarComponent component;
 
-    /**
-     * Default constructor.
-     */
     public ICal4jItem(final CalendarComponent component) {
         super();
         this.component = component;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String getUID() {
-        return component.getProperty(Uid.UID).getValue();
+        Property property = component.getProperty(Uid.UID);
+        return null == property ? null : property.getValue();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public void setUID(final String value) {
-        final Uid uid = (Uid) component.getProperty(Property.UID);
-        uid.setValue(value);
+    public void setUID(String value) {
+        if (component.getProperties().contains(Property.UID)) {
+            ((Uid) component.getProperty(Property.UID)).setValue(value);
+        } else {
+            component.getProperties().add(new Uid(value));
+        }
     }
 }
