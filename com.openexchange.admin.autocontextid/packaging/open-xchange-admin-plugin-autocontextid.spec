@@ -3,7 +3,7 @@
 
 Name:           open-xchange-admin-plugin-autocontextid
 BuildArch:	noarch
-BuildRequires:  ant open-xchange-admin-plugin-hosting-lib >= @OXVERSION@ open-xchange-admin-soap
+BuildRequires:  ant open-xchange-admin-plugin-hosting-lib >= @OXVERSION@ open-xchange-admin >= @OXVERSION@
 %if 0%{?suse_version}
 %if %{?suse_version} <= 1010
 # SLES10
@@ -39,10 +39,22 @@ License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
-Summary:        Open Xchange Admin Context Restore Plugin
+Summary:        The Open Xchange Admin Auto Context ID plugin
 Requires:       open-xchange-admin-client >= @OXVERSION@
 Requires:       open-xchange-admin-plugin-hosting >= @OXVERSION@
 #
+
+%package -n     open-xchange-admin-plugin-autocontextid-client
+Group:          Applications/Productivity
+Summary:        The Open Xchange Admin Auto Context ID plugin client library
+Requires:       open-xchange-admin-client >= @OXVERSION@ open-xchange-admin-plugin-hosting-client >= @OXVERSION@
+
+%description -n open-xchange-admin-plugin-hosting-client
+The Open Xchange Admin Auto Context ID plugin client library
+
+Authors:
+--------
+    Open-Xchange
 
 %description
 Open Xchange Admin Auto Context ID Plugin
@@ -80,5 +92,9 @@ ant -Dadmin.classpath=%{oxprefix}/bundles/%{adminbundle} \
 /opt/open-xchange/etc/admindaemon/osgi/bundle.d/*
 /opt/open-xchange/etc/admindaemon/mysql/*
 %config(noreplace) /opt/open-xchange/etc/admindaemon/plugin/*
+
+%files -n open-xchange-admin-plugin-autocontextid-client
+%dir /opt/open-xchange/lib
+/opt/open-xchange/lib/*
 
 %changelog
