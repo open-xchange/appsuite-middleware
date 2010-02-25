@@ -1,3 +1,7 @@
+* 2010-02-25 - marcus.klein@open-xchange.com
+
+ - Bugfix #15463: Added missing imports for javax.swing components needed for HTML parsing of emails.
+
 * 2010-02-24 - matthias.biggeleben@open-xchange.com
 
  - Bugfix #15038: [L3] print week-view within firefox: 2.nd page no vertical lines.
