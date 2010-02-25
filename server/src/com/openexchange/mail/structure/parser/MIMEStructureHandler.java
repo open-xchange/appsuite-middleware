@@ -594,7 +594,8 @@ public final class MIMEStructureHandler implements StructureHandler {
             HeaderName.valueOf("Resent-Cc"),
             HeaderName.valueOf("Resent-From"),
             HeaderName.valueOf("Resent-To"),
-            HeaderName.valueOf("Resent-Sender")));
+            HeaderName.valueOf("Resent-Sender"),
+            HeaderName.valueOf("Disposition-Notification-To")));
 
     private static final MailDateFormat MAIL_DATE_FORMAT;
 
