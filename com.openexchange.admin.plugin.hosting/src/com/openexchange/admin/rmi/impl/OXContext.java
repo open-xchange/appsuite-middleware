@@ -1075,17 +1075,16 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     }
 
     private void addExtensionToContext(List<Context> ctxs, List<OXCommonExtension> retval, String bundlename) throws PluginException {
-        if (null == retval) {
-            throw new PluginException("The plugin: " + bundlename + " returned an empty extension list, this is not allowed");
-        }
-        if (retval.size() != ctxs.size()) {
-            throw new PluginException("After the call of plugin: " + bundlename + " the size of the context and the extensions differ");
-        }
-        for (int i = 0; i < retval.size(); i++) {
-            try {
-                ctxs.get(i).addExtension(retval.get(i));
-            } catch (final DuplicateExtensionException e) {
-                throw new PluginException(e);
+        if (null != retval) {
+            if (retval.size() != ctxs.size()) {
+                throw new PluginException("After the call of plugin: " + bundlename + " the size of the context and the extensions differ");
+            }
+            for (int i = 0; i < retval.size(); i++) {
+                try {
+                    ctxs.get(i).addExtension(retval.get(i));
+                } catch (final DuplicateExtensionException e) {
+                    throw new PluginException(e);
+                }
             }
         }
     }
