@@ -648,6 +648,12 @@ public class MailSimpleStructureTest extends AbstractMailTest {
 
             final String id = jsonBodyObject.getString("id");
             assertEquals("Wring part ID.", "1", id);
+
+            final JSONObject jsonHeaderObject = jsonMailObject.getJSONObject("headers");
+
+            final JSONObject jsonContentTypeObject = jsonHeaderObject.getJSONObject("content-type");
+            final JSONObject paramsObject = jsonContentTypeObject.getJSONObject("params");
+            assertTrue("Charset parameter should be UTF-8, but isn't.", "UTF-8".equalsIgnoreCase(paramsObject.getString("charset")));
         } catch (final Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -679,6 +685,9 @@ public class MailSimpleStructureTest extends AbstractMailTest {
 
             final String id = jsonBodyObject.getString("id");
             assertEquals("Wring part ID.", "1", id);
+
+            final JSONObject jsonHeaderObject = jsonMailObject.getJSONObject("headers");
+            assertFalse("Content-Transfer-Encoding header should not be present.", jsonHeaderObject.hasAndNotNull("content-transfer-encoding"));
         } catch (final Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
