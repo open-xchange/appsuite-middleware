@@ -106,6 +106,8 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(NewFetchIMAPCommand.class);
 
+    private static final boolean WARN = LOG.isWarnEnabled();
+
     private static interface SeqNumFetcher {
 
         public int getNextSeqNum(int messageIndex);
@@ -490,7 +492,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
                 if (null == itemHandler) {
                     itemHandler = getItemHandlerByItem(item);
                     if (null == itemHandler) {
-                        if (LOG.isWarnEnabled()) {
+                        if (WARN) {
                             LOG.warn("Unknown FETCH item: " + item.getClass().getName());
                         }
                     } else {
@@ -507,20 +509,24 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
                 }
             }
         } catch (final MessagingException e) {
-            /*
-             * Discard corrupt message
-             */
-            final MailException imapExc = MIMEMailException.handleMessagingException(e);
-            LOG.error(new StringBuilder(128).append("Message #").append(mail.getSeqnum()).append(" discarded: ").append(
-                imapExc.getMessage()).toString(), imapExc);
+            if (WARN) {
+                /*
+                 * Discard corrupt message
+                 */
+                final MailException imapExc = MIMEMailException.handleMessagingException(e);
+                LOG.warn(new StringBuilder(128).append("Message #").append(mail.getSeqnum()).append(" discarded: ").append(
+                    imapExc.getMessage()).toString(), imapExc);
+            }
             error = true;
         } catch (final MailException e) {
             /*
              * Discard corrupt message
              */
-            LOG.error(
-                new StringBuilder(128).append("Message #").append(mail.getSeqnum()).append(" discarded: ").append(e.getMessage()).toString(),
-                e);
+            if (WARN) {
+                LOG.warn(
+                    new StringBuilder(128).append("Message #").append(mail.getSeqnum()).append(" discarded: ").append(e.getMessage()).toString(),
+                    e);
+            }
             error = true;
         }
         if (!error) {
