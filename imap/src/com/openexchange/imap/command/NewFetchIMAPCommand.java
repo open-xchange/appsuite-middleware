@@ -63,6 +63,7 @@ import javax.mail.Header;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.UIDFolder;
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.InternetHeaders;
 import javax.mail.internet.MailDateFormat;
@@ -850,8 +851,15 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
             msg.addTo(env.to);
             msg.addCc(env.cc);
             msg.addBcc(env.bcc);
-            {
+            try {
                 final InternetAddress[] replyTo = QuotedInternetAddress.toQuotedAddresses(env.replyTo);
+                if (null != replyTo && replyTo.length > 0) {
+                    for (final InternetAddress internetAddress : replyTo) {
+                        msg.addHeader("Reply-To", internetAddress.toString());
+                    }
+                }
+            } catch (final AddressException addressException) {
+                final InternetAddress[] replyTo = env.replyTo;
                 if (null != replyTo && replyTo.length > 0) {
                     for (final InternetAddress internetAddress : replyTo) {
                         msg.addHeader("Reply-To", internetAddress.toString());
