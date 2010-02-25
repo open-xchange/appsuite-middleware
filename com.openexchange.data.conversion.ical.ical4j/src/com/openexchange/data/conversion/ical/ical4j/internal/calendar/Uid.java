@@ -53,8 +53,6 @@ import java.util.List;
 import java.util.TimeZone;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.CalendarComponent;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.groupware.container.CalendarObject;
@@ -66,45 +64,23 @@ import com.openexchange.groupware.contexts.Context;
  */
 public final class Uid<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T, U> {
 
-    /**
-     * Logger.
-     */
-    private static final Log LOG = LogFactory.getLog(Uid.class);
-
-    /**
-     * Default constructor.
-     */
     public Uid() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public boolean isSet(final U calendar) {
         return isSet(calendar, CalendarObject.UID) && calendar.getUid().length() != 0;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public void emit(final int index, final U calendar, final T component,
-        final List<ConversionWarning> warnings, final Context ctx, Object... args) {
+    public void emit(final int index, final U calendar, final T component, final List<ConversionWarning> warnings, final Context ctx, Object... args) {
         component.getProperties().add(new net.fortuna.ical4j.model.property.Uid(calendar.getUid()));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public boolean hasProperty(final CalendarComponent component) {
         return null != component.getProperty(Property.UID);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public void parse(final int index, final T component, final U calendar, final TimeZone timeZone,
-        final Context ctx, final List<ConversionWarning> warnings) {
+    public void parse(final int index, final T component, final U calendar, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) {
         calendar.setUid(component.getProperty(Property.UID).getValue());
     }
 }
