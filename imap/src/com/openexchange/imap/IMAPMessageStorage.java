@@ -247,9 +247,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
              * Fetch desired messages by given UIDs. Turn UIDs to corresponding sequence numbers to maintain order cause some IMAP servers
              * ignore the order of UIDs provided in a "UID FETCH" command.
              */
-            
-            uids[5] = 785364L;
-            
             final TLongIntHashMap seqNumsMap = IMAPCommandsCollection.uids2SeqNumsMap(imapFolder, uids);
             final MailMessage[] messages = new MailMessage[uids.length];
             final MailField[] fields = fieldSet.toArray();
