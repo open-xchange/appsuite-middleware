@@ -65,9 +65,6 @@ public class ValueWriterSwitch implements WidgetSwitcher {
     }
 
     public Object password(Object... args) {
-        if(null != args[0]) {
-            return "xxxxxxxx";
-        }
         return null;
     }
 

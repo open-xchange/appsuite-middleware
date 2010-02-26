@@ -70,6 +70,9 @@ public class FormContentParser {
     public Map<String, Object> parse(JSONObject object, DynamicFormDescription form) throws JSONException {
         Map<String, Object> content = new HashMap<String, Object>();
         for(FormElement element : form) {
+            if(!object.has(element.getName())) {
+                continue;
+            }
             Object value = object.opt(element.getName());
             if(value != null) {
                 value = element.doSwitch(valueReader, value);

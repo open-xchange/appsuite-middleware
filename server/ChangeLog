@@ -1,3 +1,7 @@
+* 2010-02-26 - francisco.laguna@open-xchange.com
+
+ - Bugfix #15472: Don't preset password fields.
+
 * 2010-02-25 - thorben.betten@open-xchange.com
 
  - Bugfix #15466: Dealing with broken Reply-To header in ENVELOPE fetch item and lowered log level
