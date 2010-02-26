@@ -129,11 +129,11 @@ public class SyndMessage implements MessagingMessage {
     }
     
     public int getColorLabel() throws MessagingException {
-        return 0;
+        return -1;
     }
 
     public int getFlags() throws MessagingException {
-        return 0;
+        return -1;
     }
 
     public String getFolder() {
@@ -145,11 +145,11 @@ public class SyndMessage implements MessagingMessage {
     }
 
     public long getReceivedDate() {
-        return (null == entry.getPublishedDate()) ? 0 : entry.getPublishedDate().getTime();
+        return (null == entry.getPublishedDate()) ? -1 : entry.getPublishedDate().getTime();
     }
 
     public int getThreadLevel() {
-        return 0;
+        return -1;
     }
 
     public Collection<String> getUserFlags() throws MessagingException {

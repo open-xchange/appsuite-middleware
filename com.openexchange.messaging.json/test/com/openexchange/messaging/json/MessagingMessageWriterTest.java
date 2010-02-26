@@ -316,6 +316,33 @@ public class MessagingMessageWriterTest extends TestCase {
         assertValidates(assertion, fieldsJSON);
     }
     
+    public void testWritePostiveNumbersAsNullIfNegative() throws MessagingException, JSONException {
+     // Test with one header equivalent field and all non-header fields
+        MessagingField[] fields = new MessagingField[] {
+           MessagingField.SIZE, MessagingField.RECEIVED_DATE, MessagingField.THREAD_LEVEL};
+
+        
+        //TODO AccountName ? What is that?
+        SimpleMessagingMessage message = new SimpleMessagingMessage();
+        message.setSize(-1);
+        message.setReceivedDate(-1);
+        message.setThreadLevel(-1);
+        message.setColorLabel(-1);
+        
+        Map<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
+        headers.put("Subject", header("Subject", "the subject"));
+        message.setHeaders(headers);
+
+        JSONArray fieldsJSON = new MessagingMessageWriter().writeFields(message, fields, "com.openexchange.test1://account12");
+
+        assertEquals(3, fieldsJSON.length());
+        
+        assertNull(fieldsJSON.opt(0));
+        assertNull(fieldsJSON.opt(1));
+        assertNull(fieldsJSON.opt(2));
+        
+    }
+    
     public void testWriteHeaderArrayField() throws MessagingException, JSONException {
         MessagingField[] fields = new MessagingField[] {
             MessagingField.HEADERS};

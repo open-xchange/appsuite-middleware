@@ -56,7 +56,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -75,7 +74,6 @@ import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.MessagingMessageGetSwitch;
 import com.openexchange.messaging.MessagingPart;
 import com.openexchange.messaging.MultipartContent;
-import com.openexchange.messaging.SimpleMessagingMessage;
 import com.openexchange.messaging.StringContent;
 
 /**
@@ -406,7 +404,7 @@ public class MessagingMessageWriter {
         MessagingMessageGetSwitch switcher = new MessagingMessageGetSwitch();
         
         for (MessagingField messagingField : fields) {
-            Object value = messagingField.doSwitch(switcher, message);
+            Object value = transform(messagingField, messagingField.doSwitch(switcher, message));
             if(value == null) {
                 
             }else if(messagingField == MessagingField.HEADERS) {
@@ -431,6 +429,19 @@ public class MessagingMessageWriter {
         return fieldJSON;
     }
     
+    private Object transform(MessagingField messagingField, Object value) {
+        switch(messagingField) {
+        case SIZE: case PRIORITY: case RECEIVED_DATE: case SENT_DATE: case THREAD_LEVEL: {
+            if(Long.class.isInstance(value) && Long.valueOf(-1) == value) {
+                return null;
+            } else if (Integer.class.isInstance(value) && Integer.valueOf(-1) == value) {
+                return null;
+            }
+        }
+        }
+        return value;
+    }
+
     private static final class SimpleEntry<T1, T2> implements Map.Entry<T1, T2> {
 
         private T1 key;
