@@ -1,7 +1,7 @@
 * 2010-02-25 - thorben.betten@open-xchange.com
 
  - Bugfix #15466: Dealing with broken Reply-To header in ENVELOPE fetch item and lowered log level
- - Bugfix #15456: Fixed: Checking for proper credentials
+ - Bugfix #15456: Checking for proper credentials
 
 * 2010-02-25 - tobias.prinz@open-xchange.com
 
