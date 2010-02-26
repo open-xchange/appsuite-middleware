@@ -53,6 +53,7 @@ import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.caching.Cache;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.MessagingMessageAccess;
 import com.openexchange.messaging.json.MessagingMessageParser;
@@ -76,7 +77,8 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class GetAction extends AbstractMessagingAction {
-
+    private static final DisplayMode DISPLAY_MODE = DisplayMode.DISPLAY;
+    
     public GetAction(MessagingServiceRegistry registry, MessagingMessageWriter writer, MessagingMessageParser parser) {
         super(registry, writer, parser);
     }
@@ -93,7 +95,7 @@ public class GetAction extends AbstractMessagingAction {
         MessagingMessageAccess messageAccess = req.getMessageAccess();
         MessagingMessage message = messageAccess.getMessage(req.getFolderId(), req.getId(), req.getPeek());
         
-        return new AJAXRequestResult(writer.write(message, req.getAccountAddress()));
+        return new AJAXRequestResult(writer.write(message, req.getAccountAddress(), session, DISPLAY_MODE));
     }
 
 }

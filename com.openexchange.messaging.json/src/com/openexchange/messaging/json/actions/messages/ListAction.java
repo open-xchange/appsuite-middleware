@@ -56,6 +56,7 @@ import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.caching.Cache;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingField;
 import com.openexchange.messaging.MessagingMessage;
@@ -82,7 +83,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 
 public class ListAction extends AbstractMessagingAction {
-
+    private static final DisplayMode DISPLAY_MODE = DisplayMode.DISPLAY;
+    
     public ListAction(MessagingServiceRegistry registry, MessagingMessageWriter writer, MessagingMessageParser parser) {
         super(registry, writer, parser);
     }
@@ -121,7 +123,7 @@ public class ListAction extends AbstractMessagingAction {
         List<MessagingMessage> messages = messageAccess.getMessages(folder.getFolder(), ids.toArray(new String[ids.size()]), fields);
         
         for (MessagingMessage messagingMessage : messages) {
-            list.put(writer.writeFields(messagingMessage, fields, folder.getAccountAddress()));
+            list.put(writer.writeFields(messagingMessage, fields, folder.getAccountAddress(), session, DISPLAY_MODE));
         }
         
         return new AJAXRequestResult(list);

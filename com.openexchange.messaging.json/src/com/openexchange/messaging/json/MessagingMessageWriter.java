@@ -64,6 +64,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.mail.text.HTMLProcessing;
+import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.messaging.BinaryContent;
 import com.openexchange.messaging.MessagingBodyPart;
 import com.openexchange.messaging.MessagingField;
@@ -75,6 +77,7 @@ import com.openexchange.messaging.MessagingMessageGetSwitch;
 import com.openexchange.messaging.MessagingPart;
 import com.openexchange.messaging.MultipartContent;
 import com.openexchange.messaging.StringContent;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * A parser to emit JSON representations of MessagingMessages. Note that writing can be customized by registering
@@ -136,7 +139,7 @@ public class MessagingMessageWriter {
         headerWriters.add(new AddressHeaderWriter());
     }
     
-    private JSONObject write(MessagingPart message) throws JSONException, MessagingException {
+    private JSONObject write(MessagingPart message, ServerSession session, DisplayMode mode) throws JSONException, MessagingException {
         JSONObject messageJSON = new JSONObject();
         
         if(message.getSectionId() != null) {
@@ -153,7 +156,7 @@ public class MessagingMessageWriter {
         if(content != null) {
             MessagingContentWriter writer = getWriter(message, content);
             if(writer != null) {
-                messageJSON.put("body", writer.write(message, content));
+                messageJSON.put("body", writer.write(message, content, session, mode));
             }
         }
         
@@ -228,8 +231,8 @@ public class MessagingMessageWriter {
      * Renders a MessagingMessage in its JSON representation.
      * @param string 
      */
-    public JSONObject write(MessagingMessage message, String folderPrefix) throws JSONException, MessagingException {
-        JSONObject messageJSON = write((MessagingPart)message);
+    public JSONObject write(MessagingMessage message, String folderPrefix, ServerSession session, DisplayMode mode) throws JSONException, MessagingException {
+        JSONObject messageJSON = write((MessagingPart)message, session, mode);
 
         if(message.getId() != null) {
             messageJSON.put("id", message.getId());
@@ -277,8 +280,12 @@ public class MessagingMessageWriter {
             return StringContent.class.isInstance(content);
         }
 
-        public Object write(MessagingPart part, MessagingContent content) {
-            return ((StringContent) content).getData();
+        public Object write(MessagingPart part, MessagingContent content, ServerSession session, DisplayMode mode) {
+            String data = ((StringContent) content).getData();
+            if(null == session || null == mode) {
+                return data;
+            }
+            return HTMLProcessing.formatTextForDisplay(data, session.getUserSettingMail(), mode);
         }
 
         public int getPriority() {
@@ -293,7 +300,7 @@ public class MessagingMessageWriter {
             return BinaryContent.class.isInstance(content);
         }
 
-        public Object write(MessagingPart part, MessagingContent content) throws MessagingException {
+        public Object write(MessagingPart part, MessagingContent content, ServerSession session, DisplayMode mode) throws MessagingException {
             BinaryContent binContent = (BinaryContent) content;
             InputStream is = new BufferedInputStream(new Base64InputStream(binContent.getData(), true, -1, null));
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -347,12 +354,12 @@ public class MessagingMessageWriter {
         }
 
 
-        public Object write(MessagingPart part, MessagingContent content) throws MessagingException, JSONException {
+        public Object write(MessagingPart part, MessagingContent content, ServerSession session, DisplayMode mode) throws MessagingException, JSONException {
             MultipartContent multipart = (MultipartContent) content;
             JSONArray array = new JSONArray();
             for(int i = 0, size = multipart.getCount(); i < size; i++) {
                 MessagingBodyPart message = multipart.get(i);
-                JSONObject messageJSON = MessagingMessageWriter.this.write(message);
+                JSONObject messageJSON = MessagingMessageWriter.this.write(message, session, mode);
                 if (null != message.getDisposition()) {
                     messageJSON.put("disposition", message.getDisposition());
                 }
@@ -398,7 +405,7 @@ public class MessagingMessageWriter {
      * Individual fields are rendered exactly as in the JSONObject representation using custom header writers and content writers.
      * @param folderPrefix 
      */
-    public JSONArray writeFields(MessagingMessage message, MessagingField[] fields, String folderPrefix) throws MessagingException, JSONException {
+    public JSONArray writeFields(MessagingMessage message, MessagingField[] fields, String folderPrefix, ServerSession session, DisplayMode mode) throws MessagingException, JSONException {
         JSONArray fieldJSON = new JSONArray();
         
         MessagingMessageGetSwitch switcher = new MessagingMessageGetSwitch();
@@ -417,7 +424,7 @@ public class MessagingMessageWriter {
                 MessagingContent content = (MessagingContent) value;
                 MessagingContentWriter writer = getWriter(message, content);
                 if(writer != null) {
-                    value = writer.write(message, content);
+                    value = writer.write(message, content, session, mode);
                 }
 
             } else if (MessagingField.FOLDER_ID == messagingField) {

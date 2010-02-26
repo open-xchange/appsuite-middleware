@@ -50,9 +50,11 @@
 package com.openexchange.messaging.json;
 
 import org.json.JSONException;
+import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingPart;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * 
@@ -79,5 +81,5 @@ public interface MessagingContentWriter {
     /**
      * Turns the messaging content into its json representation
      */
-    public Object write(MessagingPart part, MessagingContent content) throws MessagingException, JSONException;
+    public Object write(MessagingPart part, MessagingContent content, ServerSession session, DisplayMode mode) throws MessagingException, JSONException;
 }

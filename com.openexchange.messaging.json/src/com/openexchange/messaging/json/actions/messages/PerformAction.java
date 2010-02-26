@@ -54,6 +54,7 @@ import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.caching.Cache;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.MessagingMessageAccess;
 import com.openexchange.messaging.json.MessagingMessageParser;
@@ -78,7 +79,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 
 public class PerformAction extends AbstractMessagingAction {
-
+    private static final DisplayMode DISPLAY_MODE = DisplayMode.MODIFYABLE;
+    
     public PerformAction(MessagingServiceRegistry registry, MessagingMessageWriter writer, MessagingMessageParser parser) {
         super(registry, writer, parser);
     }
@@ -107,7 +109,7 @@ public class PerformAction extends AbstractMessagingAction {
         if(output == null) {
             return new AJAXRequestResult(1);
         } 
-        return new AJAXRequestResult(writer.write(output, req.getAccountAddress()));
+        return new AJAXRequestResult(writer.write(output, req.getAccountAddress(), session, DISPLAY_MODE));
         
     }
 
