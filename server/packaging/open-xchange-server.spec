@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 6
+%define		ox_release 7
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -490,6 +490,14 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Thu Feb 25 2010 - marcus.klein@open-xchange.com
+ - Bugfix #15463: Added missing imports for javax.swing components needed for HTML parsing of emails.
+ - Bugfix #15467: Patching of change exceptions uid now works if the series master has no uid set.
+* Thu Feb 25 2010 - tobias.prinz@open-xchange.com
+ - Bugfix #15247: Outlook CSV field "Account" is not set as first e-mail address anymore.
+* Thu Feb 25 2010 - thorben.betten@open-xchange.com
+ - Bugfix #15466: Dealing with broken Reply-To header in ENVELOPE fetch item and lowered log level
+ - Bugfix #15456: Checking for proper credentials
 * Wed Feb 24 2010 - thorben.betten@open-xchange.com
  - Bugfix #15448: Fixed wrong array type in complex search term
  - Bugfix #15433: Less strict parsing of multipart/* parts within JavaMail routines

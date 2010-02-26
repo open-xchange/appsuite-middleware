@@ -1,3 +1,9 @@
+open-xchange-settings-extensions (6.15.0.0-6) unstable; urgency=low
+
+  * second build for 6.15-rev6
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 26 Feb 2010 10:16:19 +0100
+
 open-xchange-settings-extensions (6.15.0.0-5) unstable; urgency=low
 
   * first build for 6.15-rev6
