@@ -3,8 +3,9 @@
 
 Name:           open-xchange-admin-plugin-autocontextid
 BuildArch:	noarch
+#!BuildIgnore: post-build-checks
 BuildRequires:  ant open-xchange-admin-plugin-hosting-lib >= @OXVERSION@ open-xchange-admin >= @OXVERSION@
-%if 0%{?suse_version}
+%if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
 BuildRequires:  java-1_5_0-ibm >= 1.5.0_sr9
@@ -19,7 +20,11 @@ BuildRequires:  java-sdk-openjdk
 BuildRequires:  java-sdk-1.5.0-sun
 %endif
 %endif
-%if 0%{?rhel_version}
+%if 0%{?sles_version} >= 11
+# SLES11 or higher
+BuildRequires:  java-1_6_0-ibm-devel
+%endif
+
 # libgcj seems to be installed whether we want or not and libgcj needs cairo
 BuildRequires:  java-sdk-1.5.0-sun cairo
 %endif
@@ -70,6 +75,8 @@ Authors:
 
 
 %install
+export NO_BRP_CHECK_BYTECODE_VERSION=true
+
 %define adminbundle	com.openexchange.admin.jar
 %define oxprefix	/opt/open-xchange
 %define adminhostingbundle open_xchange_admin_plugin_hosting.jar
@@ -99,3 +106,4 @@ ant -Dadmin.classpath=%{oxprefix}/bundles/%{adminbundle} \
 /opt/open-xchange/lib/*
 
 %changelog
+
