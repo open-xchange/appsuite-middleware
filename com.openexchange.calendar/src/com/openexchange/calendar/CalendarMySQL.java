@@ -4714,7 +4714,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, e);
         } finally {
             DBUtils.closeResources(rs, stmt, null, true, ctx);
-            DBPool.push(connection);
+            DBPool.push(ctx, connection);
         }
         return 0;
     }
@@ -4755,7 +4755,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, e);
         } finally {
             DBUtils.closeResources(rs, stmt, null, true, ctx);
-            DBPool.push(connection);
+            DBPool.push(ctx, connection);
         }
         return 0;
     }
