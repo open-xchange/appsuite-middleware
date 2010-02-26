@@ -170,8 +170,8 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
     protected final void registerServlet0(final String id, final HttpServlet servlet, final Dictionary<String, String> initParams) throws ServletException {
         try {
             final String path = new URI(prependSlash(id)).normalize().toString();
-            if (servletPool.containsKey(path) && ((null == initParams) || initParams.isEmpty() || !Boolean.valueOf(
-                initParams.get(HTTP_REGISTER_FORCE)).booleanValue())) {
+            if (servletPool.containsKey(path) && ((null == initParams) || initParams.isEmpty() || !Boolean.parseBoolean(
+                initParams.get(HTTP_REGISTER_FORCE)))) {
                 throw new ServletException(new StringBuilder(256).append("A servlet with alias \"").append(path).append(
                     "\" has already been registered before.").toString());
             }
@@ -183,7 +183,7 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
             final boolean forceRegistration;
             if ((null != initParams) && !initParams.isEmpty()) {
                 configLoader.setConfig(servlet.getClass().getCanonicalName(), initParams);
-                forceRegistration = Boolean.valueOf(initParams.get(HTTP_REGISTER_FORCE)).booleanValue();
+                forceRegistration = Boolean.parseBoolean(initParams.get(HTTP_REGISTER_FORCE));
             } else {
                 forceRegistration = false;
             }
