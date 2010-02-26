@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.folderstorage.internal.actions;
+package com.openexchange.folderstorage.internal.performers;
 
 import static com.openexchange.server.services.ServerServiceRegistry.getInstance;
 import java.util.ArrayList;

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.folderstorage.internal.actions;
+package com.openexchange.folderstorage.internal.performers;
 
 import java.util.ArrayList;
 import java.util.Collection;

@@ -47,91 +47,126 @@
  *
  */
 
-package com.openexchange.folderstorage.internal.actions;
+package com.openexchange.folderstorage.internal.performers;
 
+import java.util.ArrayList;
+import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
+import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ClearPerformer} - Serves the <code>CLEAR</code> request.
+ * {@link GetPerformer} - Serves the <code>GET</code> request.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ClearPerformer extends AbstractPerformer {
+public final class GetPerformer extends AbstractUserizedFolderPerformer {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ClearPerformer.class);
+    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(GetPerformer.class);
 
     /**
-     * Initializes a new {@link ClearPerformer}.
+     * Initializes a new {@link GetPerformer}.
      * 
      * @param session The session
+     * @param decorator The optional folder service decorator
      */
-    public ClearPerformer(final ServerSession session) {
-        super(session);
+    public GetPerformer(final ServerSession session, final FolderServiceDecorator decorator) {
+        super(session, decorator);
     }
 
     /**
-     * Initializes a new {@link ClearPerformer}.
+     * Initializes a new {@link GetPerformer}.
      * 
      * @param user The user
      * @param context The context
+     * @param decorator The optional folder service decorator
      */
-    public ClearPerformer(final User user, final Context context) {
-        super(user, context);
+    public GetPerformer(final User user, final Context context, final FolderServiceDecorator decorator) {
+        super(user, context, decorator);
     }
 
     /**
-     * Initializes a new {@link ClearPerformer}.
+     * Initializes a new {@link GetPerformer}.
      * 
      * @param session The session
+     * @param decorator The optional folder service decorator
      * @param folderStorageDiscoverer The folder storage discoverer
      */
-    public ClearPerformer(final ServerSession session, final FolderStorageDiscoverer folderStorageDiscoverer) {
-        super(session, folderStorageDiscoverer);
+    public GetPerformer(final ServerSession session, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
+        super(session, decorator, folderStorageDiscoverer);
     }
 
     /**
-     * Initializes a new {@link ClearPerformer}.
+     * Initializes a new {@link GetPerformer}.
      * 
      * @param user The user
      * @param context The context
+     * @param decorator The optional folder service decorator
      * @param folderStorageDiscoverer The folder storage discoverer
      */
-    public ClearPerformer(final User user, final Context context, final FolderStorageDiscoverer folderStorageDiscoverer) {
-        super(user, context, folderStorageDiscoverer);
+    public GetPerformer(final User user, final Context context, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
+        super(user, context, decorator, folderStorageDiscoverer);
     }
 
-    /**
-     * Performs the <code>CLEAR</code> request.
-     * 
-     * @param treeId The tree identifier
-     * @param folderId The folder identifier
-     * @throws FolderException If an error occurs during deletion
-     */
-    public void doClear(final String treeId, final String folderId) throws FolderException {
+    public UserizedFolder doGet(final String treeId, final String folderId) throws FolderException {
         final FolderStorage folderStorage = folderStorageDiscoverer.getFolderStorage(treeId, folderId);
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
         }
         final long start = LOG.isDebugEnabled() ? System.currentTimeMillis() : 0L;
-        folderStorage.startTransaction(storageParameters, true);
+        folderStorage.startTransaction(storageParameters, false);
+        final java.util.List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(4);
+        openedStorages.add(folderStorage);
         try {
-            folderStorage.clearFolder(treeId, folderId, storageParameters);
+            final Folder folder = folderStorage.getFolder(treeId, folderId, storageParameters);
+            /*
+             * Check folder permission for folder
+             */
+            final Permission ownPermission;
+            if (null == getSession()) {
+                ownPermission = CalculatePermission.calculate(folder, getUser(), getContext(), getAllowedContentTypes());
+            } else {
+                ownPermission = CalculatePermission.calculate(folder, getSession(), getAllowedContentTypes());
+            }
+            if (ownPermission.getFolderPermission() <= Permission.NO_PERMISSIONS) {
+                throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
+                    folderId,
+                    getUser().getDisplayName(),
+                    Integer.valueOf(getContextId()));
+            }
+            // TODO: All or only subscribed subfolders?
+            final UserizedFolder userizedFolder =
+                getUserizedFolder(folder, ownPermission, treeId, true, true, storageParameters, openedStorages);
             if (LOG.isDebugEnabled()) {
                 final long duration = System.currentTimeMillis() - start;
-                LOG.debug(new StringBuilder().append("Clear.doClear() took ").append(duration).append("msec for folder: ").append(folderId).toString());
+                LOG.debug(new StringBuilder().append("Get.doGet() took ").append(duration).append("msec for folder: ").append(folderId).toString());
             }
-            folderStorage.commitTransaction(storageParameters);
+
+            /*
+             * Commit
+             */
+            for (final FolderStorage fs : openedStorages) {
+                fs.commitTransaction(storageParameters);
+            }
+
+            return userizedFolder;
         } catch (final FolderException e) {
-            folderStorage.rollback(storageParameters);
+            for (final FolderStorage fs : openedStorages) {
+                fs.rollback(storageParameters);
+            }
             throw e;
         } catch (final Exception e) {
-            folderStorage.rollback(storageParameters);
+            for (final FolderStorage fs : openedStorages) {
+                fs.rollback(storageParameters);
+            }
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

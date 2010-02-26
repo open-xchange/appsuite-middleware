@@ -1928,8 +1928,8 @@ public class Folder extends SessionServlet {
                             final MessagingFolderParser.ParsedMessagingFolder pmf = new MessagingFolderParser.ParsedMessagingFolder();
                             pmf.setID(mfi.toString());
                             pmf.parse(jsonObj);
-                            final com.openexchange.folderstorage.internal.actions.UpdatePerformer up =
-                                new com.openexchange.folderstorage.internal.actions.UpdatePerformer(session);
+                            final com.openexchange.folderstorage.internal.performers.UpdatePerformer up =
+                                new com.openexchange.folderstorage.internal.performers.UpdatePerformer(session);
                             up.doUpdate(pmf, null);
                             retval = mfi.toString();
                             done = true;
