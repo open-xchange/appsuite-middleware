@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 7
+%define		ox_release 8
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -490,6 +490,10 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Fri Feb 26 2010 - francisco.laguna@open-xchange.com
+ - Bugfix #15472: Don't preset password fields.
+* Fri Feb 26 2010 - thorben.betten@open-xchange.com
+ - Bugfix #15440: Safe execution of IMAP server start-up checks for a read-only IMAP server
 * Thu Feb 25 2010 - marcus.klein@open-xchange.com
  - Bugfix #15463: Added missing imports for javax.swing components needed for HTML parsing of emails.
  - Bugfix #15467: Patching of change exceptions uid now works if the series master has no uid set.
