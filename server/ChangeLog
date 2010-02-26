@@ -1,6 +1,7 @@
 * 2010-02-26 - thorben.betten@open-xchange.com
 
  - Bugfix #15440: Safe execution of IMAP server start-up checks for a read-only IMAP server
+ - Bugfix #15492: Created a custom JCS v1.3 library
 
 * 2010-02-26 - francisco.laguna@open-xchange.com
 
