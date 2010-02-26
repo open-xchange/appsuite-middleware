@@ -53,6 +53,8 @@ import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
 import static com.openexchange.mail.mime.utils.MIMEMessageUtility.fold;
 import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;
+import gnu.trove.TIntObjectHashMap;
+import gnu.trove.TLongIntHashMap;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -245,31 +247,28 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
              * Fetch desired messages by given UIDs. Turn UIDs to corresponding sequence numbers to maintain order cause some IMAP servers
              * ignore the order of UIDs provided in a "UID FETCH" command.
              */
-            final int[] seqNums = IMAPCommandsCollection.uids2SeqNums(imapFolder, uids);
-            final MailMessage[] messages = new MailMessage[seqNums.length];
+            
+            uids[5] = 785364L;
+            
+            final TLongIntHashMap seqNumsMap = IMAPCommandsCollection.uids2SeqNumsMap(imapFolder, uids);
+            final MailMessage[] messages = new MailMessage[uids.length];
             final MailField[] fields = fieldSet.toArray();
             final FetchProfile fetchProfile = getFetchProfile(fields, headerNames, null, null, getIMAPProperties().isFastFetch());
             final boolean isRev1 = imapConfig.getImapCapabilities().hasIMAP4rev1();
-            int lastPos = 0;
-            int pos = 0;
-            while (pos < seqNums.length) {
-                if (seqNums[pos] <= 0) {
-                    final int len = pos - lastPos;
-                    if (len > 0) {
-                        fetchValidSeqNumsWithFallback(lastPos, len, seqNums, messages, fetchProfile, isRev1, false);
-                    }
-                    // Determine next valid position
-                    pos++;
-                    while (pos < seqNums.length && -1 == seqNums[pos]) {
-                        pos++;
-                    }
-                    lastPos = pos;
-                } else {
-                    pos++;
-                }
+            final TIntObjectHashMap<MailMessage> fetchedMsgs;
+            {
+                final int[] seqNums = seqNumsMap.getValues();
+                fetchedMsgs = fetchValidSeqNumsWithFallback(seqNums, fetchProfile, isRev1, false);
             }
-            if (lastPos < pos) {
-                fetchValidSeqNumsWithFallback(lastPos, pos - lastPos, seqNums, messages, fetchProfile, isRev1, false);
+            /*
+             * Fill array
+             */
+            for (int i = 0; i < uids.length; i++) {
+                final long uid = uids[i];
+                final int seqNum = seqNumsMap.get(uid);
+                if (seqNum > 0) {
+                    messages[i] = fetchedMsgs.get(seqNum);
+                }
             }
             /*
              * Check field existence
@@ -284,9 +283,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
     }
 
-    private void fetchValidSeqNumsWithFallback(final int lastPos, final int len, final int[] seqNums, final MailMessage[] messages, final FetchProfile fetchProfile, final boolean isRev1, final boolean body) throws MailException, MessagingException {
+    private TIntObjectHashMap<MailMessage> fetchValidSeqNumsWithFallback(final int[] seqNums, final FetchProfile fetchProfile, final boolean isRev1, final boolean body) throws MailException, MessagingException {
         try {
-            fetchValidSeqNums(lastPos, len, seqNums, messages, fetchProfile, isRev1, body, false);
+            return fetchValidSeqNums(seqNums, fetchProfile, isRev1, body, false);
         } catch (final FolderClosedException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
         } catch (final StoreClosedException e) {
@@ -295,29 +294,31 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             if (DEBUG) {
                 LOG.debug("Fetch with BODYSTRUCTURE failed.", e);
             }
-            fetchValidSeqNums(lastPos, len, seqNums, messages, fetchProfile, isRev1, body, true);
+            return fetchValidSeqNums(seqNums, fetchProfile, isRev1, body, true);
         }
     }
 
-    private void fetchValidSeqNums(final int lastPos, final int len, final int[] seqNums, final MailMessage[] messages, final FetchProfile fetchProfile, final boolean isRev1, final boolean body, final boolean ignoreBodystructure) throws MessagingException {
-        final int[] subarr = new int[len];
-        System.arraycopy(seqNums, lastPos, subarr, 0, len);
+    private TIntObjectHashMap<MailMessage> fetchValidSeqNums(final int[] seqNums, final FetchProfile fetchProfile, final boolean isRev1, final boolean body, final boolean ignoreBodystructure) throws MessagingException {
         final long start = System.currentTimeMillis();
         final MailMessage[] submessages;
         if (ignoreBodystructure) {
             submessages =
-                new NewFetchIMAPCommand(imapFolder, isRev1, subarr, FetchIMAPCommand.getSafeFetchProfile(fetchProfile), false, true, body).setDetermineAttachmentByHeader(
+                new NewFetchIMAPCommand(imapFolder, isRev1, seqNums, FetchIMAPCommand.getSafeFetchProfile(fetchProfile), false, true, body).setDetermineAttachmentByHeader(
                     true).doCommand();
         } else {
-            submessages = new NewFetchIMAPCommand(imapFolder, isRev1, subarr, fetchProfile, false, true, body).doCommand();
+            submessages = new NewFetchIMAPCommand(imapFolder, isRev1, seqNums, fetchProfile, false, true, body).doCommand();
         }
         final long time = System.currentTimeMillis() - start;
         mailInterfaceMonitor.addUseTime(time);
         if (DEBUG) {
-            LOG.debug(new StringBuilder(128).append("IMAP fetch for ").append(subarr.length).append(" messages took ").append(time).append(
+            LOG.debug(new StringBuilder(128).append("IMAP fetch for ").append(seqNums.length).append(" messages took ").append(time).append(
                 STR_MSEC).toString());
         }
-        System.arraycopy(submessages, 0, messages, lastPos, submessages.length);
+        final TIntObjectHashMap<MailMessage> ret = new TIntObjectHashMap<MailMessage>(seqNums.length);
+        for (int i = 0; i < seqNums.length; i++) {
+            ret.put(seqNums[i], submessages[i]);
+        }
+        return ret;
     }
 
     @Override
