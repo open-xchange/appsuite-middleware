@@ -253,14 +253,22 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
                 socketHandler.handleSocket(client);
                 AJPv13Monitors.AJP_MONITOR_SERVER_THREADS.addUseTime(System.currentTimeMillis() - start);
             } catch (final java.net.SocketException e) {
-                /*
-                 * Socket closed while being blocked in accept
-                 */
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("AJP socket closed", e);
+                if (running.get()) {
+                    /*
+                     * An unexpected socket error
+                     */
+                    LOG.error(e.getMessage(), e);
+                    stopServer();
+                } else {
+                    /*
+                     * Socket closed while being blocked in accept
+                     */
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("AJP socket closed", e);
+                    }
+                    LOG.info("AJPv13Server down");
+                    keepOnRunning = false;
                 }
-                LOG.info("AJPv13Server down");
-                keepOnRunning = false;
             } catch (final IOException ex) {
                 LOG.error(ex.getMessage(), ex);
                 keepOnRunning = false;
