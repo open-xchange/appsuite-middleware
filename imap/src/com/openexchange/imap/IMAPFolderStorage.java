@@ -1438,9 +1438,13 @@ public final class IMAPFolderStorage extends MailFolderStorage {
                         if (!getACLExtension().canRead(myrights)) {
                             throw IMAPException.create(IMAPException.Code.NO_READ_ACCESS, imapConfig, session, fullname);
                         }
+                        /*-
+                         * TODO: Why check DELETE access when requesting quota?
+                         * 
                         if (!getACLExtension().canDeleteMailbox(myrights)) {
                             throw IMAPException.create(IMAPException.Code.NO_DELETE_ACCESS, imapConfig, session, fullname);
                         }
+                        */
                     }
                 } catch (final MessagingException e) {
                     throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, fullname);
