@@ -77,7 +77,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class GetAction extends AbstractMessagingAction {
-    private static final DisplayMode DISPLAY_MODE = DisplayMode.DISPLAY;
+    private static final DisplayMode DISPLAY_MODE = DisplayMode.RAW;
     
     public GetAction(MessagingServiceRegistry registry, MessagingMessageWriter writer, MessagingMessageParser parser) {
         super(registry, writer, parser);

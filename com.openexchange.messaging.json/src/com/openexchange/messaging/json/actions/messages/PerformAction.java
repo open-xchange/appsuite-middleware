@@ -79,7 +79,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 
 public class PerformAction extends AbstractMessagingAction {
-    private static final DisplayMode DISPLAY_MODE = DisplayMode.MODIFYABLE;
+    private static final DisplayMode DISPLAY_MODE = DisplayMode.RAW;
     
     public PerformAction(MessagingServiceRegistry registry, MessagingMessageWriter writer, MessagingMessageParser parser) {
         super(registry, writer, parser);

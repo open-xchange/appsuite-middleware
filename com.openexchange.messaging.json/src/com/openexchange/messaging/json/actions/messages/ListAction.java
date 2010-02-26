@@ -83,7 +83,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 
 public class ListAction extends AbstractMessagingAction {
-    private static final DisplayMode DISPLAY_MODE = DisplayMode.DISPLAY;
+    private static final DisplayMode DISPLAY_MODE = DisplayMode.RAW;
     
     public ListAction(MessagingServiceRegistry registry, MessagingMessageWriter writer, MessagingMessageParser parser) {
         super(registry, writer, parser);
