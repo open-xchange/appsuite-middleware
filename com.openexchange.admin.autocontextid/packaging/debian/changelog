@@ -1,3 +1,9 @@
+open-xchange-admin-plugin-autocontextid (6.15.0.0-1) unstable; urgency=low
+
+  * first build for 6.15-rev7
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 26 Feb 2010 13:29:34 +0100
+
 open-xchange-admin-plugin-autocontextid (6.15.0.0-0) unstable; urgency=low
 
   * first release
