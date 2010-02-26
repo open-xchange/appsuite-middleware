@@ -25,6 +25,7 @@ BuildRequires:  java-sdk-1.5.0-sun
 BuildRequires:  java-1_6_0-ibm-devel
 %endif
 
+%if 0%{?rhel_version}
 # libgcj seems to be installed whether we want or not and libgcj needs cairo
 BuildRequires:  java-sdk-1.5.0-sun cairo
 %endif
