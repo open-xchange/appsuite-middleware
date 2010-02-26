@@ -522,12 +522,21 @@ public final class IMAPDefaultFolderChecker {
         final StringBuilder tmp = new StringBuilder(32);
         final boolean checkSubscribed = true;
         final long st = System.currentTimeMillis();
-        Folder f = imapStore.getFolder(tmp.append(prefix).append(name).toString());
+        final String fullname = tmp.append(prefix).append(name).toString();
+        Folder f = imapStore.getFolder(fullname);
         tmp.setLength(0);
-        if (!f.exists() /* && !f.create(type) */) {
+        if (!f.exists()) {
             if (isFullname) {
-                /* OK, a fullname was passed. Try to create obviously non-existing IMAP folder. */
-                IMAPCommandsCollection.createFolder((IMAPFolder) f, sep, type);
+                /*
+                 * OK, a fullname was passed. Try to create obviously non-existing IMAP folder.
+                 */
+                try {
+                    IMAPCommandsCollection.createFolder((IMAPFolder) f, sep, type);
+                    return null;
+                } catch (final MessagingException e) {
+                    LOG.warn(new StringBuilder(64).append("Creation of non-existing default IMAP folder \"").append(fullname).append(
+                        "\" failed.").toString(), e);
+                }
             } else {
                 /*
                  * A name was passed. Perform a case-insensitive look-up because some IMAP servers do not allow to create a folder of which
@@ -559,11 +568,23 @@ public final class IMAPDefaultFolderChecker {
                     /*
                      * Zero or more than one candidate found. Try to create IMAP folder
                      */
-                    IMAPCommandsCollection.createFolder((IMAPFolder) f, sep, type);
+                    try {
+                        IMAPCommandsCollection.createFolder((IMAPFolder) f, sep, type);
+                    } catch (final MessagingException e) {
+                        LOG.warn(new StringBuilder(64).append("Creation of non-existing default IMAP folder \"").append(fullname).append(
+                            "\" failed.").toString(), e);
+                    }
                 } else {
                     if (MailAccount.DEFAULT_ID == accountId) {
                         // Must not edit default mail account. Try to create IMAP folder
-                        IMAPCommandsCollection.createFolder((IMAPFolder) f, sep, type);
+                        try {
+                            IMAPCommandsCollection.createFolder((IMAPFolder) f, sep, type);
+                        } catch (final MessagingException e) {
+                            LOG.warn(
+                                new StringBuilder(64).append("Creation of non-existing default IMAP folder \"").append(fullname).append(
+                                    "\" failed.").toString(),
+                                e);
+                        }
                     } else {
                         /*
                          * Found _ONE_ candidate of which name passed ignore-case comparison

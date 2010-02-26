@@ -1,3 +1,7 @@
+* 2010-02-26 - thorben.betten@open-xchange.com
+
+ - Bugfix #15440: Safe execution of IMAP server start-up checks for a read-only IMAP server
+
 * 2010-02-26 - francisco.laguna@open-xchange.com
 
  - Bugfix #15472: Don't preset password fields.

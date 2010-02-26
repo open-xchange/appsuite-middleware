@@ -122,6 +122,8 @@ public final class IMAPCommandsCollection {
 
     static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(IMAPCommandsCollection.class);
 
+    static final boolean DEBUG = LOG.isDebugEnabled();
+
     /**
      * Prevent instantiation.
      */
@@ -233,37 +235,47 @@ public final class IMAPCommandsCollection {
                 } else {
                     fullName = new StringBuilder(64).append(fullnamePrefix).append(String.valueOf(System.currentTimeMillis())).toString();
                 }
-                Boolean retval = Boolean.TRUE;
-                boolean delete = false;
                 try {
-                    if ((type & IMAPFolder.HOLDS_MESSAGES) == 0) {
-                        // Only holds folders
-                        final char separator = getSeparator(p);
-                        p.create(fullName + separator);
-                        delete = true;
-                    } else {
-                        p.create(fullName);
-                        delete = true;
-                        /*
-                         * Some IMAP servers do not allow creation of folders that can contain messages AND subfolders. Verify that created
-                         * folder may also contain subfolders.
-                         */
-                        if ((type & IMAPFolder.HOLDS_FOLDERS) != 0) {
-                            final ListInfo[] li = p.list("", fullName);
-                            if (li != null && !li[0].hasInferiors) {
-                                /*
-                                 * The new folder doesn't support inferiors.
-                                 */
-                                retval = Boolean.FALSE;
+                    Boolean retval = Boolean.TRUE;
+                    boolean delete = false;
+                    try {
+                        if ((type & IMAPFolder.HOLDS_MESSAGES) == 0) {
+                            // Only holds folders
+                            final char separator = getSeparator(p);
+                            p.create(fullName + separator);
+                            delete = true;
+                        } else {
+                            p.create(fullName);
+                            delete = true;
+                            /*
+                             * Some IMAP servers do not allow creation of folders that can contain messages AND subfolders. Verify that
+                             * created folder may also contain subfolders.
+                             */
+                            if ((type & IMAPFolder.HOLDS_FOLDERS) != 0) {
+                                final ListInfo[] li = p.list("", fullName);
+                                if (li != null && !li[0].hasInferiors) {
+                                    /*
+                                     * The new folder doesn't support inferiors.
+                                     */
+                                    retval = Boolean.FALSE;
+                                }
                             }
                         }
+                    } finally {
+                        if (delete) {
+                            p.delete(fullName);
+                        }
                     }
-                } finally {
-                    if (delete) {
-                        p.delete(fullName);
+                    return retval;
+                } catch (final CommandFailedException e) {
+                    /*
+                     * Either creation or deletion of temporary folder failed. Assume maildir folder format.
+                     */
+                    if (DEBUG) {
+                        LOG.debug("Either creation or deletion of temporary folder failed. Assume maildir folder format.", e);
                     }
+                    return Boolean.valueOf((((type & IMAPFolder.HOLDS_MESSAGES) > 0)) && ((type & IMAPFolder.HOLDS_FOLDERS) > 0));
                 }
-                return retval;
             }
         }))).booleanValue();
     }
@@ -1123,7 +1135,7 @@ public final class IMAPCommandsCollection {
                 final long start = System.currentTimeMillis();
                 IMAPCommandsCollection.uidExpunge(imapFolder, uids);
                 MailServletInterface.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-                if (LOG.isDebugEnabled()) {
+                if (DEBUG) {
                     LOG.debug(new StringBuilder(128).append(uids.length).append(" messages expunged in ").append(
                         (System.currentTimeMillis() - start)).append("msec").toString());
                 }
@@ -1555,7 +1567,7 @@ public final class IMAPCommandsCollection {
                         p.handleResult(response);
                     }
                 }
-                if (LOG.isDebugEnabled()) {
+                if (DEBUG) {
                     LOG.debug(new StringBuilder(128).append(imapFolder.getFullName()).append(
                         ": IMAP resolve fetch >>>UID FETCH ... (UID)<<< for ").append(length).append(" messages took ").append(
                         (System.currentTimeMillis() - start)).append("msec").toString());
@@ -1631,7 +1643,7 @@ public final class IMAPCommandsCollection {
                         p.handleResult(response);
                     }
                 }
-                if (LOG.isDebugEnabled()) {
+                if (DEBUG) {
                     LOG.debug(new StringBuilder(128).append(imapFolder.getFullName()).append(
                         ": IMAP resolve fetch >>>UID FETCH ... (UID)<<< for ").append(uids.length).append(" messages took ").append(
                         (System.currentTimeMillis() - start)).append("msec").toString());
