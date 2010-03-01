@@ -252,11 +252,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             final MailField[] fields = fieldSet.toArray();
             final FetchProfile fetchProfile = getFetchProfile(fields, headerNames, null, null, getIMAPProperties().isFastFetch());
             final boolean isRev1 = imapConfig.getImapCapabilities().hasIMAP4rev1();
-            final TIntObjectHashMap<MailMessage> fetchedMsgs;
-            {
-                final int[] seqNums = seqNumsMap.getValues();
-                fetchedMsgs = fetchValidSeqNumsWithFallback(seqNums, fetchProfile, isRev1, false);
-            }
+            final TIntObjectHashMap<MailMessage> fetchedMsgs =
+                fetchValidSeqNumsWithFallback(seqNumsMap.getValues(), fetchProfile, isRev1, false);
             /*
              * Fill array
              */
