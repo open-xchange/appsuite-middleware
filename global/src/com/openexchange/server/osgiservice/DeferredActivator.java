@@ -123,7 +123,9 @@ public abstract class DeferredActivator implements BundleActivator {
                         stcServices.remove(clazz);
                     }
                 } finally {
-                    context.ungetService(reference);
+                    if (null != context) {
+                        context.ungetService(reference);
+                    }
                 }
             }
         }
