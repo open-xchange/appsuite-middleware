@@ -97,7 +97,7 @@ import com.openexchange.tools.oxfolder.OXFolderSQL;
  */
 public final class DuplicateContactCollectFolderRemoverTask extends UpdateTaskAdapter {
 
-    private static final String[] DEPENDENCIES = { "com.openexchange.groupware.update.tasks.MailAccountAddPersonalTask" };
+    private static final String[] DEPENDENCIES = { MailAccountAddPersonalTask.class.getName() };
 
     public DuplicateContactCollectFolderRemoverTask() {
         super();

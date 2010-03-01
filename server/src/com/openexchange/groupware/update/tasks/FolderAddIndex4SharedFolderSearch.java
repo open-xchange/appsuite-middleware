@@ -88,7 +88,7 @@ public final class FolderAddIndex4SharedFolderSearch extends UpdateTaskAdapter {
         return UpdateTaskPriority.HIGH.priority;
     }
 
-    private static final String[] DEPENDENCIES = { "com.openexchange.groupware.update.tasks.DuplicateContactCollectFolderRemoverTask" };
+    private static final String[] DEPENDENCIES = { DuplicateContactCollectFolderRemoverTask.class.getName() };
 
     public String[] getDependencies() {
         return DEPENDENCIES;

@@ -89,10 +89,8 @@ public class LastVersionedUpdateTask extends UpdateTaskAdapter {
     }
 
     public String[] getDependencies() {
-        return DEPENDENCIES.clone();
+        return new String[0];
     }
-
-    private static final String[] DEPENDENCIES = { "com.openexchange.groupware.update.tasks.MALPollCreateTableTask" };
 
     public void perform(PerformParameters params) throws AbstractOXException {
         Schema schema = params.getSchema();

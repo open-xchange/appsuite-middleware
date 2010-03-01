@@ -104,7 +104,7 @@ public class RemoveAdminPermissionOnInfostoreTask extends UpdateTaskAdapter {
         return UpdateTaskPriority.HIGH.priority;
     }
 
-    private static final String[] DEPENDENCIES = { "com.openexchange.groupware.update.tasks.ContactsAddIndex4AutoCompleteSearch" };
+    private static final String[] DEPENDENCIES = { ContactsAddIndex4AutoCompleteSearch.class.getName() };
 
     public String[] getDependencies() {
         return DEPENDENCIES;

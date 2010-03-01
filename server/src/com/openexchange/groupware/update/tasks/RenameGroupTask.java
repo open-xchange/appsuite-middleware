@@ -94,7 +94,7 @@ public class RenameGroupTask extends UpdateTaskAdapter {
         return UpdateTaskPriority.NORMAL.priority;
     }
 
-    private static final String[] DEPENDENCIES = { "com.openexchange.groupware.update.tasks.ContactsAddUseCountColumnUpdateTask" };
+    private static final String[] DEPENDENCIES = { ContactsAddUseCountColumnUpdateTask.class.getName() };
 
     public String[] getDependencies() {
         return DEPENDENCIES;

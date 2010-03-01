@@ -318,7 +318,10 @@ public final class InternalList {
         new com.openexchange.groupware.update.tasks.HeaderCacheCreateTableTask(),
 
         // Extends the calendar tables and create table to store the confirmation data for external participants.
-        new com.openexchange.groupware.update.tasks.ExtendCalendarForIMIPHandlingTask()
+        new com.openexchange.groupware.update.tasks.ExtendCalendarForIMIPHandlingTask(),
+
+        // Enables the bit for the contact collector feature for every user because that bit was not checked before 6.16.
+        new com.openexchange.groupware.update.tasks.ContactCollectorReEnabler()
 
         // TODO: Enable virtual folder tree update task when needed
         // Migrates existing folder data to new outlook-like folder tree structure

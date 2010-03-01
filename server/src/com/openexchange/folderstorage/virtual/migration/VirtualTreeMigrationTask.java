@@ -69,6 +69,7 @@ import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.virtual.VirtualPermission;
+import com.openexchange.folderstorage.virtual.VirtualTreeCreateTableTask;
 import com.openexchange.folderstorage.virtual.sql.Insert;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -94,7 +95,7 @@ public class VirtualTreeMigrationTask extends UpdateTaskAdapter {
 
     private static final Log LOG = LogFactory.getLog(VirtualTreeMigrationTask.class);
 
-    private static final String[] DEPENDENCIES = { "com.openexchange.folderstorage.virtual.VirtualTreeCreateTableTask" };
+    private static final String[] DEPENDENCIES = { VirtualTreeCreateTableTask.class.getName() };
 
     public String[] getDependencies() {
         return DEPENDENCIES;

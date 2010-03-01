@@ -105,7 +105,7 @@ public final class GlobalAddressBookPermissionsResolverTask extends UpdateTaskAd
         return UpdateTaskPriority.HIGH.priority;
     }
 
-    private static final String[] DEPENDENCIES = { "com.openexchange.groupware.update.tasks.ContactCollectOnIncomingAndOutgoingMailUpdateTask" };
+    private static final String[] DEPENDENCIES = { ContactCollectOnIncomingAndOutgoingMailUpdateTask.class.getName() };
 
     public String[] getDependencies() {
         return DEPENDENCIES;

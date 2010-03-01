@@ -5,6 +5,7 @@
 * 2010-03-01 - marcus.klein@open-xchange.com
 
  - Bugfix #15429: Giving proper exception message if a contact in a public folder should marked private.
+ - Bugfix #15501: Enabling the contact collector for all user. 
 
 * 2010-03-01 - martin.herfurth@open-xchange.com
 

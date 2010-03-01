@@ -49,108 +49,71 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.groupware.update.UpdateConcurrency.BACKGROUND;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import com.openexchange.database.DatabaseService;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.ProgressState;
+import com.openexchange.groupware.update.TaskAttributes;
+import com.openexchange.groupware.update.UpdateException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.update.Tools;
 
 /**
- * Creates the table replicationMonitor and inserts 0 for every context.
- *
+ * Version 6.16 contains a fix putting the feature bit for the contact collector to work properly. This causes the contact collector to not
+ * work anymore for pre SP5 created users. All that users have to contact collector feature bit disabled. But contact collector worked
+ * although the bit was disabled. Therefore this task sets this bit for all users.
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class CreateReplicationTableTask extends UpdateTaskAdapter {
+public final class ContactCollectorReEnabler extends UpdateTaskAdapter {
 
-    private static final String[] DEPENDENCIES = { RemoveAdminPermissionOnInfostoreTask.class.getName() };
-
-    public CreateReplicationTableTask() {
+    public ContactCollectorReEnabler() {
         super();
     }
 
-    @Override
-    public int addedWithVersion() {
-        return 90;
-    }
-
-    @Override
-    public int getPriority() {
-        return UpdateTaskPriority.NORMAL.priority;
-    }
-
     public String[] getDependencies() {
-        return DEPENDENCIES;
+        return new String[] { ContactCollectOnIncomingAndOutgoingMailUpdateTask.class.getName() };
+    }
+
+    @Override
+    public TaskAttributes getAttributes() {
+        return new Attributes(BACKGROUND);
     }
 
     public void perform(PerformParameters params) throws AbstractOXException {
-        final int contextId = params.getContextId();
-        DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
-        final Connection con = dbService.getForUpdateTask(contextId);
+        int contextId = params.getContextId();
+        final Connection con;
+        try {
+            con = Database.getNoTimeout(contextId, true);
+        } catch (final DBPoolingException e) {
+            throw new UpdateException(e);
+        }
         try {
             con.setAutoCommit(false);
-            if (!Tools.tableExists(con, "replicationMonitor")) {
-                createTable(con);
-            }
-            int[] ctxIds = dbService.getContextsInSameSchema(contextId);
-            ProgressState status = params.getProgressState();
-            status.setTotal(ctxIds.length);
-            insertZeros(con, ctxIds, status);
+            perform(con);
             con.commit();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            autocommit(con);
-            dbService.backForUpdateTask(contextId, con);
+            Database.backNoTimeout(contextId, true, con);
         }
     }
 
-    private void insertZeros(Connection con, int[] ctxIds, ProgressState status) throws SQLException {
-        PreparedStatement stmt = null;
-        try {
-            stmt = con.prepareStatement("INSERT INTO replicationMonitor (cid, transaction) VALUES (?,0)");
-            for (int ctxId : ctxIds) {
-                if (!entryExists(con, ctxId)) {
-                    stmt.setInt(1, ctxId);
-                    stmt.addBatch();
-                }
-                status.incrementState();
-            }
-            stmt.executeBatch();
-        } finally {
-            closeSQLStuff(stmt);
-        }
-    }
-
-    private boolean entryExists(Connection con, int ctxId) throws SQLException {
-        PreparedStatement stmt = null;
-        ResultSet result = null;
-        try {
-            stmt = con.prepareStatement("SELECT transaction FROM replicationMonitor WHERE cid=?");
-            stmt.setInt(1, ctxId);
-            result = stmt.executeQuery();
-            return result.next();
-        } finally {
-            closeSQLStuff(result, stmt);
-        }
-    }
-
-    private void createTable(Connection con) throws SQLException {
+    private void perform(Connection con) throws UpdateException {
         Statement stmt = null;
         try {
             stmt = con.createStatement();
-            stmt.execute("CREATE TABLE replicationMonitor (cid INT4 UNSIGNED NOT NULL, transaction INT8 NOT NULL, PRIMARY KEY (cid)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci");
+            stmt.execute("UPDATE user_configuration SET permissions=permissions|(1<<21)");
+        } catch (final SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
         }

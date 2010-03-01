@@ -76,7 +76,7 @@ public final class UnifiedINBOXRenamerTask extends UpdateTaskAdapter {
     }
 
     public String[] getDependencies() {
-        return new String[] { "com.openexchange.groupware.update.tasks.MailAccountMigrationTask" };
+        return new String[] { MailAccountMigrationTask.class.getName() };
     }
 
     @Override

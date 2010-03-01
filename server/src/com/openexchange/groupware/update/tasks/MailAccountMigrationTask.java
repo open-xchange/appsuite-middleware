@@ -103,7 +103,7 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
         return UpdateTaskPriority.HIGH.priority;
     }
 
-    private static final String[] DEPENDENCIES = { "com.openexchange.groupware.update.tasks.MailAccountCreateTablesTask" };
+    private static final String[] DEPENDENCIES = { MailAccountCreateTablesTask.class.getName() };
 
     public String[] getDependencies() {
         return DEPENDENCIES;

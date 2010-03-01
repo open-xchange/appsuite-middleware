@@ -84,7 +84,7 @@ public final class MailAccountAddPersonalTask extends UpdateTaskAdapter {
         return UpdateTaskPriority.HIGH.priority;
     }
 
-    private static final String[] DEPENDENCIES = { "com.openexchange.groupware.update.tasks.GlobalAddressBookPermissionsResolverTask" };
+    private static final String[] DEPENDENCIES = { GlobalAddressBookPermissionsResolverTask.class.getName() };
 
     public String[] getDependencies() {
         return DEPENDENCIES;
