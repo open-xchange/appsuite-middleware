@@ -535,7 +535,12 @@ public final class FacebookSession {
                  * Failed login?
                  */
                 if ("Invalid parameter".equals(e.getMessage())) {
-                    throw FacebookMessagingExceptionCodes.FAILED_LOGIN.create(login);
+                    final FacebookMessagingException fme = FacebookMessagingExceptionCodes.FAILED_LOGIN.create(login);
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace(new StringBuilder("Login to facebook failed for login=").append(login).append(", password=").append(
+                            password).toString(), fme);
+                    }
+                    throw fme;
                 }
                 throw e;
             }
@@ -544,9 +549,12 @@ public final class FacebookSession {
              * Check if expected link after login is available
              */
             homePage = pageAfterLogin;
+            /*-
+             * 
             if (!checkLinkExistence(pageAfterLogin.getAnchors())) {
                 throw FacebookMessagingExceptionCodes.FAILED_LOGIN.create(login);
             }
+             */
             if (DEBUG) {
                 final StringBuilder sb = new StringBuilder(64);
                 sb.append("Connect successfully performed for user ").append(login);
@@ -587,7 +595,10 @@ public final class FacebookSession {
                 final Permission statusUpdate = Permission.STATUS_UPDATE;
                 if (!client.users_hasAppPermission(statusUpdate)) {
                     if (!autoClick) {
-                        throw FacebookMessagingExceptionCodes.MISSING_PERMISSION.create(statusUpdate.getName(), login, getPromptURL(statusUpdate));
+                        throw FacebookMessagingExceptionCodes.MISSING_PERMISSION.create(
+                            statusUpdate.getName(),
+                            login,
+                            getPromptURL(statusUpdate));
                     }
                     perms.add(statusUpdate);
                 }
@@ -596,7 +607,10 @@ public final class FacebookSession {
                 final Permission readStream = Permission.READ_STREAM;
                 if (!client.users_hasAppPermission(readStream)) {
                     if (!autoClick) {
-                        throw FacebookMessagingExceptionCodes.MISSING_PERMISSION.create(readStream.getName(), login, getPromptURL(readStream));
+                        throw FacebookMessagingExceptionCodes.MISSING_PERMISSION.create(
+                            readStream.getName(),
+                            login,
+                            getPromptURL(readStream));
                     }
                     perms.add(readStream);
                 }
@@ -644,9 +658,12 @@ public final class FacebookSession {
              * Check if expected link after granting permission is available
              */
             homePage = page;
+            /*-
+             * 
             if (!checkLinkExistence(page.getAnchors())) {
                 throw FacebookMessagingExceptionCodes.FAILED_LOGIN.create(login);
             }
+             */
             return true;
         } catch (final ScriptException e) {
             if (!perms.isEmpty()) {
@@ -681,7 +698,7 @@ public final class FacebookSession {
         return page;
     }
 
-    private boolean checkLinkExistence(final List<HtmlAnchor> anchors) {
+    private boolean no_checkLinkExistence(final List<HtmlAnchor> anchors) {
         final int size = anchors.size();
         final Iterator<HtmlAnchor> iterator = anchors.iterator();
         for (int i = 0; i < size; i++) {
