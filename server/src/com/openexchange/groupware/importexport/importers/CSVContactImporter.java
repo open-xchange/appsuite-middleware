@@ -213,7 +213,6 @@ public class CSVContactImporter extends AbstractImporter {
         //reading entries...
         final List<ImportResult> results = new LinkedList<ImportResult>();
         final ContactSwitcher conSet = getContactSwitcher();
-        //final ContactSQLInterface contactsql = new RdbContactSQLInterface(sessObj, sessObj.getContext());
         int lineNumber = 1;
         while (iter.hasNext()) {
             //...and writing them
