@@ -1,4 +1,8 @@
-* 2010-03-01 - thorben.betten@open-xchange.com
+* 2010-03-01 - martin.herfurth@open-xchange.com
+
+ - Bugfix #15509: Null Pointer in Conversion Servlet.
+ 
+ * 2010-03-01 - thorben.betten@open-xchange.com
 
  - Bugfix #15504: Ignoring possible FQL query result size mismatch
 

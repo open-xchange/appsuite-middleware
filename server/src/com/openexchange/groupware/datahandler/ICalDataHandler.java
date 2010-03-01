@@ -123,7 +123,7 @@ public abstract class ICalDataHandler implements DataHandler {
             if (appointment.containsUid() && (uid = appointment.getUid()) != null)
                 objectId = appointmentSql.resolveUid(uid);
                 
-            if (objectId != 0) {
+            if (objectId != 0 && confirm != null) {
                 updateOwnParticipantStatus(session, ctx, objectId, confirm, appointmentSql);
             } else {
                 appointment.setParentFolderID(calendarFolder);
