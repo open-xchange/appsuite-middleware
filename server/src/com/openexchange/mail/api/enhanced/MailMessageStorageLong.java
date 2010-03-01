@@ -218,7 +218,11 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      */
     public MailPart getImageAttachmentLong(final String folder, final long mailId, final String contentId) throws MailException {
         final ImageMessageHandler handler = new ImageMessageHandler(contentId);
-        new MailMessageParser().parseMailMessage(getMessageLong(folder, mailId, false), handler);
+        final MailMessage mail = getMessageLong(folder, mailId, false);
+        if (null == mail) {
+            throw new MailException(MailException.Code.MAIL_NOT_FOUND, Long.valueOf(mailId), folder);
+        }
+        new MailMessageParser().parseMailMessage(mail, handler);
         if (handler.getImagePart() == null) {
             throw new MailException(MailException.Code.IMAGE_ATTACHMENT_NOT_FOUND, contentId, Long.valueOf(mailId), folder);
         }
