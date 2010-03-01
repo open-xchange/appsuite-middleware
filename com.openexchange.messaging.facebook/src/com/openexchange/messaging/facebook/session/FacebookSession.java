@@ -535,11 +535,13 @@ public final class FacebookSession {
                  * Failed login?
                  */
                 if ("Invalid parameter".equals(e.getMessage())) {
-                    final FacebookMessagingException fme = FacebookMessagingExceptionCodes.FAILED_LOGIN.create(login);
-                    if (LOG.isTraceEnabled()) {
-                        LOG.trace(new StringBuilder("Login to facebook failed for login=").append(login).append(", password=").append(
-                            password).toString(), fme);
+                    if (!LOG.isTraceEnabled()) {
+                        throw FacebookMessagingExceptionCodes.FAILED_LOGIN.create(login);
                     }
+                    final FacebookMessagingException fme = FacebookMessagingExceptionCodes.FAILED_LOGIN.create(login);
+                    LOG.trace(
+                        new StringBuilder("Login to facebook failed for login=").append(login).append(", password=").append(password).toString(),
+                        fme);
                     throw fme;
                 }
                 throw e;
