@@ -160,6 +160,24 @@ public final class VirtualFolderStorage implements FolderStorage {
         }
     }
 
+    public void updateLastModified(final long lastModified, final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+        /*
+         * Get real folder storage
+         */
+        final FolderStorage folderStorage = getRealFolderStorage(folderId, storageParameters, false);
+        try {
+            // Get folder
+            folderStorage.updateLastModified(lastModified, FolderStorage.REAL_TREE_ID, folderId, storageParameters);
+            folderStorage.commitTransaction(storageParameters);
+        } catch (final FolderException e) {
+            folderStorage.rollback(storageParameters);
+            throw e;
+        } catch (final Exception e) {
+            folderStorage.rollback(storageParameters);
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
     public Folder getFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
         return getFolder(treeId, folderId, StorageType.WORKING, storageParameters);
     }

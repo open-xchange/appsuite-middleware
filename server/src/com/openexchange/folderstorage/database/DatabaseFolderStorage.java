@@ -455,6 +455,24 @@ public final class DatabaseFolderStorage implements FolderStorage {
         }
     }
 
+    public void updateLastModified(final long lastModified, final String treeId, final String folderIdentifier, final StorageParameters storageParameters) throws FolderException {
+        try {
+            final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
+            final Context ctx = storageParameters.getContext();
+            final int folderId = getUnsignedInteger(folderIdentifier);
+            if (getFolderAccess(storageParameters, getFolderType()).getFolderLastModified(folderId).after(new Date(lastModified))) {
+                throw FolderExceptionErrorMessage.CONCURRENT_MODIFICATION.create();
+            }
+            OXFolderSQL.updateLastModified(folderId, lastModified, storageParameters.getUserId(), con, ctx);
+        } catch (final DBPoolingException e) {
+            throw new FolderException(e);
+        } catch (final SQLException e) {
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } catch (final OXException e) {
+            throw new FolderException(e);
+        }
+    }
+
     public Folder getFolder(final String treeId, final String folderIdentifier, final StorageParameters storageParameters) throws FolderException {
         return getFolder(treeId, folderIdentifier, StorageType.WORKING, storageParameters);
     }

@@ -282,6 +282,8 @@ public final class CreatePerformer extends AbstractPerformer {
                             capStorage.getDefaultContentType(),
                             FolderStorage.REAL_TREE_ID);
                     }
+                    
+                    
                     // TODO: Check permission for obtained default folder ID?
                     final Folder clone4Real = (Folder) toCreate.clone();
                     clone4Real.setParentID(realParentId);

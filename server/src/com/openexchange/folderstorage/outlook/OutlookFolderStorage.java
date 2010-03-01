@@ -207,7 +207,7 @@ public final class OutlookFolderStorage implements FolderStorage {
          * Create only if folder could not be stored in real storage
          */
         final String folderId = folder.getID();
-        final String realParentId;
+        final Folder realFolder;
         {
             final FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, folderId);
             if (null == folderStorage) {
@@ -215,7 +215,7 @@ public final class OutlookFolderStorage implements FolderStorage {
             }
             folderStorage.startTransaction(storageParameters, true);
             try {
-                realParentId = folderStorage.getFolder(realTreeId, folderId, StorageType.WORKING, storageParameters).getParentID();
+                realFolder = folderStorage.getFolder(realTreeId, folderId, StorageType.WORKING, storageParameters);
                 folderStorage.commitTransaction(storageParameters);
             } catch (final FolderException e) {
                 folderStorage.rollback(storageParameters);
@@ -226,14 +226,21 @@ public final class OutlookFolderStorage implements FolderStorage {
             }
         }
         final String parentId = folder.getParentID();
-        if (realParentId.equals(parentId)) {
+        if (realFolder.getParentID().equals(parentId)) {
             /*
              * Folder already properly created at right location in real storage
              */
             return;
         }
-        final int contextId = storageParameters.getContextId();
         final int userId = storageParameters.getUserId();
+        if (null == realFolder.getLastModified()) {
+            /*
+             * Real folder has no last-modified time stamp, but virtual needs to have.
+             */
+            folder.setModifiedBy(userId);
+            folder.setLastModified(new Date());
+        }
+        final int contextId = storageParameters.getContextId();
         final int tree = Tools.getUnsignedInteger(folder.getTreeID());
         Insert.insertFolder(contextId, tree, userId, folder);
     }
@@ -313,6 +320,28 @@ public final class OutlookFolderStorage implements FolderStorage {
             final boolean isEmpty = folderStorage.isEmpty(treeId, folderId, storageParameters);
             folderStorage.commitTransaction(storageParameters);
             return isEmpty;
+        } catch (final FolderException e) {
+            folderStorage.rollback(storageParameters);
+            throw e;
+        } catch (final Exception e) {
+            folderStorage.rollback(storageParameters);
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    public void updateLastModified(final long lastModified, final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
+        /*
+         * Get real folder storage
+         */
+        final FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, folderId);
+        if (null == folderStorage) {
+            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, folderId);
+        }
+        folderStorage.startTransaction(storageParameters, false);
+        try {
+            // Get folder
+            folderStorage.updateLastModified(lastModified, FolderStorage.REAL_TREE_ID, folderId, storageParameters);
+            folderStorage.commitTransaction(storageParameters);
         } catch (final FolderException e) {
             folderStorage.rollback(storageParameters);
             throw e;

@@ -232,6 +232,17 @@ public interface FolderStorage {
     void updateFolder(Folder folder, StorageParameters storageParameters) throws FolderException;
 
     /**
+     * Updates the last-modified time stamp of the given folder in the storage.
+     * 
+     * @param lastModified The last-modified time stamp to set
+     * @param treeId The tree identifier
+     * @param folderId The folder ID
+     * @param storageParameters The storage parameters
+     * @throws FolderException If updating last-modified time stamp fails
+     */
+    void updateLastModified(long lastModified, String treeId, String folderId, StorageParameters storageParameters) throws FolderException;
+
+    /**
      * Creates the given folder on the storage.
      * <p>
      * Implementation is expected to set the identifier of created folder in passed folder instance through {@link Folder#setID(String)}.
