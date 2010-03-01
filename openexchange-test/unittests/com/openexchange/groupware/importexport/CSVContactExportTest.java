@@ -143,27 +143,4 @@ public class CSVContactExportTest extends AbstractContactTest {
 			contactSql.deleteContactObject(Integer.parseInt(res.getObjectId()), Integer.parseInt(res.getFolder()), res.getDate());
 		}
 	}
-	
-	@Test public void exportEmpty() throws NumberFormatException, Exception{
-		final Importer imp = new CSVContactImporter();
-		InputStream is;
-		
-		//importing prior to export test
-		is = new ByteArrayInputStream( TEST_EMPTY_RESULT.getBytes() ); 
-		final Map <String, Integer>folderMappings = new HashMap<String, Integer>();
-		folderMappings.put(Integer.toString(folderId), new Integer(Types.CONTACT) );
-		final List<ImportResult> results = imp.importData(sessObj, Format.CSV, is, new LinkedList<String>( folderMappings.keySet()), null);
-		
-		//exporting and asserting
-		is = exp.exportData(sessObj, Format.CSV, String.valueOf( folderId ),TEST_EMPTY_BASE, null);
-		final CSVParser parser = new CSVParser();
-		final String resStr = OXTestToolkit.readStreamAsString(is);
-		assertEquals("Two imports", parser.parse(TEST_EMPTY_RESULT), parser.parse(resStr) );
-		
-		//cleaning up
-		final ContactSQLInterface contactSql = new RdbContactSQLImpl(sessObj);
-		for(final ImportResult res : results){
-			contactSql.deleteContactObject(Integer.parseInt(res.getObjectId()), Integer.parseInt(res.getFolder()), res.getDate());
-		}
-	}
 }

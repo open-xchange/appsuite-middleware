@@ -50,22 +50,17 @@
 package com.openexchange.groupware.importexport;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
-
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-
 import junit.framework.JUnit4TestAdapter;
-
 import org.junit.Test;
-
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLImpl;
@@ -154,17 +149,12 @@ public class CSVContactImportTest extends AbstractContactTest {
         final List<ImportResult> results = importStuff(IMPORT_EMPTY);
         assertTrue("One result?" , 1 == results.size());
         final ImportResult res = results.get(0);
-        if(res.hasError()){
-            res.getException().printStackTrace();
-        }
-        assertTrue( res.isCorrect() );
+        assertTrue("Should have error", res.hasError() );
+        assertEquals("Should contain error for not importing because fields are missing", 808, res.getException().getDetailNumber());
 
-        //basic check: 1 entry in folder
+        //no import, please
         final ContactSQLInterface contactSql = new RdbContactSQLImpl(sessObj);
-        assertTrue("One contact in folder?", 1 == contactSql.getNumberOfContacts(folderId));
-
-        //cleaning up
-        contactSql.deleteContactObject(Integer.parseInt(res.getObjectId()), Integer.parseInt(res.getFolder()), res.getDate());
+        assertEquals("Should not have imported a contact", 0 ,  contactSql.getNumberOfContacts(folderId));
     }
 
 
@@ -300,6 +290,28 @@ public class CSVContactImportTest extends AbstractContactTest {
         assertTrue("Is private?", conObj.getPrivateFlag());
     }
 
+    @Test public void dontImportIfDisplayNameCanBeFormedAtAll() throws Exception{
+        final String file = ContactField.COUNTRY_BUSINESS.getReadableName() + "\nNo one likes an empty entry with a country field only";
+        try {
+            final List<ImportResult> results = importStuff(file);
+            fail("Should throw exception");
+        } catch (ImportExportException e){
+            assertEquals("Should throw exception for missing fields to build a display name" , 807, e.getDetailNumber());
+        }
+    }
+    
+    
+    @Test public void dontImportIfNoDisplayNameCanBeFormedForAGivenContact() throws Exception{
+        final String file = ContactField.SUR_NAME.getReadableName() + "," + ContactField.COUNTRY_BUSINESS.getReadableName()+ "\n,Something unimportant";
+        final List<ImportResult> results = importStuff(file);
+        assertEquals("Should give one result", 1, results.size());
+        ImportResult res = results.get(0);
+        assertTrue("Needs to contain one error", res.hasError());
+        ImportExportException exception = (ImportExportException) res.getException();
+        assertEquals("Should have a problem because there is no material for a display name", 808, exception.getDetailNumber());
+    }
+
+    
     protected void checkFirstResult(final int objectID ) throws OXException, ContextException {
         final Contact co = new RdbContactSQLImpl(sessObj).getObjectById(objectID, folderId);
         assertEquals("Checking name" ,  NAME1 , co.getGivenName());

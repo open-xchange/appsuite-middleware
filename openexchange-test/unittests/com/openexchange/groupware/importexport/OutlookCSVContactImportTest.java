@@ -52,6 +52,7 @@ package com.openexchange.groupware.importexport;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
@@ -266,6 +267,27 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
         assertEquals("Should only criticize that 'Account' cannot be translated", "I_E-0803" , res.getException().getErrorCode());
     }
 	
+
+    @Test public void dontImportIfDisplayNameCanBeFormedAtAll() throws Exception{
+        final String file = ContactField.COUNTRY_BUSINESS.getEnglishOutlookName() + "\nNo one likes an empty entry with a country field only";
+        try {
+            importStuff(file);
+            fail("Should throw exception");
+        } catch (ImportExportException e){
+            assertEquals("Should throw exception for missing fields to build a display name" , 807, e.getDetailNumber());
+        }
+    }
+    
+    @Test public void dontImportIfNoDisplayNameCanBeFormedForAGivenContact() throws Exception{
+        final String file = ContactField.SUR_NAME.getEnglishOutlookName()+ "," + ContactField.COUNTRY_BUSINESS.getReadableName()+ "\n,Something unimportant";
+        final List<ImportResult> results = importStuff(file);
+        assertEquals("Should give one result", 1, results.size());
+        ImportResult res = results.get(0);
+        assertTrue("Needs to contain one error", res.hasError());
+        ImportExportException exception = (ImportExportException) res.getException();
+        assertEquals("Should have a problem because there is no material for a display name", 808, exception.getDetailNumber());
+    }
+    
 	public void assertDateEquals(final Date date1 , final Date date2){
 		final Calendar c1 = new GregorianCalendar(), c2 = new GregorianCalendar();
 		c1.setTime(date1);
