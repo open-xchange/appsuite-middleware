@@ -1,3 +1,7 @@
+* 2010-03-01 - francisco.laguna@open-xchange.com
+
+ - Bugfix #15500: Use a different method of accessing the currently logged in user.
+
 * 2010-03-01 - marcus.klein@open-xchange.com
 
  - Bugfix #15429: Giving proper exception message if a contact in a public folder should marked private.
