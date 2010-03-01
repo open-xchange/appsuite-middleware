@@ -221,7 +221,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                         throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.LOAD_PERMISSION_EXCEPTION_4));
                     }
                 }
-                if (cdao.containsRecurrenceID()) {
+                if (cdao.containsRecurrenceID() && cdao.getRecurrenceID() != 0) {
                     cdao.setRecurrenceCalculator(setInt(i++, load_resultset));
                     cdao.setRecurrencePosition(setInt(i++, load_resultset));
                     cdao.setRecurrence(setString(i++, load_resultset));
