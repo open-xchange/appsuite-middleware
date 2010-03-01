@@ -106,7 +106,11 @@ public enum FacebookMessagingExceptionCodes implements OXErrorMessage {
      * Missing permission for the application associated with configured Facebook API key: %1$s<br>
      * Please grant access for that application in your Facebook account settings.
      */
-    MISSING_APPLICATION_PERMISSION(FacebookMessagingExceptionMessages.MISSING_APPLICATION_PERMISSION_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 10);
+    MISSING_APPLICATION_PERMISSION(FacebookMessagingExceptionMessages.MISSING_APPLICATION_PERMISSION_MSG, Category.SUBSYSTEM_OR_SERVICE_DOWN, 10),
+    /**
+     * FQL query result size (%1$s) does not match requested number of post identifiers (%2$s).
+     */
+    FQL_QUERY_RESULT_MISMATCH(FacebookMessagingExceptionMessages.FQL_QUERY_RESULT_MISMATCH_MSG, Category.CODE_ERROR, 11);
 
     private final Category category;
 

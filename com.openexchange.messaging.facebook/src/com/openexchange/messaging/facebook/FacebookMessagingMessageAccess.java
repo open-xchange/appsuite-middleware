@@ -292,7 +292,11 @@ public final class FacebookMessagingMessageAccess implements MessagingMessageAcc
                 final List<Object> results = FacebookMessagingUtility.fireFQLQuery(query.getCharSequence(), facebookRestClient);
                 final int size = results.size();
                 if (size != messageIds.length) {
-                    throw new IllegalStateException("Size mismatch.");
+                    final FacebookMessagingException warning =
+                        FacebookMessagingExceptionCodes.FQL_QUERY_RESULT_MISMATCH.create(
+                            Integer.valueOf(size),
+                            Integer.valueOf(messageIds.length));
+                    org.apache.commons.logging.LogFactory.getLog(FacebookMessagingMessageAccess.class).warn(warning.getMessage(), warning);
                 }
                 final Iterator<Object> iterator = results.iterator();
                 final Map<String, FacebookMessagingMessage> orderMap = new HashMap<String, FacebookMessagingMessage>(size);
@@ -333,18 +337,15 @@ public final class FacebookMessagingMessageAccess implements MessagingMessageAcc
              * Replace from with proper user name
              */
             if (!m.isEmpty()) {
-                final int size = m.size();
                 final Query userQuery =
                     FacebookMessagingUtility.composeFQLUserQueryFor(userFieldSet.toArray(new MessagingField[userFieldSet.size()]), m.keys());
                 /*
                  * Fire FQL query
                  */
                 final List<Object> results = FacebookMessagingUtility.fireFQLQuery(userQuery.getCharSequence(), facebookRestClient);
-                if (size != results.size()) {
-                    throw new IllegalStateException("result size mismatch!");
-                }
                 final Iterator<Object> iterator = results.iterator();
-                for (int i = 0; i < size; i++) {
+                final int resSize = results.size();
+                for (int i = 0; i < resSize; i++) {
                     final FacebookUser facebookUser = FacebookFQLUserParser.parseUserDOMElement((Element) iterator.next());
                     final String userIdStr = String.valueOf(facebookUser.getUid());
                     for (final FacebookMessagingMessage message : m.get(facebookUser.getUid())) {
@@ -509,18 +510,15 @@ public final class FacebookMessagingMessageAccess implements MessagingMessageAcc
          * Replace from with proper user name
          */
         if (!m.isEmpty()) {
-            final int size = m.size();
             final Query userQuery =
                 FacebookMessagingUtility.composeFQLUserQueryFor(userFieldSet.toArray(new MessagingField[userFieldSet.size()]), m.keys());
             /*
              * Fire FQL query
              */
             final List<Object> results = FacebookMessagingUtility.fireFQLQuery(userQuery.getCharSequence(), facebookRestClient);
-            if (size != results.size()) {
-                throw new IllegalStateException("result size mismatch!");
-            }
             final Iterator<Object> iterator = results.iterator();
-            for (int i = 0; i < size; i++) {
+            final int resSize = results.size();
+            for (int i = 0; i < resSize; i++) {
                 final FacebookUser facebookUser = FacebookFQLUserParser.parseUserDOMElement((Element) iterator.next());
                 final String userIdStr = String.valueOf(facebookUser.getUid());
                 for (final FacebookMessagingMessage message : m.get(facebookUser.getUid())) {

@@ -95,6 +95,9 @@ public final class FacebookMessagingExceptionMessages implements LocalizableStri
     public static final String MISSING_APPLICATION_PERMISSION_MSG =
         "Missing permission for the application associated with configured Facebook API key: %1$s\n" + "Please grant access for that application in your Facebook account settings.";
 
+    // FQL query result size (%1$s) does not match requested number of post identifiers (%2$s).
+    public static final String FQL_QUERY_RESULT_MISMATCH_MSG = "FQL query result size (%1$s) does not match requested number of post identifiers (%2$s).";
+
     /**
      * Initializes a new {@link FacebookMessagingExceptionMessages}.
      */
