@@ -228,12 +228,12 @@ public final class ServletConfigLoader {
     /**
      * Remembers failed lookups on class property files
      */
-    private final transient Set<String> clazzGuardian = new HashSet<String>();
+    private final transient Set<String> clazzGuardian;
 
     /**
      * Cache class properties
      */
-    private final transient Map<String, Map<String, String>> clazzProps = new HashMap<String, Map<String, String>>();
+    private final transient Map<String, Map<String, String>> clazzProps;
 
     private transient ServletConfig defaultConfig;
 
@@ -246,12 +246,12 @@ public final class ServletConfigLoader {
     /**
      * Remembers failed lookups on path property files
      */
-    private final transient Set<String> pathGuardian = new HashSet<String>();
+    private final transient Set<String> pathGuardian;
 
     /**
      * Cache path properties
      */
-    private final transient Map<String, Map<String, String>> pathProps = new HashMap<String, Map<String, String>>();
+    private final transient Map<String, Map<String, String>> pathProps;
 
     /**
      * Initializes a new servlet config loader
@@ -259,6 +259,11 @@ public final class ServletConfigLoader {
      * @param directory The directory containing properties files
      */
     public ServletConfigLoader(final File directory) {
+        super();
+        clazzGuardian = new HashSet<String>();
+        clazzProps = new HashMap<String, Map<String, String>>();
+        pathGuardian = new HashSet<String>();
+        pathProps = new HashMap<String, Map<String, String>>();
         this.directory = directory;
         globalProps = loadDirProps(this.directory);
         globalProps.put(ServerConfig.Property.IP_CHECK.getPropertyName(), ServerConfig.getInstance().isCheckIP().toString());
@@ -273,6 +278,10 @@ public final class ServletConfigLoader {
      */
     private ServletConfigLoader(final ServletConfigWrapper servletConfig, final ServletContextWrapper servletContext, final File directory) {
         super();
+        clazzGuardian = new HashSet<String>();
+        clazzProps = new HashMap<String, Map<String, String>>();
+        pathGuardian = new HashSet<String>();
+        pathProps = new HashMap<String, Map<String, String>>();
         defaultConfig = servletConfig;
         defaultContext = servletContext;
         this.directory = directory;
