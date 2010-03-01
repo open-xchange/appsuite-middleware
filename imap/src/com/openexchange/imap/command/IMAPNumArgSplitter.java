@@ -187,7 +187,10 @@ public final class IMAPNumArgSplitter {
     public static String[] getSeqNumArg(final int[] arr, final boolean keepOrder, final boolean split, final int consumed) {
         final TIntArrayList l = new TIntArrayList(arr.length);
         for (int i = 0; i < arr.length; i++) {
-            l.add(arr[i]);
+            final int seqNum = arr[i];
+            if (seqNum > 0) {
+                l.add(seqNum);
+            }
         }
         if (!keepOrder) {
             l.sort();
@@ -211,7 +214,10 @@ public final class IMAPNumArgSplitter {
     public static String[] splitMessageArg(final Message[] arr, final boolean keepOrder, final int consumed) {
         final TIntArrayList l = new TIntArrayList(arr.length);
         for (int i = 0; i < arr.length; i++) {
-            l.add(arr[i].getMessageNumber());
+            final int messageNumber = arr[i].getMessageNumber();
+            if (messageNumber > 0) {
+                l.add(messageNumber);
+            }
         }
         if (!keepOrder) {
             l.sort();
@@ -233,7 +239,10 @@ public final class IMAPNumArgSplitter {
     public static String[] splitUIDArg(final long[] arr, final boolean keepOrder, final int consumed) {
         final TLongArrayList l = new TLongArrayList(arr.length);
         for (int i = 0; i < arr.length; i++) {
-            l.add(arr[i]);
+            final long uid = arr[i];
+            if (uid >= 0) {
+                l.add(uid);
+            }
         }
         if (!keepOrder) {
             l.sort();
