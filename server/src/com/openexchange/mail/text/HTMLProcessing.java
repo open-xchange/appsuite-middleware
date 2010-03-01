@@ -307,15 +307,20 @@ public final class HTMLProcessing {
                 if ((url == null) || (isSrcAttr(content, m.start(1)))) {
                     mr.appendLiteralReplacement(sb, checkTarget(m.group()));
                 } else {
+                    tmp.setLength(0);
                     final int mlen = url.length() - 1;
                     if (mlen > 0 && '(' == url.charAt(0) && ')' == url.charAt(mlen)) {
                         url = url.substring(1, mlen);
+                        mr.appendLiteralReplacement(
+                            sb,
+                            tmp.append("(<a href=\"").append((url.startsWith("www") || url.startsWith("news") ? "http://" : "")).append(url).append(
+                                "\" target=\"_blank\">").append(url).append("</a>)").toString());
+                    } else {
+                        mr.appendReplacement(
+                            sb,
+                            tmp.append("<a href=\"").append((url.startsWith("www") || url.startsWith("news") ? "http://" : "")).append(
+                                "$1\" target=\"_blank\">$1</a>").toString());
                     }
-                    tmp.setLength(0);
-                    mr.appendReplacement(
-                        sb,
-                        tmp.append("<a href=\"").append((url.startsWith("www") || url.startsWith("news") ? "http://" : "")).append(
-                            "$1\" target=\"_blank\">$1</a>").toString());
                 }
             }
             mr.appendTail(sb);
