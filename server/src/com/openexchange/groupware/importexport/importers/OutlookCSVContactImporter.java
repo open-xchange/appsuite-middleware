@@ -73,6 +73,7 @@ import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.csv.CSVParser;
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionClasses;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.Collections;
 
 @OXExceptionSource(
 	classId=ImportExportExceptionClasses.OUTLOOKCSVCONTACTIMPORTER, 
@@ -202,4 +203,22 @@ public class OutlookCSVContactImporter extends CSVContactImporter {
 		}
 		return getFieldMapper().getNameOfField(field);
 	}
+
+    @Override
+    protected boolean passesSanityTestForDisplayName(List<String> headers) {
+        ContactFieldMapper mpr = getFieldMapper();
+        
+        return Collections.any(headers, 
+            mpr.getNameOfField(ContactField.DISPLAY_NAME),
+            mpr.getNameOfField(ContactField.SUR_NAME),
+            mpr.getNameOfField(ContactField.GIVEN_NAME),
+            mpr.getNameOfField(ContactField.EMAIL1),
+            mpr.getNameOfField(ContactField.EMAIL2),
+            mpr.getNameOfField(ContactField.EMAIL3),
+            mpr.getNameOfField(ContactField.COMPANY),
+            mpr.getNameOfField(ContactField.NICKNAME),
+            mpr.getNameOfField(ContactField.MIDDLE_NAME));
+    }
+	
+	
 }

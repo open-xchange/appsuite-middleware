@@ -91,8 +91,10 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionF
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.Collections;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.webdav.xml.fields.ContactFields;
 
 /**
  * Importer for OX own CSV file format - this format is able to represent a
@@ -113,9 +115,11 @@ import com.openexchange.tools.session.ServerSession;
         Category.WARNING,
         Category.USER_INPUT,
         Category.USER_INPUT,
-        Category.PERMISSION},
-    desc={"", "", "", "", "", "", ""},
-    exceptionId={0,1,2,3,4,5,6},
+        Category.PERMISSION,
+        Category.USER_INPUT,
+        Category.USER_INPUT},
+    desc={"", "", "", "", "", "", "", "", ""},
+    exceptionId={0,1,2,3,4,5,6,7,8},
     msg={
         "Can only import into one folder at a time.",
         "Cannot import this kind of data. Use method canImport() first.",
@@ -123,7 +127,9 @@ import com.openexchange.tools.session.ServerSession;
         "Could not find the following fields %s",
         "Could not translate a single column title. Is this a valid CSV file?",
         "Could not translate a single field of information, did not insert entry %s.",
-        "Module Contacts not enabled for user, cannot import contacts"
+        "Module Contacts not enabled for user, cannot import contacts",
+        "No field can be found that could be used to name contacts in this file: no name, no company nor e-mail.",
+        "No field was set that might give the contact in line %s a display name: no name, no company nor e-mail."
         })
 public class CSVContactImporter extends AbstractImporter {
 
@@ -209,6 +215,11 @@ public class CSVContactImporter extends AbstractImporter {
         if (!checkFields(fields)) {
             throw EXCEPTIONS.create(4);
         }
+        if(! passesSanityTestForDisplayName(fields)){
+            throw EXCEPTIONS.create(7);
+            
+        }
+            
 
         //reading entries...
         final List<ImportResult> results = new LinkedList<ImportResult>();
@@ -234,7 +245,31 @@ public class CSVContactImporter extends AbstractImporter {
         }
         return false;
     }
+    
+    protected boolean passesSanityTestForDisplayName(final List<String> headers){
+        return Collections.any(headers, 
+            ContactField.DISPLAY_NAME.getReadableName(),
+            ContactField.SUR_NAME.getReadableName(),
+            ContactField.GIVEN_NAME.getReadableName(),
+            ContactField.EMAIL1.getReadableName(),
+            ContactField.EMAIL2.getReadableName(),
+            ContactField.EMAIL3.getReadableName(),
+            ContactField.COMPANY.getReadableName(),
+            ContactField.NICKNAME.getReadableName(),
+            ContactField.MIDDLE_NAME.getReadableName());
+    }
 
+    protected boolean passesSanityTestForDisplayName(Contact con){
+        return con.contains(ContactField.DISPLAY_NAME.getNumber())
+        || con.contains(ContactField.SUR_NAME.getNumber())
+        || con.contains(ContactField.GIVEN_NAME.getNumber())
+        || con.contains(ContactField.EMAIL1.getNumber())
+        || con.contains(ContactField.EMAIL2.getNumber())
+        || con.contains(ContactField.EMAIL3.getNumber())
+        || con.contains(ContactField.COMPANY.getNumber())
+        || con.contains(ContactField.NICKNAME.getNumber())
+        || con.contains(ContactField.MIDDLE_NAME.getNumber());
+    }
 
     /**
      *
@@ -252,6 +287,12 @@ public class CSVContactImporter extends AbstractImporter {
         try{
             boolean[] atLeastOneFieldInserted = new boolean[]{false};
             final Contact contactObj= convertCsvToContact(fields, entry, conSet, lineNumber, result, atLeastOneFieldInserted);
+            if(! contactObj.canFormDisplayName()){
+                result.setException(EXCEPTIONS.create(8, Integer.valueOf(lineNumber)));
+                result.setDate(new Date());
+                return result;
+            }
+                
             contactObj.setParentFolderID(Integer.parseInt( folder.trim() ));
             if(atLeastOneFieldInserted[0]){
                 final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
@@ -263,7 +304,6 @@ public class CSVContactImporter extends AbstractImporter {
                 result.setException(EXCEPTIONS.create(5, Integer.valueOf(lineNumber)));
                 result.setDate(new Date());
             }
-
         } catch (OXException e) {
             e =    handleDataTruncation(e);
             result.setException(e);
