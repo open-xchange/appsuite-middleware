@@ -16,6 +16,7 @@
  - Bugfix #15504: Ignoring possible FQL query result size mismatch
  - Bugfix #15408: Added support for non-ascii characters occurring in mail headers
  - Bugfix #15494: Fixed start-up order
+ - Bugfix #15512: Fixed deletion of a DB folder nested below a non-DB folder
 
 * 2010-02-26 - marcus.klein@open-xchange.com
 
