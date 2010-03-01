@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -145,7 +146,7 @@ public class SyndMessage implements MessagingMessage {
     }
 
     public long getReceivedDate() {
-        return (null == entry.getPublishedDate()) ? -1 : entry.getPublishedDate().getTime();
+        return ((Date) tryThese(entry.getPublishedDate(), entry.getUpdatedDate(), new Date(-1))).getTime();
     }
 
     public int getThreadLevel() {
@@ -214,6 +215,15 @@ public class SyndMessage implements MessagingMessage {
         SyndFeed source = (entry.getSource() != null) ? entry.getSource() : feed;
         if(null != source.getImage()) {
             return source.getImage().getUrl();
+        }
+        return null;
+    }
+    
+    protected Object tryThese(Object...objects) {
+        for (Object object : objects) {
+            if(object != null) {
+                return object;
+            }
         }
         return null;
     }
