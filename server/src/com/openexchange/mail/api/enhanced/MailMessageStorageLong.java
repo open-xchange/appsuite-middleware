@@ -223,10 +223,11 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
             throw new MailException(MailException.Code.MAIL_NOT_FOUND, Long.valueOf(mailId), folder);
         }
         new MailMessageParser().parseMailMessage(mail, handler);
-        if (handler.getImagePart() == null) {
+        final MailPart imagePart = handler.getImagePart();
+        if (null == imagePart) {
             throw new MailException(MailException.Code.IMAGE_ATTACHMENT_NOT_FOUND, contentId, Long.valueOf(mailId), folder);
         }
-        return handler.getImagePart();
+        return imagePart;
     }
 
     @Override
