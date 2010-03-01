@@ -648,13 +648,13 @@ public final class Contacts {
             Category.CODE_ERROR, Category.PERMISSION, Category.PERMISSION, Category.PERMISSION, Category.CONCURRENT_MODIFICATION, Category.CODE_ERROR,
             Category.CODE_ERROR, Category.USER_INPUT, Category.CODE_ERROR, Category.CODE_ERROR, Category.CODE_ERROR, Category.USER_INPUT,
             Category.TRY_AGAIN, Category.TRY_AGAIN, Category.USER_INPUT, Category.TRY_AGAIN, Category.PERMISSION, Category.PERMISSION,
-            Category.PERMISSION, Category.USER_INPUT, Category.USER_INPUT
+            Category.PERMISSION, Category.USER_INPUT, Category.USER_INPUT, Category.PERMISSION
         },
         desc = {
             "10", "11", "12", "13", "14", "15", "16", "17", "65", "18", "19", "20", "21", "22", "23", "24", "55", "56", "59", "63", "66",
-            "67", "69", "73", "74", "75", "64"
+            "67", "69", "73", "74", "75", "64", "76"
         },
-        exceptionId = { 10, 11, 12, 13, 14, 15, 16, 17, 65, 18, 19, 20, 21, 22, 23, 24, 55, 56, 59, 63, 66, 67, 69, 73, 74, 75, 64 },
+        exceptionId = { 10, 11, 12, 13, 14, 15, 16, 17, 65, 18, 19, 20, 21, 22, 23, 24, 55, 56, 59, 63, 66, 67, 69, 73, 74, 75, 64, 76 },
         msg = {
             ContactException.NON_CONTACT_FOLDER_MSG,
             ContactException.NO_PERMISSION_MSG,
@@ -680,7 +680,8 @@ public final class Contacts {
             "Primary email address in system contact must not be edited: Context %1$d Object %2$d User %3$d",
             ContactException.NOT_IN_FOLDER,
             "Your last name is mandatory. Please enter it.",
-            "Your first name is mandatory. Please enter it."
+            "Your first name is mandatory. Please enter it.",
+            "You are not allowed to modify contact %1$d in context %2$d."
         }
     )
     public static void performContactStorageUpdate(final Contact co, final int fid, final java.util.Date client_date, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws ContactException, OXConflictException, OXObjectNotFoundException, OXConcurrentModificationException, OXException {
@@ -711,101 +712,50 @@ public final class Contacts {
             try {
                 original = getContactById(co.getObjectID(), user, group, ctx, uc, readcon);
             } catch (final Exception e) {
-                throw EXCEPTIONS.createOXObjectNotFoundException(
-                    16,
-                    e,
-                    Integer.valueOf(ctx.getContextId()),
-                    Integer.valueOf(co.getObjectID()));
-                // throw new OXObjectNotFoundException("UNABLE TO LOAD CONTACT
-                // FOR UPDATE cid="+ctx.getContextId()+" oid"+co.getObjectID(),
-                // e);
+                throw EXCEPTIONS.createOXObjectNotFoundException(16, e, I(ctx.getContextId()), I(co.getObjectID()));
             }
 
-            /*
-             * Check if contact really exists in specified folder
-             */
+            // Check if contact really exists in specified folder
             if (fid != original.getParentFolderID()) {
-                throw EXCEPTIONS.createOXPermissionException(
-                    74,
-                    Integer.valueOf(co.getObjectID()),
-                    Integer.valueOf(fid),
-                    Integer.valueOf(ctx.getContextId()));
+                throw EXCEPTIONS.createOXPermissionException(74, I(co.getObjectID()), I(fid), I(ctx.getContextId()));
             }
 
             if (FolderObject.SYSTEM_LDAP_FOLDER_ID == fid && co.containsEmail1() && ctx.getMailadmin() != user && original.getInternalUserId() == user) {
-                /*
-                 * User tries to edit his primary email address which is allowed by administrator only since this email address is used in
-                 * various places throughout the system. Therefore it is denied.
-                 */
-                throw EXCEPTIONS.createOXPermissionException(
-                    73,
-                    Integer.valueOf(ctx.getContextId()),
-                    Integer.valueOf(co.getObjectID()),
-                    Integer.valueOf(user));
-
+                // User tries to edit his primary email address which is allowed by administrator only since this email address is used in
+                // various places throughout the system. Therefore it is denied.
+                throw EXCEPTIONS.createOXPermissionException(73, I(ctx.getContextId()), I(co.getObjectID()), I(user));
             }
 
-            /*
-             * Check Rights for Source Folder
-             */
-
+            // Check Rights for Source Folder
             final int folder_whereto = co.getParentFolderID();
             final int folder_comesfrom = fid;
 
             final FolderObject contactFolder = new OXFolderAccess(readcon, ctx).getFolderObject(folder_comesfrom);
             if (contactFolder.getModule() != FolderObject.CONTACT) {
-                throw EXCEPTIONS.createOXConflictException(
-                    10,
-                    Integer.valueOf(folder_comesfrom),
-                    Integer.valueOf(ctx.getContextId()),
-                    Integer.valueOf(user));
-                // throw new OXConflictException("saveContactObject() called
-                // with a non-Contact-Folder! cid="+ctx.getContextId()+"
-                // fid="+co.getParentFolderID());
+                throw EXCEPTIONS.createOXConflictException(10, I(folder_comesfrom), I(ctx.getContextId()), I(user));
             }
             final OXFolderAccess oxfs = new OXFolderAccess(readcon, ctx);
             final EffectivePermission oclPerm = oxfs.getFolderPermission(folder_comesfrom, user, uc);
 
             if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
-                throw EXCEPTIONS.createOXPermissionException(
-                    11,
-                    Integer.valueOf(folder_comesfrom),
-                    Integer.valueOf(ctx.getContextId()),
-                    Integer.valueOf(user));
-                // throw new OXConflictException("NOT ALLOWED TO MODIFIE CONTACT
-                // cid="+ctx.getContextId()+" fid="+co.getParentFolderID());
+                throw EXCEPTIONS.createOXPermissionException(11, I(folder_comesfrom), I(ctx.getContextId()), I(user));
             }
             if (!oclPerm.canWriteAllObjects()) {
                 if (oclPerm.canWriteOwnObjects()) {
                     can_edit_only_own = true;
                 } else {
-                    throw EXCEPTIONS.createOXPermissionException(
-                        12,
-                        Integer.valueOf(co.getParentFolderID()),
-                        Integer.valueOf(ctx.getContextId()),
-                        Integer.valueOf(user));
-                    // throw new OXConflictException("NOT ALLOWED TO MODIFIE
-                    // CONTACT cid="+ctx.getContextId()+"
-                    // fid="+co.getParentFolderID());
+                    throw EXCEPTIONS.createOXPermissionException(12, I(co.getParentFolderID()), I(ctx.getContextId()), I(user));
                 }
             }
 
-            /*
-             * ++++ MOVE ++++ Check Rights for destination
-             */
+            // ++++ MOVE ++++ Check Rights for destination
             // Can delete from source?
             if (co.getParentFolderID() != fid) {
                 if (!oclPerm.canDeleteAllObjects()) {
                     if (oclPerm.canDeleteOwnObjects()) {
                         can_delete_only_own = true;
                     } else {
-                        throw EXCEPTIONS.createOXPermissionException(
-                            69,
-                            Integer.valueOf(folder_comesfrom),
-                            Integer.valueOf(ctx.getContextId()),
-                            Integer.valueOf(user));
-                        // throw new OXConflictException("NOT ALLOWED TO MODIFIE
-                        // CONTACT cid="+ctx.getContextId()+" fid="+fid);
+                        throw EXCEPTIONS.createOXPermissionException(69, I(folder_comesfrom), I(ctx.getContextId()), I(user));
                     }
                 }
 
@@ -813,39 +763,17 @@ public final class Contacts {
 
                 // Can create in destination?
                 if (!op.canCreateObjects()) {
-                    throw EXCEPTIONS.createOXPermissionException(
-                        12,
-                        Integer.valueOf(folder_whereto),
-                        Integer.valueOf(ctx.getContextId()),
-                        Integer.valueOf(user));
+                    throw EXCEPTIONS.createOXPermissionException(12, I(folder_whereto), I(ctx.getContextId()), I(user));
                 }
-                final FolderObject source = new OXFolderAccess(readcon, ctx).getFolderObject(folder_whereto);
-                if (source.getModule() != FolderObject.CONTACT) {
-                    throw EXCEPTIONS.createOXConflictException(
-                        13,
-                        Integer.valueOf(folder_whereto),
-                        Integer.valueOf(ctx.getContextId()),
-                        Integer.valueOf(user));
-                    // throw new OXConflictException("saveContactObject() called
-                    // with a non-Contact-Folder! cid="+ctx.getContextId()+"
-                    // fid"+fid);
+                final FolderObject destination = new OXFolderAccess(readcon, ctx).getFolderObject(folder_whereto);
+                if (destination.getModule() != FolderObject.CONTACT) {
+                    throw EXCEPTIONS.createOXConflictException(13, I(folder_whereto), I(ctx.getContextId()), I(user));
                 }
                 if (op.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
-                    throw EXCEPTIONS.createOXPermissionException(
-                        14,
-                        Integer.valueOf(folder_whereto),
-                        Integer.valueOf(ctx.getContextId()),
-                        Integer.valueOf(user));
-                    // throw new OXConflictException("NOT ALLOWED TO MODIFIE
-                    // CONTACT cid="+ctx.getContextId()+" fid"+fid);
+                    throw EXCEPTIONS.createOXPermissionException(14, I(folder_whereto), I(ctx.getContextId()), I(user));
                 }
-
                 if (!oclPerm.canCreateObjects()) {
-                    throw EXCEPTIONS.createOXPermissionException(
-                        15,
-                        Integer.valueOf(folder_whereto),
-                        Integer.valueOf(ctx.getContextId()),
-                        Integer.valueOf(user));
+                    throw EXCEPTIONS.createOXPermissionException(15, I(folder_whereto), I(ctx.getContextId()), I(user));
                 }
                 /*-
                  * 
@@ -863,6 +791,15 @@ public final class Contacts {
                     }
                 }
                  */
+                // Following if-block should deal with all cases of move and private flag. Optimized with binary algebra
+                if (contactFolder.getType() == FolderObject.PRIVATE && destination.getType() == FolderObject.PUBLIC) {
+                    if (co.containsPrivateFlag() && co.getPrivateFlag() || !original.getPrivateFlag() && co.containsPrivateFlag()) {
+                        throw EXCEPTIONS.createOXConflictException(65, I(ctx.getContextId()), I(co.getObjectID()));
+                    }
+                } else if (contactFolder.getType() == FolderObject.PUBLIC && destination.getType() == FolderObject.PUBLIC && co.containsPrivateFlag()) {
+                    throw EXCEPTIONS.createOXConflictException(18, I(ctx.getContextId()), I(co.getObjectID()));
+                }
+                
             }
 
             /*
@@ -870,31 +807,16 @@ public final class Contacts {
              */
 
             if (can_edit_only_own && (original.getCreatedBy() != user)) {
-                throw EXCEPTIONS.createOXConflictException(
-                    17,
-                    Integer.valueOf(fid),
-                    Integer.valueOf(ctx.getContextId()),
-                    Integer.valueOf(user));
-                // throw new OXConflictException("NOT ALLOWED TO MODIFIE CONTACT
-                // cid="+ctx.getContextId()+" oid"+co.getObjectID());
+                throw EXCEPTIONS.createOXConflictException(17, I(fid), I(ctx.getContextId()), I(user));
             }
             if (can_delete_only_own && (original.getCreatedBy() != user)) {
-                throw EXCEPTIONS.createOXConflictException(
-                    69,
-                    Integer.valueOf(fid),
-                    Integer.valueOf(ctx.getContextId()),
-                    Integer.valueOf(user));
-                // throw new OXConflictException("NOT ALLOWED TO MODIFIE CONTACT
-                // cid="+ctx.getContextId()+" oid"+co.getObjectID());
+                throw EXCEPTIONS.createOXConflictException(69, I(fid), I(ctx.getContextId()), I(user));
             }
-            if ((contactFolder.getType() != FolderObject.PRIVATE) && (co.getPrivateFlag() || original.getPrivateFlag())) {
-                // co.setPrivateFlag(false);
-                throw EXCEPTIONS.createOXConflictException(65, Integer.valueOf(ctx.getContextId()), Integer.valueOf(co.getObjectID()));
-            } else if ((contactFolder.getType() == FolderObject.PRIVATE) && original.getPrivateFlag() && (original.getCreatedBy() != user)) {
-                throw EXCEPTIONS.createOXConflictException(18, Integer.valueOf(ctx.getContextId()), Integer.valueOf(co.getObjectID()));
-                // throw new OXConflictException("NOT ALLOWED TO SAVE FOLDER
-                // OBJECTS CONTACT AS PRIVATE cid="+ctx.getContextId()+"
-                // oid="+co.getObjectID());
+            if ((contactFolder.getType() != FolderObject.PRIVATE) && (co.getPrivateFlag())) {
+                throw EXCEPTIONS.createOXConflictException(18, I(ctx.getContextId()), I(co.getObjectID()));
+            }
+            if ((contactFolder.getType() == FolderObject.PRIVATE) && original.getPrivateFlag() && (original.getCreatedBy() != user)) {
+                throw EXCEPTIONS.createOXPermissionException(76, I(co.getObjectID()), I(ctx.getContextId()));
             }
 
             final java.util.Date server_date = original.getLastModified();
