@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 14
+%define		ox_release 15
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -483,14 +483,16 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Tue Feb 16 2010 - thorben.betten@open-xchange.com
+ - Bugfix #15378: Auto-detection of proper content type if "name" parameter is present
+* Wed Feb 10 2010 - thorben.betten@open-xchange.com
+ - Bugfix #15128: Display of broken multipart/alternative mail
 * Tue Feb 09 2010 - marcus.klein@open-xchange.com
  - Bugfix #15354: Updating user attributes inside a transaction to prevent loss of aliases.
 * Mon Feb 01 2010 - thorben.betten@open-xchange.com
  - Bugfix #15287: Returning 7 bit characters on QuotedInternetAddress.getAddress()
 * Tue Jan 19 2010 - francisco.laguna@open-xchange.com
  - Bugfix #15110: Apply download constraints only to OXMF pages and not attached infostore documents.
-* Mon Jan 18 2010 - thorben.betten@open-xchange.com
- - Bugfix #15128: Display of broken multipart/alternative mail
 * Mon Jan 11 2010 - martin.herfurth@open-xchange.com
  - Bugfix #15046: Participant delete for Outlook.
 * Mon Dec 21 2009 - marcus.klein@open-xchange.com
