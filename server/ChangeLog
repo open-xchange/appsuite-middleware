@@ -1,3 +1,7 @@
+* 2010-03-01 - thorben.betten@open-xchange.com
+
+ - Bugfix #15504: Ignoring possible FQL query result size mismatch
+
 * 2010-02-26 - marcus.klein@open-xchange.com
 
  - Bugfix #15497: Returning connections to correct pool.
