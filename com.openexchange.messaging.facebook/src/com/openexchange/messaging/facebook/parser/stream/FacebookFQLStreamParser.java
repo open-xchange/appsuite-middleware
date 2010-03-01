@@ -141,7 +141,13 @@ public final class FacebookFQLStreamParser {
 
                 public void handleItem(final Node item, final FacebookMessagingMessage message) throws MessagingException {
                     // message.setHeader(MessagingHeader.KnownHeader.FROM.toString(), item.getTextContent());
-                    message.setFromUserId(FacebookMessagingUtility.parseUnsignedLong(item.getTextContent()));
+                    final String content = item.getTextContent();
+                    final long fromUserId = FacebookMessagingUtility.parseUnsignedLong(null == content ? null : content.trim());
+                    if (fromUserId < 0) {
+                        org.apache.commons.logging.LogFactory.getLog(FacebookFQLStreamParser.class).warn(
+                            new StringBuilder("Field actor_id cannot be parsed to a long: ``").append(content).append("´´").toString());
+                    }
+                    message.setFromUserId(fromUserId);
                 }
             });
             m.put("created_time", new ItemHandler() {
