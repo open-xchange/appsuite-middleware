@@ -65,7 +65,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public class ReentrantLockPool<T> implements Pool<T>, Runnable {
 
-    private static final Log LOG = LogFactory.getLog(ReentrantLockPool.class);
+    static final Log LOG = LogFactory.getLog(ReentrantLockPool.class);
 
     /* --- Constants --- */
 
@@ -632,8 +632,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                     sb.append(metaData.getIdentifier());
                     sb.append(", Object: ");
                     sb.append(metaData.getPooled());
-                    final PoolingException e = new PoolingException(sb
-                        .toString());
+                    final PoolingException e = new PoolingException(sb.toString());
                     if (testThreads && null != metaData.getTrace()) {
                         e.setStackTrace(metaData.getTrace());
                     }
