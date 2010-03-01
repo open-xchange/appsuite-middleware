@@ -59,6 +59,11 @@ import com.openexchange.messaging.generic.internet.MimeMessagingMessage;
  */
 public final class FacebookMessagingMessage extends MimeMessagingMessage {
 
+    /**
+     * Serial version UID.
+     */
+    private static final long serialVersionUID = 5314172807807461367L;
+
     private long fromUserId;
 
     // private long postId;
