@@ -169,6 +169,24 @@ public final class Collections {
             }
         }
     }
+    
+    /**
+     * Checks whether there is one element within the array that matches one of the given ones
+     */
+    public static <T> boolean any(final Collection<T> haystack, T... needles){
+        for(T hay: haystack){
+            for(T needle: needles){
+                if(needle == null){
+                    if(hay == null)
+                        return true;
+                    continue;
+                }
+                if(needle.equals(hay))
+                    return true;
+            }
+        }
+        return false;
+    }
 
     /**
      * Converts a list of Integer into an int array.
