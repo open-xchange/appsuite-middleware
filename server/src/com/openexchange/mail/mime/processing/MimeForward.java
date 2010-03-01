@@ -211,7 +211,7 @@ public final class MimeForward {
                  * Set its headers. Start with subject constructed from first message.
                  */
                 final String subjectPrefix = PREFIX_FWD;
-                String origSubject = originalMsgs[0].getHeader(MessageHeaders.HDR_SUBJECT, null);
+                String origSubject = MIMEMessageUtility.checkNonAscii(originalMsgs[0].getHeader(MessageHeaders.HDR_SUBJECT, null));
                 if (origSubject == null) {
                     forwardMsg.setSubject(subjectPrefix, MailProperties.getInstance().getDefaultMimeCharset());
                 } else {

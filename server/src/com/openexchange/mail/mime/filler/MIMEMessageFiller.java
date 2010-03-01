@@ -1130,7 +1130,7 @@ public class MIMEMessageFiller {
         final String fn;
         if (null == mailPart.getFileName()) {
             String subject =
-                new InternetHeaders(new UnsynchronizedByteArrayInputStream(rfcBytes)).getHeader(MessageHeaders.HDR_SUBJECT, null);
+                MIMEMessageUtility.checkNonAscii(new InternetHeaders(new UnsynchronizedByteArrayInputStream(rfcBytes)).getHeader(MessageHeaders.HDR_SUBJECT, null));
             if (null == subject || subject.length() == 0) {
                 fn = sb.append(PREFIX_PART).append(EXT_EML).toString();
             } else {

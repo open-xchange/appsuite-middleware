@@ -636,6 +636,47 @@ public final class MIMEMessageUtility {
     }
 
     /**
+     * Checks if given raw header contains non-ascii characters.
+     * 
+     * @param rawHeader The raw header
+     * @return The proper unicode string
+     */
+    public static String checkNonAscii(final String rawHeader) {
+        if (null == rawHeader) {
+            return null;
+        }
+        if (isAscii(rawHeader)) {
+            return rawHeader;
+        }
+        final int length = rawHeader.length();
+        final byte[] bytes = new byte[length];
+        for (int i = 0; i < length; i++) {
+            bytes[i] = (byte) rawHeader.charAt(i);
+        }
+        try {
+            return new String(bytes, MailProperties.getInstance().getDefaultMimeCharset());
+        } catch (final UnsupportedEncodingException e) {
+            // Cannot occur
+            return rawHeader;
+        }
+    }
+
+    /**
+     * Checks whether the specified string's characters are ASCII 7 bit
+     * 
+     * @param s The string to check
+     * @return <code>true</code> if string's characters are ASCII 7 bit; otherwise <code>false</code>
+     */
+    private static boolean isAscii(final String s) {
+        final char[] chars = s.toCharArray();
+        boolean isAscci = true;
+        for (int i = 0; (i < chars.length) && isAscci; i++) {
+            isAscci &= (chars[i] < 128);
+        }
+        return isAscci;
+    }
+
+    /**
      * Decodes a multi-mime-encoded header value using the algorithm specified in RFC 2047, Section 6.1 in a safe manner.
      * 
      * @param headerValue The possibly encoded header value

@@ -9,6 +9,7 @@
  * 2010-03-01 - thorben.betten@open-xchange.com
 
  - Bugfix #15504: Ignoring possible FQL query result size mismatch
+ - Bugfix #15408: Added support for non-ascii characters occurring in mail headers
 
 * 2010-02-26 - marcus.klein@open-xchange.com
 

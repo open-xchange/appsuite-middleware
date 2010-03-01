@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.mime.converters;
 
+import static com.openexchange.mail.mime.utils.MIMEMessageUtility.checkNonAscii;
 import static com.openexchange.mail.mime.utils.MIMEMessageUtility.decodeMultiEncodedHeader;
 import static com.openexchange.mail.mime.utils.MIMEMessageUtility.getFileName;
 import static com.openexchange.mail.mime.utils.MIMEMessageUtility.hasAttachments;
@@ -182,7 +183,7 @@ public final class MIMEMessageConverter {
                 return;
             }
             for (final String value : header) {
-                mailMessage.addHeader(headerName, value);
+                mailMessage.addHeader(headerName, checkNonAscii(value));
             }
         }
 
@@ -2025,13 +2026,13 @@ public final class MIMEMessageConverter {
         }
         final String values;
         if ('\0' != delimiter && valueArr.length > 1) {
-            final StringBuilder sb = new StringBuilder(valueArr[0]);
+            final StringBuilder sb = new StringBuilder(checkNonAscii(valueArr[0]));
             for (int i = 1; i < valueArr.length; i++) {
-                sb.append(delimiter).append(valueArr[i]);
+                sb.append(delimiter).append(checkNonAscii(valueArr[i]));
             }
             values = sb.toString();
         } else {
-            values = valueArr[0];
+            values = checkNonAscii(valueArr[0]);
         }
         return decodeMultiEncodedHeader(values);
     }

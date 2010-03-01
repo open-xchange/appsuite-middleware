@@ -212,7 +212,7 @@ public final class MimeReply {
              * Set headers of reply message
              */
             final String subjectPrefix = PREFIX_RE;
-            String subjectHdrValue = originalMsg.getHeader(MessageHeaders.HDR_SUBJECT, null);
+            String subjectHdrValue = MIMEMessageUtility.checkNonAscii(originalMsg.getHeader(MessageHeaders.HDR_SUBJECT, null));
             if (subjectHdrValue == null) {
                 subjectHdrValue = "";
             }

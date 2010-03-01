@@ -55,7 +55,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
 import javax.mail.FetchProfile;
 import javax.mail.Flags;
 import javax.mail.Header;
@@ -64,7 +63,6 @@ import javax.mail.MessagingException;
 import javax.mail.UIDFolder;
 import javax.mail.Message.RecipientType;
 import javax.mail.internet.InternetHeaders;
-
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailListField;
@@ -675,7 +673,12 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
             }
             for (final Enumeration<?> e = h.getAllHeaders(); e.hasMoreElements();) {
                 final Header hdr = (Header) e.nextElement();
-                msg.addHeader(hdr.getName(), hdr.getValue());
+                final String name = hdr.getName();
+                if (MessageHeaders.HDR_SUBJECT.equals(name)) {
+                    msg.addHeader(name, MIMEMessageUtility.checkNonAscii(hdr.getValue()));
+                } else {
+                    msg.addHeader(name, hdr.getValue());
+                }
                 /*-
                  * 
                 final HeaderHandler hdrHandler = hdrHandlers.get(hdr.getName());
@@ -728,7 +731,8 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
             if (null == env.subject) {
                 subject = "";
             } else {
-                final char[] chars = env.subject.toCharArray();
+                final String subj = MIMEMessageUtility.checkNonAscii(env.subject);
+                final char[] chars = subj.toCharArray();
                 final StringBuilder sb = new StringBuilder(chars.length);
                 int i = 0;
                 while (i < chars.length) {

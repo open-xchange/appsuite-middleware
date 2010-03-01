@@ -710,7 +710,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
                 put(MessageHeaders.HDR_SUBJECT, new HeaderHandler() {
 
                     public void handle(final Header hdr, final IDMailMessage mailMessage) throws MailException {
-                        mailMessage.setSubject(MIMEMessageUtility.decodeMultiEncodedHeader(hdr.getValue()));
+                        mailMessage.setSubject(MIMEMessageUtility.decodeMultiEncodedHeader(MIMEMessageUtility.checkNonAscii(hdr.getValue())));
                     }
                 });
                 put(MessageHeaders.HDR_DATE, new HeaderHandler() {
@@ -888,7 +888,8 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
             if (null == env.subject) {
                 subject = "";
             } else {
-                final char[] chars = env.subject.toCharArray();
+                final String subj = MIMEMessageUtility.checkNonAscii(env.subject);
+                final char[] chars = subj.toCharArray();
                 final StringBuilder sb = new StringBuilder(chars.length);
                 int i = 0;
                 while (i < chars.length) {
