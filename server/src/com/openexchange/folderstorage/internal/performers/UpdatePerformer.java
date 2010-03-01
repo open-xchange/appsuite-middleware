@@ -390,14 +390,14 @@ public final class UpdatePerformer extends AbstractPerformer {
     }
 
     private boolean equallyNamedSibling(final String name, final String treeId, final String parentId, final Collection<FolderStorage> openedStorages) throws FolderException {
-        final ListPerformer listAction;
+        final ListPerformer listPerformer;
         if (null == session) {
-            listAction = new ListPerformer(user, context, null);
+            listPerformer = new ListPerformer(user, context, null);
         } else {
-            listAction = new ListPerformer(session, null);
+            listPerformer = new ListPerformer(session, null);
         }
-        listAction.setStorageParameters(storageParameters);
-        final UserizedFolder[] subfolders = listAction.doList(treeId, parentId, true, openedStorages);
+        listPerformer.setStorageParameters(storageParameters);
+        final UserizedFolder[] subfolders = listPerformer.doList(treeId, parentId, true, openedStorages);
         for (final UserizedFolder userizedFolder : subfolders) {
             if (name.equals(userizedFolder.getName())) {
                 return true;
@@ -407,14 +407,14 @@ public final class UpdatePerformer extends AbstractPerformer {
     }
 
     private String nonExistingName(final String name, final String treeId, final String parentId, final Collection<FolderStorage> openedStorages) throws FolderException {
-        final ListPerformer listAction;
+        final ListPerformer listPerformer;
         if (null == session) {
-            listAction = new ListPerformer(user, context, null);
+            listPerformer = new ListPerformer(user, context, null);
         } else {
-            listAction = new ListPerformer(session, null);
+            listPerformer = new ListPerformer(session, null);
         }
-        listAction.setStorageParameters(storageParameters);
-        final UserizedFolder[] subfolders = listAction.doList(treeId, parentId, true, openedStorages);
+        listPerformer.setStorageParameters(storageParameters);
+        final UserizedFolder[] subfolders = listPerformer.doList(treeId, parentId, true, openedStorages);
         final StringBuilder sb = new StringBuilder();
         String nonExistingName = name;
         int i = 0;
