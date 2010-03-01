@@ -62,6 +62,7 @@ import com.openexchange.groupware.contact.helpers.ContactField;
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:ben.pahne@open-xchange.com">Benjamin Frederic Pahne</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - clone, hashCode, equals, toString, display name checking
  */
 public class Contact extends CommonObject implements Serializable{
 
@@ -4240,6 +4241,20 @@ public class Contact extends CommonObject implements Serializable{
 
         }
     }
+    
+    public boolean canFormDisplayName(){
+        return contains(DISPLAY_NAME)
+            || contains(SUR_NAME)
+            || contains(GIVEN_NAME)
+            || contains(EMAIL1)
+            || contains(EMAIL2)
+            || contains(EMAIL3)
+            || contains(COMPANY)
+            || contains(NICKNAME)
+            || contains(MIDDLE_NAME);
+    }
+    
+    
     @Override
     public String toString(){
         final StringBuilder name = new StringBuilder();
