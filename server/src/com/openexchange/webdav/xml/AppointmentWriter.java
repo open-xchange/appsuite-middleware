@@ -370,6 +370,10 @@ public class AppointmentWriter extends CalendarWriter {
             if (ao.getIgnoreConflicts()) {
                 addElement(AppointmentFields.IGNORE_CONFLICTS, true, e_prop);
             }
+            
+            if (ao.containsUid()) {
+                addElement(AppointmentFields.UID, ao.getUid(), e_prop);
+            }
 
             addElement(AppointmentFields.COLORLABEL, ao.getLabel(), e_prop);
 

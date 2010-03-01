@@ -142,6 +142,8 @@ public class AppointmentParser extends CalendarParser {
 		} else if (isTag(parser, AppointmentFields.IGNORE_CONFLICTS)) {
 			ao.setIgnoreConflicts(getValueAsBoolean(parser));
 			return ;
+		} else if (isTag(parser, AppointmentFields.UID)) {
+		    ao.setUid(getValue(parser));
 		} else {
 			parseElementCalendar(ao, parser);
 		}

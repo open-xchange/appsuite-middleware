@@ -60,4 +60,6 @@ public interface AppointmentFields extends CalendarFields {
 	public static final String SHOW_AS = "shown_as";
 	
 	public static final String IGNORE_CONFLICTS = "ignore_conflicts";
+	
+	public static final String UID = "uid";
 }
