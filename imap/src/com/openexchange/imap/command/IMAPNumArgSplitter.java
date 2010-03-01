@@ -187,7 +187,10 @@ public final class IMAPNumArgSplitter {
     public static String[] getSeqNumArg(final int[] arr, final boolean keepOrder, final boolean split, final int consumed) {
         final List<Integer> l = new ArrayList<Integer>(arr.length);
         for (int i = 0; i < arr.length; i++) {
-            l.add(Integer.valueOf(arr[i]));
+            final int seqNum = arr[i];
+            if (seqNum > 0) {
+                l.add(Integer.valueOf(seqNum));
+            }
         }
         if (!keepOrder) {
             Collections.sort(l);
@@ -211,7 +214,10 @@ public final class IMAPNumArgSplitter {
     public static String[] splitMessageArg(final Message[] arr, final boolean keepOrder, final int consumed) {
         final List<Integer> l = new ArrayList<Integer>(arr.length);
         for (int i = 0; i < arr.length; i++) {
-            l.add(Integer.valueOf(arr[i].getMessageNumber()));
+            final int messageNumber = arr[i].getMessageNumber();
+            if (messageNumber > 0) {
+                l.add(Integer.valueOf(messageNumber));
+            }
         }
         if (!keepOrder) {
             Collections.sort(l);
@@ -233,7 +239,10 @@ public final class IMAPNumArgSplitter {
     public static String[] splitUIDArg(final long[] arr, final boolean keepOrder, final int consumed) {
         final List<Long> l = new ArrayList<Long>(arr.length);
         for (int i = 0; i < arr.length; i++) {
-            l.add(Long.valueOf(arr[i]));
+            final long uid = arr[i];
+            if (uid >= 0) {
+                l.add(Long.valueOf(uid));
+            }
         }
         if (!keepOrder) {
             Collections.sort(l);
