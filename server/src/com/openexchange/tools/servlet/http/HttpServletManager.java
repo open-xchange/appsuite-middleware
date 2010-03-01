@@ -55,6 +55,7 @@ import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import com.openexchange.tools.servlet.http.manager.ConcurrentHttpServletManager;
+import com.openexchange.tools.servlet.http.manager.DummyHttpServletManager;
 import com.openexchange.tools.servlet.http.manager.IHttpServletManager;
 import com.openexchange.tools.servlet.http.manager.NonBlockingHttpServletManager;
 
@@ -65,7 +66,7 @@ import com.openexchange.tools.servlet.http.manager.NonBlockingHttpServletManager
  */
 public class HttpServletManager {
 
-    private static IHttpServletManager instance;
+    private static IHttpServletManager instance = DummyHttpServletManager.INSTANCE;
 
     /**
      * Initializes a new {@link HttpServletManager}
@@ -135,7 +136,7 @@ public class HttpServletManager {
      */
     final static void initHttpServletManager(final Map<String, Constructor<?>> servletConstructorMap, final boolean nonBlocking) {
         synchronized (HttpServletManager.class) {
-            if (null == instance) {
+            if (DummyHttpServletManager.INSTANCE == instance) {
                 if (nonBlocking) {
                     instance = new NonBlockingHttpServletManager(servletConstructorMap);
                 } else {
@@ -150,8 +151,8 @@ public class HttpServletManager {
      */
     final static void shutdownHttpServletManager() {
         synchronized (HttpServletManager.class) {
-            if (null != instance) {
-                instance = null;
+            if (DummyHttpServletManager.INSTANCE != instance) {
+                instance = DummyHttpServletManager.INSTANCE;
             }
         }
     }
