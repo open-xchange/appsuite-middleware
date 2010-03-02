@@ -151,7 +151,7 @@ public final class ImageTypeDetector {
     }
 
     /**
-     * <h2><a name="Image">Image files</a></h2>
+     * <h2><a href="http://www.astro.keele.ac.uk/oldusers/rno/Computing/File_magic.html">Image files</a></h2>
      * <table border="1">
      * <tbody>
      * <tr>
