@@ -51,6 +51,7 @@ package com.openexchange.webdav.xml.appointment;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.Calendar;
+import java.util.Date;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.webdav.xml.AppointmentTest;
 
@@ -78,7 +79,7 @@ public class Bug15491Test extends AppointmentTest {
         super.setUp();
 
         appointment = new Appointment();
-        appointment.setTitle("testBug13262");
+        appointment.setTitle("testBug15491");
         appointment.setStartDate(D("10.10.2010 10:00"));
         appointment.setEndDate(D("10.10.2010 11:00"));
         appointment.setParentFolderID(appointmentFolderId);
@@ -94,23 +95,49 @@ public class Bug15491Test extends AppointmentTest {
     }
     
     public void testRead() throws Exception {
+        long now = System.currentTimeMillis();
         objectId = insertAppointment(getWebConversation(), appointment, PROTOCOL + getHostName(), getLogin(), getPassword());
 
         Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getLogin(), getPassword());
         assertNotNull("Loaded Appointment is null", loadAppointment);
-        
         assertNotNull("Uid is null", loadAppointment.getUid());
         assertFalse("Uid is empty", loadAppointment.getUid().trim().equals(""));
+        
+        Appointment[] listAppointments = listAppointment(getWebConversation(), appointmentFolderId, new Date(now), true, true, PROTOCOL + getHostName(), getLogin(), getPassword());
+        
+        boolean found = false;
+        for (Appointment current : listAppointments) {
+            if (current.getObjectID() == objectId) {
+                found = true;
+                assertNotNull("Uid is null", current.getUid());
+                assertFalse("Uid is empty", current.getUid().trim().equals(""));
+                break;
+            }
+        }
+        assertTrue("Did not find appointment", found);
     }
     
     public void testWrite() throws Exception {
+        long now = System.currentTimeMillis();
         appointment.setUid("ichbineineuid");
         objectId = insertAppointment(getWebConversation(), appointment, PROTOCOL + getHostName(), getLogin(), getPassword());
 
         Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getLogin(), getPassword());
         assertNotNull("Loaded Appointment is null", loadAppointment);
-        
         assertNotNull("Uid is null", loadAppointment.getUid());
         assertEquals("Wrong Uid", "ichbineineuid", loadAppointment.getUid());
+        
+        Appointment[] listAppointments = listAppointment(getWebConversation(), appointmentFolderId, new Date(now), true, true, PROTOCOL + getHostName(), getLogin(), getPassword());
+        
+        boolean found = false;
+        for (Appointment current : listAppointments) {
+            if (current.getObjectID() == objectId) {
+                found = true;
+                assertNotNull("Uid is null", current.getUid());
+                assertEquals("Wrong Uid", "ichbineineuid", current.getUid());
+                break;
+            }
+        }
+        assertTrue("Did not find appointment", found);
     }
 }
