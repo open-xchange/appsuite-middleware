@@ -304,7 +304,7 @@ public interface FolderStorage {
     /**
      * Publishes made changes on the storage.
      * 
-     * @param params The storage parameters.
+     * @param params The storage parameters
      * @throws FolderException If committing the made changes fails.
      */
     void commitTransaction(StorageParameters params) throws FolderException;

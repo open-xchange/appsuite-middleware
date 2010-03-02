@@ -277,4 +277,12 @@ final class DummyFolder implements Folder {
         throw new UnsupportedOperationException("VirtualTreeMigrationTask.DummyFolder.setDefaultInfo()");
     }
 
+    public int getBits() {
+        throw new UnsupportedOperationException("VirtualTreeMigrationTask.DummyFolder.getBits()");
+    }
+
+    public void setBits(final int bits) {
+        throw new UnsupportedOperationException("VirtualTreeMigrationTask.DummyFolder.setBits()");
+    }
+
 }

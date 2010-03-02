@@ -200,10 +200,9 @@ public final class UpdatePerformer extends AbstractPerformer {
                     throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, newParentId);
                 }
 
-                final String parentId = folder.getParentID();
-                final FolderStorage realParentStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, parentId);
+                final FolderStorage realParentStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, oldParentId);
                 if (null == realParentStorage) {
-                    throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, parentId);
+                    throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, oldParentId);
                 }
 
                 /*
@@ -223,7 +222,7 @@ public final class UpdatePerformer extends AbstractPerformer {
                 if (FolderStorage.REAL_TREE_ID.equals(folder.getTreeID())) {
                     doMoveReal(folder, storage, realParentStorage, newRealParentStorage);
                 } else {
-                    doMoveVirtual(folder, storage, realParentStorage, newRealParentStorage, openedStorages);
+                    doMoveVirtual(folder, storage, realParentStorage, newRealParentStorage, oldParentId, openedStorages);
                 }
             } else if (rename) {
                 folder.setParentID(oldParentId);
@@ -292,7 +291,7 @@ public final class UpdatePerformer extends AbstractPerformer {
         folderStorage.updateFolder(folder, storageParameters);
     }
 
-    private void doMoveVirtual(final Folder folder, final FolderStorage virtualStorage, final FolderStorage realParentStorage, final FolderStorage newRealParentStorage, final List<FolderStorage> openedStorages) throws FolderException {
+    private void doMoveVirtual(final Folder folder, final FolderStorage virtualStorage, final FolderStorage realParentStorage, final FolderStorage newRealParentStorage, final String oldParent, final List<FolderStorage> openedStorages) throws FolderException {
         final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, folder.getID());
         if (null == realStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folder.getID());
@@ -318,6 +317,12 @@ public final class UpdatePerformer extends AbstractPerformer {
                  * Perform the move in virtual storage
                  */
                 virtualStorage.updateFolder(folder, storageParameters);
+                /*
+                 * Update new/old parent's last-modified
+                 */
+                final Date lastModified = clone4Real.getLastModified();
+                virtualStorage.updateLastModified(lastModified.getTime(), folder.getTreeID(), folder.getParentID(), storageParameters);
+                virtualStorage.updateLastModified(lastModified.getTime(), folder.getTreeID(), oldParent, storageParameters);
             } else if (!parentChildEquality && parentEquality) {
                 /*
                  * No real action required in this case. Perform the move in virtual storage only.

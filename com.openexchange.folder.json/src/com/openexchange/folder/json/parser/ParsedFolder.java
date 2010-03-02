@@ -107,6 +107,9 @@ public final class ParsedFolder implements Folder {
 
     protected int defaultType;
 
+    protected int bits;
+
+
     /**
      * Initializes an empty {@link ParsedFolder}.
      */
@@ -119,6 +122,7 @@ public final class ParsedFolder implements Folder {
         unread = -1;
         deleted = -1;
         capabilities = -1;
+        bits = -1;
     }
 
     @Override
@@ -335,6 +339,14 @@ public final class ParsedFolder implements Folder {
 
     public boolean isGlobalID() {
         return false;
+    }
+
+    public int getBits() {
+        return bits;
+    }
+
+    public void setBits(final int bits) {
+        this.bits = bits;
     }
 
 }

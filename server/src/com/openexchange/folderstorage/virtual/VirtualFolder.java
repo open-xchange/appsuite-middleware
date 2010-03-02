@@ -325,6 +325,14 @@ public final class VirtualFolder implements Folder {
         // Nothing to do
     }
 
+    public int getBits() {
+        return realFolder.getBits();
+    }
+
+    public void setBits(final int bits) {
+        // Nothing to do
+    }
+
     private static Date cloneDate(final Date d) {
         if (null == d) {
             return null;

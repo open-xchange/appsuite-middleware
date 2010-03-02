@@ -49,7 +49,9 @@
 
 package com.openexchange.folderstorage.outlook.sql;
 
+import static com.openexchange.folderstorage.outlook.sql.Utility.debugSQL;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
@@ -108,6 +110,82 @@ public final class Update {
         } finally {
             DBUtils.autocommit(con);
             databaseService.backWritable(cid, con);
+        }
+    }
+
+    private static final String SQL_UPDATE_LM =
+        "UPDATE virtualTree SET lastModified = ?, modifiedBy = ? WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+
+    /**
+     * Updates last-modified time stamp of specified folder in virtual table.
+     * 
+     * @param cid The context identifier
+     * @param tree The tree identifier
+     * @param user The user identifier
+     * @param folderId The folder identifier
+     * @param lastModified The last-modified time stamp
+     * @throws FolderException If update fails
+     */
+    public static void updateLastModified(final int cid, final int tree, final int user, final String folderId, final long lastModified) throws FolderException {
+        final DatabaseService databaseService = Utility.getDatabaseService();
+        /*
+         * Get a connection
+         */
+        final Connection con;
+        try {
+            con = databaseService.getWritable(cid);
+            con.setAutoCommit(false); // BEGIN
+        } catch (final DBPoolingException e) {
+            throw new FolderException(e);
+        } catch (final SQLException e) {
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        }
+        try {
+            updateLastModified(cid, tree, user, folderId, lastModified, con);
+            con.commit(); // COMMIT
+        } catch (final SQLException e) {
+            DBUtils.rollback(con); // ROLLBACK
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } catch (final FolderException e) {
+            DBUtils.rollback(con); // ROLLBACK
+            throw e;
+        } catch (final Exception e) {
+            DBUtils.rollback(con); // ROLLBACK
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.autocommit(con);
+            databaseService.backWritable(cid, con);
+        }
+    }
+
+    /**
+     * Updates last-modified time stamp of specified folder in virtual table.
+     * 
+     * @param cid The context identifier
+     * @param tree The tree identifier
+     * @param user The user identifier
+     * @param folderId The folder identifier
+     * @param lastModified The last-modified time stamp
+     * @param con The connection to use
+     * @throws FolderException If update fails
+     */
+    public static void updateLastModified(final int cid, final int tree, final int user, final String folderId, final long lastModified, final Connection con) throws FolderException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement(SQL_UPDATE_LM);
+            int pos = 1;
+            stmt.setLong(pos++, lastModified);
+            stmt.setInt(pos++, user);
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, tree);
+            stmt.setInt(pos++, user);
+            stmt.setString(pos, folderId);
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            debugSQL(stmt);
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
         }
     }
 

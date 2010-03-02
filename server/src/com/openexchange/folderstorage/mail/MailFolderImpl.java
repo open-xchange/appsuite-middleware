@@ -51,6 +51,8 @@ package com.openexchange.folderstorage.mail;
 
 import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.ContentType;
+import com.openexchange.folderstorage.FolderException;
+import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.mail.contentType.DraftsContentType;
@@ -62,8 +64,10 @@ import com.openexchange.folderstorage.type.MailType;
 import com.openexchange.folderstorage.type.SystemType;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mail.utils.MailFolderUtility;
+import com.openexchange.server.impl.OCLPermission;
 
 /**
  * {@link MailFolderImpl} - A mail folder.
@@ -78,9 +82,7 @@ public final class MailFolderImpl extends AbstractFolder {
      * The mail folder content type.
      */
     public static enum MailFolderType {
-        NONE(MailContentType.getInstance(), 0),
-        ROOT(MailContentType.getInstance(), 0),
-        INBOX(MailContentType.getInstance(), 7), // FolderObject.MAIL
+        NONE(MailContentType.getInstance(), 0), ROOT(MailContentType.getInstance(), 0), INBOX(MailContentType.getInstance(), 7), // FolderObject.MAIL
         DRAFTS(DraftsContentType.getInstance(), 9),
         SENT(SentContentType.getInstance(), 10),
         SPAM(SpamContentType.getInstance(), 11),
@@ -126,6 +128,8 @@ public final class MailFolderImpl extends AbstractFolder {
         super();
     }
 
+    private static final int BIT_USER_FLAG = (1 << 29);
+
     /**
      * Initializes a new {@link MailFolderImpl} from given mail folder.
      * <p>
@@ -135,8 +139,9 @@ public final class MailFolderImpl extends AbstractFolder {
      * @param accountId The account identifier
      * @param capabilities The capabilities
      * @param fullnameProvider The (optional) fullname provider
+     * @throws FolderException If creation fails
      */
-    public MailFolderImpl(final MailFolder mailFolder, final int accountId, final int capabilities, final DefaultFolderFullnameProvider fullnameProvider) {
+    public MailFolderImpl(final MailFolder mailFolder, final int accountId, final int capabilities, final DefaultFolderFullnameProvider fullnameProvider) throws FolderException {
         super();
         final String fullname = mailFolder.getFullname();
         this.id = MailFolderUtility.prepareFullname(accountId, fullname);
@@ -163,9 +168,23 @@ public final class MailFolderImpl extends AbstractFolder {
         this.nu = mailFolder.getNewMessageCount();
         this.unread = mailFolder.getUnreadMessageCount();
         this.deleted = mailFolder.getDeletedMessageCount();
+        final MailPermission mp;
         if (mailFolder.isRootFolder()) {
             mailFolderType = MailFolderType.ROOT;
+            final MailPermission rootPermission = mailFolder.getOwnPermission();
+            if (rootPermission == null) {
+                mp = new DefaultMailPermission();
+                mp.setAllPermission(
+                    OCLPermission.CREATE_SUB_FOLDERS,
+                    OCLPermission.NO_PERMISSIONS,
+                    OCLPermission.NO_PERMISSIONS,
+                    OCLPermission.NO_PERMISSIONS);
+                mp.setFolderAdmin(false);
+            } else {
+                mp = rootPermission;
+            }
         } else {
+            mp = mailFolder.getOwnPermission();
             if (mailFolder.containsDefaultFolderType()) {
                 if (mailFolder.isInbox()) {
                     mailFolderType = MailFolderType.INBOX;
@@ -203,10 +222,69 @@ public final class MailFolderImpl extends AbstractFolder {
                 mailFolderType = MailFolderType.NONE;
             }
         }
+        if (!mailFolder.isHoldsFolders() && mp.canCreateSubfolders()) {
+            // Cannot contain subfolders; therefore deny subfolder creation
+            mp.setFolderPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER);
+        }
+        if (!mailFolder.isHoldsMessages() && mp.canReadOwnObjects()) {
+            // Cannot contain messages; therefore deny read access. Folder is not selectable.
+            mp.setReadObjectPermission(OCLPermission.NO_PERMISSIONS);
+        }
+        int permissionBits =
+            createPermissionBits(
+                mp.getFolderPermission(),
+                mp.getReadPermission(),
+                mp.getWritePermission(),
+                mp.getDeletePermission(),
+                mp.isFolderAdmin());
+        if (mailFolder.isSupportsUserFlags()) {
+            permissionBits |= BIT_USER_FLAG;
+        }
+        bits = permissionBits;
         /*
          * Trash folder must not be cacheable
          */
         this.cacheable = !mailFolder.isDefaultFolder() || !mailFolderType.equals(MailFolderType.TRASH);
+    }
+
+    private static final int[] mapping = { 0, -1, 1, -1, 2, -1, -1, -1, 4 };
+
+    static int createPermissionBits(final int fp, final int orp, final int owp, final int odp, final boolean adminFlag) throws FolderException {
+        final int[] perms = new int[5];
+        perms[0] = fp == MAX_PERMISSION ? OCLPermission.ADMIN_PERMISSION : fp;
+        perms[1] = orp == MAX_PERMISSION ? OCLPermission.ADMIN_PERMISSION : orp;
+        perms[2] = owp == MAX_PERMISSION ? OCLPermission.ADMIN_PERMISSION : owp;
+        perms[3] = odp == MAX_PERMISSION ? OCLPermission.ADMIN_PERMISSION : odp;
+        perms[4] = adminFlag ? 1 : 0;
+        return createPermissionBits(perms);
+    }
+
+    /**
+     * The actual max permission that can be transfered in field 'bits' or JSON's permission object
+     */
+    private static final int MAX_PERMISSION = 64;
+
+    private static int createPermissionBits(final int[] permission) throws FolderException {
+        int retval = 0;
+        boolean first = true;
+        for (int i = permission.length - 1; i >= 0; i--) {
+            final int shiftVal = (i * 7); // Number of bits to be shifted
+            if (first) {
+                retval += permission[i] << shiftVal;
+                first = false;
+            } else {
+                if (permission[i] == OCLPermission.ADMIN_PERMISSION) {
+                    retval += MAX_PERMISSION << shiftVal;
+                } else {
+                    try {
+                        retval += mapping[permission[i]] << shiftVal;
+                    } catch (final Exception e) {
+                        throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+                    }
+                }
+            }
+        }
+        return retval;
     }
 
     @Override

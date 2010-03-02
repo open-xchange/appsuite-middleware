@@ -177,7 +177,7 @@ public final class VirtualFolderStorage implements FolderStorage {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
-
+    
     public Folder getFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
         return getFolder(treeId, folderId, StorageType.WORKING, storageParameters);
     }

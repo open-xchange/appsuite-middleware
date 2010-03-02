@@ -399,6 +399,20 @@ public interface Folder extends Serializable, Cloneable {
     void setCapabilities(int capabilities);
 
     /**
+     * Gets the bits
+     * 
+     * @return The bits
+     */
+    int getBits();
+
+    /**
+     * Sets the bits
+     * 
+     * @param bits The bits to set
+     */
+    void setBits(final int bits);
+
+    /**
      * Creates and returns a copy of this object.
      * 
      * @return A clone of this instance.

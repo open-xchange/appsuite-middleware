@@ -112,6 +112,14 @@ public final class UserizedFolderImpl implements UserizedFolder {
         }
     }
 
+    public int getBits() {
+        return folder.getBits();
+    }
+
+    public void setBits(final int bits) {
+        folder.setBits(bits);
+    }
+
     public int getCreatedBy() {
         return folder.getCreatedBy();
     }

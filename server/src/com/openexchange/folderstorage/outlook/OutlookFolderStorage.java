@@ -330,17 +330,26 @@ public final class OutlookFolderStorage implements FolderStorage {
     }
 
     public void updateLastModified(final long lastModified, final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
-        /*
-         * Get real folder storage
-         */
         final FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, folderId);
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, folderId);
         }
-        folderStorage.startTransaction(storageParameters, false);
+        folderStorage.startTransaction(storageParameters, true);
         try {
-            // Get folder
-            folderStorage.updateLastModified(lastModified, FolderStorage.REAL_TREE_ID, folderId, storageParameters);
+            final Folder realFolder = folderStorage.getFolder(realTreeId, folderId, StorageType.WORKING, storageParameters);
+            if (null == realFolder.getLastModified()) {
+                /*
+                 * Real folder has no last-modified time stamp, but virtual needs to have.
+                 */
+                final int contextId = storageParameters.getContextId();
+                final int tree = Tools.getUnsignedInteger(treeId);
+                final int userId = storageParameters.getUserId();
+                if (Select.containsFolder(contextId, tree, userId, folderId, StorageType.WORKING)) {
+                    Update.updateLastModified(contextId, tree, userId, folderId, lastModified);
+                }
+            } else {
+                folderStorage.updateLastModified(lastModified, FolderStorage.REAL_TREE_ID, folderId, storageParameters);
+            }
             folderStorage.commitTransaction(storageParameters);
         } catch (final FolderException e) {
             folderStorage.rollback(storageParameters);
@@ -970,7 +979,29 @@ public final class OutlookFolderStorage implements FolderStorage {
         final int contextId = storageParameters.getContextId();
         final int tree = Tools.getUnsignedInteger(folder.getTreeID());
         final int userId = storageParameters.getUserId();
-        if (Select.containsFolder(contextId, tree, userId, folder.getID(), StorageType.WORKING)) {
+        final String folderId = folder.getID();
+        if (Select.containsFolder(contextId, tree, userId, folderId, StorageType.WORKING)) {
+            /*
+             * TODO: Update last-modified of folder, old parent, new parent like in create() method
+             */
+            final Folder realFolder;
+            {
+                final FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, folderId);
+                if (null == folderStorage) {
+                    throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, folderId);
+                }
+                folderStorage.startTransaction(storageParameters, true);
+                try {
+                    realFolder = folderStorage.getFolder(realTreeId, folderId, StorageType.WORKING, storageParameters);
+                    folderStorage.commitTransaction(storageParameters);
+                } catch (final FolderException e) {
+                    folderStorage.rollback(storageParameters);
+                    throw e;
+                } catch (final Exception e) {
+                    folderStorage.rollback(storageParameters);
+                    throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+                }
+            }
             Update.updateFolder(contextId, tree, userId, folder);
         }
     }

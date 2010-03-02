@@ -49,6 +49,7 @@
 
 package com.openexchange.folder.json.writer;
 
+import gnu.trove.TIntIntHashMap;
 import gnu.trove.TIntObjectHashMap;
 import java.util.Collection;
 import java.util.Date;
@@ -236,13 +237,18 @@ public final class FolderWriter {
         m.put(FolderField.OWN_RIGHTS.getColumn(), new FolderFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
-                final Permission obj = folder.getOwnPermission();
-                jsonPutter.put(FolderField.OWN_RIGHTS.getName(), null == obj ? JSONObject.NULL : Integer.valueOf(createPermissionBits(
-                    obj.getFolderPermission(),
-                    obj.getReadPermission(),
-                    obj.getWritePermission(),
-                    obj.getDeletePermission(),
-                    obj.isAdmin())));
+                final int bits = folder.getBits();
+                if (bits < 0) {
+                    final Permission obj = folder.getOwnPermission();
+                    jsonPutter.put(FolderField.OWN_RIGHTS.getName(), null == obj ? JSONObject.NULL : Integer.valueOf(createPermissionBits(
+                        obj.getFolderPermission(),
+                        obj.getReadPermission(),
+                        obj.getWritePermission(),
+                        obj.getDeletePermission(),
+                        obj.isAdmin()))); 
+                } else {
+                    jsonPutter.put(FolderField.OWN_RIGHTS.getName(), Integer.valueOf(bits));
+                }
             }
         });
         m.put(FolderField.PERMISSIONS_BITS.getColumn(), new FolderFieldWriter() {
@@ -554,6 +560,17 @@ public final class FolderWriter {
      * Helper methods
      */
 
+    private static final TIntIntHashMap MAPPING = new TIntIntHashMap(6) {
+        { //Unnamed Block.
+            put(Permission.MAX_PERMISSION, MAX_PERMISSION);
+            put(MAX_PERMISSION, MAX_PERMISSION);
+            put(0, 0);
+            put(2, 1);
+            put(4, 2);
+            put(8, 4);
+        }
+    };
+
     static int createPermissionBits(final Permission perm) {
         return createPermissionBits(
             perm.getFolderPermission(),
@@ -568,34 +585,14 @@ public final class FolderWriter {
      */
     private static final int MAX_PERMISSION = 64;
 
-    static int createPermissionBits(final int fp, final int orp, final int owp, final int odp, final boolean adminFlag) {
-        final int[] perms = new int[5];
-        perms[0] = fp == MAX_PERMISSION ? Permission.MAX_PERMISSION : fp;
-        perms[1] = orp == MAX_PERMISSION ? Permission.MAX_PERMISSION : orp;
-        perms[2] = owp == MAX_PERMISSION ? Permission.MAX_PERMISSION : owp;
-        perms[3] = odp == MAX_PERMISSION ? Permission.MAX_PERMISSION : odp;
-        perms[4] = adminFlag ? 1 : 0;
-        return createPermissionBits(perms);
-    }
-
-    private static final int[] mapping = { 0, -1, 1, -1, 2, -1, -1, -1, 4 };
-
-    private static int createPermissionBits(final int[] permission) {
+    static int createPermissionBits(final int fp, final int rp, final int wp, final int dp, final boolean adminFlag) {
         int retval = 0;
-        boolean first = true;
-        for (int i = permission.length - 1; i >= 0; i--) {
-            final int shiftVal = (i * 7); // Number of bits to be shifted
-            if (first) {
-                retval += permission[i] << shiftVal;
-                first = false;
-            } else {
-                if (permission[i] == Permission.MAX_PERMISSION) {
-                    retval += MAX_PERMISSION << shiftVal;
-                } else {
-                    retval += mapping[permission[i]] << shiftVal;
-                }
-            }
-        }
+        int i = 4;
+        retval += (adminFlag ? 1 : 0) << (i-- * 7)/*Number of bits to be shifted*/;
+        retval += MAPPING.get(dp) << (i-- * 7);
+        retval += MAPPING.get(wp) << (i-- * 7);
+        retval += MAPPING.get(rp) << (i-- * 7);
+        retval += MAPPING.get(fp) << (i * 7);
         return retval;
     }
 

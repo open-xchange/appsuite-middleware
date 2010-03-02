@@ -99,6 +99,8 @@ public abstract class AbstractFolder implements Folder {
 
     protected int capabilities;
 
+    protected int bits;
+
     protected boolean deefault;
 
     protected int defaultType;
@@ -115,6 +117,7 @@ public abstract class AbstractFolder implements Folder {
         unread = -1;
         deleted = -1;
         capabilities = -1;
+        bits = -1;
         defaultType = 0;
     }
 
@@ -333,6 +336,14 @@ public abstract class AbstractFolder implements Folder {
 
     public void setCapabilities(final int capabilities) {
         this.capabilities = capabilities;
+    }
+
+    public int getBits() {
+        return bits;
+    }
+
+    public void setBits(final int bits) {
+        this.bits = bits;
     }
 
 }
