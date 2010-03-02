@@ -100,7 +100,7 @@ public class AppointmentWriter extends CalendarWriter {
             CalendarObject.PARTICIPANTS, CalendarObject.USERS, Appointment.SHOWN_AS, Appointment.FULL_TIME,
             Appointment.COLOR_LABEL, Appointment.NUMBER_OF_ATTACHMENTS,
             Appointment.CHANGE_EXCEPTIONS, Appointment.DELETE_EXCEPTIONS, Appointment.RECURRENCE_ID,
-            Appointment.RECURRENCE_POSITION, Appointment.RECURRENCE_CALCULATOR, Appointment.TIMEZONE };
+            Appointment.RECURRENCE_POSITION, Appointment.RECURRENCE_CALCULATOR, Appointment.TIMEZONE, Appointment.UID };
 
     protected final static int[] deleteFields = { DataObject.OBJECT_ID, DataObject.LAST_MODIFIED,
             Appointment.RECURRENCE_ID };
