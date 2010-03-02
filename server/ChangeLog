@@ -1,3 +1,7 @@
+* 2010-03-02 - francisco.laguna@open-xchange.com
+
+ - Bugfix #15468: Stop topward iteration when hitting parentId null
+
 * 2010-03-01 - francisco.laguna@open-xchange.com
 
  - Bugfix #15500: Use a different method of accessing the currently logged in user.

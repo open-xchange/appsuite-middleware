@@ -1267,7 +1267,7 @@ public class Folder extends SessionServlet {
                         MessagingFolder folder = folderAccess.getFolder(mfi.getFullname());
                         path.add(folder);
                         String parentId;
-                        while (!MessagingFolder.ROOT_FULLNAME.equals((parentId = folder.getParentId()))) {
+                        while (!MessagingFolder.ROOT_FULLNAME.equals((parentId = folder.getParentId())) && parentId != null) {
                             folder = folderAccess.getFolder(parentId);
                             path.add(folder);
                         }
