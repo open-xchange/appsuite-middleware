@@ -254,21 +254,28 @@ public class ReverseProxy extends HttpServlet {
                 for (Cookie cookie : state.getCookies()) {
                     // LOG.info("Response KEKS: " + cookie.getName() + " " + cookie.getValue());
                     javax.servlet.http.Cookie keks;
-                    String cookieName = cookie.getName(); 
+                    String cookieName = cookie.getName();
+                    String cookiePath = cookie.getPath();
                     if (!cookieName.startsWith("proxy-")) {
                         // add prefix
                         cookieName = prefix + cookieName;
                         // create cookie
                         keks = new javax.servlet.http.Cookie(cookieName, cookie.getValue());
-                        // set domain & path
+                        // set domain
                         keks.setDomain(hostname);
-                        keks.setPath(this.location + "/" + proxyId);
+                        // set path
+                        if (cookiePath.startsWith("/")) {
+                            cookiePath = this.location + "/" + proxyId + cookiePath;
+                        } else {
+                            cookiePath = this.location + "/" + proxyId;
+                        }
+                        keks.setPath(cookiePath);
                     } else {
                         // create cookie
                         keks = new javax.servlet.http.Cookie(cookieName, cookie.getValue());
                         // keep domain & path
                         keks.setDomain(cookie.getDomain());
-                        keks.setPath(cookie.getPath());
+                        keks.setPath(cookiePath);
                     }
                     // add to response
                     resp.addCookie(keks);
