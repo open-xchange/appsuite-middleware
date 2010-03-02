@@ -79,10 +79,8 @@ public final class MALPollModifyTableTask extends UpdateTaskAdapter {
         super();
     }
 
-    private static final String[] DEPENDENCIES = { "com.openexchange.groupware.update.tasks.MALPollCreateTableTask" };
-
     public String[] getDependencies() {
-        return DEPENDENCIES;
+        return new String[] { MALPollCreateTableTask.class.getName() };
     }
 
     public void perform(final PerformParameters params) throws AbstractOXException {
