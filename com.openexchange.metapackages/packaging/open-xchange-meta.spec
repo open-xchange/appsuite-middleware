@@ -46,7 +46,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        Open-Xchange Meta packages
 
-%define oxcommon open-xchange, open-xchange-configjump-generic, open-xchange-contactcollector, open-xchange-conversion, open-xchange-conversion-engine, open-xchange-conversion-servlet, open-xchange-crypto, open-xchange-data-conversion-ical4j, open-xchange-dataretention, open-xchange-dataretention-csv, open-xchange-genconf, open-xchange-genconf-mysql, open-xchange-imap, open-xchange-mailfilter, open-xchange-management, open-xchange-monitoring, open-xchange-passwordchange-database, open-xchange-passwordchange-servlet, open-xchange-pop3, open-xchange-push-udp, open-xchange-resource-managerequest, open-xchange-server, open-xchange-settings-extensions, open-xchange-smtp, open-xchange-sql, open-xchange-templating, open-xchange-threadpool, open-xchange-charset, open-xchange-control, open-xchange-easylogin, open-xchange-group-managerequest, open-xchange-i18n, open-xchange-jcharset, open-xchange-sessiond, open-xchange-calendar-printing, open-xchange-user-json, open-xchange-gui-wizard-plugin, open-xchange-report-client
+%define oxcommon open-xchange, open-xchange-contactcollector, open-xchange-conversion, open-xchange-conversion-engine, open-xchange-conversion-servlet, open-xchange-crypto, open-xchange-data-conversion-ical4j, open-xchange-dataretention, open-xchange-genconf, open-xchange-genconf-mysql, open-xchange-imap, open-xchange-mailfilter, open-xchange-management, open-xchange-monitoring, open-xchange-passwordchange-database, open-xchange-passwordchange-servlet, open-xchange-pop3, open-xchange-push-udp, open-xchange-resource-managerequest, open-xchange-server, open-xchange-settings-extensions, open-xchange-smtp, open-xchange-sql, open-xchange-templating, open-xchange-threadpool, open-xchange-charset, open-xchange-control, open-xchange-group-managerequest, open-xchange-i18n, open-xchange-jcharset, open-xchange-sessiond, open-xchange-calendar-printing, open-xchange-user-json, open-xchange-gui-wizard-plugin, open-xchange-report-client
 
 # ----------------------------------------------------------------------------------------------------
 %package -n	open-xchange-meta-server
@@ -85,7 +85,7 @@ Authors:
 %package -n	open-xchange-meta-pubsub
 Group:          Applications/Productivity
 Summary:	The Open-Xchange Meta package for Publish and Subscribe
-Requires:	open-xchange-publish, open-xchange-publish-basic, open-xchange-publish-infostore-online, open-xchange-publish-json, open-xchange-publish-microformats, open-xchange-subscribe, open-xchange-subscribe-json, open-xchange-subscribe-microformats, open-xchange-subscribe-crawler, open-xchange-templating, open-xchange-unifiedinbox
+Requires:	open-xchange-publish, open-xchange-publish-basic, open-xchange-publish-infostore-online, open-xchange-publish-json, open-xchange-publish-microformats, open-xchange-subscribe, open-xchange-subscribe-json, open-xchange-subscribe-microformats, open-xchange-subscribe-crawler, open-xchange-templating
 
 
 %description -n open-xchange-meta-pubsub
@@ -96,10 +96,24 @@ Authors:
     Open-Xchange
 
 # ----------------------------------------------------------------------------------------------------
+%package -n	open-xchange-meta-messaging
+Group:          Applications/Productivity
+Summary:	The Open-Xchange Meta package for Messaging
+Requires:	open-xchange-unifiedinbox, open-xchange-messaging-twitter, open-xchange-messaging-rss, open-xchange-messaging-json, open-xchange-messaging-facebook
+
+
+%description -n open-xchange-meta-messaging
+The Open-Xchange Meta package for Messaging
+
+Authors:
+--------
+    Open-Xchange
+
+# ----------------------------------------------------------------------------------------------------
 %package -n	open-xchange-meta-gui
 Group:          Applications/Productivity
 Summary:	The Open-Xchange Meta package for OX GUI
-Requires:	open-xchange-configjump-generic-gui, open-xchange-gui, open-xchange-gui-wizard-plugin-gui, open-xchange-online-help-de, open-xchange-online-help-en, open-xchange-online-help-fr
+Requires:	open-xchange-gui, open-xchange-gui-wizard-plugin-gui, open-xchange-online-help-de, open-xchange-online-help-en, open-xchange-online-help-fr
 
 
 %description -n open-xchange-meta-gui
@@ -113,7 +127,7 @@ Authors:
 %package -n	open-xchange-meta-singleserver
 Group:          Applications/Productivity
 Summary:	The Open-Xchange Meta package for OX on a single server
-Requires:	open-xchange-meta-server, open-xchange-meta-gui, open-xchange-meta-admin, open-xchange-meta-pubsub
+Requires:	open-xchange-meta-server, open-xchange-meta-gui, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging
 
 
 %description -n open-xchange-meta-singleserver

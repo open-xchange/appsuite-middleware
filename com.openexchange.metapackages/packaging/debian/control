@@ -8,7 +8,7 @@ Standards-Version: 3.6.1
 
 Package: open-xchange-meta-oxucs
 Architecture: all
-Depends: ${oxcommon}, open-xchange-authentication-ucs, open-xchange-spamhandler-default, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-gui, open-xchange-lang-es-es, open-xchange-lang-nl-nl, open-xchange-gui-lang-es-es, open-xchange-gui-lang-es-es, open-xchange-online-help-es, open-xchange-online-help-nl, open-xchange-outlook-updater
+Depends: ${oxcommon}, open-xchange-authentication-ucs, open-xchange-spamhandler-default, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-meta-gui, open-xchange-lang-es-es, open-xchange-lang-nl-nl, open-xchange-gui-lang-es-es, open-xchange-gui-lang-es-es, open-xchange-online-help-es, open-xchange-online-help-nl, open-xchange-outlook-updater
 Description: The Open-Xchange Meta package for OX into UCS integration
 
 Package: open-xchange-meta-server
@@ -23,17 +23,22 @@ Description: The Open-Xchange Meta package for User/Group Provisioning
 
 Package: open-xchange-meta-pubsub
 Architecture: all
-Depends: open-xchange-publish, open-xchange-publish-basic, open-xchange-publish-infostore-online, open-xchange-publish-json, open-xchange-publish-microformats, open-xchange-subscribe, open-xchange-subscribe-json, open-xchange-subscribe-microformats, open-xchange-subscribe-crawler, open-xchange-templating, open-xchange-unifiedinbox
+Depends: open-xchange-publish, open-xchange-publish-basic, open-xchange-publish-infostore-online, open-xchange-publish-json, open-xchange-publish-microformats, open-xchange-subscribe, open-xchange-subscribe-json, open-xchange-subscribe-microformats, open-xchange-subscribe-crawler, open-xchange-templating
 Description: The Open-Xchange Meta package for Publish and Subscribe
+
+Package: open-xchange-meta-messaging
+Architecture: all
+Depends: open-xchange-unifiedinbox, open-xchange-messaging-twitter, open-xchange-messaging-rss, open-xchange-messaging-json, open-xchange-messaging-facebook
+Description: The Open-Xchange Meta package for Messaging
 
 Package: open-xchange-meta-gui
 Architecture: all
-Depends: open-xchange-configjump-generic-gui, open-xchange-gui, open-xchange-gui-wizard-plugin-gui, open-xchange-online-help-de, open-xchange-online-help-en, open-xchange-online-help-fr
+Depends: open-xchange-gui, open-xchange-gui-wizard-plugin-gui, open-xchange-online-help-de, open-xchange-online-help-en, open-xchange-online-help-fr
 Description: The Open-Xchange Meta package for OX GUI
 
 Package: open-xchange-meta-singleserver
 Architecture: all
-Depends: open-xchange-meta-server, open-xchange-meta-gui, open-xchange-meta-admin, open-xchange-meta-pubsub
+Depends: open-xchange-meta-server, open-xchange-meta-gui, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging
 Description: The Open-Xchange Meta package for OX on a single server
 
 Package: open-xchange-meta-mobility
