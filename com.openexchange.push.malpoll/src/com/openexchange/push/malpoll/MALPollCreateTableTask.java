@@ -121,10 +121,8 @@ public final class MALPollCreateTableTask extends AbstractCreateTableImpl implem
         return new String[] { "malPollHash", "malPollUid" };
     }
 
-    private static final String[] DEPENDENCIES = { "com.openexchange.groupware.update.tasks.FolderAddIndex4SharedFolderSearch" };
-
     public String[] getDependencies() {
-        return DEPENDENCIES;
+        return new String[] { "com.openexchange.groupware.update.tasks.FolderAddIndex4SharedFolderSearch" };
     }
 
     public TaskAttributes getAttributes() {
