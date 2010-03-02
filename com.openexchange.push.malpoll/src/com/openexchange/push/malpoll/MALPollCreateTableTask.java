@@ -104,7 +104,7 @@ public final class MALPollCreateTableTask extends AbstractCreateTableImpl implem
         " cid INT4 UNSIGNED NOT NULL," +
         " hash BINARY(16) NOT NULL," +
         " uid VARCHAR(70) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
-        " PRIMARY KEY (cid,hash,uid(32))," +
+        " PRIMARY KEY (cid,hash,uid(32))" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
     }
 
