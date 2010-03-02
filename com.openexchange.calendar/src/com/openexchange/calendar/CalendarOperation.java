@@ -184,7 +184,9 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 cdao.setStartDate(setDate(i++, load_resultset));
                 cdao.setEndDate(setDate(i++, load_resultset));
                 cdao.setTimezone(setString(i++, load_resultset));
-                cdao.setRecurrenceID(setInt(i++, load_resultset));
+                int recId = setInt(i++, load_resultset);
+                if (recId != 0)
+                    cdao.setRecurrenceID(recId);
                 cdao.setLabel(setInt(i++, load_resultset));
                 cdao.setTitle(setString(i++, load_resultset));
                 cdao.setLocation(setString(i++, load_resultset));
@@ -221,7 +223,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                         throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.LOAD_PERMISSION_EXCEPTION_4));
                     }
                 }
-                if (cdao.containsRecurrenceID() && cdao.getRecurrenceID() != 0) {
+                if (cdao.containsRecurrenceID()) {
                     cdao.setRecurrenceCalculator(setInt(i++, load_resultset));
                     cdao.setRecurrencePosition(setInt(i++, load_resultset));
                     cdao.setRecurrence(setString(i++, load_resultset));
