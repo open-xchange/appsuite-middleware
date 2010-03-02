@@ -427,6 +427,11 @@ public final class CacheFolderStorage implements FolderStorage {
             storage.rollback(storageParameters);
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+        /*
+         * Invalidate cache entry
+         */
+        removeFolder(folderId, treeId, storageParameters);
+        removeFolder(folderId, REAL_TREE_ID, storageParameters);
     }
 
     public Folder getFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
