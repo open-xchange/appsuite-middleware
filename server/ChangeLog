@@ -1,3 +1,7 @@
+* 2010-03-02 - martin.herfurth@open-xchange.com
+
+ - Bugfix #15031: Resource conflict during update.
+
 * 2010-03-02 - thorben.betten@open-xchange.com
 
  - Bugfix #15520: Fixed color label in new folder tree
