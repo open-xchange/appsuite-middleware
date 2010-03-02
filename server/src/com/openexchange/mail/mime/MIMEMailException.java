@@ -107,17 +107,19 @@ public class MIMEMailException extends MailException {
          */
         FOLDER_NOT_FOUND_EXT("Mail folder \"%1$s\" could not be found on server %2$s with login %3$s (user=%4$s, context=%5$s).", Category.CODE_ERROR, FOLDER_NOT_FOUND.detailNumber),
         /**
-         * Folder "%1$s" is closed.
+         * Folder "%1$s" has been closed due to some reason.<br>
+         * Probably your request took too long.
          * <p>
          * This exception is thrown when a method is invoked on a Messaging object and the Folder that owns that object has died due to some
          * reason. Following the exception, the Folder is reset to the "closed" state.
          * </p>
          */
-        FOLDER_CLOSED("Folder \"%1$s\" is closed.", Category.CODE_ERROR, 1003),
+        FOLDER_CLOSED("Folder \"%1$s\" is closed due to some reason.\nProbably your request took too long", Category.CODE_ERROR, 1003),
         /**
-         * Folder "%1$s" is closed on server %2$s with login %3$s (user=%4$s, context=%5$s)
+         * Folder "%1$s" has been closed on server %2$s with login %3$s (user=%4$s, context=%5$s) due to some reason.<br>
+         * Probably your request took too long.
          */
-        FOLDER_CLOSED_EXT("Folder \"%1$s\" is closed on server %2$s with login %3$s (user=%4$s, context=%5$s).", Category.CODE_ERROR, FOLDER_CLOSED.detailNumber),
+        FOLDER_CLOSED_EXT("Folder \"%1$s\" has been closed on server %2$s with login %3$s (user=%4$s, context=%5$s) due to some reason.\nProbably your request took too long.", Category.CODE_ERROR, FOLDER_CLOSED.detailNumber),
         /**
          * Illegal write attempt: %1$s
          * <p>

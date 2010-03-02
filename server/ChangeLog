@@ -2,6 +2,7 @@
 
  - Bugfix #15520: Fixed color label in new folder tree
  - Bugfix #15523: Fixed changed dependency due to move of update task
+ - Bugfix #14216: Changed error message
 
 * 2010-03-02 - francisco.laguna@open-xchange.com
 
