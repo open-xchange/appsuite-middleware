@@ -81,10 +81,21 @@ public class CalendarFolderUpdaterStrategy implements FolderUpdaterStrategy<Cale
 
     public int calculateSimilarityScore(CalendarDataObject original, CalendarDataObject candidate, Object session) throws AbstractOXException {
         int score = 0;
-        // For the sake of simplicity we assume that equal titles mean equal appointments
-        // TODO: this needs to be diversified
-        if ((isset(original.getTitle()) || isset(candidate.getTitle())) && eq(original.getTitle(), candidate.getTitle())) {
+        // A score of 10 is sufficient for a match
+        if ((isset(original.getUid()) || isset(candidate.getUid())) && eq(original.getUid(), candidate.getUid())) {
             score += 10;
+        }
+        if ((isset(original.getTitle()) || isset(candidate.getTitle())) && eq(original.getTitle(), candidate.getTitle())) {
+            score += 5;
+        }
+        if ((isset(original.getNote()) || isset(candidate.getNote())) && eq(original.getNote(), candidate.getNote())) {
+            score += 5;
+        }
+        if (original.getStartDate() != null && candidate.getStartDate() != null && eq(original.getStartDate(), candidate.getStartDate())) {
+            score += 5;
+        }
+        if (original.getEndDate() != null && candidate.getEndDate() != null && eq(original.getEndDate(), candidate.getEndDate())) {
+            score += 5;
         }
 
         return score;
