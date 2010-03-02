@@ -188,23 +188,20 @@ public abstract class AbstractPerformer {
      * @throws FolderException If a folder error occurs
      */
     protected FolderStorage getOpenedStorage(final String id, final String treeId, final StorageParameters storageParameters, final java.util.Collection<FolderStorage> openedStorages) throws FolderException {
-        FolderStorage tmp = null;
         for (final FolderStorage ps : openedStorages) {
             if (ps.getFolderType().servesFolderId(id)) {
                 // Found an already opened storage which is capable to server given folderId-treeId-pair
-                tmp = ps;
+                return ps;
             }
         }
+        // None opened storage is capable to server given folderId-treeId-pair
+        final FolderStorage tmp = folderStorageDiscoverer.getFolderStorage(treeId, id);
         if (null == tmp) {
-            // None opened storage is capable to server given folderId-treeId-pair
-            tmp = folderStorageDiscoverer.getFolderStorage(treeId, id);
-            if (null == tmp) {
-                throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, id);
-            }
-            // Open storage and add to list of opened storages
-            tmp.startTransaction(storageParameters, false);
-            openedStorages.add(tmp);
+            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, id);
         }
+        // Open storage and add to list of opened storages
+        tmp.startTransaction(storageParameters, false);
+        openedStorages.add(tmp);
         return tmp;
     }
 
