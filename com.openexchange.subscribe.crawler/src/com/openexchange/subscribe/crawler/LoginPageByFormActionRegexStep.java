@@ -130,7 +130,11 @@ public class LoginPageByFormActionRegexStep extends AbstractStep<HtmlPage, Objec
                 }
                 if (!linkAvailable) {
                     LOG.error("Page that does not have the link to imply a successful login : " + output.getWebResponse().getContentAsString());
+//                    if (isDebuggingEnabled()){
+//                        openPageInBrowser(output);
+//                    }
                     throw SubscriptionErrorMessage.INVALID_LOGIN.create();
+                    
                 }
                 executedSuccessfully = true;
             }

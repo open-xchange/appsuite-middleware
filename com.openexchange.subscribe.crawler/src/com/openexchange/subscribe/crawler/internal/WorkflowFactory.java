@@ -68,7 +68,7 @@ public class WorkflowFactory {
         Workflow workflow = null;
         try {
             workflow = (Workflow) Yaml.load(new File(filename));
-            checkSanity(workflow);
+            //checkSanity(workflow);
         } catch (final FileNotFoundException e) {
         }
 
@@ -88,8 +88,8 @@ public class WorkflowFactory {
     private static void checkSanity(final Workflow workflow) throws SubscriptionException {
         Step previousStep = null;
         for (final Step currentStep : workflow.getSteps()) {
-            if (previousStep != null) {
-                if (!previousStep.outputType().equals(currentStep.inputType())) {
+            if (previousStep != null) {                
+                if (!previousStep.runEmpty()[0].equals(currentStep.runEmpty()[1])) {
                     throw SubscriptionErrorMessage.INVALID_WORKFLOW.create();
                 }
             }

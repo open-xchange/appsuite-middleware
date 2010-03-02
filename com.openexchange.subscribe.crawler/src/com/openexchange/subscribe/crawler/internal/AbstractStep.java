@@ -49,6 +49,13 @@
 
 package com.openexchange.subscribe.crawler.internal;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
+import java.lang.reflect.TypeVariable;
+import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.crawler.Workflow;
@@ -66,6 +73,8 @@ public abstract class AbstractStep<O,I> implements Step<O,I>{
     protected O output;
     
     protected I input;
+    
+    protected boolean debuggingEnabled;
 
     public boolean executedSuccessfully() {
         return executedSuccessfully;
@@ -106,4 +115,39 @@ public abstract class AbstractStep<O,I> implements Step<O,I>{
         
     }
     
+    // Convenience Methods for Development / Debugging
+    public boolean isDebuggingEnabled() {
+        return debuggingEnabled;
+    }
+
+    
+    public void setDebuggingEnabled(boolean debuggingEnabled) {
+        this.debuggingEnabled = debuggingEnabled;
+    }
+    
+    protected void openPageInBrowser(Page page){
+        File file = new File ("./crawlerTestPage.html");
+        Writer output = null;                            
+        try {
+          output = new BufferedWriter(new FileWriter(file));
+          output.write( page.getWebResponse().getContentAsString() );
+          Runtime.getRuntime().exec("open -a Safari ./crawlerTestPage.html");
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        finally {
+          try {
+            output.close();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } 
+        }
+    }
+    
+    public TypeVariable<?>[] runEmpty(){        
+        return this.getClass().getTypeParameters();
+    }
+    // Convenience Methods for Development / Debugging    
 }

@@ -246,7 +246,7 @@ public class Mappings {
             if (map.containsKey("birthday_year")) {
                 year = Integer.parseInt(map.get("birthday_year"));
             }
-            cal.set(year, month, date);
+            cal.set(year, month, date, 1, 1, 1);            
             contact.setBirthday(cal.getTime());
         }
 

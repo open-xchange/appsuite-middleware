@@ -76,7 +76,8 @@ public class GenericSubscribeServiceForWKWTest extends GenericSubscribeServiceTe
         
         // #####################################################################        
         //TODO: insert steps
-        steps.add(new LoginPageByFormActionStep("", "http://www.wer-kennt-wen.de", username, password, "start.php", "loginName", "pass", "\\/people\\/friends", 0, ""));
+        steps.add(new LoginPageByFormActionStep("", "http://www.wer-kennt-wen.de", username, password, "start.php", "loginName", "pass", "\\/people\\/friends", 1, ""));
+        steps.add(new PageByUrlStep("", "http://www.wer-kennt-wen.de/people/friends"));
         
 //        final ArrayList<PagePart> pageParts = new ArrayList<PagePart>();
 //        final PagePartSequence sequence = new PagePartSequence(pageParts, "");

@@ -137,6 +137,9 @@ public class LoginPageByFormActionStep extends AbstractStep<HtmlPage, Object> im
         } catch (final IOException e) {
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
         }
+//        if (!executedSuccessfully){
+//            openPageInBrowser(loginPage);
+//        }
     }
 
     @Override

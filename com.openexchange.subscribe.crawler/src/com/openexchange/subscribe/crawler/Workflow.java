@@ -90,6 +90,8 @@ public class Workflow {
     private Activator activator;
     
     private boolean enableJavascript;
+    
+    private boolean debuggingEnabled = false;
 
     public Workflow() {
 
@@ -103,6 +105,9 @@ public class Workflow {
     // Convenience method for setting username and password after the workflow was created
     public Object[] execute(final String username, final String password) throws SubscriptionException {
         for (final Step currentStep : steps) {
+            if (debuggingEnabled){
+                currentStep.setDebuggingEnabled(true);
+            }
             if (currentStep instanceof LoginStep) {
                 ((LoginStep) currentStep).setUsername(username);
                 ((LoginStep) currentStep).setPassword(password);
@@ -204,6 +209,16 @@ public class Workflow {
     
     public void setEnableJavascript(boolean enableJavascript) {
         this.enableJavascript = enableJavascript;
+    }
+
+    
+    public boolean isDebuggingEnabled() {
+        return debuggingEnabled;
+    }
+
+    
+    public void setDebuggingEnabled(boolean debuggingEnabled) {
+        this.debuggingEnabled = debuggingEnabled;
     }
 
     

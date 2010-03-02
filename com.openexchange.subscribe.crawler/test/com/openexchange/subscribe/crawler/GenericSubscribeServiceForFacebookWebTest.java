@@ -87,19 +87,20 @@ public class GenericSubscribeServiceForFacebookWebTest extends GenericSubscribeS
             "http://m.facebook.com/",
             "",
             "",
-            "/login\\.php.*",
+            ".*login.*",
             "email",
             "pass",
-            "(\\/friends.*)",
+            "(.*friends.*)",
             1,
             "http://m.facebook.com"));
         steps.add(new PageByLinkRegexStep("click the friends-link", "\\/friends.*"));
         steps.add(new PageByLinkRegexStep("click the all-link", "\\/friends.php?.*&a.*"));
-        steps.add(new AnchorsByLinkRegexStep(
+        steps.add(new AnchorsByLinkXPathStep(
             "click all the individual friends links on all subpages.",
             "\\/friends.php?.*&a&f.*",
-            "\\/profile.php.*&id=.*",
-            ".*&id=([0-9]*).*"));
+            "/html/body/div[4]/div[6]/table/tbody/tr[REPLACE_THIS]/td/a",
+            0,
+            17));
         final ArrayList<PagePart> pageParts = new ArrayList<PagePart>();
         pageParts.add(new PagePart("(<div class=\"section_title\">)([^<]*)(</div>)", "display_name"));
         pageParts.add(new PagePart("(<img src=\")(http:\\/\\/profile\\.ak\\.fbcdn\\.net[^\"]*)(\")", "image"));
@@ -117,7 +118,9 @@ public class GenericSubscribeServiceForFacebookWebTest extends GenericSubscribeS
         steps.add(new ContactObjectsByHTMLAnchorsAndPagePartSequenceStep(
             "Get the info-bits from the contact-page.",
             sequence,
-            "Facebook.*(Your Profile|Dein Profil)", ".*&v=info.*"));
+            "Facebook.*(Your Profile|Dein Profil)", 
+            ".*&v=info.*"));
+        steps.add(new RemoveDuplicateContactsStep());
         final Workflow workflow = new Workflow(steps);
         
         

@@ -47,42 +47,68 @@
  *
  */
 
-package com.openexchange.subscribe.crawler.internal;
+package com.openexchange.subscribe.crawler;
 
-import java.lang.reflect.TypeVariable;
+import java.util.ArrayList;
+import java.util.HashMap;
 import com.gargoylesoftware.htmlunit.WebClient;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.SubscriptionException;
-import com.openexchange.subscribe.crawler.Workflow;
+import com.openexchange.subscribe.crawler.internal.AbstractStep;
+
 
 /**
- * A Step in a crawling workflow
- * 
+ * {@link RemoveDuplicateContactsStep}
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
- * @param <O> The Output accessible if the step executed successfully
- * @param <I> The Input needed for the step to execute
  */
-public interface Step<O, I>{
+public class RemoveDuplicateContactsStep extends AbstractStep<Contact[], Contact[]> {
 
-    boolean executedSuccessfully();
+    private HashMap<String, Contact> map = new HashMap<String, Contact>();
+    
+    public RemoveDuplicateContactsStep(){
+        
+    }
+    
+    /* (non-Javadoc)
+     * @see com.openexchange.subscribe.crawler.internal.AbstractStep#execute(com.gargoylesoftware.htmlunit.WebClient)
+     */
+    @Override
+    public void execute(WebClient webClient) throws SubscriptionException {
+        ArrayList<Contact> outputList = new ArrayList<Contact>();
+        for (Contact contact : input){
+            String hash = getUniqueHash(contact);
+            if (!map.containsKey(hash)){
+                outputList.add(contact);
+                map.put(hash, contact);                
+            }
+        }
+        
+        output = outputList.toArray(new Contact[outputList.size()]);
+        
+        executedSuccessfully = true;
+    }
 
-    Exception getException();
-
-    void execute(WebClient webClient) throws SubscriptionException;
-
-    Class inputType();
-
-    Class outputType();
-    
-    void setWorkflow(Workflow workflow);
-    
-    public void setInput(I input);
-    
-    public O getOutput();
-    
-    public boolean isDebuggingEnabled();
-    
-    public void setDebuggingEnabled(boolean debuggingEnabled);
-    
-    public TypeVariable<?>[] runEmpty();
-
+    private String getUniqueHash(Contact contact){
+        String string = "";
+        if (contact.getGivenName() != null){
+            string += contact.getGivenName();
+        }
+        if (contact.getSurName() != null){
+            string += contact.getSurName();
+        }
+        if (contact.getDisplayName() != null){
+            string += contact.getDisplayName();
+        }
+        if (contact.getBirthday() != null){
+            string += contact.getBirthday().toString();
+        }
+        if (contact.getEmail1() != null){
+            string += contact.getEmail1();
+        }
+        if (contact.getCellularTelephone1() != null){
+            string += contact.getCellularTelephone1();
+        }
+        return string;
+    }
 }

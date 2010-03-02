@@ -106,9 +106,13 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
     public void execute(final WebClient webClient) throws SubscriptionException {
         final List<Contact> contactObjects = new ArrayList<Contact>();
         // final OXContainerConverter oxContainerConverter = new OXContainerConverter((TimeZone) null, (String) null);
+        HtmlPage debugPage = null;
         for (final HtmlAnchor anchor : input) {
             try {
                 HtmlPage page = anchor.click();
+                if (isDebuggingEnabled()){
+                    debugPage = page;
+                }
                 // in case the reached page is not yet the one with (all) the contact info and there is one more link to click
                 if (!linkToTargetPage.equals("")){
                    final PageByLinkRegexStep step = new PageByLinkRegexStep("", linkToTargetPage);
@@ -144,6 +148,9 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
             executedSuccessfully = true;
         }
 
+//        if (!executedSuccessfully && debugPage != null){
+//            openPageInBrowser(debugPage);
+//        }
         output = contactObjects.toArray(new Contact[contactObjects.size()]);
 
     }
