@@ -67,7 +67,10 @@ import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.StringContent;
 import com.openexchange.messaging.StringMessageHeader;
 import com.openexchange.messaging.MessagingHeader.KnownHeader;
+import com.openexchange.messaging.generic.Utility;
 import com.openexchange.messaging.generic.internet.MimeContentType;
+import com.openexchange.messaging.generic.internet.MimeMessagingBodyPart;
+import com.openexchange.messaging.generic.internet.MimeMultipartContent;
 import com.sun.syndication.feed.synd.SyndContent;
 import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndFeed;
@@ -112,9 +115,35 @@ public class SyndMessage implements MessagingMessage {
                 type = "text/"+type;
             }
         }
-        MimeContentType contentType = new MimeContentType(type);
-        addHeader(KnownHeader.CONTENT_TYPE, contentType);
-        this.content = new StringContent(content.getValue());
+        
+        if( isHTML(type) ) {
+            String textVersion = Utility.textFormat(content.getValue());
+            
+            MimeMultipartContent multipart = new MimeMultipartContent();
+            MimeMessagingBodyPart textPart = new MimeMessagingBodyPart();
+            textPart.setContent(new StringContent(textVersion), "text/plain");
+            
+            multipart.addBodyPart(textPart);
+            
+            MimeMessagingBodyPart htmlPart = new MimeMessagingBodyPart();
+            htmlPart.setContent(new StringContent(content.getValue()), type);
+            
+            multipart.addBodyPart(htmlPart);
+            
+            MimeContentType contentType = new MimeContentType("multipart/alternative");
+            addHeader(KnownHeader.CONTENT_TYPE, contentType);
+            
+            this.content = multipart;
+        } else {
+            MimeContentType contentType = new MimeContentType(type);
+            addHeader(KnownHeader.CONTENT_TYPE, contentType);
+            this.content = new StringContent(content.getValue());
+        }
+        
+    }
+
+    private boolean isHTML(String type) {
+        return type.endsWith("html");
     }
 
     private boolean knowsType(String type) {
