@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.internal;
 
+import gnu.trove.TIntIntHashMap;
 import java.util.TimeZone;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
@@ -57,6 +58,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import com.openexchange.folderstorage.Permission;
 
 /**
  * {@link Tools} - A utility class for folder storage processing.
@@ -179,6 +181,58 @@ public final class Tools {
             result -= digit;
         }
         return -result;
+    }
+
+    /**
+     * Calculates the bits from given permission.
+     * 
+     * @param perm The permission
+     * @return The bits calculated from given permission
+     */
+    public static int createPermissionBits(final Permission perm) {
+        return createPermissionBits(
+            perm.getFolderPermission(),
+            perm.getReadPermission(),
+            perm.getWritePermission(),
+            perm.getDeletePermission(),
+            perm.isAdmin());
+    }
+
+    /**
+     * The actual max permission that can be transfered in field 'bits' or JSON's permission object
+     */
+    private static final int MAX_PERMISSION = 64;
+
+    private static final TIntIntHashMap MAPPING = new TIntIntHashMap(6) {
+        { //Unnamed Block.
+            put(Permission.MAX_PERMISSION, MAX_PERMISSION);
+            put(MAX_PERMISSION, MAX_PERMISSION);
+            put(0, 0);
+            put(2, 1);
+            put(4, 2);
+            put(8, 4);
+        }
+    };
+
+    /**
+     * Calculates the bits from given permissions.
+     * 
+     * @param fp The folder permission
+     * @param rp The read permission
+     * @param wp The write permission
+     * @param dp The delete permission
+     * @param adminFlag <code>true</code> if admin access; otherwise <code>false</code>
+     * @return The bits calculated from given permissions
+     */
+    public static int createPermissionBits(final int fp, final int rp, final int wp, final int dp, final boolean adminFlag) {
+        int retval = 0;
+        int i = 4;
+        retval += (adminFlag ? 1 : 0) << (i-- * 7)/*Number of bits to be shifted*/;
+        retval += MAPPING.get(dp) << (i-- * 7);
+        retval += MAPPING.get(wp) << (i-- * 7);
+        retval += MAPPING.get(rp) << (i-- * 7);
+        retval += MAPPING.get(fp) << (i * 7);
+        return retval;
     }
 
 }
