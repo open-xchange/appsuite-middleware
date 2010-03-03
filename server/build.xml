@@ -215,6 +215,7 @@
 		<antcall target="patchConfigFiles">
 			<param name="conf.subst.patch" value="${conf.install.dir}" />
 			<param name="common.conf.subst.patch" value="${confInstallDir2}" />
+			<param name="root.conf.subst.patch" value="${prefix}" />
 		</antcall>
 	</target>
 
@@ -322,6 +323,7 @@
 	</target>
 
 	<target name="patchConfigFiles">
+		<fail message="Define root.conf.subst.patch." unless="root.conf.subst.patch" />
 		<fail message="Define conf.subst.patch." unless="conf.subst.patch" />
 		<fail message="Define common.conf.subst.patch." unless="common.conf.subst.patch" />
 		<antcall target="patchOSGiIni" />
@@ -369,8 +371,11 @@
 
 	<target name="patchPathInProperties">
 		<move tofile="${patch.conf.dir}/system.properties" file="${patch.conf.dir}/system.properties.in" overwrite="true" />
+		<move tofile="${patch.conf.dir}/import.properties" file="${patch.conf.dir}/import.properties.in" overwrite="true" />
+
 		<replace dir="${patch.conf.dir}" includes="*.properties">
 			<replacefilter token="@oxgroupwaresysconfdir@" value="${conf.subst.patch}" />
+			<replacefilter token="@rootinstalldir@" value="${root.conf.subst.patch}" />
 		</replace>
 	</target>
 
