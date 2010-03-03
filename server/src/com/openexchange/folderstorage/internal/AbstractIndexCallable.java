@@ -50,6 +50,7 @@
 package com.openexchange.folderstorage.internal;
 
 import java.util.concurrent.Callable;
+import org.apache.commons.logging.Log;
 
 /**
  * {@link AbstractIndexCallable} - Extends {@link Callable} interface by an index field.
@@ -58,6 +59,11 @@ import java.util.concurrent.Callable;
  * @since Open-Xchange v6.16
  */
 public abstract class AbstractIndexCallable<V> implements Callable<V> {
+
+    /**
+     * The logger.
+     */
+    protected final org.apache.commons.logging.Log logger;
 
     /**
      * The index assigned to this callable.
@@ -70,8 +76,19 @@ public abstract class AbstractIndexCallable<V> implements Callable<V> {
      * @param index The index assigned to this callable
      */
     protected AbstractIndexCallable(final int index) {
+        this(index, null);
+    }
+
+    /**
+     * Initializes a new {@link AbstractIndexCallable}.
+     * 
+     * @param index The index assigned to this callable
+     * @param logger The logger
+     */
+    protected AbstractIndexCallable(final int index, final Log logger) {
         super();
         this.index = index;
+        this.logger = logger;
     }
 
 }

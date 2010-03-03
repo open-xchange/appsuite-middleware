@@ -363,8 +363,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
             throw new FolderException(e);
         }
         for (int i = 0; i < size; i++) {
-            final org.apache.commons.logging.Log logger = LOG;
-            completionService.submit(new AbstractIndexCallable<Object>(i) {
+            completionService.submit(new AbstractIndexCallable<Object>(i, LOG) {
 
                 public Object call() throws FolderException {
                     final SortableId sortableId = allSubfolderIds.get(index);
