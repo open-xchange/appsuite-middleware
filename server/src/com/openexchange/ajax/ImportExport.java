@@ -128,9 +128,15 @@ public abstract class ImportExport extends SessionServlet {
         try {
             ConfigurationService conf = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
             String path = conf.getProperty("com.openexchange.import.mapper.path");
+            if(path == null) {
+                LOG.error("Reading the property 'com.openexchange.import.mapper.path' did not give path to mappers. Defaulting to deprecated mappers as fallback.");
+                return outlook;
+            }
+                
             File dir = new File(path);
             if (!dir.isDirectory()) {
                 LOG.error("Directory "+ path +" supposedly containing import mappers information wasn't actually a directory, defaulting to deprecated mappers as fallback.");
+                return outlook;
             }
             File[] files = dir.listFiles();
 
