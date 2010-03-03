@@ -53,7 +53,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -61,11 +60,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
-
 import junit.framework.JUnit4TestAdapter;
-
 import org.junit.Test;
-
+import com.openexchange.ajax.ImportExport;
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLImpl;
@@ -75,7 +72,6 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
-import com.openexchange.groupware.importexport.importers.OutlookCSVContactImporter;
 
 public class OutlookCSVContactImportTest extends AbstractContactTest{
 	public String IMPORT_HEADERS = ContactField.GIVEN_NAME.getEnglishOutlookName()+","+ContactField.EMAIL1.getEnglishOutlookName()+","+ContactField.BIRTHDAY.getEnglishOutlookName()+"\n";
@@ -85,7 +81,8 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
 	public OutlookCSVContactImportTest(){
 		super();
 		defaultFormat = Format.OUTLOOK_CSV;
-		imp = new OutlookCSVContactImporter();
+		imp = ImportExport.getOutlookImporter();
+		
 	}
 	
 	//workaround for JUnit 3 runner
