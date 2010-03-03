@@ -217,7 +217,7 @@ public class RSSMessageAccess extends RSSCommon implements MessagingMessageAcces
         try {
             return this.feed = new FeedAdapter(feedFetcher.retrieveFeed(new URL(url)), "");
         } catch (Exception e) {
-            throw MessagingExceptionCodes.MESSAGING_ERROR.create(e);
+            throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
         }
     }
 
