@@ -445,9 +445,8 @@ public class MailObject {
                     final Context ctx = ContextStorage.getStorageContext(session);
                     final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
                         ContactInterfaceDiscoveryService.class).newContactInterface(FolderObject.SYSTEM_LDAP_FOLDER_ID, session);
-                    final Contact c = contactInterface.getObjectById(
-                        UserStorage.getInstance().getUser(ctx.getMailadmin(), ctx).getContactId(),
-                        FolderObject.SYSTEM_LDAP_FOLDER_ID);
+                    final Contact c = contactInterface.getUserById(ctx.getMailadmin(),
+                        false);
                     if (null != c && c.getCompany() != null && c.getCompany().length() > 0) {
                         session.setParameter(MailSessionParameterNames.PARAM_ORGANIZATION_HDR, c.getCompany());
                         msg.setHeader(HEADER_ORGANIZATION, c.getCompany());
