@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.oxfolder;
 
+import gnu.trove.TIntArrayList;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -631,16 +632,14 @@ public final class OXFolderUtility {
      * @throws SQLException If a SQL error occurs
      * @throws DBPoolingException If a pooling error occurs
      */
-    public static boolean isDescendentFolder(final List<Integer> parentIDList, final int possibleDescendant, final Connection readCon, final Context ctx) throws SQLException, DBPoolingException {
+    public static boolean isDescendentFolder(final TIntArrayList parentIDList, final int possibleDescendant, final Connection readCon, final Context ctx) throws SQLException, DBPoolingException {
         final int size = parentIDList.size();
-        final Iterator<Integer> iter = parentIDList.iterator();
         boolean isDescendant = false;
         for (int i = 0; i < size && !isDescendant; i++) {
-            final List<Integer> subfolderIDs = OXFolderSQL.getSubfolderIDs(iter.next().intValue(), readCon, ctx);
+            final TIntArrayList subfolderIDs = OXFolderSQL.getSubfolderIDs(parentIDList.getQuick(i), readCon, ctx);
             final int subsize = subfolderIDs.size();
-            final Iterator<Integer> subiter = subfolderIDs.iterator();
             for (int j = 0; j < subsize && !isDescendant; j++) {
-                final int current = subiter.next().intValue();
+                final int current = subfolderIDs.getQuick(j);
                 isDescendant |= (current == possibleDescendant);
             }
             if (isDescendant) {

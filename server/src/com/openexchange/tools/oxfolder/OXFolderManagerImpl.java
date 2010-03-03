@@ -49,12 +49,12 @@
 
 package com.openexchange.tools.oxfolder;
 
+import gnu.trove.TIntArrayList;
 import gnu.trove.TIntObjectHashMap;
 import gnu.trove.TIntObjectProcedure;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -654,12 +654,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
                     OXFolderUtility.folderModule2String(folderObj.getModule()),
                     Integer.valueOf(ctx.getContextId()));
             }
-            if ((options & OPTION_DENY_MODULE_UPDATE) > 0) {
-                /*
-                 * Folder module must not be updated
-                 */
-                throw new OXFolderException(FolderCode.NO_FOLDER_MODULE_UPDATE);
-            } else if (storageObj.isDefaultFolder()) {
+            if (storageObj.isDefaultFolder()) {
                 /*
                  * A default folder's module must not be changed
                  */
@@ -669,6 +664,11 @@ final class OXFolderManagerImpl extends OXFolderManager {
                  * Module cannot be updated since folder already contains elements
                  */
                 throw new OXFolderException(FolderCode.DENY_FOLDER_MODULE_UPDATE);
+            } else if ((options & OPTION_DENY_MODULE_UPDATE) > 0) {
+                /*
+                 * Folder module must not be updated
+                 */
+                throw new OXFolderException(FolderCode.NO_FOLDER_MODULE_UPDATE);
             }
             final FolderObject parent = getFolderFromMaster(storageObj.getParentFolderID());
             if (!OXFolderUtility.checkFolderModuleAgainstParentModule(
@@ -1095,8 +1095,8 @@ final class OXFolderManagerImpl extends OXFolderManager {
                 /*
                  * Check if target is a descendant folder
                  */
-                final List<Integer> parentIDList = new ArrayList<Integer>(1);
-                parentIDList.add(Integer.valueOf(storageSrc.getObjectID()));
+                final TIntArrayList parentIDList = new TIntArrayList(1);
+                parentIDList.add(storageSrc.getObjectID());
                 if (OXFolderUtility.isDescendentFolder(parentIDList, targetFolderId, readCon, ctx)) {
                     throw new OXFolderException(
                         FolderCode.NO_SUBFOLDER_MOVE,
@@ -1402,7 +1402,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
                 /*
                  * Check parent subfolder flag
                  */
-                final boolean hasSubfolders = (OXFolderSQL.getSubfolderIDs(parentObj.getObjectID(), wc, ctx).size() > 0);
+                final boolean hasSubfolders = !OXFolderSQL.getSubfolderIDs(parentObj.getObjectID(), wc, ctx).isEmpty();
                 OXFolderSQL.updateSubfolderFlag(parentObj.getObjectID(), hasSubfolders, lastModified, wc, ctx);
                 /*
                  * Update cache
@@ -1798,16 +1798,15 @@ final class OXFolderManagerImpl extends OXFolderManager {
         /*
          * No subfolders detected
          */
-        final List<Integer> subfolders = OXFolderSQL.getSubfolderIDs(delFolder.getObjectID(), readCon, ctx);
+        final TIntArrayList subfolders = OXFolderSQL.getSubfolderIDs(delFolder.getObjectID(), readCon, ctx);
         if (subfolders.isEmpty()) {
             deleteableIDs.put(folderID, null);
             return;
         }
         final TIntObjectHashMap<TIntObjectHashMap<?>> subMap = new TIntObjectHashMap<TIntObjectHashMap<?>>();
         final int size = subfolders.size();
-        final Iterator<Integer> it = subfolders.iterator();
         for (int i = 0; i < size; i++) {
-            final int fuid = it.next().intValue();
+            final int fuid = subfolders.getQuick(i);
             gatherDeleteableSubfoldersRecursively(fuid, userId, userConfig, permissionIDs, subMap, initParent);
         }
         deleteableIDs.put(folderID, subMap);

@@ -52,16 +52,15 @@ package com.openexchange.tools.oxfolder;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeResources;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import gnu.trove.TIntArrayList;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -577,12 +576,12 @@ public final class OXFolderSQL {
     private static final String SQL_GETSUBFLDIDS = "SELECT fuid FROM oxfolder_tree WHERE cid = ? AND parent = ?";
 
     /**
-     * Creates a <tt>java.util.List</tt> instance containing all subfolder IDs of given folder
+     * Creates a <tt>TIntArrayList</tt> instance containing all subfolder IDs of given folder
      * 
-     * @return a <tt>java.util.List</tt> instance containing all subfolder IDs of given folder
+     * @return a <tt>TIntArrayList</tt> instance containing all subfolder IDs of given folder
      */
-    public static List<Integer> getSubfolderIDs(final int folderId, final Connection readConArg, final Context ctx) throws DBPoolingException, SQLException {
-        final List<Integer> retval = new ArrayList<Integer>();
+    public static TIntArrayList getSubfolderIDs(final int folderId, final Connection readConArg, final Context ctx) throws DBPoolingException, SQLException {
+        final TIntArrayList retval = new TIntArrayList();
         Connection readCon = readConArg;
         boolean closeReadCon = false;
         PreparedStatement stmt = null;
@@ -597,7 +596,7 @@ public final class OXFolderSQL {
             stmt.setInt(2, folderId);
             rs = stmt.executeQuery();
             while (rs.next()) {
-                retval.add(Integer.valueOf(rs.getInt(1)));
+                retval.add(rs.getInt(1));
             }
         } finally {
             closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
@@ -1328,7 +1327,7 @@ public final class OXFolderSQL {
      * @return a unique identifier for a folder.
      * @throws SQLException if generating this unique folder identifier fails.
      */
-    public static int getNextSerialForAdmin(Context ctx, Connection con) throws SQLException {
+    public static int getNextSerialForAdmin(final Context ctx, final Connection con) throws SQLException {
         return IDGenerator.getId(ctx, Types.FOLDER, con);
     }
 

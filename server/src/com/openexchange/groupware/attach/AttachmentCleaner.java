@@ -49,8 +49,7 @@
 
 package com.openexchange.groupware.attach;
 
-import java.util.ArrayList;
-import java.util.List;
+import gnu.trove.TIntArrayList;
 import com.openexchange.api2.OXException;
 import com.openexchange.event.impl.AppointmentEventInterface;
 import com.openexchange.event.impl.ContactEventInterface;
@@ -135,22 +134,16 @@ public class AttachmentCleaner implements AppointmentEventInterface, TaskEventIn
             final ServerSession sessionObj = new ServerSessionAdapter(session);
             ATTACHMENT_BASE.startTransaction();
 			final TimedResult rs = ATTACHMENT_BASE.getAttachments(parentFolderID,objectID,type,new AttachmentField[]{AttachmentField.ID_LITERAL},AttachmentField.ID_LITERAL,AttachmentBase.ASC,sessionObj.getContext(), null, null);
-			final List<Integer> ids = new ArrayList<Integer>();
+			final TIntArrayList ids = new TIntArrayList();
 			iter = rs.results();
 			if(!iter.hasNext()) {
 				return; // Shortcut
 			}
 			while(iter.hasNext()){
-				ids.add(Integer.valueOf(((AttachmentMetadata)iter.next()).getId()));
-			}
-			final int[] idA = new int[ids.size()];
-			
-			int i = 0;
-			for(final int id : ids) {
-				idA[i++] = id;
+				ids.add(((AttachmentMetadata)iter.next()).getId());
 			}
 			
-			ATTACHMENT_BASE.detachFromObject(parentFolderID, objectID, type, idA,sessionObj.getContext(), null, null);
+			ATTACHMENT_BASE.detachFromObject(parentFolderID, objectID, type, ids.toNativeArray(), sessionObj.getContext(), null, null);
 			ATTACHMENT_BASE.commit();
 		
 		} catch (final TransactionException e) {
