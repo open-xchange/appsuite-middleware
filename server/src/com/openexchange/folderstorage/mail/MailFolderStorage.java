@@ -900,6 +900,7 @@ public final class MailFolderStorage implements FolderStorage {
                     }
                     if (!newParent.equals(oldParent)) { // move & rename
                         fullname = mailAccess.getFolderStorage().moveFolder(fullname, newFullname.toString());
+                        folder.setID(fullname);
                         movePerformed = true;
                     }
                 } else {
@@ -949,6 +950,7 @@ public final class MailFolderStorage implements FolderStorage {
                 final String newName = mfd.getName();
                 if (!newName.equals(oldName)) { // rename
                     fullname = mailAccess.getFolderStorage().renameFolder(fullname, newName);
+                    folder.setID(fullname);
                 }
             }
             /*
