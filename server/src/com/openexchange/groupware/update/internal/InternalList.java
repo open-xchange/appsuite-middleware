@@ -317,7 +317,7 @@ public final class InternalList {
         // Creates necessary tables for mail header cache
         new com.openexchange.groupware.update.tasks.HeaderCacheCreateTableTask(),
 
-        // Extends the calendar tables and create table to store the confirmation data for external participants.
+        // Extends the calendar tables and creates table to store the confirmation data for external participants.
         new com.openexchange.groupware.update.tasks.ExtendCalendarForIMIPHandlingTask(),
 
         // Enables the bit for the contact collector feature for every user because that bit was not checked before 6.16.
