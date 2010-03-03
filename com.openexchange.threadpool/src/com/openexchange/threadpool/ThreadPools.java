@@ -101,7 +101,7 @@ public final class ThreadPools {
      * @param <E> The exception type
      * @param completionService The completion service to poll
      * @param size The number of tasks performed by completion service
-     * @param timeoutMillis The time out in milliseconds
+     * @param timeoutMillis The time-out in milliseconds
      * @param factory The exception factory to launder a possible {@link ExecutionException} or {@link InterruptedException}
      * @return A list of results polled from completion service
      * @throws E If polling completion service fails
@@ -118,7 +118,8 @@ public final class ThreadPools {
                 if (null != f) {
                     ret.add(f.get());
                 } else if (LOG.isWarnEnabled()) {
-                    LOG.warn("Completion service's task did not complete in a timely manner!");
+                    LOG.warn(new StringBuilder(32).append("Completion service's task elapsed time-out of ").append(timeoutMillis).append(
+                        "msec").toString());
                 }
             }
             return ret;
