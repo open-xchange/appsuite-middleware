@@ -473,9 +473,11 @@ fi
 %dir /opt/open-xchange/bundles
 %dir /opt/open-xchange/etc/groupware/osgi/bundle.d
 %dir /opt/open-xchange/etc/admindaemon/osgi/bundle.d
+%dir /opt/open-xchange/importCSV
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
 /opt/open-xchange/etc/admindaemon/osgi/bundle.d/*
 /opt/open-xchange/bundles/*
+%config(noreplace) /opt/open-xchange/importCSV/*
 
 %files -n open-xchange -f %{configfiles}
 %defattr(-,root,root)
