@@ -138,8 +138,9 @@ public final class UpdateAction extends AbstractFolderAction {
         /*
          * Return appropriate result
          */
-        final Date lastModifiedUTC = folderService.getFolder(treeId, id, session, null).getLastModifiedUTC();
-        return new AJAXRequestResult(id, lastModifiedUTC);
+        final String newId = folder.getID();
+        final Date lastModifiedUTC = folderService.getFolder(treeId, newId, session, null).getLastModifiedUTC();
+        return new AJAXRequestResult(newId, lastModifiedUTC);
     }
 
 }

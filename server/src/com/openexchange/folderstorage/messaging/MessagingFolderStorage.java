@@ -987,13 +987,14 @@ public final class MessagingFolderStorage implements FolderStorage {
                             /*
                              * Perform move operation
                              */
-                            final String movedFolder = accountAccess.getFolderAccess().moveFolder(id, newParent);
+                            String movedFolder = accountAccess.getFolderAccess().moveFolder(id, newParent);
                             if (rename) {
                                 /*
                                  * Perform rename
                                  */
-                                accountAccess.getFolderAccess().renameFolder(movedFolder, newName);
+                                movedFolder = accountAccess.getFolderAccess().renameFolder(movedFolder, newName);
                             }
+                            folder.setID(MessagingFolderIdentifier.getFQN(serviceId, accountId, movedFolder));
                             movePerformed = true;
                         }
                     } else {
@@ -1036,6 +1037,7 @@ public final class MessagingFolderStorage implements FolderStorage {
              */
             if (!movePerformed && newName != null && !newName.equals(oldName)) {
                 id = accountAccess.getFolderAccess().renameFolder(id, newName);
+                folder.setID(MessagingFolderIdentifier.getFQN(serviceId, accountId, id));
             }
             /*
              * Handle update of permission or subscription
