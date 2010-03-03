@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.request;
 
+import gnu.trove.TIntArrayList;
 import gnu.trove.TIntHashSet;
 import gnu.trove.TIntIntHashMap;
 import java.io.IOException;
@@ -547,21 +548,20 @@ public class InfostoreRequest extends CommonRequest {
                 throw new OXConflictException();
             }
             iter = result.results();
-            final List<Integer> versions = new ArrayList<Integer>();
-            while (iter.hasNext()) {
-                final int version = (iter.next()).getVersion();
-                if (version == 0) {
-                    continue;
+            final TIntArrayList versions;
+            try {
+                versions = new TIntArrayList();
+                while (iter.hasNext()) {
+                    final int version = (iter.next()).getVersion();
+                    if (version == 0) {
+                        continue;
+                    }
+                    versions.add(version);
                 }
-                versions.add(Integer.valueOf(version));
+            } finally {
+                iter.close();
             }
-            iter.close();
-            final int[] versionsArray = new int[versions.size()];
-            int index = 0;
-            for (final int version : versions) {
-                versionsArray[index++] = version;
-            }
-            infostore.removeVersion(id, versionsArray, session);
+            infostore.removeVersion(id, versions.toNativeArray(), session);
             timestamp = infostore.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, ctx,
                     user, userConfiguration).getSequenceNumber();
             infostore.commit();

@@ -49,6 +49,8 @@
 
 package com.openexchange.messaging.generic.internal;
 
+import gnu.trove.TIntArrayList;
+import gnu.trove.TIntProcedure;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -182,13 +184,29 @@ public final class CachingMessagingAccountStorage implements MessagingAccountSto
     }
 
     public List<MessagingAccount> getAccounts(final String serviceId, final Session session) throws MessagingException {
-        final List<Integer> ids = delegatee.getAccountIDs(serviceId, session);
+        final TIntArrayList ids = delegatee.getAccountIDs(serviceId, session);
         if (ids.isEmpty()) {
             return Collections.emptyList();
         }
         final List<MessagingAccount> accounts = new ArrayList<MessagingAccount>(ids.size());
-        for (final Integer id : ids) {
-            accounts.add(getAccount(serviceId, id.intValue(), session));
+        class AdderProcedure implements TIntProcedure {
+
+            MessagingException me;
+
+            public boolean execute(final int id) {
+                try {
+                    accounts.add(getAccount(serviceId, id, session));
+                    return true;
+                } catch (final MessagingException e) {
+                    me = e;
+                    return false;
+                }
+            }
+
+        }
+        final AdderProcedure ap = new AdderProcedure();
+        if (!ids.forEach(ap) && null != ap.me) {
+            throw ap.me;
         }
         return accounts;
     }

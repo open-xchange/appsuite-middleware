@@ -49,12 +49,12 @@
 
 package com.openexchange.messaging.generic.groupware;
 
+import gnu.trove.TIntArrayList;
+import gnu.trove.TIntProcedure;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigStorageException;
@@ -102,7 +102,7 @@ public final class MessagingGenericDeleteListener implements DeleteListener {
         PreparedStatement stmt = null;
         try {
             final int userId = event.getSession().getUserId();
-            final List<Integer> confIds;
+            final TIntArrayList confIds;
             {
                 ResultSet rs = null;
                 try {
@@ -111,9 +111,9 @@ public final class MessagingGenericDeleteListener implements DeleteListener {
                     stmt.setInt(pos++, contextId);
                     stmt.setInt(pos++, userId);
                     rs = stmt.executeQuery();
-                    confIds = new ArrayList<Integer>(4);
+                    confIds = new TIntArrayList(4);
                     while (rs.next()) {
-                        confIds.add(Integer.valueOf(rs.getInt(1)));
+                        confIds.add(rs.getInt(1));
                     }
                 } finally {
                     DBUtils.closeSQLStuff(rs);
@@ -126,8 +126,23 @@ public final class MessagingGenericDeleteListener implements DeleteListener {
             if (!confIds.isEmpty()) {
                 final GenericConfigurationStorageService genericConfStorageService = getService(GenericConfigurationStorageService.class);
                 final Context context = event.getContext();
-                for (final Integer confId : confIds) {
-                    genericConfStorageService.delete(wc, context, confId.intValue());
+                class GenConfDelete implements TIntProcedure {
+
+                    GenericConfigStorageException genConfError;
+
+                    public boolean execute(final int confId) {
+                        try {
+                            genericConfStorageService.delete(wc, context, confId);
+                            return true;
+                        } catch (final GenericConfigStorageException e) {
+                            genConfError = e;
+                            return false;
+                        }
+                    }
+                }
+                final GenConfDelete gcd = new GenConfDelete();
+                if (!confIds.forEach(gcd) && null != gcd.genConfError) {
+                    throw gcd.genConfError;
                 }
             }
             /*

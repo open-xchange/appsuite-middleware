@@ -49,12 +49,9 @@
 
 package com.openexchange.ajax.request;
 
-import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
-import java.util.ArrayList;
+import gnu.trove.TIntArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.TimeZone;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -567,12 +564,12 @@ public class TaskRequest {
     }
 
     private int[] removeVirtualColumns(final int[] columns) {
-        final List<Integer> tmp = new ArrayList<Integer>(columns.length);
+        final TIntArrayList tmp = new TIntArrayList(columns.length);
         for (final int col : columns) {
             if (col != Task.LAST_MODIFIED_UTC) {
-                tmp.add(I(col));
+                tmp.add(col);
             }
         }
-        return I2i(tmp);
+        return tmp.toNativeArray();
     }
 }

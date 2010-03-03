@@ -51,16 +51,15 @@ package com.openexchange.tools.oxfolder;
 
 import static com.openexchange.tools.sql.DBUtils.closeResources;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import gnu.trove.TIntArrayList;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.impl.FolderCacheManager;
@@ -317,7 +316,7 @@ public final class OXFolderAdminHelper {
             /*
              * Get context's users
              */
-            final List<Integer> users;
+            final TIntArrayList users;
             {
                 PreparedStatement stmt = null;
                 ResultSet rs = null;
@@ -326,9 +325,9 @@ public final class OXFolderAdminHelper {
                     final int pos = 1;
                     stmt.setInt(pos, cid);
                     rs = stmt.executeQuery();
-                    users = new ArrayList<Integer>();
+                    users = new TIntArrayList();
                     while (rs.next()) {
-                        users.add(Integer.valueOf(rs.getInt(pos)));
+                        users.add(rs.getInt(pos));
                     }
                 } catch (final SQLException e) {
                     throw new OXFolderException(FolderCode.SQL_ERROR, e, e.getMessage());
@@ -343,12 +342,12 @@ public final class OXFolderAdminHelper {
                 final Integer admin = Integer.valueOf(getContextAdminID(cid, writeCon));
                 final int size = users.size();
                 for (int i = 1; i < size; i++) {
-                    setGlobalAddressBookDisabled(cid, users.get(i).intValue(), !enable, writeCon, admin, false);
+                    setGlobalAddressBookDisabled(cid, users.getQuick(i), !enable, writeCon, admin, false);
                 }
                 /*
                  * Propagate with last update
                  */
-                setGlobalAddressBookDisabled(cid, users.get(0).intValue(), !enable, writeCon, admin, true);
+                setGlobalAddressBookDisabled(cid, users.getQuick(0), !enable, writeCon, admin, true);
             }
         } finally {
             Database.back(cid, true, writeCon);
@@ -1321,9 +1320,9 @@ public final class OXFolderAdminHelper {
             stmt.setInt(2, cid);
             stmt.setInt(3, group);
             rs = stmt.executeQuery();
-            final List<Integer> list = new ArrayList<Integer>();
+            final TIntArrayList list = new TIntArrayList();
             while (rs.next()) {
-                list.add(Integer.valueOf(rs.getInt(1)));
+                list.add(rs.getInt(1));
             }
             closeSQLStuff(rs, stmt);
             rs = null;
@@ -1331,7 +1330,7 @@ public final class OXFolderAdminHelper {
             if (!list.isEmpty()) {
                 stmt = writeCon.prepareStatement(SQL_UPDATE_FOLDER_TIMESTAMP.replaceFirst("#FT#", STR_OXFOLDERTREE));
                 do {
-                    final int fuid = list.remove(0).intValue();
+                    final int fuid = list.remove(0);
                     stmt.setLong(1, lastModified);
                     stmt.setInt(2, cid);
                     stmt.setInt(3, fuid);

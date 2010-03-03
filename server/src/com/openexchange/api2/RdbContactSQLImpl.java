@@ -52,6 +52,7 @@ package com.openexchange.api2;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.StringCollection.prepareForSearch;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import gnu.trove.TIntArrayList;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -1164,27 +1165,23 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
     }
 
     private int[] checkColumns(final int[] cols) {
-        final List<Integer> tmp = new ArrayList<Integer>();
+        final TIntArrayList tmp = new TIntArrayList();
         for (final int col : cols) {
             if (Contacts.mapping[col] != null) {
-                tmp.add(I(col));
+                tmp.add(col);
             } else if (Contact.IMAGE1_URL == col) {
-                tmp.add(I(col));
-                final Integer imageId = I(Contact.IMAGE1);
+                tmp.add(col);
+                final int imageId = Contact.IMAGE1;
                 if (!Arrays.contains(cols, Contact.IMAGE1) || !tmp.contains(imageId)) {
                     tmp.add(imageId);
                 }
             } else if (Contact.LAST_MODIFIED_OF_NEWEST_ATTACHMENT == col) {
-                tmp.add(I(col));
+                tmp.add(col);
             } else {
                 LOG.warn("UNKNOWN FIELD -> " + col);
             }
         }
-        final int[] retval = new int[tmp.size()];
-        for (int i = 0; i < retval.length; i++) {
-            retval[i] = tmp.get(i).intValue();
-        }
-        return retval;
+        return tmp.toNativeArray();
     }
 
     private int addQueriedContacts(final int[] cols, final List<Contact> retval, final int[][] object_id) throws SQLException, SearchIteratorException, OXException {

@@ -50,6 +50,7 @@
 package com.openexchange.ajax.request;
 
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
+import gnu.trove.TIntArrayList;
 import gnu.trove.TIntIntHashMap;
 import gnu.trove.TIntObjectHashMap;
 import java.sql.SQLException;
@@ -72,7 +73,6 @@ import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
-import com.openexchange.ajax.fields.ParticipantsFields;
 import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.parser.AppointmentParser;
 import com.openexchange.ajax.parser.CalendarParser;
@@ -517,7 +517,7 @@ public class AppointmentRequest {
 
         SearchIterator<Appointment> it = null;
 
-        final TIntObjectHashMap<ArrayList<Integer>> recurrencePositionMap = new TIntObjectHashMap<ArrayList<Integer>>();
+        final TIntObjectHashMap<TIntArrayList> recurrencePositionMap = new TIntObjectHashMap<TIntArrayList>();
 
         final String[] sColumns = split(DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS));
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
@@ -550,13 +550,13 @@ public class AppointmentRequest {
 
             if (tempRecurrencePosition > 0) {
                 final int recurrencePosition = tempRecurrencePosition;
-                ArrayList<Integer> recurrencePosList = null;
+                TIntArrayList recurrencePosList = null;
                 if (recurrencePositionMap.containsKey(objectId)) {
                     recurrencePosList = recurrencePositionMap.get(objectId);
                 } else {
-                    recurrencePosList = new ArrayList<Integer>();
+                    recurrencePosList = new TIntArrayList();
                 }
-                recurrencePosList.add(Integer.valueOf(recurrencePosition));
+                recurrencePosList.add(recurrencePosition);
                 recurrencePositionMap.put(objectId, recurrencePosList);
             }
         }
@@ -609,16 +609,17 @@ public class AppointmentRequest {
                         // Commented this because this is done in CalendarOperation.next():726 that calls extractRecurringInformation()
                         // appointment.calculateRecurrence();
                         if (recurrencePositionMap.containsKey(appointment.getObjectID())) {
-                            final ArrayList<Integer> recurrencePosList = recurrencePositionMap.get(appointment.getObjectID());
+                            final TIntArrayList recurrencePosList = recurrencePositionMap.get(appointment.getObjectID());
 
-                            for (int a = 0; a < recurrencePosList.size(); a++) {
+                            final int listSize = recurrencePosList.size();
+                            for (int a = 0; a < listSize; a++) {
                                 appointment.setStartDate(startDate);
                                 appointment.setEndDate(endDate);
                                 final RecurringResultsInterface recuResults = recColl.calculateRecurring(
                                     appointment,
                                     0,
                                     0,
-                                    recurrencePosList.get(a).intValue());
+                                    recurrencePosList.getQuick(a));
                                 if (recuResults.size() > 0) {
                                     final RecurringResultInterface result = recuResults.getRecurringResult(0);
                                     appointment.setStartDate(new Date(result.getStart()));
@@ -903,7 +904,7 @@ public class AppointmentRequest {
         final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
         //DataParser.checkInt(jData, ParticipantsFields.CONFIRMATION);
         
-        ConfirmableParticipant participant = new ParticipantParser().parseConfirmation(true, jData);
+        final ConfirmableParticipant participant = new ParticipantParser().parseConfirmation(true, jData);
         
         int userId = user.getId();
         if (jData.has(AJAXServlet.PARAMETER_ID)) {

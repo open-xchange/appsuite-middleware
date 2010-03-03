@@ -49,12 +49,10 @@
 
 package com.openexchange.ajax.request;
 
-import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
+import gnu.trove.TIntArrayList;
 import java.sql.Connection;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.TimeZone;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -517,17 +515,13 @@ public class ContactRequest {
     }
 
     private int[] removeVirtual(final int[] columns) {
-        final List<Integer> helper = new ArrayList<Integer>(columns.length);
+        final TIntArrayList helper = new TIntArrayList(columns.length);
         for (final int col : columns) {
             if (col != Contact.LAST_MODIFIED_UTC) {
-                helper.add(I(col));
+                helper.add(col);
             }
         }
-        final int[] copy = new int[helper.size()];
-        for (int i = 0; i < copy.length; i++) {
-            copy[i] = helper.get(i).intValue();
-        }
-        return copy;
+        return helper.toNativeArray();
     }
 
     public JSONObject actionGet(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException, AjaxException {
