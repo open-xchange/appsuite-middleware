@@ -192,6 +192,10 @@ Authors:
 %defattr(-,root,root)
 %doc README.TXT
 
+%files -n open-xchange-meta-messaging
+%defattr(-,root,root)
+%doc README.TXT
+
 %files -n open-xchange-meta-singleserver
 %defattr(-,root,root)
 %doc README.TXT
