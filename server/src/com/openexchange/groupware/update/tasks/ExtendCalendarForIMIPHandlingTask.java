@@ -56,6 +56,8 @@ import static com.openexchange.tools.update.Tools.tableExists;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.update.PerformParameters;
@@ -70,6 +72,8 @@ import com.openexchange.tools.update.Tools;
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class ExtendCalendarForIMIPHandlingTask extends UpdateTaskAdapter {
+
+    private static final Log LOG = LogFactory.getLog(ExtendCalendarForIMIPHandlingTask.class);
 
     private String[] TABLES = { "prg_dates", "del_dates" };
     private Column[] COLUMNS = { new Column("uid", "VARCHAR(255)"), new Column("organizer", "VARCHAR(255)"), new Column("sequence", "INT4 UNSIGNED") };
@@ -118,26 +122,51 @@ public class ExtendCalendarForIMIPHandlingTask extends UpdateTaskAdapter {
     }
 
     private void innerPerform(Connection con) throws SQLException {
+        SQLException toThrow = null;
         for (String tableName : TABLES) {
-            Tools.addColumns(con, tableName, COLUMNS);
-        }
-        if (!tableExists(con, "dateExternal")) {
-            Statement stmt = null;
             try {
-                stmt = con.createStatement();
-                stmt.execute(DATES_EXTERNAL_CREATE);
-            } finally {
-                closeSQLStuff(stmt);
+                Tools.addColumns(con, tableName, COLUMNS);
+            } catch (SQLException e) {
+                LOG.error(e.getMessage(), e);
+                if (null == toThrow) {
+                    toThrow = e;
+                }
             }
         }
-        if (!tableExists(con, "delDateExternal")) {
-            Statement stmt = null;
-            try {
-                stmt = con.createStatement();
-                stmt.execute(DELDATES_EXTERNAL_CREATE);
-            } finally {
-                closeSQLStuff(stmt);
+        try {
+            if (!tableExists(con, "dateExternal")) {
+                Statement stmt = null;
+                try {
+                    stmt = con.createStatement();
+                    stmt.execute(DATES_EXTERNAL_CREATE);
+                } finally {
+                    closeSQLStuff(stmt);
+                }
             }
+        } catch (SQLException e) {
+            LOG.error(e.getMessage(), e);
+            if (null == toThrow) {
+                toThrow = e;
+            }
+        }
+        try {
+            if (!tableExists(con, "delDateExternal")) {
+                Statement stmt = null;
+                try {
+                    stmt = con.createStatement();
+                    stmt.execute(DELDATES_EXTERNAL_CREATE);
+                } finally {
+                    closeSQLStuff(stmt);
+                }
+            }
+        } catch (SQLException e) {
+            LOG.error(e.getMessage(), e);
+            if (null == toThrow) {
+                toThrow = e;
+            }
+        }
+        if (null != toThrow) {
+            throw toThrow;
         }
     }
 }
