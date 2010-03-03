@@ -49,6 +49,7 @@
 
 package com.openexchange.unifiedinbox.copy;
 
+import gnu.trove.TIntArrayList;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.mail.api.MailAccess;
@@ -73,7 +74,7 @@ final class KF2AFDifferCallable implements Task<Object> {
 
     private final List<String> srcFullnameList;
 
-    private final List<Integer> indexList;
+    private final TIntArrayList indexList;
 
     private final boolean fast;
 
@@ -90,10 +91,10 @@ final class KF2AFDifferCallable implements Task<Object> {
         this.move = move;
         idList = new ArrayList<String>();
         srcFullnameList = new ArrayList<String>();
-        indexList = new ArrayList<Integer>();
+        indexList = new TIntArrayList();
     }
 
-    void addIdAndFullnameAndIndex(final String id, final String srcFullname, final Integer index) {
+    void addIdAndFullnameAndIndex(final String id, final String srcFullname, final int index) {
         idList.add(id);
         srcFullnameList.add(srcFullname);
         indexList.add(index);
@@ -117,7 +118,7 @@ final class KF2AFDifferCallable implements Task<Object> {
                 // Append gathered messages
                 final String[] results = destMailAccess.getMessageStorage().appendMessages(destFullname, mails);
                 for (int j = 0; j < results.length; j++) {
-                    toFill[indexList.get(j).intValue()] = results[j];
+                    toFill[indexList.get(j)] = results[j];
                 }
                 // Delete on move
                 if (move) {

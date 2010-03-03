@@ -49,6 +49,7 @@
 
 package com.openexchange.unifiedinbox.copy;
 
+import gnu.trove.TIntArrayList;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.mail.api.MailAccess;
@@ -71,7 +72,7 @@ final class KF2AFEqualCallable implements Task<Object> {
 
     private final List<String> idList;
 
-    private final List<Integer> indexList;
+    private final TIntArrayList indexList;
 
     private final boolean fast;
 
@@ -87,10 +88,10 @@ final class KF2AFEqualCallable implements Task<Object> {
         this.fast = fast;
         this.move = move;
         idList = new ArrayList<String>();
-        indexList = new ArrayList<Integer>();
+        indexList = new TIntArrayList();
     }
 
-    void addIdAndIndex(final String id, final Integer index) {
+    void addIdAndIndex(final String id, final int index) {
         idList.add(id);
         indexList.add(index);
     }
@@ -109,7 +110,7 @@ final class KF2AFEqualCallable implements Task<Object> {
                     mailAccess.getMessageStorage().copyMessages(realSource, destFullname, idList.toArray(new String[idList.size()]), fast);
             }
             for (int j = 0; j < results.length; j++) {
-                toFill[indexList.get(j).intValue()] = results[j];
+                toFill[indexList.get(j)] = results[j];
             }
         } finally {
             mailAccess.close(true);

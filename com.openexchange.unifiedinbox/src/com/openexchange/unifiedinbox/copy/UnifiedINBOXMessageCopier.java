@@ -143,7 +143,7 @@ public final class UnifiedINBOXMessageCopier {
                 callable = new KF2KFCallable(sourceFolder, destFolder, fast, move, retval, tmp.getAccountId(), session);
                 callableMap.put(accountId, callable);
             }
-            callable.addIdAndIndex(tmp.getId(), Integer.valueOf(i));
+            callable.addIdAndIndex(tmp.getId(), i);
         }
         // Perform callables
         final ThreadPoolService threadPoolService = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class);
@@ -190,7 +190,7 @@ public final class UnifiedINBOXMessageCopier {
                     callable = new KF2AFEqualCallable(sourceFolder, destFullname, fast, move, retval, tmp.getAccountId(), session);
                     callableMap.put(accountId, callable);
                 }
-                callable.addIdAndIndex(tmp.getId(), Integer.valueOf(i));
+                callable.addIdAndIndex(tmp.getId(), i);
             } else {
                 // Accounts differ
                 KF2AFDifferCallable callable = otherCallableMap.get(accountId);
@@ -198,7 +198,7 @@ public final class UnifiedINBOXMessageCopier {
                     callable = new KF2AFDifferCallable(tmp.getAccountId(), destAccountId, destFullname, fast, move, retval, session);
                     otherCallableMap.put(accountId, callable);
                 }
-                callable.addIdAndFullnameAndIndex(tmp.getId(), tmp.getFullname(), Integer.valueOf(i));
+                callable.addIdAndFullnameAndIndex(tmp.getId(), tmp.getFullname(), i);
             }
         }
         // Perform callables
