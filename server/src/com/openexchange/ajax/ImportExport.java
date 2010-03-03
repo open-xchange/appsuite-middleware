@@ -123,7 +123,7 @@ public abstract class ImportExport extends SessionServlet {
     /**
      * @return
      */
-    private Importer getOutlookImporter() {
+    public static Importer getOutlookImporter() {
         OutlookCSVContactImporter outlook = new OutlookCSVContactImporter();
         try {
             ConfigurationService conf = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
