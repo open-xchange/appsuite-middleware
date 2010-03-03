@@ -869,6 +869,40 @@ public final class OutlookFolderStorage implements FolderStorage {
         });
         taskCount++;
         /*
+         * Obtain external mail accounts with running thread
+         */
+        final List<String> accountSubfolderIDs;
+        {
+            final MailAccountStorageService mass = OutlookServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class);
+            if (null == mass) {
+                accountSubfolderIDs = Collections.emptyList();
+            } else {
+                final List<MailAccount> accounts;
+                try {
+
+                    // final MailAccount[] mailAccounts = mass.getUserMailAccounts(user.getId(), contextId);
+                    // accounts = new ArrayList<MailAccount>(mailAccounts.length);
+                    // accounts.addAll(Arrays.asList(mailAccounts));
+
+                    accounts = Arrays.asList(mass.getUserMailAccounts(user.getId(), contextId));
+                    Collections.sort(accounts, new MailAccountComparator(locale));
+                } catch (final MailAccountException e) {
+                    throw new FolderException(e);
+                }
+                if (accounts.isEmpty()) {
+                    accountSubfolderIDs = Collections.emptyList();
+                } else {
+                    accountSubfolderIDs = new ArrayList<String>(accounts.size());
+                    for (final MailAccount mailAccount : accounts) {
+                        if (!mailAccount.isDefaultAccount()) {
+                            accountSubfolderIDs.add(MailFolderUtility.prepareFullname(mailAccount.getId(), MailFolder.DEFAULT_FOLDER_ID));
+                        }
+                    }
+                    // TODO: No Unified INBOX if not enabled
+                }
+            }
+        }
+        /*
          * Wait for completion
          */
         final List<String> sortedIDs;
@@ -890,7 +924,7 @@ public final class OutlookFolderStorage implements FolderStorage {
              * Get sorted values
              */
             final Collection<List<String>> values = treeMap.values();
-            sortedIDs = new ArrayList<String>(values.size());
+            sortedIDs = new ArrayList<String>(values.size() + accountSubfolderIDs.size());
             for (final List<String> list : values) {
                 for (final String id : list) {
                     sortedIDs.add(id);
@@ -898,42 +932,13 @@ public final class OutlookFolderStorage implements FolderStorage {
             }
         }
         /*
-         * External mail accounts
+         * Add external mail accounts
          */
-        final List<String> subfolderIDs;
-        final MailAccountStorageService mass = OutlookServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class);
-        if (null != mass) {
-            final List<MailAccount> accounts;
-            try {
-                final MailAccount[] mailAccounts = mass.getUserMailAccounts(user.getId(), contextId);
-                accounts = new ArrayList<MailAccount>(mailAccounts.length);
-                accounts.addAll(Arrays.asList(mailAccounts));
-                Collections.sort(accounts, new MailAccountComparator(locale));
-            } catch (final MailAccountException e) {
-                throw new FolderException(e);
-            }
-            if (accounts.isEmpty()) {
-                subfolderIDs = sortedIDs;
-            } else {
-                subfolderIDs = new ArrayList<String>(sortedIDs.size() + accounts.size());
-                subfolderIDs.addAll(sortedIDs);
-                for (final MailAccount mailAccount : accounts) {
-                    if (!mailAccount.isDefaultAccount()) {
-                        subfolderIDs.add(MailFolderUtility.prepareFullname(mailAccount.getId(), MailFolder.DEFAULT_FOLDER_ID));
-                    }
-                }
-                // TODO: No Unified INBOX if not enabled
-            }
-        } else {
-            subfolderIDs = sortedIDs;
-        }
-        final SortableId[] ret = new SortableId[subfolderIDs.size()];
-        {
-            int i = 0;
-            for (final String id : subfolderIDs) {
-                ret[i] = new OutlookId(id, i);
-                i++;
-            }
+        sortedIDs.addAll(accountSubfolderIDs);
+        final int size = sortedIDs.size();
+        final SortableId[] ret = new SortableId[size];
+        for (int i = 0; i < size; i++) {
+            ret[i] = new OutlookId(sortedIDs.get(i), i);
         }
         return ret;
     }
