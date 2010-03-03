@@ -107,4 +107,3 @@ ant -Dadmin.classpath=%{oxprefix}/bundles/%{adminbundle} \
 /opt/open-xchange/lib/*
 
 %changelog
-

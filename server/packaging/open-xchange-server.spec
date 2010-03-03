@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 8
+%define		ox_release 1
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -490,10 +490,36 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed Mar 03 2010 - thorben.betten@open-xchange.com
+ - Bugfix #15539: Allowing registration of HttpServlets without a default constructor
+* Tue Mar 02 2010 - francisco.laguna@open-xchange.com
+ - Bugfix #15468: Stop topward iteration when hitting parentId null
+* Tue Mar 02 2010 - thorben.betten@open-xchange.com
+ - Bugfix #15520: Fixed color label in new folder tree
+ - Bugfix #15523: Fixed changed dependency due to move of update task
+ - Bugfix #14216: Changed error message
+* Tue Mar 02 2010 - martin.herfurth@open-xchange.com
+ - Bugfix #15031: Resource conflict during update.
+* Mon Mar 01 2010 - thorben.betten@open-xchange.com
+ - Bugfix #15504: Ignoring possible FQL query result size mismatch
+ - Bugfix #15408: Added support for non-ascii characters occurring in mail headers
+ - Bugfix #15494: Fixed start-up order
+ - Bugfix #15512: Fixed deletion of a DB folder nested below a non-DB folder
+* Mon Mar 01 2010 - martin.herfurth@open-xchange.com
+ - Bugfix #15509: Null Pointer in Conversion Servlet.
+* Mon Mar 01 2010 - marcus.klein@open-xchange.com
+ - Bugfix #15429: Giving proper exception message if a contact in a public folder should marked private.
+ - Bugfix #15501: Enabling the contact collector for all user. 
+* Mon Mar 01 2010 - francisco.laguna@open-xchange.com
+ - Bugfix #15500: Use a different method of accessing the currently logged in user.
 * Fri Feb 26 2010 - francisco.laguna@open-xchange.com
  - Bugfix #15472: Don't preset password fields.
 * Fri Feb 26 2010 - thorben.betten@open-xchange.com
  - Bugfix #15440: Safe execution of IMAP server start-up checks for a read-only IMAP server
+ - Bugfix #15492: Created a custom JCS v1.3 library
+ - Bugfix #15490: Logging of unexpected socket exception
+* Fri Feb 26 2010 - marcus.klein@open-xchange.com
+ - Bugfix #15497: Returning connections to correct pool.
 * Thu Feb 25 2010 - marcus.klein@open-xchange.com
  - Bugfix #15463: Added missing imports for javax.swing components needed for HTML parsing of emails.
  - Bugfix #15467: Patching of change exceptions uid now works if the series master has no uid set.
