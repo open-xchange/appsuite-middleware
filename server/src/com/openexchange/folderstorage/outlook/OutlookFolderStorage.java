@@ -527,45 +527,43 @@ public final class OutlookFolderStorage implements FolderStorage {
          */
         final List<String[]> l;
         {
-            {
-                // Get real folder storage
-                final FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, parentId);
-                if (null == folderStorage) {
-                    throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, parentId);
-                }
-                folderStorage.startTransaction(storageParameters, false);
-                try {
-                    // Get real subfolders
-                    final Folder parentFolder = folderStorage.getFolder(realTreeId, parentId, storageParameters);
-                    final String[] realSubfolderIds = getSubfolderIDs(parentFolder, folderStorage, storageParameters);
-                    l = new ArrayList<String[]>(realSubfolderIds.length);
-                    if (parentFolder.isDefault()) {
-                        /*
-                         * Strip subfolders occurring at another location in folder tree
-                         */
-                        final boolean[] contained =
-                            Select.containsFolders(contextId, tree, storageParameters.getUserId(), realSubfolderIds, StorageType.WORKING);
-                        for (int k = 0; k < realSubfolderIds.length; k++) {
-                            final String realSubfolderId = realSubfolderIds[k];
-                            if (!contained[k]) {
-                                l.add(new String[] {
-                                    realSubfolderId, folderStorage.getFolder(realTreeId, realSubfolderId, storageParameters).getName() });
-                            }
-                        }
-                    } else {
-                        for (final String realSubfolderId : realSubfolderIds) {
+            // Get real folder storage
+            final FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, parentId);
+            if (null == folderStorage) {
+                throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, parentId);
+            }
+            folderStorage.startTransaction(storageParameters, false);
+            try {
+                // Get real subfolders
+                final Folder parentFolder = folderStorage.getFolder(realTreeId, parentId, storageParameters);
+                final String[] realSubfolderIds = getSubfolderIDs(parentFolder, folderStorage, storageParameters);
+                l = new ArrayList<String[]>(realSubfolderIds.length);
+                if (parentFolder.isDefault()) {
+                    /*
+                     * Strip subfolders occurring at another location in folder tree
+                     */
+                    final boolean[] contained =
+                        Select.containsFolders(contextId, tree, storageParameters.getUserId(), realSubfolderIds, StorageType.WORKING);
+                    for (int k = 0; k < realSubfolderIds.length; k++) {
+                        final String realSubfolderId = realSubfolderIds[k];
+                        if (!contained[k]) {
                             l.add(new String[] {
                                 realSubfolderId, folderStorage.getFolder(realTreeId, realSubfolderId, storageParameters).getName() });
                         }
                     }
-                    folderStorage.commitTransaction(storageParameters);
-                } catch (final FolderException e) {
-                    folderStorage.rollback(storageParameters);
-                    throw e;
-                } catch (final Exception e) {
-                    folderStorage.rollback(storageParameters);
-                    throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+                } else {
+                    for (final String realSubfolderId : realSubfolderIds) {
+                        l.add(new String[] {
+                            realSubfolderId, folderStorage.getFolder(realTreeId, realSubfolderId, storageParameters).getName() });
+                    }
                 }
+                folderStorage.commitTransaction(storageParameters);
+            } catch (final FolderException e) {
+                folderStorage.rollback(storageParameters);
+                throw e;
+            } catch (final Exception e) {
+                folderStorage.rollback(storageParameters);
+                throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }
         // Load folder data from database

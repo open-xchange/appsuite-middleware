@@ -356,8 +356,12 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
         /*
          * Get corresponding user-sensitive folders
          */
-        final CompletionService<Object> completionService =
-            new ThreadPoolCompletionService<Object>(getInstance().getService(ThreadPoolService.class));
+        final CompletionService<Object> completionService;
+        try {
+            completionService = new ThreadPoolCompletionService<Object>(getInstance().getService(ThreadPoolService.class, true));
+        } catch (final ServiceException e) {
+            throw new FolderException(e);
+        }
         for (int i = 0; i < size; i++) {
             final org.apache.commons.logging.Log logger = LOG;
             completionService.submit(new AbstractIndexCallable<Object>(i) {
