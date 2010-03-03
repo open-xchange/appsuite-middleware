@@ -1,3 +1,7 @@
+* 2010-03-03 - thorben.betten@open-xchange.com
+
+ - Bugfix #15539: Allowing registration of HttpServlets without a default constructor
+
 * 2010-03-02 - martin.herfurth@open-xchange.com
 
  - Bugfix #15031: Resource conflict during update.

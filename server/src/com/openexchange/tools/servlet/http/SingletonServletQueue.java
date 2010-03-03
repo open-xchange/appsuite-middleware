@@ -49,9 +49,7 @@
 
 package com.openexchange.tools.servlet.http;
 
-import java.lang.reflect.Constructor;
 import javax.servlet.http.HttpServlet;
-import com.openexchange.tools.servlet.ServletConfigLoader;
 
 /**
  * {@link SingletonServletQueue} - A singleton servlet queue.
@@ -59,10 +57,6 @@ import com.openexchange.tools.servlet.ServletConfigLoader;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SingletonServletQueue implements ServletQueue {
-
-    private static final Object[] INIT_ARGS = new Object[] {};
-
-    private final Constructor<?> servletConstructor;
 
     private final String servletPath;
 
@@ -72,29 +66,18 @@ public final class SingletonServletQueue implements ServletQueue {
      * Initializes a new {@link SingletonServletQueue}.
      * 
      * @param singleton The singleton HTTP servlet
-     * @param servletConstructor The servlet constructor to create new servlet instances on demand
      * @param servletPath The servlet path
      */
-    public SingletonServletQueue(final HttpServlet singleton, final Constructor<?> servletConstructor, final String servletPath) {
+    public SingletonServletQueue(final HttpServlet singleton, final String servletPath) {
         super();
         this.singleton = singleton;
-        this.servletConstructor = servletConstructor;
         this.servletPath = servletPath;
     }
 
     public HttpServlet createServletInstance(final String servletKey) {
-        if (servletConstructor == null) {
-            return null;
-        }
-        try {
-            final HttpServlet servletInstance = (HttpServlet) servletConstructor.newInstance(INIT_ARGS);
-            servletInstance.init(ServletConfigLoader.getDefaultInstance().getConfig(
-                servletInstance.getClass().getCanonicalName(),
-                servletKey));
-            return servletInstance;
-        } catch (final Throwable t) {
-            org.apache.commons.logging.LogFactory.getLog(FiFoServletQueue.class).error(t.getMessage(), t);
-        }
+        /*
+         * No multiple singleton servlets
+         */
         return null;
     }
 

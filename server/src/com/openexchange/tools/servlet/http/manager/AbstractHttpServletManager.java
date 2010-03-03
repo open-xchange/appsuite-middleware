@@ -130,12 +130,15 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
              */
             final Constructor<?> servletConstructor = entry.getValue();
             if (servletConstructor == null) {
-                servletQueue = new SingletonServletQueue(new HttpErrorServlet("No Servlet Constructor found for " + path), null, path);
-                servletQueue.enqueue(new HttpErrorServlet("No Servlet Constructor found for " + path));
+                servletQueue = new SingletonServletQueue(new HttpErrorServlet("No servlet constructor found for " + path), path);
+                servletQueue.enqueue(new HttpErrorServlet("No servlet constructor found for " + path));
             } else {
                 try {
-                    HttpServlet servletInstance = (HttpServlet) servletConstructor.newInstance(INIT_ARGS);
+                    final HttpServlet servletInstance = (HttpServlet) servletConstructor.newInstance(INIT_ARGS);
                     if (servletInstance instanceof SingleThreadModel) {
+                        /*
+                         * Multiple instances
+                         */
                         final int servletPoolSize = AJPv13Config.getServletPoolSize();
                         servletQueue = new FiFoServletQueue(servletPoolSize, servletConstructor, false, path);
                         if (servletPoolSize > 0) {
@@ -146,13 +149,16 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
                              * Enqueue more than one instance if it implements SingleThreadModel
                              */
                             for (int i = 1; i < servletPoolSize; i++) {
-                                servletInstance = (HttpServlet) servletConstructor.newInstance(INIT_ARGS);
-                                servletInstance.init(conf);
-                                servletQueue.enqueue(servletInstance);
+                                final HttpServlet anotherServletInstance = (HttpServlet) servletConstructor.newInstance(INIT_ARGS);
+                                anotherServletInstance.init(conf);
+                                servletQueue.enqueue(anotherServletInstance);
                             }
                         }
                     } else {
-                        servletQueue = new SingletonServletQueue(servletInstance, servletConstructor, path);
+                        /*
+                         * A singleton
+                         */
+                        servletQueue = new SingletonServletQueue(servletInstance, path);
                         servletInstance.init(configLoader.getConfig(servletInstance.getClass().getCanonicalName(), path));
                         servletQueue.enqueue(servletInstance);
                     }
@@ -170,8 +176,7 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
     protected final void registerServlet0(final String id, final HttpServlet servlet, final Dictionary<String, String> initParams) throws ServletException {
         try {
             final String path = new URI(prependSlash(id)).normalize().toString();
-            if (servletPool.containsKey(path) && ((null == initParams) || initParams.isEmpty() || !Boolean.parseBoolean(
-                initParams.get(HTTP_REGISTER_FORCE)))) {
+            if (servletPool.containsKey(path) && ((null == initParams) || initParams.isEmpty() || !Boolean.parseBoolean(initParams.get(HTTP_REGISTER_FORCE)))) {
                 throw new ServletException(new StringBuilder(256).append("A servlet with alias \"").append(path).append(
                     "\" has already been registered before.").toString());
             }
@@ -188,26 +193,38 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
                 forceRegistration = false;
             }
             /*
-             * Try to determine default constructor for later instantiations
+             * Initialize servlet with servlet config
              */
-            final FiFoServletQueue servletQueue;
-            try {
-                servletQueue =
-                    new FiFoServletQueue(1, servlet.getClass().getConstructor(CLASS_ARR), !(servlet instanceof SingleThreadModel), path);
-            } catch (final SecurityException e) {
-                final ServletException se =
-                    new ServletException("Default constructor could not be found for servlet class: " + servlet.getClass().getName(), e);
-                se.initCause(e);
-                throw se;
-            } catch (final NoSuchMethodException e) {
-                final ServletException se =
-                    new ServletException("Default constructor could not be found for servlet class: " + servlet.getClass().getName(), e);
-                se.initCause(e);
-                throw se;
-            }
             final ServletConfig conf = configLoader.getConfig(servlet.getClass().getCanonicalName(), path);
             servlet.init(conf);
-            servletQueue.enqueue(servlet);
+            /*
+             * Create servlet queue dependent on singleton or not
+             */
+            final ServletQueue servletQueue;
+            if (servlet instanceof SingleThreadModel) {
+                Constructor<? extends HttpServlet> servletConstructor;
+                try {
+                    servletConstructor = servlet.getClass().getConstructor(CLASS_ARR);
+                } catch (final SecurityException e) {
+                    LOG.warn(
+                        "Default constructor could not be found for javax.servlet.SingleThreadModel servlet class: " + servlet.getClass().getName(),
+                        e);
+                    servletConstructor = null;
+                } catch (final NoSuchMethodException e) {
+                    LOG.warn(
+                        "Default constructor could not be found for javax.servlet.SingleThreadModel servlet class: " + servlet.getClass().getName(),
+                        e);
+                    servletConstructor = null;
+                }
+                final int servletPoolSize = AJPv13Config.getServletPoolSize();
+                servletQueue = new FiFoServletQueue(servletPoolSize <= 0 ? 1 : servletPoolSize, servletConstructor, false, path);
+                servletQueue.enqueue(servlet);
+            } else {
+                /*
+                 * Singleton
+                 */
+                servletQueue = new SingletonServletQueue(servlet, path);
+            }
             /*
              * Put into servlet pool for being accessible
              */
@@ -338,14 +355,11 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
             }
             return servletInst;
         }
-        final HttpServlet servletInstance = servletQueue.get();
-        if (!servletQueue.isSingleton()) {
-            /*
-             * If servlet class implements SingleThreadModel the same instance MUST NOT be used concurrently by multiple threads. So remove
-             * from queue.
-             */
-            servletQueue.dequeue();
-        }
-        return servletInstance;
+        /*
+         * If servlet class implements SingleThreadModel (non-singleton) the same instance MUST NOT be used concurrently by multiple
+         * threads. So remove from queue.
+         */
+        return servletQueue.isSingleton() ? servletQueue.get() : servletQueue.dequeue();
     }
+
 }
