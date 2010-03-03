@@ -33,3 +33,7 @@
 /opt/open-xchange/etc/groupware/whitelist.properties
 /opt/open-xchange/etc/groupware/servletmappings/servletmapping.properties
 /opt/open-xchange/etc/groupware/excludedupdatetasks.properties
+/opt/open-xchange/importCSV/outlook2003.de_DE.properties
+/opt/open-xchange/importCSV/outlook2003.en_EN.properties
+/opt/open-xchange/importCSV/outlook2003.fr_FR.properties
+/opt/open-xchange/importCSV/outlook2003.nl_NL.properties
