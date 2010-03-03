@@ -39,6 +39,7 @@
 
     <property name="mailjar" value="mail-1.4.2.jar"/>
     <property name="activationjar" value="activation-1.1.1.jar"/>
+	<property name="trovejar" value="trove-2.1.0.jar" />
 
     <!-- Third party libs -->
         <fileset dir="${basedir}" id="3rdpartyjars">
@@ -60,6 +61,7 @@
         <pathelement location="${bundlesdir}/${serverjar}"/>
 
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${mailjar}"/>
+    	<pathelement location="${bundlesdir}/${commonBundle}/lib/${trovejar}"/>
         <pathelement location="${bundlesdir}/javax.activation/lib/${activationjar}"/>
 
         <fileset refid="3rdpartyjars"/>
