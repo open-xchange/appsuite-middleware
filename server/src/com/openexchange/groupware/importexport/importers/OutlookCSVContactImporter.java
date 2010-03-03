@@ -97,7 +97,7 @@ public class OutlookCSVContactImporter extends CSVContactImporter {
 	private ContactFieldMapper fieldMapper;
     
     public List<ContactFieldMapper> getFieldMappers() {
-        if(fieldMappers == null){
+        if(fieldMappers == null){ //default
             fieldMappers = new LinkedList<ContactFieldMapper>();
             fieldMappers.add( new GermanOutlookMapper()); 
             fieldMappers.add( new FrenchOutlookMapper());
@@ -117,6 +117,12 @@ public class OutlookCSVContactImporter extends CSVContactImporter {
     
     public void setFieldMapper(ContactFieldMapper fieldMapper) {
         this.fieldMapper = fieldMapper;
+    }
+    
+    public void addFieldMappers(ContactFieldMapper newMapper) {
+        if(fieldMappers == null)
+            fieldMappers = new LinkedList<ContactFieldMapper>();
+        fieldMappers.add(newMapper);
     }
 
     @Override

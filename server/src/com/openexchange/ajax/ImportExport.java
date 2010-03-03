@@ -49,52 +49,108 @@
 
 package com.openexchange.ajax;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.BeanFactory;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.SystemConfig;
+import com.openexchange.groupware.contact.mappers.PropertyDrivenMapper;
+import com.openexchange.groupware.importexport.Importer;
 import com.openexchange.groupware.importexport.ImporterExporter;
+import com.openexchange.groupware.importexport.importers.CSVContactImporter;
+import com.openexchange.groupware.importexport.importers.OutlookCSVContactImporter;
+import com.openexchange.server.osgi.CSVTranslator;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.xml.spring.SpringParser;
 
 /**
- * Abtract class for both importers and exporters that does 
- * the configuration via Spring. This means importers and
- * exporters are loaded from a configuration file and you
- * do not need to hardcode them somewhere. 
- *
+ * Abtract class for both importers and exporters that does the configuration via Spring. This means importers and exporters are loaded from
+ * a configuration file and you do not need to hardcode them somewhere.
+ * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (spring configuration)
  */
 
 public abstract class ImportExport extends SessionServlet {
 
-	private static final long serialVersionUID = -7502282736897750395L;
+    private static final long serialVersionUID = -7502282736897750395L;
 
-	public static final String AJAX_TYPE = "type";
-	
-	private static final Log LOG = LogFactory.getLog(ImportExport.class);
-	
-	protected ImporterExporter importerExporter = null;
+    public static final String AJAX_TYPE = "type";
+
+    private static final Log LOG = LogFactory.getLog(ImportExport.class);
+
+    protected ImporterExporter importerExporter = null;
 
     private static BeanFactory beanFactory = null;
 
+    private static CSVTranslator translator;
+
+    public static CSVTranslator getTranslator() {
+        return translator;
+    }
+
+    public static void setTranslator(CSVTranslator translator) {
+        ImportExport.translator = translator;
+    }
+
     @Override
-    public void init(){
+    public void init() {
         if (importerExporter != null) {
             return;
         }
-        if(beanFactory  == null) {
+        if (beanFactory == null) {
             final String beanPath = SystemConfig.getProperty("IMPORTEREXPORTER");
-		    if (beanPath != null) {
+            if (beanPath != null) {
                 final SpringParser springParser = ServerServiceRegistry.getInstance().getService(SpringParser.class);
                 beanFactory = springParser.parseFile(beanPath, ImportExport.class.getClassLoader());
             } else {
-	     		LOG.error("missing property: IMPORTEREXPORTER");
-		    }
+                LOG.error("missing property: IMPORTEREXPORTER");
+            }
         }
-        if(beanFactory != null) {
+        if (beanFactory != null) {
             importerExporter = (ImporterExporter) beanFactory.getBean("importerExporter");
         }
+
+        importerExporter.addImporter(new CSVContactImporter());
+
+        importerExporter.addImporter(getOutlookImporter());
+    }
+
+    /**
+     * @return
+     */
+    private Importer getOutlookImporter() {
+        OutlookCSVContactImporter outlook = new OutlookCSVContactImporter();
+        try {
+            ConfigurationService conf = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+            String path = conf.getProperty("com.openexchange.import.mapper.path");
+            File dir = new File(path);
+            if (!dir.isDirectory()) {
+                LOG.error("Directory "+ path +" supposedly containing import mappers information wasn't actually a directory, defaulting to deprecated mappers as fallback.");
+            }
+            File[] files = dir.listFiles();
+
+            int mapperAmount = 0;
+            for (File file : files) {
+                if (file.getName().endsWith(".properties")) {
+
+                    Properties props = new Properties();
+                    props.load(new FileInputStream(file));
+                    PropertyDrivenMapper mapper = new PropertyDrivenMapper(props);
+                    outlook.addFieldMappers(mapper);
+                    mapperAmount++;
+                }
+            }
+            if (mapperAmount == 0) {
+                LOG.error("Did not load any CSV importer mappings, defaulting to deprecated mappers as fallback.");
+            }
+        } catch (IOException e) {
+            LOG.error("Failed when trying to load CSV importer mappings, defaulting to deprecated mappers as fallback.", e);
+        }
+        return outlook;
     }
 }

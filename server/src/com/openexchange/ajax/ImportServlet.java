@@ -75,6 +75,7 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionC
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionFactory;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadFile;
+import com.openexchange.server.osgi.CSVTranslator;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.OXJSONException.Code;
 import com.openexchange.tools.session.ServerSession;
@@ -124,12 +125,10 @@ public class ImportServlet extends ImportExport {
 
     public static final String JSON_CALLBACK = "import"; //identifying part of the ajax method that does the callback after the upload
 
-    private static final long serialVersionUID = -4691910391290394603L;
-
     public ImportServlet() {
         super();
     }
-
+    
     @Override 
     protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         final Response resObj = new Response();
