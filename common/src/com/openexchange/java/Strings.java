@@ -55,31 +55,30 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * {@link Strings} - a library for performing operations that create Strings
- *
+ * {@link Strings} - A library for performing operations that create Strings
+ * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class Strings {
-    
+
     /**
-     * Joins a collection of objects by connecting the results of
-     * their #toString() method with a connector
+     * Joins a collection of objects by connecting the results of their #toString() method with a connector
      * 
      * @param coll Collection to be connected
      * @param connector Connector place between two objects
      * @return connected strings or null if collection == null or empty string if collection is empty
      */
-    public static String join(Collection<? extends Object> coll, String connector){
+    public static String join(final Collection<? extends Object> coll, final String connector) {
         if (coll == null) {
             return null;
         }
         if (coll.size() == 0) {
             return "";
         }
-        StringBuilder builder = new StringBuilder();
-        for (Object obj : coll) {
+        final StringBuilder builder = new StringBuilder();
+        for (final Object obj : coll) {
             if (obj == null) {
-                builder.append(obj);
+                builder.append("null");
             } else {
                 builder.append(obj.toString());
             }
@@ -87,16 +86,17 @@ public class Strings {
         }
         return builder.substring(0, builder.length() - connector.length());
     }
-    
-    public static <T> String join(T[] arr, String connector) {
+
+    public static <T> String join(final T[] arr, final String connector) {
         return join(Arrays.asList(arr), connector);
     }
-    
-    public static String join(int[] arr, String connector) {
-        List<Integer> list = new LinkedList<Integer>();
-        for (int i : arr) {
+
+    public static String join(final int[] arr, final String connector) {
+        final List<Integer> list = new LinkedList<Integer>();
+        for (final int i : arr) {
             list.add(Autoboxing.I(i));
         }
         return join(list, connector);
     }
+
 }
