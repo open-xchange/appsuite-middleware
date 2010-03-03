@@ -19,6 +19,7 @@
 	<property name="tmp.dir" value="tmp" />
 	<property name="conf.dir" value="conf/groupware" />
 	<property name="commonConfDir" value="conf/common" />
+	<property name="importCSVDir" value="conf/importCSV" />
 	<property name="bin.dir" value="sbin" />
 	<property name="lib.dir" value="lib" />
 
@@ -239,6 +240,14 @@
 			<fileset dir="${commonConfDir}">
 				<include name="**" />
 				<exclude name="*.in" />
+				<exclude name="CVS" />
+			</fileset>
+		</copy>
+		
+		<mkdir dir="${destdir}/${prefix}/importCSV" />
+		<copy todir="${destdir}/${prefix}/importCSV" overwrite="true">
+			<fileset dir="${importCSVDir}">
+				<include name="**" />
 				<exclude name="CVS" />
 			</fileset>
 		</copy>
