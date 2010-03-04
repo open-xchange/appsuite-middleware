@@ -1806,8 +1806,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
         final TIntObjectHashMap<TIntObjectHashMap<?>> subMap = new TIntObjectHashMap<TIntObjectHashMap<?>>();
         final int size = subfolders.size();
         for (int i = 0; i < size; i++) {
-            final int fuid = subfolders.getQuick(i);
-            gatherDeleteableSubfoldersRecursively(fuid, userId, userConfig, permissionIDs, subMap, initParent);
+            gatherDeleteableSubfoldersRecursively(subfolders.getQuick(i), userId, userConfig, permissionIDs, subMap, initParent);
         }
         deleteableIDs.put(folderID, subMap);
     }
