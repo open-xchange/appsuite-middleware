@@ -180,6 +180,23 @@ final class MovePerformer extends AbstractPerformer {
 
     void doMoveVirtual(final Folder folder, final FolderStorage virtualStorage, final FolderStorage realParentStorage, final FolderStorage newRealParentStorage, final Folder storageFolder, final List<FolderStorage> openedStorages) throws FolderException {
         /*
+         * Check permission on folder
+         */
+        {
+            final Permission permission;
+            if (null == session) {
+                permission = CalculatePermission.calculate(storageFolder, getUser(), getContext(), ALL_ALLOWED);
+            } else {
+                permission = CalculatePermission.calculate(storageFolder, getSession(), ALL_ALLOWED);
+            }
+            if (!permission.isAdmin()) {
+                throw FolderExceptionErrorMessage.FOLDER_NOT_MOVEABLE.create(
+                    storageFolder.getLocalizedName(session.getUser().getLocale()),
+                    getUser().getDisplayName(),
+                    Integer.valueOf(getContextId()));
+            }
+        }
+        /*
          * Get subfolders
          */
         final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, folder.getID());

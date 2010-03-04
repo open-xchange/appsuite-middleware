@@ -219,10 +219,12 @@ public final class UpdatePerformer extends AbstractPerformer {
                 /*
                  * Perform move either in real or in virtual storage
                  */
+                final MovePerformer movePerformer = newMovePerformer();
+                movePerformer.setStorageParameters(storageParameters);
                 if (FolderStorage.REAL_TREE_ID.equals(folder.getTreeID())) {
-                    newMovePerformer().doMoveReal(folder, storage, realParentStorage, newRealParentStorage);
+                    movePerformer.doMoveReal(folder, storage, realParentStorage, newRealParentStorage);
                 } else {
-                    newMovePerformer().doMoveVirtual(folder, storage, realParentStorage, newRealParentStorage, storageFolder, openedStorages);
+                    movePerformer.doMoveVirtual(folder, storage, realParentStorage, newRealParentStorage, storageFolder, openedStorages);
                 }
             } else if (rename) {
                 folder.setParentID(oldParentId);
