@@ -103,6 +103,7 @@ if [ ${1:-0} -eq 2 ]; then
        ox_set_property ldapReturnField "" $pfile
    fi
 
+   ox_update_permissions "/opt/open-xchange/etc/groupware/ldapauth.properties" root:open-xchange 640
 fi
 
 %files
@@ -111,7 +112,7 @@ fi
 %dir /opt/open-xchange/etc/groupware/osgi/bundle.d/
 /opt/open-xchange/bundles/*
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
-%config(noreplace) /opt/open-xchange/etc/groupware/ldapauth.properties
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/groupware/ldapauth.properties
 
 %changelog
 * Tue Feb 02 2010 - dennis.sieben@open-xchange.com

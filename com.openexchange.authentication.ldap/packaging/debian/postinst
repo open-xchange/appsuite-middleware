@@ -51,6 +51,7 @@ postFix() {
 
 case "$1" in
     configure)
+        ox_update_permissions "/opt/open-xchange/etc/groupware/ldapauth.properties" root:open-xchange 640
         test -n "$2" && {
                 # we are in update mode, run postFix to apply fixes
                 postFix "$2"
