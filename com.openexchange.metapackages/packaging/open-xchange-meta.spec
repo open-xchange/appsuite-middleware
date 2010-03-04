@@ -58,8 +58,7 @@ Requires:	open-xchange-xerces-ibm
 Requires:	open-xchange-xerces-sun
 %endif
 Requires:	%{oxcommon}
-Requires:	open-xchange-authentication-database, open-xchange-spamhandler-default
-
+Requires:       open-xchange-authentication, open-xchange-spamhandler
 
 %description -n open-xchange-meta-server
 The Open-Xchange Meta package for OX Backend

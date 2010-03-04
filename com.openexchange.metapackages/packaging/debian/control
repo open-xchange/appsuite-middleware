@@ -13,7 +13,7 @@ Description: The Open-Xchange Meta package for OX into UCS integration
 
 Package: open-xchange-meta-server
 Architecture: all
-Depends: ${oxcommon}, open-xchange-authentication-database, open-xchange-spamhandler-default
+Depends: ${oxcommon}, open-xchange-authentication, open-xchange-spamhandler
 Description: The Open-Xchange Meta package for OX Backend
 
 Package: open-xchange-meta-admin
