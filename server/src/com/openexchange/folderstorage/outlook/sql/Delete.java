@@ -180,7 +180,10 @@ public final class Delete {
                 stmt.executeUpdate();
             } catch (final SQLException e) {
                 debugSQL(stmt);
-                throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+                final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Delete.class);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Backup failed.", e);
+                }
             } finally {
                 DBUtils.closeSQLStuff(stmt);
             }
@@ -197,7 +200,10 @@ public final class Delete {
                 stmt.executeUpdate();
             } catch (final SQLException e) {
                 debugSQL(stmt);
-                throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+                final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Delete.class);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Backup failed.", e);
+                }
             } finally {
                 DBUtils.closeSQLStuff(stmt);
             }
