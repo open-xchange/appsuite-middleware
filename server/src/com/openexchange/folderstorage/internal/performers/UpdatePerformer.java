@@ -220,9 +220,9 @@ public final class UpdatePerformer extends AbstractPerformer {
                  * Perform move either in real or in virtual storage
                  */
                 if (FolderStorage.REAL_TREE_ID.equals(folder.getTreeID())) {
-                    doMoveReal(folder, storage, realParentStorage, newRealParentStorage);
+                    newMovePerformer().doMoveReal(folder, storage, realParentStorage, newRealParentStorage);
                 } else {
-                    doMoveVirtual(folder, storage, realParentStorage, newRealParentStorage, oldParentId, openedStorages);
+                    newMovePerformer().doMoveVirtual(folder, storage, realParentStorage, newRealParentStorage, storageFolder, openedStorages);
                 }
             } else if (rename) {
                 folder.setParentID(oldParentId);
@@ -284,81 +284,11 @@ public final class UpdatePerformer extends AbstractPerformer {
 
     } // End of doUpdate()
 
-    private void doMoveReal(final Folder folder, final FolderStorage folderStorage, final FolderStorage realParentStorage, final FolderStorage newRealParentStorage) throws FolderException {
-        // if (folderStorage.equals(realParentStorage) && newRealParentStorage.equals(realParentStorage)) {
-        // throw FolderExceptionErrorMessage.MOVE_NOT_PERMITTED.create(new Object[0]);
-        // }
-        folderStorage.updateFolder(folder, storageParameters);
-    }
-
-    private void doMoveVirtual(final Folder folder, final FolderStorage virtualStorage, final FolderStorage realParentStorage, final FolderStorage newRealParentStorage, final String oldParent, final List<FolderStorage> openedStorages) throws FolderException {
-        final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, folder.getID());
-        if (null == realStorage) {
-            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folder.getID());
+    private MovePerformer newMovePerformer() {
+        if (null == session) {
+            return new MovePerformer(user, context, folderStorageDiscoverer);
         }
-        if (virtualStorage.equals(realStorage)) {
-            virtualStorage.updateFolder(folder, storageParameters);
-        } else {
-            final boolean parentChildEquality = realStorage.equals(realParentStorage);
-            final boolean parentEquality = newRealParentStorage.equals(realParentStorage);
-            if (parentChildEquality && parentEquality) {
-                checkOpenedStorage(realStorage, openedStorages);
-                /*
-                 * Perform the move in real storage
-                 */
-                final Folder clone4Real = (Folder) folder.clone();
-                clone4Real.setName(nonExistingName(
-                    clone4Real.getName(),
-                    FolderStorage.REAL_TREE_ID,
-                    clone4Real.getParentID(),
-                    openedStorages));
-                realStorage.updateFolder(clone4Real, storageParameters);
-                /*
-                 * Perform the move in virtual storage
-                 */
-                virtualStorage.updateFolder(folder, storageParameters);
-                /*
-                 * Update new/old parent's last-modified
-                 */
-                final Date lastModified = clone4Real.getLastModified();
-                virtualStorage.updateLastModified(lastModified.getTime(), folder.getTreeID(), folder.getParentID(), storageParameters);
-                virtualStorage.updateLastModified(lastModified.getTime(), folder.getTreeID(), oldParent, storageParameters);
-            } else if (!parentChildEquality && parentEquality) {
-                /*
-                 * No real action required in this case. Perform the move in virtual storage only.
-                 */
-                virtualStorage.updateFolder(folder, storageParameters);
-            } else if (parentChildEquality && !parentEquality) {
-                /*
-                 * Move to default location in real storage
-                 */
-                checkOpenedStorage(realStorage, openedStorages);
-                final String defaultParentId =
-                    realStorage.getDefaultFolderID(user, FolderStorage.REAL_TREE_ID, realStorage.getDefaultContentType(), storageParameters);
-                if (null == defaultParentId) {
-                    /*
-                     * No default folder found
-                     */
-                    throw FolderExceptionErrorMessage.NO_DEFAULT_FOLDER.create(
-                        realStorage.getDefaultContentType(),
-                        FolderStorage.REAL_TREE_ID);
-                }
-                // TODO: Check permission for obtained default folder ID?
-                final Folder clone4Real = (Folder) folder.clone();
-                clone4Real.setParentID(defaultParentId);
-                clone4Real.setName(nonExistingName(clone4Real.getName(), FolderStorage.REAL_TREE_ID, defaultParentId, openedStorages));
-                realStorage.updateFolder(clone4Real, storageParameters);
-                /*
-                 * Perform the move in virtual storage
-                 */
-                virtualStorage.updateFolder(folder, storageParameters);
-            } else {
-                /*
-                 * (!parentChildEquality && !parentEquality) ?
-                 */
-                throw FolderExceptionErrorMessage.MOVE_NOT_PERMITTED.create(new Object[0]);
-            }
-        }
+        return new MovePerformer(session, folderStorageDiscoverer);
     }
 
     private void doRenameReal(final Folder folder, final FolderStorage realStorage) throws FolderException {
@@ -377,10 +307,13 @@ public final class UpdatePerformer extends AbstractPerformer {
             checkOpenedStorage(realStorage, openedStorages);
             final Folder realFolder = realStorage.getFolder(FolderStorage.REAL_TREE_ID, folder.getID(), storageParameters);
             final Folder clone4Real = (Folder) folder.clone();
+            clone4Real.setParentID(null);
             clone4Real.setName(nonExistingName(clone4Real.getName(), FolderStorage.REAL_TREE_ID, realFolder.getParentID(), openedStorages));
             realStorage.updateFolder(clone4Real, storageParameters);
             // Update name in virtual tree
+            folder.setNewID(clone4Real.getID());
             virtualStorage.updateFolder(folder, storageParameters);
+            folder.setID(clone4Real.getID());
         }
     }
 
@@ -418,7 +351,7 @@ public final class UpdatePerformer extends AbstractPerformer {
         } else {
             listPerformer = new ListPerformer(session, null);
         }
-        listPerformer.setStorageParameters(storageParameters);
+        // listPerformer.setStorageParameters(storageParameters);
         final UserizedFolder[] subfolders = listPerformer.doList(treeId, parentId, true, openedStorages);
         final StringBuilder sb = new StringBuilder();
         String nonExistingName = name;

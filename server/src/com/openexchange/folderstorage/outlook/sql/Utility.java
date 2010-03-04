@@ -60,7 +60,7 @@ import com.openexchange.server.ServiceException;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-final class Utility {
+public final class Utility {
 
     /**
      * Initializes a new {@link Utility}.
@@ -75,7 +75,7 @@ final class Utility {
      * @return The {@link DatabaseService} from service registry
      * @throws FolderException If {@link DatabaseService} is not contained in service registry
      */
-    static DatabaseService getDatabaseService() throws FolderException {
+    public static DatabaseService getDatabaseService() throws FolderException {
         final DatabaseService databaseService;
         try {
             databaseService = OutlookServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
@@ -90,7 +90,7 @@ final class Utility {
      * 
      * @param stmt The statement
      */
-    static void debugSQL(final PreparedStatement stmt) {
+    public static void debugSQL(final PreparedStatement stmt) {
         if (null != stmt) {
             final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Utility.class);
             if (LOG.isDebugEnabled()) {
@@ -106,7 +106,7 @@ final class Utility {
      * @param stmt The statement
      * @return The extracted SQL string
      */
-    static String getSQLString(final PreparedStatement stmt) {
+    public static String getSQLString(final PreparedStatement stmt) {
         final String toString = stmt.toString();
         return toString.substring(toString.indexOf(": ") + 2);
     }

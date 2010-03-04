@@ -583,8 +583,9 @@ public final class CacheFolderStorage implements FolderStorage {
         /*
          * Perform update operation via non-cache storage
          */
+        final String parentID = folder.getParentID();
         final String oldParentId;
-        if (null != folder.getParentID()) {
+        if (null != parentID) {
             // Move
             oldParentId = getFolder(folder.getTreeID(), folder.getID(), storageParameters).getParentID();
         } else {
@@ -614,27 +615,14 @@ public final class CacheFolderStorage implements FolderStorage {
          * Refresh/Invalidate folder
          */
         removeFolder(folderId, treeId, storageParameters);
-        final Folder updatedFolder = loadFolder(treeId, folderId, StorageType.WORKING, storageParameters);
-        if (updatedFolder.isCacheable()) {
-            putFolder(updatedFolder, treeId, storageParameters);
-        }
         /*
          * Refresh/invalidate parent(s)
          */
-        final String parentID = updatedFolder.getParentID();
         if (!FolderStorage.ROOT_ID.equals(parentID)) {
             removeFolder(parentID, treeId, storageParameters);
-            final Folder parentFolder = loadFolder(treeId, parentID, StorageType.WORKING, storageParameters);
-            if (parentFolder.isCacheable()) {
-                putFolder(parentFolder, treeId, storageParameters);
-            }
         }
         if (null != oldParentId && !FolderStorage.ROOT_ID.equals(oldParentId)) {
             removeFolder(oldParentId, treeId, storageParameters);
-            final Folder oldParentFolder = loadFolder(treeId, oldParentId, StorageType.WORKING, storageParameters);
-            if (oldParentFolder.isCacheable()) {
-                putFolder(oldParentFolder, treeId, storageParameters);
-            }
         }
     }
 

@@ -86,6 +86,8 @@ public final class OutlookFolder implements Folder {
 
     private Boolean subscribed;
 
+    private String newId;
+
     /**
      * Initializes a {@link OutlookFolder} with specified real folder.
      * 
@@ -128,6 +130,14 @@ public final class OutlookFolder implements Folder {
         } catch (final CloneNotSupportedException e) {
             throw new InternalError(e.getMessage());
         }
+    }
+
+    public String getNewID() {
+        return newId;
+    }
+
+    public void setNewID(final String newId) {
+        this.newId = newId;
     }
 
     public int getCreatedBy() {

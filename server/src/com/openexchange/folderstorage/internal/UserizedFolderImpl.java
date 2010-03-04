@@ -328,4 +328,12 @@ public final class UserizedFolderImpl implements UserizedFolder {
         this.locale = locale;
     }
 
+    public String getNewID() {
+        throw new UnsupportedOperationException("UserizedFolderImpl.getNewID()");
+    }
+
+    public void setNewID(final String newId) {
+        throw new UnsupportedOperationException("UserizedFolderImpl.setNewID()");
+    }
+
 }

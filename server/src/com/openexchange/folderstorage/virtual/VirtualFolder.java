@@ -86,6 +86,8 @@ public final class VirtualFolder implements Folder {
 
     private boolean subscribed;
 
+    private String newId;
+
     /**
      * Initializes a {@link VirtualFolder} with specified real folder.
      * 
@@ -123,6 +125,14 @@ public final class VirtualFolder implements Folder {
         } catch (final CloneNotSupportedException e) {
             throw new InternalError(e.getMessage());
         }
+    }
+
+    public String getNewID() {
+        return newId;
+    }
+
+    public void setNewID(final String newId) {
+        this.newId = newId;
     }
 
     public int getCreatedBy() {

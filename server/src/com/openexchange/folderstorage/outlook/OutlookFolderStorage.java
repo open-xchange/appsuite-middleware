@@ -49,6 +49,8 @@
 
 package com.openexchange.folderstorage.outlook;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -64,6 +66,8 @@ import java.util.TreeMap;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
@@ -84,6 +88,7 @@ import com.openexchange.folderstorage.outlook.sql.Delete;
 import com.openexchange.folderstorage.outlook.sql.Insert;
 import com.openexchange.folderstorage.outlook.sql.Select;
 import com.openexchange.folderstorage.outlook.sql.Update;
+import com.openexchange.folderstorage.outlook.sql.Utility;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.utils.MailFolderUtility;
@@ -97,6 +102,7 @@ import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link OutlookFolderStorage} - The MS Outlook folder storage.
@@ -985,27 +991,46 @@ public final class OutlookFolderStorage implements FolderStorage {
         final String folderId = folder.getID();
         if (Select.containsFolder(contextId, tree, userId, folderId, StorageType.WORKING)) {
             /*
-             * TODO: Update last-modified of folder, old parent, new parent like in create() method
+             * Get a connection
              */
-            final Folder realFolder;
-            {
-                final FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, folderId);
-                if (null == folderStorage) {
-                    throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, folderId);
-                }
-                folderStorage.startTransaction(storageParameters, true);
-                try {
-                    realFolder = folderStorage.getFolder(realTreeId, folderId, StorageType.WORKING, storageParameters);
-                    folderStorage.commitTransaction(storageParameters);
-                } catch (final FolderException e) {
-                    folderStorage.rollback(storageParameters);
-                    throw e;
-                } catch (final Exception e) {
-                    folderStorage.rollback(storageParameters);
-                    throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
-                }
+            final DatabaseService databaseService = Utility.getDatabaseService();
+            final Connection con;
+            try {
+                con = databaseService.getWritable(contextId);
+                con.setAutoCommit(false); // BEGIN
+            } catch (final DBPoolingException e) {
+                throw new FolderException(e);
+            } catch (final SQLException e) {
+                throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
             }
-            Update.updateFolder(contextId, tree, userId, folder);
+            try {
+                final String name = folder.getName();
+                if (name != null) {
+                    Update.updateName(contextId, tree, userId, folderId, name, con);
+                }
+                final String parentId = folder.getParentID();
+                if (parentId != null) {
+                    Update.updateParent(contextId, tree, userId, folderId, parentId, con);
+                }
+                final String newId = folder.getNewID();
+                if (newId != null) {
+                    Update.updateId(contextId, tree, userId, folderId, newId, con);
+                }
+                Update.updateLastModified(contextId, tree, userId, folderId, System.currentTimeMillis(), con);
+                con.commit(); // COMMIT
+            } catch (final SQLException e) {
+                DBUtils.rollback(con); // ROLLBACK
+                throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+            } catch (final FolderException e) {
+                DBUtils.rollback(con); // ROLLBACK
+                throw e;
+            } catch (final Exception e) {
+                DBUtils.rollback(con); // ROLLBACK
+                throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+            } finally {
+                DBUtils.autocommit(con);
+                databaseService.backWritable(contextId, con);
+            }
         }
     }
 

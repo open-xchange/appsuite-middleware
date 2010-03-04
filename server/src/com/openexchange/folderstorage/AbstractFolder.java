@@ -73,6 +73,8 @@ public abstract class AbstractFolder implements Folder {
 
     protected String id;
 
+    protected String newId;
+
     protected String name;
 
     protected String parent;
@@ -198,6 +200,10 @@ public abstract class AbstractFolder implements Folder {
         return id;
     }
 
+    public String getNewID() {
+        return newId;
+    }
+
     public String getLocalizedName(final Locale locale) {
         return name;
     }
@@ -232,6 +238,10 @@ public abstract class AbstractFolder implements Folder {
 
     public void setID(final String id) {
         this.id = id;
+    }
+
+    public void setNewID(final String newId) {
+        this.newId = newId;
     }
 
     public void setName(final String name) {

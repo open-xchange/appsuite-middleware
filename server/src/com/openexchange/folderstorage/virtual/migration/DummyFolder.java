@@ -285,4 +285,12 @@ final class DummyFolder implements Folder {
         throw new UnsupportedOperationException("VirtualTreeMigrationTask.DummyFolder.setBits()");
     }
 
+    public String getNewID() {
+        throw new UnsupportedOperationException("DummyFolder.getNewID()");
+    }
+
+    public void setNewID(final String newId) {
+        throw new UnsupportedOperationException("DummyFolder.setNewID()");
+    }
+
 }

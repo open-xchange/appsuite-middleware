@@ -89,11 +89,13 @@ public final class Update {
         final Connection con;
         try {
             con = databaseService.getWritable(cid);
+            con.setAutoCommit(false); // BEGIN
         } catch (final DBPoolingException e) {
             throw new FolderException(e);
+        } catch (final SQLException e) {
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }
         try {
-            con.setAutoCommit(false); // BEGIN
             if (Delete.deleteFolder(cid, tree, user, folder.getID(), false, con)) {
                 Insert.insertFolder(cid, tree, user, folder, con);
             }
@@ -114,7 +116,7 @@ public final class Update {
     }
 
     private static final String SQL_UPDATE_LM =
-        "UPDATE virtualTree SET lastModified = ?, modifiedBy = ? WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+        "UPDATE virtualTree SET lastModified = ?, modifiedBy = ? WHERE cid = ? AND tree = ? AND user = ? AND folderId = ? AND lastModified IS NOT NULL";
 
     /**
      * Updates last-modified time stamp of specified folder in virtual table.
@@ -176,6 +178,105 @@ public final class Update {
             int pos = 1;
             stmt.setLong(pos++, lastModified);
             stmt.setInt(pos++, user);
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, tree);
+            stmt.setInt(pos++, user);
+            stmt.setString(pos, folderId);
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            debugSQL(stmt);
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+    }
+
+    private static final String SQL_UPDATE_PARENT =
+        "UPDATE virtualTree SET parentId = ? WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+
+    /**
+     * Updates last-modified time stamp of specified folder in virtual table.
+     * 
+     * @param cid The context identifier
+     * @param tree The tree identifier
+     * @param user The user identifier
+     * @param folderId The folder identifier
+     * @param parentId The new parent identifier
+     * @param con The connection to use
+     * @throws FolderException If update fails
+     */
+    public static void updateParent(final int cid, final int tree, final int user, final String folderId, final String parentId, final Connection con) throws FolderException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement(SQL_UPDATE_PARENT);
+            int pos = 1;
+            stmt.setString(pos++, parentId);
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, tree);
+            stmt.setInt(pos++, user);
+            stmt.setString(pos, folderId);
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            debugSQL(stmt);
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+    }
+
+    private static final String SQL_UPDATE_ID =
+        "UPDATE virtualTree SET folderId = ? WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+
+    /**
+     * Updates last-modified time stamp of specified folder in virtual table.
+     * 
+     * @param cid The context identifier
+     * @param tree The tree identifier
+     * @param user The user identifier
+     * @param folderId The folder identifier
+     * @param newFolderId The new folder identifier
+     * @param con The connection to use
+     * @throws FolderException If update fails
+     */
+    public static void updateId(final int cid, final int tree, final int user, final String folderId, final String newFolderId, final Connection con) throws FolderException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement(SQL_UPDATE_ID);
+            int pos = 1;
+            stmt.setString(pos++, newFolderId);
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, tree);
+            stmt.setInt(pos++, user);
+            stmt.setString(pos, folderId);
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            debugSQL(stmt);
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+    }
+
+    private static final String SQL_UPDATE_NAME =
+        "UPDATE virtualTree SET name = ? WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+
+    /**
+     * Updates last-modified time stamp of specified folder in virtual table.
+     * 
+     * @param cid The context identifier
+     * @param tree The tree identifier
+     * @param user The user identifier
+     * @param folderId The folder identifier
+     * @param name The new name
+     * @param con The connection to use
+     * @throws FolderException If update fails
+     */
+    public static void updateName(final int cid, final int tree, final int user, final String folderId, final String name, final Connection con) throws FolderException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement(SQL_UPDATE_NAME);
+            int pos = 1;
+            stmt.setString(pos++, name);
             stmt.setInt(pos++, cid);
             stmt.setInt(pos++, tree);
             stmt.setInt(pos++, user);

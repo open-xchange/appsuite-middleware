@@ -109,6 +109,7 @@ public final class ParsedFolder implements Folder {
 
     protected int bits;
 
+    protected String newId;
 
     /**
      * Initializes an empty {@link ParsedFolder}.
@@ -347,6 +348,14 @@ public final class ParsedFolder implements Folder {
 
     public void setBits(final int bits) {
         this.bits = bits;
+    }
+
+    public String getNewID() {
+        return newId;
+    }
+
+    public void setNewID(final String newId) {
+        this.newId = newId;
     }
 
 }

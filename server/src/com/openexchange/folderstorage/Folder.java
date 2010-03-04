@@ -166,6 +166,20 @@ public interface Folder extends Serializable, Cloneable {
     void setID(String id);
 
     /**
+     * Gets the new ID.
+     * 
+     * @return The new ID or <code>null</code> if not available
+     */
+    String getNewID();
+
+    /**
+     * Sets the new ID.
+     * 
+     * @param newId The new ID to set
+     */
+    void setNewID(String newId);
+
+    /**
      * Gets the parent ID.
      * 
      * @return The parent ID or <code>null</code> if not available
