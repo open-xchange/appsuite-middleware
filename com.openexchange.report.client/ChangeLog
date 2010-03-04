@@ -1,3 +1,8 @@
+* 2010-03-04 - benjamin.otterbach@open-xchange.com
+
+  - Bugfix #15546: Broken start script in report client package
+    - Fixed the wrong property directory value
+
 * 2010-02-18 - benjamin.otterbach@open-xchange.com
 
   - Added support for using a proxy server
