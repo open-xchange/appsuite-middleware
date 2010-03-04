@@ -168,7 +168,13 @@ public enum FolderExceptionErrorMessage implements OXErrorMessage {
      * <p>
      * Folder identifier should be passed as first argument to not injure privacy through publishing folder name.
      */
-    FOLDER_NOT_DELETEABLE(FolderExceptionMessages.FOLDER_NOT_DELETEABLE_MSG, Category.PERMISSION, 26);
+    FOLDER_NOT_DELETEABLE(FolderExceptionMessages.FOLDER_NOT_DELETEABLE_MSG, Category.PERMISSION, 26),
+    /**
+     * Folder "%1$s" must not be moved by user "%2$s" in context "%3$s".
+     * <p>
+     * Folder identifier should be passed as first argument to not injure privacy through publishing folder name.
+     */
+    FOLDER_NOT_MOVEABLE(FolderExceptionMessages.FOLDER_NOT_MOVEABLE_MSG, Category.PERMISSION, 27);
 
     private final Category category;
 

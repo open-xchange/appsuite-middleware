@@ -139,6 +139,9 @@ public class FolderExceptionMessages implements LocalizableStrings {
     // Folder "%1$s" must not be deleted by user "%2$s" in context "%3$s".
     public static final String FOLDER_NOT_DELETEABLE_MSG = "Folder \"%1$s\" must not be deleted by user \"%2$s\" in context \"%3$s\".";
 
+    // Folder "%1$s" must not be moved by user "%2$s" in context "%3$s".
+    public static final String FOLDER_NOT_MOVEABLE_MSG = "Folder \"%1$s\" must not be moved by user \"%2$s\" in context \"%3$s\".";
+
     /**
      * Initializes a new {@link FolderExceptionMessages}
      */
