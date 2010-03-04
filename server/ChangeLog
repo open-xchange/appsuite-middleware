@@ -1,3 +1,7 @@
+* 2010-03-03 - tobias.prinz@open-xchange.com
+
+ - Related to bug #15231: Outlook imports for different languages can now be easily extended by creating .properties files with mapping for them. 
+
 * 2010-03-03 - thorben.betten@open-xchange.com
 
  - Bugfix #15539: Allowing registration of HttpServlets without a default constructor
