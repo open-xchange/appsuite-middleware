@@ -67,6 +67,16 @@ export NO_BRP_CHECK_BYTECODE_VERSION=true
 
 ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 
+%post
+
+if [ ${1:-0} -eq 2 ]; then
+   # only when updating
+   . /opt/open-xchange/etc/oxfunctions.sh
+
+   ox_update_permissions "/opt/open-xchange/etc/groupware/voipnow.properties" root:open-xchange 640
+
+fi
+
 %clean
 %{__rm} -rf %{buildroot}
 
@@ -77,4 +87,5 @@ ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 %dir /opt/open-xchange/bundles
 /opt/open-xchange/bundles/*
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
-%config(noreplace) /opt/open-xchange/etc/groupware/voipnow.properties
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/groupware/voipnow.properties
+

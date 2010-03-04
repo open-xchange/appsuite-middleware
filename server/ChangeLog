@@ -1,3 +1,8 @@
+* 2010-03-04 - choeger@open-xchange.com
+
+ - Bugfix #15524: VoipNow administration login is readable for all linux users
+   on that machine
+
 * 2010-03-04 - karsten.will@open-xchange.com
 
  - fixed bug 15347 (uid-column was not loaded from db to compare it to possible update)
