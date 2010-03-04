@@ -3326,7 +3326,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 con.commit();
             } else {
                 con.rollback();
-                OXObjectNotFoundException e = new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, EnumComponent.APPOINTMENT, "");
+                OXObjectNotFoundException e = new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, EnumComponent.APPOINTMENT, "Could not find participant for this object.");
                 LOG.error(e.getMessage(), e);
                 throw e;
             }
