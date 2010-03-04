@@ -77,7 +77,7 @@ public class CalendarFolderUpdaterStrategy implements FolderUpdaterStrategy<Cale
     private static final int SUBSCRIPTION = 2;
 
     private static final int[] COMPARISON_COLUMNS = {
-        Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.TITLE, Appointment.START_DATE, Appointment.END_DATE };
+        Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.TITLE, Appointment.START_DATE, Appointment.END_DATE, Appointment.UID, Appointment.NOTE, Appointment.LAST_MODIFIED, Appointment.SEQUENCE };
 
     public int calculateSimilarityScore(CalendarDataObject original, CalendarDataObject candidate, Object session) throws AbstractOXException {
         int score = 0;
