@@ -46,17 +46,12 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        Open-Xchange Meta packages
 
-%define oxcommon open-xchange, open-xchange-contactcollector, open-xchange-conversion, open-xchange-conversion-engine, open-xchange-conversion-servlet, open-xchange-crypto, open-xchange-data-conversion-ical4j, open-xchange-dataretention, open-xchange-genconf, open-xchange-genconf-mysql, open-xchange-imap, open-xchange-mailfilter, open-xchange-management, open-xchange-monitoring, open-xchange-passwordchange-database, open-xchange-passwordchange-servlet, open-xchange-pop3, open-xchange-push-udp, open-xchange-resource-managerequest, open-xchange-server, open-xchange-settings-extensions, open-xchange-smtp, open-xchange-sql, open-xchange-templating, open-xchange-threadpool, open-xchange-charset, open-xchange-control, open-xchange-group-managerequest, open-xchange-i18n, open-xchange-jcharset, open-xchange-sessiond, open-xchange-calendar-printing, open-xchange-user-json, open-xchange-gui-wizard-plugin, open-xchange-report-client
+%define oxcommon open-xchange, open-xchange-contactcollector, open-xchange-conversion, open-xchange-conversion-engine, open-xchange-conversion-servlet, open-xchange-crypto, open-xchange-data-conversion-ical4j, open-xchange-dataretention, open-xchange-genconf, open-xchange-genconf-mysql, open-xchange-imap, open-xchange-management, open-xchange-monitoring, open-xchange-pop3, open-xchange-push-udp, open-xchange-server, open-xchange-settings-extensions, open-xchange-smtp, open-xchange-sql, open-xchange-templating, open-xchange-threadpool, open-xchange-charset, open-xchange-control, open-xchange-i18n, open-xchange-jcharset, open-xchange-sessiond, open-xchange-calendar-printing, open-xchange-user-json, open-xchange-gui-wizard-plugin, open-xchange-report-client
 
 # ----------------------------------------------------------------------------------------------------
 %package -n	open-xchange-meta-server
 Group:          Applications/Productivity
 Summary:	The Open-Xchange Meta package for OX Backend
-%if 0%{?sles_version}
-Requires:	open-xchange-xerces-ibm
-%else
-Requires:	open-xchange-xerces-sun
-%endif
 Requires:	%{oxcommon}
 Requires:       open-xchange-authentication, open-xchange-spamhandler
 
@@ -126,7 +121,7 @@ Authors:
 %package -n	open-xchange-meta-singleserver
 Group:          Applications/Productivity
 Summary:	The Open-Xchange Meta package for OX on a single server
-Requires:	open-xchange-meta-server, open-xchange-meta-gui, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging
+Requires:	open-xchange-meta-server, open-xchange-meta-gui, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-mailfilter, open-xchange-passwordchange-database, open-xchange-passwordchange-servlet, open-xchange-resource-managerequest, open-xchange-group-managerequest
 
 
 %description -n open-xchange-meta-singleserver
@@ -149,6 +144,21 @@ The Open-Xchange Meta package for Business Mobility
 Authors:
 --------
     Open-Xchange
+
+# ----------------------------------------------------------------------------------------------------
+%package -n	open-xchange-meta-parallels
+Group:          Applications/Productivity
+Summary:	The Open-Xchange Meta package for OX into Parallels integration
+Requires:	%{oxcommon}
+Requires:	open-xchange-custom-parallels, open-xchange-custom-parallels-gui, open-xchange-spamhandler-spamassassin, open-xchange-admin-soap, open-xchange-easylogin, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-meta-gui, open-xchange-lang-es-es, open-xchange-lang-nl-nl, open-xchange-gui-lang-es-es, open-xchange-gui-lang-es-es, open-xchange-online-help-es, open-xchange-online-help-nl, open-xchange-outlook-updater
+
+%description -n open-xchange-meta-parallels
+The Open-Xchange Meta package for OX into Parallels integration
+
+Authors:
+--------
+    Open-Xchange
+
 
 # ----------------------------------------------------------------------------------------------------
 
@@ -197,6 +207,10 @@ Authors:
 
 %files -n open-xchange-meta-singleserver
 %defattr(-,root,root)
+%doc README.TXT
+
+%files -n open-xchange-meta-parallels
+%defattr(-,root,root
 %doc README.TXT
 
 %changelog
