@@ -62,9 +62,11 @@ import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
+import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
@@ -204,7 +206,7 @@ final class MovePerformer extends AbstractPerformer {
                  */
                 final String oldId = folder.getID();
                 final FolderInfo oldFolderInfo = new FolderInfo(oldId, storageFolder.getName());
-                gatherSubfolders(treeId, oldFolderInfo, storageParameters, virtualStorage);
+                gatherSubfolders(treeId, oldFolderInfo, storageParameters, virtualStorage, true);
                 /*
                  * Destination folder is compatible: Perform real move
                  */
@@ -221,7 +223,7 @@ final class MovePerformer extends AbstractPerformer {
                  * Generate map
                  */
                 final FolderInfo newFolderInfo = new FolderInfo(newId, folder.getName());
-                gatherSubfolders(treeId, newFolderInfo, storageParameters, realStorage);
+                gatherSubfolders(treeId, newFolderInfo, storageParameters, realStorage, false);
                 final Map<String, String> parentIDMap = generateParentIDMap(oldFolderInfo, newFolderInfo);
                 final Map<String, String> idMap = generateIDMap(oldFolderInfo, newFolderInfo);
                 for (final Entry<String, String> entry : parentIDMap.entrySet()) {
@@ -305,7 +307,7 @@ final class MovePerformer extends AbstractPerformer {
         }
     }
 
-    private static void gatherSubfolders(final String treeId, final FolderInfo folder, final StorageParameters params, final FolderStorage storage) throws FolderException {
+    private void gatherSubfolders(final String treeId, final FolderInfo folder, final StorageParameters params, final FolderStorage storage, final boolean check) throws FolderException {
         final SortableId[] subfolders = storage.getSubfolders(treeId, folder.id, params);
         if (0 == subfolders.length) {
             return;
@@ -315,9 +317,27 @@ final class MovePerformer extends AbstractPerformer {
          */
         for (final SortableId id : subfolders) {
             final String subfolderId = id.getId();
-            final FolderInfo subfolder = new FolderInfo(subfolderId, storage.getFolder(treeId, subfolderId, params).getName());
+            final FolderInfo subfolder;
+            if (check) {
+                final Folder f = storage.getFolder(treeId, subfolderId, params);
+                final Permission permission;
+                if (null == session) {
+                    permission = CalculatePermission.calculate(f, getUser(), getContext(), ALL_ALLOWED);
+                } else {
+                    permission = CalculatePermission.calculate(f, getSession(), ALL_ALLOWED);
+                }
+                if (!permission.isAdmin()) {
+                    throw FolderExceptionErrorMessage.FOLDER_NOT_MOVEABLE.create(
+                        f.getLocalizedName(session.getUser().getLocale()),
+                        getUser().getDisplayName(),
+                        Integer.valueOf(getContextId()));
+                }
+                subfolder = new FolderInfo(subfolderId, f.getName());
+            } else {
+                subfolder = new FolderInfo(subfolderId, storage.getFolder(treeId, subfolderId, params).getName());
+            }
             folder.addSubfolder(subfolder);
-            gatherSubfolders(treeId, subfolder, params, storage);
+            gatherSubfolders(treeId, subfolder, params, storage, check);
         }
     }
 
