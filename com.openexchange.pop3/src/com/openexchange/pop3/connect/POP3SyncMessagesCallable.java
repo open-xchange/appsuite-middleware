@@ -141,7 +141,7 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
                 throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
             }
             if (LOG.isDebugEnabled()) {
-                LOG.debug("\n\tSynchronizing messages with POP3 account: " + server);
+                LOG.debug("\n\tSynchronizing messages with POP3 account: " + server, new Throwable());
             }
             /*
              * Check default folders since INBOX folder must be present prior to appending to it
