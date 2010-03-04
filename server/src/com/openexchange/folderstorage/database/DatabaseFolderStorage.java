@@ -159,8 +159,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
             /*
              * Already committed
              */
-            if (LOG.isWarnEnabled()) {
-                LOG.warn(e.getMessage(), e);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(e.getMessage(), e);
             }
             return;
         }
