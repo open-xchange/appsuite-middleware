@@ -312,6 +312,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
             }
             final OXFolderManager folderManager = OXFolderManager.getInstance(session, con, con);
+            /*-
+             * TODO: Perform last-modified check?
             {
                 final Date clientLastModified = storageParameters.getTimeStamp();
                 if (null != clientLastModified && getFolderAccess(storageParameters, getFolderType()).getFolderLastModified(folderId).after(
@@ -319,6 +321,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     throw FolderExceptionErrorMessage.CONCURRENT_MODIFICATION.create();
                 }
             }
+             * 
+             */
             folderManager.deleteFolder(fo, true, System.currentTimeMillis());
         } catch (final OXFolderException e) {
             throw new FolderException(e);
