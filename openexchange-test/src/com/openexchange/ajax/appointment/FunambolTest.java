@@ -93,8 +93,6 @@ public final class FunambolTest extends AbstractAJAXSession {
         appointment.setStartDate(new Date(TimeTools.getHour(0, timeZone)));
         appointment.setEndDate(new Date(TimeTools.getHour(1, timeZone)));
         appointment.setIgnoreConflicts(true);
-        final CommonInsertResponse response = client.execute(new InsertRequest(appointment, timeZone));
-        response.fillObject(appointment);
     }
 
     @Override
@@ -104,12 +102,15 @@ public final class FunambolTest extends AbstractAJAXSession {
     }
 
     public void testAppointmentCreationTime() throws Throwable {
-        final Date serverTime = client.getValues().getServerTime();
-
+        final CommonInsertResponse insertResponse = client.execute(new InsertRequest(appointment, timeZone));
+        insertResponse.fillObject(appointment);
         final GetResponse response = client.execute(new GetRequest(appointment));
         final Appointment reload = response.getAppointment(timeZone);
         final Date creationDate = reload.getCreationDate();
-        
+
+        // This request is responded even faster than creating an appointment. Therefore this must be the second request.
+        final Date serverTime = client.getValues().getServerTime();
+
         final long difference = Math.abs(serverTime.getTime() - creationDate.getTime());
         LOG.debug("Time difference: " + difference);
         assertTrue("Too big time difference: ", difference < MAX_DIFFERENCE);
