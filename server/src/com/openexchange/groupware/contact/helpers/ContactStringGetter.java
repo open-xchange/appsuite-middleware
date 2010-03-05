@@ -542,4 +542,8 @@ public class ContactStringGetter implements ContactSwitcher {
 		return stringify(delegate.userfield20(objects));
 	}
 
+    public Object _unknownfield(Object... objects) throws ContactException {
+        return stringify(delegate._unknownfield(objects) + "(UNKNOWN)");
+    }
+
 }

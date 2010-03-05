@@ -516,4 +516,8 @@ public class AbstractContactSwitcherWithDelegate implements ContactSwitcher {
 		return delegate.userfield20(objects);
 	}
 
+    public Object _unknownfield(Object... objects) throws ContactException {
+        return delegate._unknownfield(objects);
+    }
+
 }
