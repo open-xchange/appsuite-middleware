@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.contact.helpers;
 
+import org.omg.CORBA.portable.Delegate;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
@@ -943,7 +944,7 @@ public class ContactGetter implements ContactSwitcher {
         return conObj.getNumberOfAttachments();
     }
 
-    public Object _unknownfield(Object... objects) {
-        return null;
+    public boolean _unknownfield(Contact contact, String fieldname, Object value, Object... additionalObjects){
+        return false;
     }
 }

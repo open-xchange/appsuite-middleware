@@ -128,28 +128,27 @@ public abstract class ImportExport extends SessionServlet {
         try {
             ConfigurationService conf = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
             String path = conf.getProperty("com.openexchange.import.mapper.path");
-            if(path == null) {
+            if (path == null) {
                 LOG.error("Reading the property 'com.openexchange.import.mapper.path' did not give path to mappers. Defaulting to deprecated mappers as fallback.");
                 return outlook;
             }
-                
+
             File dir = new File(path);
             if (!dir.isDirectory()) {
-                LOG.error("Directory "+ path +" supposedly containing import mappers information wasn't actually a directory, defaulting to deprecated mappers as fallback.");
+                LOG.error("Directory " + path + " supposedly containing import mappers information wasn't actually a directory, defaulting to deprecated mappers as fallback.");
                 return outlook;
             }
             File[] files = dir.listFiles();
 
             int mapperAmount = 0;
             for (File file : files) {
-                if (file.getName().endsWith(".properties")) {
-
-                    Properties props = new Properties();
-                    props.load(new FileInputStream(file));
-                    PropertyDrivenMapper mapper = new PropertyDrivenMapper(props);
-                    outlook.addFieldMappers(mapper);
-                    mapperAmount++;
-                }
+                if (!file.getName().endsWith(".properties"))
+                    continue;
+                Properties props = new Properties();
+                props.load(new FileInputStream(file));
+                PropertyDrivenMapper mapper = new PropertyDrivenMapper(props);
+                outlook.addFieldMappers(mapper);
+                mapperAmount++;
             }
             if (mapperAmount == 0) {
                 LOG.error("Did not load any CSV importer mappings, defaulting to deprecated mappers as fallback.");

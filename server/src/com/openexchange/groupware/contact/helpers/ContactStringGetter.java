@@ -52,6 +52,7 @@ package com.openexchange.groupware.contact.helpers;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import com.openexchange.groupware.contact.ContactException;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.tools.TimeZoneUtils;
 
 /**
@@ -542,8 +543,8 @@ public class ContactStringGetter implements ContactSwitcher {
 		return stringify(delegate.userfield20(objects));
 	}
 
-    public Object _unknownfield(Object... objects) throws ContactException {
-        return stringify(delegate._unknownfield(objects) + "(UNKNOWN)");
+    public boolean _unknownfield(Contact contact, String fieldname, Object value, Object... additionalObjects) throws ContactException {
+        return delegate._unknownfield(contact, fieldname, value, additionalObjects);
     }
 
 }

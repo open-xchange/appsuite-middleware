@@ -53,6 +53,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 import com.openexchange.ajax.fields.ExtendedContactFields;
+import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.container.Contact;
 
 
@@ -66,21 +67,25 @@ public class SplitBirthdayFieldsSetter extends AbstractContactSwitcherWithDelega
     private int year = NOT_SET;
     
     @Override
-    public Object _unknownfield(Object... objects){
-        String field = (String) objects[0];
-        Contact contact = (Contact) objects[1];
-        int value = ((Integer)objects[2]).intValue();
+    public boolean _unknownfield(Contact contact, String fieldname, Object value2, Object... objects) throws ContactException{        
+        if(! ExtendedContactFields.BIRTHDAY_DAY.equals(fieldname) 
+            && !ExtendedContactFields.BIRTHDAY_MONTH.equals(fieldname) 
+            && !ExtendedContactFields.BIRTHDAY_YEAR.equals(fieldname))
+            return delegate._unknownfield(contact, fieldname, value2, objects);
         
-        if(ExtendedContactFields.BIRTHDAY_DAY.equals(field))
+        int value = ((Integer)value2).intValue();
+        
+        if(ExtendedContactFields.BIRTHDAY_DAY.equals(fieldname))
             day = value;
-        if(ExtendedContactFields.BIRTHDAY_MONTH.equals(field))
+        if(ExtendedContactFields.BIRTHDAY_MONTH.equals(fieldname))
            month = value;
-        if(ExtendedContactFields.BIRTHDAY_YEAR.equals(field))
+        if(ExtendedContactFields.BIRTHDAY_YEAR.equals(fieldname))
             year = value;
         
         if(day != NOT_SET && month != NOT_SET && year != NOT_SET)
             contact.setBirthday( calculateBirthday() );
-        return contact;
+        
+        return new Boolean(true);
     }
 
     private Date calculateBirthday() {

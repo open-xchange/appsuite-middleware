@@ -50,6 +50,7 @@
 package com.openexchange.groupware.contact.helpers;
 
 import com.openexchange.groupware.contact.ContactException;
+import com.openexchange.groupware.container.Contact;
 
 public class AbstractContactSwitcherWithDelegate implements ContactSwitcher {
 
@@ -516,8 +517,8 @@ public class AbstractContactSwitcherWithDelegate implements ContactSwitcher {
 		return delegate.userfield20(objects);
 	}
 
-    public Object _unknownfield(Object... objects) throws ContactException {
-        return delegate._unknownfield(objects);
+    public boolean _unknownfield(Contact contact, String fieldname, Object value, Object... additionalObjects) throws ContactException {
+        return delegate._unknownfield(contact, fieldname, value, additionalObjects);
     }
 
 }

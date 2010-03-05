@@ -96,7 +96,12 @@ import com.openexchange.tools.Collections;
 public class OutlookCSVContactImporter extends CSVContactImporter {
 	private List<ContactFieldMapper> fieldMappers;
 	private ContactFieldMapper fieldMapper;
+	private boolean isUsingFallback = false;
     
+	public boolean isUsingFallback(){
+	    return isUsingFallback;
+	}
+	
     public List<ContactFieldMapper> getFieldMappers() {
         if(fieldMappers == null){ //default
             fieldMappers = new LinkedList<ContactFieldMapper>();
@@ -104,6 +109,7 @@ public class OutlookCSVContactImporter extends CSVContactImporter {
             fieldMappers.add( new FrenchOutlookMapper());
             fieldMappers.add( new EnglishOutlookMapper());
             fieldMappers.add( new DutchOutlookMapper());
+            isUsingFallback = true;
         }
         return fieldMappers;
     }

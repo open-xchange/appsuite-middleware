@@ -50,6 +50,7 @@
 package com.openexchange.groupware.contact.helpers;
 
 import com.openexchange.groupware.contact.ContactException;
+import com.openexchange.groupware.container.Contact;
 
 /**
  * This is an interface for classes that operate on the class ContactFields. Implementations might be used to set the value of an
@@ -281,5 +282,5 @@ public interface ContactSwitcher {
 
     public Object numberofattachments(Object... objects) throws ContactException;
     
-    public Object _unknownfield(Object... objects) throws ContactException;
+    public boolean _unknownfield(Contact contact, String fieldname, Object value, Object... additionalObjects) throws ContactException;
 }

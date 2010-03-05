@@ -318,12 +318,16 @@ public class CSVContactImporter extends AbstractImporter {
         final List<String> wrongFields = new LinkedList<String>();
         boolean atLeastOneFieldWithWrongName = false;
         for(int i = 0; i < fields.size(); i++){
-            final ContactField currField = getRelevantField(fields.get(i));
+            final String fieldName = fields.get(i);
+            final String currEntry = entry.get(i);
+            final ContactField currField = getRelevantField(fieldName);
             if(currField == null){
+                boolean worked = conSet._unknownfield(contactObj, fieldName, currEntry);
+                if(worked)
+                    continue;
                 atLeastOneFieldWithWrongName = true;
                 wrongFields.add(fields.get(i));
             } else {
-                final String currEntry = entry.get(i);
                 if(! currEntry.equals("")){
                     currField.doSwitch(conSet, contactObj, currEntry);
                 }

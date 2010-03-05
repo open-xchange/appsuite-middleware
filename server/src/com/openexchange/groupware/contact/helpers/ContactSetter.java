@@ -1177,8 +1177,8 @@ public class ContactSetter implements ContactSwitcher {
         return Integer.valueOf(candidate.toString());
     }
 
-    public Object _unknownfield(Object... objects) throws ContactException {
-        throw EXCEPTIONS.create(1, objects[0].toString());
+    public boolean _unknownfield(Contact contact, String fieldname, Object value, Object... additionalObjects) throws ContactException {
+        throw EXCEPTIONS.create(1, fieldname);
     }
 
 }
