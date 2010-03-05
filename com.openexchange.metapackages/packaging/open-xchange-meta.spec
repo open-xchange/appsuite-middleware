@@ -210,7 +210,7 @@ Authors:
 %doc README.TXT
 
 %files -n open-xchange-meta-parallels
-%defattr(-,root,root
+%defattr(-,root,root)
 %doc README.TXT
 
 %changelog
