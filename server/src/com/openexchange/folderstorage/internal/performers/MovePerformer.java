@@ -192,6 +192,19 @@ final class MovePerformer extends AbstractPerformer {
             }
         }
         /*
+         * Check permission on destination folder
+         */
+        {
+            final Folder destFolder = virtualStorage.getFolder(folder.getTreeID(), folder.getParentID(), storageParameters);
+            final Permission permission = effectivePermission(destFolder);
+            if (permission.getFolderPermission() < Permission.CREATE_SUB_FOLDERS) {
+                throw FolderExceptionErrorMessage.NO_CREATE_SUBFOLDERS.create(
+                    getUser().getDisplayName(),
+                    destFolder.getLocalizedName(session.getUser().getLocale()),
+                    Integer.valueOf(getContextId()));
+            }
+        }
+        /*
          * Get subfolders
          */
         final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, folder.getID());
