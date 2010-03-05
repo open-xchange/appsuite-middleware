@@ -38,7 +38,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 11
+%define		ox_release 12
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -143,6 +143,9 @@ mv doc javadoc
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Fri Mar 05 2010 - choeger@open-xchange.com
+  - Bugfix #15554 -[L3] unable to create new contexts even if max unit is not
+  reached
 * Thu Oct 29 2009 - dennis.sieben@open-xchange.com
  - Bugfix #14734: Reporting Tool needs to be available for 6.12
    - Changed StatisticTool to use abstract JMX class
