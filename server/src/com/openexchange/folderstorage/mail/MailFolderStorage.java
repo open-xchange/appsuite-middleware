@@ -735,7 +735,7 @@ public final class MailFolderStorage implements FolderStorage {
         }
     };
 
-    public StorageParameters startTransaction(final StorageParameters parameters, final boolean modify) throws FolderException {
+    public boolean startTransaction(final StorageParameters parameters, final boolean modify) throws FolderException {
         /*
          * Ensure session is present
          */
@@ -745,11 +745,10 @@ public final class MailFolderStorage implements FolderStorage {
         /*
          * Put map
          */
-        parameters.putParameterIfAbsent(
+        return parameters.putParameterIfAbsent(
             MailFolderType.getInstance(),
             MailParameterConstants.PARAM_MAIL_ACCESS,
             new TIntObjectHashMap<MailAccess<?, ?>>());
-        return parameters;
     }
 
     public StoragePriority getStoragePriority() {

@@ -119,19 +119,25 @@ public final class ClearPerformer extends AbstractPerformer {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
         }
         final long start = LOG.isDebugEnabled() ? System.currentTimeMillis() : 0L;
-        folderStorage.startTransaction(storageParameters, true);
+        final boolean started = folderStorage.startTransaction(storageParameters, true);
         try {
             folderStorage.clearFolder(treeId, folderId, storageParameters);
             if (LOG.isDebugEnabled()) {
                 final long duration = System.currentTimeMillis() - start;
                 LOG.debug(new StringBuilder().append("Clear.doClear() took ").append(duration).append("msec for folder: ").append(folderId).toString());
             }
-            folderStorage.commitTransaction(storageParameters);
+            if (started) {
+                folderStorage.commitTransaction(storageParameters);
+            }
         } catch (final FolderException e) {
-            folderStorage.rollback(storageParameters);
+            if (started) {
+                folderStorage.rollback(storageParameters);
+            }
             throw e;
         } catch (final Exception e) {
-            folderStorage.rollback(storageParameters);
+            if (started) {
+                folderStorage.rollback(storageParameters);
+            }
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

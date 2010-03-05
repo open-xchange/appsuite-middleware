@@ -110,16 +110,22 @@ public final class VirtualFolderStorage implements FolderStorage {
         if (null == byContentType) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(treeId, contentType);
         }
-        byContentType.startTransaction(storageParameters, false);
+        final boolean started = byContentType.startTransaction(storageParameters, false);
         try {
             final String defaultFolderID = byContentType.getDefaultFolderID(user, treeId, contentType, storageParameters);
-            byContentType.commitTransaction(storageParameters);
+            if (started) {
+                byContentType.commitTransaction(storageParameters);
+            }
             return defaultFolderID;
         } catch (final FolderException e) {
-            byContentType.rollback(storageParameters);
+            if (started) {
+                byContentType.rollback(storageParameters);
+            }
             throw e;
         } catch (final Exception e) {
-            byContentType.rollback(storageParameters);
+            if (started) {
+                byContentType.rollback(storageParameters);
+            }
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -128,16 +134,27 @@ public final class VirtualFolderStorage implements FolderStorage {
         /*
          * Get real folder storage
          */
-        final FolderStorage realFolderStorage = getRealFolderStorage(folderId, storageParameters, false);
+        final FolderStorage realFolderStorage =
+            VirtualFolderStorageRegistry.getInstance().getFolderStorage(FolderStorage.REAL_TREE_ID, folderId);
+        if (null == realFolderStorage) {
+            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folderId);
+        }
+        final boolean started = realFolderStorage.startTransaction(storageParameters, false);
         try {
             final boolean containsForeignObjects = realFolderStorage.containsForeignObjects(user, treeId, folderId, storageParameters);
-            realFolderStorage.commitTransaction(storageParameters);
+            if (started) {
+                realFolderStorage.commitTransaction(storageParameters);
+            }
             return containsForeignObjects;
         } catch (final FolderException e) {
-            realFolderStorage.rollback(storageParameters);
+            if (started) {
+                realFolderStorage.rollback(storageParameters);
+            }
             throw e;
         } catch (final Exception e) {
-            realFolderStorage.rollback(storageParameters);
+            if (started) {
+                realFolderStorage.rollback(storageParameters);
+            }
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -146,16 +163,27 @@ public final class VirtualFolderStorage implements FolderStorage {
         /*
          * Get real folder storage
          */
-        final FolderStorage realFolderStorage = getRealFolderStorage(folderId, storageParameters, false);
+        final FolderStorage realFolderStorage =
+            VirtualFolderStorageRegistry.getInstance().getFolderStorage(FolderStorage.REAL_TREE_ID, folderId);
+        if (null == realFolderStorage) {
+            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folderId);
+        }
+        final boolean started = realFolderStorage.startTransaction(storageParameters, false);
         try {
             final boolean isEmpty = realFolderStorage.isEmpty(treeId, folderId, storageParameters);
-            realFolderStorage.commitTransaction(storageParameters);
+            if (started) {
+                realFolderStorage.commitTransaction(storageParameters);
+            }
             return isEmpty;
         } catch (final FolderException e) {
-            realFolderStorage.rollback(storageParameters);
+            if (started) {
+                realFolderStorage.rollback(storageParameters);
+            }
             throw e;
         } catch (final Exception e) {
-            realFolderStorage.rollback(storageParameters);
+            if (started) {
+                realFolderStorage.rollback(storageParameters);
+            }
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -164,16 +192,27 @@ public final class VirtualFolderStorage implements FolderStorage {
         /*
          * Get real folder storage
          */
-        final FolderStorage folderStorage = getRealFolderStorage(folderId, storageParameters, false);
+        final FolderStorage folderStorage =
+            VirtualFolderStorageRegistry.getInstance().getFolderStorage(FolderStorage.REAL_TREE_ID, folderId);
+        if (null == folderStorage) {
+            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folderId);
+        }
+        final boolean started = folderStorage.startTransaction(storageParameters, false);
         try {
             // Get folder
             folderStorage.updateLastModified(lastModified, FolderStorage.REAL_TREE_ID, folderId, storageParameters);
-            folderStorage.commitTransaction(storageParameters);
+            if (started) {
+                folderStorage.commitTransaction(storageParameters);
+            }
         } catch (final FolderException e) {
-            folderStorage.rollback(storageParameters);
+            if (started) {
+                folderStorage.rollback(storageParameters);
+            }
             throw e;
         } catch (final Exception e) {
-            folderStorage.rollback(storageParameters);
+            if (started) {
+                folderStorage.rollback(storageParameters);
+            }
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -187,16 +226,29 @@ public final class VirtualFolderStorage implements FolderStorage {
         {
             final Folder realFolder;
             {
-                // Get real folder storage
-                final FolderStorage realFolderStorage = getRealFolderStorage(folderId, storageParameters, false);
+                /*
+                 * Get real folder storage
+                 */
+                final FolderStorage realFolderStorage =
+                    VirtualFolderStorageRegistry.getInstance().getFolderStorage(FolderStorage.REAL_TREE_ID, folderId);
+                if (null == realFolderStorage) {
+                    throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folderId);
+                }
+                final boolean started = realFolderStorage.startTransaction(storageParameters, false);
                 try {
                     realFolder = realFolderStorage.getFolder(FolderStorage.REAL_TREE_ID, folderId, storageParameters);
-                    realFolderStorage.commitTransaction(storageParameters);
+                    if (started) {
+                        realFolderStorage.commitTransaction(storageParameters);
+                    }
                 } catch (final FolderException e) {
-                    realFolderStorage.rollback(storageParameters);
+                    if (started) {
+                        realFolderStorage.rollback(storageParameters);
+                    }
                     throw e;
                 } catch (final Exception e) {
-                    realFolderStorage.rollback(storageParameters);
+                    if (started) {
+                        realFolderStorage.rollback(storageParameters);
+                    }
                     throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
                 }
             }
@@ -245,8 +297,8 @@ public final class VirtualFolderStorage implements FolderStorage {
 
     }
 
-    public StorageParameters startTransaction(final StorageParameters parameters, final boolean modify) throws FolderException {
-        return parameters;
+    public boolean startTransaction(final StorageParameters parameters, final boolean modify) throws FolderException {
+        return true;
     }
 
     public void updateFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
@@ -294,28 +346,6 @@ public final class VirtualFolderStorage implements FolderStorage {
 
     public String[] getModifiedFolderIDs(final String treeId, final Date timeStamp, final ContentType[] includeContentTypes, final StorageParameters storageParameters) throws FolderException {
         return new String[0];
-    }
-
-    /**
-     * Gets the real folder storage for given folder identifier. Returned storage is already opened with given storage parameters and given
-     * <code>modify</code> behavior.
-     * 
-     * @param folderId The folder identifier
-     * @param storageParameters The storage parameters to start a transaction on returned folder storage
-     * @param modify <code>true</code> if the operation to perform on returned storage is going to modify its data; otherwise
-     *            <code>false</code>
-     * @return The real folder storage for given folder identifier
-     * @throws FolderException If real folder storage cannot be returned
-     */
-    private static FolderStorage getRealFolderStorage(final String folderId, final StorageParameters storageParameters, final boolean modify) throws FolderException {
-        // Get real folder storage
-        final FolderStorage realFolderStorage =
-            VirtualFolderStorageRegistry.getInstance().getFolderStorage(FolderStorage.REAL_TREE_ID, folderId);
-        if (null == realFolderStorage) {
-            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folderId);
-        }
-        realFolderStorage.startTransaction(storageParameters, modify);
-        return realFolderStorage;
     }
 
 }

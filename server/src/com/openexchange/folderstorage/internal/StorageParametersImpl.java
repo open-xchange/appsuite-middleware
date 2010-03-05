@@ -84,6 +84,10 @@ public final class StorageParametersImpl implements StorageParameters {
 
     private Date timeStamp;
 
+    private Thread usingThread;
+
+    private StackTraceElement[] trace;
+
     /**
      * Initializes a new {@link List} from given session.
      * 
@@ -131,12 +135,20 @@ public final class StorageParametersImpl implements StorageParameters {
         return context;
     }
 
-    public Object getParameter(final FolderType folderType, final String name) {
+    public <P> P getParameter(final FolderType folderType, final String name) {
         final Map<String, Object> m = getFolderTypeMap(folderType, false);
         if (null == m) {
             return null;
         }
-        return m.get(name);
+        try {
+            @SuppressWarnings("unchecked") final P retval = (P) m.get(name);
+            return retval;
+        } catch (final ClassCastException e) {
+            /*
+             * Wrong type
+             */
+            return null;
+        }
     }
 
     public Session getSession() {
@@ -190,6 +202,47 @@ public final class StorageParametersImpl implements StorageParameters {
 
     public int getUserId() {
         return userId;
+    }
+
+    public void markCommitted() {
+        usingThread = Thread.currentThread();
+        /*
+         * This is faster than Thread.getStackTrace() since a native method is used to fill thread's stack trace
+         */
+        trace = new Throwable().getStackTrace();
+    }
+
+    /**
+     * Gets the trace of the thread that lastly obtained this access.
+     * <p>
+     * This is useful to detect certain threads which uses an access for a long time
+     * 
+     * @return the trace of the thread that lastly obtained this access
+     */
+    public String getCommittedTrace() {
+        final StringBuilder sBuilder = new StringBuilder(512);
+        sBuilder.append(toString());
+        sBuilder.append("\nStorage parameters committed at: ").append('\n');
+        /*
+         * Start at index 2
+         */
+        final String delim = "\tat ";
+        for (int i = 2; i < trace.length; i++) {
+            sBuilder.append(delim).append(trace[i]).append('\n');
+        }
+        if ((null != usingThread) && usingThread.isAlive()) {
+            sBuilder.append("Currently using thread: ").append(usingThread.getName()).append('\n');
+            /*
+             * Only possibility to get the current working position of a thread.
+             */
+            final StackTraceElement[] trace = usingThread.getStackTrace();
+            sBuilder.append(delim).append(trace[0]);
+            final String prefix = "\n\tat ";
+            for (int i = 1; i < trace.length; i++) {
+                sBuilder.append(prefix).append(trace[i]);
+            }
+        }
+        return sBuilder.toString();
     }
 
 }

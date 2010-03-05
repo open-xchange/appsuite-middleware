@@ -159,8 +159,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
             /*
              * Already committed
              */
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(e.getMessage(), e);
+            if (LOG.isWarnEnabled()) {
+                LOG.warn("Storage already committed:\n" + params.getCommittedTrace(), e);
             }
             return;
         }
@@ -181,6 +181,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
             final FolderType folderType = getFolderType();
             params.putParameter(folderType, DatabaseParameterConstants.PARAM_CONNECTION, null);
             params.putParameter(folderType, DatabaseParameterConstants.PARAM_WRITABLE, null);
+            params.markCommitted();
         }
     }
 
@@ -800,11 +801,11 @@ public final class DatabaseFolderStorage implements FolderStorage {
         }
     }
 
-    public StorageParameters startTransaction(final StorageParameters parameters, final boolean modify) throws FolderException {
+    public boolean startTransaction(final StorageParameters parameters, final boolean modify) throws FolderException {
         final FolderType folderType = getFolderType();
         if (null != parameters.getParameter(folderType, DatabaseParameterConstants.PARAM_CONNECTION)) {
             // Connection already present
-            return parameters;
+            return false;
         }
         try {
             final DatabaseService databaseService = DatabaseServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
@@ -824,7 +825,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     databaseService.backReadOnly(context, con);
                 }
             }
-            return parameters;
+            return true;
         } catch (final ServiceException e) {
             throw new FolderException(e);
         } catch (final DBPoolingException e) {

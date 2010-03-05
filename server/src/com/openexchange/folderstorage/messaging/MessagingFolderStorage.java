@@ -809,7 +809,7 @@ public final class MessagingFolderStorage implements FolderStorage {
         }
     }
 
-    public StorageParameters startTransaction(final StorageParameters parameters, final boolean modify) throws FolderException {
+    public boolean startTransaction(final StorageParameters parameters, final boolean modify) throws FolderException {
         /*
          * Ensure session is present
          */
@@ -819,11 +819,10 @@ public final class MessagingFolderStorage implements FolderStorage {
         /*
          * Put map
          */
-        parameters.putParameterIfAbsent(
+        return parameters.putParameterIfAbsent(
             MessagingFolderType.getInstance(),
             MessagingParameterConstants.PARAM_MESSAGING_ACCESS,
             new ConcurrentHashMap<Key, MessagingAccountAccess>());
-        return parameters;
     }
 
     public StoragePriority getStoragePriority() {

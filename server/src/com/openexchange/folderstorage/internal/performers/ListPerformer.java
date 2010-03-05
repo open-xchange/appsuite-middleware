@@ -230,13 +230,17 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
 
                         public Object call() throws Exception {
                             final StorageParameters newParameters = newStorageParameters();
-                            folderStorage.startTransaction(newParameters, false);
+                            final boolean started = folderStorage.startTransaction(newParameters, false);
                             final Folder subfolder;
                             try {
                                 subfolder = folderStorage.getFolder(treeId, subfolderIds[index], newParameters);
-                                folderStorage.commitTransaction(newParameters);
+                                if (started) {
+                                    folderStorage.commitTransaction(newParameters);
+                                }
                             } catch (final Exception e) {
-                                folderStorage.rollback(newParameters);
+                                if (started) {
+                                    folderStorage.rollback(newParameters);
+                                }
                                 throw e;
                             }
                             /*
@@ -294,15 +298,21 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
         final List<SortableId> allSubfolderIds;
         if (1 == neededStorages.length) {
             final FolderStorage neededStorage = neededStorages[0];
-            neededStorage.startTransaction(storageParameters, false);
+            final boolean started = neededStorage.startTransaction(storageParameters, false);
             try {
                 allSubfolderIds = Arrays.asList(neededStorage.getSubfolders(treeId, parentId, storageParameters));
-                neededStorage.commitTransaction(storageParameters);
+                if (started) {
+                    neededStorage.commitTransaction(storageParameters);
+                }
             } catch (final FolderException e) {
-                neededStorage.rollback(storageParameters);
+                if (started) {
+                    neededStorage.rollback(storageParameters);
+                }
                 throw e;
             } catch (final Exception e) {
-                neededStorage.rollback(storageParameters);
+                if (started) {
+                    neededStorage.rollback(storageParameters);
+                }
                 throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
 
@@ -323,16 +333,22 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
 
                     public List<SortableId> call() throws FolderException {
                         final StorageParameters newParameters = newStorageParameters();
-                        neededStorage.startTransaction(newParameters, false);
+                        final boolean started = neededStorage.startTransaction(newParameters, false);
                         try {
                             final List<SortableId> l = Arrays.asList(neededStorage.getSubfolders(treeId, parentId, newParameters));
-                            neededStorage.commitTransaction(newParameters);
+                            if (started) {
+                                neededStorage.commitTransaction(newParameters);
+                            }
                             return l;
                         } catch (final FolderException e) {
-                            neededStorage.rollback(newParameters);
+                            if (started) {
+                                neededStorage.rollback(newParameters);
+                            }
                             throw e;
                         } catch (final Exception e) {
-                            neededStorage.rollback(newParameters);
+                            if (started) {
+                                neededStorage.rollback(newParameters);
+                            }
                             throw FolderException.newUnexpectedException(e);
                         }
                     }

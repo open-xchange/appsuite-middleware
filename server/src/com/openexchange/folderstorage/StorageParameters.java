@@ -135,7 +135,7 @@ public interface StorageParameters {
      * @param name The parameter name
      * @return The parameter bound to given name
      */
-    Object getParameter(FolderType folderType, String name);
+    <P> P getParameter(FolderType folderType, String name);
 
     /**
      * Puts given parameter. Any existing parameters bound to given name are replaced. A <code>null</code> value means to remove the
@@ -161,5 +161,17 @@ public interface StorageParameters {
      * @return <code>true</code> if put was successful; otherwise <code>false</code>
      */
     boolean putParameterIfAbsent(FolderType folderType, String name, Object value);
+
+    /**
+     * Sets a committed marker to this storage parameters.
+     */
+    void markCommitted();
+
+    /**
+     * Gets the trace of the thread that set the committed marker to this storage parameters.
+     * 
+     * @return The trace
+     */
+    String getCommittedTrace();
 
 }

@@ -296,10 +296,10 @@ public interface FolderStorage {
      * 
      * @param parameters The parameters
      * @param modify <code>true</code> if started transaction is supposed to modify storage's content; otherwise <code>false</code>
-     * @return The parameters with storage-specific extensions
+     * @return <code>true</code> if call started the transaction; otherwise <code>false</code> if transaction has already been started before
      * @throws FolderException If storage parameters cannot be returned
      */
-    StorageParameters startTransaction(StorageParameters parameters, boolean modify) throws FolderException;
+    boolean startTransaction(StorageParameters parameters, boolean modify) throws FolderException;
 
     /**
      * Publishes made changes on the storage.

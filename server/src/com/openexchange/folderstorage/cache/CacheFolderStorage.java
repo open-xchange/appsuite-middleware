@@ -284,15 +284,21 @@ public final class CacheFolderStorage implements FolderStorage {
             if (!FolderStorage.REAL_TREE_ID.equals(treeId)) {
                 final StorageParameters parameters = newStorageParameters(storageParameters);
                 final FolderStorage folderStorage = registry.getFolderStorage(FolderStorage.REAL_TREE_ID, folderId);
-                folderStorage.startTransaction(parameters, false);
+                final boolean started = folderStorage.startTransaction(parameters, false);
                 try {
                     realParentId = folderStorage.getFolder(FolderStorage.REAL_TREE_ID, folderId, parameters).getParentID();
-                    folderStorage.commitTransaction(parameters);
+                    if (started) {
+                        folderStorage.commitTransaction(parameters);
+                    }
                 } catch (final FolderException e) {
-                    folderStorage.rollback(parameters);
+                    if (started) {
+                        folderStorage.rollback(parameters);
+                    }
                     throw e;
                 } catch (final Exception e) {
-                    folderStorage.rollback(parameters);
+                    if (started) {
+                        folderStorage.rollback(parameters);
+                    }
                     throw FolderException.newUnexpectedException(e);
                 }
             } else {
@@ -356,13 +362,22 @@ public final class CacheFolderStorage implements FolderStorage {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(treeId, contentType);
         }
         final String folderId;
-        storage.startTransaction(storageParameters, false);
+        final boolean started = storage.startTransaction(storageParameters, false);
         try {
             folderId = storage.getDefaultFolderID(user, treeId, contentType, storageParameters);
-            storage.commitTransaction(storageParameters);
+            if (started) {
+                storage.commitTransaction(storageParameters);
+            }
         } catch (final FolderException e) {
-            storage.rollback(storageParameters);
+            if (started) {
+                storage.rollback(storageParameters);
+            }
             throw e;
+        } catch (final Exception e) {
+            if (started) {
+                storage.rollback(storageParameters);
+            }
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
         return folderId;
     }
@@ -375,16 +390,22 @@ public final class CacheFolderStorage implements FolderStorage {
         if (null == storage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
         }
-        storage.startTransaction(storageParameters, false);
+        final boolean started = storage.startTransaction(storageParameters, false);
         try {
             final boolean containsForeignObjects = storage.containsForeignObjects(user, treeId, folderId, storageParameters);
-            storage.commitTransaction(storageParameters);
+            if (started) {
+                storage.commitTransaction(storageParameters);
+            }
             return containsForeignObjects;
         } catch (final FolderException e) {
-            storage.rollback(storageParameters);
+            if (started) {
+                storage.rollback(storageParameters);
+            }
             throw e;
         } catch (final Exception e) {
-            storage.rollback(storageParameters);
+            if (started) {
+                storage.rollback(storageParameters);
+            }
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -397,16 +418,22 @@ public final class CacheFolderStorage implements FolderStorage {
         if (null == storage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
         }
-        storage.startTransaction(storageParameters, false);
+        final boolean started = storage.startTransaction(storageParameters, false);
         try {
             final boolean isEmpty = storage.isEmpty(treeId, folderId, storageParameters);
-            storage.commitTransaction(storageParameters);
+            if (started) {
+                storage.commitTransaction(storageParameters);
+            }
             return isEmpty;
         } catch (final FolderException e) {
-            storage.rollback(storageParameters);
+            if (started) {
+                storage.rollback(storageParameters);
+            }
             throw e;
         } catch (final Exception e) {
-            storage.rollback(storageParameters);
+            if (started) {
+                storage.rollback(storageParameters);
+            }
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -416,15 +443,21 @@ public final class CacheFolderStorage implements FolderStorage {
         if (null == storage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
         }
-        storage.startTransaction(storageParameters, false);
+        final boolean started = storage.startTransaction(storageParameters, false);
         try {
             storage.updateLastModified(lastModified, treeId, folderId, storageParameters);
-            storage.commitTransaction(storageParameters);
+            if (started) {
+                storage.commitTransaction(storageParameters);
+            }
         } catch (final FolderException e) {
-            storage.rollback(storageParameters);
+            if (started) {
+                storage.rollback(storageParameters);
+            }
             throw e;
         } catch (final Exception e) {
-            storage.rollback(storageParameters);
+            if (started) {
+                storage.rollback(storageParameters);
+            }
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
         /*
@@ -504,12 +537,16 @@ public final class CacheFolderStorage implements FolderStorage {
                 final java.util.List<SortableId> allSubfolderIds;
                 if (1 == neededStorages.length) {
                     final FolderStorage neededStorage = neededStorages[0];
-                    neededStorage.startTransaction(storageParameters, false);
+                    final boolean started = neededStorage.startTransaction(storageParameters, false);
                     try {
                         allSubfolderIds = Arrays.asList(neededStorage.getSubfolders(treeId, parentId, storageParameters));
-                        neededStorage.commitTransaction(storageParameters);
+                        if (started) {
+                            neededStorage.commitTransaction(storageParameters);
+                        }
                     } catch (final Exception e) {
-                        neededStorage.rollback(storageParameters);
+                        if (started) {
+                            neededStorage.rollback(storageParameters);
+                        }
                         throw e;
                     }
                 } else {
@@ -525,14 +562,18 @@ public final class CacheFolderStorage implements FolderStorage {
 
                             public java.util.List<SortableId> call() throws Exception {
                                 final StorageParameters newParameters = newStorageParameters(storageParameters);
-                                neededStorage.startTransaction(newParameters, false);
+                                final boolean started = neededStorage.startTransaction(newParameters, false);
                                 try {
                                     final java.util.List<SortableId> l =
                                         Arrays.asList(neededStorage.getSubfolders(treeId, parentId, newParameters));
-                                    neededStorage.commitTransaction(newParameters);
+                                    if (started) {
+                                        neededStorage.commitTransaction(newParameters);
+                                    }
                                     return l;
                                 } catch (final Exception e) {
-                                    neededStorage.rollback(newParameters);
+                                    if (started) {
+                                        neededStorage.rollback(newParameters);
+                                    }
                                     throw e;
                                 }
                             }
@@ -574,8 +615,8 @@ public final class CacheFolderStorage implements FolderStorage {
         // Nothing to do
     }
 
-    public StorageParameters startTransaction(final StorageParameters parameters, final boolean modify) throws FolderException {
-        return parameters;
+    public boolean startTransaction(final StorageParameters parameters, final boolean modify) throws FolderException {
+        return false;
     }
 
     public void updateFolder(final Folder folder, final StorageParameters storageParameters) throws FolderException {
@@ -679,16 +720,22 @@ public final class CacheFolderStorage implements FolderStorage {
         if (null == storage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
         }
-        storage.startTransaction(storageParameters, true);
+        final boolean started = storage.startTransaction(storageParameters, true);
         try {
             final boolean contains = storage.containsFolder(treeId, folderId, storageType, storageParameters);
-            storage.commitTransaction(storageParameters);
+            if (started) {
+                storage.commitTransaction(storageParameters);
+            }
             return contains;
         } catch (final FolderException e) {
-            storage.rollback(storageParameters);
+            if (started) {
+                storage.rollback(storageParameters);
+            }
             throw e;
         } catch (final Exception e) {
-            storage.rollback(storageParameters);
+            if (started) {
+                storage.rollback(storageParameters);
+            }
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -716,16 +763,22 @@ public final class CacheFolderStorage implements FolderStorage {
         if (null == storage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
         }
-        storage.startTransaction(storageParameters, false);
+        final boolean started = storage.startTransaction(storageParameters, false);
         try {
             final Folder folder = storage.getFolder(treeId, folderId, storageType, storageParameters);
-            storage.commitTransaction(storageParameters);
+            if (started) {
+                storage.commitTransaction(storageParameters);
+            }
             return folder;
         } catch (final FolderException e) {
-            storage.rollback(storageParameters);
+            if (started) {
+                storage.rollback(storageParameters);
+            }
             throw e;
         } catch (final Exception e) {
-            storage.rollback(storageParameters);
+            if (started) {
+                storage.rollback(storageParameters);
+            }
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

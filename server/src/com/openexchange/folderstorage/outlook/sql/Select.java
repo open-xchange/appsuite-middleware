@@ -187,6 +187,26 @@ public final class Select {
         } catch (final DBPoolingException e) {
             throw new FolderException(e);
         }
+        try {
+            return containsParent(cid, tree, user, parentId, storageType, con);
+        } finally {
+            databaseService.backReadOnly(cid, con);
+        }
+    }
+
+    /**
+     * Checks if the specified virtual tree contains a parent denoted by given parent identifier.
+     * 
+     * @param cid The context identifier
+     * @param tree The tree identifier
+     * @param user The user identifier
+     * @param parentId The parent identifier
+     * @param storageType The storage type to use
+     * @return <code>true</code> if the specified virtual tree contains a parent denoted by given parent identifier; otherwise
+     *         <code>false</code>
+     * @throws FolderException If checking folder's presence fails
+     */
+    public static boolean containsParent(final int cid, final int tree, final int user, final String parentId, final StorageType storageType, final Connection con) throws FolderException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -200,9 +220,10 @@ public final class Select {
             return rs.next();
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } catch (final Exception e) {
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
-            databaseService.backReadOnly(cid, con);
         }
     }
 
@@ -227,6 +248,26 @@ public final class Select {
         } catch (final DBPoolingException e) {
             throw new FolderException(e);
         }
+        try {
+            return containsFolder(cid, tree, user, folderId, storageType, con);
+        } finally {
+            databaseService.backReadOnly(cid, con);
+        }
+    }
+
+    /**
+     * Checks if the specified virtual tree contains a folder denoted by given folder identifier.
+     * 
+     * @param cid The context identifier
+     * @param tree The tree identifier
+     * @param user The user identifier
+     * @param folderId The folder identifier
+     * @param storageType The storage type to use
+     * @return <code>true</code> if the specified virtual tree contains a folder denoted by given folder identifier; otherwise
+     *         <code>false</code>
+     * @throws FolderException If checking folder's presence fails
+     */
+    public static boolean containsFolder(final int cid, final int tree, final int user, final String folderId, final StorageType storageType, final Connection con) throws FolderException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -240,8 +281,36 @@ public final class Select {
             return rs.next();
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } catch (final Exception e) {
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
+        }
+    }
+
+    /**
+     * Gets the name of the folder held in virtual tree for the folder denoted by given folder identifier.
+     * 
+     * @param cid The context identifier
+     * @param tree The tree identifier
+     * @param user The user identifier
+     * @param folderId The folder identifier
+     * @param storageType The storage type to use
+     * @return The name of the folder or <code>null</code> if virtual tree does not hold denoted folder
+     * @throws FolderException If returning folder's name fails
+     */
+    public static String getFolderName(final int cid, final int tree, final int user, final String folderId, final StorageType storageType) throws FolderException {
+        final DatabaseService databaseService = getDatabaseService();
+        // Get a connection
+        final Connection con;
+        try {
+            con = databaseService.getReadOnly(cid);
+        } catch (final DBPoolingException e) {
+            throw new FolderException(e);
+        }
+        try {
+            return getFolderName(cid, tree, user, folderId, storageType, con);
+        } finally {
             databaseService.backReadOnly(cid, con);
         }
     }
@@ -255,17 +324,9 @@ public final class Select {
      * @param folderId The folder identifier
      * @param storageType The storage type to use
      * @return The name of the folder or <code>null</code> if virtual tree does not hold denoted folder
-     * @throws FolderException If checking folder's presence fails
+     * @throws FolderException If returning folder's name fails
      */
-    public static String getFolderName(final int cid, final int tree, final int user, final String folderId, final StorageType storageType) throws FolderException {
-        final DatabaseService databaseService = getDatabaseService();
-        // Get a connection
-        final Connection con;
-        try {
-            con = databaseService.getReadOnly(cid);
-        } catch (final DBPoolingException e) {
-            throw new FolderException(e);
-        }
+    public static String getFolderName(final int cid, final int tree, final int user, final String folderId, final StorageType storageType, final Connection con) throws FolderException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -279,9 +340,10 @@ public final class Select {
             return rs.next() ? rs.getString(2) : null;
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } catch (final Exception e) {
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
-            databaseService.backReadOnly(cid, con);
         }
     }
 
@@ -305,6 +367,25 @@ public final class Select {
         } catch (final DBPoolingException e) {
             throw new FolderException(e);
         }
+        try {
+            return containsFolders(cid, tree, user, folderIds, storageType, con);
+        } finally {
+            databaseService.backReadOnly(cid, con);
+        }
+    }
+
+    /**
+     * Checks if the specified virtual tree contains any of the folders denoted by given folder identifiers.
+     * 
+     * @param cid The context identifier
+     * @param tree The tree identifier
+     * @param user The user identifier
+     * @param folderIds The folder identifiers
+     * @param storageType The storage type to use
+     * @return A <code>boolean</code> array containing the flag, whether the folder is contained or not
+     * @throws FolderException If checking folder's presence fails
+     */
+    public static boolean[] containsFolders(final int cid, final int tree, final int user, final String[] folderIds, final StorageType storageType, final Connection con) throws FolderException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -326,9 +407,10 @@ public final class Select {
             return ret;
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } catch (final Exception e) {
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
-            databaseService.backReadOnly(cid, con);
         }
     }
 
@@ -352,6 +434,25 @@ public final class Select {
         } catch (final DBPoolingException e) {
             throw new FolderException(e);
         }
+        try {
+            return containsFolders(cid, tree, user, folderIds, storageType, con);
+        } finally {
+            databaseService.backReadOnly(cid, con);
+        }
+    }
+
+    /**
+     * Checks if the specified virtual tree contains any of the folders denoted by given folder identifiers.
+     * 
+     * @param cid The context identifier
+     * @param tree The tree identifier
+     * @param user The user identifier
+     * @param folderIds The folder identifiers
+     * @param storageType The storage type to use
+     * @return A <code>boolean</code> array containing the flag, whether the folder is contained or not
+     * @throws FolderException If checking folder's presence fails
+     */
+    public static boolean[] containsFolders(final int cid, final int tree, final int user, final SortableId[] folderIds, final StorageType storageType, final Connection con) throws FolderException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -373,8 +474,39 @@ public final class Select {
             return ret;
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } catch (final Exception e) {
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
+        }
+    }
+
+    /**
+     * Fills specified folder, does nothing if folder does not exist in tables.
+     * 
+     * @param cid The context identifier
+     * @param tree The tree identifier
+     * @param user The user identifier
+     * @param locale The user's locale (needed for proper sorting of possible subfolders)
+     * @param outlookFolder The folder to fill
+     * @param storageType The storage type to use
+     * @return <code>true</code> if folder was present in tables; otherwise <code>false</code>
+     * @throws FolderException If filling the folder fails
+     */
+    public static boolean fillFolder(final int cid, final int tree, final int user, final Locale locale, final OutlookFolder outlookFolder, final StorageType storageType) throws FolderException {
+        final DatabaseService databaseService = getDatabaseService();
+        // Get a connection
+        final Connection con;
+        try {
+            con = databaseService.getReadOnly(cid);
+        } catch (final DBPoolingException e) {
+            throw new FolderException(e);
+        }
+        try {
+            return fillFolder(cid, tree, user, locale, outlookFolder, storageType, con);
+        }  catch (final Exception e) {
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
             databaseService.backReadOnly(cid, con);
         }
     }
@@ -391,155 +523,133 @@ public final class Select {
      * @return <code>true</code> if folder was present in tables; otherwise <code>false</code>
      * @throws FolderException If filling the folder fails
      */
-    public static boolean fillFolder(final int cid, final int tree, final int user, final Locale locale, final OutlookFolder outlookFolder, /*
-                                                                                                                                             * final
-                                                                                                                                             * List
-                                                                                                                                             * <
-                                                                                                                                             * String
-                                                                                                                                             * [
-                                                                                                                                             * ]
-                                                                                                                                             * >
-                                                                                                                                             * l
-                                                                                                                                             * ,
-                                                                                                                                             */final StorageType storageType) throws FolderException {
-        final DatabaseService databaseService = getDatabaseService();
-        // Get a connection
-        final Connection con;
-        try {
-            con = databaseService.getReadOnly(cid);
-        } catch (final DBPoolingException e) {
-            throw new FolderException(e);
-        }
+    public static boolean fillFolder(final int cid, final int tree, final int user, final Locale locale, final OutlookFolder outlookFolder, final StorageType storageType, final Connection con) throws FolderException {
         final String folderId = outlookFolder.getID();
+        // Select folder data
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        final boolean working = StorageType.WORKING.equals(storageType);
         try {
-            // Select folder data
-            PreparedStatement stmt = null;
-            ResultSet rs = null;
-            final boolean working = StorageType.WORKING.equals(storageType);
-            try {
-                stmt = con.prepareStatement(working ? SQL_SELECT : SQL_SELECT_BCK);
-                int pos = 1;
-                stmt.setInt(pos++, cid);
-                stmt.setInt(pos++, tree);
-                stmt.setInt(pos++, user);
-                stmt.setString(pos, folderId);
-                rs = stmt.executeQuery();
-                if (!rs.next()) {
-                    return false;
+            stmt = con.prepareStatement(working ? SQL_SELECT : SQL_SELECT_BCK);
+            int pos = 1;
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, tree);
+            stmt.setInt(pos++, user);
+            stmt.setString(pos, folderId);
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return false;
+            }
+            pos = 1;
+            outlookFolder.setParentID(rs.getString(pos++));
+            // Set name
+            {
+                final String name = rs.getString(pos++);
+                if (!rs.wasNull()) {
+                    outlookFolder.setName(name);
                 }
-                pos = 1;
-                outlookFolder.setParentID(rs.getString(pos++));
-                // Set name
-                {
-                    final String name = rs.getString(pos++);
-                    if (!rs.wasNull()) {
-                        outlookFolder.setName(name);
-                    }
 
-                }
-                // Set optional modified-by
-                {
-                    final int modifiedBy = rs.getInt(pos++);
-                    if (rs.wasNull()) {
-                        outlookFolder.setModifiedBy(-1);
-                    } else {
-                        outlookFolder.setModifiedBy(modifiedBy);
-                    }
-                }
-                // Set optional last-modified time stamp
-                {
-                    final long date = rs.getLong(pos);
-                    if (rs.wasNull()) {
-                        outlookFolder.setLastModified(null);
-                    } else {
-                        outlookFolder.setLastModified(new Date(date));
-                    }
-                }
-            } catch (final SQLException e) {
-                if (null != stmt) {
-                    final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Select.class);
-                    if (LOG.isDebugEnabled()) {
-                        final String sql = getSQLString(stmt);
-                        LOG.debug(new StringBuilder(sql.length() + 16).append("Failed SQL:\n\t").append(sql).toString());
-                    }
-                }
-                throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-            } finally {
-                DBUtils.closeSQLStuff(rs, stmt);
             }
-            stmt = null;
-            // Subfolder IDs
-            // outlookFolder.setSubfolderIDs(getSubfolderIds(cid, tree, user, locale, folderId, l, storageType, con));
-            // Select permissions
-            try {
-                stmt = con.prepareStatement(working ? SQL_SELECT_PERMS : SQL_SELECT_PERMS_BCK);
-                int pos = 1;
-                stmt.setInt(pos++, cid);
-                stmt.setInt(pos++, tree);
-                stmt.setInt(pos++, user);
-                stmt.setString(pos, folderId);
-                rs = stmt.executeQuery();
-                final List<Permission> permissions = new ArrayList<Permission>();
-                while (rs.next()) {
-                    final Permission p = new OutlookPermission();
-                    pos = 1;
-                    p.setEntity(rs.getInt(pos++));
-                    p.setGroup(rs.getInt(pos++) > 0);
-                    p.setFolderPermission(rs.getInt(pos++));
-                    p.setReadPermission(rs.getInt(pos++));
-                    p.setWritePermission(rs.getInt(pos++));
-                    p.setDeletePermission(rs.getInt(pos++));
-                    p.setAdmin(rs.getInt(pos++) > 0);
-                    p.setSystem(rs.getInt(pos++));
-                    permissions.add(p);
-                }
-                if (permissions.isEmpty()) {
-                    outlookFolder.setPermissions(null);
+            // Set optional modified-by
+            {
+                final int modifiedBy = rs.getInt(pos++);
+                if (rs.wasNull()) {
+                    outlookFolder.setModifiedBy(-1);
                 } else {
-                    outlookFolder.setPermissions(permissions.toArray(new Permission[permissions.size()]));
+                    outlookFolder.setModifiedBy(modifiedBy);
                 }
-            } catch (final SQLException e) {
-                if (null != stmt) {
-                    final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Select.class);
-                    if (LOG.isDebugEnabled()) {
-                        final String sql = getSQLString(stmt);
-                        LOG.debug(new StringBuilder(sql.length() + 16).append("Failed SQL:\n\t").append(sql).toString());
-                    }
-                }
-                throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-            } finally {
-                DBUtils.closeSQLStuff(rs, stmt);
             }
-            stmt = null;
-            // Select subscription
-            try {
-                stmt = con.prepareStatement(working ? SQL_SELECT_SUBSCRIPTION : SQL_SELECT_SUBSCRIPTION_BCK);
-                int pos = 1;
-                stmt.setInt(pos++, cid);
-                stmt.setInt(pos++, tree);
-                stmt.setInt(pos++, user);
-                stmt.setString(pos, folderId);
-                rs = stmt.executeQuery();
-                pos = 1;
-                boolean subscribed = true;
-                if (rs.next()) {
-                    subscribed = rs.getInt(pos) > 0;
+            // Set optional last-modified time stamp
+            {
+                final long date = rs.getLong(pos);
+                if (rs.wasNull()) {
+                    outlookFolder.setLastModified(null);
+                } else {
+                    outlookFolder.setLastModified(new Date(date));
                 }
-                outlookFolder.setSubscribed(subscribed);
-            } catch (final SQLException e) {
-                if (null != stmt) {
-                    final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Select.class);
-                    if (LOG.isDebugEnabled()) {
-                        final String sql = getSQLString(stmt);
-                        LOG.debug(new StringBuilder(sql.length() + 16).append("Failed SQL:\n\t").append(sql).toString());
-                    }
-                }
-                throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-            } finally {
-                DBUtils.closeSQLStuff(rs, stmt);
             }
+        } catch (final SQLException e) {
+            if (null != stmt) {
+                final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Select.class);
+                if (LOG.isDebugEnabled()) {
+                    final String sql = getSQLString(stmt);
+                    LOG.debug(new StringBuilder(sql.length() + 16).append("Failed SQL:\n\t").append(sql).toString());
+                }
+            }
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            databaseService.backReadOnly(cid, con);
+            DBUtils.closeSQLStuff(rs, stmt);
+        }
+        stmt = null;
+        // Subfolder IDs
+        // outlookFolder.setSubfolderIDs(getSubfolderIds(cid, tree, user, locale, folderId, l, storageType, con));
+        // Select permissions
+        try {
+            stmt = con.prepareStatement(working ? SQL_SELECT_PERMS : SQL_SELECT_PERMS_BCK);
+            int pos = 1;
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, tree);
+            stmt.setInt(pos++, user);
+            stmt.setString(pos, folderId);
+            rs = stmt.executeQuery();
+            final List<Permission> permissions = new ArrayList<Permission>();
+            while (rs.next()) {
+                final Permission p = new OutlookPermission();
+                pos = 1;
+                p.setEntity(rs.getInt(pos++));
+                p.setGroup(rs.getInt(pos++) > 0);
+                p.setFolderPermission(rs.getInt(pos++));
+                p.setReadPermission(rs.getInt(pos++));
+                p.setWritePermission(rs.getInt(pos++));
+                p.setDeletePermission(rs.getInt(pos++));
+                p.setAdmin(rs.getInt(pos++) > 0);
+                p.setSystem(rs.getInt(pos++));
+                permissions.add(p);
+            }
+            if (permissions.isEmpty()) {
+                outlookFolder.setPermissions(null);
+            } else {
+                outlookFolder.setPermissions(permissions.toArray(new Permission[permissions.size()]));
+            }
+        } catch (final SQLException e) {
+            if (null != stmt) {
+                final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Select.class);
+                if (LOG.isDebugEnabled()) {
+                    final String sql = getSQLString(stmt);
+                    LOG.debug(new StringBuilder(sql.length() + 16).append("Failed SQL:\n\t").append(sql).toString());
+                }
+            }
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+        }
+        stmt = null;
+        // Select subscription
+        try {
+            stmt = con.prepareStatement(working ? SQL_SELECT_SUBSCRIPTION : SQL_SELECT_SUBSCRIPTION_BCK);
+            int pos = 1;
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, tree);
+            stmt.setInt(pos++, user);
+            stmt.setString(pos, folderId);
+            rs = stmt.executeQuery();
+            pos = 1;
+            boolean subscribed = true;
+            if (rs.next()) {
+                subscribed = rs.getInt(pos) > 0;
+            }
+            outlookFolder.setSubscribed(subscribed);
+        } catch (final SQLException e) {
+            if (null != stmt) {
+                final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Select.class);
+                if (LOG.isDebugEnabled()) {
+                    final String sql = getSQLString(stmt);
+                    LOG.debug(new StringBuilder(sql.length() + 16).append("Failed SQL:\n\t").append(sql).toString());
+                }
+            }
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
         }
         return true;
     }
@@ -673,6 +783,14 @@ public final class Select {
         } catch (final DBPoolingException e) {
             throw new FolderException(e);
         }
+        try {
+            return getSubfolderIds(cid, tree, user, parentId, storageType, con);
+        } finally {
+            databaseService.backReadOnly(cid, con);
+        }
+    }
+
+    public static List<String[]> getSubfolderIds(final int cid, final int tree, final int user, final String parentId, final StorageType storageType, final Connection con) throws FolderException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -703,9 +821,10 @@ public final class Select {
                 }
             }
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } catch (final Exception e) {
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
-            databaseService.backReadOnly(cid, con);
         }
     }
 
