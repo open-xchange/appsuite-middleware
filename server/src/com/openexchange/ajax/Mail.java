@@ -73,8 +73,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutorCompletionService;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.servlet.ServletException;
@@ -167,8 +170,10 @@ import com.openexchange.server.ServiceException;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.threadpool.ThreadPools.ExpectedExceptionFactory;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -3193,6 +3198,17 @@ public class Mail extends PermissionServlet implements UploadListener {
         }
     }
 
+    private static final ExpectedExceptionFactory<MailException> FAC = new ExpectedExceptionFactory<MailException>() {
+
+        public Class<MailException> getType() {
+            return MailException.class;
+        }
+
+        public MailException newUnexpectedError(final Throwable e) {
+            return new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
+        }
+    };
+
     private final Response actionPutNewMail(final ServerSession session, final StringProvider body, final ParamContainer paramContainer) {
         /*
          * Some variables
@@ -3259,24 +3275,49 @@ public class Mail extends PermissionServlet implements UploadListener {
                     managedMessages = new ManagedMimeMessage[len];
                     mails = new MailMessage[len];
                     try {
-                        QuotedInternetAddress defaultSendAddr = null;
-                        for (int i = 0; i < len; i++) {
-                            managedMessages[i] =
-                                new ManagedMimeMessage(MIMEDefaultSession.getDefaultSession(), array.getString(i).getBytes("US-ASCII"));
-                            final String fromAddr = managedMessages[i].getHeader(MessageHeaders.HDR_FROM, null);
-                            if (isEmpty(fromAddr)) {
-                                // Add from address
-                                if (null == defaultSendAddr) {
-                                    defaultSendAddr = new QuotedInternetAddress(getDefaultSendAddress(session), true);
-                                }
-                                fromAddresses[i] = defaultSendAddr;
-                                managedMessages[i].setFrom(fromAddresses[i]);
-                                mails[i] = MIMEMessageConverter.convertMessage(managedMessages[i]);
+                        final CompletionService<Object> completionService;
+                        {
+                            final ThreadPoolService service = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
+                            if (null == service) {
+                                completionService = new ExecutorCompletionService<Object>(ThreadPools.CURRENT_THREAD_EXECUTOR_SERVICE);
                             } else {
-                                fromAddresses[i] = new QuotedInternetAddress(fromAddr, true);
-                                mails[i] = MIMEMessageConverter.convertMessage(managedMessages[i]);
+                                completionService = new ThreadPoolCompletionService<Object>(service);
                             }
                         }
+                        final QuotedInternetAddress defaultSendAddr = new QuotedInternetAddress(getDefaultSendAddress(session), true);
+                        for (int i = 0; i < len; i++) {
+                            final int index = i;
+                            completionService.submit(new Callable<Object>() {
+
+                                public Object call() throws MailException {
+                                    try {
+                                        managedMessages[index] =
+                                            new ManagedMimeMessage(MIMEDefaultSession.getDefaultSession(), array.getString(index).getBytes(
+                                                "US-ASCII"));
+                                        final String fromAddr = managedMessages[index].getHeader(MessageHeaders.HDR_FROM, null);
+                                        if (isEmpty(fromAddr)) {
+                                            // Add from address
+                                            fromAddresses[index] = defaultSendAddr;
+                                            managedMessages[index].setFrom(fromAddresses[index]);
+                                            mails[index] = MIMEMessageConverter.convertMessage(managedMessages[index]);
+                                        } else {
+                                            fromAddresses[index] = new QuotedInternetAddress(fromAddr, true);
+                                            mails[index] = MIMEMessageConverter.convertMessage(managedMessages[index]);
+                                        }
+                                        return null;
+                                    } catch (final AddressException e) {
+                                        throw MIMEMailException.handleMessagingException(e);
+                                    } catch (final MessagingException e) {
+                                        throw MIMEMailException.handleMessagingException(e);
+                                    } catch (final IOException e) {
+                                        throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
+                                    } catch (final JSONException e) {
+                                        throw new MailException(MailException.Code.JSON_ERROR, e, e.getMessage());
+                                    }
+                                }
+                            });
+                        }
+                        ThreadPools.takeCompletionService(completionService, len, FAC);
                     } catch (final AddressException e) {
                         throw MIMEMailException.handleMessagingException(e);
                     }
@@ -4279,7 +4320,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         return accountId;
     }
 
-    private static boolean isEmpty(final String string) {
+    static boolean isEmpty(final String string) {
         if (null == string) {
             return true;
         }
