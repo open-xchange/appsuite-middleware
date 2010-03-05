@@ -145,6 +145,9 @@ public class FolderExceptionMessages implements LocalizableStrings {
     // A temporary error occurred. Please retry.
     public static final String TEMPORARY_ERROR_MSG = "A temporary error occurred. Please retry.";
 
+    // User "%2$s" must not create subfolders below folder "%2$s" in context "%3$s".
+    public static final String NO_CREATE_SUBFOLDERS_MSG = "User \"%2$s\" must not create subfolders below folder \"%2$s\" in context \"%3$s\".";
+
     /**
      * Initializes a new {@link FolderExceptionMessages}
      */

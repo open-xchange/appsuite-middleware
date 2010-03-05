@@ -178,7 +178,11 @@ public enum FolderExceptionErrorMessage implements OXErrorMessage {
     /**
      * A temporary error occurred. Please retry.
      */
-    TEMPORARY_ERROR(FolderExceptionMessages.TEMPORARY_ERROR_MSG, Category.CODE_ERROR, 28);
+    TEMPORARY_ERROR(FolderExceptionMessages.TEMPORARY_ERROR_MSG, Category.CODE_ERROR, 28),
+    /**
+     * User "%2$s" must not create subfolders below folder "%2$s" in context "%3$s".
+     */
+    NO_CREATE_SUBFOLDERS(FolderExceptionMessages.NO_CREATE_SUBFOLDERS_MSG, Category.PERMISSION, 29);
 
     private final Category category;
 
