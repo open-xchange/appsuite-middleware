@@ -774,10 +774,17 @@ public final class MailFolderStorage implements FolderStorage {
             }
 
             final FullnameArgument argument = prepareMailFolderParam(folderId);
+            final String fullname = argument.getFullname();
+            if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname)) {
+                /*
+                 * The default folder always exists
+                 */
+                return true;
+            }
             final MailAccess<?, ?> mailAccess = getMailAccessForAccount(argument.getAccountId(), storageParameters.getSession(), accesses);
             openMailAccess(mailAccess);
 
-            return mailAccess.getFolderStorage().exists(argument.getFullname());
+            return mailAccess.getFolderStorage().exists(fullname);
         } catch (final MailException e) {
             throw new FolderException(e);
         }
