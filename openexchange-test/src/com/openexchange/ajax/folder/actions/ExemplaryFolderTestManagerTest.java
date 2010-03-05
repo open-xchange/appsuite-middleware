@@ -51,40 +51,42 @@ package com.openexchange.ajax.folder.actions;
 
 import java.util.Calendar;
 import java.util.Date;
-
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.FolderTestManager;
 
-
 /**
  * This class contains some examples of tests created for FolderTestManager
+ * 
  * @author <a href="mailto:karsten.will@open-xchange.org">Karsten Will</a>
  */
 public class ExemplaryFolderTestManagerTest extends AbstractAJAXSession {
 
-	private FolderTestManager manager;
-	private AJAXClient client; 
-	FolderObject folderObject1;
-	FolderObject folderObject2;
-	
-	public ExemplaryFolderTestManagerTest(final String name) {
-		super(name);
-	}
-	
-	@Override
+    private FolderTestManager manager;
+
+    private AJAXClient client;
+
+    FolderObject folderObject1;
+
+    FolderObject folderObject2;
+
+    public ExemplaryFolderTestManagerTest(final String name) {
+        super(name);
+    }
+
+    @Override
     public void setUp() throws Exception {
-		super.setUp();
-		client = getClient();
-		manager = new FolderTestManager(getClient());
-		//create a folder
-		folderObject1 = new FolderObject();
-		folderObject1.setFolderName("ExemplaryFolderTestManagerTest-folder1");
-		folderObject1.setType(FolderObject.PUBLIC);
-		folderObject1.setParentFolderID(client.getValues().getPrivateInfostoreFolder());
-		folderObject1.setModule(FolderObject.INFOSTORE);
+        super.setUp();
+        client = getClient();
+        manager = new FolderTestManager(getClient());
+        // create a folder
+        folderObject1 = new FolderObject();
+        folderObject1.setFolderName("ExemplaryFolderTestManagerTest-folder1");
+        folderObject1.setType(FolderObject.PUBLIC);
+        folderObject1.setParentFolderID(client.getValues().getPrivateInfostoreFolder());
+        folderObject1.setModule(FolderObject.INFOSTORE);
         // create permissions
         final OCLPermission perm1 = new OCLPermission();
         perm1.setEntity(client.getValues().getUserId());
@@ -95,15 +97,15 @@ public class ExemplaryFolderTestManagerTest extends AbstractAJAXSession {
             OCLPermission.ADMIN_PERMISSION,
             OCLPermission.ADMIN_PERMISSION,
             OCLPermission.ADMIN_PERMISSION);
-        folderObject1.setPermissionsAsArray(new OCLPermission[] { perm1});
+        folderObject1.setPermissionsAsArray(new OCLPermission[] { perm1 });
         manager.insertFolderOnServer(folderObject1);
-        
-      //create another folder
-		folderObject2 = new FolderObject();
-		folderObject2.setFolderName("ExemplaryFolderTestManagerTest-folder2");
-		folderObject2.setType(FolderObject.PUBLIC);
-		folderObject2.setParentFolderID(client.getValues().getPrivateInfostoreFolder());
-		folderObject2.setModule(FolderObject.INFOSTORE);
+
+        // create another folder
+        folderObject2 = new FolderObject();
+        folderObject2.setFolderName("ExemplaryFolderTestManagerTest-folder2");
+        folderObject2.setType(FolderObject.PUBLIC);
+        folderObject2.setParentFolderID(client.getValues().getPrivateInfostoreFolder());
+        folderObject2.setModule(FolderObject.INFOSTORE);
         // create permissions
         final OCLPermission perm2 = new OCLPermission();
         perm2.setEntity(client.getValues().getUserId());
@@ -114,47 +116,50 @@ public class ExemplaryFolderTestManagerTest extends AbstractAJAXSession {
             OCLPermission.ADMIN_PERMISSION,
             OCLPermission.ADMIN_PERMISSION,
             OCLPermission.ADMIN_PERMISSION);
-        folderObject2.setPermissionsAsArray(new OCLPermission[] { perm2});
+        folderObject2.setPermissionsAsArray(new OCLPermission[] { perm2 });
         manager.insertFolderOnServer(folderObject2);
-	}
-	
-	public void tearDown() throws Exception {
-		manager.cleanUp();
-	}
-	
-	public void testCreatedFoldersAreReturnedByGetRequest () throws Exception {
-		FolderObject fo = manager.getFolderFromServer(folderObject1.getObjectID());
-		assertEquals("The folder was not returned.", fo.getFolderName(), folderObject1.getFolderName());
-	}	
-	
-	public void testCreatedFoldersAppearInListRequest () throws Exception {
-		boolean found1 = false;
-		boolean found2 = false;
-		int[] firstFolder = new int [] {folderObject1.getParentFolderID(), folderObject1.getObjectID()};
-		int[] secondFolder = new int [] {folderObject2.getParentFolderID(), folderObject2.getObjectID()};
-		FolderObject [] allFolders = manager.listFoldersOnServer(client.getValues().getPrivateInfostoreFolder());
-		for (int i=0; i<allFolders.length; i++) {
-			FolderObject fo = allFolders[i];
-			if (fo.getObjectID() == folderObject1.getObjectID()) found1=true;
-			if (fo.getObjectID() == folderObject2.getObjectID()) found2=true;
-		}
-		assertTrue("First folder was not found.", found1);
-		assertTrue("Second folder was not found.", found2);
-	}	
-	
-	public void testCreatedFoldersAppearAsUpdatedSinceYesterday () throws Exception {
-		boolean found1 = false;
-		boolean found2 = false;
-		Date date = new Date();
-		date.setDate(date.getDate()-1);
-		FolderObject [] allFolders = manager.getUpdatedFoldersOnServer(client.getValues().getPrivateInfostoreFolder(), date);
-		for (int i=0; i<allFolders.length; i++) {
-			FolderObject co = allFolders[i];
-			if (co.getObjectID() == folderObject1.getObjectID()) found1=true;
-			if (co.getObjectID() == folderObject2.getObjectID()) found2=true;
-		}
-		assertTrue("First folder was not found.", found1);
-		assertTrue("Second folder was not found.", found2);
-	}
-}
+    }
 
+    public void tearDown() throws Exception {
+        manager.cleanUp();
+    }
+
+    public void testCreatedFoldersAreReturnedByGetRequest() throws Exception {
+        FolderObject fo = manager.getFolderFromServer(folderObject1.getObjectID());
+        assertEquals("The folder was not returned.", fo.getFolderName(), folderObject1.getFolderName());
+    }
+
+    public void testCreatedFoldersAppearInListRequest() throws Exception {
+        boolean found1 = false;
+        boolean found2 = false;
+        int[] firstFolder = new int[] { folderObject1.getParentFolderID(), folderObject1.getObjectID() };
+        int[] secondFolder = new int[] { folderObject2.getParentFolderID(), folderObject2.getObjectID() };
+        FolderObject[] allFolders = manager.listFoldersOnServer(client.getValues().getPrivateInfostoreFolder());
+        for (int i = 0; i < allFolders.length; i++) {
+            FolderObject fo = allFolders[i];
+            if (fo.getObjectID() == folderObject1.getObjectID())
+                found1 = true;
+            if (fo.getObjectID() == folderObject2.getObjectID())
+                found2 = true;
+        }
+        assertTrue("First folder was not found.", found1);
+        assertTrue("Second folder was not found.", found2);
+    }
+
+    public void testCreatedFoldersAppearAsUpdatedSinceYesterday() throws Exception {
+        boolean found1 = false;
+        boolean found2 = false;
+        Date date = new Date();
+        date.setDate(date.getDate() - 1);
+        FolderObject[] allFolders = manager.getUpdatedFoldersOnServer(client.getValues().getPrivateInfostoreFolder(), date);
+        for (int i = 0; i < allFolders.length; i++) {
+            FolderObject co = allFolders[i];
+            if (co.getObjectID() == folderObject1.getObjectID())
+                found1 = true;
+            if (co.getObjectID() == folderObject2.getObjectID())
+                found2 = true;
+        }
+        assertTrue("First folder was not found.", found1);
+        assertTrue("Second folder was not found.", found2);
+    }
+}

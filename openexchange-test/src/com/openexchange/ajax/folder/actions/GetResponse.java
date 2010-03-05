@@ -51,7 +51,6 @@ package com.openexchange.ajax.folder.actions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.groupware.container.FolderObject;
@@ -65,41 +64,39 @@ import com.openexchange.api2.OXException;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
- * 
  */
 public final class GetResponse extends AbstractAJAXResponse {
 
-	private FolderObject folder;
+    private FolderObject folder;
 
-	/**
-	 * Initializes a new {@link GetResponse}
-	 * 
-	 * @param response
-	 *            The response
-	 */
-	public GetResponse(final Response response) {
-		super(response);
-	}
+    /**
+     * Initializes a new {@link GetResponse}
+     * 
+     * @param response The response
+     */
+    public GetResponse(final Response response) {
+        super(response);
+    }
 
-	/**
+    /**
      * @return the folder
      * @throws OXJSONException parsing the folder out of the response fails.
      */
     public FolderObject getFolder() throws OXJSONException, OXException {
-        if(hasError()) {
+        if (hasError()) {
             return null;
         }
         if (null == folder) {
             final FolderObject parsed = new FolderObject();
             JSONObject data = (JSONObject) getData();
             try {
-                if(data.has(FolderFields.ID)) {
+                if (data.has(FolderFields.ID)) {
                     rearrangeId(data);
                 }
             } catch (JSONException e) {
                 throw new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, e);
             }
-            new FolderParser().parse(parsed, data);//.parse(parsed, (JSONObject) getData());
+            new FolderParser().parse(parsed, data);// .parse(parsed, (JSONObject) getData());
             fillInFullName(data, parsed);
             this.folder = parsed;
         }
@@ -107,7 +104,7 @@ public final class GetResponse extends AbstractAJAXResponse {
     }
 
     private void fillInFullName(JSONObject data, FolderObject parsed) {
-        if(data.has("full_name")) {
+        if (data.has("full_name")) {
             parsed.setFullName(data.optString("full_name"));
         }
     }

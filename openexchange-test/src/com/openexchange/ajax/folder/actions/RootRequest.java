@@ -58,29 +58,23 @@ import com.openexchange.ajax.framework.AJAXRequest.Method;
 import com.openexchange.ajax.framework.AJAXRequest.Parameter;
 import com.openexchange.groupware.container.FolderObject;
 
-
 /**
  * {@link RootRequest}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
-public class RootRequest extends AbstractFolderRequest<ListResponse>{
-    private static final int[] DEFAULT_COLUMNS = new int[] {
-        FolderObject.OBJECT_ID,
-        FolderObject.MODULE,
-        FolderObject.FOLDER_NAME,
-        FolderObject.SUBFOLDERS,
-        FolderObject.STANDARD_FOLDER,
-        FolderObject.CREATED_BY
-    };
+public class RootRequest extends AbstractFolderRequest<ListResponse> {
+
+    private static final int[] DEFAULT_COLUMNS =
+        new int[] {
+            FolderObject.OBJECT_ID, FolderObject.MODULE, FolderObject.FOLDER_NAME, FolderObject.SUBFOLDERS, FolderObject.STANDARD_FOLDER,
+            FolderObject.CREATED_BY };
 
     private final int[] columns;
 
     private final boolean ignoreMail;
 
-    public RootRequest(final int[] columns,
-        final boolean ignoreMail) {
+    public RootRequest(final int[] columns, final boolean ignoreMail) {
         super();
         this.columns = columns;
         this.ignoreMail = ignoreMail;
@@ -113,12 +107,10 @@ public class RootRequest extends AbstractFolderRequest<ListResponse>{
      */
     public Parameter[] getParameters() {
         final List<Parameter> parameters = new ArrayList<Parameter>();
-        parameters.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
-            .ACTION_ROOT));
+        parameters.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ROOT));
         parameters.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
         if (ignoreMail) {
-            parameters.add(new Parameter(AJAXServlet.PARAMETER_IGNORE,
-                "mailfolder"));
+            parameters.add(new Parameter(AJAXServlet.PARAMETER_IGNORE, "mailfolder"));
         }
         return parameters.toArray(new Parameter[parameters.size()]);
     }

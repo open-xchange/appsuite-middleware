@@ -89,7 +89,7 @@ public final class GetRequest extends AbstractFolderRequest<GetResponse> {
 
     private final int[] columns;
 
-    private int tree;
+    private int tree = 0;
 
     /**
      * Initializes a new {@link GetRequest} for specified columns
