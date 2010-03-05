@@ -1894,7 +1894,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             // with increasing numbers of db_count, the currweight value will get
             // bigger as double can hold. So here we calculate the amount of digits a number has and
             // later divide it with that 10^thisvalue
-            double div = Math.pow(10,Math.log10(totalDatabases));
+            double div = Math.pow(10,(int)Math.log10(totalDatabases));
             
             DatabaseHandle selectedDatabase = null;
             // Here we have to do a second loop because we know the amount of
