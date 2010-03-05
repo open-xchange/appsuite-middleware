@@ -76,6 +76,7 @@ public class RootNode extends AbstractFolderNode {
     }
 
 
+    @Override
     public FolderNode getParent() {
         return null;
     }

@@ -52,13 +52,11 @@ package com.openexchange.ajax.folder.actions;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.parser.FolderParser;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.FolderObject;
 
 /**
- * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Parser {
@@ -75,8 +73,7 @@ public final class Parser {
         super();
     }
 
-    public static void parse(final Object value, final int column,
-        final FolderObject folder) throws OXException {
+    public static void parse(final Object value, final int column, final FolderObject folder) throws OXException {
         switch (column) {
         case FolderObject.OBJECT_ID:
             if (value instanceof Integer) {
@@ -86,8 +83,7 @@ public final class Parser {
             }
             break;
         case FolderObject.MODULE:
-            folder.setModule(FolderParser.getModuleFromString((String) value,
-                folder.containsObjectID() ? folder.getObjectID() : -1));
+            folder.setModule(FolderParser.getModuleFromString((String) value, folder.containsObjectID() ? folder.getObjectID() : -1));
             break;
         case FolderObject.FOLDER_NAME:
             folder.setFolderName((String) value);
@@ -96,7 +92,7 @@ public final class Parser {
             folder.setSubfolderFlag(((Boolean) value).booleanValue());
             break;
         case FolderObject.STANDARD_FOLDER:
-            if(null != value && JSONObject.NULL != value) {
+            if (null != value && JSONObject.NULL != value) {
                 folder.setDefaultFolder(((Boolean) value).booleanValue());
             } else {
                 folder.setDefaultFolder(false);

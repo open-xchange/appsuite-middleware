@@ -58,19 +58,14 @@ import com.openexchange.ajax.Folder;
 import com.openexchange.groupware.container.FolderObject;
 
 /**
- * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class ListRequest extends AbstractFolderRequest<ListResponse> {
 
-    private static final int[] DEFAULT_COLUMNS = new int[] {
-        FolderObject.OBJECT_ID,
-        FolderObject.MODULE,
-        FolderObject.FOLDER_NAME,
-        FolderObject.SUBFOLDERS,
-        FolderObject.STANDARD_FOLDER,
-        FolderObject.CREATED_BY
-    };
+    private static final int[] DEFAULT_COLUMNS =
+        new int[] {
+            FolderObject.OBJECT_ID, FolderObject.MODULE, FolderObject.FOLDER_NAME, FolderObject.SUBFOLDERS, FolderObject.STANDARD_FOLDER,
+            FolderObject.CREATED_BY };
 
     private final String parentFolder;
 
@@ -80,8 +75,7 @@ public class ListRequest extends AbstractFolderRequest<ListResponse> {
 
     private int tree = 0;
 
-    public ListRequest(final String parentFolder, final int[] columns,
-        final boolean ignoreMail) {
+    public ListRequest(final String parentFolder, final int[] columns, final boolean ignoreMail) {
         super();
         this.parentFolder = parentFolder;
         this.columns = columns;
@@ -129,13 +123,11 @@ public class ListRequest extends AbstractFolderRequest<ListResponse> {
 
     private Parameter[] getParams() {
         final List<Parameter> parameters = new ArrayList<Parameter>();
-        parameters.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
-            .ACTION_LIST));
+        parameters.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST));
         parameters.add(new Parameter(Folder.PARAMETER_PARENT, parentFolder));
         parameters.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
         if (ignoreMail) {
-            parameters.add(new Parameter(AJAXServlet.PARAMETER_IGNORE,
-                "mailfolder"));
+            parameters.add(new Parameter(AJAXServlet.PARAMETER_IGNORE, "mailfolder"));
         }
         return parameters.toArray(new Parameter[parameters.size()]);
     }

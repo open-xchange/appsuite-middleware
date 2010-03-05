@@ -52,14 +52,12 @@ package com.openexchange.ajax.folder.actions;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.FolderObject;
 
 /**
- * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class ListResponse extends CommonListResponse {
@@ -72,7 +70,7 @@ public class ListResponse extends CommonListResponse {
     }
 
     public Iterator<FolderObject> getFolder() throws OXException {
-        final List<FolderObject> folders = new ArrayList<FolderObject>(); 
+        final List<FolderObject> folders = new ArrayList<FolderObject>();
         for (final Object[] rows : this) {
             final FolderObject folder = new FolderObject();
             for (int columnPos = 0; columnPos < getColumns().length; columnPos++) {

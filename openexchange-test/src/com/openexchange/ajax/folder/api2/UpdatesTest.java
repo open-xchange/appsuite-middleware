@@ -114,12 +114,9 @@ public class UpdatesTest extends AbstractAJAXSession {
 
             final FolderUpdatesResponse response;
             {
-                final UpdatesRequest request = new UpdatesRequest(
-                    FolderObject.SYSTEM_ROOT_FOLDER_ID,
-                    new int[] { FolderObject.LAST_MODIFIED_UTC, FolderObject.OBJECT_ID },
-                    -1,
-                    null,
-                    new Date(timeStamp)).setTree(1);
+                final UpdatesRequest request =
+                    new UpdatesRequest(FolderObject.SYSTEM_ROOT_FOLDER_ID, new int[] {
+                        FolderObject.LAST_MODIFIED_UTC, FolderObject.OBJECT_ID }, -1, null, new Date(timeStamp)).setTree(1);
                 response = client.execute(request);
             }
 
@@ -132,7 +129,7 @@ public class UpdatesTest extends AbstractAJAXSession {
                 found |= (iNewId == folderObject.getObjectID());
             }
             assertTrue("Newly created folder not contained in action=updates response.", found);
-            
+
         } finally {
             if (null != newId) {
                 // Delete folder
@@ -148,12 +145,8 @@ public class UpdatesTest extends AbstractAJAXSession {
     }
 
     public void testUpdatesAll() throws Throwable {
-        final UpdatesRequest request = new UpdatesRequest(
-            FolderObject.SYSTEM_ROOT_FOLDER_ID,
-            new int[] { FolderObject.LAST_MODIFIED_UTC },
-            -1,
-            null,
-            new Date(0));
+        final UpdatesRequest request =
+            new UpdatesRequest(FolderObject.SYSTEM_ROOT_FOLDER_ID, new int[] { FolderObject.LAST_MODIFIED_UTC }, -1, null, new Date(0));
         request.setFolderURL("/ajax/folder2");
         final FolderUpdatesResponse response = client.execute(request);
 

@@ -117,5 +117,5 @@ public class UpdatesRequest extends CommonUpdatesRequest<FolderUpdatesResponse> 
         }
         return l.toArray(new Parameter[l.size()]);
     }
-    
+
 }

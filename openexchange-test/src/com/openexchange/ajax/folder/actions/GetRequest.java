@@ -60,6 +60,7 @@ import com.openexchange.groupware.container.FolderObject;
 
 /**
  * Request to get a folder from the server.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
@@ -146,10 +147,8 @@ public final class GetRequest extends AbstractFolderRequest<GetResponse> {
 
     private Parameter[] getParams() {
         return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET),
-            new Parameter(AJAXServlet.PARAMETER_ID, folderIdentifier),
-            new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns)
-        };
+            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET), new Parameter(AJAXServlet.PARAMETER_ID, folderIdentifier),
+            new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns) };
     }
 
     public GetParser getParser() {

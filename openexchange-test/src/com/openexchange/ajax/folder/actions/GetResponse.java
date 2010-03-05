@@ -53,11 +53,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.parser.FolderParser;
+import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.webdav.xml.fields.FolderFields;
-import com.openexchange.ajax.parser.FolderParser;
-import com.openexchange.api2.OXException;
 
 /**
  * {@link GetResponse}

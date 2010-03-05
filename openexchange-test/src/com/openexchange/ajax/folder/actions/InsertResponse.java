@@ -88,6 +88,7 @@ public class InsertResponse extends CommonInsertResponse {
     /**
      * Puts the data of this insert response into the object. This are especially the identifier and the modified time stamp.
      */
+    @Override
     public void fillObject(final DataObject obj) {
         if (!isMailFolder(obj)) {
             obj.setObjectID(getId());

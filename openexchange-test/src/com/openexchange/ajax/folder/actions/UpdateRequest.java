@@ -57,29 +57,31 @@ import com.openexchange.groupware.container.FolderObject;
 
 /**
  * {@link UpdateRequest}
- *
+ * 
  * @author Karsten Will <a href="mailto:karsten.will@open-xchange.com">karsten.will@open-xchange.com</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class UpdateRequest extends InsertRequest {
-	
-	private final FolderObject folder;
-	private final boolean failOnError;
-	private int tree;
-	
-	/**
+
+    private final FolderObject folder;
+
+    private final boolean failOnError;
+
+    private int tree;
+
+    /**
      * Default constructor.
      */
     public UpdateRequest(final FolderObject folder) {
-    	super(folder);
-    	this.folder = folder;
-    	this.failOnError = true;
+        super(folder);
+        this.folder = folder;
+        this.failOnError = true;
     }
-    
+
     public UpdateRequest(final FolderObject folder, final boolean failOnError) {
-    	super(folder);
-    	this.folder = folder;
-    	this.failOnError = failOnError;
+        super(folder);
+        this.folder = folder;
+        this.failOnError = failOnError;
     }
 
     @Override
@@ -105,8 +107,7 @@ public class UpdateRequest extends InsertRequest {
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE),
             new Parameter(AJAXServlet.PARAMETER_INFOLDER, String.valueOf(folder.getParentFolderID())),
-                new Parameter(AJAXServlet.PARAMETER_ID, String.valueOf(folder.getObjectID())),
-                new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(folder.getLastModified().getTime()))
-        };
+            new Parameter(AJAXServlet.PARAMETER_ID, String.valueOf(folder.getObjectID())),
+            new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(folder.getLastModified().getTime())) };
     }
 }

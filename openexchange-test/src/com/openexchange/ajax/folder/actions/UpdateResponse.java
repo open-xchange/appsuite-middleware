@@ -53,20 +53,19 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
- * 
  * @author <a href="mailto:karsten.will@open-xchange.org">Karsten Will</a>
  */
 public class UpdateResponse extends AbstractAJAXResponse {
 
-	private int id;
-	
+    private int id;
+
     /**
      * @param response
      */
     UpdateResponse(final Response response) {
         super(response);
     }
-	
+
     /**
      * @return the id
      */

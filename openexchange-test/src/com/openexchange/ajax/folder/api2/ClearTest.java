@@ -124,7 +124,8 @@ public class ClearTest extends AbstractAJAXSession {
             if (!protocol.endsWith("://")) {
                 protocol = protocol + "://";
             }
-            final String hostname = null == client.getHostname() ? AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME) : client.getHostname();
+            final String hostname =
+                null == client.getHostname() ? AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME) : client.getHostname();
 
             final AJAXSession session = client.getSession();
             final UserValues values = client.getValues();
@@ -163,8 +164,8 @@ public class ClearTest extends AbstractAJAXSession {
             }
 
             final CalendarTestManager calendarTestManager = new CalendarTestManager(client);
-            final Appointment[] appointments = calendarTestManager.all(Integer.parseInt(newId), new Date(
-                s - Constants.MILLI_WEEK), new Date(s + Constants.MILLI_WEEK));
+            final Appointment[] appointments =
+                calendarTestManager.all(Integer.parseInt(newId), new Date(s - Constants.MILLI_WEEK), new Date(s + Constants.MILLI_WEEK));
 
             assertTrue("Appointments were not created.", null != appointments && appointments.length == 2);
 
@@ -176,8 +177,8 @@ public class ClearTest extends AbstractAJAXSession {
 
             assertEquals("Folder could not be cleared.", 0, nonClearedIDs.length());
 
-            final Appointment[] emptyAppointments = calendarTestManager.all(Integer.parseInt(newId), new Date(
-                s - Constants.MILLI_WEEK), new Date(s + Constants.MILLI_WEEK));
+            final Appointment[] emptyAppointments =
+                calendarTestManager.all(Integer.parseInt(newId), new Date(s - Constants.MILLI_WEEK), new Date(s + Constants.MILLI_WEEK));
 
             assertTrue("Appointments were not cleared.", null == emptyAppointments || emptyAppointments.length == 0);
 

@@ -55,7 +55,6 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.CommonInsertParser;
 
 /**
- * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - using InsertResponse instead of CommonInsertResponse
  */
@@ -69,17 +68,15 @@ class InsertParser extends CommonInsertParser {
     }
 
     @Override
-    protected InsertResponse instantiateResponse(
-        final Response response) {
+    protected InsertResponse instantiateResponse(final Response response) {
         return new InsertResponse(response);
     }
-    
+
     @Override
-    protected InsertResponse createResponse(final Response response)
-        throws JSONException {
+    protected InsertResponse createResponse(final Response response) throws JSONException {
         final InsertResponse retval = instantiateResponse(response);
-        if(JSONObject.NULL == retval.getData()) {
-            fail("Problem while inserting folder: "+ response.getErrorMessage());
+        if (JSONObject.NULL == retval.getData()) {
+            fail("Problem while inserting folder: " + response.getErrorMessage());
         }
         try {
             final int folderId = Integer.parseInt((String) retval.getData());
@@ -87,11 +84,11 @@ class InsertParser extends CommonInsertParser {
             if (isFailOnError()) {
                 assertTrue("Problem while inserting folder.", folderId > 0);
             }
-        } catch (NumberFormatException e){
-            //if the value is not an integer, we're probably dealing with a mail folder here
-            retval.setMailFolderID( (String) retval.getData() );
+        } catch (NumberFormatException e) {
+            // if the value is not an integer, we're probably dealing with a mail folder here
+            retval.setMailFolderID((String) retval.getData());
         }
-        
+
         return retval;
     }
 }

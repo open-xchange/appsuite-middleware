@@ -115,8 +115,7 @@ public class UpdateTest extends AbstractAJAXSession {
                 newId = (String) response.getResponse().getData();
                 assertNotNull("New ID must not be null!", newId);
             }
-            
-            
+
             fo.setFolderName("testCalendarFolderRename" + System.currentTimeMillis());
             fo.setObjectID(Integer.parseInt(newId));
             {
@@ -129,7 +128,7 @@ public class UpdateTest extends AbstractAJAXSession {
                     OCLPermission.ADMIN_PERMISSION,
                     OCLPermission.ADMIN_PERMISSION,
                     OCLPermission.ADMIN_PERMISSION);
-                
+
                 final OCLPermission oclP2 = new OCLPermission();
                 oclP2.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
                 oclP2.setGroupPermission(true);
@@ -141,7 +140,7 @@ public class UpdateTest extends AbstractAJAXSession {
                     OCLPermission.NO_PERMISSIONS);
                 fo.setPermissionsAsArray(new OCLPermission[] { oclP, oclP2 });
             }
-            
+
             {
                 final UpdateRequest updateRequest = new UpdateRequest(fo).setTree(1);
                 fo.setLastModified(new Date());
@@ -153,16 +152,15 @@ public class UpdateTest extends AbstractAJAXSession {
                 final GetResponse response = client.execute(request);
 
                 final JSONObject jsonObject = (JSONObject) response.getResponse().getData();
-                
+
                 final String name = jsonObject.getString("title");
                 assertNotNull("Folder name expected", name);
-                
+
                 assertEquals("Rename failed.", fo.getFolderName(), name);
-                
+
                 final JSONArray permissions = jsonObject.getJSONArray("permissions");
                 assertEquals("Unexpected number of permissions.", 2, permissions.length());
             }
-
 
         } finally {
             if (null != newId) {

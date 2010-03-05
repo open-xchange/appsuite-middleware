@@ -60,7 +60,8 @@ import com.openexchange.groupware.container.FolderObject;
 
 /**
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - added additional constructor and handling to allow for the creation of mail folders
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - added additional constructor and handling to allow for the
+ *         creation of mail folders
  */
 public class InsertRequest extends AbstractFolderRequest<CommonInsertResponse> {
 
@@ -118,17 +119,16 @@ public class InsertRequest extends AbstractFolderRequest<CommonInsertResponse> {
     }
 
     private Parameter[] getParams() {
-        if (folder.containsModule() && folder.getModule() == FolderObject.MAIL){
+        if (folder.containsModule() && folder.getModule() == FolderObject.MAIL) {
             final String[] parts = folder.getFullName().split("/");
             final StringBuilder parentBuilder = new StringBuilder();
-            for(int i = 0; i < (parts.length - 1); i++){
+            for (int i = 0; i < (parts.length - 1); i++) {
                 parentBuilder.append(parts[i]);
                 parentBuilder.append("/");
             }
-            final String parent = parentBuilder.substring(0, parentBuilder.length() -1);
+            final String parent = parentBuilder.substring(0, parentBuilder.length() - 1);
             return new Parameter[] {
-                new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW), 
-                new Parameter(FolderFields.FOLDER_ID, parent ) };
+                new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW), new Parameter(FolderFields.FOLDER_ID, parent) };
         }
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW),

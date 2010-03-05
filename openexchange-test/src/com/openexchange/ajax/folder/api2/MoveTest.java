@@ -127,7 +127,7 @@ public class MoveTest extends AbstractAJAXSession {
             if (null != newCalId) {
                 // Delete folder
                 try {
-                    final GenJSONRequest request = new GenJSONRequest(true).setJSONValue(new JSONArray("[\""+newCalId+"\"]"));
+                    final GenJSONRequest request = new GenJSONRequest(true).setJSONValue(new JSONArray("[\"" + newCalId + "\"]"));
                     request.setParameter("action", "delete").setParameter("tree", "1");
                     request.setFolderURL(servletPath);
                     client.execute(request);
@@ -138,7 +138,7 @@ public class MoveTest extends AbstractAJAXSession {
             if (null != newMailId) {
                 // Delete folder
                 try {
-                    final GenJSONRequest request = new GenJSONRequest(true).setJSONValue(new JSONArray("[\""+newMailId+"\"]"));
+                    final GenJSONRequest request = new GenJSONRequest(true).setJSONValue(new JSONArray("[\"" + newMailId + "\"]"));
                     request.setParameter("action", "delete").setParameter("tree", "1");
                     request.setFolderURL(servletPath);
                     client.execute(request);
@@ -194,7 +194,7 @@ public class MoveTest extends AbstractAJAXSession {
             if (null != newCalId) {
                 // Delete folder
                 try {
-                    final GenJSONRequest request = new GenJSONRequest(true).setJSONValue(new JSONArray("[\""+newCalId+"\"]"));
+                    final GenJSONRequest request = new GenJSONRequest(true).setJSONValue(new JSONArray("[\"" + newCalId + "\"]"));
                     request.setParameter("action", "delete").setParameter("tree", "1");
                     request.setFolderURL(servletPath);
                     client.execute(request);
@@ -205,7 +205,7 @@ public class MoveTest extends AbstractAJAXSession {
             if (null != newMailId) {
                 // Delete folder
                 try {
-                    final GenJSONRequest request = new GenJSONRequest(true).setJSONValue(new JSONArray("[\""+newMailId+"\"]"));
+                    final GenJSONRequest request = new GenJSONRequest(true).setJSONValue(new JSONArray("[\"" + newMailId + "\"]"));
                     request.setParameter("action", "delete").setParameter("tree", "1");
                     request.setFolderURL(servletPath);
                     client.execute(request);

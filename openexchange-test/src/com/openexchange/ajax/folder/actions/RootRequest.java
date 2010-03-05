@@ -53,9 +53,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.Folder;
-import com.openexchange.ajax.framework.AJAXRequest.Method;
-import com.openexchange.ajax.framework.AJAXRequest.Parameter;
 import com.openexchange.groupware.container.FolderObject;
 
 /**

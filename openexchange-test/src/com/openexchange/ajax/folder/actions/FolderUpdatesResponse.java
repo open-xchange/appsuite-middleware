@@ -48,6 +48,7 @@
  */
 
 package com.openexchange.ajax.folder.actions;
+
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.ajax.container.Response;
@@ -67,15 +68,14 @@ public class FolderUpdatesResponse extends CommonUpdatesResponse {
         super(response);
     }
 
-    
     public void setFolders(List<FolderObject> folders) {
         this.folders = folders;
     }
-    
-    public void addFolder(FolderObject folder){
+
+    public void addFolder(FolderObject folder) {
         this.folders.add(folder);
     }
-    
+
     public List<FolderObject> getFolders() {
         return this.folders;
     }

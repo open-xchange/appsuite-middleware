@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.folder.actions;
 
-import java.util.Calendar;
 import java.util.Date;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;

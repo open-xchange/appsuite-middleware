@@ -59,7 +59,7 @@ import com.openexchange.groupware.container.FolderObject;
 
 /**
  * {@link PathResponse}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class PathResponse extends CommonListResponse {
@@ -72,7 +72,7 @@ public class PathResponse extends CommonListResponse {
     }
 
     public Iterator<FolderObject> getFolder() throws OXException {
-        final List<FolderObject> folders = new ArrayList<FolderObject>(); 
+        final List<FolderObject> folders = new ArrayList<FolderObject>();
         for (final Object[] rows : this) {
             final FolderObject folder = new FolderObject();
             for (int columnPos = 0; columnPos < getColumns().length; columnPos++) {
