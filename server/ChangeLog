@@ -1,3 +1,7 @@
+* 2010-03-05 - marcus.klein@open-xchange.com
+
+ - Bugfix #15545: Adding users to listing appointments for calendar printing to get the folder identifier.
+
 * 2010-03-04 - choeger@open-xchange.com
 
  - Bugfix #15524: VoipNow administration login is readable for all linux users

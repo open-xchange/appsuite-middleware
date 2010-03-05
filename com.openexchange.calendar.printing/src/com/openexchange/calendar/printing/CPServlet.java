@@ -131,7 +131,7 @@ public class CPServlet extends PermissionServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         List<String> debuggingItems = new LinkedList<String>();
         CPTool tool = new CPTool();
 
@@ -168,10 +168,10 @@ public class CPServlet extends PermissionServlet {
             SearchIterator<Appointment> iterator;
             if (params.hasFolder()) {
                 iterator = appointmentSql.getAppointmentsBetweenInFolder(params.getFolder(), new int[] {
-                    Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.TITLE }, params.getStart(), params.getEnd(), -1, null);
+                    Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.USERS }, params.getStart(), params.getEnd(), -1, null);
             } else {
                 iterator = appointmentSql.getAppointmentsBetween(session.getUserId(), params.getStart(), params.getEnd(), new int[] {
-                    Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.TITLE }, -1, null);
+                    Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.USERS }, -1, null);
             }
             List<Appointment> idList = SearchIteratorAdapter.toList(iterator);
 
