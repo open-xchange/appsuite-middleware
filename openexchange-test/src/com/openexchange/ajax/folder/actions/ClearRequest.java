@@ -49,7 +49,9 @@
 
 package com.openexchange.ajax.folder.actions;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
@@ -65,6 +67,8 @@ import com.openexchange.groupware.container.FolderObject;
 public class ClearRequest extends AbstractFolderRequest<CommonDeleteResponse> {
 
     private final String[] folderIds;
+
+    private int tree = 0;
 
     public ClearRequest(final String[] folderIds) {
         super();
@@ -96,6 +100,11 @@ public class ClearRequest extends AbstractFolderRequest<CommonDeleteResponse> {
         }
     }
 
+    public ClearRequest setTree(final int tree) {
+        this.tree = tree;
+        return this;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -118,7 +127,12 @@ public class ClearRequest extends AbstractFolderRequest<CommonDeleteResponse> {
      * {@inheritDoc}
      */
     public Parameter[] getParameters() {
-        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_CLEAR) };
+        final List<Parameter> l = new ArrayList<Parameter>();
+        if (tree > 0) {
+            l.add(new Parameter("tree", String.valueOf(tree)));
+        }
+        l.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_CLEAR));
+        return l.toArray(new Parameter[l.size()]);
     }
 
     /**

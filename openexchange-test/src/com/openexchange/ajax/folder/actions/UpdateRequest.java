@@ -49,18 +49,23 @@
 
 package com.openexchange.ajax.folder.actions;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.fields.FolderFields;
-import com.openexchange.ajax.framework.AJAXRequest.Parameter;
 import com.openexchange.groupware.container.FolderObject;
 
 /**
+ * {@link UpdateRequest}
+ *
  * @author Karsten Will <a href="mailto:karsten.will@open-xchange.com">karsten.will@open-xchange.com</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class UpdateRequest extends InsertRequest {
 	
 	private final FolderObject folder;
 	private final boolean failOnError;
+	private int tree;
 	
 	/**
      * Default constructor.
@@ -71,16 +76,32 @@ public class UpdateRequest extends InsertRequest {
     	this.failOnError = true;
     }
     
-    public UpdateRequest(final FolderObject folder, boolean failOnError) {
+    public UpdateRequest(final FolderObject folder, final boolean failOnError) {
     	super(folder);
     	this.folder = folder;
     	this.failOnError = failOnError;
     }
-    
+
+    @Override
+    public UpdateRequest setTree(final int tree) {
+        this.tree = tree;
+        return this;
+    }
+
     /**
      * {@inheritDoc}
      */
+    @Override
     public Parameter[] getParameters() {
+        final Parameter[] params = getParams();
+        final List<Parameter> l = new ArrayList<Parameter>(Arrays.asList(params));
+        if (tree > 0) {
+            l.add(new Parameter("tree", String.valueOf(tree)));
+        }
+        return l.toArray(new Parameter[l.size()]);
+    }
+
+    private Parameter[] getParams() {
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE),
             new Parameter(AJAXServlet.PARAMETER_INFOLDER, String.valueOf(folder.getParentFolderID())),

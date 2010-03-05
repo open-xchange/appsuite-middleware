@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.folder.actions;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.FolderFields;
@@ -68,6 +71,8 @@ public class InsertRequest extends AbstractFolderRequest<CommonInsertResponse> {
      */
     final boolean failOnError;
 
+    private int tree = 0;
+
     /**
      * Default constructor.
      */
@@ -75,10 +80,15 @@ public class InsertRequest extends AbstractFolderRequest<CommonInsertResponse> {
         this(folder, true);
     }
 
-    public InsertRequest(final FolderObject folder, boolean failOnError) {
+    public InsertRequest(final FolderObject folder, final boolean failOnError) {
         super();
         this.failOnError = failOnError;
         this.folder = folder;
+    }
+
+    public InsertRequest setTree(final int tree) {
+        this.tree = tree;
+        return this;
     }
 
     /**
@@ -99,14 +109,23 @@ public class InsertRequest extends AbstractFolderRequest<CommonInsertResponse> {
      * {@inheritDoc}
      */
     public Parameter[] getParameters() {
+        final Parameter[] params = getParams();
+        final List<Parameter> l = new ArrayList<Parameter>(Arrays.asList(params));
+        if (tree > 0) {
+            l.add(new Parameter("tree", String.valueOf(tree)));
+        }
+        return l.toArray(new Parameter[l.size()]);
+    }
+
+    private Parameter[] getParams() {
         if (folder.containsModule() && folder.getModule() == FolderObject.MAIL){
-            String[] parts = folder.getFullName().split("/");
-            StringBuilder parentBuilder = new StringBuilder();
+            final String[] parts = folder.getFullName().split("/");
+            final StringBuilder parentBuilder = new StringBuilder();
             for(int i = 0; i < (parts.length - 1); i++){
                 parentBuilder.append(parts[i]);
                 parentBuilder.append("/");
             }
-            String parent = parentBuilder.substring(0, parentBuilder.length() -1);
+            final String parent = parentBuilder.substring(0, parentBuilder.length() -1);
             return new Parameter[] {
                 new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW), 
                 new Parameter(FolderFields.FOLDER_ID, parent ) };

@@ -112,8 +112,8 @@ public class ClearTest extends AbstractAJAXSession {
                 OCLPermission.ADMIN_PERMISSION);
             fo.setPermissionsAsArray(new OCLPermission[] { oclP });
 
-            final InsertRequest request = new InsertRequest(fo);
-            request.setFolderURL("/ajax/folder2");
+            final InsertRequest request = new InsertRequest(fo).setTree(1);
+            request.setFolderURL("/ajax/folders");
             final InsertResponse response = (InsertResponse) client.execute(request);
 
             newId = (String) response.getResponse().getData();
@@ -168,8 +168,8 @@ public class ClearTest extends AbstractAJAXSession {
 
             assertTrue("Appointments were not created.", null != appointments && appointments.length == 2);
 
-            final ClearRequest clearRequest = new ClearRequest(newId);
-            clearRequest.setFolderURL("/ajax/folder2");
+            final ClearRequest clearRequest = new ClearRequest(newId).setTree(1);
+            clearRequest.setFolderURL("/ajax/folders");
             final CommonDeleteResponse clearResponse = client.execute(clearRequest);
 
             final JSONArray nonClearedIDs = (JSONArray) clearResponse.getResponse().getData();
@@ -185,8 +185,8 @@ public class ClearTest extends AbstractAJAXSession {
             if (null != newId) {
                 // Delete folder
                 try {
-                    final DeleteRequest deleteRequest = new DeleteRequest(newId, new Date());
-                    deleteRequest.setFolderURL("/ajax/folder2");
+                    final DeleteRequest deleteRequest = new DeleteRequest(newId, new Date()).setTree(1);
+                    deleteRequest.setFolderURL("/ajax/folders");
                     client.execute(deleteRequest);
                 } catch (final Exception e) {
                     e.printStackTrace();

@@ -49,7 +49,10 @@
 
 package com.openexchange.ajax.folder.actions;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import com.openexchange.ajax.framework.CommonUpdatesParser;
 import com.openexchange.ajax.framework.CommonUpdatesRequest;
 import com.openexchange.groupware.search.Order;
@@ -60,6 +63,8 @@ import com.openexchange.groupware.search.Order;
 public class UpdatesRequest extends CommonUpdatesRequest<FolderUpdatesResponse> {
 
     private String folderURL;
+
+    private int tree;
 
     /**
      * @param folderId
@@ -75,6 +80,11 @@ public class UpdatesRequest extends CommonUpdatesRequest<FolderUpdatesResponse> 
     public UpdatesRequest(final int folderId, final int[] columns, final int sort, final Order order, final Date lastModified, final CommonUpdatesRequest.Ignore ignore) {
         super(AbstractFolderRequest.FOLDER_URL, folderId, columns, sort, order, lastModified, ignore, true);
         this.folderURL = AbstractFolderRequest.FOLDER_URL;
+    }
+
+    public UpdatesRequest setTree(final int tree) {
+        this.tree = tree;
+        return this;
     }
 
     /**
@@ -98,4 +108,14 @@ public class UpdatesRequest extends CommonUpdatesRequest<FolderUpdatesResponse> 
         return folderURL;
     }
 
+    @Override
+    public Parameter[] getParameters() {
+        final Parameter[] params = super.getParameters();
+        final List<Parameter> l = new ArrayList<Parameter>(Arrays.asList(params));
+        if (tree > 0) {
+            l.add(new Parameter("tree", String.valueOf(tree)));
+        }
+        return l.toArray(new Parameter[l.size()]);
+    }
+    
 }

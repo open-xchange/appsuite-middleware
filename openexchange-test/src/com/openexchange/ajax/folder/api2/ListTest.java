@@ -82,8 +82,8 @@ public class ListTest extends AbstractAJAXSession {
 
     public void testListRoot() throws Throwable {
         // List root's subfolders
-        final ListRequest request = new ListRequest(String.valueOf(FolderObject.SYSTEM_ROOT_FOLDER_ID));
-        request.setFolderURL("/ajax/folder2");
+        final ListRequest request = new ListRequest(String.valueOf(FolderObject.SYSTEM_ROOT_FOLDER_ID)).setTree(1);
+        request.setFolderURL("/ajax/folders");
         final ListResponse response = client.execute(request);
 
         final JSONArray jsonArray = (JSONArray) response.getResponse().getData();
@@ -143,8 +143,8 @@ public class ListTest extends AbstractAJAXSession {
 
     public void testListPrivate() throws Throwable {
         // List root's subfolders
-        final ListRequest request = new ListRequest(String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID));
-        request.setFolderURL("/ajax/folder2");
+        final ListRequest request = new ListRequest(String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID)).setTree(1);
+        request.setFolderURL("/ajax/folders");
         final ListResponse response = client.execute(request);
 
         final JSONArray jsonArray = (JSONArray) response.getResponse().getData();
@@ -163,8 +163,8 @@ public class ListTest extends AbstractAJAXSession {
 
     public void testListPublic() throws Throwable {
         // List root's subfolders
-        final ListRequest request = new ListRequest(String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID));
-        request.setFolderURL("/ajax/folder2");
+        final ListRequest request = new ListRequest(String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID)).setTree(1);
+        request.setFolderURL("/ajax/folders");
         final ListResponse response = client.execute(request);
 
         final JSONArray jsonArray = (JSONArray) response.getResponse().getData();
@@ -183,8 +183,8 @@ public class ListTest extends AbstractAJAXSession {
 
     public void testListShared() throws Throwable {
         // List root's subfolders
-        final ListRequest request = new ListRequest(String.valueOf(FolderObject.SYSTEM_SHARED_FOLDER_ID));
-        request.setFolderURL("/ajax/folder2");
+        final ListRequest request = new ListRequest(String.valueOf(FolderObject.SYSTEM_SHARED_FOLDER_ID)).setTree(1);
+        request.setFolderURL("/ajax/folders");
         final ListResponse response = client.execute(request);
 
         final JSONArray jsonArray = (JSONArray) response.getResponse().getData();

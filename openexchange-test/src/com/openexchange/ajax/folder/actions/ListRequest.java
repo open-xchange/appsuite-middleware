@@ -50,10 +50,9 @@
 package com.openexchange.ajax.folder.actions;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-
 import org.json.JSONException;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Folder;
 import com.openexchange.groupware.container.FolderObject;
@@ -79,6 +78,8 @@ public class ListRequest extends AbstractFolderRequest<ListResponse> {
 
     private final boolean ignoreMail;
 
+    private int tree = 0;
+
     public ListRequest(final String parentFolder, final int[] columns,
         final boolean ignoreMail) {
         super();
@@ -93,6 +94,11 @@ public class ListRequest extends AbstractFolderRequest<ListResponse> {
 
     public ListRequest(final String parentFolder, final boolean ignoreMail) {
         this(parentFolder, DEFAULT_COLUMNS, ignoreMail);
+    }
+
+    public ListRequest setTree(final int tree) {
+        this.tree = tree;
+        return this;
     }
 
     /**
@@ -113,6 +119,15 @@ public class ListRequest extends AbstractFolderRequest<ListResponse> {
      * {@inheritDoc}
      */
     public Parameter[] getParameters() {
+        final Parameter[] params = getParams();
+        final List<Parameter> l = new ArrayList<Parameter>(Arrays.asList(params));
+        if (tree > 0) {
+            l.add(new Parameter("tree", String.valueOf(tree)));
+        }
+        return l.toArray(new Parameter[l.size()]);
+    }
+
+    private Parameter[] getParams() {
         final List<Parameter> parameters = new ArrayList<Parameter>();
         parameters.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
             .ACTION_LIST));

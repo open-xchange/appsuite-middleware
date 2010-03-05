@@ -49,7 +49,9 @@
 
 package com.openexchange.ajax.folder.actions;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
@@ -68,7 +70,9 @@ public class DeleteRequest extends AbstractFolderRequest<CommonDeleteResponse> {
     private final String[] folderIds;
 
     private final Date lastModified;
-
+    
+    private int tree = 0;
+    
     public DeleteRequest(final String[] folderIds, final Date lastModified) {
         super();
         this.folderIds = folderIds;
@@ -106,6 +110,11 @@ public class DeleteRequest extends AbstractFolderRequest<CommonDeleteResponse> {
         lastModified = maxLastModified;
     }
 
+    public DeleteRequest setTree(final int tree) {
+        this.tree = tree;
+        return this;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -128,9 +137,13 @@ public class DeleteRequest extends AbstractFolderRequest<CommonDeleteResponse> {
      * {@inheritDoc}
      */
     public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE),
-            new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, lastModified.getTime()) };
+        final List<Parameter> l = new ArrayList<Parameter>();
+        if (tree > 0) {
+            l.add(new Parameter("tree", String.valueOf(tree)));
+        }
+        l.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE));
+        l.add(new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, lastModified.getTime()));
+        return l.toArray(new Parameter[l.size()]);
     }
 
     /**

@@ -110,8 +110,7 @@ public class UpdateTest extends AbstractAJAXSession {
             }
 
             {
-                final InsertRequest request = new InsertRequest(fo);
-                request.setFolderURL("/ajax/folder2");
+                final InsertRequest request = new InsertRequest(fo).setTree(1);
                 final InsertResponse response = (InsertResponse) client.execute(request);
                 newId = (String) response.getResponse().getData();
                 assertNotNull("New ID must not be null!", newId);
@@ -144,15 +143,13 @@ public class UpdateTest extends AbstractAJAXSession {
             }
             
             {
-                final UpdateRequest updateRequest = new UpdateRequest(fo);
-                updateRequest.setFolderURL("/ajax/folder2");
+                final UpdateRequest updateRequest = new UpdateRequest(fo).setTree(1);
                 fo.setLastModified(new Date());
                 final Response reqResponse = client.execute(updateRequest).getResponse();
             }
 
             {
-                final GetRequest request = new GetRequest(newId, true);
-                request.setFolderURL("/ajax/folder2");
+                final GetRequest request = new GetRequest(newId, true).setTree(1);
                 final GetResponse response = client.execute(request);
 
                 final JSONObject jsonObject = (JSONObject) response.getResponse().getData();
@@ -171,8 +168,7 @@ public class UpdateTest extends AbstractAJAXSession {
             if (null != newId) {
                 // Delete folder
                 try {
-                    final DeleteRequest deleteRequest = new DeleteRequest(newId, new Date());
-                    deleteRequest.setFolderURL("/ajax/folder2");
+                    final DeleteRequest deleteRequest = new DeleteRequest(newId, new Date()).setTree(1);
                     client.execute(deleteRequest);
                 } catch (final Exception e) {
                     e.printStackTrace();

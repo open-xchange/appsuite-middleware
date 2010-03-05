@@ -88,8 +88,7 @@ public class PathTest extends AbstractAJAXSession {
     }
 
     public void testPath1() throws Throwable {
-        final PathRequest pathRequest = new PathRequest(String.valueOf(FolderObject.SYSTEM_ROOT_FOLDER_ID));
-        pathRequest.setFolderURL("/ajax/folder2");
+        final PathRequest pathRequest = new PathRequest(String.valueOf(FolderObject.SYSTEM_ROOT_FOLDER_ID)).setTree(1);
         final PathResponse pathResponse = client.execute(pathRequest);
 
         final JSONArray jsonArray = (JSONArray) pathResponse.getResponse().getData();
@@ -99,8 +98,7 @@ public class PathTest extends AbstractAJAXSession {
     }
 
     public void testPath2() throws Throwable {
-        final PathRequest pathRequest = new PathRequest(PRIVATE_FOLDER_ID);
-        pathRequest.setFolderURL("/ajax/folder2");
+        final PathRequest pathRequest = new PathRequest(PRIVATE_FOLDER_ID).setTree(1);
         final PathResponse pathResponse = client.execute(pathRequest);
 
         final JSONArray jsonArray = (JSONArray) pathResponse.getResponse().getData();
@@ -131,15 +129,13 @@ public class PathTest extends AbstractAJAXSession {
                 OCLPermission.ADMIN_PERMISSION);
             fo.setPermissionsAsArray(new OCLPermission[] { oclP });
 
-            final InsertRequest request = new InsertRequest(fo);
-            request.setFolderURL("/ajax/folder2");
+            final InsertRequest request = new InsertRequest(fo).setTree(1);
             final InsertResponse response = (InsertResponse) client.execute(request);
 
             newId = (String) response.getResponse().getData();
             assertNotNull("New ID must not be null!", newId);
 
-            final PathRequest pathRequest = new PathRequest(newId);
-            pathRequest.setFolderURL("/ajax/folder2");
+            final PathRequest pathRequest = new PathRequest(newId).setTree(1);
             final PathResponse pathResponse = client.execute(pathRequest);
 
             final JSONArray jsonArray = (JSONArray) pathResponse.getResponse().getData();
@@ -155,8 +151,7 @@ public class PathTest extends AbstractAJAXSession {
             if (null != newId) {
                 // Delete folder
                 try {
-                    final DeleteRequest deleteRequest = new DeleteRequest(newId, new Date());
-                    deleteRequest.setFolderURL("/ajax/folder2");
+                    final DeleteRequest deleteRequest = new DeleteRequest(newId, new Date()).setTree(1);
                     client.execute(deleteRequest);
                 } catch (final Exception e) {
                     e.printStackTrace();

@@ -106,8 +106,7 @@ public class UpdatesTest extends AbstractAJAXSession {
                     OCLPermission.ADMIN_PERMISSION);
                 fo.setPermissionsAsArray(new OCLPermission[] { oclP });
                 timeStamp = System.currentTimeMillis();
-                final InsertRequest request = new InsertRequest(fo);
-                request.setFolderURL("/ajax/folder2");
+                final InsertRequest request = new InsertRequest(fo).setTree(1);
                 final InsertResponse response = (InsertResponse) client.execute(request);
                 newId = (String) response.getResponse().getData();
                 assertNotNull("New ID must not be null!", newId);
@@ -120,8 +119,7 @@ public class UpdatesTest extends AbstractAJAXSession {
                     new int[] { FolderObject.LAST_MODIFIED_UTC, FolderObject.OBJECT_ID },
                     -1,
                     null,
-                    new Date(timeStamp));
-                request.setFolderURL("/ajax/folder2");
+                    new Date(timeStamp)).setTree(1);
                 response = client.execute(request);
             }
 
@@ -139,8 +137,7 @@ public class UpdatesTest extends AbstractAJAXSession {
             if (null != newId) {
                 // Delete folder
                 try {
-                    final DeleteRequest deleteRequest = new DeleteRequest(newId, new Date());
-                    deleteRequest.setFolderURL("/ajax/folder2");
+                    final DeleteRequest deleteRequest = new DeleteRequest(newId, new Date()).setTree(1);
                     client.execute(deleteRequest);
                 } catch (final Exception e) {
                     e.printStackTrace();

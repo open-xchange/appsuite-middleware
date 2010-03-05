@@ -50,6 +50,7 @@
 package com.openexchange.ajax.folder.actions;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
@@ -73,6 +74,8 @@ public class PathRequest extends AbstractFolderRequest<PathResponse> {
 
     private final int[] columns;
 
+    private int tree = 0;
+
     public PathRequest(final String folder, final int[] columns) {
         super();
         this.folder = folder;
@@ -81,6 +84,11 @@ public class PathRequest extends AbstractFolderRequest<PathResponse> {
 
     public PathRequest(final String parentFolder) {
         this(parentFolder, DEFAULT_COLUMNS);
+    }
+
+    public PathRequest setTree(final int tree) {
+        this.tree = tree;
+        return this;
     }
 
     /**
@@ -101,6 +109,15 @@ public class PathRequest extends AbstractFolderRequest<PathResponse> {
      * {@inheritDoc}
      */
     public Parameter[] getParameters() {
+        final Parameter[] params = getParams();
+        final List<Parameter> l = new ArrayList<Parameter>(Arrays.asList(params));
+        if (tree > 0) {
+            l.add(new Parameter("tree", String.valueOf(tree)));
+        }
+        return l.toArray(new Parameter[l.size()]);
+    }
+
+    private Parameter[] getParams() {
         final List<Parameter> parameters = new ArrayList<Parameter>();
         parameters.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_PATH));
         parameters.add(new Parameter(Folder.PARAMETER_ID, folder));

@@ -49,8 +49,10 @@
 
 package com.openexchange.ajax.folder.actions;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import org.json.JSONException;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
@@ -87,6 +89,8 @@ public final class GetRequest extends AbstractFolderRequest<GetResponse> {
 
     private final int[] columns;
 
+    private int tree;
+
     /**
      * Initializes a new {@link GetRequest} for specified columns
      */
@@ -115,6 +119,11 @@ public final class GetRequest extends AbstractFolderRequest<GetResponse> {
         this(folderId, columns, true);
     }
 
+    public GetRequest setTree(final int tree) {
+        this.tree = tree;
+        return this;
+    }
+
     public Object getBody() throws JSONException {
         return null;
     }
@@ -123,7 +132,19 @@ public final class GetRequest extends AbstractFolderRequest<GetResponse> {
         return Method.GET;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public Parameter[] getParameters() {
+        final Parameter[] params = getParams();
+        final List<Parameter> l = new ArrayList<Parameter>(Arrays.asList(params));
+        if (tree > 0) {
+            l.add(new Parameter("tree", String.valueOf(tree)));
+        }
+        return l.toArray(new Parameter[l.size()]);
+    }
+
+    private Parameter[] getParams() {
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET),
             new Parameter(AJAXServlet.PARAMETER_ID, folderIdentifier),

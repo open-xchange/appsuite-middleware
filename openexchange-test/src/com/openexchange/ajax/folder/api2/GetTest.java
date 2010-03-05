@@ -82,8 +82,8 @@ public class GetTest extends AbstractAJAXSession {
 
     public void testGetRoot() throws Throwable {
         // Get root folder
-        final GetRequest request = new GetRequest(String.valueOf(FolderObject.SYSTEM_ROOT_FOLDER_ID), true);
-        request.setFolderURL("/ajax/folder2");
+        final GetRequest request = new GetRequest(String.valueOf(FolderObject.SYSTEM_ROOT_FOLDER_ID), true).setTree(1);
+        request.setFolderURL("/ajax/folders");
         final GetResponse response = client.execute(request);
 
         final JSONObject jsonObject = (JSONObject) response.getResponse().getData();
@@ -93,8 +93,8 @@ public class GetTest extends AbstractAJAXSession {
 
     public void testGetPrivate() throws Throwable {
         // Get private folder
-        final GetRequest request = new GetRequest(String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID), true);
-        request.setFolderURL("/ajax/folder2");
+        final GetRequest request = new GetRequest(String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID), true).setTree(1);
+        request.setFolderURL("/ajax/folders");
         final GetResponse response = client.execute(request);
 
         final JSONObject jsonObject = (JSONObject) response.getResponse().getData();
@@ -105,8 +105,8 @@ public class GetTest extends AbstractAJAXSession {
 
     public void testGetPublic() throws Throwable {
         // Get public folder
-        final GetRequest request = new GetRequest(String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID), true);
-        request.setFolderURL("/ajax/folder2");
+        final GetRequest request = new GetRequest(String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID), true).setTree(1);
+        request.setFolderURL("/ajax/folders");
         final GetResponse response = client.execute(request);
 
         final JSONObject jsonObject = (JSONObject) response.getResponse().getData();
@@ -117,8 +117,8 @@ public class GetTest extends AbstractAJAXSession {
 
     public void testGetShared() throws Throwable {
         // Get shared folder
-        final GetRequest request = new GetRequest(String.valueOf(FolderObject.SYSTEM_SHARED_FOLDER_ID), true);
-        request.setFolderURL("/ajax/folder2");
+        final GetRequest request = new GetRequest(String.valueOf(FolderObject.SYSTEM_SHARED_FOLDER_ID), true).setTree(1);
+        request.setFolderURL("/ajax/folders");
         final GetResponse response = client.execute(request);
 
         final JSONObject jsonObject = (JSONObject) response.getResponse().getData();
