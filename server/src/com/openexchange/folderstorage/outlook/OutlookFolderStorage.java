@@ -67,6 +67,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
@@ -1209,53 +1210,65 @@ public final class OutlookFolderStorage implements FolderStorage {
             /*
              * Get a connection
              */
-            final Connection con;
-            final boolean closeCon;
-            {
-                final Connection wcon = checkWriteConnection(storageParameters);
-                if (wcon == null) {
-                    try {
-                        con = Utility.getDatabaseService().getWritable(contextId);
-                        closeCon = true;
-                        con.setAutoCommit(false); // BEGIN
-                    } catch (final DBPoolingException e) {
-                        throw new FolderException(e);
-                    } catch (final SQLException e) {
-                        throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+            final Connection wcon = checkWriteConnection(storageParameters);
+            if (wcon == null) {
+                final DatabaseService databaseService = Utility.getDatabaseService();
+                final Connection con;
+                try {
+                    con = databaseService.getWritable(contextId);
+                    con.setAutoCommit(false); // BEGIN
+                } catch (final DBPoolingException e) {
+                    throw new FolderException(e);
+                } catch (final SQLException e) {
+                    throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+                }
+                try {
+                    final String name = folder.getName();
+                    if (name != null) {
+                        Update.updateName(contextId, tree, userId, folderId, name, con);
                     }
-                } else {
-                    con = wcon;
-                    closeCon = false;
+                    final String parentId = folder.getParentID();
+                    if (parentId != null) {
+                        Update.updateParent(contextId, tree, userId, folderId, parentId, con);
+                    }
+                    final String newId = folder.getNewID();
+                    if (newId != null) {
+                        Update.updateId(contextId, tree, userId, folderId, newId, con);
+                    }
+                    Update.updateLastModified(contextId, tree, userId, folderId, System.currentTimeMillis(), con);
+                    con.commit(); // COMMIT
+                } catch (final SQLException e) {
+                    DBUtils.rollback(con); // ROLLBACK
+                    throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+                } catch (final FolderException e) {
+                    DBUtils.rollback(con); // ROLLBACK
+                    throw e;
+                } catch (final Exception e) {
+                    DBUtils.rollback(con); // ROLLBACK
+                    throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+                } finally {
+                    DBUtils.autocommit(con);
+                    databaseService.backWritable(contextId, con);
                 }
-            }
-            try {
-                final String name = folder.getName();
-                if (name != null) {
-                    Update.updateName(contextId, tree, userId, folderId, name, con);
-                }
-                final String parentId = folder.getParentID();
-                if (parentId != null) {
-                    Update.updateParent(contextId, tree, userId, folderId, parentId, con);
-                }
-                final String newId = folder.getNewID();
-                if (newId != null) {
-                    Update.updateId(contextId, tree, userId, folderId, newId, con);
-                }
-                Update.updateLastModified(contextId, tree, userId, folderId, System.currentTimeMillis(), con);
-                con.commit(); // COMMIT
-            } catch (final SQLException e) {
-                DBUtils.rollback(con); // ROLLBACK
-                throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-            } catch (final FolderException e) {
-                DBUtils.rollback(con); // ROLLBACK
-                throw e;
-            } catch (final Exception e) {
-                DBUtils.rollback(con); // ROLLBACK
-                throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
-            } finally {
-                DBUtils.autocommit(con);
-                if (closeCon) {
-                    Utility.getDatabaseService().backWritable(contextId, con);
+            } else {
+                try {
+                    final String name = folder.getName();
+                    if (name != null) {
+                        Update.updateName(contextId, tree, userId, folderId, name, wcon);
+                    }
+                    final String parentId = folder.getParentID();
+                    if (parentId != null) {
+                        Update.updateParent(contextId, tree, userId, folderId, parentId, wcon);
+                    }
+                    final String newId = folder.getNewID();
+                    if (newId != null) {
+                        Update.updateId(contextId, tree, userId, folderId, newId, wcon);
+                    }
+                    Update.updateLastModified(contextId, tree, userId, folderId, System.currentTimeMillis(), wcon);
+                } catch (final FolderException e) {
+                    throw e;
+                } catch (final Exception e) {
+                    throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
                 }
             }
         }
