@@ -67,7 +67,6 @@ import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderException;
@@ -1210,15 +1209,24 @@ public final class OutlookFolderStorage implements FolderStorage {
             /*
              * Get a connection
              */
-            final DatabaseService databaseService = Utility.getDatabaseService();
             final Connection con;
-            try {
-                con = databaseService.getWritable(contextId);
-                con.setAutoCommit(false); // BEGIN
-            } catch (final DBPoolingException e) {
-                throw new FolderException(e);
-            } catch (final SQLException e) {
-                throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+            final boolean closeCon;
+            {
+                final Connection wcon = checkWriteConnection(storageParameters);
+                if (wcon == null) {
+                    try {
+                        con = Utility.getDatabaseService().getWritable(contextId);
+                        closeCon = true;
+                        con.setAutoCommit(false); // BEGIN
+                    } catch (final DBPoolingException e) {
+                        throw new FolderException(e);
+                    } catch (final SQLException e) {
+                        throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+                    }
+                } else {
+                    con = wcon;
+                    closeCon = false;
+                }
             }
             try {
                 final String name = folder.getName();
@@ -1246,7 +1254,9 @@ public final class OutlookFolderStorage implements FolderStorage {
                 throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
             } finally {
                 DBUtils.autocommit(con);
-                databaseService.backWritable(contextId, con);
+                if (closeCon) {
+                    Utility.getDatabaseService().backWritable(contextId, con);
+                }
             }
         }
     }
