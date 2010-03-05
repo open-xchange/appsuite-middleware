@@ -262,19 +262,35 @@ public final class OutlookFolderStorage implements FolderStorage {
         }
         final int contextId = storageParameters.getContextId();
         final int tree = Tools.getUnsignedInteger(folder.getTreeID());
-        Insert.insertFolder(contextId, tree, userId, folder);
+        final Connection wcon = checkWriteConnection(storageParameters);
+        if (null == wcon) {
+            Insert.insertFolder(contextId, tree, userId, folder);
+        } else {
+            Insert.insertFolder(contextId, tree, userId, folder, wcon);
+        }
     }
 
     public void deleteFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
         /*
          * Delete from tables if present
          */
-        Delete.deleteFolder(
-            storageParameters.getContextId(),
-            Tools.getUnsignedInteger(treeId),
-            storageParameters.getUserId(),
-            folderId,
-            true);
+        final Connection wcon = checkWriteConnection(storageParameters);
+        if (null == wcon) {
+            Delete.deleteFolder(
+                storageParameters.getContextId(),
+                Tools.getUnsignedInteger(treeId),
+                storageParameters.getUserId(),
+                folderId,
+                true);
+        } else {
+            Delete.deleteFolder(
+                storageParameters.getContextId(),
+                Tools.getUnsignedInteger(treeId),
+                storageParameters.getUserId(),
+                folderId,
+                true,
+                wcon);
+        }
     }
 
     public ContentType getDefaultContentType() {
