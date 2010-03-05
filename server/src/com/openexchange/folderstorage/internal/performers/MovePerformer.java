@@ -183,12 +183,7 @@ final class MovePerformer extends AbstractPerformer {
          * Check permission on folder
          */
         {
-            final Permission permission;
-            if (null == session) {
-                permission = CalculatePermission.calculate(storageFolder, getUser(), getContext(), ALL_ALLOWED);
-            } else {
-                permission = CalculatePermission.calculate(storageFolder, getSession(), ALL_ALLOWED);
-            }
+            final Permission permission = effectivePermission(storageFolder);
             if (!permission.isAdmin()) {
                 throw FolderExceptionErrorMessage.FOLDER_NOT_MOVEABLE.create(
                     storageFolder.getLocalizedName(session.getUser().getLocale()),
@@ -311,10 +306,14 @@ final class MovePerformer extends AbstractPerformer {
                 clone4Real.setParentID(defaultParentId);
                 clone4Real.setName(nonExistingName(clone4Real.getName(), FolderStorage.REAL_TREE_ID, defaultParentId, openedStorages));
                 realStorage.updateFolder(clone4Real, storageParameters);
-                /*
-                 * Perform the move in virtual storage
-                 */
-                virtualStorage.updateFolder(folder, storageParameters);
+                final String newId = clone4Real.getID();
+                if (null != newId) {
+                    /*
+                     * Perform the "move" in virtual storage
+                     */
+                    folder.setID(newId);
+                }
+                virtualStorage.createFolder(folder, storageParameters);
             } else {
                 /*
                  * (!parentChildEquality && !parentEquality) ?
@@ -337,12 +336,7 @@ final class MovePerformer extends AbstractPerformer {
             final FolderInfo subfolder;
             if (check) {
                 final Folder f = storage.getFolder(treeId, subfolderId, params);
-                final Permission permission;
-                if (null == session) {
-                    permission = CalculatePermission.calculate(f, getUser(), getContext(), ALL_ALLOWED);
-                } else {
-                    permission = CalculatePermission.calculate(f, getSession(), ALL_ALLOWED);
-                }
+                final Permission permission = effectivePermission(f);
                 if (!permission.isAdmin()) {
                     throw FolderExceptionErrorMessage.FOLDER_NOT_MOVEABLE.create(
                         f.getLocalizedName(session.getUser().getLocale()),
@@ -356,6 +350,16 @@ final class MovePerformer extends AbstractPerformer {
             folder.addSubfolder(subfolder);
             gatherSubfolders(treeId, subfolder, params, storage, check);
         }
+    }
+
+    private Permission effectivePermission(final Folder f) throws FolderException {
+        final Permission permission;
+        if (null == session) {
+            permission = CalculatePermission.calculate(f, getUser(), getContext(), ALL_ALLOWED);
+        } else {
+            permission = CalculatePermission.calculate(f, getSession(), ALL_ALLOWED);
+        }
+        return permission;
     }
 
     private static Map<String, String> generateIDMap(final FolderInfo oldFolder, final FolderInfo newFolder) {
