@@ -1895,6 +1895,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             // bigger as double can hold. So here we calculate the amount of digits a number has and
             // later divide it with that 10^thisvalue
             double div = Math.pow(10,(int)Math.log10(totalDatabases));
+            div = div == 0 ? 1 : div;
             
             DatabaseHandle selectedDatabase = null;
             // Here we have to do a second loop because we know the amount of
