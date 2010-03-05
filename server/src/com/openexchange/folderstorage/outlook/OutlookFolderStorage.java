@@ -505,18 +505,45 @@ public final class OutlookFolderStorage implements FolderStorage {
                 if (null == folderStorage) {
                     throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, folderId);
                 }
-                folderStorage.startTransaction(storageParameters, false);
+                final boolean started = folderStorage.startTransaction(storageParameters, false);
                 try {
                     /*
                      * Get folder
                      */
                     realFolder = folderStorage.getFolder(realTreeId, folderId, storageParameters);
-                    folderStorage.commitTransaction(storageParameters);
+                    if (started) {
+                        folderStorage.commitTransaction(storageParameters);
+                    }
                 } catch (final FolderException e) {
-                    folderStorage.rollback(storageParameters);
+                    if (started) {
+                        folderStorage.rollback(storageParameters);
+                    }
+                    /*
+                     * Check consistency
+                     */
+                    final Connection wcon = checkWriteConnection(storageParameters);
+                    if (null == wcon) {
+                        if (Select.containsFolder(contextId, tree, user.getId(), folderId, StorageType.WORKING)) {
+                            /*
+                             * In virtual tree table, but shouldn't
+                             */
+                            Delete.deleteFolder(contextId, tree, user.getId(), folderId, false);
+                            throw FolderExceptionErrorMessage.TEMPORARY_ERROR.create(e, new Object[0]);
+                        }
+                    } else {
+                        if (Select.containsFolder(contextId, tree, user.getId(), folderId, StorageType.WORKING, wcon)) {
+                            /*
+                             * In virtual tree table, but shouldn't
+                             */
+                            Delete.deleteFolder(contextId, tree, user.getId(), folderId, false, wcon);
+                            throw FolderExceptionErrorMessage.TEMPORARY_ERROR.create(e, new Object[0]);
+                        }
+                    }
                     throw e;
                 } catch (final Exception e) {
-                    folderStorage.rollback(storageParameters);
+                    if (started) {
+                        folderStorage.rollback(storageParameters);
+                    }
                     throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
                 }
             }
