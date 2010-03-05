@@ -58,32 +58,18 @@ import com.openexchange.session.Session;
  */
 public abstract class ReadOnlyValue implements IValueHandler {
 
-    /**
-     * Default constructor.
-     */
     protected ReadOnlyValue() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public final boolean isWritable() {
         return false;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public final void writeValue(final Session session, final Context ctx,
-        final User user, final Setting setting) throws SettingException {
-        throw new SettingException(SettingException.Code.NO_WRITE, setting
-            .getName());
+    public final void writeValue(final Session session, final Context ctx, final User user, final Setting setting) throws SettingException {
+        throw new SettingException(SettingException.Code.NO_WRITE, setting.getName());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public int getId() {
         return -1;
     }
