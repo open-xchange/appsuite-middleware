@@ -49,13 +49,12 @@
 
 package com.openexchange.calendar.printing.preferences;
 
-import java.util.Arrays;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 
@@ -68,9 +67,6 @@ public class CalendarPrintingEnabled implements PreferencesItemService {
 
     static final String[] PATH = new String[] { "modules", "calendar", "printing" };
 
-    /**
-     * Initializes a new {@link CalendarPrintingEnabled}.
-     */
     public CalendarPrintingEnabled() {
         super();
     }
@@ -80,26 +76,14 @@ public class CalendarPrintingEnabled implements PreferencesItemService {
     }
 
     public IValueHandler getSharedValue() {
-        return new IValueHandler() {
-
-            public int getId() {
-                return -1;
-            }
-
-            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws SettingException {
-                setting.setSingleValue(Boolean.TRUE);
-            }
-
-            public boolean isAvailable(final UserConfiguration userConfig) {
+        return new ReadOnlyValue() {
+            
+            public boolean isAvailable(UserConfiguration userConfig) {
                 return userConfig.hasCalendar();
             }
-
-            public boolean isWritable() {
-                return false;
-            }
-
-            public void writeValue(final Session session, final Context ctx, final User user, final Setting setting) throws SettingException {
-                throw new SettingException(SettingException.Code.NO_WRITE, Arrays.toString(PATH));
+            
+            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) {
+                setting.setSingleValue(Boolean.TRUE);
             }
         };
     }
