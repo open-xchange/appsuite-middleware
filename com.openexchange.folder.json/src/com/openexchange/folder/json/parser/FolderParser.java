@@ -120,7 +120,14 @@ public final class FolderParser {
             }
 
             if (folderJsonObject.hasAndNotNull(FolderField.SUBSCRIBED.getName())) {
-                folder.setSubscribed(folderJsonObject.getInt(FolderField.SUBSCRIBED.getName()) > 0);
+                try {
+                    folder.setSubscribed(folderJsonObject.getInt(FolderField.SUBSCRIBED.getName()) > 0);
+                } catch (final JSONException e) {
+                    /*
+                     * Not an integer value
+                     */
+                    folder.setSubscribed(folderJsonObject.getBoolean(FolderField.SUBSCRIBED.getName()));
+                }
             } else {
                 // If not present consider as subscribed
                 folder.setSubscribed(true);
