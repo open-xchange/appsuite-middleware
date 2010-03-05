@@ -119,6 +119,7 @@ public class ExemplaryFolderTestManagerTest extends AbstractAJAXSession {
         manager.insertFolderOnServer(folderObject2);
     }
 
+    @Override
     public void tearDown() throws Exception {
         manager.cleanUp();
     }

@@ -50,10 +50,8 @@
 package com.openexchange.ajax.folder;
 
 import java.io.IOException;
-
 import org.json.JSONException;
 import org.xml.sax.SAXException;
-
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonInsertResponse;

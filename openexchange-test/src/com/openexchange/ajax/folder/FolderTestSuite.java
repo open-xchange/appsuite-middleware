@@ -49,9 +49,9 @@
 
 package com.openexchange.ajax.folder;
 
-import com.openexchange.ajax.folder.actions.ExemplaryFolderTestManagerTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import com.openexchange.ajax.folder.actions.ExemplaryFolderTestManagerTest;
 
 /**
  * Suite for all folder tests.

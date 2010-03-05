@@ -70,9 +70,9 @@ public class DeleteRequest extends AbstractFolderRequest<CommonDeleteResponse> {
     private final String[] folderIds;
 
     private final Date lastModified;
-    
+
     private int tree = 0;
-    
+
     public DeleteRequest(final String[] folderIds, final Date lastModified) {
         super();
         this.folderIds = folderIds;
@@ -82,7 +82,7 @@ public class DeleteRequest extends AbstractFolderRequest<CommonDeleteResponse> {
     public DeleteRequest(final String folderId, final Date lastModified) {
         this(new String[] { folderId }, lastModified);
     }
-    
+
     public DeleteRequest(final int[] folderIds, final Date lastModified) {
         super();
         this.folderIds = i2s(folderIds);
