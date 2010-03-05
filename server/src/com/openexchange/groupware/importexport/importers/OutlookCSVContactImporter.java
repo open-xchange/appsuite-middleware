@@ -64,6 +64,7 @@ import com.openexchange.groupware.contact.helpers.ContactSetter;
 import com.openexchange.groupware.contact.helpers.ContactSwitcher;
 import com.openexchange.groupware.contact.helpers.ContactSwitcherForBooleans;
 import com.openexchange.groupware.contact.helpers.ContactSwitcherForSimpleDateFormat;
+import com.openexchange.groupware.contact.helpers.SplitBirthdayFieldsSetter;
 import com.openexchange.groupware.contact.mappers.ContactFieldMapper;
 import com.openexchange.groupware.contact.mappers.DutchOutlookMapper;
 import com.openexchange.groupware.contact.mappers.EnglishOutlookMapper;
@@ -184,9 +185,14 @@ public class OutlookCSVContactImporter extends CSVContactImporter {
 		dateSwitcher.addDateFormat( getGermanDateNotation());
 		dateSwitcher.addDateFormat( getAmericanDateNotation());
 		dateSwitcher.setDelegate(new ContactSetter());
+
 		final ContactSwitcherForBooleans boolSwitcher = new ContactSwitcherForBooleans();
 		boolSwitcher.setDelegate(dateSwitcher);
-		return boolSwitcher;
+
+		final SplitBirthdayFieldsSetter bdaySwitcher = new SplitBirthdayFieldsSetter();
+		bdaySwitcher.setDelegate(boolSwitcher);
+
+		return bdaySwitcher;
 	}
 	
 	public static final SimpleDateFormat getGermanDateNotation(){
