@@ -51,7 +51,6 @@ package com.openexchange.messaging.json.actions.accounts;
 
 import java.util.List;
 import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;

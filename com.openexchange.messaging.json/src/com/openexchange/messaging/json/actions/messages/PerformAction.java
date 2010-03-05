@@ -56,7 +56,6 @@ import com.openexchange.caching.Cache;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.messaging.MessagingMessage;
-import com.openexchange.messaging.MessagingMessageAccess;
 import com.openexchange.messaging.json.MessagingMessageParser;
 import com.openexchange.messaging.json.MessagingMessageWriter;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;

@@ -69,7 +69,6 @@ import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.MessagingMessageAccess;
 import com.openexchange.messaging.OrderDirection;
 import com.openexchange.messaging.generic.internet.MimeAddressMessagingHeader;
-import com.openexchange.messaging.generic.internet.MimeMessagingMessage;
 import com.openexchange.messaging.json.MessagingMessageParser;
 import com.openexchange.messaging.json.cacheing.CacheingMessageAccess;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;

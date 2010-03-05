@@ -49,7 +49,6 @@
 
 package com.openexchange.messaging.json.actions.services;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -57,7 +56,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.i18n.Translator;
 import com.openexchange.messaging.MessagingExceptionCodes;
-import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.json.MessagingServiceWriter;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.tools.session.ServerSession;

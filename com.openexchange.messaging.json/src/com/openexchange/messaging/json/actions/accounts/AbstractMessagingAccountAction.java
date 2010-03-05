@@ -54,11 +54,9 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.i18n.Translator;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.json.MessagingAccountParser;
 import com.openexchange.messaging.json.MessagingAccountWriter;
-import com.openexchange.messaging.json.MessagingServiceWriter;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 

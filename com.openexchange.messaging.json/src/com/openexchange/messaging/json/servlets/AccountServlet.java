@@ -50,7 +50,6 @@
 package com.openexchange.messaging.json.servlets;
 
 import com.openexchange.ajax.MultipleAdapterServletNew;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.messaging.json.actions.accounts.AccountActionFactory;
 import com.openexchange.tools.session.ServerSession;
 

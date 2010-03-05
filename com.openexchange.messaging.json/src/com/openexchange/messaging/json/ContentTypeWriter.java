@@ -81,7 +81,7 @@ public class ContentTypeWriter implements MessagingHeaderWriter {
     }
 
     public Object writeValue(Entry<String, Collection<MessagingHeader>> entry) throws JSONException, MessagingException {
-        ContentType cType = (ContentType) toCType(entry.getValue().iterator().next());
+        ContentType cType = toCType(entry.getValue().iterator().next());
         JSONObject jsonCType = new JSONObject();
 
         jsonCType.put("type", cType.getBaseType());

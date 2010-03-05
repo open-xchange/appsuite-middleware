@@ -49,12 +49,14 @@
 
 package com.openexchange.messaging.json;
 
+import static com.openexchange.messaging.json.MessagingAccountConstants.CONFIGURATION;
+import static com.openexchange.messaging.json.MessagingAccountConstants.DISPLAY_NAME;
+import static com.openexchange.messaging.json.MessagingAccountConstants.ID;
+import static com.openexchange.messaging.json.MessagingAccountConstants.MESSAGING_SERVICE;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.datatypes.genericonf.json.FormContentWriter;
 import com.openexchange.messaging.MessagingAccount;
-
-import static com.openexchange.messaging.json.MessagingAccountConstants.*;
 
 /**
  * Renders a MessagingAccount in its JSON representation also using the dynamic form description of the parent messaging service.

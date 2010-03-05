@@ -51,7 +51,6 @@ package com.openexchange.messaging.json;
 
 import static com.openexchange.messaging.json.MessagingAccountConstants.ID;
 import static com.openexchange.messaging.json.MessagingAccountConstants.MESSAGING_SERVICE;
-import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.datatypes.genericonf.json.FormContentParser;

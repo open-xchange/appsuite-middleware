@@ -95,7 +95,7 @@ public class ContentTypeParser implements MessagingHeaderParser {
 
     private void parseObject(Map<String, Collection<MessagingHeader>> headers, String key, JSONObject value) throws MessagingException, JSONException {
         MimeContentType contentType = new MimeContentType();
-        JSONObject jsonCType = (JSONObject) value;
+        JSONObject jsonCType = value;
         contentType.setBaseType(jsonCType.getString("type"));
 
         if (jsonCType.has("params")) {

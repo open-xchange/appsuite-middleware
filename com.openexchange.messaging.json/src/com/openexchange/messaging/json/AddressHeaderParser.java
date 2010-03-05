@@ -117,7 +117,7 @@ public class AddressHeaderParser implements MessagingHeaderParser {
     }
 
     private MessagingHeader parseString(String key, String value) throws MessagingException {
-        return (MessagingHeader) MimeAddressMessagingHeader.parseRFC822(key, value).iterator().next();
+        return MimeAddressMessagingHeader.parseRFC822(key, value).iterator().next();
     }
 
     private MessagingHeader parseObject(String key, JSONObject value) throws JSONException {

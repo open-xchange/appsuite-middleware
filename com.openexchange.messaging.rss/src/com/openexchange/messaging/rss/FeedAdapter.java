@@ -72,7 +72,7 @@ public class FeedAdapter {
     public FeedAdapter(SyndFeed feed, String folder) throws MessagingException {
         this.feed = feed;
     
-        List<SyndEntry> entries = (List<SyndEntry>) feed.getEntries();
+        List<SyndEntry> entries = feed.getEntries();
         for (SyndEntry syndEntry : entries) {
             remember(new SyndMessage(feed, syndEntry, folder));
         }

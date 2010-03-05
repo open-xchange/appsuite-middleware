@@ -68,10 +68,10 @@ import com.openexchange.mail.text.HTMLProcessing;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.messaging.BinaryContent;
 import com.openexchange.messaging.MessagingBodyPart;
-import com.openexchange.messaging.MessagingField;
-import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingException;
+import com.openexchange.messaging.MessagingField;
+import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.MessagingMessageGetSwitch;
 import com.openexchange.messaging.MessagingPart;
@@ -232,7 +232,7 @@ public class MessagingMessageWriter {
      * @param string 
      */
     public JSONObject write(MessagingMessage message, String folderPrefix, ServerSession session, DisplayMode mode) throws JSONException, MessagingException {
-        JSONObject messageJSON = write((MessagingPart)message, session, mode);
+        JSONObject messageJSON = write(message, session, mode);
 
         if(message.getId() != null) {
             messageJSON.put("id", message.getId());

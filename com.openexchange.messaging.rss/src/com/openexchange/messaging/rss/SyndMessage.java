@@ -92,7 +92,7 @@ public class SyndMessage implements MessagingMessage {
         
         addStringHeader(KnownHeader.SUBJECT, syndEntry.getTitle());
         //addStringHeader(KnownHeader.FROM, syndEntry.getAuthor());
-        List<SyndContent> contents = (List<SyndContent>) syndEntry.getContents();
+        List<SyndContent> contents = syndEntry.getContents();
         // For now we'll only use the first content element
         
         if(contents.size() > 0) {
