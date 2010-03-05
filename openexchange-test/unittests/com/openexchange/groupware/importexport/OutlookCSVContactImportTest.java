@@ -72,6 +72,7 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
+import com.openexchange.groupware.importexport.importers.OutlookCSVContactImporter;
 
 public class OutlookCSVContactImportTest extends AbstractContactTest{
 	public String IMPORT_HEADERS = ContactField.GIVEN_NAME.getEnglishOutlookName()+","+ContactField.EMAIL1.getEnglishOutlookName()+","+ContactField.BIRTHDAY.getEnglishOutlookName()+"\n";
@@ -82,7 +83,7 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
 		super();
 		defaultFormat = Format.OUTLOOK_CSV;
 		imp = ImportExport.getOutlookImporter();
-		
+		assertFalse("Should read from property file", ( (OutlookCSVContactImporter) imp).isUsingFallback());
 	}
 	
 	//workaround for JUnit 3 runner
@@ -262,6 +263,21 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
         final Contact conObj = getEntry( Integer.parseInt( res.getObjectId() ) );
         assertFalse("Should not set e-mail address", conObj.containsEmail1());
         assertEquals("Should only criticize that 'Account' cannot be translated", "I_E-0803" , res.getException().getErrorCode());
+    }
+    
+    @Test public void shouldCombineSplitDatesInDutchCSV() throws UnsupportedEncodingException, NumberFormatException, OXException, ContextException{
+        final String csv = 
+            "Voornaam, Achternaam, Geboortejaar, Geboortemaand, Geboortedag\n" +
+        	"Tobias,   Prinz,      1980,         12,            31";
+        final List<ImportResult> results = importStuff(csv);
+        assertTrue("Only one result", 1 == results.size());
+        final ImportResult res = results.get(0);
+        final Contact contact = getEntry( Integer.parseInt( res.getObjectId() ) );
+        
+        assertTrue("Birthday should have been set" , contact.containsBirthday());
+        
+        String actual = new SimpleDateFormat("yyyy-MM-dd").format( contact.getBirthday() );
+        assertEquals("Birthday should match (day-wise)", "1980-12-31", actual);
     }
 	
 

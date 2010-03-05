@@ -174,23 +174,23 @@ public class ContactSwitcherTester extends TestCase {
 	}
 	
 	public void testUnkownFieldHandling(){
-	    assertNull("Should return null when getting unknown field", new ContactGetter()._unknownfield("object","value"));
+	    assertFalse("Should return false when getting unknown field", new ContactGetter()._unknownfield(null,"field","value"));
 	    
 	    try { 
-	        new ContactSetter()._unknownfield("object","value");
+	        new ContactSetter()._unknownfield(null,"field","value");
 	        fail("Should thow exception");
 	    } catch(ContactException e){
 	        assertTrue("Should throw exception when trying to set unknown field", true);
 	    }
 	}
 	
-	public void testSplitBirthdayFieldHandling(){
+	public void testSplitBirthdayFieldHandling() throws ContactException{
 	    SplitBirthdayFieldsSetter switcher = new SplitBirthdayFieldsSetter();
 	    Contact contact = new Contact();
 	    Integer day = 31, month = 12, year = 1970;
-	    switcher._unknownfield(ExtendedContactFields.BIRTHDAY_DAY, contact, day);
-	    switcher._unknownfield(ExtendedContactFields.BIRTHDAY_MONTH, contact, month);
-	    switcher._unknownfield(ExtendedContactFields.BIRTHDAY_YEAR, contact, year);
+	    switcher._unknownfield(contact, ExtendedContactFields.BIRTHDAY_DAY, day);
+	    switcher._unknownfield(contact, ExtendedContactFields.BIRTHDAY_MONTH, month);
+	    switcher._unknownfield(contact, ExtendedContactFields.BIRTHDAY_YEAR, year);
 	    Calendar expected = Calendar.getInstance();
 	    expected.setTime(contact.getBirthday());
 	    
