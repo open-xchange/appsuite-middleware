@@ -50,9 +50,12 @@
 package com.openexchange.threadpool;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
@@ -266,6 +269,11 @@ public final class ThreadPools {
     }
 
     /**
+     * The dummy {@link ExecutorService} using current thread.
+     */
+    public static final ExecutorService CURRENT_THREAD_EXECUTOR_SERVICE = new CurrentThreadExecutorService();
+
+    /**
      * A {@link Callable} that runs given task and returns given result
      */
     private static final class RunnableAdapter<T> implements Callable<T> {
@@ -347,6 +355,37 @@ public final class ThreadPools {
             return callable.call();
         }
 
+    }
+
+    private static class CurrentThreadExecutorService extends java.util.concurrent.AbstractExecutorService {
+
+        public CurrentThreadExecutorService() {
+            super();
+        }
+
+        public void shutdown() {
+            // Nothing to do
+        }
+
+        public List<Runnable> shutdownNow() {
+            return Collections.emptyList();
+        }
+
+        public boolean isShutdown() {
+            return false;
+        }
+
+        public boolean isTerminated() {
+            return false;
+        }
+
+        public boolean awaitTermination(final long timeout, final TimeUnit unit) throws InterruptedException {
+            return false;
+        }
+
+        public void execute(final Runnable command) {
+            command.run();
+        }
     }
 
 }
