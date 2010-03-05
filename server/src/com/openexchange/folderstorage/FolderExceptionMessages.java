@@ -142,6 +142,9 @@ public class FolderExceptionMessages implements LocalizableStrings {
     // Folder "%1$s" must not be moved by user "%2$s" in context "%3$s".
     public static final String FOLDER_NOT_MOVEABLE_MSG = "Folder \"%1$s\" must not be moved by user \"%2$s\" in context \"%3$s\".";
 
+    // A temporary error occurred. Please retry.
+    public static final String TEMPORARY_ERROR_MSG = "A temporary error occurred. Please retry.";
+
     /**
      * Initializes a new {@link FolderExceptionMessages}
      */

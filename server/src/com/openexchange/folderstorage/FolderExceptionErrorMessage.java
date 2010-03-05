@@ -174,7 +174,11 @@ public enum FolderExceptionErrorMessage implements OXErrorMessage {
      * <p>
      * Folder identifier should be passed as first argument to not injure privacy through publishing folder name.
      */
-    FOLDER_NOT_MOVEABLE(FolderExceptionMessages.FOLDER_NOT_MOVEABLE_MSG, Category.PERMISSION, 27);
+    FOLDER_NOT_MOVEABLE(FolderExceptionMessages.FOLDER_NOT_MOVEABLE_MSG, Category.PERMISSION, 27),
+    /**
+     * A temporary error occurred. Please retry.
+     */
+    TEMPORARY_ERROR(FolderExceptionMessages.TEMPORARY_ERROR_MSG, Category.CODE_ERROR, 28);
 
     private final Category category;
 
