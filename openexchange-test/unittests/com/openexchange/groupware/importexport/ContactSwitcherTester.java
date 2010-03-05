@@ -51,11 +51,13 @@ package com.openexchange.groupware.importexport;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
 import junit.framework.TestCase;
 
+import com.openexchange.ajax.fields.ExtendedContactFields;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -65,6 +67,7 @@ import com.openexchange.groupware.contact.helpers.ContactSwitcher;
 import com.openexchange.groupware.contact.helpers.ContactSwitcherForBooleans;
 import com.openexchange.groupware.contact.helpers.ContactSwitcherForSimpleDateFormat;
 import com.openexchange.groupware.contact.helpers.ContactSwitcherForTimestamp;
+import com.openexchange.groupware.contact.helpers.SplitBirthdayFieldsSetter;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.importexport.importers.OutlookCSVContactImporter;
 
@@ -168,6 +171,32 @@ public class ContactSwitcherTester extends TestCase {
 		
 		assertEquals("Checking date", date, compareDate);
 		assertEquals("Checking nickname", nickname, compareNickname);
+	}
+	
+	public void testUnkownFieldHandling(){
+	    assertNull("Should return null when getting unknown field", new ContactGetter()._unknownfield("object","value"));
+	    
+	    try { 
+	        new ContactSetter()._unknownfield("object","value");
+	        fail("Should thow exception");
+	    } catch(ContactException e){
+	        assertTrue("Should throw exception when trying to set unknown field", true);
+	    }
+	}
+	
+	public void testSplitBirthdayFieldHandling(){
+	    SplitBirthdayFieldsSetter switcher = new SplitBirthdayFieldsSetter();
+	    Contact contact = new Contact();
+	    Integer day = 31, month = 12, year = 1970;
+	    switcher._unknownfield(ExtendedContactFields.BIRTHDAY_DAY, contact, day);
+	    switcher._unknownfield(ExtendedContactFields.BIRTHDAY_MONTH, contact, month);
+	    switcher._unknownfield(ExtendedContactFields.BIRTHDAY_YEAR, contact, year);
+	    Calendar expected = Calendar.getInstance();
+	    expected.setTime(contact.getBirthday());
+	    
+	    assertEquals("Day should match", day.intValue(), expected.get(Calendar.DAY_OF_MONTH));
+	    assertEquals("Month should match", Calendar.DECEMBER, expected.get(Calendar.MONTH));
+	    assertEquals("Year should match", year.intValue(), expected.get(Calendar.YEAR));
 	}
 	
 	public void testDateSwitchingForBug7552() throws Exception{
