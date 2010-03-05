@@ -82,11 +82,9 @@ import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.OXContextException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.rmi.impl.OXUser;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.services.I18nServices;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
@@ -1939,6 +1937,11 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             rs.close();
             pstm.close();
 
+            // with increasing numbers of db_count, the currweight value will get
+            // bigger as double can hold. So here we calculate the amount of digits a number has and
+            // later divide it with that 10^thisvalue
+            double div = Math.pow(10,Math.log10(totalDatabases));
+            
             DatabaseHandle selectedDatabase = null;
             // Here we have to do a second loop because we know the amount of
             // totalDatabase
@@ -1950,7 +1953,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 final String name = handle.getName();
 
                 if (unit_max == -1 || (unit_max != 0 && db_count < unit_max)) {
-                    double currweight = (double) totalDatabases / 100 * db_count;
+                    double currweight = (double) totalDatabases / div * db_count;
                     final double x = currweight / weight;
                     currweight -= (int) x * weight;
                     final double currdist = weight - currweight;

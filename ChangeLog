@@ -1,3 +1,8 @@
+* 2010-03-05 - choeger@open-xchange.com
+
+  - Bugfix #15554 -[L3] unable to create new contexts even if max unit is not
+  reached
+
 * 2009-10-29 - dennis.sieben@open-xchange.com
 
  - Bugfix #14734: Reporting Tool needs to be available for 6.12
