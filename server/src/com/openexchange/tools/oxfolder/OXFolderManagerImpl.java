@@ -1172,22 +1172,28 @@ final class OXFolderManagerImpl extends OXFolderManager {
          * Update OLD parent in cache, cause this can only be done here
          */
         if (FolderCacheManager.isEnabled()) {
-            try {
-                Connection wc = writeCon;
-                final boolean create = (wc == null);
+            Connection wc = writeCon;
+            final boolean create = (wc == null);
+            if (create) {
                 try {
-                    if (create) {
-                        wc = DBPool.pickupWriteable(ctx);
-                    }
-                    FolderCacheManager.getInstance().loadFolderObject(storageSrc.getParentFolderID(), ctx, wc);
-                    FolderCacheManager.getInstance().loadFolderObject(storageDest.getParentFolderID(), ctx, wc);
-                } finally {
-                    if (create && wc != null) {
-                        DBPool.closeWriterSilent(ctx, wc);
-                    }
+                    wc = DBPool.pickupWriteable(ctx);
+                } catch (final DBPoolingException e) {
+                    throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
                 }
-            } catch (final DBPoolingException e) {
-                throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
+            }
+            try {
+                final int srcParentId = storageSrc.getParentFolderID();
+                if (srcParentId > 0) {
+                    FolderCacheManager.getInstance().loadFolderObject(srcParentId, ctx, wc);
+                }
+                final int destParentId = storageDest.getParentFolderID();
+                if (destParentId > 0) {
+                    FolderCacheManager.getInstance().loadFolderObject(destParentId, ctx, wc);
+                }
+            } finally {
+                if (create && wc != null) {
+                    DBPool.closeWriterSilent(ctx, wc);
+                }
             }
         }
     }

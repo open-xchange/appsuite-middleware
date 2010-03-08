@@ -1,3 +1,7 @@
+* 2010-03-08 - thorben.betten@open-xchange.com
+
+ - Bugfix #14098: Fixed loading root folder when updating folder cache
+
 * 2010-03-09 - marcus.klein@open-xchange.com
 
  - Bugfix #15549: Correcting algorithm to create full month block for calendar printing.

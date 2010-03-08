@@ -923,17 +923,18 @@ public final class OXFolderSQL {
         Connection writeCon = writeConArg;
         boolean closeWriteCon = false;
         Connection readCon = readConArg;
-        boolean closeCon = false;
         PreparedStatement pst = null;
         ResultSet subFolderRS = null;
         try {
-            if (readCon == null) {
-                readCon = DBPool.pickup(ctx);
-                closeCon = true;
-            }
             if (writeCon == null) {
                 writeCon = DBPool.pickupWriteable(ctx);
                 closeWriteCon = true;
+            }
+            if (readCon == null) {
+                /*
+                 * Use write-connection as read-connection
+                 */
+                readCon = writeCon;
             }
             final boolean isAuto = writeCon.getAutoCommit();
             if (isAuto) {
@@ -989,7 +990,7 @@ public final class OXFolderSQL {
                 writeCon.setAutoCommit(true);
             }
         } finally {
-            closeResources(subFolderRS, pst, closeCon ? readCon : null, true, ctx);
+            closeSQLStuff(subFolderRS, pst);
             if (closeWriteCon && writeCon != null) {
                 DBPool.closeWriterSilent(ctx, writeCon);
             }
