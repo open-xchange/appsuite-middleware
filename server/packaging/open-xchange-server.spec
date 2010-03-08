@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 1
+%define		ox_release 2
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -492,8 +492,21 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Tue Mar 09 2010 - marcus.klein@open-xchange.com
+ - Bugfix #15549: Correcting algorithm to create full month block for calendar printing.
+* Mon Mar 08 2010 - thorben.betten@open-xchange.com
+ - Bugfix #14098: Fixed loading root folder when updating folder cache
+* Fri Mar 05 2010 - marcus.klein@open-xchange.com
+ - Bugfix #15545: Adding users to listing appointments for calendar printing to get the folder identifier.
+* Thu Mar 04 2010 - karsten.will@open-xchange.com
+ - fixed bug 15347 (uid-column was not loaded from db to compare it to possible update)
+* Thu Mar 04 2010 - choeger@open-xchange.com
+ - Bugfix #15524: VoipNow administration login is readable for all linux users
+   on that machine
 * Wed Mar 03 2010 - thorben.betten@open-xchange.com
  - Bugfix #15539: Allowing registration of HttpServlets without a default constructor
+* Wed Mar 03 2010 - tobias.prinz@open-xchange.com
+ - Related to bug #15231: Outlook imports for different languages can now be easily extended by creating .properties files with mapping for them. 
 * Tue Mar 02 2010 - francisco.laguna@open-xchange.com
  - Bugfix #15468: Stop topward iteration when hitting parentId null
 * Tue Mar 02 2010 - thorben.betten@open-xchange.com
