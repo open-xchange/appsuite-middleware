@@ -279,7 +279,11 @@ public class OXCalendarException extends OXException {
         /** SQL Problem: "%s". */
         SQL_ERROR("SQL Problem: \"%s\".", 101, Category.CODE_ERROR),
         /** Wrong number of rows changed. Expected %1$d but was %2$d. */
-        WRONG_ROW_COUNT("Wrong number of rows changed. Expected %1$d but was %2$d.", 102, Category.CODE_ERROR);
+        WRONG_ROW_COUNT("Wrong number of rows changed. Expected %1$d but was %2$d.", 102, Category.CODE_ERROR),
+        /**
+         * Unable to find a participant for a specified object.
+         */
+        COULD_NOT_FIND_PARTICIPANT("Could not find participant for this object.", 103, Category.USER_INPUT);
 
         /**
          * Message of the exception.
