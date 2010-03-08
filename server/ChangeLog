@@ -1,3 +1,7 @@
+* 2010-03-09 - marcus.klein@open-xchange.com
+
+ - Bugfix #15549: Correcting algorithm to create full month block for calendar printing.
+
 * 2010-03-05 - marcus.klein@open-xchange.com
 
  - Bugfix #15545: Adding users to listing appointments for calendar printing to get the folder identifier.

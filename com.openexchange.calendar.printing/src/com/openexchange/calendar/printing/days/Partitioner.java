@@ -131,7 +131,7 @@ public class Partitioner {
         // omit the last millisecond of the end, because this must be exclusive and we calculate always inclusive.
         lastDay = CalendarTools.getDayStart(cal, new Date(params.getEnd().getTime() - 1));
         long days = (lastDay.getTime() - firstDay.getTime()) / Constants.MILLI_DAY;
-        if (days >= 28 && days <= 31) {
+        if (days >= 27 && days <= 31) {
             makeMonthBlock(firstDay, lastDay);
         } else {
             displayStart = firstDay;
