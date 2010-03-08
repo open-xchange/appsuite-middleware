@@ -139,13 +139,13 @@ public class Partitioner {
         }
     }
 
-    private void makeMonthBlock(Date firstDay, Date lastDay) {
-        cal.setTime(firstDay);
+    private void makeMonthBlock(Date start, Date end) {
+        cal.setTime(start);
         // To be consistent with UI only use Monday as week start day.
         // cal.set(Calendar.DAY_OF_WEEK, cal.getFirstDayOfWeek());
         CalendarTools.moveBackToMonday(cal);
         displayStart = cal.getTime();
-        cal.setTime(lastDay);
+        cal.setTime(end);
         // To be consistent with UI only use Sunday as last day of week.
         // cal.set(Calendar.DAY_OF_WEEK, cal.getLastDayOfWeek());
         CalendarTools.moveForwardToSunday(cal);
@@ -159,7 +159,7 @@ public class Partitioner {
                 RecurringResultsInterface results = calendarTools.calculateRecurring(appointment, displayStart.getTime(), CalendarTools.getDayEnd(cal, displayEnd).getTime(), 0);
                 for (int i = 0; i < results.size(); i++) {
                     RecurringResultInterface result = results.getRecurringResult(i);
-                    Appointment occurrence = (Appointment) appointment.clone();
+                    Appointment occurrence = appointment.clone();
                     occurrence.setStartDate(new Date(result.getStart()));
                     occurrence.setEndDate(new Date(result.getEnd()));
                     addToMap(dayMap, occurrence);
