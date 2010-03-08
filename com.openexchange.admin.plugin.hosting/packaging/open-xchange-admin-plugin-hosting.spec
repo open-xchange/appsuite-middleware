@@ -38,7 +38,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 1
+%define		ox_release 2
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -143,6 +143,8 @@ mv doc javadoc
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Fri Mar 05 2010 - choeger@open-xchange.com
+ - Bugfix #15554 -[L3] unable to create new contexts even if max unit is not reached
 * Fri Dec 18 2009 - marcus.klein@open-xchange.com
  - Bugfix #15073: Using new AJPv13TaskMonitor for statistics.
 * Tue Dec 15 2009 - dennis.sieben@open-xchange.com
