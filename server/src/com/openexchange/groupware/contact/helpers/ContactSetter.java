@@ -1178,7 +1178,7 @@ public class ContactSetter implements ContactSwitcher {
     }
 
     public boolean _unknownfield(Contact contact, String fieldname, Object value, Object... additionalObjects) throws ContactException {
-        throw EXCEPTIONS.create(1, fieldname);
+        return false;
     }
 
 }
