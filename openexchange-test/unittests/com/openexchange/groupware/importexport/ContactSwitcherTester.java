@@ -173,15 +173,9 @@ public class ContactSwitcherTester extends TestCase {
 		assertEquals("Checking nickname", nickname, compareNickname);
 	}
 	
-	public void testUnkownFieldHandling(){
+	public void testUnkownFieldHandling() throws ContactException{
 	    assertFalse("Should return false when getting unknown field", new ContactGetter()._unknownfield(null,"field","value"));
-	    
-	    try { 
-	        new ContactSetter()._unknownfield(null,"field","value");
-	        fail("Should thow exception");
-	    } catch(ContactException e){
-	        assertTrue("Should throw exception when trying to set unknown field", true);
-	    }
+	    assertFalse("Should return false when setting unknown field", new ContactSetter()._unknownfield(null,"field","value"));
 	}
 	
 	public void testSplitBirthdayFieldHandling() throws ContactException{
