@@ -14,7 +14,7 @@
 
 	<property name="version" value="${Bundle-Version}" />
 	<property name="bundle.name" value="${Bundle-SymbolicName}.jar" />
-	<property name="composite.name" value="open-xchange-push-oneandone-${version}" />
+	<property name="composite.name" value="open-xchange-push-mailnotify-${version}" />
 
 	<!-- Install Constants -->
 	<property name="bundlesdir" value="${prefix}/bundles" />
