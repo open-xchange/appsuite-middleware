@@ -91,8 +91,7 @@ public final class Bug11619Test extends AbstractTaskTest {
         try {
             {
                 final GetRequest request = new GetRequest(insertR);
-                final GetResponse response = TaskTools.get(client, request,
-                    insertR.getTimestamp());
+                final GetResponse response = client.execute(request);
                 task = response.getTask(tz);
             }
             {
@@ -105,16 +104,14 @@ public final class Bug11619Test extends AbstractTaskTest {
             }
             {
                 final GetRequest request = new GetRequest(insertR);
-                final GetResponse response = TaskTools.get(client, request,
-                    task.getLastModified());
+                final GetResponse response = client.execute(request);
                 task = response.getTask(tz);
                 assertTrue("External participant get lost.",
                     task.getParticipants().length > 0);
             }
         } finally {
             final GetRequest request = new GetRequest(insertR);
-            final GetResponse response = TaskTools.get(client, request,
-                task.getLastModified());
+            final GetResponse response = client.execute(request);
             task = response.getTask(tz);
             TaskTools.delete(client, new DeleteRequest(task));
         }

@@ -209,7 +209,7 @@ public class TaskTest extends CalendarObjectTest {
         assertEquals(-12l, object.get(TARGET_DURATION));
 
         object.set(TARGET_DURATION,12l);
-        assertEquals(12l, object.getTargetDuration());
+        assertEquals(12l, (Object) object.getTargetDuration());
 
         object.remove(TARGET_DURATION);
         assertFalse(object.contains(TARGET_DURATION));
@@ -425,7 +425,7 @@ public class TaskTest extends CalendarObjectTest {
         assertEquals(-12l, object.get(ACTUAL_DURATION));
 
         object.set(ACTUAL_DURATION,12l);
-        assertEquals(12l, object.getActualDuration());
+        assertEquals(12l, (Object) object.getActualDuration());
 
         object.remove(ACTUAL_DURATION);
         assertFalse(object.contains(ACTUAL_DURATION));

@@ -49,10 +49,10 @@
 
 package com.openexchange.ajax.task;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
-
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.task.actions.AbstractTaskRequest;
@@ -98,8 +98,8 @@ public class SmokeTest extends AbstractTaskTest {
         task.setStatus(Task.IN_PROGRESS);
         task.setPriority(Task.HIGH);
         task.setPercentComplete(75);
-        task.setTargetDuration(2);
-        task.setActualDuration(2);
+        task.setTargetDuration(L(2));
+        task.setActualDuration(L(2));
         final InsertResponse insertR = TaskTools.insert(client,
             new InsertRequest(task, timeZone));
         final GetResponse getR = TaskTools.get(client, new GetRequest(insertR));

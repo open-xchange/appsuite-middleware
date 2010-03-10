@@ -49,9 +49,8 @@
 
 package com.openexchange.ajax.task.actions;
 
-import org.json.JSONException;
-
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.groupware.tasks.Task;
 
 /**
  * Retrieves a task from the server.
@@ -59,30 +58,13 @@ import com.openexchange.ajax.AJAXServlet;
  */
 public class GetRequest extends AbstractTaskRequest<GetResponse> {
 
-    /**
-     * Task is requested through this folder.
-     */
     private final int folderId;
 
-    /**
-     * Unique identifier of the task.
-     */
     private final int taskId;
 
     private boolean failOnError;
-    
-    /**
-     * @return the failOnError
-     */
-    public final boolean isFailOnError() {
-        return failOnError;
-    }
 
-    /**
-     * Default constructor.
-     */
-    public GetRequest(final int folderId, final int taskId,
-        final boolean failOnError) {
+    public GetRequest(int folderId, int taskId, boolean failOnError) {
         super();
         this.folderId = folderId;
         this.taskId = taskId;
@@ -97,43 +79,27 @@ public class GetRequest extends AbstractTaskRequest<GetResponse> {
         this(folderId, taskId, true);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public Object getBody() throws JSONException {
+    public GetRequest(Task task) {
+        this(task.getParentFolderID(), task.getObjectID());
+    }
+
+    public Object getBody() {
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Method getMethod() {
         return Method.GET;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Parameter[] getParameters() {
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET),
-            new Parameter(AJAXServlet.PARAMETER_INFOLDER, String.valueOf(
-                folderId)),
-            new Parameter(AJAXServlet.PARAMETER_ID, String.valueOf(taskId))
+            new Parameter(AJAXServlet.PARAMETER_INFOLDER, folderId),
+            new Parameter(AJAXServlet.PARAMETER_ID, taskId)
         };
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public GetParser getParser() {
         return new GetParser(failOnError);
-    }
-
-    /**
-     * @param failOnError the failOnError to set
-     */
-    public final void setFailOnError(final boolean failOnError) {
-        this.failOnError = failOnError;
     }
 }

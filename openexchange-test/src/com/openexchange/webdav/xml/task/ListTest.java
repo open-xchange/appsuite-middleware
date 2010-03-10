@@ -49,6 +49,8 @@
 
 package com.openexchange.webdav.xml.task;
 
+import static com.openexchange.java.Autoboxing.F;
+import static com.openexchange.java.Autoboxing.L;
 import java.util.Date;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.test.TestException;
@@ -130,7 +132,7 @@ public class ListTest extends TaskTest {
         taskObj.setNote("note");
         taskObj.setCategories("testcat1,testcat2,testcat3");
         taskObj.setActualCosts(1.5F);
-        taskObj.setActualDuration(210);
+        taskObj.setActualDuration(L(210));
         taskObj.setBillingInformation("billing information");
         taskObj.setCompanies("companies");
         taskObj.setCurrency("currency");
@@ -139,7 +141,7 @@ public class ListTest extends TaskTest {
         taskObj.setPriority(Task.HIGH);
         taskObj.setStatus(Task.IN_PROGRESS);
         taskObj.setTargetCosts(5.5F);
-        taskObj.setTargetDuration(450);
+        taskObj.setTargetDuration(L(450));
         taskObj.setTripMeter("trip meter");
 
         final int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
@@ -177,8 +179,8 @@ public class ListTest extends TaskTest {
         taskObj.setLabel(2);
         taskObj.setNote("note");
         taskObj.setCategories("testcat1,testcat2,testcat3");
-        taskObj.setActualCosts(1.5F);
-        taskObj.setActualDuration(210);
+        taskObj.setActualCosts(F(1.5f));
+        taskObj.setActualDuration(L(210));
         taskObj.setBillingInformation("billing information");
         taskObj.setCompanies("companies");
         taskObj.setCurrency("currency");
@@ -186,8 +188,8 @@ public class ListTest extends TaskTest {
         taskObj.setPercentComplete(50);
         taskObj.setPriority(Task.HIGH);
         taskObj.setStatus(Task.IN_PROGRESS);
-        taskObj.setTargetCosts(5.5F);
-        taskObj.setTargetDuration(450);
+        taskObj.setTargetCosts(F(5.5f));
+        taskObj.setTargetDuration(L(450));
         taskObj.setTripMeter("trip meter");
         taskObj.setParentFolderID(taskFolderId);
 

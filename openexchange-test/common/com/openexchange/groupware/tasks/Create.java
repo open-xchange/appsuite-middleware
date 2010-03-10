@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.tasks;
 
+import static com.openexchange.java.Autoboxing.F;
+import static com.openexchange.java.Autoboxing.L;
 import java.util.Date;
 
 /**
@@ -80,10 +82,10 @@ public class Create {
         task.setStatus(Task.NOT_STARTED);
         task.setPriority(Task.NORMAL);
         task.setCategories("Categories");
-        task.setTargetDuration(1440);
-        task.setActualDuration(1440);
-        task.setTargetCosts(1.0f);
-        task.setActualCosts(1.0f);
+        task.setTargetDuration(L(1440));
+        task.setActualDuration(L(1440));
+        task.setTargetCosts(F(1.0f));
+        task.setActualCosts(F(1.0f));
         task.setCurrency("\u20ac");
         task.setTripMeter("trip meter");
         task.setBillingInformation("billing information");

@@ -56,19 +56,18 @@ import static com.openexchange.ajax.task.TaskTools.getAllTasksInFolder;
 import static com.openexchange.ajax.task.TaskTools.getTask;
 import static com.openexchange.ajax.task.TaskTools.insertTask;
 import static com.openexchange.ajax.task.TaskTools.updateTask;
-
+import static com.openexchange.java.Autoboxing.F;
+import static com.openexchange.java.Autoboxing.L;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
-
 import com.openexchange.ajax.AbstractAJAXTest;
 import com.openexchange.ajax.config.ConfigTools;
 import com.openexchange.ajax.container.Response;
@@ -122,10 +121,10 @@ public class TasksTest extends AbstractAJAXTest {
         task.setStatus(Task.NOT_STARTED); //FIXME!
         task.setPriority(Task.NORMAL);
         task.setCategories("Categories");
-        task.setTargetDuration(1440);
-        task.setActualDuration(1440);
-        task.setTargetCosts(1.0f);
-        task.setActualCosts(1.0f);
+        task.setTargetDuration(L(1440));
+        task.setActualDuration(L(1440));
+        task.setTargetCosts(F(1.0f));
+        task.setActualCosts(F(1.0f));
         task.setCurrency("\u20ac");
         task.setTripMeter("trip meter");
         task.setBillingInformation("billing information");
@@ -268,7 +267,7 @@ public class TasksTest extends AbstractAJAXTest {
         failOnError(response);
 
         response = getTask(getWebConversation(), getHostName(), getSessionId(),
-            folderId, taskId, response.getTimestamp());
+            folderId, taskId);
         assertEquals("Title of task is not updated.", updatedTitle,
             ((Task) response.getData()).getTitle());
         lastModified = response.getTimestamp();

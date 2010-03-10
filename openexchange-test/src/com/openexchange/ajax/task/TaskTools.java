@@ -53,17 +53,13 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Date;
 import java.util.TimeZone;
-
 import javax.servlet.http.HttpServletResponse;
-
 import junit.framework.Assert;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
-
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
@@ -201,11 +197,10 @@ public final class TaskTools extends Assert {
     }
 
     public static InsertResponse insert(final WebConversation conversation, 
-		final String hostName, final String sessionId, final String protocol, 
-		final InsertRequest request) throws AjaxException, IOException, 
-		SAXException, JSONException {
-		return Executor.execute(new AJAXSession(
-    			conversation, sessionId), request, protocol, hostName);
+        final String hostName, final String sessionId, final String protocol, 
+        final InsertRequest request) throws AjaxException, IOException, 
+        SAXException, JSONException {
+        return Executor.execute(new AJAXSession(conversation, sessionId), request, protocol, hostName);
     }
 
     /**
@@ -292,52 +287,16 @@ public final class TaskTools extends Assert {
         return response;
     }
 
-    public static Response getTask(final WebConversation conversation,
-        final String hostName, final String sessionId, final int folderId,
-        final int taskId, final Date lastModified) throws IOException,
-        SAXException, JSONException, AjaxException, OXJSONException {
-        LOG.trace("Getting task.");
-        final AJAXClient client = new AJAXClient(new AJAXSession(conversation,
-            sessionId));
-        final GetResponse getR = get(client, new GetRequest(folderId,
-            taskId), lastModified);
-        final Response response = getR.getResponse();
-        response.setData(getR.getTask(client.getValues().getTimeZone()));
-        return response;
-    }
-
     /**
-     * @deprecated use {@link #get(AJAXClient, GetRequest, long)}.
+     * @deprecated use {@link AJAXClient#execute(com.openexchange.ajax.framework.AJAXRequest)}.
      */
     @Deprecated
-    public static GetResponse get(final AJAXSession session,
-        final GetRequest request) throws AjaxException, IOException,
-        SAXException, JSONException {
+    public static GetResponse get(final AJAXSession session, final GetRequest request) throws AjaxException, IOException, SAXException, JSONException {
         return Executor.execute(session, request);
     }
 
-    public static GetResponse get(final AJAXClient client,
-        final GetRequest request) throws AjaxException, IOException,
-        SAXException, JSONException {
-        return get(client, request, ZERO);
-    }
-
-    public static GetResponse get(final AJAXClient client,
-        final GetRequest request, final Date lastModified) throws AjaxException,
-        IOException, SAXException, JSONException {
-        final boolean origFail = request.isFailOnError();
-        request.setFailOnError(false);
-        GetResponse response = null;
-        final long start = System.currentTimeMillis();
-        do {
-            response = Executor.execute(client, request);
-        } while (!timeout(start) &&
-            (response.hasError() || lastModified.after(response.getTimestamp())));
-        request.setFailOnError(origFail);
-        if (origFail) {
-            assertFalse(response.getResponse().getErrorMessage(), response.hasError());
-        }
-        return response;
+    public static GetResponse get(final AJAXClient client, final GetRequest request) throws AjaxException, IOException, SAXException, JSONException {
+        return client.execute(request);
     }
 
     /**
