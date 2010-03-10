@@ -56,8 +56,10 @@ import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -539,6 +541,32 @@ public class ICalEmitterTest extends TestCase {
         ICalFile ical = serialize(task);
         
         assertProperty(ical, "UID", "nexn787n478478onzwo87nwiuhi");
+    }
+    
+    public void testShouldNotUseDTENDasEndForIndividualAppointmentsInASeries() throws IOException{
+        int occurences = 4;
+        
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(new Date());
+        cal.add(Calendar.DAY_OF_MONTH, 1);
+        cal.set(Calendar.HOUR_OF_DAY, 8);
+        Date start = cal.getTime();
+        
+        cal.add(Calendar.HOUR, 1);
+        Date end = cal.getTime();
+        
+        Appointment app = new Appointment();
+        app.setStartDate(start);
+        app.setEndDate(end);
+        app.setRecurrenceType(Appointment.DAILY);
+        app.setOccurrence(occurences);
+        app.setInterval(1);
+        app.setDays(127);
+        
+        ICalFile ical = serialize(app);
+        String dtend = ical.getValue("DTEND");
+        assertEquals("Recurrence rule should be 'daily, for four days, every day'.", "FREQ=DAILY;INTERVAL=1;COUNT=4", ical.getValue("RRULE"));
+        assertTrue("Reccurence rule should point to the next day, not the end of the recurences", dtend.startsWith(new SimpleDateFormat("yyyyMMdd").format(end)));
     }
     
     public void no_testTaskOrganizer() throws IOException {
