@@ -309,7 +309,21 @@ public final class MALPollPushListener implements PushListener {
         final Set<String> newIds;
         final Set<String> delIds;
         {
-            final Set<String> fetchedUids = gatherUIDs(mailService);
+            final Set<String> fetchedUids;
+            try {
+                fetchedUids = gatherUIDs(mailService);
+            } catch (final MailException e) {
+                if (MailException.Code.ACCOUNT_DOES_NOT_EXIST.getNumber() == e.getDetailNumber()) {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug(e.getMessage(), e);
+                    }
+                    /*
+                     * Nothing to synchronize
+                     */
+                    return;
+                }
+                throw e;
+            }
             final Set<String> dbUids;
             if (loadDBIDs) {
                 dbUids = MALPollDBUtility.getMailIDs(hash, contextId);
