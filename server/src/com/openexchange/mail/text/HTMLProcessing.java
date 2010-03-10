@@ -309,11 +309,19 @@ public final class HTMLProcessing {
                 } else {
                     tmp.setLength(0);
                     final int mlen = url.length() - 1;
-                    if (mlen > 0 && '(' == url.charAt(0) && ')' == url.charAt(mlen)) {
-                        url = url.substring(1, mlen);
+                    if (mlen > 0 && ')' == url.charAt(mlen)) {
+                        /*
+                         * Keep starting parenthesis if present
+                         */
+                        if ('(' == url.charAt(0)) {
+                            url = url.substring(1, mlen);
+                            tmp.append('(');
+                        } else {
+                            url = url.substring(0, mlen);
+                        }
                         mr.appendLiteralReplacement(
                             sb,
-                            tmp.append("(<a href=\"").append((url.startsWith("www") || url.startsWith("news") ? "http://" : "")).append(url).append(
+                            tmp.append("<a href=\"").append((url.startsWith("www") || url.startsWith("news") ? "http://" : "")).append(url).append(
                                 "\" target=\"_blank\">").append(url).append("</a>)").toString());
                     } else {
                         mr.appendReplacement(
