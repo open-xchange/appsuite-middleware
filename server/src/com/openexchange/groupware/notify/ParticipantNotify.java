@@ -88,13 +88,17 @@ import com.openexchange.data.conversion.ical.ITipMethod;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.event.impl.AppointmentEventInterface2;
 import com.openexchange.event.impl.TaskEventInterface2;
+import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
+import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.OXCalendarException;
+import com.openexchange.groupware.calendar.RecurringResultInterface;
+import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.ExternalUserParticipant;
@@ -244,7 +248,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         }
         return allIds;
     }
-    
+
     protected User[] resolveUsers(final Context ctx, final int... ids) throws LdapException {
         final User[] r = new User[ids.length];
         for (int i = 0; i < ids.length; i++) {
@@ -892,6 +896,8 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             textPart.setContent(text, "text/plain; charset=UTF-8");
             
             ICalSession icalSession = emitter.createSession();
+            Appointment appointmentForICal = ((Appointment) cal).clone();
+            appointmentForICal.setEndDate( computeFirstOccurrenceEnd(appointmentForICal) );
             emitter.writeAppointment(icalSession, (Appointment) cal, session.getContext(), iTip, new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
             UnsynchronizedByteArrayOutputStream byteArrayOutputStream = new UnsynchronizedByteArrayOutputStream();
             emitter.writeSession(icalSession, byteArrayOutputStream);
@@ -912,7 +918,9 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             LOG.error("Unable to compose message", e);
         } catch (IOException e) {
             LOG.error("Unable to compose message", e);
-        }
+        } catch (OXException e) {
+            LOG.error("Unable to compose message", e);
+        } 
         return mp;
     }
 
@@ -1918,6 +1926,12 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         return cal.getTime();
     }
 
+    private static Date computeFirstOccurrenceEnd(CalendarObject app) throws OXException {
+        CalendarCollectionService service = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
+        RecurringResultsInterface recurrences = service.calculateFirstRecurring(app);
+        RecurringResultInterface recurringResult = recurrences.getRecurringResult(0);
+        return new Date(recurringResult.getEnd());
+    }
     /**
      * Checks if specified appointment is a change exception.
      * 
