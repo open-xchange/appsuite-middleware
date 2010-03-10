@@ -27,13 +27,6 @@ postFix() {
   # prevent bash from expanding, see bug 13316
   GLOBIGNORE='*'
 
-  # SoftwareChange_Request-180
-  # -----------------------------------------------------------------------
-  local pfile=/opt/open-xchange/etc/groupware/notification.properties
-  if ! ox_exists_property notify_external_participants_on_secondary $pfile; then
-      ox_set_property notify_external_participants_on_secondary false $pfile
-  fi
-
   # SoftwareChange_Request-194
   # -----------------------------------------------------------------------
   local pfile=/opt/open-xchange/etc/groupware/cache.ccf

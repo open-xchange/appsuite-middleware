@@ -63,77 +63,76 @@ import com.openexchange.tools.conf.AbstractConfig;
  */
 public class NotificationConfig extends AbstractConfig implements Initialization {
 
-	private static final Log LOG = LogFactory.getLog(NotificationConfig.class);
-	
-	private static final Property KEY = Property.NOTIFICATION;
-	
-	enum NotificationProperty{
-		
-		NOTIFY_ON_DELETE("notify_participants_on_delete"),
-		OBJECT_LINK("object_link"),
-		NOTIFY_EXTERNAL_PARTICIPANTS_ON_SECONDARY_EVENT("notify_external_participants_on_secondary");
-		
-		
-		private final String name;
-		
-		private NotificationProperty(final String name){
-			this.name = name;
-		}
-		
-		public String getName(){
-			return name;
-		}
-		
-	}
-	
-	private static NotificationConfig INSTANCE = new NotificationConfig();
+    private static final Log LOG = LogFactory.getLog(NotificationConfig.class);
+
+    private static final Property KEY = Property.NOTIFICATION;
+
+    enum NotificationProperty{
+
+        NOTIFY_ON_DELETE("notify_participants_on_delete"),
+        OBJECT_LINK("object_link");
+
+
+        private final String name;
+
+        private NotificationProperty(final String name){
+            this.name = name;
+        }
+
+        public String getName(){
+            return name;
+        }
+
+    }
+
+    private static NotificationConfig INSTANCE = new NotificationConfig();
 
     public static NotificationConfig getInstance() {
         return INSTANCE;
     }
 
     @Override
-	protected String getPropertyFileName() throws ConfigurationException {
-		final String filename = SystemConfig.getProperty(KEY);
+    protected String getPropertyFileName() throws ConfigurationException {
+        final String filename = SystemConfig.getProperty(KEY);
         if (null == filename) {
             throw new ConfigurationException(Code.PROPERTY_MISSING,
                 KEY.getPropertyName());
         }
         return filename;
-	}
-	
-	public static String getProperty(final NotificationProperty prop, final String def) {
-		if(!INSTANCE.isPropertiesLoadInternal()) {
-			try {
-				INSTANCE.loadPropertiesInternal();
-			} catch (final ConfigurationException e) {
-				LOG.error(e);
-				return def;
-			}
-		}
-		if(!INSTANCE.isPropertiesLoadInternal()) {
-			return def;
-		}
-		return INSTANCE.getPropertyInternal(prop.getName(), def);
-	}
-	
-	public static boolean getPropertyAsBoolean(final NotificationProperty prop, final boolean def) {
-		final String boolVal = getProperty(prop,null);
-		if(boolVal == null) {
-			return def;
-		}
-		return Boolean.parseBoolean(boolVal);
-	}
+    }
+
+    public static String getProperty(final NotificationProperty prop, final String def) {
+        if(!INSTANCE.isPropertiesLoadInternal()) {
+            try {
+                INSTANCE.loadPropertiesInternal();
+            } catch (final ConfigurationException e) {
+                LOG.error(e);
+                return def;
+            }
+        }
+        if(!INSTANCE.isPropertiesLoadInternal()) {
+            return def;
+        }
+        return INSTANCE.getPropertyInternal(prop.getName(), def);
+    }
+
+    public static boolean getPropertyAsBoolean(final NotificationProperty prop, final boolean def) {
+        final String boolVal = getProperty(prop,null);
+        if(boolVal == null) {
+            return def;
+        }
+        return Boolean.parseBoolean(boolVal);
+    }
 
     public void start() throws ConfigurationException {
         if(!INSTANCE.isPropertiesLoadInternal()) {
-			INSTANCE.loadPropertiesInternal();
-		}
+            INSTANCE.loadPropertiesInternal();
+        }
         NotificationPool.getInstance().startup();
     }
 
     public void stop() {
-    	 NotificationPool.getInstance().shutdown();
+         NotificationPool.getInstance().shutdown();
         INSTANCE = new NotificationConfig();
     }
 

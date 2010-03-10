@@ -145,13 +145,6 @@ if [ ${1:-0} -eq 2 ]; then
    # prevent bash from expanding, see bug 13316
    GLOBIGNORE='*'
 
-   # SoftwareChange_Request-180
-   # -----------------------------------------------------------------------
-   pfile=/opt/open-xchange/etc/groupware/notification.properties
-   if ! ox_exists_property notify_external_participants_on_secondary $pfile; then
-       ox_set_property notify_external_participants_on_secondary false $pfile
-   fi
-
    # SoftwareChange_Request-194
    # -----------------------------------------------------------------------
    pfile=/opt/open-xchange/etc/groupware/cache.ccf
