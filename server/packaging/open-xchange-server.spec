@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 2
+%define		ox_release 3
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -485,6 +485,13 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed Mar 10 2010 - thorben.betten@open-xchange.com
+ - Bugfix #15561: Ignoring mail folders on admin login if admin has no mailbox
+ - Bugfix #15538: Properly parsing an URL when surrounded by parentheses
+* Wed Mar 10 2010 - francisco.laguna@open-xchange.com
+ - Bugfix #15571: Send notification mails for secondary events to all users, only external users get the IMIP attachment.
+* Wed Mar 10 2010 - marcus.klein@open-xchange.com
+ - Bugfix #10071: Correctly storing zero values for tasks target and actual costs and duration.
 * Tue Mar 09 2010 - marcus.klein@open-xchange.com
  - Bugfix #15549: Correcting algorithm to create full month block for calendar printing.
 * Mon Mar 08 2010 - thorben.betten@open-xchange.com
