@@ -55,8 +55,6 @@ import com.openexchange.messaging.generic.DefaultMessagingAccount;
 
 public class Messaging extends DefaultMessagingAccount {
 	/**
-	 * Don't try this at home...
-	 * 
 	 * @author Martin Braun <martin.braun@open-xchange.com>
 	 */
 	private static final long serialVersionUID = 1337L;
