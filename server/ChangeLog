@@ -1,3 +1,7 @@
+* 2010-03-10 - thorben.betten@open-xchange.com
+
+ - Bugfix #15561: Ignoring mail folders on admin login if admin has no mailbox
+
 * 2010-03-08 - thorben.betten@open-xchange.com
 
  - Bugfix #14098: Fixed loading root folder when updating folder cache

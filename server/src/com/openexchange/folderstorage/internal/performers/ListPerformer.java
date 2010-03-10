@@ -69,6 +69,8 @@ import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.internal.AbstractIndexCallable;
 import com.openexchange.folderstorage.internal.CalculatePermission;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceException;
@@ -315,7 +317,6 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                 }
                 throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
-
         } else {
             allSubfolderIds = new ArrayList<SortableId>(neededStorages.length * 8);
             final CompletionService<List<SortableId>> completionService;
@@ -344,12 +345,15 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                             if (started) {
                                 neededStorage.rollback(newParameters);
                             }
-                            throw e;
+                            addWarning(e);
+                            return Collections.<SortableId> emptyList();
                         } catch (final Exception e) {
                             if (started) {
                                 neededStorage.rollback(newParameters);
                             }
-                            throw FolderException.newUnexpectedException(e);
+                            final FolderException folderException = FolderException.newUnexpectedException(e);
+                            addWarning(folderException);
+                            return Collections.<SortableId> emptyList();
                         }
                     }
                 });
@@ -361,6 +365,20 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                 ThreadPools.pollCompletionService(completionService, neededStorages.length, getMaxRunningMillis(), FACTORY);
             for (final List<SortableId> result : results) {
                 allSubfolderIds.addAll(result);
+            }
+            /*
+             * All failed with a warning?
+             */
+            if (!results.isEmpty() && (results.size() == getNumOfWarnings())) {
+                /*
+                 * Throw first warning in set
+                 */
+                final AbstractOXException e = getWarnings().iterator().next();
+                e.setCategory(Category.CODE_ERROR);
+                if (!(e instanceof FolderException)) {
+                    throw new FolderException(e);
+                }
+                throw ((FolderException) e);
             }
         }
         /*

@@ -88,6 +88,8 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
 
     protected final ConcurrentMap<String, ServletQueue> servletPool;
 
+    protected final ConcurrentMap<String, ConcurrentStack<ServletQueue>> parkedServletPool;
+
     /**
      * Creates a new {@link AbstractHttpServletManager}.
      * <p>
@@ -98,6 +100,7 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
     protected AbstractHttpServletManager(final Map<String, Constructor<?>> servletConstructorMap) {
         super();
         servletPool = new ConcurrentHashMap<String, ServletQueue>();
+        parkedServletPool = new ConcurrentHashMap<String, ConcurrentStack<ServletQueue>>(4);
         createServlets(servletConstructorMap);
     }
 
@@ -231,12 +234,28 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
             if (forceRegistration) {
                 final ServletQueue previous = servletPool.put(path, servletQueue);
                 if (null != previous) {
+                    /*-
+                     * 
                     final String canonicalName = previous.get().getClass().getCanonicalName();
                     configLoader.removeConfig(canonicalName);
                     if (LOG.isInfoEnabled()) {
                         LOG.info(new StringBuilder(64).append("Previous servlet \"").append(canonicalName).append("\" unregistered from \"").append(
                             path).append('"'));
                     }
+                     * 
+                     */
+                    /*
+                     * Park queue
+                     */
+                    ConcurrentStack<ServletQueue> parkedQueues = parkedServletPool.get(path);
+                    if (null == parkedQueues) {
+                        final ConcurrentStack<ServletQueue> newParkedQueues = new ConcurrentStack<ServletQueue>();
+                        parkedQueues = parkedServletPool.putIfAbsent(path, newParkedQueues);
+                        if (null == parkedQueues) {
+                            parkedQueues = newParkedQueues;
+                        }
+                    }
+                    parkedQueues.push(previous);
                 }
             } else {
                 if (servletPool.putIfAbsent(path, servletQueue) != null) {
@@ -271,6 +290,19 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
                 return;
             }
             configLoader.removeConfig(servletQueue.get().getClass().getCanonicalName());
+            /*
+             * Look-up parked queues
+             */
+            final ConcurrentStack<ServletQueue> parkedQueues = parkedServletPool.get(path);
+            if (null != parkedQueues) {
+                /*
+                 * Restore previous queue
+                 */
+                final ServletQueue queue = parkedQueues.pop();
+                if (null != queue) {
+                    servletPool.put(path, queue);
+                }
+            }
         } catch (final URISyntaxException e) {
             final ServletException se = new ServletException("Servlet path is not a valid URI", e);
             se.initCause(e);

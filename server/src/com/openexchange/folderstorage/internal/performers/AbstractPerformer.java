@@ -157,6 +157,15 @@ public abstract class AbstractPerformer {
     }
 
     /**
+     * Gets the number of warnings.
+     * 
+     * @return The number of warnings
+     */
+    public int getNumOfWarnings() {
+        return warnings.size();
+    }
+
+    /**
      * Gets the warnings of this performer as an unmodifiable {@link Set set}.
      * 
      * @return The warnings as an unmodifiable set

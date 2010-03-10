@@ -92,6 +92,7 @@ import com.openexchange.folderstorage.outlook.sql.Select;
 import com.openexchange.folderstorage.outlook.sql.Update;
 import com.openexchange.folderstorage.outlook.sql.Utility;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
@@ -113,6 +114,14 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class OutlookFolderStorage implements FolderStorage {
 
+    /**
+     * The logger.
+     */
+    static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(OutlookFolderStorage.class);
+
+    /**
+     * The prepared fullname.
+     */
     static final String PREPARED_FULLNAME_INBOX = MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, "INBOX");
 
     private static final ThreadPools.ExpectedExceptionFactory<FolderException> FACTORY =
@@ -933,7 +942,25 @@ public final class OutlookFolderStorage implements FolderStorage {
                     /*
                      * Get IDs
                      */
-                    final SortableId[] mailIDs = folderStorage.getSubfolders(realTreeId, fullname, storageParameters);
+                    final SortableId[] mailIDs;
+                    try {
+                        mailIDs = folderStorage.getSubfolders(realTreeId, fullname, storageParameters);
+                    } catch (final FolderException e) {
+                        final Throwable cause = e.getCause();
+                        if (cause instanceof MailException) {
+                            final MailException me = (MailException) cause;
+                            if (MailException.Code.ACCOUNT_DOES_NOT_EXIST.getNumber() == me.getDetailNumber()) {
+                                if (LOG.isDebugEnabled()) {
+                                    LOG.debug(e.getMessage(), e);
+                                }
+                                /*
+                                 * Return empty map
+                                 */
+                                return new TreeMap<String, List<String>>(comparator);
+                            }
+                        }
+                        throw e;
+                    }
                     final TreeMap<String, List<String>> treeMap = new TreeMap<String, List<String>>(comparator);
                     for (final SortableId sortableId : mailIDs) {
                         final String id = sortableId.getId();
