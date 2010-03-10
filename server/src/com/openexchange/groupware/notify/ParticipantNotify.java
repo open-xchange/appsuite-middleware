@@ -244,7 +244,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         }
         return allIds;
     }
-
+    
     protected User[] resolveUsers(final Context ctx, final int... ids) throws LdapException {
         final User[] r = new User[ids.length];
         for (int i = 0; i < ids.length; i++) {
@@ -567,7 +567,6 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             final List<EmailableParticipant> participants = entry.getValue();
             for (final EmailableParticipant p : participants) {
                 TimeZone tz = TimeZone.getDefault();
-                boolean reply = EnumSet.of(State.Type.ACCEPTED, State.Type.DECLINED, State.Type.TENTATIVELY_ACCEPTED).contains(state.getType());
                 boolean sendMail = true;
 
                 if (p.type != Participant.EXTERNAL_USER && allUserIds.contains(Integer.valueOf(p.id))) {
@@ -578,12 +577,11 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                             p.id,
                             session.getUserId()) && ((!newObj.containsNotification() || newObj.getNotification()) || (forceNotifyOthers && p.id != session.getUserId()));
                         tz = p.timeZone;
-                        sendMail = sendMail && !reply;
                     } catch (final AbstractOXException e) {
                         LL.log(e);
                     }
                 } else {
-                    sendMail = !p.ignoreNotification && (!newObj.containsNotification() || newObj.getNotification()) || (newObj.getModifiedBy() != p.id && forceNotifyOthers) && !reply;
+                    sendMail = !p.ignoreNotification && (!newObj.containsNotification() || newObj.getNotification()) || (newObj.getModifiedBy() != p.id && forceNotifyOthers);
                     if (p.timeZone != null) {
                         tz = p.timeZone;
                     }
@@ -842,7 +840,12 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 } else {
                     textMessage = createTemplate.render(p.getLocale(), renderMap);
                 }
-                msg.message = generateMessageMultipart(session, cal, textMessage, state.getModule(), state.getType(), ITipMethod.REPLY);
+                // Attach IMIP Magic only for external users on secondary events, to tell them the state of the appointment, but don't bother with internal users.
+                if(p.type == Participant.EXTERNAL_USER) {
+                    msg.message = generateMessageMultipart(session, cal, textMessage, state.getModule(), state.getType(), ITipMethod.REPLY);
+                } else {
+                    msg.message = textMessage;
+                }
             } else  if (state.getType() == State.Type.DELETED) {
                 msg.message = generateMessageMultipart(session, cal, createTemplate.render(p.getLocale(), renderMap), state.getModule(), state.getType(), ITipMethod.CANCEL);
             } else {

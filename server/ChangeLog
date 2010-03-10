@@ -1,3 +1,7 @@
+* 2010-03-10 - francisco.laguna@open-xchange.com
+
+ - Bugfix #15571: Send notification mails for secondary events to all users, only external users get the IMIP attachment.
+
 * 2010-03-10 - thorben.betten@open-xchange.com
 
  - Bugfix #15561: Ignoring mail folders on admin login if admin has no mailbox
