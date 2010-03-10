@@ -50,6 +50,7 @@
 package com.openexchange.groupware.tasks.mapping;
 
 import static com.openexchange.java.Autoboxing.L;
+import static com.openexchange.java.Autoboxing.l;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -85,29 +86,29 @@ public class TargetDuration implements Mapper<Long> {
     }
 
     public void toDB(PreparedStatement stmt, int pos, Task task) throws SQLException {
-        if (0 == task.getTargetDuration() && task.containsTargetDuration()) {
+        if (null == task.getTargetDuration()) {
             stmt.setNull(pos, Types.BIGINT);
         } else {
-            stmt.setLong(pos, task.getTargetDuration());
+            stmt.setLong(pos, l(task.getTargetDuration()));
         }
     }
 
     public void fromDB(ResultSet result, int pos, Task task) throws SQLException {
         long targetDuration = result.getLong(pos);
         if (!result.wasNull()) {
-            task.setTargetDuration(targetDuration);
+            task.setTargetDuration(L(targetDuration));
         }
     }
 
     public boolean equals(Task task1, Task task2) {
-        return task1.getTargetDuration() == task2.getTargetDuration();
+        return task1.getTargetDuration().equals(task2.getTargetDuration());
     }
 
     public Long get(Task task) {
-        return L(task.getTargetDuration());
+        return task.getTargetDuration();
     }
 
     public void set(Task task, Long value) {
-        task.setTargetDuration(value.longValue());
+        task.setTargetDuration(value);
     }
 }

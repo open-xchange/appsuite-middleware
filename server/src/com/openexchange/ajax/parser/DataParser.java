@@ -175,16 +175,15 @@ public abstract class DataParser {
 
     private static final Pattern DIGITS = Pattern.compile("^\\-?\\d+$");
 
-    public static long parseLong(final JSONObject jsonObj, final String name)
-        throws OXJSONException {
+    public static Long parseLong(final JSONObject jsonObj, final String name) throws OXJSONException {
         final String tmp;
         try {
             tmp = jsonObj.getString(name);
         } catch (final JSONException e) {
-            return 0;
+            return null;
         }
         if (tmp == null || jsonObj.isNull(name) || tmp.length() == 0) {
-            return 0;
+            return null;
         }
         final Parsing parsing = new Parsing() {
             public String getAttribute() {
@@ -193,24 +192,21 @@ public abstract class DataParser {
         };
         // Check for non digit characters and give specialized exception for this.
         if (!DIGITS.matcher(tmp).matches()) {
-            final OXJSONException e = new OXJSONException(
-                Code.CONTAINS_NON_DIGITS, tmp, name);
+            final OXJSONException e = new OXJSONException(Code.CONTAINS_NON_DIGITS, tmp, name);
             e.addProblematic(parsing);
             throw e;
         }
         try {
-            return Long.parseLong(tmp);
-        } catch (final NumberFormatException e1) {
+            return Long.valueOf(tmp);
+        } catch (NumberFormatException e1) {
             // Check if it parses into a BigInteger.
             try {
                 new BigInteger(tmp);
-                final OXJSONException e = new OXJSONException(
-                    Code.TOO_BIG_NUMBER, e1, name);
+                final OXJSONException e = new OXJSONException(Code.TOO_BIG_NUMBER, e1, name);
                 e.addProblematic(parsing);
                 throw e;
             } catch (final NumberFormatException e2) {
-                final OXJSONException e = new OXJSONException(
-                    Code.NUMBER_PARSING, e1, tmp, name);
+                final OXJSONException e = new OXJSONException(Code.NUMBER_PARSING, e1, tmp, name);
                 e.addProblematic(parsing);
                 throw e;
             }

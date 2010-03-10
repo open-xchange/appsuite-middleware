@@ -91,6 +91,10 @@ public final class Autoboxing {
         return Long.valueOf(l);
     }
 
+    public static long l(Long l) {
+        return l.longValue();
+    }
+
     /**
      * Short method name for {@link Boolean#valueOf(boolean)} that uses cached instances.
      * @param b boolean value to be converted to a Boolean object.
@@ -107,6 +111,10 @@ public final class Autoboxing {
      */
     public static Float F(final float f) {
         return Float.valueOf(f);
+    }
+
+    public static float f(Float f) {
+        return f.floatValue();
     }
 
     /**

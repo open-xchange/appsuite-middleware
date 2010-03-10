@@ -50,6 +50,7 @@
 package com.openexchange.groupware.tasks.mapping;
 
 import static com.openexchange.java.Autoboxing.F;
+import static com.openexchange.java.Autoboxing.f;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -78,29 +79,29 @@ public final class ActualCosts implements Mapper<Float> {
     }
 
     public void toDB(PreparedStatement stmt, int pos, Task task) throws SQLException {
-        if (0 == task.getActualCosts() && task.containsActualCosts()) {
+        if (null == task.getActualCosts()) {
             stmt.setNull(pos, Types.FLOAT);
         } else {
-            stmt.setDouble(pos, task.getActualCosts());
+            stmt.setDouble(pos, f(task.getActualCosts()));
         }
     }
 
     public void fromDB(ResultSet result, int pos, Task task) throws SQLException {
         float actualCosts = result.getFloat(pos);
         if (!result.wasNull()) {
-            task.setActualCosts(actualCosts);
+            task.setActualCosts(F(actualCosts));
         }
     }
 
     public boolean equals(Task task1, Task task2) {
-        return task1.getActualCosts() == task2.getActualCosts();
+        return task1.getActualCosts().equals(task2.getActualCosts());
     }
 
     public Float get(Task task) {
-        return F(task.getActualCosts());
+        return task.getActualCosts();
     }
 
     public void set(Task task, Float value) {
-        task.setActualCosts(value.floatValue());
+        task.setActualCosts(value);
     }
 }

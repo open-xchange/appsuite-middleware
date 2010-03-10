@@ -189,6 +189,10 @@ public class DataWriter {
         writeParameter(name, Long.toString(value), json, condition);
     }
 
+    public static void writeParameter(String name, Long value, JSONObject json, boolean condition) throws JSONException {
+        writeParameter(name, String.valueOf(value), json, condition);
+    }
+
     /**
      * Conditionally puts given <code>float</code> value into specified JSON
      * object.
@@ -198,9 +202,11 @@ public class DataWriter {
      * @param condition <code>true</code> to put; otherwise <code>false</code> to omit value
      * @throws JSONException If a JSON error occurs
      */
-    public static void writeParameter(final String name, final float value, final JSONObject json, final boolean condition) throws JSONException {
+    public static void writeParameter(final String name, final Float value, final JSONObject json, final boolean condition) throws JSONException {
         // Floats must be written as strings.
-        writeParameter(name, floatFormat.format(value), json, condition);
+        if (condition) {
+            writeParameter(name, floatFormat.format(value), json);
+        }
     }
 
     /**
@@ -348,9 +354,13 @@ public class DataWriter {
      * @param condition <code>true</code> to put; otherwise <code>false</code>
      * to put {@link JSONObject#NULL}
      */
-    public static void writeValue(final float value, final JSONArray jsonArray, final boolean condition) {
+    public static void writeValue(Float value, final JSONArray jsonArray, final boolean condition) {
         // Floats must be written as strings
-        writeValue(floatFormat.format(value), jsonArray, condition);
+        if (condition) {
+            writeValue(floatFormat.format(value), jsonArray);
+        } else {
+            writeNull(jsonArray);
+        }
     }
 
     /**
@@ -363,6 +373,19 @@ public class DataWriter {
     public static void writeValue(final long value, final JSONArray jsonArray, final boolean condition) {
         // Large values of long must be written as string. See bug 11311.
         writeValue(Long.toString(value), jsonArray, condition);
+    }
+
+    public static void writeValue(Long value, JSONArray json, boolean condition) {
+        // Large values of long must be written as string. See bug 11311.
+        if (condition) {
+            writeValue(value.toString(), json);
+        } else {
+            writeNull(json);
+        }
+    }
+
+    public static void writeNull(JSONArray json) {
+        json.put(JSONObject.NULL);
     }
 
     /**

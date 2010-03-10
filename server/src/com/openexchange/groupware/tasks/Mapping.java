@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.tasks;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.sql.PreparedStatement;
@@ -987,7 +988,7 @@ public final class Mapping {
      * @return the mapper implementation for the given attribute.
      */
     public static Mapper<?> getMapping(final int attributeId) {
-        return ID_MAPPING.get(Integer.valueOf(attributeId));
+        return ID_MAPPING.get(I(attributeId));
     }
     /**
      * returns all known field mappers

@@ -141,19 +141,19 @@ public class Task extends CalendarObject {
 
     private int projectId = 0;
 
-    private float targetCosts = 0;
+    private Float targetCosts;
 
-    private float actualCosts = 0;
-
-    /**
-     * The duration is measured by outlook in minutes. We do here the same.
-     */
-    private long targetDuration = 0;
+    private Float actualCosts;
 
     /**
      * The duration is measured by outlook in minutes. We do here the same.
      */
-    private long actualDuration = 0;
+    private Long targetDuration;
+
+    /**
+     * The duration is measured by outlook in minutes. We do here the same.
+     */
+    private Long actualDuration;
 
     private int priority = 0;
 
@@ -214,25 +214,25 @@ public class Task extends CalendarObject {
         return projectId;
     }
 
-    public float getTargetCosts() {
+    public Float getTargetCosts() {
         return targetCosts;
     }
 
-    public float getActualCosts() {
+    public Float getActualCosts() {
         return actualCosts;
     }
 
     /**
      * @return the target duration
      */
-    public long getTargetDuration() {
+    public Long getTargetDuration() {
         return targetDuration;
     }
 
     /**
      * @return the actual duration
      */
-    public long getActualDuration() {
+    public Long getActualDuration() {
         return actualDuration;
     }
 
@@ -282,12 +282,12 @@ public class Task extends CalendarObject {
         projectIdSet = true;
     }
 
-    public void setTargetCosts(final float target_costs) {
+    public void setTargetCosts(Float target_costs) {
         this.targetCosts = target_costs;
         targetCostsSet = true;
     }
 
-    public void setActualCosts(final float actual_costs) {
+    public void setActualCosts(Float actual_costs) {
         this.actualCosts = actual_costs;
         actualCostsSet = true;
     }
@@ -295,7 +295,7 @@ public class Task extends CalendarObject {
     /**
      * @param targetDuration the target duration to set
      */
-    public void setTargetDuration(final long targetDuration) {
+    public void setTargetDuration(Long targetDuration) {
         this.targetDuration = targetDuration;
         targetDurationSet = true;
     }
@@ -303,7 +303,7 @@ public class Task extends CalendarObject {
     /**
      * @param actualDuration the actual duration to set
      */
-    public void setActualDuration(final long actualDuration) {
+    public void setActualDuration(Long actualDuration) {
         this.actualDuration = actualDuration;
         actualDurationSet = true;
     }
@@ -365,22 +365,22 @@ public class Task extends CalendarObject {
     }
 
     public void removeTargetCosts() {
-        targetCosts = 0;
+        targetCosts = null;
         targetCostsSet = false;
     }
 
     public void removeActualCosts() {
-        actualCosts = 0;
+        actualCosts = null;
         actualCostsSet = false;
     }
 
     public void removeTargetDuration() {
-        targetDuration = 0;
+        targetDuration = null;
         targetDurationSet = false;
     }
 
     public void removeActualDuration() {
-        actualDuration = 0;
+        actualDuration = null;
         actualDurationSet = false;
     }
 
@@ -500,12 +500,12 @@ public class Task extends CalendarObject {
         super.reset();
 
         projectId = 0;
-        targetCosts = 0;
-        actualCosts = 0;
+        targetCosts = null;
+        actualCosts = null;
 
-        targetDuration = 0;
+        targetDuration = null;
 
-        actualDuration = 0;
+        actualDuration = null;
 
         priority = 0;
         percentComplete = 0;

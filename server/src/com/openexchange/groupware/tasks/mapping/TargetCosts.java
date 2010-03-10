@@ -50,6 +50,7 @@
 package com.openexchange.groupware.tasks.mapping;
 
 import static com.openexchange.java.Autoboxing.F;
+import static com.openexchange.java.Autoboxing.f;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -78,29 +79,29 @@ public final class TargetCosts implements Mapper<Float> {
     }
 
     public void toDB(PreparedStatement stmt, int pos, Task task) throws SQLException {
-        if (0 == task.getTargetCosts() && task.containsTargetCosts()) {
+        if (null == task.getTargetCosts()) {
             stmt.setNull(pos, Types.FLOAT);
         } else {
-            stmt.setDouble(pos, task.getTargetCosts());
+            stmt.setDouble(pos, f(task.getTargetCosts()));
         }
     }
 
     public void fromDB(ResultSet result, int pos, Task task) throws SQLException {
         float targetCosts = result.getFloat(pos);
         if (!result.wasNull()) {
-            task.setTargetCosts(targetCosts);
+            task.setTargetCosts(F(targetCosts));
         }
     }
 
     public boolean equals(Task task1, Task task2) {
-        return task1.getTargetCosts() == task2.getTargetCosts();
+        return task1.getTargetCosts().equals(task2.getTargetCosts());
     }
 
     public Float get(Task task) {
-        return F(task.getTargetCosts());
+        return task.getTargetCosts();
     }
 
     public void set(Task task, Float value) {
-        task.setTargetCosts(value.floatValue());
+        task.setTargetCosts(value);
     }
 }

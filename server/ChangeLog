@@ -1,3 +1,7 @@
+* 2010-03-10 - marcus.klein@open-xchange.com
+
+ - Bugfix #10071: Correctly storing zero values for tasks target and actual costs and duration.
+
 * 2010-03-10 - francisco.laguna@open-xchange.com
 
  - Bugfix #15571: Send notification mails for secondary events to all users, only external users get the IMIP attachment.

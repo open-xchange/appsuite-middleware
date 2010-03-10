@@ -92,9 +92,7 @@ public class TaskWriter extends CalendarWriter {
         writeParameter(TaskFields.START_DATE, task.getStartDate(), json);
         writeParameter(TaskFields.END_DATE, task.getEndDate(), json);
         writeParameter(TaskFields.ACTUAL_COSTS, task.getActualCosts(), json, task.containsActualCosts());
-        if (task.containsActualDuration()) {
-            writeParameter(TaskFields.ACTUAL_DURATION, task.getActualDuration(), json);
-        }
+        writeParameter(TaskFields.ACTUAL_DURATION, task.getActualDuration(), json, task.containsActualDuration());
         writeParameter(TaskFields.NOTE, task.getNote(), json);
         writeParameter(TaskFields.AFTER_COMPLETE, task.getAfterComplete(), json);
         writeParameter(TaskFields.BILLING_INFORMATION, task.getBillingInformation(), json);
@@ -111,9 +109,7 @@ public class TaskWriter extends CalendarWriter {
             writeParameter(TaskFields.STATUS, task.getStatus(), json);
         }
         writeParameter(TaskFields.TARGET_COSTS, task.getTargetCosts(), json, task.containsTargetCosts());
-        if (task.containsTargetDuration()) {
-            writeParameter(TaskFields.TARGET_DURATION, task.getTargetDuration(), json);
-        }
+        writeParameter(TaskFields.TARGET_DURATION, task.getTargetDuration(), json, task.containsTargetDuration());
         writeParameter(TaskFields.TRIP_METER, task.getTripMeter(), json);
         writeParameter(TaskFields.ALARM, task.getAlarm(), timeZone, json);
         writeRecurrenceParameter(task, json);
