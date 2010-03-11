@@ -896,9 +896,15 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             textPart.setContent(text, "text/plain; charset=UTF-8");
             
             ICalSession icalSession = emitter.createSession();
-            Appointment appointmentForICal = ((Appointment) cal).clone();
-            appointmentForICal.setEndDate( computeFirstOccurrenceEnd(appointmentForICal) );
+            Date until = null;
+            if (Appointment.NO_RECURRENCE != cal.getRecurrenceType()) {
+                until = cal.getEndDate();
+                cal.setEndDate(computeFirstOccurrenceEnd(cal));
+            }
             emitter.writeAppointment(icalSession, (Appointment) cal, session.getContext(), iTip, new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
+            if (null != until) {
+                cal.setEndDate(until);
+            }
             UnsynchronizedByteArrayOutputStream byteArrayOutputStream = new UnsynchronizedByteArrayOutputStream();
             emitter.writeSession(icalSession, byteArrayOutputStream);
             InputStream icalFile = new UnsynchronizedByteArrayInputStream(byteArrayOutputStream.toByteArray());
@@ -1932,6 +1938,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         RecurringResultInterface recurringResult = recurrences.getRecurringResult(0);
         return new Date(recurringResult.getEnd());
     }
+
     /**
      * Checks if specified appointment is a change exception.
      * 
