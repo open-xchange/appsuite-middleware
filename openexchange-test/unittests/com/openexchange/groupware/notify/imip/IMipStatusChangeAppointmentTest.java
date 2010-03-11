@@ -104,22 +104,34 @@ public class IMipStatusChangeAppointmentTest extends IMipTest {
         notify.appointmentAccepted(appointment, so2);
         List<Message> messages = notify.getMessages();
         
-        boolean foundFirst = false;
+        boolean foundFirst = false, ownerMsg = false, senderMsg = false, otherParticipantMsg = false;
         
         for (Message message : messages) {
             if (message.addresses.contains("123@example.invalid")) {
                 checkState(message.message, ITipMethod.REPLY);
                 foundFirst = true;
             } else if (message.addresses.contains(userMail)) {
-                fail("Owner (not organizer) should not get a mail");
+                ownerMsg = true;
             } else if (message.addresses.contains(secondUserMail)) {
-                fail("Sender should not get a mail");
+                senderMsg = true;
             } else if (message.addresses.contains(thirdUserMail)) {
-                fail("Other participants should not get reply mails.");
+                otherParticipantMsg = true;
             }
         }
         
+        if(! ownerMsg)
+            fail("Owner (not organizer) should get a mail");
+        if( senderMsg)
+            fail("Sender should not get a mail");
+        if( ! otherParticipantMsg)
+            fail("Other participants should not get reply mails.");
+        
         assertTrue("missing user", foundFirst);
+        notify.clearMessages();
+    }
+    
+    private void fail2(String failMessage, Message email, int status){
+        //fail("["+status+"] " + email.addresses + ": " + failMessage);
     }
 
 }
