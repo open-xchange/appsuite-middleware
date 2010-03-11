@@ -49,9 +49,7 @@
 
 package com.openexchange.groupware.tasks;
 
-import static com.openexchange.java.Autoboxing.F;
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.L;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -581,13 +579,13 @@ public class Task extends CalendarObject {
             setStatus(((Integer) value).intValue());
             break;
         case TARGET_DURATION:
-            setTargetDuration(((Long) value).longValue());
+            setTargetDuration((Long) value);
             break;
         case DATE_COMPLETED:
             setDateCompleted((Date) value);
             break;
         case TARGET_COSTS:
-            setTargetCosts(((Float) value).floatValue());
+            setTargetCosts((Float) value);
             break;
         case PRIORITY:
             setPriority(((Integer) value).intValue());
@@ -608,7 +606,7 @@ public class Task extends CalendarObject {
             setCurrency((String) value);
             break;
         case ACTUAL_COSTS:
-            setActualCosts(((Float) value).floatValue());
+            setActualCosts((Float) value);
             break;
         case PROJECT_ID:
             setProjectID(((Integer) value).intValue());
@@ -617,7 +615,7 @@ public class Task extends CalendarObject {
             setTripMeter((String) value);
             break;
         case ACTUAL_DURATION:
-            setActualDuration(((Long) value).longValue());
+            setActualDuration((Long) value);
             break;
         default:
             super.set(field, value);
@@ -630,11 +628,11 @@ public class Task extends CalendarObject {
         case STATUS:
             return I(getStatus());
         case TARGET_DURATION:
-            return L(getTargetDuration());
+            return getTargetDuration();
         case DATE_COMPLETED:
             return getDateCompleted();
         case TARGET_COSTS:
-            return F(getTargetCosts());
+            return getTargetCosts();
         case PRIORITY:
             return I(getPriority());
         case BILLING_INFORMATION:
@@ -648,13 +646,13 @@ public class Task extends CalendarObject {
         case CURRENCY:
             return getCurrency();
         case ACTUAL_COSTS:
-            return F(getActualCosts());
+            return getActualCosts();
         case PROJECT_ID:
             return I(getProjectID());
         case TRIP_METER:
             return getTripMeter();
         case ACTUAL_DURATION:
-            return L(getActualDuration());
+            return getActualDuration();
         default:
             return super.get(field);
         }

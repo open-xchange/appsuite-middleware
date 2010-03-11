@@ -190,7 +190,11 @@ public class DataWriter {
     }
 
     public static void writeParameter(String name, Long value, JSONObject json, boolean condition) throws JSONException {
-        writeParameter(name, String.valueOf(value), json, condition);
+        if (null == value) {
+            writeNull(name, json, condition);
+        } else {
+            writeParameter(name, String.valueOf(value), json, condition);
+        }
     }
 
     /**
@@ -204,8 +208,10 @@ public class DataWriter {
      */
     public static void writeParameter(final String name, final Float value, final JSONObject json, final boolean condition) throws JSONException {
         // Floats must be written as strings.
-        if (condition) {
-            writeParameter(name, floatFormat.format(value), json);
+        if (null == value) {
+            writeNull(name, json, condition);
+        } else {
+            writeParameter(name, floatFormat.format(value), json, condition);
         }
     }
 
@@ -384,8 +390,14 @@ public class DataWriter {
         }
     }
 
-    public static void writeNull(JSONArray json) {
+    protected static void writeNull(JSONArray json) {
         json.put(JSONObject.NULL);
+    }
+
+    protected static void writeNull(String name, JSONObject json, boolean condition) throws JSONException {
+        if (condition) {
+            json.put(name, JSONObject.NULL);
+        }
     }
 
     /**

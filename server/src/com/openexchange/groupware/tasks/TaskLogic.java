@@ -52,6 +52,7 @@ package com.openexchange.groupware.tasks;
 import static com.openexchange.groupware.tasks.StorageType.ACTIVE;
 import static com.openexchange.groupware.tasks.StorageType.DELETED;
 import static com.openexchange.groupware.tasks.StorageType.REMOVED;
+import static com.openexchange.java.Autoboxing.f;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -222,12 +223,10 @@ public final class TaskLogic {
             }
         }
         final int limit = 130000;
-        if (task.containsActualCosts()
-            && (limit < task.getActualCosts() || -limit > task.getActualCosts())) {
+        if (task.containsActualCosts() && null != task.getActualCosts() && (limit < f(task.getActualCosts()) || -limit > f(task.getActualCosts()))) {
             throw new TaskException(Code.COSTS_OFF_LIMIT);
         }
-        if (task.containsTargetCosts()
-            && (limit < task.getTargetCosts() || -limit > task.getTargetCosts())) {
+        if (task.containsTargetCosts() && null != task.getTargetCosts() && (limit < f(task.getTargetCosts()) || -limit > f(task.getTargetCosts()))) {
             throw new TaskException(Code.COSTS_OFF_LIMIT);
         }
     }

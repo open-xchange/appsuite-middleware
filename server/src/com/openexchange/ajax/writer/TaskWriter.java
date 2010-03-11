@@ -68,12 +68,6 @@ public class TaskWriter extends CalendarWriter {
 
     private static final Log LOG = LogFactory.getLog(TaskWriter.class);
 
-    /**
-     * Initializes a new {@link TaskWriter}
-     *
-     * @param timeZone
-     *            The user time zone
-     */
     public TaskWriter(final TimeZone timeZone) {
         super(timeZone, null);
     }
