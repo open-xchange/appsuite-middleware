@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 3
+%define		ox_release 4
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -485,6 +485,8 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Thu Mar 11 2010 - marcus.klein@open-xchange.com
+ - Bugfix #15582: Only replacing end date of an appointment if it is a series.
 * Wed Mar 10 2010 - thorben.betten@open-xchange.com
  - Bugfix #15561: Ignoring mail folders on admin login if admin has no mailbox
  - Bugfix #15538: Properly parsing an URL when surrounded by parentheses
