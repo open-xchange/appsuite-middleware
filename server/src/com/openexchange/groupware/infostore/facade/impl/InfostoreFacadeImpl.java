@@ -87,6 +87,8 @@ import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreTimedResult;
+import com.openexchange.groupware.infostore.database.InfostoreFilenameReservation;
+import com.openexchange.groupware.infostore.database.InfostoreFilenameReserver;
 import com.openexchange.groupware.infostore.database.impl.CheckSizeSwitch;
 import com.openexchange.groupware.infostore.database.impl.CreateDocumentAction;
 import com.openexchange.groupware.infostore.database.impl.CreateVersionAction;
@@ -100,6 +102,7 @@ import com.openexchange.groupware.infostore.database.impl.InfostoreQueryCatalog;
 import com.openexchange.groupware.infostore.database.impl.InfostoreSecurity;
 import com.openexchange.groupware.infostore.database.impl.InfostoreSecurityImpl;
 import com.openexchange.groupware.infostore.database.impl.InsertDocumentIntoDelTableAction;
+import com.openexchange.groupware.infostore.database.impl.SelectForUpdateFilenameReserver;
 import com.openexchange.groupware.infostore.database.impl.SetSwitch;
 import com.openexchange.groupware.infostore.database.impl.UpdateDocumentAction;
 import com.openexchange.groupware.infostore.database.impl.UpdateVersionAction;
@@ -143,13 +146,11 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * DatabaseImpl
- *
- * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin
- *         Otterbach</a>
+ * 
+ * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
  */
 @OXExceptionSource(classId = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_FACADE_IMPL_INFOSTOREFACADEIMPL, component = EnumComponent.INFOSTORE)
-public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
-        DBProviderUser {
+public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, DBProviderUser {
 
     private static final ValidationChain VALIDATION = new ValidationChain();
     static {
@@ -158,10 +159,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         // Add more infostore validators here, as needed
     }
 
+    private static final InfostoreFilenameReserver filenameReserver = new SelectForUpdateFilenameReserver();
+
     private static final Log LOG = LogFactory.getLog(InfostoreFacadeImpl.class);
 
-    private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(
-            InfostoreFacadeImpl.class);
+    private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(InfostoreFacadeImpl.class);
 
     public static final InfostoreQueryCatalog QUERIES = new InfostoreQueryCatalog();
 
@@ -169,8 +171,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 
     private InfostoreSecurity security = new InfostoreSecurityImpl();
 
-    private final EntityLockManager lockManager = new EntityLockManagerImpl(
-            "infostore_lock");
+    private final EntityLockManager lockManager = new EntityLockManagerImpl("infostore_lock");
 
     private final ThreadLocal<List<String>> fileIdRemoveList = new ThreadLocal<List<String>>();
 
@@ -182,7 +183,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         super();
         expiredLocksListener = new TouchInfoitemsWithExpiredLocksListener(null, this);
         lockManager.addExpiryListener(expiredLocksListener);
-   }
+    }
 
     public InfostoreFacadeImpl(final DBProvider provider) {
         this();
@@ -191,49 +192,42 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 
     public void setSecurity(final InfostoreSecurity security) {
         this.security = security;
-        if(null != getProvider()) {
+        if (null != getProvider()) {
             setProvider(getProvider());
         }
     }
 
-    public boolean exists(final int id, final int version, final Context ctx, final User user,
-            final UserConfiguration userConfig) throws OXException {
+    public boolean exists(final int id, final int version, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         try {
             return security.getInfostorePermission(id, ctx, user, userConfig).canReadObject();
         } catch (final InfostoreException x) {
-            if(x.getDetailNumber() == Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_DATABASE_IMPL_INFOSTORESECURITYIMPL*100) {
+            if (x.getDetailNumber() == Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_DATABASE_IMPL_INFOSTORESECURITYIMPL * 100) {
                 return false;
             }
             throw x;
         }
     }
 
-    @OXThrowsMultiple(
-            category = {Category.USER_INPUT, Category.USER_INPUT},
-            desc = {"The User does not have read permissions on the requested Infoitem. ", "The document could not be loaded because it doesn't exist."},
-            exceptionId = {0,38},
-            msg = {"You do not have sufficient read permissions.", "The document you requested doesn't exist."}
-    )
-    public DocumentMetadata getDocumentMetadata(final int id, final int version,
-            final Context ctx, final User user, final UserConfiguration userConfig)
-            throws OXException {
-        final EffectiveInfostorePermission infoPerm = security
-                .getInfostorePermission(id, ctx, user, userConfig);
+    @OXThrowsMultiple(category = { Category.USER_INPUT, Category.USER_INPUT }, desc = {
+        "The User does not have read permissions on the requested Infoitem. ", "The document could not be loaded because it doesn't exist." }, exceptionId = {
+        0, 38 }, msg = { "You do not have sufficient read permissions.", "The document you requested doesn't exist." })
+    public DocumentMetadata getDocumentMetadata(final int id, final int version, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+        final EffectiveInfostorePermission infoPerm = security.getInfostorePermission(id, ctx, user, userConfig);
 
         if (!infoPerm.canReadObject()) {
             throw EXCEPTIONS.create(0);
         }
-        
+
         final List<Lock> locks = lockManager.findLocks(id, ctx, user, userConfig);
         final Map<Integer, List<Lock>> allLocks = new HashMap<Integer, List<Lock>>();
         allLocks.put(Integer.valueOf(id), locks);
-        
-        return addNumberOfVersions(addLocked(load(id,version,ctx), allLocks,ctx, user, userConfig), ctx);
+
+        return addNumberOfVersions(addLocked(load(id, version, ctx), allLocks, ctx, user, userConfig), ctx);
     }
 
     private DocumentMetadata load(final int id, final int version, final Context ctx) throws OXException {
         final InfostoreIterator iter = InfostoreIterator.loadDocumentIterator(id, version, getProvider(), ctx);
-        if(!iter.hasNext()) {
+        if (!iter.hasNext()) {
             throw EXCEPTIONS.create(38);
         }
         DocumentMetadata dm;
@@ -246,27 +240,22 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         return dm;
     }
 
-    public void saveDocumentMetadata(final DocumentMetadata document,
-            final long sequenceNumber, final ServerSession sessionObj) throws OXException {
+    public void saveDocumentMetadata(final DocumentMetadata document, final long sequenceNumber, final ServerSession sessionObj) throws OXException {
         saveDocument(document, null, sequenceNumber, sessionObj);
     }
 
-    public void saveDocumentMetadata(final DocumentMetadata document,
-            final long sequenceNumber, final Metadata[] modifiedColumns,
-            final ServerSession sessionObj) throws OXException {
-        saveDocument(document, null, sequenceNumber, modifiedColumns,
-                sessionObj);
+    public void saveDocumentMetadata(final DocumentMetadata document, final long sequenceNumber, final Metadata[] modifiedColumns, final ServerSession sessionObj) throws OXException {
+        saveDocument(document, null, sequenceNumber, modifiedColumns, sessionObj);
     }
 
-    @OXThrowsMultiple(
-            category = {Category.USER_INPUT, Category.SUBSYSTEM_OR_SERVICE_DOWN, Category.SUBSYSTEM_OR_SERVICE_DOWN},
-            desc = {"The User does not have read permissions on the requested Infoitem. ", "The file store couldn't be reached and is probably down.", "The file could not be found in the file store. This means either that the file store was not available or that database and file store are inconsistent. Run the recovery tool."},
-            exceptionId = {1,39,40},
-            msg = {"You do not have sufficient read permissions.","The file store could not be reched", "The file could not be retrieved."})
-    public InputStream getDocument(final int id, final int version, final Context ctx, final User user,
-            final UserConfiguration userConfig) throws OXException {
-        final EffectiveInfostorePermission infoPerm = security
-                .getInfostorePermission(id, ctx, user, userConfig);
+    @OXThrowsMultiple(category = { Category.USER_INPUT, Category.SUBSYSTEM_OR_SERVICE_DOWN, Category.SUBSYSTEM_OR_SERVICE_DOWN }, desc = {
+        "The User does not have read permissions on the requested Infoitem. ",
+        "The file store couldn't be reached and is probably down.",
+        "The file could not be found in the file store. This means either that the file store was not available or that database and file store are inconsistent. Run the recovery tool." }, exceptionId = {
+        1, 39, 40 }, msg = {
+        "You do not have sufficient read permissions.", "The file store could not be reched", "The file could not be retrieved." })
+    public InputStream getDocument(final int id, final int version, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+        final EffectiveInfostorePermission infoPerm = security.getInfostorePermission(id, ctx, user, userConfig);
         if (!infoPerm.canReadObject()) {
             throw EXCEPTIONS.create(1);
         }
@@ -287,10 +276,12 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
     }
 
     @OXThrows(category = Category.USER_INPUT, desc = "The user does not have sufficient write permissions to lock this infoitem.", exceptionId = 18, msg = "You need write permissions to lock a document.")
-    public void lock(final int id, final long diff, final ServerSession sessionObj)
-            throws OXException {
-        final EffectiveInfostorePermission infoPerm = security
-                .getInfostorePermission(id, sessionObj.getContext(), getUser(sessionObj), getUserConfiguration(sessionObj));
+    public void lock(final int id, final long diff, final ServerSession sessionObj) throws OXException {
+        final EffectiveInfostorePermission infoPerm = security.getInfostorePermission(
+            id,
+            sessionObj.getContext(),
+            getUser(sessionObj),
+            getUserConfiguration(sessionObj));
         if (!infoPerm.canWriteObject()) {
             throw EXCEPTIONS.create(18);
         }
@@ -301,15 +292,25 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         } else {
             timeout = System.currentTimeMillis() + diff;
         }
-        lockManager.lock(id, timeout, Scope.EXCLUSIVE, Type.WRITE, sessionObj
-                .getUserlogin(), sessionObj.getContext(), getUser(sessionObj), getUserConfiguration(sessionObj));
+        lockManager.lock(
+            id,
+            timeout,
+            Scope.EXCLUSIVE,
+            Type.WRITE,
+            sessionObj.getUserlogin(),
+            sessionObj.getContext(),
+            getUser(sessionObj),
+            getUserConfiguration(sessionObj));
         touch(id, sessionObj);
     }
 
     @OXThrows(category = Category.USER_INPUT, desc = "The user does not have sufficient write permissions to unlock this infoitem.", exceptionId = 17, msg = "You need write permissions to unlock a document.")
     public void unlock(final int id, final ServerSession sessionObj) throws OXException {
-        final EffectiveInfostorePermission infoPerm = security
-                .getInfostorePermission(id, sessionObj.getContext(), getUser(sessionObj), getUserConfiguration(sessionObj));
+        final EffectiveInfostorePermission infoPerm = security.getInfostorePermission(
+            id,
+            sessionObj.getContext(),
+            getUser(sessionObj),
+            getUserConfiguration(sessionObj));
         if (!infoPerm.canWriteObject()) {
             throw EXCEPTIONS.create(17);
         }
@@ -320,8 +321,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 
     public void touch(final int id, final ServerSession sessionObj) throws OXException {
         try {
-            final DocumentMetadata oldDocument = load(id, CURRENT_VERSION, sessionObj
-                            .getContext());
+            final DocumentMetadata oldDocument = load(id, CURRENT_VERSION, sessionObj.getContext());
             final DocumentMetadata document = new DocumentMetadataImpl(oldDocument);
 
             document.setLastModified(new Date());
@@ -330,8 +330,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
             final UpdateDocumentAction updateDocument = new UpdateDocumentAction();
             updateDocument.setContext(sessionObj.getContext());
             updateDocument.setDocuments(Arrays.asList(document));
-            updateDocument.setModified(Metadata.LAST_MODIFIED_LITERAL,
-                    Metadata.MODIFIED_BY_LITERAL);
+            updateDocument.setModified(Metadata.LAST_MODIFIED_LITERAL, Metadata.MODIFIED_BY_LITERAL);
             updateDocument.setOldDocuments(Arrays.asList(oldDocument));
             updateDocument.setProvider(this);
             updateDocument.setQueryCatalog(QUERIES);
@@ -342,8 +341,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
             final UpdateVersionAction updateVersion = new UpdateVersionAction();
             updateVersion.setContext(sessionObj.getContext());
             updateVersion.setDocuments(Arrays.asList(document));
-            updateVersion.setModified(Metadata.LAST_MODIFIED_LITERAL,
-                    Metadata.MODIFIED_BY_LITERAL);
+            updateVersion.setModified(Metadata.LAST_MODIFIED_LITERAL, Metadata.MODIFIED_BY_LITERAL);
             updateVersion.setOldDocuments(Arrays.asList(oldDocument));
             updateVersion.setProvider(this);
             updateVersion.setQueryCatalog(QUERIES);
@@ -362,12 +360,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
     }
 
     @OXThrows(category = Category.INTERNAL_ERROR, desc = "The system couldn't iterate the result dataset. This can have numerous exciting causes.", exceptionId = 13, msg = "Could not iterate result")
-    private Delta<DocumentMetadata> addLocked(final Delta<DocumentMetadata> delta, final Map<Integer, List<Lock>> locks, final Context ctx, final User user,
-            final UserConfiguration userConfig) throws OXException {
+    private Delta<DocumentMetadata> addLocked(final Delta<DocumentMetadata> delta, final Map<Integer, List<Lock>> locks, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         try {
             return new LockDelta(delta, locks, ctx, user, userConfig);
         } catch (final SearchIteratorException e) {
-            throw EXCEPTIONS.create(13,e);
+            throw EXCEPTIONS.create(13, e);
         }
     }
 
@@ -376,7 +373,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         try {
             return new NumberOfVersionsDelta(delta, ctx);
         } catch (final SearchIteratorException e) {
-            throw EXCEPTIONS.create(44,e);
+            throw EXCEPTIONS.create(44, e);
         }
     }
 
@@ -394,8 +391,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
     }
 
     @OXThrows(category = Category.INTERNAL_ERROR, desc = "The system couldn't iterate the result dataset. This can have numerous exciting causes.", exceptionId = 14, msg = "Could not iterate result")
-    private TimedResult<DocumentMetadata> addLocked(final TimedResult<DocumentMetadata> tr, final Context ctx, final User user,
-            final UserConfiguration userConfig) throws OXException {
+    private TimedResult<DocumentMetadata> addLocked(final TimedResult<DocumentMetadata> tr, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         try {
             return new LockTimedResult(tr, ctx, user, userConfig);
         } catch (final SearchIteratorException e) {
@@ -410,7 +406,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
             return performQuery(ctx, QUERIES.getNumberOfVersionsQueryForOneDocument(), new ResultProcessor<DocumentMetadata>() {
 
                 public DocumentMetadata process(final ResultSet rs) throws SQLException {
-                    if(!rs.next()) {
+                    if (!rs.next()) {
                         LOG.error("Infoitem disappeared when trying to count versions");
                         return document;
                     }
@@ -422,21 +418,25 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
             }, Integer.valueOf(document.getId()), Integer.valueOf(ctx.getContextId()));
         } catch (final SQLException e) {
             LOG.error(e.getMessage(), e);
-            throw EXCEPTIONS.create(42, e, Integer.valueOf(document.getId()), Integer.valueOf(ctx.getContextId()), QUERIES.getNumberOfVersionsQueryForOneDocument());
+            throw EXCEPTIONS.create(
+                42,
+                e,
+                Integer.valueOf(document.getId()),
+                Integer.valueOf(ctx.getContextId()),
+                QUERIES.getNumberOfVersionsQueryForOneDocument());
         } catch (final TransactionException e) {
             throw new InfostoreException(e);
         }
     }
 
-    private DocumentMetadata addLocked(final DocumentMetadata document, final Map<Integer, List<Lock>> allLocks, final Context ctx,
-            final User user, final UserConfiguration userConfig) throws OXException {
+    private DocumentMetadata addLocked(final DocumentMetadata document, final Map<Integer, List<Lock>> allLocks, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         List<Lock> locks = null;
-        if(allLocks != null) {
+        if (allLocks != null) {
             locks = allLocks.get(Integer.valueOf(document.getId()));
         } else {
             locks = lockManager.findLocks(document.getId(), ctx, user, userConfig);
         }
-        if(locks == null) {
+        if (locks == null) {
             locks = Collections.emptyList();
         }
         long max = 0;
@@ -462,9 +462,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         return new SearchIteratorAdapter<DocumentMetadata>(list.iterator());
     }
 
-    private SearchIterator<DocumentMetadata> lockedUntilIterator(final SearchIterator<?> iter, final Map<Integer, List<Lock>> locks,
-            final Context ctx, final User user, final UserConfiguration userConfig)
-         throws SearchIteratorException, OXException {
+    private SearchIterator<DocumentMetadata> lockedUntilIterator(final SearchIterator<?> iter, final Map<Integer, List<Lock>> locks, final Context ctx, final User user, final UserConfiguration userConfig) throws SearchIteratorException, OXException {
         final List<DocumentMetadata> list = new ArrayList<DocumentMetadata>();
         while (iter.hasNext()) {
             final DocumentMetadata m = (DocumentMetadata) iter.next();
@@ -472,10 +470,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
             list.add(m);
         }
         /*
-         * Moving addLock() outside of iterator's loop to avoid a duplicate
-         * connection fetch from DB pool since first invocation of hasNext()
-         * already obtains a pooled connection which is only released on final
-         * call to next().
+         * Moving addLock() outside of iterator's loop to avoid a duplicate connection fetch from DB pool since first invocation of
+         * hasNext() already obtains a pooled connection which is only released on final call to next().
          */
         for (final DocumentMetadata m : list) {
             addLocked(m, locks, ctx, user, userConfig);
@@ -483,165 +479,164 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         return new SearchIteratorAdapter<DocumentMetadata>(list.iterator());
     }
 
-    private DocumentMetadata checkWriteLock(final int id, final ServerSession sessionObj)
-            throws OXException {
-        final DocumentMetadata document = load(id, CURRENT_VERSION,
-                sessionObj.getContext());
+    private DocumentMetadata checkWriteLock(final int id, final ServerSession sessionObj) throws OXException {
+        final DocumentMetadata document = load(id, CURRENT_VERSION, sessionObj.getContext());
         checkWriteLock(document, sessionObj);
         return document;
     }
 
     @OXThrows(category = Category.CONCURRENT_MODIFICATION, desc = "The infoitem was locked by some other user. Only the user that locked the item (the one that modified the entry) can modify a locked infoitem.", exceptionId = 15, msg = "This document is locked.")
-    private void checkWriteLock(final DocumentMetadata document,
-            final ServerSession sessionObj) throws OXException {
+    private void checkWriteLock(final DocumentMetadata document, final ServerSession sessionObj) throws OXException {
         if (document.getModifiedBy() == sessionObj.getUserId()) {
             return;
         }
 
-        if(lockManager.isLocked(document.getId(), sessionObj.getContext(), getUser(sessionObj), getUserConfiguration(sessionObj))) {
+        if (lockManager.isLocked(document.getId(), sessionObj.getContext(), getUser(sessionObj), getUserConfiguration(sessionObj))) {
             throw EXCEPTIONS.create(15);
         }
 
     }
 
     @OXThrows(category = Category.CONCURRENT_MODIFICATION, desc = "The infoitem was locked by some other user. Only the user that locked the item and the creator of the item can unlock a locked infoitem.", exceptionId = 16, msg = "You cannot unlock this document.")
-    private void checkMayUnlock(final int id, final ServerSession sessionObj)
-            throws OXException {
-        final DocumentMetadata document = load(id, CURRENT_VERSION,
-                sessionObj.getContext());
-        if (document.getCreatedBy() == sessionObj.getUserId()
-                || document.getModifiedBy() == sessionObj.getUserId()) {
+    private void checkMayUnlock(final int id, final ServerSession sessionObj) throws OXException {
+        final DocumentMetadata document = load(id, CURRENT_VERSION, sessionObj.getContext());
+        if (document.getCreatedBy() == sessionObj.getUserId() || document.getModifiedBy() == sessionObj.getUserId()) {
             return;
         }
-        final List<Lock> locks = lockManager.findLocks(id, sessionObj.getContext(),
-                getUser(sessionObj), getUserConfiguration(sessionObj));
+        final List<Lock> locks = lockManager.findLocks(id, sessionObj.getContext(), getUser(sessionObj), getUserConfiguration(sessionObj));
         if (locks.size() > 0) {
             throw EXCEPTIONS.create(16);
         }
     }
 
-    @OXThrowsMultiple(category = { Category.USER_INPUT,
-            Category.SUBSYSTEM_OR_SERVICE_DOWN, Category.INTERNAL_ERROR }, desc = {
-            "The user may not create objects in the given folder. ",
-            "The file store couldn't be reached.",
-            "The IDGenerator threw an SQL Exception look at that one to find out what's wrong." }, exceptionId = {
-            2, 19, 20 }, msg = {
-            "You do not have sufficient permissions to create objects in this folder.",
-            "The file store could not be reached.", "Could not generate new ID." })
-    public void saveDocument(final DocumentMetadata document, final InputStream data,
-            final long sequenceNumber, final ServerSession sessionObj) throws OXException {
+    @OXThrowsMultiple(category = { Category.USER_INPUT, Category.SUBSYSTEM_OR_SERVICE_DOWN, Category.INTERNAL_ERROR }, desc = {
+        "The user may not create objects in the given folder. ", "The file store couldn't be reached.",
+        "The IDGenerator threw an SQL Exception look at that one to find out what's wrong." }, exceptionId = {
+        2, 19, 20}, msg = {
+        "You do not have sufficient permissions to create objects in this folder.", "The file store could not be reached.",
+        "Could not generate new ID."})
+    public void saveDocument(final DocumentMetadata document, final InputStream data, final long sequenceNumber, final ServerSession sessionObj) throws OXException {
         security.checkFolderId(document.getFolderId(), sessionObj.getContext());
 
         if (document.getId() == InfostoreFacade.NEW) {
-            final EffectivePermission isperm = security.getFolderPermission(document
-                    .getFolderId(), sessionObj.getContext(), getUser(sessionObj), getUserConfiguration(sessionObj));
+            final EffectivePermission isperm = security.getFolderPermission(
+                document.getFolderId(),
+                sessionObj.getContext(),
+                getUser(sessionObj),
+                getUserConfiguration(sessionObj));
             if (!isperm.canCreateObjects()) {
                 throw EXCEPTIONS.create(2);
             }
             setDefaults(document);
-            checkUniqueFilename(document.getFileName(), document.getFolderId(), document.getId(), sessionObj.getContext());
 
             VALIDATION.validate(document);
             CheckSizeSwitch.checkSizes(document, getProvider(), sessionObj.getContext());
 
-
-            Connection writeCon = null;
-            try {
-                startDBTransaction();
-                writeCon = getWriteConnection(sessionObj.getContext());
-
-                document.setId(getId(sessionObj.getContext(), writeCon));
-                commitDBTransaction();
-            } catch (final SQLException e) {
-                throw EXCEPTIONS.create(20, e);
-            } finally {
-                releaseWriteConnection(sessionObj.getContext(), writeCon);
-                finishDBTransaction();
-            }
-            document.setCreationDate(new Date(System.currentTimeMillis()));
-            document.setLastModified(document.getCreationDate());
-            document.setCreatedBy(sessionObj.getUserId());
-            document.setModifiedBy(sessionObj.getUserId());
-
-            // db.createDocument(document, data, sessionObj.getContext(),
-            // sessionObj.getUserObject(), getUserConfiguration(sessionObj));
-
-            if (null != data) {
-                document.setVersion(1);
-            } else {
-                document.setVersion(0);
-            }
-
-            final CreateDocumentAction createAction = new CreateDocumentAction();
-            createAction.setContext(sessionObj.getContext());
-            createAction.setDocuments(Arrays.asList(document));
-            createAction.setProvider(this);
-            createAction.setQueryCatalog(QUERIES);
+            InfostoreFilenameReservation reservation = reserve(document.getFileName(), document.getFolderId(), document.getId(), sessionObj.getContext());
 
             try {
-                perform(createAction, true);
-            } catch (final OXException x) {
-                throw x;
-            } catch (final AbstractOXException e1) {
-                throw new InfostoreException(e1);
-            }
-
-            final DocumentMetadata version0 = new DocumentMetadataImpl(document);
-            version0.setFileName(null);
-            version0.setFileSize(0);
-            version0.setFileMD5Sum(null);
-            version0.setFileMIMEType(null);
-            version0.setVersion(0);
-
-            CreateVersionAction createVersionAction = new CreateVersionAction();
-            createVersionAction.setContext(sessionObj.getContext());
-            createVersionAction.setDocuments(Arrays.asList(version0));
-            createVersionAction.setProvider(this);
-            createVersionAction.setQueryCatalog(QUERIES);
-
-            try {
-                perform(createVersionAction, true);
-            } catch (final OXException x) {
-                throw x;
-            } catch (final AbstractOXException e1) {
-                throw new InfostoreException(e1);
-            }
-
-            if (data != null) {
-                final SaveFileWithQuotaAction saveFile = new SaveFileWithQuotaAction();
+                Connection writeCon = null;
                 try {
-                    final QuotaFileStorage qfs = (QuotaFileStorage) getFileStorage(sessionObj
-                            .getContext());
-                    saveFile.setStorage(qfs);
-                    saveFile.setSizeHint(document.getFileSize());
-                    saveFile.setIn(data);
-
-                    perform(saveFile, false);
-
-                    document.setVersion(1);
-                    document.setFilestoreLocation(saveFile.getId());
-                    if (document.getFileSize() == 0) {
-                        document.setFileSize(qfs.getFileSize(saveFile.getId()));
-                    }
-
-                    createVersionAction = new CreateVersionAction();
-                    createVersionAction.setContext(sessionObj.getContext());
-                    createVersionAction.setDocuments(Arrays.asList(document));
-                    createVersionAction.setProvider(this);
-                    createVersionAction.setQueryCatalog(QUERIES);
-
-                    perform(createVersionAction, true);
-
-                } catch (final FileStorageException e) {
-                    throw new InfostoreException(e);
-                } catch (final ContextException e) {
-                    throw new InfostoreException(e);
-                } catch (final OXException x) {
-                    throw x;
-                } catch (final AbstractOXException e) {
-                    throw new InfostoreException(e);
+                    startDBTransaction();
+                    writeCon = getWriteConnection(sessionObj.getContext());
+                    document.setId(getId(sessionObj.getContext(), writeCon));
+                    commitDBTransaction();
+                } catch (final SQLException e) {
+                    throw EXCEPTIONS.create(20, e);
+                } finally {
+                    releaseWriteConnection(sessionObj.getContext(), writeCon);
+                    finishDBTransaction();
                 }
 
+                document.setCreationDate(new Date(System.currentTimeMillis()));
+                document.setLastModified(document.getCreationDate());
+                document.setCreatedBy(sessionObj.getUserId());
+                document.setModifiedBy(sessionObj.getUserId());
+
+                // db.createDocument(document, data, sessionObj.getContext(),
+                // sessionObj.getUserObject(), getUserConfiguration(sessionObj));
+
+                if (null != data) {
+                    document.setVersion(1);
+                } else {
+                    document.setVersion(0);
+                }
+
+                final CreateDocumentAction createAction = new CreateDocumentAction();
+                createAction.setContext(sessionObj.getContext());
+                createAction.setDocuments(Arrays.asList(document));
+                createAction.setProvider(this);
+                createAction.setQueryCatalog(QUERIES);
+
+                try {
+                    perform(createAction, true);
+                } catch (final OXException x) {
+                    throw x;
+                } catch (final AbstractOXException e1) {
+                    throw new InfostoreException(e1);
+                }
+
+                final DocumentMetadata version0 = new DocumentMetadataImpl(document);
+                version0.setFileName(null);
+                version0.setFileSize(0);
+                version0.setFileMD5Sum(null);
+                version0.setFileMIMEType(null);
+                version0.setVersion(0);
+
+                CreateVersionAction createVersionAction = new CreateVersionAction();
+                createVersionAction.setContext(sessionObj.getContext());
+                createVersionAction.setDocuments(Arrays.asList(version0));
+                createVersionAction.setProvider(this);
+                createVersionAction.setQueryCatalog(QUERIES);
+
+                try {
+                    perform(createVersionAction, true);
+                } catch (final OXException x) {
+                    throw x;
+                } catch (final AbstractOXException e1) {
+                    throw new InfostoreException(e1);
+                }
+
+                if (data != null) {
+                    final SaveFileWithQuotaAction saveFile = new SaveFileWithQuotaAction();
+                    try {
+                        final QuotaFileStorage qfs = (QuotaFileStorage) getFileStorage(sessionObj.getContext());
+                        saveFile.setStorage(qfs);
+                        saveFile.setSizeHint(document.getFileSize());
+                        saveFile.setIn(data);
+
+                        perform(saveFile, false);
+
+                        document.setVersion(1);
+                        document.setFilestoreLocation(saveFile.getId());
+                        if (document.getFileSize() == 0) {
+                            document.setFileSize(qfs.getFileSize(saveFile.getId()));
+                        }
+
+                        createVersionAction = new CreateVersionAction();
+                        createVersionAction.setContext(sessionObj.getContext());
+                        createVersionAction.setDocuments(Arrays.asList(document));
+                        createVersionAction.setProvider(this);
+                        createVersionAction.setQueryCatalog(QUERIES);
+
+                        perform(createVersionAction, true);
+
+                    } catch (final FileStorageException e) {
+                        throw new InfostoreException(e);
+                    } catch (final ContextException e) {
+                        throw new InfostoreException(e);
+                    } catch (final OXException x) {
+                        throw x;
+                    } catch (final AbstractOXException e) {
+                        throw new InfostoreException(e);
+                    }
+
+                }
+
+            } finally {
+                if (reservation != null) {
+                    reservation.destroySilently();
+                }
             }
 
             final EventClient ec = new EventClient(sessionObj);
@@ -652,18 +647,17 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
             }
 
         } else {
-            saveDocument(document, data, sequenceNumber, nonNull(document),
-                    sessionObj);
+            saveDocument(document, data, sequenceNumber, nonNull(document), sessionObj);
         }
     }
 
     private void setDefaults(final DocumentMetadata document) {
-        if(document.getTitle() == null || "".equals(document.getTitle())) {
+        if (document.getTitle() == null || "".equals(document.getTitle())) {
             document.setTitle(document.getFileName());
         }
     }
 
-    protected <T> T  performQuery(final Context ctx, final String query, final ResultProcessor<T> rsp, final Object...args) throws SQLException, TransactionException {
+    protected <T> T performQuery(final Context ctx, final String query, final ResultProcessor<T> rsp, final Object... args) throws SQLException, TransactionException {
         Connection readCon = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -671,8 +665,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         try {
             readCon = getReadConnection(ctx);
             stmt = readCon.prepareStatement(query);
-            for(int i = 0; i < args.length; i++) {
-                stmt.setObject(i+1, args[i]);
+            for (int i = 0; i < args.length; i++) {
+                stmt.setObject(i + 1, args[i]);
             }
 
             rs = stmt.executeQuery();
@@ -680,19 +674,17 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
             return rsp.process(rs);
         } finally {
             close(stmt, rs);
-            if(readCon != null) {
+            if (readCon != null) {
                 releaseReadConnection(ctx, readCon);
             }
         }
     }
 
     // FIXME Move 2 query builder
-    private int getNextVersionNumberForInfostoreObject(final int cid,
-            final int infostore_id, final Connection con) throws SQLException {
+    private int getNextVersionNumberForInfostoreObject(final int cid, final int infostore_id, final Connection con) throws SQLException {
         int retval = 0;
 
-        PreparedStatement stmt = con
-                .prepareStatement("SELECT MAX(version_number) FROM infostore_document WHERE cid=? AND infostore_id=?");
+        PreparedStatement stmt = con.prepareStatement("SELECT MAX(version_number) FROM infostore_document WHERE cid=? AND infostore_id=?");
         stmt.setInt(1, cid);
         stmt.setInt(2, infostore_id);
         ResultSet result = stmt.executeQuery();
@@ -702,8 +694,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         result.close();
         stmt.close();
 
-        stmt = con
-                .prepareStatement("SELECT MAX(version_number) FROM del_infostore_document WHERE cid=? AND infostore_id=?");
+        stmt = con.prepareStatement("SELECT MAX(version_number) FROM del_infostore_document WHERE cid=? AND infostore_id=?");
         stmt.setInt(1, cid);
         stmt.setInt(2, infostore_id);
         result = stmt.executeQuery();
@@ -719,45 +710,26 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         return retval + 1;
     }
 
-    @OXThrows(
-            category=Category.USER_INPUT,
-            desc="To remain consistent in WebDAV no two current versions in a given folder may contain a file with the same filename. The user must either choose a different filename, or switch the other file to a version with a different filename.",
-            exceptionId=41,
-            msg="Files attached to InfoStore items must have unique names. Filename: %s. The other document with this file name is %s."
-    )
-    private void checkUniqueFilename(final String filename, final long folderId, final int id, final Context ctx) throws OXException  {
-        if(null == filename) {
-            return;
-        }
-        if("".equals(filename.trim())) {
-            return;
-        }
-        InfostoreIterator iter = null;
-        try {
-            iter = InfostoreIterator.documentsByFilename(folderId, filename, new Metadata[]{Metadata.ID_LITERAL, Metadata.TITLE_LITERAL}, new AlwaysWriteConnectionProvider(getProvider()), ctx);
-            while(iter.hasNext()) {
-                final DocumentMetadata dm = iter.next();
-                if(dm.getId() != id) {
-                    throw EXCEPTIONS.create(41,filename, dm.getTitle());
-                }
-            }
-        } catch (final SearchIteratorException e) {
-            throw new InfostoreException(e);
-        } finally {
-            if (iter != null) {
-                try {
-                    iter.close();
-                } catch (final SearchIteratorException e) {
-                    throw new InfostoreException(e);
-                }
-            }
-        }
+    @OXThrowsMultiple(category = {Category.USER_INPUT, Category.CODE_ERROR},
+                                desc = {"To remain consistent in WebDAV no two current versions in a given folder may contain a file with the same filename. The user must either choose a different filename, or switch the other file to a version with a different filename.", "SQL Error while reserving filename"},
+                                exceptionId = {41, 46},
+                                msg = {"Files attached to InfoStore items must have unique names. Filename: %s. The other document with this file name is %s.", "SQL Error while trying to reserver filename."})
+    private InfostoreFilenameReservation reserve(final String filename, final long folderId, final int id, final Context ctx) throws OXException {
 
+        InfostoreFilenameReservation reservation = null;
+        try {
+            reservation = filenameReserver.reserveFilename(filename, folderId, id, ctx, this);
+            if (reservation == null) {
+                throw EXCEPTIONS.create(41, filename, "Unknown");
+            }
+        } catch (SQLException e) {
+            throw EXCEPTIONS.create(46, e);
+        }
+        return reservation;
     }
 
-    protected FileStorage getFileStorage(final Context ctx) throws
-            FilestoreException, FileStorageException {
-        return FileStorage.getInstance(FilestoreStorage.createURI(ctx),ctx, this.getProvider());
+    protected FileStorage getFileStorage(final Context ctx) throws FilestoreException, FileStorageException {
+        return FileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx, this.getProvider());
     }
 
     private Metadata[] nonNull(final DocumentMetadata document) {
@@ -772,53 +744,45 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
     }
 
     @OXThrowsMultiple(category = { Category.USER_INPUT, Category.USER_INPUT, Category.USER_INPUT }, desc = {
-            "The user doesn't have the required write permissions to update the infoitem.",
-            "The user isn't allowed to create objects in the target folder when moving an infoitem.",
-            "Need delete permissions in original folder to move an item"}, exceptionId = {
-            3, 4, 21 }, msg = { "You are not allowed to update this item.",
-            "You are not allowed to create objects in the target folder.",
-            "You are not allowed to delete objects in the source folder, so this document cannot be moved."})
-    public void saveDocument(final DocumentMetadata document, final InputStream data,
-            final long sequenceNumber, Metadata[] modifiedColumns,
-            final ServerSession sessionObj) throws OXException {
+        "The user doesn't have the required write permissions to update the infoitem.",
+        "The user isn't allowed to create objects in the target folder when moving an infoitem.",
+        "Need delete permissions in original folder to move an item" }, exceptionId = { 3, 4, 21 }, msg = {
+        "You are not allowed to update this item.", "You are not allowed to create objects in the target folder.",
+        "You are not allowed to delete objects in the source folder, so this document cannot be moved." })
+    public void saveDocument(final DocumentMetadata document, final InputStream data, final long sequenceNumber, Metadata[] modifiedColumns, final ServerSession sessionObj) throws OXException {
         try {
-            final EffectiveInfostorePermission infoPerm = security
-                    .getInfostorePermission(document.getId(), sessionObj
-                            .getContext(), getUser(sessionObj),
-                            getUserConfiguration(sessionObj));
+            final EffectiveInfostorePermission infoPerm = security.getInfostorePermission(
+                document.getId(),
+                sessionObj.getContext(),
+                getUser(sessionObj),
+                getUserConfiguration(sessionObj));
             if (!infoPerm.canWriteObject()) {
                 throw EXCEPTIONS.create(3);
             }
-            if ((Arrays.asList(modifiedColumns)
-                    .contains(Metadata.FOLDER_ID_LITERAL))
-                    && (document.getFolderId() != -1) && infoPerm.getObject().getFolderId() != document.getFolderId()) {
-                security.checkFolderId(document.getFolderId(), sessionObj
-                        .getContext());
+            if ((Arrays.asList(modifiedColumns).contains(Metadata.FOLDER_ID_LITERAL)) && (document.getFolderId() != -1) && infoPerm.getObject().getFolderId() != document.getFolderId()) {
+                security.checkFolderId(document.getFolderId(), sessionObj.getContext());
                 final EffectivePermission isperm = security.getFolderPermission(
-                        document.getFolderId(), sessionObj.getContext(),
-                        getUser(sessionObj), getUserConfiguration(sessionObj));
+                    document.getFolderId(),
+                    sessionObj.getContext(),
+                    getUser(sessionObj),
+                    getUserConfiguration(sessionObj));
                 if (!(isperm.canCreateObjects())) {
                     throw EXCEPTIONS.create(4);
                 }
 
-                if(!infoPerm.canDeleteObject()) {
+                if (!infoPerm.canDeleteObject()) {
                     throw EXCEPTIONS.create(21);
                 }
             }
 
             CheckSizeSwitch.checkSizes(document, getProvider(), sessionObj.getContext());
 
-
             final DocumentMetadata oldDocument = checkWriteLock(document.getId(), sessionObj);
-
-
 
             document.setLastModified(new Date());
             document.setModifiedBy(sessionObj.getUserId());
 
-
             VALIDATION.validate(document);
-
 
             // db.updateDocument(document, data, sequenceNumber,
             // modifiedColumns, sessionObj.getContext(),
@@ -827,127 +791,133 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
             // db.createDocument(document, data, sessionObj.getContext(),
             // sessionObj.getUserObject(), getUserConfiguration(sessionObj));
 
-            final Set<Metadata> updatedCols = new HashSet<Metadata>(Arrays
-                    .asList(modifiedColumns));
+            final Set<Metadata> updatedCols = new HashSet<Metadata>(Arrays.asList(modifiedColumns));
             updatedCols.add(Metadata.LAST_MODIFIED_LITERAL);
             updatedCols.add(Metadata.MODIFIED_BY_LITERAL);
 
-            if(updatedCols.contains(Metadata.VERSION_LITERAL)) {
-                final String fname = load(document.getId(), document.getVersion(), sessionObj.getContext()).getFileName();
-                if(fname != null && !fname.equals(oldDocument.getFileName())) {
-                    checkUniqueFilename(fname, oldDocument.getFolderId(), oldDocument.getId(), sessionObj.getContext());
+            List<InfostoreFilenameReservation> reservations = new ArrayList<InfostoreFilenameReservation>(2);
+            try {
+                if (updatedCols.contains(Metadata.VERSION_LITERAL)) {
+                    final String fname = load(document.getId(), document.getVersion(), sessionObj.getContext()).getFileName();
+                    if (fname != null && !fname.equals(oldDocument.getFileName())) {
+
+                        reservations.add(reserve(fname, oldDocument.getFolderId(), oldDocument.getId(), sessionObj.getContext()));
+
+                    }
                 }
-            }
 
-            modifiedColumns = updatedCols.toArray(new Metadata[updatedCols
-                    .size()]);
+                modifiedColumns = updatedCols.toArray(new Metadata[updatedCols.size()]);
 
-            if(document.getFileName() != null && !document.getFileName().equals(oldDocument.getFileName())) {
-                checkUniqueFilename(document.getFileName(), oldDocument.getFolderId(), oldDocument.getId(), sessionObj.getContext());
-            }
+                if (document.getFileName() != null && !document.getFileName().equals(oldDocument.getFileName())) {
+                    reservations.add(reserve(
+                        document.getFileName(),
+                        oldDocument.getFolderId(),
+                        oldDocument.getId(),
+                        sessionObj.getContext()));
+                }
 
-            if (data != null) {
+                if (data != null) {
 
-                final SaveFileWithQuotaAction saveFile = new SaveFileWithQuotaAction();
-                try {
-                    final QuotaFileStorage qfs = (QuotaFileStorage) getFileStorage(sessionObj
-                            .getContext());
-                    saveFile.setStorage(qfs);
-                    saveFile.setSizeHint(document.getFileSize());
-                    saveFile.setIn(data);
-                    perform(saveFile, false);
-                    document.setFilestoreLocation(saveFile.getId());
-
-                    if (document.getFileSize() == 0) {
-                        document.setFileSize(qfs.getFileSize(saveFile.getId()));
-                    }
-
-                    final GetSwitch get = new GetSwitch(oldDocument);
-                    final SetSwitch set = new SetSwitch(document);
-                    final Set<Metadata> alreadySet = new HashSet<Metadata>(Arrays
-                            .asList(modifiedColumns));
-                    for (final Metadata m : Arrays.asList(
-                            Metadata.DESCRIPTION_LITERAL,
-                            Metadata.TITLE_LITERAL, Metadata.URL_LITERAL)) {
-                        if (alreadySet.contains(m)) {
-                            continue;
-                        }
-                        set.setValue(m.doSwitch(get));
-                        m.doSwitch(set);
-                    }
-
-                    document.setCreatedBy(sessionObj.getUserId());
-                    document.setCreationDate(new Date());
-                    Connection con = null;
+                    final SaveFileWithQuotaAction saveFile = new SaveFileWithQuotaAction();
                     try {
-                        con = getReadConnection(sessionObj.getContext());
-                        document
-                                .setVersion(getNextVersionNumberForInfostoreObject(
-                                        sessionObj.getContext().getContextId(),
-                                        document.getId(), con));
-                        updatedCols.add(Metadata.VERSION_LITERAL);
-                    } catch (final SQLException e) {
-                        LOG.error("SQLException: ", e);
-                    } finally {
-                        releaseReadConnection(sessionObj.getContext(), con);
+                        final QuotaFileStorage qfs = (QuotaFileStorage) getFileStorage(sessionObj.getContext());
+                        saveFile.setStorage(qfs);
+                        saveFile.setSizeHint(document.getFileSize());
+                        saveFile.setIn(data);
+                        perform(saveFile, false);
+                        document.setFilestoreLocation(saveFile.getId());
+
+                        if (document.getFileSize() == 0) {
+                            document.setFileSize(qfs.getFileSize(saveFile.getId()));
+                        }
+
+                        final GetSwitch get = new GetSwitch(oldDocument);
+                        final SetSwitch set = new SetSwitch(document);
+                        final Set<Metadata> alreadySet = new HashSet<Metadata>(Arrays.asList(modifiedColumns));
+                        for (final Metadata m : Arrays.asList(Metadata.DESCRIPTION_LITERAL, Metadata.TITLE_LITERAL, Metadata.URL_LITERAL)) {
+                            if (alreadySet.contains(m)) {
+                                continue;
+                            }
+                            set.setValue(m.doSwitch(get));
+                            m.doSwitch(set);
+                        }
+
+                        document.setCreatedBy(sessionObj.getUserId());
+                        document.setCreationDate(new Date());
+                        Connection con = null;
+                        try {
+                            con = getReadConnection(sessionObj.getContext());
+                            document.setVersion(getNextVersionNumberForInfostoreObject(
+                                sessionObj.getContext().getContextId(),
+                                document.getId(),
+                                con));
+                            updatedCols.add(Metadata.VERSION_LITERAL);
+                        } catch (final SQLException e) {
+                            LOG.error("SQLException: ", e);
+                        } finally {
+                            releaseReadConnection(sessionObj.getContext(), con);
+                        }
+
+                        final CreateVersionAction createVersionAction = new CreateVersionAction();
+                        createVersionAction.setContext(sessionObj.getContext());
+                        createVersionAction.setDocuments(Arrays.asList(document));
+                        createVersionAction.setProvider(this);
+                        createVersionAction.setQueryCatalog(QUERIES);
+
+                        perform(createVersionAction, true);
+
+                    } catch (final FileStorageException e) {
+                        throw new InfostoreException(e);
+                    } catch (final ContextException e) {
+                        throw new InfostoreException(e);
+                    } catch (final OXException x) {
+                        throw x;
+                    } catch (final AbstractOXException e) {
+                        throw new InfostoreException(e);
                     }
 
-                    final CreateVersionAction createVersionAction = new CreateVersionAction();
-                    createVersionAction.setContext(sessionObj.getContext());
-                    createVersionAction.setDocuments(Arrays.asList(document));
-                    createVersionAction.setProvider(this);
-                    createVersionAction.setQueryCatalog(QUERIES);
-
-                    perform(createVersionAction, true);
-
-                } catch (final FileStorageException e) {
-                    throw new InfostoreException(e);
-                } catch (final ContextException e) {
-                    throw new InfostoreException(e);
-                } catch (final OXException x) {
-                    throw x;
-                } catch (final AbstractOXException e) {
-                    throw new InfostoreException(e);
+                } else if (QUERIES.updateVersion(modifiedColumns)) {
+                    if (!updatedCols.contains(Metadata.VERSION_LITERAL)) {
+                        document.setVersion(oldDocument.getVersion());
+                    }
+                    final UpdateVersionAction updateVersionAction = new UpdateVersionAction();
+                    updateVersionAction.setContext(sessionObj.getContext());
+                    updateVersionAction.setDocuments(Arrays.asList(document));
+                    updateVersionAction.setOldDocuments(Arrays.asList(oldDocument));
+                    updateVersionAction.setProvider(this);
+                    updateVersionAction.setQueryCatalog(QUERIES);
+                    updateVersionAction.setModified(modifiedColumns);
+                    updateVersionAction.setTimestamp(sequenceNumber);
+                    try {
+                        perform(updateVersionAction, true);
+                    } catch (final OXException x) {
+                        throw x;
+                    } catch (final AbstractOXException e1) {
+                        throw new InfostoreException(e1);
+                    }
                 }
 
-            } else if (QUERIES.updateVersion(modifiedColumns)) {
-                if (!updatedCols.contains(Metadata.VERSION_LITERAL)) {
-                    document.setVersion(oldDocument.getVersion());
+                modifiedColumns = updatedCols.toArray(new Metadata[updatedCols.size()]);
+                if (QUERIES.updateDocument(modifiedColumns)) {
+                    final UpdateDocumentAction updateAction = new UpdateDocumentAction();
+                    updateAction.setContext(sessionObj.getContext());
+                    updateAction.setDocuments(Arrays.asList(document));
+                    updateAction.setOldDocuments(Arrays.asList(oldDocument));
+                    updateAction.setProvider(this);
+                    updateAction.setQueryCatalog(QUERIES);
+                    updateAction.setModified(modifiedColumns);
+                    updateAction.setTimestamp(sequenceNumber);
+                    try {
+                        perform(updateAction, true);
+                    } catch (final OXException x) {
+                        throw x;
+                    } catch (final AbstractOXException e1) {
+                        throw new InfostoreException(e1);
+                    }
                 }
-                final UpdateVersionAction updateVersionAction = new UpdateVersionAction();
-                updateVersionAction.setContext(sessionObj.getContext());
-                updateVersionAction.setDocuments(Arrays.asList(document));
-                updateVersionAction.setOldDocuments(Arrays.asList(oldDocument));
-                updateVersionAction.setProvider(this);
-                updateVersionAction.setQueryCatalog(QUERIES);
-                updateVersionAction.setModified(modifiedColumns);
-                updateVersionAction.setTimestamp(sequenceNumber);
-                try {
-                    perform(updateVersionAction, true);
-                } catch (final OXException x) {
-                    throw x;
-                } catch (final AbstractOXException e1) {
-                    throw new InfostoreException(e1);
-                }
-            }
-
-            modifiedColumns = updatedCols.toArray(new Metadata[updatedCols
-                    .size()]);
-            if (QUERIES.updateDocument(modifiedColumns)) {
-                final UpdateDocumentAction updateAction = new UpdateDocumentAction();
-                updateAction.setContext(sessionObj.getContext());
-                updateAction.setDocuments(Arrays.asList(document));
-                updateAction.setOldDocuments(Arrays.asList(oldDocument));
-                updateAction.setProvider(this);
-                updateAction.setQueryCatalog(QUERIES);
-                updateAction.setModified(modifiedColumns);
-                updateAction.setTimestamp(sequenceNumber);
-                try {
-                    perform(updateAction, true);
-                } catch (final OXException x) {
-                    throw x;
-                } catch (final AbstractOXException e1) {
-                    throw new InfostoreException(e1);
+            } finally {
+                for (InfostoreFilenameReservation infostoreFilenameReservation : reservations) {
+                    infostoreFilenameReservation.destroySilently();
                 }
             }
 
@@ -955,13 +925,13 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
             final DocumentMetadataImpl docForEvent = new DocumentMetadataImpl(oldDocument);
             final SetSwitch set = new SetSwitch(docForEvent);
             final GetSwitch get = new GetSwitch(document);
-            for(final Metadata metadata : modifiedColumns) {
+            for (final Metadata metadata : modifiedColumns) {
                 set.setValue(metadata.doSwitch(get));
                 metadata.doSwitch(set);
             }
             final OXFolderAccess ofa = new OXFolderAccess(sessionObj.getContext());
             int folderId = (int) oldDocument.getFolderId();
-            if(updatedCols.contains(Metadata.FOLDER_ID_LITERAL)) {
+            if (updatedCols.contains(Metadata.FOLDER_ID_LITERAL)) {
                 folderId = (int) docForEvent.getFolderId();
             }
             ec.modify(oldDocument, docForEvent, ofa.getFolderObject(folderId));
@@ -973,18 +943,19 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         }
     }
 
-    public void removeDocument(final long folderId, final long date,
-            final ServerSession sessionObj) throws OXException {
+    public void removeDocument(final long folderId, final long date, final ServerSession sessionObj) throws OXException {
         final DBProvider reuseProvider = new ReuseReadConProvider(getProvider());
         try {
-            final List<DocumentMetadata> allVersions = InfostoreIterator
-                    .allVersionsWhere("infostore.folder_id = " + folderId,
-                            Metadata.VALUES_ARRAY, reuseProvider,
-                            sessionObj.getContext()).asList();
-            final List<DocumentMetadata> allDocuments = InfostoreIterator
-                    .allDocumentsWhere("infostore.folder_id = " + folderId,
-                            Metadata.VALUES_ARRAY, reuseProvider,
-                            sessionObj.getContext()).asList();
+            final List<DocumentMetadata> allVersions = InfostoreIterator.allVersionsWhere(
+                "infostore.folder_id = " + folderId,
+                Metadata.VALUES_ARRAY,
+                reuseProvider,
+                sessionObj.getContext()).asList();
+            final List<DocumentMetadata> allDocuments = InfostoreIterator.allDocumentsWhere(
+                "infostore.folder_id = " + folderId,
+                Metadata.VALUES_ARRAY,
+                reuseProvider,
+                sessionObj.getContext()).asList();
             removeDocuments(allDocuments, allVersions, date, sessionObj, null);
         } catch (final SearchIteratorException x) {
             throw new InfostoreException(x);
@@ -992,10 +963,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
     }
 
     @OXThrows(category = Category.CONCURRENT_MODIFICATION, desc = "Not all infoitems in the given folder could be deleted. This may be due to the infoitems being modified since the last request, or the objects might not even exist anymore or the user doesn't have enough delete permissions on certain objects.", exceptionId = 5, msg = "Could not delete all objects.")
-    private void removeDocuments(final List<DocumentMetadata> allDocuments,
-            final List<DocumentMetadata> allVersions, final long date,
-            final ServerSession sessionObj, final List<DocumentMetadata> rejected)
-            throws OXException {
+    private void removeDocuments(final List<DocumentMetadata> allDocuments, final List<DocumentMetadata> allVersions, final long date, final ServerSession sessionObj, final List<DocumentMetadata> rejected) throws OXException {
         final List<DocumentMetadata> delDocs = new ArrayList<DocumentMetadata>();
         final List<DocumentMetadata> delVers = new ArrayList<DocumentMetadata>();
         final Set<Integer> rejectedIds = new HashSet<Integer>();
@@ -1082,8 +1050,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
     }
 
     @OXThrows(category = Category.SUBSYSTEM_OR_SERVICE_DOWN, desc = "Could not remove file from file store.", exceptionId = 37, msg = "Could not remove file from file store.")
-    private void removeFile(final Context context, final String filestoreLocation)
-            throws OXException {
+    private void removeFile(final Context context, final String filestoreLocation) throws OXException {
         if (filestoreLocation == null) {
             return;
         }
@@ -1103,8 +1070,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
     }
 
     @OXThrows(category = Category.USER_INPUT, desc = "You do not have the permissions to delete at least one of the info items.", exceptionId = 45, msg = "You do not have the permissions to delete at least one of the info items.")
-    public int[] removeDocument(final int[] id, final long date,
-            final ServerSession sessionObj) throws OXException {
+    public int[] removeDocument(final int[] id, final long date, final ServerSession sessionObj) throws OXException {
         final StringBuilder ids = new StringBuilder().append('(');
         for (final int i : id) {
             ids.append(i).append(',');
@@ -1118,11 +1084,15 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         final DBProvider reuseProvider = new ReuseReadConProvider(getProvider());
         try {
             allVersions = InfostoreIterator.allVersionsWhere(
-                    "infostore.id IN " + ids.toString(), Metadata.VALUES_ARRAY,
-                    reuseProvider, sessionObj.getContext()).asList();
+                "infostore.id IN " + ids.toString(),
+                Metadata.VALUES_ARRAY,
+                reuseProvider,
+                sessionObj.getContext()).asList();
             allDocuments = InfostoreIterator.allDocumentsWhere(
-                    "infostore.id IN " + ids.toString(), Metadata.VALUES_ARRAY,
-                    reuseProvider, sessionObj.getContext()).asList();
+                "infostore.id IN " + ids.toString(),
+                Metadata.VALUES_ARRAY,
+                reuseProvider,
+                sessionObj.getContext()).asList();
         } catch (final SearchIteratorException x) {
             throw new InfostoreException(x);
         } catch (final Throwable t) {
@@ -1149,12 +1119,14 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
                 idSet.remove(Integer.valueOf(m.getId()));
                 EffectivePermission p = perms.get(m.getFolderId());
                 if (p == null) {
-                    p = security.getFolderPermission(m.getFolderId(), sessionObj
-                            .getContext(), getUser(sessionObj), getUserConfiguration(sessionObj));
+                    p = security.getFolderPermission(
+                        m.getFolderId(),
+                        sessionObj.getContext(),
+                        getUser(sessionObj),
+                        getUserConfiguration(sessionObj));
                     perms.put(m.getFolderId(), p);
                 }
-                final EffectiveInfostorePermission infoPerm = new EffectiveInfostorePermission(
-                        p, m, getUser(sessionObj));
+                final EffectiveInfostorePermission infoPerm = new EffectiveInfostorePermission(p, m, getUser(sessionObj));
                 if (!infoPerm.canDeleteObject()) {
                     throw EXCEPTIONS.create(45);
                 }
@@ -1170,8 +1142,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
             }
         }
 
-        removeDocuments(toDeleteDocs, toDeleteVersions, date, sessionObj,
-                rejected);
+        removeDocuments(toDeleteDocs, toDeleteVersions, date, sessionObj, rejected);
 
         final int[] nd = new int[rejected.size() + idSet.size()];
         int i = 0;
@@ -1186,21 +1157,22 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
     }
 
     @OXThrows(category = Category.USER_INPUT, desc = "The user must be allowed to delete the object in order to delete a version of it.", exceptionId = 6, msg = "You do not have sufficient permission to delete this version.")
-    public int[] removeVersion(final int id, final int[] versionId, final ServerSession sessionObj)
-            throws OXException {
+    public int[] removeVersion(final int id, final int[] versionId, final ServerSession sessionObj) throws OXException {
         if (versionId.length <= 0) {
             return versionId;
         }
 
-        DocumentMetadata metadata = load(id,
-                InfostoreFacade.CURRENT_VERSION, sessionObj.getContext());
+        DocumentMetadata metadata = load(id, InfostoreFacade.CURRENT_VERSION, sessionObj.getContext());
         try {
             checkWriteLock(metadata, sessionObj);
         } catch (final OXException x) {
             return versionId;
         }
-        final EffectiveInfostorePermission infoPerm = security
-                .getInfostorePermission(metadata, sessionObj.getContext(), getUser(sessionObj), getUserConfiguration(sessionObj));
+        final EffectiveInfostorePermission infoPerm = security.getInfostorePermission(
+            metadata,
+            sessionObj.getContext(),
+            getUser(sessionObj),
+            getUserConfiguration(sessionObj));
         if (!infoPerm.canDeleteObject()) {
             throw EXCEPTIONS.create(6);
         }
@@ -1217,16 +1189,14 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         List<DocumentMetadata> allVersions = null;
         try {
             allVersions = InfostoreIterator.allVersionsWhere(
-                    "infostore_document.infostore_id = " + id
-                            + " AND infostore_document.version_number IN "
-                            + versions.toString()
-                            + " and infostore_document.version_number != 0 ",
-                    Metadata.VALUES_ARRAY, this, sessionObj.getContext())
-                    .asList();
+                "infostore_document.infostore_id = " + id + " AND infostore_document.version_number IN " + versions.toString() + " and infostore_document.version_number != 0 ",
+                Metadata.VALUES_ARRAY,
+                this,
+                sessionObj.getContext()).asList();
         } catch (final SearchIteratorException x) {
             throw new InfostoreException(x);
         }
-        
+
         final Date now = new Date();
 
         boolean removeCurrent = false;
@@ -1238,9 +1208,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
             v.setLastModified(now);
             removeFile(sessionObj.getContext(), v.getFilestoreLocation());
         }
-        
+
         // update version number if needed
-        
+
         final DocumentMetadata update = new DocumentMetadataImpl(metadata);
 
         update.setLastModified(now);
@@ -1253,8 +1223,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         if (removeCurrent) {
 
             // Update Version 0
-            final DocumentMetadata oldVersion0 = load(id, 0,
-                    sessionObj.getContext());
+            final DocumentMetadata oldVersion0 = load(id, 0, sessionObj.getContext());
 
             final DocumentMetadata version0 = new DocumentMetadataImpl(metadata);
             version0.setVersion(0);
@@ -1263,12 +1232,13 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
             final UpdateVersionAction updateVersion = new UpdateVersionAction();
             updateVersion.setContext(sessionObj.getContext());
             updateVersion.setDocuments(Arrays.asList(version0));
-            updateVersion.setModified(Metadata.DESCRIPTION_LITERAL,
-                    Metadata.TITLE_LITERAL, Metadata.URL_LITERAL,
-                    Metadata.LAST_MODIFIED_LITERAL,
-                    Metadata.MODIFIED_BY_LITERAL,
-                    Metadata.FILE_MIMETYPE_LITERAL
-                    );
+            updateVersion.setModified(
+                Metadata.DESCRIPTION_LITERAL,
+                Metadata.TITLE_LITERAL,
+                Metadata.URL_LITERAL,
+                Metadata.LAST_MODIFIED_LITERAL,
+                Metadata.MODIFIED_BY_LITERAL,
+                Metadata.FILE_MIMETYPE_LITERAL);
             updateVersion.setOldDocuments(Arrays.asList(oldVersion0));
             updateVersion.setProvider(this);
             updateVersion.setQueryCatalog(QUERIES);
@@ -1282,24 +1252,23 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
             }
 
             // Set new Version Number
-            update.setVersion(db.getMaxActiveVersion(metadata.getId(),
-                    sessionObj.getContext(), allVersions));
+            update.setVersion(db.getMaxActiveVersion(metadata.getId(), sessionObj.getContext(), allVersions));
             updatedFields.add(Metadata.VERSION_LITERAL);
         }
 
         final UpdateDocumentAction updateDocument = new UpdateDocumentAction();
         updateDocument.setContext(sessionObj.getContext());
         updateDocument.setDocuments(Arrays.asList(update));
-        updateDocument.setModified(updatedFields
-                .toArray(new Metadata[updatedFields.size()]));
+        updateDocument.setModified(updatedFields.toArray(new Metadata[updatedFields.size()]));
         updateDocument.setOldDocuments(Arrays.asList(metadata));
         updateDocument.setProvider(this);
         updateDocument.setQueryCatalog(QUERIES);
         updateDocument.setTimestamp(Long.MAX_VALUE);
 
-        if(removeCurrent) {
+        InfostoreFilenameReservation reservation = null;
+        if (removeCurrent) {
             metadata = load(metadata.getId(), update.getVersion(), sessionObj.getContext());
-            checkUniqueFilename(metadata.getFileName(), metadata.getFolderId(), metadata.getId(), sessionObj.getContext());
+            reservation = reserve(metadata.getFileMD5Sum(), metadata.getFolderId(), metadata.getId(), sessionObj.getContext());
         }
 
         try {
@@ -1309,7 +1278,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         } catch (final AbstractOXException e1) {
             throw new InfostoreException(e1);
         }
-        
+
         // Remove Versions
 
         final DeleteVersionAction deleteVersion = new DeleteVersionAction();
@@ -1342,27 +1311,19 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         return retval;
     }
 
-    public TimedResult<DocumentMetadata> getDocuments(final long folderId, final Context ctx, final User user,
-            final UserConfiguration userConfig) throws OXException {
-        return getDocuments(folderId,
-                Metadata.HTTPAPI_VALUES_ARRAY, null, 0, ctx, user,
-                userConfig);
+    public TimedResult<DocumentMetadata> getDocuments(final long folderId, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+        return getDocuments(folderId, Metadata.HTTPAPI_VALUES_ARRAY, null, 0, ctx, user, userConfig);
     }
 
-    public TimedResult<DocumentMetadata> getDocuments(final long folderId, final Metadata[] columns,
-            final Context ctx, final User user, final UserConfiguration userConfig)
-            throws OXException {
+    public TimedResult<DocumentMetadata> getDocuments(final long folderId, final Metadata[] columns, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         return getDocuments(folderId, columns, null, 0, ctx, user, userConfig);
     }
 
     @OXThrows(category = Category.USER_INPUT, desc = "The user may not read objects in the given folder. ", exceptionId = 7, msg = "You do not have sufficient permissions to read objects in this folder.")
-    public TimedResult<DocumentMetadata> getDocuments(final long folderId, Metadata[] columns,
-            final Metadata sort, final int order, final Context ctx, final User user,
-            final UserConfiguration userConfig) throws OXException {
+    public TimedResult<DocumentMetadata> getDocuments(final long folderId, Metadata[] columns, final Metadata sort, final int order, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         columns = addLastModifiedIfNeeded(columns);
         boolean onlyOwn = false;
-        final EffectivePermission isperm = security.getFolderPermission(folderId,
-                ctx, user, userConfig);
+        final EffectivePermission isperm = security.getFolderPermission(folderId, ctx, user, userConfig);
         if (isperm.getReadPermission() == EffectivePermission.NO_PERMISSIONS) {
             throw EXCEPTIONS.create(7);
         } else if (isperm.getReadPermission() == EffectivePermission.READ_OWN_OBJECTS) {
@@ -1375,14 +1336,14 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
                 addLocked = true;
                 break;
             }
-            if(m == Metadata.NUMBER_OF_VERSIONS_LITERAL) {
+            if (m == Metadata.NUMBER_OF_VERSIONS_LITERAL) {
                 addNumberOfVersions = true;
                 break;
             }
         }
 
         InfostoreIterator iter = null;
-        if(onlyOwn) {
+        if (onlyOwn) {
             iter = InfostoreIterator.documentsByCreator(folderId, user.getId(), columns, sort, order, getProvider(), ctx);
         } else {
             iter = InfostoreIterator.documents(folderId, columns, sort, order, getProvider(), ctx);
@@ -1397,23 +1358,17 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         return tr;
     }
 
-    public TimedResult<DocumentMetadata> getVersions(final int id, final Context ctx, final User user,
-            final UserConfiguration userConfig) throws OXException {
-        return getVersions(id, Metadata.HTTPAPI_VALUES_ARRAY,
-                null, 0, ctx, user, userConfig);
+    public TimedResult<DocumentMetadata> getVersions(final int id, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+        return getVersions(id, Metadata.HTTPAPI_VALUES_ARRAY, null, 0, ctx, user, userConfig);
     }
 
-    public TimedResult<DocumentMetadata> getVersions(final int id, final Metadata[] columns, final Context ctx,
-            final User user, final UserConfiguration userConfig) throws OXException {
+    public TimedResult<DocumentMetadata> getVersions(final int id, final Metadata[] columns, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         return getVersions(id, columns, null, 0, ctx, user, userConfig);
     }
 
     @OXThrows(category = Category.USER_INPUT, desc = "The user may not read objects in the given folder. ", exceptionId = 8, msg = "You do not have sufficient permissions to read objects in this folder.")
-    public TimedResult<DocumentMetadata> getVersions(final int id, Metadata[] columns, final Metadata sort,
-            final int order, final Context ctx, final User user, final UserConfiguration userConfig)
-            throws OXException {
-        final EffectiveInfostorePermission infoPerm = security
-                .getInfostorePermission(id, ctx, user, userConfig);
+    public TimedResult<DocumentMetadata> getVersions(final int id, Metadata[] columns, final Metadata sort, final int order, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+        final EffectiveInfostorePermission infoPerm = security.getInfostorePermission(id, ctx, user, userConfig);
         if (!infoPerm.canReadObject()) {
             throw EXCEPTIONS.create(8);
         }
@@ -1426,8 +1381,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         }
         columns = addLastModifiedIfNeeded(columns);
         final InfostoreIterator iter = InfostoreIterator.versions(id, columns, sort, order, getProvider(), ctx);
-        final TimedResult<DocumentMetadata> tr = new  InfostoreTimedResult(iter);
-
+        final TimedResult<DocumentMetadata> tr = new InfostoreTimedResult(iter);
 
         if (addLocked) {
             return addLocked(tr, ctx, user, userConfig);
@@ -1437,22 +1391,19 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
     }
 
     @OXThrows(category = Category.USER_INPUT, desc = "The user may not read objects in the given folder. ", exceptionId = 9, msg = "You do not have sufficient permissions to read objects in this folder.")
-    public TimedResult<DocumentMetadata> getDocuments(final int[] ids, Metadata[] columns, final Context ctx,
-            final User user, final UserConfiguration userConfig) throws OXException {
+    public TimedResult<DocumentMetadata> getDocuments(final int[] ids, Metadata[] columns, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
 
         try {
-            security.injectInfostorePermissions(ids, ctx, user, userConfig,
-                    null, new Injector<Object, EffectiveInfostorePermission>() {
+            security.injectInfostorePermissions(ids, ctx, user, userConfig, null, new Injector<Object, EffectiveInfostorePermission>() {
 
-                        public Object inject(final Object list,
-                                final EffectiveInfostorePermission element) {
-                            if (!element.canReadObject()) {
-                                throw new NotAllowed(element.getObjectID());
-                            }
-                            return list;
-                        }
+                public Object inject(final Object list, final EffectiveInfostorePermission element) {
+                    if (!element.canReadObject()) {
+                        throw new NotAllowed(element.getObjectID());
+                    }
+                    return list;
+                }
 
-                    });
+            });
         } catch (final NotAllowed na) {
             throw EXCEPTIONS.create(9);
         }
@@ -1460,11 +1411,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         final InfostoreIterator iter = InfostoreIterator.list(ids, columns, getProvider(), ctx);
         TimedResult<DocumentMetadata> tr = new InfostoreTimedResult(iter);
 
-        for(final Metadata m : columns) {
-            if(m == Metadata.LOCKED_UNTIL_LITERAL) {
+        for (final Metadata m : columns) {
+            if (m == Metadata.LOCKED_UNTIL_LITERAL) {
                 tr = addLocked(tr, ctx, user, userConfig);
             }
-            if(m == Metadata.NUMBER_OF_VERSIONS_LITERAL) {
+            if (m == Metadata.NUMBER_OF_VERSIONS_LITERAL) {
                 tr = addNumberOfVersions(tr, ctx);
             }
         }
@@ -1472,20 +1423,14 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 
     }
 
-    public Delta<DocumentMetadata> getDelta(final long folderId, final long updateSince, final Metadata[] columns,
-            final boolean ignoreDeleted, final Context ctx, final User user,
-            final UserConfiguration userConfig) throws OXException, SearchIteratorException {
-        return getDelta(folderId, updateSince, columns, null, 0, ignoreDeleted,
-                ctx, user, userConfig);
+    public Delta<DocumentMetadata> getDelta(final long folderId, final long updateSince, final Metadata[] columns, final boolean ignoreDeleted, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException, SearchIteratorException {
+        return getDelta(folderId, updateSince, columns, null, 0, ignoreDeleted, ctx, user, userConfig);
     }
 
     @OXThrows(category = Category.USER_INPUT, desc = "The user may not read objects in the given folder. ", exceptionId = 10, msg = "You do not have sufficient permissions to read objects in this folder.")
-    public Delta<DocumentMetadata> getDelta(final long folderId, final long updateSince, Metadata[] columns,
-            final Metadata sort, final int order, final boolean ignoreDeleted, final Context ctx,
-            final User user, final UserConfiguration userConfig) throws OXException, SearchIteratorException {
+    public Delta<DocumentMetadata> getDelta(final long folderId, final long updateSince, Metadata[] columns, final Metadata sort, final int order, final boolean ignoreDeleted, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException, SearchIteratorException {
         boolean onlyOwn = false;
-        final EffectivePermission isperm = security.getFolderPermission(folderId,
-                ctx, user, userConfig);
+        final EffectivePermission isperm = security.getFolderPermission(folderId, ctx, user, userConfig);
         if (isperm.getReadPermission() == EffectivePermission.NO_PERMISSIONS) {
             throw EXCEPTIONS.create(10);
         } else if (isperm.getReadPermission() == EffectivePermission.READ_OWN_OBJECTS) {
@@ -1505,7 +1450,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         }
 
         final Map<Integer, List<Lock>> locks = loadLocksInFolderAndExpireOldLocks(folderId, ctx, user, userConfig);
-        
+
         final DBProvider reuse = new ReuseReadConProvider(getProvider());
 
         InfostoreIterator newIter = null;
@@ -1513,17 +1458,17 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         InfostoreIterator delIter = null;
 
         columns = addLastModifiedIfNeeded(columns);
-        
-        if(onlyOwn) {
+
+        if (onlyOwn) {
             newIter = InfostoreIterator.newDocumentsByCreator(folderId, user.getId(), columns, sort, order, updateSince, reuse, ctx);
             modIter = InfostoreIterator.modifiedDocumentsByCreator(folderId, user.getId(), columns, sort, order, updateSince, reuse, ctx);
-            if(!ignoreDeleted) {
+            if (!ignoreDeleted) {
                 delIter = InfostoreIterator.deletedDocumentsByCreator(folderId, user.getId(), sort, order, updateSince, reuse, ctx);
             }
         } else {
             newIter = InfostoreIterator.newDocuments(folderId, columns, sort, order, updateSince, reuse, ctx);
             modIter = InfostoreIterator.modifiedDocuments(folderId, columns, sort, order, updateSince, reuse, ctx);
-            if(!ignoreDeleted) {
+            if (!ignoreDeleted) {
                 delIter = InfostoreIterator.deletedDocuments(folderId, sort, order, updateSince, reuse, ctx);
             }
         }
@@ -1537,8 +1482,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         Delta<DocumentMetadata> delta = new DeltaImpl<DocumentMetadata>(newIter, modIter, it, System.currentTimeMillis());
 
         if (addLocked) {
-            delta = addLocked(delta, locks, ctx,
-                    user, userConfig);
+            delta = addLocked(delta, locks, ctx, user, userConfig);
         }
         if (addNumberOfVersions) {
             delta = addNumberOfVersions(delta, ctx);
@@ -1546,12 +1490,17 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         return delta;
     }
 
-
     private Map<Integer, List<Lock>> loadLocksInFolderAndExpireOldLocks(final long folderId, final Context ctx, final User user, final UserConfiguration userConfig) throws SearchIteratorException, OXException {
         final Map<Integer, List<Lock>> locks = new HashMap<Integer, List<Lock>>();
-        final InfostoreIterator documents = InfostoreIterator.documents(folderId, new Metadata[]{Metadata.ID_LITERAL}, null, -1, getProvider(), ctx);
+        final InfostoreIterator documents = InfostoreIterator.documents(
+            folderId,
+            new Metadata[] { Metadata.ID_LITERAL },
+            null,
+            -1,
+            getProvider(),
+            ctx);
         try {
-            while(documents.hasNext()) {
+            while (documents.hasNext()) {
                 final DocumentMetadata document = documents.next();
                 lockManager.findLocks(document.getId(), ctx, user, userConfig);
             }
@@ -1562,11 +1511,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
     }
 
     @OXThrows(category = Category.USER_INPUT, desc = "The user may not read objects in the given folder. ", exceptionId = 11, msg = "You do not have sufficient permissions to read objects in this folder.")
-    public int countDocuments(final long folderId, final Context ctx, final User user,
-            final UserConfiguration userConfig) throws OXException {
+    public int countDocuments(final long folderId, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         boolean onlyOwn = false;
-        final EffectivePermission isperm = security.getFolderPermission(folderId,
-                ctx, user, userConfig);
+        final EffectivePermission isperm = security.getFolderPermission(folderId, ctx, user, userConfig);
         if (!(isperm.canReadAllObjects()) && !(isperm.canReadOwnObjects())) {
             throw EXCEPTIONS.create(11);
         } else if (isperm.canReadOwnObjects()) {
@@ -1575,8 +1522,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         return db.countDocuments(folderId, onlyOwn, ctx, user, userConfig);
     }
 
-    public boolean hasFolderForeignObjects(final long folderId, final Context ctx,
-            final User user, final UserConfiguration userConfig) throws OXException {
+    public boolean hasFolderForeignObjects(final long folderId, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         return db.hasFolderForeignObjects(folderId, ctx, user, userConfig);
     }
 
@@ -1602,14 +1548,14 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
             }
         }
     }
-    
+
     private Metadata[] addLastModifiedIfNeeded(final Metadata[] columns) {
         for (final Metadata metadata : columns) {
-            if(metadata == Metadata.LAST_MODIFIED_LITERAL || metadata == Metadata.LAST_MODIFIED_UTC_LITERAL) {
+            if (metadata == Metadata.LAST_MODIFIED_LITERAL || metadata == Metadata.LAST_MODIFIED_UTC_LITERAL) {
                 return columns;
             }
         }
-        final Metadata[] copy = new Metadata[columns.length+1];
+        final Metadata[] copy = new Metadata[columns.length + 1];
         int i = 0;
         for (final Metadata metadata : columns) {
             copy[i++] = metadata;
@@ -1617,13 +1563,13 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         copy[i] = Metadata.LAST_MODIFIED_UTC_LITERAL;
         return copy;
     }
-    
 
     public InfostoreSecurity getSecurity() {
         return security;
     }
 
     private static final class NotAllowed extends RuntimeException {
+
         private static final long serialVersionUID = 4872889537922290831L;
 
         public int id;
@@ -1636,43 +1582,56 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
     private static enum ServiceMethod {
         COMMIT, FINISH, ROLLBACK, SET_REQUEST_TRANSACTIONAL, START_TRANSACTION, SET_PROVIDER;
 
-        public void call(final Object o, final Object...args) {
-            if(!(o instanceof DBService)) {
+        public void call(final Object o, final Object... args) {
+            if (!(o instanceof DBService)) {
                 return;
             }
             final DBService service = (DBService) o;
-            switch(this) {
-                default : return;
-                case SET_REQUEST_TRANSACTIONAL: service.setRequestTransactional(((Boolean) args[0]).booleanValue()); break;
-                case SET_PROVIDER: service.setProvider((DBProvider)args[0]); break;
+            switch (this) {
+            default:
+                return;
+            case SET_REQUEST_TRANSACTIONAL:
+                service.setRequestTransactional(((Boolean) args[0]).booleanValue());
+                break;
+            case SET_PROVIDER:
+                service.setProvider((DBProvider) args[0]);
+                break;
             }
         }
 
-        public void callUnsafe(final Object o, final Object...args) throws TransactionException {
-            if(!(o instanceof DBService)) {
+        public void callUnsafe(final Object o, final Object... args) throws TransactionException {
+            if (!(o instanceof DBService)) {
                 return;
             }
             final DBService service = (DBService) o;
-            switch(this) {
-                default : call(o, args); break;
-                case COMMIT: service.commit(); break;
-                case FINISH: service.finish(); break;
-                case ROLLBACK: service.rollback(); break;
-                case START_TRANSACTION: service.startTransaction(); break;
+            switch (this) {
+            default:
+                call(o, args);
+                break;
+            case COMMIT:
+                service.commit();
+                break;
+            case FINISH:
+                service.finish();
+                break;
+            case ROLLBACK:
+                service.rollback();
+                break;
+            case START_TRANSACTION:
+                service.startTransaction();
+                break;
             }
         }
 
     }
 
-
     @Override
-    @OXThrowsMultiple(category = { Category.SUBSYSTEM_OR_SERVICE_DOWN,
-            Category.SUBSYSTEM_OR_SERVICE_DOWN }, desc = {
-            "Cannot reach the file store so some documents were not deleted.",
-            "Cannot reach the file store so some documents were not deleted. This propably means that file store and db are inconsistent. Run the recovery tool." }, exceptionId = {
-            35, 36 }, msg = {
-            "Cannot reach the file store so I cannot remove the documents.",
-            "Cannot remove file. Database and file store are probably inconsistent. Please contact an administrator to run the recovery tool." }
+    @OXThrowsMultiple(category = { Category.SUBSYSTEM_OR_SERVICE_DOWN, Category.SUBSYSTEM_OR_SERVICE_DOWN }, desc = {
+        "Cannot reach the file store so some documents were not deleted.",
+        "Cannot reach the file store so some documents were not deleted. This propably means that file store and db are inconsistent. Run the recovery tool." }, exceptionId = {
+        35, 36 }, msg = {
+        "Cannot reach the file store so I cannot remove the documents.",
+        "Cannot remove file. Database and file store are probably inconsistent. Please contact an administrator to run the recovery tool." }
 
     )
     public void commit() throws TransactionException {
@@ -1681,11 +1640,10 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
         lockManager.commit();
         if (null != fileIdRemoveList.get() && fileIdRemoveList.get().size() > 0) {
             try {
-                final QuotaFileStorage qfs = (QuotaFileStorage) getFileStorage(ctxHolder
-                        .get());
+                final QuotaFileStorage qfs = (QuotaFileStorage) getFileStorage(ctxHolder.get());
                 for (final String id : fileIdRemoveList.get()) {
                     try {
-                        //System.out.println("REMOVE " + id);
+                        // System.out.println("REMOVE " + id);
                         qfs.deleteFile(id);
                     } catch (final FileStorageException x) {
                         throw new TransactionException(x);
@@ -1750,8 +1708,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
     }
 
     private static final UserConfiguration getUserConfiguration(final ServerSession sessionObj) {
-        return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
-                sessionObj.getContext());
+        return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext());
     }
 
     private static final User getUser(final ServerSession sessionObj) {
@@ -1764,8 +1721,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 
         private final SearchIterator<DocumentMetadata> results;
 
-        public NumberOfVersionsTimedResult(final TimedResult<DocumentMetadata> delegate, final Context ctx) throws SearchIteratorException,
-                OXException {
+        public NumberOfVersionsTimedResult(final TimedResult<DocumentMetadata> delegate, final Context ctx) throws SearchIteratorException, OXException {
             sequenceNumber = delegate.sequenceNumber();
 
             this.results = numberOfVersionsIterator(delegate.results(), ctx);
@@ -1781,20 +1737,16 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 
     }
 
-
     private final class LockTimedResult implements TimedResult<DocumentMetadata> {
 
         private final long sequenceNumber;
 
         private final SearchIterator<DocumentMetadata> results;
 
-        public LockTimedResult(final TimedResult<DocumentMetadata> delegate, final Context ctx, final User user,
-                final UserConfiguration userConfig) throws SearchIteratorException,
-                OXException {
+        public LockTimedResult(final TimedResult<DocumentMetadata> delegate, final Context ctx, final User user, final UserConfiguration userConfig) throws SearchIteratorException, OXException {
             sequenceNumber = delegate.sequenceNumber();
 
-            this.results = lockedUntilIterator(delegate.results(), null, ctx, user,
-                    userConfig);
+            this.results = lockedUntilIterator(delegate.results(), null, ctx, user, userConfig);
         }
 
         public SearchIterator<DocumentMetadata> results() {
@@ -1817,18 +1769,13 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 
         private SearchIterator<DocumentMetadata> deleted;
 
-        public LockDelta(final Delta<DocumentMetadata> delegate, final Map<Integer, List<Lock>> locks, final Context ctx, final User user,
-                final UserConfiguration userConfig) throws SearchIteratorException,
-                OXException {
+        public LockDelta(final Delta<DocumentMetadata> delegate, final Map<Integer, List<Lock>> locks, final Context ctx, final User user, final UserConfiguration userConfig) throws SearchIteratorException, OXException {
             final SearchIterator<DocumentMetadata> deleted = delegate.getDeleted();
-            if(null != deleted) {
-                this.deleted = lockedUntilIterator(deleted, locks, ctx,
-                        user, userConfig);
+            if (null != deleted) {
+                this.deleted = lockedUntilIterator(deleted, locks, ctx, user, userConfig);
             }
-            this.modified = lockedUntilIterator(delegate.getModified(), locks, ctx,
-                    user, userConfig);
-            this.newIter = lockedUntilIterator(delegate.getNew(), locks, ctx, user,
-                    userConfig);
+            this.modified = lockedUntilIterator(delegate.getModified(), locks, ctx, user, userConfig);
+            this.newIter = lockedUntilIterator(delegate.getNew(), locks, ctx, user, userConfig);
             this.sequenceNumber = delegate.sequenceNumber();
         }
 
@@ -1870,10 +1817,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 
         private SearchIterator<DocumentMetadata> deleted;
 
-        public NumberOfVersionsDelta(final Delta<DocumentMetadata> delegate, final Context ctx) throws SearchIteratorException,
-                OXException {
+        public NumberOfVersionsDelta(final Delta<DocumentMetadata> delegate, final Context ctx) throws SearchIteratorException, OXException {
             final SearchIterator<DocumentMetadata> deleted = delegate.getDeleted();
-            if(null != deleted) {
+            if (null != deleted) {
                 this.deleted = numberOfVersionsIterator(deleted, ctx);
             }
             this.modified = numberOfVersionsIterator(delegate.getModified(), ctx);
@@ -1910,10 +1856,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
     }
 
     private static interface ResultProcessor<T> {
+
         public T process(ResultSet rs) throws SQLException;
     }
 
     public void setSessionHolder(final SessionHolder sessionHolder) {
-       expiredLocksListener.setSessionHolder(sessionHolder);
+        expiredLocksListener.setSessionHolder(sessionHolder);
     }
 }

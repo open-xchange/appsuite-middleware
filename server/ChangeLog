@@ -1,3 +1,7 @@
+* 2010-03-11 - francisco.laguna@open-xchange.com
+
+ - Bugfix #14820: Reserve filename using a mutex
+
 * 2010-03-11 - marcus.klein@open-xchange.com
 
  - Bugfix #15582: Only replacing end date of an appointment if it is a series.

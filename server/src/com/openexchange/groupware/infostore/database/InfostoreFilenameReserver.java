@@ -47,34 +47,21 @@
  *
  */
 
-package com.openexchange.server.osgi;
+package com.openexchange.groupware.infostore.database;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import java.sql.SQLException;
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.tx.DBProvider;
+
 
 /**
- * {@link Activator} combines several activators in the server bundle that have been prepared to split up the server bundle into several
- * bundles. Currently this is not done to keep number of packages low.
+ * {@link InfostoreFilenameReserver}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class Activator extends CompositeBundleActivator {
+public interface InfostoreFilenameReserver {
 
-    private final BundleActivator[] activators = {
-        new com.openexchange.database.osgi.Activator(),
-        new com.openexchange.groupware.update.osgi.Activator(),
-        new com.openexchange.groupware.reminder.osgi.Activator(),
-        new com.openexchange.server.osgi.ServerActivator(),
-        new com.openexchange.groupware.tasks.osgi.Activator(),
-        new com.openexchange.groupware.infostore.osgi.InfostoreActivator()
-    };
+    public InfostoreFilenameReservation reserveFilename(String fileName, long folderId, int id, Context context, DBProvider provider) throws SQLException, OXException ;
 
-    public Activator() {
-        super();
-    }
-
-    @Override
-    protected BundleActivator[] getActivators() {
-        return activators;
-    }
 }

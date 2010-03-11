@@ -47,34 +47,38 @@
  *
  */
 
-package com.openexchange.server.osgi;
+package com.openexchange.groupware.infostore.osgi;
 
+import java.util.Arrays;
+import java.util.Collection;
 import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import org.osgi.framework.BundleContext;
+import com.openexchange.database.CreateTableService;
+import com.openexchange.groupware.infostore.database.impl.InfostoreFilenameReservationsCreateTableTask;
+import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
+
 
 /**
- * {@link Activator} combines several activators in the server bundle that have been prepared to split up the server bundle into several
- * bundles. Currently this is not done to keep number of packages low.
+ * {@link InfostoreActivator}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class Activator extends CompositeBundleActivator {
+public class InfostoreActivator implements BundleActivator {
 
-    private final BundleActivator[] activators = {
-        new com.openexchange.database.osgi.Activator(),
-        new com.openexchange.groupware.update.osgi.Activator(),
-        new com.openexchange.groupware.reminder.osgi.Activator(),
-        new com.openexchange.server.osgi.ServerActivator(),
-        new com.openexchange.groupware.tasks.osgi.Activator(),
-        new com.openexchange.groupware.infostore.osgi.InfostoreActivator()
-    };
-
-    public Activator() {
-        super();
+    public void start(BundleContext context) throws Exception {
+        final InfostoreFilenameReservationsCreateTableTask task = new InfostoreFilenameReservationsCreateTableTask();
+        
+        context.registerService(CreateTableService.class.getName(), task, null);
+        context.registerService(UpdateTaskProviderService.class.getName(), new UpdateTaskProviderService() {
+            public Collection<UpdateTask> getUpdateTasks() {
+                return Arrays.asList(((UpdateTask) task));
+            }
+        }, null);
     }
 
-    @Override
-    protected BundleActivator[] getActivators() {
-        return activators;
+    public void stop(BundleContext context) throws Exception {
+        // OSGi automatically takes down registered services
     }
+
 }
