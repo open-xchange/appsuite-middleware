@@ -150,7 +150,7 @@ Authors:
 Group:          Applications/Productivity
 Summary:	The Open-Xchange Meta package for OX into Parallels integration
 Requires:	%{oxcommon}
-Requires:	open-xchange-custom-parallels, open-xchange-custom-parallels-gui, open-xchange-spamhandler-spamassassin, open-xchange-admin-soap, open-xchange-easylogin, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-meta-gui, open-xchange-lang-es-es, open-xchange-lang-nl-nl, open-xchange-gui-lang-es-es, open-xchange-gui-lang-es-es, open-xchange-online-help-es, open-xchange-online-help-nl, open-xchange-outlook-updater
+Requires:	open-xchange-custom-parallels, open-xchange-custom-parallels-gui, open-xchange-spamhandler-spamassassin, open-xchange-admin-soap, open-xchange-easylogin, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-meta-gui, open-xchange-lang-es-es, open-xchange-lang-nl-nl, open-xchange-gui-lang-es-es, open-xchange-gui-lang-es-es, open-xchange-online-help-es, open-xchange-online-help-nl
 
 %description -n open-xchange-meta-parallels
 The Open-Xchange Meta package for OX into Parallels integration
