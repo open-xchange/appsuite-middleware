@@ -1268,7 +1268,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, D
         InfostoreFilenameReservation reservation = null;
         if (removeCurrent) {
             metadata = load(metadata.getId(), update.getVersion(), sessionObj.getContext());
-            reservation = reserve(metadata.getFileMD5Sum(), metadata.getFolderId(), metadata.getId(), sessionObj.getContext());
+            reservation = reserve(metadata.getFileName(), metadata.getFolderId(), metadata.getId(), sessionObj.getContext());
         }
 
         try {
