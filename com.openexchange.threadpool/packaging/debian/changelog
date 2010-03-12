@@ -1,8 +1,9 @@
-open-xchange-threadpool (6.17.0.0-0) unstable; urgency=low
+open-xchange-threadpool (6.16.0.0-3.1) unstable; urgency=low
 
-  * new unstable cycle
+  * Non-maintainer upload.
+  * first build for 6.16-rev4
 
- -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 12 Mar 2010 10:55:36 +0100
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 12 Mar 2010 18:47:45 +0100
 
 open-xchange-threadpool (6.16.0.0-3) unstable; urgency=low
 

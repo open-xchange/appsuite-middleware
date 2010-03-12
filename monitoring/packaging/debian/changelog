@@ -1,8 +1,8 @@
-open-xchange-monitoring (6.17.0.0-0) unstable; urgency=low
+open-xchange-monitoring (6.16.0.0-4) unstable; urgency=low
 
-  * new unstable cycle
+  * first build for 6.16-rev4
 
- -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 12 Mar 2010 10:55:41 +0100
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 12 Mar 2010 18:47:50 +0100
 
 open-xchange-monitoring (6.16.0.0-3) unstable; urgency=low
 

@@ -1,3 +1,9 @@
+open-xchange-activation (1.1.1-23) unstable; urgency=low
+
+  * first build for 6.16-rev4
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 12 Mar 2010 18:47:29 +0100
+
 open-xchange-activation (1.1.1-22) unstable; urgency=low
 
   * first build for 6.16-rev3

@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 4
+%define		ox_release 5
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -494,6 +494,9 @@ fi
 %changelog
 * Thu Mar 11 2010 - marcus.klein@open-xchange.com
  - Bugfix #15582: Only replacing end date of an appointment if it is a series.
+ - Bugfix #15580: Correctly parsing values written as null from the client.
+* Thu Mar 11 2010 - tobias.prinz@open-xchange.com
+ - Bugfix #15584: Removed access to data container objects through reflection to prevent further breaks due to refactoring.
 * Wed Mar 10 2010 - thorben.betten@open-xchange.com
  - Bugfix #15561: Ignoring mail folders on admin login if admin has no mailbox
  - Bugfix #15538: Properly parsing an URL when surrounded by parentheses
