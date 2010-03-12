@@ -161,6 +161,7 @@ public class SelectForUpdateReservation implements InfostoreFilenameReservation 
 
     private void finishTransaction() throws SQLException {
         con.setAutoCommit(true);
+        releaseConnection();
     }
 
     private void rollback() throws SQLException {
