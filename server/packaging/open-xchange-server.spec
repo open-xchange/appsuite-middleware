@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 4
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -144,6 +144,13 @@ if [ ${1:-0} -eq 2 ]; then
 
    # prevent bash from expanding, see bug 13316
    GLOBIGNORE='*'
+
+   # Property to disable iCal attachment for iMIP mail messages to internal users.
+   # -----------------------------------------------------------------------
+   local pfile=/opt/open-xchange/etc/groupware/notification.properties
+   if ! ox_exists_property imipForInternalUser $pfile; then
+      ox_set_property imipForInternalUser false $pfile
+   fi
 
    # SoftwareChange_Request-194
    # -----------------------------------------------------------------------
@@ -487,9 +494,6 @@ fi
 %changelog
 * Thu Mar 11 2010 - marcus.klein@open-xchange.com
  - Bugfix #15582: Only replacing end date of an appointment if it is a series.
- - Bugfix #15580: Correctly parsing values written as null from the client.
-* Thu Mar 11 2010 - francisco.laguna@open-xchange.com
- - Bugfix #14820: Reserve filename using a mutex
 * Wed Mar 10 2010 - thorben.betten@open-xchange.com
  - Bugfix #15561: Ignoring mail folders on admin login if admin has no mailbox
  - Bugfix #15538: Properly parsing an URL when surrounded by parentheses
