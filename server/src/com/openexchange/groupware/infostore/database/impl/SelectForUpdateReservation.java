@@ -67,26 +67,35 @@ import com.openexchange.groupware.tx.StaticDBPoolProvider;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.tools.iterator.SearchIteratorException;
 
-
 /**
  * {@link SelectForUpdateReservation}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SelectForUpdateReservation implements InfostoreFilenameReservation {
 
     private static final String REMOVE_RESERVATION_SQL = "DELETE FROM infostoreReservedPaths WHERE cid = ? AND folder = ? AND name = ?";
+
     private static final String LOCK_FOLDER_SQL = "SELECT fuid FROM oxfolder_tree WHERE cid = ? AND fuid = ? FOR UPDATE ";
+
     private static final String RESERVE_NAME_SQL = "INSERT INTO infostoreReservedPaths (cid, folder, name) VALUES (?, ?, ?)";
+
     private static final Log LOG = LogFactory.getLog(SelectForUpdateReservation.class);
 
     private String fileName;
+
     private long folderId;
+
     private int id;
+
     private Context ctx;
+
     private DBProvider provider;
+
     private Connection con;
-    
+
+    private boolean reserved;
+
     public SelectForUpdateReservation(String fileName, long folderId, int id, Context context, DBProvider provider) {
         super();
         this.fileName = fileName;
@@ -116,12 +125,18 @@ public class SelectForUpdateReservation implements InfostoreFilenameReservation 
     }
 
     public boolean reserve() throws SQLException, OXException {
+        if(reserved) {
+            return true;
+        }
+        if (!mustReserveName()) {
+            return true;
+        }
         boolean free = false;
         try {
             startTransaction();
             lockFolder();
             free = checkFree();
-            if(free) {
+            if (free) {
                 reserveFilename();
             }
             commit();
@@ -131,7 +146,17 @@ public class SelectForUpdateReservation implements InfostoreFilenameReservation 
         } finally {
             finishTransaction();
         }
-        return free;
+        return reserved = free;
+    }
+
+    protected boolean mustReserveName() {
+        if (null == fileName) {
+            return false;
+        }
+        if ("".equals(fileName.trim())) {
+            return false;
+        }
+        return true;
     }
 
     private void finishTransaction() throws SQLException {
@@ -151,19 +176,18 @@ public class SelectForUpdateReservation implements InfostoreFilenameReservation 
     }
 
     private boolean checkFree() throws OXException, SQLException {
-        // TODO: Add check for folders
-        if(null == fileName) {
-            return true;
-        }
-        if("".equals(fileName.trim())) {
-            return true;
-        }
+
         InfostoreIterator iter = null;
         try {
-            iter = InfostoreIterator.documentsByFilename(folderId, fileName, new Metadata[]{Metadata.ID_LITERAL, Metadata.TITLE_LITERAL}, new StaticDBPoolProvider(con), ctx);
-            while(iter.hasNext()) {
+            iter = InfostoreIterator.documentsByFilename(
+                folderId,
+                fileName,
+                new Metadata[] { Metadata.ID_LITERAL, Metadata.TITLE_LITERAL },
+                new StaticDBPoolProvider(con),
+                ctx);
+            while (iter.hasNext()) {
                 final DocumentMetadata dm = iter.next();
-                if(dm.getId() != id) {
+                if (dm.getId() != id) {
                     return false;
                 }
             }
@@ -178,48 +202,53 @@ public class SelectForUpdateReservation implements InfostoreFilenameReservation 
                 }
             }
         }
-        
-        return ! hasResult("SELECT 1 FROM infostoreReservedPaths WHERE cid = ? AND folder = ? AND name = ?", ctx.getContextId(), folderId, fileName);
-    }
 
+        return !hasResult(
+            "SELECT 1 FROM infostoreReservedPaths WHERE cid = ? AND folder = ? AND name = ?",
+            ctx.getContextId(),
+            folderId,
+            fileName);
+    }
 
     private void lockFolder() throws SQLException {
         exec(LOCK_FOLDER_SQL, ctx.getContextId(), folderId);
     }
-    
+
     private void removeReservation() throws SQLException {
+        if(!reserved) {
+            return;
+        }
         exec(REMOVE_RESERVATION_SQL, ctx.getContextId(), folderId, fileName);
     }
 
-    private void exec(String sql, Object...replacements) throws SQLException {
+    private void exec(String sql, Object... replacements) throws SQLException {
         PreparedStatement stmt = con.prepareStatement(sql);
         try {
-            for(int i = 0; i < replacements.length; i++) {
-                stmt.setObject(i+1, replacements[i]);
+            for (int i = 0; i < replacements.length; i++) {
+                stmt.setObject(i + 1, replacements[i]);
             }
             stmt.execute();
         } finally {
             stmt.close();
         }
     }
-    
-    private boolean hasResult(String sql, Object...replacements) throws SQLException {
+
+    private boolean hasResult(String sql, Object... replacements) throws SQLException {
         PreparedStatement stmt = con.prepareStatement(sql);
         ResultSet rs = null;
         try {
-            for(int i = 0; i < replacements.length; i++) {
-                stmt.setObject(i+1, replacements[i]);
+            for (int i = 0; i < replacements.length; i++) {
+                stmt.setObject(i + 1, replacements[i]);
             }
             rs = stmt.executeQuery();
             return rs.next();
         } finally {
             stmt.close();
-            if(rs != null) {
+            if (rs != null) {
                 rs.close();
             }
         }
     }
-
 
     private void startTransaction() throws TransactionException, SQLException {
         openConnection();
