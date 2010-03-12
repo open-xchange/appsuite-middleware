@@ -50,7 +50,10 @@
 package com.openexchange.groupware.notify.imip;
 
 import java.util.List;
+import javax.mail.internet.MimeMultipart;
 import com.openexchange.data.conversion.ical.ITipMethod;
+import com.openexchange.groupware.container.ExternalUserParticipant;
+import com.openexchange.groupware.container.Participant;
 
 /**
  * {@link IMipNewAppointmentTest}
@@ -66,8 +69,16 @@ public class IMipNewAppointmentTest extends IMipTest {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        
+
         appointment = appointments.buildAppointmentWithUserParticipants(user, secondUser);
+        Participant external = new ExternalUserParticipant("external@example.invalid");
+
+        Participant[] participants = appointment.getParticipants();
+        Participant[] moreParticipants = new Participant[participants.length + 1];
+        System.arraycopy(participants, 0, moreParticipants, 0, participants.length);
+        moreParticipants[participants.length] = external;
+
+        appointment.setParticipants(moreParticipants);
     }
 
     /*
@@ -85,16 +96,23 @@ public class IMipNewAppointmentTest extends IMipTest {
         List<Message> messages = notify.getMessages();
         
         boolean foundSecond = false;
+        boolean foundThird = false;
         
         for (Message message : messages) {
             if (message.addresses.contains(userMail)) {
                 checkState(message.message, ITipMethod.NO_METHOD);
-            } else if (message.addresses.contains(secondUserMail)) {
+            }
+            if (message.addresses.contains(secondUserMail)) {
                 foundSecond = true;
+                assertFalse("message should not be a multipart", MimeMultipart.class.isInstance(message));
+            }
+            if (message.addresses.contains("external@example.invalid")) {
+                foundThird = true;
                 checkState(message.message, ITipMethod.REQUEST);
             }
         }
         
         assertTrue("missing user", foundSecond);
+        assertTrue("missing user", foundThird);
     }
 }
