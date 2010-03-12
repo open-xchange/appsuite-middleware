@@ -474,7 +474,7 @@ public class OXContainerConverter {
         Property property = object.getProperty("N");
         if (property != null) {
             final ArrayList<?> N = (ArrayList<?>) property.getValue();
-            
+
             fillArrayUpTo(N, 5); // fix for 7248
             ListValue(contactContainer, Contact.SUR_NAME, N.get(0), " ");
             ListValue(contactContainer, Contact.GIVEN_NAME, N.get(1), " ");
@@ -607,26 +607,10 @@ public class OXContainerConverter {
         final int FAX = 1;
 
         final int[][][] phones = {
-            {
-                {
-                    Contact.TELEPHONE_BUSINESS1,
-                    Contact.TELEPHONE_BUSINESS2 },
-                { Contact.FAX_BUSINESS } },
-            {
-                {
-                    Contact.TELEPHONE_HOME1,
-                    Contact.TELEPHONE_HOME2 },
-                { Contact.FAX_HOME } },
-            {
-                {
-                    Contact.CELLULAR_TELEPHONE1,
-                    Contact.CELLULAR_TELEPHONE2 }, {} },
-            { { Contact.TELEPHONE_CAR }, {} },
-            { { Contact.TELEPHONE_ISDN }, {} },
-            { { Contact.TELEPHONE_PAGER }, {} },
-            {
-                { Contact.TELEPHONE_OTHER },
-                { Contact.FAX_OTHER } } };
+            { { Contact.TELEPHONE_BUSINESS1, Contact.TELEPHONE_BUSINESS2 }, { Contact.FAX_BUSINESS } },
+            { { Contact.TELEPHONE_HOME1, Contact.TELEPHONE_HOME2 }, { Contact.FAX_HOME } },
+            { { Contact.CELLULAR_TELEPHONE1, Contact.CELLULAR_TELEPHONE2 }, {} }, { { Contact.TELEPHONE_CAR }, {} },
+            { { Contact.TELEPHONE_ISDN }, {} }, { { Contact.TELEPHONE_PAGER }, {} }, { { Contact.TELEPHONE_OTHER }, { Contact.FAX_OTHER } } };
 
         final int[][][] index = {
             { { 0 }, { 0 } }, { { 0 }, { 0 } }, { { 0 }, { 0 } }, { { 0 }, { 0 } }, { { 0 }, { 0 } }, { { 0 }, { 0 } }, { { 0 }, { 0 } } };
@@ -653,7 +637,7 @@ public class OXContainerConverter {
                     }
                 }
                 final ArrayList<?> A = (ArrayList<?>) property.getValue();
-                fillArrayUpTo(A,7);
+                fillArrayUpTo(A, 7);
                 if (A == null) {
                     throw new ConverterException("Invalid property ADR");
                 }
@@ -766,12 +750,12 @@ public class OXContainerConverter {
 
     /**
      * fills and array with null up to a specified amount
-     * */
+     */
     private void fillArrayUpTo(ArrayList<?> a, final int limit) {
-        if(a == null){
+        if (a == null) {
             a = new ArrayList<Object>();
         }
-        for(int i = a.size(); i < limit; i++ ){
+        for (int i = a.size(); i < limit; i++) {
             a.add(null);
         }
     }
@@ -817,7 +801,8 @@ public class OXContainerConverter {
                 // In case the configuration file was not read (yet) the default value is given here
                 final long maxSize = ContactConfig.getInstance().getMaxImageSize();
                 if (maxSize > 0 && bytes.length > maxSize) {
-                    final ConverterException e = new ConverterException("Contact image is " + bytes.length + " bytes large and limit is " + maxSize + " bytes. Image is therefore ignored.");
+                    final ConverterException e = new ConverterException(
+                        "Contact image is " + bytes.length + " bytes large and limit is " + maxSize + " bytes. Image is therefore ignored.");
                     LOG.warn(e.getMessage(), e);
                     bytes = null;
                 }
@@ -864,7 +849,7 @@ public class OXContainerConverter {
             if (property == null) {
                 return false;
             }
-            containerObj.set(fieldNumber, property.getValue().toString() );
+            containerObj.set(fieldNumber, property.getValue().toString());
             return true;
         } catch (final Exception e) {
             throw new ConverterException(e);
@@ -872,7 +857,7 @@ public class OXContainerConverter {
     }
 
     /**
-     * Bridges the gap between a Versit object  using a list and OX using a single string field 
+     * Bridges the gap between a Versit object using a list and OX using a single string field
      */
     private static boolean StringFromListProperty(final CommonObject containerObj, final VersitObject object, final String VersitName, final int fieldNumber) throws ConverterException {
         try {
@@ -880,10 +865,10 @@ public class OXContainerConverter {
             if (property == null) {
                 return false;
             }
-            if( property.getValue() instanceof String) {
+            if (property.getValue() instanceof String) {
                 return StringProperty(containerObj, object, VersitName, fieldNumber);
             }
-            
+
             final List<String> args = (List<String>) property.getValue();
             containerObj.set(fieldNumber, Strings.join(args, ", "));
             return true;
@@ -1157,7 +1142,7 @@ public class OXContainerConverter {
                     sb.append(val);
                 }
             }
-            containerObj.set(fieldNumber, sb.toString() );
+            containerObj.set(fieldNumber, sb.toString());
         } catch (final Exception e) {
             throw new ConverterException(e);
         }
@@ -1168,7 +1153,7 @@ public class OXContainerConverter {
             if (index[0] >= phones.length) {
                 return;
             }
-            containerObj.set( phones[index[0]++], value);
+            containerObj.set(phones[index[0]++], value);
         } catch (final Exception e) {
             throw new ConverterException(e);
         }
