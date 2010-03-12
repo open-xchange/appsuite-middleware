@@ -1,6 +1,5 @@
-open-xchange-passwordchange-servlet (6.16.0.0-3.1) unstable; urgency=low
+open-xchange-passwordchange-servlet (6.16.0.0-4) unstable; urgency=low
 
-  * Non-maintainer upload.
   * first build for 6.16-rev4
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 12 Mar 2010 18:48:44 +0100
