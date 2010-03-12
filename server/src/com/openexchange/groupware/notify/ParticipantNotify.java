@@ -855,10 +855,10 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                     msg.message = textMessage;
                 }
             } else  if (state.getType() == State.Type.DELETED) {
-                if (p.type == Participant.USER && NotificationConfig.getPropertyAsBoolean(NotificationProperty.INTERNAL_IMIP, false)) {
-                    msg.message = generateMessageMultipart(session, cal, createTemplate.render(p.getLocale(), renderMap), state.getModule(), state.getType(), ITipMethod.CANCEL);
-                } else {
+                if (p.type == Participant.USER && !NotificationConfig.getPropertyAsBoolean(NotificationProperty.INTERNAL_IMIP, false)) {
                     msg.message = createTemplate.render(p.getLocale(), renderMap);
+                } else {
+                    msg.message = generateMessageMultipart(session, cal, createTemplate.render(p.getLocale(), renderMap), state.getModule(), state.getType(), ITipMethod.CANCEL);
                 }
             } else {
                 msg.message = createTemplate.render(p.getLocale(), renderMap);
