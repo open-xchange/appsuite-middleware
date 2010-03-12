@@ -100,6 +100,10 @@ public class MessagingFixtureFactory implements FixtureFactory<Messaging> {
                 config.put("name", values.get("name"));
                 values.remove("name");
             }
+            if (values.containsKey("url")) {
+                config.put("url", values.get("url"));
+                values.remove("url");
+            }
             if (values.containsKey("login")) {
                 config.put("login", values.get("login"));
                 values.remove("login");
