@@ -50,13 +50,11 @@
 package com.openexchange.tools.versit.converter;
 
 import static com.openexchange.tools.io.IOUtils.closeStreamStuff;
-import gnu.trove.TIntObjectHashMap;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
-import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
@@ -87,9 +85,7 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.ExternalUserParticipant;
-import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -121,7 +117,7 @@ import com.openexchange.tools.versit.values.RecurrenceValue.Weekday;
  * VCard, you're at the right place - but don't forget to do it in both directions.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> (adapted Victor's parser for OX6)
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> (bugfixes: 7248, 7249, 7472, 7703, 7718, 7719, 8475)
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> (bugfixing and refactoring)
  */
 public class OXContainerConverter {
 
