@@ -1,3 +1,9 @@
+open-xchange-authentication-imap (6.17.0.0-0) unstable; urgency=low
+
+  * new unstable cycle
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 12 Mar 2010 10:56:56 +0100
+
 open-xchange-authentication-imap (6.16.0.0-3) unstable; urgency=low
 
   * first build for 6.16-rev3
