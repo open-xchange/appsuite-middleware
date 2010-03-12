@@ -835,11 +835,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 } else {
                     textMessage = createTemplate.render(p.getLocale(), renderMap);
                 }
-                if (p.type == Participant.USER && !NotificationConfig.getPropertyAsBoolean(NotificationProperty.INTERNAL_IMIP, false)) {
-                    msg.message = textMessage;
-                } else {
-                    msg.message = generateMessageMultipart(session, cal, textMessage, state.getModule(), state.getType(), ITipMethod.REQUEST);
-                }
+                msg.message = generateMessageMultipart(session, cal, textMessage, state.getModule(), state.getType(), ITipMethod.REQUEST);
             } else if (EnumSet.of(State.Type.ACCEPTED, State.Type.DECLINED, State.Type.TENTATIVELY_ACCEPTED).contains(state.getType())) {
                 String textMessage = "";
                 if ((p.type == Participant.EXTERNAL_USER || p.type == Participant.RESOURCE)) {
@@ -855,11 +851,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                     msg.message = textMessage;
                 }
             } else  if (state.getType() == State.Type.DELETED) {
-                if (p.type == Participant.USER && NotificationConfig.getPropertyAsBoolean(NotificationProperty.INTERNAL_IMIP, false)) {
-                    msg.message = generateMessageMultipart(session, cal, createTemplate.render(p.getLocale(), renderMap), state.getModule(), state.getType(), ITipMethod.CANCEL);
-                } else {
-                    msg.message = createTemplate.render(p.getLocale(), renderMap);
-                }
+                msg.message = generateMessageMultipart(session, cal, createTemplate.render(p.getLocale(), renderMap), state.getModule(), state.getType(), ITipMethod.CANCEL);
             } else {
                 msg.message = createTemplate.render(p.getLocale(), renderMap);
             }
@@ -895,6 +887,8 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             return text;
         }
         
+        Appointment app = (Appointment) cal;
+        
         ITipContainer iTip = new ITipContainer(method, type, session.getUserId());
         ICalEmitter emitter = ServerServiceRegistry.getInstance().getService(ICalEmitter.class);
         Multipart mp = new MimeMultipart("alternative");
@@ -905,13 +899,19 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             
             ICalSession icalSession = emitter.createSession();
             Date until = null;
-            if (Appointment.NO_RECURRENCE != cal.getRecurrenceType()) {
-                until = cal.getEndDate();
-                cal.setEndDate(computeFirstOccurrenceEnd(cal));
+            if (Appointment.NO_RECURRENCE != app.getRecurrenceType()) {
+                until = app.getEndDate();
+                app.setEndDate(computeFirstOccurrenceEnd(app));
             }
-            emitter.writeAppointment(icalSession, (Appointment) cal, session.getContext(), iTip, new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
+            boolean hasAlarm = app.containsAlarm();
+            int alarm = app.getAlarm();
+            app.removeAlarm();
+            emitter.writeAppointment(icalSession, app, session.getContext(), iTip, new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
             if (null != until) {
-                cal.setEndDate(until);
+                app.setEndDate(until);
+            }
+            if (hasAlarm) {
+                app.setAlarm(alarm);
             }
             UnsynchronizedByteArrayOutputStream byteArrayOutputStream = new UnsynchronizedByteArrayOutputStream();
             emitter.writeSession(icalSession, byteArrayOutputStream);
