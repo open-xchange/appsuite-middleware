@@ -80,8 +80,6 @@ if [ -n "$CLASSPATH" ]; then
 	CLASSPATH="-classpath $CLASSPATH"
 fi
 
-pushd $OXPREFIX
-
 ox_save_backup $CONSOLELOG
 
 if [ -n "$UMASK" ]; then
