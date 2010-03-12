@@ -55,17 +55,19 @@ import java.io.IOException;
 import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.BeanFactory;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.contact.mappers.PropertyDrivenMapper;
 import com.openexchange.groupware.importexport.Importer;
 import com.openexchange.groupware.importexport.ImporterExporter;
+import com.openexchange.groupware.importexport.exporters.CSVContactExporter;
+import com.openexchange.groupware.importexport.exporters.ICalExporter;
+import com.openexchange.groupware.importexport.exporters.VCardExporter;
 import com.openexchange.groupware.importexport.importers.CSVContactImporter;
+import com.openexchange.groupware.importexport.importers.ICalImporter;
 import com.openexchange.groupware.importexport.importers.OutlookCSVContactImporter;
+import com.openexchange.groupware.importexport.importers.VCardImporter;
 import com.openexchange.server.osgi.CSVTranslator;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.xml.spring.SpringParser;
 
 /**
  * Abtract class for both importers and exporters that does the configuration via Spring. This means importers and exporters are loaded from
@@ -85,8 +87,6 @@ public abstract class ImportExport extends SessionServlet {
 
     protected ImporterExporter importerExporter = null;
 
-    private static BeanFactory beanFactory = null;
-
     private static CSVTranslator translator;
 
     public static CSVTranslator getTranslator() {
@@ -99,29 +99,23 @@ public abstract class ImportExport extends SessionServlet {
 
     @Override
     public void init() {
-        if (importerExporter != null) {
+        if (importerExporter != null)
             return;
-        }
-        if (beanFactory == null) {
-            final String beanPath = SystemConfig.getProperty("IMPORTEREXPORTER");
-            if (beanPath != null) {
-                final SpringParser springParser = ServerServiceRegistry.getInstance().getService(SpringParser.class);
-                beanFactory = springParser.parseFile(beanPath, ImportExport.class.getClassLoader());
-            } else {
-                LOG.error("missing property: IMPORTEREXPORTER");
-            }
-        }
-        if (beanFactory != null) {
-            importerExporter = (ImporterExporter) beanFactory.getBean("importerExporter");
-        }
-
+        
+        importerExporter = new ImporterExporter();
+        
+        importerExporter.addExporter(new ICalExporter());
+        importerExporter.addExporter(new VCardExporter());
+        importerExporter.addExporter(new CSVContactExporter());
+        
+        importerExporter.addImporter(new ICalImporter());
+        importerExporter.addImporter(new VCardImporter());
         importerExporter.addImporter(new CSVContactImporter());
-
         importerExporter.addImporter(getOutlookImporter());
     }
 
     /**
-     * @return
+     * reads out the .properies files and creates all importers given there.
      */
     public static Importer getOutlookImporter() {
         OutlookCSVContactImporter outlook = new OutlookCSVContactImporter();
