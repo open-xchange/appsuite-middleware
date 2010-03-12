@@ -70,7 +70,8 @@ public class NotificationConfig extends AbstractConfig implements Initialization
     enum NotificationProperty{
 
         NOTIFY_ON_DELETE("notify_participants_on_delete"),
-        OBJECT_LINK("object_link");
+        OBJECT_LINK("object_link"),
+        INTERNAL_IMIP("imipForInternalUsers");
 
 
         private final String name;

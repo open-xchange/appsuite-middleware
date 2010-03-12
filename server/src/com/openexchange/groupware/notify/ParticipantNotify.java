@@ -835,7 +835,11 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 } else {
                     textMessage = createTemplate.render(p.getLocale(), renderMap);
                 }
-                msg.message = generateMessageMultipart(session, cal, textMessage, state.getModule(), state.getType(), ITipMethod.REQUEST);
+                if (p.type == Participant.USER && !NotificationConfig.getPropertyAsBoolean(NotificationProperty.INTERNAL_IMIP, false)) {
+                    msg.message = textMessage;
+                } else {
+                    msg.message = generateMessageMultipart(session, cal, textMessage, state.getModule(), state.getType(), ITipMethod.REQUEST);
+                }
             } else if (EnumSet.of(State.Type.ACCEPTED, State.Type.DECLINED, State.Type.TENTATIVELY_ACCEPTED).contains(state.getType())) {
                 String textMessage = "";
                 if ((p.type == Participant.EXTERNAL_USER || p.type == Participant.RESOURCE)) {
@@ -851,7 +855,11 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                     msg.message = textMessage;
                 }
             } else  if (state.getType() == State.Type.DELETED) {
-                msg.message = generateMessageMultipart(session, cal, createTemplate.render(p.getLocale(), renderMap), state.getModule(), state.getType(), ITipMethod.CANCEL);
+                if (p.type == Participant.USER && NotificationConfig.getPropertyAsBoolean(NotificationProperty.INTERNAL_IMIP, false)) {
+                    msg.message = generateMessageMultipart(session, cal, createTemplate.render(p.getLocale(), renderMap), state.getModule(), state.getType(), ITipMethod.CANCEL);
+                } else {
+                    msg.message = createTemplate.render(p.getLocale(), renderMap);
+                }
             } else {
                 msg.message = createTemplate.render(p.getLocale(), renderMap);
             }
