@@ -147,7 +147,7 @@ if [ ${1:-0} -eq 2 ]; then
 
    # Property to disable iCal attachment for iMIP mail messages to internal users.
    # -----------------------------------------------------------------------
-   local pfile=/opt/open-xchange/etc/groupware/notification.properties
+   pfile=/opt/open-xchange/etc/groupware/notification.properties
    if ! ox_exists_property imipForInternalUser $pfile; then
       ox_set_property imipForInternalUser false $pfile
    fi
