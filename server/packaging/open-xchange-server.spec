@@ -145,6 +145,13 @@ if [ ${1:-0} -eq 2 ]; then
    # prevent bash from expanding, see bug 13316
    GLOBIGNORE='*'
 
+   # Property to disable iCal attachment for iMIP mail messages to internal users.
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/notification.properties
+   if ! ox_exists_property imipForInternalUser $pfile; then
+      ox_set_property imipForInternalUser false $pfile
+   fi
+
    # SoftwareChange_Request-194
    # -----------------------------------------------------------------------
    pfile=/opt/open-xchange/etc/groupware/cache.ccf
