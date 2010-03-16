@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 # postinst script for open-xchange-contacts-ldap
 #
 # see: dh_installdeb(1)
