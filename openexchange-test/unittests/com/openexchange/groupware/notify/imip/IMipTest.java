@@ -77,7 +77,7 @@ public abstract class IMipTest extends ParticipantNotifyTest {
     protected String secondUser;
     
     protected String thirdUser;
-
+    
     protected int userId;
 
     protected int secondUserId;
@@ -103,9 +103,10 @@ public abstract class IMipTest extends ParticipantNotifyTest {
         super.setUp();
 
         folders = new TestFolderToolkit();
-        contextTools = new TestContextToolkit();
-        ctx = contextTools.getDefaultContext();
         final TestConfig config = new TestConfig();
+        contextTools = new TestContextToolkit();
+        
+        ctx = contextTools.getContextByName(config.getContextName());
         user = config.getUser();
         secondUser = config.getSecondUser();
         thirdUser = config.getThirdUser();
