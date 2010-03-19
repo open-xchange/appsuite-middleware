@@ -110,10 +110,7 @@ public class YAMLFixtureLoader implements FixtureLoader {
                 return fixtureFile;
             } else {
                 System.out.println("\"" + fixtureFile.getAbsolutePath() + "\" does not exist.");
-                File dir = fixtureFile.getParentFile();
-                for (File file : dir.listFiles()) {
-                    System.out.println("file \"" + file.getAbsolutePath() + "\" is in the directory.");
-                }
+                checkParents(fixtureFile.getParentFile());
             }
             fixtureFile = new File(path, fixtureName+".yml");
             if (fixtureFile.exists()) {
@@ -133,6 +130,16 @@ public class YAMLFixtureLoader implements FixtureLoader {
             sb.setLength(sb.length() - 1);
         }
         throw new FixtureException("Can't find fixture " + fixtureName + " in path: " +sb.toString());
+    }
+
+    private void checkParents(File file) {
+        if (file.exists()) {
+            for (File sub : file.listFiles()) {
+                System.out.println("Sub \"" + sub.getAbsolutePath() + "\" can be listed.");
+            }
+        } else {
+            checkParents(file.getParentFile());
+        }
     }
 
     private void parse(final File file, final String fixtureName) throws FixtureException {
