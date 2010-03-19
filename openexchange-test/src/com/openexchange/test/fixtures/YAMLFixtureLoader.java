@@ -138,7 +138,12 @@ public class YAMLFixtureLoader implements FixtureLoader {
                 System.out.println("Sub \"" + sub.getAbsolutePath() + "\" can be listed.");
             }
         } else {
-            checkParents(file.getParentFile());
+            File parent = file.getParentFile();
+            if (null == parent) {
+                System.out.println("No parent: \"" + file + "\".");
+            } else {
+                checkParents(parent);
+            }
         }
     }
 
