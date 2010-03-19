@@ -114,7 +114,15 @@ public class YAMLFixtureLoader implements FixtureLoader {
                 return fixtureFile;
             }
         }
-        throw new FixtureException("Can't find fixture "+fixtureName);
+        StringBuilder sb = new StringBuilder();
+        for (File path : loadPath) {
+            sb.append(path.getAbsolutePath());
+            sb.append(',');
+        }
+        if (sb.length() > 1) {
+            sb.setLength(sb.length() - 1);
+        }
+        throw new FixtureException("Can't find fixture " + fixtureName + " in path: " +sb.toString());
     }
 
     private void parse(final File file, final String fixtureName) throws FixtureException {
