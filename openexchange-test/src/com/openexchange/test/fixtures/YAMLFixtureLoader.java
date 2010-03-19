@@ -140,7 +140,7 @@ public class YAMLFixtureLoader implements FixtureLoader {
         } else {
             File parent = file.getParentFile();
             if (null == parent) {
-                System.out.println("No parent: \"" + file + "\".");
+                System.out.println("No parent: \"" + file.getAbsolutePath() + "\".");
             } else {
                 checkParents(parent);
             }
