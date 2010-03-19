@@ -110,7 +110,7 @@ public class YAMLFixtureLoader implements FixtureLoader {
                 return fixtureFile;
             } else {
                 System.out.println("\"" + fixtureFile.getAbsolutePath() + "\" does not exist.");
-                checkParents(fixtureFile.getParentFile());
+                checkParents(fixtureFile.getAbsoluteFile());
             }
             fixtureFile = new File(path, fixtureName+".yml");
             if (fixtureFile.exists()) {
