@@ -105,14 +105,14 @@ public class YAMLFixtureLoader implements FixtureLoader {
 
     private File locateFile(final String fixtureName) throws FixtureException {
         for (final File path : loadPath) {
-            File fixtureFile = new File(path, fixtureName);
+            File fixtureFile = new File(path, fixtureName).getAbsoluteFile();
             if( fixtureFile.exists()) {
                 return fixtureFile;
             } else {
                 System.out.println("\"" + fixtureFile.getAbsolutePath() + "\" does not exist.");
                 checkParents(fixtureFile.getAbsoluteFile());
             }
-            fixtureFile = new File(path, fixtureName+".yml");
+            fixtureFile = new File(path, fixtureName+".yml").getAbsoluteFile();
             if (fixtureFile.exists()) {
                 return fixtureFile;
             } else {
