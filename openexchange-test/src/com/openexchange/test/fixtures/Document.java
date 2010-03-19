@@ -55,7 +55,7 @@ public class Document {
 		if (null == this.file) {
 			final String localPath = this.getLocalPath();
 			if (null != localPath) {
-				this.file = new File(localPath);
+				this.file = new File(localPath).getAbsoluteFile();
 			}
 		}
 		return file;
