@@ -65,7 +65,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.CalendarFields;
-import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.TasksSQLInterface;
