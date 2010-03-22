@@ -121,6 +121,10 @@ public abstract class AbstractContactTemplateTest extends TestCase {
         contact.setStreetBusiness("street_business" + identifier);
         contact.setPostalCodeBusiness("postal_code_business" + identifier);
         contact.setCityBusiness("city_business" + identifier);
+        contact.setTelephoneBusiness1("telephone_business1" + identifier);
+        contact.setTelephoneHome1("telephone_home1" + identifier);
+        contact.setTelephoneBusiness2("telephone_business2" + identifier);
+        contact.setTelephoneHome2("telephone_home2" + identifier);
         return contact;
     }
 
