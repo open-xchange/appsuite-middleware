@@ -129,9 +129,4 @@ public class IMipStatusChangeAppointmentTest extends IMipTest {
         assertTrue("missing user", foundFirst);
         notify.clearMessages();
     }
-    
-    private void fail2(String failMessage, Message email, int status){
-        //fail("["+status+"] " + email.addresses + ": " + failMessage);
-    }
-
 }
