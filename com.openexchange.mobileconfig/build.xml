@@ -28,6 +28,7 @@
 	<!-- JAR names for classpath -->
 	<property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar" />
 	<property name="osgiservicesjar" value="org.eclipse.osgi.services_3.1.200.v20070605.jar" />
+    <property name="servletjar" value="javax.servlet_2.4.0.v200706111738.jar" />
 	<property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
 	<property name="threadpooljar" value="com.openexchange.threadpool.jar" />
 	<property name="globaljar" value="com.openexchange.global.jar" />
@@ -46,6 +47,7 @@
 	<path id="project.classpath">
 		<pathelement location="${bundlesdir}/${osgijar}" />
 		<pathelement location="${bundlesdir}/${osgiservicesjar}" />
+	    <pathelement location="${bundlesdir}/${servletjar}" />
 		<pathelement location="${bundlesdir}/${commonsloggingjar}" />
 		<pathelement location="${bundlesdir}/${globaljar}" />
 		<pathelement location="${bundlesdir}/${threadpooljar}" />
@@ -82,10 +84,6 @@
 	</target>
 
 	<target name="installConfig">
-		<mkdir dir="${confInstallCopyDir}" />
-		<copy todir="${confInstallCopyDir}" overwrite="true">
-			<fileset dir="${conf.dir}" />
-		</copy>
 		<mkdir dir="${destdir}/${bundle.d}" />
 		<echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}" />
 	</target>
