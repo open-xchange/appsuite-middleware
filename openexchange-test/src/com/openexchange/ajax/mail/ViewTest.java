@@ -55,6 +55,7 @@ import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.actions.GetRequest;
 import com.openexchange.ajax.mail.actions.GetResponse;
 import com.openexchange.ajax.mail.actions.SendRequest;
+import com.openexchange.ajax.mail.actions.GetRequest.View;
 
 /**
  * {@link ViewTest}
@@ -95,8 +96,7 @@ public final class ViewTest extends AbstractMailTest {
         /*
          * Perform action=get
          */
-        final GetRequest getRequest = new GetRequest(folderAndID[0], folderAndID[1]);
-        getRequest.setView("raw");
+        final GetRequest getRequest = new GetRequest(folderAndID[0], folderAndID[1], View.RAW);
         final GetResponse response = Executor.execute(getSession(), getRequest);
         final JSONArray attachments = response.getAttachments();
         assertNotNull("Attachments not present in JSON mail object.", attachments);

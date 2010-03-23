@@ -72,6 +72,10 @@ public class DeleteRequest extends AbstractMailRequest<DeleteResponse> {
 
     private boolean failOnError = true;
 
+    public DeleteRequest(String folder, String id, boolean hardDelete) {
+        this(new String[][] {{ folder, id }}, hardDelete);
+    }
+
     public DeleteRequest(final String[][] folderAndMailIds) {
         this(folderAndMailIds, false);
     }
@@ -99,7 +103,7 @@ public class DeleteRequest extends AbstractMailRequest<DeleteResponse> {
         return new AbstractAJAXParser<DeleteResponse>(failOnError) {
 
             @Override
-            protected DeleteResponse createResponse(final Response response) throws JSONException {
+            protected DeleteResponse createResponse(final Response response) {
                 return new DeleteResponse(response);
             }
         };

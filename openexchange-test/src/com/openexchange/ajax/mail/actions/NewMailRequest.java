@@ -52,9 +52,11 @@ package com.openexchange.ajax.mail.actions;
 import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.webdav.xml.fields.CommonFields;
 
 /**
  * {@link NewMailRequest} - The request for <code>/ajax/mail?action=new</code>.
@@ -63,89 +65,31 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  */
 public class NewMailRequest extends AbstractMailRequest<NewMailResponse> {
 
-    private String rfc822;
+    private final String folder;
 
-    private String folder;
+    private final String rfc822;
 
-    private int flags;
+    private final int flags;
 
-    private boolean failOnError;
+    private final boolean failOnError;
 
-    public boolean doesFailOnError() {
-        return failOnError;
+    public NewMailRequest(String folder, String rfc822, int flags) {
+        this(folder, rfc822, flags, true);
     }
 
-    public void setFailOnError(final boolean failOnError) {
+    public NewMailRequest(String folder, String rfc822, int flags, boolean failOnError) {
+        super();
+        this.folder = folder;
+        this.rfc822 = rfc822;
+        this.flags = flags;
         this.failOnError = failOnError;
     }
 
-    /**
-     * Gets the flags.
-     * 
-     * @return The flags
-     */
-    public int getFlags() {
-        return flags;
+    public boolean isFailOnError() {
+        return failOnError;
     }
 
-    /**
-     * Sets the flags.
-     * 
-     * @param flags The flags to set
-     */
-    public void setFlags(final int flags) {
-        this.flags = flags;
-    }
-
-    /**
-     * Gets the RFC822 data.
-     * 
-     * @return The RFC822 data
-     */
-    public String getRfc822() {
-        return rfc822;
-    }
-
-    /**
-     * Sets the RFC822 data.
-     * 
-     * @param rfc822 The RFC822 data to set
-     */
-    public void setRfc822(final String rfc822) {
-        this.rfc822 = rfc822;
-    }
-
-    /**
-     * Gets the folder to append the message to.
-     * 
-     * @return The folder
-     */
-    public String getFolder() {
-        return folder;
-    }
-
-    /**
-     * Sets the folder to append the message to
-     * 
-     * @param folder The folder to set
-     */
-    public void setFolder(final String folder) {
-        this.folder = folder;
-    }
-
-    /**
-     * Initializes a new {@link NewMailRequest}.
-     * 
-     * @param rfc822 The RFC822 data to set
-     */
-    public NewMailRequest(final String rfc822) {
-        super();
-        this.rfc822 = rfc822;
-        this.flags = -1;
-        this.folder = null;
-    }
-
-    public Object getBody() throws JSONException {
+    public Object getBody() {
         return rfc822;
     }
 
@@ -153,9 +97,8 @@ public class NewMailRequest extends AbstractMailRequest<NewMailResponse> {
         return Method.PUT;
     }
 
-    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
+    public Parameter[] getParameters() {
         final List<Parameter> list = new LinkedList<Parameter>();
-
         list.add(new Parameter(Mail.PARAMETER_ACTION, Mail.ACTION_NEW));
         list.add(new Parameter(Mail.PARAMETER_SRC, "1"));
         if (folder != null) {
@@ -164,18 +107,23 @@ public class NewMailRequest extends AbstractMailRequest<NewMailResponse> {
         if (flags >= 0) {
             list.add(new Parameter(Mail.PARAMETER_FLAGS, flags));
         }
-
         return list.toArray(new Parameter[list.size()]);
     }
 
-    public AbstractAJAXParser<? extends NewMailResponse> getParser() {
+    public AbstractAJAXParser<NewMailResponse> getParser() {
         return new AbstractAJAXParser<NewMailResponse>(failOnError) {
-
             @Override
             protected NewMailResponse createResponse(final Response response) throws JSONException {
-                return new NewMailResponse(response);
+                NewMailResponse retval = new NewMailResponse(response);
+                JSONObject json = (JSONObject) response.getData();
+                if (json.has(CommonFields.FOLDER_ID)) {
+                    retval.setFolder(json.getString(CommonFields.FOLDER_ID));
+                }
+                if (json.has(CommonFields.ID)) {
+                    retval.setId(json.getString(CommonFields.ID));
+                }
+                return retval;
             }
         };
     }
-
 }

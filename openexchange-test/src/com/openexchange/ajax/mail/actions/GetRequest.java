@@ -51,7 +51,6 @@ package com.openexchange.ajax.mail.actions;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.container.Response;
@@ -64,41 +63,36 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  */
 public final class GetRequest extends AbstractMailRequest<GetResponse> {
 
-    class GetParser extends AbstractAJAXParser<GetResponse> {
-
-        /**
-         * Default constructor.
-         */
-        GetParser(final boolean failOnError) {
-            super(failOnError);
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        protected GetResponse createResponse(final Response response) throws JSONException {
-            return new GetResponse(response);
-        }
-    }
-
-    /**
-     * Unique identifier
-     */
-    private final String[] folderAndID;
-
+    private final String folder;
+    private final String id;
+    private final View view;
     private final boolean failOnError;
-
-    private String view;
 
     private boolean structure;
 
-    public GetRequest(final String folder, final String ID) {
-        this(new String[] { folder, ID }, true);
+    public GetRequest(final String folder, final String id) {
+        this(folder, id, null, false, true);
     }
 
-    public GetRequest(final String folder, final String ID, final boolean failOnError) {
-        this(new String[] { folder, ID }, failOnError);
+    public GetRequest(String folder, String id, boolean failOnError) {
+        this(folder, id, null, false, failOnError);
+    }
+
+    public GetRequest(String folder, String id, boolean structure, boolean failOnError) {
+        this(folder, id, null, structure, failOnError);
+    }
+
+    public GetRequest(String folder, String id, View view) {
+        this(folder, id, view, false, true);
+    }
+
+    private GetRequest(String folder, String id, View view, boolean structure, boolean failOnError) {
+        super();
+        this.folder = folder;
+        this.id = id;
+        this.view = view;
+        this.structure = structure;
+        this.failOnError = failOnError;
     }
 
     public GetRequest setStructure(final boolean structure) {
@@ -106,72 +100,46 @@ public final class GetRequest extends AbstractMailRequest<GetResponse> {
         return this;
     }
 
-    /**
-     * Initializes a new {@link GetRequest}
-     * 
-     * @param mailPath
-     */
-    public GetRequest(final String[] folderAndID) {
-        this(folderAndID, true);
-    }
-
-    /**
-     * Initializes a new {@link GetRequest}
-     * 
-     * @param mailPath
-     * @param failOnError
-     */
-    public GetRequest(final String[] folderAndID, final boolean failOnError) {
-        super();
-        this.folderAndID = folderAndID;
-        this.failOnError = failOnError;
-    }
-
-    public String getView() {
-        return view;
-    }
-
-    public void setView(final String view) {
-        this.view = view;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-     */
-    public Object getBody() throws JSONException {
+    public Object getBody() {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-     */
     public Method getMethod() {
         return Method.GET;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-     */
     public Parameter[] getParameters() {
         final List<Parameter> l = new ArrayList<Parameter>(4);
         l.add(new Parameter(AJAXServlet.PARAMETER_ACTION, structure ? AJAXServlet.ACTION_GET_STRUCTURE : AJAXServlet.ACTION_GET));
-        l.add(new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderAndID[0]));
-        l.add(new Parameter(AJAXServlet.PARAMETER_ID, folderAndID[1]));
+        l.add(new Parameter(AJAXServlet.PARAMETER_FOLDERID, folder));
+        l.add(new Parameter(AJAXServlet.PARAMETER_ID, id));
         if (null != view && !structure) {
-            l.add(new Parameter(Mail.PARAMETER_VIEW, view));
+            l.add(new Parameter(Mail.PARAMETER_VIEW, view.value));
         }
         return l.toArray(new Parameter[l.size()]);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-     */
-    public AbstractAJAXParser<GetResponse> getParser() {
+    public GetParser getParser() {
         return new GetParser(failOnError);
     }
 
+    private class GetParser extends AbstractAJAXParser<GetResponse> {
+
+        GetParser(final boolean failOnError) {
+            super(failOnError);
+        }
+
+        @Override
+        protected GetResponse createResponse(final Response response) {
+            return new GetResponse(response);
+        }
+    }
+
+    public enum View {
+        RAW("raw");
+        String value;
+        View(String value) {
+            this.value = value;
+        }
+    }
 }

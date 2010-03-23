@@ -128,7 +128,7 @@ public final class GetTest extends AbstractMailTest {
         /*
          * Perform action=get
          */
-        final GetResponse response = Executor.execute(getSession(), new GetRequest(folderAndID[0], folderAndID[1]).setStructure(true));
+        final GetResponse response = Executor.execute(getSession(), new GetRequest(folderAndID[0], folderAndID[1], true, true));
 
         final JSONObject obj = (JSONObject) response.getData();
         assertNotNull("Structured JSON mail object is null, but shouldn't", obj);

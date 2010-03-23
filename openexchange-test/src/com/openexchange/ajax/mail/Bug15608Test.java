@@ -47,38 +47,69 @@
  *
  */
 
-package com.openexchange.ajax.mail.actions;
+package com.openexchange.ajax.mail;
 
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import java.util.TimeZone;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.mail.actions.DeleteRequest;
+import com.openexchange.ajax.mail.actions.GetRequest;
+import com.openexchange.ajax.mail.actions.GetResponse;
+import com.openexchange.ajax.mail.actions.NewMailRequest;
+import com.openexchange.ajax.mail.actions.NewMailResponse;
+import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
- * {@link NewMailResponse} - Response received by <code>/ajax/mail?action=new</code>.
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link Bug15608Test}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class NewMailResponse extends AbstractAJAXResponse {
+public class Bug15608Test extends AbstractAJAXSession {
 
+    private static final int ORIG_FLAGS = 32;
+    private AJAXClient client;
+    private TimeZone timeZone;
     private String folder;
+    private String address;
     private String id;
 
-    NewMailResponse(final Response response) {
-        super(response);
+    public Bug15608Test(String name) {
+        super(name);
     }
 
-    void setFolder(String folder) {
-        this.folder = folder;
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        client = getClient();
+        timeZone = client.getValues().getTimeZone();
+        folder = client.getValues().getInboxFolder();
+        address = client.getValues().getSendAddress();
+        NewMailRequest request = new NewMailRequest(folder, MAIL.replaceAll("#ADDR#", address), ORIG_FLAGS);
+        NewMailResponse response = client.execute(request);
+        id = response.getId();
     }
 
-    void setId(String id) {
-        this.id = id;
+    @Override
+    protected void tearDown() throws Exception {
+        client.execute(new DeleteRequest(folder, id, true));
+        super.tearDown();
     }
 
-    public String getFolder() {
-        return folder;
+    public void testFlags() throws Throwable {
+        GetRequest request = new GetRequest(folder, id);
+        GetResponse response = client.execute(request);
+        MailMessage mail = response.getMail(timeZone);
+        int testFlags = mail.getFlags();
+        assertEquals("Wanted flags are not set.", ORIG_FLAGS, testFlags);
     }
 
-    public String getId() {
-        return id;
-    }
+    private static final String MAIL =
+        "From: #ADDR#\n" +
+        "To: #ADDR#\n" +
+        "Subject: Test for bug 15608\n" +
+        "Mime-Version: 1.0\n" +
+        "Content-Type: text/plain; charset=\"UTF-8\"\n" +
+        "Content-Transfer-Encoding: 8bit\n" +
+        "\n" +
+        "Test for bug 15608\n";
 }

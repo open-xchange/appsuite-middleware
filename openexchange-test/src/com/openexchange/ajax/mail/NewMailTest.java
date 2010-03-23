@@ -64,27 +64,22 @@ import com.openexchange.tools.servlet.AjaxException;
  */
 public class NewMailTest extends AbstractMailTest {
 
-    private static final String EML_WITHOUT_FROM = "" +
-    		"Message-Id: <4A002517.4650.0059.1@deployfast.com>\n" + 
-            "X-Mailer: Novell GroupWise Internet Agent 8.0.0 \n" + 
-            "Date: Tue, 05 May 2009 11:37:58 -0500\n" + 
-            "To: #TOADDR#\n" + 
-            "Subject: Re: Your order for East Texas Lighthouse\n" + 
-            "Mime-Version: 1.0\n" + 
-            "Content-Type: text/plain; charset=\"UTF-8\"\n" + 
-            "Content-Transfer-Encoding: 8bit\n" + 
-            "\n" + 
-            "This is a MIME message. If you are reading this text, you may want to \n" + 
-            "consider changing to a mail reader or gateway that understands how to \n" + 
-            "properly handle MIME multipart messages.";
+    private static final String EML_WITHOUT_FROM =
+        "Message-Id: <4A002517.4650.0059.1@deployfast.com>\n" + 
+        "X-Mailer: Novell GroupWise Internet Agent 8.0.0 \n" + 
+        "Date: Tue, 05 May 2009 11:37:58 -0500\n" + 
+        "To: #TOADDR#\n" + 
+        "Subject: Re: Your order for East Texas Lighthouse\n" + 
+        "Mime-Version: 1.0\n" + 
+        "Content-Type: text/plain; charset=\"UTF-8\"\n" + 
+        "Content-Transfer-Encoding: 8bit\n" + 
+        "\n" + 
+        "This is a MIME message. If you are reading this text, you may want to \n" + 
+        "consider changing to a mail reader or gateway that understands how to \n" + 
+        "properly handle MIME multipart messages.";
 
     private UserValues values;
 
-    /**
-     * Initializes a new {@link NewMailTest}.
-     * 
-     * @param name The name
-     */
     public NewMailTest(final String name) {
         super(name);
     }
@@ -97,32 +92,26 @@ public class NewMailTest extends AbstractMailTest {
 
     @Override
     protected void tearDown() throws Exception {
-        //clearFolder( values.getSentFolder() );
-        //clearFolder( values.getInboxFolder() );
         super.tearDown();
     }
 
     public void testTransportNewRFC822MailWithoutFrom() throws AjaxException, IOException, SAXException, JSONException{
         System.out.println(values.getDraftsFolder());
         
-        final NewMailRequest newMailRequest = new NewMailRequest(EML_WITHOUT_FROM.replaceFirst("#TOADDR#", values.getSendAddress()));
-        newMailRequest.setFailOnError(true);
+        final NewMailRequest newMailRequest = new NewMailRequest(null, EML_WITHOUT_FROM.replaceFirst("#TOADDR#", values.getSendAddress()), -1, true);
         final NewMailResponse newMailResponse = getClient().execute(newMailRequest);
         
         assertNotNull("Missing folder in response.", newMailResponse.getFolder());
-        assertNotNull("Missing ID in response.", newMailResponse.getID());
+        assertNotNull("Missing ID in response.", newMailResponse.getId());
     }
 
     public void testAppendNewRFC822MailWithoutFrom() throws AjaxException, IOException, SAXException, JSONException{
         System.out.println(values.getDraftsFolder());
         
-        final NewMailRequest newMailRequest = new NewMailRequest(EML_WITHOUT_FROM.replaceFirst("#TOADDR#", values.getSendAddress()));
-        newMailRequest.setFailOnError(true);
-        newMailRequest.setFolder(values.getDraftsFolder());
+        final NewMailRequest newMailRequest = new NewMailRequest(values.getDraftsFolder(), EML_WITHOUT_FROM.replaceFirst("#TOADDR#", values.getSendAddress()), -1, true);
         final NewMailResponse newMailResponse = getClient().execute(newMailRequest);
         
         assertNotNull("Missing folder in response.", newMailResponse.getFolder());
-        assertNotNull("Missing ID in response.", newMailResponse.getID());
+        assertNotNull("Missing ID in response.", newMailResponse.getId());
     }
-
 }
