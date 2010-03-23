@@ -52,27 +52,22 @@ package com.openexchange.ajax.appointment.bugtests;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.java.util.TimeZones;
 
 public class Bug8317Test extends AppointmentTest {
-	
-	private static final Log LOG = LogFactory.getLog(Bug8317Test.class);
-	
-	public Bug8317Test(final String name) {
-		super(name);
-	}
-	
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-	}
-	
+
+    public Bug8317Test(final String name) {
+        super(name);
+    }
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+    }
+
     /**
      * INFO: This test case must be done at least today + 1 days because otherwise
      * no conflict resolution is made because past appointments do not conflict!
@@ -82,8 +77,7 @@ public class Bug8317Test extends AppointmentTest {
      * TODO: Create a dynamic date/time in the future for testing.
      */
     public void testBug8317() throws Exception {
-        final TimeZone utc = TimeZone.getTimeZone("UTC");
-        final Calendar calendar = Calendar.getInstance(utc);
+        final Calendar calendar = Calendar.getInstance(TimeZones.UTC);
         calendar.setTimeInMillis(startTime);
         calendar.add(Calendar.DATE, 5);
 

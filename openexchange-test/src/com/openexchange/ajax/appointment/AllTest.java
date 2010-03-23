@@ -21,6 +21,7 @@ import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.java.util.TimeZones;
 import com.openexchange.tools.servlet.AjaxException;
 
 public class AllTest extends AppointmentTest {
@@ -58,14 +59,14 @@ public class AllTest extends AppointmentTest {
         anotherAppointment.setParentFolderID(appointmentFolderId);
         create( anotherAppointment );
 
-        AllRequest all = new AllRequest(appointmentFolderId, SIMPLE_COLUMNS, D("01/01/1990 00:00"), D("01/01/2000 00:00"), utc);
+        AllRequest all = new AllRequest(appointmentFolderId, SIMPLE_COLUMNS, D("01/01/1990 00:00"), D("01/01/2000 00:00"), TimeZones.UTC);
         CommonAllResponse allResponse = getClient().execute(all);
 
         // Verify appointments are included in response
         final JSONArray data = (JSONArray) allResponse.getData();
         assertInResponse(data, appointment, anotherAppointment);
 
-        all = new AllRequest(appointmentFolderId, SIMPLE_COLUMNS, D("01/01/1990 00:00"), D("01/01/2000 00:00"), utc);
+        all = new AllRequest(appointmentFolderId, SIMPLE_COLUMNS, D("01/01/1990 00:00"), D("01/01/2000 00:00"), TimeZones.UTC);
         final TimeZone respTimeZone = TimeZone.getTimeZone("GMT+08:00");
         all.setTimeZoneId(respTimeZone.getID());
         allResponse = getClient().execute(all);
@@ -117,7 +118,7 @@ public class AllTest extends AppointmentTest {
         anotherAppointment.setParentFolderID(appointmentFolderId);
         create( anotherAppointment );
 
-        final AllRequest all = new AllRequest(appointmentFolderId, SIMPLE_COLUMNS, D("01/01/1999 00:00"), D("01/01/2000 00:00"), utc);
+        final AllRequest all = new AllRequest(appointmentFolderId, SIMPLE_COLUMNS, D("01/01/1999 00:00"), D("01/01/2000 00:00"), TimeZones.UTC);
         final CommonAllResponse allResponse = getClient().execute(all);
 
         // Verify appointments are included in response

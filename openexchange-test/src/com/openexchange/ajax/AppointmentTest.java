@@ -52,16 +52,19 @@ package com.openexchange.ajax;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.TimeZone;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
-
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
@@ -74,10 +77,10 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.ParticipantsFields;
+import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.Executor;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.parser.AppointmentParser;
 import com.openexchange.ajax.parser.ResponseParser;
 import com.openexchange.ajax.request.AppointmentRequest;
@@ -97,6 +100,7 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.ResourceGroupParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.java.util.TimeZones;
 import com.openexchange.test.OXTestToolkit;
 import com.openexchange.test.TestException;
 import com.openexchange.tools.StringCollection;
@@ -150,7 +154,6 @@ public class AppointmentTest extends AbstractAJAXTest {
     protected int userId = 0;
 
     protected TimeZone timeZone = null;
-    protected TimeZone utc = TimeZone.getTimeZone("UTC");
 
     private static final Log LOG = LogFactory.getLog(AppointmentTest.class);
 
@@ -1237,7 +1240,7 @@ public class AppointmentTest extends AbstractAJAXTest {
     }
 
     protected void create( Appointment appointment ) throws JSONException, IOException, SAXException, AjaxException {
-        InsertRequest insert = new InsertRequest(appointment, utc, true);
+        InsertRequest insert = new InsertRequest(appointment, TimeZones.UTC, true);
         getClient().execute(insert).fillAppointment(appointment);
         clean.add( appointment );
     }
