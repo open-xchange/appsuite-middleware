@@ -61,19 +61,12 @@ import com.openexchange.ajax.fields.DataFields;
  */
 public abstract class AbstractInsertParser<T extends CommonInsertResponse> extends AbstractAJAXParser<T> {
 
-    /**
-     * @param failOnError
-     */
     public AbstractInsertParser(final boolean failOnError) {
         super(failOnError);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    protected T createResponse(final Response response)
-        throws JSONException {
+    protected T createResponse(final Response response) throws JSONException {
         final T retval = instantiateResponse(response);
         final JSONObject data = (JSONObject) response.getData();
         if (null != data && data.has(DataFields.ID)) {
