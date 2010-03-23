@@ -1,3 +1,7 @@
+* 2010-03-23 - tobias.prinz@open-xchange.com
+
+ - Bugfix #15640: Full contact publication template now uses right keys for phone numbers
+
 * 2010-03-11 - francisco.laguna@open-xchange.com
 
  - Bugfix #14820: Reserve filename using a mutex
