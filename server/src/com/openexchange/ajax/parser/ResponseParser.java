@@ -243,14 +243,15 @@ public final class ResponseParser {
     }
 
     public static final class StringComponent implements Component {
+
+        private static final long serialVersionUID = 1159589477110476030L;
         private final String abbr;
+
         public StringComponent(final String abbr) {
             super();
             this.abbr = abbr;
         }
-        /**
-         * {@inheritDoc}
-         */
+
         public String getAbbreviation() {
             return abbr;
         }
