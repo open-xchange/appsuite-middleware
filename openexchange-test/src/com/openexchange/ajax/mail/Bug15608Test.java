@@ -97,6 +97,7 @@ public class Bug15608Test extends AbstractAJAXSession {
 
     public void testFlags() throws Throwable {
         GetRequest request = new GetRequest(folder, id);
+        request.setUnseen(true);
         GetResponse response = client.execute(request);
         MailMessage mail = response.getMail(timeZone);
         int testFlags = mail.getFlags();

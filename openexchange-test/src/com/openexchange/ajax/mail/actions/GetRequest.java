@@ -66,9 +66,9 @@ public final class GetRequest extends AbstractMailRequest<GetResponse> {
     private final String folder;
     private final String id;
     private final View view;
+    private final boolean structure;
+    private boolean unseen;
     private final boolean failOnError;
-
-    private boolean structure;
 
     public GetRequest(final String folder, final String id) {
         this(folder, id, null, false, true);
@@ -95,9 +95,8 @@ public final class GetRequest extends AbstractMailRequest<GetResponse> {
         this.failOnError = failOnError;
     }
 
-    public GetRequest setStructure(final boolean structure) {
-        this.structure = structure;
-        return this;
+    public void setUnseen(boolean unseen) {
+        this.unseen = unseen;
     }
 
     public Object getBody() {
@@ -115,6 +114,9 @@ public final class GetRequest extends AbstractMailRequest<GetResponse> {
         l.add(new Parameter(AJAXServlet.PARAMETER_ID, id));
         if (null != view && !structure) {
             l.add(new Parameter(Mail.PARAMETER_VIEW, view.value));
+        }
+        if (unseen) {
+            l.add(new Parameter(Mail.PARAMETER_UNSEEN, 1));
         }
         return l.toArray(new Parameter[l.size()]);
     }
