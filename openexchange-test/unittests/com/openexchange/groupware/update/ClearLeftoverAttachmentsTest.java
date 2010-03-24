@@ -108,7 +108,7 @@ public class ClearLeftoverAttachmentsTest extends UpdateTest {
     }
 
     private void removeSomeFiles() throws FileStorageException, FilestoreException {
-        final FileStorage fs = FileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx,getProvider());
+        final FileStorage fs = FileStorage.getInstance(FilestoreStorage.createURI(ctx));
         fs.deleteFile(attachments.get(OFFSET+2).getFileId());
         fs.deleteFile(attachments.get(OFFSET+3).getFileId());
     }
@@ -118,7 +118,7 @@ public class ClearLeftoverAttachmentsTest extends UpdateTest {
     }
 
     private void assertRemovedFiles() throws FileStorageException, FilestoreException {
-        final FileStorage fs = FileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx,getProvider());
+        final FileStorage fs = FileStorage.getInstance(FilestoreStorage.createURI(ctx));
         for(int i = OFFSET+1; i < attachments.size(); i++) {
             try {
                 fs.getFile(attachments.get(i).getFileId());

@@ -6,6 +6,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
+import com.openexchange.tools.file.FileStorage;
+import com.openexchange.tools.file.internal.FileStorageImpl;
+import com.openexchange.tools.file.internal.FileStorageStarterImpl;
 
 import com.openexchange.groupware.tx.AbstractActionTest;
 import com.openexchange.groupware.tx.UndoableAction;
@@ -19,27 +22,18 @@ public class SaveFileActionTest extends AbstractActionTest {
 	private SaveFileAction saveFile = null;
 	private FileStorage storage = null;
 
-	private Class<? extends FileStorage> origImpl;
-	
-	/**
-     * {@inheritDoc}
-     */
-    @Override
+	@Override
     protected void setUp() throws Exception {
         super.setUp();
-        origImpl = FileStorage.getImpl();
-        FileStorage.setImpl(LocalFileStorage.class);
         tempFile = File.createTempFile("filestorage", ".tmp");
         tempFile.delete();
+        FileStorage.fss = new FileStorageStarterImpl();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void tearDown() throws Exception {
-        rmdir(tempFile);
-        FileStorage.setImpl(origImpl);
+        rmdir(new File("file:" + tempFile.toString()));
+        FileStorage.fss = null;
         super.tearDown();
     }
 
@@ -54,7 +48,7 @@ public class SaveFileActionTest extends AbstractActionTest {
 
 	@Override
 	protected UndoableAction getAction() throws Exception {
-		storage = FileStorage.getInstance(new URI("file://"+tempFile.getAbsolutePath()));
+		storage = FileStorage.getInstance(new URI("file:"+tempFile.toString()));
 		saveFile = new SaveFileAction();
 		saveFile.setStorage(storage);
 		saveFile.setIn(new ByteArrayInputStream(content.getBytes("UTF-8")));

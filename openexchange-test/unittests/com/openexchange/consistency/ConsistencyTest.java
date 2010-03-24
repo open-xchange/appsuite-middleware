@@ -66,6 +66,8 @@ import com.openexchange.groupware.attach.InMemoryAttachmentBase;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
+import com.openexchange.groupware.filestore.FilestoreException;
+import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.InMemoryInfostoreDatabase;
 import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
@@ -75,6 +77,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.FileStorageException;
 import com.openexchange.tools.file.InMemoryFileStorage;
+import com.openexchange.tools.file.internal.FileStorageImpl;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -206,11 +209,11 @@ public class ConsistencyTest extends TestCase {
         for(final DocumentMetadata version : changes) {
             assertEquals("\nCaution! The file has changed", version.getDescription());
             assertEquals("text/plain", version.getFileMIMEType());
-            try {
+            //try {
                 assertNotNull(storage.getFile(version.getFilestoreLocation()));
-            } catch (final FileStorageException e) {
-                fail(e.toString());
-            }
+            /*} catch (final FileStorageException e) {
+                fail(e.toString());*/
+            //}
         }
     }
 
@@ -225,11 +228,11 @@ public class ConsistencyTest extends TestCase {
         for(final AttachmentMetadata attachment : changes) {
             assertEquals("\nCaution! The file has changed", attachment.getComment());
             assertEquals("text/plain", attachment.getFileMIMEType());
-            try {
+            //try {
                 assertNotNull(storage.getFile(attachment.getFileId()));
-            } catch (final FileStorageException e) {
-                fail(e.toString());
-            }
+            //} catch (final FileStorageException e) {
+              //  fail(e.toString());
+            //}
         }
 
     }
@@ -465,8 +468,7 @@ public class ConsistencyTest extends TestCase {
             return attachments;
         }
 
-        @Override
-		protected FileStorage getFileStorage(final Context ctx) {
+		private InMemoryFileStorage getMemoryFileStorage(final Context ctx) {
             storage.setContext(ctx);
             return storage;
         }
@@ -495,6 +497,11 @@ public class ConsistencyTest extends TestCase {
         @Override
 		protected User getAdmin(final Context ctx) throws LdapException {
             return null;
+        }
+
+        @Override
+        protected FileStorage getFileStorage(Context ctx) throws FileStorageException, FilestoreException {
+            return FileStorage.getInstance(FilestoreStorage.createURI(ctx));
         }
     }
 

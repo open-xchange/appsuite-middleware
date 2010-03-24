@@ -97,8 +97,7 @@ public class ClearOrphanedInfostoreDocumentsTest extends UpdateTest {
         exec("DELETE FROM del_infostore_document WHERE infostore_id = ?", 100001);
 
         FileStorage fs  = FileStorage.getInstance(
-                FilestoreStorage.createURI(ctx), ctx,
-                getProvider());
+                FilestoreStorage.createURI(ctx), ctx);
         for (String path : paths) {
             fs.deleteFile(path);        
         }
@@ -144,8 +143,7 @@ public class ClearOrphanedInfostoreDocumentsTest extends UpdateTest {
 
     private void createOrphanedInfostoreDocumentEntry(int id, int version) throws FileStorageException, FilestoreException, UnsupportedEncodingException, SQLException, DBPoolingException {
         FileStorage fs  = FileStorage.getInstance(
-                FilestoreStorage.createURI(ctx), ctx,
-                getProvider());
+                FilestoreStorage.createURI(ctx), ctx);
 
         String path = fs.saveNewFile(new ByteArrayInputStream("Hallo Welt".getBytes("UTF-8")));
         paths.add(path);

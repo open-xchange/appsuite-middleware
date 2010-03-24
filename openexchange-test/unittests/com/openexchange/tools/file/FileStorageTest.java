@@ -39,11 +39,16 @@ package com.openexchange.tools.file;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
 
 import junit.framework.TestCase;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.tools.file.external.FileStorage;
+import com.openexchange.tools.file.external.FileStorageException;
+import com.openexchange.tools.file.internal.FileStorageImpl;
 
 import com.openexchange.tools.RandomString;
 
@@ -58,7 +63,7 @@ public class FileStorageTest extends TestCase {
      */
     private static final Log LOG = LogFactory.getLog(FileStorageTest.class);
 
-    private Class< ? extends FileStorage> origImpl;
+    //private Class< ? extends FileStorage> origImpl;
 
     /**
      * {@inheritDoc}
@@ -66,8 +71,8 @@ public class FileStorageTest extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        origImpl = FileStorage.getImpl();
-        FileStorage.setImpl(LocalFileStorage.class);
+        /*origImpl = FileStorage.getImpl();
+        FileStorage.setImpl(LocalFileStorage.class);*/
     }
 
     /**
@@ -75,7 +80,7 @@ public class FileStorageTest extends TestCase {
      */
     @Override
     protected void tearDown() throws Exception {
-        FileStorage.setImpl(origImpl);
+       // FileStorage.setImpl(origImpl);
         super.tearDown();
     }
 
@@ -88,8 +93,8 @@ public class FileStorageTest extends TestCase {
         final File tempFile = File.createTempFile("filestorage", ".tmp");
         tempFile.delete();
         LOG.trace(tempFile.getAbsolutePath());
-        final FileStorage storage = FileStorage.getInstance(tempFile.toURI());
-        rmdir(tempFile);
+        final FileStorage storage = new FileStorageImpl(tempFile.toURI());
+        rmdir(new File("file:" + tempFile.toString()));
         assertNotNull("Can't create file storage.", storage);
     }
 
@@ -104,9 +109,9 @@ public class FileStorageTest extends TestCase {
         final String fileContent = RandomString.generateLetter(100);
         final ByteArrayInputStream baos = new ByteArrayInputStream(fileContent
             .getBytes("UTF-8"));
-        final FileStorage storage = FileStorage.getInstance(tempFile.toURI());
+        final FileStorage storage = new FileStorageImpl(tempFile.toURI());
         final String identifier = storage.saveNewFile(baos);
-        rmdir(tempFile);
+        rmdir(new File("file:" + tempFile.toString()));
         assertNotNull("Can't create new file in file storage.", identifier);
     }
 
@@ -114,44 +119,53 @@ public class FileStorageTest extends TestCase {
      * Test for bug 3978.
      */
     public final void testExceptionOnUnavailableFilestore() throws Throwable {
-    	final File tempFile = File.createTempFile("filestorage", ".tmp");
-        tempFile.delete();
-        final String fileContent = RandomString.generateLetter(100);
-        final ByteArrayInputStream baos = new ByteArrayInputStream(fileContent
-            .getBytes("UTF-8"));
-        final FileStorage storage = FileStorage.getInstance(tempFile.toURI());
-        final String identifier = storage.saveNewFile(baos);
-        rmdir(tempFile);
-        assertFalse(tempFile.exists());
-        try {
-        	storage.getFile(identifier);
-        	fail("Expected IOException");
-        } catch (final FileStorageException x) {
-        	// Everything fine. Error is discovered.
-        }
+    	try {
+    	    final File tempFile = File.createTempFile("filestorage", ".tmp");
+    	    tempFile.delete();
+            final String fileContent = RandomString.generateLetter(100);
+            final ByteArrayInputStream baos = new ByteArrayInputStream(fileContent
+                .getBytes("UTF-8"));
+            final FileStorage storage = new FileStorageImpl(tempFile.toURI());
+            final String identifier = storage.saveNewFile(baos);
+            rmdir(new File("file:" + tempFile.toString()));
+            assertFalse(tempFile.exists());
 
-        try {
-        	storage.saveNewFile(baos);
+            storage.getFile(identifier);
             fail("Expected IOException");
-        } catch (final FileStorageException x) {
-        	// Everything fine. Error is discovered.
-        }
+
+
+
+            storage.saveNewFile(baos);
+            fail("Expected IOException");
+    	} catch (FileStorageException e) {
+    	    
+    	} finally {
+    	    
+    	}
+        
+
     }
     
     /**
      * Test for bug 3978.
      */
     public final void testExceptionOnUnknown() throws Throwable {
-    	final File tempFile = File.createTempFile("filestorage", ".tmp");
-        tempFile.delete();
-        final FileStorage storage = FileStorage.getInstance(tempFile.toURI());
+        File tempFile = null;
         try {
-        	storage.getFile("00/00/01");
-        	fail("Expected IOException");
-        } catch (final FileStorageException x) {
-        	// Everything fine. Error is discovered.
+            tempFile = File.createTempFile("filestorage", ".tmp");
+            tempFile.delete();
+            final FileStorage storage = new FileStorageImpl(tempFile.toURI());
+
+            storage.getFile("00/00/01");
+            fail("Expected IOException");
+
+            
+        } catch (FileStorageException e) {
+            
+        } finally {
+            rmdir(new File("file:" + tempFile.toString()));
         }
-        rmdir(tempFile);
+    	
     }
 
 	private static void rmdir(final File tempFile) {

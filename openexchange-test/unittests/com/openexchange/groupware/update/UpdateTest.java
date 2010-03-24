@@ -135,8 +135,7 @@ public abstract class UpdateTest extends TestCase {
     protected final void assertNotInFilestorage(List<String> paths) throws FileStorageException, FilestoreException {
 
         FileStorage fs  = FileStorage.getInstance(
-                        FilestoreStorage.createURI(ctx), ctx,
-                        getProvider());
+                        FilestoreStorage.createURI(ctx), ctx);
         SortedSet<String> existingPaths = fs.getFileList();
         for (String path : paths) {
             assertFalse(existingPaths.contains(path));

@@ -11,17 +11,24 @@ import java.util.Random;
 
 import junit.framework.TestCase;
 
+import com.openexchange.tools.file.external.FileStorageException;
+import com.openexchange.tools.file.external.QuotaFileStorageException;
+import com.openexchange.tools.file.external.FileStorage;
+import com.openexchange.tools.file.internal.FileStorageImpl;
+import com.openexchange.tools.file.internal.QuotaFileStorageImpl;
+
+import com.openexchange.database.DBPoolingException;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
-import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.test.DelayedInputStream;
 import com.openexchange.tools.RandomString;
 
 public class QuotaFileStorageTest extends TestCase {
+	private FileStorage fs;
 	
-	
-	 private Class<? extends FileStorage> origImpl;
+	 //private Class<? extends FileStorage> origImpl;
 
 	/**
      * {@inheritDoc}
@@ -29,8 +36,6 @@ public class QuotaFileStorageTest extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        origImpl = FileStorage.getImpl();
-        FileStorage.setImpl(TestQuotaFileStorage.class);
     }
 
     /**
@@ -38,7 +43,7 @@ public class QuotaFileStorageTest extends TestCase {
      */
     @Override
     protected void tearDown() throws Exception {
-        FileStorage.setImpl(origImpl);
+       //FileStorage.setImpl(origImpl);
         super.tearDown();
     }
 
@@ -51,7 +56,9 @@ public class QuotaFileStorageTest extends TestCase {
         
         tempFile.delete();
         
-        final TestQuotaFileStorage quotaStorage = (TestQuotaFileStorage) FileStorage.getInstance(3,256,new URI("file://"+tempFile.getAbsolutePath()),new ContextImpl(1),new DummyDBProvider());
+        fs = new FileStorageImpl(new URI("file:"+tempFile.getAbsolutePath()));
+        final TestQuotaFileStorage quotaStorage = new TestQuotaFileStorage(new ContextImpl(1), fs, new DummyDatabaseService());
+        
         quotaStorage.setQuota(10000);
         // And again, some lines from the original test
         final String fileContent = RandomString.generateLetter(100);
@@ -67,7 +74,7 @@ public class QuotaFileStorageTest extends TestCase {
         quotaStorage.deleteFile(id);
         
         assertEquals(0,quotaStorage.getUsage());
-        rmdir(tempFile);
+        rmdir(new File("file:" + tempFile.toString()));
     }
 	
 	public void testFull() throws Exception{
@@ -77,7 +84,8 @@ public class QuotaFileStorageTest extends TestCase {
         
         tempFile.delete();
         
-        final TestQuotaFileStorage quotaStorage = (TestQuotaFileStorage) FileStorage.getInstance(3,256,new URI("file://"+tempFile.getAbsolutePath()),new ContextImpl(1),new DummyDBProvider());
+        fs = new FileStorageImpl(new URI("file://"+tempFile.getAbsolutePath()));
+        final TestQuotaFileStorage quotaStorage = new TestQuotaFileStorage(new ContextImpl(1), fs, new DummyDatabaseService());
         quotaStorage.setQuota(10000);
         
         final String fileContent = RandomString.generateLetter(100);
@@ -90,10 +98,10 @@ public class QuotaFileStorageTest extends TestCase {
 	           
 	        final String id = quotaStorage.saveNewFile(bais);
 	        fail("Managed to exceed quota");
-        } catch (final FileStorageException x) {
+        } catch (final QuotaFileStorageException x) {
         	assertTrue(true);
         }
-        rmdir(tempFile);
+        rmdir(new File("file:" + tempFile.toString()));
 	}
 	
 	public void testExclusiveLock() throws Exception{
@@ -104,9 +112,10 @@ public class QuotaFileStorageTest extends TestCase {
         
         tempFile.delete();
         
-        final TestQuotaFileStorage quotaStorage = (TestQuotaFileStorage) FileStorage.getInstance(3,256,new URI("file://"+tempFile.getAbsolutePath()),new ContextImpl(1),new DummyDBProvider());
+        fs = new FileStorageImpl(new URI("file://"+tempFile.getAbsolutePath()));
+        final TestQuotaFileStorage quotaStorage = new TestQuotaFileStorage(new ContextImpl(1), fs, new DummyDatabaseService());
         quotaStorage.setQuota(10000);
-        quotaStorage.storeUsage(5000);
+        quotaStorage.setUsage(5000);
         
         final Thread[] threads = new Thread[100];
         for(int i = 0; i < threads.length; i++) {
@@ -117,7 +126,7 @@ public class QuotaFileStorageTest extends TestCase {
         for(final Thread thread : threads) { thread.join(); }
         
         assertEquals(5000, quotaStorage.getUsage());
-        rmdir(tempFile);
+        rmdir(new File("file:" + tempFile.toString()));
 	}
 	
 	public void testConcurrentLock() throws Exception  {
@@ -126,7 +135,8 @@ public class QuotaFileStorageTest extends TestCase {
         
         tempFile.delete();
         
-        final TestQuotaFileStorage quotaStorage = (TestQuotaFileStorage) FileStorage.getInstance(3,256,new URI("file://"+tempFile.getAbsolutePath()),new ContextImpl(1),new DummyDBProvider());
+        fs = new FileStorageImpl(new URI("file://"+tempFile.getAbsolutePath()));
+        final TestQuotaFileStorage quotaStorage = new TestQuotaFileStorage(new ContextImpl(1), fs, new DummyDatabaseService());
         quotaStorage.setQuota(10000);
         
         final int size = 1000;
@@ -134,7 +144,7 @@ public class QuotaFileStorageTest extends TestCase {
         final long delay = 6000;
         
         quotaStorage.setQuota(size*tests);
-        quotaStorage.storeUsage(0);
+        quotaStorage.setUsage(0);
         
         
         
@@ -156,14 +166,15 @@ public class QuotaFileStorageTest extends TestCase {
         }
         
         assertFalse(new File(tempFile,".lock").exists());
-        rmdir(tempFile);
+        rmdir(new File("file:" + tempFile.toString()));
 	}
 	
 	
-	public static final class TestQuotaFileStorage extends QuotaFileStorage{
+	public static final class TestQuotaFileStorage extends QuotaFileStorageImpl {
 
-		public TestQuotaFileStorage(final Object...initData) throws FileStorageException {
-			super(initData);
+		public TestQuotaFileStorage(final Context ctx, final FileStorage fs, final DatabaseService dbs) throws QuotaFileStorageException {
+			//FileStorageImpl fsi = new FileStorageImpl(uri);
+		    super(ctx, fs, dbs);
 		}
 
 		private long usage;
@@ -172,6 +183,8 @@ public class QuotaFileStorageTest extends TestCase {
 		public void setQuota(final long quota){
 			this.quota = quota;
 		}
+		
+		
 
 		@Override
 		public long getQuota() {
@@ -179,13 +192,30 @@ public class QuotaFileStorageTest extends TestCase {
 		}
 
 		@Override
-		protected long getUsage(final boolean write) throws QuotaFileStorageException {
+        public long getUsage() throws QuotaFileStorageException {
 			return usage;
 		}
-
+		
 		@Override
-		protected void storeUsage(final long usage) throws QuotaFileStorageException {
+		protected void setUsage(long usage) throws QuotaFileStorageException {
 			this.usage = usage;
+		}
+		
+		@Override
+		protected boolean incUsage(long usage)  throws QuotaFileStorageException {
+		    boolean full = false;
+		    if (this.usage + usage <= this.quota) {
+		        this.usage += usage;
+		    } else {
+		        full = true;
+		    }
+		    
+		    return full;
+		}
+		
+		@Override 
+		protected void decUsage(long usage) {
+		    this.usage -= usage;
 		}
 
 		
@@ -278,29 +308,135 @@ public class QuotaFileStorageTest extends TestCase {
 		}
 	}
 	
-	private static final class DummyDBProvider implements DBProvider{
+	
+	private static final class DummyDatabaseService implements DatabaseService {
 
-		public Connection getReadConnection(final Context ctx) throws TransactionException {
-			// TODO Auto-generated method stub
-			return null;
-		}
+        public Connection getReadConnection(final Context ctx) throws TransactionException {
+            // TODO Auto-generated method stub
+            return null;
+        }
 
-		public Connection getWriteConnection(final Context ctx) throws TransactionException {
-			// TODO Auto-generated method stub
-			return null;
-		}
+        public Connection getWriteConnection(final Context ctx) throws TransactionException {
+            // TODO Auto-generated method stub
+            return null;
+        }
 
-		public void releaseReadConnection(final Context ctx, final Connection con) {
-			// TODO Auto-generated method stub
-			
-		}
+        public void releaseReadConnection(final Context ctx, final Connection con) {
+            // TODO Auto-generated method stub
+            
+        }
 
-		public void releaseWriteConnection(final Context ctx, final Connection con) {
-			// TODO Auto-generated method stub
-			
-		}
-		
-	}
+        public void releaseWriteConnection(final Context ctx, final Connection con) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        public void back(int poolId, Connection con) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        public void backForUpdateTask(int contextId, Connection con) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        public void backReadOnly(Context ctx, Connection con) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        public void backReadOnly(int contextId, Connection con) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        public void backWritable(Context ctx, Connection con) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        public void backWritable(int contextId, Connection con) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        public Connection get(int poolId, String schema) throws DBPoolingException {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        public int[] getContextsInSameSchema(int contextId) throws DBPoolingException {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        public Connection getForUpdateTask(int contextId) throws DBPoolingException {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        public Connection getReadOnly(Context ctx) throws DBPoolingException {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        public Connection getReadOnly(int contextId) throws DBPoolingException {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        public String getSchemaName(int contextId) throws DBPoolingException {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        public Connection getWritable(Context ctx) throws DBPoolingException {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        public Connection getWritable(int contextId) throws DBPoolingException {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        public int getWritablePool(int contextId) throws DBPoolingException {
+            // TODO Auto-generated method stub
+            return 0;
+        }
+
+        public void invalidate(int contextId) throws DBPoolingException {
+            // TODO Auto-generated method stub
+            
+        }
+
+        public void backReadOnly(Connection con) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        public void backWritable(Connection con) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        public Connection getReadOnly() throws DBPoolingException {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        public Connection getWritable() throws DBPoolingException {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        public int[] listContexts(int poolId) throws DBPoolingException {
+            // TODO Auto-generated method stub
+            return null;
+        }
+        
+    }
 
     private static void rmdir(final File tempFile) {
         if (tempFile.isDirectory()) {

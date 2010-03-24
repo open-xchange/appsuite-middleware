@@ -49,8 +49,10 @@
 package com.openexchange.tools.file;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -58,26 +60,30 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.openexchange.tools.file.internal.FileStorageImpl;
+import com.openexchange.tools.file.external.FileStorageException;
+
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextImpl;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class InMemoryFileStorage extends FileStorage{
+public class InMemoryFileStorage extends FileStorageImpl {
 
     private final Map<Context, Map<String, byte[]>>  data = new HashMap<Context, Map<String, byte[]>>();
 
     private final Map<Context, List<String>> deletions = new HashMap<Context, List<String>>();
 
     private Context ctx;
+   
 
     public InMemoryFileStorage() throws FileStorageException {
-        super(3,32);
-
+        super(null);
     }
 
     @Override
-	protected Set<String> delete(final String[] names) throws FileStorageException {
+	protected Set<String> delete(final String[] names) {
         for (String name : names) {
             getCtxMap().put(name,null);
             deletions.get(ctx).add(name);
@@ -85,7 +91,7 @@ public class InMemoryFileStorage extends FileStorage{
         return Collections.emptySet();
     }
 
-    @Override
+   @Override
 	protected void save(final String name, final InputStream input) throws FileStorageException {
         final List<Byte> bytes = new ArrayList<Byte>();
         final byte[] buffer = new byte[1024];
@@ -119,16 +125,6 @@ public class InMemoryFileStorage extends FileStorage{
     }
 
     @Override
-	protected long length(final String name) throws FileStorageException {
-        return get(name).length;
-    }
-
-    @Override
-	protected String type(final String name) throws FileStorageException {
-        return "";
-    }
-
-    @Override
 	protected boolean exists(final String name) throws FileStorageException {
         return getCtxMap().containsKey(name);
     }
@@ -145,11 +141,6 @@ public class InMemoryFileStorage extends FileStorage{
     
     @Override
 	protected void unlock() throws FileStorageException {
-
-    }
-
-    @Override
-	protected void closeImpl() {
 
     }
 
