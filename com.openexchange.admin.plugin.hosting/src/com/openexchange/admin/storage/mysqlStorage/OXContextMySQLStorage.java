@@ -235,7 +235,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             boolean simpleDelete = null == gwCtx;
             try {
                 if (!simpleDelete) {
-                    FileStorage.getInstance(storageURI, gwCtx, DBProvider.DUMMY).remove();
+                    FileStorage.getInstance(storageURI, gwCtx).remove();
                 }
             } catch (FileStorageException e) {
                 simpleDelete = true;
