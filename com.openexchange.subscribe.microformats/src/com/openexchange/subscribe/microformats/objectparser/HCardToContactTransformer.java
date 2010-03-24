@@ -240,39 +240,39 @@ public class HCardToContactTransformer {
                 c.setFaxHome(tel.value);
             } else if(tel.types.contains("home")) {
                 c.setTelephoneHome1(tel.value);
-            } else if(tel.types.contains("x-ox-home2")) {
+            } else if(tel.types.contains("x-ox-home2") || tel.types.contains("ox_home2")) {
                 c.setTelephoneHome2(tel.value);
             } else if(tel.types.contains("work") && tel.types.contains("fax")) {
                 c.setFaxBusiness(tel.value);
             } else if(tel.types.contains("work")) {
                 c.setTelephoneBusiness1(tel.value);
-            } else if(tel.types.contains("x-ox-business2")) {
+            } else if(tel.types.contains("x-ox-business2") || tel.types.contains("ox_business2")) {
                 c.setTelephoneBusiness2(tel.value);
-            } else if(tel.types.contains("x-ox-other")  && tel.types.contains("fax")){
+            } else if( (tel.types.contains("x-ox-other") || tel.types.contains("ox_other")) && tel.types.contains("fax")  ){
                 c.setFaxOther(tel.value);
-            } else if(tel.types.contains("x-ox-other")){
+            } else if(tel.types.contains("x-ox-other") || tel.types.contains("ox_other")){
                 c.setTelephoneOther(tel.value);
             } else if(tel.types.contains("fax")){
                 postponedFax.add(tel);
-            } else if(tel.types.contains("x-ox-callback")){
+            } else if(tel.types.contains("x-ox-callback") || tel.types.contains("ox_callback")){
                 c.setTelephoneCallback(tel.value);
-            } else if(tel.types.contains("x-ox-company")){
+            } else if(tel.types.contains("x-ox-company") || tel.types.contains("ox_company")){
                 c.setTelephoneCompany(tel.value);
-            } else if(tel.types.contains("x-ox-cellular2")){
+            } else if(tel.types.contains("x-ox-cellular2") || tel.types.contains("ox_cellular2")){
                 c.setCellularTelephone2(tel.value);
-            } else if(tel.types.contains("x-ox-pager")){
+            } else if(tel.types.contains("x-ox-pager") || tel.types.contains("ox_pager")){
                 c.setTelephonePager(tel.value);
-            } else if(tel.types.contains("x-ox-primary")){
+            } else if(tel.types.contains("x-ox-primary") || tel.types.contains("ox_primary")){
                 c.setTelephonePrimary(tel.value);
-            } else if(tel.types.contains("x-ox-radio")){
+            } else if(tel.types.contains("x-ox-radio") || tel.types.contains("ox_radio")){
                 c.setTelephoneRadio(tel.value);
-            } else if(tel.types.contains("x-ox-telex")){
+            } else if(tel.types.contains("x-ox-telex") || tel.types.contains("ox_telex")){
                 c.setTelephoneTelex(tel.value);
-            } else if(tel.types.contains("x-ox-ttytdd")){
+            } else if(tel.types.contains("x-ox-ttytdd") || tel.types.contains("ox_ttytdd")){
                 c.setTelephoneTTYTTD(tel.value);
-            } else if(tel.types.contains("x-ox-ip")){
+            } else if(tel.types.contains("x-ox-ip") || tel.types.contains("ox_ip")){
                 c.setTelephoneIP(tel.value);
-            } else if(tel.types.contains("x-ox-assistant")){
+            } else if(tel.types.contains("x-ox-assistant") || tel.types.contains("ox_assistant")){
                 c.setTelephoneAssistant(tel.value);
             } else {
                 postponed.add(tel);
