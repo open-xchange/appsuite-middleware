@@ -1,3 +1,7 @@
+* 2010-03-24 - tobias.prinz@open-xchange.com
+
+ - RFC 2447: IMIP behaviour: Party crashers (people not invited, e.g. responding from another e-mail address) can now be accepted as participants by the organizer of the event  
+
 * 2010-03-24 - thorben.betten@open-xchange.com
 
  - Bugfix #15655: Ignoring error when creating a default folder for an external account

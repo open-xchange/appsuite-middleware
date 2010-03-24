@@ -3294,38 +3294,46 @@ public class CalendarMySQL implements CalendarSqlImp {
     public Date setExternalConfirmation(int oid, int folderId, String mail, int confirm, String message, Session so, Context ctx) throws OXException {
         checkConfirmPermission(folderId, -1, so, ctx);
         
+        String insert = "INSERT INTO dateExternal (confirm, reason, objectId, cid, mailAddress) VALUES (?, ?, ?, ?, ?)"; //this is a party crasher
         String update = "UPDATE dateExternal SET confirm = ?, reason = ? WHERE objectId = ? AND cid = ? and mailAddress = ?";
         String updateAppointment = "UPDATE prg_dates SET changing_date = ?, changed_from = ? WHERE intfield01 = ? AND cid = ?";
         
-        Connection con = null;
-        PreparedStatement stmtUpdate = null;
+        Connection writeCon = null;
+        Connection readCon = null;
+        PreparedStatement stmt = null;
         PreparedStatement stmtUpdateAppointment = null;
         Date changeTimestamp = new Date();
-        
         try {
-            con = DBPool.pickupWriteable(ctx);
-            con.setAutoCommit(false);
-            stmtUpdate = con.prepareStatement(update);
-            stmtUpdate.setInt(1, confirm);
+            readCon = DBPool.pickup(ctx);
+            boolean isNewParticipant = ! checkIfParticipantIsInvited(mail, ctx.getContextId(), oid, readCon);
+            writeCon = DBPool.pickupWriteable(ctx);
+            writeCon.setAutoCommit(false);
+            
+            if(isNewParticipant)
+                stmt = writeCon.prepareStatement(insert);
+            else
+                stmt = writeCon.prepareStatement(update);
+            
+            stmt.setInt(1, confirm);
             if (message == null) {
-                stmtUpdate.setNull(2, java.sql.Types.VARCHAR);
+                stmt.setNull(2, java.sql.Types.VARCHAR);
             } else {
-                stmtUpdate.setString(2, message);
+                stmt.setString(2, message);
             }
-            stmtUpdate.setInt(3, oid);
-            stmtUpdate.setInt(4, so.getContextId());
-            stmtUpdate.setString(5, mail);
-            final int changes = stmtUpdate.executeUpdate();
+            stmt.setInt(3, oid);
+            stmt.setInt(4, so.getContextId());
+            stmt.setString(5, mail);
+            final int changes = stmt.executeUpdate();
             if (changes > 0) {
-                stmtUpdateAppointment = con.prepareStatement(updateAppointment);
+                stmtUpdateAppointment = writeCon.prepareStatement(updateAppointment);
                 stmtUpdateAppointment.setLong(1, changeTimestamp.getTime());
                 stmtUpdateAppointment.setInt(2, so.getUserId());
                 stmtUpdateAppointment.setInt(3, oid);
                 stmtUpdateAppointment.setInt(4, so.getContextId());
                 stmtUpdateAppointment.executeUpdate();
-                con.commit();
+                writeCon.commit();
             } else {
-                con.rollback();
+                writeCon.rollback();
                 OXCalendarException e = new OXCalendarException(OXCalendarException.Code.COULD_NOT_FIND_PARTICIPANT);
                 LOG.error(e.getMessage(), e);
                 throw e;
@@ -3335,17 +3343,20 @@ public class CalendarMySQL implements CalendarSqlImp {
         } catch (final SQLException sqle) {
             throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
         } finally {
-            collection.closePreparedStatement(stmtUpdate);
+            collection.closePreparedStatement(stmt);
             collection.closePreparedStatement(stmtUpdateAppointment);
-            if (con != null) {
+            if (writeCon != null) {
                 try {
-                    con.setAutoCommit(true);
+                    writeCon.setAutoCommit(true);
                 } catch (final SQLException sqle) {
                     LOG.error("setUserConfirmation (writecon) error while setAutoCommit(true) ", sqle);
                     throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
                 } finally {
-                    DBPool.closeWriterSilent(ctx, con);
+                    DBPool.closeWriterSilent(ctx, writeCon);
                 }
+            }
+            if (readCon != null) {
+                DBPool.closeReaderSilent(ctx, readCon);
             }
         }
         return changeTimestamp;
@@ -3590,6 +3601,18 @@ public class CalendarMySQL implements CalendarSqlImp {
         return (mc == 1);
     }
 
+
+    private final boolean checkIfParticipantIsInvited(final String mail, final int contextId, final int objectId, final Connection readcon) throws SQLException {
+        final PreparedStatement pst = readcon.prepareStatement("SELECT objectId FROM dateExternal WHERE objectId = ? AND cid = ? AND mailAddress = ?");
+        pst.setInt(1, objectId);
+        pst.setInt(2, contextId);
+        pst.setString(3, mail);
+        ResultSet resultSet = pst.executeQuery();
+        boolean isInvited = resultSet.next();
+        pst.close();
+        return isInvited;
+    }
+    
     private final long deleteOnlyOneParticipantInPrivateFolder(final int oid, final int cid, final int uid,
             final int fid, final Context c, final Connection writecon, final Session so) throws SQLException,
             OXMandatoryFieldException, OXConflictException, OXException {
