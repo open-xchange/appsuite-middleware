@@ -47,37 +47,14 @@
  *
  */
 
-package com.openexchange.server.osgi;
+package com.openexchange.tools.file.external;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+public interface QuotaFileStorage extends FileStorage {
 
-/**
- * {@link Activator} combines several activators in the server bundle that have been prepared to split up the server bundle into several
- * bundles. Currently this is not done to keep number of packages low.
- *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
- */
-public class Activator extends CompositeBundleActivator {
+    long getQuota();
 
-    private final BundleActivator[] activators = {
-    	new com.openexchange.tools.file.osgi.FileStorageStarterActivator(),	
-        new com.openexchange.database.osgi.Activator(),
-        new com.openexchange.tools.file.osgi.QuotaFileStorageStarterActivator(),
-        new com.openexchange.tools.file.osgi.FileStorageWrapperActivator(),
-        new com.openexchange.groupware.update.osgi.Activator(),
-        new com.openexchange.groupware.reminder.osgi.Activator(),
-        new com.openexchange.server.osgi.ServerActivator(),
-        new com.openexchange.groupware.tasks.osgi.Activator(),
-        new com.openexchange.groupware.infostore.osgi.InfostoreActivator()
-    };
+    long getUsage() throws QuotaFileStorageException;
 
-    public Activator() {
-        super();
-    }
+    void recalculateUsage() throws QuotaFileStorageException;
 
-    @Override
-    protected BundleActivator[] getActivators() {
-        return activators;
-    }
 }

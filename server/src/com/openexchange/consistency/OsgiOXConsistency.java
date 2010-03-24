@@ -99,8 +99,7 @@ public class OsgiOXConsistency extends Consistency {
 
     @Override
     protected FileStorage getFileStorage(final Context ctx) throws FileStorageException, FilestoreException {
-        return FileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx,
-                new DBPoolProvider());
+        return FileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
     }
 
     @Override

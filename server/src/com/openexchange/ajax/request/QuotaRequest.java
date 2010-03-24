@@ -86,7 +86,7 @@ public class QuotaRequest extends CommonRequest {
         super(w);
         try {
             final Context ctx = session.getContext();
-            this.qfs = (QuotaFileStorage) FileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx, new DBPoolProvider());
+            this.qfs = (QuotaFileStorage) FileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
         } catch (final AbstractOXException e) {
             this.fsException = e;
         }

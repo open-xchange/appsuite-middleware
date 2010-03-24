@@ -94,6 +94,6 @@ public final class FileStorageRemover extends ContextDelete {
     }
 
     private FileStorage getFileStorage(final Context ctx, DBProvider dbProvider) throws FileStorageException, FilestoreException {
-        return FileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx, dbProvider); 
+        return FileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx); 
     }
 }

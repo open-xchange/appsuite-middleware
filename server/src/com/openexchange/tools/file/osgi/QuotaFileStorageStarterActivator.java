@@ -47,37 +47,27 @@
  *
  */
 
-package com.openexchange.server.osgi;
+package com.openexchange.tools.file.osgi;
 
 import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Filter;
+import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.tools.file.external.FileStorageStarter;
 
-/**
- * {@link Activator} combines several activators in the server bundle that have been prepared to split up the server bundle into several
- * bundles. Currently this is not done to keep number of packages low.
- *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
- */
-public class Activator extends CompositeBundleActivator {
+public class QuotaFileStorageStarterActivator implements BundleActivator {
 
-    private final BundleActivator[] activators = {
-    	new com.openexchange.tools.file.osgi.FileStorageStarterActivator(),	
-        new com.openexchange.database.osgi.Activator(),
-        new com.openexchange.tools.file.osgi.QuotaFileStorageStarterActivator(),
-        new com.openexchange.tools.file.osgi.FileStorageWrapperActivator(),
-        new com.openexchange.groupware.update.osgi.Activator(),
-        new com.openexchange.groupware.reminder.osgi.Activator(),
-        new com.openexchange.server.osgi.ServerActivator(),
-        new com.openexchange.groupware.tasks.osgi.Activator(),
-        new com.openexchange.groupware.infostore.osgi.InfostoreActivator()
-    };
+    private ServiceTracker track;
 
-    public Activator() {
-        super();
+    public void start(final BundleContext context) throws Exception {
+        final Filter filter = context.createFilter("(|(objectClass=" + FileStorageStarter.class.getName() + ")(objectClass=" + DatabaseService.class.getName() + "))");
+        track = new ServiceTracker(context, filter, new FileStorageStarterTracker(context));
+        track.open();
     }
 
-    @Override
-    protected BundleActivator[] getActivators() {
-        return activators;
+    public void stop(final BundleContext context) throws Exception {
+        track.close();
     }
+
 }

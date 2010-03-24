@@ -47,56 +47,88 @@
  *
  */
 
-package com.openexchange.tools.file;
+package com.openexchange.tools.file.external;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 
 /**
- * @author marcus
+ * Exceptions of the QuotaFileStorage.
+ * 
+ * @author Steffen Templin
  */
 public class QuotaFileStorageException extends FileStorageException {
 
     /**
-     * Serialization.
+     * For serialization.
      */
-    private static final long serialVersionUID = -1459280511961165849L;
+    private static final long serialVersionUID = 5832529635500224019L;
 
     public QuotaFileStorageException(final AbstractOXException x) {
         super(x);
     }
 
     /**
-     * @param code
-     * @param messageArgs
+     * Initializes a new exception using the information provides by the code.
+     * 
+     * @param code code for the exception.
+     * @param messageArgs arguments that will be formatted into the message.
      */
     public QuotaFileStorageException(final Code code, final Object... messageArgs) {
         this(code, null, messageArgs);
     }
 
     /**
-     * @param code
-     * @param cause
-     * @param messageArgs
+     * Initializes a new exception using the information provides by the code.
+     * 
+     * @param code code for the exception.
+     * @param cause the cause of the exception.
+     * @param messageArgs arguments that will be formatted into the message.
      */
     public QuotaFileStorageException(final Code code, final Throwable cause, final Object... messageArgs) {
-        super(EnumComponent.FILESTORE, code.category, code.detailNumber, code.message, cause);
+        super(EnumComponent.FILESTORE, code.category, code.detailNumber, null == code.message ? cause.getMessage() : code.message, cause);
         setMessageArgs(messageArgs);
     }
 
     /**
-     * Error codes for the quota file storage exception.
+     * Constructor with all parameters for inheritance.
      * 
-     * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+     * @param component Component.
+     * @param category Category.
+     * @param number detail number.
+     * @param message message of the exception.
+     * @param cause the cause.
+     */
+    protected QuotaFileStorageException(final EnumComponent component, final Category category, final int detailNumber, final String message, final Throwable cause) {
+        super(component, category, detailNumber, message, cause);
+    }
+
+    /**
+     * Error codes for the file storage exception.
+     * 
+     * @author Steffen Templin
      */
     public enum Code {
         /**
-         * Invalid constructor parameter at %1$d with type %2$s.
+         * May be used to throw a proper AbstractOXException is there is no FileStorage available
          */
-        INVALID_PARAMETER("Invalid constructor parameter at %1$d with type %2$s.", Category.CODE_ERROR, 1),
-        SQL_EXCEPTION("An invalid SQL query was sent to the server.", Category.CODE_ERROR, 2),
-        TOO_LARGE("The file cannot be added to filestore. File size: %s Quota: %s Used: %s", Category.USER_INPUT, 3),
-        UNDERLYING_EXCEPTION("A file storage error occurred on the server. Please try again later. Additional information: file storage id: %1$s, context id: %2$s, message from the low-level file storage class: %3$s", Category.INTERNAL_ERROR, 4);
+        INSTANTIATIONERROR("Couldn't reach the filestore", Category.SUBSYSTEM_OR_SERVICE_DOWN, 1),
+        /**
+         * Getting DBConnection failed
+         */
+        SQLERROR("Cannot access the Database: %s", Category.SUBSYSTEM_OR_SERVICE_DOWN, 2),
+        /**
+         * Could not execute SQLStatement
+         */
+        SQLSTATEMENTERROR("Database Query could not be realized", Category.CODE_ERROR, 3),
+        /**
+         * Allowed Quota reached
+         */
+        STORE_FULL("The allowed Quota is reached.", Category.USER_INPUT, 4),
+        /**
+         * Quota is negative
+         */
+        QUOTA_UNDERRUN("Quota seems to be inconsistent. Please run recalculateUsage() on context %1$d.", Category.TRUNCATED, 5);
 
         /**
          * Message of the exception.

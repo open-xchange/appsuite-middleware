@@ -396,7 +396,7 @@ public class DatabaseImpl extends DBService {
             }
             result = stmt.executeQuery();
             if (result.next()) {
-                final FileStorage fs = FileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx, this.getProvider());
+                final FileStorage fs = FileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
                 retval = fs.getFile(result.getString(1));
                 fs.close();
             }
@@ -1452,7 +1452,7 @@ public class DatabaseImpl extends DBService {
                     files.add(version.getFilestoreLocation());
                 }
             }
-            fs.deleteFile(files.toArray(new String[files.size()]));
+            fs.deleteFiles(files.toArray(new String[files.size()]));
 
             final EventClient ec = new EventClient(session);
 
@@ -1490,7 +1490,7 @@ public class DatabaseImpl extends DBService {
 
             final FileStorage fileStorage = getFileStorage(ctx);
             final String[] filesArray = files.toArray(new String[files.size()]);
-            fileStorage.deleteFile(filesArray);
+            fileStorage.deleteFiles(filesArray);
         } catch (final SQLException x) {
             LOG.error(x.getMessage(), x);
             throw EXCEPTIONS.create(36, x, x.toString());
@@ -1837,7 +1837,7 @@ public class DatabaseImpl extends DBService {
     }
 
     protected FileStorage getFileStorage(final Context ctx) throws FileStorageException, FilestoreException {
-        return FileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx, this.getProvider());
+        return FileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
     }
 
     @Override

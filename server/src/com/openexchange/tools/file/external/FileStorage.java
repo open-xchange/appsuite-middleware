@@ -47,37 +47,32 @@
  *
  */
 
-package com.openexchange.server.osgi;
+package com.openexchange.tools.file.external;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import java.io.InputStream;
+import java.util.Set;
+import java.util.SortedSet;
 
-/**
- * {@link Activator} combines several activators in the server bundle that have been prepared to split up the server bundle into several
- * bundles. Currently this is not done to keep number of packages low.
- *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
- */
-public class Activator extends CompositeBundleActivator {
+public interface FileStorage {
 
-    private final BundleActivator[] activators = {
-    	new com.openexchange.tools.file.osgi.FileStorageStarterActivator(),	
-        new com.openexchange.database.osgi.Activator(),
-        new com.openexchange.tools.file.osgi.QuotaFileStorageStarterActivator(),
-        new com.openexchange.tools.file.osgi.FileStorageWrapperActivator(),
-        new com.openexchange.groupware.update.osgi.Activator(),
-        new com.openexchange.groupware.reminder.osgi.Activator(),
-        new com.openexchange.server.osgi.ServerActivator(),
-        new com.openexchange.groupware.tasks.osgi.Activator(),
-        new com.openexchange.groupware.infostore.osgi.InfostoreActivator()
-    };
+    String saveNewFile(final InputStream file) throws FileStorageException;
 
-    public Activator() {
-        super();
-    }
+    InputStream getFile(String name) throws FileStorageException;
 
-    @Override
-    protected BundleActivator[] getActivators() {
-        return activators;
-    }
+    SortedSet<String> getFileList() throws FileStorageException;
+
+    long getFileSize(final String name) throws FileStorageException;
+
+    String getMimeType(final String name) throws FileStorageException;
+
+    boolean deleteFile(final String identifier) throws FileStorageException;
+
+    Set<String> deleteFiles(final String[] identifiers) throws FileStorageException;
+
+    void remove() throws FileStorageException;
+
+    void recreateStateFile() throws FileStorageException;
+    
+    boolean stateFileIsCorrect() throws FileStorageException;
+
 }

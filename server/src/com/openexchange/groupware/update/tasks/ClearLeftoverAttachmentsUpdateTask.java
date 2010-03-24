@@ -71,11 +71,11 @@ import com.openexchange.groupware.update.UpdateException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.tools.file.FileStorageException;
-import com.openexchange.tools.file.LocalFileStorage;
+import com.openexchange.tools.file.FileStorage;
 
 public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
 
-    private final ThreadLocal<Map<Integer,LocalFileStorage>> filestorages = new ThreadLocal<Map<Integer,LocalFileStorage>>();
+    private final ThreadLocal<Map<Integer, FileStorage>> filestorages = new ThreadLocal<Map<Integer,FileStorage>>();
 
     private static final Log LOG = LogFactory.getLog(ClearLeftoverAttachmentsUpdateTask.class);
 
@@ -95,7 +95,7 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
     )
     public void perform(final Schema schema, final int contextId) throws AbstractOXException {
         try {
-            filestorages.set(new HashMap<Integer,LocalFileStorage>());
+            filestorages.set(new HashMap<Integer, FileStorage>());
             for(final LeftoverAttachment att : getLeftoverAttachmentsInSchema(contextId)){
                 removeFile(att.getFileId(), att.getContextId()); //FIXME will not work during update
                 try {
@@ -163,14 +163,15 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
         // We have to use the local file storage to bypass quota handling, which must remain
         // unaffected by these operations
 
-        LocalFileStorage fs = filestorages.get().get(I(ctx_id));
+        FileStorage fs = filestorages.get().get(I(ctx_id));
         if(fs == null) {
             final URI uri = createURI(ctx_id);
             if (uri == null) {
                 throw UpdateExceptionCodes.OTHER_PROBLEM.create("Can not determine filestore for context " + ctx_id + ".");
             }
 
-            fs = new LocalFileStorage(I(3),I(256),uri);  //FIXME: It's very dangerous to just copy these values (3 and 256)!
+            //fs = new LocalFileStorage(I(3),I(256),uri);  //FIXME: It's very dangerous to just copy these values (3 and 256)!
+            fs = FileStorage.getInstance(uri);
             filestorages.get().put(I(ctx_id), fs);
         }
         try {

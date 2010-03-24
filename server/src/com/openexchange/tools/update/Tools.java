@@ -530,7 +530,7 @@ public final class Tools {
         final URI fileStorageURI = FilestoreStorage.createURI(ctx);
         final File file = new File(fileStorageURI);
         if (file.exists()) {
-            final FileStorage fs = FileStorage.getInstance(fileStorageURI, ctx, new SimpleDBProvider(con, con));
+            final FileStorage fs = FileStorage.getInstance(fileStorageURI, ctx);
             fs.deleteFile(fileStoreLocation);
         }
     }

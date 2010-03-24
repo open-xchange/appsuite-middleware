@@ -47,42 +47,43 @@
  *
  */
 
-package com.openexchange.tools.file;
+package com.openexchange.tools.file.internal;
 
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.AbstractOXExceptionFactory;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.infostore.Classes;
-import com.openexchange.groupware.infostore.InfostoreException;
+import java.net.URI;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.tools.file.external.FileStorage;
+import com.openexchange.tools.file.external.FileStorageException;
+import com.openexchange.tools.file.external.FileStorageStarter;
+import com.openexchange.tools.file.external.QuotaFileStorage;
+import com.openexchange.tools.file.external.QuotaFileStorageException;
+import com.openexchange.tools.file.external.QuotaFileStorageStarter;
 
-public class QuotaFileStorageExceptionFactory extends AbstractOXExceptionFactory {
+public class QuotaFileStorageStarterImpl implements QuotaFileStorageStarter {
 
-    public QuotaFileStorageExceptionFactory(final Class clazz) {
-        super(clazz);
+    private final FileStorageStarter fss;
+
+    private final DatabaseService dbs;
+
+    public QuotaFileStorageStarterImpl(final DatabaseService dbs, final FileStorageStarter fss) {
+        this.fss = fss;
+        this.dbs = dbs;
     }
 
-    private static final int CLASS = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_INFOSTOREEXCEPTIONFACTORY;
-
-    @Override
-    protected AbstractOXException buildException(final EnumComponent component, final Category category, final int number, final String message, final Throwable cause, final Object... msgArgs) {
-        if (component != EnumComponent.FILESTORE) {
-            throw new IllegalArgumentException("This factory can only build exceptions for the filestore");
+    public QuotaFileStorage getQuotaFileStorage(final Context ctx, final URI uri) throws QuotaFileStorageException {
+        FileStorage fs;
+        QuotaFileStorage qfs;
+        if (fss != null && dbs != null) {
+            try {
+                fs = fss.getFileStorage(uri);
+                qfs = new QuotaFileStorageImpl(ctx, fs, dbs);
+                return qfs;
+            } catch (final FileStorageException e) {
+                throw new QuotaFileStorageException(e);
+            }
+        } else {
+            throw new QuotaFileStorageException(QuotaFileStorageException.Code.INSTANTIATIONERROR);
         }
-        return new InfostoreException(category, number, message, cause, msgArgs);
-    }
-
-    @Override
-    protected int getClassId() {
-        return CLASS;
-    }
-
-    public InfostoreException create(final int id, final Object... msgParams) {
-        return (InfostoreException) createException(id, msgParams);
-    }
-
-    public InfostoreException create(final int id, final Throwable cause, final Object... msgParams) {
-        return (InfostoreException) createException(id, cause, msgParams);
     }
 
 }
