@@ -3227,7 +3227,11 @@ public class Mail extends PermissionServlet implements UploadListener {
             if (body == null || body.isEmpty()) {
                 throw new MailException(MailException.Code.MISSING_PARAMETER, PARAMETER_DATA);
             }
-            final int flags = paramContainer.getIntParam(PARAMETER_FLAGS);
+            final int flags;
+            {
+                final int i = paramContainer.getIntParam(PARAMETER_FLAGS);
+                flags = ParamContainer.NOT_FOUND == i ? 0 : i;
+            }
             final boolean force;
             {
                 String tmp = paramContainer.getStringParam("force");
@@ -3342,6 +3346,9 @@ public class Mail extends PermissionServlet implements UploadListener {
                     final MailServletInterface mailInterface = MailServletInterface.getInstance(session);
                     try {
                         ids = mailInterface.appendMessages(folder, mails, force);
+                        if (flags > 0) {
+                            mailInterface.updateMessageFlags(folder, ids, flags, true);
+                        }
                     } finally {
                         mailInterface.close(true);
                     }
