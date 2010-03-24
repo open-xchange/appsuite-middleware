@@ -1,7 +1,11 @@
 package com.openexchange.mobileconfig.osgi;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.mobileconfig.MobileConfigServlet;
 import com.openexchange.mobileconfig.services.MobileConfigServiceRegistry;
 import com.openexchange.server.osgiservice.DeferredActivator;
@@ -15,9 +19,14 @@ public class Activator extends DeferredActivator {
     private static final Class<?>[] NEEDED_SERVICES = {};
     private static final String ALIAS = "/ajax/mobileconfig/eas.mobileconfig";
 
+    private List<ServiceTracker> serviceTrackerList;
 
     private ServletRegistration registration;
 
+    public Activator() {
+        serviceTrackerList = new ArrayList<ServiceTracker>();
+    }
+    
     @Override
     protected Class<?>[] getNeededServices() {
         return NEEDED_SERVICES;
@@ -56,12 +65,28 @@ public class Activator extends DeferredActivator {
                 }
             }
         }
+        serviceTrackerList.add(new ServiceTracker(context, HostnameService.class.getName(), new HostnameInstallationServiceListener(context)));
+        
+        // Open service trackers
+        for (final ServiceTracker tracker : serviceTrackerList) {
+            tracker.open();
+        }
+
         register();
     }
 
     @Override
     protected void stopBundle() throws Exception {
         unregister();
+
+        /*
+         * Close service trackers
+         */
+        for (final ServiceTracker tracker : serviceTrackerList) {
+            tracker.close();
+        }
+        serviceTrackerList.clear();
+
         MobileConfigServiceRegistry.getServiceRegistry().clearRegistry();
     }
 

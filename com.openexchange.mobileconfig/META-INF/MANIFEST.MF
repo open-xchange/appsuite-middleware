@@ -18,4 +18,5 @@ Import-Package: com.openexchange.groupware.ldap,
  javax.servlet.http,
  org.apache.commons.logging,
  org.osgi.service.http,
- org.osgi.framework;version="1.3.0"
+ org.osgi.framework;version="1.3.0",
+ org.osgi.util.tracker;version="1.3.2"
