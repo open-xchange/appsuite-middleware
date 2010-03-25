@@ -1,3 +1,7 @@
+* 2010-03-25 - thorben.betten@open-xchange.com
+
+ - Bugfix #15655: Ignoring error when creating a default folder for an external account
+
 * 2010-03-25 - karsten.will@open-xchange.com
 
  - Bugfix #15660: Using commons HttpClient for login to linked in to fix redirect problems with HtmlUnit.
