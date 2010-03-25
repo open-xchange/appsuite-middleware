@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 15
+%define		ox_release 16
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -483,6 +483,11 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Thu Mar 25 2010 - karsten.will@open-xchange.com
+ - Bugfix #15660: Using commons HttpClient for login to linked in to fix redirect problems with HtmlUnit.
+* Thu Mar 25 2010 - thorben.betten@open-xchange.com
+ - Bugfix #15655: Ignoring error when creating a default folder for an external account
+ - Bugfix #15671: Probing for optional TOP and UIDL POP3 commands
 * Tue Feb 16 2010 - thorben.betten@open-xchange.com
  - Bugfix #15378: Auto-detection of proper content type if "name" parameter is present
 * Wed Feb 10 2010 - thorben.betten@open-xchange.com
