@@ -307,6 +307,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
     @Override
     public MailFolder getRootFolder() throws MailException {
         pop3Storage.connect();
+        addWarnings(pop3Storage.getWarnings());
         return pop3Storage.getFolderStorage().getRootFolder();
     }
 
@@ -320,7 +321,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
         final POP3Config config = getPOP3Config();
         checkFieldsBeforeConnect(config);
         try {
-            final POP3Store pop3Store = POP3StoreConnector.getPOP3Store(config, getMailProperties(), false, session);
+            final POP3Store pop3Store = POP3StoreConnector.getPOP3Store(config, getMailProperties(), false, session, true).getPop3Store();
             /*
              * Close quietly
              */
@@ -341,6 +342,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
     protected void connectInternal() throws MailException {
         // Connect the storage
         pop3Storage.connect();
+        addWarnings(pop3Storage.getWarnings());
         connected = true;
         /*
          * Ensure exclusive connect through future since a POP3 account may only be connected to one client at the same time

@@ -377,7 +377,12 @@ public final class POP3Exception extends MIMEMailException {
         /**
          * POP3 storage path "%1$s" cannot be created for user %2$s in context %3$s.
          */
-        ILLEGAL_PATH("POP3 storage path \"%1$s\" cannot be created for user %2$s in context %3$s.", Category.CODE_ERROR, 2069);
+        ILLEGAL_PATH("POP3 storage path \"%1$s\" cannot be created for user %2$s in context %3$s.", Category.CODE_ERROR, 2069),
+        /**
+         * Due to missing required capability %1$s POP3 messages are fetched and removed (expunge-on-quit) from server %2$s with login %3$s
+         * (user=%4$s, context=%5$s).
+         */
+        EXPUNGE_MODE_ONLY("Due to missing required capability %1$s POP3 messages are fetched and removed (expunge-on-quit) from server %2$s with login %3$s (user=%4$s, context=%5$s).", Category.SETUP_ERROR, 2070);
 
         private final String message;
 

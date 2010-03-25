@@ -50,6 +50,9 @@
 package com.openexchange.mail.api;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
@@ -100,6 +103,8 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     protected final int accountId;
 
+    protected final Collection<MailException> warnings;
+
     protected boolean cacheable;
 
     private transient MailConfig mailConfig;
@@ -127,9 +132,28 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      */
     protected MailAccess(final Session session, final int accountId) {
         super();
+        warnings = new ArrayList<MailException>(2);
         this.session = session;
         this.accountId = accountId;
         cacheable = true;
+    }
+
+    /**
+     * Adds given warnings.
+     * 
+     * @param warnings The warnings to add
+     */
+    protected void addWarnings(final Collection<MailException> warnings) {
+        this.warnings.addAll(warnings);
+    }
+
+    /**
+     * Gets possible warnings.
+     * 
+     * @return Possible warnings.
+     */
+    public Collection<MailException> getWarnings() {
+        return Collections.unmodifiableCollection(warnings);
     }
 
     /**

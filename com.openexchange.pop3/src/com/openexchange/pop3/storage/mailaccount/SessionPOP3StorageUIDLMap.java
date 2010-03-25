@@ -120,10 +120,11 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         this.uidl2pair = new ConcurrentHashMap<String, FullnameUIDPair>();
         mode = new int[] { 1 };
         final ClearMapsRunnable cmr = new ClearMapsRunnable(session, key, uidl2pair, pair2uidl, rwLock, mode);
-        final ScheduledTimerTask timerTask = POP3ServiceRegistry.getServiceRegistry().getService(TimerService.class).scheduleWithFixedDelay(
-            cmr,
-            SessionCacheProperties.SCHEDULED_TASK_INITIAL_DELAY,
-            SessionCacheProperties.SCHEDULED_TASK_DELAY);
+        final ScheduledTimerTask timerTask =
+            POP3ServiceRegistry.getServiceRegistry().getService(TimerService.class).scheduleWithFixedDelay(
+                cmr,
+                SessionCacheProperties.SCHEDULED_TASK_INITIAL_DELAY,
+                SessionCacheProperties.SCHEDULED_TASK_DELAY);
         cmr.setTimerTask(timerTask);
         init();
     }
@@ -175,9 +176,11 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
             delegatee.addMappings(uidls, fullnameUIDPairs);
             for (int i = 0; i < fullnameUIDPairs.length; i++) {
                 final String uidl = uidls[i];
-                final FullnameUIDPair pair = fullnameUIDPairs[i];
-                pair2uidl.put(pair, uidl);
-                uidl2pair.put(uidl, pair);
+                if (null != uidl) {
+                    final FullnameUIDPair pair = fullnameUIDPairs[i];
+                    pair2uidl.put(pair, uidl);
+                    uidl2pair.put(uidl, pair);
+                }
             }
         } finally {
             readLock.unlock();

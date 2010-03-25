@@ -73,7 +73,15 @@ import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
  */
 public final class POP3CapabilityCache {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(POP3CapabilityCache.class);
+    /**
+     * The logger.
+     */
+    static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(POP3CapabilityCache.class);
+
+    /**
+     * The default capabilities providing only mandatory POP3 commands.
+     */
+    static final Capability DEFAULT_CAPABILITIES = new Capability("USER\r\nPASS\r\nSTAT\r\nLIST\r\nRETR\r\nDELE\r\nNOOP\r\nRSET\r\nQUIT");
 
     private static ConcurrentMap<InetSocketAddress, Future<Capability>> MAP;
 
@@ -350,7 +358,13 @@ public final class POP3CapabilityCache {
                                 sb.append(c);
                             }
                         }
-                        throw new IOException("POP3 CAPA command failed: " + sb.toString());
+                        /*
+                         * Assume default capabilities: USER, PASS, STAT, LIST, RETR, DELE, NOOP, RSET, QUIT
+                         */
+                        if (LOG.isWarnEnabled()) {
+                            LOG.warn(sb.insert(0, "POP3 CAPA command failed: ").toString());
+                        }
+                        return DEFAULT_CAPABILITIES;
                     } else if ('+' == pre) {
                         sb.append(pre);
                         eol = false;
@@ -369,7 +383,10 @@ public final class POP3CapabilityCache {
                         }
                         final String responseCode = sb.toString();
                         if (!responseCode.toUpperCase().startsWith("+OK")) {
-                            throw new IOException("POP3 CAPA command failed: " + responseCode);
+                            if (LOG.isWarnEnabled()) {
+                                LOG.warn(new StringBuilder("POP3 CAPA command failed: ").append(responseCode).toString());
+                            }
+                            return DEFAULT_CAPABILITIES;
                         }
                         sb.setLength(0);
                         if (skipLF) {
@@ -402,10 +419,14 @@ public final class POP3CapabilityCache {
                         }
                         capabilities = sb.toString();
                     } else {
-                        if (Character.isDefined(pre)) {
-                            throw new IOException(new StringBuilder("Unexpected CAPA response start: ").append(pre).toString());
+                        if (LOG.isWarnEnabled()) {
+                            if (Character.isDefined(pre)) {
+                                LOG.warn(new StringBuilder("Unexpected CAPA response start: ").append(pre).toString());
+                            } else {
+                                LOG.warn(new StringBuilder("Invalid unicode character: ").append(((int) pre)).toString());
+                            }
                         }
-                        throw new IOException(new StringBuilder("Invalid unicode character: ").append(((int) pre)).toString());
+                        return DEFAULT_CAPABILITIES;
                     }
                 }
                 /*
