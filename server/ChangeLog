@@ -1,3 +1,7 @@
+* 2010-03-25 - karsten.will@open-xchange.com
+
+ - Bugfix #15660: Using commons HttpClient for login to linked in to fix redirect problems with HtmlUnit.
+
 * 2010-02-16 - thorben.betten@open-xchange.com
 
  - Bugfix #15378: Auto-detection of proper content type if "name" parameter is present

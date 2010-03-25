@@ -73,21 +73,13 @@ public class GenericSubscribeServiceForLinkedInTest extends GenericSubscribeServ
         CrawlerDescription crawler = new CrawlerDescription();
         crawler.setDisplayName("LinkedIn");
         crawler.setId("com.openexchange.subscribe.linkedin");
-        crawler.setPriority(3);        
+        crawler.setPriority(3);
 
         ArrayList<Step> listOfSteps = new ArrayList<Step>();
 
-        listOfSteps.add(new LoginPageStep(
-            "Login to www.linkedin.com",
-            "https://www.linkedin.com/secure/login",
-            "",
-            "",
-            "login",
-            "session_key",
-            "session_password",
-            "/connections?trk=hb_tab_cnts",
-            "https://www.linkedin.com"));
-        listOfSteps.add(new PageByUrlStep("Get to the contacts list", "http://www.linkedin.com/connections?trk=hb_side_cnts"));
+        listOfSteps.add(new LoginWithHttpClientStep("Call LinkedIn with all parameters that are normally set by the login-form",
+            "https://www.linkedin.com/secure/login?session_key=USERNAME&session_password=PASSWORD&session_login=&session_rikey=&csrfToken=ajax:6545267463289092740"));
+
         listOfSteps.add(new PageByUrlStep(
             "Get to the no-javascript contacts list",
             "http://www.linkedin.com/connectionsnojs?trk=cnx_nojslink"));
