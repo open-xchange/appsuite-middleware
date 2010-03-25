@@ -101,7 +101,7 @@ public class ChangeFilestore extends FilestoreAbstraction {
     private void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
 
-        setFilestoreIDOption(parser);
+        setFilestoreIDOption(parser, "changed");
 
         setPathOption(parser, NeededQuadState.notneeded);
 

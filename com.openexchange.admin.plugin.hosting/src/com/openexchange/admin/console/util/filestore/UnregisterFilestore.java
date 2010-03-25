@@ -97,7 +97,7 @@ public class UnregisterFilestore extends FilestoreAbstraction {
 
         setDefaultCommandLineOptionsWithoutContextID(parser);
 
-        setFilestoreIDOption(parser);
+        setFilestoreIDOption(parser, "unregistered");
 
     }
 }

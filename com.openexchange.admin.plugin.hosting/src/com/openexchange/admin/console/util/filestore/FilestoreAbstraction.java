@@ -118,8 +118,8 @@ public abstract class FilestoreAbstraction extends UtilAbstraction {
         }
     }
 
-    protected void setFilestoreIDOption(final AdminParser parser) {
-        this.filestoreIdOption = setShortLongOpt(parser, OPT_NAME_STORE_FILESTORE_ID_SHORT, OPT_NAME_STORE_FILESTORE_ID_LONG, "The id of the filestore which should be deleted", true, NeededQuadState.needed);
+    protected void setFilestoreIDOption(final AdminParser parser, String command) {
+        this.filestoreIdOption = setShortLongOpt(parser, OPT_NAME_STORE_FILESTORE_ID_SHORT, OPT_NAME_STORE_FILESTORE_ID_LONG, "The id of the filestore which should be " + command, true, NeededQuadState.needed);
     }
 
     protected void parseAndSetFilestoreID(final AdminParser parser, final Filestore fstore) {
