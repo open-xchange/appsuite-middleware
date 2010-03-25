@@ -175,9 +175,11 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
             delegatee.addMappings(uidls, fullnameUIDPairs);
             for (int i = 0; i < fullnameUIDPairs.length; i++) {
                 final String uidl = uidls[i];
-                final FullnameUIDPair pair = fullnameUIDPairs[i];
-                pair2uidl.put(pair, uidl);
-                uidl2pair.put(uidl, pair);
+                if (null != uidl) {
+                    final FullnameUIDPair pair = fullnameUIDPairs[i];
+                    pair2uidl.put(pair, uidl);
+                    uidl2pair.put(uidl, pair);
+                }
             }
         } finally {
             readLock.unlock();

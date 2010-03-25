@@ -55,6 +55,7 @@ import java.io.IOException;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -404,7 +405,7 @@ public class Folder extends SessionServlet {
          */
         final Response response = new Response();
         final OXJSONWriter jsonWriter = new OXJSONWriter();
-
+        AbstractOXException warning = null;
         Date lastModifiedDate = null;
         /*
          * Start response
@@ -770,7 +771,22 @@ public class Folder extends SessionServlet {
                                     for (int i = 0; i < size; i++) {
                                         final Future<Object> f = completionFuture.poll(maxRunningMillis, TimeUnit.MILLISECONDS);
                                         if (null != f) {
-                                            f.get();
+                                            try {
+                                                f.get();
+                                            } catch (final ExecutionException e) {
+                                                final Throwable t = e.getCause();
+                                                if (t instanceof MailException) {
+                                                    if (null == warning) {
+                                                        /*
+                                                         * TODO: Does UI already accept warnings?
+                                                         */
+                                                        warning = (AbstractOXException) t;
+                                                        warning.setCategory(Category.WARNING);
+                                                    }
+                                                } else {
+                                                    throw e;
+                                                }
+                                            }
                                         }
                                     }
                                 } catch (final InterruptedException e) {
@@ -971,6 +987,13 @@ public class Folder extends SessionServlet {
                      * E-Mail folder
                      */
                     it = mailInterface.getChildFolders(parentIdentifier, all);
+                    /*
+                     * Check for possible warning
+                     */
+                    final Collection<MailException> warnings = mailInterface.getWarnings();
+                    if (!warnings.isEmpty()) {
+                        warning = warnings.iterator().next();
+                    }
                     final MailFolderFieldWriter[] writers =
                         com.openexchange.mail.json.writer.FolderWriter.getMailFolderFieldWriter(
                             columns,
@@ -1026,6 +1049,10 @@ public class Folder extends SessionServlet {
          * Close response and flush print writer
          */
         jsonWriter.endArray();
+        if (null != warning) {
+            LOG.warn(warning.getMessage(), warning);
+            // TODO: response.setWarning(warning);
+        }
         response.setData(jsonWriter.getObject());
         response.setTimestamp(lastModifiedDate);
         return response;

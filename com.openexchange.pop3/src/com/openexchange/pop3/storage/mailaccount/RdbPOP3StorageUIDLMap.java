@@ -134,27 +134,33 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
             // Delete possibly existing mappings for specified UIDLs
             stmt = con.prepareStatement(SQL_DELETE_UIDLS);
             for (int i = 0; i < uidls.length; i++) {
-                int pos = 1;
-                stmt.setInt(pos++, cid);
-                stmt.setInt(pos++, user);
-                stmt.setInt(pos++, accountId);
-                stmt.setString(pos++, uidls[i]);
-                stmt.addBatch();
+                final String uidl = uidls[i];
+                if (uidl != null) {
+                    int pos = 1;
+                    stmt.setInt(pos++, cid);
+                    stmt.setInt(pos++, user);
+                    stmt.setInt(pos++, accountId);
+                    stmt.setString(pos++, uidl);
+                    stmt.addBatch();
+                }
             }
             stmt.executeBatch();
             closeSQLStuff(null, stmt);
             // Insert new mappings for specified UIDLs
             stmt = con.prepareStatement(SQL_INSERT_UIDLS);
             for (int i = 0; i < uidls.length; i++) {
-                int pos = 1;
-                stmt.setInt(pos++, cid);
-                stmt.setInt(pos++, user);
-                stmt.setInt(pos++, accountId);
-                stmt.setString(pos++, uidls[i]);
-                final FullnameUIDPair pair = fullnameUIDPairs[i];
-                stmt.setString(pos++, pair.getFullname());
-                stmt.setString(pos++, pair.getMailId());
-                stmt.addBatch();
+                final String uidl = uidls[i];
+                if (uidl != null) {
+                    int pos = 1;
+                    stmt.setInt(pos++, cid);
+                    stmt.setInt(pos++, user);
+                    stmt.setInt(pos++, accountId);
+                    stmt.setString(pos++, uidl);
+                    final FullnameUIDPair pair = fullnameUIDPairs[i];
+                    stmt.setString(pos++, pair.getFullname());
+                    stmt.setString(pos++, pair.getMailId());
+                    stmt.addBatch();
+                }
             }
             stmt.executeBatch();
         } catch (final SQLException e) {

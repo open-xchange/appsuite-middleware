@@ -373,7 +373,12 @@ public final class POP3Exception extends MIMEMailException {
         /**
          * Missing required capability %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s).
          */
-        MISSING_REQUIRED_CAPABILITY("Missing required capability %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s).", Category.SETUP_ERROR, 2068);
+        MISSING_REQUIRED_CAPABILITY("Missing required capability %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s).", Category.SETUP_ERROR, 2068),
+        /**
+         * Due to missing required capability %1$s POP3 messages are fetched and removed (expunge-on-quit) from server %2$s with login %3$s
+         * (user=%4$s, context=%5$s).
+         */
+        EXPUNGE_MODE_ONLY("Due to missing required capability %1$s POP3 messages are fetched and removed (expunge-on-quit) from server %2$s with login %3$s (user=%4$s, context=%5$s).", Category.SETUP_ERROR, 2069);
 
         private final String message;
 
