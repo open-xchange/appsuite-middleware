@@ -49,14 +49,15 @@
 
 package com.openexchange.ajax.mail;
 
+import java.io.ByteArrayInputStream;
 import java.util.TimeZone;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.mail.actions.DeleteRequest;
 import com.openexchange.ajax.mail.actions.GetRequest;
 import com.openexchange.ajax.mail.actions.GetResponse;
-import com.openexchange.ajax.mail.actions.NewMailRequest;
-import com.openexchange.ajax.mail.actions.NewMailResponse;
+import com.openexchange.ajax.mail.actions.ImportMailRequest;
+import com.openexchange.ajax.mail.actions.ImportMailResponse;
 import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
@@ -71,7 +72,7 @@ public class Bug15608Test extends AbstractAJAXSession {
     private TimeZone timeZone;
     private String folder;
     private String address;
-    private String id;
+    private String[][] ids;
 
     public Bug15608Test(String name) {
         super(name);
@@ -84,19 +85,24 @@ public class Bug15608Test extends AbstractAJAXSession {
         timeZone = client.getValues().getTimeZone();
         folder = client.getValues().getInboxFolder();
         address = client.getValues().getSendAddress();
-        NewMailRequest request = new NewMailRequest(folder, MAIL.replaceAll("#ADDR#", address), ORIG_FLAGS);
-        NewMailResponse response = client.execute(request);
-        id = response.getId();
+        String mail = MAIL.replaceAll("#ADDR#", address);
+        ByteArrayInputStream[] massMails = new ByteArrayInputStream[1000];
+        for (int i = 0; i < massMails.length; i++) {
+            massMails[i] = new ByteArrayInputStream(mail.getBytes("UTF-8"));
+        }
+        ImportMailRequest request = new ImportMailRequest(folder, ORIG_FLAGS, massMails);
+        ImportMailResponse response = client.execute(request);
+        ids = response.getIds();
     }
 
     @Override
     protected void tearDown() throws Exception {
-        client.execute(new DeleteRequest(folder, id, true));
+        client.execute(new DeleteRequest(ids, true));
         super.tearDown();
     }
 
     public void testFlags() throws Throwable {
-        GetRequest request = new GetRequest(folder, id);
+        GetRequest request = new GetRequest(folder, ids[0][1]);
         request.setUnseen(true);
         GetResponse response = client.execute(request);
         MailMessage mail = response.getMail(timeZone);
@@ -112,5 +118,6 @@ public class Bug15608Test extends AbstractAJAXSession {
         "Content-Type: text/plain; charset=\"UTF-8\"\n" +
         "Content-Transfer-Encoding: 8bit\n" +
         "\n" +
-        "Test for bug 15608\n";
+        "Test for bug 15608\n" +
+        "äöüÄÖÜß\n";
 }
