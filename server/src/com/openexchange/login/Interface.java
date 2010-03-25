@@ -66,5 +66,7 @@ public enum Interface {
 
     WEBDAV_VCARD,
 
-    OUTLOOK_UPDATER
+    OUTLOOK_UPDATER,
+
+    MOBILECONFIG
 }
