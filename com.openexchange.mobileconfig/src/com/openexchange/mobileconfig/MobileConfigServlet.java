@@ -4,15 +4,20 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Locale;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.login.Interface;
 import com.openexchange.mobileconfig.services.MobileConfigServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.webdav.OXServlet;
 
 
@@ -22,14 +27,31 @@ public class MobileConfigServlet extends OXServlet {
      * 
      */
     private static final long serialVersionUID = 7913468326542861986L;
+    
+    @Override
+    protected boolean useHttpAuth() {
+        return false;
+    }
 
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        final Session session = getSession(req);
-        final PrintWriter writer = resp.getWriter();
-        final User user = UserStorage.getStorageUser(session.getUserId(), session.getContextId());
-        if (null != user) {
-            writeMobileConfig(writer, user.getMail(), getHostname(session.getUserId(), session.getContextId()), "OX EAS", session.getLogin());
+        if (doAuth(req, new HttpServletResponseWrapper(resp) {
+
+            @Override
+            public void addCookie(Cookie cookie) {
+                // cookies will not be added
+            }
+            
+        })) {
+            final Session session = getSession(req);
+            final PrintWriter writer = resp.getWriter();
+            final User user = UserStorage.getStorageUser(session.getUserId(), session.getContextId());
+            if (null != user) {
+                writeMobileConfig(writer, user.getMail(), getHostname(session.getUserId(), session.getContextId()), "OX EAS", session.getLogin());
+            }
+            Tools.disableCaching(resp);
+            
+            Tools.deleteCookies(req, resp);
         }
     }
 
@@ -51,7 +73,7 @@ public class MobileConfigServlet extends OXServlet {
 
     @Override
     protected Interface getInterface() {
-        return Interface.HTTP_JSON;
+        return Interface.MOBILECONFIG;
     }
     
     private void writeMobileConfig(final PrintWriter printWriter, final String email, final String host, final String displayname, final String username) {
