@@ -321,7 +321,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
         final POP3Config config = getPOP3Config();
         checkFieldsBeforeConnect(config);
         try {
-            final POP3Store pop3Store = POP3StoreConnector.getPOP3Store(config, getMailProperties(), false, session, true).getPop3Store();
+            final POP3Store pop3Store = POP3StoreConnector.getPOP3Store(config, getMailProperties(), false, session, false).getPop3Store();
             /*
              * Close quietly
              */

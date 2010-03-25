@@ -376,7 +376,7 @@ public final class POP3StoreConnector {
                  * Mandatory to further work with JavaMail API
                  */
                 throw new POP3Exception(
-                    POP3Exception.Code.EXPUNGE_MODE_ONLY,
+                    POP3Exception.Code.MISSING_REQUIRED_CAPABILITY,
                     "TOP",
                     server,
                     login,
@@ -400,7 +400,7 @@ public final class POP3StoreConnector {
                  */
                 if (errorOnMissingUIDL) {
                     throw new POP3Exception(
-                        POP3Exception.Code.EXPUNGE_MODE_ONLY,
+                        POP3Exception.Code.MISSING_REQUIRED_CAPABILITY,
                         "UIDL",
                         server,
                         login,
