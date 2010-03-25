@@ -4,17 +4,19 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Locale;
 import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import com.openexchange.authentication.LoginException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.login.Interface;
+import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.mobileconfig.services.MobileConfigServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.http.Tools;
@@ -23,6 +25,8 @@ import com.openexchange.tools.webdav.OXServlet;
 
 public class MobileConfigServlet extends OXServlet {
 
+    private static final transient Log LOG = LogFactory.getLog(MobileConfigServlet.class);
+    
     /**
      * 
      */
@@ -35,23 +39,37 @@ public class MobileConfigServlet extends OXServlet {
 
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (doAuth(req, new HttpServletResponseWrapper(resp) {
+        final PrintWriter writer = resp.getWriter();
+        if (!req.isSecure()) {
+            writer.println("This page can only be accessed over a secure connection");
+            writer.close();
+            Tools.deleteCookies(req, resp);
+            return;
+        }
+        final HttpServletResponseWrapper noCookieResponse = new HttpServletResponseWrapper(resp) {
 
             @Override
             public void addCookie(Cookie cookie) {
                 // cookies will not be added
             }
             
-        })) {
+        };
+        if (doAuth(req, noCookieResponse)) {
             final Session session = getSession(req);
-            final PrintWriter writer = resp.getWriter();
             final User user = UserStorage.getStorageUser(session.getUserId(), session.getContextId());
             if (null != user) {
-                writeMobileConfig(writer, user.getMail(), getHostname(session.getUserId(), session.getContextId()), "OX EAS", session.getLogin());
+                writeMobileConfig(writer, user.getMail(), getHostname(session.getUserId(), session.getContextId()), "OX EAS", session.getLogin(), session.getPassword());
             }
             Tools.disableCaching(resp);
             
             Tools.deleteCookies(req, resp);
+            
+            try {
+                LoginPerformer.getInstance().doLogout(session.getSessionID());
+            } catch (LoginException e) {
+                LOG.error(e.getMessage(), e);
+            }
+
         }
     }
 
@@ -76,7 +94,7 @@ public class MobileConfigServlet extends OXServlet {
         return Interface.MOBILECONFIG;
     }
     
-    private void writeMobileConfig(final PrintWriter printWriter, final String email, final String host, final String displayname, final String username) {
+    private void writeMobileConfig(final PrintWriter printWriter, final String email, final String host, final String displayname, final String username, final String password) {
         try {
             printWriter.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
             printWriter.println("<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">");
@@ -89,6 +107,8 @@ public class MobileConfigServlet extends OXServlet {
             printWriter.println("           <string>" + email + "</string>");
             printWriter.println("           <key>Host</key>");
             printWriter.println("           <string>" + host + "</string>");
+            printWriter.println("           <key>Password</key>");
+            printWriter.println("           <string>" + password + "</string>");
             printWriter.println("           <key>PayloadDescription</key>");
             printWriter.println("           <string>Geräte für die Verwendung mit Microsoft Exchange-ActiveSync-Diensten konfigurieren.</string>");
             printWriter.println("           <key>PayloadDisplayName</key>");
