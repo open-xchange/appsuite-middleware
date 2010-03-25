@@ -42,33 +42,41 @@ workflowString: |
             type: 1
             typeOfInfo: email1
           - !com.openexchange.subscribe.crawler.internal.PagePart
-            regex: (<h2>Phone</h2>)
+            regex: "(<h2>(Phone|Telefon)</h2>)"
           - !com.openexchange.subscribe.crawler.internal.PagePart
-            regex: "([^0-9\\+\\(\\)]*Home:[^0-9\\+\\(\\)])*([0-9\\s\\+\\-\\/\\(\\)]*)(&)"
+            regex: "(Home|Privat):[^0-9\\+\\(\\)]*([0-9\\s\\+\\-\\/\\(\\)]*)()"
             type: 1
             typeOfInfo: telephone_home1
           - !com.openexchange.subscribe.crawler.internal.PagePart
-            regex: "([^0-9\\+\\(\\)]*Work:[^0-9\\+\\(\\)])*([0-9\\s\\+\\-\\/\\(\\)]*)(&)"
+            regex: "(Work|Gesch.ftlich):[^0-9\\+\\(\\)]*([0-9\\s\\+\\-\\/\\(\\)]*)()"
             type: 1
             typeOfInfo: telephone_business1
           - !com.openexchange.subscribe.crawler.internal.PagePart
-            regex: "([^0-9\\+\\(\\)]*Mobile:[^0-9\\+\\(\\)])*([0-9\\s\\+\\-\\/\\(\\)]*)(&)"
+            regex: "(Mobile|Handy):[^0-9\\+\\(\\)]*([0-9\\s\\+\\-\\/\\(\\)]*)()"
             type: 1
             typeOfInfo: cellular_telephone1
           - !com.openexchange.subscribe.crawler.internal.PagePart
-            regex: (<h2>Work</h2>)
+            regex: "(<h2>(Work|Gesch.ftlich)</h2>)"
           - !com.openexchange.subscribe.crawler.internal.PagePart
-            regex: "(<dt>[\\s]*Company:[\\s]*<\\/dt>[\\s]*<dd>[\\s]*<div>[\\s]*)([^<]*)(<\\/div>)"
+            regex: "<dt>[\\s]*(Company|Firma):[\\s]*<\\/dt>[\\s]*<dd>[\\s]*<div>[\\s]*([^<]*)(<\\/div>)"
             type: 1
             typeOfInfo: company
           - !com.openexchange.subscribe.crawler.internal.PagePart
-            regex: "(<dt>[\\s]*Title:[\\s]*<\\/dt>[\\s]*<dd>[\\s]*<div>[\\s]*)([^<]*)(<\\/div>)"
+            regex: "<dt>[\\s]*(Title|Titel):[\\s]*<\\/dt>[\\s]*<dd>[\\s]*<div>[\\s]*([^<]*)(<\\/div>)"
             type: 1
             typeOfInfo: title
           - !com.openexchange.subscribe.crawler.internal.PagePart
-            regex: "(<dt>[\\s]*Address:[\\s]*<\\/dt>[\\s]*<dd>[\\s]*<div>[\\s]*)([a-zA-Z0-9\\säöüß]*<br \\/>[\\s]*<br \\/>[\\s]*[a-zA-Z0-9\\säöüß]*<br \\/>[\\s]*[a-zA-Z0-9\\säöüß]*)(<)"
+            regex: "(Address|Adresse):[\\s]*<\\/dt>[\\s]*<dd>[\\s]*<div>[\\s]*([a-zA-Z0-9\\säöüß]*)(<br \\/>)"
             type: 1
-            typeOfInfo: address_note
+            typeOfInfo: street_business
+          - !com.openexchange.subscribe.crawler.internal.PagePart
+            regex: "(<br \\/>)*([0-9]*)(\\s)"
+            type: 1
+            typeOfInfo: postal_code_business
+          - !com.openexchange.subscribe.crawler.internal.PagePart
+            regex: "()([a-zA-Z0-9\\säöüß]*)()"
+            type: 1
+            typeOfInfo: city_business
           - !com.openexchange.subscribe.crawler.internal.PagePart
             regex: (<h2>Instant Messenger</h2>)
           - !com.openexchange.subscribe.crawler.internal.PagePart
@@ -77,9 +85,21 @@ workflowString: |
             type: 1
             typeOfInfo: instant_messenger1
           - !com.openexchange.subscribe.crawler.internal.PagePart
-            regex: (<h2>Personal</h2>)
+            regex: "(<h2>(Personal|Pers.nliche Daten)</h2>)"
           - !com.openexchange.subscribe.crawler.internal.PagePart
-            regex: "(Birthday:[^0-9]*)([0-9]{2})(\\/)"
+            regex: "(Address|Adresse):[\\s]*<\\/dt>[\\s]*<dd>[\\s]*<div>[\\s]*([a-zA-Z0-9\\säöüß]*)(<br \\/>)*"
+            type: 1
+            typeOfInfo: street_home
+          - !com.openexchange.subscribe.crawler.internal.PagePart
+            regex: "(<br \\/>\\s)([0-9]*)(\\s)"
+            type: 1
+            typeOfInfo: postal_code_home
+          - !com.openexchange.subscribe.crawler.internal.PagePart
+            regex: "()([a-zA-Z0-9\\säöüß]*)()"
+            type: 1
+            typeOfInfo: city_home
+          - !com.openexchange.subscribe.crawler.internal.PagePart
+            regex: "(Birthday|Geburtstag):[^0-9]*([0-9]{2})(\\/)"
             type: 1
             typeOfInfo: birthday_month
           - !com.openexchange.subscribe.crawler.internal.PagePart
