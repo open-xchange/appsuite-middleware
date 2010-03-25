@@ -239,8 +239,7 @@ public class Executor extends Assert {
         return parameter.getURLParameters();
     }
 
-    private static InputStream createBody(final Object body)
-        throws UnsupportedEncodingException {
+    private static InputStream createBody(final Object body) throws UnsupportedEncodingException {
         return new ByteArrayInputStream(body.toString().getBytes(ENCODING));
     }
 }

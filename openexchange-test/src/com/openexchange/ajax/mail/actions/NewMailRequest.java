@@ -66,11 +66,8 @@ import com.openexchange.webdav.xml.fields.CommonFields;
 public class NewMailRequest extends AbstractMailRequest<NewMailResponse> {
 
     private final String folder;
-
     private final String rfc822;
-
     private final int flags;
-
     private final boolean failOnError;
 
     public NewMailRequest(String folder, String rfc822, int flags) {
