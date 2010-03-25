@@ -164,7 +164,7 @@ public abstract class ParamContainer {
         }
     };
 
-    private static final ErrorInfo getErrorInfo(final EnumComponent component) {
+    static final ErrorInfo getErrorInfo(final EnumComponent component) {
         switch (component) {
         case FOLDER:
             return FOLDER_ERR_INFO;
