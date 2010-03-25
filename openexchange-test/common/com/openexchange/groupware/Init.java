@@ -148,6 +148,9 @@ import com.openexchange.threadpool.internal.ThreadPoolServiceImpl;
 import com.openexchange.timer.TimerService;
 import com.openexchange.timer.internal.CustomThreadPoolExecutorTimerService;
 import com.openexchange.tools.events.TestEventAdmin;
+import com.openexchange.tools.file.FileStorage;
+import com.openexchange.tools.file.internal.FileStorageStarterImpl;
+import com.openexchange.tools.file.internal.QuotaFileStorageStarterImpl;
 import com.openexchange.tools.servlet.ServletConfigLoader;
 import com.openexchange.tools.servlet.http.HttpManagersInit;
 import com.openexchange.user.UserService;
@@ -294,6 +297,7 @@ public final class Init {
         startAndInjectNotification();
         startAndInjectCache();
         startAndInjectDatabaseBundle();
+        startAndInjectFileStorage();
         startAndInjectDatabaseUpdate();
         startAndInjectI18NBundle();
         startAndInjectMonitoringBundle();
@@ -443,8 +447,15 @@ public final class Init {
         CacheService cacheService = (CacheService) services.get(CacheService.class);
         com.openexchange.database.internal.Initialization.getInstance().getTimer().setTimerService(timerService);
         final DatabaseService dbService = com.openexchange.database.internal.Initialization.getInstance().start(configurationService);
+        services.put(DatabaseService.class, dbService);
         com.openexchange.database.internal.Initialization.getInstance().setCacheService(cacheService);
         Database.setDatabaseService(dbService);
+    }
+
+    public static void startAndInjectFileStorage() {
+        FileStorage.fss = new FileStorageStarterImpl();
+        DatabaseService dbService = (DatabaseService) services.get(DatabaseService.class);
+        FileStorage.qfss = new QuotaFileStorageStarterImpl(dbService, FileStorage.fss);
     }
 
     public static void startAndInjectDatabaseUpdate() throws ComponentAlreadyRegisteredException {
