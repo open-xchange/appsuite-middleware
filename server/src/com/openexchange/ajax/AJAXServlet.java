@@ -235,6 +235,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     
     public static final String ACTION_RESOLVE_UID = "resolveuid";
 
+    public static final String ACTION_IMPORT = "import";
+
     /**
      * The parameter 'from' specifies index of starting entry in list of objects dependent on given order criteria and folder id
      */
@@ -845,13 +847,13 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
          */
     }
 
-    protected void writeResponse(final Response response, final HttpServletResponse httpServletResponse) throws IOException {
-        httpServletResponse.setContentType(CONTENTTYPE_JAVASCRIPT);
+    protected void writeResponse(final Response response, final HttpServletResponse servletResponse) throws IOException {
+        servletResponse.setContentType(CONTENTTYPE_JAVASCRIPT);
         try {
-            ResponseWriter.write(response, httpServletResponse.getWriter());
+            ResponseWriter.write(response, servletResponse.getWriter());
         } catch (final JSONException e) {
             log(RESPONSE_ERROR, e);
-            sendError(httpServletResponse);
+            sendError(servletResponse);
         }
     }
 
