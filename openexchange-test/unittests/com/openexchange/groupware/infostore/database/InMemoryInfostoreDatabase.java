@@ -73,7 +73,7 @@ import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.tx.Undoable;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.tools.file.FileStorage;
-import com.openexchange.tools.file.FileStorageException;
+import com.openexchange.tools.file.external.FileStorageException;
 import com.openexchange.tools.session.ServerSession;
 
 

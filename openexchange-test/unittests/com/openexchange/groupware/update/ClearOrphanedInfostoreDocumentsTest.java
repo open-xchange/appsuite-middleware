@@ -56,7 +56,7 @@ import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.update.tasks.ClearOrphanedInfostoreDocuments;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.file.FileStorage;
-import com.openexchange.tools.file.FileStorageException;
+import com.openexchange.tools.file.external.FileStorageException;
 import com.openexchange.tools.update.ForeignKeyOld;
 
 import java.io.ByteArrayInputStream;

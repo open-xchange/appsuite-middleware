@@ -75,8 +75,8 @@ import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.file.FileStorage;
-import com.openexchange.tools.file.FileStorageException;
 import com.openexchange.tools.file.InMemoryFileStorage;
+import com.openexchange.tools.file.external.FileStorageException;
 import com.openexchange.tools.file.internal.FileStorageImpl;
 
 /**

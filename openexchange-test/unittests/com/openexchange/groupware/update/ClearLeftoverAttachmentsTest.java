@@ -17,7 +17,7 @@ import com.openexchange.groupware.filestore.FilestoreException;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.update.tasks.ClearLeftoverAttachmentsUpdateTask;
 import com.openexchange.tools.file.FileStorage;
-import com.openexchange.tools.file.FileStorageException;
+import com.openexchange.tools.file.external.FileStorageException;
 
 public class ClearLeftoverAttachmentsTest extends UpdateTest {
     private AttachmentBase attachmentBase;

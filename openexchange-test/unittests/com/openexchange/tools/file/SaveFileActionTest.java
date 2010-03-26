@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
 import com.openexchange.tools.file.FileStorage;
+import com.openexchange.tools.file.external.FileStorageException;
 import com.openexchange.tools.file.internal.FileStorageImpl;
 import com.openexchange.tools.file.internal.FileStorageStarterImpl;
 
