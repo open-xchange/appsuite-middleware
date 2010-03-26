@@ -114,7 +114,7 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.server.ServiceException;
-import com.openexchange.tools.file.FileStorage;
+import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.file.external.FileStorageException;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 
@@ -234,7 +234,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             boolean simpleDelete = null == gwCtx;
             try {
                 if (!simpleDelete) {
-                    FileStorage.getInstance(storageURI, gwCtx).remove();
+                    QuotaFileStorage.getInstance(storageURI, gwCtx).remove();
                 }
             } catch (FileStorageException e) {
                 simpleDelete = true;
