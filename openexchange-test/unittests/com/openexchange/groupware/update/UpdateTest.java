@@ -21,6 +21,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.tools.file.FileStorage;
+import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.file.external.FileStorageException;
 
 public abstract class UpdateTest extends TestCase {
@@ -134,7 +135,7 @@ public abstract class UpdateTest extends TestCase {
 
     protected final void assertNotInFilestorage(List<String> paths) throws FileStorageException, FilestoreException {
 
-        FileStorage fs  = FileStorage.getInstance(
+        FileStorage fs  = QuotaFileStorage.getInstance(
                         FilestoreStorage.createURI(ctx), ctx);
         SortedSet<String> existingPaths = fs.getFileList();
         for (String path : paths) {

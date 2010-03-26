@@ -6,13 +6,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
-import com.openexchange.tools.file.FileStorage;
-import com.openexchange.tools.file.external.FileStorageException;
-import com.openexchange.tools.file.internal.FileStorageImpl;
-import com.openexchange.tools.file.internal.FileStorageStarterImpl;
-
 import com.openexchange.groupware.tx.AbstractActionTest;
 import com.openexchange.groupware.tx.UndoableAction;
+import com.openexchange.tools.file.external.FileStorageException;
+import com.openexchange.tools.file.internal.FileStorageStarterImpl;
 
 public class SaveFileActionTest extends AbstractActionTest {
 
@@ -28,13 +25,13 @@ public class SaveFileActionTest extends AbstractActionTest {
         super.setUp();
         tempFile = File.createTempFile("filestorage", ".tmp");
         tempFile.delete();
-        FileStorage.fss = new FileStorageStarterImpl();
+        FileStorage.setFileStorageStarter(new FileStorageStarterImpl());
     }
 
     @Override
     protected void tearDown() throws Exception {
         rmdir(new File("file:" + tempFile.toString()));
-        FileStorage.fss = null;
+        FileStorage.setFileStorageStarter(null);
         super.tearDown();
     }
 

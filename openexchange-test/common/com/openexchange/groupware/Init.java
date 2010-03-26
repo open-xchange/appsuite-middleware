@@ -149,6 +149,8 @@ import com.openexchange.timer.TimerService;
 import com.openexchange.timer.internal.CustomThreadPoolExecutorTimerService;
 import com.openexchange.tools.events.TestEventAdmin;
 import com.openexchange.tools.file.FileStorage;
+import com.openexchange.tools.file.QuotaFileStorage;
+import com.openexchange.tools.file.external.FileStorageStarter;
 import com.openexchange.tools.file.internal.FileStorageStarterImpl;
 import com.openexchange.tools.file.internal.QuotaFileStorageStarterImpl;
 import com.openexchange.tools.servlet.ServletConfigLoader;
@@ -453,9 +455,10 @@ public final class Init {
     }
 
     public static void startAndInjectFileStorage() {
-        FileStorage.fss = new FileStorageStarterImpl();
+        FileStorageStarter fileStorageStarter = new FileStorageStarterImpl();
+        FileStorage.setFileStorageStarter(fileStorageStarter); 
         DatabaseService dbService = (DatabaseService) services.get(DatabaseService.class);
-        FileStorage.qfss = new QuotaFileStorageStarterImpl(dbService, FileStorage.fss);
+        QuotaFileStorage.setQuotaFileStorageStarter(new QuotaFileStorageStarterImpl(dbService, fileStorageStarter));
     }
 
     public static void startAndInjectDatabaseUpdate() throws ComponentAlreadyRegisteredException {

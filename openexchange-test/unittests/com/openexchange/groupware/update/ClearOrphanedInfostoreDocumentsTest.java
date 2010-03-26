@@ -56,6 +56,7 @@ import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.update.tasks.ClearOrphanedInfostoreDocuments;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.file.FileStorage;
+import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.file.external.FileStorageException;
 import com.openexchange.tools.update.ForeignKeyOld;
 
@@ -96,7 +97,7 @@ public class ClearOrphanedInfostoreDocumentsTest extends UpdateTest {
         exec("DELETE FROM infostore_document WHERE infostore_id = ?", 100000);
         exec("DELETE FROM del_infostore_document WHERE infostore_id = ?", 100001);
 
-        FileStorage fs  = FileStorage.getInstance(
+        FileStorage fs  = QuotaFileStorage.getInstance(
                 FilestoreStorage.createURI(ctx), ctx);
         for (String path : paths) {
             fs.deleteFile(path);        
@@ -142,7 +143,7 @@ public class ClearOrphanedInfostoreDocumentsTest extends UpdateTest {
     }
 
     private void createOrphanedInfostoreDocumentEntry(int id, int version) throws FileStorageException, FilestoreException, UnsupportedEncodingException, SQLException, DBPoolingException {
-        FileStorage fs  = FileStorage.getInstance(
+        FileStorage fs  = QuotaFileStorage.getInstance(
                 FilestoreStorage.createURI(ctx), ctx);
 
         String path = fs.saveNewFile(new ByteArrayInputStream("Hallo Welt".getBytes("UTF-8")));
