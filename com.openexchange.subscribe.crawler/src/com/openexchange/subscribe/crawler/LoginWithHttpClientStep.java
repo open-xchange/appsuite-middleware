@@ -98,6 +98,8 @@ public class LoginWithHttpClientStep extends AbstractStep<Object, Object> implem
             int code = httpClient.executeMethod(getMethod);            
             
             webClient.setWebConnection(new WebConnection() {
+            	
+            	private HttpClient httpClient_ = httpClient;
 
                 public WebResponse getResponse(WebRequestSettings settings) throws IOException {
                     URL url = settings.getUrl();

@@ -107,10 +107,10 @@ public class WebClientCloser {
             if (webConnection == null) {
                 return null;
             }
-            if (!HttpWebConnection.class.isInstance(webConnection)) {
-                LOG.error("Cannot close webclient: webConnection is not of class " + HttpWebConnection.class.getName() + " but of class " + webConnection.getClass().getName());
-                return null;
-            }
+//            if (!HttpWebConnection.class.isInstance(webConnection)) {
+//                LOG.error("Cannot close webclient: webConnection is not of class " + HttpWebConnection.class.getName() + " but of class " + webConnection.getClass().getName());
+//                return null;
+//            }
             final Object httpClient = HTTP_CLIENT_FIELD.get(webConnection);
             if (httpClient == null) {
                 return null;
