@@ -138,7 +138,9 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
             }
             executedSuccessfully = true;
         }
-
+        if (input.isEmpty()) {
+            executedSuccessfully = true;
+        }
         output = contactObjects.toArray(new Contact[contactObjects.size()]);
 
     }
