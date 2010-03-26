@@ -985,7 +985,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
     protected FileStorage getFileStorage(final Context ctx) throws AbstractOXException {
         if(USE_QUOTA) {
-            return FileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
+            return QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
         }
         return FileStorage.getInstance(FilestoreStorage.createURI(ctx));
     }

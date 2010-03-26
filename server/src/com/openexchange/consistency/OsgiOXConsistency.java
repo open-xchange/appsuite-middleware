@@ -68,6 +68,7 @@ import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.file.FileStorage;
+import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.file.external.FileStorageException;
 
 /**
@@ -99,7 +100,7 @@ public class OsgiOXConsistency extends Consistency {
 
     @Override
     protected FileStorage getFileStorage(final Context ctx) throws FileStorageException, FilestoreException {
-        return FileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
+        return QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
     }
 
     @Override

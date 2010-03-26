@@ -74,8 +74,8 @@ import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.filestore.FilestoreException;
 import com.openexchange.groupware.filestore.FilestoreStorage;
-import com.openexchange.groupware.tx.SimpleDBProvider;
 import com.openexchange.tools.file.FileStorage;
+import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.file.external.FileStorageException;
 
 /**
@@ -530,7 +530,7 @@ public final class Tools {
         final URI fileStorageURI = FilestoreStorage.createURI(ctx);
         final File file = new File(fileStorageURI);
         if (file.exists()) {
-            final FileStorage fs = FileStorage.getInstance(fileStorageURI, ctx);
+            final FileStorage fs = QuotaFileStorage.getInstance(fileStorageURI, ctx);
             fs.deleteFile(fileStoreLocation);
         }
     }

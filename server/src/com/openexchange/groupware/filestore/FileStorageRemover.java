@@ -57,6 +57,7 @@ import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.SimpleDBProvider;
 import com.openexchange.tools.file.FileStorage;
+import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.file.external.FileStorageException;
 
 /**
@@ -94,6 +95,6 @@ public final class FileStorageRemover extends ContextDelete {
     }
 
     private FileStorage getFileStorage(final Context ctx, DBProvider dbProvider) throws FileStorageException, FilestoreException {
-        return FileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx); 
+        return QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx); 
     }
 }

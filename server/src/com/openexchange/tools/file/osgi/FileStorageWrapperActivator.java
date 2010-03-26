@@ -54,6 +54,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.tools.file.FileStorage;
+import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.file.external.FileStorageStarter;
 import com.openexchange.tools.file.external.QuotaFileStorageStarter;
 
@@ -86,7 +88,7 @@ public class FileStorageWrapperActivator implements BundleActivator {
 
         public Object addingService(final ServiceReference reference) {
             final FileStorageStarter service = (FileStorageStarter) context.getService(reference);
-            com.openexchange.tools.file.FileStorage.fss = service;
+            FileStorage.setFileStorageStarter(service);
             return service;
         }
 
@@ -96,8 +98,8 @@ public class FileStorageWrapperActivator implements BundleActivator {
         }
 
         public void removedService(final ServiceReference reference, final Object service) {
-            com.openexchange.tools.file.FileStorage.fss = null;
-
+            FileStorage.setFileStorageStarter(null);
+            context.ungetService(reference);
         }
 
     }
@@ -112,7 +114,7 @@ public class FileStorageWrapperActivator implements BundleActivator {
 
         public Object addingService(final ServiceReference reference) {
             final QuotaFileStorageStarter service = (QuotaFileStorageStarter) context.getService(reference);
-            com.openexchange.tools.file.FileStorage.qfss = service;
+            QuotaFileStorage.setQuotaFileStorageStarter(service);
             return service;
         }
 
@@ -122,8 +124,8 @@ public class FileStorageWrapperActivator implements BundleActivator {
         }
 
         public void removedService(final ServiceReference reference, final Object service) {
-            com.openexchange.tools.file.FileStorage.qfss = null;
-
+            QuotaFileStorage.setQuotaFileStorageStarter(null);
+            context.ungetService(reference);
         }
 
     }

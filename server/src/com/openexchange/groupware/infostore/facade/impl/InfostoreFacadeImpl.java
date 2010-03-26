@@ -729,7 +729,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, D
     }
 
     protected FileStorage getFileStorage(final Context ctx) throws FilestoreException, FileStorageException {
-        return FileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
+        return QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
     }
 
     private Metadata[] nonNull(final DocumentMetadata document) {

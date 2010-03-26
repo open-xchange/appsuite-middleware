@@ -105,6 +105,7 @@ import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.tools.file.FileStorage;
+import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.file.external.FileStorageException;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
@@ -396,7 +397,7 @@ public class DatabaseImpl extends DBService {
             }
             result = stmt.executeQuery();
             if (result.next()) {
-                final FileStorage fs = FileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
+                final FileStorage fs = QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
                 retval = fs.getFile(result.getString(1));
                 fs.close();
             }
@@ -1837,7 +1838,7 @@ public class DatabaseImpl extends DBService {
     }
 
     protected FileStorage getFileStorage(final Context ctx) throws FileStorageException, FilestoreException {
-        return FileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
+        return QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
     }
 
     @Override

@@ -53,37 +53,34 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.Set;
 import java.util.SortedSet;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.tools.file.external.FileStorageException;
 import com.openexchange.tools.file.external.FileStorageStarter;
-import com.openexchange.tools.file.external.QuotaFileStorageStarter;
+import com.openexchange.tools.file.external.FileStorageException.Code;
 
 public class FileStorage {
 
-    public static FileStorageStarter fss;
-    public static QuotaFileStorageStarter qfss;
+    private static FileStorageStarter fss;
 
     private com.openexchange.tools.file.external.FileStorage fs;
 
-    protected FileStorage(final URI uri) throws FileStorageException {
+    private FileStorage(final URI uri) throws FileStorageException {
+        super();
         fs = fss.getFileStorage(uri);
+    }
+
+    protected FileStorage() {
+        super();
     }
 
     public static final FileStorage getInstance(final URI uri) throws FileStorageException {
         if (fss == null) {
-            throw new FileStorageException(FileStorageException.Code.INSTANTIATIONERROR);
+            throw new FileStorageException(Code.INSTANTIATIONERROR, "No file storage starter registered.");
         }
         return new FileStorage(uri);
     }
 
-    public static final FileStorage getInstance(final URI uri, final Context ctx) throws FileStorageException {
-        FileStorage retval = null;
-        if (qfss != null) {
-            retval = new com.openexchange.tools.file.QuotaFileStorage(uri, ctx, qfss);
-        } else {
-            throw new FileStorageException(FileStorageException.Code.INSTANTIATIONERROR);
-        }
-        return retval;
+    public static void setFileStorageStarter(FileStorageStarter fss) {
+        FileStorage.fss = fss;
     }
 
     public boolean deleteFile(final String identifier) throws FileStorageException {

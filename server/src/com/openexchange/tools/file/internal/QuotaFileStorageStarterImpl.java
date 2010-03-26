@@ -52,7 +52,6 @@ package com.openexchange.tools.file.internal;
 import java.net.URI;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.tools.file.external.FileStorage;
 import com.openexchange.tools.file.external.FileStorageException;
 import com.openexchange.tools.file.external.FileStorageStarter;
 import com.openexchange.tools.file.external.QuotaFileStorage;
@@ -71,19 +70,13 @@ public class QuotaFileStorageStarterImpl implements QuotaFileStorageStarter {
     }
 
     public QuotaFileStorage getQuotaFileStorage(final Context ctx, final URI uri) throws QuotaFileStorageException {
-        FileStorage fs;
-        QuotaFileStorage qfs;
-        if (fss != null && dbs != null) {
-            try {
-                fs = fss.getFileStorage(uri);
-                qfs = new QuotaFileStorageImpl(ctx, fs, dbs);
-                return qfs;
-            } catch (final FileStorageException e) {
-                throw new QuotaFileStorageException(e);
-            }
-        } else {
+        if (fss == null || dbs == null) {
             throw new QuotaFileStorageException(QuotaFileStorageException.Code.INSTANTIATIONERROR);
         }
+        try {
+            return new QuotaFileStorageImpl(ctx, fss.getFileStorage(uri), dbs);
+        } catch (FileStorageException e) {
+            throw new QuotaFileStorageException(e);
+        }
     }
-
 }

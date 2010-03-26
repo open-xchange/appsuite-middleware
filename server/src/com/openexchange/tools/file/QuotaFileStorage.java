@@ -55,15 +55,29 @@ import java.util.Set;
 import java.util.SortedSet;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.tools.file.external.FileStorageException;
+import com.openexchange.tools.file.external.FileStorageException.Code;
 import com.openexchange.tools.file.external.QuotaFileStorageStarter;
 
-public class QuotaFileStorage extends FileStorage {
+public final class QuotaFileStorage extends FileStorage {
+
+    private static QuotaFileStorageStarter qfss;
 
     private com.openexchange.tools.file.external.QuotaFileStorage qfs;
 
-    public QuotaFileStorage(final URI uri, final Context ctx, final QuotaFileStorageStarter qfss) throws FileStorageException {
-        super(uri);
+    private QuotaFileStorage(final URI uri, final Context ctx, final QuotaFileStorageStarter qfss) throws FileStorageException {
+        super();
         qfs = qfss.getQuotaFileStorage(ctx, uri);
+    }
+
+    public static final QuotaFileStorage getInstance(final URI uri, final Context ctx) throws FileStorageException {
+        if (qfss == null) {
+            throw new FileStorageException(Code.INSTANTIATIONERROR, "No quota file storage starter registered.");
+        }
+        return new com.openexchange.tools.file.QuotaFileStorage(uri, ctx, qfss);
+    }
+
+    public static void setQuotaFileStorageStarter(QuotaFileStorageStarter qfss) {
+        QuotaFileStorage.qfss = qfss;
     }
 
     public long getUsage() throws FileStorageException {
@@ -124,7 +138,13 @@ public class QuotaFileStorage extends FileStorage {
     }
 
     @Override
-    public String saveNewFile(final InputStream file, final long sizeHint) throws FileStorageException {
-        return qfs.saveNewFile(file);
+    public String saveNewFile(InputStream file, long sizeHint) throws FileStorageException {
+        // TODO use sizeHint to faster break on over quota
+        return super.saveNewFile(file, sizeHint);
+    }
+
+    @Override
+    public void close() {
+        qfs = null;
     }
 }

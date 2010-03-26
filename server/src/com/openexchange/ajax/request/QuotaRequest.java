@@ -62,10 +62,8 @@ import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.filestore.FilestoreStorage;
-import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailServletInterface;
-import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.session.ServerSession;
 
@@ -86,7 +84,7 @@ public class QuotaRequest extends CommonRequest {
         super(w);
         try {
             final Context ctx = session.getContext();
-            this.qfs = (QuotaFileStorage) FileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
+            this.qfs = QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
         } catch (final AbstractOXException e) {
             this.fsException = e;
         }
