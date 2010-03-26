@@ -109,14 +109,13 @@ import com.openexchange.groupware.filestore.FilestoreException;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.i18n.Groups;
 import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.server.ServiceException;
 import com.openexchange.tools.file.FileStorage;
-import com.openexchange.tools.file.FileStorageException;
+import com.openexchange.tools.file.external.FileStorageException;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 
 /**
