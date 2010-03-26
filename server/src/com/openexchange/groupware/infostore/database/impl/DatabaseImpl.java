@@ -105,7 +105,7 @@ import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.tools.file.FileStorage;
-import com.openexchange.tools.file.FileStorageException;
+import com.openexchange.tools.file.external.FileStorageException;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorException;

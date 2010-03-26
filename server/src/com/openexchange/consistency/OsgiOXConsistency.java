@@ -68,7 +68,7 @@ import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.file.FileStorage;
-import com.openexchange.tools.file.FileStorageException;
+import com.openexchange.tools.file.external.FileStorageException;
 
 /**
  * Provides the integration of the consistency tool in the OSGi OX.

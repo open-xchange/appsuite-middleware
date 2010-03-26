@@ -70,8 +70,8 @@ import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.tools.file.FileStorageException;
 import com.openexchange.tools.file.FileStorage;
+import com.openexchange.tools.file.external.FileStorageException;
 
 public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
 

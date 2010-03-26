@@ -222,6 +222,17 @@ public abstract class DataParser {
         return d;
     }
 
+    private int getOffSet(TimeZone timeZone, Date d) {
+        int offset = timeZone.getOffset(d.getTime());
+        Date test = new Date(d.getTime() - offset);
+        int clientOffset = timeZone.getOffset(test.getTime());
+        if (clientOffset != offset) {
+            // UI offset addition triggered DST, use not DST
+            offset = clientOffset;
+        }
+        return offset;
+    }
+
     public static Date parseDate(final JSONObject jsonObj, final String name) {
         if (!jsonObj.has(name)) {
             return null;

@@ -76,8 +76,8 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.server.ServiceException;
 import com.openexchange.tools.file.FileStorage;
-import com.openexchange.tools.file.FileStorageException;
 import com.openexchange.tools.file.QuotaFileStorage;
+import com.openexchange.tools.file.external.FileStorageException;
 
 /**
  * Provides the Business Logic for the consistency tool. Concrete subclasses must provide integration

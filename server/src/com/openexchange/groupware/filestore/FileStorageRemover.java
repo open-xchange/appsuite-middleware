@@ -57,7 +57,7 @@ import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.SimpleDBProvider;
 import com.openexchange.tools.file.FileStorage;
-import com.openexchange.tools.file.FileStorageException;
+import com.openexchange.tools.file.external.FileStorageException;
 
 /**
  * This class implements a delete listener and removes the directories of the

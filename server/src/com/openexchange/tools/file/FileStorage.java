@@ -54,32 +54,26 @@ import java.net.URI;
 import java.util.Set;
 import java.util.SortedSet;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.tools.file.external.FileStorageException;
+import com.openexchange.tools.file.external.FileStorageStarter;
 import com.openexchange.tools.file.external.QuotaFileStorageStarter;
 
 public class FileStorage {
 
+    public static FileStorageStarter fss;
     public static QuotaFileStorageStarter qfss;
 
-    private static com.openexchange.tools.file.external.FileStorage fs;
-
-    public static com.openexchange.tools.file.external.FileStorageStarter fss;
+    private com.openexchange.tools.file.external.FileStorage fs;
 
     protected FileStorage(final URI uri) throws FileStorageException {
-        try {
-            fs = fss.getFileStorage(uri);
-        } catch (final com.openexchange.tools.file.external.FileStorageException e) {
-            throw new FileStorageException(e);
-        }
+        fs = fss.getFileStorage(uri);
     }
 
     public static final FileStorage getInstance(final URI uri) throws FileStorageException {
-        FileStorage retval = null;
-        if (fss != null) {
-            retval = new com.openexchange.tools.file.FileStorage(uri);
-        } else {
+        if (fss == null) {
             throw new FileStorageException(FileStorageException.Code.INSTANTIATIONERROR);
         }
-        return retval;
+        return new FileStorage(uri);
     }
 
     public static final FileStorage getInstance(final URI uri, final Context ctx) throws FileStorageException {
@@ -93,88 +87,46 @@ public class FileStorage {
     }
 
     public boolean deleteFile(final String identifier) throws FileStorageException {
-        try {
-            return fs.deleteFile(identifier);
-        } catch (final com.openexchange.tools.file.external.FileStorageException e) {
-            throw new FileStorageException(e);
-        }
+        return fs.deleteFile(identifier);
     }
 
     public Set<String> deleteFiles(final String[] identifiers) throws FileStorageException {
-        try {
-            return fs.deleteFiles(identifiers);
-        } catch (final com.openexchange.tools.file.external.FileStorageException e) {
-            throw new FileStorageException(e);
-        }
+        return fs.deleteFiles(identifiers);
     }
 
     public InputStream getFile(final String name) throws FileStorageException {
-        try {
-            return fs.getFile(name);
-        } catch (final com.openexchange.tools.file.external.FileStorageException e) {
-            throw new FileStorageException(e);
-        }
+        return fs.getFile(name);
     }
 
     public SortedSet<String> getFileList() throws FileStorageException {
-        try {
-            return fs.getFileList();
-        } catch (final com.openexchange.tools.file.external.FileStorageException e) {
-            throw new FileStorageException(e);
-        }
+        return fs.getFileList();
     }
 
     public long getFileSize(final String name) throws FileStorageException {
-        try {
-            return fs.getFileSize(name);
-        } catch (final com.openexchange.tools.file.external.FileStorageException e) {
-            throw new FileStorageException(e);
-        }
+        return fs.getFileSize(name);
     }
 
     public String getMimeType(final String name) throws FileStorageException {
-        try {
-            return fs.getMimeType(name);
-        } catch (final com.openexchange.tools.file.external.FileStorageException e) {
-            throw new FileStorageException(e);
-        }
+        return fs.getMimeType(name);
     }
 
     public void recreateStateFile() throws FileStorageException {
-        try {
-            fs.recreateStateFile();
-        } catch (final com.openexchange.tools.file.external.FileStorageException e) {
-            throw new FileStorageException(e);
-        }
-
+        fs.recreateStateFile();
     }
 
     public void remove() throws FileStorageException {
-        try {
-            fs.remove();
-        } catch (final com.openexchange.tools.file.external.FileStorageException e) {
-            throw new FileStorageException(e);
-        }
+        fs.remove();
     }
 
     public String saveNewFile(final InputStream file) throws FileStorageException {
-        try {
-            return fs.saveNewFile(file);
-        } catch (final com.openexchange.tools.file.external.FileStorageException e) {
-            throw new FileStorageException(e);
-        }
+        return fs.saveNewFile(file);
     }
 
     public String saveNewFile(final InputStream file, final long sizeHint) throws FileStorageException {
-        try {
-            return fs.saveNewFile(file);
-        } catch (final com.openexchange.tools.file.external.FileStorageException e) {
-            throw new FileStorageException(e);
-        }
+        return fs.saveNewFile(file);
     }
 
     public void close() {
         fs = null;
     }
-
 }

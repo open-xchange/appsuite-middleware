@@ -76,7 +76,7 @@ import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
-import com.openexchange.tools.file.FileStorageException;
+import com.openexchange.tools.file.external.FileStorageException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Tools;

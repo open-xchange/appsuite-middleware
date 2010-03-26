@@ -59,124 +59,72 @@ import com.openexchange.tools.file.external.QuotaFileStorageStarter;
 
 public class QuotaFileStorage extends FileStorage {
 
-    private static com.openexchange.tools.file.external.QuotaFileStorage qfs;
+    private com.openexchange.tools.file.external.QuotaFileStorage qfs;
 
-    public QuotaFileStorage(final URI uri, final Context ctx, final QuotaFileStorageStarter qfss) throws com.openexchange.tools.file.FileStorageException {
+    public QuotaFileStorage(final URI uri, final Context ctx, final QuotaFileStorageStarter qfss) throws FileStorageException {
         super(uri);
-        try {
-            qfs = qfss.getQuotaFileStorage(ctx, uri);
-        } catch (final FileStorageException e) {
-            throw new com.openexchange.tools.file.FileStorageException(e);
-        }
+        qfs = qfss.getQuotaFileStorage(ctx, uri);
     }
 
-    public long getUsage() throws com.openexchange.tools.file.FileStorageException {
-        try {
-            return qfs.getUsage();
-        } catch (final FileStorageException e) {
-            throw new com.openexchange.tools.file.FileStorageException(e);
-        }
+    public long getUsage() throws FileStorageException {
+        return qfs.getUsage();
     }
 
-    public void recalculateUsage() throws com.openexchange.tools.file.FileStorageException {
-        try {
-            qfs.recalculateUsage();
-        } catch (final FileStorageException e) {
-            throw new com.openexchange.tools.file.FileStorageException(e);
-        }
+    public void recalculateUsage() throws FileStorageException {
+        qfs.recalculateUsage();
     }
 
-    public long getQuota() throws FileStorageException {
+    public long getQuota() {
         return qfs.getQuota();
     }
 
     @Override
-    public boolean deleteFile(final String identifier) throws com.openexchange.tools.file.FileStorageException {
-        try {
-            return qfs.deleteFile(identifier);
-        } catch (final FileStorageException e) {
-            throw new com.openexchange.tools.file.FileStorageException(e);
-        }
+    public boolean deleteFile(final String identifier) throws FileStorageException {
+        return qfs.deleteFile(identifier);
     }
 
     @Override
-    public Set<String> deleteFiles(final String[] identifiers) throws com.openexchange.tools.file.FileStorageException {
-        try {
-            return qfs.deleteFiles(identifiers);
-        } catch (final FileStorageException e) {
-            throw new com.openexchange.tools.file.FileStorageException(e);
-        }
+    public Set<String> deleteFiles(final String[] identifiers) throws FileStorageException {
+        return qfs.deleteFiles(identifiers);
     }
 
     @Override
-    public InputStream getFile(final String name) throws com.openexchange.tools.file.FileStorageException {
-        try {
-            return qfs.getFile(name);
-        } catch (final FileStorageException e) {
-            throw new com.openexchange.tools.file.FileStorageException(e);
-        }
+    public InputStream getFile(final String name) throws FileStorageException {
+        return qfs.getFile(name);
     }
 
     @Override
-    public SortedSet<String> getFileList() throws com.openexchange.tools.file.FileStorageException {
-        try {
-            return qfs.getFileList();
-        } catch (final FileStorageException e) {
-            throw new com.openexchange.tools.file.FileStorageException(e);
-        }
+    public SortedSet<String> getFileList() throws FileStorageException {
+        return qfs.getFileList();
     }
 
     @Override
-    public long getFileSize(final String name) throws com.openexchange.tools.file.FileStorageException {
-        try {
-            return qfs.getFileSize(name);
-        } catch (final FileStorageException e) {
-            throw new com.openexchange.tools.file.FileStorageException(e);
-        }
+    public long getFileSize(final String name) throws FileStorageException {
+        return qfs.getFileSize(name);
     }
 
     @Override
-    public String getMimeType(final String name) throws com.openexchange.tools.file.FileStorageException {
-        try {
-            return qfs.getMimeType(name);
-        } catch (final FileStorageException e) {
-            throw new com.openexchange.tools.file.FileStorageException(e);
-        }
+    public String getMimeType(final String name) throws FileStorageException {
+        return qfs.getMimeType(name);
     }
 
     @Override
-    public void recreateStateFile() throws com.openexchange.tools.file.FileStorageException {
-        try {
-            qfs.recreateStateFile();
-        } catch (final FileStorageException e) {
-            throw new com.openexchange.tools.file.FileStorageException(e);
-        }
+    public void recreateStateFile() throws FileStorageException {
+        qfs.recreateStateFile();
     }
 
     @Override
-    public void remove() throws com.openexchange.tools.file.FileStorageException {
-        try {
-            qfs.remove();
-        } catch (final FileStorageException e) {
-            throw new com.openexchange.tools.file.FileStorageException(e);
-        }
+    public void remove() throws FileStorageException {
+        qfs.remove();
     }
 
     @Override
-    public String saveNewFile(final InputStream file) throws com.openexchange.tools.file.FileStorageException {
-        try {
-            return qfs.saveNewFile(file);
-        } catch (final FileStorageException e) {
-            throw new com.openexchange.tools.file.FileStorageException(e);
-        }
+    public String saveNewFile(final InputStream file) throws FileStorageException {
+        return qfs.saveNewFile(file);
     }
 
     @Override
-    public String saveNewFile(final InputStream file, final long sizeHint) throws com.openexchange.tools.file.FileStorageException {
-        try {
-            return qfs.saveNewFile(file);
-        } catch (final FileStorageException e) {
-            throw new com.openexchange.tools.file.FileStorageException(e);
-        }
+    public String saveNewFile(final InputStream file, final long sizeHint) throws FileStorageException {
+        return qfs.saveNewFile(file);
     }
 }

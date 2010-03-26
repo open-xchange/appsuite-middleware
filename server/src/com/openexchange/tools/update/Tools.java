@@ -76,7 +76,7 @@ import com.openexchange.groupware.filestore.FilestoreException;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.tx.SimpleDBProvider;
 import com.openexchange.tools.file.FileStorage;
-import com.openexchange.tools.file.FileStorageException;
+import com.openexchange.tools.file.external.FileStorageException;
 
 /**
  * This class contains some tools to ease update of database.
