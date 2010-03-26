@@ -127,6 +127,8 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
     private final CalendarCollection recColl;
     
     private int readFolderId;
+
+    private String categories;
     
     private static final Log LOG = LogFactory.getLog(FreeBusyResults.class);
     
@@ -213,6 +215,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
                 pflag = rs.getInt(8);
                 owner = rs.getInt(9);
                 colorLabel = rs.getInt(17); // SQL NULL would return zero which is no color label
+                categories = rs.getString(18); // SQL NULL would return null
                 cdao.setCreatedBy(owner);
                 final int recid = rs.getInt(10);
                 if (recid != 0) {
@@ -312,6 +315,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
                 cdao.setTitle(title);
                 cdao.setParentFolderID(readFolderId);
                 cdao.setLabel(colorLabel);
+                cdao.setCategories(categories);
             }
             final Participants ret = resolveConflictingUserParticipants();
             cdao.setParticipants(ret.getList());
