@@ -102,7 +102,9 @@ public class ContactObjectsByVcardTextPagesStep extends AbstractStep<Contact[], 
             }
             executedSuccessfully = true;
         }
-
+        if (input.isEmpty()) {
+            executedSuccessfully = true;
+        }
         output = new Contact[contactObjects.size()];
         for (int i = 0; i < output.length && i < contactObjects.size(); i++) {
             output[i] = contactObjects.get(i);
