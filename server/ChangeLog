@@ -1,3 +1,7 @@
+* 2010-03-29 - marcus.klein@open-xchange.com
+
+ - Bugfix #15710: Fixed wrong call to super class.
+
 * 2010-03-25 - thorben.betten@open-xchange.com
 
  - Bugfix #15671: Probing for optional TOP and UIDL POP3 commands

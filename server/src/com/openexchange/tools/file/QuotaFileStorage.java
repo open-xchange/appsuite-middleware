@@ -140,7 +140,7 @@ public final class QuotaFileStorage extends FileStorage {
     @Override
     public String saveNewFile(InputStream file, long sizeHint) throws FileStorageException {
         // TODO use sizeHint to faster break on over quota
-        return super.saveNewFile(file, sizeHint);
+        return qfs.saveNewFile(file);
     }
 
     @Override
