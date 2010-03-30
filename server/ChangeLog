@@ -1,6 +1,7 @@
 * 2010-03-30 - marcus.klein@open-xchange.com
 
  - Bugfix #15721: Correct ordner and proper transaction handling when deleting a user that has POP3 accounts.
+ - Bugfix #15700: Creating a new action for importing mails from body of request as multipart/form-data stream.
 
 * 2010-03-29 - marcus.klein@open-xchange.com
 
@@ -20,7 +21,7 @@
 
 * 2010-03-24 - marcus.klein@open-xchange.com
 
- - Bugfix #15608: Store flags as requests on action new with optional folder parameter.
+ - Bugfix #15608: Store flags as requested on action new with optional folder parameter.
 
 * 2010-03-23 - tobias.prinz@open-xchange.com
 
