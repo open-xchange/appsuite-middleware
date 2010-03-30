@@ -47,50 +47,45 @@
  *
  */
 
-package com.openexchange.mailaccount.internal;
+package com.openexchange.groupware.delete;
 
 import java.sql.Connection;
-import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteFailedException;
-import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountException;
-import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.server.ServiceException;
-import com.openexchange.server.services.ServerServiceRegistry;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
- * {@link MailAccountDeleteListener} - {@link DeleteListener} for mail account storage.
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * Removes a users POP3 synchronization information. Those table have a foreign key on mail account tables and this information must be
+ * removed before removing mail account information.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class MailAccountDeleteListener implements DeleteListener {
-
-    /**
-     * Initializes a new {@link MailAccountDeleteListener}.
-     */
-    public MailAccountDeleteListener() {
-        super();
-    }
+final class POP3DeleteListener implements DeleteListener {
 
     public void deletePerformed(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon) throws DeleteFailedException {
-        if (deleteEvent.getType() == DeleteEvent.TYPE_USER) {
+        if (DeleteEvent.TYPE_USER == deleteEvent.getType()) {
+            PreparedStatement stmt = null;
             try {
-                final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
-                    MailAccountStorageService.class,
-                    true);
+                final int contextId = deleteEvent.getContext().getContextId();
                 final int user = deleteEvent.getId();
-                final int cid = deleteEvent.getContext().getContextId();
-                final MailAccount[] accounts = storageService.getUserMailAccounts(user, cid);
-                for (final MailAccount account : accounts) {
-                    storageService.deleteMailAccount(account.getId(), user, cid, true, writeCon);
-                }
-            } catch (final ServiceException e) {
-                throw new DeleteFailedException(e);
-            } catch (final MailAccountException e) {
-                throw new DeleteFailedException(e);
+
+                stmt = writeCon.prepareStatement("DELETE FROM pop3_storage_deleted WHERE cid=? AND user=?");
+                int pos = 1;
+                stmt.setInt(pos++, contextId);
+                stmt.setInt(pos++, user);
+                stmt.executeUpdate();
+                DBUtils.closeSQLStuff(stmt);
+
+                stmt = writeCon.prepareStatement("DELETE FROM pop3_storage_ids WHERE cid=? AND user=?");
+                pos = 1;
+                stmt.setInt(pos++, contextId);
+                stmt.setInt(pos++, user);
+                stmt.executeUpdate();
+            } catch (final SQLException e) {
+                throw new DeleteFailedException(DeleteFailedException.Code.SQL_ERROR, e, e.getMessage());
+            } finally {
+                DBUtils.closeSQLStuff(stmt);
             }
         }
     }
-
 }

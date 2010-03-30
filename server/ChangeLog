@@ -1,3 +1,7 @@
+* 2010-03-30 - marcus.klein@open-xchange.com
+
+ - Bugfix #15721: Correct ordner and proper transaction handling when deleting a user that has POP3 accounts.
+
 * 2010-03-29 - marcus.klein@open-xchange.com
 
  - Bugfix #15710: Fixed wrong call to super class.
