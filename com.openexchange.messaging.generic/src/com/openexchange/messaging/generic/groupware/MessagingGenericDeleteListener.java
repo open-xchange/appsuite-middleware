@@ -90,15 +90,6 @@ public final class MessagingGenericDeleteListener implements DeleteListener {
          * Writable connection
          */
         final int contextId = event.getContext().getContextId();
-        final Connection wc;
-        try {
-            wc = databaseService.getWritable(contextId);
-            wc.setAutoCommit(false); // BEGIN
-        } catch (final DBPoolingException e) {
-            throw new DeleteFailedException(e);
-        } catch (final SQLException e) {
-            throw new DeleteFailedException(DeleteFailedException.Code.SQL_ERROR, e, e.getMessage());
-        }
         PreparedStatement stmt = null;
         try {
             final int userId = event.getSession().getUserId();
@@ -106,7 +97,7 @@ public final class MessagingGenericDeleteListener implements DeleteListener {
             {
                 ResultSet rs = null;
                 try {
-                    stmt = wc.prepareStatement("SELECT confId FROM messagingAccount WHERE cid = ? AND user = ?");
+                    stmt = writeCon.prepareStatement("SELECT confId FROM messagingAccount WHERE cid = ? AND user = ?");
                     int pos = 1;
                     stmt.setInt(pos++, contextId);
                     stmt.setInt(pos++, userId);
@@ -132,7 +123,7 @@ public final class MessagingGenericDeleteListener implements DeleteListener {
 
                     public boolean execute(final int confId) {
                         try {
-                            genericConfStorageService.delete(wc, context, confId);
+                            genericConfStorageService.delete(writeCon, context, confId);
                             return true;
                         } catch (final GenericConfigStorageException e) {
                             genConfError = e;
@@ -148,25 +139,19 @@ public final class MessagingGenericDeleteListener implements DeleteListener {
             /*
              * Delete account data
              */
-            stmt = wc.prepareStatement("DELETE FROM messagingAccount WHERE cid = ? AND user = ?");
+            stmt = writeCon.prepareStatement("DELETE FROM messagingAccount WHERE cid = ? AND user = ?");
             int pos = 1;
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
             stmt.executeUpdate();
-            wc.commit(); // COMMIT
         } catch (final GenericConfigStorageException e) {
-            DBUtils.rollback(wc); // ROLL-BACK
             throw new DeleteFailedException(e);
         } catch (final SQLException e) {
-            DBUtils.rollback(wc); // ROLL-BACK
             throw new DeleteFailedException(DeleteFailedException.Code.SQL_ERROR, e, e.getMessage());
         } catch (final Exception e) {
-            DBUtils.rollback(wc); // ROLL-BACK
             throw new DeleteFailedException(DeleteFailedException.Code.ERROR, e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);
-            DBUtils.autocommit(wc);
-            databaseService.backWritable(contextId, wc);
         }
     }
 
