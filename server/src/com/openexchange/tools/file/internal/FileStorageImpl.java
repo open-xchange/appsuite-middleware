@@ -152,7 +152,6 @@ public class FileStorageImpl implements FileStorage {
         if (!storage.exists() && !storage.mkdirs()) {
             throw new FileStorageException(FileStorageException.Code.CREATE_DIR_FAILED, storage.getAbsolutePath());
         }
-
         lock(LOCK_TIMEOUT);
         try {
             
@@ -166,6 +165,14 @@ public class FileStorageImpl implements FileStorage {
         } finally {
             unlock();
         }
+    }
+
+    /**
+     * Constructor for subclassing to run tests. It should be removed an the subclass should implement the whole FileStorage interface.
+     */
+    protected FileStorageImpl() {
+        super();
+        storage = null;
     }
 
     /**
