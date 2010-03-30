@@ -50,8 +50,6 @@
 package com.openexchange.groupware.delete;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
@@ -74,7 +72,6 @@ import com.openexchange.preferences.UserSettingServerDeleteListener;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.file.QuotaUsageDelete;
 import com.openexchange.tools.oxfolder.OXFolderDeleteListener;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link DeleteRegistry} - A registry for instances of {@link DeleteListener} whose
@@ -143,11 +140,11 @@ public final class DeleteRegistry {
     private DeleteRegistry() {
         super();
         classes = new ConcurrentHashMap<Class<? extends DeleteListener>, Object>();
-        final DeleteListener[] staticListeners = getStaticListeners();
-        for (final DeleteListener deleteListener : staticListeners) {
+        final DeleteListener[] tmpListeners = getStaticListeners();
+        for (final DeleteListener deleteListener : tmpListeners) {
             classes.put(deleteListener.getClass(), PRESENT);
         }
-        this.staticListeners = new CopyOnWriteArrayList<DeleteListener>(staticListeners);
+        this.staticListeners = new CopyOnWriteArrayList<DeleteListener>(tmpListeners);
         listeners = new ConcurrentLinkedQueue<DeleteListener>();
     }
 
@@ -193,39 +190,9 @@ public final class DeleteRegistry {
              */
             new ImageRegistryDeleteListener(),
             new UserSettingServerDeleteListener(),
-            new MailAccountDeleteListener(),
-            /*
-             * Remove POP3 data
-             */
-            new DeleteListener() {
-
-                public void deletePerformed(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon) throws DeleteFailedException {
-                    if (DeleteEvent.TYPE_USER == deleteEvent.getType()) {
-                        PreparedStatement stmt = null;
-                        try {
-                            final int contextId = deleteEvent.getContext().getContextId();
-                            final int user = deleteEvent.getId();
-
-                            stmt = writeCon.prepareStatement("DELETE FROM pop3_storage_deleted WHERE cid = ? AND user = ?");
-                            int pos = 1;
-                            stmt.setInt(pos++, contextId);
-                            stmt.setInt(pos++, user);
-                            stmt.executeUpdate();
-                            DBUtils.closeSQLStuff(stmt);
-
-                            stmt = writeCon.prepareStatement("DELETE FROM pop3_storage_ids WHERE cid = ? AND user = ?");
-                            pos = 1;
-                            stmt.setInt(pos++, contextId);
-                            stmt.setInt(pos++, user);
-                            stmt.executeUpdate();
-                        } catch (final SQLException e) {
-                            throw new DeleteFailedException(DeleteFailedException.Code.SQL_ERROR, e, e.getMessage());
-                        } finally {
-                            DBUtils.closeSQLStuff(stmt);
-                        }
-                    }
-                }
-            } };
+            new POP3DeleteListener(),
+            new MailAccountDeleteListener()
+        };
     }
 
     /**

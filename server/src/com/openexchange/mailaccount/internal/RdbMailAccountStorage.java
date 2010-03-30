@@ -311,8 +311,14 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             throw new MailAccountException(e);
         }
         try {
+            con.setAutoCommit(false);
             deleteMailAccount(id, user, cid, deletePrimary, con);
+            con.commit();
+        } catch (SQLException e) {
+            rollback(con);
+            throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
         } finally {
+            autocommit(con);
             Database.back(cid, true, con);
         }
     }
@@ -323,7 +329,6 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         }
         PreparedStatement stmt = null;
         try {
-            con.setAutoCommit(false);
             final DeleteListenerRegistry registry = DeleteListenerRegistry.getInstance();
             registry.triggerOnBeforeDeletion(id, user, cid, con);
             // First delete properties
@@ -340,14 +345,11 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             stmt.setLong(2, id);
             stmt.setLong(3, user);
             stmt.executeUpdate();
-            con.commit();
             registry.triggerOnAfterDeletion(id, user, cid, con);
         } catch (final SQLException e) {
-            rollback(con);
             throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
-            autocommit(con);
         }
     }
 
