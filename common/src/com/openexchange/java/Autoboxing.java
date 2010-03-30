@@ -64,6 +64,14 @@ public final class Autoboxing {
         super();
     }
 
+    public static Byte B(final byte b) {
+        return Byte.valueOf(b);
+    }
+
+    public static byte b(final Byte b) {
+        return b.byteValue();
+    }
+
     /**
      * Short method name for {@link Integer#valueOf(int)} that uses cached instances for small values of integer.
      * @param i integer value to be converted to an Integer object.
