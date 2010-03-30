@@ -235,6 +235,9 @@ public abstract class AbstractAJAXTest extends TestCase {
         if (null == login) {
             login = getAJAXProperty("login");
         }
+        if(! login.contains("@")){
+            login += "@" + getAJAXProperty("contextName");
+        }
         return login;
     }
 
