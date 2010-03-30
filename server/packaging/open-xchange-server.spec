@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 16
+%define		ox_release 17
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -483,6 +483,8 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Tue Mar 30 2010 - marcus.klein@open-xchange.com
+ - Bugfix #15721: Correct ordner and proper transaction handling when deleting a user that has POP3 accounts.
 * Thu Mar 25 2010 - karsten.will@open-xchange.com
  - Bugfix #15660: Using commons HttpClient for login to linked in to fix redirect problems with HtmlUnit.
 * Thu Mar 25 2010 - thorben.betten@open-xchange.com
