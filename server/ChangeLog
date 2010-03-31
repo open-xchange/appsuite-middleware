@@ -1,3 +1,7 @@
+* 2010-03-31 - thorben.betten@open-xchange.com
+
+ - Bugfix #15711: Showing more sophisticated error message.
+
 * 2010-03-31 - marcus.klein@open-xchange.com
 
  - Bugfix #15718: Fixed wrong initialization of refactored file storage implementation.

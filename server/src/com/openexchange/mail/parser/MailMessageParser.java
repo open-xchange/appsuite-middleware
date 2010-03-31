@@ -245,7 +245,9 @@ public final class MailMessageParser {
              */
             parseMailContent(mail, handler, prefix, 1);
         } catch (final IOException e) {
-            throw new MailException(MailException.Code.UNREADBALE_PART_CONTENT, e, Long.valueOf(mail.getMailId()), mail.getFolder());
+            final String mailId = mail.getMailId();
+            final String folder = mail.getFolder();
+            throw new MailException(MailException.Code.UNREADBALE_PART_CONTENT, e, null == mailId ? "" : mailId, null == folder ? "" : folder);
         }
         handler.handleMessageEnd(mail);
     }
