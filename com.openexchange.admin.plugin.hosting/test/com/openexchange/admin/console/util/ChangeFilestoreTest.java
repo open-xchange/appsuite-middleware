@@ -68,7 +68,7 @@ public class ChangeFilestoreTest extends AbstractTest {
     public void testEditFilestore() {
         
         resetBuffers();
-        String store = "file:////tmp/"+System.currentTimeMillis();
+        String store = "file:/tmp/"+System.currentTimeMillis();
         new RegisterFilestore(RegisterFilestoreTest.getAllOptionData(store)){
             protected void sysexit(int exitCode) {
                 ChangeFilestoreTest.this.returnCode = exitCode;
@@ -94,7 +94,7 @@ public class ChangeFilestoreTest extends AbstractTest {
     public void testEditFilestoreWithInvalidCredentials() {
         
         resetBuffers();
-        String store = "file:////tmp/"+System.currentTimeMillis();
+        String store = "file:/tmp/"+System.currentTimeMillis();
         new RegisterFilestore(RegisterFilestoreTest.getAllOptionData(store)){
             protected void sysexit(int exitCode) {
                 ChangeFilestoreTest.this.returnCode = exitCode;

@@ -99,7 +99,7 @@ public abstract class FilestoreAbstraction extends UtilAbstraction {
     }
 
     protected void setPathOption(final AdminParser parser, final NeededQuadState needed) {
-        this.filestorePathOption = setShortLongOpt(parser, OPT_NAME_STORE_PATH_SHORT, OPT_NAME_STORE_PATH_LONG, "Path to store filestore contents in URI format e.g. file:///tmp/filestore", true, needed);
+        this.filestorePathOption = setShortLongOpt(parser, OPT_NAME_STORE_PATH_SHORT, OPT_NAME_STORE_PATH_LONG, "Path to store filestore contents in URI format e.g. file:/tmp/filestore", true, needed);
     }
 
     protected void setSizeOption(final AdminParser parser, final String defaultvalue) {

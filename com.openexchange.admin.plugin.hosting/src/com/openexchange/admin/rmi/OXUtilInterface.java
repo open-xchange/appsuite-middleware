@@ -98,7 +98,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  *  
  * <b>// Register filestore</b>
  * Filestore client_st = new Filestore();
- * client_st.setUrl("file:///var/ox/filestore");
+ * client_st.setUrl("file:/var/ox/filestore");
  * client_st.setSize(100L);        
  * client_st.setMaxContexts(100);
  * iface.registerFilestore(srv,auth);

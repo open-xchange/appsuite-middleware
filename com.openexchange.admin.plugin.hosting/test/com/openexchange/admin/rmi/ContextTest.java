@@ -369,7 +369,7 @@ public class ContextTest extends AbstractTest {
             Filestore fis = new Filestore();
             fis.setMaxContexts(10000);
             fis.setSize(8796093022208L);
-            java.net.URI uri = new java.net.URI("file:///tmp/disc_" + System.currentTimeMillis());
+            java.net.URI uri = new java.net.URI("file:/tmp/disc_" + System.currentTimeMillis());
             fis.setUrl(uri.toString());
             new java.io.File(uri.getPath()).mkdir();
             oxu.registerFilestore(fis, cred);
