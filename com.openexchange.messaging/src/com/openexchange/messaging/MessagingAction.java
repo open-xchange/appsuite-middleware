@@ -63,7 +63,7 @@ public final class MessagingAction {
      */
     public static enum Type {
         /**
-         * The action required no message and no arguments.
+         * The action requires no message and no arguments.
          */
         NONE,
         /**
