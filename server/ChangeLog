@@ -1,3 +1,7 @@
+* 2010-03-31 - marcus.klein@open-xchange.com
+
+ - Bugfix #15718: Fixed wrong initialization of refactored file storage implementation.
+
 * 2010-03-30 - marcus.klein@open-xchange.com
 
  - Bugfix #15721: Correct ordner and proper transaction handling when deleting a user that has POP3 accounts.

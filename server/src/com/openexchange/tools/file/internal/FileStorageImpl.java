@@ -148,13 +148,12 @@ public class FileStorageImpl implements FileStorage {
      */
     public FileStorageImpl(final URI uri) throws FileStorageException {
         super();
-        storage = new File(uri.toString());
+        storage = new File(uri);
         if (!storage.exists() && !storage.mkdirs()) {
             throw new FileStorageException(FileStorageException.Code.CREATE_DIR_FAILED, storage.getAbsolutePath());
         }
         lock(LOCK_TIMEOUT);
         try {
-            
             if (!exists(STATEFILENAME)) {
                 if (LOG.isInfoEnabled()) {
                     LOG.info("Repairing.");
