@@ -402,7 +402,18 @@ public class OXContextMySQLStorageCommon {
     public final void initReplicationMonitor(Connection con, int contextId) throws SQLException {
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("INSERT INTO replicationMonitor (cid, transaction) VALUES (?,0)");
+            stmt = con.prepareStatement("INSERT INTO replicationMonitor (cid,transaction) VALUES (?,0)");
+            stmt.setInt(1, contextId);
+            stmt.execute();
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
+    public final void initFilestoreUsage(Connection con, int contextId) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("INSERT INTO filestore_usage (cid,used) VALUES (?,0)");
             stmt.setInt(1, contextId);
             stmt.execute();
         } finally {
