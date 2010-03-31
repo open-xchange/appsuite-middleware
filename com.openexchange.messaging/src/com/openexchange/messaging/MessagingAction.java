@@ -67,7 +67,7 @@ public final class MessagingAction {
          */
         NONE,
         /**
-         * The action requires a message from storage identified by givan arguments.
+         * The action requires a message from storage identified by given arguments.
          */
         STORAGE,
         /**
