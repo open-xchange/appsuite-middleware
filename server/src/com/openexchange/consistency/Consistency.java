@@ -595,6 +595,7 @@ public abstract class Consistency implements ConsistencyMBean {
             for (final String identifier : problems) {
                 try {
                     database.startTransaction();
+                    database.startDBTransaction();
                     database.setRequestTransactional(true);
                     final int[] numbers = database.removeDocument(identifier, ctx);
                     database.commit();
