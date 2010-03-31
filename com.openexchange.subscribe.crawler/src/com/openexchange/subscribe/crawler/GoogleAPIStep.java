@@ -63,6 +63,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.google.gdata.client.Service;
+import com.google.gdata.client.GoogleService.InvalidCredentialsException;
 import com.google.gdata.client.contacts.ContactsService;
 import com.google.gdata.data.Link;
 import com.google.gdata.data.contacts.ContactEntry;
@@ -74,6 +75,7 @@ import com.google.gdata.data.extensions.PhoneNumber;
 import com.google.gdata.data.extensions.StructuredPostalAddress;
 import com.google.gdata.util.ServiceException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
 import com.openexchange.subscribe.crawler.internal.LoginStep;
@@ -266,8 +268,10 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
             LOG.error(e);
         } catch (final IOException e) {
             LOG.error(e);
+        } catch (final InvalidCredentialsException e){
+            throw SubscriptionErrorMessage.INVALID_LOGIN.create();
         } catch (final ServiceException e) {
-            LOG.error(e);
+            LOG.error(e);            
         }
 
         output = new Contact[contacts.size()];
