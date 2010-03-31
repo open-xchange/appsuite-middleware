@@ -1765,7 +1765,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
              * Handle ham.
              */
             try {
-                IMAPProvider.getInstance().getSpamHandler().handleHam(
+                SpamHandlerRegistry.getSpamHandlerBySession(session, accountId, IMAPProvider.getInstance()).handleHam(
                     accountId,
                     imapFolder.getFullName(),
                     longs2uids(msgUIDs),
