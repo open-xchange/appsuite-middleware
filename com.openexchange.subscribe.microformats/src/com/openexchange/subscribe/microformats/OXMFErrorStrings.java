@@ -47,41 +47,31 @@
  *
  */
 
-package com.openexchange.subscribe.microformats.datasources;
+package com.openexchange.subscribe.microformats;
 
-import java.io.IOException;
-import java.io.Reader;
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.SubscriptionException;
-import com.openexchange.subscribe.microformats.OXMFSubscriptionErrorMessage;
+import com.openexchange.exceptions.LocalizableStrings;
+
 
 /**
- * {@link HTTPOXMFDataSource}
- * 
+ * {@link OXMFErrorStrings}
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class HTTPOXMFDataSource implements OXMFDataSource {
+public class OXMFErrorStrings implements LocalizableStrings{
 
-    private static final String URL = "url";
-
-    private static final Log LOG = LogFactory.getLog(HTTPOXMFDataSource.class);
-
-    public Reader getData(Subscription subscription) throws SubscriptionException {
-        String site = (String)subscription.getConfiguration().get(URL);
-
-        try {
-            return HTTPToolkit.grab(site);
-        } catch (HttpException e) {
-            LOG.error(e.getMessage(), e);
-            throw OXMFSubscriptionErrorMessage.ERROR_LOADING_SUBSCRIPTION.create(e, site);
-        } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
-            throw OXMFSubscriptionErrorMessage.ERROR_LOADING_SUBSCRIPTION.create(e, site);
-        }
-
-    }
-
+    // A parsing error occurred: %1$s.
+    public static final String PARSE_EXCEPTION = "A parsing error occurred: %1$s.";
+    
+    // An IOException occurred: %1$s. Was trying to get the service at %2$s.
+    public static final String IOException = "An IOException occurred: %1$s. Was trying to get the service at %2$s.";
+    
+    // A HTTPException occurred: %1$s. Was trying to get the service at %2$s.
+    public static final String HttpException = "A HTTPException occurred: %1$s. Was trying to get the service at %2$s.";
+    
+    // Can only post to external subscription soures
+    public static final String CAN_ONLY_POST_TO_EXTERNAL_SUBSCRIPTION_SOURCES = "Can only post to external subscription soures";
+    
+    // Could not fetch site at %1$s. Please check the spelling or whether you can reach the site in your browser.
+    public static final String ERROR_LOADING_SUBSCRIPTION = "Could not fetch site at %1$s. Please check the spelling or whether you can reach the site in your browser.";
+        
 }
