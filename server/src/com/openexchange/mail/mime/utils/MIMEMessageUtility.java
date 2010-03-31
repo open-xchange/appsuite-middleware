@@ -695,8 +695,7 @@ public final class MIMEMessageUtility {
             do {
                 try {
                     sb.append(hdrVal.substring(lastMatch, m.start()));
-                    final String enc;
-                    if ("Q".equals(m.group(2))) {
+                    if ("Q".equalsIgnoreCase(m.group(2))) {
                         final String charset = m.group(1);
                         final String preparedEWord = prepareQEncodedValue(m.group(3), charset);
                         if (null == tmp) {
@@ -705,18 +704,26 @@ public final class MIMEMessageUtility {
                             tmp.setLength(0);
                         }
                         tmp.append("=?").append(charset).append('?').append('Q').append('?').append(preparedEWord).append("?=");
-                        enc = tmp.toString();
+                        sb.append(MimeUtility.decodeWord(tmp.toString()));
+                    } else if ("B".equalsIgnoreCase(m.group(2))) {
+                        try {
+                            sb.append(MimeUtility.decodeWord(m.group()));
+                        } catch (final ParseException e) {
+                            /*
+                             * Retry with another library
+                             */
+                            sb.append(new String(Base64.decodeBase64(m.group(3).getBytes("US-ASCII")), m.group(1)));
+                        }
                     } else {
-                        enc = m.group();
+                        sb.append(MimeUtility.decodeWord(m.group()));
                     }
-                    sb.append(MimeUtility.decodeWord(enc));
                     lastMatch = m.end();
                 } catch (final UnsupportedEncodingException e) {
-                    LOG.error("Unsupported character-encoding in encoded-word: " + m.group(), e);
+                    LOG.warn("Unsupported character-encoding in encoded-word: " + m.group(), e);
                     sb.append(m.group());
                     lastMatch = m.end();
                 } catch (final ParseException e) {
-                    LOG.error("String is not an encoded-word as per RFC 2047: " + m.group(), e);
+                    LOG.warn("String is not an encoded-word as per RFC 2047: " + m.group(), e);
                     sb.append(m.group());
                     lastMatch = m.end();
                 }
