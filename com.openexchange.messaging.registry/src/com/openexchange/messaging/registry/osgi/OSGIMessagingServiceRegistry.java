@@ -50,6 +50,7 @@
 package com.openexchange.messaging.registry.osgi;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
@@ -85,6 +86,9 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
     
     public List<MessagingService> getAllServices() throws MessagingException {
         Object[] services = tracker.getServices();
+        if(null == services) {
+            return Collections.emptyList();
+        }
         List<MessagingService> messagingServices = new ArrayList<MessagingService>(services.length);
         for (Object object : services) {
             messagingServices.add((MessagingService) object);
