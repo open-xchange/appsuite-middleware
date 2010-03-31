@@ -86,7 +86,7 @@ public class QuotaFileStorageException extends FileStorageException {
      * @param messageArgs arguments that will be formatted into the message.
      */
     public QuotaFileStorageException(final Code code, final Throwable cause, final Object... messageArgs) {
-        super(EnumComponent.FILESTORE, code.category, code.detailNumber, null == code.message ? cause.getMessage() : code.message, cause);
+        super(EnumComponent.FILESTORE, code.getCategory(), code.getDetailNumber(), null == code.getMessage() ? cause.getMessage() : code.getMessage(), cause);
         setMessageArgs(messageArgs);
     }
 
@@ -126,9 +126,9 @@ public class QuotaFileStorageException extends FileStorageException {
          */
         STORE_FULL("The allowed Quota is reached.", Category.USER_INPUT, 4),
         /**
-         * Quota is negative
+         * Quota seems to be inconsistent. Please use consistency tool on context %1$d.
          */
-        QUOTA_UNDERRUN("Quota seems to be inconsistent. Please run recalculateUsage() on context %1$d.", Category.TRUNCATED, 5);
+        QUOTA_UNDERRUN("Quota seems to be inconsistent. Please use consistency tool on context %1$d.", Category.TRUNCATED, 5);
 
         /**
          * Message of the exception.
