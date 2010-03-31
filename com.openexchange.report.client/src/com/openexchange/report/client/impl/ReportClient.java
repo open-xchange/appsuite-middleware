@@ -67,6 +67,7 @@ import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.report.client.container.ContextDetail;
 import com.openexchange.report.client.container.Total;
+import com.openexchange.report.client.transport.TransportHandler;
 import com.openexchange.tools.CSVWriter;
 import com.openexchange.tools.console.TableWriter;
 import com.openexchange.tools.console.TableWriter.ColumnFormat;

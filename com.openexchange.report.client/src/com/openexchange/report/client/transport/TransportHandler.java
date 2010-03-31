@@ -47,12 +47,13 @@
  *
  */
 
-package com.openexchange.report.client.impl;
+package com.openexchange.report.client.transport;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.Authenticator;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -64,6 +65,7 @@ import com.openexchange.report.client.configuration.ReportConfiguration;
 import com.openexchange.report.client.container.ContextDetail;
 import com.openexchange.report.client.container.ContextModuleAccessCombination;
 import com.openexchange.report.client.container.Total;
+import com.openexchange.tools.encoding.Base64;
 
 public class TransportHandler {
 	
@@ -81,7 +83,7 @@ public class TransportHandler {
 	
 	public TransportHandler() {	}
 	
-    protected void sendReport(List<Total> totals, List<ContextDetail> contextDetails, String[] versions) throws IOException, JSONException {
+    public void sendReport(List<Total> totals, List<ContextDetail> contextDetails, String[] versions) throws IOException, JSONException {
     	JSONObject metadata = buildJSONObject(totals, contextDetails, versions);
     	
     	ReportConfiguration reportConfiguration = new ReportConfiguration();
@@ -102,13 +104,8 @@ public class TransportHandler {
         if ("true".equals(reportConfiguration.getUseProxy().trim())) {
         	System.setProperty("https.proxyHost", reportConfiguration.getProxyAddress().trim());
         	System.setProperty("https.proxyPort", reportConfiguration.getProxyPort().trim());
-
-            if ("true".equals(reportConfiguration.getProxyAuthRequired().trim())) {
-            	System.setProperty("https.proxyUser", reportConfiguration.getProxyUsername().trim());
-            	System.setProperty("https.proxyPassword", reportConfiguration.getProxyPassword().trim());
-            }
         }
-       
+        
         HttpsURLConnection httpsURLConnection = (HttpsURLConnection) new URL("https://"+REPORT_SERVER_URL+"/").openConnection();
         httpsURLConnection.setUseCaches(false);
         httpsURLConnection.setDoOutput(true);
@@ -116,6 +113,21 @@ public class TransportHandler {
         httpsURLConnection.setRequestMethod("POST");
         httpsURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 
+        if ("true".equals(reportConfiguration.getUseProxy().trim()) && "true".equals(reportConfiguration.getProxyAuthRequired().trim())) {
+			String proxyAutorizationProperty = "Basic "
+					+ Base64.encode((reportConfiguration.getProxyUsername()
+							.trim()
+							+ ":" + reportConfiguration.getProxyPassword()
+							.trim()).getBytes());
+			
+            Authenticator.setDefault(new ProxyAuthenticator(
+            		reportConfiguration.getProxyUsername().trim(),
+            		reportConfiguration.getProxyPassword().trim()
+            		));
+            
+            httpsURLConnection.setRequestProperty("Proxy-Authorization", proxyAutorizationProperty);
+        }
+        
         DataOutputStream stream = new DataOutputStream(httpsURLConnection.getOutputStream());
         stream.writeBytes(report.toString());
         stream.flush();
@@ -171,5 +183,5 @@ public class TransportHandler {
 
     	return retval;
     }
-	
+    
 }

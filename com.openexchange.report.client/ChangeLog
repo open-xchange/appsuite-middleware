@@ -1,3 +1,8 @@
+* 2010-03-31 - benjamin.otterbach@open-xchange.com
+
+  - Bugfix #15616: Report client does not work through a HTTP proxy which requires authentication
+    - Fixed broken HTTPS proxy handling
+
 * 2010-03-04 - benjamin.otterbach@open-xchange.com
 
   - Bugfix #15546: Broken start script in report client package
