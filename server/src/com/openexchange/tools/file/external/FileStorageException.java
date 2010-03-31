@@ -86,7 +86,7 @@ public class FileStorageException extends AbstractOXException {
      * @param messageArgs arguments that will be formatted into the message.
      */
     public FileStorageException(final Code code, final Throwable cause, final Object... messageArgs) {
-        super(EnumComponent.FILESTORE, code.category, code.detailNumber, null == code.message ? cause.getMessage() : code.message, cause);
+        super(EnumComponent.FILESTORE, code.getCategory(), code.getDetailNumber(), null == code.getMessage() ? cause.getMessage() : code.getMessage(), cause);
         setMessageArgs(messageArgs);
     }
 
@@ -109,70 +109,28 @@ public class FileStorageException extends AbstractOXException {
      * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
      */
     public enum Code {
-        /**
-         * A property is missing.
-         */
-        PROPERTY_MISSING("Cannot find property %s.", Category.SETUP_ERROR, 1),
-        /**
-         * Class can not be found.
-         */
-        CLASS_NOT_FOUND("Class %s can not be loaded.", Category.SETUP_ERROR, 2),
-        /**
-         * An IO error occurred: %s
-         */
+        /** An IO error occurred: %s */
         IOERROR("An IO error occurred: %s", Category.SUBSYSTEM_OR_SERVICE_DOWN, 3),
-        /**
-         * May be used to turn the IOException of getInstance into a proper AbstractOXException
-         */
+        /** May be used to turn the IOException of getInstance into a proper AbstractOXException */
         INSTANTIATIONERROR("Couldn't reach the filestore: %s", Category.SUBSYSTEM_OR_SERVICE_DOWN, 4),
-        /**
-         * Invalid constructor parameter at %1$d with type %2$s.
-         */
-        INVALID_PARAMETER("Invalid constructor parameter at %1$d with type %2$s.", Category.CODE_ERROR, 5),
-        /**
-         * Cannot create directory \"%1$s\" for FileStorage.
-         */
+        /** Cannot create directory \"%1$s\" for FileStorage. */
         CREATE_DIR_FAILED("Cannot create directory \"%1$s\" for FileStorage.", Category.SETUP_ERROR, 6),
-        /**
-         * 'Depth' must be >= 1 but is %1$d.
-         */
-        INVALID_DEPTH("'Depth' must be >= 1 but is %1$d.", Category.CODE_ERROR, 7),
-        /**
-         * Entries must be >= 1 but is %1$d.
-         */
-        INVALID_ENTRIES("'Entries' must be >= 1 but is %1$d.", Category.CODE_ERROR, 8),
-        /**
-         * Unsupported encoding.
-         */
+        /** Unsupported encoding. */
         ENCODING("Unsupported encoding.", Category.CODE_ERROR, 9),
-        /**
-         * Number parsing problem.
-         */
+        /** Number parsing problem. */
         NO_NUMBER("Number parsing problem.", Category.CODE_ERROR, 10),
-        /**
-         * File storage is full.
-         */
+        /** File storage is full. */
         STORE_FULL("File storage is full.", Category.EXTERNAL_RESOURCE_FULL, 11),
-        /**
-         * Depth mismatch while computing next entry.
-         */
+        /** Depth mismatch while computing next entry. */
         DEPTH_MISMATCH("'Depth' mismatch while computing next entry.", Category.CODE_ERROR, 12),
-        /**
-         * Cannot remove lock file.
-         */
+        /** Cannot remove lock file. */
         UNLOCK("Cannot remove lock file.", Category.SUBSYSTEM_OR_SERVICE_DOWN, 13),
-        /**
-         * Cannot create lock file.
-         */
+        /** Cannot create lock file. */
         LOCK("Cannot create lock file.", Category.SUBSYSTEM_OR_SERVICE_DOWN, 14),
-        /**
-         * Cannot create file %1$s.
-         */
-        CREATE_FAILED("Cannot create file %1$s.", Category.SUBSYSTEM_OR_SERVICE_DOWN, 15),
-        /**
-         * Eliminating the FileStorage failed.
-         */
-        NOT_ELIMINATED("Eliminating the FileStorage failed.", Category.SUBSYSTEM_OR_SERVICE_DOWN, 16);
+        /** Eliminating the FileStorage failed. */
+        NOT_ELIMINATED("Eliminating the FileStorage failed.", Category.SUBSYSTEM_OR_SERVICE_DOWN, 16),
+        /** File does not exist in filestore \"%1$s\". Consider running consistency tool. */
+        FILE_NOT_FOUND("File does not exist in filestore \"%1$s\". Consider running consistency tool.", Category.SUBSYSTEM_OR_SERVICE_DOWN, 17);
 
         /**
          * Message of the exception.

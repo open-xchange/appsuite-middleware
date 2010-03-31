@@ -422,13 +422,12 @@ public class FileStorageImpl implements FileStorage {
         }
     }
 
-    /**
-     * @param identifier identifier of the file.
-     * @return the file size of the file.
-     * @throws FileStorageException if an error occurs.
-     */
     public long getFileSize(final String name) throws FileStorageException {
-        return new File(storage, name).length();
+        File dataFile = new File(storage, name);
+        if (!dataFile.exists()) {
+            throw new FileStorageException(Code.FILE_NOT_FOUND, dataFile.getAbsoluteFile().getAbsolutePath());
+        }
+        return dataFile.length();
     }
 
     public String getMimeType(final String name) throws FileStorageException {
