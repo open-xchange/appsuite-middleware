@@ -454,8 +454,10 @@ public final class JSONMessageCache {
             for (final FutureTask<JSONObject> ft : futures) {
                 try {
                     final JSONObject jsonObject = getFromFuture(ft, waitTimeMillis);
-                    final int flags = jsonObject.optInt(flagsKey);
-                    jsonObject.put(flagsKey, seen ? (flags | MailMessage.FLAG_SEEN) : (flags & ~MailMessage.FLAG_SEEN));
+                    if (null != jsonObject) {
+                        final int flags = jsonObject.optInt(flagsKey);
+                        jsonObject.put(flagsKey, seen ? (flags | MailMessage.FLAG_SEEN) : (flags & ~MailMessage.FLAG_SEEN));
+                    }
                 } catch (final TimeoutException e) {
                     // Not yet available
                 }
@@ -467,7 +469,9 @@ public final class JSONMessageCache {
             for (final FutureTask<JSONObject> ft : objectMap.values()) {
                 try {
                     final JSONObject jsonObject = getFromFuture(ft, waitTimeMillis);
-                    jsonObject.put(unreadKey, unread);
+                    if (null != jsonObject) {
+                        jsonObject.put(unreadKey, unread);
+                    }
                 } catch (final TimeoutException e) {
                     // Not yet available
                 }

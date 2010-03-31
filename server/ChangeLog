@@ -2,6 +2,7 @@
 
  - Bugfix #15711: Showing more sophisticated error message.
  - Bugfix #15730: Correctly decoding base64 encoded header.
+ - Bugfix #15614: Fixed possible null derefence.
 
 * 2010-03-31 - marcus.klein@open-xchange.com
 
