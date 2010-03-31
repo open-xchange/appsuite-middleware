@@ -1085,6 +1085,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
             contextCommon.initSequenceTables(contextId, oxCon);
             contextCommon.initReplicationMonitor(oxCon, contextId);
+            contextCommon.initFilestoreUsage(oxCon, contextId);
 
             final int groupId = IDGenerator.getId(contextId, com.openexchange.groupware.Types.PRINCIPAL, oxCon);
             final int adminId = IDGenerator.getId(contextId, com.openexchange.groupware.Types.PRINCIPAL, oxCon);
