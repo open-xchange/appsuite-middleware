@@ -71,7 +71,7 @@ public final class ReadOnlyDynamicFormDescription extends DynamicFormDescription
     /**
      * Initializes a new {@link ReadOnlyDynamicFormDescription}.
      * 
-     * @param The delegate form description
+     * @param delegatee The delegate form description
      */
     public ReadOnlyDynamicFormDescription(final DynamicFormDescription delegatee) {
         super();
