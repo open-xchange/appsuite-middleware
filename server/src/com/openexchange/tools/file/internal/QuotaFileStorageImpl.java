@@ -49,6 +49,10 @@
 
 package com.openexchange.tools.file.internal;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
+import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -71,6 +75,8 @@ import com.openexchange.tools.sql.DBUtils;
 
 public class QuotaFileStorageImpl implements QuotaFileStorage {
 
+    private static final Log LOG = LogFactory.getLog(QuotaFileStorage.class);
+
     /**
      * The context of the QuotaFileStorage
      */
@@ -85,11 +91,6 @@ public class QuotaFileStorageImpl implements QuotaFileStorage {
      * Service for DB Connections
      */
     private final DatabaseService db;
-
-    /**
-     * The Logfile
-     */
-    private final Log LOG = LogFactory.getLog(QuotaFileStorage.class);
 
     /**
      * Initializes the QuotaFileStorage
@@ -109,34 +110,22 @@ public class QuotaFileStorageImpl implements QuotaFileStorage {
         }
     }
 
-    /**
-     * Returns the Context specific Quota
-     */
     public long getQuota() {
         return context.getFileStorageQuota();
     }
 
-    /**
-     * Deletes a File
-     * 
-     * @param identifier The file that has to be deleted
-     * @return true if file was deleted correctly
-     */
     public boolean deleteFile(final String identifier) throws QuotaFileStorageException {
         try {
             final long fileSize = fileStorage.getFileSize(identifier);
-
             final boolean deleted = fileStorage.deleteFile(identifier);
             if (!deleted) {
                 return false;
-            } else {
-                decUsage(fileSize);
-                return true;
             }
+            decUsage(fileSize);
+            return true;
         } catch (final FileStorageException e) {
             throw new QuotaFileStorageException(e);
         }
-
     }
 
     /**
@@ -190,7 +179,7 @@ public class QuotaFileStorageImpl implements QuotaFileStorage {
             DBUtils.closeSQLStuff(rs);
             DBUtils.closeSQLStuff(sstmt);
             DBUtils.closeSQLStuff(ustmt);
-            close(con);
+            db.backWritable(context, con);
         }
 
         return full;
@@ -231,7 +220,7 @@ public class QuotaFileStorageImpl implements QuotaFileStorage {
 
             if (newUsage < 0) {
                 newUsage = 0;
-                final QuotaFileStorageException e = new QuotaFileStorageException(QuotaFileStorageException.Code.QUOTA_UNDERRUN, context.getContextId());
+                final QuotaFileStorageException e = new QuotaFileStorageException(QuotaFileStorageException.Code.QUOTA_UNDERRUN, I(context.getContextId()));
                 LOG.fatal(e.getMessage(), e);
             }
 
@@ -249,7 +238,7 @@ public class QuotaFileStorageImpl implements QuotaFileStorage {
             DBUtils.closeSQLStuff(rs);
             DBUtils.closeSQLStuff(sstmt);
             DBUtils.closeSQLStuff(ustmt);
-            close(con);
+            db.backWritable(context, con);
         }
     }
 
@@ -269,13 +258,13 @@ public class QuotaFileStorageImpl implements QuotaFileStorage {
 
         PreparedStatement sstmt = null;
         PreparedStatement ustmt = null;
-
+        ResultSet result = null;
         try {
             con.setAutoCommit(false);
 
             sstmt = con.prepareStatement("SELECT used FROM filestore_usage WHERE cid = ? FOR UPDATE");
             sstmt.setInt(1, context.getContextId());
-            sstmt.executeQuery();
+            result = sstmt.executeQuery();
 
             ustmt = con.prepareStatement("UPDATE filestore_usage SET used = ? WHERE cid = ?");
             ustmt.setLong(1, usage);
@@ -287,44 +276,21 @@ public class QuotaFileStorageImpl implements QuotaFileStorage {
             DBUtils.rollback(con);
             throw new QuotaFileStorageException(QuotaFileStorageException.Code.SQLSTATEMENTERROR, s);
         } finally {
-            DBUtils.autocommit(con);
-            DBUtils.closeSQLStuff(sstmt);
-            DBUtils.closeSQLStuff(ustmt);
-            close(con);
+            autocommit(con);
+            closeSQLStuff(result, sstmt);
+            closeSQLStuff(ustmt);
+            db.backWritable(context, con);
         }
     }
 
-    /**
-     * Closes Connections
-     * 
-     * @param con
-     * @param sstmt
-     * @param ustmt
-     */
-    protected void close(final Connection con) {
-        if (con != null) {
-            try {
-                con.close();
-            } catch (final SQLException e) {
-                LOG.error("", e);
-            }
-        }
-    }
-
-    /**
-     * Delete a List of Files.
-     * 
-     * @return A list of Files that could not be deleted.
-     */
     public Set<String> deleteFiles(final String[] identifiers) throws QuotaFileStorageException {
         final HashMap<String, Long> fileSizes = new HashMap<String, Long>();
         final SortedSet<String> set = new TreeSet<String>();
-
         for (final String identifier : identifiers) {
             boolean deleted;
             try {
                 deleted = fileStorage.deleteFile(identifier);
-                fileSizes.put(identifier, getFileSize(identifier));
+                fileSizes.put(identifier, L(getFileSize(identifier)));
                 if (!deleted) {
                     set.add(identifier);
                 }
@@ -333,56 +299,38 @@ public class QuotaFileStorageImpl implements QuotaFileStorage {
             }
 
         }
-
         fileSizes.keySet().removeAll(set);
-
         long sum = 0;
-
         for (final long fileSize : fileSizes.values()) {
             sum += fileSize;
         }
-
         decUsage(sum);
-
         return set;
     }
 
-    /**
-     * Get the actual Usage of the Quota.
-     */
     public long getUsage() throws QuotaFileStorageException {
-        PreparedStatement stmt = null;
-        ResultSet result = null;
-
         final Connection con;
         try {
             con = db.getReadOnly(context);
         } catch (final DBPoolingException p) {
             throw new QuotaFileStorageException(p);
         }
-
+        PreparedStatement stmt = null;
+        ResultSet result = null;
         try {
             stmt = con.prepareStatement("SELECT used FROM filestore_usage WHERE cid = ?");
             stmt.setInt(1, context.getContextId());
             result = stmt.executeQuery();
-
-            if (!result.next()) {
-                return 0;
-            } else {
-                return result.getLong(1);
-            }
+            return result.next() ? result.getLong(1) : 0;
         } catch (final SQLException e) {
             throw new QuotaFileStorageException(QuotaFileStorageException.Code.SQLSTATEMENTERROR, e);
         } finally {
             DBUtils.closeSQLStuff(result);
             DBUtils.closeSQLStuff(stmt);
-            close(con);
+            db.backReadOnly(context, con);
         }
     }
 
-    /**
-     * Save a new File in the FileStorage. Usage will be increased.
-     */
     public String saveNewFile(final InputStream is) throws QuotaFileStorageException {
         String file = null;
         String retval = null;
@@ -438,9 +386,6 @@ public class QuotaFileStorageImpl implements QuotaFileStorage {
         }
     }
 
-    /**
-     * Returns a SortedSet with all Files in the Storage.
-     */
     public SortedSet<String> getFileList() throws QuotaFileStorageException {
         try {
             return fileStorage.getFileList();
@@ -449,9 +394,6 @@ public class QuotaFileStorageImpl implements QuotaFileStorage {
         }
     }
 
-    /**
-     * Returns a specific File from the Storage.
-     */
     public InputStream getFile(final String file) throws QuotaFileStorageException {
         try {
             return fileStorage.getFile(file);
@@ -460,9 +402,6 @@ public class QuotaFileStorageImpl implements QuotaFileStorage {
         }
     }
 
-    /**
-     * Returns the size of a File in the Store.
-     */
     public long getFileSize(final String name) throws QuotaFileStorageException {
         try {
             return fileStorage.getFileSize(name);
@@ -471,9 +410,6 @@ public class QuotaFileStorageImpl implements QuotaFileStorage {
         }
     }
 
-    /**
-     * Returns the MimeType of a File in the Store.
-     */
     public String getMimeType(final String name) throws QuotaFileStorageException {
         try {
             return fileStorage.getMimeType(name);
@@ -482,9 +418,6 @@ public class QuotaFileStorageImpl implements QuotaFileStorage {
         }
     }
 
-    /**
-     * Removes the whole FileStorage. Quota will be set to zero.
-     */
     public void remove() throws QuotaFileStorageException {
         try {
             fileStorage.remove();
@@ -494,9 +427,6 @@ public class QuotaFileStorageImpl implements QuotaFileStorage {
         }
     }
 
-    /**
-     * Recreates the State File.
-     */
     public void recreateStateFile() throws QuotaFileStorageException {
         try {
             fileStorage.recreateStateFile();
@@ -512,5 +442,4 @@ public class QuotaFileStorageImpl implements QuotaFileStorage {
             throw new QuotaFileStorageException(e);
         }
     }
-
 }
