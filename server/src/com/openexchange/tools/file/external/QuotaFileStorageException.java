@@ -109,26 +109,20 @@ public class QuotaFileStorageException extends FileStorageException {
      * @author Steffen Templin
      */
     public enum Code {
-        /**
-         * May be used to throw a proper AbstractOXException is there is no FileStorage available
-         */
+        /** Couldn't reach the filestore */
         INSTANTIATIONERROR("Couldn't reach the filestore", Category.SUBSYSTEM_OR_SERVICE_DOWN, 1),
-        /**
-         * Getting DBConnection failed
-         */
+        /** Cannot access the Database: %s */
         SQLERROR("Cannot access the Database: %s", Category.SUBSYSTEM_OR_SERVICE_DOWN, 2),
-        /**
-         * Could not execute SQLStatement
-         */
+        /** Database Query could not be realized */
         SQLSTATEMENTERROR("Database Query could not be realized", Category.CODE_ERROR, 3),
-        /**
-         * Allowed Quota reached
-         */
+        /** The allowed Quota is reached. */
         STORE_FULL("The allowed Quota is reached.", Category.USER_INPUT, 4),
-        /**
-         * Quota seems to be inconsistent. Please use consistency tool on context %1$d.
-         */
-        QUOTA_UNDERRUN("Quota seems to be inconsistent. Please use consistency tool on context %1$d.", Category.TRUNCATED, 5);
+        /** Quota seems to be inconsistent. Please use consistency tool on context %1$d. */
+        QUOTA_UNDERRUN("Quota seems to be inconsistent. Please use consistency tool on context %1$d.", Category.TRUNCATED, 5),
+        /** Quota usage is missing for context %1$d. */
+        NO_USAGE("Quota usage is missing for context %1$d.", Category.CODE_ERROR, 6),
+        /** Update of quota usage for context %1$d failed. */
+        UPDATE_FAILED("Update of quota usage for context %1$d failed.", Category.CODE_ERROR, 7);
 
         /**
          * Message of the exception.

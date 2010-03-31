@@ -71,6 +71,7 @@ import com.openexchange.tools.file.external.FileStorage;
 import com.openexchange.tools.file.external.FileStorageException;
 import com.openexchange.tools.file.external.QuotaFileStorage;
 import com.openexchange.tools.file.external.QuotaFileStorageException;
+import com.openexchange.tools.file.external.QuotaFileStorageException.Code;
 import com.openexchange.tools.sql.DBUtils;
 
 public class QuotaFileStorageImpl implements QuotaFileStorage {
@@ -151,23 +152,28 @@ public class QuotaFileStorageImpl implements QuotaFileStorage {
         try {
             con.setAutoCommit(false);
 
-            sstmt = con.prepareStatement("SELECT used FROM filestore_usage WHERE cid = ? FOR UPDATE");
+            sstmt = con.prepareStatement("SELECT used FROM filestore_usage WHERE cid=? FOR UPDATE");
             sstmt.setInt(1, context.getContextId());
             rs = sstmt.executeQuery();
 
-            long oldUsage = 0;
-            while (rs.next()) {
+            final long oldUsage;
+            if (rs.next()) {
                 oldUsage = rs.getLong(1);
+            } else {
+                throw new QuotaFileStorageException(Code.NO_USAGE, I(context.getContextId()));
             }
 
             final long newUsage = oldUsage + usage;
             if (newUsage > context.getFileStorageQuota()) {
                 full = true;
             } else {
-                ustmt = con.prepareStatement("UPDATE filestore_usage SET used = ? WHERE cid = ?");
+                ustmt = con.prepareStatement("UPDATE filestore_usage SET used=? WHERE cid=?");
                 ustmt.setLong(1, newUsage);
                 ustmt.setInt(2, context.getContextId());
-                ustmt.execute();
+                int rows = ustmt.executeUpdate();
+                if (1 != rows) {
+                    throw new QuotaFileStorageException(Code.UPDATE_FAILED, I(context.getContextId()));
+                }
             }
 
             con.commit();
@@ -208,13 +214,15 @@ public class QuotaFileStorageImpl implements QuotaFileStorage {
 
             con.setAutoCommit(false);
 
-            sstmt = con.prepareStatement("SELECT used FROM filestore_usage WHERE cid = ? FOR UPDATE");
+            sstmt = con.prepareStatement("SELECT used FROM filestore_usage WHERE cid=? FOR UPDATE");
             sstmt.setInt(1, context.getContextId());
             rs = sstmt.executeQuery();
 
-            long oldUsage = 0;
-            while (rs.next()) {
+            final long oldUsage;
+            if (rs.next()) {
                 oldUsage = rs.getLong("used");
+            } else {
+                throw new QuotaFileStorageException(Code.NO_USAGE, I(context.getContextId()));
             }
             long newUsage = oldUsage - usage;
 
@@ -224,10 +232,13 @@ public class QuotaFileStorageImpl implements QuotaFileStorage {
                 LOG.fatal(e.getMessage(), e);
             }
 
-            ustmt = con.prepareStatement("UPDATE filestore_usage SET used = ? WHERE cid = ?");
+            ustmt = con.prepareStatement("UPDATE filestore_usage SET used=? WHERE cid=?");
             ustmt.setLong(1, newUsage);
             ustmt.setInt(2, context.getContextId());
-            ustmt.execute();
+            int rows = ustmt.executeUpdate();
+            if (1 != rows) {
+                throw new QuotaFileStorageException(Code.UPDATE_FAILED, I(context.getContextId()));
+            }
 
             con.commit();
         } catch (final SQLException s) {
@@ -262,15 +273,20 @@ public class QuotaFileStorageImpl implements QuotaFileStorage {
         try {
             con.setAutoCommit(false);
 
-            sstmt = con.prepareStatement("SELECT used FROM filestore_usage WHERE cid = ? FOR UPDATE");
+            sstmt = con.prepareStatement("SELECT used FROM filestore_usage WHERE cid=? FOR UPDATE");
             sstmt.setInt(1, context.getContextId());
             result = sstmt.executeQuery();
+            if (!result.next()) {
+                throw new QuotaFileStorageException(Code.NO_USAGE, I(context.getContextId()));
+            }
 
-            ustmt = con.prepareStatement("UPDATE filestore_usage SET used = ? WHERE cid = ?");
+            ustmt = con.prepareStatement("UPDATE filestore_usage SET used=? WHERE cid=?");
             ustmt.setLong(1, usage);
             ustmt.setInt(2, context.getContextId());
-            ustmt.execute();
-
+            int rows = ustmt.executeUpdate();
+            if (1 != rows) {
+                throw new QuotaFileStorageException(Code.UPDATE_FAILED, I(context.getContextId()));
+            }
             con.commit();
         } catch (final SQLException s) {
             DBUtils.rollback(con);
@@ -317,11 +333,16 @@ public class QuotaFileStorageImpl implements QuotaFileStorage {
         }
         PreparedStatement stmt = null;
         ResultSet result = null;
+        final long usage;
         try {
-            stmt = con.prepareStatement("SELECT used FROM filestore_usage WHERE cid = ?");
+            stmt = con.prepareStatement("SELECT used FROM filestore_usage WHERE cid=?");
             stmt.setInt(1, context.getContextId());
             result = stmt.executeQuery();
-            return result.next() ? result.getLong(1) : 0;
+            if (result.next()) {
+                usage = result.getLong(1);
+            } else {
+                throw new QuotaFileStorageException(Code.NO_USAGE, I(context.getContextId()));
+            }
         } catch (final SQLException e) {
             throw new QuotaFileStorageException(QuotaFileStorageException.Code.SQLSTATEMENTERROR, e);
         } finally {
@@ -329,6 +350,7 @@ public class QuotaFileStorageImpl implements QuotaFileStorage {
             DBUtils.closeSQLStuff(stmt);
             db.backReadOnly(context, con);
         }
+        return usage;
     }
 
     public String saveNewFile(final InputStream is) throws QuotaFileStorageException {
