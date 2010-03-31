@@ -82,11 +82,6 @@ public class QuotaFileStorageImpl implements QuotaFileStorage {
     private final FileStorage fileStorage;
 
     /**
-     * The ContextId
-     */
-    private final int cid;
-
-    /**
      * Service for DB Connections
      */
     private final DatabaseService db;
@@ -105,16 +100,13 @@ public class QuotaFileStorageImpl implements QuotaFileStorage {
      * @throws QuotaFileStorageException
      */
     public QuotaFileStorageImpl(final Context context, final FileStorage fs, final DatabaseService db) throws QuotaFileStorageException {
+        super();
         this.context = context;
-        cid = context.getContextId();
         fileStorage = fs;
-
+        this.db = db;
         if (fileStorage == null) {
             throw new QuotaFileStorageException(QuotaFileStorageException.Code.INSTANTIATIONERROR);
         }
-
-        this.db = db;
-
     }
 
     /**
@@ -171,7 +163,7 @@ public class QuotaFileStorageImpl implements QuotaFileStorage {
             con.setAutoCommit(false);
 
             sstmt = con.prepareStatement("SELECT used FROM filestore_usage WHERE cid = ? FOR UPDATE");
-            sstmt.setInt(1, cid);
+            sstmt.setInt(1, context.getContextId());
             rs = sstmt.executeQuery();
 
             long oldUsage = 0;
@@ -185,7 +177,7 @@ public class QuotaFileStorageImpl implements QuotaFileStorage {
             } else {
                 ustmt = con.prepareStatement("UPDATE filestore_usage SET used = ? WHERE cid = ?");
                 ustmt.setLong(1, newUsage);
-                ustmt.setInt(2, cid);
+                ustmt.setInt(2, context.getContextId());
                 ustmt.execute();
             }
 
@@ -228,7 +220,7 @@ public class QuotaFileStorageImpl implements QuotaFileStorage {
             con.setAutoCommit(false);
 
             sstmt = con.prepareStatement("SELECT used FROM filestore_usage WHERE cid = ? FOR UPDATE");
-            sstmt.setInt(1, cid);
+            sstmt.setInt(1, context.getContextId());
             rs = sstmt.executeQuery();
 
             long oldUsage = 0;
@@ -239,13 +231,13 @@ public class QuotaFileStorageImpl implements QuotaFileStorage {
 
             if (newUsage < 0) {
                 newUsage = 0;
-                final QuotaFileStorageException e = new QuotaFileStorageException(QuotaFileStorageException.Code.QUOTA_UNDERRUN, cid);
+                final QuotaFileStorageException e = new QuotaFileStorageException(QuotaFileStorageException.Code.QUOTA_UNDERRUN, context.getContextId());
                 LOG.fatal(e.getMessage(), e);
             }
 
             ustmt = con.prepareStatement("UPDATE filestore_usage SET used = ? WHERE cid = ?");
             ustmt.setLong(1, newUsage);
-            ustmt.setInt(2, cid);
+            ustmt.setInt(2, context.getContextId());
             ustmt.execute();
 
             con.commit();
@@ -282,12 +274,12 @@ public class QuotaFileStorageImpl implements QuotaFileStorage {
             con.setAutoCommit(false);
 
             sstmt = con.prepareStatement("SELECT used FROM filestore_usage WHERE cid = ? FOR UPDATE");
-            sstmt.setInt(1, cid);
+            sstmt.setInt(1, context.getContextId());
             sstmt.executeQuery();
 
             ustmt = con.prepareStatement("UPDATE filestore_usage SET used = ? WHERE cid = ?");
             ustmt.setLong(1, usage);
-            ustmt.setInt(2, cid);
+            ustmt.setInt(2, context.getContextId());
             ustmt.execute();
 
             con.commit();
@@ -371,7 +363,7 @@ public class QuotaFileStorageImpl implements QuotaFileStorage {
 
         try {
             stmt = con.prepareStatement("SELECT used FROM filestore_usage WHERE cid = ?");
-            stmt.setInt(1, cid);
+            stmt.setInt(1, context.getContextId());
             result = stmt.executeQuery();
 
             if (!result.next()) {
@@ -431,7 +423,7 @@ public class QuotaFileStorageImpl implements QuotaFileStorage {
     public void recalculateUsage() throws QuotaFileStorageException {
         try {
             if (LOG.isInfoEnabled()) {
-                LOG.info("Recalculating usage for Context " + cid);
+                LOG.info("Recalculating usage for Context " + context.getContextId());
             }
             final SortedSet<String> filenames = fileStorage.getFileList();
             long entireFileSize = 0;
