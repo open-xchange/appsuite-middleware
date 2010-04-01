@@ -1,3 +1,7 @@
+* 2010-04-01 - tobias.prinz@open-xchange.com
+
+ - Bugfix #15726: Crawler gives more helpful error message on invalid accounts.
+
 * 2010-03-11 - tobias.prinz@open-xchange.com
 
  - Bugfix #15584: Removed access to data container objects through reflection to prevent further breaks due to refactoring.
