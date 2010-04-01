@@ -21,7 +21,6 @@ set -e
 setUCRVars() {
     eval $(ucr shell)
     
-set -x
     descrarr=( "OXtender for MS Outlook" "OXtender for Business Mobility" )
     if [ "$(ucr get repository/online/component/ox/description)" != "Open-Xchange Server" ]; then
 	ucr set repository/online/component/ox/description="Open-Xchange Server"
