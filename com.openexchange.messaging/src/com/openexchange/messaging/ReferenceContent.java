@@ -60,6 +60,14 @@ public class ReferenceContent implements SimpleContent<String> {
 
     private String id;
 
+    public ReferenceContent() {
+
+    }
+
+    public ReferenceContent(String refId) {
+       this.id = refId; 
+    }
+
     public String getData() throws MessagingException {
         return id;
     }
