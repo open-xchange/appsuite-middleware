@@ -89,9 +89,6 @@ public class JSONDocumentMetadata implements DocumentMetadata {
         this.jsonObject = new JSONObject(json);
         
         //Test parsing of complex objects
-        if(jsonObject.has(Metadata.CATEGORIES_LITERAL.getName())) {
-            jsonObject.getJSONArray(Metadata.CATEGORIES_LITERAL.getName());
-        }
         if(jsonObject.has(Metadata.URL_LITERAL.getName())) {
             String url = jsonObject.getString(Metadata.URL_LITERAL.getName());
             if(!"".equals(url.trim())) {
@@ -321,36 +318,14 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 
     public String getCategories() {
         if(!jsonObject.has(Metadata.CATEGORIES_LITERAL.getName())) {
-            return "";
+            return null;
         }
-        try {
-            final JSONArray arr = jsonObject.getJSONArray(Metadata.CATEGORIES_LITERAL.getName());
-            if(arr.length() == 0)
-                return "";
-            final StringBuffer list = new StringBuffer();
-            for(int i = 0; i < arr.length(); i++) {
-                list.append(arr.get(i));
-                list.append(", ");
-            }
-            list.setLength(list.length()-2);
-            return list.toString();
-        } catch (final JSONException e) {
-            LOG.debug("",e);
-        }
-        return "";
+        return jsonObject.optString(Metadata.CATEGORIES_LITERAL.getName());
     }
 
     public void setCategories(final String categories) {
-        final JSONArray catArray = new JSONArray();
-        
-        final String[] categoriesSplit = categories.split("\\s+,\\s+");
-        
-        for(final String category : categoriesSplit) {
-            catArray.put(category);
-        }
-        
         try {
-            jsonObject.put(Metadata.CATEGORIES_LITERAL.getName(), catArray);
+            jsonObject.put(Metadata.CATEGORIES_LITERAL.getName(), categories);
         } catch (final JSONException e) {
             LOG.error("",e);
         }
