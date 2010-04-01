@@ -1,3 +1,7 @@
+* 2010-04-01 - marcus.klein@open-xchange.com
+
+ - Bugfix #15731: Proper initializing the refactored quota file storage.
+
 * 2010-03-31 - thorben.betten@open-xchange.com
 
  - Bugfix #15711: Showing more sophisticated error message.
