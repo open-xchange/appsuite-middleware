@@ -158,23 +158,6 @@ public class FunctionTests extends AbstractAJAXSession {
     }
 
     /**
-     * Checks if the new preferences entry availableModules works.
-     */
-    public void testAvailableModules() throws Throwable {
-        final AJAXClient client = getClient();
-        final GetResponse get = ConfigTools.get(client, new GetRequest(Tree
-            .AvailableModules));
-        final Object[] modules = get.getArray();
-        assertTrue("Can't get available modules.", modules.length > 0);
-        final StringBuffer sb = new StringBuffer("Modules: ");
-        for (int i = 0; i < modules.length; i++) {
-            sb.append(modules[i]);
-            sb.append(", ");
-        }
-        LOG.info(sb.toString());
-    }
-
-    /**
      * Checks if the new preferences entry extras works.
      */
     public void testConfigJumpFlag() throws Throwable {

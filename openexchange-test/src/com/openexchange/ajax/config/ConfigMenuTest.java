@@ -92,17 +92,6 @@ public class ConfigMenuTest extends AbstractAJAXSession {
     }
 
     /**
-     * Tests if the modules can be read from the server.
-     */
-    public void testReadModules() throws Throwable {
-        final GetRequest request = new GetRequest(Tree.AvailableModules);
-        final GetResponse response = getClient().execute(request);
-        final Object[] array = response.getArray();
-        LOG.trace("Modules: " + Arrays.toString(array));
-        assertTrue("Got no modules from server.", array.length > 0);
-    }
-
-    /**
      * Tests if the spam-button setting can be read from the server.
      */
     public void testHasSpam() throws Throwable {

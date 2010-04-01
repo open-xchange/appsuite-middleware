@@ -49,36 +49,35 @@
 
 package com.openexchange.ajax.config;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.Arrays;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import com.openexchange.ajax.config.actions.GetRequest;
+import com.openexchange.ajax.config.actions.GetResponse;
+import com.openexchange.ajax.config.actions.Tree;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
 
 /**
- * Suite for all config tests.
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * This test case tests the AJAX interface of the config system for the AJAX
+ * GUI.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class ConfigTestSuite {
+public class AvailableModulesTest extends AbstractAJAXSession {
+
+    private static final Log LOG = LogFactory.getLog(AvailableModulesTest.class);
+
+    public AvailableModulesTest(final String name) {
+        super(name);
+    }
 
     /**
-     * Prevent instantiation
+     * Tests if the modules can be read from the server.
      */
-    private ConfigTestSuite() {
-        super();
-    }
-    
-    /**
-     * Generates the task test suite.
-     * @return the task tests suite.
-     */
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(AvailableModulesTest.class);
-        tests.addTestSuite(ConfigMenuTest.class);
-        tests.addTestSuite(ForwardInlineOrAttachmentTest.class);
-        tests.addTestSuite(FunctionTests.class);
-        tests.addTestSuite(SpamButtonTest.class);
-        tests.addTestSuite(ModulesTest.class);
-        tests.addTestSuite(BugTests.class);
-        tests.addTestSuite(Bug15354Test.class);
-        return tests;
+    public void testReadModules() throws Throwable {
+        final GetRequest request = new GetRequest(Tree.AvailableModules);
+        final GetResponse response = getClient().execute(request);
+        final Object[] array = response.getArray();
+        LOG.trace("Modules: " + Arrays.toString(array));
+        assertTrue("Got no modules from server.", array.length > 0);
     }
 }
