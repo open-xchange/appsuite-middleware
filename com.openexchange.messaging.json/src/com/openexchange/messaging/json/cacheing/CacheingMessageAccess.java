@@ -60,6 +60,7 @@ import java.util.Set;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
 import com.openexchange.messaging.IndexRange;
+import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingField;
 import com.openexchange.messaging.MessagingMessage;
@@ -216,6 +217,10 @@ public class CacheingMessageAccess implements MessagingMessageAccess {
 
     protected String getGroupName(String folderId) {
         return session.getContextId()+"/"+folderPrefix+"/"+folderId;
+    }
+
+    public MessagingContent resolveContent(String folder, String id, String referenceId) throws MessagingException {
+        return delegate.resolveContent(folder, id, referenceId);
     }
 
 }

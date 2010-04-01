@@ -149,4 +149,12 @@ public class SimMessageAccess implements MessagingMessageAccess {
         called.add(new Call("updateMessage", message, fields));
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.messaging.MessagingMessageAccess#resolveContent(java.lang.String, java.lang.String, java.lang.String)
+     */
+    public MessagingContent resolveContent(String folder, String id, String referenceId) throws MessagingException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

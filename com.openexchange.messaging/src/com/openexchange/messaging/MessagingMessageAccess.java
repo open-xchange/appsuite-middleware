@@ -222,5 +222,14 @@ public interface MessagingMessageAccess {
      * @throws MessagingException If performing specified action fails or action is not applicable for this perform() method
      */
     public MessagingMessage perform(MessagingMessage message, String action) throws MessagingException;
-
+    
+    /**
+     * This method resolves a @see {@link ReferenceContent} id.
+     * @param folder The folder identifier
+     * @param id The message identifier
+     * @param referenceId the reference identifier
+     * @return
+     * @throws MessagingException
+     */
+    public MessagingContent resolveContent(String folder, String id, String referenceId) throws MessagingException;
 }

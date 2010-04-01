@@ -55,6 +55,7 @@ import java.util.Collections;
 import java.util.List;
 import com.openexchange.messaging.IndexRange;
 import com.openexchange.messaging.MessagingAccountManager;
+import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingField;
@@ -219,6 +220,10 @@ public class RSSMessageAccess extends RSSCommon implements MessagingMessageAcces
         } catch (Exception e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
         }
+    }
+
+    public MessagingContent resolveContent(String folder, String id, String referenceId) throws MessagingException {
+        throw new UnsupportedOperationException();
     }
 
 

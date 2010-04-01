@@ -54,6 +54,7 @@ import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.messaging.IndexRange;
 import com.openexchange.messaging.MessagingAccount;
+import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingField;
@@ -288,6 +289,10 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
             }
         }
         return retval;
+    }
+
+    public MessagingContent resolveContent(String folder, String id, String referenceId) throws MessagingException {
+        throw new UnsupportedOperationException();
     }
 
 }

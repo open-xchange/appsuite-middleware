@@ -71,6 +71,7 @@ import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.messaging.IndexRange;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingAddressHeader;
+import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingField;
@@ -623,6 +624,10 @@ public final class FacebookMessagingMessageAccess implements MessagingMessageAcc
      */
     public long getFacebookUserId() {
         return facebookUserId;
+    }
+
+    public MessagingContent resolveContent(String folder, String id, String referenceId) throws MessagingException {
+        throw new UnsupportedOperationException();
     }
 
 }
