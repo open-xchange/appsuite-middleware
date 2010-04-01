@@ -204,6 +204,18 @@ public class MessagingMessageWriterTest extends TestCase {
         assertValidates(assertion, messageJSON);
 
     }
+    
+    public void testReferenceContent() throws MessagingException, JSONException {
+        SimpleMessagingMessage message = new SimpleMessagingMessage();
+        message.setContentReference("coolReferenceId");
+
+        JSONObject messageJSON = new MessagingMessageWriter().write(message, null, null, null);
+
+        JSONAssertion assertion = new JSONAssertion().isObject().hasKey("body").withValueObject().hasKey("ref").withValue("coolReferenceId").objectEnds().objectEnds();
+
+        assertValidates(assertion, messageJSON);
+
+    }
 
     public void testBinaryMessage() throws MessagingException, JSONException, UnsupportedEncodingException {
         SimpleMessagingMessage message = new SimpleMessagingMessage();

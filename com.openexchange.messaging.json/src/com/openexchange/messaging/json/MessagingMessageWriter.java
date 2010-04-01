@@ -270,6 +270,7 @@ public class MessagingMessageWriter {
         {
             add(new StringContentRenderer());
             add(new BinaryContentRenderer());
+            add(new ReferenceContentRenderer());
             add(new MultipartContentRenderer());
         }
     };
