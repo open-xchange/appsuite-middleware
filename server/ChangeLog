@@ -1,3 +1,7 @@
+* 2010-04-01 - francisco.laguna@open-xchange.com
+
+ - Bugfix #14932: Move error messages around for translation and make them nicer.
+
 * 2010-04-01 - marcus.klein@open-xchange.com
 
  - Bugfix #15731: Proper initializing the refactored quota file storage.
