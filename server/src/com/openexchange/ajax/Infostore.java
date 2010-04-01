@@ -342,7 +342,6 @@ public class Infostore extends PermissionServlet {
             resp.setException(new AbstractOXException(x.getMessage())); // FIXME
             try {
                 res.setContentType("text/html; charset=UTF-8");
-
                 throw new UploadServletException(res, substitute(
                     JS_FRAGMENT,
                     STR_JSON,
@@ -352,14 +351,11 @@ public class Infostore extends PermissionServlet {
             } catch (final JSONException e) {
                 LOG.error("Giving up", e);
             }
-        } catch (final JSONException e) {
-            handleOXException(res, e, action, true, null);
         } catch (final Throwable t) {
             final Response resp = new Response();
             resp.setException(new AbstractOXException(t.getMessage())); // FIXME
             try {
                 res.setContentType("text/html; charset=UTF-8");
-
                 throw new UploadServletException(res, substitute(
                     JS_FRAGMENT,
                     STR_JSON,
@@ -665,38 +661,38 @@ public class Infostore extends PermissionServlet {
 
     private final boolean handleOXException(final HttpServletResponse res, final Throwable t, final String action, final boolean post, final String fragmentOverride) {
         res.setContentType("text/html; charset=UTF-8");
+        final AbstractOXException e;
         if (t instanceof AbstractOXException) {
-            final Response resp = new Response();
-            resp.setException((AbstractOXException) t);
-            Writer writer = null;
-
-            try {
-                if (post) {
-                    writer = new UnsynchronizedStringWriter();
-                } else {
-                    writer = res.getWriter();
-                }
-                ResponseWriter.write(resp, writer);
-                if (post) {
-                    res.getWriter().write(
-                        substitute(
-                            fragmentOverride != null ? fragmentOverride : JS_FRAGMENT,
-                            STR_JSON,
-                            writer.toString(),
-                            STR_ACTION,
-                            action));
-                }
-            } catch (final JSONException e) {
-                LOG.error("", t);
-            } catch (final IOException e) {
-                LOG.error("", e);
-            }
-
-            LL.log((AbstractOXException) t);
-
-            return true;
+            e = (AbstractOXException) t;
+        } else {
+            e = new AbstractOXException(t); 
         }
-        return false;
+        final Response resp = new Response();
+        resp.setException(e);
+        Writer writer = null;
+        try {
+            if (post) {
+                writer = new UnsynchronizedStringWriter();
+            } else {
+                writer = res.getWriter();
+            }
+            ResponseWriter.write(resp, writer);
+            if (post) {
+                res.getWriter().write(
+                    substitute(
+                        fragmentOverride != null ? fragmentOverride : JS_FRAGMENT,
+                        STR_JSON,
+                        writer.toString(),
+                        STR_ACTION,
+                        action));
+            }
+        } catch (final JSONException e1) {
+            LOG.error("", t);
+        } catch (final IOException e1) {
+            LOG.error("", e);
+        }
+        LL.log((AbstractOXException) t);
+        return true;
     }
 
     protected void sendErrorAsJS(final PrintWriter w, final String error, final String... errorParams) {
