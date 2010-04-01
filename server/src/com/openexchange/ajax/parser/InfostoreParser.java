@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.ajax.parser;
 
 import java.util.Iterator;
@@ -58,7 +56,6 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.utils.Metadata;
 
-
 public class InfostoreParser {
 
     /**
@@ -66,68 +63,67 @@ public class InfostoreParser {
      */
     public static class UnknownMetadataException extends Exception {
 
-		private static final long serialVersionUID = 3260737756212968495L;
-		private final String columnId;
+        private static final long serialVersionUID = 3260737756212968495L;
+        private final String columnId;
 
-		public UnknownMetadataException(final String id) {
-			this.columnId = id;
-		}
-		
-		public String getColumnId() {
-			return columnId;
-		}
+        public UnknownMetadataException(final String id) {
+            this.columnId = id;
+        }
+        
+        public String getColumnId() {
+            return columnId;
+        }
 
-	}
+    }
 
-	public DocumentMetadata getDocumentMetadata(final String json) throws JSONException, OXException {
-		
-		final DocumentMetadata m = new JSONDocumentMetadata(json);
-		return m;
-	}
+    public DocumentMetadata getDocumentMetadata(final String json) throws JSONException, OXException {
+        
+        final DocumentMetadata m = new JSONDocumentMetadata(json);
+        return m;
+    }
 
-	public Metadata[] getColumns(final String[] parameterValues) throws UnknownMetadataException {
-		final Metadata[] cols = new Metadata[parameterValues.length];
-		int i = 0;
-		for(final String idString : parameterValues) {
-			int id = -1;
-			try {
-				id = Integer.parseInt(idString);
-			} catch (final NumberFormatException x) {
-				throw new UnknownMetadataException(idString);
-			}
-			final Metadata m = Metadata.get(id);
-			if(m == null) {
-				throw new UnknownMetadataException(idString);
-			}
-			cols[i++] = m;
-		}
-		return cols;
-	}
+    public Metadata[] getColumns(final String[] parameterValues) throws UnknownMetadataException {
+        final Metadata[] cols = new Metadata[parameterValues.length];
+        int i = 0;
+        for(final String idString : parameterValues) {
+            int id = -1;
+            try {
+                id = Integer.parseInt(idString);
+            } catch (final NumberFormatException x) {
+                throw new UnknownMetadataException(idString);
+            }
+            final Metadata m = Metadata.get(id);
+            if(m == null) {
+                throw new UnknownMetadataException(idString);
+            }
+            cols[i++] = m;
+        }
+        return cols;
+    }
 
-	public Metadata[] findPresentFields(final String updateBody) throws UnknownMetadataException, JSONException{
-		final JSONObject obj = new JSONObject(updateBody);
-		
-		final Metadata[] metadata = new Metadata[obj.length()];
-		int i = 0;
-		boolean shrink = false;
-		for(final Iterator iter = obj.keys(); iter.hasNext();) {
-			final String key = (String) iter.next();
-			final Metadata m = Metadata.get(key);
-			if(m == null) {
-				throw new UnknownMetadataException(key);
-			}
-			if(m == Metadata.FILENAME_LITERAL && (obj.optString(key) == null || obj.optString(key).equals(""))) {
-				shrink = true;
-			} else {
-				metadata[i++] = m;
-			}
-		}
-		if(shrink) {
-			final Metadata[] shrunk = new Metadata[metadata.length-1];
-			System.arraycopy(metadata, 0, shrunk, 0, shrunk.length);
-			return shrunk;
-		}
-		return metadata;
-	}
-
+    public Metadata[] findPresentFields(final String updateBody) throws UnknownMetadataException, JSONException{
+        final JSONObject obj = new JSONObject(updateBody);
+        
+        final Metadata[] metadata = new Metadata[obj.length()];
+        int i = 0;
+        boolean shrink = false;
+        for(final Iterator iter = obj.keys(); iter.hasNext();) {
+            final String key = (String) iter.next();
+            final Metadata m = Metadata.get(key);
+            if(m == null) {
+                throw new UnknownMetadataException(key);
+            }
+            if(m == Metadata.FILENAME_LITERAL && (obj.optString(key) == null || obj.optString(key).equals(""))) {
+                shrink = true;
+            } else {
+                metadata[i++] = m;
+            }
+        }
+        if(shrink) {
+            final Metadata[] shrunk = new Metadata[metadata.length-1];
+            System.arraycopy(metadata, 0, shrunk, 0, shrunk.length);
+            return shrunk;
+        }
+        return metadata;
+    }
 }
