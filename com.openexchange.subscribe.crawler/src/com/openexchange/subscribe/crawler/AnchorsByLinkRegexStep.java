@@ -158,8 +158,9 @@ public class AnchorsByLinkRegexStep extends AbstractStep<List<HtmlAnchor>, HtmlP
                     }
                 }
             }
-
-            executedSuccessfully = true;
+            if (output != null && output.size() != 0){
+                executedSuccessfully = true;
+            }
 
         } catch (final FailingHttpStatusCodeException e) {
             exception = e;

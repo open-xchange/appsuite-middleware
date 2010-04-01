@@ -1,3 +1,7 @@
+* 2010-04-01 - marcus.klein@open-xchange.com
+
+ - Bugfix #15724: Correctly checking if some anchor is on the page or not.
+
 * 2010-04-01 - francisco.laguna@open-xchange.com
 
  - Bugfix #14932: Move error messages around for translation and make them nicer.
