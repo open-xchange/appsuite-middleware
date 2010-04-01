@@ -71,11 +71,11 @@ public class GenericSubscribeServiceForYahooComTest extends GenericSubscribeServ
         CrawlerDescription crawler = new CrawlerDescription();
         crawler.setDisplayName("yahoo.com");
         crawler.setId("com.openexchange.subscribe.crawler.yahoocom");
-        crawler.setPriority(4);
+        crawler.setPriority(5);
         List<Step> steps = new LinkedList<Step>();
         
         String crapBefore = "[^0-9\\+\\(\\)]*";
-        final String VALID_ADDRESS_PART = "[a-zA-Z0-9\\s\u00e4\u00f6\u00fc\u00df]*";
+        String VALID_ADDRESS_PART = "[a-zA-Z0-9\\s\u00e4\u00f6\u00fc\u00df]*";
 
         steps.add(new LoginPageByFormActionStep(
             "Log in",
@@ -85,7 +85,7 @@ public class GenericSubscribeServiceForYahooComTest extends GenericSubscribeServ
             "https://login.yahoo.com/config/login?",
             "login",
             "passwd",
-            "(.*address.*)",
+            "(http\\:\\/\\/address\\.yahoo\\.com\\/)",
             1,
             ""));
         steps.add(new PageByUrlStep("We are not automatically redirected so we have to click a link", "http://address.yahoo.com/"));

@@ -1,7 +1,7 @@
 --- !com.openexchange.subscribe.crawler.CrawlerDescription
 displayName: yahoo.com
 id: com.openexchange.subscribe.crawler.yahoocom
-priority: 4
+priority: 5
 workflowString: |
   --- !com.openexchange.subscribe.crawler.Workflow
   steps: 
@@ -9,11 +9,11 @@ workflowString: |
       actionOfLoginForm: "https://login.yahoo.com/config/login?"
       baseUrl: ""
       description: Log in
-      linkAvailableAfterLogin: "(.*address.*)"
+      linkAvailableAfterLogin: "(http\\:\\/\\/address\\.yahoo\\.com\\/)"
       nameOfPasswordField: passwd
       nameOfUserField: login
       numberOfForm: 1
-      pageTitleAfterLogin: "(.*address.*)"
+      pageTitleAfterLogin: "(http\\:\\/\\/address\\.yahoo\\.com\\/)"
       password: ""
       url: "http://address.yahoo.com/index.php"
       username: ""
