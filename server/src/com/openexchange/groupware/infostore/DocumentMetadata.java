@@ -54,99 +54,94 @@ import java.util.Date;
 import java.util.Set;
 
 public interface DocumentMetadata extends Serializable{
-	
-	// versioned
-	public String getProperty(String key);
-	
-	// versioned
-	public Set<String> getPropertyNames();
-	
-	// versioned persistent
-	public Date getLastModified();
-	public void setLastModified(Date now);
-	
-	// persistent
-	public Date getCreationDate();
-	public void setCreationDate(Date creationDate);
-	
-	// versioned persistent
-	public int getModifiedBy();
-	public void setModifiedBy(int lastEditor);
-	
-	// persistent
-	public long getFolderId();
-	public void setFolderId(long folderId);
-	
-	// persistent
-	public String getTitle();
-	public void setTitle(String title);
-	
-	// versioned persistent
-	public int getVersion();
-	public void setVersion(int version);
-	
-	// versioned transient
-	public String getContent();
-	
-	// versioned persistent
-	public long getFileSize();
-	public void setFileSize(long length);
-	
-	// versioned persistent
-	public String getFileMIMEType();
-	public void setFileMIMEType(String type);
-	
-	// versioned persistent
-	public String getFileName();
-	public void setFileName(String fileName);
-	
-	// persistent
-	public int getId();
-	public void setId(int id);
-	
-	// persistent
-	public int getCreatedBy();
-	public void setCreatedBy(int cretor);
-	
-	// persistent
-	public String getDescription();
-	public void setDescription(String description);
-	
-	// persistent
-	public String getURL();
-	public void setURL(String url);
-	
-	// versioned persistent
-	public long getSequenceNumber();
 
-	public String getCategories();
-	public void setCategories(String categories);
+    // versioned
+    String getProperty(String key);
 
-	public Date getLockedUntil();
-	public void setLockedUntil(Date lockedUntil);
+    // versioned
+    Set<String> getPropertyNames();
 
-	public String getFileMD5Sum();
-	public void setFileMD5Sum(String sum);
+    // versioned persistent
+    Date getLastModified();
+    void setLastModified(Date now);
 
-	public int getColorLabel();
-	public void setColorLabel(int color);
+    // persistent
+    Date getCreationDate();
+    void setCreationDate(Date creationDate);
 
-	public boolean isCurrentVersion();
-	public void setIsCurrentVersion(boolean bool);
+    // versioned persistent
+    int getModifiedBy();
+    void setModifiedBy(int lastEditor);
 
-	public String getVersionComment();
-	public void setVersionComment(String string);
+    // persistent
+    long getFolderId();
+    void setFolderId(long folderId);
 
-	public void setFilestoreLocation(String string);
+    // persistent
+    String getTitle();
+    void setTitle(String title);
 
-	public String getFilestoreLocation();
+    // versioned persistent
+    int getVersion();
+    void setVersion(int version);
+
+    // versioned transient
+    String getContent();
+
+    // versioned persistent
+    long getFileSize();
+    void setFileSize(long length);
+
+    // versioned persistent
+    String getFileMIMEType();
+    void setFileMIMEType(String type);
+
+    // versioned persistent
+    String getFileName();
+    void setFileName(String fileName);
+
+    // persistent
+    int getId();
+    void setId(int id);
+
+    // persistent
+    int getCreatedBy();
+    void setCreatedBy(int cretor);
+
+    // persistent
+    String getDescription();
+    void setDescription(String description);
+
+    // persistent
+    String getURL();
+    void setURL(String url);
+
+    // versioned persistent
+    long getSequenceNumber();
+
+    String getCategories();
+    void setCategories(String categories);
+
+    Date getLockedUntil();
+    void setLockedUntil(Date lockedUntil);
+
+    String getFileMD5Sum();
+    void setFileMD5Sum(String sum);
+
+    int getColorLabel();
+    void setColorLabel(int color);
+
+    boolean isCurrentVersion();
+    void setIsCurrentVersion(boolean bool);
+
+    String getVersionComment();
+    void setVersionComment(String string);
+
+    void setFilestoreLocation(String string);
+
+    String getFilestoreLocation();
 
     // virtual
-    public void setNumberOfVersions(int numberOfVersions);
-    public int getNumberOfVersions();
-
-	
-	
-	
-	
+    void setNumberOfVersions(int numberOfVersions);
+    int getNumberOfVersions();
 }
