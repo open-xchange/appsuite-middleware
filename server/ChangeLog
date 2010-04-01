@@ -34,6 +34,10 @@
 
  - Bugfix #15671: Probing for optional TOP and UIDL POP3 commands
 
+* 2010-03-25 - karsten.will@open-xchange.com
+
+ - Bugfix #15660: Using commons HttpClient for login to linked in to fix redirect problems with HtmlUnit.
+
 * 2010-03-24 - tobias.prinz@open-xchange.com
 
  - RFC 2447: IMIP behaviour: Party crashers (people not invited, e.g. responding from another e-mail address) can now be accepted as participants by the organizer of the event  
