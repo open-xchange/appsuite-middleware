@@ -71,59 +71,59 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     private static final transient Log LOG = LogFactory.getLog(UserConfiguration.class);
 
-    private static final int WEBMAIL = 1;
+    public static final int WEBMAIL = 1;
 
-    private static final int CALENDAR = 1 << 1;
+    public static final int CALENDAR = 1 << 1;
 
-    private static final int CONTACTS = 1 << 2;
+    public static final int CONTACTS = 1 << 2;
 
-    private static final int TASKS = 1 << 3;
+    public static final int TASKS = 1 << 3;
 
-    private static final int INFOSTORE = 1 << 4;
+    public static final int INFOSTORE = 1 << 4;
 
-    private static final int PROJECTS = 1 << 5;
+    public static final int PROJECTS = 1 << 5;
 
-    private static final int FORUM = 1 << 6;
+    public static final int FORUM = 1 << 6;
 
-    private static final int PINBOARD_WRITE_ACCESS = 1 << 7;
+    public static final int PINBOARD_WRITE_ACCESS = 1 << 7;
 
-    private static final int WEBDAV_XML = 1 << 8;
+    public static final int WEBDAV_XML = 1 << 8;
 
-    private static final int WEBDAV = 1 << 9;
+    public static final int WEBDAV = 1 << 9;
 
-    private static final int ICAL = 1 << 10;
+    public static final int ICAL = 1 << 10;
 
-    private static final int VCARD = 1 << 11;
+    public static final int VCARD = 1 << 11;
 
-    private static final int RSS_BOOKMARKS = 1 << 12;
+    public static final int RSS_BOOKMARKS = 1 << 12;
 
-    private static final int RSS_PORTAL = 1 << 13;
+    public static final int RSS_PORTAL = 1 << 13;
 
-    private static final int MOBILITY = 1 << 14;
+    public static final int MOBILITY = 1 << 14;
 
-    private static final int EDIT_PUBLIC_FOLDERS = 1 << 15;
+    public static final int EDIT_PUBLIC_FOLDERS = 1 << 15;
 
-    private static final int READ_CREATE_SHARED_FOLDERS = 1 << 16;
+    public static final int READ_CREATE_SHARED_FOLDERS = 1 << 16;
 
-    private static final int DELEGATE_TASKS = 1 << 17;
+    public static final int DELEGATE_TASKS = 1 << 17;
 
-    private static final int EDIT_GROUP = 1 << 18;
+    public static final int EDIT_GROUP = 1 << 18;
 
-    private static final int EDIT_RESOURCE = 1 << 19;
+    public static final int EDIT_RESOURCE = 1 << 19;
 
-    private static final int EDIT_PASSWORD = 1 << 20;
+    public static final int EDIT_PASSWORD = 1 << 20;
 
-    private static final int COLLECT_EMAIL_ADDRESSES = 1 << 21;
+    public static final int COLLECT_EMAIL_ADDRESSES = 1 << 21;
 
-    private static final int MULTIPLE_MAIL_ACCOUNTS = 1 << 22;
+    public static final int MULTIPLE_MAIL_ACCOUNTS = 1 << 22;
 
-    private static final int SUBSCRIPTION = 1 << 23;
+    public static final int SUBSCRIPTION = 1 << 23;
 
-    private static final int PUBLICATION = 1 << 24;
+    public static final int PUBLICATION = 1 << 24;
 
-    private static final int ACTIVE_SYNC = 1 << 25;
+    public static final int ACTIVE_SYNC = 1 << 25;
 
-    private static final int USM = 1 << 26;
+    public static final int USM = 1 << 26;
 
     /*-
      * Field members
@@ -147,7 +147,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
     /**
      * The context.
      */
-    private final transient Context ctx;
+    private final Context ctx;
 
     /**
      * The accessible modules.
@@ -912,7 +912,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
         setPermission(editPassword, EDIT_PASSWORD);
     }
 
-    private boolean hasPermission(final int permission) {
+    public boolean hasPermission(final int permission) {
         return (permissionBits & permission) == permission;
     }
 
