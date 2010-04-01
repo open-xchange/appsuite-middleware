@@ -1,3 +1,7 @@
+* 2010-04-01 - karsten.will@open-xchange.com
+
+- Bugfix #15725 - Yahoo crawler reports "got exception null" if invalid credentials are entered
+
 * 2010-04-01 - marcus.klein@open-xchange.com
 
  - Bugfix #15724: Correctly checking if some anchor is on the page or not.
