@@ -99,7 +99,7 @@ public class SubscriptionErrorStrings implements LocalizableStrings {
     public static final String CHECK_WEBSITE =  "Make sure, that the Service is still available, and there are no major changes on the website";
     
     // Service unavailable
-    public static final String SERVICE_UNAVAILABLE = "Service unavailable";
+    public static final String SERVICE_UNAVAILABLE = "Service unavailable or wrong credentials";
     
     // Please correct the steps of this workflow so that output of one step and input of the next step match
     public static final String OUTPUT_MUST_MATCH_INPUT = "Please correct the steps of this workflow so that output of one step and input of the next step match";
