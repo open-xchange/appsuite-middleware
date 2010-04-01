@@ -70,6 +70,7 @@ public class HTTPOXMFDataSource implements OXMFDataSource {
     private static final Log LOG = LogFactory.getLog(HTTPOXMFDataSource.class);
 
     public Reader getData(Subscription subscription) throws SubscriptionException {
+        String site = (String)subscription.getConfiguration().get(URL);
 
         try {
             return HTTPToolkit.grab((String)subscription.getConfiguration().get(URL));
