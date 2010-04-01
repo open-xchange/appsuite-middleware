@@ -21,14 +21,27 @@ set -e
 setUCRVars() {
     eval $(ucr shell)
     
+set -x
     descrarr=( "OXtender for MS Outlook" "OXtender for Business Mobility" )
-    ucr set repository/online/component/ox/description="Open-Xchange Server"
+    if [ "$(ucr get repository/online/component/ox/description)" != "Open-Xchange Server" ]; then
+	ucr set repository/online/component/ox/description="Open-Xchange Server"
+    fi
     
     cnt=0
     components=$(ucr get ox/components/available)
+    oldcomponents=$components
+
     for repo in oxoutlook oxmobility; do
 	# fix all descriptions
-	ucr set repository/online/component/${repo}/description="${descrarr[$cnt]}"
+	if [ "$(ucr get repository/online/component/${repo}/description)" != "${descrarr[$cnt]}" ]; then
+	   ucr set repository/online/component/${repo}/description="${descrarr[$cnt]}"
+	fi
+
+	if echo $components | grep $repo >/dev/null; then
+	   cnt=$(( $cnt + 1 ))
+	   continue
+	fi
+
         renabled=$(ucr get repository/online/component/$repo)
         if [ -z "$renabled" ]; then
 	    ucr set repository/online/component/${repo}=enabled
@@ -46,7 +59,9 @@ setUCRVars() {
     	fi
         cnt=$(( $cnt + 1 ))
     done
-    ucr set ox/components/available="$components"
+    if [ "$components" != "$oldcomponents" ]; then
+	ucr set ox/components/available="$components"
+    fi
 }
 
 case "$1" in
