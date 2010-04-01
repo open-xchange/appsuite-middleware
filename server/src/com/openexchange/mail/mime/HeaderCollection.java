@@ -498,6 +498,19 @@ public class HeaderCollection implements Serializable {
     }
 
     /**
+     * Gets an  instance of {@link Iterator} to iterate all header names.
+     * 
+     * @return An  instance of {@link Iterator} to iterate all header names
+     */
+    public Iterator<String> getHeaderNames() {
+        final List<String> tmp = new ArrayList<String>(map.size());
+        for (HeaderName headerName : map.keySet()) {
+            tmp.add(headerName.toString());
+        }
+        return tmp.iterator();
+    }
+
+    /**
      * Gets an instance of {@link Iterator} to iterate all headers.
      * 
      * @return An instance of {@link Iterator} to iterate all headers
