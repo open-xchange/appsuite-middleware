@@ -582,6 +582,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, D
                 version0.setFileMD5Sum(null);
                 version0.setFileMIMEType(null);
                 version0.setVersion(0);
+                version0.setFilestoreLocation(null);
 
                 CreateVersionAction createVersionAction = new CreateVersionAction();
                 createVersionAction.setContext(sessionObj.getContext());
@@ -600,7 +601,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, D
                 if (data != null) {
                     final SaveFileWithQuotaAction saveFile = new SaveFileWithQuotaAction();
                     try {
-                        final QuotaFileStorage qfs = (QuotaFileStorage) getFileStorage(sessionObj.getContext());
+                        final QuotaFileStorage qfs = getFileStorage(sessionObj.getContext());
                         saveFile.setStorage(qfs);
                         saveFile.setSizeHint(document.getFileSize());
                         saveFile.setIn(data);
@@ -728,7 +729,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, D
         return reservation;
     }
 
-    protected FileStorage getFileStorage(final Context ctx) throws FilestoreException, FileStorageException {
+    protected QuotaFileStorage getFileStorage(final Context ctx) throws FilestoreException, FileStorageException {
         return QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
     }
 
