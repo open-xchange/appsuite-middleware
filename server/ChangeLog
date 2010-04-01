@@ -1,3 +1,7 @@
+* 2010-04-01 - thorben.betten@open-xchange.com
+
+ - Bugfix #15686: No spam handler for external accounts
+
 * 2010-03-30 - marcus.klein@open-xchange.com
 
  - Bugfix #15721: Correct ordner and proper transaction handling when deleting a user that has POP3 accounts.
