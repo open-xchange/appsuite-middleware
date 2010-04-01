@@ -1,5 +1,7 @@
 * 2010-04-01 - karsten.will@open-xchange.com
 
+ - "fixed" bug 15724 by changing the wording from "Service unavailable" to "Service unavailable or wrong credentials"
+ 
  - Bugfix #15725: Yahoo crawler now gives readable exception if invalid credentials are entered.
 
 * 2010-04-01 - marcus.klein@open-xchange.com
