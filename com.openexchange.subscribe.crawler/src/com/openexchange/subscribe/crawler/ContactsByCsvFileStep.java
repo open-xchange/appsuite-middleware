@@ -55,14 +55,12 @@ import java.util.Vector;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.gargoylesoftware.htmlunit.TextPage;
-import com.gargoylesoftware.htmlunit.UnexpectedPage;
 import com.gargoylesoftware.htmlunit.WebClient;
+import com.openexchange.groupware.contact.ContactUtil;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
 import com.openexchange.subscribe.crawler.internal.Mappings;
 import com.openexchange.tools.versit.converter.ConverterException;
-
 
 /**
  * {@link ContactsByCsvFileStep}
@@ -78,7 +76,7 @@ public class ContactsByCsvFileStep extends AbstractStep<Contact[], TextPage>{
     private static final Log LOG = LogFactory.getLog(ContactsByCsvFileStep.class);
     
     public ContactsByCsvFileStep() {
-        
+        super();
     }
     
     public ContactsByCsvFileStep(final String description, final boolean ignoreFirstLine, final Map<Integer, String> fieldMapping) {
@@ -88,7 +86,7 @@ public class ContactsByCsvFileStep extends AbstractStep<Contact[], TextPage>{
     }
     
     @Override
-    public void execute(final WebClient webClient) throws SubscriptionException {
+    public void execute(final WebClient webClient) {
         final Vector<Contact> contactObjects = new Vector<Contact>();
         String page = input.getWebResponse().getContentAsString();
         int counter = 0;
@@ -126,7 +124,8 @@ public class ContactsByCsvFileStep extends AbstractStep<Contact[], TextPage>{
             
             page = page.substring(endOfLine + 1);
             counter ++;
-            if (contact != null){
+            if (contact != null) {
+                ContactUtil.generateDisplayName(contact);
                 contactObjects.add(contact);
             }
             

@@ -76,6 +76,10 @@ public abstract class AbstractStep<O,I> implements Step<O,I>{
     
     protected boolean debuggingEnabled;
 
+    protected AbstractStep() {
+        super();
+    }
+
     public boolean executedSuccessfully() {
         return executedSuccessfully;
     }
