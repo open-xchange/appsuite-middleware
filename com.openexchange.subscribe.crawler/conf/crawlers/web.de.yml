@@ -25,10 +25,8 @@ workflowString: |
       url: "/online/adressbuch/.*"
     - !com.openexchange.subscribe.crawler.AnchorsByLinkRegexStep
       linkRegex: "adr_show.*"
-      resultpageLinks: []
+      mayHaveEmptyOutput: true
       subpageLinkRegex: ""
-      subpages: []
-      subpagesHref: []
     - !com.openexchange.subscribe.crawler.ContactObjectsByHTMLAnchorsAndPagePartSequenceStep
       pageParts: !com.openexchange.subscribe.crawler.PagePartSequence
         page: ""
