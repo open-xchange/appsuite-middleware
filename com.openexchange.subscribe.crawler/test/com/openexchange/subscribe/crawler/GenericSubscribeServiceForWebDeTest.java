@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import org.ho.yaml.Yaml;
-import org.ho.yaml.YamlConfig;
 import com.openexchange.subscribe.crawler.internal.PagePart;
 import com.openexchange.subscribe.crawler.internal.PagePartSequence;
 import com.openexchange.subscribe.crawler.internal.Step;
@@ -95,7 +94,7 @@ public class GenericSubscribeServiceForWebDeTest extends GenericSubscribeService
         steps.add(new PageByLinkRegexStep("Use the site without frames", "/online/[^h]+.*"));
         steps.add(new PageByLinkRegexStep("This is a fancy page that does not appear in the browser.", "/online/adressbuch/.*"));
         steps.add(new PageByLinkRegexStep("Go to the contacts list.", "/online/adressbuch/.*"));
-        steps.add(new AnchorsByLinkRegexStep("Get each contact.", "", "adr_show.*"));
+        steps.add(new AnchorsByLinkRegexStep("Get each contact.", "", "adr_show.*", true));
         ArrayList<PagePart> pageParts = new ArrayList<PagePart>();
         pageParts.add(new PagePart("(width=\"282\"><b>)"+VALID_NAME+"(<)", "display_name"));
         pageParts.add(new PagePart("E\\-Mail\\-Adressen"));

@@ -33,6 +33,7 @@ workflowString: |
     - !com.openexchange.subscribe.crawler.AnchorsByLinkRegexStep
       description: Get each contact.
       linkRegex: "adr_show.*"
+      mayHaveEmptyOutput: true
       subpageLinkRegex: ""
     - !com.openexchange.subscribe.crawler.ContactObjectsByHTMLAnchorsAndPagePartSequenceStep
       description: Get the information of each contact from the individual webpages

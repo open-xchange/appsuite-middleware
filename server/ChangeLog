@@ -1,6 +1,7 @@
 * 2010-04-05 - marcus.klein@open-xchange.com
 
  - Bugfix #15744: Generating display name for GMX contacts from given and sure name.
+ - Bugfix #15764: Web crawler for web.de works now with an empty address book.
 
 * 2010-04-01 - karsten.will@open-xchange.com
 
