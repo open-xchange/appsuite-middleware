@@ -47,66 +47,45 @@
  *
  */
 
-package com.openexchange.subscribe.crawler;
+package com.openexchange.groupware.contact;
 
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.groupware.container.Contact;
 
-public abstract class AbstractStep<O,I> implements Step<O,I>{
+/**
+ * First start of a utility class for contacts. This class should contain methods that are useful for the complete backend and not only the
+ * contacts component.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
+public class ContactUtil {
 
-    protected String description;
-
-    protected Exception exception;
-
-    protected boolean executedSuccessfully;
-    
-    protected Workflow workflow;
-    
-    protected O output;
-    
-    protected I input;
-
-    protected AbstractStep() {
+    private ContactUtil() {
         super();
     }
 
-    public boolean executedSuccessfully() {
-        return executedSuccessfully;
+    public static void generateDisplayName(Contact contact) {
+        if (contact.containsDisplayName()) {
+            return;
+        }
+        boolean hasUsefulGivenName = contact.containsGivenName() && contact.getGivenName() != null && contact.getGivenName().length() > 0;
+        boolean hasUsefulSureName = contact.containsSurName() && contact.getSurName() != null && contact.getSurName().length() > 0; 
+        if (hasUsefulGivenName || hasUsefulSureName) {
+            StringBuilder sb = new StringBuilder();
+            if (hasUsefulSureName) {
+                sb.append(contact.getSurName());
+            }
+            if (hasUsefulGivenName && hasUsefulSureName) {
+                sb.append(", ");
+            }
+            if (hasUsefulGivenName) {
+                sb.append(contact.getGivenName());
+            }
+            contact.setDisplayName(sb.toString());
+            return;
+        }
+        if (contact.containsCompany() && contact.getCompany() != null && contact.getCompany().length() > 0) {
+            contact.setDisplayName(contact.getCompany());
+            return;
+        }
     }
-
-    public Exception getException() {
-        return this.exception;
-    }
-    
-    public void setWorkflow (final Workflow workflow){
-        this.workflow = workflow;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-    
-    public void setDescription(final String description) {
-        this.description = description;
-    }
-
-    public abstract void execute(WebClient webClient) throws SubscriptionException;
-
-    public Class inputType() {
-        return input.getClass();
-    }
-
-    public Class outputType() {
-        return output.getClass();
-    }
-
-    public O getOutput() {
-        return output;
-    }
-
-    public void setInput(final I input) {
-        this.input = input;
-        
-    }
-    
 }
