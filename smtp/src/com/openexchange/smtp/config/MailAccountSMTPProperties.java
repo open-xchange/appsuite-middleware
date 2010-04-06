@@ -50,6 +50,8 @@
 package com.openexchange.smtp.config;
 
 import java.nio.charset.Charset;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.mail.transport.config.MailAccountTransportProperties;
 import com.openexchange.mailaccount.MailAccount;
 
@@ -60,7 +62,9 @@ import com.openexchange.mailaccount.MailAccount;
  */
 public final class MailAccountSMTPProperties extends MailAccountTransportProperties implements ISMTPProperties {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MailAccountSMTPProperties.class);
+    private static final Log LOG = LogFactory.getLog(MailAccountSMTPProperties.class);
+
+    private final MailAccount mailAccount;
 
     /**
      * Initializes a new {@link MailAccountSMTPProperties}.
@@ -70,6 +74,7 @@ public final class MailAccountSMTPProperties extends MailAccountTransportPropert
      */
     public MailAccountSMTPProperties(final MailAccount mailAccount) {
         super(mailAccount);
+        this.mailAccount = mailAccount;
     }
 
     public String getSmtpAuthEnc() {
@@ -134,12 +139,16 @@ public final class MailAccountSMTPProperties extends MailAccountTransportPropert
     }
 
     public boolean isSmtpEnvelopeFrom() {
-        final String smtpEnvFromStr = properties.get("com.openexchange.smtp.setSMTPEnvelopeFrom");
-        if (null == smtpEnvFromStr) {
-            return SMTPProperties.getInstance().isSmtpEnvelopeFrom();
+        final boolean retval;
+        if (mailAccount.getId() == 0) {
+            final String smtpEnvFromStr = properties.get("com.openexchange.smtp.setSMTPEnvelopeFrom");
+            if (null == smtpEnvFromStr) {
+                return SMTPProperties.getInstance().isSmtpEnvelopeFrom();
+            }
+            retval = Boolean.parseBoolean(smtpEnvFromStr);
+        } else {
+            retval = false;
         }
-
-        return Boolean.parseBoolean(smtpEnvFromStr);
+        return retval;
     }
-
 }

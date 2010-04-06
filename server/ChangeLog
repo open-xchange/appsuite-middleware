@@ -1,3 +1,7 @@
+* 2010-04-06 - marcus.klein@open-xchange.com
+
+ - Bugfix #15656: Disabling configurable envelope-from for external mail accounts.
+
 * 2010-04-05 - marcus.klein@open-xchange.com
 
  - Bugfix #15744: Generating display name for GMX contacts from given and sure name.
