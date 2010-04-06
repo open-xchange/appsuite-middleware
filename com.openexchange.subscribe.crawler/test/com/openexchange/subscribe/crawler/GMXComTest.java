@@ -48,30 +48,15 @@
  */
 
 package com.openexchange.subscribe.crawler;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 
 /**
- * {@link AllCrawlersTestSuite}
+ * {@link GMXComTest}
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class AllCrawlersTestSuite{
-    public AllCrawlersTestSuite() {
-        super();
-    }
-
-    public static Test suite() {
-        final TestSuite testSuite = new TestSuite();
-        testSuite.addTestSuite(FacebookTest.class);
-        testSuite.addTestSuite(GMXTest.class);
-        testSuite.addTestSuite(GoogleMailTest.class);
-        testSuite.addTestSuite(LinkedInTest.class);
-        testSuite.addTestSuite(WebDeTest.class);              
-        testSuite.addTestSuite(XINGTest.class);
-        testSuite.addTestSuite(YahooComTest.class);
-        testSuite.addTestSuite(GMXComTest.class);
-        return testSuite;
+public class GMXComTest extends GenericSubscribeServiceTestHelpers{
+    public void testGMX(){
+        checkSingleCrawler("gmx.com");
     }
 }
