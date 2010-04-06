@@ -134,19 +134,21 @@ public class MailMessagingPart implements MessagingPart {
                             cachedContent = tmp = new StringContent(content);
                         }
                     } else if (contentType.startsWith(CT_MSG_RFC822)) {
-                        final Object content = mailPart.getContent();
                         final MailMessage nestedMail;
-                        if (content instanceof MailMessage) {
-                            nestedMail = (MailMessage) content;
-                        } else if (content instanceof InputStream) {
-                            nestedMail = convertMessage(new MimeMessage(getDefaultSession(), (InputStream) content));
-                        } else {
-                            final StringBuilder sb = new StringBuilder(128);
-                            sb.append("Ignoring nested message.").append(
-                                "Cannot handle part's content which should be a RFC822 message according to its content type: ");
-                            sb.append((null == content ? "null" : content.getClass().getSimpleName()));
-                            LOG.error(sb.toString());
-                            nestedMail = null;
+                        {
+                            final Object content = mailPart.getContent();
+                            if (content instanceof MailMessage) {
+                                nestedMail = (MailMessage) content;
+                            } else if (content instanceof InputStream) {
+                                nestedMail = convertMessage(new MimeMessage(getDefaultSession(), (InputStream) content));
+                            } else {
+                                final StringBuilder sb = new StringBuilder(128);
+                                sb.append("Ignoring nested message.").append(
+                                    "Cannot handle part's content which should be a RFC822 message according to its content type: ");
+                                sb.append((null == content ? "null" : content.getClass().getSimpleName()));
+                                LOG.error(sb.toString());
+                                nestedMail = null;
+                            }
                         }
                         if (null != nestedMail) {
                             /*
