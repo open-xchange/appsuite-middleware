@@ -93,7 +93,7 @@ public class GenericSubscribeServiceForYahooComTest extends GenericSubscribeServ
             ""));
         steps.add(new PageByUrlStep("We are not automatically redirected so we have to click a link", "http://address.yahoo.com/"));
         steps.add(new PageByLinkRegexStep("Click on Classic Contacts", ".*contact_list.*"));
-        steps.add(new AnchorsByLinkRegexStep("Get the links to all contact detail pages", "", ".*detailed_contact.*"));
+        steps.add(new AnchorsByLinkRegexStep("Get the links to all contact detail pages", "", ".*detailed_contact.*", true));
         ArrayList<PagePart> pageParts = new ArrayList<PagePart>();
         pageParts.add(new PagePart("(<h1>\\s)"+VALID_NAME+"(</h1>)","display_name"));
         pageParts.add(new PagePart("(qa_compose1[^>]*>)"+VALID_EMAIL_REGEX+"(<)","email1"));        

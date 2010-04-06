@@ -148,7 +148,7 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
             executedSuccessfully = true;
         }
 
-        if (input == null){
+        if (input == null || input.isEmpty()){
             executedSuccessfully = true;
         }
         

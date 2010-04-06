@@ -1,3 +1,7 @@
+* 2010-04-06 - karsten.will@open-xchange.com
+
+- Bugfix #15794 - Empty Yahoo-Addressbooks work now
+
 * 2010-04-06 - marcus.klein@open-xchange.com
 
  - Bugfix #15656: Disabling configurable envelope-from for external mail accounts.
