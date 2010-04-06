@@ -121,32 +121,24 @@ public class FileStorageStarterTracker implements ServiceTrackerCustomizer {
     public void removedService(final ServiceReference reference, final Object service) {
         boolean needsUnregistration = false;
         final ServiceRegistration reg = registration;
-
         if (service instanceof DatabaseService) {
             dbService = null;
         }
-
         if (service instanceof FileStorageStarter) {
             fssService = null;
         }
-
         lock.lock();
         try {
-            if ((dbService == null) || (fssService == null) && registration != null) {
+            if ((dbService == null || fssService == null) && isRegistered) {
+                registration = null;
                 needsUnregistration = true;
                 isRegistered = false;
             }
-
-            registration = null;
-
         } finally {
             lock.unlock();
         }
-
         if (needsUnregistration) {
             reg.unregister();
         }
-
     }
-
 }
