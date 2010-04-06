@@ -49,6 +49,8 @@
 
 package com.openexchange.messaging.mail;
 
+import static com.openexchange.mail.mime.MIMEDefaultSession.getDefaultSession;
+import static com.openexchange.mail.mime.converters.MIMEMessageConverter.convertMessage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -65,10 +67,8 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.HeaderName;
-import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MessageHeaders;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.messaging.ContentType;
@@ -139,8 +139,7 @@ public class MailMessagingPart implements MessagingPart {
                         if (content instanceof MailMessage) {
                             nestedMail = (MailMessage) content;
                         } else if (content instanceof InputStream) {
-                            nestedMail =
-                                    MIMEMessageConverter.convertMessage(new MimeMessage(MIMEDefaultSession.getDefaultSession(), (InputStream) content));
+                            nestedMail = convertMessage(new MimeMessage(getDefaultSession(), (InputStream) content));
                         } else {
                             final StringBuilder sb = new StringBuilder(128);
                             sb.append("Ignoring nested message.").append(
@@ -171,7 +170,7 @@ public class MailMessagingPart implements MessagingPart {
                 if (null == tmp) {
                     final String sequenceId = mailPart.getSequenceId();
                     cachedContent = tmp = new ReferenceContent(sequenceId == null ? "1" : sequenceId);
-                    //cachedContent = tmp = new MailBinaryContent(mailPart);
+                    // cachedContent = tmp = new MailBinaryContent(mailPart);
                 }
             } catch (final MailException e) {
                 throw new MessagingException(e);
@@ -275,7 +274,7 @@ public class MailMessagingPart implements MessagingPart {
         }
         return ret;
     }
-    
+
     private Collection<MessagingHeader> convertTo(final String name) throws MessagingException {
         final String[] headers = mailPart.getHeader(name);
         if (null == headers) {
