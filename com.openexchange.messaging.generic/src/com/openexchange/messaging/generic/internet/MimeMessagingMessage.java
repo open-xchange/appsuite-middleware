@@ -150,7 +150,7 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Messa
     public void setColorLabel(final int colorLabel) throws MessagingException {
         try {
             /*
-             * Disable all existing color lable flags
+             * Disable all existing color label flags
              */
             mimeMessage.setFlags(ALL_COLOR_LABELS, false);
             /*
