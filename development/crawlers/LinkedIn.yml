@@ -15,6 +15,7 @@ workflowString: |
     - !com.openexchange.subscribe.crawler.AnchorsByLinkRegexStep
       description: Get all pages that link to a connections profile
       linkRegex: "(/profile\\?viewProfile=).*(goback).*"
+      mayHaveEmptyOutput: true
       subpageLinkRegex: "(/connectionsnojs\\?split_page=).*"
     - !com.openexchange.subscribe.crawler.ContactObjectsByHTMLAnchorsAndPagePartSequenceStep
       description: Get the information of each contact from the individual webpages
