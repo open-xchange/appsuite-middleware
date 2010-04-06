@@ -145,7 +145,7 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Messa
      * Sets the color label.
      * 
      * @param colorLabel The color label
-     * @throws MessagingException If setting color lable fails
+     * @throws MessagingException If setting color label fails
      */
     public void setColorLabel(final int colorLabel) throws MessagingException {
         try {
