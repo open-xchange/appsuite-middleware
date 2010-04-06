@@ -56,6 +56,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -124,19 +125,15 @@ public class FileStorageImpl implements FileStorage {
     /**
      * Set of Filenames that will not appear in the getFileList
      */
-    private static final Set<String> SPECIAL_FILENAMES = new HashSet<String>() {
+    protected static final Set<String> SPECIAL_FILENAMES;
 
-        private static final long serialVersionUID = -1052533462069386445L;
-
-        {
-            add(LOCK_FILENAME);
-            add(STATEFILENAME);
-        }
-    };
-
-    /**
-     * Logger.
-     */
+    static {
+        Set<String> tmp = new HashSet<String>();
+        tmp.add(LOCK_FILENAME);
+        tmp.add(STATEFILENAME);
+        SPECIAL_FILENAMES = Collections.unmodifiableSet(tmp);
+    }
+    
     private static final Log LOG = LogFactory.getLog(FileStorageImpl.class);
 
     /**
@@ -230,11 +227,7 @@ public class FileStorageImpl implements FileStorage {
             final int realEntries = getFileList().size() + unusedEntries.size();
 
             // Check if Statefile matches to the calculation
-            if (realEntries != entryCount) {
-                return false;
-            } else {
-                return true;
-            }
+            return realEntries == entryCount;
         } finally {
             unlock();
         }
@@ -295,9 +288,10 @@ public class FileStorageImpl implements FileStorage {
         }
 
         // Forms the Output String
-        String retval = "";
+        StringBuilder retval = new StringBuilder();
         for (int j = 0; j < vals.length; j++) {
-            retval = retval + "/" + vals[j];
+            retval.append("/");
+            retval.append(vals[j]);
         }
         return retval.substring(1);
     }
@@ -396,7 +390,7 @@ public class FileStorageImpl implements FileStorage {
     /**
      * @return a complete list of files in this filestorage
      */
-    public SortedSet<String> getFileList() throws FileStorageException {
+    public SortedSet<String> getFileList() {
         final SortedSet<String> allIds = new TreeSet<String>();
         listRecursively(allIds, "", storage);
         return allIds;
@@ -409,16 +403,12 @@ public class FileStorageImpl implements FileStorage {
         }
         if (file.isDirectory()) {
             for (final File subfile : file.listFiles()) {
-                listRecursively(allIds, prefix + "/" + file.getName(), subfile); // Adds
-                // an
-                // illegal
-                // /storage_name/
-                // in
-                // the
-                // beginning
+                // This adds an illegal  /storage_name/  in the beginning
+                listRecursively(allIds, prefix + "/" + file.getName(), subfile);
             }
         } else {
-            allIds.add(prefix.substring(2 + storage.getName().length()) + "/" + file.getName()); // Gets rid of that illegal prefix
+            // Gets rid of that illegal prefix
+            allIds.add(prefix.substring(2 + file.getName().length()) + "/" + file.getName());
         }
     }
 
@@ -430,7 +420,7 @@ public class FileStorageImpl implements FileStorage {
         return dataFile.length();
     }
 
-    public String getMimeType(final String name) throws FileStorageException {
+    public String getMimeType(final String name) {
         final MimetypesFileTypeMap map = new MimetypesFileTypeMap();
         return map.getContentType(new File(storage, name));
     }
@@ -594,7 +584,7 @@ public class FileStorageImpl implements FileStorage {
      * @return true if File or Folder exists
      * @throws FileStorageException
      */
-    protected boolean exists(final String name) throws FileStorageException {
+    protected boolean exists(final String name) {
         return new File(storage, name).exists();
     }
 
@@ -605,11 +595,11 @@ public class FileStorageImpl implements FileStorage {
      * @param input The Inputfile
      * @throws FileStorageException
      */
-    protected void save(final String name, final InputStream input) throws FileStorageException
-
-    {
+    protected void save(final String name, final InputStream input) throws FileStorageException {
         final File file = new File(storage, name);
-        file.getParentFile().mkdirs();
+        if (!file.getParentFile().mkdirs()) {
+            throw new FileStorageException(FileStorageException.Code.CREATE_DIR_FAILED, file.getAbsolutePath());
+        }
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(file);
@@ -619,8 +609,6 @@ public class FileStorageImpl implements FileStorage {
                 fos.write(buf, 0, len);
                 len = input.read(buf);
             }
-        } catch (final FileNotFoundException e) {
-            throw new FileStorageException(FileStorageException.Code.IOERROR, e, e.getMessage());
         } catch (final IOException e) {
             throw new FileStorageException(FileStorageException.Code.IOERROR, e, e.getMessage());
         } finally {
@@ -639,7 +627,7 @@ public class FileStorageImpl implements FileStorage {
         final long maxLifeTime = 100 * timeout;
         final long lastModified = lock.lastModified();
         if (lastModified > 0 && lastModified + maxLifeTime < System.currentTimeMillis()) {
-            lock.delete();
+            unlock();
             LOG.error("Deleting a very old stale lock file here " + lock.getAbsolutePath() + ". Assuming it has not been removed by a crashed/restartet application.");
         }
         final long failTime = System.currentTimeMillis() + timeout;
@@ -671,6 +659,21 @@ public class FileStorageImpl implements FileStorage {
     }
 
     /**
+     * Deletes the lock
+     * 
+     * @throws FileStorageException
+     */
+    protected void unlock() throws FileStorageException {
+        final File lock = new File(storage, LOCK_FILENAME);
+        if (!lock.delete()) {
+            if (lock.exists()) {
+                LOG.error("Couldn't delete lock file: " + lock.getAbsolutePath() + ". This will probably leave a stale lockfile behind rendering this filestorage unusable, delete in manually.");
+                throw new FileStorageException(Code.UNLOCK);
+            }
+        }
+    }
+
+    /**
      * Loads the state file.
      * 
      * @return a successfully loaded state file.
@@ -697,21 +700,6 @@ public class FileStorageImpl implements FileStorage {
         } catch (final FileStorageException e) {
             delete(new String[] { STATEFILENAME });
             throw e;
-        }
-    }
-
-    /**
-     * Deletes the lock
-     * 
-     * @throws FileStorageException
-     */
-    protected void unlock() throws FileStorageException {
-        final File lock = new File(storage, LOCK_FILENAME);
-        if (!lock.delete()) {
-            if (lock.exists()) {
-                LOG.error("Couldn't delete lock file: " + lock.getAbsolutePath() + ". This will probably leave a stale lockfile behind rendering this filestorage unusable, delete in manually.");
-                throw new FileStorageException(Code.UNLOCK);
-            }
         }
     }
 

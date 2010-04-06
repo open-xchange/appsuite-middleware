@@ -63,20 +63,20 @@ public class FileStorage {
 
     private com.openexchange.tools.file.external.FileStorage fs;
 
-    private FileStorage(final URI uri) throws FileStorageException {
-        super();
-        fs = fss.getFileStorage(uri);
-    }
-
     protected FileStorage() {
         super();
+    }
+
+    public FileStorage(com.openexchange.tools.file.external.FileStorage fs) {
+        super();
+        this.fs = fs;
     }
 
     public static final FileStorage getInstance(final URI uri) throws FileStorageException {
         if (fss == null) {
             throw new FileStorageException(Code.INSTANTIATIONERROR, "No file storage starter registered.");
         }
-        return new FileStorage(uri);
+        return new FileStorage(fss.getFileStorage(uri));
     }
 
     public static void setFileStorageStarter(FileStorageStarter fss) {
@@ -116,10 +116,6 @@ public class FileStorage {
     }
 
     public String saveNewFile(final InputStream file) throws FileStorageException {
-        return fs.saveNewFile(file);
-    }
-
-    public String saveNewFile(final InputStream file, final long sizeHint) throws FileStorageException {
         return fs.saveNewFile(file);
     }
 
