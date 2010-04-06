@@ -49,8 +49,21 @@
 
 package com.openexchange.messaging.json.servlets;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.MultipleAdapterServletNew;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.messaging.MessagingContent;
+import com.openexchange.messaging.MessagingException;
+import com.openexchange.messaging.MessagingMessageAccess;
+import com.openexchange.messaging.json.BinaryContentDumper;
+import com.openexchange.messaging.json.MessagingContentDumper;
 import com.openexchange.messaging.json.actions.messages.MessagingActionFactory;
+import com.openexchange.messaging.json.actions.messages.MessagingRequestData;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -62,13 +75,47 @@ import com.openexchange.tools.session.ServerSession;
 public class MessagesServlet extends MultipleAdapterServletNew {
 
     
+    private static final Object RESOLVE = "resolve";
+    private List<MessagingContentDumper> dumpers = new ArrayList<MessagingContentDumper>(1) {{
+        add(new BinaryContentDumper());
+        // Add more as needed
+    }};
+
     public MessagesServlet() {
         super(MessagingActionFactory.INSTANCE);
     }
     
     @Override
     protected boolean hasModulePermission(ServerSession session) {
-        return true; // TODO
+        return true; 
+    }
+    
+    @Override
+    protected boolean handleIndividually(String action, HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
+        if(RESOLVE.equals(action)) {
+            AJAXRequestData requestData = parseRequest(req, false);
+            MessagingRequestData request = MessagingActionFactory.INSTANCE.wrapRequest(requestData, getSessionObject(req));
+            
+            try {
+                MessagingMessageAccess messageAccess = request.getMessageAccess();
+                
+                MessagingContent content = messageAccess.resolveContent(request.getFolderId(), request.getId(), request.getReferenceId());
+                
+                //TODO: Set Content-Type Header
+                for(MessagingContentDumper dumper : dumpers) {
+                    if(dumper.handles(content)) {
+                        dumper.dump(content, resp.getOutputStream());
+                    }
+                }
+                
+                
+            } catch (MessagingException e) {
+                throw new ServletException(e);
+            }
+            
+            return true;
+        }
+        return super.handleIndividually(action, req, resp);
     }
 
 }

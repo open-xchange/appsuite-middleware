@@ -409,4 +409,8 @@ public class MessagingRequestData {
         }
     }
 
+    public String getReferenceId() throws MessagingException {
+        return requireParameter("referenceId");
+    }
+
 }

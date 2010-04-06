@@ -47,66 +47,47 @@
  *
  */
 
-package com.openexchange.messaging.json.actions.messages;
+package com.openexchange.messaging.json;
 
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.caching.Cache;
-import com.openexchange.messaging.json.MessagingMessageParser;
-import com.openexchange.messaging.json.MessagingMessageWriter;
-import com.openexchange.messaging.registry.MessagingServiceRegistry;
-import com.openexchange.session.Session;
-import com.openexchange.tools.servlet.AjaxException;
-import com.openexchange.tools.session.ServerSession;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import com.openexchange.messaging.BinaryContent;
+import com.openexchange.messaging.MessagingContent;
+import com.openexchange.messaging.MessagingException;
 
 
 /**
- * {@link MessagingActionFactory}
+ * {@link BinaryContentDumper}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class MessagingActionFactory implements AJAXActionServiceFactory {
+public class BinaryContentDumper implements MessagingContentDumper {
 
-    public static MessagingActionFactory INSTANCE = null; // Initialized in Activator
-
-    private Map<String, AJAXActionService> actions = null;
-
-    private Cache cache;
-
-    private MessagingMessageParser parser;
-
-    private MessagingMessageWriter writer;
-
-    private MessagingServiceRegistry registry;
-    
-    
-    public MessagingActionFactory(MessagingServiceRegistry registry, MessagingMessageWriter writer, MessagingMessageParser parser, Cache cache) {
-        super();
-        actions = new HashMap<String, AJAXActionService>();
+    public void dump(MessagingContent content, OutputStream outputStream) throws MessagingException, IOException {
+        BinaryContent binContent = (BinaryContent) content;
+        InputStream inputStream = binContent.getData();
         
-        actions.put("all", new AllAction(registry, writer, parser, cache));
-        actions.put("get", new GetAction(registry, writer, parser, cache));
-        actions.put("list", new ListAction(registry, writer, parser, cache));
-        actions.put("perform", new PerformAction(registry, writer, parser, cache));
-        actions.put("send", new SendAction(registry, writer, parser, cache));
-        actions.put("update", new UpdateAction(registry, writer, parser, cache));
-        actions.put("updates", new UpdatesAction(registry, writer, parser, cache));
+        BufferedInputStream bin = new BufferedInputStream(inputStream);
+        BufferedOutputStream bout = new BufferedOutputStream(outputStream);
+        try {
+            int i = -1;
+            while((i = bin.read()) > 0) { bout.write(i); }
+        } finally {
+            if(bin != null) {
+                bin.close();
+            }
+            if(bout != null) {
+                bout.flush();
+            }
+        }
         
-        this.writer = writer;
-        this.parser = parser;
-        this.cache = cache;
-        this.registry = registry;
-    } 
-    
-    public AJAXActionService createActionService(String action) throws AjaxException {
-        return actions.get(action);
     }
-    
-    public MessagingRequestData wrapRequest(AJAXRequestData req, ServerSession session) {
-        return new MessagingRequestData(req, session, registry, parser, cache);
+
+    public boolean handles(MessagingContent content) {
+        return BinaryContent.class.isInstance(content);
     }
 
 }
