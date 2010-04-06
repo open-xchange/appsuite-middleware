@@ -75,7 +75,8 @@ public class GenericSubscribeServiceForLinkedInTest extends GenericSubscribeServ
         ArrayList<Step> listOfSteps = new ArrayList<Step>();
 
         listOfSteps.add(new LoginWithHttpClientStep("Call LinkedIn with all parameters that are normally set by the login-form",
-            "https://www.linkedin.com/secure/login?session_key=USERNAME&session_password=PASSWORD&session_login=&session_rikey=&csrfToken=ajax:6545267463289092740"));
+            "https://www.linkedin.com/secure/login?session_key=USERNAME&session_password=PASSWORD&session_login=&session_rikey=&csrfToken=ajax:6545267463289092740",
+            ".*manual_redirect_link.*"));
 
         listOfSteps.add(new PageByUrlStep(
             "Get to the no-javascript contacts list",

@@ -53,6 +53,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
@@ -82,15 +85,16 @@ import com.openexchange.subscribe.SubscriptionException;
  */
 public class LoginWithHttpClientStep extends AbstractStep<Object, Object> implements LoginStep {
     
-    private String url;
+    private String url, regex;
     
     public LoginWithHttpClientStep(){
         
     }
     
-    public LoginWithHttpClientStep(String description, String url){
+    public LoginWithHttpClientStep(String description, String url, String regex){
         this.description = description;
         this.url = url;
+        this.regex = regex;
     }
 
     public void execute(WebClient webClient) throws SubscriptionException {
@@ -100,7 +104,14 @@ public class LoginWithHttpClientStep extends AbstractStep<Object, Object> implem
         try {
             GetMethod getMethod = new GetMethod(url);
             getMethod.setFollowRedirects(true);
-            int code = httpClient.executeMethod(getMethod);            
+            int code = httpClient.executeMethod(getMethod); 
+            String page = getMethod.getResponseBodyAsString();
+            
+            Pattern pattern = Pattern.compile(regex);
+            Matcher matcher = pattern.matcher(page);
+            if (! matcher.find()){
+            	throw SubscriptionErrorMessage.INVALID_LOGIN.create();
+            }
             
             webClient.setWebConnection(new CrawlerWebConnection(webClient) {            	
 
@@ -158,6 +169,14 @@ public class LoginWithHttpClientStep extends AbstractStep<Object, Object> implem
     public void setUrl(String url) {
         this.url = url;
     }
+
+	public String getRegex() {
+		return regex;
+	}
+
+	public void setRegex(String regex) {
+		this.regex = regex;
+	}
 
     
 }
