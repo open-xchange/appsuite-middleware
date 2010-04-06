@@ -62,7 +62,6 @@ import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.SubscriptionException;
-import com.openexchange.subscribe.crawler.darkside.WebClientCloser;
 import com.openexchange.tools.versit.VersitException;
 import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
@@ -149,8 +148,7 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceMultithreadedStep ext
             this.loginStepString = loginStepString;
         }
 
-        public List<Contact> call() throws Exception {
-            final WebClientCloser closer = new WebClientCloser();
+        public List<Contact> call() throws Exception {            
             // emulate a known client, hopefully keeping our profile low
             final WebClient webClient = new WebClient(BrowserVersion.FIREFOX_2);
             // Javascript needs to be disabled for security reasons
@@ -294,7 +292,6 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceMultithreadedStep ext
 
             } finally {
                 webClient.closeAllWindows();
-                closer.close(webClient);
             }
 
             return contacts;

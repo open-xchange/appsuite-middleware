@@ -55,9 +55,6 @@ import com.openexchange.subscribe.crawler.PagePart;
 import com.openexchange.subscribe.crawler.PagePartSequence;
 import com.openexchange.subscribe.crawler.Step;
 
-//import com.openexchange.server.services.ServerServiceRegistry;
-//import com.openexchange.timer.TimerService;
-//import com.openexchange.timer.internal.TimerImpl;
 
 /**
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
@@ -86,7 +83,7 @@ public class GenericSubscribeServiceForLinkedInTest extends GenericSubscribeServ
         listOfSteps.add(new AnchorsByLinkRegexStep(
             "Get all pages that link to a connections profile",
             "(/connectionsnojs\\?split_page=).*",
-            "(/profile\\?viewProfile=).*(goback).*"));
+            "(/profile\\?viewProfile=).*(goback).*", true));
         ArrayList<PagePart> pageParts = new ArrayList<PagePart>();
         pageParts.add(new PagePart(
             "(<img src=\")([a-zA-Z://\\._0-9]*)(\" class=\"photo\" width=\"80\" height=\"80\" alt=\"[a-zA-Z\u00e4\u00f6\u00fc\\s]*\">)",

@@ -55,8 +55,11 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.GetMethod;
+
+import com.gargoylesoftware.htmlunit.CrawlerWebConnection;
 import com.gargoylesoftware.htmlunit.HttpMethod;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebConnection;
@@ -64,6 +67,7 @@ import com.gargoylesoftware.htmlunit.WebRequestSettings;
 import com.gargoylesoftware.htmlunit.WebResponse;
 import com.gargoylesoftware.htmlunit.WebResponseData;
 import com.gargoylesoftware.htmlunit.WebResponseImpl;
+import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionException;
 
 
@@ -90,16 +94,15 @@ public class LoginWithHttpClientStep extends AbstractStep<Object, Object> implem
     }
 
     public void execute(WebClient webClient) throws SubscriptionException {
-        final HttpClient httpClient = new HttpClient();
+    	MultiThreadedHttpConnectionManager manager = new MultiThreadedHttpConnectionManager();
+        final HttpClient httpClient = new HttpClient(manager);
         
         try {
             GetMethod getMethod = new GetMethod(url);
             getMethod.setFollowRedirects(true);
             int code = httpClient.executeMethod(getMethod);            
             
-            webClient.setWebConnection(new WebConnection() {
-            	
-            	private HttpClient httpClient_ = httpClient;
+            webClient.setWebConnection(new CrawlerWebConnection(webClient) {            	
 
                 public WebResponse getResponse(WebRequestSettings settings) throws IOException {
                     URL url = settings.getUrl();
@@ -121,7 +124,11 @@ public class LoginWithHttpClientStep extends AbstractStep<Object, Object> implem
                     return new WebResponseImpl(responseData, url, method, loadTime);
                 }
                 
-            });
+                public HttpClient getHttpClient (){
+                    return httpClient;
+                }
+                
+            });                        
             
             executedSuccessfully = true;
             
