@@ -74,7 +74,7 @@ public class MimeBinaryContent implements BinaryContent {
     /**
      * Initializes a new {@link MimeBinaryContent}.
      * 
-     * @param mimeBodyPart The MIME body part
+     * @param part The MIME part
      */
     public MimeBinaryContent(final Part part) {
         super();
