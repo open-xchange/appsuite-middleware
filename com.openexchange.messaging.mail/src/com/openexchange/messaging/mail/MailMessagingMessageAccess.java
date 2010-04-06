@@ -179,7 +179,7 @@ public final class MailMessagingMessageAccess implements MessagingMessageAccess 
 
     public List<String> moveMessages(final String sourceFolder, final String destFolder, final String[] messageIds, final boolean fast) throws MessagingException {
         try {
-            String[] ids = messageStorage.moveMessages(sourceFolder, destFolder, messageIds, fast);
+            final String[] ids = messageStorage.moveMessages(sourceFolder, destFolder, messageIds, fast);
             return fast ? Collections.<String> emptyList() : Arrays.asList(ids);
         } catch (final MailException e) {
             throw new MessagingException(e);
@@ -193,15 +193,15 @@ public final class MailMessagingMessageAccess implements MessagingMessageAccess 
                     logicTools.getFowardMessage(new MailMessage[] { messageStorage.getMessage(folder, id, false) });
                 return from(fowardMessage);
             } else if (MailConstants.TYPE_REPLY.equalsIgnoreCase(action)) {
-                MailMessage replyMessage = logicTools.getReplyMessage(messageStorage.getMessage(folder, id, false), false);
+                final MailMessage replyMessage = logicTools.getReplyMessage(messageStorage.getMessage(folder, id, false), false);
                 return from(replyMessage);
             } else if (MailConstants.TYPE_REPLY_ALL.equalsIgnoreCase(action)) {
-                MailMessage replyMessage = logicTools.getReplyMessage(messageStorage.getMessage(folder, id, false), true);
+                final MailMessage replyMessage = logicTools.getReplyMessage(messageStorage.getMessage(folder, id, false), true);
                 return from(replyMessage);
             } else {
                 throw MessagingExceptionCodes.UNKNOWN_ACTION.create(action);
             }
-        } catch (MailException e) {
+        } catch (final MailException e) {
             throw new MessagingException(e);
         }
     }
@@ -236,14 +236,22 @@ public final class MailMessagingMessageAccess implements MessagingMessageAccess 
 
     public void updateMessage(final MessagingMessage message, final MessagingField[] fields) throws MessagingException {
         try {
-            EnumSet<MessagingField> set = EnumSet.copyOf(Arrays.asList(fields));
+            final EnumSet<MessagingField> set = EnumSet.copyOf(Arrays.asList(fields));
             if (set.contains(MessagingField.COLOR_LABEL)) {
                 messageStorage.updateMessageColorLabel(message.getFolder(), new String[] { message.getId() }, message.getColorLabel());
             }
             if (set.contains(MessagingField.FLAGS)) {
                 messageStorage.updateMessageFlags(message.getFolder(), new String[] { message.getId() }, message.getFlags(), true);
             }
-        } catch (MailException e) {
+        } catch (final MailException e) {
+            throw new MessagingException(e);
+        }
+    }
+
+    public MessagingContent resolveContent(final String folder, final String id, final String referenceId) throws MessagingException {
+        try {
+            return new MailBinaryContent(messageStorage.getAttachment(folder, id, referenceId));
+        } catch (final MailException e) {
             throw new MessagingException(e);
         }
     }
@@ -354,15 +362,7 @@ public final class MailMessagingMessageAccess implements MessagingMessageAccess 
         return new MailMessagingMessage(mailMessage);
     }
 
-    private com.openexchange.mail.search.SearchTerm<?> from(SearchTerm<?> searchTerm) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.messaging.MessagingMessageAccess#resolveContent(java.lang.String, java.lang.String, java.lang.String)
-     */
-    public MessagingContent resolveContent(String folder, String id, String referenceId) throws MessagingException {
+    private com.openexchange.mail.search.SearchTerm<?> from(final SearchTerm<?> searchTerm) {
         // TODO Auto-generated method stub
         return null;
     }

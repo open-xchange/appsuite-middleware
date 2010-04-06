@@ -169,7 +169,8 @@ public class MailMessagingPart implements MessagingPart {
                  * Get binary content
                  */
                 if (null == tmp) {
-                    cachedContent = tmp = new ReferenceContent(mailPart.getSequenceId());
+                    final String sequenceId = mailPart.getSequenceId();
+                    cachedContent = tmp = new ReferenceContent(sequenceId == null ? "1" : sequenceId);
                     //cachedContent = tmp = new MailBinaryContent(mailPart);
                 }
             } catch (final MailException e) {
