@@ -59,6 +59,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.tools.file.external.FileStorageException;
 import com.openexchange.tools.file.internal.FileStorageImpl;
@@ -138,6 +140,19 @@ public class InMemoryFileStorage extends FileStorageImpl {
     @Override
     protected void unlock() {
         // Nothing to lock.
+    }
+
+    @Override
+    public SortedSet<String> getFileList() {
+        SortedSet<String> retval = new TreeSet<String>();
+        retval.addAll(getCtxMap().keySet());
+        retval.removeAll(SPECIAL_FILENAMES);
+        return retval;
+    }
+
+    @Override
+    public long getFileSize(String name) {
+        return get(name).length;
     }
 
     public void put(final Context context, final String filestoreId, final byte[] bytes) {

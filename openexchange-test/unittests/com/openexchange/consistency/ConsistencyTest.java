@@ -46,8 +46,10 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.consistency;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,9 +58,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import junit.framework.TestCase;
-
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentMetadata;
@@ -66,18 +66,13 @@ import com.openexchange.groupware.attach.InMemoryAttachmentBase;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
-import com.openexchange.groupware.filestore.FilestoreException;
-import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.InMemoryInfostoreDatabase;
 import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
-import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.InMemoryFileStorage;
-import com.openexchange.tools.file.external.FileStorageException;
-import com.openexchange.tools.file.internal.FileStorageImpl;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -97,6 +92,7 @@ public class ConsistencyTest extends TestCase {
     private int id = 20;
 
     private static final HashSet<String> MISSING = new HashSet<String>() {
+        private static final long serialVersionUID = -795039863003179912L;
         {
             add("00/01/01");
             add("00/01/03");
@@ -105,13 +101,14 @@ public class ConsistencyTest extends TestCase {
     };
 
     private static final HashSet<String> UNASSIGNED = new HashSet<String>() {
+        private static final long serialVersionUID = 7050405041645511451L;
         {
             add("00/04/04");
         }
     };
 
     @Override
-	protected void setUp() throws Exception {
+    protected void setUp() throws Exception {
         super.setUp();
         storage = new InMemoryFileStorage();
         ctx = new ContextImpl(1);
@@ -123,16 +120,13 @@ public class ConsistencyTest extends TestCase {
         ctx3 = new ContextImpl(3);
         ctx3.setFilestoreId(2);
 
-        contexts.put(ctx.getContextId(), ctx);
-        contexts.put(ctx2.getContextId(), ctx2);
-        contexts.put(ctx3.getContextId(), ctx3);
-
+        contexts.put(I(ctx.getContextId()), ctx);
+        contexts.put(I(ctx2.getContextId()), ctx2);
+        contexts.put(I(ctx3.getContextId()), ctx3);
 
         simulateBrokenContext(ctx);
         simulateBrokenContext(ctx2);
         simulateBrokenContext(ctx3);
-
-
     }
 
     // Tests //
@@ -307,12 +301,12 @@ public class ConsistencyTest extends TestCase {
         assertTrue(unassigned.isEmpty());
     }
 
-    protected void assertContexts(final Map<Integer, List<String>> missing,final Set<String> expect, final Context...contexts) {
+    protected void assertContexts(final Map<Integer, List<String>> missing,final Set<String> expect, final Context... testContexts) {
         assertNotNull(missing);
         final Set<Integer> contextIds = new HashSet<Integer>(missing.keySet());
-        assertEquals(contextIds.toString(), contexts.length, contextIds.size());
-        for(final Context context : contexts) {
-            final List<String> ids = missing.get(context.getContextId());
+        assertEquals(contextIds.toString(), testContexts.length, contextIds.size());
+        for(final Context context : testContexts) {
+            final List<String> ids = missing.get(I(context.getContextId()));
             assertNotNull(ids);
 
             final Set<String> expected = new HashSet<String>(expect);
@@ -321,124 +315,123 @@ public class ConsistencyTest extends TestCase {
             expected.removeAll(ids);
             assertTrue(ids.toString(), expected.isEmpty());
 
-            contextIds.remove(context.getContextId());
+            contextIds.remove(I(context.getContextId()));
         }
 
         assertTrue(contextIds.toString(), contextIds.isEmpty());
 
     }
 
-
     private ConsistencyMBean getConsistencyTool() {
-        return new TestConsistency(database,attachments, storage, contexts);
+        return new TestConsistency(database, attachments, storage, contexts);
     }
 
     // Simulation //
 
-    protected void simulateBrokenContext(final Context ctx){
+    protected void simulateBrokenContext(final Context context) {
 
-        simulateBrokenOlderVersionInInfostore(ctx);
-        simulateBrokenCurrentVersionInInfostore(ctx);
-        simulateWholeInfostoreEntry(ctx);
-        simulateBrokenAttachment(ctx);
-        simulateWholeAttachment(ctx);
-        simulateFileStoreEntryWithoutDatabaseEntry(ctx);
+        simulateBrokenOlderVersionInInfostore(context);
+        simulateBrokenCurrentVersionInInfostore(context);
+        simulateWholeInfostoreEntry(context);
+        simulateBrokenAttachment(context);
+        simulateWholeAttachment(context);
+        simulateFileStoreEntryWithoutDatabaseEntry(context);
 
     }
 
-    private void simulateFileStoreEntryWithoutDatabaseEntry(final Context ctx) {
+    private void simulateFileStoreEntryWithoutDatabaseEntry(final Context context) {
         final String unassignedEntry = "00/04/04";
-        createFilestoreEntry(ctx, unassignedEntry, "unassigned");
+        createFilestoreEntry(context, unassignedEntry, "unassigned");
     }
 
 
 
-    private void simulateWholeAttachment(final Context ctx) {
+    private void simulateWholeAttachment(final Context context) {
         final String attachmentEntry = "00/00/01";
-        createAttachment(ctx, attachmentEntry);
-        createFilestoreEntry(ctx, attachmentEntry, "wholeAttachment");
+        createAttachment(context, attachmentEntry);
+        createFilestoreEntry(context, attachmentEntry, "wholeAttachment");
     }
 
-    private void simulateBrokenAttachment(final Context ctx) {
+    private void simulateBrokenAttachment(final Context context) {
         final String brokenAttachment = "00/01/01";
-        createAttachment(ctx, brokenAttachment);
+        createAttachment(context, brokenAttachment);
     }
 
-    private void simulateWholeInfostoreEntry(final Context ctx) {
+    private void simulateWholeInfostoreEntry(final Context context) {
         final String version1 = "00/00/02";
         final String version2 = "00/00/03";
-        final int id = createInfostoreDocument(ctx);
-        createVersion(ctx, id, version1);
-        createVersion(ctx, id, version2);
+        final int dmId = createInfostoreDocument(context);
+        createVersion(context, dmId, version1);
+        createVersion(context, dmId, version2);
 
-        createFilestoreEntry(ctx, version1, "wholeInfoitemVersion1");
-        createFilestoreEntry(ctx, version2, "wholeInfoitemVersion2");
+        createFilestoreEntry(context, version1, "wholeInfoitemVersion1");
+        createFilestoreEntry(context, version2, "wholeInfoitemVersion2");
         
     }
 
-    private void simulateBrokenCurrentVersionInInfostore(final Context ctx) {
+    private void simulateBrokenCurrentVersionInInfostore(final Context context) {
         final String version1 = "00/01/02";
         final String version2 = "00/01/03";
-        final int id = createInfostoreDocument(ctx);
-        createVersion(ctx, id, version1);
-        createVersion(ctx, id, version2);
+        final int dmId = createInfostoreDocument(context);
+        createVersion(context, dmId, version1);
+        createVersion(context, dmId, version2);
 
-        createFilestoreEntry(ctx, version1, "brokenCurrentVersionV1");
+        createFilestoreEntry(context, version1, "brokenCurrentVersionV1");
                 
     }
 
-    private void simulateBrokenOlderVersionInInfostore(final Context ctx) {
+    private void simulateBrokenOlderVersionInInfostore(final Context context) {
         final String version1 = "00/02/02";
         final String version2 = "00/02/03";
-        final int id = createInfostoreDocument(ctx);
-        createVersion(ctx, id, version1);
-        createVersion(ctx, id, version2);
+        final int dmId = createInfostoreDocument(context);
+        createVersion(context, dmId, version1);
+        createVersion(context, dmId, version2);
 
-        createFilestoreEntry(ctx, version2, "brokenOlderVersionV2");
+        createFilestoreEntry(context, version2, "brokenOlderVersionV2");
     }
 
-    private void createFilestoreEntry(final Context ctx, final String filestoreId, final String content) {
+    private void createFilestoreEntry(final Context context, final String filestoreId, final String content) {
         try {
-            storage.put(ctx,filestoreId, content.getBytes("UTF-8"));
+            storage.put(context,filestoreId, content.getBytes("UTF-8"));
         } catch (final UnsupportedEncodingException e) {
             //IGNORE
         }
     }
 
-    private void createAttachment(final Context ctx, final String filestorePath) {
+    private void createAttachment(final Context context, final String filestorePath) {
         final AttachmentMetadata attachment = new AttachmentImpl();
         attachment.setFileId(filestorePath);
         attachment.setId(id++);
         attachment.setFilename("attachment.bin");
         attachment.setFilesize(23);
 
-        attachments.put(ctx, attachment);
+        attachments.put(context, attachment);
 
     }
 
-    private int createInfostoreDocument(final Context ctx) {
+    private int createInfostoreDocument(final Context context) {
         final int istoreId  = id++;
 
         final DocumentMetadata dm = new DocumentMetadataImpl();
         dm.setId(istoreId);
         dm.setVersion(0);
 
-        database.put(ctx,dm);
+        database.put(context,dm);
 
 
         return istoreId;
     }
 
-    private void createVersion(final Context ctx, final int id, final String filestoreLocation) {
+    private void createVersion(final Context context, final int dmId, final String filestoreLocation) {
         final DocumentMetadata dm = new DocumentMetadataImpl();
-        dm.setId(id);
+        dm.setId(dmId);
         dm.setFilestoreLocation(filestoreLocation);
-        dm.setVersion(database.getNextVersionNumber(ctx,id));
+        dm.setVersion(database.getNextVersionNumber(context, dmId));
 
-        database.put(ctx,dm);        
+        database.put(context,dm);        
     }
 
-    private static final class TestConsistency extends Consistency{
+    private static final class TestConsistency extends Consistency {
 
         private InMemoryInfostoreDatabase database = new InMemoryInfostoreDatabase();
         private InMemoryFileStorage storage = null;
@@ -446,7 +439,7 @@ public class ConsistencyTest extends TestCase {
 
         private Map<Integer, Context> contexts = null;
 
-        private TestConsistency(final InMemoryInfostoreDatabase database, final InMemoryAttachmentBase attachments, final InMemoryFileStorage storage, final Map<Integer, Context> contexts) {
+        TestConsistency(final InMemoryInfostoreDatabase database, final InMemoryAttachmentBase attachments, final InMemoryFileStorage storage, final Map<Integer, Context> contexts) {
             this.database = database;
             this.storage = storage;
             this.attachments = attachments;
@@ -454,27 +447,22 @@ public class ConsistencyTest extends TestCase {
         }
 
         @Override
-		protected Context getContext(final int contextId) {
-            return contexts.get(contextId);
+        protected Context getContext(final int contextId) {
+            return contexts.get(I(contextId));
         }
 
         @Override
-		protected DatabaseImpl getDatabase() {
+        protected DatabaseImpl getDatabase() {
             return database;
         }
 
         @Override
-		protected AttachmentBase getAttachments() {
+        protected AttachmentBase getAttachments() {
             return attachments;
         }
 
-		private InMemoryFileStorage getMemoryFileStorage(final Context ctx) {
-            storage.setContext(ctx);
-            return storage;
-        }
-
         @Override
-		protected List<Context> getContextsForFilestore(final int filestoreId) {
+        protected List<Context> getContextsForFilestore(final int filestoreId) {
             final List<Context> retval = new ArrayList<Context>();
             for(final Context context : contexts.values()){
                 if(context.getFilestoreId() == filestoreId) {
@@ -485,23 +473,24 @@ public class ConsistencyTest extends TestCase {
         }
 
         @Override
-		protected List<Context> getContextsForDatabase(final int datbaseId) {
-            return Arrays.asList(contexts.get(1), contexts.get(3));
+        protected List<Context> getContextsForDatabase(final int datbaseId) {
+            return Arrays.asList(contexts.get(I(1)), contexts.get(I(3)));
         }
 
         @Override
-		protected List<Context> getAllContexts() {
+        protected List<Context> getAllContexts() {
             return new ArrayList<Context>(contexts.values());
         }
 
         @Override
-		protected User getAdmin(final Context ctx) throws LdapException {
+        protected User getAdmin(final Context ctx) {
             return null;
         }
 
         @Override
-        protected FileStorage getFileStorage(Context ctx) throws FileStorageException, FilestoreException {
-            return FileStorage.getInstance(FilestoreStorage.createURI(ctx));
+        protected FileStorage getFileStorage(Context ctx) {
+            storage.setContext(ctx);
+            return new FileStorage(storage);
         }
     }
 
