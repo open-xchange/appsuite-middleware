@@ -77,6 +77,7 @@ import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.MessagingPart;
+import com.openexchange.messaging.ReferenceContent;
 import com.openexchange.messaging.StringContent;
 import com.openexchange.messaging.StringMessageHeader;
 import com.openexchange.messaging.generic.internet.MimeAddressMessagingHeader;
@@ -168,7 +169,8 @@ public class MailMessagingPart implements MessagingPart {
                  * Get binary content
                  */
                 if (null == tmp) {
-                    cachedContent = tmp = new MailBinaryContent(mailPart);
+                    cachedContent = tmp = new ReferenceContent(mailPart.getSequenceId());
+                    //cachedContent = tmp = new MailBinaryContent(mailPart);
                 }
             } catch (final MailException e) {
                 throw new MessagingException(e);
