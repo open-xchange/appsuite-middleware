@@ -26,6 +26,7 @@ workflowString: |
     - !com.openexchange.subscribe.crawler.AnchorsByLinkRegexStep
       description: Get the links to all contact detail pages
       linkRegex: ".*detailed_contact.*"
+      mayHaveEmptyOutput: true
       subpageLinkRegex: ""
     - !com.openexchange.subscribe.crawler.ContactObjectsByHTMLAnchorsAndPagePartSequenceStep
       description: Get each contacts details
