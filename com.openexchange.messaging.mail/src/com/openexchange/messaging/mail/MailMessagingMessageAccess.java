@@ -64,6 +64,7 @@ import com.openexchange.mail.api.MailLogicTools;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.messaging.IndexRange;
+import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingField;
@@ -356,6 +357,14 @@ public final class MailMessagingMessageAccess implements MessagingMessageAccess 
     }
 
     private com.openexchange.mail.search.SearchTerm<?> from(SearchTerm<?> searchTerm) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.messaging.MessagingMessageAccess#resolveContent(java.lang.String, java.lang.String, java.lang.String)
+     */
+    public MessagingContent resolveContent(String folder, String id, String referenceId) throws MessagingException {
         // TODO Auto-generated method stub
         return null;
     }
