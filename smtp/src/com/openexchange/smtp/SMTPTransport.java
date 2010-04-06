@@ -133,7 +133,7 @@ public final class SMTPTransport extends MailTransport {
 
     private final UserSettingMail usm;
 
-    private volatile SMTPConfig smtpConfig;
+    private volatile SMTPConfig cachedSmtpConfig;
 
     protected SMTPTransport() {
         super();
@@ -302,15 +302,15 @@ public final class SMTPTransport extends MailTransport {
     }
 
     private SMTPConfig getTransportConfig0() throws MailException {
-        if (smtpConfig == null) {
+        if (cachedSmtpConfig == null) {
             synchronized (this) {
-                if (smtpConfig == null) {
-                    smtpConfig = TransportConfig.getTransportConfig(SMTPConfig.class, new SMTPConfig(), session, accountId);
-                    smtpConfig.setTransportProperties(createNewMailProperties());
+                if (cachedSmtpConfig == null) {
+                    cachedSmtpConfig = TransportConfig.getTransportConfig(SMTPConfig.class, new SMTPConfig(), session, accountId);
+                    cachedSmtpConfig.setTransportProperties(createNewMailProperties());
                 }
             }
         }
-        return smtpConfig;
+        return cachedSmtpConfig;
     }
 
     private static final String ACK_TEXT =

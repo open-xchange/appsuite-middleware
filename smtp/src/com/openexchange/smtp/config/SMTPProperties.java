@@ -53,7 +53,6 @@ import static com.openexchange.smtp.services.SMTPServiceRegistry.getServiceRegis
 import java.nio.charset.Charset;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.mail.api.AbstractProtocolProperties;
-import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.transport.config.ITransportProperties;
 import com.openexchange.mail.transport.config.TransportProperties;
 
@@ -104,7 +103,7 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
     }
 
     @Override
-    protected void loadProperties0() throws MailConfigException {
+    protected void loadProperties0() {
         final StringBuilder logBuilder = new StringBuilder(1024);
         logBuilder.append("\nLoading global SMTP properties...\n");
 
