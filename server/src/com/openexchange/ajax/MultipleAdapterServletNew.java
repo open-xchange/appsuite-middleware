@@ -145,6 +145,10 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
             if (action == null) {
                 throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, PARAMETER_ACTION);
             }
+            if(handleIndividually(action, req, resp)) {
+                return;
+            }
+            
             final AJAXRequestData data = parseRequest(req, preferStream);
             final AJAXRequestResult result = factory.createActionService(action).perform(data, getSessionObject(req));
             response.setData(result.getResultObject());
@@ -167,6 +171,17 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
             LOG.error(e1.getMessage(), e1);
             sendError(resp);
         }
+    }
+
+    /**
+     * Override this to handle an action differently from the usual JSON handling. This is primarily useful for handling up / downloads
+     * @param action The action parameter given
+     * @param req The HTTP request object
+     * @param resp The HTTP response object
+     * @return
+     */
+    protected boolean handleIndividually(String action, HttpServletRequest req, HttpServletResponse resp) {
+        return false;
     }
 
     private AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream) throws IOException {
