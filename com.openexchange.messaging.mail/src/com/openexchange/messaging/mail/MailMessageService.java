@@ -70,7 +70,10 @@ import com.openexchange.session.Session;
  */
 public final class MailMessageService implements MessagingService {
 
-    private static final String ID = "com.openexchange.messaging.mail";
+    /**
+     * The identifier of {@link MailMessageService}: <code>"com.openexchange.messaging.mail"</code>.
+     */
+    static final String ID = "com.openexchange.messaging.mail";
 
     private static final String DISPLAY_NAME = "Mail";
 

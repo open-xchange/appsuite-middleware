@@ -55,7 +55,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
-import javax.mail.internet.MimeMessage;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;
@@ -72,7 +71,6 @@ import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.MessagingMessageAccess;
 import com.openexchange.messaging.OrderDirection;
 import com.openexchange.messaging.SearchTerm;
-import com.openexchange.messaging.generic.internet.MimeMessagingMessage;
 import com.openexchange.session.Session;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -352,8 +350,8 @@ public final class MailMessagingMessageAccess implements MessagingMessageAccess 
         return new com.openexchange.mail.IndexRange(indexRange.start, indexRange.end);
     }
 
-    private MessagingMessage from(final MailMessage mailMessage) throws MailException {
-        return new MimeMessagingMessage((MimeMessage) MIMEMessageConverter.convertMailMessage(mailMessage));
+    private static MessagingMessage from(final MailMessage mailMessage) {
+        return new MailMessagingMessage(mailMessage);
     }
 
     private com.openexchange.mail.search.SearchTerm<?> from(SearchTerm<?> searchTerm) {
