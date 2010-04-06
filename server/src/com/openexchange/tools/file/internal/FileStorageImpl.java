@@ -597,8 +597,9 @@ public class FileStorageImpl implements FileStorage {
      */
     protected void save(final String name, final InputStream input) throws FileStorageException {
         final File file = new File(storage, name);
-        if (!file.getParentFile().mkdirs()) {
-            throw new FileStorageException(FileStorageException.Code.CREATE_DIR_FAILED, file.getAbsolutePath());
+        final File parentDir = file.getParentFile();
+        if (!parentDir.mkdirs()) {
+            throw new FileStorageException(FileStorageException.Code.CREATE_DIR_FAILED, parentDir.getAbsolutePath());
         }
         FileOutputStream fos = null;
         try {
