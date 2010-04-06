@@ -254,5 +254,9 @@ public class SimpleMessagingMessage implements MessagingMessage, MessagingBodyPa
         this.picture = picture;
     }
 
+    public void setContentReference(String string) {
+      this.content =  new ReferenceContent(string);
+    }
+
 
 }
