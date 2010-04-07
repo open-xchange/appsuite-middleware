@@ -55,7 +55,7 @@
         <pathelement location="${bundlesdir}/${cachingjar}"/>
         <pathelement location="${bundlesdir}/${serverjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/${commonjar}"/>
-        <pathelement location="${bundlesdir}/${commonBundle}/${mailjar}"/>
+        <pathelement location="${bundlesdir}/${commonBundle}/lib/${mailjar}"/>
         <fileset refid="3rdpartyjars"/>
     </path>
 
