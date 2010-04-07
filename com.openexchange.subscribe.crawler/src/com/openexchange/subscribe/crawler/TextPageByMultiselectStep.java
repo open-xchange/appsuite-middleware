@@ -109,7 +109,12 @@ public class TextPageByMultiselectStep extends AbstractStep<TextPage, HtmlPage> 
             
             try {
                 output = (TextPage) button.click();
-            } catch (final Exception e) {
+            }
+            catch (final ClassCastException e){
+                LOG.info("Instead of the expected TextPage something else was returned. Maybe the users addressbook is empty.");
+                executedSuccessfully = true;
+            }
+            catch (final Exception e) {
                 LOG.error(e);
             }
             if (output != null) {
