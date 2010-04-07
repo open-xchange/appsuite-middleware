@@ -124,6 +124,7 @@ public class MailMessagingMessage extends MailMessagingBodyPart implements Messa
     public void setUserFlags(final Collection<String> userFlags) {
         if (null == userFlags) {
             mailMessage.removeUserFlags();
+            return;
         }
         mailMessage.addUserFlags(userFlags.toArray(new String[userFlags.size()]));
     }
