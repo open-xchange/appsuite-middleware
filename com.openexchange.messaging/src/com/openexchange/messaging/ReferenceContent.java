@@ -49,11 +49,10 @@
 
 package com.openexchange.messaging;
 
-
 /**
- * A ReferenceContent represents a reference to a large message content that should be requested separately.    
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Francisco Laguna</a>
+ * A ReferenceContent represents a reference to a large message content that should be requested separately.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ReferenceContent implements SimpleContent<String> {
@@ -61,21 +60,32 @@ public class ReferenceContent implements SimpleContent<String> {
     private String id;
 
     public ReferenceContent() {
-
+        super();
     }
 
     public ReferenceContent(String refId) {
-       this.id = refId; 
+        super();
+        this.id = refId;
     }
 
     public String getData() throws MessagingException {
         return id;
     }
-    
+
+    /**
+     * Sets the reference identifier.
+     * 
+     * @param id The reference identifier
+     */
     public void setId(String id) {
         this.id = id;
     }
-    
+
+    /**
+     * Gets the reference identifier.
+     * 
+     * @return The reference identifier
+     */
     public String getId() {
         return id;
     }
