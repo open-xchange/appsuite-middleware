@@ -1,10 +1,11 @@
 * 2010-04-07 - karsten.will@open-xchange.com
-- Fix for unnamed Bug that occurs when crawling an empty GMX-Addressbook
-- Bugfix #15724 - LoginWithHttpClientStep expanded to throw correct error when entering wrong credentials
+
+ - Fix for unnamed Bug that occurs when crawling an empty GMX-Addressbook
+ - Bugfix #15724: LoginWithHttpClientStep expanded to throw correct error when entering wrong credentials
 
 * 2010-04-06 - karsten.will@open-xchange.com
 
-- Bugfix #15794 - Empty Yahoo-Addressbooks work now
+ - Bugfix #15794: Empty Yahoo-Addressbooks work now
 
 * 2010-04-06 - marcus.klein@open-xchange.com
 
