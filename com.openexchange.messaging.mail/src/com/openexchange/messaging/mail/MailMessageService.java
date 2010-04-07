@@ -73,7 +73,7 @@ public final class MailMessageService implements MessagingService {
     /**
      * The identifier of {@link MailMessageService}: <code>"com.openexchange.messaging.mail"</code>.
      */
-    static final String ID = "com.openexchange.messaging.mail";
+    private static final String ID = "com.openexchange.messaging.mail";
 
     private static final String DISPLAY_NAME = "Mail";
 

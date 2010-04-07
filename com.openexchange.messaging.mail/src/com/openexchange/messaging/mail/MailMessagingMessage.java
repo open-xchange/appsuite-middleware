@@ -212,9 +212,9 @@ public class MailMessagingMessage extends MailMessagingBodyPart implements Messa
     
     
     /**
-     * Sets the picture
+     * Sets the picture URL.
      *
-     * @param picture The picture url
+     * @param picture The picture URL
      */
     public void setPicture(String picture) {
         this.picture = picture;

@@ -64,12 +64,12 @@ public class MailMessagingException extends MessagingException {
 
     private static final long serialVersionUID = -3554129943396182447L;
 
-    private static final String STR_COMPONENT = "FACEBOOK";
+    private static final String STR_COMPONENT = "MAIL";
 
     /**
      * The {@link Component} for facebook messaging exception.
      */
-    public static final Component FACEBOOK_COMPONENT = new Component() {
+    public static final Component MAIL_COMPONENT = new Component() {
 
         private static final long serialVersionUID = -7217868089213025324L;
 
@@ -94,7 +94,7 @@ public class MailMessagingException extends MessagingException {
      * @param cause The cause
      */
     public MailMessagingException(final String message, final AbstractOXException cause) {
-        super(FACEBOOK_COMPONENT, message, cause);
+        super(MAIL_COMPONENT, message, cause);
     }
 
     /**
@@ -106,7 +106,7 @@ public class MailMessagingException extends MessagingException {
      * @param cause The cause
      */
     public MailMessagingException(final Category category, final int detailNumber, final String message, final Throwable cause) {
-        super(FACEBOOK_COMPONENT, category, detailNumber, message, cause);
+        super(MAIL_COMPONENT, category, detailNumber, message, cause);
     }
 
     /**
