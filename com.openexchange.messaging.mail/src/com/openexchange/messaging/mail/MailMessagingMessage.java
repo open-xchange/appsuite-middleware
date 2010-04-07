@@ -181,20 +181,18 @@ public class MailMessagingMessage extends MailMessagingBodyPart implements Messa
     public void setId(final String id) {
         mailMessage.setMailId(id);
     }
-    
+
     public String getPicture() {
         return picture;
     }
-    
-    
+
     /**
      * Sets the picture URL.
-     *
+     * 
      * @param picture The picture URL
      */
     public void setPicture(String picture) {
         this.picture = picture;
     }
-
 
 }
