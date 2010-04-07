@@ -38,7 +38,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:        @OXVERSION@
-%define         ox_release 0
+%define         ox_release 1
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -80,6 +80,12 @@ ant -Dlib.dir=/opt/open-xchange/lib -Ddestdir=%{buildroot} -Dprefix=/opt/open-xc
 /opt/open-xchange/bundles/*
 /opt/open-xchange/sbin/*
 %changelog
+* Thu Apr 01 2010 - benjamin.otterbach@open-xchange.com
+  - Bugfix #15754: Report Client does not send reports with latest HEAD
+    - Added missing Apache library to report script
+* Wed Mar 31 2010 - benjamin.otterbach@open-xchange.com
+  - Bugfix #15616: Report client does not work through a HTTP proxy which requires authentication
+    - Fixed broken HTTPS proxy handling
 * Thu Mar 04 2010 - benjamin.otterbach@open-xchange.com
   - Bugfix #15546: Broken start script in report client package
     - Fixed the wrong property directory value
