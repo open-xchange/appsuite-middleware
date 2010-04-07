@@ -55,6 +55,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.subscribe.crawler.internal.PagePart;
 import com.openexchange.subscribe.crawler.internal.PagePartSequence;
 import junit.framework.TestCase;
@@ -65,25 +66,7 @@ import junit.framework.TestCase;
 public class PagePartSequenceTest extends TestCase {
 
     public void testPagePartSequence() {
-        File file = new File("test-resources/GoogleMailResultTestPage.txt");
-        StringBuilder contents = new StringBuilder();
-
-        try {
-            BufferedReader input = new BufferedReader(new FileReader(file));
-            try {
-                String line = null;
-                while ((line = input.readLine()) != null) {
-                    contents.append(line);
-                    contents.append(System.getProperty("line.separator"));
-                }
-            } finally {
-                input.close();
-            }
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-
-        String page = contents.toString();
+        String page = getStringFromFile("test-resources/GoogleMailResultTestPage.txt");
 
         ArrayList<PagePart> pageParts = new ArrayList<PagePart>();
         pageParts.add(new PagePart(
@@ -129,6 +112,29 @@ public class PagePartSequenceTest extends TestCase {
         assertEquals("business@im.com", map.get("instant_messenger1"));
 
     }
+
+    private String getStringFromFile(String filename) {
+        File file = new File(filename);
+        StringBuilder contents = new StringBuilder();
+
+        try {
+            BufferedReader input = new BufferedReader(new FileReader(file));
+            try {
+                String line = null;
+                while ((line = input.readLine()) != null) {
+                    contents.append(line);
+                    contents.append(System.getProperty("line.separator"));
+                }
+            } finally {
+                input.close();
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
+        String page = contents.toString();
+        return page;
+    }
     
     public void testWebDeSubpage(){
         String page =">51379\u00a0Leverkusen<br>Germany</td>";
@@ -169,5 +175,61 @@ public class PagePartSequenceTest extends TestCase {
         
         assertTrue("contact Peter Mueller was not retrieved", peterFound);
         assertTrue("contact Hans-Georg Walter was not retrieved", hansGeorgFound);
+    }
+    
+    public void testYahooCom(){
+        String page = getStringFromFile("test-resources/YahooCom.html");
+        String VALID_NAME = GenericSubscribeServiceTestHelpers.VALID_NAME;
+        String VALID_EMAIL_REGEX = GenericSubscribeServiceTestHelpers.VALID_EMAIL_REGEX;
+        String VALID_PHONE_REGEX = GenericSubscribeServiceTestHelpers.VALID_PHONE_REGEX;
+        String VALID_ADDRESS_PART = GenericSubscribeServiceTestHelpers.VALID_ADDRESS_PART;
+        
+        String crapBefore = "[^0-9\\+\\(\\)]*";
+        
+        ArrayList<PagePart> pageParts = new ArrayList<PagePart>();
+        pageParts.add(new PagePart("(<h1>\\s)"+VALID_NAME+"(</h1>)","display_name"));
+        pageParts.add(new PagePart("(qa_compose1[^>]*>)"+VALID_EMAIL_REGEX+"(<)","email1"));        
+        // add a filler to be sure we are in the phone numbers part
+        pageParts.add(new PagePart("(<h2>(Phone|Telefon)</h2>)"));
+        pageParts.add(new PagePart("(Home|Privat):"+crapBefore+VALID_PHONE_REGEX+"()","telephone_home1"));
+        pageParts.add(new PagePart("(Work|Gesch.ftlich):"+crapBefore+VALID_PHONE_REGEX+"()","telephone_business1"));
+        pageParts.add(new PagePart("(Mobile|Handy):"+crapBefore+VALID_PHONE_REGEX+"()","cellular_telephone1"));
+        // add a filler to be sure we are in the work part
+        pageParts.add(new PagePart("(<h2>(Work|Gesch.ftlich)</h2>)"));
+        pageParts.add(new PagePart("<dt>[\\s]*(Company|Firma):[\\s]*<\\/dt>[\\s]*<dd>[\\s]*<div>[\\s]*([^<]*)(<\\/div>)","company"));
+        pageParts.add(new PagePart("<dt>[\\s]*(Title|Titel):[\\s]*<\\/dt>[\\s]*<dd>[\\s]*<div>[\\s]*([^<]*)(<\\/div>)","title"));
+        pageParts.add(new PagePart("(Address|Adresse):[\\s]*<\\/dt>[\\s]*<dd>[\\s]*<div>[\\s]*("+VALID_ADDRESS_PART+")(<br \\/>)", "street_business"));
+        pageParts.add(new PagePart("(<br \\/>)*([0-9]*)(\\s)", "postal_code_business"));
+        pageParts.add(new PagePart("()("+VALID_ADDRESS_PART+")()", "city_business"));
+        // add a filler to be sure we are in the instant messenger part
+        pageParts.add(new PagePart("(<h2>Instant Messenger</h2>)")); 
+        pageParts.add(new PagePart("(AIM|Google Talk|Skype|Windows Live|Yahoo):[\\s]*<\\/dt>[\\s]*<dd>[\\s]*<div>[\\s]*([^<]*)(<\\/div>)","instant_messenger1",1));
+        // add a filler to be sure we are in the personal address
+        pageParts.add(new PagePart("(<h2>(Personal|Pers.nliche Daten)</h2>)"));
+        pageParts.add(new PagePart("(Address|Adresse):[\\s]*<\\/dt>[\\s]*<dd>[\\s]*<div>[\\s]*("+VALID_ADDRESS_PART+")(<br \\/>)*", "street_home"));
+        pageParts.add(new PagePart("(<br \\/>\\s)([0-9]*)(\\s)", "postal_code_home"));
+        pageParts.add(new PagePart("()("+VALID_ADDRESS_PART+")()", "city_home"));
+        pageParts.add(new PagePart("(Birthday|Geburtstag):[^0-9]*([0-9]{2})(\\/)","birthday_month"));
+        pageParts.add(new PagePart("()([0-9]{2})(\\/)","birthday_day"));
+        pageParts.add(new PagePart("()([0-9]{4})(<)","birthday_year"));
+        PagePartSequence sequence = new PagePartSequence(pageParts, "");
+        sequence.setPage(page);
+        Map<String, String> map = sequence.retrieveInformation();
+        
+        assertTrue("display_name not good, should be 'Willi Winzig' but is '"+map.get("display_name")+"'",map.get("display_name").contains("Willi Winzig"));
+        assertTrue("telephone_home1 should be in here", map.containsKey("telephone_home1"));
+        assertTrue("telephone_home1 should be '06331 148973' but is '"+map.get("telephone_home1")+"'", map.get("telephone_home1").equals("06331 148973"));
+        assertTrue("There should not be a work phone number", !map.containsKey("telephone_business1"));
+        assertTrue("cellular_telephone1 should be '01520 12345678' but is '"+map.get("cellular_telephone1")+"'", map.get("cellular_telephone1").equals("01520 12345678"));
+        System.out.println(map.get("street_business"));
+        System.out.println(map.get("postal_code_business"));
+        System.out.println(map.get("city_business"));
+        System.out.println(map.get("street_home"));
+        System.out.println(map.get("postal_code_home"));
+        System.out.println(map.get("city_home"));
+//        assertTrue("Some Address should be there", map.containsKey("address_note"));
+//        assertTrue("The preferred Address should be the business one not "+ map.get("address_note"), map.get("address_note").contains("Totenweg"));
+        assertTrue("Instant Messenger should be in", map.containsKey("instant_messenger1"));
+        assertTrue("Instant Messenger has the right value", map.get("instant_messenger1").contains("hss7ps"));
     }
 }
