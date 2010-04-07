@@ -59,10 +59,18 @@ public class ReferenceContent implements SimpleContent<String> {
 
     private String id;
 
+    /**
+     * Initializes a new {@link ReferenceContent}.
+     */
     public ReferenceContent() {
         super();
     }
 
+    /**
+     * Initializes a new {@link ReferenceContent}.
+     * 
+     * @param refId The reference identifier
+     */
     public ReferenceContent(String refId) {
         super();
         this.id = refId;
