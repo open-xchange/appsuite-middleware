@@ -8,6 +8,7 @@ workflowString: |
   steps: 
     - !com.openexchange.subscribe.crawler.LoginWithHttpClientStep
       description: Call LinkedIn with all parameters that are normally set by the login-form
+      regex: ".*manual_redirect_link.*"
       url: "https://www.linkedin.com/secure/login?session_key=USERNAME&session_password=PASSWORD&session_login=&session_rikey=&csrfToken=ajax:6545267463289092740"
     - !com.openexchange.subscribe.crawler.PageByUrlStep
       description: Get to the no-javascript contacts list
