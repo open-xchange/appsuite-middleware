@@ -207,8 +207,9 @@ public class MailMessagingPart implements MessagingPart {
             String cs = contentType.getCharsetParameter();
             if (!CharsetDetector.isValid(cs)) {
                 StringBuilder sb = null;
-                if (null != cs) {
+                if (null != cs && WARN_ENABLED) {
                     sb = new StringBuilder(64).append("Illegal or unsupported encoding: \"").append(cs).append("\".");
+                    LOG.warn(sb.toString());
                 }
                 if (contentType.startsWith(CT_TEXT)) {
                     cs = CharsetDetector.detectCharset(mailPart.getInputStream());
