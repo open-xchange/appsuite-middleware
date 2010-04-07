@@ -67,6 +67,7 @@ import com.openexchange.session.Session;
  * {@link MailMessageService}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since Open-Xchange v6.18
  */
 public final class MailMessageService implements MessagingService {
 

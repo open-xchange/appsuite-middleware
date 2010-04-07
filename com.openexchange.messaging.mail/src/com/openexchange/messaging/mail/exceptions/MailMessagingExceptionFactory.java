@@ -58,7 +58,7 @@ import com.openexchange.messaging.mail.MailMessagingExceptionCodes;
  * {@link MailMessagingExceptionFactory} - Factory for creating {@link FacebookMessagingException}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since Open-Xchange v6.16
+ * @since Open-Xchange v6.18
  */
 public final class MailMessagingExceptionFactory extends Exceptions<MailMessagingException> {
 

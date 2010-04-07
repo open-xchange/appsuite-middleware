@@ -58,6 +58,7 @@ import com.openexchange.messaging.MultipartContent;
  * {@link MailMessagingBodyPart}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since Open-Xchange v6.18
  */
 public class MailMessagingBodyPart extends MailMessagingPart implements MessagingBodyPart {
 

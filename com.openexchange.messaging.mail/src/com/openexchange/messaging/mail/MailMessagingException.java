@@ -55,10 +55,10 @@ import com.openexchange.groupware.Component;
 import com.openexchange.messaging.MessagingException;
 
 /**
- * {@link MailMessagingException} - A facebook messaging exception
+ * {@link MailMessagingException} - A mail messaging exception
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since Open-Xchange v6.16
+ * @since Open-Xchange v6.18
  */
 public class MailMessagingException extends MessagingException {
 
@@ -67,7 +67,7 @@ public class MailMessagingException extends MessagingException {
     private static final String STR_COMPONENT = "MAIL";
 
     /**
-     * The {@link Component} for facebook messaging exception.
+     * The {@link Component} for mail messaging exception.
      */
     public static final Component MAIL_COMPONENT = new Component() {
 

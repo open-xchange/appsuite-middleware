@@ -63,8 +63,11 @@ import com.openexchange.messaging.MessagingMessage;
  * {@link MailMessagingMessage}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since Open-Xchange v6.18
  */
 public class MailMessagingMessage extends MailMessagingBodyPart implements MessagingMessage {
+
+    private static final long serialVersionUID = 1499076267481699121L;
 
     private static final Flags ALL_COLOR_LABELS;
 

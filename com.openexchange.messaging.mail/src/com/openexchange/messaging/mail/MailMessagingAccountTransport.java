@@ -71,6 +71,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  * {@link MailMessagingAccountTransport}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since Open-Xchange v6.18
  */
 public class MailMessagingAccountTransport implements MessagingAccountTransport {
 

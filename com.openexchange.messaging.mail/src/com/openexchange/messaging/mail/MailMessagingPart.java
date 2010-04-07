@@ -90,6 +90,7 @@ import com.openexchange.messaging.generic.internet.MimeStringMessagingHeader;
  * {@link MailMessagingPart}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since Open-Xchange v6.18
  */
 public class MailMessagingPart implements MessagingPart {
 

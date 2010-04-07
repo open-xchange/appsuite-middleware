@@ -61,6 +61,7 @@ import com.openexchange.messaging.MessagingException;
  * {@link MailContentType}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since Open-Xchange v6.18
  */
 public final class MailContentType implements ContentType {
 

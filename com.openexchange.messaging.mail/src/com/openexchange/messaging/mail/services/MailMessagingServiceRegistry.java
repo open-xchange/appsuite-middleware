@@ -55,6 +55,7 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
  * {@link MailMessagingServiceRegistry} - Container class for the service registry of <i>com.openexchange.messaging.mail</i> bundle.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since Open-Xchange v6.18
  */
 public final class MailMessagingServiceRegistry {
 
