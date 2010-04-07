@@ -1009,7 +1009,7 @@ msgstr "Rendez-vous (décliné)"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:551
 msgid "Appointment (tentative)"
-msgstr "Rendez-vous (tentative)"
+msgstr "Rendez-vous (temporaire)"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:553
 msgid "New task"
@@ -1033,7 +1033,7 @@ msgstr "Tâche (déclinée)"
 
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:563
 msgid "Task (tentative)"
-msgstr "Tâche (tentative)"
+msgstr "Tâche (temporaire)"
 
 #. -
 #. * MISC
@@ -1136,7 +1136,7 @@ msgstr "en attente"
 #. tentative
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:636
 msgid "tentative"
-msgstr "tentative"
+msgstr "temporaire"
 
 #. external
 #: /var/lib/hudson/workspace/unstableCreateServerPOT/open-xchange/server/src/com/openexchange/groupware/i18n/Notifications.java:639
