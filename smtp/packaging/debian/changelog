@@ -1,3 +1,9 @@
+open-xchange-smtp (6.14.0.0-13) unstable; urgency=low
+
+  * build for PTF 2010033110000201
+
+ -- Benjamin Otterbach <benjamin.otterbach@open-xchange.com>  Wed,  7 Apr 2010 09:09:02 +0200
+
 open-xchange-smtp (6.14.0.0-12) unstable; urgency=low
 
   * build for PTF 2010033110000201
