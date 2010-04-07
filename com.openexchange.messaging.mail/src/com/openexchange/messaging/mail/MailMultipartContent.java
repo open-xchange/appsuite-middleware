@@ -103,9 +103,16 @@ public class MailMultipartContent implements MultipartContent {
             /*
              * Set section identifier
              */
-            final String sectionId = enclosedMailPart.getSequenceId();
-            bodyPart.setSectionId(sectionId == null ? Integer.toString(index + 1) : new StringBuilder(8).append(sectionId).append('.').append(
-                Integer.toString(index + 1)).toString());
+            final String sectionId = mimeMultipart.getSequenceId();
+            if (sectionId == null) {
+                final String sid = Integer.toString(index + 1);
+                bodyPart.setSectionId(sid);
+                enclosedMailPart.setSequenceId(sid);
+            } else {
+                final String sid = new StringBuilder(8).append(sectionId).append('.').append(Integer.toString(index + 1)).toString();
+                bodyPart.setSectionId(sid);
+                enclosedMailPart.setSequenceId(sid);
+            }
             /*
              * Return
              */

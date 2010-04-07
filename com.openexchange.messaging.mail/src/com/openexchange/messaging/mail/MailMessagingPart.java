@@ -157,11 +157,22 @@ public class MailMessagingPart implements MessagingPart {
                              */
                             final MailMessagingMessage m = new MailMessagingMessage(nestedMail);
                             final String sectionId = mailPart.getSequenceId();
+                            /*
+                             * TODO: Examine this one
+                             */
                             final boolean increaseSecId = false;
                             if (increaseSecId) {
-                                m.setSectionId(sectionId == null ? "1" : new StringBuilder(8).append(sectionId).append('.').append(1).toString());
+                                if (sectionId == null) {
+                                    m.setSectionId("1");
+                                    nestedMail.setSequenceId("1");
+                                } else {
+                                    final String sid = new StringBuilder(8).append(sectionId).append('.').append(1).toString();
+                                    m.setSectionId(sid);
+                                    nestedMail.setSequenceId(sid);
+                                }
                             } else {
                                 m.setSectionId(sectionId);
+                                nestedMail.setSequenceId(sectionId);
                             }
                             cachedContent = tmp = m;
                         }
