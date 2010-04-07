@@ -101,6 +101,81 @@ public final class MailMessageService implements MessagingService {
          */
         formDescription.add(FormElement.input(MailConstants.MAIL_LOGIN, "Login", true, ""));
         formDescription.add(FormElement.password(MailConstants.MAIL_PASSWORD, "Password", true, ""));
+        /*-
+         * Confirmed ham
+         * Confirmed ham fullname
+         */
+        formDescription.add(FormElement.input(MailConstants.MAIL_CONFIRMED_HAM, "Confirmed Ham", false, "confirmed-ham"));
+        formDescription.add(FormElement.input(MailConstants.MAIL_CONFIRMED_HAM_FULLNAME, "Confirmed Ham Fullname", false, ""));
+        /*-
+         * Confirmed spam
+         * Confirmed spam fullname
+         */
+        formDescription.add(FormElement.input(MailConstants.MAIL_CONFIRMED_SPAM, "Confirmed Spam", false, "confirmed-spam"));
+        formDescription.add(FormElement.input(MailConstants.MAIL_CONFIRMED_SPAM_FULLNAME, "Confirmed Spam Fullname", false, ""));
+        /*-
+         * Drafts
+         * Drafts fullname
+         */
+        formDescription.add(FormElement.input(MailConstants.MAIL_DRAFTS, "Drafts", false, "Drafts"));
+        formDescription.add(FormElement.input(MailConstants.MAIL_DRAFTS_FULLNAME, "Drafts Fullname", false, ""));
+        /*-
+         * Sent
+         * Sent fullname
+         */
+        formDescription.add(FormElement.input(MailConstants.MAIL_SENT, "Sent", false, "Sent"));
+        formDescription.add(FormElement.input(MailConstants.MAIL_SENT_FULLNAME, "Sent Fullname", false, ""));
+        /*-
+         * Spam
+         * Spam fullname
+         */
+        formDescription.add(FormElement.input(MailConstants.MAIL_SPAM, "Spam", false, "Spam"));
+        formDescription.add(FormElement.input(MailConstants.MAIL_SPAM_FULLNAME, "Spam Fullname", false, ""));
+        /*-
+         * Trash
+         * Trash fullname
+         */
+        formDescription.add(FormElement.input(MailConstants.MAIL_TRASH, "Trash", false, "Trash"));
+        formDescription.add(FormElement.input(MailConstants.MAIL_TRASH_FULLNAME, "Trash Fullname", false, ""));
+        /*-
+         * Mail port
+         * Mail protocol
+         * Mail secure
+         * Mail server
+         */
+        formDescription.add(FormElement.input(MailConstants.MAIL_PORT, "Mail Port", true, ""));
+        formDescription.add(FormElement.input(MailConstants.MAIL_PROTOCOL, "Mail Protocol", true, ""));
+        formDescription.add(FormElement.checkbox(MailConstants.MAIL_SECURE, "Mail Secure", false, Boolean.FALSE));
+        formDescription.add(FormElement.input(MailConstants.MAIL_SERVER, "Mail Server", true, ""));
+        /*-
+         * Primary address
+         * Personal
+         */
+        formDescription.add(FormElement.input(MailConstants.MAIL_PRIMARY_ADDRESS, "Primary Address", true, ""));
+        formDescription.add(FormElement.input(MailConstants.MAIL_PERSONAL, "Personal", false, ""));
+        /*-
+         * Transport login
+         * Transport password
+         */
+        formDescription.add(FormElement.input(MailConstants.TRANSPORT_LOGIN, "Transport Login", false, ""));
+        formDescription.add(FormElement.password(MailConstants.TRANSPORT_PASSWORD, "Transport Password", false, ""));
+        /*-
+         * Transport port
+         * Transport protocol
+         * Transport secure
+         * Transport server
+         */
+        formDescription.add(FormElement.input(MailConstants.TRANSPORT_PORT, "Mail Port", false, ""));
+        formDescription.add(FormElement.input(MailConstants.TRANSPORT_PROTOCOL, "Mail Protocol", false, ""));
+        formDescription.add(FormElement.checkbox(MailConstants.TRANSPORT_SECURE, "Mail Secure", false, Boolean.FALSE));
+        formDescription.add(FormElement.input(MailConstants.TRANSPORT_SERVER, "Mail Server", false, ""));
+        /*
+         * Unified mail enabled
+         */
+        formDescription.add(FormElement.checkbox(MailConstants.UNIFIED_MAIL_ENABLED, "Unified Mail Enabled", false, Boolean.FALSE));
+        /*
+         * Create read-only view on generated form description
+         */
         this.formDescription = new ReadOnlyDynamicFormDescription(formDescription);
     }
 
