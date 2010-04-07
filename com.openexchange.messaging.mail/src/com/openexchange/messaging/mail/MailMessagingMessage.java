@@ -53,7 +53,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import javax.mail.Flags;
 import javax.mail.internet.MimeMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.messaging.MessagingException;
@@ -67,34 +66,7 @@ import com.openexchange.messaging.MessagingMessage;
  */
 public class MailMessagingMessage extends MailMessagingBodyPart implements MessagingMessage {
 
-    private static final long serialVersionUID = 1499076267481699121L;
-
-    private static final Flags ALL_COLOR_LABELS;
-
-    private static final Flags ALL_SYSTEM_FLAGS;
-
-    static {
-        final StringBuilder sb = new StringBuilder(6);
-        Flags flags = new Flags();
-        for (int i = 0; i <= 10; i++) {
-            sb.setLength(0);
-            flags.add(sb.append(MailMessage.COLOR_LABEL_PREFIX).append(i).toString());
-            sb.setLength(0);
-            flags.add(sb.append(MailMessage.COLOR_LABEL_PREFIX_OLD).append(i).toString());
-        }
-        ALL_COLOR_LABELS = flags;
-
-        flags = new Flags();
-        flags.add(Flags.Flag.ANSWERED);
-        flags.add(Flags.Flag.DELETED);
-        flags.add(Flags.Flag.DRAFT);
-        flags.add(Flags.Flag.FLAGGED);
-        flags.add(Flags.Flag.SEEN);
-        flags.add(Flags.Flag.USER);
-        flags.add(MessagingMessage.USER_FORWARDED);
-        flags.add(MessagingMessage.USER_READ_ACK);
-        ALL_SYSTEM_FLAGS = flags;
-    }
+    private static final long serialVersionUID = 3329678416653813017L;
 
     /**
      * The underlying {@link MimeMessage} instance.
