@@ -49,15 +49,19 @@
 
 package com.openexchange.ajax.mail;
 
+import static com.openexchange.mail.MailListField.FLAGS;
+import static com.openexchange.mail.MailListField.ID;
 import java.io.ByteArrayInputStream;
 import java.util.TimeZone;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.mail.actions.DeleteRequest;
 import com.openexchange.ajax.mail.actions.GetRequest;
 import com.openexchange.ajax.mail.actions.GetResponse;
 import com.openexchange.ajax.mail.actions.ImportMailRequest;
 import com.openexchange.ajax.mail.actions.ImportMailResponse;
+import com.openexchange.ajax.mail.actions.ListRequest;
 import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
@@ -68,6 +72,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 public class Bug15608Test extends AbstractAJAXSession {
 
     private static final int ORIG_FLAGS = 32;
+    private static final int[] ATTRIBUTES = { ID.getField(), FLAGS.getField() };
     private AJAXClient client;
     private TimeZone timeZone;
     private String folder;
@@ -86,7 +91,7 @@ public class Bug15608Test extends AbstractAJAXSession {
         folder = client.getValues().getInboxFolder();
         address = client.getValues().getSendAddress();
         String mail = MAIL.replaceAll("#ADDR#", address);
-        ByteArrayInputStream[] massMails = new ByteArrayInputStream[1000];
+        ByteArrayInputStream[] massMails = new ByteArrayInputStream[100];
         for (int i = 0; i < massMails.length; i++) {
             massMails[i] = new ByteArrayInputStream(mail.getBytes("UTF-8"));
         }
@@ -102,12 +107,23 @@ public class Bug15608Test extends AbstractAJAXSession {
     }
 
     public void testFlags() throws Throwable {
-        GetRequest request = new GetRequest(folder, ids[0][1]);
-        request.setUnseen(true);
-        GetResponse response = client.execute(request);
-        MailMessage mail = response.getMail(timeZone);
-        int testFlags = mail.getFlags();
-        assertEquals("Wanted flags are not set.", ORIG_FLAGS, testFlags);
+        {
+            ListRequest request = new ListRequest(ids, ATTRIBUTES);
+            CommonListResponse response = client.execute(request);
+            int flagsPos = response.getColumnPos(FLAGS.getField());
+            for (Object[] mail : response) {
+                int testFlags = ((Integer) mail[flagsPos]).intValue();
+                assertEquals("Wanted flags are not set.", ORIG_FLAGS, testFlags);
+            }
+        }
+        for (String[] folderAndId : ids) {
+            GetRequest request = new GetRequest(folder, folderAndId[1]);
+            request.setUnseen(true);
+            GetResponse response = client.execute(request);
+            MailMessage mail = response.getMail(timeZone);
+            int testFlags = mail.getFlags();
+            assertEquals("Wanted flags are not set.", ORIG_FLAGS, testFlags);
+        }
     }
 
     private static final String MAIL =
