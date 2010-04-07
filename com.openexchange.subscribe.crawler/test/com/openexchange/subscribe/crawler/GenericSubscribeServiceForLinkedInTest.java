@@ -71,12 +71,13 @@ public class GenericSubscribeServiceForLinkedInTest extends GenericSubscribeServ
         crawler.setDisplayName("LinkedIn");
         crawler.setId("com.openexchange.subscribe.linkedin");
         crawler.setCrawlerApiVersion(616);
-        crawler.setPriority(3);
+        crawler.setPriority(4);
 
         ArrayList<Step> listOfSteps = new ArrayList<Step>();
 
         listOfSteps.add(new LoginWithHttpClientStep("Call LinkedIn with all parameters that are normally set by the login-form",
-            "https://www.linkedin.com/secure/login?session_key=USERNAME&session_password=PASSWORD&session_login=&session_rikey=&csrfToken=ajax:6545267463289092740"));
+            "https://www.linkedin.com/secure/login?session_key=USERNAME&session_password=PASSWORD&session_login=&session_rikey=&csrfToken=ajax:6545267463289092740",
+            ".*manual_redirect_link.*"));
         
         listOfSteps.add(new PageByUrlStep(
             "Get to the no-javascript contacts list",
@@ -84,7 +85,7 @@ public class GenericSubscribeServiceForLinkedInTest extends GenericSubscribeServ
         listOfSteps.add(new AnchorsByLinkRegexStep(
             "Get all pages that link to a connections profile",
             "(/connectionsnojs\\?split_page=).*",
-            "(/profile\\?viewProfile=).*(goback).*"));
+            "(/profile\\?viewProfile=).*(goback).*", true));
         ArrayList<PagePart> pageParts = new ArrayList<PagePart>();
         pageParts.add(new PagePart(
             "(<img src=\")([a-zA-Z://\\._0-9]*)(\" class=\"photo\" width=\"80\" height=\"80\" alt=\"[a-zA-Z\u00e4\u00f6\u00fc\\s]*\">)",
