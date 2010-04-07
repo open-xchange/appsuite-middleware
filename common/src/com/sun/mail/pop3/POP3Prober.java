@@ -71,7 +71,7 @@ public final class POP3Prober {
      */
     public POP3Prober(final POP3Store pop3Store, final POP3Folder pop3Folder) throws IOException, MessagingException {
         super();
-        protocol = 0 == pop3Folder.getMessageCount() ? null : pop3Store.getPort(pop3Folder);
+        protocol = (0 == pop3Folder.getMessageCount() ? null : pop3Store.getPort(pop3Folder));
     }
 
     /**
