@@ -315,6 +315,9 @@ public final class MailMessagingMessageAccess implements MessagingMessageAccess 
     }
 
     private static com.openexchange.mail.OrderDirection from(final OrderDirection order) {
+        if(order == null) {
+            return null;
+        }
         switch (order) {
         case ASC:
             return com.openexchange.mail.OrderDirection.ASC;
@@ -326,6 +329,9 @@ public final class MailMessagingMessageAccess implements MessagingMessageAccess 
     }
 
     private static MailSortField fromSort(final MessagingField sortField) {
+        if(sortField == null) {
+            return null;
+        }
         switch (sortField) {
         case ACCOUNT_NAME:
             return MailSortField.ACCOUNT_NAME;
