@@ -146,7 +146,7 @@ public class FileStorageImpl implements FileStorage {
     public FileStorageImpl(final URI uri) throws FileStorageException {
         super();
         storage = new File(uri);
-        if (!storage.exists() && !storage.mkdirs()) {
+        if (!storage.exists() && !mkdirs(storage)) {
             throw new FileStorageException(FileStorageException.Code.CREATE_DIR_FAILED, storage.getAbsolutePath());
         }
         lock(LOCK_TIMEOUT);
@@ -597,7 +597,10 @@ public class FileStorageImpl implements FileStorage {
      */
     protected void save(final String name, final InputStream input) throws FileStorageException {
         final File file = new File(storage, name);
-        file.getParentFile().mkdirs();
+        final File parentDir = file.getParentFile();
+        if (!parentDir.exists() && !mkdirs(parentDir)) {
+            throw new FileStorageException(FileStorageException.Code.CREATE_DIR_FAILED, parentDir.getAbsolutePath());
+        }
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(file);
@@ -802,4 +805,14 @@ public class FileStorageImpl implements FileStorage {
         return state;
     }
 
+    private boolean mkdirs(File directory) {
+        if (directory.exists()) {
+            return true;
+        }
+        File parent = directory.getParentFile();
+        if (!mkdirs(parent)) {
+            return false;
+        }
+        return directory.mkdir();
+    }
 }
