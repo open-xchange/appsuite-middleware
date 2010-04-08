@@ -223,8 +223,7 @@ public class TasksSQLImpl implements TasksSQLInterface {
             // Create folder mappings
             Set<Folder> folders;
             if (Tools.isFolderPublic(folder)) {
-                folders = TaskLogic.createFolderMapping(folderId, task
-                    .getCreatedBy(), InternalParticipant.EMPTY);
+                folders = TaskLogic.createFolderMapping(folderId, task.getCreatedBy(), InternalParticipant.EMPTY_INTERNAL);
             } else {
                 Tools.fillStandardFolders(ctx, ParticipantStorage
                     .extractInternal(parts));

@@ -62,7 +62,7 @@ public class InternalParticipant extends TaskParticipant {
     /**
      * An empty set of participants for tasks.
      */
-    static final Set<InternalParticipant> EMPTY = Collections.emptySet();
+    static final Set<InternalParticipant> EMPTY_INTERNAL = Collections.emptySet();
 
     /**
      * User.
