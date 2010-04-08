@@ -75,9 +75,8 @@ import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 
 /**
- * {@link PushActivator} - The 1&1 push activator.
+ * {@link PushActivator} - The push activator.
  * 
- * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  */
 public final class PushActivator extends DeferredActivator {
 
@@ -85,9 +84,9 @@ public final class PushActivator extends DeferredActivator {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(PushActivator.class);
     
-    private static final String PROP_UDP_LISTEN_HOST = "com.openexchange.push.oneandone.udp_listen_host";
+    private static final String PROP_UDP_LISTEN_HOST = "com.openexchange.push.mail.notify.udp_listen_host";
 
-    private static final String PROP_UDP_LISTEN_PORT = "com.openexchange.push.oneandone.udp_listen_port";
+    private static final String PROP_UDP_LISTEN_PORT = "com.openexchange.push.mail.notify.udp_listen_port";
 
     private List<ServiceRegistration> serviceRegistrations;
 
@@ -190,7 +189,7 @@ public final class PushActivator extends DeferredActivator {
     private void readConfiguration() throws ConfigurationException {
         final StringBuilder sb = new StringBuilder();
         sb.append(CRLF);
-        sb.append("Properties for 1&1 push:" + CRLF);
+        sb.append("Properties for mail push:" + CRLF);
         sb.append("------------------------" + CRLF);
         /*
          * Read configuration
