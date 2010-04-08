@@ -110,19 +110,17 @@ public class QuotaFileStorageException extends FileStorageException {
      */
     public enum Code {
         /** Couldn't reach the filestore */
-        INSTANTIATIONERROR("Couldn't reach the filestore", Category.SUBSYSTEM_OR_SERVICE_DOWN, 1),
-        /** Cannot access the Database: %s */
-        SQLERROR("Cannot access the Database: %s", Category.SUBSYSTEM_OR_SERVICE_DOWN, 2),
+        INSTANTIATIONERROR("Couldn't reach the filestore", Category.SUBSYSTEM_OR_SERVICE_DOWN, 21),
         /** Database Query could not be realized */
-        SQLSTATEMENTERROR("Database Query could not be realized", Category.CODE_ERROR, 3),
+        SQLSTATEMENTERROR("Database Query could not be realized", Category.CODE_ERROR, 23),
         /** The allowed Quota is reached. */
-        STORE_FULL("The allowed Quota is reached.", Category.USER_INPUT, 4),
+        STORE_FULL("The allowed Quota is reached.", Category.USER_INPUT, 24),
         /** Quota seems to be inconsistent. Please use consistency tool on context %1$d. */
-        QUOTA_UNDERRUN("Quota seems to be inconsistent. Please use consistency tool on context %1$d.", Category.TRUNCATED, 5),
+        QUOTA_UNDERRUN("Quota seems to be inconsistent. Please use consistency tool on context %1$d.", Category.TRUNCATED, 25),
         /** Quota usage is missing for context %1$d. */
-        NO_USAGE("Quota usage is missing for context %1$d.", Category.CODE_ERROR, 6),
+        NO_USAGE("Quota usage is missing for context %1$d.", Category.CODE_ERROR, 26),
         /** Update of quota usage for context %1$d failed. */
-        UPDATE_FAILED("Update of quota usage for context %1$d failed.", Category.CODE_ERROR, 7);
+        UPDATE_FAILED("Update of quota usage for context %1$d failed.", Category.CODE_ERROR, 27);
 
         /**
          * Message of the exception.

@@ -147,35 +147,29 @@ public class QuotaFileStorageImpl implements QuotaFileStorage {
         PreparedStatement sstmt = null;
         PreparedStatement ustmt = null;
         ResultSet rs = null;
-        boolean full = false;
-
         try {
             con.setAutoCommit(false);
-
             sstmt = con.prepareStatement("SELECT used FROM filestore_usage WHERE cid=? FOR UPDATE");
             sstmt.setInt(1, context.getContextId());
             rs = sstmt.executeQuery();
-
             final long oldUsage;
             if (rs.next()) {
                 oldUsage = rs.getLong(1);
             } else {
                 throw new QuotaFileStorageException(Code.NO_USAGE, I(context.getContextId()));
             }
-
-            final long newUsage = oldUsage + usage;
-            if (newUsage > context.getFileStorageQuota()) {
-                full = true;
-            } else {
-                ustmt = con.prepareStatement("UPDATE filestore_usage SET used=? WHERE cid=?");
-                ustmt.setLong(1, newUsage);
-                ustmt.setInt(2, context.getContextId());
-                int rows = ustmt.executeUpdate();
-                if (1 != rows) {
-                    throw new QuotaFileStorageException(Code.UPDATE_FAILED, I(context.getContextId()));
-                }
+            long newUsage = oldUsage + usage;
+            long quota = context.getFileStorageQuota();
+            if (quota > 0 && newUsage > quota) {
+                return true;
             }
-
+            ustmt = con.prepareStatement("UPDATE filestore_usage SET used=? WHERE cid=?");
+            ustmt.setLong(1, newUsage);
+            ustmt.setInt(2, context.getContextId());
+            int rows = ustmt.executeUpdate();
+            if (1 != rows) {
+                throw new QuotaFileStorageException(Code.UPDATE_FAILED, I(context.getContextId()));
+            }
             con.commit();
         } catch (final SQLException s) {
             DBUtils.rollback(con);
@@ -187,9 +181,7 @@ public class QuotaFileStorageImpl implements QuotaFileStorage {
             DBUtils.closeSQLStuff(ustmt);
             db.backWritable(context, con);
         }
-
-        return full;
-
+        return false;
     }
 
     /**
@@ -382,7 +374,6 @@ public class QuotaFileStorageImpl implements QuotaFileStorage {
         if (full) {
             throw new QuotaFileStorageException(QuotaFileStorageException.Code.STORE_FULL);
         }
-
         return retval;
 
     }
