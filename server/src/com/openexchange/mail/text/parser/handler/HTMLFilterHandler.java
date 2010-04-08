@@ -505,13 +505,11 @@ public final class HTMLFilterHandler implements HTMLHandler {
                 }
             }
         }
+        htmlBuilder.append('<').append(tag).append(attrBuilder.toString());
         if (simple) {
-            if (attrBuilder.length() > 0 || size == 0) {
-                htmlBuilder.append('<').append(tag).append(attrBuilder.toString()).append('/').append('>');
-            }
-        } else {
-            htmlBuilder.append('<').append(tag).append(attrBuilder.toString()).append('>');
+            htmlBuilder.append('/');
         }
+        htmlBuilder.append('>');
     }
 
     /**

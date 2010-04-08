@@ -1,6 +1,7 @@
 * 2010-04-08 - marcus.klein@open-xchange.com
 
  - Bugfix #15367: Removing MAL poll database entries when a user should be deleted.
+ - Bugfix #15826: Not removing simple HTML tags from emails if their attributes are filtered.
 
 * 2010-04-07 - karsten.will@open-xchange.com
 
