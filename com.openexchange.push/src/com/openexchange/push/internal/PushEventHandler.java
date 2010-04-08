@@ -54,6 +54,8 @@ import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.push.PushListener;
@@ -74,7 +76,7 @@ public final class PushEventHandler implements EventHandler {
     /**
      * The logger constant.
      */
-    static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(PushEventHandler.class);
+    static final Log LOG = LogFactory.getLog(PushEventHandler.class);
 
     /**
      * Whether logger allows debug.
@@ -132,8 +134,8 @@ public final class PushEventHandler implements EventHandler {
                     }
 
                 } else if (SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
-                    @SuppressWarnings("unchecked") final Map<String, Session> sessionContainer =
-                        (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
+                    @SuppressWarnings("unchecked")
+                    final Map<String, Session> sessionContainer = (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
                     /*
                      * Iterate push managers
                      */
