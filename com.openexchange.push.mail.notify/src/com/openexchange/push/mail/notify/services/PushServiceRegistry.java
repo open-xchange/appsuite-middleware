@@ -52,9 +52,8 @@ package com.openexchange.push.mail.notify.services;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
- * {@link PushServiceRegistry} - A registry for services needed by 1&1 push bundle
+ * {@link PushServiceRegistry} - A registry for services needed by push bundle
  * 
- * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  */
 public final class PushServiceRegistry {
 
