@@ -53,6 +53,8 @@ import java.text.MessageFormat;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.push.PushException;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.malpoll.services.MALPollServiceRegistry;
@@ -65,6 +67,8 @@ import com.openexchange.tools.Collections;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MALPollPushListenerRegistry {
+
+    private static final Log LOG = LogFactory.getLog(MALPollPushListenerRegistry.class);
 
     private static final MALPollPushListenerRegistry instance = new MALPollPushListenerRegistry();
 
@@ -168,17 +172,13 @@ public final class MALPollPushListenerRegistry {
         final MALPollPushListener listener = map.remove(key);
         if (null != listener) {
             listener.close();
-            try {
-                MALPollDBUtility.dropMailIDs(key.cid, key.user, MALPollPushListener.getAccountId(), MALPollPushListener.getFolder());
-            } catch (final PushException e) {
-                org.apache.commons.logging.LogFactory.getLog(MALPollPushListenerRegistry.class).error(
-                    new StringBuilder("DB tables could not be cleansed for removed push listener. User=").append(key.user).append(
-                        ", context=").append(key.cid).toString(),
-                    e);
-            }
-            return true;
         }
-        return false;
+        try {
+            MALPollDBUtility.dropMailIDs(key.cid, key.user);
+        } catch (final PushException e) {
+            LOG.error("DB tables could not be cleansed for removed push listener. User=" + key.user + ", context=" + key.cid, e);
+        }
+        return true;
     }
 
     /**

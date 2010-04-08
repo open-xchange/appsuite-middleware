@@ -1,3 +1,7 @@
+* 2010-04-08 - marcus.klein@open-xchange.com
+
+ - Bugfix #15367: Removing MAL poll database entries when a user should be deleted.
+
 * 2010-04-07 - karsten.will@open-xchange.com
 
  - Fix for unnamed Bug that occurs when crawling an empty GMX-Addressbook

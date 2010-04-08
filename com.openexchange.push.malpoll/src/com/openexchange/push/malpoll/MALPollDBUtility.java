@@ -242,72 +242,81 @@ public final class MALPollDBUtility {
      * 
      * @param cid The context ID
      * @param user The user ID
-     * @param accountId The account ID
-     * @param fullname The folder fullname
      * @throws PushException If a database resource could not be acquired
      */
-    public static void dropMailIDs(final int cid, final int user, final int accountId, final String fullname) throws PushException {
+    public static void dropMailIDs(final int cid, final int user) throws PushException {
         final DatabaseService databaseService = getDBService();
-        final Connection writableConnection;
+        final Connection con;
         try {
-            writableConnection = databaseService.getForUpdateTask(cid);
-            writableConnection.setAutoCommit(false); // BEGIN
+            con = databaseService.getForUpdateTask(cid);
         } catch (final DBPoolingException e) {
             throw new PushException(e);
-        } catch (final SQLException e) {
-            throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
         try {
-            PreparedStatement stmt = null;
-            ResultSet rs = null;
-            try {
-                /*
-                 * Select all UUIDs belonging to given user
-                 */
-                stmt = writableConnection.prepareStatement("SELECT hash FROM malPollHash WHERE cid = ? AND user = ?");
-                stmt.setInt(1, cid);
-                stmt.setInt(2, user);
-                rs = stmt.executeQuery();
-                final List<UUID> uuids = new ArrayList<UUID>();
-                while (rs.next()) {
-                    uuids.add(toUUID(rs.getBytes(1)));
-                }
-                rs.close();
-                stmt.close();
-                /*
-                 * Delete all entries belonging to identified UUIDs
-                 */
-                if (!uuids.isEmpty()) {
-                    stmt = writableConnection.prepareStatement("DELETE FROM malPollUid WHERE cid = ? AND hash = UNHEX(REPLACE(?,'-',''))");
-                    for (final UUID uuid : uuids) {
-                        stmt.setInt(1, cid);
-                        stmt.setString(2, uuid.toString());
-                        stmt.addBatch();
-                    }
-                    stmt.executeBatch();
-                    stmt.close();
-                }
-                /*
-                 * Delete all user data
-                 */
-                stmt = writableConnection.prepareStatement("DELETE FROM malPollHash WHERE cid = ? AND user = ?");
-                stmt.setInt(1, cid);
-                stmt.setInt(2, user);
-                stmt.executeUpdate();
-                writableConnection.commit(); // COMMIT
-            } catch (final SQLException e) {
-                rollback(writableConnection);
-                throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            } catch (final Exception e) {
-                rollback(writableConnection);
-                throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            } finally {
-                MALPollDBUtility.closeSQLStuff(rs);
-                MALPollDBUtility.closeSQLStuff(stmt);
+            con.setAutoCommit(false);
+            final List<UUID> uuids = getUserUUIDs(cid, con, user);
+            deleteEntries(cid, con, uuids);
+            deleteUserData(cid, con, user);
+            con.commit(); // COMMIT
+        } catch (final SQLException e) {
+            rollback(con);
+            throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            autocommit(con);
+            databaseService.backForUpdateTask(cid, con);
+        }
+    }
+
+    private static List<UUID> getUserUUIDs(int cid, Connection con, int user) throws SQLException {
+        final List<UUID> uuids = new ArrayList<UUID>();
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            // Select all UUIDs belonging to given user
+            stmt = con.prepareStatement("SELECT hash FROM malPollHash WHERE cid=? AND user=?");
+            stmt.setInt(1, cid);
+            stmt.setInt(2, user);
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                uuids.add(toUUID(rs.getBytes(1)));
             }
         } finally {
-            autocommit(writableConnection);
-            databaseService.backWritable(cid, writableConnection);
+            MALPollDBUtility.closeSQLStuff(rs);
+            MALPollDBUtility.closeSQLStuff(stmt);
+        }
+        return uuids;
+    }
+
+    private static void deleteEntries(int cid, Connection con, List<UUID> uuids) throws SQLException {
+        if (uuids.isEmpty()) {
+            return;
+        }
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("DELETE FROM malPollUid WHERE cid = ? AND hash = UNHEX(REPLACE(?,'-',''))");
+            for (final UUID uuid : uuids) {
+                stmt.setInt(1, cid);
+                stmt.setString(2, uuid.toString());
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+        } finally {
+            MALPollDBUtility.closeSQLStuff(stmt);
+        }
+    }
+
+    private static void deleteUserData(int cid, Connection con, int user) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            /*
+             * Delete all user data
+             */
+            stmt = con.prepareStatement("DELETE FROM malPollHash WHERE cid = ? AND user = ?");
+            stmt.setInt(1, cid);
+            stmt.setInt(2, user);
+            stmt.executeUpdate();
+        } finally {
+            MALPollDBUtility.closeSQLStuff(stmt);
         }
     }
 

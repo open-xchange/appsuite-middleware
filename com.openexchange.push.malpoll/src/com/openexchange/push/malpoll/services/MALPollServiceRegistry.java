@@ -49,31 +49,22 @@
 
 package com.openexchange.push.malpoll.services;
 
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.server.osgiservice.AbstractServiceRegistry;
 
 /**
  * {@link MALPollServiceRegistry} - A registry for services needed by MAL poll bundle
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MALPollServiceRegistry {
+public final class MALPollServiceRegistry extends AbstractServiceRegistry {
 
-    private static final ServiceRegistry REGISTRY = new ServiceRegistry();
+    private static final MALPollServiceRegistry REGISTRY = new MALPollServiceRegistry();
 
-    /**
-     * Gets the service registry
-     * 
-     * @return The service registry
-     */
-    public static ServiceRegistry getServiceRegistry() {
+    public static MALPollServiceRegistry getServiceRegistry() {
         return REGISTRY;
     }
 
-    /**
-     * Initializes a new {@link MALPollServiceRegistry}
-     */
     private MALPollServiceRegistry() {
         super();
     }
-
 }
