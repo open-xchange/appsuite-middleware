@@ -177,7 +177,6 @@ import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.ThreadRenamer;
-import com.openexchange.threadpool.ThreadPools.ExpectedExceptionFactory;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -3213,17 +3212,6 @@ public class Mail extends PermissionServlet implements UploadListener {
             }
         }
     }
-
-    private static final ExpectedExceptionFactory<MailException> FAC = new ExpectedExceptionFactory<MailException>() {
-
-        public Class<MailException> getType() {
-            return MailException.class;
-        }
-
-        public MailException newUnexpectedError(final Throwable e) {
-            return new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
-        }
-    };
 
     private interface PutNewMailData {
         InternetAddress getFromAddress();
