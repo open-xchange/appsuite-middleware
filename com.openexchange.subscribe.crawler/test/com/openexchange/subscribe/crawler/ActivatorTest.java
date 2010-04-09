@@ -64,52 +64,31 @@ import com.openexchange.subscribe.crawler.osgi.Activator;
  */
 public class ActivatorTest extends GenericSubscribeServiceTestHelpers {
 
-    /**
-     * Get all yml-files in the config directory and create crawlers out of them. Use each crawler with a specified testuser.
-     */
-    public void testActivator() {
-        
-        HashMap<String, String> map = null;
-        try {
-            map = (HashMap<String, String>) Yaml.load(getSecretsFile());
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        
-        SimConfigurationService config = new SimConfigurationService();
-        // test with the real crawlers
-        config.stringProperties.put("com.openexchange.subscribe.crawler.path", System.getProperty("crawlersConf"));
-        Activator activator = new Activator();
-        ArrayList<CrawlerDescription> crawlers = activator.getCrawlersFromFilesystem(config);
-        for (CrawlerDescription crawler : crawlers) {
-            String crawlerName = crawler.getDisplayName();
-            if (map.containsKey(crawlerName+"_user") && map.containsKey(crawlerName+"_password")){
-                String username = map.get(crawlerName+"_user");
-                String password = map.get(crawlerName+"_password");
-                System.out.println("***** Testing crawler : " + crawlerName);
-                findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
-            } else {
-                fail("***** No credentials for crawler : " + crawlerName);
-            }
-        }
-
+	public void testFacebook(){
+        checkSingleCrawler("Facebook");
     }
-
-    private File getSecretsFile() {
-        String value = System.getProperty("secretFile");
-        if (null == value) {
-            fail("File for crawler credentials is not defined.");
-        }
-        File secrets = new File(value);
-        if (!secrets.exists()) {
-            fail("File for crawler credentials does not exist.");
-        }
-        if (!secrets.isFile()) {
-            fail("File for crawler credentials is not a file.");
-        }
-        if (!secrets.canRead()) {
-            fail("File for crawler credentials can not be read.");
-        }
-        return secrets;
+	
+	public void testGMX(){
+        checkSingleCrawler("gmx.de");
+    }
+	
+	public void testGoogleMail(){
+        checkSingleCrawler("GoogleMail");
+    }
+	
+	public void testLinkedIn(){
+        checkSingleCrawler("LinkedIn");
+    }
+	
+	public void testWebDe(){
+        checkSingleCrawler("web.de");
+    }
+	
+	public void testXing(){
+        checkSingleCrawler("XING");
+    }
+	
+	public void testYahooCom(){
+        checkSingleCrawler("yahoo.com");
     }
 }

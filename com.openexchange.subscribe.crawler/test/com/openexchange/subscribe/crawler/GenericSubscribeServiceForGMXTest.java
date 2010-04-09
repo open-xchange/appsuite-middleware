@@ -71,11 +71,12 @@ public class GenericSubscribeServiceForGMXTest extends GenericSubscribeServiceTe
         CrawlerDescription crawler = new CrawlerDescription();
         crawler.setDisplayName("gmx.de");
         crawler.setId("com.openexchange.subscribe.crawler.gmx");
+        crawler.setPriority(2);
         List<Step> steps = new LinkedList<Step>();
 
         steps.add(new LoginPageByFormActionStep(
             "Log in",
-            "https://www.gmx.de",
+            "http://www.gmx.de",
             "",
             "",
             "https://service.gmx.net/de/cgi/login",

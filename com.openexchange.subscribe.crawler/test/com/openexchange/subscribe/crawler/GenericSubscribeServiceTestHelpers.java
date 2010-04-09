@@ -51,11 +51,17 @@ package com.openexchange.subscribe.crawler;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
+
 import junit.framework.TestCase;
 import org.ho.yaml.Yaml;
+
+import com.openexchange.config.SimConfigurationService;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.subscribe.crawler.osgi.Activator;
 
 /**
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
@@ -66,12 +72,37 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
     public static final String VALID_NAME = "([a-zA-Z\\s\u00e4\u00f6\u00fc\u00df-]*)";
     public static final String VALID_PHONE_REGEX = "([0-9\\s\\+\\-\\/\\(\\)]*)";
     
+    private HashMap<String, String> map;
+    ArrayList<CrawlerDescription> crawlers;
+    private Activator activator;
+    
     public GenericSubscribeServiceTestHelpers() {
         super();
     }
 
     public GenericSubscribeServiceTestHelpers(final String name) {
         super(name);
+    }
+
+	/**
+     * Get all yml-files in the config directory and create crawlers out of them.
+     */
+    @Override
+    public void setUp() {
+        try {
+            // insert path to credentials-file here (switch for automated tests (Hudson) / local tests)
+            map = (HashMap<String, String>) Yaml.load(getSecretsFile());
+            // map = (HashMap<String, String>) Yaml.load(new File("/Users/karstenwill/Documents/Development/crawlerCredentials.yml"));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        
+        SimConfigurationService config = new SimConfigurationService();
+        //test with the real crawlers (switch for automated tests (Hudson) / local tests)
+        config.stringProperties.put("com.openexchange.subscribe.crawler.path", System.getProperty("crawlersConf"));
+        // config.stringProperties.put("com.openexchange.subscribe.crawler.path", "conf/crawlers/");
+        activator = new Activator();
+        crawlers = activator.getCrawlersFromFilesystem(config);
     }
 
     protected void findOutIfThereAreContactsForThisConfiguration(final String username, final String password, final CrawlerDescription crawler) {
@@ -143,4 +174,39 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
         }
     }
 
+	protected void checkSingleCrawler(String nameOfCrawlerToCheck) {
+        for (CrawlerDescription crawler : crawlers) {
+            String crawlerName = crawler.getDisplayName();
+            if (crawlerName.equals(nameOfCrawlerToCheck)) {
+                String [] domains = {".de",".com",".uk",".fr",".es",".nl"};
+                for (String domain : domains){
+                    if (map.containsKey(crawlerName+"_user" + domain) && map.containsKey(crawlerName+"_password" + domain)){
+                        String username = map.get(crawlerName+"_user" + domain);
+                        String password = map.get(crawlerName+"_password" + domain);
+                        System.out.println("***** Testing crawler : " + crawlerName + " for domain : " + domain);
+                        findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
+                    }
+                }
+            }
+        }
+
+    }
+
+    private File getSecretsFile() {
+        String value = System.getProperty("secretFile");
+        if (null == value) {
+            fail("File for crawler credentials is not defined.");
+        }
+        File secrets = new File(value);
+        if (!secrets.exists()) {
+            fail("File for crawler credentials does not exist.");
+        }
+        if (!secrets.isFile()) {
+            fail("File for crawler credentials is not a file.");
+        }
+        if (!secrets.canRead()) {
+            fail("File for crawler credentials can not be read.");
+        }
+        return secrets;
+    }
 }
