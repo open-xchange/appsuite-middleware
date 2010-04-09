@@ -226,6 +226,12 @@ public enum Tree {
     
     /** [inside GUI] "true" or "false" */
     LaunchWizardOnStart("/gui/wizard/launchOnStart"),
+    
+    /** [inside GUI] */
+    Categories("/gui/categories"),
+    
+    CategoriesLocal("/gui/categories/local"),
+    
 
     //TODO: more gui settings
 
