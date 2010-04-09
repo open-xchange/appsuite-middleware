@@ -53,31 +53,21 @@ import com.openexchange.groupware.settings.tree.AbstractModules;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 
 /**
- * Contains initialization for the modules configuration tree setting
- * public_folders.
+ * Contains initialization for the modules configuration tree setting public_folders.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class PublicFolders extends AbstractModules {
 
-    /**
-     * Default constructor.
-     */
     public PublicFolders() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String[] getPath() {
         return new String[] { "modules", "folder", "public_folders" };
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected boolean getModule(final UserConfiguration userConfig) {
-		return userConfig.hasFullPublicFolderAccess();
-	}
+        return userConfig.hasFullPublicFolderAccess();
+    }
 }

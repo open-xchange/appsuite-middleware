@@ -74,7 +74,7 @@ public final class UserSettingServerDeleteListener implements DeleteListener {
     public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws DeleteFailedException {
         if (DeleteEvent.TYPE_USER == event.getType()) {
             try {
-                ServerUserSetting.deleteEntry(event.getContext().getContextId(), event.getId(), writeCon);
+                ServerUserSetting.getInstance(writeCon).deleteEntry(event.getContext().getContextId(), event.getId());
             } catch (final SettingException e) {
                 throw new DeleteFailedException(e);
             }

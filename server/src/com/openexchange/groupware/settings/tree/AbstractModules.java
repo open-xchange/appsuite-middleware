@@ -55,39 +55,27 @@ import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 
 /**
- * Contains initialization for the modules configuration tree setting webmail.
+ * Abstract class for easily adding preferences item returning features enabled for a user. 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public abstract class AbstractModules implements PreferencesItemService {
 
-    /**
-     * Default constructor.
-     */
     public AbstractModules() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public IValueHandler getSharedValue() {
+
         return new ReadOnlyValue() {
-            /**
-             * {@inheritDoc}
-             */
-            public void getValue(final Session session, final Context ctx,
-                final User user, final UserConfiguration userConfig,
-                final Setting setting) throws SettingException {
+
+            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) {
                 setting.setSingleValue(Boolean.valueOf(getModule(userConfig)));
             }
-            /**
-             * {@inheritDoc}
-             */
+
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return true;
             }

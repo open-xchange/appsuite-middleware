@@ -49,6 +49,7 @@
 
 package com.openexchange.preferences;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -198,6 +199,25 @@ public class ServerUserSetting {
 
     };
 
+    private static final Attribute<Integer> FOLDER_TREE = new Attribute<Integer>() {
+
+        public Integer getAttribute(ResultSet rs) throws SQLException {
+            return I(rs.getInt(getColumnName()));
+        }
+
+        public String getColumnName() {
+            return "folderTree";
+        }
+
+        public void setAttribute(PreparedStatement pstmt, Integer value) throws SQLException {
+            if (value == null) {
+                pstmt.setInt(1, 0);
+            } else {
+                pstmt.setInt(1, value.intValue());
+            }
+        }        
+    };
+
     private static final ServerUserSetting defaultInstance = new ServerUserSetting();
 
     /**
@@ -292,8 +312,8 @@ public class ServerUserSetting {
      * @param user user id
      */
     public void setIContactColletion(Context ctx, Session session, final int userId, final boolean enabled) throws SettingException {
-        setAttributeInternal(ctx.getContextId(), userId, CONTACT_COLLECT_ENABLED, Boolean.valueOf(enabled), connection);
-        if (enabled && getAttributeInternal(ctx.getContextId(), userId, CONTACT_COLLECT_FOLDER, connection) == null) {
+        setAttributeInternal(ctx.getContextId(), userId, CONTACT_COLLECT_ENABLED, Boolean.valueOf(enabled));
+        if (enabled && getAttributeInternal(ctx.getContextId(), userId, CONTACT_COLLECT_FOLDER) == null) {
             ContactCollectorService contactCollectService = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
             User user;
             try {
@@ -318,7 +338,7 @@ public class ServerUserSetting {
      * @return The value or <code>false</code> if no entry is found.
      */
     public Boolean isIContactCollectionEnabled(final int cid, final int user) throws SettingException {
-        final Boolean attribute = getAttributeInternal(cid, user, CONTACT_COLLECT_ENABLED, connection);
+        final Boolean attribute = getAttributeInternal(cid, user, CONTACT_COLLECT_ENABLED);
         return null == attribute ? Boolean.FALSE : attribute;
     }
 
@@ -330,7 +350,7 @@ public class ServerUserSetting {
      * @param folder folder id
      */
     public void setIContactCollectionFolder(final int cid, final int user, final Integer folder) throws SettingException {
-        setAttributeInternal(cid, user, CONTACT_COLLECT_FOLDER, folder, connection);
+        setAttributeInternal(cid, user, CONTACT_COLLECT_FOLDER, folder);
     }
 
     /**
@@ -341,7 +361,7 @@ public class ServerUserSetting {
      * @return folder id or <code>null</code> if no entry found.
      */
     public Integer getIContactCollectionFolder(final int cid, final int user) throws SettingException {
-        return getAttributeInternal(cid, user, CONTACT_COLLECT_FOLDER, connection);
+        return getAttributeInternal(cid, user, CONTACT_COLLECT_FOLDER);
     }
 
     /**
@@ -353,7 +373,7 @@ public class ServerUserSetting {
      * @throws SettingException If a setting error occurs
      */
     public void setContactCollectOnMailAccess(final int cid, final int user, final boolean value) throws SettingException {
-        setAttributeInternal(cid, user, CONTACT_COLLECT_ON_MAIL_ACCESS, Boolean.valueOf(value), connection);
+        setAttributeInternal(cid, user, CONTACT_COLLECT_ON_MAIL_ACCESS, Boolean.valueOf(value));
     }
 
     /**
@@ -365,7 +385,7 @@ public class ServerUserSetting {
      * @throws SettingException If a setting error occurs
      */
     public Boolean isContactCollectOnMailAccess(final int cid, final int user) throws SettingException {
-        final Boolean attribute = getAttributeInternal(cid, user, CONTACT_COLLECT_ON_MAIL_ACCESS, connection);
+        final Boolean attribute = getAttributeInternal(cid, user, CONTACT_COLLECT_ON_MAIL_ACCESS);
         return null == attribute ? Boolean.FALSE : attribute;
     }
 
@@ -378,7 +398,7 @@ public class ServerUserSetting {
      * @throws SettingException If a setting error occurs
      */
     public void setContactCollectOnMailTransport(final int cid, final int user, final boolean value) throws SettingException {
-        setAttributeInternal(cid, user, CONTACT_COLLECT_ON_MAIL_TRANSPORT, Boolean.valueOf(value), connection);
+        setAttributeInternal(cid, user, CONTACT_COLLECT_ON_MAIL_TRANSPORT, Boolean.valueOf(value));
     }
 
     /**
@@ -390,7 +410,7 @@ public class ServerUserSetting {
      * @throws SettingException If a setting error occurs
      */
     public Boolean isContactCollectOnMailTransport(final int cid, final int user) throws SettingException {
-        final Boolean attribute = getAttributeInternal(cid, user, CONTACT_COLLECT_ON_MAIL_TRANSPORT, connection);
+        final Boolean attribute = getAttributeInternal(cid, user, CONTACT_COLLECT_ON_MAIL_TRANSPORT);
         return null == attribute ? Boolean.FALSE : attribute;
     }
 
@@ -403,7 +423,7 @@ public class ServerUserSetting {
      * @throws SettingException If a setting error occurs
      */
     public Integer getDefaultStatusPrivate(final int cid, final int user) throws SettingException {
-        Integer value = getAttributeInternal(cid, user, DEFAULT_STATUS_PRIVATE, connection);
+        Integer value = getAttributeInternal(cid, user, DEFAULT_STATUS_PRIVATE);
         if (value == null) {
             value = Integer.valueOf(0);
         }
@@ -419,7 +439,7 @@ public class ServerUserSetting {
      * @throws SettingException
      */
     public void setDefaultStatusPrivate(final int cid, final int user, final Integer status) throws SettingException {
-        setAttributeInternal(cid, user, DEFAULT_STATUS_PRIVATE, status, connection);
+        setAttributeInternal(cid, user, DEFAULT_STATUS_PRIVATE, status);
     }
 
     /**
@@ -431,7 +451,7 @@ public class ServerUserSetting {
      * @throws SettingException
      */
     public Integer getDefaultStatusPublic(final int cid, final int user) throws SettingException {
-        Integer value = getAttributeInternal(cid, user, DEFAULT_STATUS_PUBLIC, connection);
+        Integer value = getAttributeInternal(cid, user, DEFAULT_STATUS_PUBLIC);
         if (value == null) {
             value = Integer.valueOf(0);
         }
@@ -447,45 +467,47 @@ public class ServerUserSetting {
      * @throws SettingException
      */
     public void setDefaultStatusPublic(final int cid, final int user, final Integer status) throws SettingException {
-        setAttributeInternal(cid, user, DEFAULT_STATUS_PUBLIC, status, connection);
+        setAttributeInternal(cid, user, DEFAULT_STATUS_PUBLIC, status);
     }
 
-    private static <T> T getAttributeInternal(final int cid, final int user, final Attribute<T> attribute, final Connection connection) throws SettingException {
+    public Integer getFolderTree(int cid, int user) throws SettingException {
+        Integer value = getAttribute(cid, user, FOLDER_TREE, connection);
+        if (null == value) {
+            // FIXME add default from configuration file
+        }
+        return value;
+    }
+
+    private <T> T getAttributeInternal(final int cid, final int user, final Attribute<T> attribute) throws SettingException {
         final Connection con;
-        final boolean closeCon;
         if (connection == null) {
             try {
                 con = Database.get(cid, false);
             } catch (final DBPoolingException e) {
                 throw new SettingException(e);
             }
-            closeCon = true;
         } else {
             con = connection;
-            closeCon = false;
         }
         try {
             return getAttribute(cid, user, attribute, con);
         } finally {
-            if (closeCon) {
+            if (null == connection) {
                 Database.back(cid, false, con);
             }
         }
     }
 
-    private static <T> void setAttributeInternal(final int cid, final int user, final Attribute<T> attribute, final T value, final Connection connection) throws SettingException {
+    private <T> void setAttributeInternal(final int cid, final int user, final Attribute<T> attribute, final T value) throws SettingException {
         final Connection con;
-        final boolean closeCon;
         if (connection == null) {
             try {
                 con = Database.get(cid, true);
             } catch (final DBPoolingException e) {
                 throw new SettingException(e);
             }
-            closeCon = true;
         } else {
             con = connection;
-            closeCon = false;
         }
         try {
             if (hasEntry(cid, user, con)) {
@@ -494,28 +516,34 @@ public class ServerUserSetting {
                 insertAttribute(cid, user, attribute, value, con);
             }
         } finally {
-            if (closeCon) {
+            if (null == connection) {
                 Database.back(cid, true, con);
             }
         }
     }
 
-    private static <T> T getAttribute(final int cid, final int user, final Attribute<T> attribute, final Connection connection) throws SettingException {
-        T retval = null;
+    void deleteEntry(int cid, int user) throws SettingException {
         final Connection con;
-        final boolean closeCon;
         if (connection == null) {
-            // Use a writable connection to ensure most up-to-date value is read
             try {
                 con = Database.get(cid, true);
             } catch (final DBPoolingException e) {
                 throw new SettingException(e);
             }
-            closeCon = true;
         } else {
             con = connection;
-            closeCon = false;
         }
+        try {
+            deleteEntry(cid, user, con);
+        } finally {
+            if (null == connection) {
+                Database.back(cid, true, con);
+            }
+        }
+    }
+
+    private <T> T getAttribute(final int cid, final int user, final Attribute<T> attribute, final Connection con) throws SettingException {
+        T retval = null;
         final String select = "SELECT " + attribute.getColumnName() + " FROM user_setting_server WHERE cid=? AND user=?";
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -531,14 +559,11 @@ public class ServerUserSetting {
             throw new SettingException(SettingException.Code.SQL_ERROR, e);
         } finally {
             closeSQLStuff(rs, stmt);
-            if (closeCon) {
-                Database.back(cid, true, con);
-            }
         }
         return retval;
     }
 
-    private static <T> void updateAttribute(final int cid, final int user, final Attribute<T> attribute, final T value, final Connection con) throws SettingException {
+    private <T> void updateAttribute(final int cid, final int user, final Attribute<T> attribute, final T value, final Connection con) throws SettingException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("UPDATE user_setting_server SET " + attribute.getColumnName() + "=? WHERE cid=? AND user=?");
@@ -553,7 +578,7 @@ public class ServerUserSetting {
         }
     }
 
-    private static <T> void insertAttribute(final int cid, final int user, final Attribute<T> attribute, final T value, final Connection con) throws SettingException {
+    private <T> void insertAttribute(final int cid, final int user, final Attribute<T> attribute, final T value, final Connection con) throws SettingException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("INSERT INTO user_setting_server (" + attribute.getColumnName() + ",cid,user) VALUES (?,?,?)");
@@ -568,7 +593,7 @@ public class ServerUserSetting {
         }
     }
 
-    public static void deleteEntry(final int cid, final int user, final Connection con) throws SettingException {
+    private void deleteEntry(final int cid, final int user, final Connection con) throws SettingException {
         PreparedStatement stmt = null;
         final ResultSet rs = null;
         try {
@@ -583,7 +608,7 @@ public class ServerUserSetting {
         }
     }
 
-    private static boolean hasEntry(final int cid, final int user, final Connection con) throws SettingException {
+    private boolean hasEntry(final int cid, final int user, final Connection con) throws SettingException {
         boolean retval = false;
         PreparedStatement stmt = null;
         ResultSet rs = null;

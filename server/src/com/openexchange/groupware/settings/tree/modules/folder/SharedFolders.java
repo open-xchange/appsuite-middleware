@@ -53,31 +53,21 @@ import com.openexchange.groupware.settings.tree.AbstractModules;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 
 /**
- * Contains initialization for the modules configuration tree setting
- * read_create_shared_folders.
+ * Contains initialization for the modules configuration tree setting read_create_shared_folders.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class SharedFolders extends AbstractModules {
 
-    /**
-     * Default constructor.
-     */
     public SharedFolders() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String[] getPath() {
         return new String[] { "modules", "folder", "read_create_shared_folders" };
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected boolean getModule(final UserConfiguration userConfig) {
-		return userConfig.hasFullSharedFolderAccess();
-	}
+        return userConfig.hasFullSharedFolderAccess();
+    }
 }

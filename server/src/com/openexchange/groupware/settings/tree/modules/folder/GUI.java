@@ -54,31 +54,21 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.SharedNode;
 
 /**
- * Setup for the preference that stores the GUI configuration for the folder
- * as a string in the database.
+ * Setup for the preference that stores the GUI configuration for the folder as a string in the database.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class GUI implements PreferencesItemService {
 
     private static final String NAME = "gui";
 
-    /**
-     * Default constructor.
-     */
     public GUI() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String[] getPath() {
         return new String[] { "modules", "folder", NAME };
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public IValueHandler getSharedValue() {
         return new SharedNode(NAME, 5);
     }

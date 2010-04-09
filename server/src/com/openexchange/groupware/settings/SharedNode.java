@@ -64,53 +64,32 @@ public final class SharedNode implements IValueHandler {
 
     private final int id;
 
-    /**
-     * Default constructor.
-     */
-    public SharedNode(final String name) {
+    public SharedNode(String name) {
         this(name, -1);
     }
 
-    public SharedNode(final String name, final int id) {
+    public SharedNode(String name, int id) {
         super();
         this.name = name;
         this.id = id;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public void getValue(final Session session, final Context ctx,
-        final User user, final UserConfiguration userConfig,
-        final Setting setting) throws SettingException {
+    public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws SettingException {
         throw new SettingException(SettingException.Code.NOT_LEAF, name);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public boolean isAvailable(final UserConfiguration userConfig) {
+    public boolean isAvailable(UserConfiguration userConfig) {
         return true;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public boolean isWritable() {
         return false;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public void writeValue(final Session session, final Context ctx, final User user,
-        final Setting setting) throws SettingException {
+    public void writeValue(Session session, Context ctx, User user, Setting setting) throws SettingException {
         throw new SettingException(SettingException.Code.NO_WRITE, name);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public int getId() {
         return id;
     }

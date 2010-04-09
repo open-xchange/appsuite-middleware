@@ -59,6 +59,8 @@ import com.openexchange.session.Session;
  */
 public interface IValueHandler {
 
+    int NO_ID = -1;
+
     /**
      * @param session Session.
      * @param userConfig user configuration.
