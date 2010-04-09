@@ -128,6 +128,7 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
             enableJavascript);
 
         final Workflow testWorkflow = service.getWorkflow();
+        
         Contact[] contacts = new Contact[0];
         try {
             contacts = (Contact[]) testWorkflow.execute(username, password);
@@ -182,6 +183,7 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
             enableJavascript);
 
         final Workflow testWorkflow = service.getWorkflow();
+        testWorkflow.setDebuggingEnabled(true);
         Appointment[] events = new Appointment[0];
         try {
             events = (Appointment[])testWorkflow.execute(username, password);
@@ -223,13 +225,14 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
         for (CrawlerDescription crawler : crawlers) {
             String crawlerName = crawler.getDisplayName();
             if (crawlerName.equals(nameOfCrawlerToCheck)) {
-                if (map.containsKey(crawlerName+"_user") && map.containsKey(crawlerName+"_password")){
-                    String username = map.get(crawlerName+"_user");
-                    String password = map.get(crawlerName+"_password");
-                    System.out.println("***** Testing crawler : " + crawlerName);
-                    findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
-                } else {
-                    fail("***** No credentials for crawler : " + crawlerName);
+                String [] domains = {".de",".com",".uk",".fr",".es",".nl"};
+                for (String domain : domains){
+                    if (map.containsKey(crawlerName+"_user" + domain) && map.containsKey(crawlerName+"_password" + domain)){
+                        String username = map.get(crawlerName+"_user" + domain);
+                        String password = map.get(crawlerName+"_password" + domain);
+                        System.out.println("***** Testing crawler : " + crawlerName + " for domain : " + domain);
+                        findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
+                    }
                 }
             }
         }
