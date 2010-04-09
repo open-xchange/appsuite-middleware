@@ -51,9 +51,10 @@ package com.openexchange.voipnow.json.preferences;
 
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.SharedNode;
 
 /**
- * {@link GUI}
+ * Stores UI settings for the VOIPnow extension.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -61,23 +62,14 @@ public final class GUI implements PreferencesItemService {
 
     private static final String NAME = "gui";
 
-    /**
-     * Default constructor.
-     */
     public GUI() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String[] getPath() {
         return new String[] { "modules", "com.4psa.voipnow", NAME };
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public IValueHandler getSharedValue() {
         return new SharedNode(NAME, 10);
     }
