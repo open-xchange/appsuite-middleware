@@ -315,12 +315,8 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
 
     private JSONObject toJSONArgs(final Map<String, String> modified) throws JSONException {
         final JSONObject obj = new JSONObject();
-        for(final String attr : modified.keySet()) {
-            if(attr.equals("categories")) {
-                obj.put(attr, new JSONArray(modified.get(attr)));
-            } else {
-                obj.put(attr, modified.get(attr));
-            }
+        for (final String attr : modified.keySet()) {
+            obj.put(attr, modified.get(attr));
         }
         return obj;
     }
