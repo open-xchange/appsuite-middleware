@@ -49,12 +49,11 @@
 
 package com.openexchange.ajax.config;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Date;
 import java.util.Random;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.GetResponse;
 import com.openexchange.ajax.config.actions.SetRequest;
@@ -70,10 +69,9 @@ import com.openexchange.tools.RandomString;
  */
 public class FunctionTests extends AbstractAJAXSession {
 
-    /**
-     * Logger.
-     */
     private static final Log LOG = LogFactory.getLog(FunctionTests.class);
+
+    private AJAXClient client;
 
     /**
      * Default constructor.
@@ -83,16 +81,20 @@ public class FunctionTests extends AbstractAJAXSession {
         super(name);
     }
 
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        client = getClient();
+    }
+
     /**
      * Tests if the idle timeout for uploaded files is sent to the GUI.
      * @throws Throwable if an exception occurs.
      */
     public void testMaxUploadIdleTimeout() throws Throwable {
-        final int value = ConfigTools.get(getClient(), new GetRequest(
-            Tree.MaxUploadIdleTimeout)).getInteger();
+        final int value = client.execute(new GetRequest(Tree.MaxUploadIdleTimeout)).getInteger();
         LOG.info("Max upload idle timeout: " + value);
-        assertTrue("Got no value for the maxUploadIdleTimeout configuration "
-            + "parameter.", value > 0);
+        assertTrue("Got no value for the maxUploadIdleTimeout configuration " + "parameter.", value > 0);
     }
 
     /**
@@ -106,7 +108,6 @@ public class FunctionTests extends AbstractAJAXSession {
      * interface.
      */
     public void testCurrentTime() throws Throwable {
-        final AJAXClient client = getClient();
         final long firstServerTime;
         {
             final GetRequest request = new GetRequest(Tree.CurrentTime);
@@ -135,11 +136,9 @@ public class FunctionTests extends AbstractAJAXSession {
      * Tests if the server gives the context identifier.
      */
     public void testContextID() throws Throwable {
-        final int value = ConfigTools.get(getClient(), new GetRequest(
-            Tree.ContextID)).getInteger();
+        final int value = client.execute(new GetRequest(Tree.ContextID)).getInteger();
         LOG.info("Context identifier: " + value);
-        assertTrue("Got no value for the contextID configuration parameter.",
-            value > 0);
+        assertTrue("Got no value for the contextID configuration parameter.", value > 0);
     }
 
     /**
@@ -161,9 +160,7 @@ public class FunctionTests extends AbstractAJAXSession {
      * Checks if the new preferences entry extras works.
      */
     public void testConfigJumpFlag() throws Throwable {
-        final AJAXClient client = getClient();
-        final GetResponse get = ConfigTools.get(client, new GetRequest(Tree
-            .Extras));
+        final GetResponse get = client.execute(new GetRequest(Tree.Extras));
         LOG.info("Should extras link be displayed: " + get.getBoolean());
     }
 
@@ -172,9 +169,7 @@ public class FunctionTests extends AbstractAJAXSession {
      * works.
      */
     public void testShowParticipantsDialogFlag() throws Throwable {
-        final AJAXClient client = getClient();
-        final GetResponse get = ConfigTools.get(client, new GetRequest(Tree
-            .ShowParticipantDialog));
+        final GetResponse get = client.execute(new GetRequest(Tree.ShowParticipantDialog));
         LOG.info("Should participant dialog be displayed: " + get.getBoolean());
     }
 
@@ -183,9 +178,7 @@ public class FunctionTests extends AbstractAJAXSession {
      * when the participant selection dialog is opened.
      */
     public void testAutoSearchFlag() throws Throwable {
-        final AJAXClient client = getClient();
-        final GetResponse get = ConfigTools.get(client, new GetRequest(Tree
-            .ParticipantAutoSearch));
+        final GetResponse get = client.execute(new GetRequest(Tree.ParticipantAutoSearch));
         LOG.info("Is search triggered on opened participant dialog: " + get.getBoolean());
     }
 
@@ -194,33 +187,26 @@ public class FunctionTests extends AbstractAJAXSession {
      * an email address are shown in the participant selection dialog.
      */
     public void testShowWithoutEmailFlag() throws Throwable {
-        final AJAXClient client = getClient();
-        final GetResponse get = ConfigTools.get(client, new GetRequest(Tree
-            .ShowWithoutEmail));
+        final GetResponse get = client.execute(new GetRequest(Tree.ShowWithoutEmail));
         LOG.info("Are external participants without email address shown in participant dialog: " + get.getBoolean());
     }
 
     public void testMailAddressAutoSearchFlag() throws Throwable {
-        final AJAXClient client = getClient();
-        final GetResponse get = ConfigTools.get(client, new GetRequest(Tree
-            .MailAddressAutoSearch));
+        final GetResponse get = client.execute(new GetRequest(Tree.MailAddressAutoSearch));
         LOG.info("Is search triggered on opened recipient dialog: " + get.getBoolean());
     }
 
     public void testMinimumSearchCharacters() throws Throwable {
-        final AJAXClient client = getClient();
         final GetResponse response = client.execute(new GetRequest(Tree.MinimumSearchCharacters));
         LOG.info("Minimum of characters for a search pattern: " + response.getInteger());
     }
 
     public void testMaximumNumberParticipants() throws Throwable {
-        final AJAXClient client = getClient();
         final GetResponse response = client.execute(new GetRequest(Tree.MAXIMUM_NUMBER_PARTICIPANTS));
         LOG.info("Maximum number of participants for appointments and tasks: " + response.getInteger());
     }
 
     public void testSingleFolderSearch() throws Throwable {
-        final AJAXClient client = getClient();
         final GetResponse response = client.execute(new GetRequest(Tree.SingleFolderSearch));
         LOG.info("User is only allowed to search in a single folder: " + response.getBoolean());
     }
@@ -238,13 +224,21 @@ public class FunctionTests extends AbstractAJAXSession {
     }
     
     public void testCharacterSearch() throws Throwable {
-        final AJAXClient client = getClient();
         final GetResponse response = client.execute(new GetRequest(Tree.CharacterSearch));
         LOG.info("User is only allowed to search via character side bar in contacts: " + response.getBoolean());
     }
 
+    public void testFolderTree() throws Throwable {
+        final int defaultValue = client.execute(new GetRequest(Tree.FolderTree)).getInteger();
+        client.execute(new SetRequest(Tree.FolderTree, I(0)));
+        assertEquals("Selecting OX folder tree did not work.", 0, client.execute(new GetRequest(Tree.FolderTree)).getInteger());
+        client.execute(new SetRequest(Tree.FolderTree, I(1)));
+        assertEquals("Selecting new Outlook folder tree did not work.", 1, client.execute(new GetRequest(Tree.FolderTree)).getInteger());
+        // Restore default
+        client.execute(new SetRequest(Tree.FolderTree, I(defaultValue)));
+    }
+
     private void testBoolean(final Tree param, final boolean testWrite) throws Throwable {
-        final AJAXClient client = getClient();
         // Remember for restore.
         final boolean oldValue = client.execute(new GetRequest(param)).getBoolean();
         if (testWrite) {
@@ -256,13 +250,11 @@ public class FunctionTests extends AbstractAJAXSession {
     }
 
     private void testWriteTrue(final Tree param) throws Throwable {
-        final AJAXClient client = getClient();
         client.execute(new SetRequest(param, Boolean.TRUE));
         assertTrue(client.execute(new GetRequest(param)).getBoolean());
     }
 
     private void testWriteFalse(final Tree param) throws Throwable {
-        final AJAXClient client = getClient();
         client.execute(new SetRequest(param, Boolean.FALSE));
         assertFalse(client.execute(new GetRequest(param)).getBoolean());
     }

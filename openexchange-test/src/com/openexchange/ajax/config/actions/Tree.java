@@ -305,7 +305,10 @@ public enum Tree {
 
     /** Minimum number of characters a search pattern must have to prevent large responses and slow queries. (read-only, added 2008-10-20/SP5) */
     MinimumSearchCharacters("/minimumSearchCharacters"),
-    
+
+    /** The complete module subtree */
+    Modules("/modules"),
+
     /** all email addresses of the user including the primary address (read-only, added 2008-02-25) */
     MailAddresses("/modules/mail/addresses"),
 
@@ -432,6 +435,9 @@ public enum Tree {
 
     /** */
     SyncML("/modules/interfaces/syncml"),
+
+    /** Defines which folder tree is used by the user (added 2010-04-12, v6.18) */
+    FolderTree("/modules/folder/tree"),
 
     /** */
     PublicFolders("/modules/folder/public_folders"),
