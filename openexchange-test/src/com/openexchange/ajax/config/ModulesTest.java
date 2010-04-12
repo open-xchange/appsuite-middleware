@@ -51,25 +51,14 @@ package com.openexchange.ajax.config;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.ajax.config.actions.GetRequest;
+import com.openexchange.ajax.config.actions.Tree;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
 
-import com.openexchange.ajax.AbstractAJAXTest;
+public class ModulesTest extends AbstractAJAXSession {
 
-public class ModulesTest extends AbstractAJAXTest {
-
-    /**
-     * Logger.
-     */
     private static final Log LOG = LogFactory.getLog(ModulesTest.class);
 
-    /**
-     * Path to the configuration parameter.
-     */
-    private static final String PATH = "modules";
-
-    /**
-     * Default constructor.
-     * @param name Name of the test.
-     */
     public ModulesTest(final String name) {
         super(name);
     }
@@ -79,10 +68,8 @@ public class ModulesTest extends AbstractAJAXTest {
      * @throws Throwable if an exception occurs.
      */
     public void testModules() throws Throwable {
-        final String value = ConfigTools.readSetting(getWebConversation(),
-            getHostName(), getSessionId(), PATH);
+        String value = getClient().execute(new GetRequest(Tree.Modules)).getString();
         LOG.info("Modules: " + value);
-        assertNotNull("Got no value for the modules configuration parameter.",
-            value);
+        assertNotNull("Got no value for the modules configuration parameter.", value);
     }
 }
