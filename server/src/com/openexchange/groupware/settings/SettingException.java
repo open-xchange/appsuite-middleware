@@ -54,132 +54,61 @@ import com.openexchange.groupware.EnumComponent;
 
 /**
  * This exception indicates a problem in the user settings component.
- * TODO Error codes
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class SettingException extends AbstractOXException {
 
-    /**
-     * For serialization.
-     */
     private static final long serialVersionUID = -337443328059042460L;
 
-    /**
-     * Initializes a new exception using the information provided by the code.
-     * @param code code for the exception.
-     * @param messageArgs arguments that will be formatted into the message.
-     */
     public SettingException(final Code code, final Object... messageArgs) {
         this(code, null, messageArgs);
     }
 
-    /**
-     * Initializes a new exception using the information provided by the cause.
-     * @param cause the cause.
-     */
     public SettingException(final AbstractOXException cause) {
         super(cause);
     }
 
-    /**
-     * Initializes a new exception using the information provided by the code.
-     * @param code code for the exception.
-     * @param cause the cause of the exception.
-     * @param messageArgs arguments that will be formatted into the message.
-     */
-    public SettingException(final Code code, final Throwable cause,
-        final Object... messageArgs) {
-        super(EnumComponent.USER_SETTING, code.category, code.detailNumber,
-            null == code.message ? cause.getMessage() : code.message, cause);
+    public SettingException(final Code code, final Throwable cause, final Object... messageArgs) {
+        super(
+            EnumComponent.USER_SETTING,
+            code.getCategory(),
+            code.getDetailNumber(),
+            null == code.getMessage() ? cause.getMessage() : code.getMessage(),
+            cause);
         setMessageArgs(messageArgs);
     }
 
-    /**
-     * Error codes for the setting exception.
-     * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
-     */
     public enum Code {
-        /**
-         * Cannot get connection to database.
-         */
-        NO_CONNECTION("Cannot get connection to database.",
-            Category.SUBSYSTEM_OR_SERVICE_DOWN, 1),
-        /**
-         * An SQL problem occures while reading information from the config
-         * database.
-         */
+        /** Cannot get connection to database. */
+        NO_CONNECTION("Cannot get connection to database.", Category.SUBSYSTEM_OR_SERVICE_DOWN, 1),
+        /** An SQL problem occures while reading information from the config database. */
         SQL_ERROR(null, Category.CODE_ERROR, 2),
-        /**
-         * Writing the setting %1$s is not permitted.
-         */
-        NO_WRITE("Writing the setting %1$s is not permitted.",
-            Category.PERMISSION, 3),
-        /**
-         * Unknown setting path %1$s.
-         */
-        UNKNOWN_PATH("Unknown setting path %1$s.", Category.CODE_ERROR,
-            4),
-        /**
-         * Setting "%1$s" is not a leaf one.
-         */
-        NOT_LEAF("Setting \"%1$s\" is not a leaf one.",
-            Category.CODE_ERROR, 5),
-        /**
-         * Exception while parsing JSON.
-         */
-        JSON_READ_ERROR("Exception while parsing JSON.",
-            Category.CODE_ERROR, 6),
-        /**
-         * Problem while initialising configuration tree.
-         */
-        INIT("Problem while initialising configuration tree.", Category
-            .CODE_ERROR, 8),
-        /**
-         * Invalid value %s written to setting %s.
-         */
-        INVALID_VALUE("Invalid value %s written to setting %s.", Category
-            .USER_INPUT, 9),
-        /**
-         * Found duplicate database identifier %d. Not adding preferences item.
-         */
-        DUPLICATE_ID("Found duplicate database identifier %d. Not adding "
-            + "preferences item.", Category.CODE_ERROR, 10),
-        /**
-         * Exception while writing JSON object.
-         */
-        JSON_WRITE_ERROR("Exception while writing JSON object.",
-            Category.CODE_ERROR, 11), 
-        /**
-         * Found duplicate path %s.
-         */
+        /** Writing the setting %1$s is not permitted. */
+        NO_WRITE("Writing the setting %1$s is not permitted.", Category.PERMISSION, 3),
+        /** Unknown setting path %1$s. */
+        UNKNOWN_PATH("Unknown setting path %1$s.", Category.CODE_ERROR, 4),
+        /** Setting "%1$s" is not a leaf one. */
+        NOT_LEAF("Setting \"%1$s\" is not a leaf one.", Category.CODE_ERROR, 5),
+        /** Exception while parsing JSON. */
+        JSON_READ_ERROR("Exception while parsing JSON.", Category.CODE_ERROR, 6),
+        /** Problem while initialising configuration tree. */
+        INIT("Problem while initialising configuration tree.", Category.CODE_ERROR, 8),
+        /** Invalid value %s written to setting %s. */
+        INVALID_VALUE("Invalid value %s written to setting %s.", Category.USER_INPUT, 9),
+        /** Found duplicate database identifier %d. Not adding preferences item. */
+        DUPLICATE_ID("Found duplicate database identifier %d. Not adding preferences item.", Category.CODE_ERROR, 10),
+        /** Found duplicate path %s. */
         DUPLICATE_PATH("Found duplicate path %s.", Category.CODE_ERROR, 12),
-        
-        /**
-         * Subsystem error.
-         */
+        /** Subsystem error. */
         SUBSYSTEM("Error during use of a subsystem", Category.SUBSYSTEM_OR_SERVICE_DOWN, 13);
 
-        /**
-         * Message of the exception.
-         */
         private final String message;
 
-        /**
-         * Category of the exception.
-         */
         private final Category category;
 
-        /**
-         * Detail number of the exception.
-         */
         private final int detailNumber;
 
-        /**
-         * Default constructor.
-         * @param message message.
-         * @param category category.
-         * @param detailNumber detail number.
-         */
         private Code(final String message, final Category category,
             final int detailNumber) {
             this.message = message;
@@ -187,23 +116,14 @@ public class SettingException extends AbstractOXException {
             this.detailNumber = detailNumber;
         }
 
-        /**
-         * @return the category
-         */
         public Category getCategory() {
             return category;
         }
 
-        /**
-         * @return the detailNumber
-         */
         public int getDetailNumber() {
             return detailNumber;
         }
 
-        /**
-         * @return the message
-         */
         public String getMessage() {
             return message;
         }
