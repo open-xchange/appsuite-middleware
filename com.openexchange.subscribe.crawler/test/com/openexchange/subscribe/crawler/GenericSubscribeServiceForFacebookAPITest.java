@@ -81,13 +81,13 @@ public class GenericSubscribeServiceForFacebookAPITest extends GenericSubscribeS
             "https://login.facebook.com/login.php?login_attempt=1",
             "email",
             "pass",
-            "(http://www.facebook.com/profile.*)"));
+            "(http://www.facebook.com/.*profile.*)"));
 
         Workflow workflow = new Workflow(steps);
         crawler.setWorkflowString(Yaml.dump(workflow));
 
         findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
         // uncomment this if the if the crawler description was updated to get the new config-files
-        // dumpThis(crawler, crawler.getDisplayName());
+        dumpThis(crawler, crawler.getDisplayName());
     }
 }

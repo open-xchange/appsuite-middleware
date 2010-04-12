@@ -1,3 +1,7 @@
+ * 2010-04-09 - tobias.prinz@open-xchange.com
+
+ - Bugfix #15596: Crawler for Facebook works again.
+
 * 2010-04-09 - francisco.laguna@open-xchange.com
 
  - Bugfix #14932: Move error messages around for translation and make them nicer.
