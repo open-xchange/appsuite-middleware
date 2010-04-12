@@ -1,3 +1,7 @@
+* 2010-04-09 - francisco.laguna@open-xchange.com
+
+ - Bugfix #14932: Move error messages around for translation and make them nicer.
+
 * 2010-04-01 - tobias.prinz@open-xchange.com
 
  - Bugfix #15726: Crawler gives more helpful error message on invalid accounts.
