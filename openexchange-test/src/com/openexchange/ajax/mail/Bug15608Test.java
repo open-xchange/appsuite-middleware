@@ -135,5 +135,5 @@ public class Bug15608Test extends AbstractAJAXSession {
         "Content-Transfer-Encoding: 8bit\n" +
         "\n" +
         "Test for bug 15608\n" +
-        "äöüÄÖÜß\n";
+        "\u00e4\u00f6\u00fc\u00c4\u00d6\u00dc\u00df\n";
 }
