@@ -1,3 +1,8 @@
+* 2010-04-12 - choeger@open-xchange.com
+
+ - Bugfix #15612: /opt/open-xchange/etc/oxfunctions.sh does not work on
+    Ubuntu, which is using dash instead of bash
+
 * 2010-04-08 - marcus.klein@open-xchange.com
 
  - Bugfix #15367: Removing MAL poll database entries when a user should be deleted.
