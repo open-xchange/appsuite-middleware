@@ -62,6 +62,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.folder.json.Constants;
 import com.openexchange.folder.json.multiple.FolderMultipleHandlerFactory;
 import com.openexchange.folder.json.preferences.Tree;
+import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.settings.PreferencesItemService;
@@ -177,6 +178,7 @@ public class Activator extends DeferredActivator {
     }
 
     private void apply(final ConfigurationService configurationService) {
+        ServiceRegistry.getInstance().addService(ConfigurationService.class, configurationService);
         final String tmpModule = configurationService.getProperty("com.openexchange.folder.json.module");
         if (null != tmpModule) {
             final String cmod = Constants.getModule();
@@ -210,6 +212,7 @@ public class Activator extends DeferredActivator {
             Constants.setServletPath(servletPath);
             servletPath = null;
         }
+        ServiceRegistry.getInstance().removeService(ConfigurationService.class);
     }
 
 }
