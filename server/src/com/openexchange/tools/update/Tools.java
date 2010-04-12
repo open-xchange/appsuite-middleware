@@ -525,7 +525,7 @@ public final class Tools {
 
     private static final String TABLE = "TABLE";
 
-    public static void removeFile(final int cid, final String fileStoreLocation, final Connection con) throws FileStorageException, FilestoreException, ContextException {
+    public static void removeFile(final int cid, final String fileStoreLocation) throws FileStorageException, FilestoreException, ContextException {
         final Context ctx = ContextStorage.getInstance().loadContext(cid);
         final URI fileStorageURI = FilestoreStorage.createURI(ctx);
         final File file = new File(fileStorageURI);
@@ -602,6 +602,18 @@ public final class Tools {
             stmt.execute(sql.toString());
         } finally {
             closeSQLStuff(stmt);
+        }
+    }
+
+    public static void checkAndAddColumns(Connection con, String tableName, Column... cols) throws SQLException {
+        List<Column> notExisting = new ArrayList<Column>();
+        for (Column col : cols) {
+            if (!columnExists(con, tableName, col.getName())) {
+                notExisting.add(col);
+            }
+        }
+        if (!notExisting.isEmpty()) {
+            addColumns(con, tableName, notExisting.toArray(new Column[notExisting.size()]));
         }
     }
 }

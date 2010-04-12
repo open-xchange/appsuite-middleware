@@ -319,7 +319,7 @@ public class ContactsRepairLinksAttachments implements UpdateTask {
     private final void deleteAttachments(final int cid, final Connection con, final int id, final String filename) throws SQLException {
         LOG.info("Deleting orphaned attachment " + id + " in context " + cid + ".");
         try {
-            Tools.removeFile(cid, filename, con);
+            Tools.removeFile(cid, filename);
         } catch (final ContextException e) {
             LOG.info("Context is already removed. Assuming its files are removed, too.");
         } catch (final FilestoreException e) {

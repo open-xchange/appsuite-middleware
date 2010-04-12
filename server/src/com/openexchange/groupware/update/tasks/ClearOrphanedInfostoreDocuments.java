@@ -128,7 +128,7 @@ public class ClearOrphanedInfostoreDocuments implements UpdateTask {
                 delete.executeUpdate();
                 if (null != fileStoreLocation) {
                     // Version 0 has no file.
-                    Tools.removeFile(cid, fileStoreLocation, con);
+                    Tools.removeFile(cid, fileStoreLocation);
                 } else if (0 != version) {
                     LOG.warn("Found file version without location in filestore. cid:" + cid + ",id:" + id + ",version:" + version + ".");
                 }
