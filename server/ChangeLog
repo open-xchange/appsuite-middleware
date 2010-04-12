@@ -1,4 +1,9 @@
- * 2010-04-09 - tobias.prinz@open-xchange.com
+* 2010-04-12 - choeger@open-xchange.com
+
+ - Bugfix #15612: /opt/open-xchange/etc/oxfunctions.sh does not work on
+   Ubuntu, which is using dash instead of bash
+
+* 2010-04-09 - tobias.prinz@open-xchange.com
 
  - Bugfix #15596: Crawler for Facebook works again.
 
