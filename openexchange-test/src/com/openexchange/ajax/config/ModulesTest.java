@@ -68,7 +68,7 @@ public class ModulesTest extends AbstractAJAXSession {
      * @throws Throwable if an exception occurs.
      */
     public void testModules() throws Throwable {
-        String value = getClient().execute(new GetRequest(Tree.Modules)).getString();
+        String value = getClient().execute(new GetRequest(Tree.Modules)).getJSON().toString();
         LOG.info("Modules: " + value);
         assertNotNull("Got no value for the modules configuration parameter.", value);
     }
