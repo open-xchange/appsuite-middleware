@@ -109,8 +109,7 @@ public final class ConfigTree {
      * @throws SettingException if the path cannot be resolved to a setting
      * object.
      */
-    public static Setting getSettingByPath(final Setting actual,
-        final String[] path) throws SettingException {
+    public static Setting getSettingByPath(final Setting actual, final String[] path) throws SettingException {
         Setting retval = actual;
         if (path.length != 0) {
             final String[] remainingPath = new String[path.length - 1];
@@ -122,8 +121,14 @@ public final class ConfigTree {
                 child = actual.getElement(path[0]);
             }
             if (null == child) {
-                throw new SettingException(Code.UNKNOWN_PATH, actual.getName()
-                    + '/' + path[0]);
+                StringBuilder sb = new StringBuilder(path[0]);
+                Setting parent = actual;
+                while (null != parent) {
+                    sb.insert(0, '/');
+                    sb.insert(0, parent.getName());
+                    parent = parent.getParent();
+                }
+                throw new SettingException(Code.UNKNOWN_PATH, sb.toString());
             }
             retval = getSettingByPath(child, remainingPath);
         }
