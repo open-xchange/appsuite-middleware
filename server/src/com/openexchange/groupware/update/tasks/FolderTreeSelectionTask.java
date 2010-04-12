@@ -47,39 +47,50 @@
  *
  */
 
-package com.openexchange.folder.json.preferences;
+package com.openexchange.groupware.update.tasks;
 
-import com.openexchange.groupware.settings.IValueHandler;
-import com.openexchange.groupware.settings.PreferencesItemService;
+import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.rollback;
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link GUI}
+ * {@link FolderTreeSelectionTask}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class GUI implements PreferencesItemService {
+public class FolderTreeSelectionTask extends UpdateTaskAdapter {
 
-    private static final String NAME = "gui";
-
-    /**
-     * Default constructor.
-     */
-    public GUI() {
+    public FolderTreeSelectionTask() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public String[] getPath() {
-        return new String[] { "modules", "folderstorage", NAME };
+    public String[] getDependencies() {
+        return new String[] { TaskCreateUserSettingServer.class.getName() };
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public IValueHandler getSharedValue() {
-        return new SharedNode(NAME, 11);
+    public void perform(PerformParameters params) throws AbstractOXException {
+        int contextId = params.getContextId();
+        final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
+        final Connection con = dbService.getForUpdateTask(contextId);
+        try {
+            con.setAutoCommit(false);
+            Tools.checkAndAddColumns(con, "user_setting_server", new Column("folderTree", "INT4"));
+            con.commit();
+        } catch (final SQLException e) {
+            rollback(con);
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            autocommit(con);
+            dbService.backForUpdateTask(contextId, con);
+        }
     }
-
 }

@@ -102,7 +102,7 @@ public class ServerUserSetting {
 
         public Integer getAttribute(final ResultSet rs) throws SQLException {
             int retval = rs.getInt(getColumnName());
-            return rs.wasNull() ? null : Integer.valueOf(retval);
+            return rs.wasNull() ? null : I(retval);
         }
 
         public String getColumnName() {
@@ -162,7 +162,7 @@ public class ServerUserSetting {
     private static final Attribute<Integer> DEFAULT_STATUS_PRIVATE = new Attribute<Integer>() {
 
         public Integer getAttribute(final ResultSet rs) throws SQLException {
-            return Integer.valueOf(rs.getInt(getColumnName()));
+            return I(rs.getInt(getColumnName()));
         }
 
         public String getColumnName() {
@@ -182,7 +182,7 @@ public class ServerUserSetting {
     private static final Attribute<Integer> DEFAULT_STATUS_PUBLIC = new Attribute<Integer>() {
 
         public Integer getAttribute(final ResultSet rs) throws SQLException {
-            return Integer.valueOf(rs.getInt(getColumnName()));
+            return I(rs.getInt(getColumnName()));
         }
 
         public String getColumnName() {
@@ -202,7 +202,14 @@ public class ServerUserSetting {
     private static final Attribute<Integer> FOLDER_TREE = new Attribute<Integer>() {
 
         public Integer getAttribute(ResultSet rs) throws SQLException {
-            return I(rs.getInt(getColumnName()));
+            int tmp = rs.getInt(getColumnName());
+            final Integer retval;
+            if (rs.wasNull()) {
+                retval = null;
+            } else {
+                retval = I(tmp);
+            }
+            return retval;
         }
 
         public String getColumnName() {
@@ -249,7 +256,7 @@ public class ServerUserSetting {
      * @param folder folder id
      */
     public static void setContactCollectionFolder(final int cid, final int user, final int folder) throws SettingException {
-        defaultInstance.setIContactCollectionFolder(cid, user, Integer.valueOf(folder));
+        defaultInstance.setIContactCollectionFolder(cid, user, I(folder));
     }
 
     /**
@@ -312,8 +319,8 @@ public class ServerUserSetting {
      * @param user user id
      */
     public void setIContactColletion(Context ctx, Session session, final int userId, final boolean enabled) throws SettingException {
-        setAttributeInternal(ctx.getContextId(), userId, CONTACT_COLLECT_ENABLED, Boolean.valueOf(enabled));
-        if (enabled && getAttributeInternal(ctx.getContextId(), userId, CONTACT_COLLECT_FOLDER) == null) {
+        setAttribute(ctx.getContextId(), userId, CONTACT_COLLECT_ENABLED, Boolean.valueOf(enabled));
+        if (enabled && getAttribute(ctx.getContextId(), userId, CONTACT_COLLECT_FOLDER) == null) {
             ContactCollectorService contactCollectService = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
             User user;
             try {
@@ -338,7 +345,7 @@ public class ServerUserSetting {
      * @return The value or <code>false</code> if no entry is found.
      */
     public Boolean isIContactCollectionEnabled(final int cid, final int user) throws SettingException {
-        final Boolean attribute = getAttributeInternal(cid, user, CONTACT_COLLECT_ENABLED);
+        final Boolean attribute = getAttribute(cid, user, CONTACT_COLLECT_ENABLED);
         return null == attribute ? Boolean.FALSE : attribute;
     }
 
@@ -350,7 +357,7 @@ public class ServerUserSetting {
      * @param folder folder id
      */
     public void setIContactCollectionFolder(final int cid, final int user, final Integer folder) throws SettingException {
-        setAttributeInternal(cid, user, CONTACT_COLLECT_FOLDER, folder);
+        setAttribute(cid, user, CONTACT_COLLECT_FOLDER, folder);
     }
 
     /**
@@ -361,7 +368,7 @@ public class ServerUserSetting {
      * @return folder id or <code>null</code> if no entry found.
      */
     public Integer getIContactCollectionFolder(final int cid, final int user) throws SettingException {
-        return getAttributeInternal(cid, user, CONTACT_COLLECT_FOLDER);
+        return getAttribute(cid, user, CONTACT_COLLECT_FOLDER);
     }
 
     /**
@@ -373,7 +380,7 @@ public class ServerUserSetting {
      * @throws SettingException If a setting error occurs
      */
     public void setContactCollectOnMailAccess(final int cid, final int user, final boolean value) throws SettingException {
-        setAttributeInternal(cid, user, CONTACT_COLLECT_ON_MAIL_ACCESS, Boolean.valueOf(value));
+        setAttribute(cid, user, CONTACT_COLLECT_ON_MAIL_ACCESS, Boolean.valueOf(value));
     }
 
     /**
@@ -385,7 +392,7 @@ public class ServerUserSetting {
      * @throws SettingException If a setting error occurs
      */
     public Boolean isContactCollectOnMailAccess(final int cid, final int user) throws SettingException {
-        final Boolean attribute = getAttributeInternal(cid, user, CONTACT_COLLECT_ON_MAIL_ACCESS);
+        final Boolean attribute = getAttribute(cid, user, CONTACT_COLLECT_ON_MAIL_ACCESS);
         return null == attribute ? Boolean.FALSE : attribute;
     }
 
@@ -398,7 +405,7 @@ public class ServerUserSetting {
      * @throws SettingException If a setting error occurs
      */
     public void setContactCollectOnMailTransport(final int cid, final int user, final boolean value) throws SettingException {
-        setAttributeInternal(cid, user, CONTACT_COLLECT_ON_MAIL_TRANSPORT, Boolean.valueOf(value));
+        setAttribute(cid, user, CONTACT_COLLECT_ON_MAIL_TRANSPORT, Boolean.valueOf(value));
     }
 
     /**
@@ -410,7 +417,7 @@ public class ServerUserSetting {
      * @throws SettingException If a setting error occurs
      */
     public Boolean isContactCollectOnMailTransport(final int cid, final int user) throws SettingException {
-        final Boolean attribute = getAttributeInternal(cid, user, CONTACT_COLLECT_ON_MAIL_TRANSPORT);
+        final Boolean attribute = getAttribute(cid, user, CONTACT_COLLECT_ON_MAIL_TRANSPORT);
         return null == attribute ? Boolean.FALSE : attribute;
     }
 
@@ -423,9 +430,9 @@ public class ServerUserSetting {
      * @throws SettingException If a setting error occurs
      */
     public Integer getDefaultStatusPrivate(final int cid, final int user) throws SettingException {
-        Integer value = getAttributeInternal(cid, user, DEFAULT_STATUS_PRIVATE);
+        Integer value = getAttribute(cid, user, DEFAULT_STATUS_PRIVATE);
         if (value == null) {
-            value = Integer.valueOf(0);
+            value = I(0);
         }
         return value;
     }
@@ -439,7 +446,7 @@ public class ServerUserSetting {
      * @throws SettingException
      */
     public void setDefaultStatusPrivate(final int cid, final int user, final Integer status) throws SettingException {
-        setAttributeInternal(cid, user, DEFAULT_STATUS_PRIVATE, status);
+        setAttribute(cid, user, DEFAULT_STATUS_PRIVATE, status);
     }
 
     /**
@@ -451,9 +458,9 @@ public class ServerUserSetting {
      * @throws SettingException
      */
     public Integer getDefaultStatusPublic(final int cid, final int user) throws SettingException {
-        Integer value = getAttributeInternal(cid, user, DEFAULT_STATUS_PUBLIC);
+        Integer value = getAttribute(cid, user, DEFAULT_STATUS_PUBLIC);
         if (value == null) {
-            value = Integer.valueOf(0);
+            value = I(0);
         }
         return value;
     }
@@ -467,18 +474,25 @@ public class ServerUserSetting {
      * @throws SettingException
      */
     public void setDefaultStatusPublic(final int cid, final int user, final Integer status) throws SettingException {
-        setAttributeInternal(cid, user, DEFAULT_STATUS_PUBLIC, status);
+        setAttribute(cid, user, DEFAULT_STATUS_PUBLIC, status);
     }
 
+    /**
+     * Get the selected folder tree for the user. Return value may be <code>null</code> if the user does not have selected a folder tree.
+     * @param cid context identifier
+     * @param user user identifier.
+     * @return the selected folder tree or <code>null</code>
+     * @throws SettingException if reading the value from the database fails.
+     */
     public Integer getFolderTree(int cid, int user) throws SettingException {
-        Integer value = getAttribute(cid, user, FOLDER_TREE, connection);
-        if (null == value) {
-            // FIXME add default from configuration file
-        }
-        return value;
+        return getAttribute(cid, user, FOLDER_TREE);
     }
 
-    private <T> T getAttributeInternal(final int cid, final int user, final Attribute<T> attribute) throws SettingException {
+    public void setFolderTree(int cid, int user, Integer value) throws SettingException {
+        setAttribute(cid, user, FOLDER_TREE, value);
+    }
+
+    private <T> T getAttribute(final int cid, final int user, final Attribute<T> attribute) throws SettingException {
         final Connection con;
         if (connection == null) {
             try {
@@ -498,7 +512,7 @@ public class ServerUserSetting {
         }
     }
 
-    private <T> void setAttributeInternal(final int cid, final int user, final Attribute<T> attribute, final T value) throws SettingException {
+    private <T> void setAttribute(final int cid, final int user, final Attribute<T> attribute, final T value) throws SettingException {
         final Connection con;
         if (connection == null) {
             try {

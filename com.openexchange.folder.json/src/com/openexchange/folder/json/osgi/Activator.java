@@ -52,6 +52,8 @@ package com.openexchange.folder.json.osgi;
 import static com.openexchange.folder.json.services.ServiceRegistry.getInstance;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
@@ -59,7 +61,7 @@ import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.folder.json.Constants;
 import com.openexchange.folder.json.multiple.FolderMultipleHandlerFactory;
-import com.openexchange.folder.json.preferences.GUI;
+import com.openexchange.folder.json.preferences.Tree;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.settings.PreferencesItemService;
@@ -73,6 +75,8 @@ import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class Activator extends DeferredActivator {
+
+    private static final Log LOG = LogFactory.getLog(Activator.class);
 
     private List<ServiceRegistration> serviceRegistrations;
 
@@ -130,13 +134,13 @@ public class Activator extends DeferredActivator {
              * Preference item
              */
             serviceRegistrations = new ArrayList<ServiceRegistration>(2);
-            serviceRegistrations.add(context.registerService(PreferencesItemService.class.getName(), new GUI(), null));
+            serviceRegistrations.add(context.registerService(PreferencesItemService.class.getName(), new Tree(), null));
             serviceRegistrations.add(context.registerService(
                 MultipleHandlerFactoryService.class.getName(),
                 new FolderMultipleHandlerFactory(),
                 null));
         } catch (final Exception e) {
-            org.apache.commons.logging.LogFactory.getLog(Activator.class).error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             throw e;
         }
     }
@@ -173,26 +177,26 @@ public class Activator extends DeferredActivator {
     }
 
     private void apply(final ConfigurationService configurationService) {
-        final String module = configurationService.getProperty("com.openexchange.folder.json.module");
-        if (null != module) {
+        final String tmpModule = configurationService.getProperty("com.openexchange.folder.json.module");
+        if (null != tmpModule) {
             final String cmod = Constants.getModule();
-            if (!cmod.equals(module)) {
+            if (!cmod.equals(tmpModule)) {
                 /*
                  * Remember old module and apply new one
                  */
                 this.module = cmod;
-                Constants.setModule(module);
+                Constants.setModule(tmpModule);
             }
         }
-        final String servletPath = configurationService.getProperty("com.openexchange.folder.json.servletPath");
-        if (null != servletPath) {
+        final String tmpServletPath = configurationService.getProperty("com.openexchange.folder.json.servletPath");
+        if (null != tmpServletPath) {
             final String cpath = Constants.getServletPath();
-            if (!cpath.equals(servletPath)) {
+            if (!cpath.equals(tmpServletPath)) {
                 /*
                  * Remember old path and apply new one
                  */
                 this.servletPath = cpath;
-                Constants.setServletPath(servletPath);
+                Constants.setServletPath(tmpServletPath);
             }
         }
     }

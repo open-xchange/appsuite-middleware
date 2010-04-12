@@ -321,7 +321,12 @@ public final class InternalList {
         new com.openexchange.groupware.update.tasks.ExtendCalendarForIMIPHandlingTask(),
 
         // Enables the bit for the contact collector feature for every user because that bit was not checked before 6.16.
-        new com.openexchange.groupware.update.tasks.ContactCollectorReEnabler()
+        new com.openexchange.groupware.update.tasks.ContactCollectorReEnabler(),
+
+        // +++++++++++++++++++++++++++++++++ Version 6.18 starts here. +++++++++++++++++++++++++++++++++
+
+        // Adds a column to the table user_setting_server named folderTree to store the selected folder tree.
+        new com.openexchange.groupware.update.tasks.FolderTreeSelectionTask()
 
         // TODO: Enable virtual folder tree update task when needed
         // Migrates existing folder data to new outlook-like folder tree structure
