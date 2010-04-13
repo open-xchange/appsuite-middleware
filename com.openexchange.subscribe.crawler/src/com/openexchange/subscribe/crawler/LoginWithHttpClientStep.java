@@ -53,20 +53,22 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.GetMethod;
-import com.gargoylesoftware.htmlunit.BrowserVersion;
+
 import com.gargoylesoftware.htmlunit.HttpMethod;
-import com.gargoylesoftware.htmlunit.NicelyResynchronizingAjaxController;
-import com.gargoylesoftware.htmlunit.WaitingRefreshHandler;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebConnection;
 import com.gargoylesoftware.htmlunit.WebRequestSettings;
 import com.gargoylesoftware.htmlunit.WebResponse;
 import com.gargoylesoftware.htmlunit.WebResponseData;
 import com.gargoylesoftware.htmlunit.WebResponseImpl;
+import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionException;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
 import com.openexchange.subscribe.crawler.internal.LoginStep;
@@ -83,15 +85,16 @@ import com.openexchange.subscribe.crawler.internal.LoginStep;
  */
 public class LoginWithHttpClientStep extends AbstractStep<Object, Object> implements LoginStep {
     
-    private String url;
+    private String url, regex;
     
     public LoginWithHttpClientStep(){
         
     }
     
-    public LoginWithHttpClientStep(String description, String url){
+    public LoginWithHttpClientStep(String description, String url, String regex){
         this.description = description;
         this.url = url;
+        this.regex = regex;
     }
 
     public void execute(WebClient webClient) throws SubscriptionException {
@@ -102,6 +105,13 @@ public class LoginWithHttpClientStep extends AbstractStep<Object, Object> implem
             getMethod.setFollowRedirects(true);
             int code = httpClient.executeMethod(getMethod);            
             
+            String page = getMethod.getResponseBodyAsString();
+            Pattern pattern = Pattern.compile(regex);
+            Matcher matcher = pattern.matcher(page);
+            if (!matcher.find()) {
+                throw SubscriptionErrorMessage.INVALID_LOGIN.create();
+            }
+
             webClient.setWebConnection(new WebConnection() {
 
                 public WebResponse getResponse(WebRequestSettings settings) throws IOException {
@@ -145,15 +155,22 @@ public class LoginWithHttpClientStep extends AbstractStep<Object, Object> implem
         url = url.replace("USERNAME", username);
     }
 
-    
     public String getUrl() {
         return url;
     }
 
-    
     public void setUrl(String url) {
         this.url = url;
     }
 
     
+    public String getRegex() {
+        return regex;
+    }
+
+    
+    public void setRegex(String regex) {
+        this.regex = regex;
+    }
+
 }
