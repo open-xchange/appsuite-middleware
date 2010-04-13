@@ -1,6 +1,7 @@
 * 2010-04-13 - karsten.will@open-xchange.com
 
  - Bugfix #15660: Using commons HttpClient for login to linked in to fix redirect problems with HtmlUnit.
+ - Bugfix #15676: Yahoo crawler can crawl yahoo.de accounts.
 
 * 2010-04-13 - marcus.klein@open-xchange.com
 
