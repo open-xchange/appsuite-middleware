@@ -3,6 +3,7 @@
  - Bugfix #15660: Using commons HttpClient for login to linked in to fix redirect problems with HtmlUnit.
  - Bugfix #15676: Yahoo crawler can crawl yahoo.de accounts.
  - Bugfix #15724: LoginWithHttpClientStep expanded to throw correct error when entering wrong credentials
+ - Bugfix #15725: Yahoo crawler now gives readable exception if invalid credentials are entered.
 
 * 2010-04-13 - marcus.klein@open-xchange.com
 
