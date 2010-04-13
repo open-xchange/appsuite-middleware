@@ -2,24 +2,13 @@
 crawlerApiVersion: 616
 displayName: LinkedIn
 id: com.openexchange.subscribe.linkedin
-priority: 2
+priority: 4
 workflowString: |
   --- !com.openexchange.subscribe.crawler.Workflow
   steps: 
-    - !com.openexchange.subscribe.crawler.LoginPageStep
-      baseUrl: "https://www.linkedin.com"
-      description: Login to www.linkedin.com
-      linkAvailableAfterLogin: /connections?trk=hb_tab_cnts
-      nameOfLoginForm: login
-      nameOfPasswordField: session_password
-      nameOfUserField: session_key
-      pageTitleAfterLogin: /connections?trk=hb_tab_cnts
-      password: ""
-      url: "https://www.linkedin.com/secure/login"
-      username: ""
-    - !com.openexchange.subscribe.crawler.PageByUrlStep
-      description: Get to the contacts list
-      url: "http://www.linkedin.com/connections?trk=hb_side_cnts"
+    - !com.openexchange.subscribe.crawler.LoginWithHttpClientStep
+      description: Call LinkedIn with all parameters that are normally set by the login-form
+      url: "https://www.linkedin.com/secure/login?session_key=USERNAME&session_password=PASSWORD&session_login=&session_rikey=&csrfToken=ajax:6545267463289092740"
     - !com.openexchange.subscribe.crawler.PageByUrlStep
       description: Get to the no-javascript contacts list
       url: "http://www.linkedin.com/connectionsnojs?trk=cnx_nojslink"

@@ -1,4 +1,8 @@
-* 2010-04-06 - marcus.klein@open-xchange.com
+* 2010-04-13 - karsten.will@open-xchange.com
+
+ - Bugfix #15660: Using commons HttpClient for login to linked in to fix redirect problems with HtmlUnit.
+
+* 2010-04-13 - marcus.klein@open-xchange.com
 
  - Bugfix #15656: Disabling configurable envelope-from for external mail accounts.
 
