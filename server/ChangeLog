@@ -6,6 +6,7 @@
 * 2010-04-13 - marcus.klein@open-xchange.com
 
  - Bugfix #15656: Disabling configurable envelope-from for external mail accounts.
+ - Bugfix #15700: Creating a new action for importing mails from body of request as multipart/form-data stream.
 
 * 2010-04-13 - thorben.betten@open-xchange.com
 
