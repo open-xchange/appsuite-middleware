@@ -59,6 +59,7 @@ import java.io.IOException;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -189,6 +190,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
     private User user;
 
+    private final Collection<MailException> warnings;
+
     /**
      * Initializes a new {@link MailServletInterfaceImpl}.
      * 
@@ -196,6 +199,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
      */
     MailServletInterfaceImpl(final Session session) throws MailException {
         super();
+        warnings = new ArrayList<MailException>(2);
         try {
             if (session instanceof ServerSession) {
                 final ServerSession serverSession = (ServerSession) session;
@@ -244,6 +248,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             }
         }
         return locale;
+    }
+
+    @Override
+    public Collection<MailException> getWarnings() {
+        return Collections.unmodifiableCollection(warnings);
     }
 
     @Override
@@ -1525,6 +1534,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             final long start = System.currentTimeMillis();
             try {
                 mailAccess.connect();
+                warnings.addAll(mailAccess.getWarnings());
                 MailServletInterface.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                 MailServletInterface.mailInterfaceMonitor.changeNumSuccessfulLogins(true);
             } catch (final MailException e) {

@@ -55,6 +55,7 @@ import java.io.IOException;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -971,6 +972,13 @@ public class Folder extends SessionServlet {
                          * E-Mail folder
                          */
                         it = mailInterface.getChildFolders(parentIdentifier, all);
+	                    /*
+	                     * Check for possible warning
+	                     */
+	                    final Collection<MailException> warnings = mailInterface.getWarnings();
+	                    if (!warnings.isEmpty()) {
+	                        warning = warnings.iterator().next();
+	                    }
                         final MailFolderFieldWriter[] writers =
                             com.openexchange.mail.json.writer.FolderWriter.getMailFolderFieldWriter(
                                 columns,

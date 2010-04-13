@@ -49,6 +49,7 @@
 
 package com.openexchange.pop3.storage;
 
+import java.util.Collection;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -73,6 +74,13 @@ public interface POP3Storage {
      * @throws MailException If closing the storage fails
      */
     public void close() throws MailException;
+
+    /**
+     * Gets possible warnings.
+     * 
+     * @return Possible warnings.
+     */
+    public Collection<MailException> getWarnings();
 
     /**
      * Convenience method to obtain folder's number of unread messages in a fast way; meaning no default folder check is performed.

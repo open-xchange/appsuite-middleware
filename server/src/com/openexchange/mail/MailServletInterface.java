@@ -49,6 +49,7 @@
 
 package com.openexchange.mail;
 
+import java.util.Collection;
 import com.openexchange.api2.MailInterfaceMonitor;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.mail.api.MailConfig;
@@ -419,4 +420,12 @@ public abstract class MailServletInterface {
      * @return The account ID
      */
     public abstract int getAccountID();
+
+    /**
+     * Gets possible warnings.
+     * 
+     * @return Possible warnings
+     */
+    public abstract Collection<MailException> getWarnings();
+    
 }
