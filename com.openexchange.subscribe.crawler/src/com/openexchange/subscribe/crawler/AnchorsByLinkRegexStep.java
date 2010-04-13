@@ -223,6 +223,13 @@ public class AnchorsByLinkRegexStep extends AbstractStep<List<HtmlAnchor>, HtmlP
         return linkRegex;
     }
 
+    public boolean isMayHaveEmptyOutput() {
+        return mayHaveEmptyOutput;
+    }
+
+    public void setMayHaveEmptyOutput(boolean mayHaveEmptyOutput) {
+        this.mayHaveEmptyOutput = mayHaveEmptyOutput;
+    }
     public void setLinkRegex(final String linkRegex) {
         this.linkRegex = linkRegex;
     }
@@ -235,13 +242,5 @@ public class AnchorsByLinkRegexStep extends AbstractStep<List<HtmlAnchor>, HtmlP
     
     public void setIdentifyingCriteria(final String identifyingCriteria) {
         this.identifyingCriteria = identifyingCriteria;
-    }
-
-    public boolean isMayHaveEmptyOutput() {
-        return mayHaveEmptyOutput;
-    }
-
-    public void setMayHaveEmptyOutput(boolean mayHaveEmptyOutput) {
-        this.mayHaveEmptyOutput = mayHaveEmptyOutput;
     }
 }

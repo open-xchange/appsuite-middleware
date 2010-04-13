@@ -12,6 +12,7 @@
  - Bugfix #15764: Web crawler for web.de works now with an empty address book.
  - Bugfix #15744: Generating display name for GMX contacts from given and sure name.
  - Bugfix #15747: Using a more genering exception message if the crawler login fails.
+ - Bugfix #15764: Web crawler for web.de works now with an empty address book.
 
 * 2010-04-13 - thorben.betten@open-xchange.com
 
