@@ -1,13 +1,16 @@
+* 2010-04-13 - thorben.betten@open-xchange.com
+
+ - Bugfix #15655: Ignoring error when creating a default folder for an external account
+
 * 2010-04-12 - choeger@open-xchange.com
 
- - Bugfix #15612: /opt/open-xchange/etc/oxfunctions.sh does not work on
-   Ubuntu, which is using dash instead of bash
+ - Bugfix #15612: /opt/open-xchange/etc/oxfunctions.sh does not work on Ubuntu, which is using dash instead of bash.
 
-* 2010-04-09 - tobias.prinz@open-xchange.com
+* 2010-04-12 - tobias.prinz@open-xchange.com
 
  - Bugfix #15596: Crawler for Facebook works again.
 
-* 2010-04-09 - francisco.laguna@open-xchange.com
+* 2010-04-12 - francisco.laguna@open-xchange.com
 
  - Bugfix #14932: Move error messages around for translation and make them nicer.
 

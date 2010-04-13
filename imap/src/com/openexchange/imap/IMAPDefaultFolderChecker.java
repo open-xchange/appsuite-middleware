@@ -380,13 +380,25 @@ public final class IMAPDefaultFolderChecker {
                                     Integer.valueOf(session.getContextId()),
                                     "Waiting time elapsed.");
                             }
-                            f.get();
+                            try {
+                                f.get();
+                            } catch (final ExecutionException e) {
+                                if (MailAccount.DEFAULT_ID == accountId) {
+                                    /*
+                                     * Mandatory for primary mail account
+                                     */
+                                    throw ThreadPools.launderThrowable(e, MailException.class);
+                                }
+                                final MailException me = ThreadPools.launderThrowable(e, MailException.class);
+                                LOG.warn(new StringBuilder(128).append("A default folder could not be created on IMAP server ").append(
+                                    imapConfig.getServer()).append(" for login ").append(imapConfig.getLogin()).append(" (user=").append(
+                                    session.getUserId()).append(", context=").append(session.getContextId()).append("): ").append(
+                                    me.getMessage()).toString(), me);
+                            }
                         }
                     } catch (final InterruptedException e) {
                         // Keep interrupted status
                         throw new MailException(MailException.Code.INTERRUPT_ERROR, e);
-                    } catch (final ExecutionException e) {
-                        throw ThreadPools.launderThrowable(e, MailException.class);
                     }
                     if (DEBUG) {
                         LOG.debug(new StringBuilder(64).append("Default folders check for account ").append(accountId).append(" took ").append(
