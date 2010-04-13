@@ -4,6 +4,7 @@
  - Bugfix #15676: Yahoo crawler can crawl yahoo.de accounts.
  - Bugfix #15724: LoginWithHttpClientStep expanded to throw correct error when entering wrong credentials
  - Bugfix #15725: Yahoo crawler now gives readable exception if invalid credentials are entered.
+ - Bugfix #15789: Removed reflection from the crawler bundle
 
 * 2010-04-13 - marcus.klein@open-xchange.com
 
@@ -12,7 +13,6 @@
  - Bugfix #15764: Web crawler for web.de works now with an empty address book.
  - Bugfix #15744: Generating display name for GMX contacts from given and sure name.
  - Bugfix #15747: Using a more genering exception message if the crawler login fails.
- - Bugfix #15764: Web crawler for web.de works now with an empty address book.
 
 * 2010-04-13 - thorben.betten@open-xchange.com
 

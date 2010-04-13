@@ -50,18 +50,20 @@
 package com.openexchange.subscribe.crawler;
 
 import java.util.List;
+import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ho.yaml.Yaml;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
+import com.gargoylesoftware.htmlunit.CrawlerWebConnection;
 import com.gargoylesoftware.htmlunit.NicelyResynchronizingAjaxController;
 import com.gargoylesoftware.htmlunit.ThreadedRefreshHandler;
 import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.util.WebConnectionWrapper;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionException;
-import com.openexchange.subscribe.crawler.darkside.WebClientCloser;
 import com.openexchange.subscribe.crawler.internal.LoginStep;
 import com.openexchange.subscribe.crawler.internal.LogoutStep;
 import com.openexchange.subscribe.crawler.internal.NeedsLoginStepString;
@@ -74,8 +76,6 @@ import com.openexchange.subscribe.crawler.osgi.Activator;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class Workflow {
-
-    private static final WebClientCloser closer = new WebClientCloser();
 
     private List<Step> steps;
 
@@ -124,13 +124,15 @@ public class Workflow {
 
         // emulate a known client, hopefully keeping our profile low
         final WebClient webClient = new WebClient(BrowserVersion.FIREFOX_2);
+        CrawlerWebConnection crawlerConnection = new CrawlerWebConnection(webClient);
+        webClient.setWebConnection(crawlerConnection);
         // Javascript is disable by default for security reasons but may be activated for single crawlers
         webClient.setJavaScriptEnabled(enableJavascript);
         webClient.setTimeout(60000);
         webClient.setAjaxController(new NicelyResynchronizingAjaxController());
         if (useThreadedRefreshHandler) {
             webClient.setRefreshHandler(new ThreadedRefreshHandler());
-        }
+        }        
         try {
 
             Step previousStep = null;
@@ -152,10 +154,11 @@ public class Workflow {
                 }
             }
 
-            webClient.closeAllWindows();
+            webClient.closeAllWindows();            
             return (Object[]) result;
         } finally {
-            closer.close(webClient);
+            MultiThreadedHttpConnectionManager manager = (MultiThreadedHttpConnectionManager) crawlerConnection.getHttpClient().getHttpConnectionManager();
+            manager.shutdown();
         }
     }
 
