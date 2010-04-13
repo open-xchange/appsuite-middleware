@@ -89,11 +89,11 @@ public class SubscriptionErrorStrings implements LocalizableStrings {
     // Check value to parse.
     public static final String CHECK_VALUE = "Check value to parse.";
     
-    // Please correct the password and try again
-    public static final String CORRECT_PASSWORD = "Please correct the password and try again";
+    // Please correct the login or password and try again
+    public static final String CORRECT_PASSWORD = "Please correct the login or password and try again";
     
-    // The password you entered was wrong
-    public static final String WRONG_PASSWORD = "The password you entered was wrong";
+    // The login or password you entered was wrong
+    public static final String WRONG_PASSWORD = "The login or password you entered are wrong";
     
     // Make sure, that the Service is still available, and there are no major changes on the website
     public static final String CHECK_WEBSITE =  "Make sure, that the Service is still available, and there are no major changes on the website";
