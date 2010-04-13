@@ -11,6 +11,7 @@
 
  - Bugfix #15655: Ignoring error when creating a default folder for an external account
  - Bugfix #15671: Probing for optional TOP and UIDL POP3 commands
+ - Bugfix #15686: Not handling spam for external mail accounts.
 
 * 2010-04-12 - choeger@open-xchange.com
 
