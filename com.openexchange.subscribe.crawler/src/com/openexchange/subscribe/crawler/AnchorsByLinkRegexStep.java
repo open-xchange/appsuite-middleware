@@ -86,31 +86,30 @@ public class AnchorsByLinkRegexStep extends AbstractStep<List<HtmlAnchor>, HtmlP
     
     private static Log LOG = LogFactory.getLog(AnchorsByLinkRegexStep.class);
 
+    private boolean mayHaveEmptyOutput;
+
     public AnchorsByLinkRegexStep() {
-        subpagesHref = new ArrayList<String>();
-        outputHref = new ArrayList<String>();
-        uniqueIds = new ArrayList<String>();
-        subpages = new ArrayList<HtmlPage>();
-        output = new ArrayList<HtmlAnchor>();
-        identifyingCriteria = "";
+        this(null, null, null, "", false);
     }
 
     public AnchorsByLinkRegexStep(final String description, final String subpageLinkRegex, final String linkRegex) {
-        this.description = description;
-        this.subpageLinkRegex = subpageLinkRegex;
-        this.linkRegex = linkRegex;
-        subpagesHref = new ArrayList<String>();
-        outputHref = new ArrayList<String>();
-        uniqueIds = new ArrayList<String>();
-        subpages = new ArrayList<HtmlPage>();
-        output = new ArrayList<HtmlAnchor>();
-        identifyingCriteria = "";
+        this(description, subpageLinkRegex, linkRegex, "", false);
     }
-    
+
+    public AnchorsByLinkRegexStep(final String description, final String subpageLinkRegex, final String linkRegex, boolean mayHaveEmptyOutput) {
+        this(description, subpageLinkRegex, linkRegex, "", mayHaveEmptyOutput);
+    }
+
     public AnchorsByLinkRegexStep(final String description, final String subpageLinkRegex, final String linkRegex, final String identifyingCriteria) {
+        this(description, subpageLinkRegex, linkRegex, identifyingCriteria, false);
+    }
+
+    public AnchorsByLinkRegexStep(final String description, final String subpageLinkRegex, final String linkRegex, final String identifyingCriteria, boolean mayHaveEmptyOutput) {
+        super();
         this.description = description;
         this.subpageLinkRegex = subpageLinkRegex;
         this.linkRegex = linkRegex;
+        this.mayHaveEmptyOutput = mayHaveEmptyOutput;
         subpagesHref = new ArrayList<String>();
         outputHref = new ArrayList<String>();
         uniqueIds = new ArrayList<String>();
@@ -166,7 +165,7 @@ public class AnchorsByLinkRegexStep extends AbstractStep<List<HtmlAnchor>, HtmlP
                     }
                 }
             }
-            if (output != null && output.size() != 0){
+            if (output != null && (output.size() != 0 || mayHaveEmptyOutput)) {
                 executedSuccessfully = true;                
             } else {
                 LOG.error("No links matching the criteria were found.");
@@ -238,4 +237,11 @@ public class AnchorsByLinkRegexStep extends AbstractStep<List<HtmlAnchor>, HtmlP
         this.identifyingCriteria = identifyingCriteria;
     }
 
+    public boolean isMayHaveEmptyOutput() {
+        return mayHaveEmptyOutput;
+    }
+
+    public void setMayHaveEmptyOutput(boolean mayHaveEmptyOutput) {
+        this.mayHaveEmptyOutput = mayHaveEmptyOutput;
+    }
 }

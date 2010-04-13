@@ -8,6 +8,7 @@
 
  - Bugfix #15656: Disabling configurable envelope-from for external mail accounts.
  - Bugfix #15700: Creating a new action for importing mails from body of request as multipart/form-data stream.
+ - Bugfix #15764: Web crawler for web.de works now with an empty address book.
 
 * 2010-04-13 - thorben.betten@open-xchange.com
 
