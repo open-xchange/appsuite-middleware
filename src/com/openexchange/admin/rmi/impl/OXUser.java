@@ -1087,7 +1087,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             String check_default_sender_address;
             if (primaryEmail != null) {
                 check_primary_mail = primaryEmail;
-                tool.primaryMailExists(ctx, primaryEmail);
+                if (!primaryEmail.equals(dbuser.getPrimaryEmail())) {
+                    tool.primaryMailExists(ctx, primaryEmail);
+                }
             } else {
                 check_primary_mail = dbuser.getPrimaryEmail();
             }
