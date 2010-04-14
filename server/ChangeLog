@@ -1,3 +1,7 @@
+* 2010-04-14 - marcus.klein@open-xchange.com
+
+ - Bugfix #15790: Not failing if some context has no login mappings.
+
 * 2010-04-13 - karsten.will@open-xchange.com
 
  - Bugfix #15660: Using commons HttpClient for login to linked in to fix redirect problems with HtmlUnit.

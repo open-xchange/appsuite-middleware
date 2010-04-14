@@ -187,7 +187,9 @@ public class ReportingMBean implements DynamicMBean {
                     sb.append(loginInfo);
                     sb.append(',');
                 }
-                sb.setLength(sb.length() - 1);
+                if (sb.length() > 0) {
+                    sb.setLength(sb.length() - 1);
+                }
                 TabularDataSupport moduleAccessCombinations = new TabularDataSupport(moduleAccessCombinationsType);
                 consolidateAccessCombinations(configs, moduleAccessCombinations);
                 CompositeDataSupport value = new CompositeDataSupport(detailRow, detailNames, new Object[] {
