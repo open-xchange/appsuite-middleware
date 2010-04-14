@@ -82,6 +82,8 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
     private String titleExceptionsRegex, linkToTargetPage;
 
     private static final Log LOG = LogFactory.getLog(ContactObjectsByHTMLAnchorsAndPagePartSequenceStep.class);
+    
+    private boolean addPagesTogether;
 
     public ContactObjectsByHTMLAnchorsAndPagePartSequenceStep(final String description, final PagePartSequence pageParts) {
         this.description = description;
@@ -95,6 +97,14 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
         this.pageParts = pageParts;
         this.titleExceptionsRegex = titleExceptionsRegex;
         this.linkToTargetPage = linkToTargetPage;
+    }
+    
+    public ContactObjectsByHTMLAnchorsAndPagePartSequenceStep(final String description, final PagePartSequence pageParts, final String titleExceptionsRegex, final String linkToTargetPage, boolean addPagesTogether) {
+        this.description = description;
+        this.pageParts = pageParts;
+        this.titleExceptionsRegex = titleExceptionsRegex;
+        this.linkToTargetPage = linkToTargetPage;
+        this.addPagesTogether = addPagesTogether;
     }
 
     public ContactObjectsByHTMLAnchorsAndPagePartSequenceStep() {
@@ -110,6 +120,7 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
         for (final HtmlAnchor anchor : input) {
             try {
                 HtmlPage page = anchor.click();
+                String additionalPageString = "";
                 if (isDebuggingEnabled()){
                     debugPage = page;
                 }
@@ -118,11 +129,17 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
                    final PageByLinkRegexStep step = new PageByLinkRegexStep("", linkToTargetPage);
                    step.setInput(page);
                    step.execute(webClient);
-                   page = step.getOutput();
+                   // sometimes additional Information is on a linked page. If that is the case this subpage needs to be added
+                   if (! addPagesTogether){
+                       page = step.getOutput();
+                   } else {
+                       additionalPageString = step.getOutput().getWebResponse().getContentAsString();
+                   }
                 }
                 final String titleText = page.getTitleText();
                 if (null != titleText && !titleText.matches(titleExceptionsRegex)){
-                    final String pageString = StringEscapeUtils.unescapeHtml(page.getWebResponse().getContentAsString());                
+                    String pageAsString = page.getWebResponse().getContentAsString() + additionalPageString;
+                    final String pageString = StringEscapeUtils.unescapeHtml(pageAsString);                
                     pageParts.setPage(pageString);
                     LOG.debug("Page evaluated is : "+pageString);
                     final HashMap<String, String> map = pageParts.retrieveInformation();
@@ -186,6 +203,16 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
     
     public void setLinkToTargetPage(final String linkToTargetPage) {
         this.linkToTargetPage = linkToTargetPage;
+    }
+
+    
+    public boolean isAddPagesTogether() {
+        return addPagesTogether;
+    }
+
+    
+    public void setAddPagesTogether(boolean addPagesTogether) {
+        this.addPagesTogether = addPagesTogether;
     }
 
     

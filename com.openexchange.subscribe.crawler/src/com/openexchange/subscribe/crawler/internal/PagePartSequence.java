@@ -81,7 +81,6 @@ public class PagePartSequence {
 
     public HashMap<String, String> retrieveInformation() {
         final HashMap<String, String> retrievedInformation = new HashMap<String, String>();
-
         extractInformationOnce(retrievedInformation);
 
         return retrievedInformation;
@@ -118,8 +117,11 @@ public class PagePartSequence {
                         retrievedInformation.put(pagePart.getTypeOfInfo(), info + " ("+matcher.group(pagePart.getAddInfo())+")");
                     }
                 }
-                // set the page to the rest (after this part)
-                page = page.substring(indexOfPageRest);
+                // throw away the part of the String that was just matched or leave it
+                if (!pagePart.isKeepStringAfterMatching()){
+                    // set the page to the rest (after this part)
+                    page = page.substring(indexOfPageRest);
+                }
             }
         }
     }
