@@ -63,7 +63,7 @@ import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
 /**
- * {@link FolderTreeSelectionTask}
+ * This update task adds the column folderTree to the table user_setting_server. There the selected folder tree should be stored.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
