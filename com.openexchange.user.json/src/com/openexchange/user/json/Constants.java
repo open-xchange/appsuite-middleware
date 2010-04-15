@@ -49,6 +49,8 @@
 
 package com.openexchange.user.json;
 
+import com.openexchange.groupware.container.FolderObject;
+
 /**
  * {@link Constants} - Constants for the HTTP JSON interface of the user component.
  * 
@@ -69,7 +71,7 @@ public final class Constants {
     /**
      * The user address book folder identifier.
      */
-    public static final int USER_ADDRESS_BOOK_FOLDER_ID = 6;
+    public static final int USER_ADDRESS_BOOK_FOLDER_ID = FolderObject.SYSTEM_LDAP_FOLDER_ID;
 
     private Constants() {
         super();

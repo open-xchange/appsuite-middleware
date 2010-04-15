@@ -80,6 +80,8 @@ public interface ContactInterface {
 
     public void updateContactObject(final Contact co, final int fid, final java.util.Date d) throws OXException, OXConcurrentModificationException, ContactException;
 
+    void updateUserContact(Contact contact, Date lastmodified) throws OXException;
+
     /**
      * Determines the number of contacts a certain private or public folder.
      * 
