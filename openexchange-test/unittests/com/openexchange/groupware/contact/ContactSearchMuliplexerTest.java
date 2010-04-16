@@ -162,6 +162,10 @@ public class ContactSearchMuliplexerTest extends TestCase {
                 
             }
 
+            public void updateUserContact(Contact contact, Date lastmodified) throws OXException {
+                // Nothing to do.
+            }
+
             public SearchIterator<Contact> getContactsByExtendedSearch(final ContactSearchObject searchobject, final int orderBy, final String orderDir, final int[] cols) throws OXException {
                 return new SearchIteratorAdapter<Contact>(contacts.iterator());
             }
