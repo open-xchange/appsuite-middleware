@@ -49,8 +49,6 @@
 
 package com.openexchange.groupware.settings.tree.modules.personaldata;
 
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
@@ -59,9 +57,8 @@ import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
-import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.oxfolder.OXFolderProperties;
 
 /**
  * 
@@ -88,18 +85,10 @@ public final class Module implements PreferencesItemService {
      */
     public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
-            public void getValue(final Session session, final Context ctx,
-                final User user, final UserConfiguration userConfig,
-                final Setting setting) throws SettingException {
-                try {
-                    final OCLPermission permission = new OXFolderAccess(ctx)
-                        .getFolderPermission(FolderObject.SYSTEM_LDAP_FOLDER_ID,
-                        user.getId(), userConfig);
-                    setting.setSingleValue(Boolean.valueOf(permission.canWriteOwnObjects()));
-                } catch (final OXException e) {
-                    throw new SettingException(e);
-                }
+            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws SettingException {
+                setting.setSingleValue(Boolean.valueOf(OXFolderProperties.isEnableInternalUsersEdit()));
             }
+
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return true;
             }

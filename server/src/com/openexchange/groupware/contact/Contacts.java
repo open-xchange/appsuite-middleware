@@ -50,8 +50,10 @@
 package com.openexchange.groupware.contact;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeResources;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
@@ -1109,6 +1111,228 @@ public final class Contacts {
                 } catch (final Exception ex) {
                     LOG.error("Unable to set setAutoCommit = true");
                 }
+                try {
+                    DBPool.closeWriterSilent(ctx, writecon);
+                } catch (final Exception ex) {
+                    LOG.error("Unable to set return writeconnection");
+                }
+            }
+        }
+    }
+
+    public static void performUserContactStorageUpdate(Contact contact, java.util.Date lastModified, int userId, int[] groups, Context ctx, UserConfiguration userConfig) throws ContactException, OXException {
+        validateEmailAddress(contact);
+        if (!contact.containsParentFolderID() || (contact.getParentFolderID() == 0)) {
+            contact.setParentFolderID(FolderObject.SYSTEM_LDAP_FOLDER_ID);
+        }
+        final ContactSql cs = new ContactMySql(ctx, userId);
+        Contact original = null;
+        Connection writecon = null;
+        Connection readcon = null;
+        try {
+            readcon = DBPool.pickup(ctx);
+            try {
+                original = getContactById(contact.getObjectID(), userId, groups, ctx, userConfig, readcon);
+            } catch (Exception e) {
+                throw EXCEPTIONS.createOXObjectNotFoundException(16, e, I(ctx.getContextId()), I(contact.getObjectID()));
+            }
+            // Check if contact really exists in specified folder
+            if (contact.containsEmail1() && ctx.getMailadmin() != userId && original.getInternalUserId() == userId) {
+                // User tries to edit his primary email address which is allowed by administrator only since this email address is used in
+                // various places throughout the system. Therefore it is denied.
+                throw EXCEPTIONS.createOXPermissionException(73, I(ctx.getContextId()), I(contact.getObjectID()), I(userId));
+            }
+
+            // ++++ MOVE ++++ Check Rights for destination
+            if (contact.getParentFolderID() != FolderObject.SYSTEM_LDAP_FOLDER_ID) {
+                throw EXCEPTIONS.createOXPermissionException(69, I(FolderObject.SYSTEM_LDAP_FOLDER_ID), I(ctx.getContextId()), I(userId));
+            }
+            // ALL RIGHTS CHECK SO FAR, CHECK FOR MODIFY ONLY OWN
+            if (original.getCreatedBy() != userId) {
+                throw EXCEPTIONS.createOXConflictException(17, I(FolderObject.SYSTEM_LDAP_FOLDER_ID), I(ctx.getContextId()), I(userId));
+            }
+            if (contact.getPrivateFlag() || original.getPrivateFlag()) {
+                throw EXCEPTIONS.createOXConflictException(65, I(ctx.getContextId()), I(contact.getObjectID()));
+            }
+
+            final java.util.Date server_date = original.getLastModified();
+            if (DEBUG) {
+                LOG.debug("Compare Dates for Contact Update\nClient-Date=" + lastModified.getTime() + "\nServer-Date=" + server_date.getTime());
+            }
+            if ((lastModified != null) && (lastModified.getTime() > -1) && (lastModified.getTime() < server_date.getTime())) {
+                throw EXCEPTIONS.createOXConcurrentModificationException(19);
+            }
+            if (contact.containsDisplayName() && (null == contact.getDisplayName() || "".equals(contact.getDisplayName()))) {
+                throw EXCEPTIONS.create(66);
+            }
+            if (contact.containsSurName() && (null == contact.getSurName() || "".equals(contact.getSurName()))) {
+                throw EXCEPTIONS.create(75);
+            }
+            if (contact.containsGivenName() && (null == contact.getGivenName() || "".equals(contact.getGivenName()))) {
+                throw EXCEPTIONS.create(64);
+            }
+
+            // Check for duplicate display name.
+            if (contact.containsDisplayName() && (contact.getDisplayName() != null)) {
+                Statement stmt = null;
+                ResultSet rs = null;
+                final ContactSql csql = new ContactMySql(ctx, userId);
+                csql.setFolder(contact.getParentFolderID());
+                final ContactSearchObject cso = new ContactSearchObject();
+                cso.setDisplayName(contact.getDisplayName());
+                cso.setIgnoreOwn(contact.getObjectID());
+                csql.setContactSearchObject(cso);
+                csql.setSelect(csql.iFgetColsString(new int[] { 1, 20, }).toString());
+                csql.setSearchHabit(" AND ");
+                try {
+                    stmt = csql.getSqlStatement(readcon);
+                    rs = ((PreparedStatement) stmt).executeQuery();
+                    if (rs.next()) {
+                        throw EXCEPTIONS.create(67, I(ctx.getContextId()), I(contact.getObjectID()));
+                    }
+                } catch (final SQLException sq) {
+                    throw EXCEPTIONS.create(66, sq, I(ctx.getContextId()), I(contact.getObjectID()));
+                } finally {
+                    closeSQLStuff(rs, stmt);
+                }
+            }
+            if ((!contact.containsFileAs() || ((contact.getFileAs() != null) && (contact.getFileAs().length() > 0))) && (contact.getDisplayName() != null)) {
+                contact.setFileAs(contact.getDisplayName());
+            }
+
+            // Check for bad characters
+            checkCharacters(contact);
+        } catch (final DBPoolingException oe) {
+            throw EXCEPTIONS.create(20, oe);
+        } finally {
+            try {
+                DBPool.closeReaderSilent(ctx, readcon);
+            } catch (final Exception ex) {
+                LOG.error("Unable to close READ Connection", ex);
+            }
+        }
+
+        PreparedStatement ps = null;
+        final StringBuilder update = new StringBuilder();
+        try {
+            boolean modifiedDisplayName = false;
+            final int[] mod = new int[650];
+            int cnt = 0;
+            for (int i = 0; i < 650; i++) {
+                if ((mapping[i] != null) && !mapping[i].compare(contact, original)) {
+                    // Check if modified field is DISPLAY-NAME and contact denotes a system user
+                    if (i == Contact.DISPLAY_NAME && original.getInternalUserId() > 0) {
+                        modifiedDisplayName = true;
+                    }
+                    mod[cnt] = i;
+                    cnt++;
+                }
+            }
+            final int[] modtrim = new int[cnt];
+            System.arraycopy(mod, 0, modtrim, 0, cnt);
+
+            if (modtrim.length <= 0) {
+                throw EXCEPTIONS.create(22, I(ctx.getContextId()), I(contact.getObjectID()));
+            }
+
+            for (int i = 0; i < modtrim.length; i++) {
+                if ((mapping[modtrim[i]] != null) && mapping[modtrim[i]].containsElement(contact) && (modtrim[i] != Contact.DISTRIBUTIONLIST) && (modtrim[i] != Contact.LINKS) && (modtrim[i] != Contact.OBJECT_ID) && (i != Contact.IMAGE1_CONTENT_TYPE)) {
+                    update.append(mapping[modtrim[i]].getDBFieldName()).append(" = ?,");
+                }
+            }
+            final int id = contact.getObjectID();
+            if (id == -1) {
+                throw EXCEPTIONS.createOXConflictException(21);
+            }
+            final long lmd = System.currentTimeMillis();
+
+            final StringBuilder updater = cs.iFperformContactStorageUpdate(update, lmd, id, ctx.getContextId());
+
+            writecon = DBPool.pickupWriteable(ctx);
+            ps = writecon.prepareStatement(updater.toString());
+            int counter = 1;
+            for (int i = 0; i < modtrim.length; i++) {
+                if ((mapping[modtrim[i]] != null) && mapping[modtrim[i]].containsElement(contact) && (modtrim[i] != Contact.DISTRIBUTIONLIST) && (modtrim[i] != Contact.LINKS) && (modtrim[i] != Contact.OBJECT_ID) && (i != Contact.IMAGE1_CONTENT_TYPE)) {
+                    mapping[modtrim[i]].fillPreparedStatement(ps, counter, contact);
+                    counter++;
+                }
+            }
+
+            final Date ddd = new Date(lmd);
+            contact.setLastModified(ddd);
+
+            writecon.setAutoCommit(false);
+
+            if (DEBUG) {
+                LOG.debug("INFO: YOU WANT TO UPDATE THIS: cid=" + ctx.getContextId() + " oid=" + contact.getObjectID() + " -> " + ps.toString());
+            }
+            ps.execute();
+
+            if (contact.containsNumberOfDistributionLists() && (contact.getSizeOfDistributionListArray() > 0)) {
+                writeDistributionListArrayUpdate(
+                    contact.getDistributionList(),
+                    original.getDistributionList(),
+                    contact.getObjectID(),
+                    ctx.getContextId(),
+                    writecon);
+            }
+            if (contact.containsNumberOfLinks() && (contact.getSizeOfLinks() > 0)) {
+                writeContactLinkArrayUpdate(contact.getLinks(), original.getLinks(), contact.getObjectID(), ctx.getContextId(), writecon);
+            }
+
+            if (contact.containsImage1()) {
+                if (contact.getImage1() != null) {
+                    if (ContactConfig.getInstance().getProperty(PROP_SCALE_IMAGES).equalsIgnoreCase("true")) {
+                        try {
+                            contact.setImage1(scaleContactImage(contact.getImage1(), contact.getImageContentType()));
+                        } catch (final IOException ex) {
+                            throw EXCEPTIONS.create(23, ex);
+                        } catch (final Exception ex) {
+                            throw EXCEPTIONS.create(59, ex);
+                        }
+                    } else {
+                        checkImageSize(contact.getImage1().length, Integer.parseInt(ContactConfig.getInstance().getProperty(
+                            PROP_MAX_IMAGE_SIZE)));
+                    }
+                    if (original.containsImage1()) {
+                        updateContactImage(contact.getObjectID(), contact.getImage1(), ctx.getContextId(), contact.getImageContentType(), writecon);
+                    } else {
+                        writeContactImage(contact.getObjectID(), contact.getImage1(), ctx.getContextId(), contact.getImageContentType(), writecon);
+                    }
+                } else if (original.containsImage1()) {
+                    try {
+                        deleteImage(contact.getObjectID(), ctx.getContextId(), writecon);
+                    } catch (final SQLException oxee) {
+                        LOG.error("Unable to delete Contact Image", oxee);
+                    }
+                }
+            }
+            // Check for DISPLAY-NAME update
+            if (modifiedDisplayName) {
+                OXFolderAdminHelper.propagateUserModification(
+                    original.getInternalUserId(),
+                    new int[] { Contact.DISPLAY_NAME },
+                    System.currentTimeMillis(),
+                    writecon,
+                    writecon,
+                    ctx.getContextId());
+            }
+            writecon.commit();
+        } catch (final OXException ox) {
+            rollback(writecon);
+            throw ox;
+        } catch (final DBPoolingException oe) {
+            throw EXCEPTIONS.create(55, oe);
+        } catch (final DataTruncation se) {
+            rollback(writecon);
+            throw Contacts.getTruncation(writecon, se, "prg_contacts", contact);
+        } catch (final SQLException se) {
+            rollback(writecon);
+            throw EXCEPTIONS.create(24, I(ctx.getContextId()), I(contact.getObjectID()));
+        } finally {
+            closeSQLStuff(ps);
+            autocommit(writecon);
+            if (null != writecon) {
                 try {
                     DBPool.closeWriterSilent(ctx, writecon);
                 } catch (final Exception ex) {

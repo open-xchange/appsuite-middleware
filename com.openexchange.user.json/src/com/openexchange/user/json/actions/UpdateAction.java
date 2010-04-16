@@ -112,7 +112,7 @@ public final class UpdateAction extends AbstractUserAction {
             ServiceRegistry.getInstance().getService(ContactInterfaceFactory.class, true).create(
                 Constants.USER_ADDRESS_BOOK_FOLDER_ID,
                 session);
-        contactInterface.updateContactObject(parsedUserContact, Constants.USER_ADDRESS_BOOK_FOLDER_ID, clientLastModified);
+        contactInterface.updateUserContact(parsedUserContact, clientLastModified);
         /*
          * Update user, too
          */

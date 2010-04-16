@@ -103,6 +103,10 @@ public class SimContactSQLInterface implements ContactSQLInterface {
 
     }
 
+    public void updateUserContact(Contact contact, Date lastmodified) throws OXException {
+        // Nothing to do.
+    }
+
     /*
      * (non-Javadoc)
      * @see
