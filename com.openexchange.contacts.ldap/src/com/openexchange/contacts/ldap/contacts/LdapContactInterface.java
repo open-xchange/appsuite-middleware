@@ -456,6 +456,10 @@ public class LdapContactInterface implements ContactInterface {
         LOG.info("Called updateContactObject");
     }
 
+    public void updateUserContact(Contact contact, Date lastmodified) throws OXException {
+        LOG.info("Called updateUserContact");
+    }
+
     private void addFilterFor(final String fieldname, final String searchString, final StringBuilder sb) {
         if ("*".equals(searchString)) {
             sb.append("(");

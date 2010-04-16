@@ -21,6 +21,10 @@
  - Bugfix #15794: Empty Yahoo-Addressbooks work now
  - Bugfix #15789: Removed reflection from the crawler bundle
 
+* 2010-04-15 - marcus.klein@open-xchange.com
+
+ - Bugfix #15891: Do not check global address book folder permissions if user edits his own contact through user interface.
+
 * 2010-04-06 - marcus.klein@open-xchange.com
 
  - Bugfix #15656: Disabling configurable envelope-from for external mail accounts.
