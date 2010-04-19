@@ -61,7 +61,7 @@ import com.openexchange.groupware.AbstractOXException;
 /**
  * {@link SimpleTableCreationTask}
  *
- * @author <a href="mailto:firstname.lastname@open-xchange.com">Firstname Lastname</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public abstract class SimpleTableCreationTask extends UpdateTaskAdapter {
 
