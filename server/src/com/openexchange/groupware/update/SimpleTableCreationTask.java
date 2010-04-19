@@ -57,10 +57,9 @@ import java.sql.Statement;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
 
-
 /**
  * {@link SimpleTableCreationTask}
- *
+ * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public abstract class SimpleTableCreationTask extends UpdateTaskAdapter {
@@ -75,7 +74,7 @@ public abstract class SimpleTableCreationTask extends UpdateTaskAdapter {
         try {
             con.setAutoCommit(false);
             Statement statement = con.createStatement();
-            statement.execute( getStatement() );
+            statement.execute(getStatement());
             con.commit();
         } catch (SQLException e) {
             rollback(con);
