@@ -63,6 +63,6 @@ public interface UpdateTaskProviderService {
      * 
      * @return A collection view of this provider's update tasks.
      */
-    public Collection<UpdateTask> getUpdateTasks();
+    public Collection<? extends UpdateTask> getUpdateTasks();
 
 }
