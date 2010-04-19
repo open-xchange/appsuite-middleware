@@ -1,3 +1,7 @@
+* 2010-04-19 - marcus.klein@open-xchange.com
+
+ - Bugfix #15900: Corrected class loading problem due to annotation based exception framework.
+
 * 2010-04-14 - marcus.klein@open-xchange.com
 
  - Bugfix #15790: Not failing if some context has no login mappings.
