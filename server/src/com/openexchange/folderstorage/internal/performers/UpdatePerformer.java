@@ -159,11 +159,11 @@ public final class UpdatePerformer extends AbstractPerformer {
             }
             final boolean changePermissions;
             {
-                final Permission[] newPerms = folder.getPermissions();
+                final Permission[] newPerms = stripSystemPermissions(folder.getPermissions());
                 if (null == newPerms) {
                     changePermissions = false;
                 } else {
-                    final Permission[] oldPerms = storageFolder.getPermissions();
+                    final Permission[] oldPerms = stripSystemPermissions(storageFolder.getPermissions());
                     if (newPerms.length != oldPerms.length) {
                         changePermissions = true;
                     } else {
@@ -370,6 +370,21 @@ public final class UpdatePerformer extends AbstractPerformer {
             }
         }
         return nonExistingName;
+    }
+
+    private static Permission[] stripSystemPermissions(final Permission[] permissions) {
+        if (null == permissions) {
+            return null;
+        }
+        final int len = permissions.length;
+        final List<Permission> list = new ArrayList<Permission>(len);
+        for (int i = 0; i < len; i++) {
+            final Permission permission = permissions[i];
+            if (0 == permission.getSystem()) {
+                list.add(permission);
+            }
+        }
+        return list.toArray(new Permission[list.size()]);
     }
 
 }
