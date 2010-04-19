@@ -68,8 +68,8 @@ public class OXMFErrorStrings implements LocalizableStrings{
     // A HTTPException occurred: %1$s. Was trying to get the service at %2$s.
     public static final String HttpException = "A HTTPException occurred: %1$s. Was trying to get the service at %2$s.";
     
-    // Can only post to external subscription soures
-    public static final String CAN_ONLY_POST_TO_EXTERNAL_SUBSCRIPTION_SOURCES = "Can only post to external subscription soures";
+    // Can only post to external subscription sources.
+    public static final String CAN_ONLY_POST_TO_EXTERNAL_SUBSCRIPTION_SOURCES = "Can only post to external subscription sources.";
     
     // Could not fetch site at %1$s. Please check the spelling or whether you can reach the site in your browser.
     public static final String ERROR_LOADING_SUBSCRIPTION = "Could not fetch site at %1$s. Please check the spelling or whether you can reach the site in your browser.";
