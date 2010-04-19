@@ -49,63 +49,23 @@
 
 package com.openexchange.publish.database;
 
-import com.openexchange.database.AbstractCreateTableImpl;
+import com.openexchange.groupware.update.SimpleTableCreationTask;
+
 
 /**
- * Creates tables necessary to run the publish part of PubSub.
- * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class CreatePublicationTables extends AbstractCreateTableImpl {
-    
-    public static final String CREATE_USER_AND_PASSWORD_CREATE_STATEMENT = 
-        "CREATE TABLE publication_users (" +
-            "cid INT, " +
-            "pub_id INT, " +
-            "name VARCHAR(32), " +
-        	"password VARCHAR(32), " +
-        	"FOREIGN KEY (pub_id) " +
-        	"REFERENCES publications(id), " +
-        	"FOREIGN KEY (cid) " +
-        	"REFERENCES publications(cid)" +
-        ")";
-    
+public class PublicationWithUsernameAndPasswordUpdateTask extends SimpleTableCreationTask {
+
     @Override
-    public String[] getCreateStatements() {
-        return new String[] { 
-            "CREATE TABLE publications (" 
-            + "id INT4 UNSIGNED NOT NULL," 
-            + "cid INT4 UNSIGNED NOT NULL," 
-            + "user_id INT4 UNSIGNED NOT NULL,"
-            + "entity INT4 UNSIGNED NOT NULL," 
-            + "module VARCHAR(255) NOT NULL," 
-            + "configuration_id INT4 UNSIGNED NOT NULL," 
-            + "target_id VARCHAR(255) NOT NULL," 
-            + "PRIMARY KEY (cid, id)," 
-            + "FOREIGN KEY(cid, user_id) REFERENCES user(cid, id))" 
-            + "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;",
-            
-            "CREATE TABLE sequence_publications (" 
-            + "cid INT4 UNSIGNED NOT NULL," 
-            + "id INT4 UNSIGNED NOT NULL," 
-            + "PRIMARY KEY  (cid))" 
-            + "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;"
-        };
+    public String[] getDependencies() {
+        return new String[0];
     }
 
-
-    public String[] requiredTables() {
-        return new String[]{
-            "user"
-        };
+    @Override
+    protected String getStatement() {
+        return CreatePublicationTables.CREATE_USER_AND_PASSWORD_CREATE_STATEMENT;
     }
 
-
-    public String[] tablesToCreate() {
-        return new String[]{
-            "publications",
-            "sequence_publications"
-        };
-    }
 
 }
