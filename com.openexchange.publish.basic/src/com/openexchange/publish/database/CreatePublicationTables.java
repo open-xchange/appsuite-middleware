@@ -60,8 +60,8 @@ public class CreatePublicationTables extends AbstractCreateTableImpl {
     
     public static final String CREATE_USER_AND_PASSWORD_CREATE_STATEMENT = 
         "CREATE TABLE publication_users (" +
-            "cid INT, " +
-            "pub_id INT, " +
+            "cid INT4, " +
+            "pub_id INT4, " +
             "name VARCHAR(32), " +
         	"password VARCHAR(32), " +
         	"FOREIGN KEY (pub_id) " +
