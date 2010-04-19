@@ -79,7 +79,7 @@ public final class UpdateTaskCustomizer implements ServiceTrackerCustomizer {
         UpdateTaskProviderService providerService = (UpdateTaskProviderService) context.getService(reference);
         DynamicList registry = DynamicList.getInstance();
         // Get provider's collection
-        final Collection<UpdateTask> collection = providerService.getUpdateTasks();
+        final Collection<UpdateTask> collection = (Collection<UpdateTask>) providerService.getUpdateTasks();
         boolean error = false;
         for (UpdateTask task : collection) {
             if (!registry.addUpdateTask(task)) {
@@ -110,7 +110,7 @@ public final class UpdateTaskCustomizer implements ServiceTrackerCustomizer {
             try {
                 final DynamicList registry = DynamicList.getInstance();
                 final UpdateTaskProviderService providerService = (UpdateTaskProviderService) service;
-                final Collection<UpdateTask> collection = providerService.getUpdateTasks();
+                final Collection<UpdateTask> collection = (Collection<UpdateTask>) providerService.getUpdateTasks();
                 for (final UpdateTask task : collection) {
                     registry.removeUpdateTask(task);
                 }
