@@ -181,7 +181,7 @@ public final class ContactInterfaceDiscoveryServiceImpl implements ContactInterf
             this.ctx = ctx;
         }
 
-        public ContactInterface newContactInterface(final Session session) throws OXException {
+        public ContactInterface newContactInterface(final Session session) {
             return new RdbContactSQLImpl(session, ctx);
         }
     } // End of RdbContactInterfaceProvider
