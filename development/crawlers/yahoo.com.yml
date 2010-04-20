@@ -2,7 +2,7 @@
 crawlerApiVersion: 616
 displayName: yahoo.com
 id: com.openexchange.subscribe.crawler.yahoocom
-priority: 5
+priority: 6
 workflowString: |
   --- !com.openexchange.subscribe.crawler.Workflow
   steps: 
@@ -35,7 +35,7 @@ workflowString: |
         page: ""
         pageParts: 
           - !com.openexchange.subscribe.crawler.internal.PagePart
-            regex: "(<h1>\\s)([a-zA-Z\\säöüß-]*)(</h1>)"
+            regex: "(<h1>\\s)([a-zA-Z\\säöüß-éè]*)(</h1>)"
             type: 1
             typeOfInfo: display_name
           - !com.openexchange.subscribe.crawler.internal.PagePart
@@ -67,15 +67,17 @@ workflowString: |
             type: 1
             typeOfInfo: title
           - !com.openexchange.subscribe.crawler.internal.PagePart
-            regex: "(Address|Adresse):[\\s]*<\\/dt>[\\s]*<dd>[\\s]*<div>[\\s]*([a-zA-Z0-9\\säöüß]*)(<br \\/>)"
+            keepStringAfterMatching: true
+            regex: "(?s)(Address|Adresse):(?:[^>]*>){3}\\s*([a-zA-Z0-9\\.\\säöüß]*)(<br \\/>)"
             type: 1
             typeOfInfo: street_business
           - !com.openexchange.subscribe.crawler.internal.PagePart
-            regex: "(<br \\/>)*([0-9]*)(\\s)"
+            keepStringAfterMatching: true
+            regex: "(?s)(Address|Adresse):(?:[^>]*>){5}\\s*([0-9]*)()"
             type: 1
             typeOfInfo: postal_code_business
           - !com.openexchange.subscribe.crawler.internal.PagePart
-            regex: "()([a-zA-Z0-9\\säöüß]*)()"
+            regex: "(?s)(Address|Adresse):(?:[^>]*>){5}\\s*[0-9]*\\s*([^0-9<]*)(<)"
             type: 1
             typeOfInfo: city_business
           - !com.openexchange.subscribe.crawler.internal.PagePart
@@ -88,15 +90,17 @@ workflowString: |
           - !com.openexchange.subscribe.crawler.internal.PagePart
             regex: "(<h2>(Personal|Pers.nliche Daten)</h2>)"
           - !com.openexchange.subscribe.crawler.internal.PagePart
-            regex: "(Address|Adresse):[\\s]*<\\/dt>[\\s]*<dd>[\\s]*<div>[\\s]*([a-zA-Z0-9\\säöüß]*)(<br \\/>)*"
+            keepStringAfterMatching: true
+            regex: "(?s)(Address|Adresse):(?:[^>]*>){3}\\s*([a-zA-Z0-9\\.\\säöüß]*)(<br \\/>)"
             type: 1
             typeOfInfo: street_home
           - !com.openexchange.subscribe.crawler.internal.PagePart
-            regex: "(<br \\/>\\s)([0-9]*)(\\s)"
+            keepStringAfterMatching: true
+            regex: "(?s)(Address|Adresse):(?:[^>]*>){5}\\s*([0-9]*)()"
             type: 1
             typeOfInfo: postal_code_home
           - !com.openexchange.subscribe.crawler.internal.PagePart
-            regex: "()([a-zA-Z0-9\\säöüß]*)()"
+            regex: "(?s)(Address|Adresse):(?:[^>]*>){5}\\s*[0-9]*\\s*([^0-9<]*)(<)"
             type: 1
             typeOfInfo: city_home
           - !com.openexchange.subscribe.crawler.internal.PagePart
