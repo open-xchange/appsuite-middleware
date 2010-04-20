@@ -49,11 +49,15 @@
 
 package com.openexchange.publish.osgi;
 
+import java.util.Arrays;
+import java.util.Collection;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.database.CreateTableService;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.publish.database.CreatePublicationTables;
+import com.openexchange.publish.database.PublicationWithUsernameAndPasswordUpdateTask;
 
 
 /**
@@ -68,6 +72,12 @@ public class CreateTableActivator implements BundleActivator {
 
     public void start(final BundleContext context) throws Exception {
         serviceRegistration = context.registerService(CreateTableService.class.getName(), new CreatePublicationTables(), null);
+        
+        context.registerService(UpdateTaskProviderService.class.getName(), new UpdateTaskProviderService() {
+            public Collection<PublicationWithUsernameAndPasswordUpdateTask> getUpdateTasks() {
+                return Arrays.asList((new PublicationWithUsernameAndPasswordUpdateTask()));
+            }
+        }, null);
     }
 
     public void stop(final BundleContext context) throws Exception {
