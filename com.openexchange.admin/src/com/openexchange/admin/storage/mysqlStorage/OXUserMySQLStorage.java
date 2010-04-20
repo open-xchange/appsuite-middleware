@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.storage.mysqlStorage;
 
+import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
@@ -108,6 +109,7 @@ import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.ServiceException;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
@@ -665,7 +667,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 }
             }
             changePrimaryMailAccount(ctx, con, usrdata, userId);
-
+            storeFolderTree(ctx, con, usrdata, userId);
             // update last modified column
             changeLastModified(userId, ctx, con);
 
@@ -719,6 +721,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             log.error("Error", e);
             rollback(con);
             throw new StorageException(e);
+        } catch (AbstractOXException e) {
+            log.error(e.getMessage(), e);
+            rollback(con);
+            throw new StorageException(e.toString());
         } finally {
             try {
                 if (folder_update != null) {
@@ -809,12 +815,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public int create(final Context ctx, final User usrdata, final UserModuleAccess moduleAccess, final Connection write_ox_con, final int internal_user_id, final int contact_id, final int uid_number) throws StorageException {
+    public int create(final Context ctx, final User usrdata, final UserModuleAccess moduleAccess, final Connection con, final int internal_user_id, final int contact_id, final int uid_number) throws StorageException {
         PreparedStatement ps = null;
         final String LOGINSHELL = "/bin/bash";
 
         try {
-            ps = write_ox_con.prepareStatement("SELECT user FROM user_setting_admin WHERE cid=?");
+            ps = con.prepareStatement("SELECT user FROM user_setting_admin WHERE cid=?");
             ps.setInt(1, ctx.getId());
             final ResultSet rs = ps.executeQuery();
             int admin_id = 0;
@@ -831,7 +837,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
             PreparedStatement stmt = null;
             try {
-                stmt = write_ox_con.prepareStatement("INSERT INTO user (cid,id,userPassword,passwordMech,shadowLastChange,mail,timeZone,preferredLanguage,mailEnabled,imapserver,smtpserver,contactId,homeDirectory,uidNumber,gidNumber,loginShell,imapLogin) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                stmt = con.prepareStatement("INSERT INTO user (cid,id,userPassword,passwordMech,shadowLastChange,mail,timeZone,preferredLanguage,mailEnabled,imapserver,smtpserver,contactId,homeDirectory,uidNumber,gidNumber,loginShell,imapLogin) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
                 stmt.setInt(1, ctx.getId().intValue());
                 stmt.setInt(2, internal_user_id);
                 stmt.setString(3, passwd);
@@ -896,10 +902,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 final int def_group_id;
                 if (usrdata.getDefault_group() == null) {
                     // Set to context's default group
-                    def_group_id = tool.getDefaultGroupForContext(ctx, write_ox_con);
+                    def_group_id = tool.getDefaultGroupForContext(ctx, con);
                 } else {
                     def_group_id = usrdata.getDefault_group().getId().intValue();
-                    if (!tool.existsGroup(ctx, write_ox_con, def_group_id)) {
+                    if (!tool.existsGroup(ctx, con, def_group_id)) {
                         throw new StorageException("No such group with ID " + def_group_id + " in context " + ctx.getId());
                     }
                 }
@@ -908,7 +914,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 // if yes, update user table to correct gidnumber of users
                 // default group
                 if (Integer.parseInt(prop.getGroupProp(AdminProperties.Group.GID_NUMBER_START, "-1")) > 0) {
-                    final int gid_number = tool.getGidNumberOfGroup(ctx, def_group_id, write_ox_con);
+                    final int gid_number = tool.getGidNumberOfGroup(ctx, def_group_id, con);
                     if (-1 == gid_number) {
                         // Specified group does not exist
                         stmt.setInt(15, NOGROUP);
@@ -998,7 +1004,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 contact_query.append(questionmarks);
                 contact_query.append(")");
 
-                stmt = write_ox_con.prepareStatement(contact_query.toString());
+                stmt = con.prepareStatement(contact_query.toString());
 
                 stmt.setInt(1, ctx.getId());
                 stmt.setInt(2, internal_user_id);
@@ -1085,7 +1091,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     while (itr.hasNext()) {
                         final String tmp_mail = itr.next().toString().trim();
                         if (tmp_mail.length() > 0) {
-                            stmt = write_ox_con.prepareStatement("INSERT INTO user_attribute (cid,id,name,value) VALUES (?,?,?,?)");
+                            stmt = con.prepareStatement("INSERT INTO user_attribute (cid,id,name,value) VALUES (?,?,?,?)");
                             stmt.setInt(1, ctx.getId());
                             stmt.setInt(2, internal_user_id);
                             stmt.setString(3, "alias");
@@ -1097,18 +1103,18 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 }
                 
                 // Fill in dynamic attributes
-                insertDynamicAttributes(write_ox_con, ctx.getId(), internal_user_id, usrdata.getUserAttributes());
+                insertDynamicAttributes(con, ctx.getId(), internal_user_id, usrdata.getUserAttributes());
                 
 
                 // add user to login2user table with the internal id
-                stmt = write_ox_con.prepareStatement("INSERT INTO login2user (cid,id,uid) VALUES (?,?,?)");
+                stmt = con.prepareStatement("INSERT INTO login2user (cid,id,uid) VALUES (?,?,?)");
                 stmt.setInt(1, ctx.getId());
                 stmt.setInt(2, internal_user_id);
                 stmt.setString(3, usrdata.getName());
                 stmt.executeUpdate();
                 stmt.close();
 
-                stmt = write_ox_con.prepareStatement("INSERT INTO groups_member (cid,id,member) VALUES (?,?,?)");
+                stmt = con.prepareStatement("INSERT INTO groups_member (cid,id,member) VALUES (?,?,?)");
                 stmt.setInt(1, ctx.getId());
                 stmt.setInt(2, def_group_id);
                 stmt.setInt(3, internal_user_id);
@@ -1116,7 +1122,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.close();
 
                 if (mustMapAdmin) {
-                    stmt = write_ox_con.prepareStatement("INSERT INTO user_setting_admin (cid,user) VALUES (?,?)");
+                    stmt = con.prepareStatement("INSERT INTO user_setting_admin (cid,user) VALUES (?,?)");
                     stmt.setInt(1, ctx.getId());
                     stmt.setInt(2, admin_id);
                     stmt.executeUpdate();
@@ -1124,9 +1130,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 }
 
                 // add the module access rights to the db
-                final int[] all_groups = getGroupsForUser(ctx, internal_user_id, write_ox_con);
+                final int[] all_groups = getGroupsForUser(ctx, internal_user_id, con);
 
-                myChangeInsertModuleAccess(ctx, internal_user_id, moduleAccess, true, write_ox_con, write_ox_con, all_groups);
+                myChangeInsertModuleAccess(ctx, internal_user_id, moduleAccess, true, con, con, all_groups);
 
                 // add users standard mail settings
                 final StringBuffer sb = new StringBuffer("INSERT INTO user_setting_mail (cid,user,std_trash,std_sent,std_drafts,std_spam,send_addr,bits,confirmed_spam,confirmed_ham,");
@@ -1149,7 +1155,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 }
                 sb.deleteCharAt(sb.length() - 1);
                 sb.append(')');
-                stmt = write_ox_con.prepareStatement(sb.toString());
+                stmt = con.prepareStatement(sb.toString());
                 stmt.setInt(1, ctx.getId());
                 stmt.setInt(2, internal_user_id);
                 stmt.setString(3, std_mail_folder_trash);
@@ -1184,15 +1190,17 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 // by the ox api
                 if (internal_user_id != admin_id) {
                     final OXFolderAdminHelper oxa = new OXFolderAdminHelper();
-                    oxa.addUserToOXFolders(internal_user_id, usrdata.getDisplay_name(), lang, ctx.getId(), write_ox_con);
+                    oxa.addUserToOXFolders(internal_user_id, usrdata.getDisplay_name(), lang, ctx.getId(), con);
                 }
             } finally {
                 closePreparedStatement(stmt);
             }
             // Write primary mail account.
-            createPrimaryMailAccount(ctx, write_ox_con, usrdata, internal_user_id);
+            createPrimaryMailAccount(ctx, con, usrdata, internal_user_id);
             // Write GUI configuration to database.
-            storeUISettings(ctx, write_ox_con, usrdata, internal_user_id);
+            storeUISettings(ctx, con, usrdata, internal_user_id);
+            // Set wanted folder tree.
+            storeFolderTree(ctx, con, usrdata, internal_user_id);
             if (log.isInfoEnabled()) {
                 log.info("User " + internal_user_id + " created!");
             }
@@ -1208,6 +1216,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             throw new StorageException(e.toString());
         } catch (final OXException e) {
             log.error("OX Error", e);
+            throw new StorageException(e.toString());
+        } catch (AbstractOXException e) {
+            log.error(e.getMessage(), e);
             throw new StorageException(e.toString());
         } catch (final NoSuchAlgorithmException e) {
             // Here we throw without rollback, because at the point this
@@ -1312,6 +1323,17 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 }
             }
         }
+    }
+
+    private void storeFolderTree(Context ctx, Connection con, User user, int userId) throws SettingException {
+        if (!user.isFolderTreeSet()) {
+            return;
+        }
+        Integer folderTree = user.getFolderTree();
+        if (null == folderTree) {
+            return;
+        }
+        ServerUserSetting.getInstance(con).setFolderTree(i(ctx.getId()), userId, folderTree);
     }
 
     @Override
