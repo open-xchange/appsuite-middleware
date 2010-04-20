@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 5
+%define		ox_release 1
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -492,6 +492,34 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Fri Apr 16 2010 - marcus.klein@open-xchange.com
+ - Bugfix #15891: Do not check global address book folder permissions if user edits his own contact through user interface.
+* Wed Apr 14 2010 - marcus.klein@open-xchange.com
+ - Bugfix #15790: Not failing if some context has no login mappings.
+* Tue Apr 13 2010 - thorben.betten@open-xchange.com
+ - Bugfix #15655: Ignoring error when creating a default folder for an external account
+ - Bugfix #15671: Probing for optional TOP and UIDL POP3 commands
+ - Bugfix #15686: Not handling spam for external mail accounts.
+* Tue Apr 13 2010 - marcus.klein@open-xchange.com
+ - Bugfix #15656: Disabling configurable envelope-from for external mail accounts.
+ - Bugfix #15700: Creating a new action for importing mails from body of request as multipart/form-data stream.
+ - Bugfix #15764: Web crawler for web.de works now with an empty address book.
+ - Bugfix #15744: Generating display name for GMX contacts from given and sure name.
+ - Bugfix #15747: Using a more genering exception message if the crawler login fails.
+* Tue Apr 13 2010 - karsten.will@open-xchange.com
+ - Bugfix #15660: Using commons HttpClient for login to linked in to fix redirect problems with HtmlUnit.
+ - Bugfix #15676: Yahoo crawler can crawl yahoo.de accounts.
+ - Bugfix #15724: LoginWithHttpClientStep expanded to throw correct error when entering wrong credentials
+ - Bugfix #15725: Yahoo crawler now gives readable exception if invalid credentials are entered.
+ - Bugfix #15789: Removed reflection from the crawler bundle
+* Mon Apr 12 2010 - francisco.laguna@open-xchange.com
+ - Bugfix #14932: Move error messages around for translation and make them nicer.
+* Mon Apr 12 2010 - tobias.prinz@open-xchange.com
+ - Bugfix #15596: Crawler for Facebook works again.
+* Mon Apr 12 2010 - choeger@open-xchange.com
+ - Bugfix #15612: /opt/open-xchange/etc/oxfunctions.sh does not work on Ubuntu, which is using dash instead of bash.
+* Thu Apr 01 2010 - tobias.prinz@open-xchange.com
+ - Bugfix #15726: Crawler gives more helpful error message on invalid accounts.
 * Thu Mar 11 2010 - marcus.klein@open-xchange.com
  - Bugfix #15582: Only replacing end date of an appointment if it is a series.
  - Bugfix #15580: Correctly parsing values written as null from the client.
