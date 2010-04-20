@@ -67,6 +67,8 @@
 
     <target name="clean">
         <delete dir="${tmp.dir}"/>
+    	<delete dir="${commonTmpDir}"/>
+        <delete dir="${adminTmpDir}"/>
     </target>
 
     <target name="patchConfigFiles">
