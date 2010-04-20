@@ -541,6 +541,10 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
 
     private boolean defaultSenderAddressset = false;
 
+    private Integer folderTree;
+
+    private boolean folderTreeSet = false;
+
     private Map<String, String> guiPreferences;
     
     /**
@@ -4202,6 +4206,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         this.userfield19 = null;
         this.userfield20 = null;
         this.defaultSenderAddress = null;
+        folderTree = null;
         this.guiPreferences = null;
         this.userAttributes = new HashMap<String, Map<String, String>>();
     }
@@ -4468,6 +4473,19 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         return defaultSenderAddressset;
     }
 
+    public Integer getFolderTree() {
+        return folderTree;
+    }
+
+    public void setFolderTree(Integer folderTree) {
+        folderTreeSet = true;
+        this.folderTree = folderTree;
+    }
+
+    public boolean isFolderTreeSet() {
+        return folderTreeSet;
+    }
+
     /**
      * Sets a generic user attribute
      */
@@ -4663,6 +4681,8 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         result = prime * result + (country_otherset ? 1231 : 1237);
         result = prime * result + ((defaultSenderAddress == null) ? 0 : defaultSenderAddress.hashCode());
         result = prime * result + (defaultSenderAddressset ? 1231 : 1237);
+        result = prime * result + ((folderTree == null) ? 0 : folderTree.hashCode());
+        result = prime * result + (folderTreeSet ? 1231 : 1237);
         result = prime * result + ((default_group == null) ? 0 : default_group.hashCode());
         result = prime * result + (default_groupset ? 1231 : 1237);
         result = prime * result + ((department == null) ? 0 : department.hashCode());
@@ -4996,6 +5016,13 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         } else if (!defaultSenderAddress.equals(other.defaultSenderAddress))
             return false;
         if (defaultSenderAddressset != other.defaultSenderAddressset)
+            return false;
+        if (folderTree == null) {
+            if (other.folderTree != null)
+                return false;
+        } else if (!folderTree.equals(other.folderTree))
+            return false;
+        if (folderTreeSet != other.folderTreeSet)
             return false;
         if (default_group == null) {
             if (other.default_group != null)
