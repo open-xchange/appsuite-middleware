@@ -122,7 +122,6 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.DeltaImpl;
 import com.openexchange.groupware.results.TimedResult;
-import com.openexchange.groupware.tx.AlwaysWriteConnectionProvider;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.DBProviderUser;
 import com.openexchange.groupware.tx.DBService;
@@ -150,7 +149,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
  */
 @OXExceptionSource(classId = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_FACADE_IMPL_INFOSTOREFACADEIMPL, component = EnumComponent.INFOSTORE)
-public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, DBProviderUser {
+public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
     private static final ValidationChain VALIDATION = new ValidationChain();
     static {
@@ -714,7 +713,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, D
     @OXThrowsMultiple(category = {Category.USER_INPUT, Category.CODE_ERROR},
                                 desc = {"To remain consistent in WebDAV no two current versions in a given folder may contain a file with the same filename. The user must either choose a different filename, or switch the other file to a version with a different filename.", "SQL Error while reserving filename"},
                                 exceptionId = {41, 46},
-                                msg = {"Files attached to InfoStore items must have unique names. Filename: %s. The other document with this file name is %s.", "SQL Error while trying to reserver filename."})
+                                msg = {"Files attached to InfoStore items must have unique names. Filename: %s. The other document with this file name is %s.", "SQL Error while reserving filename."})
     private InfostoreFilenameReservation reserve(final String filename, final long folderId, final int id, final Context ctx) throws OXException {
 
         InfostoreFilenameReservation reservation = null;
@@ -821,7 +820,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, D
 
                     final SaveFileWithQuotaAction saveFile = new SaveFileWithQuotaAction();
                     try {
-                        final QuotaFileStorage qfs = (QuotaFileStorage) getFileStorage(sessionObj.getContext());
+                        final QuotaFileStorage qfs = getFileStorage(sessionObj.getContext());
                         saveFile.setStorage(qfs);
                         saveFile.setSizeHint(document.getFileSize());
                         saveFile.setIn(data);
@@ -1060,7 +1059,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, D
             ctxHolder.set(context);
         } else {
             try {
-                final QuotaFileStorage qfs = (QuotaFileStorage) getFileStorage(context);
+                final QuotaFileStorage qfs = getFileStorage(context);
                 qfs.deleteFile(filestoreLocation);
             } catch (final FileStorageException x) {
                 throw new InfostoreException(x);
@@ -1266,10 +1265,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, D
         updateDocument.setQueryCatalog(QUERIES);
         updateDocument.setTimestamp(Long.MAX_VALUE);
 
-        InfostoreFilenameReservation reservation = null;
         if (removeCurrent) {
             metadata = load(metadata.getId(), update.getVersion(), sessionObj.getContext());
-            reservation = reserve(metadata.getFileName(), metadata.getFolderId(), metadata.getId(), sessionObj.getContext());
+            reserve(metadata.getFileName(), metadata.getFolderId(), metadata.getId(), sessionObj.getContext());
         }
 
         try {
@@ -1641,7 +1639,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, D
         lockManager.commit();
         if (null != fileIdRemoveList.get() && fileIdRemoveList.get().size() > 0) {
             try {
-                final QuotaFileStorage qfs = (QuotaFileStorage) getFileStorage(ctxHolder.get());
+                final QuotaFileStorage qfs = getFileStorage(ctxHolder.get());
                 for (final String id : fileIdRemoveList.get()) {
                     try {
                         // System.out.println("REMOVE " + id);
