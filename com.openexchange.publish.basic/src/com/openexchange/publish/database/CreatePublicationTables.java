@@ -61,9 +61,10 @@ public class CreatePublicationTables extends AbstractCreateTableImpl {
     public static final String CREATE_USER_AND_PASSWORD_CREATE_STATEMENT = 
         "CREATE TABLE publication_users (" +
             "cid INT4 UNSIGNED NOT NULL," +
-            "pub_id INT4 UNSIGNED NOT NULL," +
+            "id INT4 UNSIGNED NOT NULL," +
             "name VARCHAR(255) NOT NULL," +
         	"password VARCHAR(255) NOT NULL," +
+        	"PRIMARY KEY (cid,id,name)," +
         	"FOREIGN KEY (cid,pub_id) REFERENCES publications(cid,id)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
@@ -87,6 +88,7 @@ public class CreatePublicationTables extends AbstractCreateTableImpl {
             + "id INT4 UNSIGNED NOT NULL," 
             + "PRIMARY KEY (cid))" 
             + "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci",
+            
             CREATE_USER_AND_PASSWORD_CREATE_STATEMENT
         };
     }
