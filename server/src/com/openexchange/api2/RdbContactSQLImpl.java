@@ -201,7 +201,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
         }
     }
 
-    @OXThrows(category = Category.CODE_ERROR, desc = "", exceptionId = 60, msg = ContactException.EVENT_QUEUE)
+    @OXThrows(category = Category.CODE_ERROR, desc = "", exceptionId = 61, msg = ContactException.EVENT_QUEUE)
     public void updateUserContact(Contact contact, java.util.Date lastModified) throws OXException {
         try {
             final Contact storageVersion = Contacts.getContactById(contact.getObjectID(), session);
@@ -209,9 +209,9 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
             final EventClient ec = new EventClient(session);
             ec.modify(storageVersion, contact, new OXFolderAccess(ctx).getFolderObject(contact.getParentFolderID()));
         } catch (final EventException ise) {
-            throw EXCEPTIONS.create(60, ise);
+            throw EXCEPTIONS.create(61, ise);
         } catch (final ContextException ise) {
-            throw EXCEPTIONS.create(60, ise);
+            throw EXCEPTIONS.create(61, ise);
         } catch (final DBPoolingException e) {
             throw new ContactException(e);
         }
