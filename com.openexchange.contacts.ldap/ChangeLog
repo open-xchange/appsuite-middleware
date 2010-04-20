@@ -1,3 +1,8 @@
+* 2010-04-20 - dennis.sieben@open-xchange.com
+
+ - Bugfix #15899 - Global addressbook doesn't return results via EAS once contacts-ldap is installed
+   - Add new check for null values
+
 * 2009-11-25 - choeger@open-xchange.com
 
  - Bugfix #14479 -  Contacts LDAP bundles does not start (SLES11, IBM JAVA)
