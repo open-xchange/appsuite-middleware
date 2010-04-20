@@ -110,7 +110,6 @@ public class Tree implements PreferencesItemService {
                     }
                 }
                 setting.setSingleValue(tree);
-                
             }
 
             public boolean isAvailable(UserConfiguration userConfig) {
