@@ -57,19 +57,16 @@ import com.openexchange.database.AbstractCreateTableImpl;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class CreatePublicationTables extends AbstractCreateTableImpl {
-    
+
     public static final String CREATE_USER_AND_PASSWORD_CREATE_STATEMENT = 
         "CREATE TABLE publication_users (" +
-            "cid INT4, " +
-            "pub_id INT4, " +
-            "name VARCHAR(32), " +
-        	"password VARCHAR(32), " +
-        	"FOREIGN KEY (pub_id) " +
-        	"REFERENCES publications(id), " +
-        	"FOREIGN KEY (cid) " +
-        	"REFERENCES publications(cid)" +
-        ")";
-    
+            "cid INT4 UNSIGNED NOT NULL," +
+            "pub_id INT4 UNSIGNED NOT NULL," +
+            "name VARCHAR(255) NOT NULL," +
+        	"password VARCHAR(255) NOT NULL," +
+        	"FOREIGN KEY (cid,pub_id) REFERENCES publications(cid,id)" +
+        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+
     @Override
     public String[] getCreateStatements() {
         return new String[] { 
@@ -81,31 +78,24 @@ public class CreatePublicationTables extends AbstractCreateTableImpl {
             + "module VARCHAR(255) NOT NULL," 
             + "configuration_id INT4 UNSIGNED NOT NULL," 
             + "target_id VARCHAR(255) NOT NULL," 
-            + "PRIMARY KEY (cid, id)," 
-            + "FOREIGN KEY(cid, user_id) REFERENCES user(cid, id))" 
-            + "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;",
-            
+            + "PRIMARY KEY (cid,id)," 
+            + "FOREIGN KEY(cid,user_id) REFERENCES user(cid,id))" 
+            + "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci",
+
             "CREATE TABLE sequence_publications (" 
             + "cid INT4 UNSIGNED NOT NULL," 
             + "id INT4 UNSIGNED NOT NULL," 
-            + "PRIMARY KEY  (cid))" 
-            + "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;"
+            + "PRIMARY KEY (cid))" 
+            + "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci",
+            CREATE_USER_AND_PASSWORD_CREATE_STATEMENT
         };
     }
-
 
     public String[] requiredTables() {
-        return new String[]{
-            "user"
-        };
+        return new String[] { "user" };
     }
-
 
     public String[] tablesToCreate() {
-        return new String[]{
-            "publications",
-            "sequence_publications"
-        };
+        return new String[] { "publications", "sequence_publications", "publication_users" };
     }
-
 }

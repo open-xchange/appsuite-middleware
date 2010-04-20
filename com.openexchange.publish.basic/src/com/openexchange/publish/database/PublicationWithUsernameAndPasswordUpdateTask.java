@@ -59,13 +59,11 @@ public class PublicationWithUsernameAndPasswordUpdateTask extends SimpleTableCre
 
     @Override
     public String[] getDependencies() {
-        return new String[0];
+        return new String[] { "com.openexchange.groupware.update.tasks.CreatePublicationTablesTask" };
     }
 
     @Override
     protected String getStatement() {
         return CreatePublicationTables.CREATE_USER_AND_PASSWORD_CREATE_STATEMENT;
     }
-
-
 }
