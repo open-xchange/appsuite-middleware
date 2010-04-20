@@ -106,10 +106,7 @@ public final class GetRequest extends AbstractFolderRequest<GetResponse> {
      * Initializes a new {@link GetRequest} for all columns
      */
     public GetRequest(final String folderIdentifier, final boolean failOnError) {
-        super();
-        this.folderIdentifier = folderIdentifier;
-        this.columns = FolderObject.ALL_COLUMNS;
-        this.failOnError = failOnError;
+        this(folderIdentifier, FolderObject.ALL_COLUMNS, failOnError);
     }
 
     public GetRequest(final int folderId, final int[] columns) {
@@ -120,12 +117,16 @@ public final class GetRequest extends AbstractFolderRequest<GetResponse> {
         this(folderId, columns, true);
     }
 
+    public GetRequest(int folderId) {
+        this(String.valueOf(folderId), FolderObject.ALL_COLUMNS, true);
+    }
+
     public GetRequest setTree(final int tree) {
         this.tree = tree;
         return this;
     }
 
-    public Object getBody() throws JSONException {
+    public Object getBody() {
         return null;
     }
 
@@ -133,9 +134,6 @@ public final class GetRequest extends AbstractFolderRequest<GetResponse> {
         return Method.GET;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Parameter[] getParameters() {
         final Parameter[] params = getParams();
         final List<Parameter> l = new ArrayList<Parameter>(Arrays.asList(params));
