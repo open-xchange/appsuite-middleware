@@ -492,6 +492,8 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Tue Apr 20 2010 - marcus.klein@open-xchange.com
+ - Bugfix #15900: Corrected class loading problem due to annotation based exception framework.
 * Fri Apr 16 2010 - marcus.klein@open-xchange.com
  - Bugfix #15891: Do not check global address book folder permissions if user edits his own contact through user interface.
 * Wed Apr 14 2010 - marcus.klein@open-xchange.com
