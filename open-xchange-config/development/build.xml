@@ -74,6 +74,7 @@
     <target name="patchConfigFiles">
         <fail message="Define conf.subst.patch." unless="conf.subst.patch"/>
         <antcall target="patchSessiondProperties"/>
+    	<antcall target="patchCrawlerProperties"/>
         <antcall target="patchPath"/>
         <antcall target="patchDataRetentionProperties"/>
     </target>
@@ -90,6 +91,13 @@
             <replacefilter token="@sessiondport@" value="33333"/>
         </replace>
     </target>
+	
+	<target name="patchCrawlerProperties">
+        <move tofile="${patch.conf.dir}/crawler.properties" file="${patch.conf.dir}/crawler.properties.in" overwrite="true"/>
+        <replace file="${patch.conf.dir}/crawler.properties">
+            <replacefilter token="@oxgroupwaresysconfdir@" value="${basedir}"/>
+        </replace>
+	</target>
 
     <target name="patchPath">
         <move todir="${patch.conf.dir}" includeemptydirs="false">
