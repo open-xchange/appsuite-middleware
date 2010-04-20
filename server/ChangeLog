@@ -1,3 +1,7 @@
+* 2010-04-20 - karsten.will@open-xchange.com
+
+ - Bugfix #15842 - yahoo crawler auto generates the address class on import
+
 * 2010-04-19 - thorben.betten@open-xchange.com
 
  - Bugfix #15804: Fixed permission update if folder holds a system permission

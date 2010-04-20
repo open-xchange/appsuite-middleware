@@ -75,7 +75,7 @@ public class GenericSubscribeServiceForYahooComTest extends GenericSubscribeServ
         crawler.setDisplayName("yahoo.com");
         crawler.setId("com.openexchange.subscribe.crawler.yahoocom");
         crawler.setCrawlerApiVersion(616);
-        crawler.setPriority(5);
+        crawler.setPriority(6);
         List<Step> steps = new LinkedList<Step>();
         
         String crapBefore = "[^0-9\\+\\(\\)]*";
@@ -105,18 +105,18 @@ public class GenericSubscribeServiceForYahooComTest extends GenericSubscribeServ
         // add a filler to be sure we are in the work part
         pageParts.add(new PagePart("(<h2>(Work|Gesch.ftlich)</h2>)"));
         pageParts.add(new PagePart("<dt>[\\s]*(Company|Firma):[\\s]*<\\/dt>[\\s]*<dd>[\\s]*<div>[\\s]*([^<]*)(<\\/div>)","company"));
-        pageParts.add(new PagePart("<dt>[\\s]*(Title|Titel):[\\s]*<\\/dt>[\\s]*<dd>[\\s]*<div>[\\s]*([^<]*)(<\\/div>)","title"));
-        pageParts.add(new PagePart("(Address|Adresse):[\\s]*<\\/dt>[\\s]*<dd>[\\s]*<div>[\\s]*("+VALID_ADDRESS_PART+")(<br \\/>)", "street_business"));
-        pageParts.add(new PagePart("(<br \\/>)*([0-9]*)(\\s)", "postal_code_business"));
-        pageParts.add(new PagePart("()("+VALID_ADDRESS_PART+")()", "city_business"));
+        pageParts.add(new PagePart("<dt>[\\s]*(Title|Titel):[\\s]*<\\/dt>[\\s]*<dd>[\\s]*<div>[\\s]*([^<]*)(<\\/div>)","title"));//       
+        pageParts.add(new PagePart("(?s)(Address|Adresse):(?:[^>]*>){3}\\s*("+VALID_ADDRESS_PART+")(<br \\/>)", "street_business", true));
+        pageParts.add(new PagePart("(?s)(Address|Adresse):(?:[^>]*>){5}\\s*([0-9]*)()", "postal_code_business", true));
+        pageParts.add(new PagePart("(?s)(Address|Adresse):(?:[^>]*>){5}\\s*[0-9]*\\s*([^0-9<]*)(<)", "city_business"));
         // add a filler to be sure we are in the instant messenger part
         pageParts.add(new PagePart("(<h2>Instant Messenger</h2>)")); 
         pageParts.add(new PagePart("(AIM|Google Talk|Skype|Windows Live|Yahoo):[\\s]*<\\/dt>[\\s]*<dd>[\\s]*<div>[\\s]*([^<]*)(<\\/div>)","instant_messenger1",1));
         // add a filler to be sure we are in the personal address
         pageParts.add(new PagePart("(<h2>(Personal|Pers.nliche Daten)</h2>)"));
-        pageParts.add(new PagePart("(Address|Adresse):[\\s]*<\\/dt>[\\s]*<dd>[\\s]*<div>[\\s]*("+VALID_ADDRESS_PART+")(<br \\/>)*", "street_home"));
-        pageParts.add(new PagePart("(<br \\/>\\s)([0-9]*)(\\s)", "postal_code_home"));
-        pageParts.add(new PagePart("()("+VALID_ADDRESS_PART+")()", "city_home"));
+        pageParts.add(new PagePart("(?s)(Address|Adresse):(?:[^>]*>){3}\\s*("+VALID_ADDRESS_PART+")(<br \\/>)", "street_home", true));
+        pageParts.add(new PagePart("(?s)(Address|Adresse):(?:[^>]*>){5}\\s*([0-9]*)()", "postal_code_home", true));
+        pageParts.add(new PagePart("(?s)(Address|Adresse):(?:[^>]*>){5}\\s*[0-9]*\\s*([^0-9<]*)(<)", "city_home"));
         pageParts.add(new PagePart("(Birthday|Geburtstag):[^0-9]*([0-9]{2})(\\/)","birthday_month"));
         pageParts.add(new PagePart("()([0-9]{2})(\\/)","birthday_day"));
         pageParts.add(new PagePart("()([0-9]{4})(<)","birthday_year"));
