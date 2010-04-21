@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 1
+%define		ox_release 2
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -499,6 +499,65 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Tue Apr 20 2010 - karsten.will@open-xchange.com
+ - Bugfix #15842 - yahoo crawler auto generates the address class on import
+* Mon Apr 19 2010 - marcus.klein@open-xchange.com
+ - Bugfix #15900: Corrected class loading problem due to annotation based exception framework.
+* Mon Apr 19 2010 - thorben.betten@open-xchange.com
+ - Bugfix #15804: Fixed permission update if folder holds a system permission
+* Thu Apr 15 2010 - marcus.klein@open-xchange.com
+ - Bugfix #15891: Do not check global address book folder permissions if user edits his own contact through user interface.
+* Wed Apr 14 2010 - marcus.klein@open-xchange.com
+ - Bugfix #15790: Not failing if some context has no login mappings.
+* Mon Apr 12 2010 - choeger@open-xchange.com
+ - Bugfix #15612: /opt/open-xchange/etc/oxfunctions.sh does not work on Ubuntu, which is using dash instead of bash
+* Thu Apr 08 2010 - marcus.klein@open-xchange.com
+ - Bugfix #15367: Removing MAL poll database entries when a user should be deleted.
+ - Bugfix #15826: Not removing simple HTML tags from emails if their attributes are filtered.
+* Wed Apr 07 2010 - karsten.will@open-xchange.com
+ - Fix for unnamed Bug that occurs when crawling an empty GMX-Addressbook
+ - Bugfix #15724: LoginWithHttpClientStep expanded to throw correct error when entering wrong credentials
+* Tue Apr 06 2010 - marcus.klein@open-xchange.com
+ - Bugfix #15656: Disabling configurable envelope-from for external mail accounts.
+* Tue Apr 06 2010 - karsten.will@open-xchange.com
+ - Bugfix #15794: Empty Yahoo-Addressbooks work now
+ - Bugfix #15789: Removed reflection from the crawler bundle
+* Mon Apr 05 2010 - marcus.klein@open-xchange.com
+ - Bugfix #15744: Generating display name for GMX contacts from given and sure name.
+ - Bugfix #15764: Web crawler for web.de works now with an empty address book.
+ - Bugfix #15747: Using a more genering exception message if the crawler login fails.
+* Thu Apr 01 2010 - marcus.klein@open-xchange.com
+ - Bugfix #15731: Proper initializing the refactored quota file storage.
+* Thu Apr 01 2010 - francisco.laguna@open-xchange.com
+ - Bugfix #14932: Move error messages around for translation and make them nicer.
+* Thu Apr 01 2010 - karsten.will@open-xchange.com
+ - Bugfix #15725: Yahoo crawler now gives readable exception if invalid credentials are entered.
+* Wed Mar 31 2010 - marcus.klein@open-xchange.com
+ - Bugfix #15718: Fixed wrong initialization of refactored file storage implementation.
+* Wed Mar 31 2010 - thorben.betten@open-xchange.com
+ - Bugfix #15711: Showing more sophisticated error message.
+ - Bugfix #15730: Correctly decoding base64 encoded header.
+ - Bugfix #15614: Fixed possible null dereference.
+ - Bugfix #15686: No spam handler for external accounts
+* Wed Mar 31 2010 - karsten.will@open-xchange.com
+ - Bugfix #15726: Crawler now gives better error message if account is invalid.
+* Tue Mar 30 2010 - marcus.klein@open-xchange.com
+ - Bugfix #15721: Correct ordner and proper transaction handling when deleting a user that has POP3 accounts.
+ - Bugfix #15700: Creating a new action for importing mails from body of request as multipart/form-data stream.
+* Mon Mar 29 2010 - marcus.klein@open-xchange.com
+ - Bugfix #15710: Fixed wrong call to super class.
+* Thu Mar 25 2010 - karsten.will@open-xchange.com
+ - Bugfix #15660: Using commons HttpClient for login to linked in to fix redirect problems with HtmlUnit.
+* Thu Mar 25 2010 - thorben.betten@open-xchange.com
+ - Bugfix #15671: Probing for optional TOP and UIDL POP3 commands
+* Wed Mar 24 2010 - marcus.klein@open-xchange.com
+ - Bugfix #15608: Store flags as requested on action new with optional folder parameter.
+* Wed Mar 24 2010 - thorben.betten@open-xchange.com
+ - Bugfix #15655: Ignoring error when creating a default folder for an external account
+* Wed Mar 24 2010 - tobias.prinz@open-xchange.com
+ - RFC 2447: IMIP behaviour: Party crashers (people not invited, e.g. responding from another e-mail address) can now be accepted as participants by the organizer of the event  
+* Tue Mar 23 2010 - tobias.prinz@open-xchange.com
+ - Bugfix #15640: Full contact publication template now uses right keys for phone numbers
 * Thu Mar 11 2010 - marcus.klein@open-xchange.com
  - Bugfix #15582: Only replacing end date of an appointment if it is a series.
  - Bugfix #15580: Correctly parsing values written as null from the client.

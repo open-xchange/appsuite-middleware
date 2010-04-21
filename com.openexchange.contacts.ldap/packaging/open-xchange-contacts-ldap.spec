@@ -38,7 +38,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 1
+%define		ox_release 2
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -108,6 +108,9 @@ fi
 %attr(640,root,open-xchange) /opt/open-xchange/etc/groupware/contacts-ldap/*/*.example
 
 %changelog
+* Tue Apr 20 2010 - dennis.sieben@open-xchange.com
+ - Bugfix #15899 - Global addressbook doesn't return results via EAS once contacts-ldap is installed
+   - Add new check for null values
 * Wed Nov 25 2009 - choeger@open-xchange.com
  - Bugfix #14479 -  Contacts LDAP bundles does not start (SLES11, IBM JAVA)
 * Tue Nov 10 2009 - dennis.sieben@open-xchange.com
