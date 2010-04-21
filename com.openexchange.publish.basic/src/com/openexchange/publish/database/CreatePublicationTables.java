@@ -65,7 +65,7 @@ public class CreatePublicationTables extends AbstractCreateTableImpl {
             "name VARCHAR(255) NOT NULL," +
         	"password VARCHAR(255) NOT NULL," +
         	"PRIMARY KEY (cid,id,name)," +
-        	"FOREIGN KEY (cid,pub_id) REFERENCES publications(cid,id)" +
+        	"FOREIGN KEY (cid,id) REFERENCES publications(cid,id)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
     @Override
