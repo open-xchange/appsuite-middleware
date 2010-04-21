@@ -56,7 +56,7 @@ package com.openexchange.subscribe.crawler;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class TOnlineDETEst extends GenericSubscribeServiceTestHelpers{
-    public void testGMX(){
+    public void testTOnlineDE(){
         checkSingleCrawler("t-online.de");
     }
 
