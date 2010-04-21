@@ -14,7 +14,7 @@ workflowString: |
       numberOfForm: 2
       pageTitleAfterLogin: ".*/service\\.gmx\\.net\\/de\\/cgi\\/g\\.fcgi/addressbook.*"
       password: ""
-      url: "https://www.gmx.de"
+      url: "http://www.gmx.de"
       username: ""
     - !com.openexchange.subscribe.crawler.PageByLinkRegexStep
       description: Click on the addressbook link in the menu to the left.

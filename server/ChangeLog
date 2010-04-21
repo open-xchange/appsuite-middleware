@@ -1,3 +1,7 @@
+* 2010-04-21 - marcus.klein@open-xchange.com
+
+ - Bugfix #15902: Not using secure HTTPS anymore for www.gmx.de because their certificate is broken.
+
 * 2010-04-20 - marcus.klein@open-xchange.com
 
  - Bugfix #15900: Corrected class loading problem due to annotation based exception framework.
