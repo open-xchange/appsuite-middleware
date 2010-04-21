@@ -118,7 +118,9 @@ mkdir -p %{buildroot}/var/log/open-xchange
 
 # generate list of config files for config package
 rm -f %{configfiles}
-find %{buildroot}/opt/open-xchange/etc/groupware %{buildroot}/opt/open-xchange/etc/common \
+find %{buildroot}/opt/open-xchange/etc/groupware \
+     %{buildroot}/opt/open-xchange/etc/groupware/servletmappings \
+     %{buildroot}/opt/open-xchange/etc/common \
 	-maxdepth 1 -type f \
 	-not -name oxfunctions.sh \
 	-printf "%%%config(noreplace) %p\n" > %{configfiles}
