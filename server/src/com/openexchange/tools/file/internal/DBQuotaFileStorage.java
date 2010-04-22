@@ -74,7 +74,7 @@ import com.openexchange.tools.file.external.QuotaFileStorageException;
 import com.openexchange.tools.file.external.QuotaFileStorageException.Code;
 import com.openexchange.tools.sql.DBUtils;
 
-public class QuotaFileStorageImpl implements QuotaFileStorage {
+public class DBQuotaFileStorage implements QuotaFileStorage {
 
     private static final Log LOG = LogFactory.getLog(QuotaFileStorage.class);
 
@@ -101,7 +101,7 @@ public class QuotaFileStorageImpl implements QuotaFileStorage {
      * @param db The DatabaseService.
      * @throws QuotaFileStorageException
      */
-    public QuotaFileStorageImpl(final Context context, final FileStorage fs, final DatabaseService db) throws QuotaFileStorageException {
+    public DBQuotaFileStorage(final Context context, final FileStorage fs, final DatabaseService db) throws QuotaFileStorageException {
         super();
         this.context = context;
         fileStorage = fs;

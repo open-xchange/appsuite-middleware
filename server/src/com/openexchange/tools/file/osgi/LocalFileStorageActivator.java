@@ -51,23 +51,21 @@ package com.openexchange.tools.file.osgi;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Filter;
-import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.tools.file.external.FileStorageStarter;
+import org.osgi.framework.ServiceRegistration;
+import com.openexchange.tools.file.external.FileStorageFactory;
+import com.openexchange.tools.file.internal.LocalFileStorageFactory;
 
-public class QuotaFileStorageStarterActivator implements BundleActivator {
+public class LocalFileStorageActivator implements BundleActivator {
 
-    private ServiceTracker track;
+    private ServiceRegistration reg;
 
     public void start(final BundleContext context) throws Exception {
-        final Filter filter = context.createFilter("(|(objectClass=" + FileStorageStarter.class.getName() + ")(objectClass=" + DatabaseService.class.getName() + "))");
-        track = new ServiceTracker(context, filter, new FileStorageStarterTracker(context));
-        track.open();
+        final FileStorageFactory fm = new LocalFileStorageFactory();
+        reg = context.registerService(FileStorageFactory.class.getName(), fm, null);
     }
 
     public void stop(final BundleContext context) throws Exception {
-        track.close();
+        reg.unregister();
     }
 
 }

@@ -47,25 +47,11 @@
  *
  */
 
-package com.openexchange.tools.file.internal;
+package com.openexchange.tools.file.external;
 
 import java.net.URI;
-import com.openexchange.tools.file.external.FileStorageException;
-import com.openexchange.tools.file.external.FileStorageStarter;
 
-public class FileStorageStarterImpl implements FileStorageStarter {
+public interface FileStorageFactory {
 
-    public FileStorageImpl getFileStorage(final URI uri) throws FileStorageException {
-        return start(uri);
-    }
-
-    private FileStorageImpl start(final URI uri) throws FileStorageException {
-        FileStorageImpl fs;
-        try {
-            fs = new FileStorageImpl(uri);
-            return fs;
-        } catch (final FileStorageException e) {
-            throw new FileStorageException(FileStorageException.Code.INSTANTIATIONERROR, e, uri);
-        }
-    }
+    public FileStorage getFileStorage(URI uri) throws FileStorageException;
 }

@@ -47,25 +47,36 @@
  *
  */
 
-package com.openexchange.tools.file.osgi;
+package com.openexchange.tools.file.internal;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-import com.openexchange.tools.file.external.FileStorageStarter;
-import com.openexchange.tools.file.internal.FileStorageStarterImpl;
+import java.net.URI;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.tools.file.external.FileStorageException;
+import com.openexchange.tools.file.external.FileStorageFactory;
+import com.openexchange.tools.file.external.QuotaFileStorage;
+import com.openexchange.tools.file.external.QuotaFileStorageException;
+import com.openexchange.tools.file.external.QuotaFileStorageFactory;
 
-public class FileStorageStarterActivator implements BundleActivator {
+public class DBQuotaFileStorageFactory implements QuotaFileStorageFactory {
 
-    private ServiceRegistration reg;
+    private final FileStorageFactory fss;
 
-    public void start(final BundleContext context) throws Exception {
-        final FileStorageStarter fm = new FileStorageStarterImpl();
-        reg = context.registerService(FileStorageStarter.class.getName(), fm, null);
+    private final DatabaseService dbs;
+
+    public DBQuotaFileStorageFactory(final DatabaseService dbs, final FileStorageFactory fss) {
+        this.fss = fss;
+        this.dbs = dbs;
     }
 
-    public void stop(final BundleContext context) throws Exception {
-        reg.unregister();
+    public QuotaFileStorage getQuotaFileStorage(final Context ctx, final URI uri) throws QuotaFileStorageException {
+        if (fss == null || dbs == null) {
+            throw new QuotaFileStorageException(QuotaFileStorageException.Code.INSTANTIATIONERROR);
+        }
+        try {
+            return new DBQuotaFileStorage(ctx, fss.getFileStorage(uri), dbs);
+        } catch (FileStorageException e) {
+            throw new QuotaFileStorageException(e);
+        }
     }
-
 }

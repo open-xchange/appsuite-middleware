@@ -56,15 +56,15 @@ import java.util.SortedSet;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.tools.file.external.FileStorageException;
 import com.openexchange.tools.file.external.FileStorageException.Code;
-import com.openexchange.tools.file.external.QuotaFileStorageStarter;
+import com.openexchange.tools.file.external.QuotaFileStorageFactory;
 
 public final class QuotaFileStorage extends FileStorage {
 
-    private static QuotaFileStorageStarter qfss;
+    private static QuotaFileStorageFactory qfss;
 
     private com.openexchange.tools.file.external.QuotaFileStorage qfs;
 
-    private QuotaFileStorage(final URI uri, final Context ctx, final QuotaFileStorageStarter qfss) throws FileStorageException {
+    private QuotaFileStorage(final URI uri, final Context ctx, final QuotaFileStorageFactory qfss) throws FileStorageException {
         super();
         qfs = qfss.getQuotaFileStorage(ctx, uri);
     }
@@ -76,7 +76,7 @@ public final class QuotaFileStorage extends FileStorage {
         return new com.openexchange.tools.file.QuotaFileStorage(uri, ctx, qfss);
     }
 
-    public static void setQuotaFileStorageStarter(QuotaFileStorageStarter qfss) {
+    public static void setQuotaFileStorageStarter(QuotaFileStorageFactory qfss) {
         QuotaFileStorage.qfss = qfss;
     }
 

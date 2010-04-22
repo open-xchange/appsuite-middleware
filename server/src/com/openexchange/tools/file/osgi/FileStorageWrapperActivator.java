@@ -56,8 +56,8 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
-import com.openexchange.tools.file.external.FileStorageStarter;
-import com.openexchange.tools.file.external.QuotaFileStorageStarter;
+import com.openexchange.tools.file.external.FileStorageFactory;
+import com.openexchange.tools.file.external.QuotaFileStorageFactory;
 
 public class FileStorageWrapperActivator implements BundleActivator {
 
@@ -66,8 +66,8 @@ public class FileStorageWrapperActivator implements BundleActivator {
     private ServiceTracker QFSTracker;
 
     public void start(final BundleContext context) throws Exception {
-        FSTracker = new ServiceTracker(context, FileStorageStarter.class.getName(), new FSTrackerCustomizer(context));
-        QFSTracker = new ServiceTracker(context, QuotaFileStorageStarter.class.getName(), new QFSTrackerCustomizer(context));
+        FSTracker = new ServiceTracker(context, FileStorageFactory.class.getName(), new FSTrackerCustomizer(context));
+        QFSTracker = new ServiceTracker(context, QuotaFileStorageFactory.class.getName(), new QFSTrackerCustomizer(context));
         FSTracker.open();
         QFSTracker.open();
     }
@@ -75,7 +75,6 @@ public class FileStorageWrapperActivator implements BundleActivator {
     public void stop(final BundleContext context) throws Exception {
         FSTracker.close();
         QFSTracker.close();
-
     }
 
     private static class FSTrackerCustomizer implements ServiceTrackerCustomizer {
@@ -87,7 +86,7 @@ public class FileStorageWrapperActivator implements BundleActivator {
         }
 
         public Object addingService(final ServiceReference reference) {
-            final FileStorageStarter service = (FileStorageStarter) context.getService(reference);
+            final FileStorageFactory service = (FileStorageFactory) context.getService(reference);
             FileStorage.setFileStorageStarter(service);
             return service;
         }
@@ -113,7 +112,7 @@ public class FileStorageWrapperActivator implements BundleActivator {
         }
 
         public Object addingService(final ServiceReference reference) {
-            final QuotaFileStorageStarter service = (QuotaFileStorageStarter) context.getService(reference);
+            final QuotaFileStorageFactory service = (QuotaFileStorageFactory) context.getService(reference);
             QuotaFileStorage.setQuotaFileStorageStarter(service);
             return service;
         }

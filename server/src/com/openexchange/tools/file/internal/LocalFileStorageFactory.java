@@ -47,12 +47,25 @@
  *
  */
 
-package com.openexchange.tools.file.external;
+package com.openexchange.tools.file.internal;
 
 import java.net.URI;
-import com.openexchange.groupware.contexts.Context;
+import com.openexchange.tools.file.external.FileStorageException;
+import com.openexchange.tools.file.external.FileStorageFactory;
 
-public interface QuotaFileStorageStarter {
+public class LocalFileStorageFactory implements FileStorageFactory {
 
-    public QuotaFileStorage getQuotaFileStorage(Context context, URI uri) throws QuotaFileStorageException;
+    public LocalFileStorageFactory() {
+        super();
+    }
+
+    public LocalFileStorage getFileStorage(final URI uri) throws FileStorageException {
+        LocalFileStorage fs;
+        try {
+            fs = new LocalFileStorage(uri);
+            return fs;
+        } catch (final FileStorageException e) {
+            throw new FileStorageException(FileStorageException.Code.INSTANTIATIONERROR, e, uri);
+        }
+    }
 }

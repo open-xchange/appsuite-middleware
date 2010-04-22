@@ -56,11 +56,11 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.tools.file.external.FileStorageStarter;
-import com.openexchange.tools.file.external.QuotaFileStorageStarter;
-import com.openexchange.tools.file.internal.QuotaFileStorageStarterImpl;
+import com.openexchange.tools.file.external.FileStorageFactory;
+import com.openexchange.tools.file.external.QuotaFileStorageFactory;
+import com.openexchange.tools.file.internal.DBQuotaFileStorageFactory;
 
-public class FileStorageStarterTracker implements ServiceTrackerCustomizer {
+public class DBQuotaFileStorageRegisterer implements ServiceTrackerCustomizer {
 
     private ServiceRegistration registration = null;
 
@@ -70,52 +70,42 @@ public class FileStorageStarterTracker implements ServiceTrackerCustomizer {
 
     private DatabaseService dbService;
 
-    private FileStorageStarter fssService;
+    private FileStorageFactory fssService;
 
     boolean isRegistered = false;
 
-    public FileStorageStarterTracker(final BundleContext context) {
+    public DBQuotaFileStorageRegisterer(final BundleContext context) {
         super();
         this.context = context;
     }
 
     public Object addingService(final ServiceReference reference) {
         final Object service = context.getService(reference);
-
         boolean needsRegistration = false;
-
         lock.lock();
-
         try {
-
             if (service instanceof DatabaseService) {
                 dbService = (DatabaseService) service;
             }
-
-            if (service instanceof FileStorageStarter) {
-                fssService = (FileStorageStarter) service;
+            if (service instanceof FileStorageFactory) {
+                fssService = (FileStorageFactory) service;
             }
-
             if (dbService != null && fssService != null && !isRegistered) {
                 needsRegistration = true;
                 isRegistered = true;
             }
-
         } finally {
             lock.unlock();
         }
-
         if (needsRegistration) {
-            final QuotaFileStorageStarter qfss = new QuotaFileStorageStarterImpl(dbService, fssService);
-            registration = context.registerService(QuotaFileStorageStarter.class.getName(), qfss, null);
+            final QuotaFileStorageFactory qfss = new DBQuotaFileStorageFactory(dbService, fssService);
+            registration = context.registerService(QuotaFileStorageFactory.class.getName(), qfss, null);
         }
-
         return service;
     }
 
     public void modifiedService(final ServiceReference reference, final Object service) {
-        // TODO Auto-generated method stub
-
+        // Nothing to do.
     }
 
     public void removedService(final ServiceReference reference, final Object service) {
@@ -124,7 +114,7 @@ public class FileStorageStarterTracker implements ServiceTrackerCustomizer {
         if (service instanceof DatabaseService) {
             dbService = null;
         }
-        if (service instanceof FileStorageStarter) {
+        if (service instanceof FileStorageFactory) {
             fssService = null;
         }
         lock.lock();

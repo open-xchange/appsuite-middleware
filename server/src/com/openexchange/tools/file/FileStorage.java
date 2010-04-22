@@ -54,12 +54,12 @@ import java.net.URI;
 import java.util.Set;
 import java.util.SortedSet;
 import com.openexchange.tools.file.external.FileStorageException;
-import com.openexchange.tools.file.external.FileStorageStarter;
+import com.openexchange.tools.file.external.FileStorageFactory;
 import com.openexchange.tools.file.external.FileStorageException.Code;
 
 public class FileStorage {
 
-    private static FileStorageStarter fss;
+    private static FileStorageFactory fss;
 
     private com.openexchange.tools.file.external.FileStorage fs;
 
@@ -79,7 +79,7 @@ public class FileStorage {
         return new FileStorage(fss.getFileStorage(uri));
     }
 
-    public static void setFileStorageStarter(FileStorageStarter fss) {
+    public static void setFileStorageStarter(FileStorageFactory fss) {
         FileStorage.fss = fss;
     }
 

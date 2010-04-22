@@ -50,8 +50,15 @@
 package com.openexchange.tools.file.external;
 
 import java.net.URI;
+import com.openexchange.groupware.contexts.Context;
 
-public interface FileStorageStarter {
+/**
+ * {@link QuotaFileStorageFactory}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
+public interface QuotaFileStorageFactory {
 
-    public FileStorage getFileStorage(URI uri) throws FileStorageException;
+    public QuotaFileStorage getQuotaFileStorage(Context context, URI uri) throws QuotaFileStorageException;
+
 }

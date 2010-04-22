@@ -70,7 +70,7 @@ import com.openexchange.tools.file.external.FileStorage;
 import com.openexchange.tools.file.external.FileStorageException;
 import com.openexchange.tools.file.external.FileStorageException.Code;
 
-public class FileStorageImpl implements FileStorage {
+public class LocalFileStorage implements FileStorage {
 
     /**
      * Default number of files or directories per directory.
@@ -134,7 +134,7 @@ public class FileStorageImpl implements FileStorage {
         SPECIAL_FILENAMES = Collections.unmodifiableSet(tmp);
     }
     
-    private static final Log LOG = LogFactory.getLog(FileStorageImpl.class);
+    private static final Log LOG = LogFactory.getLog(LocalFileStorage.class);
 
     /**
      * Constructor with more detailed parameters. This file storage can store entries ^ depth files.
@@ -143,7 +143,7 @@ public class FileStorageImpl implements FileStorage {
      * @param entries number of entries per sub directory.
      * @throws FileStorageException if a problem occurs while creating the file storage.
      */
-    public FileStorageImpl(final URI uri) throws FileStorageException {
+    public LocalFileStorage(final URI uri) throws FileStorageException {
         super();
         storage = new File(uri);
         if (!storage.exists() && !mkdirs(storage)) {
@@ -166,7 +166,7 @@ public class FileStorageImpl implements FileStorage {
     /**
      * Constructor for subclassing to run tests. It should be removed an the subclass should implement the whole FileStorage interface.
      */
-    protected FileStorageImpl() {
+    protected LocalFileStorage() {
         super();
         storage = null;
     }

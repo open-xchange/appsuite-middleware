@@ -47,36 +47,27 @@
  *
  */
 
-package com.openexchange.tools.file.internal;
+package com.openexchange.tools.file.osgi;
 
-import java.net.URI;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Filter;
+import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.tools.file.external.FileStorageException;
-import com.openexchange.tools.file.external.FileStorageStarter;
-import com.openexchange.tools.file.external.QuotaFileStorage;
-import com.openexchange.tools.file.external.QuotaFileStorageException;
-import com.openexchange.tools.file.external.QuotaFileStorageStarter;
+import com.openexchange.tools.file.external.FileStorageFactory;
 
-public class QuotaFileStorageStarterImpl implements QuotaFileStorageStarter {
+public class DBQuotaFileStorageActivator implements BundleActivator {
 
-    private final FileStorageStarter fss;
+    private ServiceTracker track;
 
-    private final DatabaseService dbs;
-
-    public QuotaFileStorageStarterImpl(final DatabaseService dbs, final FileStorageStarter fss) {
-        this.fss = fss;
-        this.dbs = dbs;
+    public void start(final BundleContext context) throws Exception {
+        final Filter filter = context.createFilter("(|(objectClass=" + FileStorageFactory.class.getName() + ")(objectClass=" + DatabaseService.class.getName() + "))");
+        track = new ServiceTracker(context, filter, new DBQuotaFileStorageRegisterer(context));
+        track.open();
     }
 
-    public QuotaFileStorage getQuotaFileStorage(final Context ctx, final URI uri) throws QuotaFileStorageException {
-        if (fss == null || dbs == null) {
-            throw new QuotaFileStorageException(QuotaFileStorageException.Code.INSTANTIATIONERROR);
-        }
-        try {
-            return new QuotaFileStorageImpl(ctx, fss.getFileStorage(uri), dbs);
-        } catch (FileStorageException e) {
-            throw new QuotaFileStorageException(e);
-        }
+    public void stop(final BundleContext context) throws Exception {
+        track.close();
     }
+
 }
