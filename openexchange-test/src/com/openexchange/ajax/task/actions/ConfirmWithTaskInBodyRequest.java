@@ -51,21 +51,21 @@ package com.openexchange.ajax.task.actions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.fields.ParticipantsFields;
+import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.groupware.tasks.Task;
-
 
 /**
  * {@link ConfirmWithTaskInBodyRequest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class ConfirmWithTaskInBodyRequest extends AbstractTaskRequest<ConfirmResponse> {
 
     private Task task;
+    private int confirmation;
     private String confirmMessage;
-    private Object confirmation;
     private boolean failOnError;
 
     public ConfirmWithTaskInBodyRequest(Task task, String confirmmessage, int confirmation) {
@@ -78,27 +78,26 @@ public class ConfirmWithTaskInBodyRequest extends AbstractTaskRequest<ConfirmRes
         this.confirmation = confirmation;
         this.failOnError = failOnError;
     }
-    
+
     public Object getBody() throws JSONException {
-        JSONObject object = new JSONObject();
-        object.put("id", task.getObjectID());
-        object.put("confirmation", confirmation);
-        object.put("confirmmessage", confirmMessage);
-        return object;
+        JSONObject json = new JSONObject();
+        json.put(TaskFields.ID, task.getObjectID());
+        json.put(ParticipantsFields.CONFIRMATION, confirmation);
+        json.put(ParticipantsFields.CONFIRM_MESSAGE, confirmMessage);
+        return json;
     }
 
-    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
+    public Method getMethod() {
         return Method.PUT;
     }
 
-    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
+    public Parameter[] getParameters() {
         Parameter[] params = new Parameter[1];
-        params[0] = new Parameter("action", "confirm");
+        params[0] = new Parameter(AJAXServlet.PARAMETER_ACTION, "confirm");
         return params;
     }
 
-    public AbstractAJAXParser<? extends ConfirmResponse> getParser() {
+    public ConfirmParser getParser() {
         return new ConfirmParser(failOnError);
     }
-
 }

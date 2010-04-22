@@ -51,7 +51,8 @@ package com.openexchange.ajax.task.actions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.fields.ParticipantsFields;
 import com.openexchange.groupware.tasks.Task;
 
 /**
@@ -61,12 +62,9 @@ import com.openexchange.groupware.tasks.Task;
  */
 public class ConfirmWithParametersRequest extends AbstractTaskRequest<ConfirmResponse> {
 
-    private int confirmation;
-
-    private String confirmmessage;
-
     private Task task;
-
+    private int confirmation;
+    private String confirmMessage;
     private boolean failOnError;
 
     public ConfirmWithParametersRequest(Task task, String confirmmessage, int confirmation) {
@@ -75,33 +73,30 @@ public class ConfirmWithParametersRequest extends AbstractTaskRequest<ConfirmRes
 
     public ConfirmWithParametersRequest(Task task, String confirmmessage, int confirmation, boolean failOnError) {
         this.task = task;
-        this.confirmmessage = confirmmessage;
+        this.confirmMessage = confirmmessage;
         this.confirmation = confirmation;
         this.failOnError = failOnError;
     }
 
     public Object getBody() throws JSONException {
-        JSONObject pObject = new JSONObject();
-        pObject.put("confirmmessage", confirmmessage);
-        pObject.put("confirmation", confirmation);
-        return pObject;
+        JSONObject json = new JSONObject();
+        json.put(ParticipantsFields.CONFIRMATION, confirmation);
+        json.put(ParticipantsFields.CONFIRM_MESSAGE, confirmMessage);
+        return json;
     }
 
-    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
-        return com.openexchange.ajax.framework.AJAXRequest.Method.PUT;
+    public Method getMethod() {
+        return Method.PUT;
     }
 
-    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
-        Parameter[] parameters = new Parameter[4];
-        parameters[0] = new Parameter("action", "confirm");
-        parameters[1] = new Parameter("folder", task.getParentFolderID());
-        parameters[2] = new Parameter("id", task.getObjectID());
-        parameters[3] = new Parameter("timestamp", task.getLastModified());
-        return parameters;
+    public Parameter[] getParameters() {
+        Parameter[] params = new Parameter[2];
+        params[0] = new Parameter(AJAXServlet.PARAMETER_ACTION, "confirm");
+        params[1] = new Parameter(AJAXServlet.PARAMETER_ID, task.getObjectID());
+        return params;
     }
 
-    public AbstractAJAXParser<? extends ConfirmResponse> getParser() {
+    public ConfirmParser getParser() {
         return new ConfirmParser(failOnError);
     }
-
 }
