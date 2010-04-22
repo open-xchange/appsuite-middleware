@@ -14,8 +14,8 @@ import junit.framework.TestCase;
 import com.openexchange.tools.file.external.FileStorageException;
 import com.openexchange.tools.file.external.QuotaFileStorageException;
 import com.openexchange.tools.file.external.FileStorage;
-import com.openexchange.tools.file.internal.FileStorageImpl;
-import com.openexchange.tools.file.internal.QuotaFileStorageImpl;
+import com.openexchange.tools.file.internal.LocalFileStorage;
+import com.openexchange.tools.file.internal.DBQuotaFileStorage;
 
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
@@ -56,7 +56,7 @@ public class QuotaFileStorageTest extends TestCase {
         
         tempFile.delete();
         
-        fs = new FileStorageImpl(new URI("file:"+tempFile.getAbsolutePath()));
+        fs = new LocalFileStorage(new URI("file:"+tempFile.getAbsolutePath()));
         final TestQuotaFileStorage quotaStorage = new TestQuotaFileStorage(new ContextImpl(1), fs, new DummyDatabaseService());
         
         quotaStorage.setQuota(10000);
@@ -84,7 +84,7 @@ public class QuotaFileStorageTest extends TestCase {
         
         tempFile.delete();
         
-        fs = new FileStorageImpl(new URI("file://"+tempFile.getAbsolutePath()));
+        fs = new LocalFileStorage(new URI("file://"+tempFile.getAbsolutePath()));
         final TestQuotaFileStorage quotaStorage = new TestQuotaFileStorage(new ContextImpl(1), fs, new DummyDatabaseService());
         quotaStorage.setQuota(10000);
         
@@ -112,7 +112,7 @@ public class QuotaFileStorageTest extends TestCase {
         
         tempFile.delete();
         
-        fs = new FileStorageImpl(new URI("file://"+tempFile.getAbsolutePath()));
+        fs = new LocalFileStorage(new URI("file://"+tempFile.getAbsolutePath()));
         final TestQuotaFileStorage quotaStorage = new TestQuotaFileStorage(new ContextImpl(1), fs, new DummyDatabaseService());
         quotaStorage.setQuota(10000);
         quotaStorage.setUsage(5000);
@@ -135,7 +135,7 @@ public class QuotaFileStorageTest extends TestCase {
         
         tempFile.delete();
         
-        fs = new FileStorageImpl(new URI("file://"+tempFile.getAbsolutePath()));
+        fs = new LocalFileStorage(new URI("file://"+tempFile.getAbsolutePath()));
         final TestQuotaFileStorage quotaStorage = new TestQuotaFileStorage(new ContextImpl(1), fs, new DummyDatabaseService());
         quotaStorage.setQuota(10000);
         
@@ -170,7 +170,7 @@ public class QuotaFileStorageTest extends TestCase {
 	}
 	
 	
-	public static final class TestQuotaFileStorage extends QuotaFileStorageImpl {
+	public static final class TestQuotaFileStorage extends DBQuotaFileStorage {
 
 		public TestQuotaFileStorage(final Context ctx, final FileStorage fs, final DatabaseService dbs) throws QuotaFileStorageException {
 			//FileStorageImpl fsi = new FileStorageImpl(uri);

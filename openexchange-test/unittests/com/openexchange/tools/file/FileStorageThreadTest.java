@@ -6,7 +6,7 @@ import java.io.FileInputStream;
 import junit.framework.TestCase;
 import java.io.*;
 
-import com.openexchange.tools.file.internal.FileStorageImpl;
+import com.openexchange.tools.file.internal.LocalFileStorage;
 import com.openexchange.tools.file.external.FileStorage;
 
 import java.util.*;
@@ -31,7 +31,7 @@ public class FileStorageThreadTest extends TestCase {
         super.setUp();
         tempFile = File.createTempFile("filestorage", ".tmp");
         tempFile.delete();
-        FileStorage fm = new FileStorageImpl(tempFile.toURI());    
+        FileStorage fm = new LocalFileStorage(tempFile.toURI());    
         fm = null;
         
         for (int i = 0; i < fmr.length; i++) {
@@ -60,7 +60,7 @@ public class FileStorageThreadTest extends TestCase {
 
         super.tearDown();
         
-        final FileStorage fm = new FileStorageImpl(tempFile.toURI());        
+        final FileStorage fm = new LocalFileStorage(tempFile.toURI());        
         assertTrue(fm.stateFileIsCorrect()); 
     	rmdir(new File("file:" + tempFile.toString()));
     }
@@ -95,7 +95,7 @@ public class FileStorageThreadTest extends TestCase {
         {
         	try {        	    
                 final File testfile = File.createTempFile("filestorage", ".test");
-                final FileStorage fm = new FileStorageImpl(tempFile.toURI());
+                final FileStorage fm = new LocalFileStorage(tempFile.toURI());
 
             	SortedSet<String> set = new TreeSet<String>();
             	while (run) {
@@ -123,7 +123,7 @@ public class FileStorageThreadTest extends TestCase {
     public void testStateFileIsCorrect() throws Throwable
     {
         final File testfile = File.createTempFile("filestorage", ".test");
-        final FileStorage fm = new FileStorageImpl(tempFile.toURI());
+        final FileStorage fm = new LocalFileStorage(tempFile.toURI());
     	SortedSet<String> set = new TreeSet<String>();
     	for (int j = 0; j < 10; j++) {
     		for (int i = 0; i < 10; i++) {

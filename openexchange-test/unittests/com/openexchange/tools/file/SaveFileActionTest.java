@@ -9,7 +9,7 @@ import java.net.URI;
 import com.openexchange.groupware.tx.AbstractActionTest;
 import com.openexchange.groupware.tx.UndoableAction;
 import com.openexchange.tools.file.external.FileStorageException;
-import com.openexchange.tools.file.internal.FileStorageStarterImpl;
+import com.openexchange.tools.file.internal.LocalFileStorageFactory;
 
 public class SaveFileActionTest extends AbstractActionTest {
 
@@ -25,7 +25,7 @@ public class SaveFileActionTest extends AbstractActionTest {
         super.setUp();
         tempFile = File.createTempFile("filestorage", ".tmp");
         tempFile.delete();
-        FileStorage.setFileStorageStarter(new FileStorageStarterImpl());
+        FileStorage.setFileStorageStarter(new LocalFileStorageFactory());
     }
 
     @Override

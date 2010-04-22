@@ -150,9 +150,9 @@ import com.openexchange.timer.internal.CustomThreadPoolExecutorTimerService;
 import com.openexchange.tools.events.TestEventAdmin;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
-import com.openexchange.tools.file.external.FileStorageStarter;
-import com.openexchange.tools.file.internal.FileStorageStarterImpl;
-import com.openexchange.tools.file.internal.QuotaFileStorageStarterImpl;
+import com.openexchange.tools.file.external.FileStorageFactory;
+import com.openexchange.tools.file.internal.LocalFileStorageFactory;
+import com.openexchange.tools.file.internal.DBQuotaFileStorageFactory;
 import com.openexchange.tools.servlet.ServletConfigLoader;
 import com.openexchange.tools.servlet.http.HttpManagersInit;
 import com.openexchange.user.UserService;
@@ -455,10 +455,10 @@ public final class Init {
     }
 
     public static void startAndInjectFileStorage() {
-        FileStorageStarter fileStorageStarter = new FileStorageStarterImpl();
+        FileStorageFactory fileStorageStarter = new LocalFileStorageFactory();
         FileStorage.setFileStorageStarter(fileStorageStarter); 
         DatabaseService dbService = (DatabaseService) services.get(DatabaseService.class);
-        QuotaFileStorage.setQuotaFileStorageStarter(new QuotaFileStorageStarterImpl(dbService, fileStorageStarter));
+        QuotaFileStorage.setQuotaFileStorageStarter(new DBQuotaFileStorageFactory(dbService, fileStorageStarter));
     }
 
     public static void startAndInjectDatabaseUpdate() throws ComponentAlreadyRegisteredException {

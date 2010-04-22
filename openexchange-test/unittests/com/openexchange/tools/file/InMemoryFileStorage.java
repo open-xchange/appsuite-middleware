@@ -63,12 +63,12 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.tools.file.external.FileStorageException;
-import com.openexchange.tools.file.internal.FileStorageImpl;
+import com.openexchange.tools.file.internal.LocalFileStorage;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class InMemoryFileStorage extends FileStorageImpl {
+public class InMemoryFileStorage extends LocalFileStorage {
 
     private final Map<Context, Map<String, byte[]>> data = new HashMap<Context, Map<String, byte[]>>();
 

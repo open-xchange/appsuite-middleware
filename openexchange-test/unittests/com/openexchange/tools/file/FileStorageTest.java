@@ -57,7 +57,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.tools.RandomString;
 import com.openexchange.tools.file.external.FileStorage;
 import com.openexchange.tools.file.external.FileStorageException;
-import com.openexchange.tools.file.internal.FileStorageImpl;
+import com.openexchange.tools.file.internal.LocalFileStorage;
 
 /**
  * Test for the file storage.
@@ -76,7 +76,7 @@ public class FileStorageTest extends TestCase {
         final File tempFile = File.createTempFile("filestorage", ".tmp");
         tempFile.delete();
         LOG.trace(tempFile.getAbsolutePath());
-        final FileStorage storage = new FileStorageImpl(tempFile.toURI());
+        final FileStorage storage = new LocalFileStorage(tempFile.toURI());
         rmdir(tempFile);
         assertNotNull("Can't create file storage.", storage);
     }
@@ -92,7 +92,7 @@ public class FileStorageTest extends TestCase {
         final String fileContent = RandomString.generateLetter(100);
         final ByteArrayInputStream baos = new ByteArrayInputStream(fileContent
             .getBytes("UTF-8"));
-        final FileStorage storage = new FileStorageImpl(tempFile.toURI());
+        final FileStorage storage = new LocalFileStorage(tempFile.toURI());
         final String identifier = storage.saveNewFile(baos);
         rmdir(tempFile);
         assertNotNull("Can't create new file in file storage.", identifier);
@@ -106,7 +106,7 @@ public class FileStorageTest extends TestCase {
         tempFile.delete();
         final String fileContent = RandomString.generateLetter(100);
         final ByteArrayInputStream baos = new ByteArrayInputStream(fileContent.getBytes("UTF-8"));
-        final FileStorage storage = new FileStorageImpl(tempFile.toURI());
+        final FileStorage storage = new LocalFileStorage(tempFile.toURI());
         final String identifier = storage.saveNewFile(baos);
         rmdir(tempFile);
         assertFalse(tempFile.exists());
@@ -130,7 +130,7 @@ public class FileStorageTest extends TestCase {
     public final void testExceptionOnUnknown() throws Throwable {
         File tempFile =  File.createTempFile("filestorage", ".tmp");
         tempFile.delete();
-        final FileStorage storage = new FileStorageImpl(tempFile.toURI());
+        final FileStorage storage = new LocalFileStorage(tempFile.toURI());
         try {
             storage.getFile("00/00/01");
             fail("Expected IOException");
