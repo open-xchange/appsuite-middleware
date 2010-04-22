@@ -49,15 +49,9 @@
 
 package com.openexchange.ajax.task;
 
-import java.io.IOException;
 import java.util.TimeZone;
-
-import org.json.JSONException;
-import org.xml.sax.SAXException;
-
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * Super class for task ajax tests.
