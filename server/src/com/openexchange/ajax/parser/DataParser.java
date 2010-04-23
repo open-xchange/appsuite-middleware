@@ -89,7 +89,7 @@ public abstract class DataParser {
         this.timeZone = timeZone;
     }
 
-    protected void parseElementDataObject(final DataObject dataobject, final JSONObject jsonobject) throws OXJSONException {
+    protected void parseElementDataObject(final DataObject dataobject, final JSONObject jsonobject) throws JSONException, OXJSONException {
         if (jsonobject.has(DataFields.ID)) {
             dataobject.setObjectID(parseInt(jsonobject, DataFields.ID));
         }
@@ -132,15 +132,18 @@ public abstract class DataParser {
         return retval;
     }
 
-    public static int parseInt(JSONObject json, String name) throws OXJSONException {
+    public static int parseInt(JSONObject json, String name) throws JSONException, OXJSONException {
         if (!json.has(name)) {
             return NO_INT;
         }
+        String tmp = json.getString(name);
+        if (tmp == null || json.isNull(name) || tmp.length() == 0) {
+            return 0;
+        }
         try {
-            return checkInt(json, name);
-        } catch (AjaxException e) {
-            // Will only be thrown if JSON does not has the attribute.
-            throw new OXJSONException(e);
+            return Integer.parseInt(tmp);
+        } catch (final NumberFormatException e) {
+            throw new OXJSONException(Code.NUMBER_PARSING, e, tmp, name);
         }
     }
 

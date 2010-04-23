@@ -437,7 +437,7 @@ public class TaskRequest {
         return jsonResponseObject;
     }
 
-    public JSONObject actionConfirm(JSONObject json) throws OXMandatoryFieldException, OXException, AjaxException, OXJSONException {
+    public JSONObject actionConfirm(JSONObject json) throws OXMandatoryFieldException, OXException, AjaxException, OXJSONException, JSONException {
         JSONObject data = DataParser.checkJSONObject(json, ResponseFields.DATA);
         Task task = new Task();
         new TaskParser(timeZone).parse(task, data);
