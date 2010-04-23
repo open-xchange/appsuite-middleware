@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.tasks;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
@@ -206,8 +207,10 @@ public final class ConfirmTask {
      */
     private InternalParticipant getOrigParticipant() throws TaskException {
         if (null == origParticipant) {
-            origParticipant = partStor.selectInternal(ctx, taskId, userId,
-                StorageType.ACTIVE);
+            origParticipant = partStor.selectInternal(ctx, taskId, userId, StorageType.ACTIVE);
+            if (null == origParticipant) {
+                throw new TaskException(Code.PARTICIPANT_NOT_FOUND, I(userId), I(taskId));
+            }
         }
         return origParticipant;
     }
