@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 2
+%define		ox_release 3
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -492,6 +492,8 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Fri Apr 23 2010 - marcus.klein@open-xchange.com
+ - Bugfix #15897: Prefering task identifier in URL on confirm requests.
 * Wed Apr 21 2010 - marcus.klein@open-xchange.com
  - Bugfix #15902: Not using secure HTTPS anymore for www.gmx.de because their certificate is broken.
 * Tue Apr 20 2010 - marcus.klein@open-xchange.com

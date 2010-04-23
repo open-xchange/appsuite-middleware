@@ -1,3 +1,9 @@
+open-xchange-publish (6.16.1.0-3) unstable; urgency=low
+
+  * third build for public ptf 2010-04-20
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 23 Apr 2010 11:43:23 +0200
+
 open-xchange-publish (6.16.1.0-2) unstable; urgency=low
 
   * second build for public ptf 2010-04-20
