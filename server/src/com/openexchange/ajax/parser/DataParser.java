@@ -88,7 +88,7 @@ public abstract class DataParser {
         this.timeZone = timeZone;
     }
 
-    protected void parseElementDataObject(final DataObject dataobject, final JSONObject jsonobject) throws JSONException, OXJSONException {
+    protected void parseElementDataObject(final DataObject dataobject, final JSONObject jsonobject) throws OXJSONException {
         if (jsonobject.has(DataFields.ID)) {
             dataobject.setObjectID(parseInt(jsonobject, DataFields.ID));
         }
@@ -131,20 +131,15 @@ public abstract class DataParser {
         return retval;
     }
 
-    public static int parseInt(final JSONObject jsonObj, final String name) throws JSONException, OXJSONException {
-        if (!jsonObj.has(name)) {
+    public static int parseInt(JSONObject json, String name) throws OXJSONException {
+        if (!json.has(name)) {
             return 0;
         }
-
-        final String tmp = jsonObj.getString(name);
-        if (tmp == null || jsonObj.isNull(name) || tmp.length() == 0) {
-            return 0;
-        }
-
         try {
-            return Integer.parseInt(tmp);
-        } catch (final NumberFormatException exc) {
-            throw new OXJSONException(Code.INVALID_VALUE, exc, name, tmp);
+            return checkInt(json, name);
+        } catch (AjaxException e) {
+            // Will only be thrown if JSON does not has the attribute.
+            throw new OXJSONException(e);
         }
     }
 
@@ -256,16 +251,15 @@ public abstract class DataParser {
         return tmp;
     }
 
-    public static int checkInt(final JSONObject jsonObj, final String name) throws OXJSONException, AjaxException {
-        final String tmp = checkString(jsonObj, name);
+    public static int checkInt(JSONObject json, String name) throws OXJSONException, AjaxException {
+        final String tmp = checkString(json, name);
         if (tmp == null || tmp.length() == 0) {
             throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
         }
-
         try {
             return Integer.parseInt(tmp);
-        } catch (final NumberFormatException exc) {
-            throw new OXJSONException(Code.INVALID_VALUE, exc, name, tmp);
+        } catch (NumberFormatException e) {
+            throw new OXJSONException(Code.NUMBER_PARSING, e, tmp, name);
         }
     }
 
