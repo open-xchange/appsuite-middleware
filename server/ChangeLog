@@ -1,3 +1,7 @@
+* 2010-04-23 - marcus.klein@open-xchange.com
+
+ - Bugfix #15897: Prefering task identifier in URL on confirm requests.
+
 * 2010-04-21 - marcus.klein@open-xchange.com
 
  - Bugfix #15902: Not using secure HTTPS anymore for www.gmx.de because their certificate is broken.

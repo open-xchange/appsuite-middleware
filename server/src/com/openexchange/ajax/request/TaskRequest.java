@@ -437,19 +437,22 @@ public class TaskRequest {
         return jsonResponseObject;
     }
 
-    public JSONObject actionConfirm(final JSONObject jsonObj) throws OXMandatoryFieldException, OXException, AjaxException, OXJSONException, JSONException {
-        final JSONObject jData = DataParser.checkJSONObject(jsonObj, ResponseFields.DATA);
-        final Task taskObj = new Task();
-
-        final TaskParser taskParser = new TaskParser(timeZone);
-        taskParser.parse(taskObj, jData);
-
-        final TasksSQLInterface taskSql = new TasksSQLImpl(session);
-
-        final int taskId = (taskObj.containsObjectID()) ? taskObj.getObjectID() : DataParser.checkInt(jsonObj, "id");
-
-        timestamp = taskSql.setUserConfirmation(taskId, session.getUserId(), taskObj.getConfirm(), taskObj.getConfirmMessage());
-
+    public JSONObject actionConfirm(JSONObject json) throws OXMandatoryFieldException, OXException, AjaxException, OXJSONException, JSONException {
+        JSONObject data = DataParser.checkJSONObject(json, ResponseFields.DATA);
+        Task task = new Task();
+        new TaskParser(timeZone).parse(task, data);
+        TasksSQLInterface taskSql = new TasksSQLImpl(session);
+        int taskIdFromParameter = DataParser.parseInt(json, AJAXServlet.PARAMETER_ID);
+        final int taskId;
+        if (0 == taskIdFromParameter) {
+            if (!task.containsObjectID()) {
+                throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, AJAXServlet.PARAMETER_ID);
+            }
+            taskId = task.getObjectID();
+        } else {
+            taskId = taskIdFromParameter;
+        }
+        timestamp = taskSql.setUserConfirmation(taskId, session.getUserId(), task.getConfirm(), task.getConfirmMessage());
         return new JSONObject();
     }
 
