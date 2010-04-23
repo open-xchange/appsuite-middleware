@@ -59,10 +59,11 @@ import com.openexchange.groupware.EnumComponent;
  */
 public class OXJSONException extends AbstractOXException {
 
-    /**
-     * For serialization.
-     */
     private static final long serialVersionUID = 3931776129684819019L;
+
+    public OXJSONException(AbstractOXException cause) {
+        super(cause);
+    }
 
     /**
      * Initializes a new exception using the information provided by the code.
@@ -70,7 +71,7 @@ public class OXJSONException extends AbstractOXException {
      * @param code code for the exception.
      * @param messageArgs arguments that will be formatted into the message.
      */
-    public OXJSONException(final Code code, final Object... messageArgs) {
+    public OXJSONException(Code code, Object... messageArgs) {
         this(code, null, messageArgs);
     }
 
@@ -81,72 +82,36 @@ public class OXJSONException extends AbstractOXException {
      * @param cause the cause of the exception.
      * @param messageArgs arguments that will be formatted into the message.
      */
-    public OXJSONException(final Code code, final Throwable cause, final Object... messageArgs) {
-        super(EnumComponent.SERVLET, code.category, code.number, null == code.message ? cause.getMessage() : code.message, cause);
+    public OXJSONException(Code code, Throwable cause, Object... messageArgs) {
+        super(EnumComponent.SERVLET, code.getCategory(), code.getNumber(), null == code.getMessage() ? cause.getMessage() : code.getMessage(), cause);
         setMessageArgs(messageArgs);
     }
 
     /**
      * Error codes for servlet exceptions.
-     * 
-     * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
      */
     public enum Code {
-        /**
-         * Exception while writing JSON.
-         */
+        /** Exception while writing JSON. */
         JSON_WRITE_ERROR("Exception while writing JSON.", Category.CODE_ERROR, 1),
-        /**
-         * Exception while parsing JSON: "%s".
-         */
+        /** Exception while parsing JSON: "%s". */
         JSON_READ_ERROR("Exception while parsing JSON: \"%s\".", Category.CODE_ERROR, 2),
-        /**
-         * Invalid cookie.
-         */
+        /** Invalid cookie. */
         INVALID_COOKIE("Invalid cookie.", Category.TRY_AGAIN, 3),
-        /**
-         * Exception while building JSON.
-         */
+        /** Exception while building JSON. */
         JSON_BUILD_ERROR("Exception while building JSON.", Category.CODE_ERROR, 4),
-        /**
-         * Value "%1$s" of attribute %s contains non digit characters.
-         */
+        /** Value "%1$s" of attribute %s contains non digit characters. */
         CONTAINS_NON_DIGITS("Value \"%1$s\" of attribute %2$s contains non digit characters.", Category.USER_INPUT, 5),
-        /**
-         * Too many digits within field %1$s.
-         */
+        /** Too many digits within field %1$s. */
         TOO_BIG_NUMBER("Too many digits within field %1$s.", Category.USER_INPUT, 6),
-        /**
-         * Unable to parse value "%1$s" within field %2$s as a number.
-         */
+        /** Unable to parse value "%1$s" within field %2$s as a number. */
         NUMBER_PARSING("Unable to parse value \"%1$s\" within field %2$s as a number.", Category.CODE_ERROR, 7),
-        /**
-         * Invalid value \"%2$s\" in JSON attribute \"%1$s\".
-         */
+        /** Invalid value \"%2$s\" in JSON attribute \"%1$s\". */
         INVALID_VALUE("Invalid value \"%2$s\" in JSON attribute \"%1$s\".", Category.USER_INPUT, 8);
 
-        /**
-         * Message of the exception.
-         */
         private final String message;
-
-        /**
-         * Category of the exception.
-         */
         private final Category category;
-
-        /**
-         * Detail number of the exception.
-         */
         private final int number;
 
-        /**
-         * Default constructor.
-         * 
-         * @param message message.
-         * @param category category.
-         * @param detailNumber detail number.
-         */
         private Code(final String message, final Category category, final int detailNumber) {
             this.message = message;
             this.category = category;
