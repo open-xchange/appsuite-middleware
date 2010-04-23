@@ -53,7 +53,7 @@ import java.io.IOException;
 import java.util.Date;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
-import com.openexchange.ajax.task.actions.ConfirmWithParametersRequest;
+import com.openexchange.ajax.task.actions.ConfirmWithTaskInParametersRequest;
 import com.openexchange.ajax.task.actions.ConfirmWithTaskInBodyRequest;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.tasks.Task;
@@ -98,14 +98,14 @@ public class ConfirmTest extends AbstractTaskTestForAJAXClient {
     }
     
     public void testConfirmWithTaskInParameters() throws AjaxException, IOException, SAXException, JSONException {
-        ConfirmWithParametersRequest request = new ConfirmWithParametersRequest(task, "Confirmanize!", Task.ACCEPT);
+        ConfirmWithTaskInParametersRequest request = new ConfirmWithTaskInParametersRequest(task, Task.ACCEPT, "Confirmanize!");
         getClient().execute(request);
         
         checkTaskOnServer(Task.ACCEPT, "Confirmanize!");
     }
     
     public void testConfirmWithTaskInBody() throws AjaxException, IOException, SAXException, JSONException {
-        ConfirmWithTaskInBodyRequest request = new ConfirmWithTaskInBodyRequest(task, "Confirmanize!", Task.ACCEPT);
+        ConfirmWithTaskInBodyRequest request = new ConfirmWithTaskInBodyRequest(task, Task.ACCEPT, "Confirmanize!");
         getClient().execute(request);
         
         checkTaskOnServer(Task.ACCEPT, "Confirmanize!");

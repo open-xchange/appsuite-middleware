@@ -56,30 +56,32 @@ import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.groupware.tasks.Task;
 
 /**
- * The identifier is sent in the body of the confirm request. This is behavior of SP5 and earlier.
+ * Confirm request that can send the task identifier in URL and body.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class ConfirmWithTaskInBodyRequest extends AbstractConfirmRequest {
+public class ConfirmWith2IdsRequest extends AbstractConfirmRequest {
 
     private Task task;
+    private int bodyId;
 
-    public ConfirmWithTaskInBodyRequest(Task task, int confirmStatus, String confirmMessage) {
-        this(task, confirmStatus, confirmMessage, true);
-    }
-
-    public ConfirmWithTaskInBodyRequest(Task task, int confirmStatus, String confirmMessage, boolean failOnError) {
+    public ConfirmWith2IdsRequest(Task task, int bodyId, int confirmStatus, String confirmMessage, boolean failOnError) {
         super(confirmStatus, confirmMessage, failOnError);
         this.task = task;
+        this.bodyId = bodyId;
+    }
+
+    public ConfirmWith2IdsRequest(Task task, int bodyId, int confirmStatus, String confirmMessage) {
+        this(task, bodyId, confirmStatus, confirmMessage, true);
     }
 
     @Override
     protected void addBodyParameter(JSONObject json) throws JSONException {
-        json.put(TaskFields.ID, task.getObjectID());
+        json.put(TaskFields.ID, bodyId);
     }
 
     @Override
-    protected void addRequestParameter(List<com.openexchange.ajax.framework.AJAXRequest.Parameter> params) {
-        // Nothing to add.
+    protected void addRequestParameter(List<Parameter> params) {
+        params.add(new Parameter(TaskFields.ID, task.getObjectID()));
     }
 }

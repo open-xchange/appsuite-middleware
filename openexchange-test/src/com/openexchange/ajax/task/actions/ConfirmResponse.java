@@ -52,17 +52,14 @@ package com.openexchange.ajax.task.actions;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
-
 /**
  * {@link ConfirmResponse}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class ConfirmResponse extends AbstractAJAXResponse {
 
     protected ConfirmResponse(Response response) {
         super(response);
     }
-
 }

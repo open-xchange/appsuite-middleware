@@ -49,54 +49,36 @@
 
 package com.openexchange.ajax.task.actions;
 
-import org.json.JSONException;
+import java.util.List;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.fields.ParticipantsFields;
 import com.openexchange.groupware.tasks.Task;
 
 /**
- * {@link ConfirmWithParametersRequest}
+ * {@link ConfirmWithTaskInParametersRequest}
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class ConfirmWithParametersRequest extends AbstractTaskRequest<ConfirmResponse> {
+public class ConfirmWithTaskInParametersRequest extends AbstractConfirmRequest {
 
     private Task task;
-    private int confirmation;
-    private String confirmMessage;
-    private boolean failOnError;
 
-    public ConfirmWithParametersRequest(Task task, String confirmmessage, int confirmation) {
-        this(task, confirmmessage, confirmation, true);
+    public ConfirmWithTaskInParametersRequest(Task task, int confirmStatus, String confirmMessage) {
+        this(task, confirmStatus, confirmMessage, true);
     }
 
-    public ConfirmWithParametersRequest(Task task, String confirmmessage, int confirmation, boolean failOnError) {
+    public ConfirmWithTaskInParametersRequest(Task task, int confirmStatus, String confirmMessage, boolean failOnError) {
+        super(confirmStatus, confirmMessage, failOnError);
         this.task = task;
-        this.confirmMessage = confirmmessage;
-        this.confirmation = confirmation;
-        this.failOnError = failOnError;
     }
 
-    public Object getBody() throws JSONException {
-        JSONObject json = new JSONObject();
-        json.put(ParticipantsFields.CONFIRMATION, confirmation);
-        json.put(ParticipantsFields.CONFIRM_MESSAGE, confirmMessage);
-        return json;
+    @Override
+    protected void addBodyParameter(JSONObject json) {
+        // Nothing to add.
     }
 
-    public Method getMethod() {
-        return Method.PUT;
-    }
-
-    public Parameter[] getParameters() {
-        Parameter[] params = new Parameter[2];
-        params[0] = new Parameter(AJAXServlet.PARAMETER_ACTION, "confirm");
-        params[1] = new Parameter(AJAXServlet.PARAMETER_ID, task.getObjectID());
-        return params;
-    }
-
-    public ConfirmParser getParser() {
-        return new ConfirmParser(failOnError);
+    @Override
+    protected void addRequestParameter(List<Parameter> params) {
+        params.add(new Parameter(AJAXServlet.PARAMETER_ID, task.getObjectID()));
     }
 }

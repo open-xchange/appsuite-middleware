@@ -49,37 +49,58 @@
 
 package com.openexchange.ajax.task.actions;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.fields.TaskFields;
-import com.openexchange.groupware.tasks.Task;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.fields.ParticipantsFields;
 
 /**
- * The identifier is sent in the body of the confirm request. This is behavior of SP5 and earlier.
- *
+ * {@link AbstractConfirmRequest}
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class ConfirmWithTaskInBodyRequest extends AbstractConfirmRequest {
+public abstract class AbstractConfirmRequest extends AbstractTaskRequest<ConfirmResponse> {
 
-    private Task task;
+    private int confirmation;
+    private String confirmMessage;
+    private boolean failOnError;
 
-    public ConfirmWithTaskInBodyRequest(Task task, int confirmStatus, String confirmMessage) {
-        this(task, confirmStatus, confirmMessage, true);
+    protected AbstractConfirmRequest(int confirmStatus, String confirmMessage) {
+        this(confirmStatus, confirmMessage, true);
     }
 
-    public ConfirmWithTaskInBodyRequest(Task task, int confirmStatus, String confirmMessage, boolean failOnError) {
-        super(confirmStatus, confirmMessage, failOnError);
-        this.task = task;
+    protected AbstractConfirmRequest(int confirmStatus, String confirmMessage, boolean failOnError) {
+        this.confirmMessage = confirmMessage;
+        this.confirmation = confirmStatus;
+        this.failOnError = failOnError;
     }
 
-    @Override
-    protected void addBodyParameter(JSONObject json) throws JSONException {
-        json.put(TaskFields.ID, task.getObjectID());
+    public Object getBody() throws JSONException {
+        JSONObject json = new JSONObject();
+        json.put(ParticipantsFields.CONFIRMATION, confirmation);
+        json.put(ParticipantsFields.CONFIRM_MESSAGE, confirmMessage);
+        addBodyParameter(json);
+        return json;
     }
 
-    @Override
-    protected void addRequestParameter(List<com.openexchange.ajax.framework.AJAXRequest.Parameter> params) {
-        // Nothing to add.
+    protected abstract void addBodyParameter(JSONObject json) throws JSONException;
+
+    public Method getMethod() {
+        return Method.PUT;
+    }
+
+    public Parameter[] getParameters() {
+        List<Parameter> params = new ArrayList<Parameter>();
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "confirm"));
+        addRequestParameter(params);
+        return params.toArray(new Parameter[params.size()]);
+    }
+
+    protected abstract void addRequestParameter(List<Parameter> params);
+
+    public ConfirmParser getParser() {
+        return new ConfirmParser(failOnError);
     }
 }
