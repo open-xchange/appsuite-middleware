@@ -70,8 +70,9 @@ import com.openexchange.tools.servlet.OXJSONException.Code;
  */
 public abstract class DataParser {
 
-    protected boolean parseAll;
+    public static final int NO_INT = 0;
 
+    protected boolean parseAll;
     protected TimeZone timeZone;
 
     protected DataParser() {
@@ -133,7 +134,7 @@ public abstract class DataParser {
 
     public static int parseInt(JSONObject json, String name) throws OXJSONException {
         if (!json.has(name)) {
-            return 0;
+            return NO_INT;
         }
         try {
             return checkInt(json, name);
