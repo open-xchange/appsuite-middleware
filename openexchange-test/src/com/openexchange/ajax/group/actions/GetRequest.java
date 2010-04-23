@@ -49,54 +49,36 @@
 
 package com.openexchange.ajax.group.actions;
 
-import org.json.JSONException;
-
 import com.openexchange.ajax.AJAXServlet;
 
 /**
+ * Request for getting a group from the backend.
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class GetRequest extends AbstractGroupRequest {
+public final class GetRequest extends AbstractGroupRequest<GetResponse> {
 
     private final int groupId;
-
     private final boolean failOnError;
 
-    /**
-     * @param groupId
-     * @param failOnError
-     */
-    public GetRequest(final int groupId, final boolean failOnError) {
+    public GetRequest(int groupId, boolean failOnError) {
         super();
         this.groupId = groupId;
         this.failOnError = failOnError;
     }
 
-    /**
-     * @param groupId
-     */
-    public GetRequest(final int groupId) {
+    public GetRequest(int groupId) {
         this(groupId, true);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public Object getBody() throws JSONException {
+    public Object getBody() {
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Method getMethod() {
         return Method.GET;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Parameter[] getParameters() {
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET),
@@ -104,9 +86,6 @@ public final class GetRequest extends AbstractGroupRequest {
         };
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public GetParser getParser() {
         return new GetParser(failOnError);
     }
