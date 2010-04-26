@@ -148,7 +148,7 @@ public final class TwitterMessagingFolderAccess implements MessagingFolderAccess
                 Integer.valueOf(user),
                 Integer.valueOf(cid));
         }
-        return TwitterMessagingFolder.getInstance();
+        return TwitterMessagingFolder.getInstance(user);
     }
 
     private static final Quota.Type[] MESSAGE = { Quota.Type.MESSAGE };
@@ -187,7 +187,7 @@ public final class TwitterMessagingFolderAccess implements MessagingFolderAccess
     }
 
     public MessagingFolder getRootFolder() throws MessagingException {
-        return TwitterMessagingFolder.getInstance();
+        return TwitterMessagingFolder.getInstance(user);
     }
 
     private static final Quota.Type[] STORAGE = { Quota.Type.STORAGE };

@@ -91,9 +91,9 @@ public final class TwitterMessagingFolder implements MessagingFolder {
             MessagingPermission.NO_PERMISSIONS,
             MessagingPermission.DELETE_OWN_OBJECTS);
         mp.setAdmin(false);
+        mp.setEntity(user);
+        mp.setGroup(false);
         ownPermission = MessagingPermissions.unmodifiablePermission(mp);
-        ownPermission.setEntity(user);
-        ownPermission.setGroup(false);
         permissions = Arrays.asList(ownPermission);
     }
 
