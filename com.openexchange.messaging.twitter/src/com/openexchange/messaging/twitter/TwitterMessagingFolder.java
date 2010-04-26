@@ -49,6 +49,7 @@
 
 package com.openexchange.messaging.twitter;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -77,6 +78,8 @@ public final class TwitterMessagingFolder implements MessagingFolder {
 
     private final MessagingPermission ownPermission;
 
+    private final List<MessagingPermission> permissions;
+
     /**
      * Initializes a new {@link TwitterMessagingFolder}.
      */
@@ -90,6 +93,7 @@ public final class TwitterMessagingFolder implements MessagingFolder {
             MessagingPermission.DELETE_OWN_OBJECTS);
         mp.setAdmin(false);
         ownPermission = MessagingPermissions.unmodifiablePermission(mp);
+        permissions = Arrays.asList(ownPermission);
     }
 
     public Set<String> getCapabilities() {
@@ -113,7 +117,7 @@ public final class TwitterMessagingFolder implements MessagingFolder {
     }
 
     public List<MessagingPermission> getPermissions() {
-        return Collections.emptyList();
+        return permissions;
     }
 
     public boolean hasSubfolders() {
