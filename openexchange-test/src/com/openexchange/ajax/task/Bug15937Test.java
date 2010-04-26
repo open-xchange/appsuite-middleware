@@ -47,32 +47,30 @@
  *
  */
 
-package com.openexchange.ajax.contact;
+package com.openexchange.ajax.task;
 
 import java.util.TimeZone;
-import com.openexchange.ajax.config.actions.Tree;
-import com.openexchange.ajax.contact.action.DeleteRequest;
-import com.openexchange.ajax.contact.action.GetRequest;
-import com.openexchange.ajax.contact.action.GetResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.ajax.framework.CommonDeleteResponse;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.ajax.task.actions.DeleteRequest;
+import com.openexchange.ajax.task.actions.GetRequest;
+import com.openexchange.ajax.task.actions.GetResponse;
+import com.openexchange.ajax.task.actions.InsertRequest;
+import com.openexchange.ajax.task.actions.InsertResponse;
+import com.openexchange.groupware.tasks.Task;
 
 /**
- * {@link Bug15317Test}
+ * {@link Bug15937Test}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Bug15317Test extends AbstractAJAXSession {
+public class Bug15937Test extends AbstractAJAXSession {
 
     private AJAXClient client;
-    private TimeZone tz;
-    private Contact userContact;
-    private int contactId;
+    private Task task;
+    private TimeZone timeZone;
 
-    public Bug15317Test(String name) {
+    public Bug15937Test(String name) {
         super(name);
     }
 
@@ -80,14 +78,27 @@ public class Bug15317Test extends AbstractAJAXSession {
     protected void setUp() throws Exception {
         super.setUp();
         client = getClient();
-        tz = client.getValues().getTimeZone();
-        contactId = client.execute(new com.openexchange.ajax.config.actions.GetRequest(Tree.ContactID)).getInteger();
-        GetResponse response = client.execute(new GetRequest(FolderObject.SYSTEM_LDAP_FOLDER_ID, contactId, tz));
-        userContact = response.getContact();
+        timeZone = client.getValues().getTimeZone();
+        task = new Task();
+        task.setParentFolderID(client.getValues().getPrivateTaskFolder());
+        task.setTitle("Test for bug 15937");
+        task.setNumberOfAttachments(42);
+        InsertRequest request = new InsertRequest(task, timeZone);
+        InsertResponse response = client.execute(request);
+        response.fillTask(task);
     }
 
-    public void testDeleteUserContact() throws Throwable {
-        CommonDeleteResponse response = client.execute(new DeleteRequest(userContact, false));
-        assertTrue("Delete was not denied.", response.hasError());
+    @Override
+    protected void tearDown() throws Exception {
+        client.execute(new DeleteRequest(task));
+        super.tearDown();
+    }
+
+    public void testNumberOfAttachments() throws Throwable {
+        GetRequest request = new GetRequest(task);
+        GetResponse response = client.execute(request);
+        Task testTask = response.getTask(timeZone);
+        assertTrue("Number of attachments should be send.", testTask.containsNumberOfAttachments());
+        assertEquals("Number of attachments must be zero.", 0, testTask.getNumberOfAttachments());
     }
 }

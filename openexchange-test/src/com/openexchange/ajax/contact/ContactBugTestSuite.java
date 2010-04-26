@@ -54,9 +54,6 @@ import junit.framework.TestSuite;
 
 public final class ContactBugTestSuite extends TestSuite {
 
-    /**
-     * Prevent instantiation.
-     */
     private ContactBugTestSuite() {
         super();
     }
@@ -69,6 +66,7 @@ public final class ContactBugTestSuite extends TestSuite {
         tests.addTestSuite(Bug13931Test.class);
         tests.addTestSuite(Bug15317Test.class);
         tests.addTestSuite(Bug15315Test.class);
+        tests.addTestSuite(Bug15937Test.class);
         return tests;
     }
 }

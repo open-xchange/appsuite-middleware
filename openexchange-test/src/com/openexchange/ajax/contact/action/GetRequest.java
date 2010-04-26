@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.groupware.container.Contact;
 
 /**
  * 
@@ -82,6 +83,10 @@ public class GetRequest extends AbstractContactRequest<GetResponse> {
 
     public GetRequest(final int folderId, final InsertResponse insert, TimeZone timeZone) {
         this(folderId, insert.getId(), timeZone, true);
+    }
+
+    public GetRequest(Contact contact, TimeZone timeZone) {
+        this(contact.getParentFolderID(), contact.getObjectID(), timeZone, true);
     }
 
     public Object getBody() {

@@ -47,32 +47,32 @@
  *
  */
 
-package com.openexchange.ajax.contact;
+package com.openexchange.ajax.appointment.bugtests;
 
+import java.util.Calendar;
 import java.util.TimeZone;
-import com.openexchange.ajax.config.actions.Tree;
-import com.openexchange.ajax.contact.action.DeleteRequest;
-import com.openexchange.ajax.contact.action.GetRequest;
-import com.openexchange.ajax.contact.action.GetResponse;
+import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
+import com.openexchange.ajax.appointment.action.DeleteRequest;
+import com.openexchange.ajax.appointment.action.GetRequest;
+import com.openexchange.ajax.appointment.action.GetResponse;
+import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.ajax.framework.CommonDeleteResponse;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.calendar.TimeTools;
+import com.openexchange.groupware.container.Appointment;
 
 /**
- * {@link Bug15317Test}
+ * {@link Bug15937Test}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Bug15317Test extends AbstractAJAXSession {
+public class Bug15937Test extends AbstractAJAXSession {
 
     private AJAXClient client;
-    private TimeZone tz;
-    private Contact userContact;
-    private int contactId;
+    private Appointment appointment;
+    private TimeZone timeZone;
 
-    public Bug15317Test(String name) {
+    public Bug15937Test(String name) {
         super(name);
     }
 
@@ -80,14 +80,31 @@ public class Bug15317Test extends AbstractAJAXSession {
     protected void setUp() throws Exception {
         super.setUp();
         client = getClient();
-        tz = client.getValues().getTimeZone();
-        contactId = client.execute(new com.openexchange.ajax.config.actions.GetRequest(Tree.ContactID)).getInteger();
-        GetResponse response = client.execute(new GetRequest(FolderObject.SYSTEM_LDAP_FOLDER_ID, contactId, tz));
-        userContact = response.getContact();
+        timeZone = client.getValues().getTimeZone();
+        appointment = new Appointment();
+        appointment.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        appointment.setTitle("Test for bug 15937");
+        final Calendar calendar = TimeTools.createCalendar(timeZone);
+        appointment.setStartDate(calendar.getTime());
+        calendar.add(Calendar.HOUR, 1);
+        appointment.setEndDate(calendar.getTime());
+        appointment.setNumberOfAttachments(42);
+        InsertRequest request = new InsertRequest(appointment, timeZone);
+        AppointmentInsertResponse response = client.execute(request);
+        response.fillAppointment(appointment);
     }
 
-    public void testDeleteUserContact() throws Throwable {
-        CommonDeleteResponse response = client.execute(new DeleteRequest(userContact, false));
-        assertTrue("Delete was not denied.", response.hasError());
+    @Override
+    protected void tearDown() throws Exception {
+        client.execute(new DeleteRequest(appointment));
+        super.tearDown();
+    }
+
+    public void testNumberOfAttachments() throws Throwable {
+        GetRequest request = new GetRequest(appointment);
+        GetResponse response = client.execute(request);
+        Appointment testAppointment = response.getAppointment(timeZone);
+        assertTrue("Number of attachments should be send.", testAppointment.containsNumberOfAttachments());
+        assertEquals("Number of attachments must be zero.", 0, testAppointment.getNumberOfAttachments());
     }
 }

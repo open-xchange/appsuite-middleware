@@ -76,6 +76,7 @@ import com.openexchange.ajax.appointment.bugtests.Bug13942Test;
 import com.openexchange.ajax.appointment.bugtests.Bug14357Test;
 import com.openexchange.ajax.appointment.bugtests.Bug14679Test;
 import com.openexchange.ajax.appointment.bugtests.Bug15074Test;
+import com.openexchange.ajax.appointment.bugtests.Bug15937Test;
 import com.openexchange.ajax.appointment.bugtests.Bug4392Test;
 import com.openexchange.ajax.appointment.bugtests.Bug4541Test;
 import com.openexchange.ajax.appointment.bugtests.Bug6055Test;
@@ -99,24 +100,24 @@ public class AppointmentBugTestSuite extends TestSuite{
         super();
     }
 
-	/**
-	 * @return the suite.
-	 */
-	public static Test suite() {
-		final TestSuite tests = new TestSuite();
-		tests.addTestSuite(Bug4392Test.class);
-		tests.addTestSuite(Bug4541Test.class);
-		tests.addTestSuite(Bug6055Test.class);
-		tests.addTestSuite(Bug8317Test.class);
+    /**
+     * @return the suite.
+     */
+    public static Test suite() {
+        final TestSuite tests = new TestSuite();
+        tests.addTestSuite(Bug4392Test.class);
+        tests.addTestSuite(Bug4541Test.class);
+        tests.addTestSuite(Bug6055Test.class);
+        tests.addTestSuite(Bug8317Test.class);
         tests.addTestSuite(Bug8724Test.class);
-		tests.addTestSuite(Bug8836Test.class);
-		tests.addTestSuite(Bug9089Test.class);
-		tests.addTestSuite(Bug10154Test.class);
-		tests.addTestSuite(Bug10733Test.class);
+        tests.addTestSuite(Bug8836Test.class);
+        tests.addTestSuite(Bug9089Test.class);
+        tests.addTestSuite(Bug10154Test.class);
+        tests.addTestSuite(Bug10733Test.class);
         tests.addTestSuite(Bug10836Test.class);
-		tests.addTestSuite(Bug11250Test.class);
-		tests.addTestSuite(Bug11865Test.class);
-		tests.addTestSuite(Bug12099Test.class);
+        tests.addTestSuite(Bug11250Test.class);
+        tests.addTestSuite(Bug11865Test.class);
+        tests.addTestSuite(Bug12099Test.class);
         tests.addTestSuite(Bug12326Test.class);
         tests.addTestSuite(Bug12372Test.class);
         tests.addTestSuite(Bug12444Test.class);
@@ -140,6 +141,7 @@ public class AppointmentBugTestSuite extends TestSuite{
         tests.addTestSuite(Bug13788Test.class);
         tests.addTestSuite(Bug14679Test.class);
         tests.addTestSuite(Bug15074Test.class);
-		return tests;
-	}
+        tests.addTestSuite(Bug15937Test.class);
+        return tests;
+    }
 }

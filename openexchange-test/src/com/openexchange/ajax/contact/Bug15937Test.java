@@ -49,30 +49,26 @@
 
 package com.openexchange.ajax.contact;
 
-import java.util.TimeZone;
-import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.contact.action.GetResponse;
+import com.openexchange.ajax.contact.action.InsertRequest;
+import com.openexchange.ajax.contact.action.InsertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.FolderObject;
 
 /**
- * {@link Bug15317Test}
+ * {@link Bug15937Test}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Bug15317Test extends AbstractAJAXSession {
+public class Bug15937Test extends AbstractAJAXSession {
 
     private AJAXClient client;
-    private TimeZone tz;
-    private Contact userContact;
-    private int contactId;
+    private Contact contact;
 
-    public Bug15317Test(String name) {
+    public Bug15937Test(String name) {
         super(name);
     }
 
@@ -80,14 +76,26 @@ public class Bug15317Test extends AbstractAJAXSession {
     protected void setUp() throws Exception {
         super.setUp();
         client = getClient();
-        tz = client.getValues().getTimeZone();
-        contactId = client.execute(new com.openexchange.ajax.config.actions.GetRequest(Tree.ContactID)).getInteger();
-        GetResponse response = client.execute(new GetRequest(FolderObject.SYSTEM_LDAP_FOLDER_ID, contactId, tz));
-        userContact = response.getContact();
+        contact = new Contact();
+        contact.setParentFolderID(client.getValues().getPrivateContactFolder());
+        contact.setDisplayName("Test for bug 15937");
+        contact.setNumberOfAttachments(42);
+        InsertRequest request = new InsertRequest(contact);
+        InsertResponse response = client.execute(request);
+        response.fillObject(contact);
     }
 
-    public void testDeleteUserContact() throws Throwable {
-        CommonDeleteResponse response = client.execute(new DeleteRequest(userContact, false));
-        assertTrue("Delete was not denied.", response.hasError());
+    @Override
+    protected void tearDown() throws Exception {
+        client.execute(new DeleteRequest(contact));
+        super.tearDown();
+    }
+
+    public void testNumberOfAttachments() throws Throwable {
+        GetRequest request = new GetRequest(contact, client.getValues().getTimeZone());
+        GetResponse response = client.execute(request);
+        Contact testContact = response.getContact();
+        assertTrue("Number of attachments should be send.", testContact.containsNumberOfAttachments());
+        assertEquals("Number of attachments must be zero.", 0, testContact.getNumberOfAttachments());
     }
 }
