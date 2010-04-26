@@ -321,6 +321,37 @@ ox_exists_property() {
     grep -E "^$prop *[:=]" $propfile >/dev/null || return 1
 }
 
+# savely find key/val in keys and values containing all kind of ugly chars
+# delimiter must be either = or :
+save_read_prop() {
+    export prop="$1"
+    export propfile="$2"
+    perl -e '
+use strict;
+
+my $file=$ENV{"propfile"};
+my $search=$ENV{"prop"};
+open(FILE,$file) || die "unable to open $file: $!";
+my $val;
+while(<FILE>) {
+    chomp;
+    my $len=length($search);
+    if( substr($_,0,$len) eq $search ) {
+        foreach my $dl ( "=", ":" ) {
+           my $idx=index($_,$dl);
+           if( $idx >= $len ) {
+              $val=substr($_,$idx+1);
+           }
+        }
+        last;
+    }
+}
+print "$val\n";
+
+close(FILE);
+'
+}
+
 # usage:
 # ox_read_property property /path/to/file
 # 
@@ -331,7 +362,9 @@ ox_read_property() {
     test -z "$propfile" && die "ox_read_property: missing propfile argument (arg 2)"
     test -e "$propfile" || die "ox_read_property: $propfile does not exist"
 
-    sed -n -e "/^$prop/Is/^$prop *[:=]\(.*\).*$/\1/p" < $propfile
+    # sed -n -e "/^$prop/Is;^$prop *[:=]\(.*\).*$;\1;p" < $propfile
+    # UGLY: we have keys containing /
+    save_read_prop "$prop" "$propfile"
 }
 
 # usage:
