@@ -65,15 +65,14 @@ import com.openexchange.messaging.MessagingPermissions;
  */
 public final class TwitterMessagingFolder implements MessagingFolder {
 
-    private static final TwitterMessagingFolder INSTANCE = new TwitterMessagingFolder();
-
     /**
      * Gets the instance.
      * 
+     * @param user The user ID
      * @return The instance
      */
-    public static TwitterMessagingFolder getInstance() {
-        return INSTANCE;
+    public static TwitterMessagingFolder getInstance(final int user) {
+        return new TwitterMessagingFolder(user);
     }
 
     private final MessagingPermission ownPermission;
@@ -83,7 +82,7 @@ public final class TwitterMessagingFolder implements MessagingFolder {
     /**
      * Initializes a new {@link TwitterMessagingFolder}.
      */
-    private TwitterMessagingFolder() {
+    private TwitterMessagingFolder(final int user) {
         super();
         final MessagingPermission mp = DefaultMessagingPermission.newInstance();
         mp.setAllPermissions(
@@ -93,6 +92,8 @@ public final class TwitterMessagingFolder implements MessagingFolder {
             MessagingPermission.DELETE_OWN_OBJECTS);
         mp.setAdmin(false);
         ownPermission = MessagingPermissions.unmodifiablePermission(mp);
+        ownPermission.setEntity(user);
+        ownPermission.setGroup(false);
         permissions = Arrays.asList(ownPermission);
     }
 
