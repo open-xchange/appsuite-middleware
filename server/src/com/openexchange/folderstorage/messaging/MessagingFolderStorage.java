@@ -77,7 +77,6 @@ import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StoragePriority;
 import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.mail.MailParameterConstants;
-import com.openexchange.folderstorage.mail.MailServiceRegistry;
 import com.openexchange.folderstorage.messaging.contentType.DraftsContentType;
 import com.openexchange.folderstorage.messaging.contentType.MessagingContentType;
 import com.openexchange.folderstorage.messaging.contentType.SentContentType;
@@ -92,9 +91,6 @@ import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.messaging.MailMessagingService;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountException;
-import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.messaging.DefaultMessagingFolder;
 import com.openexchange.messaging.DefaultMessagingPermission;
 import com.openexchange.messaging.MessagingAccount;
@@ -525,25 +521,17 @@ public final class MessagingFolderStorage implements FolderStorage {
                 final MessagingFolder rootFolder = accountAccess.getFolderAccess().getRootFolder();
                 retval = new MessagingFolderImpl(rootFolder, accountId, serviceId, null);
                 /*
-                 * Set proper name for non-primary account
+                 * Set proper name
                  */
-                if (MailAccount.DEFAULT_ID != accountId) {
-                    /*
-                     * Set proper name
-                     */
-                    try {
-                        final MailAccountStorageService storageService =
-                            MailServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
-                        final MailAccount mailAccount =
-                            storageService.getMailAccount(accountId, storageParameters.getUserId(), storageParameters.getContextId());
-                        if (!UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(mailAccount.getMailProtocol())) {
-                            retval.setName(mailAccount.getName());
-                        }
-                    } catch (final ServiceException e) {
-                        throw new FolderException(e);
-                    } catch (final MailAccountException e) {
-                        throw new FolderException(e);
-                    }
+                try {
+                    final MessagingServiceRegistry msr =
+                        MessagingFolderStorageServiceRegistry.getServiceRegistry().getService(MessagingServiceRegistry.class, true);
+                    final MessagingService messagingService = msr.getMessagingService(serviceId);
+                    final MessagingAccount messagingAccount =
+                        messagingService.getAccountManager().getAccount(accountId, storageParameters.getSession());
+                    retval.setName(messagingAccount.getDisplayName());
+                } catch (final ServiceException e) {
+                    throw new FolderException(e);
                 }
                 hasSubfolders = rootFolder.hasSubfolders();
             } else {
