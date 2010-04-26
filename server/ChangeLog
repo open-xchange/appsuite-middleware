@@ -1,3 +1,7 @@
+* 2010-04-26 - marcus.klein@open-xchange.com
+
+ - Bugfix #15937: Ignoring number of attachments if sent from client.
+
 * 2010-04-23 - marcus.klein@open-xchange.com
 
  - Bugfix #15897: Prefering task identifier in URL on confirm requests.

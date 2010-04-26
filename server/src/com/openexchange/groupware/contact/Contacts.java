@@ -490,6 +490,7 @@ public final class Contacts {
             co.removeCreatedBy();
             co.removeModifiedBy();
             co.removeObjectID();
+            co.setNumberOfAttachments(0);
 
             /*
              * Check for bad characters inside strings
@@ -9510,7 +9511,7 @@ public final class Contacts {
 
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final int i = rs.getInt(pos);
-                if (!rs.wasNull() && (i > 0)) {
+                if (!rs.wasNull()) {
                     co.setNumberOfAttachments(i);
                 }
             }
@@ -9532,11 +9533,7 @@ public final class Contacts {
             }
 
             public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                if (((String) ob).equals("0")) {
-                    ps.setInt(position, 0);
-                } else {
-                    ps.setInt(position, Integer.parseInt((String) ob));
-                }
+                ps.setInt(position, Integer.parseInt((String) ob));
             }
 
             public Object getData(final ResultSet rs, final int pos) throws SQLException {

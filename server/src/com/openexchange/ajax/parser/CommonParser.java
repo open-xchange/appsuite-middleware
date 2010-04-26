@@ -79,25 +79,18 @@ public class CommonParser extends FolderChildParser {
         if (json.has(CommonFields.CATEGORIES)) {
             obj.setCategories(parseString(json, CommonFields.CATEGORIES));
         }
-        
         if (json.has(CommonFields.COLORLABEL)) {
             obj.setLabel(parseInt(json, CommonFields.COLORLABEL));
         }
-
         if (json.has(CommonFields.PRIVATE_FLAG)) {
             obj.setPrivateFlag(parseBoolean(json, CommonFields.PRIVATE_FLAG));
         }
-        
-        if (json.has(CommonFields.NUMBER_OF_ATTACHMENTS)) {
+        if (parseAll && json.has(CommonFields.NUMBER_OF_ATTACHMENTS)) {
             obj.setNumberOfAttachments(parseInt(json, CommonFields.NUMBER_OF_ATTACHMENTS));
-        }        
+        }
         if (parseAll && json.has(CommonFields.LAST_MODIFIED_OF_NEWEST_ATTACHMENT_UTC)) {
             obj.setLastModifiedOfNewestAttachment(parseDate(json, CommonFields.LAST_MODIFIED_OF_NEWEST_ATTACHMENT_UTC));
         }
         parseElementFolderChildObject(obj, json);
     }
 }
-
-
-
-
