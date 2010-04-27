@@ -1,3 +1,7 @@
+* 2010-04-27 - thorben.betten@open-xchange.com
+
+ - Bugfix #15947: Marking messaging folders as subscribed by default.
+
 * 2010-04-26 - marcus.klein@open-xchange.com
 
  - Bugfix #15937: Ignoring number of attachments if sent from client.
