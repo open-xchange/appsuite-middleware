@@ -114,7 +114,6 @@ public final class EventQueue {
                     callEvent(q2);
                 }
                 if (closing.get() && q1.isEmpty() && q2.isEmpty()) {
-                    LOG.info("Event queue processor task removed.");
                     scheduledTimerTask.cancel(false); // Stops this TimerTask
                     final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
                     if (timer != null) {
@@ -695,8 +694,7 @@ public final class EventQueue {
             }
             if (null != ServerServiceRegistry.getInstance().getService(TimerService.class)) {
                 // TODO TimerService is gone. Maybe event queues must be processed without the task.
-                LOG.warn("Waiting " + (2 * delay) + " seconds for queued events to be processed.");
-                if (!ALL_EVENTS_PROCESSED.await(2 * delay, TimeUnit.SECONDS)) {
+                if (!ALL_EVENTS_PROCESSED.await(2 * delay, TimeUnit.MILLISECONDS)) {
                     LOG.warn("Task did not clean event queues on shutdown.");
                 }
             }
