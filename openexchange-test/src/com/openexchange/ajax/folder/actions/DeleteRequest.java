@@ -49,11 +49,9 @@
 
 package com.openexchange.ajax.folder.actions;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import org.json.JSONArray;
-import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.CommonDeleteParser;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
@@ -71,30 +69,26 @@ public class DeleteRequest extends AbstractFolderRequest<CommonDeleteResponse> {
 
     private final Date lastModified;
 
-    private int tree = 0;
-
-    public DeleteRequest(final String[] folderIds, final Date lastModified) {
-        super();
+    public DeleteRequest(API api, String[] folderIds, Date lastModified) {
+        super(api);
         this.folderIds = folderIds;
         this.lastModified = lastModified;
     }
 
-    public DeleteRequest(final String folderId, final Date lastModified) {
-        this(new String[] { folderId }, lastModified);
+    public DeleteRequest(API api, String folderId, Date lastModified) {
+        this(api, new String[] { folderId }, lastModified);
     }
 
-    public DeleteRequest(final int[] folderIds, final Date lastModified) {
-        super();
-        this.folderIds = i2s(folderIds);
-        this.lastModified = lastModified;
+    public DeleteRequest(API api, int[] folderIds, Date lastModified) {
+        this(api, i2s(folderIds), lastModified);
     }
 
-    public DeleteRequest(final int folderId, final Date lastModified) {
-        this(new int[] { folderId }, lastModified);
+    public DeleteRequest(API api, int folderId, Date lastModified) {
+        this(api, new int[] { folderId }, lastModified);
     }
 
-    public DeleteRequest(final FolderObject... folder) {
-        super();
+    public DeleteRequest(API api, final FolderObject... folder) {
+        super(api);
         folderIds = new String[folder.length];
         Date maxLastModified = new Date(Long.MIN_VALUE);
         for (int i = 0; i < folder.length; i++) {
@@ -110,15 +104,7 @@ public class DeleteRequest extends AbstractFolderRequest<CommonDeleteResponse> {
         lastModified = maxLastModified;
     }
 
-    public DeleteRequest setTree(final int tree) {
-        this.tree = tree;
-        return this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Object getBody() throws JSONException {
+    public Object getBody() {
         final JSONArray array = new JSONArray();
         for (final String folderId : folderIds) {
             array.put(folderId);
@@ -126,38 +112,17 @@ public class DeleteRequest extends AbstractFolderRequest<CommonDeleteResponse> {
         return array;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Method getMethod() {
         return Method.PUT;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public Parameter[] getParameters() {
-        final List<Parameter> l = new ArrayList<Parameter>();
-        if (tree > 0) {
-            l.add(new Parameter("tree", String.valueOf(tree)));
-        }
-        l.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE));
-        l.add(new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, lastModified.getTime()));
-        return l.toArray(new Parameter[l.size()]);
+    @Override
+    protected void addParameters(List<Parameter> params) {
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE));
+        params.add(new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, lastModified.getTime()));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public CommonDeleteParser getParser() {
         return new CommonDeleteParser(true);
-    }
-
-    private String[] i2s(final int[] intArr) {
-        final String[] strArr = new String[intArr.length];
-        for (int i = 0; i < intArr.length; i++) {
-            strArr[i] = Integer.valueOf(intArr[i]).toString();
-        }
-        return strArr;
     }
 }

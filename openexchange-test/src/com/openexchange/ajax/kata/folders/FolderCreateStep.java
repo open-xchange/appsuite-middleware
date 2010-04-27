@@ -45,10 +45,10 @@
  *
  */
 
-
 package com.openexchange.ajax.kata.folders;
 
 import java.util.Date;
+import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonInsertResponse;
@@ -79,11 +79,11 @@ public class FolderCreateStep extends AbstractStep implements IdentitySource<Fol
         }
     }
 
-    public void perform(AJAXClient client) throws Exception {
-        this.client = client;
-        this.manager = new FolderTestManager(client);
+    public void perform(AJAXClient myClient) throws Exception {
+        this.client = myClient;
+        this.manager = new FolderTestManager(myClient);
              
-        InsertRequest insertRequest = new InsertRequest(entry, false);
+        InsertRequest insertRequest = new InsertRequest(API.OX_OLD, entry, false);
         CommonInsertResponse insertResponse = execute(insertRequest);
         insertResponse.fillObject(entry);
         inserted = !insertResponse.hasError();
@@ -101,7 +101,7 @@ public class FolderCreateStep extends AbstractStep implements IdentitySource<Fol
         folder.setLastModified( entry.getLastModified());        
     }
 
-    public void forgetIdentity(FolderObject entry) {
+    public void forgetIdentity(FolderObject myEntry) {
         inserted = false;
     }
     

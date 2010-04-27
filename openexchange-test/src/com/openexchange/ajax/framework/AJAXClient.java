@@ -170,7 +170,7 @@ public class AJAXClient {
     }
 
     public <T extends AbstractAJAXResponse> T execute(final AJAXRequest<T> request) throws AjaxException, IOException, SAXException, JSONException {
-        if(hostname != null && protocol != null) {
+        if (hostname != null && protocol != null) {
             // TODO: Maybe assume http as default protocol
             return Executor.execute(getSession(), request, getProtocol(), getHostname());
         }

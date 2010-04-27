@@ -54,14 +54,13 @@ import java.util.Date;
 import java.util.List;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
+import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.FolderUpdatesResponse;
 import com.openexchange.ajax.folder.actions.ListRequest;
 import com.openexchange.ajax.folder.actions.UpdatesRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.kata.NeedExistingStep;
-import com.openexchange.api.OXConflictException;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.search.Order;
@@ -89,20 +88,20 @@ public class FolderVerificationStep extends NeedExistingStep<FolderObject> {
         this.entry = entry;
     }
 
-    public void perform(AJAXClient client) throws Exception {
-        this.client = client;
-        this.manager = new FolderTestManager(client);
+    public void perform(AJAXClient myClient) throws Exception {
+        this.client = myClient;
+        this.manager = new FolderTestManager(myClient);
         assumeIdentity(entry);
         checkWithReadMethods(entry);
     }
 
-    private void checkWithReadMethods(FolderObject folder) throws OXException, JSONException, AjaxException, IOException, SAXException {
+    private void checkWithReadMethods(FolderObject folder) throws  JSONException, AjaxException, IOException, SAXException {
         checkViaGet(folder);
         checkViaList(folder);
         checkViaUpdates(folder);
     }
 
-    private void checkViaGet(FolderObject folder) throws OXException, JSONException {
+    private void checkViaGet(FolderObject folder) {
         FolderObject loaded = manager.getFolderFromServer(folder);
         compare(folder, loaded);
     }
@@ -110,7 +109,7 @@ public class FolderVerificationStep extends NeedExistingStep<FolderObject> {
 
     private void checkViaList(FolderObject folder) throws AjaxException, IOException, SAXException, JSONException {
         int[] requestedFields = FolderObject.ALL_COLUMNS;//new int[]{FolderObject.OBJECT_ID, FolderObject.FOLDER_ID}; 
-        ListRequest listRequest = new ListRequest( Integer.toString( folder.getParentFolderID() ), requestedFields, true );
+        ListRequest listRequest = new ListRequest(API.OX_OLD, Integer.toString(folder.getParentFolderID()), requestedFields, true );
         CommonListResponse response = client.execute(listRequest);
 
         Object[][] rows = response.getArray();
@@ -118,19 +117,19 @@ public class FolderVerificationStep extends NeedExistingStep<FolderObject> {
         checkInList(folder, rows, requestedFields, "list-");
     }
 
-    private void checkViaUpdates(FolderObject folder) throws AjaxException, IOException, SAXException, JSONException, OXConflictException {
-        UpdatesRequest updates = new UpdatesRequest(
+    private void checkViaUpdates(FolderObject folder) throws AjaxException, IOException, SAXException, JSONException {
+        UpdatesRequest updates = new UpdatesRequest(API.OX_OLD,
             folder.getParentFolderID(),
             FolderObject.ALL_COLUMNS,
             -1,
             Order.ASCENDING,
             new Date(0));
-        FolderUpdatesResponse response = (FolderUpdatesResponse) client.execute(updates);
+        FolderUpdatesResponse response = client.execute(updates);
         List<FolderObject> folders = response.getFolders();
-        checkInList(folder, folders, "updates-");
+        checkInList(folder, folders);
     }
     
-    private void checkInList(FolderObject folder, Object[][] rows, int[] columns, String typeOfAction) throws AjaxException, IOException, SAXException, JSONException {
+    private void checkInList(FolderObject folder, Object[][] rows, int[] columns, String typeOfAction) {
         int idPos = findIDIndex(columns);
 
         for (int i = 0; i < rows.length; i++) {
@@ -176,7 +175,7 @@ public class FolderVerificationStep extends NeedExistingStep<FolderObject> {
         ;
     }
 
-    private void compare(FolderObject folder, Object[] row, int[] columns) throws AjaxException, IOException, SAXException, JSONException {
+    private void compare(FolderObject folder, Object[] row, int[] columns) {
         assertEquals("Result should contain same number of elements as the request", Integer.valueOf(row.length), Integer.valueOf(columns.length));
         for (int i = 0; i < columns.length; i++) {
             int column = columns[i];
@@ -189,7 +188,7 @@ public class FolderVerificationStep extends NeedExistingStep<FolderObject> {
             if (folder.contains(column)) {
                 Object expected = folder.get(column);
                 Object actual = row[i];
-                actual = transform(column, actual);
+                actual = transform(actual);
                 assertEquals(name + " Column: " + column, expected, actual);
             }
         }
@@ -205,7 +204,7 @@ public class FolderVerificationStep extends NeedExistingStep<FolderObject> {
         return -1;
     }
 
-    private void checkInList(FolderObject folder, List<FolderObject> folders, String nameOfAction) {
+    private void checkInList(FolderObject folder, List<FolderObject> folders) {
         for (FolderObject folderFromList : folders) {
             if (folderFromList.getObjectID() == folder.getObjectID()) {
                 compare(folder, folderFromList);
@@ -215,10 +214,11 @@ public class FolderVerificationStep extends NeedExistingStep<FolderObject> {
         fail("Object not found in response: (" + folder.getObjectID() + ") " + name);
     }
     
-    private Object transform(int column, Object actual) throws AjaxException, IOException, SAXException, JSONException {
+    private Object transform(Object actual)  {
         return actual;
     }
 
     public void cleanUp() throws Exception {
+        // Nothing to clean up
     }
 }

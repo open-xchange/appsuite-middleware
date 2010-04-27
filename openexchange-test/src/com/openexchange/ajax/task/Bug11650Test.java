@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.task;
 
+import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonInsertResponse;
@@ -90,8 +91,8 @@ public class Bug11650Test extends AbstractTaskTest {
             berta.getValues().getUserId());
         folder.setParentFolderID(antonFID);
         // Share a folder.
-        final CommonInsertResponse fResponse = Executor.execute(anton,
-            new com.openexchange.ajax.folder.actions.InsertRequest(folder));
+        final CommonInsertResponse fResponse = anton.execute(
+            new com.openexchange.ajax.folder.actions.InsertRequest(API.OX_OLD, folder));
         fResponse.fillObject(folder);
         final Task task = Create.createWithDefaults();
         task.setTitle("Bug11650Test");
@@ -107,15 +108,14 @@ public class Bug11650Test extends AbstractTaskTest {
                 // Search in that shared task folder.
                 final TaskSearchObject search = new TaskSearchObject();
                 search.setPattern("*");
-                search.setFolder(folder.getObjectID());
+                search.addFolder(folder.getObjectID());
                 final SearchResponse response = Executor.execute(berta,
                     new SearchRequest(search, SearchRequest.GUI_COLUMNS));
                 assertFalse("Searching for tasks in a shared folder failed.",
                     response.hasError());
             }
         } finally {
-            Executor.execute(anton, new DeleteRequest(folder.getObjectID(),
-                folder.getLastModified()));
+            anton.execute(new DeleteRequest(API.OX_OLD, folder.getObjectID(), folder.getLastModified()));
         }
     }
 

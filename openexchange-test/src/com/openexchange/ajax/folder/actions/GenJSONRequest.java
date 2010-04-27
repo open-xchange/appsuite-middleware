@@ -49,12 +49,10 @@
 
 package com.openexchange.ajax.folder.actions;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
 
@@ -66,10 +64,7 @@ import org.json.JSONValue;
  */
 public class GenJSONRequest extends AbstractFolderRequest<GenJSONResponse> {
 
-    /**
-     * Should the parser fail on error in server response.
-     */
-    final boolean failOnError;
+    private final boolean failOnError;
 
     private JSONValue jsonValue;
 
@@ -77,11 +72,8 @@ public class GenJSONRequest extends AbstractFolderRequest<GenJSONResponse> {
 
     private final Map<String, String> parameters;
 
-    /**
-     * Default constructor.
-     */
-    public GenJSONRequest() {
-        this(true);
+    public GenJSONRequest(API api) {
+        this(api, true);
     }
 
     /**
@@ -89,53 +81,40 @@ public class GenJSONRequest extends AbstractFolderRequest<GenJSONResponse> {
      * 
      * @param failOnError Whether to fail on error
      */
-    public GenJSONRequest(final boolean failOnError) {
-        super();
+    public GenJSONRequest(API api, final boolean failOnError) {
+        super(api);
         this.failOnError = failOnError;
         method = Method.PUT;
         parameters = new HashMap<String, String>();
     }
 
-    public GenJSONRequest setJSONValue(final JSONValue jsonValue) {
+    public void setJSONValue(final JSONValue jsonValue) {
         this.jsonValue = jsonValue;
-        return this;
     }
 
-    public GenJSONRequest setMethod(final Method method) {
+    public void setMethod(final Method method) {
         this.method = method;
-        return this;
     }
 
-    public GenJSONRequest setParameter(final String name, final String value) {
+    public void setParameter(final String name, final String value) {
         parameters.put(name, value);
-        return this;
     }
 
-    public Object getBody() throws JSONException {
+    public Object getBody() {
         return null == jsonValue ? JSONObject.NULL : jsonValue;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Method getMethod() {
         return method;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public Parameter[] getParameters() {
-        final List<Parameter> tmp = new ArrayList<Parameter>(parameters.size());
+    @Override
+    protected void addParameters(List<Parameter> params) {
         for (final Entry<String, String> entry : parameters.entrySet()) {
-            tmp.add(new Parameter(entry.getKey(), entry.getValue()));
+            params.add(new Parameter(entry.getKey(), entry.getValue()));
         }
-        return tmp.toArray(new Parameter[tmp.size()]);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public GenJSONParser getParser() {
         return new GenJSONParser(failOnError);
     }

@@ -50,6 +50,7 @@
 package com.openexchange.ajax.folder;
 
 import java.util.Iterator;
+import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.GetResponse;
 import com.openexchange.ajax.folder.actions.ListRequest;
@@ -84,7 +85,7 @@ public class GetMailInboxTest extends AbstractAJAXSession {
     }
 
     public void testGetMailInbox() throws Throwable {
-        ListRequest request = new ListRequest(String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID));
+        ListRequest request = new ListRequest(API.OX_OLD, String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID));
         ListResponse response = client.execute(request);
         Iterator<FolderObject> iter = response.getFolder();
         FolderObject defaultIMAPFolder = null;
@@ -98,7 +99,7 @@ public class GetMailInboxTest extends AbstractAJAXSession {
         }
         assertNotNull("Default email folder not found.", defaultIMAPFolder);
         assertTrue("Default email folder has no subfolders.", defaultIMAPFolder.hasSubfolders());
-        request = new ListRequest(defaultIMAPFolder.getFullName());
+        request = new ListRequest(API.OX_OLD, defaultIMAPFolder.getFullName());
         response = client.execute(request);
         iter = response.getFolder();
         FolderObject inboxFolder = null;
@@ -110,7 +111,7 @@ public class GetMailInboxTest extends AbstractAJAXSession {
             }
         }
         assertNotNull("Inbox folder for default mail account not found.", inboxFolder);
-        GetRequest request2 = new GetRequest(inboxFolder.getFullName(), new int[] {
+        GetRequest request2 = new GetRequest(API.OX_OLD, inboxFolder.getFullName(), new int[] {
             FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME, FolderObject.OWN_RIGHTS, FolderObject.PERMISSIONS_BITS });
         GetResponse response2 = client.execute(request2);
         assertFalse("Get failed.", response2.hasError());

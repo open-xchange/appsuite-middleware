@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.folder.actions;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -65,37 +67,27 @@ import com.openexchange.server.impl.OCLPermission;
  */
 abstract class AbstractFolderRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
 
-    /**
-     * URL of the folder AJAX interface.
-     */
     public static final String FOLDER_URL = "/ajax/folders";
 
-    private String folderURL;
+    public static final String FOLDER_URL_NEW = "/ajax/folders2";
 
-    /**
-     * Default constructor.
-     */
-    protected AbstractFolderRequest() {
+    protected static String[] i2s(final int[] intArr) {
+        final String[] strArr = new String[intArr.length];
+        for (int i = 0; i < intArr.length; i++) {
+            strArr[i] = Integer.valueOf(intArr[i]).toString();
+        }
+        return strArr;
+    }
+
+    private API api;
+
+    protected AbstractFolderRequest(API api) {
         super();
-        folderURL = FOLDER_URL;
+        this.api = api;
     }
 
-    /**
-     * Manually set folder URL. The URL is then accessible via {@link #getServletPath()}.
-     * <p>
-     * Default is <code>"/ajax/folders"</code>.
-     * 
-     * @param folderURL The new folder URL
-     */
-    public void setFolderURL(final String folderURL) {
-        this.folderURL = folderURL;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public String getServletPath() {
-        return folderURL;
+        return api.getUrl();
     }
 
     protected JSONObject convert(final FolderObject folder) throws JSONException {
@@ -148,5 +140,24 @@ abstract class AbstractFolderRequest<T extends AbstractAJAXResponse> implements 
             retval = "";
         }
         return retval;
+    }
+
+    public final Parameter[] getParameters() {
+        List<Parameter> params = new ArrayList<Parameter>();
+        addParameters(params);
+        if (api.getTreeId() != -1) {
+            params.add(new Parameter("tree", api.getTreeId()));
+        }
+        return params.toArray(new Parameter[params.size()]);
+    }
+
+    protected abstract void addParameters(List<Parameter> params);
+
+    static final String getURL(API api) {
+        return api.getUrl();
+    }
+
+    static final int getTree(API api) {
+        return api.getTreeId();
     }
 }

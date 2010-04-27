@@ -49,10 +49,7 @@
 
 package com.openexchange.ajax.folder.actions;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.container.Response;
@@ -66,91 +63,54 @@ import com.openexchange.groupware.container.FolderObject;
  */
 public class PathRequest extends AbstractFolderRequest<PathResponse> {
 
-    private static final int[] DEFAULT_COLUMNS =
-        new int[] {
-            FolderObject.OBJECT_ID, FolderObject.MODULE, FolderObject.FOLDER_NAME, FolderObject.SUBFOLDERS, FolderObject.STANDARD_FOLDER,
-            FolderObject.CREATED_BY };
+    private static final int[] DEFAULT_COLUMNS = {
+        FolderObject.OBJECT_ID, FolderObject.MODULE, FolderObject.FOLDER_NAME, FolderObject.SUBFOLDERS, FolderObject.STANDARD_FOLDER,
+        FolderObject.CREATED_BY };
 
     private final String folder;
 
     private final int[] columns;
 
-    private int tree = 0;
-
-    public PathRequest(final String folder, final int[] columns) {
-        super();
+    public PathRequest(API api, String folder, int[] columns) {
+        super(api);
         this.folder = folder;
         this.columns = columns;
     }
 
-    public PathRequest(final String parentFolder) {
-        this(parentFolder, DEFAULT_COLUMNS);
+    public PathRequest(API api, String parentFolder) {
+        this(api, parentFolder, DEFAULT_COLUMNS);
     }
 
-    public PathRequest setTree(final int tree) {
-        this.tree = tree;
-        return this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Object getBody() throws JSONException {
+    public Object getBody() {
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Method getMethod() {
         return Method.GET;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public Parameter[] getParameters() {
-        final Parameter[] params = getParams();
-        final List<Parameter> l = new ArrayList<Parameter>(Arrays.asList(params));
-        if (tree > 0) {
-            l.add(new Parameter("tree", String.valueOf(tree)));
-        }
-        return l.toArray(new Parameter[l.size()]);
+    @Override
+    protected void addParameters(List<Parameter> params) {
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_PATH));
+        params.add(new Parameter(Folder.PARAMETER_ID, folder));
+        params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
     }
 
-    private Parameter[] getParams() {
-        final List<Parameter> parameters = new ArrayList<Parameter>();
-        parameters.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_PATH));
-        parameters.add(new Parameter(Folder.PARAMETER_ID, folder));
-        parameters.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
-        return parameters.toArray(new Parameter[parameters.size()]);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public PathParser getParser() {
         return new PathParser(columns, true);
     }
 
     private static class PathParser extends AbstractListParser<PathResponse> {
 
-        /**
-         * @param failOnError
-         */
         public PathParser(final int[] columns, final boolean failOnError) {
             super(failOnError, columns);
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         protected PathResponse instanciateReponse(final Response response) {
             final PathResponse retval = new PathResponse(response);
             retval.setColumns(getColumns());
             return retval;
         }
-
     }
 }

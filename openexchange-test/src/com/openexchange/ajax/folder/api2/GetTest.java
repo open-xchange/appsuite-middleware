@@ -50,6 +50,7 @@
 package com.openexchange.ajax.folder.api2;
 
 import org.json.JSONObject;
+import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.GetResponse;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -82,8 +83,7 @@ public class GetTest extends AbstractAJAXSession {
 
     public void testGetRoot() throws Throwable {
         // Get root folder
-        final GetRequest request = new GetRequest(String.valueOf(FolderObject.SYSTEM_ROOT_FOLDER_ID), true).setTree(1);
-        request.setFolderURL("/ajax/folders");
+        final GetRequest request = new GetRequest(API.OUTLOOK, String.valueOf(FolderObject.SYSTEM_ROOT_FOLDER_ID), true);
         final GetResponse response = client.execute(request);
 
         final JSONObject jsonObject = (JSONObject) response.getResponse().getData();
@@ -93,8 +93,7 @@ public class GetTest extends AbstractAJAXSession {
 
     public void testGetPrivate() throws Throwable {
         // Get private folder
-        final GetRequest request = new GetRequest(String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID), true).setTree(1);
-        request.setFolderURL("/ajax/folders");
+        final GetRequest request = new GetRequest(API.OUTLOOK, String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID), true);
         final GetResponse response = client.execute(request);
 
         final JSONObject jsonObject = (JSONObject) response.getResponse().getData();
@@ -105,8 +104,7 @@ public class GetTest extends AbstractAJAXSession {
 
     public void testGetPublic() throws Throwable {
         // Get public folder
-        final GetRequest request = new GetRequest(String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID), true).setTree(1);
-        request.setFolderURL("/ajax/folders");
+        final GetRequest request = new GetRequest(API.OUTLOOK, String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID), true);
         final GetResponse response = client.execute(request);
 
         final JSONObject jsonObject = (JSONObject) response.getResponse().getData();
@@ -117,8 +115,7 @@ public class GetTest extends AbstractAJAXSession {
 
     public void testGetShared() throws Throwable {
         // Get shared folder
-        final GetRequest request = new GetRequest(String.valueOf(FolderObject.SYSTEM_SHARED_FOLDER_ID), true).setTree(1);
-        request.setFolderURL("/ajax/folders");
+        final GetRequest request = new GetRequest(API.OUTLOOK, String.valueOf(FolderObject.SYSTEM_SHARED_FOLDER_ID), true);
         final GetResponse response = client.execute(request);
 
         final JSONObject jsonObject = (JSONObject) response.getResponse().getData();

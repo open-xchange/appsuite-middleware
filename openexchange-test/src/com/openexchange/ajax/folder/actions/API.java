@@ -49,57 +49,31 @@
 
 package com.openexchange.ajax.folder.actions;
 
-import java.util.List;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.groupware.container.FolderObject;
-
 /**
- * {@link RootRequest}
- * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * Enumeration of possible folder APIs. There are now 2 implementations of the OX folder tree and 1 implementation of the Outlook-like
+ * folder tree.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class RootRequest extends AbstractFolderRequest<ListResponse> {
+public enum API {
 
-    private static final int[] DEFAULT_COLUMNS = {
-        FolderObject.OBJECT_ID, FolderObject.MODULE, FolderObject.FOLDER_NAME, FolderObject.SUBFOLDERS, FolderObject.STANDARD_FOLDER,
-        FolderObject.CREATED_BY };
+    OX_OLD(AbstractFolderRequest.FOLDER_URL, -1),
+    OX_NEW(AbstractFolderRequest.FOLDER_URL_NEW, 0),
+    OUTLOOK(AbstractFolderRequest.FOLDER_URL_NEW, 1);
 
-    private final int[] columns;
+    private String url;
+    private int treeId;
 
-    private final boolean ignoreMail;
-
-    public RootRequest(API api, int[] columns, boolean ignoreMail) {
-        super(api);
-        this.columns = columns;
-        this.ignoreMail = ignoreMail;
+    private API(String url, int treeId) {
+        this.url = url;
+        this.treeId = treeId;
     }
 
-    public RootRequest(API api) {
-        this(api, DEFAULT_COLUMNS, false);
+    String getUrl() {
+        return url;
     }
 
-    public RootRequest(API api, boolean ignoreMail) {
-        this(api, DEFAULT_COLUMNS, ignoreMail);
-    }
-
-    public Object getBody() {
-        return null;
-    }
-
-    public Method getMethod() {
-        return Method.GET;
-    }
-
-    @Override
-    protected void addParameters(List<Parameter> params) {
-        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ROOT));
-        params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
-        if (ignoreMail) {
-            params.add(new Parameter(AJAXServlet.PARAMETER_IGNORE, "mailfolder"));
-        }
-    }
-
-    public ListParser getParser() {
-        return new ListParser(columns, true);
+    int getTreeId() {
+        return treeId;
     }
 }

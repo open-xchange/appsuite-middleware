@@ -50,6 +50,7 @@
 package com.openexchange.ajax.folder.api2;
 
 import org.json.JSONArray;
+import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.ListRequest;
 import com.openexchange.ajax.folder.actions.ListResponse;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -82,8 +83,7 @@ public class ListTest extends AbstractAJAXSession {
 
     public void testListRoot() throws Throwable {
         // List root's subfolders
-        final ListRequest request = new ListRequest(String.valueOf(FolderObject.SYSTEM_ROOT_FOLDER_ID)).setTree(1);
-        request.setFolderURL("/ajax/folders");
+        final ListRequest request = new ListRequest(API.OUTLOOK, String.valueOf(FolderObject.SYSTEM_ROOT_FOLDER_ID));
         final ListResponse response = client.execute(request);
 
         final JSONArray jsonArray = (JSONArray) response.getResponse().getData();
@@ -143,8 +143,7 @@ public class ListTest extends AbstractAJAXSession {
 
     public void testListPrivate() throws Throwable {
         // List root's subfolders
-        final ListRequest request = new ListRequest(String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID)).setTree(1);
-        request.setFolderURL("/ajax/folders");
+        final ListRequest request = new ListRequest(API.OUTLOOK, String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID));
         final ListResponse response = client.execute(request);
 
         final JSONArray jsonArray = (JSONArray) response.getResponse().getData();
@@ -163,8 +162,7 @@ public class ListTest extends AbstractAJAXSession {
 
     public void testListPublic() throws Throwable {
         // List root's subfolders
-        final ListRequest request = new ListRequest(String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID)).setTree(1);
-        request.setFolderURL("/ajax/folders");
+        final ListRequest request = new ListRequest(API.OUTLOOK, String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID));
         final ListResponse response = client.execute(request);
 
         final JSONArray jsonArray = (JSONArray) response.getResponse().getData();
@@ -183,8 +181,7 @@ public class ListTest extends AbstractAJAXSession {
 
     public void testListShared() throws Throwable {
         // List root's subfolders
-        final ListRequest request = new ListRequest(String.valueOf(FolderObject.SYSTEM_SHARED_FOLDER_ID)).setTree(1);
-        request.setFolderURL("/ajax/folders");
+        final ListRequest request = new ListRequest(API.OUTLOOK, String.valueOf(FolderObject.SYSTEM_SHARED_FOLDER_ID));
         final ListResponse response = client.execute(request);
 
         final JSONArray jsonArray = (JSONArray) response.getResponse().getData();

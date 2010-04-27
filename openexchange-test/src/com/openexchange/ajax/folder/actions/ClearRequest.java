@@ -49,11 +49,9 @@
 
 package com.openexchange.ajax.folder.actions;
 
-import java.util.ArrayList;
-import java.util.Date;
+import static com.openexchange.java.Autoboxing.I;
 import java.util.List;
 import org.json.JSONArray;
-import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.CommonDeleteParser;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
@@ -68,47 +66,36 @@ public class ClearRequest extends AbstractFolderRequest<CommonDeleteResponse> {
 
     private final String[] folderIds;
 
-    private int tree = 0;
-
-    public ClearRequest(final String[] folderIds) {
-        super();
+    public ClearRequest(API api, String[] folderIds) {
+        super(api);
         this.folderIds = folderIds;
     }
 
-    public ClearRequest(final String folderId) {
-        this(new String[] { folderId });
+    public ClearRequest(API api, String folderId) {
+        this(api, new String[] { folderId });
     }
 
-    public ClearRequest(final int[] folderIds) {
-        super();
-        this.folderIds = i2s(folderIds);
+    public ClearRequest(API api, final int[] folderIds) {
+        this(api, i2s(folderIds));
     }
 
-    public ClearRequest(final int folderId, final Date lastModified) {
-        this(new int[] { folderId });
+    public ClearRequest(API api, final int folderId) {
+        this(api, new int[] { folderId });
     }
 
-    public ClearRequest(final FolderObject... folder) {
-        super();
+    public ClearRequest(API api, final FolderObject... folder) {
+        super(api);
         folderIds = new String[folder.length];
         for (int i = 0; i < folder.length; i++) {
             if (folder[i].containsObjectID()) { // task, appointment or contact folder
-                folderIds[i] = Integer.valueOf(folder[i].getObjectID()).toString();
+                folderIds[i] = I(folder[i].getObjectID()).toString();
             } else { // mail folder
                 folderIds[i] = folder[i].getFullName();
             }
         }
     }
 
-    public ClearRequest setTree(final int tree) {
-        this.tree = tree;
-        return this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Object getBody() throws JSONException {
+    public Object getBody() {
         final JSONArray array = new JSONArray();
         for (final String folderId : folderIds) {
             array.put(folderId);
@@ -116,37 +103,16 @@ public class ClearRequest extends AbstractFolderRequest<CommonDeleteResponse> {
         return array;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Method getMethod() {
         return Method.PUT;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public Parameter[] getParameters() {
-        final List<Parameter> l = new ArrayList<Parameter>();
-        if (tree > 0) {
-            l.add(new Parameter("tree", String.valueOf(tree)));
-        }
-        l.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_CLEAR));
-        return l.toArray(new Parameter[l.size()]);
+    @Override
+    protected void addParameters(List<Parameter> params) {
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_CLEAR));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public CommonDeleteParser getParser() {
         return new CommonDeleteParser(true);
-    }
-
-    private String[] i2s(final int[] intArr) {
-        final String[] strArr = new String[intArr.length];
-        for (int i = 0; i < intArr.length; i++) {
-            strArr[i] = Integer.valueOf(intArr[i]).toString();
-        }
-        return strArr;
     }
 }

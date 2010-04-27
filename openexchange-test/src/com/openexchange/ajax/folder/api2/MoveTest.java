@@ -51,6 +51,7 @@ package com.openexchange.ajax.folder.api2;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.GenJSONRequest;
 import com.openexchange.ajax.folder.actions.GenJSONResponse;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -65,8 +66,6 @@ public class MoveTest extends AbstractAJAXSession {
 
     private AJAXClient client;
 
-    private String servletPath;
-
     /**
      * Initializes a new {@link MoveTest}.
      * 
@@ -79,7 +78,6 @@ public class MoveTest extends AbstractAJAXSession {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        servletPath = "/ajax/folders";
         client = getClient();
     }
 
@@ -93,9 +91,10 @@ public class MoveTest extends AbstractAJAXSession {
                 JSONObject newFolder =
                     new JSONObject(
                         "{\"title\":\"newCalFolder" + System.currentTimeMillis() + "\",\"module\":\"calendar\",\"permissions\":[{\"group\":false,\"bits\":403710016,\"entity\":" + userId + "}],\"subscribed\":1}");
-                GenJSONRequest request = new GenJSONRequest(true).setJSONValue(newFolder);
-                request.setFolderURL(servletPath);
-                request.setParameter("action", "new").setParameter("folder_id", "1").setParameter("tree", "1");
+                GenJSONRequest request = new GenJSONRequest(API.OUTLOOK, true);
+                request.setJSONValue(newFolder);
+                request.setParameter("action", "new");
+                request.setParameter("folder_id", "1");
                 GenJSONResponse response = client.execute(request);
                 newCalId = (String) response.getData();
                 assertNotNull("New ID must not be null!", newCalId);
@@ -103,9 +102,10 @@ public class MoveTest extends AbstractAJAXSession {
                 newFolder =
                     new JSONObject(
                         "{\"title\":\"newMailFolder" + System.currentTimeMillis() + "\",\"module\":\"mail\",\"permissions\":[{\"group\":false,\"bits\":403710016,\"entity\":" + userId + "}],\"subscribed\":1}");
-                request = new GenJSONRequest(true).setJSONValue(newFolder);
-                request.setFolderURL(servletPath);
-                request.setParameter("action", "new").setParameter("folder_id", "1").setParameter("tree", "1");
+                request = new GenJSONRequest(API.OUTLOOK, true);
+                request.setJSONValue(newFolder);
+                request.setParameter("action", "new");
+                request.setParameter("folder_id", "1");
                 response = client.execute(request);
                 newMailId = (String) response.getData();
                 assertNotNull("New ID must not be null!", newMailId);
@@ -115,10 +115,10 @@ public class MoveTest extends AbstractAJAXSession {
                 /*
                  * Move calendar folder below mail folder without timestamp parameter
                  */
-                final GenJSONRequest request = new GenJSONRequest(true);
-                request.setFolderURL(servletPath);
+                final GenJSONRequest request = new GenJSONRequest(API.OUTLOOK, true);
                 request.setJSONValue(new JSONObject("{\"folder_id\":\"" + newMailId + "\"}"));
-                request.setParameter("action", "update").setParameter("id", newCalId).setParameter("tree", "1");
+                request.setParameter("action", "update");
+                request.setParameter("id", newCalId);
                 final GenJSONResponse response = client.execute(request);
                 final String newCalIDMoved = (String) response.getData();
                 assertEquals("ID not equal.", newCalId, newCalIDMoved);
@@ -127,9 +127,9 @@ public class MoveTest extends AbstractAJAXSession {
             if (null != newCalId) {
                 // Delete folder
                 try {
-                    final GenJSONRequest request = new GenJSONRequest(true).setJSONValue(new JSONArray("[\"" + newCalId + "\"]"));
-                    request.setParameter("action", "delete").setParameter("tree", "1");
-                    request.setFolderURL(servletPath);
+                    final GenJSONRequest request = new GenJSONRequest(API.OUTLOOK, true);
+                    request.setJSONValue(new JSONArray("[\"" + newCalId + "\"]"));
+                    request.setParameter("action", "delete");
                     client.execute(request);
                 } catch (final Exception e) {
                     e.printStackTrace();
@@ -138,9 +138,9 @@ public class MoveTest extends AbstractAJAXSession {
             if (null != newMailId) {
                 // Delete folder
                 try {
-                    final GenJSONRequest request = new GenJSONRequest(true).setJSONValue(new JSONArray("[\"" + newMailId + "\"]"));
-                    request.setParameter("action", "delete").setParameter("tree", "1");
-                    request.setFolderURL(servletPath);
+                    final GenJSONRequest request = new GenJSONRequest(API.OUTLOOK, true);
+                    request.setJSONValue(new JSONArray("[\"" + newMailId + "\"]"));
+                    request.setParameter("action", "delete");
                     client.execute(request);
                 } catch (final Exception e) {
                     e.printStackTrace();
@@ -159,9 +159,10 @@ public class MoveTest extends AbstractAJAXSession {
                 JSONObject newFolder =
                     new JSONObject(
                         "{\"title\":\"newCalFolder" + System.currentTimeMillis() + "\",\"module\":\"calendar\",\"permissions\":[{\"group\":false,\"bits\":403710016,\"entity\":" + userId + "}],\"subscribed\":1}");
-                GenJSONRequest request = new GenJSONRequest(true).setJSONValue(newFolder);
-                request.setFolderURL(servletPath);
-                request.setParameter("action", "new").setParameter("folder_id", "1").setParameter("tree", "1");
+                GenJSONRequest request = new GenJSONRequest(API.OUTLOOK, true);
+                request.setJSONValue(newFolder);
+                request.setParameter("action", "new");
+                request.setParameter("folder_id", "1");
                 GenJSONResponse response = client.execute(request);
                 newCalId = (String) response.getData();
                 assertNotNull("New ID must not be null!", newCalId);
@@ -169,9 +170,10 @@ public class MoveTest extends AbstractAJAXSession {
                 newFolder =
                     new JSONObject(
                         "{\"title\":\"newMailFolder" + System.currentTimeMillis() + "\",\"module\":\"mail\",\"permissions\":[{\"group\":false,\"bits\":403710016,\"entity\":" + userId + "}],\"subscribed\":1}");
-                request = new GenJSONRequest(true).setJSONValue(newFolder);
-                request.setFolderURL(servletPath);
-                request.setParameter("action", "new").setParameter("folder_id", "1").setParameter("tree", "1");
+                request = new GenJSONRequest(API.OUTLOOK, true);
+                request.setJSONValue(newFolder);
+                request.setParameter("action", "new");
+                request.setParameter("folder_id", "1");
                 response = client.execute(request);
                 newMailId = (String) response.getData();
                 assertNotNull("New ID must not be null!", newMailId);
@@ -181,10 +183,10 @@ public class MoveTest extends AbstractAJAXSession {
                 /*
                  * Move mail folder below calendar folder without timestamp parameter
                  */
-                final GenJSONRequest request = new GenJSONRequest(true);
-                request.setFolderURL(servletPath);
+                final GenJSONRequest request = new GenJSONRequest(API.OUTLOOK, true);
                 request.setJSONValue(new JSONObject("{\"folder_id\":\"" + newCalId + "\"}"));
-                request.setParameter("action", "update").setParameter("id", newMailId).setParameter("tree", "1");
+                request.setParameter("action", "update");
+                request.setParameter("id", newMailId);
                 final GenJSONResponse response = client.execute(request);
                 final String newMailIDMoved = (String) response.getData();
                 assertEquals("ID must not be equal.", newMailId, newMailIDMoved);
@@ -194,9 +196,9 @@ public class MoveTest extends AbstractAJAXSession {
             if (null != newCalId) {
                 // Delete folder
                 try {
-                    final GenJSONRequest request = new GenJSONRequest(true).setJSONValue(new JSONArray("[\"" + newCalId + "\"]"));
-                    request.setParameter("action", "delete").setParameter("tree", "1");
-                    request.setFolderURL(servletPath);
+                    final GenJSONRequest request = new GenJSONRequest(API.OUTLOOK, true);
+                    request.setJSONValue(new JSONArray("[\"" + newCalId + "\"]"));
+                    request.setParameter("action", "delete");
                     client.execute(request);
                 } catch (final Exception e) {
                     e.printStackTrace();
@@ -205,9 +207,9 @@ public class MoveTest extends AbstractAJAXSession {
             if (null != newMailId) {
                 // Delete folder
                 try {
-                    final GenJSONRequest request = new GenJSONRequest(true).setJSONValue(new JSONArray("[\"" + newMailId + "\"]"));
-                    request.setParameter("action", "delete").setParameter("tree", "1");
-                    request.setFolderURL(servletPath);
+                    final GenJSONRequest request = new GenJSONRequest(API.OUTLOOK, true);
+                    request.setJSONValue(new JSONArray("[\"" + newMailId + "\"]"));
+                    request.setParameter("action", "delete");
                     client.execute(request);
                 } catch (final Exception e) {
                     e.printStackTrace();

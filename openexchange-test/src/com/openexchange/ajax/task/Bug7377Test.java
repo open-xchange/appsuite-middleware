@@ -51,9 +51,8 @@ package com.openexchange.ajax.task;
 
 import java.util.Date;
 import java.util.TimeZone;
-
 import com.openexchange.ajax.folder.Create;
-import com.openexchange.ajax.folder.FolderTools;
+import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.reminder.ReminderTools;
@@ -184,8 +183,8 @@ public class Bug7377Test extends AbstractTaskTest {
             final FolderObject tmp = Create.setupPublicFolder("Bug7377TaskFolder1",
                 FolderObject.TASK, client1.getValues().getUserId());
             tmp.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
-            final CommonInsertResponse response = FolderTools.insert(client1,
-                new com.openexchange.ajax.folder.actions.InsertRequest(tmp));
+            final CommonInsertResponse response = client1.execute(
+                new com.openexchange.ajax.folder.actions.InsertRequest(API.OX_OLD, tmp));
             tmp.setObjectID(response.getId());
             tmp.setLastModified(response.getTimestamp());
             folder = tmp;
@@ -228,8 +227,7 @@ public class Bug7377Test extends AbstractTaskTest {
                 TaskTools.delete(client1, new DeleteRequest(task));
             }
             if (null != folder) {
-                FolderTools.delete(client1, new com.openexchange.ajax.folder.actions
-                    .DeleteRequest(folder.getObjectID(), folder.getLastModified()));
+                client1.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(API.OX_OLD, folder.getObjectID(), folder.getLastModified()));
             }
         }
     }

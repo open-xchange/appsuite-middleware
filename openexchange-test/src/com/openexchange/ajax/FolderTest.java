@@ -72,6 +72,7 @@ import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.config.ConfigTools;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.ajax.folder.FolderTools;
+import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.FolderUpdatesResponse;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.GetResponse;
@@ -182,8 +183,10 @@ public class FolderTest extends AbstractAJAXTest {
     }
 
     public static List<FolderObject> getSubfolders(final WebConversation conversation, final String protocol, final String hostname, final String sessionId, final String parentIdentifier, final boolean printOutput, final boolean ignoreMailfolder) throws MalformedURLException, IOException, SAXException, JSONException, OXException, AjaxException {
-        final AJAXSession session = new AJAXSession(conversation, sessionId);
-        return FolderTools.getSubFolders(session, protocol, hostname, parentIdentifier, ignoreMailfolder);
+        AJAXClient client = new AJAXClient(new AJAXSession(conversation, sessionId));
+        client.setProtocol(protocol);
+        client.setHostname(hostname);
+        return FolderTools.getSubFolders(client, parentIdentifier, ignoreMailfolder);
     }
 
     public static FolderObject getFolder(final WebConversation conversation, final String hostname, final String sessionId, final String folderIdentifier, final Calendar timestamp, final boolean printOutput) throws MalformedURLException, IOException, SAXException, JSONException, OXException {
@@ -1354,10 +1357,9 @@ public class FolderTest extends AbstractAJAXTest {
     public void testLastModifiedUTCInGet() throws JSONException, AjaxException, IOException, SAXException {
         final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
         // Load an existing folder
-        final GetRequest getRequest = new GetRequest(
-            "" + FolderObject.SYSTEM_PUBLIC_FOLDER_ID,
-            new int[] { FolderObject.LAST_MODIFIED_UTC },
-            true);
+        final GetRequest getRequest = new GetRequest(API.OX_OLD,
+            FolderObject.SYSTEM_PUBLIC_FOLDER_ID,
+            new int[] { FolderObject.LAST_MODIFIED_UTC });
         final GetResponse response = Executor.execute(client, getRequest);
         assertTrue(((JSONObject) response.getData()).has("last_modified_utc"));
     }
@@ -1367,11 +1369,11 @@ public class FolderTest extends AbstractAJAXTest {
     public void testLastModifiedUTCInList() throws JSONException, IOException, SAXException, AjaxException {
         final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
         // List known folder
-        final ListRequest listRequest = new ListRequest(
+        final ListRequest listRequest = new ListRequest(API.OX_OLD,
             "" + FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID,
             new int[] { FolderObject.LAST_MODIFIED_UTC },
             false);
-        final ListResponse listResponse = Executor.execute(client, listRequest);
+        final ListResponse listResponse = client.execute(listRequest);
         final JSONArray arr = (JSONArray) listResponse.getData();
         final int size = arr.length();
         assertTrue(size > 0);
@@ -1388,7 +1390,7 @@ public class FolderTest extends AbstractAJAXTest {
     public void testLastModifiedUTCInUpdates() throws JSONException, AjaxException, IOException, SAXException {
         final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
         // List known folder
-        final UpdatesRequest updatesRequest = new UpdatesRequest(
+        final UpdatesRequest updatesRequest = new UpdatesRequest(API.OX_OLD,
             FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID,
             new int[] { FolderObject.LAST_MODIFIED_UTC },
             -1,

@@ -49,8 +49,6 @@
 
 package com.openexchange.ajax.folder.actions;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
@@ -72,53 +70,31 @@ public class InsertRequest extends AbstractFolderRequest<CommonInsertResponse> {
      */
     final boolean failOnError;
 
-    private int tree = 0;
-
     /**
      * Default constructor.
      */
-    public InsertRequest(final FolderObject folder) {
-        this(folder, true);
+    public InsertRequest(API api, FolderObject folder) {
+        this(api, folder, true);
     }
 
-    public InsertRequest(final FolderObject folder, final boolean failOnError) {
-        super();
+    public InsertRequest(API api, FolderObject folder, boolean failOnError) {
+        super(api);
         this.failOnError = failOnError;
         this.folder = folder;
     }
 
-    public InsertRequest setTree(final int tree) {
-        this.tree = tree;
-        return this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public Object getBody() throws JSONException {
         return convert(folder);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Method getMethod() {
         return Method.PUT;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public Parameter[] getParameters() {
-        final Parameter[] params = getParams();
-        final List<Parameter> l = new ArrayList<Parameter>(Arrays.asList(params));
-        if (tree > 0) {
-            l.add(new Parameter("tree", String.valueOf(tree)));
-        }
-        return l.toArray(new Parameter[l.size()]);
-    }
-
-    private Parameter[] getParams() {
+    @Override
+    protected void addParameters(List<Parameter> params) {
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW));
+        
         if (folder.containsModule() && folder.getModule() == FolderObject.MAIL) {
             final String[] parts = folder.getFullName().split("/");
             final StringBuilder parentBuilder = new StringBuilder();
@@ -127,17 +103,12 @@ public class InsertRequest extends AbstractFolderRequest<CommonInsertResponse> {
                 parentBuilder.append("/");
             }
             final String parent = parentBuilder.substring(0, parentBuilder.length() - 1);
-            return new Parameter[] {
-                new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW), new Parameter(FolderFields.FOLDER_ID, parent) };
+            params.add(new Parameter(FolderFields.FOLDER_ID, parent));
+        } else {
+            params.add(new Parameter(FolderFields.FOLDER_ID, folder.getParentFolderID()));
         }
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW),
-            new Parameter(FolderFields.FOLDER_ID, folder.getParentFolderID()) };
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public InsertParser getParser() {
         return new InsertParser(failOnError);
     }

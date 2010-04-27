@@ -53,8 +53,8 @@ import static com.openexchange.ajax.folder.Create.ocl;
 import org.json.JSONArray;
 import com.openexchange.ajax.contact.action.AllRequest;
 import com.openexchange.ajax.contact.action.InsertRequest;
-import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.folder.Create;
+import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonInsertResponse;
@@ -81,6 +81,7 @@ public class Bug13931Test extends AbstractAJAXSession {
         super(name);
     }
 
+    @Override
     public void setUp() throws Exception {
         super.setUp();
 
@@ -95,7 +96,7 @@ public class Bug13931Test extends AbstractAJAXSession {
             OCLPermission.ADMIN_PERMISSION,
             OCLPermission.ADMIN_PERMISSION);
         folder = Create.folder(privateFolderId, "Folder to test bug 13931", FolderObject.CONTACT, FolderObject.PRIVATE, ocl);
-        CommonInsertResponse response = getClient().execute(new com.openexchange.ajax.folder.actions.InsertRequest(folder));
+        CommonInsertResponse response = getClient().execute(new com.openexchange.ajax.folder.actions.InsertRequest(API.OX_OLD, folder));
         response.fillObject(folder);
         folderId = folder.getObjectID();
 
@@ -132,8 +133,9 @@ public class Bug13931Test extends AbstractAJAXSession {
         assertEquals("Wrong order", bbb.getObjectID(), jsonArray.getJSONArray(3).getInt(0));
     }
 
+    @Override
     public void tearDown() throws Exception {
-        getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(folder.getObjectID(), folder.getLastModified()));
+        getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(API.OX_OLD, folder.getObjectID(), folder.getLastModified()));
 
         super.tearDown();
     }

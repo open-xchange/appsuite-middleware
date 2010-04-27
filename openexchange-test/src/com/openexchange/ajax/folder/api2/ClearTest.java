@@ -52,6 +52,7 @@ package com.openexchange.ajax.folder.api2;
 import java.util.Date;
 import org.json.JSONArray;
 import com.openexchange.ajax.AppointmentTest;
+import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.ClearRequest;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.InsertRequest;
@@ -112,8 +113,7 @@ public class ClearTest extends AbstractAJAXSession {
                 OCLPermission.ADMIN_PERMISSION);
             fo.setPermissionsAsArray(new OCLPermission[] { oclP });
 
-            final InsertRequest request = new InsertRequest(fo).setTree(1);
-            request.setFolderURL("/ajax/folders");
+            final InsertRequest request = new InsertRequest(API.OUTLOOK, fo);
             final InsertResponse response = (InsertResponse) client.execute(request);
 
             newId = (String) response.getResponse().getData();
@@ -169,8 +169,7 @@ public class ClearTest extends AbstractAJAXSession {
 
             assertTrue("Appointments were not created.", null != appointments && appointments.length == 2);
 
-            final ClearRequest clearRequest = new ClearRequest(newId).setTree(1);
-            clearRequest.setFolderURL("/ajax/folders");
+            final ClearRequest clearRequest = new ClearRequest(API.OUTLOOK, newId);
             final CommonDeleteResponse clearResponse = client.execute(clearRequest);
 
             final JSONArray nonClearedIDs = (JSONArray) clearResponse.getResponse().getData();
@@ -186,8 +185,7 @@ public class ClearTest extends AbstractAJAXSession {
             if (null != newId) {
                 // Delete folder
                 try {
-                    final DeleteRequest deleteRequest = new DeleteRequest(newId, new Date()).setTree(1);
-                    deleteRequest.setFolderURL("/ajax/folders");
+                    final DeleteRequest deleteRequest = new DeleteRequest(API.OUTLOOK, newId, new Date());
                     client.execute(deleteRequest);
                 } catch (final Exception e) {
                     e.printStackTrace();

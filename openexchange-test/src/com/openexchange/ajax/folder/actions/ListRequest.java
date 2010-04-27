@@ -49,10 +49,7 @@
 
 package com.openexchange.ajax.folder.actions;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Folder;
 import com.openexchange.groupware.container.FolderObject;
@@ -62,10 +59,9 @@ import com.openexchange.groupware.container.FolderObject;
  */
 public class ListRequest extends AbstractFolderRequest<ListResponse> {
 
-    private static final int[] DEFAULT_COLUMNS =
-        new int[] {
-            FolderObject.OBJECT_ID, FolderObject.MODULE, FolderObject.FOLDER_NAME, FolderObject.SUBFOLDERS, FolderObject.STANDARD_FOLDER,
-            FolderObject.CREATED_BY };
+    private static final int[] DEFAULT_COLUMNS = {
+        FolderObject.OBJECT_ID, FolderObject.MODULE, FolderObject.FOLDER_NAME, FolderObject.SUBFOLDERS, FolderObject.STANDARD_FOLDER,
+        FolderObject.CREATED_BY };
 
     private final String parentFolder;
 
@@ -73,68 +69,39 @@ public class ListRequest extends AbstractFolderRequest<ListResponse> {
 
     private final boolean ignoreMail;
 
-    private int tree = 0;
-
-    public ListRequest(final String parentFolder, final int[] columns, final boolean ignoreMail) {
-        super();
+    public ListRequest(API api, String parentFolder, int[] columns, boolean ignoreMail) {
+        super(api);
         this.parentFolder = parentFolder;
         this.columns = columns;
         this.ignoreMail = ignoreMail;
     }
 
-    public ListRequest(final String parentFolder) {
-        this(parentFolder, DEFAULT_COLUMNS, false);
+    public ListRequest(API api, String parentFolder) {
+        this(api, parentFolder, DEFAULT_COLUMNS, false);
     }
 
-    public ListRequest(final String parentFolder, final boolean ignoreMail) {
-        this(parentFolder, DEFAULT_COLUMNS, ignoreMail);
+    public ListRequest(API api, String parentFolder, boolean ignoreMail) {
+        this(api, parentFolder, DEFAULT_COLUMNS, ignoreMail);
     }
 
-    public ListRequest setTree(final int tree) {
-        this.tree = tree;
-        return this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Object getBody() throws JSONException {
+    public Object getBody() {
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Method getMethod() {
         return Method.GET;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public Parameter[] getParameters() {
-        final Parameter[] params = getParams();
-        final List<Parameter> l = new ArrayList<Parameter>(Arrays.asList(params));
-        if (tree > 0) {
-            l.add(new Parameter("tree", String.valueOf(tree)));
-        }
-        return l.toArray(new Parameter[l.size()]);
-    }
-
-    private Parameter[] getParams() {
-        final List<Parameter> parameters = new ArrayList<Parameter>();
-        parameters.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST));
-        parameters.add(new Parameter(Folder.PARAMETER_PARENT, parentFolder));
-        parameters.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
+    @Override
+    protected void addParameters(List<Parameter> params) {
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST));
+        params.add(new Parameter(Folder.PARAMETER_PARENT, parentFolder));
+        params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
         if (ignoreMail) {
-            parameters.add(new Parameter(AJAXServlet.PARAMETER_IGNORE, "mailfolder"));
+            params.add(new Parameter(AJAXServlet.PARAMETER_IGNORE, "mailfolder"));
         }
-        return parameters.toArray(new Parameter[parameters.size()]);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public ListParser getParser() {
         return new ListParser(columns, true);
     }

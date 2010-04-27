@@ -52,7 +52,7 @@ package com.openexchange.ajax.folder.api2;
 import java.util.Date;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.GetResponse;
@@ -110,7 +110,7 @@ public class UpdateTest extends AbstractAJAXSession {
             }
 
             {
-                final InsertRequest request = new InsertRequest(fo).setTree(1);
+                final InsertRequest request = new InsertRequest(API.OUTLOOK, fo);
                 final InsertResponse response = (InsertResponse) client.execute(request);
                 newId = (String) response.getResponse().getData();
                 assertNotNull("New ID must not be null!", newId);
@@ -142,13 +142,13 @@ public class UpdateTest extends AbstractAJAXSession {
             }
 
             {
-                final UpdateRequest updateRequest = new UpdateRequest(fo).setTree(1);
+                final UpdateRequest updateRequest = new UpdateRequest(API.OUTLOOK, fo);
                 fo.setLastModified(new Date());
-                final Response reqResponse = client.execute(updateRequest).getResponse();
+                client.execute(updateRequest).getResponse();
             }
 
             {
-                final GetRequest request = new GetRequest(newId, true).setTree(1);
+                final GetRequest request = new GetRequest(API.OUTLOOK, newId, true);
                 final GetResponse response = client.execute(request);
 
                 final JSONObject jsonObject = (JSONObject) response.getResponse().getData();
@@ -166,7 +166,7 @@ public class UpdateTest extends AbstractAJAXSession {
             if (null != newId) {
                 // Delete folder
                 try {
-                    final DeleteRequest deleteRequest = new DeleteRequest(newId, new Date()).setTree(1);
+                    final DeleteRequest deleteRequest = new DeleteRequest(API.OUTLOOK, newId, new Date());
                     client.execute(deleteRequest);
                 } catch (final Exception e) {
                     e.printStackTrace();

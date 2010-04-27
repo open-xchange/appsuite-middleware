@@ -49,8 +49,6 @@
 
 package com.openexchange.ajax.folder.actions;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.groupware.container.FolderObject;
@@ -65,49 +63,20 @@ public class UpdateRequest extends InsertRequest {
 
     private final FolderObject folder;
 
-    private final boolean failOnError;
-
-    private int tree;
-
-    /**
-     * Default constructor.
-     */
-    public UpdateRequest(final FolderObject folder) {
-        super(folder);
+    public UpdateRequest(API api, FolderObject folder, boolean failOnError) {
+        super(api, folder, failOnError);
         this.folder = folder;
-        this.failOnError = true;
     }
 
-    public UpdateRequest(final FolderObject folder, final boolean failOnError) {
-        super(folder);
-        this.folder = folder;
-        this.failOnError = failOnError;
+    public UpdateRequest(API api, FolderObject folder) {
+        this(api, folder, true);
     }
 
     @Override
-    public UpdateRequest setTree(final int tree) {
-        this.tree = tree;
-        return this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Parameter[] getParameters() {
-        final Parameter[] params = getParams();
-        final List<Parameter> l = new ArrayList<Parameter>(Arrays.asList(params));
-        if (tree > 0) {
-            l.add(new Parameter("tree", String.valueOf(tree)));
-        }
-        return l.toArray(new Parameter[l.size()]);
-    }
-
-    private Parameter[] getParams() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE),
-            new Parameter(AJAXServlet.PARAMETER_INFOLDER, String.valueOf(folder.getParentFolderID())),
-            new Parameter(AJAXServlet.PARAMETER_ID, String.valueOf(folder.getObjectID())),
-            new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(folder.getLastModified().getTime())) };
+    protected void addParameters(List<Parameter> params) {
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE));
+        params.add(new Parameter(AJAXServlet.PARAMETER_INFOLDER, String.valueOf(folder.getParentFolderID())));
+        params.add(new Parameter(AJAXServlet.PARAMETER_ID, String.valueOf(folder.getObjectID())));
+        params.add(new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(folder.getLastModified().getTime())));
     }
 }

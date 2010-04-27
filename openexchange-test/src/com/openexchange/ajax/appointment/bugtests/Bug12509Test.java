@@ -57,6 +57,7 @@ import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
+import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
@@ -81,6 +82,7 @@ public class Bug12509Test extends AbstractAJAXSession {
         super(name);
     }
 
+    @Override
     public void setUp() throws Exception {
         super.setUp();
 
@@ -113,7 +115,7 @@ public class Bug12509Test extends AbstractAJAXSession {
         permissions.add(oclp2);
         folder.setPermissions(permissions);
 
-        com.openexchange.ajax.folder.actions.InsertRequest folderInsertRequest = new com.openexchange.ajax.folder.actions.InsertRequest(folder);
+        com.openexchange.ajax.folder.actions.InsertRequest folderInsertRequest = new com.openexchange.ajax.folder.actions.InsertRequest(API.OX_OLD, folder);
         CommonInsertResponse folderInsertResponse = clientA.execute(folderInsertRequest);
         folderInsertResponse.fillObject(folder);
 
@@ -155,10 +157,11 @@ public class Bug12509Test extends AbstractAJAXSession {
         clientA.execute(appointmentGetRequest);
     }
 
+    @Override
     public void tearDown() throws Exception {
         DeleteRequest appointmentDeleteRequest = new DeleteRequest(appointment);
         clientA.execute(appointmentDeleteRequest);
-        com.openexchange.ajax.folder.actions.DeleteRequest folderDeleteRequest = new com.openexchange.ajax.folder.actions.DeleteRequest(folder);
+        com.openexchange.ajax.folder.actions.DeleteRequest folderDeleteRequest = new com.openexchange.ajax.folder.actions.DeleteRequest(API.OX_OLD, folder);
         clientA.execute(folderDeleteRequest);
 
         super.tearDown();

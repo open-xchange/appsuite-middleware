@@ -51,6 +51,7 @@ package com.openexchange.ajax.folder.api2;
 
 import java.util.Date;
 import java.util.List;
+import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.FolderUpdatesResponse;
 import com.openexchange.ajax.folder.actions.InsertRequest;
@@ -106,7 +107,7 @@ public class UpdatesTest extends AbstractAJAXSession {
                     OCLPermission.ADMIN_PERMISSION);
                 fo.setPermissionsAsArray(new OCLPermission[] { oclP });
                 timeStamp = System.currentTimeMillis();
-                final InsertRequest request = new InsertRequest(fo).setTree(1);
+                final InsertRequest request = new InsertRequest(API.OUTLOOK, fo);
                 final InsertResponse response = (InsertResponse) client.execute(request);
                 newId = (String) response.getResponse().getData();
                 assertNotNull("New ID must not be null!", newId);
@@ -115,8 +116,8 @@ public class UpdatesTest extends AbstractAJAXSession {
             final FolderUpdatesResponse response;
             {
                 final UpdatesRequest request =
-                    new UpdatesRequest(FolderObject.SYSTEM_ROOT_FOLDER_ID, new int[] {
-                        FolderObject.LAST_MODIFIED_UTC, FolderObject.OBJECT_ID }, -1, null, new Date(timeStamp)).setTree(1);
+                    new UpdatesRequest(API.OUTLOOK, FolderObject.SYSTEM_ROOT_FOLDER_ID, new int[] {
+                        FolderObject.LAST_MODIFIED_UTC, FolderObject.OBJECT_ID }, -1, null, new Date(timeStamp));
                 response = client.execute(request);
             }
 
@@ -134,7 +135,7 @@ public class UpdatesTest extends AbstractAJAXSession {
             if (null != newId) {
                 // Delete folder
                 try {
-                    final DeleteRequest deleteRequest = new DeleteRequest(newId, new Date()).setTree(1);
+                    final DeleteRequest deleteRequest = new DeleteRequest(API.OUTLOOK, newId, new Date());
                     client.execute(deleteRequest);
                 } catch (final Exception e) {
                     e.printStackTrace();
@@ -146,8 +147,7 @@ public class UpdatesTest extends AbstractAJAXSession {
 
     public void testUpdatesAll() throws Throwable {
         final UpdatesRequest request =
-            new UpdatesRequest(FolderObject.SYSTEM_ROOT_FOLDER_ID, new int[] { FolderObject.LAST_MODIFIED_UTC }, -1, null, new Date(0));
-        request.setFolderURL("/ajax/folder2");
+            new UpdatesRequest(API.OX_NEW, FolderObject.SYSTEM_ROOT_FOLDER_ID, new int[] { FolderObject.LAST_MODIFIED_UTC }, -1, null, new Date(0));
         final FolderUpdatesResponse response = client.execute(request);
 
         assertNotNull(response);

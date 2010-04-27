@@ -50,6 +50,7 @@
 package com.openexchange.ajax.folder.api2;
 
 import java.util.List;
+import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.GetResponse;
@@ -83,23 +84,20 @@ public class Bug15672Test extends AbstractAJAXSession {
         folder.setFolderName("Bug 15672 Test folder " + System.currentTimeMillis());
         folder.setModule(FolderObject.TASK);
 //        folder.setPermissionsAsArray(new OCLPermission[0]);
-        InsertRequest request = new InsertRequest(folder);
-        request.setTree(1);
+        InsertRequest request = new InsertRequest(API.OUTLOOK, folder);
         CommonInsertResponse response = client.execute(request);
         response.fillObject(folder);
     }
 
     @Override
     protected void tearDown() throws Exception {
-        DeleteRequest request = new DeleteRequest(folder);
-        request.setTree(1);
+        DeleteRequest request = new DeleteRequest(API.OUTLOOK, folder);
         client.execute(request);
         super.tearDown();
     }
 
     public void test4ProperPermissions() throws Throwable {
-        GetRequest request = new GetRequest(folder.getObjectID());
-        request.setTree(1);
+        GetRequest request = new GetRequest(API.OUTLOOK, folder.getObjectID());
         GetResponse response = client.execute(request);
         FolderObject testFolder = response.getFolder();
         List<OCLPermission> permissions = testFolder.getPermissions();

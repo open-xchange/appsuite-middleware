@@ -49,10 +49,7 @@
 
 package com.openexchange.ajax.folder.actions;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
@@ -68,18 +65,12 @@ public final class GetRequest extends AbstractFolderRequest<GetResponse> {
 
     class GetParser extends AbstractAJAXParser<GetResponse> {
 
-        /**
-         * Default constructor.
-         */
         GetParser(final boolean failOnError) {
             super(failOnError);
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
-        protected GetResponse createResponse(final Response response) throws JSONException {
+        protected GetResponse createResponse(final Response response) {
             return new GetResponse(response);
         }
     }
@@ -90,40 +81,30 @@ public final class GetRequest extends AbstractFolderRequest<GetResponse> {
 
     private final int[] columns;
 
-    private int tree = 0;
-
     /**
      * Initializes a new {@link GetRequest} for specified columns
      */
-    public GetRequest(final String folderIdentifier, final int[] columns, final boolean failOnError) {
-        super();
+    public GetRequest(API api, String folderIdentifier, int[] columns, boolean failOnError) {
+        super(api);
         this.folderIdentifier = folderIdentifier;
         this.columns = columns;
         this.failOnError = failOnError;
     }
 
-    /**
-     * Initializes a new {@link GetRequest} for all columns
-     */
-    public GetRequest(final String folderIdentifier, final boolean failOnError) {
-        this(folderIdentifier, FolderObject.ALL_COLUMNS, failOnError);
+    public GetRequest(API api, String folderIdentifier, boolean failOnError) {
+        this(api, folderIdentifier, FolderObject.ALL_COLUMNS, failOnError);
     }
 
-    public GetRequest(final int folderId, final int[] columns) {
-        this(String.valueOf(folderId), columns, true);
+    public GetRequest(API api, int folderId, int[] columns) {
+        this(api, String.valueOf(folderId), columns, true);
     }
 
-    public GetRequest(final String folderId, final int[] columns) {
-        this(folderId, columns, true);
+    public GetRequest(API api, String folderId, int[] columns) {
+        this(api, folderId, columns, true);
     }
 
-    public GetRequest(int folderId) {
-        this(String.valueOf(folderId), FolderObject.ALL_COLUMNS, true);
-    }
-
-    public GetRequest setTree(final int tree) {
-        this.tree = tree;
-        return this;
+    public GetRequest(API api, int folderId) {
+        this(api, String.valueOf(folderId), FolderObject.ALL_COLUMNS, true);
     }
 
     public Object getBody() {
@@ -134,19 +115,11 @@ public final class GetRequest extends AbstractFolderRequest<GetResponse> {
         return Method.GET;
     }
 
-    public Parameter[] getParameters() {
-        final Parameter[] params = getParams();
-        final List<Parameter> l = new ArrayList<Parameter>(Arrays.asList(params));
-        if (tree > 0) {
-            l.add(new Parameter("tree", String.valueOf(tree)));
-        }
-        return l.toArray(new Parameter[l.size()]);
-    }
-
-    private Parameter[] getParams() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET), new Parameter(AJAXServlet.PARAMETER_ID, folderIdentifier),
-            new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns) };
+    @Override
+    protected void addParameters(List<Parameter> params) {
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET));
+        params.add(new Parameter(AJAXServlet.PARAMETER_ID, folderIdentifier));
+        params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
     }
 
     public GetParser getParser() {

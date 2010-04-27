@@ -50,6 +50,7 @@
 package com.openexchange.ajax.appointment;
 
 import static com.openexchange.ajax.folder.Create.ocl;
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
@@ -59,6 +60,7 @@ import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.folder.Create;
+import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
@@ -86,15 +88,16 @@ public class UserStory2173Test extends AbstractAJAXSession {
         super(name);
     }
 
+    @Override
     public void setUp() throws Exception {
         super.setUp();
 
         clientA = getClient();
         clientB = new AJAXClient(User.User3);
 
-        SetRequest setRequest = new SetRequest(Tree.CalendarDefaultStatusPrivate, Appointment.ACCEPT);
+        SetRequest setRequest = new SetRequest(Tree.CalendarDefaultStatusPrivate, I(Appointment.ACCEPT));
         clientB.execute(setRequest);
-        setRequest = new SetRequest(Tree.CalendarDefaultStatusPublic, Appointment.ACCEPT);
+        setRequest = new SetRequest(Tree.CalendarDefaultStatusPublic, I(Appointment.ACCEPT));
         clientB.execute(setRequest);
 
         publicFolder = Create.folder(
@@ -118,7 +121,7 @@ public class UserStory2173Test extends AbstractAJAXSession {
                 OCLPermission.ADMIN_PERMISSION,
                 OCLPermission.ADMIN_PERMISSION,
                 OCLPermission.ADMIN_PERMISSION));
-        CommonInsertResponse folderResponse = clientA.execute(new com.openexchange.ajax.folder.actions.InsertRequest(publicFolder));
+        CommonInsertResponse folderResponse = clientA.execute(new com.openexchange.ajax.folder.actions.InsertRequest(API.OX_OLD, publicFolder));
         folderResponse.fillObject(publicFolder);
 
         List<Participant> participants = ParticipantTools.createParticipants(
@@ -142,6 +145,7 @@ public class UserStory2173Test extends AbstractAJAXSession {
         appointmentPublic.setIgnoreConflicts(true);
     }
 
+    @Override
     public void tearDown() throws Exception {
         if (appointmentPrivate.getObjectID() > 0) {
             clientA.execute(new DeleteRequest(appointmentPrivate));
@@ -151,12 +155,12 @@ public class UserStory2173Test extends AbstractAJAXSession {
             clientA.execute(new DeleteRequest(appointmentPublic));
         }
         
-        clientA.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(publicFolder.getObjectID(), publicFolder.getLastModified()));
+        clientA.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(API.OX_OLD, publicFolder.getObjectID(), publicFolder.getLastModified()));
         
-        SetRequest setRequest = new SetRequest(Tree.CalendarDefaultStatusPrivate, Appointment.NONE);
+        SetRequest setRequest = new SetRequest(Tree.CalendarDefaultStatusPrivate, I(Appointment.NONE));
         clientB.execute(setRequest);
         
-        setRequest = new SetRequest(Tree.CalendarDefaultStatusPublic, Appointment.NONE);
+        setRequest = new SetRequest(Tree.CalendarDefaultStatusPublic, I(Appointment.NONE));
         clientB.execute(setRequest);
 
         super.tearDown();

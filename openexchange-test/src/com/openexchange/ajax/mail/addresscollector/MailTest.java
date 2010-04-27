@@ -1,16 +1,17 @@
 package com.openexchange.ajax.mail.addresscollector;
 
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
-
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.folder.Create;
+import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -34,15 +35,13 @@ import com.openexchange.tools.servlet.AjaxException;
 public class MailTest extends AbstractMailTest {
     
     private AJAXClient client;
-    
-    private static final String PROTOCOL = "http://";
 
     public MailTest(final String name) {
         super(name);
     }
     
     @Override
-	public void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
         this.client = getClient();
     }
@@ -71,9 +70,9 @@ public class MailTest extends AbstractMailTest {
             checkContacts(folder.getObjectID());
             
         } finally {
-            if(folder != null) {
-				deleteContactFolder(folder);
-			}
+            if (folder != null) {
+                deleteContactFolder(folder);
+            }
             
             clearFolder(getInboxFolder());
             clearFolder(getSentFolder());
@@ -113,18 +112,18 @@ public class MailTest extends AbstractMailTest {
     private FolderObject createContactFolder() throws AjaxException, IOException, SAXException, JSONException {
         final FolderObject folder = Create.createPrivateFolder("ContactCollectionFolder " + System.currentTimeMillis(), FolderObject.CONTACT, client.getValues().getUserId());
         folder.setParentFolderID(client.getValues().getPrivateContactFolder());
-        final CommonInsertResponse response = Executor.execute(client, new InsertRequest(folder));
+        final CommonInsertResponse response = Executor.execute(client, new InsertRequest(API.OX_OLD, folder));
         folder.setObjectID(response.getId());
         folder.setLastModified(response.getTimestamp());
         
-        Executor.execute(client, new SetRequest(Tree.ContactCollectEnabled, true));
-        Executor.execute(client, new SetRequest(Tree.ContactCollectFolder, folder.getObjectID()));
+        client.execute(new SetRequest(Tree.ContactCollectEnabled, B(true)));
+        client.execute(new SetRequest(Tree.ContactCollectFolder, I(folder.getObjectID())));
         return folder;
     }
     
     private void deleteContactFolder(final FolderObject folder) throws AjaxException, IOException, SAXException, JSONException {
-        Executor.execute(client, new SetRequest(Tree.ContactCollectEnabled, false));
-        Executor.execute(client, new DeleteRequest(folder.getObjectID(), folder.getLastModified()));
+        Executor.execute(client, new SetRequest(Tree.ContactCollectEnabled, B(false)));
+        Executor.execute(client, new DeleteRequest(API.OX_OLD, folder.getObjectID(), folder.getLastModified()));
     }
 
 }

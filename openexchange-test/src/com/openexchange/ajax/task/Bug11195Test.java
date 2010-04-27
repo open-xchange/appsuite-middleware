@@ -50,8 +50,7 @@
 package com.openexchange.ajax.task;
 
 import java.util.TimeZone;
-
-import com.openexchange.ajax.folder.FolderTools;
+import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.task.actions.DeleteRequest;
@@ -100,8 +99,8 @@ public final class Bug11195Test extends AbstractTaskTest {
             }
             // Create folder to move task to
             {
-                final CommonInsertResponse response = FolderTools.insert(client,
-                    new com.openexchange.ajax.folder.actions.InsertRequest(moveTo));
+                final CommonInsertResponse response = client.execute(
+                    new com.openexchange.ajax.folder.actions.InsertRequest(API.OX_OLD, moveTo));
                 moveTo.setObjectID(response.getId());
                 moveTo.setLastModified(response.getTimestamp());
             }
@@ -127,8 +126,7 @@ public final class Bug11195Test extends AbstractTaskTest {
                 TaskTools.delete(client, new DeleteRequest(task));
             }
             if (null != moveTo.getLastModified()) {
-                FolderTools.delete(client, new com.openexchange.ajax.folder.actions
-                    .DeleteRequest(moveTo.getObjectID(), moveTo.getLastModified()));
+                client.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(API.OX_OLD, moveTo.getObjectID(), moveTo.getLastModified()));
             }
         }
     }

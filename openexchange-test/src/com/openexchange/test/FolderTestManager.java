@@ -60,6 +60,7 @@ import java.util.Vector;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
+import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.GetResponse;
@@ -137,7 +138,7 @@ public class FolderTestManager implements TestManager{
      * Remembers this folder for cleanup later.
      */
     public FolderObject insertFolderOnServer(FolderObject folderToCreate) {
-        InsertRequest request = new InsertRequest(folderToCreate);
+        InsertRequest request = new InsertRequest(API.OX_OLD, folderToCreate);
         CommonInsertResponse response = null;
         try {
             response = client.execute(request);
@@ -163,7 +164,7 @@ public class FolderTestManager implements TestManager{
      * Updates a folder via HTTP-API and returns the same folder for convenience
      */
     public FolderObject updateFolderOnServer(FolderObject folder) {
-        UpdateRequest request = new UpdateRequest(folder);
+        UpdateRequest request = new UpdateRequest(API.OX_OLD, folder);
         try {
             setLastResponse(client.execute(request));
             remember(folder);
@@ -178,7 +179,7 @@ public class FolderTestManager implements TestManager{
      * Deletes a folder via HTTP-API
      */
     public void deleteFolderOnServer(FolderObject folderToDelete) throws AjaxException, IOException, SAXException, JSONException {
-        DeleteRequest request = new DeleteRequest(folderToDelete);
+        DeleteRequest request = new DeleteRequest(API.OX_OLD, folderToDelete);
         setLastResponse(client.execute(request));
         removeFolderFromCleanupList(folderToDelete);
     }
@@ -231,7 +232,7 @@ public class FolderTestManager implements TestManager{
         boolean oldValue = getFailOnError();
         setFailOnError(failOnErrorOverride);
         FolderObject returnedFolder = null;
-        GetRequest request = new GetRequest(folderID, Arrays.addUniquely(FolderObject.ALL_COLUMNS,additionalColumns));
+        GetRequest request = new GetRequest(API.OX_OLD, folderID, Arrays.addUniquely(FolderObject.ALL_COLUMNS,additionalColumns));
         GetResponse response = null;
         try {
             response = client.execute(request);
@@ -253,7 +254,7 @@ public class FolderTestManager implements TestManager{
      */
     public FolderObject getFolderFromServer(String name, boolean failOnErrorOverride) {
         FolderObject returnedFolder = null;
-        GetRequest request = new GetRequest(name, failOnErrorOverride);
+        GetRequest request = new GetRequest(API.OX_OLD, name, failOnErrorOverride);
         GetResponse response = null;
         try {
             response = client.execute(request);
@@ -272,7 +273,7 @@ public class FolderTestManager implements TestManager{
         boolean oldValue = getFailOnError();
         setFailOnError(failOnErrorOverride);
         FolderObject returnedFolder = null;
-        GetRequest request = new GetRequest(folderId, FolderObject.ALL_COLUMNS);
+        GetRequest request = new GetRequest(API.OX_OLD, folderId, FolderObject.ALL_COLUMNS);
         GetResponse response = null;
         try {
             response = client.execute(request);
@@ -315,7 +316,7 @@ public class FolderTestManager implements TestManager{
 
     public FolderObject[] listFoldersOnServer(int parentFolderId, int[] additionalFields) {
         Vector<FolderObject> allFolders = new Vector<FolderObject>();
-        ListRequest request = new ListRequest(Integer.toString(parentFolderId), Arrays.addUniquely(new int[] { FolderObject.OBJECT_ID },additionalFields), getFailOnError());
+        ListRequest request = new ListRequest(API.OX_OLD, Integer.toString(parentFolderId), Arrays.addUniquely(new int[] { FolderObject.OBJECT_ID },additionalFields), getFailOnError());
         try {
             ListResponse response = client.execute(request);
             Iterator<FolderObject> iterator = response.getFolder();
@@ -341,7 +342,7 @@ public class FolderTestManager implements TestManager{
         }
         Vector<FolderObject> allFolders = new Vector<FolderObject>();
         // FolderObject parentFolder = this.getFolderFromServer(parentFolderId);
-        ListRequest request = new ListRequest(folder.getFullName(), new int[] { FolderObject.OBJECT_ID }, getFailOnError());
+        ListRequest request = new ListRequest(API.OX_OLD, folder.getFullName(), new int[] { FolderObject.OBJECT_ID }, getFailOnError());
         try {
             ListResponse response = client.execute(request);
             setLastResponse(response);
@@ -361,7 +362,7 @@ public class FolderTestManager implements TestManager{
     public FolderObject[] listRootFoldersOnServer() {
         Vector<FolderObject> allFolders = new Vector<FolderObject>();
         // FolderObject parentFolder = this.getFolderFromServer(parentFolderId);
-        RootRequest request = new RootRequest(new int[] { FolderObject.OBJECT_ID }, ignoreMailFolders);
+        RootRequest request = new RootRequest(API.OX_OLD, new int[] { FolderObject.OBJECT_ID }, ignoreMailFolders);
         try {
             ListResponse response = client.execute(request);
             setLastResponse(response);
@@ -387,7 +388,7 @@ public class FolderTestManager implements TestManager{
     
     public FolderObject[] getUpdatedFoldersOnServer(int folderId, Date lastModified, int[] additionalFields) {
         Vector<FolderObject> allFolders = new Vector<FolderObject>();
-        UpdatesRequest request = new UpdatesRequest(folderId, Arrays.addUniquely(new int[] { FolderObject.OBJECT_ID }, additionalFields), -1, null, lastModified);
+        UpdatesRequest request = new UpdatesRequest(API.OX_OLD, folderId, Arrays.addUniquely(new int[] { FolderObject.OBJECT_ID }, additionalFields), -1, null, lastModified);
         try {
             CommonUpdatesResponse response = client.execute(request);
             int idPos = findIDPosition(response.getColumns());

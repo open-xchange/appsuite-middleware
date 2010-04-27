@@ -50,20 +50,20 @@
 package com.openexchange.ajax.appointment;
 
 import static com.openexchange.ajax.folder.Create.ocl;
+import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.Date;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.folder.Create;
+import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.server.impl.OCLPermission;
-import static com.openexchange.groupware.calendar.TimeTools.D;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -84,6 +84,7 @@ public class UserStory1085Test extends AppointmentTest {
         super(name);
     }
 
+    @Override
     public void setUp() throws Exception {
         super.setUp();
         
@@ -110,7 +111,7 @@ public class UserStory1085Test extends AppointmentTest {
                 OCLPermission.ADMIN_PERMISSION,
                 OCLPermission.ADMIN_PERMISSION));
         
-        CommonInsertResponse response = clientB.execute(new com.openexchange.ajax.folder.actions.InsertRequest(folder));
+        CommonInsertResponse response = clientB.execute(new com.openexchange.ajax.folder.actions.InsertRequest(API.OX_OLD, folder));
         response.fillObject(folder);
         
         appointmenShare = new Appointment();
@@ -145,11 +146,12 @@ public class UserStory1085Test extends AppointmentTest {
         end = D("02.02.2009 00:00");
     }
 
+    @Override
     public void tearDown() throws Exception {
         clientB.execute(new DeleteRequest(appointmenShare));
         clientC.execute(new DeleteRequest(appointmentPrivate));
         clientC.execute(new DeleteRequest(appointmentNormal));
-        clientB.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(folder.getObjectID(), folder.getLastModified()));
+        clientB.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(API.OX_OLD, folder.getObjectID(), folder.getLastModified()));
         
         super.tearDown();
     }

@@ -59,6 +59,7 @@ import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.folder.Create;
+import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.participant.ParticipantTools;
@@ -85,6 +86,7 @@ public class Bug13826Test extends AbstractAJAXSession {
         super(name);
     }
 
+    @Override
     public void setUp() throws Exception {
         super.setUp();
         
@@ -92,7 +94,7 @@ public class Bug13826Test extends AbstractAJAXSession {
         sourceFolderId = getClient().getValues().getPrivateAppointmentFolder();
         OCLPermission ocl = ocl(userId, false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         folder = Create.folder(sourceFolderId, "Folder to test bug 13826", FolderObject.CALENDAR, FolderObject.PRIVATE, ocl);
-        CommonInsertResponse response = getClient().execute(new com.openexchange.ajax.folder.actions.InsertRequest(folder));
+        CommonInsertResponse response = getClient().execute(new com.openexchange.ajax.folder.actions.InsertRequest(API.OX_OLD, folder));
         response.fillObject(folder);
         targetFolderId = folder.getObjectID();
         
@@ -137,12 +139,13 @@ public class Bug13826Test extends AbstractAJAXSession {
         setCurrentValues(loadedAppointment);
     }
 
+    @Override
     public void tearDown() throws Exception {
         if (appointment != null && lastModified != null) {
             appointment.setLastModified(lastModified);
             getClient().execute(new DeleteRequest(appointment.getObjectID(), currentFolder, lastModified));
         }
-        getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(folder.getObjectID(), folder.getLastModified()));
+        getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(API.OX_OLD, folder.getObjectID(), folder.getLastModified()));
         
         super.tearDown();
     }

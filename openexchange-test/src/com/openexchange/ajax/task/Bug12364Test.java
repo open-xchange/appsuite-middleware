@@ -52,6 +52,7 @@ package com.openexchange.ajax.task;
 import java.util.TimeZone;
 
 import com.openexchange.ajax.folder.Create;
+import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -74,14 +75,14 @@ public final class Bug12364Test extends AbstractAJAXSession {
     }
 
     public void testMoveTasks() throws Throwable {
-        final AJAXClient client = getClient();
-        final TimeZone tz = client.getValues().getTimeZone();
+        final AJAXClient myClient = getClient();
+        final TimeZone tz = myClient.getValues().getTimeZone();
         final FolderObject folder1;
         final FolderObject folder2;
         {
-            folder1 = Create.createPublicFolder(client,
+            folder1 = Create.createPublicFolder(myClient,
                 "bug 12364 test folder 1", FolderObject.TASK);
-            folder2 = Create.createPublicFolder(client,
+            folder2 = Create.createPublicFolder(myClient,
                 "bug 12364 test folder 2", FolderObject.TASK);
         }
         try {
@@ -92,18 +93,18 @@ public final class Bug12364Test extends AbstractAJAXSession {
             final Task task2 = new Task();
             task2.setTitle("bug 12364 test 2");
             task2.setParentFolderID(folder2.getObjectID());
-            TaskTools.insert(client, task1, task2);
+            TaskTools.insert(myClient, task1, task2);
             // Move them
             task1.setParentFolderID(folder2.getObjectID());
             task2.setParentFolderID(folder1.getObjectID());
             final UpdateRequest request1 = new UpdateRequest(folder1.getObjectID(), task1, tz);
             final UpdateRequest request2 = new UpdateRequest(folder2.getObjectID(), task2, tz);
-            client.execute(MultipleRequest.create(new UpdateRequest[] {
+            myClient.execute(MultipleRequest.create(new UpdateRequest[] {
                 request1,
                 request2
             }));
         } finally {
-            client.execute(new DeleteRequest(folder1, folder2));
+            myClient.execute(new DeleteRequest(API.OX_OLD, folder1, folder2));
         }
     }
 }

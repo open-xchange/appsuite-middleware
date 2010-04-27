@@ -55,22 +55,21 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 import java.util.Map.Entry;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
-
 import com.openexchange.ajax.AbstractAJAXTest;
 import com.openexchange.ajax.MailTest;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.folder.FolderTools;
+import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.ListRequest;
 import com.openexchange.ajax.folder.actions.ListResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
+import com.openexchange.ajax.parser.ResponseParser;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -116,21 +115,14 @@ public class AlwaysTest extends AbstractAJAXTest {
 
     private AJAXClient client;
 
-    /**
-     * @param name
-     */
     public AlwaysTest(final String name) {
         super(name);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        client = new AJAXClient(new AJAXSession(getWebConversation(),
-            getSessionId()));
+        client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
     }
 
     public void testFolderListing() throws Throwable {
@@ -163,7 +155,7 @@ public class AlwaysTest extends AbstractAJAXTest {
         final JSONObject json = MailTest.getAllMails(getWebConversation(),
             getHostName(), getSessionId(), folderId, listAttributes,
             false);
-        final Response response = Response.parse(json.toString());
+        final Response response = ResponseParser.parse(json.toString());
         assertFalse(response.getErrorMessage(), response.hasError());
         final JSONArray array = (JSONArray) response.getData();
         final int count = max == -1 ? array.length() : Math.min(max, array
@@ -182,7 +174,7 @@ public class AlwaysTest extends AbstractAJAXTest {
     public static Map<String, String> getIMAPRights(final AJAXClient client,
         final String parent) throws IOException,
         SAXException, JSONException, AjaxException {
-        final ListResponse listR = FolderTools.list(client, new ListRequest(
+        final ListResponse listR = client.execute(new ListRequest(API.OX_OLD,
             parent, new int[] { FolderObject.OBJECT_ID, FolderObject.OWN_RIGHTS
             }, false));
         final Map<String, String> retval = new HashMap<String, String>();
@@ -194,7 +186,7 @@ public class AlwaysTest extends AbstractAJAXTest {
 
     public FolderObject getIMAPRootFolder() throws OXException, IOException,
         SAXException, JSONException, AjaxException {
-        final ListResponse listR = FolderTools.list(client, new ListRequest(
+        final ListResponse listR = client.execute(new ListRequest(API.OX_OLD,
             String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID)));
         FolderObject defaultIMAPFolder = null;
         final Iterator<FolderObject> iter = listR.getFolder();

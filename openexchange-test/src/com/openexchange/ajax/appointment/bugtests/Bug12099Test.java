@@ -61,6 +61,7 @@ import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.folder.Create;
+import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
@@ -92,9 +93,9 @@ public final class Bug12099Test extends AbstractAJAXSession {
      * then has the changed_from set to 0.
      */
     public void testSeriesChangedFromIsZero() throws Throwable {
-        final AJAXClient client = getClient();
-        final int folderId = client.getValues().getPrivateAppointmentFolder();
-        final TimeZone tz = client.getValues().getTimeZone();
+        final AJAXClient myClient = getClient();
+        final int folderId = myClient.getValues().getPrivateAppointmentFolder();
+        final TimeZone tz = myClient.getValues().getTimeZone();
         final Appointment series = new Appointment();
         {
             series.setTitle("Bug 12099 test");
@@ -116,7 +117,7 @@ public final class Bug12099Test extends AbstractAJAXSession {
         }
         {
             final InsertRequest request = new InsertRequest(series, tz);
-            final CommonInsertResponse response = client.execute(request);
+            final CommonInsertResponse response = myClient.execute(request);
             series.setObjectID(response.getId());
             series.setLastModified(response.getTimestamp());
         }
@@ -124,19 +125,19 @@ public final class Bug12099Test extends AbstractAJAXSession {
         {
             final DeleteRequest request = new DeleteRequest(series.getObjectID(),
                 folderId, 1, series.getLastModified());
-            final CommonDeleteResponse response = client.execute(request);
+            final CommonDeleteResponse response = myClient.execute(request);
             series.setLastModified(response.getTimestamp());
         }
         {
             final GetRequest request = new GetRequest(folderId, series.getObjectID());
-            final GetResponse response = client.execute(request);
+            final GetResponse response = myClient.execute(request);
             series.setLastModified(response.getTimestamp());
             final Appointment test = response.getAppointment(tz);
             assertEquals("Editor of appointment series must not be 0.", 
-                client.getValues().getUserId(), test.getModifiedBy());
+                myClient.getValues().getUserId(), test.getModifiedBy());
         }
         } finally {
-            client.execute(new DeleteRequest(series.getObjectID(), folderId,
+            myClient.execute(new DeleteRequest(series.getObjectID(), folderId,
                 series.getLastModified()));
         }
     }
@@ -168,7 +169,7 @@ public final class Bug12099Test extends AbstractAJAXSession {
                 OCLPermission.ADMIN_PERMISSION));
         {
             final CommonInsertResponse response = clientA.execute(
-                new com.openexchange.ajax.folder.actions.InsertRequest(folder));
+                new com.openexchange.ajax.folder.actions.InsertRequest(API.OX_OLD, folder));
             response.fillObject(folder);
         }
         final Appointment appointment = new Appointment();
@@ -211,7 +212,7 @@ public final class Bug12099Test extends AbstractAJAXSession {
 //                clientB.execute(new DeleteRequest(appointment.getObjectID(),
 //                    folder.getObjectID(), appointment.getLastModified()));
 //            }
-            clientA.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(
+            clientA.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(API.OX_OLD,
                 folder.getObjectID(), folder.getLastModified()));
         }
     }
