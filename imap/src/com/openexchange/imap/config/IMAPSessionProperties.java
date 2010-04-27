@@ -156,6 +156,14 @@ public final class IMAPSessionProperties {
          */
         properties.put("mail.imap.appendbuffersize", "1048576");
         /*
+         * Controls whether the IMAP partial-fetch capability should be used. Defaults to true.
+         */
+        properties.put("mail.imap.partialfetch", "true");
+        /*
+         * Partial fetch size in bytes. Defaults to 16K.
+         */
+        properties.put("mail.imap.fetchsize", "51200");
+        /*
          * Apply configured JavaMail properties from file
          */
         final Properties javaMailProperties = MailProperties.getInstance().getJavaMailProperties();
