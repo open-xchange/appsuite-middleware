@@ -49,6 +49,7 @@
 
 package com.openexchange.calendar;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.HashSet;
 import java.util.Set;
 import com.openexchange.groupware.calendar.OXCalendarException;
@@ -157,7 +158,7 @@ public class RecurrenceChecker {
             throw new OXCalendarException(OXCalendarException.Code.INCOMPLETE_REC_INFOS_MONTHDAY);
 
         if (!cdao.containsMonth())
-            throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_YEARLY_MONTH);
+            throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_YEARLY_MONTH, I(-1));
 
         if (!cdao.containsDays())
             checkYearly1(cdao);
