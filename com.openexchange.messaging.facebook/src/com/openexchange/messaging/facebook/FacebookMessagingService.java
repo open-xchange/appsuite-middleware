@@ -77,7 +77,7 @@ public final class FacebookMessagingService implements MessagingService {
     private static final String DISPLAY_NAME = "Facebook";
 
     /**
-     * Gets the service identifier for twitter messaging service.
+     * Gets the service identifier for facebook messaging service.
      * 
      * @return The service identifier
      */

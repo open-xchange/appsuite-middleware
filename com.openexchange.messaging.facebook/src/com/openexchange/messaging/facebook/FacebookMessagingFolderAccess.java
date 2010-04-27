@@ -281,6 +281,7 @@ public class FacebookMessagingFolderAccess implements MessagingFolderAccess {
             }
             dmf.setRootFolder(true);
             dmf.setSubfolders(false);
+            dmf.setSubscribed(true);
             dmf.setSubscribedSubfolders(false);
             dmf.setUnreadMessageCount(0);
             return dmf;
