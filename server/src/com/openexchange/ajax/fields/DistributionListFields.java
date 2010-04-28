@@ -54,11 +54,10 @@ package com.openexchange.ajax.fields;
  *
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
-
 public interface DistributionListFields extends ContactFields {
-	
-	public static final String MAIL = "mail";
-	
-	public static final String MAIL_FIELD = "mail_field";
+
+    static final String MAIL = "mail";
+
+    static final String MAIL_FIELD = "mail_field";
 
 }
