@@ -27,6 +27,25 @@ postFix() {
 
   GLOBIGNORE='*'
 
+  # SoftwareChange_Request-282
+  # -----------------------------------------------------------------------
+  local pfile=/opt/open-xchange/etc/admindaemon/ModuleAccessDefinitions.properties
+  ox_system_type
+  local type=$?
+  if [ $type -eq $DEBIAN ]; then
+      local ofile="${pfile}.dpkg-dist"
+  else
+      local ofile="${pfile}.rpmnew"
+  fi
+  for prop in webmail pim pim_infostore pim_mobility groupware_standard groupware_premium; do
+      if [ -n "$ofile" ] && [ -e "$ofile" ]; then
+	  local oval=$(ox_read_property $prop $ofile)
+	  if [ -n "$oval" ]; then
+	      ox_set_property $prop "$oval" $pfile
+	  fi
+      fi
+  done
+
   # SoftwareChange_Request-194
   # -----------------------------------------------------------------------
   local pfile=/opt/open-xchange/etc/admindaemon/cache.ccf
