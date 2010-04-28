@@ -143,6 +143,25 @@ if [ ${1:-0} -eq 2 ]; then
 
   GLOBIGNORE='*'
 
+   # SoftwareChange_Request-282
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/admindaemon/ModuleAccessDefinitions.properties
+   ox_system_type
+   type=$?
+   if [ $type -eq $DEBIAN ]; then
+      ofile="${pfile}.dpkg-dist"
+   else
+      ofile="${pfile}.rpmnew"
+   fi
+   for prop in webmail pim pim_infostore pim_mobility groupware_standard groupware_premium; do
+      if [ -n "$ofile" ] && [ -e "$ofile" ]; then
+	  oval=$(ox_read_property $prop $ofile)
+	  if [ -n "$oval" ]; then
+	      ox_set_property $prop "$oval" $pfile
+	  fi
+      fi
+   done
+
    # SoftwareChange_Request-194
    # -----------------------------------------------------------------------
    pfile=/opt/open-xchange/etc/admindaemon/cache.ccf
