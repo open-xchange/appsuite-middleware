@@ -79,6 +79,7 @@ import com.openexchange.messaging.MessagingFolder;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.MessagingMessageAccess;
+import com.openexchange.messaging.MessagingPart;
 import com.openexchange.messaging.OrderDirection;
 import com.openexchange.messaging.SearchTerm;
 import com.openexchange.messaging.StringContent;
@@ -89,6 +90,8 @@ import com.openexchange.messaging.facebook.utility.FacebookMessagingUtility;
 import com.openexchange.messaging.facebook.utility.FacebookUser;
 import com.openexchange.messaging.facebook.utility.FacebookMessagingUtility.Query;
 import com.openexchange.messaging.facebook.utility.FacebookMessagingUtility.StaticFiller;
+import com.openexchange.messaging.generic.AttachmentFinderHandler;
+import com.openexchange.messaging.generic.MessageParser;
 import com.openexchange.messaging.generic.MessagingComparator;
 import com.openexchange.messaging.generic.internet.MimeAddressMessagingHeader;
 import com.openexchange.server.ServiceException;
@@ -163,6 +166,16 @@ public final class FacebookMessagingMessageAccess implements MessagingMessageAcc
             }
         }
         return tmp;
+    }
+
+    public MessagingPart getAttachment(final String folder, final String messageId, final String sectionId) throws MessagingException {
+        final AttachmentFinderHandler handler = new AttachmentFinderHandler(sectionId);
+        new MessageParser().parseMessage(getMessage(folder, messageId, true), handler);
+        final MessagingPart part = handler.getMessagingPart();
+        if (null == part) {
+            throw MessagingExceptionCodes.ATTACHMENT_NOT_FOUND.create(sectionId, messageId, folder);
+        }
+        return part;
     }
 
     public void appendMessages(final String folder, final MessagingMessage[] messages) throws MessagingException {
@@ -626,7 +639,7 @@ public final class FacebookMessagingMessageAccess implements MessagingMessageAcc
         return facebookUserId;
     }
 
-    public MessagingContent resolveContent(String folder, String id, String referenceId) throws MessagingException {
+    public MessagingContent resolveContent(final String folder, final String id, final String referenceId) throws MessagingException {
         throw new UnsupportedOperationException();
     }
 

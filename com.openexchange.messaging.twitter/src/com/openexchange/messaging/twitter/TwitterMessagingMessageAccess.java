@@ -61,9 +61,12 @@ import com.openexchange.messaging.MessagingField;
 import com.openexchange.messaging.MessagingFolder;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.MessagingMessageAccess;
+import com.openexchange.messaging.MessagingPart;
 import com.openexchange.messaging.OrderDirection;
 import com.openexchange.messaging.SearchTerm;
 import com.openexchange.messaging.StringContent;
+import com.openexchange.messaging.generic.AttachmentFinderHandler;
+import com.openexchange.messaging.generic.MessageParser;
 import com.openexchange.session.Session;
 import com.openexchange.twitter.Status;
 import com.openexchange.twitter.TwitterAccess;
@@ -108,6 +111,16 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
         id = account.getId();
         user = session.getUserId();
         cid = session.getContextId();
+    }
+
+    public MessagingPart getAttachment(final String folder, final String messageId, final String sectionId) throws MessagingException {
+        final AttachmentFinderHandler handler = new AttachmentFinderHandler(sectionId);
+        new MessageParser().parseMessage(getMessage(folder, messageId, true), handler);
+        final MessagingPart part = handler.getMessagingPart();
+        if (null == part) {
+            throw MessagingExceptionCodes.ATTACHMENT_NOT_FOUND.create(sectionId, messageId, folder);
+        }
+        return part;
     }
 
     public void appendMessages(final String folder, final MessagingMessage[] messages) throws MessagingException {

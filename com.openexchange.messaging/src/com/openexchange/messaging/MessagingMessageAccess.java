@@ -110,6 +110,17 @@ public interface MessagingMessageAccess {
     public List<MessagingMessage> searchMessages(String folder, IndexRange indexRange, MessagingField sortField, OrderDirection order, SearchTerm<?> searchTerm, MessagingField[] fields) throws MessagingException;
 
     /**
+     * Gets the message's attachment identified through given section identifier.
+     * 
+     * @param folder The folder fullname
+     * @param messageId The message identifier
+     * @param sectionId The attachment's section identifier
+     * @return The attachment wrapped by a {@link MessagingPart} instance
+     * @throws MessagingException If no attachment can be found whose sequence ID matches given section identifier.
+     */
+    public MessagingPart getAttachment(String folder, String messageId, String sectionId) throws MessagingException;
+
+    /**
      * Updates specified fields of given message.
      * 
      * @param message The message
@@ -222,9 +233,10 @@ public interface MessagingMessageAccess {
      * @throws MessagingException If performing specified action fails or action is not applicable for this perform() method
      */
     public MessagingMessage perform(MessagingMessage message, String action) throws MessagingException;
-    
+
     /**
      * This method resolves a @see {@link ReferenceContent} id.
+     * 
      * @param folder The folder identifier
      * @param id The message identifier
      * @param referenceId the reference identifier

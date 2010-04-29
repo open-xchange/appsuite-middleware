@@ -65,6 +65,7 @@ import com.openexchange.messaging.MessagingException;
 import com.openexchange.messaging.MessagingField;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.MessagingMessageAccess;
+import com.openexchange.messaging.MessagingPart;
 import com.openexchange.messaging.OrderDirection;
 import com.openexchange.messaging.SearchTerm;
 import com.openexchange.session.Session;
@@ -76,16 +77,20 @@ import com.openexchange.session.Session;
  */
 public class CacheingMessageAccess implements MessagingMessageAccess {
 
-    private MessagingMessageAccess delegate;
-    private Cache cache;
-    private String folderPrefix;
-    private Session session;
+    private final MessagingMessageAccess delegate;
+    private final Cache cache;
+    private final String folderPrefix;
+    private final Session session;
 
     public CacheingMessageAccess(MessagingMessageAccess delegate, Cache cache, String folderPrefix, Session session) {
         this.delegate = delegate;
         this.cache = cache;
         this.folderPrefix = folderPrefix;
         this.session = session;
+    }
+
+    public MessagingPart getAttachment(String folder, String messageId, String sectionId) throws MessagingException {
+        return delegate.getAttachment(folder, messageId, sectionId);
     }
 
     public void appendMessages(String folder, MessagingMessage[] messages) throws MessagingException {

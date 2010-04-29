@@ -69,8 +69,11 @@ import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingField;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.MessagingMessageAccess;
+import com.openexchange.messaging.MessagingPart;
 import com.openexchange.messaging.OrderDirection;
 import com.openexchange.messaging.SearchTerm;
+import com.openexchange.messaging.generic.AttachmentFinderHandler;
+import com.openexchange.messaging.generic.MessageParser;
 import com.openexchange.session.Session;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -124,6 +127,16 @@ public final class MailMessagingMessageAccess implements MessagingMessageAccess 
         } catch (final IOException e) {
             throw MessagingExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }
+    }
+
+    public MessagingPart getAttachment(final String folder, final String messageId, final String sectionId) throws MessagingException {
+        final AttachmentFinderHandler handler = new AttachmentFinderHandler(sectionId);
+        new MessageParser().parseMessage(getMessage(folder, messageId, true), handler);
+        final MessagingPart part = handler.getMessagingPart();
+        if (null == part) {
+            throw MessagingExceptionCodes.ATTACHMENT_NOT_FOUND.create(sectionId, messageId, folder);
+        }
+        return part;
     }
 
     public List<String> copyMessages(final String sourceFolder, final String destFolder, final String[] messageIds, final boolean fast) throws MessagingException {

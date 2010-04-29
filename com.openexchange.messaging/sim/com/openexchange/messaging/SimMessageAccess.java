@@ -82,6 +82,7 @@ public class SimMessageAccess implements MessagingMessageAccess {
 
     private final List<Call> called = new ArrayList<Call>();
     private MessagingMessage templateMessage;
+    private MessagingPart templatePart;
     
     public List<Call> getCalls() {
         return called;
@@ -89,6 +90,11 @@ public class SimMessageAccess implements MessagingMessageAccess {
     
     public void setTemplateMessage(final MessagingMessage templateMessage) {
         this.templateMessage = templateMessage;
+    }
+
+    public MessagingPart getAttachment(String folder, String messageId, String sectionId) throws MessagingException {
+        called.add(new Call("getAttachment", folder, messageId, sectionId));
+        return templatePart;
     }
     
     public void appendMessages(final String folder, final MessagingMessage[] messages) throws MessagingException {

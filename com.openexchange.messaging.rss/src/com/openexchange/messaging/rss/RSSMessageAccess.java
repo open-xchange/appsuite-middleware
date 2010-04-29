@@ -61,8 +61,11 @@ import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingField;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.MessagingMessageAccess;
+import com.openexchange.messaging.MessagingPart;
 import com.openexchange.messaging.OrderDirection;
 import com.openexchange.messaging.SearchTerm;
+import com.openexchange.messaging.generic.AttachmentFinderHandler;
+import com.openexchange.messaging.generic.MessageParser;
 import com.openexchange.messaging.generic.MessagingComparator;
 import com.openexchange.session.Session;
 import com.sun.syndication.fetcher.FeedFetcher;
@@ -75,8 +78,8 @@ import com.sun.syndication.fetcher.FeedFetcher;
  */
 public class RSSMessageAccess extends RSSCommon implements MessagingMessageAccess {
 
-    private FeedFetcher feedFetcher;
-    private MessagingAccountManager accounts;
+    private final FeedFetcher feedFetcher;
+    private final MessagingAccountManager accounts;
     
     private FeedAdapter feed = null;
     
@@ -86,6 +89,16 @@ public class RSSMessageAccess extends RSSCommon implements MessagingMessageAcces
         this.session = session;
         this.feedFetcher = fetcher;
         this.accounts = accounts;
+    }
+
+    public MessagingPart getAttachment(final String folder, final String messageId, final String sectionId) throws MessagingException {
+        final AttachmentFinderHandler handler = new AttachmentFinderHandler(sectionId);
+        new MessageParser().parseMessage(getMessage(folder, messageId, true), handler);
+        final MessagingPart part = handler.getMessagingPart();
+        if (null == part) {
+            throw MessagingExceptionCodes.ATTACHMENT_NOT_FOUND.create(sectionId, messageId, folder);
+        }
+        return part;
     }
 
     public void appendMessages(final String folder, final MessagingMessage[] messages) throws MessagingException {
