@@ -62,7 +62,7 @@ import java.util.List;
  */
 public class TableWriter {
 
-    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
 
     private final PrintStream ps;
     private final ColumnFormat[] formats;
