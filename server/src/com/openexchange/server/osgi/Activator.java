@@ -61,7 +61,7 @@ import com.openexchange.server.osgiservice.CompositeBundleActivator;
 public class Activator extends CompositeBundleActivator {
 
     private final BundleActivator[] activators = {
-    	new com.openexchange.tools.file.osgi.LocalFileStorageActivator(),	
+        new com.openexchange.tools.file.osgi.LocalFileStorageActivator(),
         new com.openexchange.database.osgi.Activator(),
         new com.openexchange.tools.file.osgi.DBQuotaFileStorageActivator(),
         new com.openexchange.tools.file.osgi.FileStorageWrapperActivator(),
