@@ -119,4 +119,13 @@ public final class AttachmentFinderHandler implements MessageHandler {
         return true;
     }
 
+    /**
+     * Gets the part.
+     * 
+     * @return The found part or <code>null</code>
+     */
+    public MessagingPart getMessagingPart() {
+        return messagingPart;
+    }
+
 }
