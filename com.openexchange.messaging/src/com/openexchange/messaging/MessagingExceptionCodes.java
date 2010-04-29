@@ -146,7 +146,7 @@ public enum MessagingExceptionCodes implements OXErrorMessage {
      */
     NOT_CONNECTED(MessagingExceptionMessages.NOT_CONNECTED_MSG, Category.PERMISSION, 22), 
     /**
-     * Invalid sorting column. Can not sort by %1$s.
+     * Invalid sorting column. Cannot sort by %1$s.
      */
     INVALID_SORTING_COLUMN(MessagingExceptionMessages.INVALID_SORTING_COLUMN_MSG, Category.USER_INPUT, 23),
     /**
