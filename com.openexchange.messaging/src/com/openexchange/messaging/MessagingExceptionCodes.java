@@ -148,7 +148,11 @@ public enum MessagingExceptionCodes implements OXErrorMessage {
     /**
      * Invalid sorting column. Can not sort by %1$s.
      */
-    INVALID_SORTING_COLUMN(MessagingExceptionMessages.INVALID_SORTING_COLUMN_MSG, Category.USER_INPUT, 23);
+    INVALID_SORTING_COLUMN(MessagingExceptionMessages.INVALID_SORTING_COLUMN_MSG, Category.USER_INPUT, 23),
+    /**
+     * No attachment found with section identifier %1$s in message %2$s in folder %3$s.
+     */
+    ATTACHMENT_NOT_FOUND(MessagingExceptionMessages.ATTACHMENT_NOT_FOUND_MSG, Category.CODE_ERROR, 24);
 
     private final Category category;
 

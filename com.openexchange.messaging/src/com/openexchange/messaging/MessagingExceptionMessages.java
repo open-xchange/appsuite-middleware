@@ -125,6 +125,9 @@ public final class MessagingExceptionMessages implements LocalizableStrings {
     // Invalid sorting column. Can not sort by %1$s.
     public static final String INVALID_SORTING_COLUMN_MSG = "Invalid sorting column. Can not sort by %1$s.";
 
+    // No attachment found with section identifier %1$s in message %2$s in folder %3$s.
+    public static final String ATTACHMENT_NOT_FOUND_MSG = "No attachment found with section identifier %1$s in message %2$s in folder %3$s.";
+
     /**
      * Initializes a new {@link MessagingExceptionMessages}.
      */
