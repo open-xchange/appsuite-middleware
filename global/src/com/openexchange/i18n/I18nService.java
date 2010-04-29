@@ -52,15 +52,18 @@ package com.openexchange.i18n;
 import java.util.Locale;
 
 /**
+ * Service for publishing implementations to translate texts into other languages. Implementating services must carry the property named
+ * {@link #LANGUAGE} containing the string representation of the locate returned by the {@link #getLocale()} method.
  * @author <a href="mailto:ben.pahne@open-xchange">Ben Pahne</a>
  */
-
 public interface I18nService {
 
-    public String getLocalized(String key);
+    static final String LANGUAGE = "language";
 
-    public boolean hasKey(String key);
+    String getLocalized(String key);
 
-    public Locale getLocale();
+    boolean hasKey(String key);
+
+    Locale getLocale();
 
 }
