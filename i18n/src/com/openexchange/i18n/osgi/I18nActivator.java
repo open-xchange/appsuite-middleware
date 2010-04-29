@@ -175,7 +175,7 @@ public class I18nActivator implements BundleActivator {
             list.add(new I18nImpl(rc));
 
             final Properties prop = new Properties();
-            prop.put("language", rc.getLocale());
+            prop.put(I18nService.LANGUAGE, rc.getLocale());
 
         }
 
@@ -183,7 +183,7 @@ public class I18nActivator implements BundleActivator {
             final List<I18nService> list = locales.get(locale);
 
             final Properties prop = new Properties();
-            prop.put("language", locale);
+            prop.put(I18nService.LANGUAGE, locale);
 
             I18nService i18n = null;
             if (list.size() == 1) {
