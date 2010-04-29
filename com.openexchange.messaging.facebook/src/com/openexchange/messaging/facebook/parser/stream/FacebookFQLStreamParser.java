@@ -145,7 +145,7 @@ public final class FacebookFQLStreamParser {
                     final long fromUserId = FacebookMessagingUtility.parseUnsignedLong(null == content ? null : content.trim());
                     if (fromUserId < 0) {
                         org.apache.commons.logging.LogFactory.getLog(FacebookFQLStreamParser.class).warn(
-                            new StringBuilder("Field actor_id cannot be parsed to a long: ``").append(content).append("´´").toString());
+                            new StringBuilder("Field actor_id cannot be parsed to a long: ``").append(content).append("\u00b4\u00b4").toString());
                     }
                     message.setFromUserId(fromUserId);
                 }
