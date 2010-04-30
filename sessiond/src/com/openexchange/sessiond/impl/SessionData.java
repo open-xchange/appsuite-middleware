@@ -342,7 +342,11 @@ final class SessionData {
                     final SessionControl sessionControl = container.removeSessionById(sessionId);
                     final Session session = sessionControl.getSession();
                     userList.get(i).remove(session.getLoginName());
-                    randomList.get(i).remove(session.getRandomToken());
+                    String random = session.getRandomToken();
+                    if (null != random) {
+                        // If session is access through random token, random token is removed in the session.
+                        randomList.get(i).remove(random);
+                    }
                     return sessionControl;
                 }
             }
