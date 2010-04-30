@@ -205,6 +205,9 @@ public final class ServerConfig {
         case JMX_BIND_ADDRESS:
             value = SINGLETON.jmxBindAddress;
             break;
+        case UI_WEB_PATH:
+            value = SINGLETON.uiWebPath;
+            break;
         default:
             value = getProperty(property.getPropertyName());
         }
