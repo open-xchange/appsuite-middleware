@@ -54,6 +54,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.server.osgiservice.Tools;
 import com.openexchange.tools.file.external.FileStorageFactory;
 
 public class DBQuotaFileStorageActivator implements BundleActivator {
@@ -61,7 +62,7 @@ public class DBQuotaFileStorageActivator implements BundleActivator {
     private ServiceTracker track;
 
     public void start(final BundleContext context) throws Exception {
-        final Filter filter = context.createFilter("(|(objectClass=" + FileStorageFactory.class.getName() + ")(objectClass=" + DatabaseService.class.getName() + "))");
+        final Filter filter = Tools.generateServiceFilter(context, FileStorageFactory.class, DatabaseService.class);
         track = new ServiceTracker(context, filter, new DBQuotaFileStorageRegisterer(context));
         track.open();
     }
