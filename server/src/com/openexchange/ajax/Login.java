@@ -107,13 +107,15 @@ public class Login extends AJAXServlet {
 
     private static final String PARAM_PASSWORD = "password";
 
-    private static final String REDIRECT_URL = "/index.html#id=";
+    private static final String PARAM_UI_WEB_PATH = "uiWebPath";
 
     public static final String COOKIE_PREFIX = "open-xchange-session-";
 
     private static final Log LOG = LogFactory.getLog(Login.class);
 
-    private boolean checkIP = true;
+    private boolean checkIP;
+
+    private String uiWebPath;
 
     public Login() {
         super();
@@ -122,7 +124,13 @@ public class Login extends AJAXServlet {
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        checkIP = Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.IP_CHECK.getPropertyName()));
+        String value = config.getInitParameter(ServerConfig.Property.IP_CHECK.getPropertyName());
+        if (null == value || value.trim().length() == 0) {
+            checkIP = true;
+        } else {
+            checkIP = Boolean.parseBoolean(value.trim());
+        }
+        uiWebPath = config.getInitParameter(ServerConfig.Property.UI_WEB_PATH.getPropertyName());
     }
 
     @Override
@@ -214,16 +222,28 @@ public class Login extends AJAXServlet {
                 final User user = UserStorage.getInstance().getUser(session.getUserId(), context);
                 if (!context.isEnabled() || !user.isMailEnabled()) {
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                    return;
                 }
             } catch (final UndeclaredThrowableException e) {
                 resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                return;
             } catch (final ContextException e) {
                 resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                return;
             } catch (final LdapException e) {
                 resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                return;
             }
             writeCookie(resp, session);
-            resp.sendRedirect(REDIRECT_URL + session.getSessionID());
+            // Removed document fragment for session identifier because session identifier is contained in cookie.
+            // If cookies get splitted into session and secret cookie session identifier must be added as URL parameter.
+            String usedUIWebPath = req.getParameter(PARAM_UI_WEB_PATH);
+            if (null == usedUIWebPath) {
+                usedUIWebPath = uiWebPath;
+            }
+            // Prevent HTTP response splitting.
+            usedUIWebPath = usedUIWebPath.replaceAll("[\n\r]", "");
+            resp.sendRedirect(usedUIWebPath);
         } else if (ACTION_AUTOLOGIN.equals(action)) {
             final Cookie[] cookies = req.getCookies();
             final Response response = new Response();

@@ -52,55 +52,36 @@ package com.openexchange.easylogin.osgi;
 import java.util.Stack;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Filter;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.server.osgiservice.Tools;
 
 /**
  * {@link Activator}
  * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class Activator implements BundleActivator {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Activator.class);
-
-    private static final String ALIAS = "servlet/easylogin";
-
     private final Stack<ServiceTracker> trackers = new Stack<ServiceTracker>();
 
-    /**
-     * Initializes a new {@link Activator}
-     */
     public Activator() {
-        // TODO Auto-generated constructor stub
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
-     */
     public void start(BundleContext context) throws Exception {
-        trackers.push(new ServiceTracker(context, HttpService.class.getName(), new ServletRegisterer(context)));
-        trackers.push(new ServiceTracker(context, ConfigurationService.class.getName(), new ConfigurationReader(context)));
+        Filter filter = Tools.generateServiceFilter(context, HttpService.class, ConfigurationService.class);
+        trackers.push(new ServiceTracker(context, filter, new ServletRegisterer(context)));
         for (final ServiceTracker tracker : trackers) {
             tracker.open();
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
-     */
-    public void stop(BundleContext arg0) throws Exception {
+    public void stop(BundleContext context) throws Exception {
         while (!trackers.isEmpty()) {
             trackers.pop().close();
         }
     }
-
-    public static String getALIAS() {
-        return ALIAS;
-    }
-
 }

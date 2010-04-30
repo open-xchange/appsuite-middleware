@@ -94,6 +94,8 @@ public final class ServerConfig {
 
     private Boolean checkIP;
 
+    private String uiWebPath;
+
     private ServerConfig() {
         super();
     }
@@ -158,6 +160,7 @@ public final class ServerConfig {
         // JMX bind address
         jmxBindAddress = props.getProperty(Property.JMX_BIND_ADDRESS.getPropertyName(), "localhost");
         checkIP = Boolean.valueOf(props.getProperty(Property.IP_CHECK.getPropertyName(), Boolean.TRUE.toString()));
+        uiWebPath = props.getProperty(Property.UI_WEB_PATH.getPropertyName(), "/ox6/index.html");
     }
 
     /**
@@ -341,7 +344,8 @@ public final class ServerConfig {
          */
         IP_CHECK("com.openexchange.IPCheck"),
         /**
-         * 
+         * Configures the path on the web server where the UI is located. This path is used to generate links directly into the UI. The
+         * default conforms to the path where the UI is installed by the standard packages on the web server.
          */
         UI_WEB_PATH("com.openexchange.UIWebPath");
 

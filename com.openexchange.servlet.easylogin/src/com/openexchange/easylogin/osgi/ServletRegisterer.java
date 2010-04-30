@@ -49,12 +49,18 @@
 
 package com.openexchange.easylogin.osgi;
 
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import javax.servlet.ServletException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
+import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.easylogin.EasyLogin;
-
 
 /**
  * {@link ServletRegisterer}
@@ -62,55 +68,83 @@ import com.openexchange.easylogin.EasyLogin;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class ServletRegisterer implements ServiceTrackerCustomizer {
-    
+
+    private static final Log LOG = LogFactory.getLog(ServletRegisterer.class);
+
+    private static final String ALIAS = "servlet/easylogin";
+
     private BundleContext context;
-    
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-    .getLog(ServletRegisterer.class);
-    
+
+    private final Lock lock = new ReentrantLock();
+
+    private ConfigurationService configService;
+
+    private HttpService httpService;
+
+    private boolean isRegistered;
+
     public ServletRegisterer(BundleContext context){
+        super();
         this.context = context;
     }
 
-    /* (non-Javadoc)
-     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
-     */
     public Object addingService(ServiceReference reference) {
-       final HttpService httpService = (HttpService) context.getService(reference);
-       try {           
-           httpService.registerServlet(Activator.getALIAS(), new EasyLogin(), null, null);
-           LOG.info(EasyLogin.class.getName() + " successfully registered");
-       } catch (final Exception e) {
-           LOG.error(e.getMessage(), e);
-       }
-       return httpService;
+        final Object service = context.getService(reference);
+        boolean needsRegistration = false;
+        lock.lock();
+        try {
+            if (service instanceof ConfigurationService) {
+                configService = (ConfigurationService) service;
+            }
+            if (service instanceof HttpService) {
+                httpService = (HttpService) service;
+            }
+            if (configService != null && httpService != null && !isRegistered) {
+                needsRegistration = true;
+                isRegistered = true;
+            }
+        } finally {
+            lock.unlock();
+        }
+        if (needsRegistration) {
+            try {
+                httpService.registerServlet(ALIAS, new EasyLogin(), configService.getFile("easylogin.properties"), null);
+                LOG.info(EasyLogin.class.getName() + " successfully registered");
+            } catch (ServletException e) {
+                LOG.error("EasyLogin servlet can not be registered.", e);
+            } catch (NamespaceException e) {
+                LOG.error("EasyLogin servlet can not be registered.", e);
+            }
+        }
+        return service;
     }
 
-    /* (non-Javadoc)
-     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference, java.lang.Object)
-     */
     public void modifiedService(ServiceReference reference, Object service) {
         // nothing to do here
-
     }
 
-    /* (non-Javadoc)
-     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
-     */
     public void removedService(ServiceReference reference, Object service) {
-        try {
-            /*
-             * Unregister servlet
-             */
-            final HttpService httpService = (HttpService) service;
-            if (null != httpService) {
-                httpService.unregister(Activator.getALIAS());
-            }
-            LOG.info(EasyLogin.class.getName() + " successfully unregistered");
-        } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+        HttpService leavingService = null;
+        boolean needsUnregistration = false;
+        if (service instanceof ConfigurationService) {
+            configService = null;
         }
-        context.ungetService(reference);
+        if (service instanceof HttpService) {
+            httpService = null;
+            leavingService = (HttpService) service;
+        }
+        lock.lock();
+        try {
+            if (null != leavingService && isRegistered) {
+                needsUnregistration = true;
+                isRegistered = false;
+            }
+        } finally {
+            lock.unlock();
+        }
+        if (null != leavingService && needsUnregistration) {
+            leavingService.unregister(ALIAS);
+            LOG.info(EasyLogin.class.getName() + " successfully unregistered");
+        }
     }
-
 }
