@@ -94,9 +94,6 @@ public final class ServerConfig {
 
     private Boolean checkIP;
 
-    /**
-     * Prevent instantiation
-     */
     private ServerConfig() {
         super();
     }
@@ -106,12 +103,12 @@ public final class ServerConfig {
     }
 
     public void initialize(ConfigurationService confService) {
-        final Properties props = confService.getFile(FILENAME);
-        if (null == props) {
+        final Properties newProps = confService.getFile(FILENAME);
+        if (null == newProps) {
             LOG.info("Configuration file " + FILENAME + " is missing. Using defaults.");
         } else {
             this.props.clear();
-            this.props.putAll(props);
+            this.props.putAll(newProps);
             LOG.info("Read configuration file " + FILENAME + ".");
         }
         reinit();
@@ -124,7 +121,7 @@ public final class ServerConfig {
 
     private void reinit() {
         // UPLOAD_DIRECTORY
-        uploadDirectory = props.getProperty(Property.UploadDirectory.propertyName, "/tmp/");
+        uploadDirectory = props.getProperty(Property.UploadDirectory.getPropertyName(), "/tmp/");
         if (!uploadDirectory.endsWith("/")) {
             uploadDirectory += "/";
         }
@@ -142,24 +139,24 @@ public final class ServerConfig {
         }
         // MAX_FILE_UPLOAD_SIZE
         try {
-            maxFileUploadSize = Integer.parseInt(getProperty(Property.MaxFileUploadSize.propertyName));
+            maxFileUploadSize = Integer.parseInt(getProperty(Property.MaxFileUploadSize.getPropertyName()));
         } catch (final NumberFormatException e) {
             maxFileUploadSize = 10000;
         }
         // MAX_UPLOAD_IDLE_TIME_MILLIS
         try {
-            maxUploadIdleTimeMillis = Integer.parseInt(getProperty(Property.MaxUploadIdleTimeMillis.propertyName));
+            maxUploadIdleTimeMillis = Integer.parseInt(getProperty(Property.MaxUploadIdleTimeMillis.getPropertyName()));
         } catch (final NumberFormatException e) {
             maxUploadIdleTimeMillis = 300000;
         }
         // PrefetchEnabled
-        prefetchEnabled = Boolean.parseBoolean(props.getProperty(Property.PrefetchEnabled.propertyName, Boolean.FALSE.toString()));
+        prefetchEnabled = Boolean.parseBoolean(props.getProperty(Property.PrefetchEnabled.getPropertyName(), Boolean.FALSE.toString()));
         // Default encoding
-        defaultEncoding = props.getProperty(Property.DefaultEncoding.propertyName, "UTF-8");
+        defaultEncoding = props.getProperty(Property.DefaultEncoding.getPropertyName(), "UTF-8");
         // JMX port
-        jmxPort = Integer.parseInt(props.getProperty(Property.JMX_PORT.propertyName, "9999"));
+        jmxPort = Integer.parseInt(props.getProperty(Property.JMX_PORT.getPropertyName(), "9999"));
         // JMX bind address
-        jmxBindAddress = props.getProperty(Property.JMX_BIND_ADDRESS.propertyName, "localhost");
+        jmxBindAddress = props.getProperty(Property.JMX_BIND_ADDRESS.getPropertyName(), "localhost");
         checkIP = Boolean.valueOf(props.getProperty(Property.IP_CHECK.getPropertyName(), Boolean.TRUE.toString()));
     }
 
@@ -206,7 +203,7 @@ public final class ServerConfig {
             value = SINGLETON.jmxBindAddress;
             break;
         default:
-            value = getProperty(property.propertyName);
+            value = getProperty(property.getPropertyName());
         }
         return value;
     }
@@ -228,7 +225,7 @@ public final class ServerConfig {
         if (Property.PrefetchEnabled == property) {
             value = SINGLETON.prefetchEnabled;
         } else {
-            value = Boolean.parseBoolean(SINGLETON.props.getProperty(property.propertyName));
+            value = Boolean.parseBoolean(SINGLETON.props.getProperty(property.getPropertyName()));
         }
         return value;
     }
@@ -247,13 +244,13 @@ public final class ServerConfig {
             break;
         default:
             try {
-                String prop = getProperty(property.propertyName);
+                String prop = getProperty(property.getPropertyName());
                 if (prop == null) {
-                    throw new ConfigurationException(Code.PROPERTY_MISSING, property.propertyName);
+                    throw new ConfigurationException(Code.PROPERTY_MISSING, property.getPropertyName());
                 }
-                value = Integer.valueOf(getProperty(property.propertyName));
+                value = Integer.valueOf(getProperty(property.getPropertyName()));
             } catch (NumberFormatException e) {
-                throw new ConfigurationException(Code.PROPERTY_NOT_AN_INTEGER, property.propertyName);
+                throw new ConfigurationException(Code.PROPERTY_NOT_AN_INTEGER, property.getPropertyName());
             }
         }
         return value;
@@ -276,15 +273,14 @@ public final class ServerConfig {
             value = SINGLETON.jmxPort;
         } else {
             try {
-                final String prop = getProperty(property.propertyName);
+                final String prop = getProperty(property.getPropertyName());
                 if (prop == null) {
-                    throw new ConfigurationException(ConfigurationException.Code.PROPERTY_MISSING,
-                            property.propertyName);
+                    throw new ConfigurationException(Code.PROPERTY_MISSING, property.getPropertyName());
                 }
-                value = Integer.parseInt(getProperty(property.propertyName));
+                value = Integer.parseInt(getProperty(property.getPropertyName()));
             } catch (final NumberFormatException e) {
-                throw new ConfigurationException(ConfigurationException.Code.PROPERTY_NOT_AN_INTEGER,
-                        property.propertyName);
+                throw new ConfigurationException(Code.PROPERTY_NOT_AN_INTEGER,
+                        property.getPropertyName());
             }
         }
         return value;
@@ -294,9 +290,6 @@ public final class ServerConfig {
         return checkIP;
     }
 
-    /**
-     * Enumeration of all properties in the server.properties file.
-     */
     public static enum Property {
         /**
          * Upload directory.
@@ -346,19 +339,14 @@ public final class ServerConfig {
          * If this connfiguration parameter is set to <code>true</code> and the client IP addresses do not match the request will be denied.
          * Setting this parameter to <code>false</code> will only log the different client IP addresses with debug level.
          */
-        IP_CHECK("com.openexchange.IPCheck");
-
+        IP_CHECK("com.openexchange.IPCheck"),
         /**
-         * Name of the property in the server.properties file.
+         * 
          */
+        UI_WEB_PATH("com.openexchange.UIWebPath");
+
         private String propertyName;
 
-        /**
-         * Default constructor.
-         * 
-         * @param propertyName
-         *            Name of the property in the server.properties file.
-         */
         private Property(final String propertyName) {
             this.propertyName = propertyName;
         }
