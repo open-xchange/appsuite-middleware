@@ -51,6 +51,8 @@ package com.openexchange.groupware.notify;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import com.openexchange.configuration.ServerConfig;
+import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
@@ -131,6 +133,7 @@ public abstract class LinkableState implements State {
 
 		subst.put(new StringReplacement(TemplateToken.FOLDER_ID, String.valueOf(folder)));
 		subst.put(new StringReplacement(TemplateToken.OBJECT_ID, String.valueOf(obj.getObjectID())));
+        subst.put(new StringReplacement(TemplateToken.UI_WEB_PATH, ServerConfig.getProperty(Property.UI_WEB_PATH)));
 		final HostnameService hostnameService = ServerServiceRegistry.getInstance().getService(HostnameService.class);
 		final String hostnameStr;
 		if (hostnameService == null || (hostnameStr = hostnameService.getHostname(p.id, p.cid)) == null) {

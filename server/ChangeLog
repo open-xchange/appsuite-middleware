@@ -1,3 +1,8 @@
+* 2010-04-30 - marcus.klein@open-xchange.com
+
+ - Bugfix #15880: Made path to the UI fully configurable and it can be passed through parameters on easylogin and login redirect requests.
+ - Bugfix #15936: Session identifier is not passed anymore as document fragment on login redirect request.
+
 * 2010-04-23 - marcus.klein@open-xchange.com
 
  - Bugfix #15897: Prefering task identifier in URL on confirm requests.

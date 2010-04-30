@@ -64,6 +64,7 @@ import java.util.Set;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import com.openexchange.configuration.ServerConfig;
+import com.openexchange.configuration.ServerConfig.Property;
 
 /**
  * The ServletConfigLoader is used to discover init parameters for servlets. Some 3rd party servlets prefer to be configured via init
@@ -287,6 +288,7 @@ public final class ServletConfigLoader {
         this.directory = directory;
         globalProps = loadDirProps(this.directory);
         globalProps.put(ServerConfig.Property.IP_CHECK.getPropertyName(), ServerConfig.getInstance().isCheckIP().toString());
+        globalProps.put(ServerConfig.Property.UI_WEB_PATH.getPropertyName(), ServerConfig.getProperty(Property.UI_WEB_PATH));
     }
 
     /**

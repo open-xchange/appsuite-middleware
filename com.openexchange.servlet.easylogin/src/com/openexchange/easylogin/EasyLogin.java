@@ -61,6 +61,7 @@ import java.net.URL;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -68,14 +69,13 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.authentication.LoginException;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.session.Session;
-import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.login.Interface;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
+import com.openexchange.session.Session;
+import com.openexchange.tools.servlet.http.Tools;
 
 /**
  * New version with a login/handling that is more secure. Also parameter AuthID is added. 
@@ -86,115 +86,173 @@ import com.openexchange.login.internal.LoginPerformer;
  */
 public class EasyLogin extends HttpServlet {
 
-    /**
-	 * 
-	 */
     private static final long serialVersionUID = 7233346063627500582L;
 
     private static final Log LOG = LogFactory.getLog(EasyLogin.class);
 
-    private static String AJAX_ROOT = "/ajax";
+    private static final String AUTH_ID_PARAMETER = "authId";
 
-    private static String passwordPara = "password";
+    private static final String UI_WEB_PATH_PARAMETER = "uiWebPath";
 
-    private static String loginPara = "login";
+    private String ajaxRoot;
 
-    private static String redirPara = "redirect"; // param for what should be done after error on login
+    private String passwordParam;
 
-    private static String directLinkPara = "direct_link";
+    private String loginParam;
 
-    private static String OX_PATH_RELATIVE = "../";
+    private boolean doGetEnabled;
 
-    private static boolean doGetEnabled = false;
+    private boolean popupOnError;
 
-    private static boolean popUpOnError = true;
-
-    private static boolean allowInsecure = false;
-
-    private static String remoteIP = "NONE";
-
-    private static final String authIdParameter = "authId";
+    private boolean allowInsecure;
     
-    private static String errorPageTemplate = "<html><body><h1>ERROR_MESSAGE</h1></body></html>";
+    private String errorPageTemplate;
     
-    private static String loadBalancer = "localhost";
+    private String loadBalancer;
 
-    /**
-     * Initializes a new {@link EasyLogin}
-     */
     public EasyLogin() {
         super();
     }
 
-    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    @Override
+    public void init(ServletConfig config) throws ServletException {
+        super.init(config);
+        passwordParam = config.getInitParameter("com.openexchange.easylogin.passwordPara");
+        if (null == passwordParam) {
+            passwordParam = "password";
+            LOG.error("Could not find passwordPara in configuration file, using default: " + passwordParam);
+        } else {
+            LOG.info("Set passwordPara to " + passwordParam);
+        }
+        loginParam = config.getInitParameter("com.openexchange.easylogin.loginPara");
+        if (null == loginParam) {
+            loginParam = "login";
+            LOG.error("Could not find loginPara in configuration file, using default: " + loginParam);
+        } else {
+            LOG.info("Set loginPara to " + loginParam);
+        }
+        ajaxRoot = config.getInitParameter("com.openexchange.easylogin.AJAX_ROOT");
+        if (null == ajaxRoot) {
+            ajaxRoot = "/ajax";
+            LOG.error("Could not find AJAX_ROOT in configuration file, using default: " + ajaxRoot);
+        } else {
+            LOG.info("Set AJAX_ROOT to " + ajaxRoot);
+        }
+        if (null == config.getInitParameter("com.openexchange.easylogin.doGetEnabled")) {
+            doGetEnabled = false;
+            LOG.error("Could not find doGetEnabled in configuration file, using default: " + doGetEnabled);
+        } else {
+            String value = config.getInitParameter("com.openexchange.easylogin.doGetEnabled").trim();
+            doGetEnabled = Boolean.parseBoolean(value);
+            LOG.info("Set doGetEnabled to " + doGetEnabled);
+        }
 
-        remoteIP = req.getRemoteAddr();
-        processLoginRequest(req, resp);
-
+        if (null == config.getInitParameter("com.openexchange.easylogin.popUpOnError")) {
+            popupOnError = true;
+            LOG.error("Could not find popUpOnError in properties-file, using default: " + popupOnError);
+        } else {
+            String value = config.getInitParameter("com.openexchange.easylogin.popUpOnError").trim();
+            popupOnError = Boolean.parseBoolean(value);
+            LOG.info("Set popUpOnError to " + popupOnError);
+        }
+        if (null == config.getInitParameter("com.openexchange.easylogin.allowInsecureTransmission")) {
+            allowInsecure = false;
+            LOG.error("Could not find allowInsecure in configuration file, using default: " + allowInsecure);
+        } else {
+            String value = config.getInitParameter("com.openexchange.easylogin.allowInsecureTransmission").trim();
+            allowInsecure = Boolean.parseBoolean(value);
+            LOG.info("Set allowInsecure to " + allowInsecure);
+        }
+        if (null == config.getInitParameter("com.openexchange.easylogin.errorPageTemplate")) {
+            errorPageTemplate = "<html><body><h1>ERROR_MESSAGE</h1></body></html>";
+            LOG.error("No errorPage-template was specified, using default.");
+        } else {
+            String templateFileLocation = config.getInitParameter("com.openexchange.easylogin.errorPageTemplate");
+            File templateFile = new File(templateFileLocation);
+            if (templateFile.exists() && templateFile.canRead() && templateFile.isFile()) {
+                errorPageTemplate = getFileContents(templateFile);
+                LOG.info("Found an error page template at " + templateFileLocation);
+            } else {
+                LOG.error("Could not find an error page template at " + templateFileLocation + ", using default.");
+            }
+        }
+        loadBalancer = config.getInitParameter("com.openexchange.easylogin.loadBalancer");
+        if (null == loadBalancer) {
+            loadBalancer = "localhost";
+            LOG.error("Could not find parameter loadBalancer in configuration file, using default: " + loadBalancer);
+        } else {
+            LOG.info("Set loadBalancer to " + loadBalancer);
+        }
     }
 
     @Override
-    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        remoteIP = req.getRemoteAddr();
+    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+        processLoginRequest(req, resp);
+    }
 
+    @Override
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         if (!doGetEnabled) {
+            LOG.error("IP: " + req.getRemoteAddr() + ", AuthID: " + getAuthID(req) + ", Denied GET request.");
             // show error to user
-            resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, "GET not supported");
+            resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, "GET is not allowed.");
         } else {
             processLoginRequest(req, resp);
         }
-
     }
 
-    private void processLoginRequest(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        logInfo("Hostname=" + req.getRemoteHost() + ", URI=" + req.getRequestURI() + ", Scheme=" + req.getScheme(), null);
+    private void processLoginRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         Tools.disableCaching(resp);
         resp.setContentType("text/html");
-        String authID = "";
         // check for / generate AuthID
-        if (req.getParameter(authIdParameter) == null || req.getParameter(authIdParameter).trim().length() == 0) {
-            authID = UUIDs.getUnformattedString(UUID.randomUUID());
-        } else {
-            authID = req.getParameter(authIdParameter).trim();
-        }
-        if (allowInsecure || !req.isSecure()) {
-            if (allowInsecure && !req.isSecure()) {
-                logInfo("Using insecure transmission.", null);
-            } else {
-                logInfo("Rejecting insecure transmission.", null);
-                resp.sendError(HttpServletResponse.SC_FORBIDDEN, "EasyLogin: Only secure transmission allowed");
+        final String authID = getAuthID(req);
+        final String login = getParameter(req, loginParam);
+        if (!req.isSecure()) {
+            if (!allowInsecure) {
+                LOG.error("IP: " + req.getRemoteAddr() + ", Login: " + login + ", AuthID: " + authID + ", Denied insecure request.");
+                resp.sendError(HttpServletResponse.SC_FORBIDDEN, "EasyLogin: Only secure transmission allowed.");
                 return;
             }
         }
-        PrintWriter out = resp.getWriter();
-
-        if (req.getParameter(passwordPara) == null || req.getParameter(passwordPara).trim().length() == 0) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "parameter " + passwordPara + " missing");
-            logError("Got request without password", authID);
-        } else if (req.getParameter(loginPara) == null || req.getParameter(loginPara).trim().length() == 0) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "parameter " + loginPara + " missing");
-            logError("Got request without login", authID);
-        } else {
-
-            final String password = req.getParameter(passwordPara);
-            final String login = req.getParameter(loginPara).trim().toLowerCase();
-            
-            logInfo("Login=" + login, null);
-            
-            // do login via https
-            //doHTTPLogin(resp, out, password, login, authID);
-            // do login via JAVA
-            doJavaLogin(resp, req, out, password, login, authID);
-            
+        if (null == login) {
+            LOG.error("IP: " + req.getRemoteAddr() + ", AuthID: " + authID + ", Parameter " + loginParam + " is missing.");
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "parameter " + loginParam + " is missing.");
+            return;
         }
+        final String password = getParameter(req, passwordParam);
+        if (null == password) {
+            LOG.error("IP: " + req.getRemoteAddr() + ", Login: " + login + ", AuthID: " + authID + ", Parameter " + passwordParam + " is missing.");
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Parameter " + passwordParam + " is missing.");
+            return;
+        }
+        // do login via HTTPS
+        // doHTTPLogin(resp, out, password, login, authID);
+        // do login via Java
+        doJavaLogin(req, resp, authID, login, password);
     }
-    
-    private void doJavaLogin(final HttpServletResponse resp, final HttpServletRequest req, PrintWriter out, final String password, final String login, final String authID) throws IOException{        
-        Session session = null;
-        
-        LoginPerformer loginPerformer = LoginPerformer.getInstance();
+
+    private String getAuthID(HttpServletRequest req) {
+        String authID = req.getParameter(AUTH_ID_PARAMETER);
+        if (authID == null || req.getParameter(AUTH_ID_PARAMETER).trim().length() == 0) {
+            authID = UUIDs.getUnformattedString(UUID.randomUUID());
+        } else {
+            authID = authID.trim();
+        }
+        return authID;
+    }
+
+    private String getParameter(HttpServletRequest req, String param) {
+        String login = req.getParameter(param);
+        if (null != login && login.trim().length() == 0) {
+            login = null;
+        }
+        return login;
+    }
+
+    private void doJavaLogin(final HttpServletRequest req, HttpServletResponse resp, final String authID, final String login, final String password) throws IOException{        
+        final LoginResult result;
         try {
-            LoginResult result = loginPerformer.doLogin(new LoginRequest() {
+            result = LoginPerformer.getInstance().doLogin(new LoginRequest() {
                 public String getUserAgent() {
                     return req.getHeader("user-agent");
                 }
@@ -220,25 +278,32 @@ public class EasyLogin extends HttpServlet {
                     return null;
                 }
             });
-            
-            session = result.getSession();
         } catch (LoginException e) {
-            logError(e.getMessage(), e, authID);
+            LOG.error("IP: " + req.getRemoteAddr() + ", Login: " + login + ", AuthID: " + authID + ", Login failed.", e);
+            String errorPage = errorPageTemplate.replace("ERROR_MESSAGE", e.getMessage());
+            resp.getWriter().write(errorPage);
+            return;
         }
-        
-        if (session != null){
-            // send redirect if login worked
-            logInfo("Login worked, sending redirect", authID);
-            resp.sendRedirect(AJAX_ROOT + "/login;jsessionid=" + session.getSessionID() + "?action=redirect&random=" + session.getRandomToken());
-        } else {
-            logError("Login did not work, sending errorPage", null, authID);
-            String errorPage = errorPageTemplate.replace("ERROR_MESSAGE", "Rien ne va plus");
-            out.write(errorPage);
+        final Session session = result.getSession();
+        // send redirect if login worked
+        LOG.info("IP: " + req.getRemoteAddr() + ", Login: " + login + ", AuthID: " + authID + ", Login successful. Redirecting.");
+        // JSESSIONID cookie gets automatically set by AJP connector on this response. Browser should reuse it for request to login servlet.
+        StringBuilder sb = new StringBuilder(ajaxRoot);
+        sb.append("/login?action=redirect&random=");
+        sb.append(session.getRandomToken());
+        String uiWebPath = getParameter(req, UI_WEB_PATH_PARAMETER);
+        if (null != uiWebPath) {
+            sb.append('&');
+            sb.append(UI_WEB_PATH_PARAMETER);
+            sb.append('=');
+            sb.append(uiWebPath);
         }
+        resp.sendRedirect(sb.toString());
     }
 
+    @SuppressWarnings("unused")
     private void doHTTPLogin(final HttpServletResponse resp, PrintWriter out, final String password, final String login, final String authID) throws MalformedURLException, IOException {
-        String urlString = "https://"+ loadBalancer + AJAX_ROOT + "/login?action=login&name=" + login + "&password=" + password + "&" + authIdParameter + "=" + authID;
+        String urlString = "https://"+ loadBalancer + ajaxRoot + "/login?action=login&name=" + login + "&password=" + password + "&" + AUTH_ID_PARAMETER + "=" + authID;
         URL url = new URL(urlString);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setDoOutput(true);
@@ -262,10 +327,10 @@ public class EasyLogin extends HttpServlet {
                 if (valueMatcher.find()) {
                     value = valueMatcher.group(1);
                 }
-                logInfo("Getting cookie : " + key + "=" + value, null);
+                LOG.info("Getting cookie : " + key + "=" + value);
                 if (content.startsWith("JSESSIONID")) {
                     jSessionID = value;
-                    logInfo("jSessionID : " + jSessionID, null);
+                    LOG.info("jSessionID : " + jSessionID);
                 }
             }
             i++;
@@ -281,7 +346,7 @@ public class EasyLogin extends HttpServlet {
             Matcher randomMatcher = randomPattern.matcher(line);
             if (randomMatcher.find()) {
                 randomToken = randomMatcher.group(1);
-                logInfo("randomToken : " + randomToken, null);
+                LOG.info("randomToken : " + randomToken);
             }
             Pattern errorPattern = Pattern.compile("\"error\":\"([^\"]*)\"");
             Matcher errorMatcher = errorPattern.matcher(line);
@@ -294,135 +359,31 @@ public class EasyLogin extends HttpServlet {
         
         if (errorMessage == null){
             // send redirect if login worked
-            logInfo("Login worked, sending redirect", null);
-            resp.sendRedirect(AJAX_ROOT + "/login;jsessionid=" + jSessionID + "?action=redirect&random=" + randomToken);
+            LOG.info("Login worked, sending redirect");
+            resp.sendRedirect(ajaxRoot + "/login;jsessionid=" + jSessionID + "?action=redirect&random=" + randomToken);
         } else {
-            logInfo("Login did not work, sending errorPage", null);
+            LOG.info("Login did not work, sending errorPage");
             String errorPage = errorPageTemplate.replace("ERROR_MESSAGE", errorMessage);
             out.write(errorPage);
         }
     }
 
-    private static void logit(final String msg, final Throwable e, final boolean isError, final String authID) {
-        if (isError) {
-            if (e != null) {
-                LOG.error("EasyLogin IP: " + remoteIP + ", authId: " + authID + " : " + msg, e);
-            } else {
-                LOG.error("EasyLogin IP: " + remoteIP + ", authId: " + authID + " : " + msg);
-            }
-        } else {
-            if (e != null) {
-                LOG.info("EasyLogin IP: " + remoteIP + ", authId: " + authID + " : " + msg, e);
-            } else {
-                LOG.info("EasyLogin IP: " + remoteIP + ", authId: " + authID + " : " + msg);
-            }
-        }
-    }
-
-    private static void logError(final String msg, String authID) {
-        logit(msg, null, true, authID);
-    }
-
-    private static void logError(final String msg, final Throwable e, String authID) {
-        logit(msg, e, true, authID);
-    }
-
-    private static void logInfo(final String msg, String authID) {
-        logit(msg, null, false, authID);
-    }
-
-    public static void initConfig(ConfigurationService config) {
-        synchronized (EasyLogin.class) {
-
-            if (config.getProperty("com.openexchange.easylogin.passwordPara") != null) {
-                passwordPara = config.getProperty("com.openexchange.easylogin.passwordPara");
-                logInfo("Set passwordPara to " + passwordPara, null);
-            } else {
-                logError("Could not find passwordPara in properties-file, using default: " + passwordPara, "");
-            }
-
-            if (config.getProperty("com.openexchange.easylogin.loginPara") != null) {
-                loginPara = config.getProperty("com.openexchange.easylogin.loginPara");
-                logInfo("Set loginPara to " + loginPara, null);
-            } else {
-                logError("Could not find loginPara in properties-file, using default: " + loginPara, "");
-            }
-
-            if (config.getProperty("com.openexchange.easylogin.AJAX_ROOT") != null) {
-                AJAX_ROOT = config.getProperty("com.openexchange.easylogin.AJAX_ROOT");
-                logInfo("Set AJAX_ROOT to " + AJAX_ROOT, null);
-            } else {
-                logError("Could not find AJAX_ROOT in properties-file, using default: " + AJAX_ROOT, "");
-            }
-
-            if (config.getProperty("com.openexchange.easylogin.OX_PATH_RELATIVE") != null) {
-                OX_PATH_RELATIVE = config.getProperty("com.openexchange.easylogin.OX_PATH_RELATIVE");
-                logInfo("Set OX_PATH_RELATIVE to " + OX_PATH_RELATIVE, null);
-            } else {
-                logError("Could not find OX_PATH_RELATIVE in properties-file, using default: " + OX_PATH_RELATIVE, "");
-            }
-
-            if (config.getProperty("com.openexchange.easylogin.doGetEnabled") != null) {
-                String property = config.getProperty("com.openexchange.easylogin.doGetEnabled", "").trim();
-                doGetEnabled = Boolean.parseBoolean(property);
-                logInfo("Set doGetEnabled to " + doGetEnabled, null);
-            } else {
-                logError("Could not find doGetEnabled in properties-file, using default: " + doGetEnabled, null, null);
-            }
-
-            if (config.getProperty("com.openexchange.easylogin.popUpOnError") != null) {
-                String property = config.getProperty("com.openexchange.easylogin.popUpOnError", "").trim();
-                popUpOnError = Boolean.parseBoolean(property);
-                logInfo("Set popUpOnError to " + popUpOnError, null);
-            } else {
-                logError("Could not find popUpOnError in properties-file, using default: " + popUpOnError, null, null);
-            }
-            if (config.getProperty("com.openexchange.easylogin.allowInsecureTransmission") != null) {
-                String property = config.getProperty("com.openexchange.easylogin.allowInsecureTransmission", "").trim();
-                allowInsecure = Boolean.parseBoolean(property);
-                logInfo("Set allowInsecure to " + allowInsecure, null);
-            } else {
-                logError("Could not find allowInsecure in properties-file, using default: " + allowInsecure, null, null);
-            }
-            if (config.getProperty("com.openexchange.easylogin.errorPageTemplate") != null) {
-                String templateFileLocation = config.getProperty("com.openexchange.easylogin.errorPageTemplate", "");
-                File templateFile = new File(templateFileLocation);
-                if (templateFile.exists() && templateFile.canRead() && templateFile.isFile()){
-                    errorPageTemplate = getFileContents(templateFile);
-                    logInfo("Found an errorPage-template at " + templateFileLocation, null);
-                } else {
-                    logError("Could not find an errorPage-template at "+templateFileLocation+", using default.", null, null);
-                }
-            } else {
-                logError("No errorPage-template was specified, using default.", null, null);
-            }
-            if (config.getProperty("com.openexchange.easylogin.loadBalancer") != null) {
-                loadBalancer = config.getProperty("com.openexchange.easylogin.loadBalancer");
-                logInfo("Set loadBalancer to " + loadBalancer, null);
-            } else {
-                logError("Could not find parameter loadBalancer in properties-file, using default: " + loadBalancer, null, null);
-            }
-        }
-    }
-
     static public String getFileContents(File file) {
-        StringBuilder stringBuilder = new StringBuilder();        
+        StringBuilder stringBuilder = new StringBuilder();
         try {
-          BufferedReader input =  new BufferedReader(new FileReader(file));
-          try {
-            String line = null;
-            while (( line = input.readLine()) != null){
-              stringBuilder.append(line);
-              stringBuilder.append(System.getProperty("line.separator"));
+            BufferedReader input = new BufferedReader(new FileReader(file));
+            try {
+                String line = null;
+                while ((line = input.readLine()) != null) {
+                    stringBuilder.append(line);
+                    stringBuilder.append(System.getProperty("line.separator"));
+                }
+            } finally {
+                input.close();
             }
-          }
-          finally {
-            input.close();
-          }
-        }
-        catch (IOException e){
-          logError(e.getMessage(), e, null);
+        } catch (IOException e) {
+            LOG.error(e.getMessage(), e);
         }
         return stringBuilder.toString();
-      }
+    }
 }

@@ -94,6 +94,8 @@ public final class ServerConfig {
 
     private Boolean checkIP;
 
+    private String uiWebPath;
+
     /**
      * Prevent instantiation
      */
@@ -161,6 +163,7 @@ public final class ServerConfig {
         // JMX bind address
         jmxBindAddress = props.getProperty(Property.JMX_BIND_ADDRESS.propertyName, "localhost");
         checkIP = Boolean.valueOf(props.getProperty(Property.IP_CHECK.getPropertyName(), Boolean.TRUE.toString()));
+        uiWebPath = props.getProperty(Property.UI_WEB_PATH.getPropertyName(), "/ox6/index.html");
     }
 
     /**
@@ -204,6 +207,9 @@ public final class ServerConfig {
             break;
         case JMX_BIND_ADDRESS:
             value = SINGLETON.jmxBindAddress;
+            break;
+        case UI_WEB_PATH:
+            value = SINGLETON.uiWebPath;
             break;
         default:
             value = getProperty(property.propertyName);
@@ -346,7 +352,12 @@ public final class ServerConfig {
          * If this connfiguration parameter is set to <code>true</code> and the client IP addresses do not match the request will be denied.
          * Setting this parameter to <code>false</code> will only log the different client IP addresses with debug level.
          */
-        IP_CHECK("com.openexchange.IPCheck");
+        IP_CHECK("com.openexchange.IPCheck"),
+        /**
+         * Configures the path on the web server where the UI is located. This path is used to generate links directly into the UI. The
+         * default conforms to the path where the UI is installed by the standard packages on the web server.
+         */
+        UI_WEB_PATH("com.openexchange.UIWebPath");
 
         /**
          * Name of the property in the server.properties file.
