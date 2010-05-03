@@ -168,7 +168,7 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
         /*
          * Add mappings
          */
-        final FullnameUIDPair[] pairs = new FullnameUIDPair[uidls.length];
+        final FullnameUIDPair[] pairs = new FullnameUIDPair[uids.length];
         for (int i = 0; i < pairs.length; i++) {
             pairs[i] = FullnameUIDPair.newINBOXInstance(uids[i]);
         }

@@ -103,8 +103,63 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
 
     private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(POP3Access.class);
 
-    private static final ConcurrentMap<InetSocketAddress, Future<Object>> SYNCHRONIZER_MAP =
-        new ConcurrentHashMap<InetSocketAddress, Future<Object>>();
+    private static final ConcurrentMap<LoginKey, Future<Object>> SYNCHRONIZER_MAP = new ConcurrentHashMap<LoginKey, Future<Object>>();
+
+    private static final class LoginKey {
+
+        public static LoginKey N(final InetSocketAddress server, final String login) {
+            return new LoginKey(server, login);
+        }
+
+        private final InetSocketAddress server;
+
+        private final String login;
+
+        private final int hash;
+
+        private LoginKey(final InetSocketAddress server, final String login) {
+            super();
+            this.server = server;
+            this.login = login;
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((login == null) ? 0 : login.hashCode());
+            result = prime * result + ((server == null) ? 0 : server.hashCode());
+            hash = result;
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof LoginKey)) {
+                return false;
+            }
+            final LoginKey other = (LoginKey) obj;
+            if (login == null) {
+                if (other.login != null) {
+                    return false;
+                }
+            } else if (!login.equals(other.login)) {
+                return false;
+            }
+            if (server == null) {
+                if (other.server != null) {
+                    return false;
+                }
+            } else if (!server.equals(other.server)) {
+                return false;
+            }
+            return true;
+        }
+
+    }
 
     /*-
      * Members
@@ -347,13 +402,14 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
         /*
          * Ensure exclusive connect through future since a POP3 account may only be connected to one client at the same time
          */
-        final InetSocketAddress server;
+        final LoginKey key;
         try {
-            server = new InetSocketAddress(InetAddress.getByName(getPOP3Config().getServer()), getPOP3Config().getPort());
+            final POP3Config config = getPOP3Config();
+            key = LoginKey.N(new InetSocketAddress(InetAddress.getByName(config.getServer()), config.getPort()), config.getLogin());
         } catch (final UnknownHostException e) {
             throw MIMEMailException.handleMessagingException(new MessagingException(e.getMessage(), e), getPOP3Config(), session);
         }
-        Future<Object> f = SYNCHRONIZER_MAP.get(server);
+        Future<Object> f = SYNCHRONIZER_MAP.get(key);
         boolean removeFromMap = false;
         if (null == f) {
             final FutureTask<Object> ft =
@@ -376,7 +432,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
                             POP3Access.incrementCounter();
                         }
                     }));
-            f = SYNCHRONIZER_MAP.putIfAbsent(server, ft);
+            f = SYNCHRONIZER_MAP.putIfAbsent(key, ft);
             if (f == null) {
                 /*
                  * Yap, this thread's future task was put to map
@@ -414,7 +470,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
                 /*
                  * And remove from map
                  */
-                SYNCHRONIZER_MAP.remove(server);
+                SYNCHRONIZER_MAP.remove(key);
             }
         }
     }

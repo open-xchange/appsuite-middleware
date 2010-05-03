@@ -400,6 +400,12 @@ public class MailAccountPOP3Storage implements POP3Storage {
                     final Message[] all = inbox.getMessages();
                     if (containsWarnings) {
                         addAllMessagesToStorage(inbox, all);
+                        /*
+                         * Mark messages as \Deleted
+                         */
+                        for (int i = 0; i < all.length; i++) {
+                            all[i].setFlags(FLAGS_DELETED, true);
+                        }
                         doExpunge = true;
                     } else {
                         // Initiate UIDL fetch
@@ -430,7 +436,9 @@ public class MailAccountPOP3Storage implements POP3Storage {
                         addMessagesToStorage(newUIDLs, inbox, all);
 
                         if (expunge) {
-                            // Mark messages as \Deleted
+                            /*
+                             * Mark messages as \Deleted
+                             */
                             for (int i = 0; i < all.length; i++) {
                                 all[i].setFlags(FLAGS_DELETED, true);
                             }
@@ -474,26 +482,29 @@ public class MailAccountPOP3Storage implements POP3Storage {
     }
 
     private void addMessagesToStorage(final Set<String> newUIDLs, final POP3Folder inbox, final Message[] all) throws MessagingException, MailException {
-        /*
-         * Filter new ones
-         */
-        final List<Message> toFetch = new ArrayList<Message>(newUIDLs.size());
-        for (int i = 0; i < all.length; i++) {
-            final Message message = all[i];
-            final String uidl = inbox.getUID(message);
-            if (newUIDLs.contains(uidl)) {
-                toFetch.add(message);
+        final Message[] msgs;
+        {
+            /*
+             * Filter new ones
+             */
+            final List<Message> toFetch = new ArrayList<Message>(newUIDLs.size());
+            for (int i = 0; i < all.length; i++) {
+                final Message message = all[i];
+                final String uidl = inbox.getUID(message);
+                if (newUIDLs.contains(uidl)) {
+                    toFetch.add(message);
+                }
             }
+            /*
+             * Fetch ENVELOPE for new messages
+             */
+            msgs = toFetch.toArray(new Message[toFetch.size()]);
+            final FetchProfile fetchProfile = new FetchProfile();
+            fetchProfile.add(FetchProfile.Item.ENVELOPE);
+            final long start = System.currentTimeMillis();
+            inbox.fetch(msgs, fetchProfile);
+            MailServletInterface.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
         }
-        /*
-         * Fetch ENVELOPE for new messages
-         */
-        final Message[] msgs = toFetch.toArray(new Message[toFetch.size()]);
-        final FetchProfile fetchProfile = new FetchProfile();
-        fetchProfile.add(FetchProfile.Item.ENVELOPE);
-        final long start = System.currentTimeMillis();
-        inbox.fetch(msgs, fetchProfile);
-        MailServletInterface.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
         /*
          * Append them to storage
          */

@@ -257,13 +257,13 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         readLock.lock();
         try {
             checkInit(readLock);
+            delegatee.deleteFullnameUIDPairMappings(fullnameUIDPairs);
             for (int i = 0; i < fullnameUIDPairs.length; i++) {
                 final String uidl = pair2uidl.remove(fullnameUIDPairs[i]);
                 if (null != uidl) {
                     uidl2pair.remove(uidl);
                 }
             }
-            delegatee.deleteFullnameUIDPairMappings(fullnameUIDPairs);
         } finally {
             readLock.unlock();
         }
@@ -274,13 +274,13 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         readLock.lock();
         try {
             checkInit(readLock);
+            delegatee.deleteUIDLMappings(uidls);
             for (int i = 0; i < uidls.length; i++) {
                 final FullnameUIDPair pair = uidl2pair.remove(uidls[i]);
                 if (null != pair) {
                     pair2uidl.remove(pair);
                 }
             }
-            delegatee.deleteUIDLMappings(uidls);
         } finally {
             readLock.unlock();
         }
