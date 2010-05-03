@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 4
+%define		ox_release 5
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -492,6 +492,8 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Mon May 03 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16021: Fixed NullPointerException on session closing if sessions random was used.
 * Fri Apr 30 2010 - marcus.klein@open-xchange.com
  - Bugfix #15880: Made path to the UI fully configurable and it can be passed through parameters on easylogin and login redirect requests.
  - Bugfix #15936: Session identifier is not passed anymore as document fragment on login redirect request.
