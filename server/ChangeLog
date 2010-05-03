@@ -5,6 +5,7 @@
 * 2010-05-03 - marcus.klein@open-xchange.com
 
  - Bugfix #16021: Fixed NullPointerException on session closing if sessions random was used.
+ - Bugfix #15933: Using DB master server to change the POP3 storage provider name.
 
 * 2010-04-30 - marcus.klein@open-xchange.com
 
