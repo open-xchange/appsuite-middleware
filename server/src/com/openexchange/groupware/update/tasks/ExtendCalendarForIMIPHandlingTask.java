@@ -78,7 +78,7 @@ public class ExtendCalendarForIMIPHandlingTask extends UpdateTaskAdapter {
     private String[] TABLES = { "prg_dates", "del_dates" };
     private Column[] COLUMNS = { new Column("uid", "VARCHAR(255)"), new Column("organizer", "VARCHAR(255)"), new Column("sequence", "INT4 UNSIGNED") };
 
-    private static final String DATES_EXTERNAL_CREATE = 
+    private static final String DATES_EXTERNAL_CREATE =
         "CREATE TABLE dateExternal (" +
         "cid INT4 UNSIGNED NOT NULL," +
         "objectId INT4 UNSIGNED NOT NULL," +
@@ -89,8 +89,8 @@ public class ExtendCalendarForIMIPHandlingTask extends UpdateTaskAdapter {
         "PRIMARY KEY (cid,objectId,mailAddress)," +
         "FOREIGN KEY (cid,objectId) REFERENCES prg_dates(cid,intfield01)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
-    
-    private static final String DELDATES_EXTERNAL_CREATE = 
+
+    private static final String DELDATES_EXTERNAL_CREATE =
         "CREATE TABLE delDateExternal (" +
         "cid INT4 UNSIGNED NOT NULL," +
         "objectId INT4 UNSIGNED NOT NULL," +
@@ -101,7 +101,7 @@ public class ExtendCalendarForIMIPHandlingTask extends UpdateTaskAdapter {
         "PRIMARY KEY (cid,objectId, mailAddress)," +
         "FOREIGN KEY (cid,objectId) REFERENCES del_dates(cid,intfield01)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
-    
+
     public String[] getDependencies() {
         return new String[] { "com.openexchange.groupware.update.tasks.AddAppointmentParticipantsIndexTask" };
     }
