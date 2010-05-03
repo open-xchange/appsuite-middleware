@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -58,9 +58,9 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.MailSortField;
-import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.Quota;
 import com.openexchange.mail.Quota.Type;

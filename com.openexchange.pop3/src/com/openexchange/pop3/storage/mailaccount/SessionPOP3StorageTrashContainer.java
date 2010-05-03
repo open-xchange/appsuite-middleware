@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -72,6 +72,8 @@ import com.openexchange.timer.TimerService;
  */
 public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashContainer {
 
+    private static final Object PRESENT = new Object();
+
     /**
      * Gets the trash container bound to specified POP3 access.
      * 
@@ -100,8 +102,6 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
     /*-
      * Member section
      */
-
-    private static final Object PRESENT = new Object();
 
     private final ReadWriteLock rwLock;
 
@@ -166,8 +166,8 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
         readLock.lock();
         try {
             checkInit(readLock);
-            set.put(uidl, PRESENT);
             delegatee.addUIDL(uidl);
+            set.put(uidl, PRESENT);
         } finally {
             readLock.unlock();
         }
@@ -178,8 +178,8 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
         readLock.lock();
         try {
             checkInit(readLock);
-            set.clear();
             delegatee.clear();
+            set.clear();
         } finally {
             readLock.unlock();
         }
@@ -203,8 +203,8 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
         readLock.lock();
         try {
             checkInit(readLock);
-            set.remove(uidl);
             delegatee.removeUIDL(uidl);
+            set.remove(uidl);
         } finally {
             readLock.unlock();
         }
@@ -215,10 +215,10 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
         readLock.lock();
         try {
             checkInit(readLock);
+            delegatee.addAllUIDL(uidls);
             for (final String uidl : uidls) {
                 set.put(uidl, PRESENT);
             }
-            delegatee.addAllUIDL(uidls);
         } finally {
             readLock.unlock();
         }

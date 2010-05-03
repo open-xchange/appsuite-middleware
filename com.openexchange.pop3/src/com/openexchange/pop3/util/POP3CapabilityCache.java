@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -189,11 +189,8 @@ public final class POP3CapabilityCache {
     public static String getCapability(final InetSocketAddress address, final boolean isSecure, final int connectionTimeout, final int timeout) throws IOException {
         Future<Capability> f = MAP.get(address);
         if (null == f) {
-            final FutureTask<Capability> ft = new FutureTask<Capability>(new CapabilityCallable(
-                address,
-                isSecure,
-                connectionTimeout,
-                timeout));
+            final FutureTask<Capability> ft =
+                new FutureTask<Capability>(new CapabilityCallable(address, isSecure, connectionTimeout, timeout));
             f = MAP.putIfAbsent(address, ft);
             if (null == f) {
                 f = ft;
@@ -423,7 +420,11 @@ public final class POP3CapabilityCache {
                         capabilities = sb.toString();
                     } else {
                         if (LOG.isWarnEnabled()) {
-                            LOG.warn(new StringBuilder("POP3 CAPA command failed. Unexpected response start: ").append(pre).toString());
+                            if (Character.isDefined(pre)) {
+                                LOG.warn(new StringBuilder("Unexpected CAPA response start: ").append(pre).toString());
+                            } else {
+                                LOG.warn(new StringBuilder("Invalid unicode character: ").append(((int) pre)).toString());
+                            }
                         }
                         return DEFAULT_CAPABILITIES;
                     }

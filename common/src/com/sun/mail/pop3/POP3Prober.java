@@ -47,48 +47,69 @@
  *
  */
 
-package com.openexchange.pop3;
+package com.sun.mail.pop3;
 
-import com.openexchange.mail.api.MailCapabilities;
-
+import java.io.IOException;
+import javax.mail.MessagingException;
 
 /**
- * {@link POP3Capabilities} - The POP3 capabilities.
- *
+ * {@link POP3Prober} - Probes support of <code><small>UIDL</small></code> and <code><small>TOP</small></code> POP3 commands.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class POP3Capabilities extends MailCapabilities {
+public final class POP3Prober {
+
+    private final Protocol protocol;
 
     /**
-     * Initializes a new {@link POP3Capabilities}.
+     * Initializes a new {@link POP3Prober}.
+     * 
+     * @param pop3Store The connected POP3 store
+     * @param pop3Folder The POP3 folder to check with
+     * @throws IOException If initialization fails
+     * @throws MessagingException If initialization fails
      */
-    public POP3Capabilities() {
+    public POP3Prober(final POP3Store pop3Store, final POP3Folder pop3Folder) throws IOException, MessagingException {
         super();
+        protocol = (0 == pop3Folder.getMessageCount() ? null : pop3Store.getPort(pop3Folder));
     }
 
-    @Override
-    public boolean hasPermissions() {
-        return false;
+    /**
+     * Probes the <code><small>UIDL</small></code> command.
+     * 
+     * @return <code>true</code> if <code><small>UIDL</small></code> command is supported; otherwise <code>false</code>
+     */
+    public boolean probeUIDL() {
+        if (null == protocol) {
+            /*
+             * Nothing to probe present
+             */
+            return true;
+        }
+        try {
+            return protocol.uidl(new String[1]);
+        } catch (final IOException e) {
+            return false;
+        }
     }
 
-    @Override
-    public boolean hasQuota() {
-        return false;
-    }
-
-    @Override
-    public boolean hasSort() {
-        return false;
-    }
-
-    @Override
-    public boolean hasSubscription() {
-        return false;
-    }
-
-    @Override
-    public boolean hasThreadReferences() {
-        return false;
+    /**
+     * Probes the <code><small>TOP</small></code> command.
+     * 
+     * @return <code>true</code> if <code><small>TOP</small></code> command is supported; otherwise <code>false</code>
+     */
+    public boolean probeTOP() {
+        if (null == protocol) {
+            /*
+             * Nothing to probe present
+             */
+            return true;
+        }
+        try {
+            return (null != protocol.top(1, 1));
+        } catch (final IOException e) {
+            return false;
+        }
     }
 
 }

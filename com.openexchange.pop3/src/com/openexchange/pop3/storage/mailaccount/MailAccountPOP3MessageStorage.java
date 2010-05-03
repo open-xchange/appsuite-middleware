@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -168,7 +168,7 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
         /*
          * Add mappings
          */
-        final FullnameUIDPair[] pairs = new FullnameUIDPair[uidls.length];
+        final FullnameUIDPair[] pairs = new FullnameUIDPair[uids.length];
         for (int i = 0; i < pairs.length; i++) {
             pairs[i] = FullnameUIDPair.newINBOXInstance(uids[i]);
         }

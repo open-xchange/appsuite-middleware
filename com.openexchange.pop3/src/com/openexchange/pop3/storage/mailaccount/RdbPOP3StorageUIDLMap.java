@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -133,10 +133,10 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         try {
             // Delete possibly existing mappings for specified UIDLs
             stmt = con.prepareStatement(SQL_DELETE_UIDLS);
-            for (int i = 0; i < uidls.length; i++) {
-                final String uidl = uidls[i];
+            int pos;
+            for (final String uidl : uidls) {
                 if (uidl != null) {
-                    int pos = 1;
+                    pos = 1;
                     stmt.setInt(pos++, cid);
                     stmt.setInt(pos++, user);
                     stmt.setInt(pos++, accountId);
@@ -151,7 +151,7 @@ public final class RdbPOP3StorageUIDLMap implements POP3StorageUIDLMap {
             for (int i = 0; i < uidls.length; i++) {
                 final String uidl = uidls[i];
                 if (uidl != null) {
-                    int pos = 1;
+                    pos = 1;
                     stmt.setInt(pos++, cid);
                     stmt.setInt(pos++, user);
                     stmt.setInt(pos++, accountId);
