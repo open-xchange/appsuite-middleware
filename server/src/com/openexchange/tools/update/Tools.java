@@ -128,7 +128,7 @@ public final class Tools {
         }
         boolean matches = columns.length == foundColumns.size();
         for (int i = 0; matches && i < columns.length; i++) {
-            matches = columns[i].equals(foundColumns.get(i));
+            matches = columns[i].equalsIgnoreCase(foundColumns.get(i));
         }
         return matches;
     }
@@ -174,7 +174,7 @@ public final class Tools {
             }
             boolean matches = true;
             for (int i = 0; matches && i < columns.length; i++) {
-                matches = columns[i].equals(foundColumns.get(i));
+                matches = columns[i].equalsIgnoreCase(foundColumns.get(i));
             }
             if (matches) {
                 foundIndex = entry.getKey();
@@ -209,7 +209,7 @@ public final class Tools {
             closeSQLStuff(result);
         }
         for (final ForeignKey key : keys) {
-            if (key.getPrimaryTable().equals(primaryTable) && key.getForeignTable().equals(foreignTable) && key.matches(primaryColumns, foreignColumns)) {
+            if (key.getPrimaryTable().equalsIgnoreCase(primaryTable) && key.getForeignTable().equalsIgnoreCase(foreignTable) && key.matches(primaryColumns, foreignColumns)) {
                 return key.getName();
             }
         }
@@ -490,7 +490,7 @@ public final class Tools {
         boolean retval = false;
         try {
             rs = metaData.getTables(null, null, table, new String[] { TABLE });
-            retval = (rs.next() && rs.getString("TABLE_NAME").equals(table));
+            retval = (rs.next() && rs.getString("TABLE_NAME").equalsIgnoreCase(table));
         } finally {
             closeSQLStuff(rs);
         }
@@ -513,7 +513,7 @@ public final class Tools {
         try {
             rs = metaData.getColumns(null, null, table, column);
             while (rs.next()) {
-                retval = rs.getString(4).equals(column);
+                retval = rs.getString(4).equalsIgnoreCase(column);
             }
         } finally {
             closeSQLStuff(rs);
