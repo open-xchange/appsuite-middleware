@@ -33,7 +33,7 @@
 
  - Bugfix #14932: Move error messages around for translation and make them nicer.
  
- * 2010-04-01 - tobias.prinz@open-xchange.com
+* 2010-04-01 - tobias.prinz@open-xchange.com
 
  - Bugfix #15596: Crawler for Facebook works again.
  - Bugfix #15726: Crawler now gives better error message if account is invalid.
