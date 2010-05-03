@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 22
+%define		ox_release 23
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -483,6 +483,30 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Mon May 03 2010 - marcus.klein@open-xchange.com
+ - Bugfix #15933: Using DB master server to change the POP3 storage provider name.
+* Mon May 03 2010 - thorben.betten@open-xchange.com
+ - Bugfix #15975: Properly marking messages as \Deleted prior to expunge on INBOX folder
+* Thu Apr 15 2010 - marcus.klein@open-xchange.com
+ - Bugfix #15891: Do not check global address book folder permissions if user edits his own contact through user interface.
+* Tue Apr 06 2010 - marcus.klein@open-xchange.com
+ - Bugfix #15656: Disabling configurable envelope-from for external mail accounts.
+* Mon Apr 05 2010 - marcus.klein@open-xchange.com
+ - Bugfix #15744: Generating display name for GMX contacts from given and sure name.
+ - Bugfix #15764: Web crawler for web.de works now with an empty address book.
+ - Bugfix #15747: Using a more genering exception message if the crawler login fails.
+* Thu Apr 01 2010 - thorben.betten@open-xchange.com
+ - Bugfix #15686: No spam handler for external accounts
+* Thu Apr 01 2010 - tobias.prinz@open-xchange.com
+ - Bugfix #15596: Crawler for Facebook works again.
+ - Bugfix #15726: Crawler now gives better error message if account is invalid.
+* Thu Apr 01 2010 - francisco.laguna@open-xchange.com
+ - Bugfix #14932: Move error messages around for translation and make them nicer.
+* Thu Apr 01 2010 - marcus.klein@open-xchange.com
+ - Bugfix #15724: Correctly checking if some anchor is on the page or not.
+* Thu Apr 01 2010 - karsten.will@open-xchange.com
+ - Bugfix #15724: Changed the wording from "Service unavailable" to "Service unavailable or wrong credentials"
+ - Bugfix #15725: Yahoo crawler now gives readable exception if invalid credentials are entered.
 * Tue Mar 30 2010 - marcus.klein@open-xchange.com
  - Bugfix #15721: Correct ordner and proper transaction handling when deleting a user that has POP3 accounts.
 * Thu Mar 25 2010 - karsten.will@open-xchange.com
