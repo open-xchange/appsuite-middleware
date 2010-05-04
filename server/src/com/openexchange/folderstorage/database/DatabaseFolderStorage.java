@@ -96,6 +96,7 @@ import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
@@ -573,6 +574,9 @@ public final class DatabaseFolderStorage implements FolderStorage {
                                     subfolderIdentifies.add(id.toString());
                                 }
                                 retval.setSubfolderIDs(subfolderIdentifies.toArray(new String[subfolderIdentifies.size()]));
+                            }
+                            if (FolderObject.SYSTEM_LDAP_FOLDER_ID == folderId) {
+                                retval.setName(FolderStrings.SYSTEM_LDAP_FOLDER_NAME);
                             }
                         }
                     }
