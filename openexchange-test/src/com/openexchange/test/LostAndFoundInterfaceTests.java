@@ -51,13 +51,6 @@ package com.openexchange.test;
 
 import com.openexchange.ajax.AJAXFileUploadTest;
 import com.openexchange.ajax.appointment.recurrence.Bug12280Test;
-import com.openexchange.ajax.folder.api2.ClearTest;
-import com.openexchange.ajax.folder.api2.CreateTest;
-import com.openexchange.ajax.folder.api2.GetTest;
-import com.openexchange.ajax.folder.api2.ListTest;
-import com.openexchange.ajax.folder.api2.PathTest;
-import com.openexchange.ajax.folder.api2.UpdatesTest;
-import com.openexchange.ajax.folder.api2.UpdateTest;
 import com.openexchange.ajax.importexport.ICalImportExportServletTest;
 import com.openexchange.ajax.importexport.VCardImportExportServletTest;
 import com.openexchange.ajax.infostore.test.CreateAndDeleteInfostoreTest;
@@ -93,13 +86,6 @@ public class LostAndFoundInterfaceTests {
         tests.addTestSuite(CreateAndDeleteInfostoreTest.class);
         tests.addTestSuite(VCardImportExportServletTest.class);
         tests.addTestSuite(ICalImportExportServletTest.class);
-        tests.addTestSuite(UpdatesTest.class);
-        tests.addTestSuite(UpdateTest.class);
-        tests.addTestSuite(PathTest.class);
-        tests.addTestSuite(ListTest.class);
-        tests.addTestSuite(GetTest.class);
-        tests.addTestSuite(CreateTest.class);
-        tests.addTestSuite(ClearTest.class);
         tests.addTestSuite(Bug12280Test.class);
         tests.addTestSuite(AJAXFileUploadTest.class);
         

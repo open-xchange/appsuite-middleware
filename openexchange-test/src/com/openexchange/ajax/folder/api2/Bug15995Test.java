@@ -47,59 +47,51 @@
  *
  */
 
-package com.openexchange.ajax.folder;
+package com.openexchange.ajax.folder.api2;
 
-import com.openexchange.ajax.appointment.GetTest;
-import com.openexchange.ajax.folder.api2.Bug15995Test;
-import com.openexchange.ajax.folder.api2.ClearTest;
-import com.openexchange.ajax.folder.api2.CreateTest;
-import com.openexchange.ajax.folder.api2.ListTest;
-import com.openexchange.ajax.folder.api2.MoveTest;
-import com.openexchange.ajax.folder.api2.PathTest;
-import com.openexchange.ajax.folder.api2.UpdateTest;
-import com.openexchange.ajax.folder.api2.UpdatesTest;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.Locale;
+import com.openexchange.ajax.config.actions.SetRequest;
+import com.openexchange.ajax.config.actions.Tree;
+import com.openexchange.ajax.folder.actions.API;
+import com.openexchange.ajax.folder.actions.GetRequest;
+import com.openexchange.ajax.folder.actions.GetResponse;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.i18n.FolderStrings;
 
 /**
- * Suite for all folder tests.
+ * Checks name of global address book.
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class FolderTestSuite {
+public class Bug15995Test extends AbstractAJAXSession {
 
-    /**
-     * Prevent instantiation.
-     */
-    private FolderTestSuite() {
-        super();
+    private AJAXClient client;
+    private Locale locale;
+
+    public Bug15995Test(String name) {
+        super(name);
     }
 
-    /**
-     * Generates the task test suite.
-     * @return the task tests suite.
-     */
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        // First the function tests.
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        client = getClient();
+        locale = client.getValues().getLocale();
+        client.execute(new SetRequest(Tree.Language, Locale.US));
+    }
 
-        // Now several single function tests.
-        tests.addTestSuite(GetMailInboxTest.class);
-        tests.addTestSuite(GetVirtualTest.class);
-        tests.addTestSuite(GetSortedMailFolderTest.class);
-        tests.addTestSuite(ExemplaryFolderTestManagerTest.class);
+    @Override
+    protected void tearDown() throws Exception {
+        client.execute(new SetRequest(Tree.Language, locale));
+        super.tearDown();
+    }
 
-        // New folder API
-        tests.addTestSuite(ClearTest.class);
-        tests.addTestSuite(CreateTest.class);
-        tests.addTestSuite(GetTest.class);
-        tests.addTestSuite(ListTest.class);
-        tests.addTestSuite(MoveTest.class);
-        tests.addTestSuite(PathTest.class);
-        tests.addTestSuite(UpdatesTest.class);
-        tests.addTestSuite(UpdateTest.class);
-
-        // And finally bug tests.
-        tests.addTestSuite(Bug12393Test.class);
-        return tests;
+    public void testGlobalAddressbookName() throws Throwable {
+        GetRequest request = new GetRequest(API.OX_NEW, FolderObject.SYSTEM_LDAP_FOLDER_ID);
+        GetResponse response = client.execute(request);
+        FolderObject folder = response.getFolder();
+        assertEquals("Name of global address book is not set properly.", FolderStrings.SYSTEM_LDAP_FOLDER_NAME, folder.getFolderName());
     }
 }
