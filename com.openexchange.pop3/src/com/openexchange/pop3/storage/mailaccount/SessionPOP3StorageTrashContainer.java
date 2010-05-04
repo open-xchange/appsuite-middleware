@@ -166,8 +166,8 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
         readLock.lock();
         try {
             checkInit(readLock);
-            set.put(uidl, PRESENT);
             delegatee.addUIDL(uidl);
+            set.put(uidl, PRESENT);
         } finally {
             readLock.unlock();
         }
@@ -178,8 +178,8 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
         readLock.lock();
         try {
             checkInit(readLock);
-            set.clear();
             delegatee.clear();
+            set.clear();
         } finally {
             readLock.unlock();
         }
@@ -203,8 +203,8 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
         readLock.lock();
         try {
             checkInit(readLock);
-            set.remove(uidl);
             delegatee.removeUIDL(uidl);
+            set.remove(uidl);
         } finally {
             readLock.unlock();
         }
@@ -215,10 +215,10 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
         readLock.lock();
         try {
             checkInit(readLock);
+            delegatee.addAllUIDL(uidls);
             for (final String uidl : uidls) {
                 set.put(uidl, PRESENT);
             }
-            delegatee.addAllUIDL(uidls);
         } finally {
             readLock.unlock();
         }

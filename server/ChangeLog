@@ -1,3 +1,7 @@
+* 2010-05-03 - thorben.betten@open-xchange.com
+
+ - Bugfix #15975: Properly marking messages as \Deleted prior to expunge on INBOX folder.
+
 * 2010-05-03 - marcus.klein@open-xchange.com
 
  - Bugfix #16021: Fixed NullPointerException on session closing if sessions random was used.

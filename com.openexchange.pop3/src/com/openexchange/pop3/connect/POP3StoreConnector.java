@@ -64,12 +64,10 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.mail.AuthenticationFailedException;
-import javax.mail.Message;
 import javax.mail.MessagingException;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
-import com.openexchange.mail.mime.utils.MIMEStorageUtility;
 import com.openexchange.pop3.POP3Exception;
 import com.openexchange.pop3.POP3Provider;
 import com.openexchange.pop3.config.IPOP3Properties;
@@ -80,7 +78,7 @@ import com.openexchange.pop3.util.POP3CapabilityCache;
 import com.openexchange.session.Session;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 import com.sun.mail.pop3.POP3Folder;
-import com.sun.mail.pop3.POP3Message;
+import com.sun.mail.pop3.POP3Prober;
 import com.sun.mail.pop3.POP3Store;
 
 /**
@@ -345,13 +343,44 @@ public final class POP3StoreConnector {
                 final POP3Folder inbox = (POP3Folder) pop3Store.getFolder("INBOX");
                 inbox.open(POP3Folder.READ_ONLY);
                 try {
-                    final Message[] allMessages = inbox.getMessages();
-                    if (allMessages.length > 0) {
-                        final Message[] single = new Message[1];
-                        single[0] = allMessages[0];
-                        probeUIDL(session, server, result, login, hasUidl, inbox, single, errorOnMissingUIDL);
-                        probeTOP(session, server, login, hasTop, single);
+                    final POP3Prober prober = new POP3Prober(pop3Store, inbox);
+                    if (!prober.probeUIDL()) {
+                        /*-
+                         * Probe failed.
+                         * Avoid fetching UIDs when further working with JavaMail API
+                         */
+                        if (errorOnMissingUIDL) {
+                            throw new POP3Exception(
+                                POP3Exception.Code.MISSING_REQUIRED_CAPABILITY,
+                                "UIDL",
+                                server,
+                                login,
+                                Integer.valueOf(session.getUserId()),
+                                Integer.valueOf(session.getContextId()));
+                        }
+                        result.addWarning(new POP3Exception(
+                            POP3Exception.Code.EXPUNGE_MODE_ONLY,
+                            "UIDL",
+                            server,
+                            login,
+                            Integer.valueOf(session.getUserId()),
+                            Integer.valueOf(session.getContextId())));
                     }
+                    if (!prober.probeTOP()) {
+                        /*-
+                         * Probe failed.
+                         * Mandatory to further work with JavaMail API
+                         */
+                        throw new POP3Exception(
+                            POP3Exception.Code.MISSING_REQUIRED_CAPABILITY,
+                            "TOP",
+                            server,
+                            login,
+                            Integer.valueOf(session.getUserId()),
+                            Integer.valueOf(session.getContextId()));
+                    }
+                } catch (final IOException e) {
+                    throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
                 } finally {
                     inbox.close(false);
                 }
@@ -360,61 +389,6 @@ public final class POP3StoreConnector {
             return result;
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, pop3Config, session);
-        }
-    }
-
-    private static void probeTOP(final Session session, final String server, final String login, final boolean hasTop, final Message[] single) throws POP3Exception {
-        if (!hasTop) {
-            /*
-             * Probe TOP
-             */
-            try {
-                ((POP3Message) single[0]).top(1);
-            } catch (final Exception e) {
-                /*-
-                 * Probe failed.
-                 * Mandatory to further work with JavaMail API
-                 */
-                throw new POP3Exception(
-                    POP3Exception.Code.MISSING_REQUIRED_CAPABILITY,
-                    "TOP",
-                    server,
-                    login,
-                    Integer.valueOf(session.getUserId()),
-                    Integer.valueOf(session.getContextId()));
-            }
-        }
-    }
-
-    private static void probeUIDL(final Session session, final String server, final POP3StoreResult result, final String login, final boolean hasUidl, final POP3Folder inbox, final Message[] single, final boolean errorOnMissingUIDL) throws POP3Exception {
-        if (!hasUidl) {
-            /*
-             * Probe UIDL
-             */
-            try {
-                inbox.fetch(single, MIMEStorageUtility.getUIDFetchProfile());
-            } catch (final Exception e) {
-                /*-
-                 * Probe failed.
-                 * Avoid fetching UIDs when further working with JavaMail API
-                 */
-                if (errorOnMissingUIDL) {
-                    throw new POP3Exception(
-                        POP3Exception.Code.MISSING_REQUIRED_CAPABILITY,
-                        "UIDL",
-                        server,
-                        login,
-                        Integer.valueOf(session.getUserId()),
-                        Integer.valueOf(session.getContextId()));
-                }
-                result.addWarning(new POP3Exception(
-                    POP3Exception.Code.EXPUNGE_MODE_ONLY,
-                    "UIDL",
-                    server,
-                    login,
-                    Integer.valueOf(session.getUserId()),
-                    Integer.valueOf(session.getContextId())));
-            }
         }
     }
 

@@ -120,10 +120,11 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         this.uidl2pair = new ConcurrentHashMap<String, FullnameUIDPair>();
         mode = new int[] { 1 };
         final ClearMapsRunnable cmr = new ClearMapsRunnable(session, key, uidl2pair, pair2uidl, rwLock, mode);
-        final ScheduledTimerTask timerTask = POP3ServiceRegistry.getServiceRegistry().getService(TimerService.class).scheduleWithFixedDelay(
-            cmr,
-            SessionCacheProperties.SCHEDULED_TASK_INITIAL_DELAY,
-            SessionCacheProperties.SCHEDULED_TASK_DELAY);
+        final ScheduledTimerTask timerTask =
+            POP3ServiceRegistry.getServiceRegistry().getService(TimerService.class).scheduleWithFixedDelay(
+                cmr,
+                SessionCacheProperties.SCHEDULED_TASK_INITIAL_DELAY,
+                SessionCacheProperties.SCHEDULED_TASK_DELAY);
         cmr.setTimerTask(timerTask);
         init();
     }
@@ -256,13 +257,13 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         readLock.lock();
         try {
             checkInit(readLock);
+            delegatee.deleteFullnameUIDPairMappings(fullnameUIDPairs);
             for (int i = 0; i < fullnameUIDPairs.length; i++) {
                 final String uidl = pair2uidl.remove(fullnameUIDPairs[i]);
                 if (null != uidl) {
                     uidl2pair.remove(uidl);
                 }
             }
-            delegatee.deleteFullnameUIDPairMappings(fullnameUIDPairs);
         } finally {
             readLock.unlock();
         }
@@ -273,13 +274,13 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         readLock.lock();
         try {
             checkInit(readLock);
+            delegatee.deleteUIDLMappings(uidls);
             for (int i = 0; i < uidls.length; i++) {
                 final FullnameUIDPair pair = uidl2pair.remove(uidls[i]);
                 if (null != pair) {
                     pair2uidl.remove(pair);
                 }
             }
-            delegatee.deleteUIDLMappings(uidls);
         } finally {
             readLock.unlock();
         }

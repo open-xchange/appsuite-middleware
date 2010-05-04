@@ -134,8 +134,8 @@ public final class SessionPOP3StorageProperties implements POP3StorageProperties
         readLock.lock();
         try {
             checkValid();
-            map.put(propertyName, propertyValue);
             delegatee.addProperty(propertyName, propertyValue);
+            map.put(propertyName, propertyValue);
         } finally {
             readLock.unlock();
         }
@@ -164,8 +164,8 @@ public final class SessionPOP3StorageProperties implements POP3StorageProperties
         readLock.lock();
         try {
             checkValid();
-            map.remove(propertyName);
             delegatee.removeProperty(propertyName);
+            map.remove(propertyName);
         } finally {
             readLock.unlock();
         }
