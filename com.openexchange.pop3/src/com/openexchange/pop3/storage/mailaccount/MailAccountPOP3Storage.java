@@ -208,7 +208,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
         return path;
     }
 
-    public void close() throws MailException {
+    public void close() {
         defaultMailAccess.close(true);
     }
 
@@ -372,24 +372,25 @@ public class MailAccountPOP3Storage implements POP3Storage {
 
     private static final Flags FLAGS_DELETED = new Flags(Flags.Flag.DELETED);
 
-    public void syncMessages(final boolean expunge, final POP3StorageConnectCounter connectCounter) throws MailException {
-        final POP3StoreResult result =
-            POP3StoreConnector.getPOP3Store(
-                pop3Access.getPOP3Config(),
-                pop3Access.getMailProperties(),
-                false,
-                pop3Access.getSession(),
-                !expunge);
-        final POP3Store pop3Store = result.getPop3Store();
-        final boolean containsWarnings = result.containsWarnings();
-        if (containsWarnings) {
-            this.warnings.addAll(result.getWarnings());
-        }
-        /*
-         * Increase counter
-         */
-        connectCounter.incrementCounter();
+    public void syncMessages(final boolean expunge, final POP3StorageConnectCounter connectCounter) {
+        POP3Store pop3Store = null;
         try {
+            final POP3StoreResult result =
+                POP3StoreConnector.getPOP3Store(
+                    pop3Access.getPOP3Config(),
+                    pop3Access.getMailProperties(),
+                    false,
+                    pop3Access.getSession(),
+                    !expunge);
+            pop3Store = result.getPop3Store();
+            final boolean containsWarnings = result.containsWarnings();
+            if (containsWarnings) {
+                this.warnings.addAll(result.getWarnings());
+            }
+            /*
+             * Increase counter
+             */
+            connectCounter.incrementCounter();
             final POP3Folder inbox = (POP3Folder) pop3Store.getFolder("INBOX");
             inbox.open(POP3Folder.READ_WRITE);
             boolean doExpunge = false;
@@ -466,16 +467,20 @@ public class MailAccountPOP3Storage implements POP3Storage {
                 }
             }
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e, pop3Access.getPOP3Config(), pop3Access.getSession());
+            MailException e1 = MIMEMailException.handleMessagingException(e, pop3Access.getPOP3Config(), pop3Access.getSession());
+            LOG.warn("Connect to POP3 account failed: " + e.getMessage(), e);
+            warnings.add(e1);
+        } catch (MailException e) {
+            LOG.warn("Connect to POP3 account failed: " + e.getMessage(), e);
+            warnings.add(e);
         } finally {
             try {
-                pop3Store.close();
+                if (null != pop3Store) {
+                    pop3Store.close();
+                }
             } catch (final MessagingException e) {
                 LOG.error(e.getMessage(), e);
             } finally {
-                /*
-                 * Decrease counters
-                 */
                 connectCounter.decrementCounter();
             }
         }

@@ -49,6 +49,7 @@
 
 package com.openexchange.mail;
 
+import static com.openexchange.java.Autoboxing.l;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -202,10 +203,8 @@ public final class MailAccessWatcher {
                     final MailAccess<?, ?> mailAccess = e.getKey();
                     if (mailAccess.isConnectedUnsafe()) {
                         final Long val = e.getValue();
-                        if ((null != val) && ((System.currentTimeMillis() - val.longValue()) > watcherTime)) {
-                            sb.setLength(0);
-                            logger.info(sb.append(INFO_PREFIX.replaceFirst("#N#", String.valueOf(watcherTime))).append(
-                                mailAccess.getTrace()).toString());
+                        if ((null != val) && ((System.currentTimeMillis() - l(val)) > watcherTime)) {
+                            logger.info(INFO_PREFIX.replaceFirst("#N#", Long.toString(System.currentTimeMillis() - l(val))) + mailAccess.getTrace());
                             exceededCons.add(mailAccess);
                         }
                     } else {

@@ -1,6 +1,7 @@
 * 2010-05-04 - marcus.klein@open-xchange.com
 
  - Bugfix #15995: Setting correct folder name for global address book.
+ - Bugfix #15061: Pass warnings from the POP3 background sync process to the frontend.
 
 * 2010-05-04 - viktor.pracht@open-xchange.com
 

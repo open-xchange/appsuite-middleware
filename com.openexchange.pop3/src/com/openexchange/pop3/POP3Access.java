@@ -447,6 +447,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
          */
         try {
             f.get();
+            addWarnings(pop3Storage.getWarnings());
         } catch (final InterruptedException e) {
             // Keep interrupted status
             Thread.currentThread().interrupt();
