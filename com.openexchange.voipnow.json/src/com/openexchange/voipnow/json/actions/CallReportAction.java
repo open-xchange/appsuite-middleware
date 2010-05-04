@@ -50,10 +50,17 @@
 package com.openexchange.voipnow.json.actions;
 
 import java.rmi.RemoteException;
+import java.util.Date;
+import java.util.TimeZone;
+
 import org.apache.axis2.AxisFault;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com._4psa.common_xsd._2_0_4.DateTime;
 import com._4psa.common_xsd._2_0_4.PositiveInteger;
+import com._4psa.reportdata_xsd._2_0_4.Call_type0;
 import com._4psa.reportdata_xsd._2_0_4.IncomingCalls_type0;
 import com._4psa.reportdata_xsd._2_0_4.OutgoingCalls_type0;
 import com._4psa.reportmessages_xsd._2_0_4.CallReportRequest;
@@ -62,11 +69,15 @@ import com._4psa.reportmessages_xsd._2_0_4.Disposion_type1;
 import com._4psa.reportmessages_xsd._2_0_4.Interval_type0;
 import com._4psa.reportmessagesinfo_xsd._2_0_4.CallReportResponseType;
 import com._4psa.voipnowservice._2_0_4.ReportPortStub;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.writer.DataWriter;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.voipnow.json.CustomConverter;
 import com.openexchange.voipnow.json.VoipNowExceptionCodes;
 
 /**
@@ -102,6 +113,11 @@ public final class CallReportAction extends AbstractVoipNowSOAPAction<ReportPort
              */
             final long start = checkLongParameter(request, "start");
             final long end = checkLongParameter(request, "end");
+			final String timeZoneID = request
+					.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
+			final TimeZone timeZone = TimeZoneUtils
+					.getTimeZone(null == timeZoneID ? session.getUser()
+							.getTimeZone() : timeZoneID);
             final String disposion = "answered";
             // TODO: What about disposion??? "ANSWERED", "BUSY", "FAILED", "NO ANSWER", "UNKNOWN", or "NOT ALLOWED"
             /*
@@ -164,8 +180,14 @@ public final class CallReportAction extends AbstractVoipNowSOAPAction<ReportPort
             /*
              * Get response type
              */
-            final CallReportResponseType callReportResponseType =
-                stub.callReport(callReportRequest, getUserCredentials(setting)).getCallReportResponse();
+			final CallReportResponseType callReportResponseType;
+			CustomConverter.setEnabled(true);
+			try {
+				callReportResponseType = stub.callReport(callReportRequest,
+						getUserCredentials(setting)).getCallReportResponse();
+			} finally {
+				CustomConverter.setEnabled(false);
+			}
             /*
              * Incoming calls
              */
@@ -203,6 +225,44 @@ public final class CallReportAction extends AbstractVoipNowSOAPAction<ReportPort
                  */
                 calls.put("outgoing", outgoingCallsObject);
             }
+			/*
+			 * Call history
+			 */
+			{
+				final Call_type0[] history = callReportResponseType.getCall();
+				final JSONArray historyObject = new JSONArray();
+				if (null != history) {
+					for (int i = 0; i < history.length; i++) {
+						final Call_type0 call = history[i];
+						final JSONObject callObject = new JSONObject();
+						string("source", call.getSource(), callObject);
+						string("destination", call.getDestination(), callObject);
+						date("startDate", call.getStartDate(), callObject,
+								timeZone);
+						string("duration", call.getDuration(), callObject);
+						date("answerDate", call.getAnswerDate(), callObject,
+								timeZone);
+						final com._4psa.reportdata_xsd._2_0_4.Flow_type13 flow = call
+								.getFlow();
+						if (null != flow) {
+							callObject.put("flow", flow.getValue());
+						}
+						final com._4psa.reportdata_xsd._2_0_4.Type_type13 type = call
+								.getType();
+						if (null != type) {
+							callObject.put("type", type.getValue());
+						}
+						final com._4psa.reportdata_xsd._2_0_4.Disposion_type3 disposition = call
+								.getDisposion();
+						if (null != disposition) {
+							callObject.put("disposition", disposition
+									.getValue());
+						}
+						historyObject.put(callObject);
+					}
+				}
+				calls.put("calls", historyObject);
+			}
             /*
              * Return
              */
@@ -215,8 +275,25 @@ public final class CallReportAction extends AbstractVoipNowSOAPAction<ReportPort
             throw new AjaxException(AjaxException.Code.JSONError, e, e.getMessage());
         }
     }
+    
+	private static void string(String key,
+			com._4psa.common_xsd._2_0_4.String value, JSONObject object)
+			throws JSONException {
+		if (null != value) {
+			object.put(key, value.getString());
+		}
+	}
 
-    @Override
+	private static void date(String key, DateTime value, JSONObject object,
+			TimeZone timeZone) throws JSONException {
+		if (null != value) {
+			final Date dateValue = value.getDateTime().getTime();
+			DataWriter.writeParameter(key, dateValue, dateValue, timeZone,
+					object);
+		}
+	}
+	
+	@Override
     protected String getSOAPPath() {
         return SOAP_PATH;
     }
