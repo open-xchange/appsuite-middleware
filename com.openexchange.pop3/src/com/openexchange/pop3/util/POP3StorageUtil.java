@@ -139,7 +139,7 @@ public class POP3StorageUtil {
     public static void setPOP3StorageProviderName(final int accountId, final int user, final int cid, final String name) throws POP3Exception {
         final Connection con;
         try {
-            con = Database.get(cid, false);
+            con = Database.get(cid, true);
         } catch (final DBPoolingException e) {
             throw new POP3Exception(e);
         }
@@ -166,7 +166,7 @@ public class POP3StorageUtil {
             throw new POP3Exception(POP3Exception.Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
-            Database.back(cid, false, con);
+            Database.back(cid, true, con);
         }
     }
 
