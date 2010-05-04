@@ -210,6 +210,4 @@ public class ConfirmationsTest extends AbstractAJAXSession {
         SearchResponse response5 = client.execute(new SearchRequest("*", folderId, COLUMNS));
         checkConfirmations(extractExternal(updated.getParticipants()), findConfirmations(response5));
     }
-
-    
 }
