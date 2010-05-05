@@ -50,12 +50,15 @@
 package com.openexchange.ajax.folder.api2;
 
 import org.json.JSONArray;
+import com.openexchange.ajax.folder.FolderTools;
 import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.ListRequest;
 import com.openexchange.ajax.folder.actions.ListResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.server.impl.OCLPermission;
 
 /**
  * {@link ListTest}
@@ -65,6 +68,7 @@ import com.openexchange.groupware.container.FolderObject;
 public class ListTest extends AbstractAJAXSession {
 
     private AJAXClient client;
+    private AJAXClient client2;
 
     /**
      * Initializes a new {@link ListTest}.
@@ -79,6 +83,7 @@ public class ListTest extends AbstractAJAXSession {
     protected void setUp() throws Exception {
         super.setUp();
         client = getClient();
+        client2 = new AJAXClient(User.User2);
     }
 
     public void testListRoot() throws Throwable {
@@ -142,7 +147,7 @@ public class ListTest extends AbstractAJAXSession {
 
     public void testListPrivate() throws Throwable {
         // List root's subfolders
-        final ListRequest request = new ListRequest(API.OUTLOOK, String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID));
+        final ListRequest request = new ListRequest(API.OX_NEW, String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID));
         final ListResponse response = client.execute(request);
 
         final JSONArray jsonArray = (JSONArray) response.getResponse().getData();
@@ -161,7 +166,7 @@ public class ListTest extends AbstractAJAXSession {
 
     public void testListPublic() throws Throwable {
         // List root's subfolders
-        final ListRequest request = new ListRequest(API.OUTLOOK, String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID));
+        final ListRequest request = new ListRequest(API.OX_NEW, String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID));
         final ListResponse response = client.execute(request);
 
         final JSONArray jsonArray = (JSONArray) response.getResponse().getData();
@@ -179,8 +184,18 @@ public class ListTest extends AbstractAJAXSession {
     }
 
     public void testListShared() throws Throwable {
+        int folderId = client2.getValues().getPrivateAppointmentFolder();
+        int userId = client.getValues().getUserId();
+        FolderTools.shareFolder(
+            client2,
+            folderId,
+            userId,
+            OCLPermission.READ_FOLDER,
+            OCLPermission.READ_ALL_OBJECTS,
+            OCLPermission.NO_PERMISSIONS,
+            OCLPermission.NO_PERMISSIONS);
         // List root's subfolders
-        final ListRequest request = new ListRequest(API.OUTLOOK, String.valueOf(FolderObject.SYSTEM_SHARED_FOLDER_ID));
+        final ListRequest request = new ListRequest(API.OX_NEW, String.valueOf(FolderObject.SYSTEM_SHARED_FOLDER_ID));
         final ListResponse response = client.execute(request);
 
         final JSONArray jsonArray = (JSONArray) response.getResponse().getData();
@@ -195,6 +210,7 @@ public class ListTest extends AbstractAJAXSession {
 
         // final JSONArray email = jsonArray.getJSONArray(0);
         // System.out.println(email);
+        FolderTools.unshareFolder(client2, folderId, userId);
     }
 
 }

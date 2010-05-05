@@ -56,13 +56,18 @@ import java.util.List;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.folder.actions.API;
+import com.openexchange.ajax.folder.actions.GetRequest;
+import com.openexchange.ajax.folder.actions.GetResponse;
 import com.openexchange.ajax.folder.actions.ListRequest;
 import com.openexchange.ajax.folder.actions.ListResponse;
+import com.openexchange.ajax.folder.actions.UpdateRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.servlet.OXJSONException;
 
 /**
  * 
@@ -107,5 +112,43 @@ public final class FolderTools {
             retval.add(iter.next());
         }
         return retval;
+    }
+
+    public static void shareFolder(AJAXClient client, int folderId, int userId, int fp, int opr, int opw, int opd) throws AjaxException, IOException, SAXException, JSONException, OXJSONException, OXException {
+        GetRequest getQ = new GetRequest(API.OX_OLD, folderId);
+        GetResponse getR = client.execute(getQ);
+        FolderObject origFolder = getR.getFolder();
+        FolderObject changed = new FolderObject();
+        changed.setObjectID(folderId);
+        changed.setLastModified(getR.getTimestamp());
+        List<OCLPermission> permissions = new ArrayList<OCLPermission>();
+        permissions.addAll(origFolder.getPermissions());
+        OCLPermission addedPerm = new OCLPermission();
+        addedPerm.setEntity(userId);
+        addedPerm.setAllPermission(fp, opr, opw, opd);
+        permissions.add(addedPerm);
+        changed.setPermissions(permissions);
+        UpdateRequest updQ = new UpdateRequest(API.OX_OLD, changed);
+        client.execute(updQ);
+    }
+
+    public static void unshareFolder(AJAXClient client, int folderId, int userId) throws AjaxException, IOException, SAXException, JSONException, OXJSONException, OXException {
+        GetRequest getQ = new GetRequest(API.OX_OLD, folderId);
+        GetResponse getR = client.execute(getQ);
+        FolderObject origFolder = getR.getFolder();
+        List<OCLPermission> permissions = new ArrayList<OCLPermission>();
+        permissions.addAll(origFolder.getPermissions());
+        Iterator<OCLPermission> iter = permissions.iterator();
+        while (iter.hasNext()) {
+            if (iter.next().getEntity() == userId) {
+                iter.remove();
+            }
+        }
+        FolderObject changed = new FolderObject();
+        changed.setObjectID(folderId);
+        changed.setLastModified(getR.getTimestamp());
+        changed.setPermissions(permissions);
+        UpdateRequest updQ = new UpdateRequest(API.OX_OLD, changed);
+        client.execute(updQ);
     }
 }
