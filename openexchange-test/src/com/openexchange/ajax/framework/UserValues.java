@@ -65,7 +65,7 @@ import com.openexchange.i18n.LocaleTools;
 import com.openexchange.tools.servlet.AjaxException;
 
 /**
- *
+ * Help and caching class for values of the preferences tree.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class UserValues {
@@ -87,9 +87,6 @@ public class UserValues {
 
     private String defaultAddress;
 
-    /**
-     * Default constructor.
-     */
     public UserValues(final AJAXClient client) {
         super();
         this.client = client;
@@ -103,38 +100,38 @@ public class UserValues {
     }
 
     public String getSentFolder() throws AjaxException, IOException, SAXException, JSONException {
-	    if (null == sentFolder) {
-	    	sentFolder = client.execute(new GetRequest(Tree.SentFolder)).getString();
-	    }
-	    return sentFolder;
-	}
+        if (null == sentFolder) {
+            sentFolder = client.execute(new GetRequest(Tree.SentFolder)).getString();
+        }
+        return sentFolder;
+    }
 
     public String getTrashFolder() throws AjaxException, IOException, SAXException, JSONException {
-	    if (null == trashFolder) {
-	    	trashFolder = client.execute(new GetRequest(Tree.TrashFolder)).getString();
-	    }
-	    return trashFolder;
-	}
+        if (null == trashFolder) {
+            trashFolder = client.execute(new GetRequest(Tree.TrashFolder)).getString();
+        }
+        return trashFolder;
+    }
     
     public String getDraftsFolder() throws AjaxException, IOException, SAXException, JSONException {
-	    if (null == draftsFolder) {
-	    	draftsFolder = client.execute(new GetRequest(Tree.DraftsFolder)).getString();
-	    }
-	    return draftsFolder;
-	}
+        if (null == draftsFolder) {
+            draftsFolder = client.execute(new GetRequest(Tree.DraftsFolder)).getString();
+        }
+        return draftsFolder;
+    }
     
     public int getPrivateInfostoreFolder() throws AjaxException, IOException, SAXException, JSONException {
-	    if (null == privateInfostoreFolder) {
-	    	privateInfostoreFolder = I(client.execute(new GetRequest(Tree.PrivateInfostoreFolder)).getInteger());
-	    }
-	    return privateInfostoreFolder.intValue();
-	}
+        if (null == privateInfostoreFolder) {
+            privateInfostoreFolder = I(client.execute(new GetRequest(Tree.PrivateInfostoreFolder)).getInteger());
+        }
+        return privateInfostoreFolder.intValue();
+    }
     
     public String getSendAddress() throws AjaxException, IOException, SAXException, JSONException {
-    	 if (null == sendAddress) {
-    		 sendAddress = client.execute(new GetRequest(Tree.SendAddress)).getString();
- 	    }
- 	    return sendAddress;
+        if (null == sendAddress) {
+            sendAddress = client.execute(new GetRequest(Tree.SendAddress)).getString();
+        }
+        return sendAddress;
     }
 
     public Locale getLocale() throws AjaxException, IOException, SAXException, JSONException {
