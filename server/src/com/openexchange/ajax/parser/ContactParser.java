@@ -149,7 +149,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.LAST_NAME);
             }
-            public void setObject(final Contact contactobject, final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setSurName(parseString(jsonobject, ContactFields.LAST_NAME));
             }
         },
@@ -157,8 +157,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.TITLE);
             }
-            public void setObject(final Contact contactobject,
-                    final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setTitle(parseString(jsonobject, ContactFields.TITLE));
             }
         },
@@ -166,8 +165,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.FIRST_NAME);
             }
-            public void setObject(final Contact contactobject,
-                    final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setGivenName (parseString(jsonobject, ContactFields.FIRST_NAME));
             }
         },
@@ -175,8 +173,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.MARITAL_STATUS);
             }
-            public void setObject(final Contact contactobject,
-                    final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setMaritalStatus(parseString(jsonobject, ContactFields.MARITAL_STATUS));
             }
         },
@@ -184,8 +181,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.ANNIVERSARY);
             }
-            public void setObject(final Contact contactobject,
-                    final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setAnniversary(parseDate(jsonobject, ContactFields.ANNIVERSARY));
             }
         },
@@ -193,8 +189,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.ASSISTANT_NAME);
             }
-            public void setObject(final Contact contactobject,
-                    final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setAssistantName(parseString(jsonobject, ContactFields.ASSISTANT_NAME));
             }
         },
@@ -202,8 +197,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.BIRTHDAY);
             }
-            public void setObject(final Contact contactobject,
-                    final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setBirthday(parseDate(jsonobject, ContactFields.BIRTHDAY));
             }
         },
@@ -211,8 +205,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.BRANCHES);
             }
-            public void setObject(final Contact contactobject,
-                    final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setBranches(parseString(jsonobject, ContactFields.BRANCHES));
             }
         },
@@ -220,8 +213,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.BUSINESS_CATEGORY);
             }
-            public void setObject(final Contact contactobject,
-                    final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setBusinessCategory(parseString(jsonobject, ContactFields.BUSINESS_CATEGORY));
             }
         },
@@ -229,8 +221,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.CELLULAR_TELEPHONE1);
             }
-            public void setObject(final Contact contactobject,
-                    final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setCellularTelephone1(parseString(jsonobject, ContactFields.CELLULAR_TELEPHONE1));
             }
         },
@@ -238,8 +229,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.CELLULAR_TELEPHONE2);
             }
-            public void setObject(final Contact contactobject,
-                    final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setCellularTelephone2(parseString(jsonobject, ContactFields.CELLULAR_TELEPHONE2));
             }
         },
@@ -247,8 +237,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.CITY_HOME);
             }
-            public void setObject(final Contact contactobject,
-                    final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setCityHome(parseString(jsonobject, ContactFields.CITY_HOME));
             }
         },
@@ -256,8 +245,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.CITY_BUSINESS);
             }
-            public void setObject(final Contact contactobject,
-                    final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setCityBusiness(parseString(jsonobject, ContactFields.CITY_BUSINESS));
             }
         },
@@ -265,8 +253,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.CITY_OTHER);
             }
-            public void setObject(final Contact contactobject,
-                    final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setCityOther(parseString(jsonobject, ContactFields.CITY_OTHER));
             }
         },
@@ -274,8 +261,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.COMMERCIAL_REGISTER);
             }
-            public void setObject(final Contact contactobject,
-                    final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setCommercialRegister(parseString(jsonobject, ContactFields.COMMERCIAL_REGISTER));
             }
         },
@@ -283,8 +269,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.COMPANY);
             }
-            public void setObject(final Contact contactobject,
-                    final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setCompany(parseString(jsonobject, ContactFields.COMPANY));
             }
         },
@@ -292,8 +277,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.COUNTRY_HOME);
             }
-            public void setObject(final Contact contactobject,
-                    final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setCountryHome(parseString(jsonobject, ContactFields.COUNTRY_HOME));
             }
         },
@@ -301,8 +285,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.COUNTRY_BUSINESS);
             }
-            public void setObject(final Contact contactobject,
-                    final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setCountryBusiness(parseString(jsonobject, ContactFields.COUNTRY_BUSINESS));
             }
         },
@@ -310,8 +293,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.COUNTRY_OTHER);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setCountryOther(parseString(jsonobject, ContactFields.COUNTRY_OTHER));
             }
         },
@@ -319,8 +301,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.DEFAULT_ADDRESS);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException, OXJSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) throws JSONException, OXJSONException {
                 contactobject.setDefaultAddress(parseInt(jsonobject, ContactFields.DEFAULT_ADDRESS));
             }
         },
@@ -328,8 +309,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.DEPARTMENT);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setDepartment(parseString(jsonobject, ContactFields.DEPARTMENT));
             }
         },
@@ -337,8 +317,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.DISPLAY_NAME);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setDisplayName(parseString(jsonobject, ContactFields.DISPLAY_NAME));
             }
         },
@@ -346,8 +325,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.MARK_AS_DISTRIBUTIONLIST);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) throws JSONException {
                 contactobject.setMarkAsDistributionlist(parseBoolean(jsonobject, ContactFields.MARK_AS_DISTRIBUTIONLIST));
             }
         },
@@ -355,8 +333,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.EMAIL1);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setEmail1(parseString(jsonobject, ContactFields.EMAIL1));
             }
         },
@@ -364,8 +341,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.EMAIL2);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setEmail2(parseString(jsonobject, ContactFields.EMAIL2));
             }
         },
@@ -373,8 +349,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.EMAIL3);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setEmail3(parseString(jsonobject, ContactFields.EMAIL3));
             }
         },
@@ -382,8 +357,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.EMPLOYEE_TYPE);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setEmployeeType(parseString(jsonobject, ContactFields.EMPLOYEE_TYPE));
             }
         },
@@ -391,8 +365,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.FAX_BUSINESS);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setFaxBusiness(parseString(jsonobject, ContactFields.FAX_BUSINESS));
             }
         },
@@ -400,8 +373,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.FAX_HOME);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setFaxHome(parseString(jsonobject, ContactFields.FAX_HOME));
             }
         },
@@ -409,8 +381,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.FAX_OTHER);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setFaxOther(parseString(jsonobject, ContactFields.FAX_OTHER));
             }
         },
@@ -418,8 +389,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.IMAGE1);
             }
-            public void setObject(final Contact contactobject,
-                    final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 final String image = parseString(jsonobject, ContactFields.IMAGE1);
                 if (image != null) {
                     contactobject.setImage1(image.getBytes());
@@ -432,8 +402,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.NOTE);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setNote(parseString(jsonobject, ContactFields.NOTE));
             }
         },
@@ -441,8 +410,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.INFO);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setInfo(parseString(jsonobject, ContactFields.INFO));
             }
         },
@@ -450,8 +418,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.INSTANT_MESSENGER1);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setInstantMessenger1(parseString(jsonobject, ContactFields.INSTANT_MESSENGER1));
             }
         },
@@ -459,8 +426,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.INSTANT_MESSENGER2);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setInstantMessenger2(parseString(jsonobject, ContactFields.INSTANT_MESSENGER2));
             }
         },
@@ -468,8 +434,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.MANAGER_NAME);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setManagerName(parseString(jsonobject, ContactFields.MANAGER_NAME));
             }
         },
@@ -477,8 +442,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.SECOND_NAME);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setMiddleName(parseString(jsonobject, ContactFields.SECOND_NAME));
             }
         },
@@ -486,8 +450,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.NICKNAME);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setNickname(parseString(jsonobject, ContactFields.NICKNAME));
             }
         },
@@ -495,8 +458,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.NUMBER_OF_CHILDREN);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setNumberOfChildren(parseString(jsonobject, ContactFields.NUMBER_OF_CHILDREN));
             }
         },
@@ -504,8 +466,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.NUMBER_OF_EMPLOYEE);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setNumberOfEmployee(parseString(jsonobject, ContactFields.NUMBER_OF_EMPLOYEE));
             }
         },
@@ -513,8 +474,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.POSITION);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setPosition(parseString(jsonobject, ContactFields.POSITION));
             }
         },
@@ -522,8 +482,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.POSTAL_CODE_HOME);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setPostalCodeHome(parseString(jsonobject, ContactFields.POSTAL_CODE_HOME));
             }
         },
@@ -531,8 +490,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.POSTAL_CODE_BUSINESS);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setPostalCodeBusiness(parseString(jsonobject, ContactFields.POSTAL_CODE_BUSINESS));
             }
         },
@@ -540,8 +498,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.POSTAL_CODE_OTHER);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setPostalCodeOther(parseString(jsonobject, ContactFields.POSTAL_CODE_OTHER));
             }
         },
@@ -549,8 +506,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.PROFESSION);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setProfession(parseString(jsonobject, ContactFields.PROFESSION));
             }
         },
@@ -558,8 +514,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.ROOM_NUMBER);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setRoomNumber(parseString(jsonobject, ContactFields.ROOM_NUMBER));
             }
         },
@@ -567,8 +522,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.SALES_VOLUME);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setSalesVolume(parseString(jsonobject, ContactFields.SALES_VOLUME));
             }
         },
@@ -576,8 +530,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.SPOUSE_NAME);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setSpouseName(parseString(jsonobject, ContactFields.SPOUSE_NAME));
             }
         },
@@ -585,8 +538,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.STATE_HOME);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setStateHome(parseString(jsonobject, ContactFields.STATE_HOME));
             }
         },
@@ -594,8 +546,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.STATE_BUSINESS);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setStateBusiness(parseString(jsonobject, ContactFields.STATE_BUSINESS));
             }
         },
@@ -603,8 +554,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.STATE_OTHER);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setStateOther(parseString(jsonobject, ContactFields.STATE_OTHER));
             }
         },
@@ -612,8 +562,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.STREET_HOME);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setStreetHome(parseString(jsonobject, ContactFields.STREET_HOME));
             }
         },
@@ -621,8 +570,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.STREET_BUSINESS);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setStreetBusiness(parseString(jsonobject, ContactFields.STREET_BUSINESS));
             }
         },
@@ -630,8 +578,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.STREET_OTHER);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setStreetOther(parseString(jsonobject, ContactFields.STREET_OTHER));
             }
         },
@@ -639,8 +586,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.SUFFIX);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setSuffix(parseString(jsonobject, ContactFields.SUFFIX));
             }
         },
@@ -648,8 +594,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.TAX_ID);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setTaxID(parseString(jsonobject, ContactFields.TAX_ID));
             }
         },
@@ -657,8 +602,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.TELEPHONE_ASSISTANT);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setTelephoneAssistant(parseString(jsonobject, ContactFields.TELEPHONE_ASSISTANT));
             }
         },
@@ -666,8 +610,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.TELEPHONE_BUSINESS1);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setTelephoneBusiness1(parseString(jsonobject, ContactFields.TELEPHONE_BUSINESS1));
             }
         },
@@ -675,8 +618,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.TELEPHONE_BUSINESS2);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setTelephoneBusiness2(parseString(jsonobject, ContactFields.TELEPHONE_BUSINESS2));
             }
         },
@@ -684,8 +626,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.TELEPHONE_CALLBACK);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setTelephoneCallback(parseString(jsonobject, ContactFields.TELEPHONE_CALLBACK));
             }
         },
@@ -693,8 +634,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.TELEPHONE_CAR);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setTelephoneCar(parseString(jsonobject, ContactFields.TELEPHONE_CAR));
             }
         },
@@ -702,8 +642,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.TELEPHONE_COMPANY);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setTelephoneCompany(parseString(jsonobject, ContactFields.TELEPHONE_COMPANY));
             }
         },
@@ -711,8 +650,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.TELEPHONE_HOME1);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setTelephoneHome1(parseString(jsonobject, ContactFields.TELEPHONE_HOME1));
             }
         },
@@ -720,8 +658,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.TELEPHONE_HOME2);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setTelephoneHome2(parseString(jsonobject, ContactFields.TELEPHONE_HOME2));
             }
         },
@@ -729,8 +666,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.TELEPHONE_IP);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setTelephoneIP(parseString(jsonobject, ContactFields.TELEPHONE_IP));
             }
         },
@@ -738,8 +674,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.TELEPHONE_ISDN);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setTelephoneISDN(parseString(jsonobject, ContactFields.TELEPHONE_ISDN));
             }
         },
@@ -747,8 +682,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.TELEPHONE_OTHER);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setTelephoneOther(parseString(jsonobject, ContactFields.TELEPHONE_OTHER));
             }
         },
@@ -756,8 +690,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.TELEPHONE_PAGER);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setTelephonePager(parseString(jsonobject, ContactFields.TELEPHONE_PAGER));
             }
         },
@@ -765,8 +698,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.TELEPHONE_PRIMARY);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setTelephonePrimary(parseString(jsonobject, ContactFields.TELEPHONE_PRIMARY));
             }
         },
@@ -774,8 +706,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.TELEPHONE_RADIO);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setTelephoneRadio(parseString(jsonobject, ContactFields.TELEPHONE_RADIO));
             }
         },
@@ -783,8 +714,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.TELEPHONE_TELEX);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setTelephoneTelex(parseString(jsonobject, ContactFields.TELEPHONE_TELEX));
             }
         },
@@ -792,8 +722,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.TELEPHONE_TTYTDD);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setTelephoneTTYTTD(parseString(jsonobject, ContactFields.TELEPHONE_TTYTDD));
             }
         },
@@ -801,8 +730,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.URL);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setURL(parseString(jsonobject, ContactFields.URL));
             }
         },
@@ -810,8 +738,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.USE_COUNT);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException, OXJSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) throws JSONException, OXJSONException {
                 contactobject.setUseCount(parseInt(jsonobject, ContactFields.USE_COUNT));
             }
         },
@@ -819,8 +746,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.USERFIELD01);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setUserField01(parseString(jsonobject, ContactFields.USERFIELD01));
             }
         },
@@ -828,8 +754,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.USERFIELD02);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setUserField02(parseString(jsonobject, ContactFields.USERFIELD02));
             }
         },
@@ -837,8 +762,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.USERFIELD03);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setUserField03(parseString(jsonobject, ContactFields.USERFIELD03));
             }
         },
@@ -846,8 +770,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.USERFIELD04);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setUserField04(parseString(jsonobject, ContactFields.USERFIELD04));
             }
         },
@@ -855,8 +778,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.USERFIELD05);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setUserField05(parseString(jsonobject, ContactFields.USERFIELD05));
             }
         },
@@ -864,8 +786,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.USERFIELD06);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setUserField06(parseString(jsonobject, ContactFields.USERFIELD06));
             }
         },
@@ -873,8 +794,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.USERFIELD07);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setUserField07(parseString(jsonobject, ContactFields.USERFIELD07));
             }
         },
@@ -882,8 +802,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.USERFIELD08);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setUserField08(parseString(jsonobject, ContactFields.USERFIELD08));
             }
         },
@@ -891,8 +810,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.USERFIELD09);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setUserField09(parseString(jsonobject, ContactFields.USERFIELD09));
             }
         },
@@ -900,8 +818,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.USERFIELD10);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setUserField10(parseString(jsonobject, ContactFields.USERFIELD10));
             }
         },
@@ -909,8 +826,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.USERFIELD11);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setUserField11(parseString(jsonobject, ContactFields.USERFIELD11));
             }
         },
@@ -918,8 +834,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.USERFIELD12);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setUserField12(parseString(jsonobject, ContactFields.USERFIELD12));
             }
         },
@@ -927,8 +842,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.USERFIELD13);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setUserField13(parseString(jsonobject, ContactFields.USERFIELD13));
             }
         },
@@ -936,8 +850,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.USERFIELD14);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setUserField14(parseString(jsonobject, ContactFields.USERFIELD14));
             }
         },
@@ -945,8 +858,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.USERFIELD15);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setUserField15(parseString(jsonobject, ContactFields.USERFIELD15));
             }
         },
@@ -954,8 +866,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.USERFIELD16);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setUserField16(parseString(jsonobject, ContactFields.USERFIELD16));
             }
         },
@@ -963,8 +874,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.USERFIELD17);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setUserField17(parseString(jsonobject, ContactFields.USERFIELD17));
             }
         },
@@ -972,8 +882,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.USERFIELD18);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setUserField18(parseString(jsonobject, ContactFields.USERFIELD18));
             }
         },
@@ -981,8 +890,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.USERFIELD19);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setUserField19(parseString(jsonobject, ContactFields.USERFIELD19));
             }
         },
@@ -990,8 +898,7 @@ public class ContactParser extends CommonParser {
             public boolean jsonObjectContains(final JSONObject jsonobject) {
                 return jsonobject.has(ContactFields.USERFIELD20);
             }
-            public void setObject(final Contact contactobject,
-                final JSONObject jsonobject) throws JSONException {
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setUserField20(parseString(jsonobject, ContactFields.USERFIELD20));
             }
         }

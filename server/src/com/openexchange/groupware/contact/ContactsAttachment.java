@@ -47,8 +47,6 @@
  *
  */
 
-
-	
 package com.openexchange.groupware.contact;
 
 import java.util.Date;
@@ -68,98 +66,99 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 
 /**
- Contacts
- @author <a href="mailto:ben.pahne@comfire.de">Benjamin Frederic Pahne</a>
- 
+ * Contacts
+ * @author <a href="mailto:ben.pahne@comfire.de">Benjamin Frederic Pahne</a>
  */
-	
 @OXExceptionSource(
-		classId=Classes.COM_OPENEXCHANGE_GROUPWARE_CONTACTS_CONTACTSATTACHMENT,
-		component=EnumComponent.CONTACT
-	)
+        classId=Classes.COM_OPENEXCHANGE_GROUPWARE_CONTACTS_CONTACTSATTACHMENT,
+        component=EnumComponent.CONTACT
+    )
 public class ContactsAttachment implements AttachmentListener, AttachmentAuthorization {
 
-	private static final ContactExceptionFactory EXCEPTIONS = new ContactExceptionFactory(ContactsAttachment.class);
-	
-	private static final Log LOG = LogFactory.getLog(ContactsAttachment.class);
+    private static final ContactExceptionFactory EXCEPTIONS = new ContactExceptionFactory(ContactsAttachment.class);
 
-	public ContactsAttachment (){	}
+    private static final Log LOG = LogFactory.getLog(ContactsAttachment.class);
 
-	public long attached(final AttachmentEvent e) throws OXException {
-		try{
-			final Contact co = Contacts.getContactById(e.getAttachedId(),e.getUser().getId(),e.getUser().getGroups(),e.getContext(),e.getUserConfig(),e.getWriteConnection());
-			co.setNumberOfAttachments(co.getNumberOfAttachments()+1);
-			final Date d = new Date(System.currentTimeMillis());
-			Contacts.performContactStorageUpdate(co,co.getParentFolderID(),d,e.getUser().getId(),e.getUser().getGroups(),e.getContext(),e.getUserConfig());
-			return co.getLastModified().getTime();
-		} catch (final OXException ex) {
-			throw ex;
-		}
-	}
+    public ContactsAttachment () {
+        super();
+    }
 
-	@OXThrows(
-			category=Category.USER_INPUT,
-			desc="",
-			exceptionId=0,
-			msg= "Number of documents attached to this contact is below zero. You can not remove any more attachments."
-	)
-	public long detached(final AttachmentEvent e) throws OXException {
-		try{
-			final Contact co = Contacts.getContactById(e.getAttachedId(),e.getUser().getId(),e.getUser().getGroups(),e.getContext(),e.getUserConfig(),e.getWriteConnection());
-			if (co.getNumberOfAttachments() < 1){
-				throw EXCEPTIONS.create(0);
-				//throw new OXException("Numer of Attached Documents to this Contact is below zero. You can not remove more Attachments!");
-			}
-			final int[] xx = e.getDetached();
-			co.setNumberOfAttachments(co.getNumberOfAttachments()-xx.length);
-			final Date d = new Date(System.currentTimeMillis());
-			Contacts.performContactStorageUpdate(co,co.getParentFolderID(),d,e.getUser().getId(),e.getUser().getGroups(),e.getContext(),e.getUserConfig());
-			return co.getLastModified().getTime();
-		} catch (final OXException ex) {
-			throw ex;
-		}
-	}
+    public long attached(final AttachmentEvent e) throws OXException {
+        final int userId = e.getUser().getId();
+        final int[] groups = e.getUser().getGroups();
+        try {
+            final Contact co = Contacts.getContactById(e.getAttachedId(), userId, groups, e.getContext(), e.getUserConfig(), e.getWriteConnection());
+            co.setNumberOfAttachments(co.getNumberOfAttachments() + 1);
+            Contacts.performContactStorageUpdate(co, co.getParentFolderID(), co.getLastModified(), userId, groups, e.getContext(), e.getUserConfig());
+            return co.getLastModified().getTime();
+        } catch (final OXException ex) {
+            throw ex;
+        }
+    }
 
-	@OXThrows(
-			category=Category.PERMISSION,
-			desc="",
-			exceptionId=1,
-			msg= "Insufficient write rights for this folder. Unable to attach document. Context %4$d Folder %1$d Object %2$d User %3$d"
-	)
-	public void checkMayAttach(final int folderId, final int objectId, final User user, final UserConfiguration userConfig, final Context ctx) throws OXException {
-		try{
-			final boolean back = Contacts.performContactWriteCheckByID(folderId, objectId,user.getId(),user.getGroups(),ctx,userConfig);
-			if (!back){
-				throw EXCEPTIONS.create(1, Integer.valueOf(folderId),Integer.valueOf(objectId),Integer.valueOf(user.getId()),Integer.valueOf(ctx.getContextId()));
-	            //throw new OXException("Insufficient write rights for this folder! Unable to attach Document.");
-			}
-		} catch (final OXException e){
-			LOG.error("Insufficient write rights for this folder! Unable to attach document.", e);
-			throw e;
-		}
-	}
+    @OXThrows(
+            category=Category.USER_INPUT,
+            desc="",
+            exceptionId=0,
+            msg= "Number of documents attached to this contact is below zero. You can not remove any more attachments."
+    )
+    public long detached(final AttachmentEvent e) throws OXException {
+        try{
+            final Contact co = Contacts.getContactById(e.getAttachedId(),e.getUser().getId(),e.getUser().getGroups(),e.getContext(),e.getUserConfig(),e.getWriteConnection());
+            if (co.getNumberOfAttachments() < 1){
+                throw EXCEPTIONS.create(0);
+                //throw new OXException("Numer of Attached Documents to this Contact is below zero. You can not remove more Attachments!");
+            }
+            final int[] xx = e.getDetached();
+            co.setNumberOfAttachments(co.getNumberOfAttachments()-xx.length);
+            final Date d = new Date(System.currentTimeMillis());
+            Contacts.performContactStorageUpdate(co,co.getParentFolderID(),d,e.getUser().getId(),e.getUser().getGroups(),e.getContext(),e.getUserConfig());
+            return co.getLastModified().getTime();
+        } catch (final OXException ex) {
+            throw ex;
+        }
+    }
 
-	public void checkMayDetach(final int folderId, final int objectId, final User user, final UserConfiguration userConfig, final Context ctx) throws OXException {
-		checkMayAttach(folderId, objectId,user,userConfig,ctx);
-	}
+    @OXThrows(
+            category=Category.PERMISSION,
+            desc="",
+            exceptionId=1,
+            msg= "Insufficient write rights for this folder. Unable to attach document. Context %4$d Folder %1$d Object %2$d User %3$d"
+    )
+    public void checkMayAttach(final int folderId, final int objectId, final User user, final UserConfiguration userConfig, final Context ctx) throws OXException {
+        try{
+            final boolean back = Contacts.performContactWriteCheckByID(folderId, objectId,user.getId(),user.getGroups(),ctx,userConfig);
+            if (!back){
+                throw EXCEPTIONS.create(1, Integer.valueOf(folderId),Integer.valueOf(objectId),Integer.valueOf(user.getId()),Integer.valueOf(ctx.getContextId()));
+                //throw new OXException("Insufficient write rights for this folder! Unable to attach Document.");
+            }
+        } catch (final OXException e){
+            LOG.error("Insufficient write rights for this folder! Unable to attach document.", e);
+            throw e;
+        }
+    }
 
-	@OXThrows(
-			category=Category.PERMISSION,
-			desc="",
-			exceptionId=2,
-			msg= "Insufficient write rights for this folder. Unable to attach document. Context %4$d Folder %1$d Object %2$d User %3$d"
-	)
-	public void checkMayReadAttachments(final int folderId, final int objectId, final User user, final UserConfiguration userConfig, final Context ctx) throws OXException {
-		try{
-			final boolean back = Contacts.performContactReadCheckByID(folderId, objectId,user.getId(),user.getGroups(),ctx,userConfig);
-			if (!back){
-				throw EXCEPTIONS.create(2, Integer.valueOf(folderId),Integer.valueOf(objectId),Integer.valueOf(user.getId()),Integer.valueOf(ctx.getContextId()));
-	            //throw new OXException("Insufficient write rights for this folder! Unable to attach Document.");
-			}
-		} catch (final OXException e){
-			LOG.error("Insufficient read rights for this folder! Unable to attach Document.", e);
-			throw e;
-		}		
-	}
+    public void checkMayDetach(final int folderId, final int objectId, final User user, final UserConfiguration userConfig, final Context ctx) throws OXException {
+        checkMayAttach(folderId, objectId,user,userConfig,ctx);
+    }
+
+    @OXThrows(
+            category=Category.PERMISSION,
+            desc="",
+            exceptionId=2,
+            msg= "Insufficient write rights for this folder. Unable to attach document. Context %4$d Folder %1$d Object %2$d User %3$d"
+    )
+    public void checkMayReadAttachments(final int folderId, final int objectId, final User user, final UserConfiguration userConfig, final Context ctx) throws OXException {
+        try{
+            final boolean back = Contacts.performContactReadCheckByID(folderId, objectId,user.getId(),user.getGroups(),ctx,userConfig);
+            if (!back){
+                throw EXCEPTIONS.create(2, Integer.valueOf(folderId),Integer.valueOf(objectId),Integer.valueOf(user.getId()),Integer.valueOf(ctx.getContextId()));
+                //throw new OXException("Insufficient write rights for this folder! Unable to attach Document.");
+            }
+        } catch (final OXException e){
+            LOG.error("Insufficient read rights for this folder! Unable to attach Document.", e);
+            throw e;
+        }
+    }
 
 }
