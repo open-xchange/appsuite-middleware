@@ -183,6 +183,7 @@ public abstract class AbstractAJAXTest extends TestCase {
      */
     protected WebConversation newWebConversation() {
         HttpUnitOptions.setDefaultCharacterSet("UTF-8");
+        HttpUnitOptions.setScriptingEnabled(false);
         return new WebConversation();
     }
 
