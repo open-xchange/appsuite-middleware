@@ -50,14 +50,11 @@
 package com.openexchange.ajax.group;
 
 import java.io.IOException;
-
 import org.json.JSONException;
 import org.xml.sax.SAXException;
-
 import com.meterware.httpunit.WebConversation;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
-import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.group.actions.SearchRequest;
 import com.openexchange.ajax.group.actions.SearchResponse;
 import com.openexchange.group.Group;
@@ -77,12 +74,12 @@ public class GroupTest {
      * @deprecated use {@link GroupTools#search(AJAXClient, SearchRequest)}
      */
     @Deprecated
-	public static final Group[] searchGroup(final WebConversation conv,
-        final String pattern, final String host, final String session) throws
-        AjaxException, IOException, SAXException, JSONException, OXJSONException {
+    public static final Group[] searchGroup(final WebConversation conv, final String pattern, String protocol, final String host, final String session) throws AjaxException, IOException, SAXException, JSONException, OXJSONException {
+        AJAXClient client = new AJAXClient(new AJAXSession(conv, session));
+        client.setProtocol(protocol);
+        client.setHostname(host);
         final SearchRequest request = new SearchRequest(pattern);
-        final SearchResponse response = (SearchResponse) Executor.execute(
-            new AJAXSession(conv, session), request, host);
+        final SearchResponse response = client.execute(request);
         return response.getGroups();
     }
 }

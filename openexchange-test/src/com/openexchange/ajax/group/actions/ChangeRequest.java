@@ -60,7 +60,7 @@ import com.openexchange.group.Group;
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class ChangeRequest extends AbstractGroupRequest {
+public final class ChangeRequest extends AbstractGroupRequest<ChangeResponse> {
 
     private final Group group;
 
@@ -76,32 +76,20 @@ public final class ChangeRequest extends AbstractGroupRequest {
         this.failOnError = failOnError;
     }
 
-    /**
-     * @param group
-     */
     public ChangeRequest(final Group group) {
         this(group, true);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Object getBody() throws JSONException {
         final JSONObject json = new JSONObject();
         new GroupWriter().writeGroup(group, json);
         return json;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Method getMethod() {
         return Method.PUT;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Parameter[] getParameters() {
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE),
@@ -110,9 +98,6 @@ public final class ChangeRequest extends AbstractGroupRequest {
         };
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public ChangeParser getParser() {
         return new ChangeParser(failOnError);
     }

@@ -60,59 +60,39 @@ import com.openexchange.group.Group;
  * Request class for creating a group.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class CreateRequest extends AbstractGroupRequest {
+public final class CreateRequest extends AbstractGroupRequest<CreateResponse> {
 
     private final Group group;
 
     private final boolean failOnError;
 
-    /**
-     * @param group
-     * @param failOnError
-     */
     public CreateRequest(final Group group, final boolean failOnError) {
         super();
         this.group = group;
         this.failOnError = failOnError;
     }
 
-    /**
-     * Default constructor.
-     */
     public CreateRequest(final Group group) {
         this(group, true);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Object getBody() throws JSONException {
         final JSONObject json = new JSONObject();
         new GroupWriter().writeGroup(group, json);
         return json;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Method getMethod() {
         return Method.PUT;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Parameter[] getParameters() {
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW)
         };
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public CreateParser getParser() {
         return new CreateParser(failOnError);
     }
-
 }

@@ -49,30 +49,16 @@
 
 package com.openexchange.ajax.framework;
 
-import org.json.JSONException;
-
 import com.openexchange.ajax.container.Response;
 
 /**
  * Common parser for delete responses.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class CommonDeleteParser extends AbstractAJAXParser<CommonDeleteResponse> {
+public class CommonDeleteParser extends AbstractDeleteParser<CommonDeleteResponse> {
 
-    /**
-     * Default constructor.
-     */
     public CommonDeleteParser(final boolean failOnError) {
         super(failOnError);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected final CommonDeleteResponse createResponse(final Response response)
-        throws JSONException {
-        return instanciateResponse(response);
     }
 
     /**
@@ -80,6 +66,7 @@ public class CommonDeleteParser extends AbstractAJAXParser<CommonDeleteResponse>
      * @param response the json response container.
      * @return a {@link CommonDeleteResponse}
      */
+    @Override
     protected CommonDeleteResponse instanciateResponse(final Response response) {
         return new CommonDeleteResponse(response);
     }

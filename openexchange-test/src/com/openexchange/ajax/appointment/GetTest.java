@@ -96,18 +96,14 @@ public class GetTest extends AppointmentTest {
         final Appointment appointmentObj = createAppointmentObject("testGetWithParticipants");
 
         final int userParticipantId = ContactTest.searchContact(getWebConversation(), userParticipant3, FolderObject.SYSTEM_LDAP_FOLDER_ID, new int[] { Contact.INTERNAL_USERID }, PROTOCOL + getHostName(), getSessionId())[0].getInternalUserId();
-        final int groupParticipantId = GroupTest.searchGroup(getWebConversation(), groupParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
+        final int groupParticipantId = GroupTest.searchGroup(getWebConversation(), groupParticipant, PROTOCOL, getHostName(), getSessionId())[0].getIdentifier();
         final int resourceParticipantId = ResourceTest.searchResource(getWebConversation(), resourceParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
 
         final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[4];
-        participants[0] = new UserParticipant();
-        participants[0].setIdentifier(userId);
-        participants[1] = new UserParticipant();
-        participants[1].setIdentifier(userParticipantId);
-        participants[2] = new GroupParticipant();
-        participants[2].setIdentifier(groupParticipantId);
-        participants[3] = new ResourceParticipant();
-        participants[3].setIdentifier(resourceParticipantId);
+        participants[0] = new UserParticipant(userId);
+        participants[1] = new UserParticipant(userParticipantId);
+        participants[2] = new GroupParticipant(groupParticipantId);
+        participants[3] = new ResourceParticipant(resourceParticipantId);
 
         appointmentObj.setParticipants(participants);
 
@@ -135,7 +131,7 @@ public class GetTest extends AppointmentTest {
         appointmentObj.setCategories("testcat1,testcat2,testcat3");
 
         final int userParticipantId = ContactTest.searchContact(getWebConversation(), userParticipant3, FolderObject.SYSTEM_LDAP_FOLDER_ID, new int[] { Contact.INTERNAL_USERID }, PROTOCOL + getHostName(), getSessionId())[0].getInternalUserId();
-        final int groupParticipantId = GroupTest.searchGroup(getWebConversation(), groupParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
+        final int groupParticipantId = GroupTest.searchGroup(getWebConversation(), groupParticipant, PROTOCOL, getHostName(), getSessionId())[0].getIdentifier();
         final int resourceParticipantId = ResourceTest.searchResource(getWebConversation(), resourceParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
 
         final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[4];
@@ -176,6 +172,7 @@ public class GetTest extends AppointmentTest {
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
         appointmentObj.setParentFolderID(appointmentFolderId);
+        appointmentObj.setIgnoreConflicts(true);
 
         final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 
@@ -188,18 +185,14 @@ public class GetTest extends AppointmentTest {
         appointmentObj.setCategories("testcat1,testcat2,testcat3");
 
         final int userParticipantId = ContactTest.searchContact(getWebConversation(), userParticipant3, FolderObject.SYSTEM_LDAP_FOLDER_ID, new int[] { Contact.INTERNAL_USERID }, PROTOCOL + getHostName(), getSessionId())[0].getInternalUserId();
-        final int groupParticipantId = GroupTest.searchGroup(getWebConversation(), groupParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
+        final int groupParticipantId = GroupTest.searchGroup(getWebConversation(), groupParticipant, PROTOCOL, getHostName(), getSessionId())[0].getIdentifier();
         final int resourceParticipantId = ResourceTest.searchResource(getWebConversation(), resourceParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
 
         final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[4];
-        participants[0] = new UserParticipant();
-        participants[0].setIdentifier(userId);
-        participants[1] = new UserParticipant();
-        participants[1].setIdentifier(userParticipantId);
-        participants[2] = new GroupParticipant();
-        participants[2].setIdentifier(groupParticipantId);
-        participants[3] = new ResourceParticipant();
-        participants[3].setIdentifier(resourceParticipantId);
+        participants[0] = new UserParticipant(userId);
+        participants[1] = new UserParticipant(userParticipantId);
+        participants[2] = new GroupParticipant(groupParticipantId);
+        participants[3] = new ResourceParticipant(resourceParticipantId);
 
         appointmentObj.setParticipants(participants);
 

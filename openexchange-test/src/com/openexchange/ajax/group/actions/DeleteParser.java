@@ -50,27 +50,20 @@
 package com.openexchange.ajax.group.actions;
 
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.CommonDeleteParser;
-import com.openexchange.ajax.framework.CommonDeleteResponse;
+import com.openexchange.ajax.framework.AbstractDeleteParser;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class DeleteParser extends CommonDeleteParser {
+public final class DeleteParser extends AbstractDeleteParser<DeleteResponse> {
 
-    /**
-     * @param failOnError
-     */
     public DeleteParser(final boolean failOnError) {
         super(failOnError);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    protected CommonDeleteResponse instanciateResponse(final Response response) {
+    protected DeleteResponse instanciateResponse(final Response response) {
         return new DeleteResponse(response);
     }
 }

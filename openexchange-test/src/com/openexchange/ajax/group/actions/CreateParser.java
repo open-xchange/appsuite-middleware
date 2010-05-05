@@ -50,27 +50,20 @@
 package com.openexchange.ajax.group.actions;
 
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.CommonInsertParser;
-import com.openexchange.ajax.framework.CommonInsertResponse;
+import com.openexchange.ajax.framework.AbstractInsertParser;
 
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class CreateParser extends CommonInsertParser {
+public class CreateParser extends AbstractInsertParser<CreateResponse> {
 
-    /**
-     * @param failOnError
-     */
     public CreateParser(final boolean failOnError) {
         super(failOnError);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    protected CommonInsertResponse instantiateResponse(final Response response) {
+    protected CreateResponse instantiateResponse(final Response response) {
         return new CreateResponse(response);
     }
 }

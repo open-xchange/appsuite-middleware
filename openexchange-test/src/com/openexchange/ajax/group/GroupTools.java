@@ -83,39 +83,27 @@ public final class GroupTools {
         super();
     }
 
-    public static final GetResponse get(final AJAXClient client,
-        final GetRequest request) throws AjaxException, IOException,
-        SAXException, JSONException {
-        return (GetResponse) Executor.execute(client, request);
-    }
-
-    public static SearchResponse search(final AJAXClient client,
-        final SearchRequest request) throws AjaxException, IOException,
-        SAXException, JSONException {
-        return (SearchResponse) Executor.execute(client, request);
-    }
-
-    public static ListResponse list(final AJAXClient client,
-        final ListRequest request) throws AjaxException, IOException,
-        SAXException, JSONException {
+    public static final GetResponse get(final AJAXClient client, final GetRequest request) throws AjaxException, IOException, SAXException, JSONException {
         return Executor.execute(client, request);
     }
 
-    public static CreateResponse create(final AJAXClient client,
-        final CreateRequest request) throws AjaxException, IOException,
-        SAXException, JSONException {
-        return (CreateResponse) Executor.execute(client, request);
+    public static SearchResponse search(final AJAXClient client, final SearchRequest request) throws AjaxException, IOException, SAXException, JSONException {
+        return Executor.execute(client, request);
     }
 
-    public static DeleteResponse delete(final AJAXClient client,
-        final DeleteRequest request) throws AjaxException, IOException,
-        SAXException, JSONException {
-        return (DeleteResponse) Executor.execute(client, request);
+    public static ListResponse list(final AJAXClient client, final ListRequest request) throws AjaxException, IOException, SAXException, JSONException {
+        return Executor.execute(client, request);
     }
 
-    public static ChangeResponse change(final AJAXClient client,
-        final ChangeRequest request) throws AjaxException, IOException,
-        SAXException, JSONException {
-        return (ChangeResponse) Executor.execute(client, request);
+    public static CreateResponse create(final AJAXClient client, final CreateRequest request) throws AjaxException, IOException, SAXException, JSONException {
+        return Executor.execute(client, request);
+    }
+
+    public static DeleteResponse delete(final AJAXClient client, final DeleteRequest request) throws AjaxException, IOException, SAXException, JSONException {
+        return Executor.execute(client, request);
+    }
+
+    public static ChangeResponse change(final AJAXClient client, final ChangeRequest request) throws AjaxException, IOException, SAXException, JSONException {
+        return Executor.execute(client, request);
     }
 }

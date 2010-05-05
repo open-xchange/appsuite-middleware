@@ -49,8 +49,6 @@
 
 package com.openexchange.ajax.group.actions;
 
-import org.json.JSONException;
-
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
@@ -60,19 +58,12 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  */
 public final class ChangeParser extends AbstractAJAXParser<ChangeResponse> {
 
-    /**
-     * @param failOnError
-     */
     public ChangeParser(final boolean failOnError) {
         super(failOnError);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    protected ChangeResponse createResponse(final Response response)
-        throws JSONException {
+    protected ChangeResponse createResponse(final Response response) {
         return new ChangeResponse(response);
     }
 }

@@ -47,58 +47,25 @@
  *
  */
 
-package com.openexchange.ajax.group.actions;
-
-import java.util.Date;
+package com.openexchange.ajax.framework;
 
 import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.fields.DataFields;
+import com.openexchange.ajax.container.Response;
 
 /**
- *
+ * Common parser for delete responses.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class DeleteRequest extends AbstractGroupRequest<DeleteResponse> {
+public abstract class AbstractDeleteParser<T extends CommonDeleteResponse> extends AbstractAJAXParser<T> {
 
-    private final int groupId;
-
-    private final Date lastModified;
-
-    private final boolean failOnError;
-
-    public DeleteRequest(final int groupId, final Date lastModified,
-        final boolean failOnError) {
-        super();
-        this.groupId = groupId;
-        this.lastModified = lastModified;
-        this.failOnError = failOnError;
+    protected AbstractDeleteParser(final boolean failOnError) {
+        super(failOnError);
     }
 
-    public DeleteRequest(final int groupId, final Date lastModified) {
-        this(groupId, lastModified, true);
+    @Override
+    protected final T createResponse(final Response response) throws JSONException {
+        return instanciateResponse(response);
     }
 
-    public Object getBody() throws JSONException {
-        final JSONObject json = new JSONObject();
-        json.put(DataFields.ID, groupId);
-        return json;
-    }
-
-    public Method getMethod() {
-        return Method.PUT;
-    }
-
-    public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE),
-            new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, lastModified)
-        };
-    }
-
-    public DeleteParser getParser() {
-        return new DeleteParser(failOnError);
-    }
+    protected abstract T instanciateResponse(final Response response);
 }
