@@ -62,14 +62,12 @@ import com.openexchange.ajax.publish.actions.NewPublicationRequest;
 import com.openexchange.ajax.publish.actions.NewPublicationResponse;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.publish.Publication;
-import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.SimPublicationTargetDiscoveryService;
-import com.openexchange.publish.json.PublicationJSONException;
 import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * {@link DeletePublicationTest}
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class DeletePublicationTest extends AbstractPublicationTest {
@@ -78,7 +76,7 @@ public class DeletePublicationTest extends AbstractPublicationTest {
         super(name);
     }
 
-    public void testDeletingAFolderDeletesThePublication() throws AjaxException, IOException, SAXException, JSONException, PublicationException, PublicationJSONException, InterruptedException {
+    public void testDeletingAFolderDeletesThePublication() throws AjaxException, IOException, SAXException, JSONException, InterruptedException {
         Contact contact = createDefaultContactFolderWithOneContact();
 
         // publish
@@ -94,7 +92,7 @@ public class DeletePublicationTest extends AbstractPublicationTest {
         // delete folder of publication
         getFolderManager().deleteFolderOnServer(contact.getParentFolderID(), new Date(Long.MAX_VALUE));
         Thread.sleep(1000); //asynchronous delete event needs time to hit
-        
+
         // verify deletion of publication
         GetPublicationRequest getReq = new GetPublicationRequest(expected.getId());
         GetPublicationResponse getResp = myClient.execute(getReq);
@@ -123,7 +121,6 @@ public class DeletePublicationTest extends AbstractPublicationTest {
         GetPublicationResponse getResp = myClient.execute(getReq);
         assertTrue("Reading deleted publication should produce exception", getResp.hasError());
     }
-    
 
     public void testDeletionOfNonExistingPublicationShouldFail() throws AjaxException, IOException, SAXException, JSONException {
         // delete publication
