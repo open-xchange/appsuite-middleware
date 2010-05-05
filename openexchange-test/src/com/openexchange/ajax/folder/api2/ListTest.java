@@ -83,7 +83,7 @@ public class ListTest extends AbstractAJAXSession {
 
     public void testListRoot() throws Throwable {
         // List root's subfolders
-        final ListRequest request = new ListRequest(API.OUTLOOK, String.valueOf(FolderObject.SYSTEM_ROOT_FOLDER_ID));
+        final ListRequest request = new ListRequest(API.OX_NEW, FolderObject.SYSTEM_ROOT_FOLDER_ID);
         final ListResponse response = client.execute(request);
 
         final JSONArray jsonArray = (JSONArray) response.getResponse().getData();
@@ -106,8 +106,7 @@ public class ListTest extends AbstractAJAXSession {
             }
         }
 
-        /*-
-         * 
+/*
         ListRequest request = new ListRequest(String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID));
         ListResponse response = client.execute(request);
         Iterator<FolderObject> iter = response.getFolder();
@@ -138,7 +137,7 @@ public class ListTest extends AbstractAJAXSession {
             FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME, FolderObject.OWN_RIGHTS, FolderObject.PERMISSIONS_BITS });
         GetResponse response2 = client.execute(request2);
         assertFalse("Get failed.", response2.hasError());
-         */
+*/
     }
 
     public void testListPrivate() throws Throwable {

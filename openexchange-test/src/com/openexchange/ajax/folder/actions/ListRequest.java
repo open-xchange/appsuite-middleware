@@ -80,6 +80,10 @@ public class ListRequest extends AbstractFolderRequest<ListResponse> {
         this(api, parentFolder, DEFAULT_COLUMNS, false);
     }
 
+    public ListRequest(API api, int parentFolder) {
+        this(api, Integer.toString(parentFolder), false);
+    }
+
     public ListRequest(API api, String parentFolder, boolean ignoreMail) {
         this(api, parentFolder, DEFAULT_COLUMNS, ignoreMail);
     }
