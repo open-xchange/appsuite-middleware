@@ -53,7 +53,6 @@ import com.openexchange.ajax.appointment.GetTest;
 import com.openexchange.ajax.folder.api2.Bug15995Test;
 import com.openexchange.ajax.folder.api2.ClearTest;
 import com.openexchange.ajax.folder.api2.CreateTest;
-import com.openexchange.ajax.folder.api2.ListTest;
 import com.openexchange.ajax.folder.api2.MoveTest;
 import com.openexchange.ajax.folder.api2.PathTest;
 import com.openexchange.ajax.folder.api2.UpdateTest;

@@ -47,10 +47,9 @@
  *
  */
 
-package com.openexchange.ajax.folder.api2;
+package com.openexchange.ajax.folder;
 
 import org.json.JSONArray;
-import com.openexchange.ajax.folder.FolderTools;
 import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.ListRequest;
 import com.openexchange.ajax.folder.actions.ListResponse;
