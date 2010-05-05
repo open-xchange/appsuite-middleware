@@ -313,7 +313,7 @@ public class NewTest extends AppointmentTest {
 
         final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[2];
         participants[0] = new UserParticipant(userId);
-        participants[1] = new GroupParticipant(userId);
+        participants[1] = new GroupParticipant(groupParticipantId);
 
         appointmentObj.setParticipants(participants);
 
