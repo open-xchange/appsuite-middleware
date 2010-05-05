@@ -1,3 +1,7 @@
+* 2010-05-05 - marcus.klein@open-xchange.com
+
+ - Bugfix #15884: Finishing task iterator pre reader even if some problem occurs.
+
 * 2010-05-04 - marcus.klein@open-xchange.com
 
  - Bugfix #15995: Setting correct folder name for global address book.

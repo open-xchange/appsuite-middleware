@@ -82,66 +82,32 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class TaskIterator2 implements TaskIterator, Runnable {
 
-    /**
-     * Context.
-     */
     private final Context ctx;
 
-    /**
-     * unique identifier of the user for reminders.
-     */
     private final int userId;
 
     private final String sql;
 
     private final StatementSetter setter;
 
-    /**
-     * Folder through that the objects are requested.
-     */
     private final int folderId;
 
-    /**
-     * Wanted fields of the task.
-     */
     private final int[] taskAttributes;
 
-    /**
-     * Additional fields that cannot be read from the {@link ResultSet}.
-     */
     private final int[] additionalAttributes;
 
-    /**
-     * ACTIVE or DELETED.
-     */
     private final StorageType type;
 
-    /**
-     * Pre read tasks.
-     */
     private final PreRead<Task> preread = new PreRead<Task>();
 
-    /**
-     * Finished read tasks.
-     */
     private final Queue<Task> ready = new LinkedList<Task>();
 
     private TaskException exc;
 
-    /**
-     * Field for the thread reading the {@link ResultSet}.
-     */
     private final Thread runner;
 
-    /**
-     * For reading participants.
-     */
-    private final ParticipantStorage partStor = ParticipantStorage
-        .getInstance();
+    private final ParticipantStorage partStor = ParticipantStorage.getInstance();
 
-    /**
-     * Warnings
-     */
     private final List<AbstractOXException> warnings;
 
     /**
@@ -194,35 +160,22 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void close() throws SearchIteratorException {
         try {
             runner.join();
         } catch (final InterruptedException e) {
-            throw new SearchIteratorException(new TaskException(TaskException
-                .Code.THREAD_ISSUE, e));
+            throw new SearchIteratorException(new TaskException(Code.THREAD_ISSUE, e));
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public boolean hasNext() {
         return !ready.isEmpty() || preread.hasNext() || null != exc;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public boolean hasSize() {
         return false;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Task next() throws SearchIteratorException {
         if (ready.isEmpty() && !preread.hasNext()) {
             throw new SearchIteratorException(exc);
@@ -265,23 +218,14 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
         return ready.poll();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void addWarning(final AbstractOXException warning) {
         warnings.add(warning);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public AbstractOXException[] getWarnings() {
         return warnings.isEmpty() ? null : warnings.toArray(new AbstractOXException[warnings.size()]);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public boolean hasWarnings() {
         return !warnings.isEmpty();
     }
@@ -329,9 +273,6 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
         throw new UnsupportedOperationException("Method not implemented");
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void run() {
         Connection con = null;
         PreparedStatement stmt = null;
@@ -358,7 +299,6 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
                 }
                 preread.offer(task);
             }
-            preread.finished();
         } catch (final SQLException e) {
             exc = new TaskException(Code.SQL_ERROR, e, e.getMessage());
         } catch (final DBPoolingException e) {
@@ -366,6 +306,7 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
         } catch (Throwable t) {
             exc = new TaskException(Code.THREAD_ISSUE, t);
         } finally {
+            preread.finished();
             DBUtils.closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(ctx, con);
         }
