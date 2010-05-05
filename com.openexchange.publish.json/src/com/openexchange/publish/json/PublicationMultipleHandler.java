@@ -49,6 +49,7 @@
 
 package com.openexchange.publish.json;
 
+import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.publish.json.MultipleHandlerTools.wrapThrowable;
 import static com.openexchange.publish.json.PublicationJSONErrorMessage.MISSING_PARAMETER;
 import static com.openexchange.publish.json.PublicationJSONErrorMessage.UNKNOWN_ACTION;
@@ -72,6 +73,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.publish.Publication;
+import com.openexchange.publish.PublicationErrorMessage;
 import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationService;
 import com.openexchange.publish.PublicationTarget;
@@ -81,7 +83,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link PublicationMultipleHandler}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class PublicationMultipleHandler implements MultipleHandler {
@@ -96,22 +98,24 @@ public class PublicationMultipleHandler implements MultipleHandler {
     }
 
     public void close() {
-
+        // Nothing to do.
     }
 
     public Date getTimestamp() {
         return null;
     }
-    
-    public static final Set<String> ACTIONS_REQUIRING_BODY = new HashSet<String>() {{
-        
-        add("new");
-        add("update");
-        add("delete");
-        add("list");
-        
-    }};
 
+    public static final Set<String> ACTIONS_REQUIRING_BODY = new HashSet<String>() {
+        private static final long serialVersionUID = -4485493200664773739L;
+        {
+
+            add("new");
+            add("update");
+            add("delete");
+            add("list");
+
+        }
+    };
 
     public Object performRequest(final String action, final JSONObject request, final ServerSession session, final boolean secure) throws AbstractOXException, JSONException {
         try {
@@ -155,7 +159,7 @@ public class PublicationMultipleHandler implements MultipleHandler {
                     publications.add(publication);
                 }
             }
-            
+
         }
         final String[] basicColumns = getBasicColumns(request);
         final Map<String, String[]> dynamicColumns = getDynamicColumns(request);
@@ -185,7 +189,7 @@ public class PublicationMultipleHandler implements MultipleHandler {
     }
 
     private static final Set<String> KNOWN_PARAMS = new HashSet<String>() {
-
+        private static final long serialVersionUID = -6947818649378328911L;
         {
             add("entityModule");
             add("columns");
@@ -223,7 +227,7 @@ public class PublicationMultipleHandler implements MultipleHandler {
         return dynamicColumnIdentifiers;
     }
 
-    private String[] getBasicColumns(final JSONObject request) throws JSONException {
+    private String[] getBasicColumns(final JSONObject request) {
         final String columns = request.optString("columns");
         if (columns == null || columns.equals("")) {
             return new String[] { "id", "entityId", "entityModule", "target" };
@@ -273,8 +277,8 @@ public class PublicationMultipleHandler implements MultipleHandler {
         for (int i = 0, size = ids.length(); i < size; i++) {
             final int id = ids.getInt(i);
             final PublicationTarget target = discovery.getTarget(context, id);
-            if(target == null) {
-                continue;
+            if (target == null) {
+                throw PublicationErrorMessage.PublicationNotFound.create();
             }
             final PublicationService publisher = target.getPublicationService();
             final Publication publication = new Publication();
@@ -283,26 +287,20 @@ public class PublicationMultipleHandler implements MultipleHandler {
             publication.setUserId(session.getUserId());
             publisher.delete(publication);
         }
-        return 1;
+        return L(1);
     }
 
     private Object updatePublication(final JSONObject request, final ServerSession session) throws JSONException, PublicationException, PublicationJSONException {
         final Publication publication = getPublication(request, session);
-
         publication.update();
-
-        return 1;
-
+        return L(1);
     }
 
     private Object createPublication(final JSONObject request, final ServerSession session) throws PublicationException, PublicationJSONException, JSONException {
         final Publication publication = getPublication(request, session);
         publication.setId(-1);
-
         publication.create();
-
-        return publication.getId();
-
+        return L(publication.getId());
     }
 
     private Object createList(final List<Publication> publications, final String[] basicColumns, final Map<String, String[]> dynamicColumns, final List<String> dynamicColumnOrder) throws PublicationJSONException, JSONException {
