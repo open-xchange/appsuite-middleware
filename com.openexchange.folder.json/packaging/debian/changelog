@@ -1,3 +1,9 @@
+open-xchange-folder-json (6.17.0.0-3) unstable; urgency=low
+
+  * first build for 6.17-rev3
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed,  5 May 2010 14:12:59 +0200
+
 open-xchange-folder-json (6.17.0.0-2) unstable; urgency=low
 
   * first build for 6.17-rev2

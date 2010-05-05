@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 2
+%define		ox_release 3
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -508,8 +508,27 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Tue May 04 2010 - viktor.pracht@open-xchange.com
+  - TA2994 for US4375: Call history
+* Tue May 04 2010 - marcus.klein@open-xchange.com
+ - Bugfix #15995: Setting correct folder name for global address book.
+ - Bugfix #15061: Pass warnings from the POP3 background sync process to the frontend.
+* Mon May 03 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16021: Fixed NullPointerException on session closing if sessions random was used.
+ - Bugfix #15933: Using DB master server to change the POP3 storage provider name.
+* Mon May 03 2010 - thorben.betten@open-xchange.com
+ - Bugfix #15975: Properly marking messages as \Deleted prior to expunge on INBOX folder
+* Fri Apr 30 2010 - marcus.klein@open-xchange.com
+ - Bugfix #15880: Made path to the UI fully configurable and it can be passed through parameters on easylogin and login redirect requests.
+ - Bugfix #15936: Session identifier is not passed anymore as document fragment on login redirect request.
+* Tue Apr 27 2010 - thorben.betten@open-xchange.com
+ - Bugfix #15947: Marking messaging folders as subscribed by default.
+* Mon Apr 26 2010 - marcus.klein@open-xchange.com
+ - Bugfix #15937: Ignoring number of attachments if sent from client.
+* Fri Apr 23 2010 - marcus.klein@open-xchange.com
+ - Bugfix #15897: Prefering task identifier in URL on confirm requests.
 * Tue Apr 20 2010 - karsten.will@open-xchange.com
- - Bugfix #15842 - yahoo crawler auto generates the address class on import
+ - Bugfix #15842: yahoo crawler auto generates the address class on import
 * Mon Apr 19 2010 - marcus.klein@open-xchange.com
  - Bugfix #15900: Corrected class loading problem due to annotation based exception framework.
 * Mon Apr 19 2010 - thorben.betten@open-xchange.com
