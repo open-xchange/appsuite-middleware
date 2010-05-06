@@ -1844,9 +1844,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             // delete all users
             for (final User user : users) {
                 final int user_id = user.getId();
-                if (log.isInfoEnabled()) {
-                    log.info("Delete user " + user_id + "(" + ctx.getId() + ") via OX API...");
-                }
+
                 final DeleteEvent delev = new DeleteEvent(this, user_id, DeleteEvent.TYPE_USER, ctx.getId());
                 DeleteRegistry.getInstance().fireDeleteEvent(delev, write_ox_con, write_ox_con);
                 if (log.isDebugEnabled()) {
@@ -1919,6 +1917,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     Contacts.deleteContact(getContactIdByUserId(ctx.getId(), user_id, write_ox_con), ctx.getId(), write_ox_con, true);
                 } else {
                     Contacts.deleteContact(getContactIdByUserId(ctx.getId(), user_id, write_ox_con), ctx.getId(), write_ox_con, false);
+                }
+
+                if (log.isInfoEnabled()) {
+                    log.info("Deleted user " + user_id + "(" + ctx.getId() + ") ...");
                 }
 
             }
