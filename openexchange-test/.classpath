@@ -50,9 +50,5 @@
 	<classpathentry kind="src" path="/com.openexchange.subscribe.microformats"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.messaging"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.messaging.generic"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.subscribe.microformats"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.publish.basic"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.sql"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.datatypes.genericonf.storage"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
