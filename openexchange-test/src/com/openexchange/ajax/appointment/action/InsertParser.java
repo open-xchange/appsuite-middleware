@@ -86,12 +86,10 @@ public class InsertParser extends AbstractInsertParser<AppointmentInsertResponse
                     assertTrue("Problem while inserting object.", objectId > 0);
                 }
                 retval.setId(objectId);
-            } else if (isFailOnError()){
-                fail("Missing created object identifier: " + response.getJSON());
-            }
-            
-            if (data.has("conflicts")) {
+            } else if (data.has("conflicts")) {
                 parseConflicts(data, retval);
+            } else if (isFailOnError()) {
+                fail("Missing created object identifier: " + response.getJSON());
             }
         }
         return retval;
