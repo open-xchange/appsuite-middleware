@@ -1844,9 +1844,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             // delete all users
             for (final User user : users) {
                 final int user_id = user.getId();
-                if (log.isDebugEnabled()) {
-                    log.debug("Start delete user " + user_id + " in context " + ctx.getId());
-                    log.debug("Delete user " + user_id + "(" + ctx.getId() + ") via OX API...");
+                if (log.isInfoEnabled()) {
+                    log.info("Delete user " + user_id + "(" + ctx.getId() + ") via OX API...");
                 }
                 final DeleteEvent delev = new DeleteEvent(this, user_id, DeleteEvent.TYPE_USER, ctx.getId());
                 DeleteRegistry.getInstance().fireDeleteEvent(delev, write_ox_con, write_ox_con);
