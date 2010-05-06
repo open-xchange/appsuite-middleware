@@ -67,6 +67,7 @@ public class AppointmentAJAXSuite extends TestSuite{
         tests.addTestSuite(ConfirmOthers.class);
         tests.addTestSuite(CopyTest.class);
         tests.addTestSuite(DeleteTest.class);
+        tests.addTestSuite(GetTest.class);
         tests.addTestSuite(FreeBusyTest.class);
         tests.addTestSuite(HasTest.class);
         tests.addTestSuite(ListTest.class);

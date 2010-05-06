@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.folder;
 
-import com.openexchange.ajax.appointment.GetTest;
+import com.openexchange.ajax.folder.api2.GetTest;
 import com.openexchange.ajax.folder.api2.Bug15995Test;
 import com.openexchange.ajax.folder.api2.ClearTest;
 import com.openexchange.ajax.folder.api2.CreateTest;
