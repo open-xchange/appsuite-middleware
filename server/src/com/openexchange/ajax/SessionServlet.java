@@ -143,8 +143,7 @@ public abstract class SessionServlet extends AJAXServlet {
      */
     @Override
     @OXThrows(category = Category.TRY_AGAIN, desc = "", exceptionId = 4, msg = "Context is locked.")
-    protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
-            IOException {
+    protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         Tools.disableCaching(resp);
         try {
             final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
