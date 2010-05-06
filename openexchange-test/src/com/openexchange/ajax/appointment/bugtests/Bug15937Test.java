@@ -84,6 +84,7 @@ public class Bug15937Test extends AbstractAJAXSession {
         appointment = new Appointment();
         appointment.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
         appointment.setTitle("Test for bug 15937");
+        appointment.setIgnoreConflicts(true);
         final Calendar calendar = TimeTools.createCalendar(timeZone);
         appointment.setStartDate(calendar.getTime());
         calendar.add(Calendar.HOUR, 1);
