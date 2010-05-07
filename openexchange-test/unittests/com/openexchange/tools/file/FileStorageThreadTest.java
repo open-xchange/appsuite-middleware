@@ -109,7 +109,7 @@ public class FileStorageThreadTest extends TestCase {
             		for (int i = 0; i < 10; i = i + 3) {
             			boolean del = fm.deleteFile(set.first());
             			set.remove(set.first());
-            			System.out.println("Thread: " + Thread.currentThread().getName() + ", löschen: " + del);
+            			System.out.println("Thread: " + Thread.currentThread().getName() + ", l\u00f6schen: " + del);
             		}
             	}
             	testfile.delete();
