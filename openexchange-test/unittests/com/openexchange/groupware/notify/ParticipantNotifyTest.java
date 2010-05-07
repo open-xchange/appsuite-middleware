@@ -11,9 +11,12 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Properties;
 import java.util.Set;
 import java.util.TimeZone;
+import javax.mail.Session;
 import junit.framework.TestCase;
+import com.openexchange.ajax.user.UserImpl4Test;
 import com.openexchange.api2.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.groupware.Init;
@@ -31,10 +34,14 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.MockGroupLookup;
 import com.openexchange.groupware.ldap.MockResourceLookup;
+import com.openexchange.groupware.ldap.MockUser;
 import com.openexchange.groupware.ldap.MockUserLookup;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserConfigurationFactory;
 import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.groupware.ldap.UserImpl;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
 import com.openexchange.groupware.notify.State.Type;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -277,9 +284,14 @@ public class ParticipantNotifyTest extends TestCase {
 
 
         // inject test instance as message sender
+        // session.setUserConfiguration(new UserConfigurationFactory().getConfiguration(1));
 
         ParticipantNotify.messageSender = notify;
-        //session.setUserConfiguration(new UserConfigurationFactory().getConfiguration(1));
+        
+        // Set default Sender Address for Testuser
+        UserSettingMail usm = new UserSettingMail(session.getUserId(), session.getContextId());
+        usm.setSendAddr("default@test");
+        
 	    NotificationPool.getInstance().clear();
     }
 	
@@ -350,6 +362,15 @@ public class ParticipantNotifyTest extends TestCase {
 		public int folderId;
         protected final boolean internal;
         public Type overrideType;
+        public String fromAddr;
+        
+        public void setFromAddr(String addr) {
+            fromAddr = addr;
+        }
+        
+        public String getFromAddr() {
+            return fromAddr;
+        }
 
         public Message(final String messageTitle, final Object message, final List<String>addresses, final int folderId, final boolean internal, State.Type overrideType) {
 			this.messageTitle = messageTitle;
@@ -430,7 +451,30 @@ public class ParticipantNotifyTest extends TestCase {
 
 		@Override
 		protected void sendMessage(MailMessage msg, final ServerSession session, final CalendarObject obj, final State state, final boolean suppressOXReminderHeader) {
-			messageCollector.add(new Message(msg.title, msg.message, msg.addresses, msg.folderId, msg.internal, msg.overrideType));
+			Message m = new Message(msg.title, msg.message, msg.addresses, msg.folderId, msg.internal, msg.overrideType);
+			
+			String fromAddr;
+	        String senderSource = NotificationConfig.getProperty(NotificationProperty.FROM_SOURCE, "primaryMail");
+	        if (senderSource.equals("defaultSenderAddress")) {               
+	            try {
+                    fromAddr = getUserSettingMail(session.getUserId(), session.getContext()).getSendAddr();
+                } catch (OXException e) {
+                    try {
+                        fromAddr = USER_STORAGE.getUser(session.getUserId()).getMail();
+                    } catch (UserException e1) {
+                        fromAddr = "User not found";
+                    }
+                }
+	        } else {
+	            try {
+                    fromAddr = USER_STORAGE.getUser(session.getUserId()).getMail();
+                } catch (UserException e) {
+                    fromAddr = "User not found";
+                }
+	        } 
+
+	        m.setFromAddr(fromAddr);
+		    messageCollector.add(m);
 		}
 
         @Override

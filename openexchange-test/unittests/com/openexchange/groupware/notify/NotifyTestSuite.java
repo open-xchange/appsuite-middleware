@@ -66,6 +66,7 @@ public class NotifyTestSuite {
         tests.addTestSuite(NoSendTest.class);
         tests.addTestSuite(ExternalTest.class);
         tests.addTestSuite(Bug9950Test.class);
+        tests.addTestSuite(Bug15300Test.class);
         tests.addTestSuite(Bug9256Test.class);
         tests.addTestSuite(Bug9204Test.class);
         tests.addTestSuite(Bug7507Test.class);
