@@ -60,6 +60,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.jcs.engine.control.CompositeCacheManager;
 import com.openexchange.caching.CacheException;
 import com.openexchange.config.ConfigurationService;
@@ -162,24 +164,31 @@ public final class JCSCacheServiceInit {
 
     private void configure(final Properties props) throws CacheException {
         if (this.props == null) {
+            // This should be the initial configuration with cache.ccf
             this.props = props;
+            checkDefaultAuxiliary();
+            ccmInstance.configure(this.props, false);
         } else {
-            /*
-             * Overwrite or add with previously loaded properties
-             */
+            // Additional caches are added here. Check that already existing caches are not touched.
+            Properties additionalProps = new Properties();
             for (final Entry<Object, Object> property : props.entrySet()) {
-                final String value = (String) property.getValue();
-                if (!isEmpty(value)) {
-                    this.props.put(property.getKey(), value);
+                String key = (String) property.getKey();
+                String value = (String) property.getValue();
+                if (isDefault(key)) {
+                    LOG.warn("Ignoring default cache configuration property: " + key + '=' + value);
+                } else if (overwritesExisting(key)) {
+                    LOG.warn("Ignoring overwriting existing cache configuration property: " + key + '=' + value);
+                } else {
+                    additionalProps.put(key, value);
                 }
             }
+            this.props.putAll(additionalProps);
+            ccmInstance.configure(additionalProps, false);
             //this.props.putAll(props);
         }
         /*
          * ... and (re-)configure composite cache manager
          */
-        checkDefaultAuxiliary();
-        ccmInstance.configure(this.props, false);
     }
 
     /**
@@ -344,16 +353,23 @@ public final class JCSCacheServiceInit {
         return defaultCacheRegions.contains(regionName);
     }
 
-    private static boolean isEmpty(final String str) {
-        if (null == str || 0 == str.length()) {
-            return true;
+    final Pattern regionPattern = Pattern.compile("jcs\\.region\\.([a-zA-Z]*)\\.");
+
+    private boolean overwritesExisting(String key) {
+        Matcher matcher = regionPattern.matcher(key);
+        if (matcher.matches()) {
+            String regionName = matcher.group(1);
+            String[] existingRegionNames = ccmInstance.getCacheNames();
+            for (String existingRegionName : existingRegionNames) {
+                if (existingRegionName.equals(regionName)) {
+                    return true;
+                }
+            }
         }
-        final int len = str.length();
-        boolean ret = true;
-        for (int i = 0; ret && i < len; i++) {
-            ret = Character.isWhitespace(str.charAt(i));
-        }
-        return ret;
+        return false;
     }
 
+    private static boolean isDefault(String key) {
+        return key.startsWith(DEFAULT_REGION);
+    }
 }

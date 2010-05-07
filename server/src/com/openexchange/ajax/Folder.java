@@ -149,6 +149,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderManager;
+import com.openexchange.tools.oxfolder.OXFolderPermissionException;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.http.Tools;
@@ -799,10 +800,8 @@ public class Folder extends SessionServlet {
                             folderWriter.writeOXFolderFieldsAsArray(columns, internalUsers, FolderObject.getFolderString(
                                 internalUsers.getObjectID(),
                                 locale), -1);
-                        } catch (final OXException e) {
-                            /*
-                             * Internal users folder not visible to current user
-                             */
+                        } catch (final OXFolderPermissionException e) {
+                            // Internal users folder not visible to current user
                             if (LOG.isDebugEnabled()) {
                                 LOG.debug(e.getMessage(), e);
                             }

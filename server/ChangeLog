@@ -1,3 +1,7 @@
+* 2010-05-07 - marcus.klein@open-xchange.com
+
+ - Bugfix #16039: Corrected cache initialization to fix not working cache invalidation. More detailed logging if problem occur.
+
 * 2010-05-07 - steffen.templin@open-xchange.com
 
  - Bugfix #15300: Added the possibility to use primary mail address or default sender address as from header in notification mails.
