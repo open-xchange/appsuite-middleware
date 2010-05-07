@@ -212,7 +212,21 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         }
         String type = (msg.overrideType != null) ? msg.overrideType.toString() : state.getType().toString();
         final MailObject mail = new MailObject(session, obj.getObjectID(), fuid, state.getModule(), type);
-        mail.setFromAddr(UserStorage.getStorageUser(session.getUserId(), session.getContext()).getMail());
+                
+        String fromAddr;
+        String senderSource = NotificationConfig.getProperty(NotificationProperty.FROM_SOURCE, "primaryMail");
+        if (senderSource.equals("defaultSenderAddress")) {          
+            try {
+                fromAddr = getUserSettingMail(session.getUserId(), session.getContext()).getSendAddr();
+            } catch (OXException e) {
+                LOG.error(e.getMessage(), e);
+                fromAddr = UserStorage.getStorageUser(session.getUserId(), session.getContext()).getMail();
+            }
+        } else {
+            fromAddr = UserStorage.getStorageUser(session.getUserId(), session.getContext()).getMail();
+        }   
+        
+        mail.setFromAddr(fromAddr);
         mail.setToAddrs(msg.addresses.toArray(new String[msg.addresses.size()]));
         mail.setText(msg.message);
         mail.setSubject(msg.title);

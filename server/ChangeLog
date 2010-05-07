@@ -1,3 +1,7 @@
+* 2010-05-07 - steffen.templin@open-xchange.com
+
+ - Bugfix #15300: Added the possibility to use primary mail address or default sender address as from header in notification mails.
+
 * 2010-05-05 - marcus.klein@open-xchange.com
 
  - Bugfix #15884: Finishing task iterator pre reader even if some problem occurs.
