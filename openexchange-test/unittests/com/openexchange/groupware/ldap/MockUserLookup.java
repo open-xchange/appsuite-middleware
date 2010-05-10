@@ -162,15 +162,14 @@ public class MockUserLookup {
         user.setMail("user9@test.invalid");
         user.setGroups(new int[]{1,4});
         addUser(user);
-        
+
         user = new MockUser(2000);
         user.setDisplayName("Session User");
-        user.setPreferredLanguage("de");
+        user.setPreferredLanguage("en_US");
         user.setTimeZone(tz);
         user.setMail("primary@test");
         user.setGroups(new int[]{1,4});
         addUser(user);
-
     }
 
     private void addUser(final User user) {
