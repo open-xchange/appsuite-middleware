@@ -50,8 +50,10 @@
 package com.openexchange.ajax.resource;
 
 import java.io.IOException;
-import java.util.Arrays;
-
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.resource.actions.ResourceAllRequest;
 import com.openexchange.ajax.resource.actions.ResourceAllResponse;
@@ -59,71 +61,67 @@ import com.openexchange.ajax.resource.actions.ResourceListRequest;
 import com.openexchange.ajax.resource.actions.ResourceListResponse;
 import com.openexchange.resource.Resource;
 import com.openexchange.tools.servlet.AjaxException;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.xml.sax.SAXException;
 
 /**
  * {@link ResourceListAJAXTest} - Tests the LIST request on resource servlet
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class ResourceListAJAXTest extends AbstractResourceTest {
 
-	/**
-	 * Initializes a new {@link ResourceListAJAXTest}
-	 * 
-	 * @param name
-	 *            The test name
-	 */
-	public ResourceListAJAXTest(final String name) {
-		super(name);
-	}
+    /**
+     * Initializes a new {@link ResourceListAJAXTest}
+     *
+     * @param name
+     *            The test name
+     */
+    public ResourceListAJAXTest(final String name) {
+        super(name);
+    }
 
-	/**
-	 * Tests the <code>action=list</code>
-	 */
-	public void testList() throws AjaxException, JSONException, IOException, SAXException {
-		int id = -1;
-		try {
-			/*
-			 * Create a resource
-			 */
-			final Resource resource = new Resource();
-			resource.setAvailable(true);
-			resource.setMail("my.resource@domain.tdl");
-			resource.setSimpleName(ResourceListAJAXTest.class.getName());
-			resource.setDisplayName(ResourceListAJAXTest.class.getName());
-			resource.setDescription(ResourceListAJAXTest.class.getName());
-			id = createResource(resource);
-			/*
-			 * Perform all request
-			 */
-			final ResourceAllResponse allResponse = Executor.execute(getSession(),
-					new ResourceAllRequest(true));
-			final int[] ids = allResponse.getIDs();
-			assertTrue("All request failed", ids != null);
+    /**
+     * Tests the <code>action=list</code>
+     */
+    public void testList() throws AjaxException, JSONException, IOException, SAXException {
+        int id = -1;
+        try {
+            /*
+             * Create a resource
+             */
+            final Resource resource = new Resource();
+            resource.setAvailable(true);
+            resource.setMail("my.resource@domain.tdl");
+            resource.setSimpleName(ResourceListAJAXTest.class.getName());
+            resource.setDisplayName(ResourceListAJAXTest.class.getName());
+            resource.setDescription(ResourceListAJAXTest.class.getName());
+            id = createResource(resource);
+            /*
+             * Perform all request
+             */
+            final ResourceAllResponse allResponse = Executor.execute(getSession(),
+                    new ResourceAllRequest(true));
+            final int[] ids = allResponse.getIDs();
+            assertTrue("All request failed", ids != null);
 
-			/*
-			 * Perform list request
-			 */
-			final ResourceListResponse listResponse = Executor.execute(getSession(),
-					new ResourceListRequest(ids, true));
-			final Resource[] resources = listResponse.getResources();
+            /*
+             * Perform list request
+             */
+            final ResourceListResponse listResponse = Executor.execute(getSession(),
+                    new ResourceListRequest(ids, true));
+            final Resource[] resources = listResponse.getResources();
 
-			assertTrue("List failed", resources != null && resources.length == ids.length);
-			
+            assertTrue("List failed", resources != null && resources.length == ids.length);
+
             JSONArray arr = (JSONArray) listResponse.getData();
             for(int i = 0, size = arr.length(); i < size; i++) {
                 JSONObject res = arr.optJSONObject(i);
                 assertNotNull(res);
                 assertTrue(res.has("last_modified_utc"));
             }
-		} finally {
-		    deleteResource(id);
-		}
+        } finally {
+            deleteResource(id);
+        }
 
-	}
+    }
 }
