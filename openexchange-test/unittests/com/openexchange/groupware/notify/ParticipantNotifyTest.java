@@ -1,3 +1,52 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
 package com.openexchange.groupware.notify;
 
 import java.io.File;
@@ -58,57 +107,57 @@ import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 public class ParticipantNotifyTest extends TestCase {
-	
-	protected static final MockGroupLookup GROUP_STORAGE = new MockGroupLookup();
-	protected static final MockUserLookup USER_STORAGE = new MockUserLookup();
-	protected static final MockResourceLookup RESOURCE_STORAGE = new MockResourceLookup();
-	
-	protected static final UserConfigurationFactory USER_CONFIGS = new UserConfigurationFactory();
-	
-	
-	public static final int EN = 0;
-	public static final int DE = 1;
-	public static final int FR = 2;
-	
-	
-	protected final TestParticipantNotify notify = new TestParticipantNotify();
 
-	protected final Date start = new Date(System.currentTimeMillis()+ 2*Constants.MILLI_DAY);
-	// end date must be in the future for creating notifications. See bug 12063.
-	protected final Date end = new Date(System.currentTimeMillis() + 3*Constants.MILLI_DAY);
-	protected ServerSession session = null;
-	
-	// TODO: Reactivate if translations are available
-	public void notestResolveGroup() throws Exception{
-		final Participant[] participants = getParticipants(U(),G(2),S(), R());
-		final Task t = getTask(participants);
-		t.setUsers((UserParticipant[])null); // If the user participants are not set, fall back to resolving groups in ParticipantNotify
-		notify.taskCreated(t,session);
-		
-		final Message msg = notify.getMessages().get(0);
-		
-		final String[] participantNames = parseParticipants( msg );
-		
-		assertAddresses( notify.getMessages(), "user2@test.invalid", "user4@test.invalid", "user6@test.invalid", "user8@test.invalid");
-		assertLanguage( DE , msg );
-		assertNames( participantNames, "User 2 (waiting)", "User 4 (waiting)", "User 6 (waiting)", "User 8 (waiting)" );
-	}
+    protected static final MockGroupLookup GROUP_STORAGE = new MockGroupLookup();
+    protected static final MockUserLookup USER_STORAGE = new MockUserLookup();
+    protected static final MockResourceLookup RESOURCE_STORAGE = new MockResourceLookup();
 
-	// TODO: Reactivate if translations are available
-	public void notestNoSendDouble() throws Exception{
-		final Participant[] participants = getParticipants(U(3),G(2),S("user2@test.invalid"), R());
-		final Task t = getTask(participants);
-		
-		notify.taskCreated(t,session);
-		
-		final Message msg = notify.getMessages().get(0);
-		
-		final String[] participantNames = parseParticipants( msg );
-		assertAddresses( notify.getMessages(), "user2@test.invalid", "user4@test.invalid", "user6@test.invalid", "user8@test.invalid");
-		assertLanguage( DE , msg );
-		assertNames( participantNames, "User 2", "User 4", "User 6", "User 8" );
-	}
-	
+    protected static final UserConfigurationFactory USER_CONFIGS = new UserConfigurationFactory();
+
+
+    public static final int EN = 0;
+    public static final int DE = 1;
+    public static final int FR = 2;
+
+
+    protected final TestParticipantNotify notify = new TestParticipantNotify();
+
+    protected final Date start = new Date(System.currentTimeMillis()+ 2*Constants.MILLI_DAY);
+    // end date must be in the future for creating notifications. See bug 12063.
+    protected final Date end = new Date(System.currentTimeMillis() + 3*Constants.MILLI_DAY);
+    protected ServerSession session = null;
+
+    // TODO: Reactivate if translations are available
+    public void notestResolveGroup() throws Exception{
+        final Participant[] participants = getParticipants(U(),G(2),S(), R());
+        final Task t = getTask(participants);
+        t.setUsers((UserParticipant[])null); // If the user participants are not set, fall back to resolving groups in ParticipantNotify
+        notify.taskCreated(t,session);
+
+        final Message msg = notify.getMessages().get(0);
+
+        final String[] participantNames = parseParticipants( msg );
+
+        assertAddresses( notify.getMessages(), "user2@test.invalid", "user4@test.invalid", "user6@test.invalid", "user8@test.invalid");
+        assertLanguage( DE , msg );
+        assertNames( participantNames, "User 2 (waiting)", "User 4 (waiting)", "User 6 (waiting)", "User 8 (waiting)" );
+    }
+
+    // TODO: Reactivate if translations are available
+    public void notestNoSendDouble() throws Exception{
+        final Participant[] participants = getParticipants(U(3),G(2),S("user2@test.invalid"), R());
+        final Task t = getTask(participants);
+
+        notify.taskCreated(t,session);
+
+        final Message msg = notify.getMessages().get(0);
+
+        final String[] participantNames = parseParticipants( msg );
+        assertAddresses( notify.getMessages(), "user2@test.invalid", "user4@test.invalid", "user6@test.invalid", "user8@test.invalid");
+        assertLanguage( DE , msg );
+        assertNames( participantNames, "User 2", "User 4", "User 6", "User 8" );
+    }
+
 
 
 
@@ -116,10 +165,10 @@ public class ParticipantNotifyTest extends TestCase {
     public Appointment convertFromICal(final InputStream icalFile) throws Exception{
         OXContainerConverter oxContainerConverter = null;
 
-	    oxContainerConverter = new OXContainerConverter(session.getContext(), TimeZone.getDefault());
+        oxContainerConverter = new OXContainerConverter(session.getContext(), TimeZone.getDefault());
         final VersitDefinition def = ICalendar.definition;
-		final VersitDefinition.Reader versitReader = def.getReader(icalFile, "UTF-8");
-		final VersitObject rootVersitObject = def.parseBegin(versitReader);
+        final VersitDefinition.Reader versitReader = def.getReader(icalFile, "UTF-8");
+        final VersitObject rootVersitObject = def.parseBegin(versitReader);
         VersitObject versitObject = null;
         versitObject = def.parseChild(versitReader, rootVersitObject);
         return oxContainerConverter.convertAppointment(versitObject);
@@ -127,147 +176,147 @@ public class ParticipantNotifyTest extends TestCase {
 
 
 
-    
+
 
 
     public static final void assertLanguage(final int lang, final Message msg) {
-		assertEquals(lang,guessLanguage(msg));
-	}
+        assertEquals(lang,guessLanguage(msg));
+    }
 
-	public static final void assertNames(final String[] names, final String... expected) {
-		assertNames(Arrays.asList(names), expected);
-	}
+    public static final void assertNames(final String[] names, final String... expected) {
+        assertNames(Arrays.asList(names), expected);
+    }
 
-	public static final void assertNames(final Iterable<String> names, final String... expected) {
-		final Set<String> expectSet = new HashSet<String>(Arrays.asList(expected));
-		for(final String name : names) {
-			assertTrue(name + "is not in " + expectSet.toString(), expectSet.remove(name));
-		}
+    public static final void assertNames(final Iterable<String> names, final String... expected) {
+        final Set<String> expectSet = new HashSet<String>(Arrays.asList(expected));
+        for(final String name : names) {
+            assertTrue("'" + name + "' is not in '" + expectSet.toString() + "'", expectSet.remove(name));
+        }
         assertTrue("Didn't find " + expectSet, expectSet.isEmpty());
     }
 
     protected static void assertIsSubstring(final String expected, final String string) {
         assertTrue("Could not find '"+expected+"' in '"+string+"'", string.indexOf(expected) != -1);
     }
-    
-	
+
+
     public static final void assertAddresses(final Collection<Message> messages, final String...addresses) {
-		final List<String> collected = new ArrayList<String>();
-		for(final Message msg : messages) {
-			collected.addAll(msg.addresses);
-		}
-		assertNames(collected,addresses);
-	}
+        final List<String> collected = new ArrayList<String>();
+        for(final Message msg : messages) {
+            collected.addAll(msg.addresses);
+        }
+        assertNames(collected,addresses);
+    }
 
 
     public Task getTask(final Participant[] participants) throws LdapException, UserException {
-		final Task task = new Task();
-		task.setStartDate(start);
-		task.setEndDate(end);
-		task.setTitle("TestSimple");
-		task.setCreatedBy(session.getUserId());
-		task.setNotification(true);
-		//task.setModifiedBy(session.getUserObject().getId());
-		task.setStatus(Task.NOT_STARTED);
-		task.setPercentComplete(0);
-		
-		
-		task.setParticipants(participants);
-		
-		final List<UserParticipant> userParticipants = new ArrayList<UserParticipant>();
-		for(final Participant p : participants) {
-			switch(p.getType()){
-			case Participant.USER :
-				userParticipants.add((UserParticipant)p);
-				break;
-			case Participant.GROUP :
-				final int[] memberIds = G(p.getIdentifier())[0].getMember();
-				final User[] asUsers = U(memberIds);
-				final Participant[] userParticipantsFromGroup = getParticipants(asUsers, G(), S(), R());
-				for(final Participant up : userParticipantsFromGroup) {
-					userParticipants.add((UserParticipant)up);
-				}
-				break;
-			}
-		}
-		
-		task.setUsers(userParticipants);
-		
-		return task;
-	}
-	
-	public static User[] U(final int...ids) throws UserException {
-		final User[] users = new User[ids.length];
-		int i = 0;
-		for(final int id : ids) {
-			users[i++] = USER_STORAGE.getUser(id);
-		}
-		return users;
-	}
-	
-	public static final Group[] G(final int...ids) throws LdapException {
-		final Group[] groups = new Group[ids.length];
-		int i = 0;
-		for(final int id : ids) {
-			groups[i++] = GROUP_STORAGE.getGroup(id);       
-		}
-		return groups;
-	}
-	
-	public static final String[] S(final String...strings) {
-		return strings;
-	}
-	
-	public static final Resource[] R(final int...ids) {
-		final Resource[] resources = new Resource[ids.length];
-		int i = 0;
-		for(final int id : ids) {
-			resources[i++] = RESOURCE_STORAGE.getResource(id);
-		}
-		return resources;
-	}
-	
-	public static final Participant[] getParticipants(final User[] users, final Group[] groups, final String[] external, final Resource[] resources) {
-		final Participant[] participants = new Participant[users.length+groups.length+external.length+resources.length];
-		
-		int i = 0;
-		
-		for(final User user : users) {
-			final UserParticipant p = new UserParticipant(user.getId());
-			p.setDisplayName(user.getDisplayName());
-			p.setEmailAddress(user.getMail());
-			p.setPersonalFolderId(user.getId()*100); // Imaginary
-			participants[i++] = p;
-		}
-		
-		for(final Group group : groups) {
-			final Participant p = new GroupParticipant(group.getIdentifier());
-			p.setDisplayName(group.getDisplayName());
-			participants[i++] = p;	
-		}
-		
-		for(final String externalMail : external) {
-			final Participant p = new ExternalUserParticipant(externalMail);
-			p.setDisplayName(externalMail);
-			participants[i++] = p;
-		}
-		
-		for(final Resource resource : resources) {
-			final Participant p = new ResourceParticipant(resource.getIdentifier());
-			p.setDisplayName(resource.getDisplayName());
-			participants[i++] = p;
-		}
-		
-		return participants;
-	}
+        final Task task = new Task();
+        task.setStartDate(start);
+        task.setEndDate(end);
+        task.setTitle("TestSimple");
+        task.setCreatedBy(session.getUserId());
+        task.setNotification(true);
+        //task.setModifiedBy(session.getUserObject().getId());
+        task.setStatus(Task.NOT_STARTED);
+        task.setPercentComplete(0);
+
+
+        task.setParticipants(participants);
+
+        final List<UserParticipant> userParticipants = new ArrayList<UserParticipant>();
+        for(final Participant p : participants) {
+            switch(p.getType()){
+            case Participant.USER :
+                userParticipants.add((UserParticipant)p);
+                break;
+            case Participant.GROUP :
+                final int[] memberIds = G(p.getIdentifier())[0].getMember();
+                final User[] asUsers = U(memberIds);
+                final Participant[] userParticipantsFromGroup = getParticipants(asUsers, G(), S(), R());
+                for(final Participant up : userParticipantsFromGroup) {
+                    userParticipants.add((UserParticipant)up);
+                }
+                break;
+            }
+        }
+
+        task.setUsers(userParticipants);
+
+        return task;
+    }
+
+    public static User[] U(final int...ids) throws UserException {
+        final User[] users = new User[ids.length];
+        int i = 0;
+        for(final int id : ids) {
+            users[i++] = USER_STORAGE.getUser(id);
+        }
+        return users;
+    }
+
+    public static final Group[] G(final int...ids) throws LdapException {
+        final Group[] groups = new Group[ids.length];
+        int i = 0;
+        for(final int id : ids) {
+            groups[i++] = GROUP_STORAGE.getGroup(id);
+        }
+        return groups;
+    }
+
+    public static final String[] S(final String...strings) {
+        return strings;
+    }
+
+    public static final Resource[] R(final int...ids) {
+        final Resource[] resources = new Resource[ids.length];
+        int i = 0;
+        for(final int id : ids) {
+            resources[i++] = RESOURCE_STORAGE.getResource(id);
+        }
+        return resources;
+    }
+
+    public static final Participant[] getParticipants(final User[] users, final Group[] groups, final String[] external, final Resource[] resources) {
+        final Participant[] participants = new Participant[users.length+groups.length+external.length+resources.length];
+
+        int i = 0;
+
+        for(final User user : users) {
+            final UserParticipant p = new UserParticipant(user.getId());
+            p.setDisplayName(user.getDisplayName());
+            p.setEmailAddress(user.getMail());
+            p.setPersonalFolderId(user.getId()*100); // Imaginary
+            participants[i++] = p;
+        }
+
+        for(final Group group : groups) {
+            final Participant p = new GroupParticipant(group.getIdentifier());
+            p.setDisplayName(group.getDisplayName());
+            participants[i++] = p;
+        }
+
+        for(final String externalMail : external) {
+            final Participant p = new ExternalUserParticipant(externalMail);
+            p.setDisplayName(externalMail);
+            participants[i++] = p;
+        }
+
+        for(final Resource resource : resources) {
+            final Participant p = new ResourceParticipant(resource.getIdentifier());
+            p.setDisplayName(resource.getDisplayName());
+            participants[i++] = p;
+        }
+
+        return participants;
+    }
 
     @Override
-	public void setUp() throws Exception {
-		
-		Init.startServer();
+    public void setUp() throws Exception {
+
+        Init.startServer();
         final String templates = TestInit.getTestProperty("templatePath");
-		TemplateListResourceBundle.setTemplatePath(new File(templates));
-		
+        TemplateListResourceBundle.setTemplatePath(new File(templates));
+
 
         final Context ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext"));
         final SessionObject sessObj = new SessionObject("bla");
@@ -281,21 +330,21 @@ public class ParticipantNotifyTest extends TestCase {
         // session.setUserConfiguration(new UserConfigurationFactory().getConfiguration(1));
 
         ParticipantNotify.messageSender = notify;
-        
+
         // Set default Sender Address for Testuser
         UserSettingMail usm = new UserSettingMail(session.getUserId(), session.getContextId());
         usm.setSendAddr("default@test");
-        
-	    NotificationPool.getInstance().clear();
+
+        NotificationPool.getInstance().clear();
     }
-	
-	@Override
-	public void tearDown() throws Exception {
-		notify.clearMessages();
+
+    @Override
+    public void tearDown() throws Exception {
+        notify.clearMessages();
         Init.stopServer();
     }
-	
-	protected String[] parseParticipants(final Message msg) {
+
+    protected String[] parseParticipants(final Message msg) {
         final List<String> participants = new ArrayList<String>();
         String[] lines = getLines(msg, "Teilnehmer", "Ressourcen");
         for(final String line : lines) {
@@ -306,71 +355,71 @@ public class ParticipantNotifyTest extends TestCase {
             participants.add(line);
         }
         return participants.toArray(new String[participants.size()]);
-	}
+    }
 
-	protected static int guessLanguage(final Message msg) {
-		final String[] german = new String[]{"Aufgabe", "erstellt", "ge\u00fcndert", "entfernt"};
-		final String[] french = new String[]{"t\u00e2che", "cr\u00e9e", "modifi\u00e9", "supprim\u00e9" };
-		for(final String g : german) {
-			if(msg.messageTitle.contains(g)) {
-				return DE;
-			}
-		}
-		for(final String f : french) {
-			if(msg.messageTitle.contains(f)) {
-				return FR;
-			}
-		}
-		return EN;
-	}
-	
-	protected String[] getLines(final Message msg, final String from, final String to) {
-		boolean collect = false;
-		final List<String> collector = new ArrayList<String>();
-		final String[] allLines = ((String) msg.message).split("\n");
-		for(String line : allLines) {
-			line = line.trim();
-			if(line.startsWith(to)) {
-				break;
-			}
-			
-			if(collect) {
-				if(!"".equals(line)&&!line.matches("=+")) {
-					collector.add(line);
-				}
-			}
-			
-			if(line.startsWith(from)) {
-				collect = true;
-			}
-			
-		}
-		return collector.toArray(new String[collector.size()]);
-	}
+    protected static int guessLanguage(final Message msg) {
+        final String[] german = new String[]{"Aufgabe", "erstellt", "ge\u00fcndert", "entfernt"};
+        final String[] french = new String[]{"t\u00e2che", "cr\u00e9e", "modifi\u00e9", "supprim\u00e9" };
+        for(final String g : german) {
+            if(msg.messageTitle.contains(g)) {
+                return DE;
+            }
+        }
+        for(final String f : french) {
+            if(msg.messageTitle.contains(f)) {
+                return FR;
+            }
+        }
+        return EN;
+    }
+
+    protected String[] getLines(final Message msg, final String from, final String to) {
+        boolean collect = false;
+        final List<String> collector = new ArrayList<String>();
+        final String[] allLines = ((String) msg.message).split("\n");
+        for(String line : allLines) {
+            line = line.trim();
+            if(line.startsWith(to)) {
+                break;
+            }
+
+            if(collect) {
+                if(!"".equals(line)&&!line.matches("=+")) {
+                    collector.add(line);
+                }
+            }
+
+            if(line.startsWith(from)) {
+                collect = true;
+            }
+
+        }
+        return collector.toArray(new String[collector.size()]);
+    }
 
 
-	protected static final class Message {
-		public String messageTitle;
-		public Object message;
-		public List<String> addresses;
-		public int folderId;
+    protected static final class Message {
+        public String messageTitle;
+        public Object message;
+        public List<String> addresses;
+        public int folderId;
         protected final boolean internal;
         public Type overrideType;
         public String fromAddr;
-        
+
         public void setFromAddr(String addr) {
             fromAddr = addr;
         }
-        
+
         public String getFromAddr() {
             return fromAddr;
         }
 
         public Message(final String messageTitle, final Object message, final List<String>addresses, final int folderId, final boolean internal, State.Type overrideType) {
-			this.messageTitle = messageTitle;
-			this.message = message;
-			this.addresses = addresses;
-			this.folderId = folderId;
+            this.messageTitle = messageTitle;
+            this.message = message;
+            this.addresses = addresses;
+            this.folderId = folderId;
             this.internal = internal;
             this.overrideType = overrideType;
         }
@@ -394,63 +443,63 @@ public class ParticipantNotifyTest extends TestCase {
             sb.append(message);
             return sb.toString();
         }
-	}
-	
-	protected static final class TestParticipantNotify extends ParticipantNotify {
+    }
 
-		protected final List<Message> messageCollector = new ArrayList<Message>();
-		
-		public boolean realUsers = false;
-		
-		@Override
-		protected Group[] resolveGroups(final Context ctx, final int... ids) throws LdapException {
-			return G(ids);
-		}
+    protected static final class TestParticipantNotify extends ParticipantNotify {
 
-		@Override
-		protected User[] resolveUsers(final Context ctx, final int... ids) throws LdapException {
-		    if (realUsers) {
-		        return super.resolveUsers(ctx, ids);
-		    }
-			try {
+        protected final List<Message> messageCollector = new ArrayList<Message>();
+
+        public boolean realUsers = false;
+
+        @Override
+        protected Group[] resolveGroups(final Context ctx, final int... ids) throws LdapException {
+            return G(ids);
+        }
+
+        @Override
+        protected User[] resolveUsers(final Context ctx, final int... ids) throws LdapException {
+            if (realUsers) {
+                return super.resolveUsers(ctx, ids);
+            }
+            try {
                 return U(ids);
             } catch (final UserException e) {
                 throw new LdapException(e);
             }
-		}
+        }
 
-		@Override
-		protected Resource[] resolveResources(final Context ctx, final int...ids) throws LdapException{
-			return R(ids);
-		}
-		
-		public List<Message> getMessages(){
+        @Override
+        protected Resource[] resolveResources(final Context ctx, final int...ids) throws LdapException{
+            return R(ids);
+        }
+
+        public List<Message> getMessages(){
             NotificationPool.getInstance().sendAllMessages();
             return messageCollector;
-		}
-		
-		public void clearMessages(){
-			messageCollector.clear();
-		}	
-		
-		@Override
-		protected UserConfiguration getUserConfiguration(final int id, final int[] groups, final Context context) throws SQLException {
-			return USER_CONFIGS.getConfiguration(id);
-		}
-		
-		@Override
-		protected UserSettingMail getUserSettingMail(final int id, final Context context) throws OXException {
-			return USER_CONFIGS.getSetting(id);
-		}
+        }
 
-		@Override
-		protected void sendMessage(MailMessage msg, final ServerSession session, final CalendarObject obj, final State state, final boolean suppressOXReminderHeader) {
-			Message m = new Message(msg.title, msg.message, msg.addresses, msg.folderId, msg.internal, msg.overrideType);
-			
-			String fromAddr;
-	        String senderSource = NotificationConfig.getProperty(NotificationProperty.FROM_SOURCE, "primaryMail");
-	        if (senderSource.equals("defaultSenderAddress")) {               
-	            try {
+        public void clearMessages(){
+            messageCollector.clear();
+        }
+
+        @Override
+        protected UserConfiguration getUserConfiguration(final int id, final int[] groups, final Context context) throws SQLException {
+            return USER_CONFIGS.getConfiguration(id);
+        }
+
+        @Override
+        protected UserSettingMail getUserSettingMail(final int id, final Context context) throws OXException {
+            return USER_CONFIGS.getSetting(id);
+        }
+
+        @Override
+        protected void sendMessage(MailMessage msg, final ServerSession session, final CalendarObject obj, final State state, final boolean suppressOXReminderHeader) {
+            Message m = new Message(msg.title, msg.message, msg.addresses, msg.folderId, msg.internal, msg.overrideType);
+
+            String fromAddr;
+            String senderSource = NotificationConfig.getProperty(NotificationProperty.FROM_SOURCE, "primaryMail");
+            if (senderSource.equals("defaultSenderAddress")) {
+                try {
                     fromAddr = getUserSettingMail(session.getUserId(), session.getContext()).getSendAddr();
                 } catch (OXException e) {
                     try {
@@ -459,17 +508,17 @@ public class ParticipantNotifyTest extends TestCase {
                         fromAddr = "User not found";
                     }
                 }
-	        } else {
-	            try {
+            } else {
+                try {
                     fromAddr = USER_STORAGE.getUser(session.getUserId()).getMail();
                 } catch (UserException e) {
                     fromAddr = "User not found";
                 }
-	        } 
+            }
 
-	        m.setFromAddr(fromAddr);
-		    messageCollector.add(m);
-		}
+            m.setFromAddr(fromAddr);
+            messageCollector.add(m);
+        }
 
         @Override
         protected String getFolderName(final int folderId, final Locale locale, final OXFolderAccess access) {
@@ -487,16 +536,16 @@ public class ParticipantNotifyTest extends TestCase {
         }
     }
 
-	protected static final class TestLinkableState extends LinkableState {
+    protected static final class TestLinkableState extends LinkableState {
 
-		protected int module;
+        protected int module;
 
-		public void setModule(final int module) {
-			this.module = module;
+        public void setModule(final int module) {
+            this.module = module;
 }
-		public int getModule() {
-			return module;
-		}
+        public int getModule() {
+            return module;
+        }
 
         public void modifyInternal(final MailObject mail, final CalendarObject obj, final ServerSession sess) {
 
@@ -507,43 +556,43 @@ public class ParticipantNotifyTest extends TestCase {
         }
 
         public boolean sendMail(final UserSettingMail userSettingMail, int owner, int participant, int modificationUser) {
-			// TODO Auto-generated method stub
-			return false;
-		}
+            // TODO Auto-generated method stub
+            return false;
+        }
 
-		@Override
-		public void loadTemplate() {
-		}
-		
-		public void setTemplateString(final String template) {
-			object_link_template = new StringTemplate(template);
-		}
-		public DateFormat getDateFormat(final Locale locale) {
-			// TODO Auto-generated method stub
-			return null;
-		}
-		public TemplateReplacement getAction() {
-			// TODO Auto-generated method stub
-			return null;
-		}
-		public TemplateReplacement getConfirmationAction() {
-			// TODO Auto-generated method stub
-			return null;
-		}
-		public Template getTemplate() {
-			// TODO Auto-generated method stub
-			return null;
-		}
-		public Type getType() {
-			// TODO Auto-generated method stub
-			return null;
-		}
+        @Override
+        public void loadTemplate() {
+        }
+
+        public void setTemplateString(final String template) {
+            object_link_template = new StringTemplate(template);
+        }
+        public DateFormat getDateFormat(final Locale locale) {
+            // TODO Auto-generated method stub
+            return null;
+        }
+        public TemplateReplacement getAction() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+        public TemplateReplacement getConfirmationAction() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+        public Template getTemplate() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+        public Type getType() {
+            // TODO Auto-generated method stub
+            return null;
+        }
         public boolean onlyIrrelevantFieldsChanged(CalendarObject oldObj, CalendarObject newObj) {
             // TODO Auto-generated method stub
             return false;
         }
-		
-	}
+
+    }
 
     protected static class TestMailObject extends MailObject{
         protected InputStream theInputStream;
@@ -556,7 +605,7 @@ public class ParticipantNotifyTest extends TestCase {
 
 
         @Override
-		public void addFileAttachment(final ContentType contentType, final String fileName, final InputStream inputStream) throws MailException {
+        public void addFileAttachment(final ContentType contentType, final String fileName, final InputStream inputStream) throws MailException {
             this.theContentType = contentType;
             this.theFilename = fileName;
             this.theInputStream = inputStream;
