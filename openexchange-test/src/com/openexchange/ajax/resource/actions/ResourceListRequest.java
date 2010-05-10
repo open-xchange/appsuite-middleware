@@ -62,93 +62,93 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
  * {@link ResourceListRequest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class ResourceListRequest extends AbstractResourceRequest<ResourceListResponse> {
 
-	private final boolean failOnError;
+    private final boolean failOnError;
 
-	private final int[] ids;
+    private final int[] ids;
 
-	/**
-	 * Initializes a new {@link ResourceListRequest}
-	 * 
-	 * @param failOnError
-	 *            <code>true</code> to fail on error; otherwise
-	 *            <code>false</code>
-	 */
-	public ResourceListRequest(final int[] ids, final boolean failOnError) {
-		super();
-		this.ids = ids;
-		this.failOnError = failOnError;
-	}
+    /**
+     * Initializes a new {@link ResourceListRequest}
+     *
+     * @param failOnError
+     *            <code>true</code> to fail on error; otherwise
+     *            <code>false</code>
+     */
+    public ResourceListRequest(final int[] ids, final boolean failOnError) {
+        super();
+        this.ids = ids;
+        this.failOnError = failOnError;
+    }
 
-	public ResourceListRequest(final int[] ids) {
-	    this(ids, true);
-	}
+    public ResourceListRequest(final int[] ids) {
+        this(ids, true);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-	 */
-	public Object getBody() throws JSONException {
-		final JSONArray data = new JSONArray();
-		for (final int id : ids) {
-			final JSONObject jo = new JSONObject();
-			jo.put(AJAXServlet.PARAMETER_ID, id);
-			data.put(jo);
-		}
-		return data;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
+     */
+    public Object getBody() throws JSONException {
+        final JSONArray data = new JSONArray();
+        for (final int id : ids) {
+            final JSONObject jo = new JSONObject();
+            jo.put(AJAXServlet.PARAMETER_ID, id);
+            data.put(jo);
+        }
+        return data;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-	 */
-	public Method getMethod() {
-		return Method.PUT;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
+     */
+    public Method getMethod() {
+        return Method.PUT;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-	 */
-	public Parameter[] getParameters() {
-		final List<Parameter> params = new ArrayList<Parameter>();
-		params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST));
-		return params.toArray(new Parameter[params.size()]);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
+     */
+    public Parameter[] getParameters() {
+        final List<Parameter> params = new ArrayList<Parameter>();
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST));
+        return params.toArray(new Parameter[params.size()]);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-	 */
-	public ResourceListParser getParser() {
-		return new ResourceListParser(failOnError);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
+     */
+    public ResourceListParser getParser() {
+        return new ResourceListParser(failOnError);
+    }
 
-	private static final class ResourceListParser extends AbstractAJAXParser<ResourceListResponse> {
+    private static final class ResourceListParser extends AbstractAJAXParser<ResourceListResponse> {
 
-		/**
-		 * Default constructor.
-		 */
-		ResourceListParser(final boolean failOnError) {
-			super(failOnError);
-		}
+        /**
+         * Default constructor.
+         */
+        ResourceListParser(final boolean failOnError) {
+            super(failOnError);
+        }
 
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		protected ResourceListResponse createResponse(final Response response) throws JSONException {
-			return new ResourceListResponse(response);
-		}
-	}
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        protected ResourceListResponse createResponse(final Response response) throws JSONException {
+            return new ResourceListResponse(response);
+        }
+    }
 
 }
