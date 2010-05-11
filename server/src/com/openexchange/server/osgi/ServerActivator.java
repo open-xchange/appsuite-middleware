@@ -112,6 +112,7 @@ import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.contact.ContactInterfaceProvider;
 import com.openexchange.groupware.contact.datahandler.ContactInsertDataHandler;
+import com.openexchange.groupware.contact.datahandler.ContactJSONDataHandler;
 import com.openexchange.groupware.contact.datasource.ContactDataSource;
 import com.openexchange.groupware.contact.datasource.ContactImageDataSource;
 import com.openexchange.groupware.contact.internal.ContactInterfaceDiscoveryServiceImpl;
@@ -549,6 +550,11 @@ public final class ServerActivator extends DeferredActivator {
             final Dictionary<Object, Object> props = new Hashtable<Object, Object>();
             props.put(STR_IDENTIFIER, "com.openexchange.contact");
             registrationList.add(context.registerService(DataHandler.class.getName(), new ContactInsertDataHandler(), props));
+        }
+        {
+            final Dictionary<Object, Object> props = new Hashtable<Object, Object>();
+            props.put(STR_IDENTIFIER, "com.openexchange.contact.json");
+            registrationList.add(context.registerService(DataHandler.class.getName(), new ContactJSONDataHandler(), props));
         }
         {
             final Dictionary<Object, Object> props = new Hashtable<Object, Object>();

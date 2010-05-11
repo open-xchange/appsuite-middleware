@@ -1,3 +1,7 @@
+* 2010-05-11 - viktor.pracht@open-xchange.com
+
+  - Bugfix #15507: Opening iCal attachments from invitation e-mail the content is imported immediately
+
 * 2010-05-07 - marcus.klein@open-xchange.com
 
  - Bugfix #16039: Corrected cache initialization to fix not working cache invalidation. More detailed logging if problem occur.
