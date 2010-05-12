@@ -60,8 +60,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import org.apache.jcs.engine.control.CompositeCacheConfigurator;
 import org.apache.jcs.engine.control.CompositeCacheManager;
 import com.openexchange.caching.CacheException;
 import com.openexchange.config.ConfigurationService;
@@ -79,6 +78,10 @@ public final class JCSCacheServiceInit {
     private static final String PROP_CACHE_CONF_FILE = "com.openexchange.caching.configfile";
 
     private final static String DEFAULT_REGION = "jcs.default";
+
+    private static final String REGION_PREFIX = "jcs.region.";
+
+    private static final String AUX_PREFIX = "jcs.auxiliary.";
 
     private static JCSCacheServiceInit SINGLETON;
 
@@ -121,6 +124,21 @@ public final class JCSCacheServiceInit {
     private Properties props;
 
     /**
+     * The list of default auxiliary names.
+     */
+    private final Set<String> auxiliaryNames;
+
+    /**
+     * The auxiliary properties.
+     */
+    private Properties auxiliaryProps;
+
+    /**
+     * The cache configurator.
+     */
+    private CompositeCacheConfigurator configurator;
+
+    /**
      * Atomic boolean to keep track of initialization status
      */
     private final AtomicBoolean started;
@@ -136,6 +154,7 @@ public final class JCSCacheServiceInit {
     private JCSCacheServiceInit() {
         super();
         started = new AtomicBoolean();
+        auxiliaryNames = new HashSet<String>(4);
     }
 
     private static Properties loadProperties(final String cacheConfigFile) throws CacheException {
@@ -162,33 +181,55 @@ public final class JCSCacheServiceInit {
         return props;
     }
 
-    private void configure(final Properties props) throws CacheException {
-        if (this.props == null) {
-            // This should be the initial configuration with cache.ccf
-            this.props = props;
-            checkDefaultAuxiliary();
-            ccmInstance.configure(this.props, false);
-        } else {
-            // Additional caches are added here. Check that already existing caches are not touched.
-            Properties additionalProps = new Properties();
-            for (final Entry<Object, Object> property : props.entrySet()) {
-                String key = (String) property.getKey();
-                String value = (String) property.getValue();
-                if (isDefault(key)) {
-                    LOG.warn("Ignoring default cache configuration property: " + key + '=' + value);
-                } else if (overwritesExisting(key)) {
-                    LOG.warn("Ignoring overwriting existing cache configuration property: " + key + '=' + value);
-                } else {
-                    additionalProps.put(key, value);
+    private void configure(final Properties properties) throws CacheException {
+        synchronized (ccmInstance) {
+            if (null == props) {
+                /*
+                 * This should be the initial configuration with cache.ccf
+                 */
+                props = properties;
+                checkDefaultAuxiliary();
+                auxiliaryProps = getAuxiliaryProps(properties);
+                configurator = ccmInstance.configure(props, false);
+            } else {
+                /*
+                 * Additional caches are added here. Check that already existing caches are not touched.
+                 */
+                if (properties.isEmpty()) {
+                    /*
+                     * Nothing to do.
+                     */
+                    return;
                 }
+                final Properties additionalProps = new Properties();
+                boolean addAuxProps = false;
+                for (final Entry<Object, Object> property : properties.entrySet()) {
+                    final String key = (String) property.getKey();
+                    final String value = (String) property.getValue();
+                    /*
+                     * Check if additional configuration requires any auxiliary cache.
+                     */
+                    addAuxProps |= checkAdditionalAuxiliary(key, value);
+                    if (isDefault(key)) {
+                        LOG.warn(new StringBuilder("Ignoring default cache configuration property: ").append(key).append('=').append(value).toString());
+                    } else if (overwritesExisting(key)) {
+                        LOG.warn(new StringBuilder("Ignoring overwriting existing cache configuration property: ").append(key).append('=').append(
+                            value).toString());
+                    } else if (props.containsKey(key)) {
+                        LOG.warn(new StringBuilder("Ignoring overwriting existing cache configuration property: ").append(key).append('=').append(
+                            value).toString());
+                    } else {
+                        additionalProps.put(key, value);
+                    }
+                }
+                props.putAll(additionalProps);
+                if (addAuxProps) {
+                    additionalProps.putAll(auxiliaryProps);
+                }
+                configurator.doConfigureCaches(additionalProps);
+                // ccmInstance.configure(additionalProps, false);
             }
-            this.props.putAll(additionalProps);
-            ccmInstance.configure(additionalProps, false);
-            //this.props.putAll(props);
         }
-        /*
-         * ... and (re-)configure composite cache manager
-         */
     }
 
     /**
@@ -353,14 +394,10 @@ public final class JCSCacheServiceInit {
         return defaultCacheRegions.contains(regionName);
     }
 
-    final Pattern regionPattern = Pattern.compile("jcs\\.region\\.([a-zA-Z]*)\\.");
-
-    private boolean overwritesExisting(String key) {
-        Matcher matcher = regionPattern.matcher(key);
-        if (matcher.matches()) {
-            String regionName = matcher.group(1);
-            String[] existingRegionNames = ccmInstance.getCacheNames();
-            for (String existingRegionName : existingRegionNames) {
+    private boolean overwritesExisting(final String key) {
+        if (key.startsWith(REGION_PREFIX) && (key.indexOf("attributes") < 0)) {
+            final String regionName = key.substring(REGION_PREFIX.length());
+            for (final String existingRegionName : ccmInstance.getCacheNames()) {
                 if (existingRegionName.equals(regionName)) {
                     return true;
                 }
@@ -369,7 +406,29 @@ public final class JCSCacheServiceInit {
         return false;
     }
 
-    private static boolean isDefault(String key) {
+    private boolean checkAdditionalAuxiliary(final String key, final String value) {
+        /*-
+         * 
+        if (key.startsWith(REGION_PREFIX) && (key.indexOf("attributes") < 0) && (value != null) && (value.length() > 0)) {
+            throw new ElevenException(CacheErrorCode.NO_ADDITIONAL_AUX_REGION, key.substring(REGION_PREFIX.length()), value);
+        }
+         */
+        return (key.startsWith(REGION_PREFIX) && (key.indexOf("attributes") < 0) && (value != null) && (value.length() > 0));
+    }
+
+    private static boolean isDefault(final String key) {
         return key.startsWith(DEFAULT_REGION);
     }
+
+    private Properties getAuxiliaryProps(final Properties properties) {
+        final Properties ret = new Properties();
+        for (final Entry<Object, Object> property : properties.entrySet()) {
+            final String key = (String) property.getKey();
+            if (key.startsWith(AUX_PREFIX)) {
+                ret.put(key, property.getValue());
+            }
+        }
+        return ret;
+    }
+
 }
