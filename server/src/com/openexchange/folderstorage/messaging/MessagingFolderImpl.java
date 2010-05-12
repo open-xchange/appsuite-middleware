@@ -94,7 +94,8 @@ public final class MessagingFolderImpl extends AbstractFolder {
         DRAFTS(DraftsContentType.getInstance(), 14),
         SENT(SentContentType.getInstance(), 15),
         SPAM(SpamContentType.getInstance(), 16),
-        TRASH(TrashContentType.getInstance(), 17);
+        TRASH(TrashContentType.getInstance(), 17),
+        MESSAGING(MessagingContentType.getInstance(), 13);
 
         private final ContentType contentType;
 
@@ -154,7 +155,7 @@ public final class MessagingFolderImpl extends AbstractFolder {
     public MessagingFolderImpl(final MessagingFolder messagingFolder, final int accountId, final String serviceId, final DefaultFolderFullnameProvider fullnameProvider) {
         super();
         final String fullname = messagingFolder.getId();
-        this.id = MailFolderUtility.prepareFullname(accountId, fullname);
+        this.id = serviceId + "://" + accountId;
         this.name = messagingFolder.getName();
         final boolean isRootFolder = messagingFolder.isRootFolder();
         if (isRootFolder) { // Root folder
@@ -184,33 +185,31 @@ public final class MessagingFolderImpl extends AbstractFolder {
         this.nu = messagingFolder.getNewMessageCount();
         this.unread = messagingFolder.getUnreadMessageCount();
         this.deleted = messagingFolder.getDeletedMessageCount();
-        if (messagingFolder.isRootFolder()) {
-            messagingFolderType = MessagingFolderType.ROOT;
-        } else {
-            if (messagingFolder.containsDefaultFolderType()) {
-                messagingFolderType = TYPES.get(messagingFolder.getDefaultFolderType());
-            } else if (null != fullname) {
-                try {
-                    if (fullname.equals(fullnameProvider.getDraftsFolder())) {
-                        messagingFolderType = MessagingFolderType.DRAFTS;
-                    } else if (fullname.equals(fullnameProvider.getINBOXFolder())) {
-                        messagingFolderType = MessagingFolderType.INBOX;
-                    } else if (fullname.equals(fullnameProvider.getSentFolder())) {
-                        messagingFolderType = MessagingFolderType.SENT;
-                    } else if (fullname.equals(fullnameProvider.getSpamFolder())) {
-                        messagingFolderType = MessagingFolderType.SPAM;
-                    } else if (fullname.equals(fullnameProvider.getTrashFolder())) {
-                        messagingFolderType = MessagingFolderType.TRASH;
-                    } else {
-                        messagingFolderType = MessagingFolderType.NONE;
-                    }
-                } catch (final MessagingException e) {
-                    org.apache.commons.logging.LogFactory.getLog(MessagingFolderImpl.class).error(e.getMessage(), e);
+        if (messagingFolder.containsDefaultFolderType()) {
+            messagingFolderType = TYPES.get(messagingFolder.getDefaultFolderType());
+        } else if (null != fullname) {
+            try {
+                if (fullname.equals(fullnameProvider.getDraftsFolder())) {
+                    messagingFolderType = MessagingFolderType.DRAFTS;
+                } else if (fullname.equals(fullnameProvider.getINBOXFolder())) {
+                    messagingFolderType = MessagingFolderType.INBOX;
+                } else if (fullname.equals(fullnameProvider.getSentFolder())) {
+                    messagingFolderType = MessagingFolderType.SENT;
+                } else if (fullname.equals(fullnameProvider.getSpamFolder())) {
+                    messagingFolderType = MessagingFolderType.SPAM;
+                } else if (fullname.equals(fullnameProvider.getTrashFolder())) {
+                    messagingFolderType = MessagingFolderType.TRASH;
+                } else {
                     messagingFolderType = MessagingFolderType.NONE;
                 }
-            } else {
+            } catch (final MessagingException e) {
+                org.apache.commons.logging.LogFactory.getLog(MessagingFolderImpl.class).error(e.getMessage(), e);
                 messagingFolderType = MessagingFolderType.NONE;
             }
+        } else if (messagingFolder.isRootFolder()) {
+            messagingFolderType = MessagingFolderType.ROOT;
+        } else {
+            messagingFolderType = MessagingFolderType.NONE;
         }
         /*
          * Trash folder must not be cacheable
@@ -310,6 +309,7 @@ public final class MessagingFolderImpl extends AbstractFolder {
         m2.put(DefaultFolderType.SENT, MessagingFolderType.SENT);
         m2.put(DefaultFolderType.SPAM, MessagingFolderType.SPAM);
         m2.put(DefaultFolderType.TRASH, MessagingFolderType.TRASH);
+        m2.put(DefaultFolderType.MESSAGING, MessagingFolderType.MESSAGING);
 
         TYPES = Collections.unmodifiableMap(m2);
     }

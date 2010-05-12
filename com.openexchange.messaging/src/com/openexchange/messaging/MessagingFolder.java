@@ -64,7 +64,7 @@ public interface MessagingFolder {
      * The default folder type.
      */
     public static enum DefaultFolderType {
-        NONE, INBOX, DRAFTS, SENT, SPAM, TRASH, CONFIRMED_SPAM, CONFIRMED_HAM;
+        NONE, INBOX, DRAFTS, SENT, SPAM, TRASH, CONFIRMED_SPAM, CONFIRMED_HAM, MESSAGING;
     }
 
     /**

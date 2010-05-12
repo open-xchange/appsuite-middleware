@@ -1,3 +1,7 @@
+* 2010-05-12 - marcus.klein@open-xchange.com
+
+ - Bugfix #16063: Added messaging folder type and changed their identifier to contain the scheme.
+
 * 2010-05-11 - viktor.pracht@open-xchange.com
 
   - Bugfix #15507: Opening iCal attachments from invitation e-mail the content is imported immediately

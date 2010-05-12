@@ -636,6 +636,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
             }
             array.append(FolderObject.SYSTEM_MODULE);
             array.append(FolderObject.UNBOUND);
+            array.append(FolderObject.MESSAGING);
             accessibleModules = array.toArray();
             Arrays.sort(accessibleModules);
             accessibleModulesComputed = true;
