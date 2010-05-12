@@ -64,15 +64,16 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  */
 public class MoveMailRequest extends AbstractMailRequest<UpdateMailResponse> {
 
-    /**
-     * Initializes a new {@link MoveMailRequest}.
-     */
     public MoveMailRequest(String origin, String destination, String mailID, boolean failOnError) {
         super();
         this.origin = origin;
         this.destination = destination;
         this.mailID = mailID;
         this.failOnError = failOnError;
+    }
+
+    public MoveMailRequest(String origin, String destination, String mailID) {
+        this(origin, destination, mailID, true);
     }
 
     private String destination, origin, mailID;
@@ -106,7 +107,7 @@ public class MoveMailRequest extends AbstractMailRequest<UpdateMailResponse> {
         return new AbstractAJAXParser<UpdateMailResponse>(failOnError) {
 
             @Override
-            protected UpdateMailResponse createResponse(final Response response) throws JSONException {
+            protected UpdateMailResponse createResponse(final Response response) {
                 return new UpdateMailResponse(response);
             }
         };

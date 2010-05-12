@@ -76,6 +76,10 @@ public class DeleteRequest extends AbstractMailRequest<DeleteResponse> {
         this(new String[][] {{ folder, id }}, hardDelete);
     }
 
+    public DeleteRequest(String[] folderAndMailId, boolean hardDelete) {
+        this(new String[][] { folderAndMailId }, hardDelete);
+    }
+
     public DeleteRequest(final String[][] folderAndMailIds) {
         this(folderAndMailIds, false);
     }

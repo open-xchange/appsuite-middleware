@@ -95,6 +95,10 @@ public final class GetRequest extends AbstractFolderRequest<GetResponse> {
         this(api, folderIdentifier, FolderObject.ALL_COLUMNS, failOnError);
     }
 
+    public GetRequest(API api, String folderIdentifier) {
+        this(api, folderIdentifier, FolderObject.ALL_COLUMNS, true);
+    }
+
     public GetRequest(API api, int folderId, int[] columns) {
         this(api, String.valueOf(folderId), columns, true);
     }
