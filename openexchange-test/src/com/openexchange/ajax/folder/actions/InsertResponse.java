@@ -90,7 +90,7 @@ public class InsertResponse extends CommonInsertResponse {
      */
     @Override
     public void fillObject(final DataObject obj) {
-        if (!isMailFolder(obj)) {
+        if (!isMailFolder()) {
             obj.setObjectID(getId());
         }
         obj.setLastModified(getTimestamp());
@@ -98,7 +98,7 @@ public class InsertResponse extends CommonInsertResponse {
             obj.setCreationDate(obj.getLastModified());
     }
 
-    private boolean isMailFolder(DataObject obj) {
+    private boolean isMailFolder() {
         return getMailFolderID() != null;
     }
 }
