@@ -53,7 +53,6 @@ import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.FolderFields;
-import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.groupware.container.FolderObject;
 
 /**
@@ -61,7 +60,7 @@ import com.openexchange.groupware.container.FolderObject;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - added additional constructor and handling to allow for the
  *         creation of mail folders
  */
-public class InsertRequest extends AbstractFolderRequest<CommonInsertResponse> {
+public class InsertRequest extends AbstractFolderRequest<InsertResponse> {
 
     private final FolderObject folder;
 

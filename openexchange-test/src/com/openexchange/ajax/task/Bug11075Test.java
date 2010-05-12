@@ -53,6 +53,7 @@ import java.util.Date;
 import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.InsertRequest;
+import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.MultipleRequest;
@@ -89,7 +90,7 @@ public final class Bug11075Test extends AbstractTaskTest {
             inserts[i] = new InsertRequest(API.OX_OLD, createFolder("Bug11075Test_" + i,
                 client.getValues().getUserId()));
         }
-        final MultipleResponse<CommonInsertResponse> mInsert = client.execute(MultipleRequest.create(inserts));
+        final MultipleResponse<InsertResponse> mInsert = client.execute(MultipleRequest.create(inserts));
         final int[] folderIds = new int[inserts.length];
         Date timestamp = new Date(0);
         for (int i = 0; i < folderIds.length; i++) {
