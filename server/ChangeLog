@@ -1,3 +1,7 @@
+* 2010-05-12 - thorben.betten@open-xchange.com
+
+ - Bugfix #16098: Using existing defaults and laterals for later added caches.
+
 * 2010-05-12 - marcus.klein@open-xchange.com
 
  - Bugfix #16063: Added messaging folder type and changed their identifier to contain the scheme.
