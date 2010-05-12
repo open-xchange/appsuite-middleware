@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project name="com.openexchange.caching" default="install" basedir=".">
 
     <!-- Customizable values -->
@@ -50,15 +51,13 @@
     </target>
 
     <target name="compile" depends="prepare">
-        <javac srcdir="${source..}" destdir="${output..}" debug="true"
-            encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
+        <javac srcdir="${source..}" destdir="${output..}" debug="true" encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
             <classpath refid="project.classpath"/>
         </javac>
     </target>
 
     <target name="jar" depends="prepare,compile">
-        <jar jarfile="${tmp.dir}/${bundle.name}"
-            manifest="META-INF/MANIFEST.MF">
+        <jar jarfile="${tmp.dir}/${bundle.name}" manifest="META-INF/MANIFEST.MF">
             <fileset dir="${output..}"/>
             <fileset refid="3rdpartyjars"/>
         </jar>
@@ -72,11 +71,9 @@
 
     <target name="installConfig">
         <mkdir dir="${destdir}/${bundle.d}"/>
-        <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini"
-            message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
+        <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
         <mkdir dir="${destdir}/${adbundle.d}"/>
-        <echo file="${destdir}/${adbundle.d}/${Bundle-SymbolicName}.ini"
-            message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
+        <echo file="${destdir}/${adbundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
     </target>
 
     <target name="installJar" depends="jar">
@@ -101,10 +98,8 @@
                 <exclude name="Todo"/>
             </fileset>
         </copy>
-        <tar destfile="../${composite.name}.tar.gz"
-            basedir="${dist-package}"
-            includes="${composite.name}/"
-             compression="gzip"/>        <!-- dpkg-source does not like anything else -->
+        <!-- dpkg-source does not like anything else -->
+        <tar destfile="../${composite.name}.tar.gz" basedir="${dist-package}" includes="${composite.name}/" compression="gzip"/>
         <delete dir="${dist-package}"/>
     </target>
 
