@@ -61,123 +61,77 @@ import com.openexchange.groupware.AbstractOXException.ProblematicAttribute;
 
 /**
  * This class implements inheritable methods for AJAX responses.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public abstract class AbstractAJAXResponse extends Assert {
 
-	private final Response response;
+    private final Response response;
 
-	private long requestDuration;
+    private long requestDuration;
 
-	private long parseDuration;
+    private long parseDuration;
 
     private List<ConflictObject> conflicts;
 
-	protected AbstractAJAXResponse(final Response response) {
-		super();
-		this.response = response;
-	}
+    protected AbstractAJAXResponse(final Response response) {
+        super();
+        this.response = response;
+    }
 
-	/**
-	 * Gets the sole request's duration in milliseconds
-	 * 
-	 * @return The sole request's duration in milliseconds
-	 */
-	public long getRequestDuration() {
-		return requestDuration;
-	}
+    public long getRequestDuration() {
+        return requestDuration;
+    }
 
-	/**
-	 * Sets the sole request's duration in milliseconds
-	 * 
-	 * @param duration
-	 *            The sole request's duration in milliseconds
-	 */
-	void setRequestDuration(final long duration) {
-		this.requestDuration = duration;
-	}
+    void setRequestDuration(final long duration) {
+        this.requestDuration = duration;
+    }
 
-	/**
-	 * Gets the parse duration of request's JSON data in milliseconds
-	 * 
-	 * @return The parse duration of request's JSON data in milliseconds
-	 */
-	public long getParseDuration() {
-		return parseDuration;
-	}
+    public long getParseDuration() {
+        return parseDuration;
+    }
 
-	/**
-	 * Sets the parse duration of request's JSON data in milliseconds
-	 * 
-	 * @param parseDuration
-	 *            The parse duration of request's JSON data in milliseconds
-	 */
-	void setParseDuration(final long parseDuration) {
-		this.parseDuration = parseDuration;
-	}
+    void setParseDuration(final long parseDuration) {
+        this.parseDuration = parseDuration;
+    }
 
-	/**
-	 * Gets the total duration (request + parse duration)
-	 * 
-	 * @return The total duration
-	 */
-	public long getTotalDuration() {
-		return (requestDuration + parseDuration);
-	}
+    public long getTotalDuration() {
+        return (requestDuration + parseDuration);
+    }
 
-	public Response getResponse() {
-		return response;
-	}
+    public Response getResponse() {
+        return response;
+    }
 
-	public Object getData() {
-		return response.getData();
-	}
+    public Object getData() {
+        return response.getData();
+    }
 
-	/**
-	 * If the server response contains an overall timestamp, it can be get with
-	 * this method.
-	 * 
-	 * @return the timestamp from the response.
-	 */
-	public Date getTimestamp() {
-		return response.getTimestamp();
-	}
+    public Date getTimestamp() {
+        return response.getTimestamp();
+    }
 
-	public boolean hasError() {
-		return response.hasError();
-	}
+    public boolean hasError() {
+        return response.hasError();
+    }
 
-	public AbstractOXException getException() {
-		return response.getException();
-	}
+    public AbstractOXException getException() {
+        return response.getException();
+    }
 
-	public ProblematicAttribute[] getProblematics() {
-	    return response.getException().getProblematics();
-	}
-	
-    /**
-     * 
-     * @return
-     */
+    public ProblematicAttribute[] getProblematics() {
+        return response.getException().getProblematics();
+    }
+
     public List<ConflictObject> getConflicts() {
         return conflicts;
     }
-    
-    /**
-     * 
-     * @param conflicts
-     */
+
     public void setConflicts(List <ConflictObject> conflicts) {
         this.conflicts = conflicts;
     }
-    
-    /**
-     * 
-     * @return
-     */
+
     public boolean hasConflicts() {
         return this.conflicts != null && this.conflicts.size() != 0;
     }
-    
 }
