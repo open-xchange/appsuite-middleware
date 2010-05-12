@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 3
+%define		ox_release 4
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -508,6 +508,16 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed May 12 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16063: Added messaging folder type and changed their identifier to contain the scheme.
+* Tue May 11 2010 - viktor.pracht@open-xchange.com
+  - Bugfix #15507: Opening iCal attachments from invitation e-mail the content is imported immediately
+* Fri May 07 2010 - steffen.templin@open-xchange.com
+ - Bugfix #15300: Added the possibility to use primary mail address or default sender address as from header in notification mails.
+* Fri May 07 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16039: Corrected cache initialization to fix not working cache invalidation. More detailed logging if problem occur.
+* Wed May 05 2010 - marcus.klein@open-xchange.com
+ - Bugfix #15884: Finishing task iterator pre reader even if some problem occurs.
 * Tue May 04 2010 - viktor.pracht@open-xchange.com
   - TA2994 for US4375: Call history
 * Tue May 04 2010 - marcus.klein@open-xchange.com
