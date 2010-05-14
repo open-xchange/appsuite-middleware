@@ -67,6 +67,7 @@ public class ReminderBugTestSuite {
         tests.addTestSuite(Bug5128Test.class);
         tests.addTestSuite(Bug6408Test.class);
         tests.addTestSuite(Bug7590Test.class);
+        tests.addTestSuite(Bug15740Test.class);
         return tests;
     }
 }
