@@ -56,9 +56,11 @@ import org.apache.commons.logging.LogFactory;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
+import com.gargoylesoftware.htmlunit.html.HtmlButton;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlPasswordInput;
+import com.gargoylesoftware.htmlunit.html.HtmlSubmitInput;
 import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionException;
@@ -74,12 +76,12 @@ public class LoginPageByFormActionStep extends AbstractStep<HtmlPage, Object> im
     
     private static Log LOG = LogFactory.getLog(LoginPageByFormActionStep.class);
 
-    private String url, username, password, actionOfLoginForm, nameOfUserField, nameOfPasswordField, linkAvailableAfterLogin, baseUrl;
+    private String url, username, password, actionOfLoginForm, nameOfUserField, nameOfPasswordField, linkAvailableAfterLogin, baseUrl, nameOfSubmit;
 
     private int numberOfForm;
 
     public LoginPageByFormActionStep() {
-
+        nameOfSubmit = "";
     }
 
     public LoginPageByFormActionStep(final String description, final String url, final String username, final String password, final String actionOfLoginForm, final String nameOfUserField, final String nameOfPasswordField, final String linkAvailableAfterLogin, final int numberOfForm, final String baseUrl) {
@@ -93,6 +95,21 @@ public class LoginPageByFormActionStep extends AbstractStep<HtmlPage, Object> im
         this.linkAvailableAfterLogin = linkAvailableAfterLogin;
         this.numberOfForm = numberOfForm;
         this.baseUrl = baseUrl;
+        this.nameOfSubmit = "";
+    }
+    
+    public LoginPageByFormActionStep(final String description, final String url, final String username, final String password, final String actionOfLoginForm, final String nameOfUserField, final String nameOfPasswordField, final String linkAvailableAfterLogin, final int numberOfForm, final String baseUrl, final String nameOfSubmit) {
+        this.description = description;
+        this.url = url;
+        this.username = username;
+        this.password = password;
+        this.actionOfLoginForm = actionOfLoginForm;
+        this.nameOfUserField = nameOfUserField;
+        this.nameOfPasswordField = nameOfPasswordField;
+        this.linkAvailableAfterLogin = linkAvailableAfterLogin;
+        this.numberOfForm = numberOfForm;
+        this.baseUrl = baseUrl;
+        this.nameOfSubmit = nameOfSubmit;
     }
 
     @Override
@@ -115,7 +132,15 @@ public class LoginPageByFormActionStep extends AbstractStep<HtmlPage, Object> im
                 userfield.setValueAttribute(username);
                 final HtmlPasswordInput passwordfield = loginForm.getInputByName(nameOfPasswordField);
                 passwordfield.setValueAttribute(password);
-                final HtmlPage pageAfterLogin = (HtmlPage) loginForm.submit(null);
+                HtmlPage pageAfterLogin;
+                // if there is no submit-element specified use the default submit.
+                if (nameOfSubmit.equals("")){
+                    pageAfterLogin = (HtmlPage) loginForm.submit(null);
+                } else {
+                    HtmlSubmitInput button = (HtmlSubmitInput) loginPage.getElementByName(nameOfSubmit);
+                    pageAfterLogin = button.click();
+                }
+                
                 output = pageAfterLogin;
 
                 boolean linkAvailable = false;
@@ -125,10 +150,12 @@ public class LoginPageByFormActionStep extends AbstractStep<HtmlPage, Object> im
                     }
                 }
                 if (!linkAvailable) {
-                    LOG.error("Page that does not have the link to imply a successful login : " + output.getWebResponse().getContentAsString());
+                    LOG.error("Login for crawler "+ workflow.getSubscription().getDisplayName() +"failed!");
+                    LOG.debug("Page that does not have the link to imply a successful login : " + output.getWebResponse().getContentAsString());
                     throw SubscriptionErrorMessage.INVALID_LOGIN.create();
                 }
                 executedSuccessfully = true;
+//                openPageInBrowser(output);
             }
         } catch (final FailingHttpStatusCodeException e) {
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
@@ -226,5 +253,17 @@ public class LoginPageByFormActionStep extends AbstractStep<HtmlPage, Object> im
     public void setBaseUrl(final String baseUrl) {
         this.baseUrl = baseUrl;
     }
+
+    
+    public String getNameOfSubmit() {
+        return nameOfSubmit;
+    }
+
+    
+    public void setNameOfSubmit(String nameOfSubmit) {
+        this.nameOfSubmit = nameOfSubmit;
+    }
+    
+    
 
 }
