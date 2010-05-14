@@ -128,7 +128,9 @@ public class GetArisingReminder {
                     LOG.error(re.getMessage(), re);
                     continue;
                 }
-                if (appointment.getEndDate().after(new Date())) {
+                if (appointment.containsUntil() && appointment.getUntil().after(new Date())) {
+                    retval.add(reminder);
+                } else if (appointment.getEndDate().after(new Date())) {
                     retval.add(reminder);
                 } else {
                     new DeleteReminder(ctx, reminder).perform();
