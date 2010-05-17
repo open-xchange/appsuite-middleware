@@ -272,7 +272,7 @@ public final class CreatePerformer extends AbstractPerformer {
                         capStorage.getDefaultFolderID(
                             user,
                             FolderStorage.REAL_TREE_ID,
-                            capStorage.getDefaultContentType(),
+                            null == folderContentType ? capStorage.getDefaultContentType() : folderContentType,
                             storageParameters);
                     if (null == realParentId) {
                         /*
