@@ -84,7 +84,7 @@ public final class HttpServiceImpl implements HttpService {
         }
     }
 
-    public void registerServlet(final String alias, final Servlet servlet, @SuppressWarnings("unchecked") final Dictionary initparams, final HttpContext context) throws ServletException, NamespaceException {
+    public void registerServlet(final String alias, final Servlet servlet, @SuppressWarnings("unchecked") final Dictionary initparams, final HttpContext context) throws ServletException {
         try {
             @SuppressWarnings("unchecked") final Dictionary<String, String> dic = initparams;
             HttpServletManager.registerServlet(alias, (HttpServlet) servlet, dic);
