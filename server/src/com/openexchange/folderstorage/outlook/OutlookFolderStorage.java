@@ -86,6 +86,7 @@ import com.openexchange.folderstorage.mail.contentType.DraftsContentType;
 import com.openexchange.folderstorage.mail.contentType.SentContentType;
 import com.openexchange.folderstorage.mail.contentType.SpamContentType;
 import com.openexchange.folderstorage.mail.contentType.TrashContentType;
+import com.openexchange.folderstorage.messaging.MessagingFolderIdentifier;
 import com.openexchange.folderstorage.outlook.sql.Delete;
 import com.openexchange.folderstorage.outlook.sql.Insert;
 import com.openexchange.folderstorage.outlook.sql.Select;
@@ -94,11 +95,17 @@ import com.openexchange.folderstorage.outlook.sql.Utility;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.messaging.MailMessagingService;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
+import com.openexchange.messaging.MessagingAccount;
+import com.openexchange.messaging.MessagingException;
+import com.openexchange.messaging.MessagingFolder;
+import com.openexchange.messaging.MessagingService;
+import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
@@ -1136,10 +1143,67 @@ public final class OutlookFolderStorage implements FolderStorage {
                     accountSubfolderIDs = new ArrayList<String>(accounts.size());
                     for (final MailAccount mailAccount : accounts) {
                         if (!mailAccount.isDefaultAccount()) {
-                            accountSubfolderIDs.add(MailFolderUtility.prepareFullname(mailAccount.getId(), MailFolder.DEFAULT_FOLDER_ID));
+                            if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(mailAccount.getMailProtocol())) {
+                                /*
+                                 * Ensure Unified INBOX is enabled; meaning at least one account is subscribed to Unified INBOX
+                                 */
+                                final UnifiedINBOXManagement uim = OutlookServiceRegistry.getServiceRegistry().getService(UnifiedINBOXManagement.class);
+                                try {
+                                    if (null != uim && uim.isEnabled(user.getId(), contextId)) {
+                                        accountSubfolderIDs.add(MailFolderUtility.prepareFullname(mailAccount.getId(), MailFolder.DEFAULT_FOLDER_ID));
+                                    }
+                                } catch (final MailAccountException e) {
+                                    LOG.error(e.getMessage(), e);
+                                }
+                            } else {
+                                accountSubfolderIDs.add(MailFolderUtility.prepareFullname(mailAccount.getId(), MailFolder.DEFAULT_FOLDER_ID));
+                            }
                         }
                     }
-                    // TODO: No Unified INBOX if not enabled
+                }
+            }
+        }
+        /*
+         * Obtain external messaging accounts with running thread
+         */
+        final List<String> messagingSubfolderIDs;
+        {
+            /*
+             * Messaging accounts; except mail
+             */
+            final List<MessagingAccount> messagingAccounts = new ArrayList<MessagingAccount>();
+            {
+                final MessagingServiceRegistry msr =
+                    OutlookServiceRegistry.getServiceRegistry().getService(MessagingServiceRegistry.class);
+                if (null != msr) {
+                    try {
+                        final List<MessagingService> allServices = msr.getAllServices();
+                        for (final MessagingService messagingService : allServices) {
+                            if (!messagingService.getId().equals(MailMessagingService.ID)) {
+                                /*
+                                 * Only non-mail services
+                                 */
+                                try {
+                                    messagingAccounts.addAll(messagingService.getAccountManager().getAccounts(parameters.getSession()));
+                                } catch (MessagingException e) {
+                                    LOG.error(e.getMessage(), e);
+                                }
+                            }
+                        }
+                    } catch (MessagingException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
+                }
+                if (!messagingAccounts.isEmpty()) {
+                    final int sz = messagingAccounts.size();
+                    messagingSubfolderIDs = new ArrayList<String>(sz);
+                    for (int i = 0; i < sz; i++) {
+                        final MessagingAccount ma = messagingAccounts.get(i);
+                        final MessagingFolderIdentifier mfi = new MessagingFolderIdentifier(ma.getMessagingService().getId(), ma.getId(), MessagingFolder.ROOT_FULLNAME);
+                        messagingSubfolderIDs.add(mfi.toString());
+                    }
+                } else {
+                    messagingSubfolderIDs = Collections.emptyList();
                 }
             }
         }
@@ -1176,6 +1240,10 @@ public final class OutlookFolderStorage implements FolderStorage {
          * Add external mail accounts
          */
         sortedIDs.addAll(accountSubfolderIDs);
+        /*
+         * Add external messaging accounts
+         */
+        sortedIDs.addAll(messagingSubfolderIDs);
         final int size = sortedIDs.size();
         final SortableId[] ret = new SortableId[size];
         for (int i = 0; i < size; i++) {
