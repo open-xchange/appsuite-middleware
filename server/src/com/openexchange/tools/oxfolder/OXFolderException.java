@@ -475,10 +475,9 @@ public class OXFolderException extends OXException {
          */
         INVALID_DATA("Folder contains invalid data: \"%1$s\"", Category.USER_INPUT, 76),
         /**
-         * A private folder with the same name %1$s has already been shared to identical user(s) (Either direct or affected user(s) are
-         * members of a group to whom the folder is shared).\nPlease enter another name to share the folder.
+         * You already share a personal folder named "%1$s" with the same user. You can not share two folders with exactly the same name with a user. Please rename the folder before sharing it with this user.
          */
-        SIMILAR_NAMED_SHARED_FOLDER("A private folder with the same name %1$s has already been shared to identical user(s) " + "(Either direct or affected user(s) are members of a group to whom the folder is shared)." + "\nPlease enter another name to share the folder.", Category.USER_INPUT, 77),
+        SIMILAR_NAMED_SHARED_FOLDER("You already share a personal folder named \"%1$s\" with the same user. You can not share two folders with exactly the same name with a user. Please rename the folder before sharing it with this user.", Category.USER_INPUT, 77),
         /**
          * Folder module cannot be updated since folder is not empty
          */

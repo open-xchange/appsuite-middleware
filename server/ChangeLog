@@ -1,3 +1,7 @@
+* 2010-05-12 - thorben.betten@open-xchange.com
+
+ - Bugfix #15963: Changed text of error message
+
 * 2010-05-14 - steffen.templin@open-xchange.com
 
 - Bugfix #15740: Now using getUntil() of appointments for deleting old reminders.
