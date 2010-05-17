@@ -204,7 +204,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                 } else {
                     parentPermission = CalculatePermission.calculate(parent, getSession(), getAllowedContentTypes());
                 }
-                if (parentPermission.getFolderPermission() <= Permission.NO_PERMISSIONS) {
+                if (!isReadable(parentPermission, all, parent)) {
                     throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
                         parentId,
                         getUser().getDisplayName(),
@@ -430,7 +430,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                             } else {
                                 userPermission = CalculatePermission.calculate(subfolder, getSession(), getAllowedContentTypes());
                             }
-                            if (userPermission.getFolderPermission() >= Permission.READ_FOLDER) {
+                            if (isReadable(userPermission, all, subfolder)) {
                                 subfolders[index] =
                                     getUserizedFolder(subfolder, userPermission, treeId, all, true, newParameters, openedStorages);
                             }
@@ -451,6 +451,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                         throw FolderException.newUnexpectedException(e);
                     }
                 }
+
             });
         }
         /*
@@ -458,6 +459,14 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
          */
         ThreadPools.pollCompletionService(completionService, size, getMaxRunningMillis(), FACTORY);
         return trimArray(subfolders);
+    }
+
+    protected static boolean isReadable(final Permission permission, final boolean all, final Folder folder) {
+        if (permission.getFolderPermission() >= Permission.READ_FOLDER) {
+            return true;
+        }
+        final String[] subfolderIDs = folder.getSubfolderIDs();
+        return all && (null == subfolderIDs || subfolderIDs.length > 0);
     }
 
     private static final int DEFAULT_MAX_RUNNING_MILLIS = 120000;
