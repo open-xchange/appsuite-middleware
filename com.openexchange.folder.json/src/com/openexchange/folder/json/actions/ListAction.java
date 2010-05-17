@@ -99,7 +99,11 @@ public final class ListAction extends AbstractFolderAction {
             throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, "parent");
         }
         final int[] columns = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
-        final boolean all = Boolean.parseBoolean(request.getParameter(AJAXServlet.PARAMETER_ALL));
+        final boolean all;
+        {
+            final String parameter = request.getParameter(AJAXServlet.PARAMETER_ALL);
+            all = "1".equals(parameter) || Boolean.parseBoolean(parameter);
+        }
         final String timeZoneId = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
         final java.util.List<ContentType> allowedContentTypes = parseOptionalContentTypeArrayParameter("allowed_modules", request);
         /*
