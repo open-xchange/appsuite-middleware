@@ -86,4 +86,8 @@ public class MessagingContentType implements ContentType {
         return 13;
     }
 
+    public int getPriority() {
+        return 0;
+    }
+
 }

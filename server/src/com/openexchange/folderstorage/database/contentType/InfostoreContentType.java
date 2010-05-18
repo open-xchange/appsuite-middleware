@@ -86,4 +86,8 @@ public final class InfostoreContentType implements ContentType {
         return 8;
     }
 
+    public int getPriority() {
+        return 0;
+    }
+
 }

@@ -86,4 +86,8 @@ public final class CalendarContentType implements ContentType {
         return 2;
     }
 
+    public int getPriority() {
+        return 0;
+    }
+
 }

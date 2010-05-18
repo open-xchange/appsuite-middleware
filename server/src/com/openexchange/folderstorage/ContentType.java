@@ -72,4 +72,11 @@ public interface ContentType {
      */
     String toString();
 
+    /**
+     * Gets the priority.
+     * 
+     * @return The priority.
+     */
+    int getPriority();
+
 }

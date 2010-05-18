@@ -74,4 +74,9 @@ public final class DraftsContentType extends MailContentType {
         super();
     }
 
+    @Override
+    public int getPriority() {
+        return 1;
+    }
+
 }

@@ -282,8 +282,7 @@ public final class CreatePerformer extends AbstractPerformer {
                             capStorage.getDefaultContentType(),
                             FolderStorage.REAL_TREE_ID);
                     }
-                    
-                    
+
                     // TODO: Check permission for obtained default folder ID?
                     final Folder clone4Real = (Folder) toCreate.clone();
                     clone4Real.setParentID(realParentId);
@@ -316,6 +315,26 @@ public final class CreatePerformer extends AbstractPerformer {
                  * 2. Create in virtual storage
                  */
                 virtualStorage.createFolder(toCreate, storageParameters);
+                /*
+                 * 3. Update parent's last-modified time stamp
+                 */
+                final boolean started = realStorage.startTransaction(storageParameters, true);
+                try {
+                    realStorage.updateLastModified(System.currentTimeMillis(), FolderStorage.REAL_TREE_ID, parentId, storageParameters);
+                    if (started) {
+                        realStorage.commitTransaction(storageParameters);
+                    }
+                } catch (final FolderException e) {
+                    if (started) {
+                        realStorage.rollback(storageParameters);
+                    }
+                    throw e;
+                } catch (final Exception e) {
+                    if (started) {
+                        realStorage.rollback(storageParameters);
+                    }
+                    throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+                }
             }
         }
         return toCreate.getID();

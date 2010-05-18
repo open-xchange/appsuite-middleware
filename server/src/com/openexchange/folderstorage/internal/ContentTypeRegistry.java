@@ -233,24 +233,31 @@ public final class ContentTypeRegistry implements ContentTypeDiscoveryService {
             /*
              * Iterate general storages' content types
              */
+            ContentType candidate = null;
             for (final FolderStorage genStorage : generalStorages) {
                 final FolderStorage folderStorage = genStorage;
                 final ContentType[] supportedContentTypes = folderStorage.getSupportedContentTypes();
                 for (int i = 0; i < supportedContentTypes.length; i++) {
                     final ContentType supportedContentType = supportedContentTypes[i];
-                    if (supportedContentType.toString().equals(contentTypeString)) {
-                        return supportedContentType;
+                    if (supportedContentType.toString().equals(contentTypeString) && (null == candidate || candidate.getPriority() > supportedContentType.getPriority())) {
+                        candidate = supportedContentType;
                     }
                 }
+            }
+            if (candidate != null) {
+                return candidate;
             }
             /*
              * Iterate concrete content types
              */
             final Set<ContentType> concreteCTs = entry.getValue().getConcreteStorages().keySet();
             for (final ContentType contentType : concreteCTs) {
-                if (contentType.toString().equals(contentTypeString)) {
-                    return contentType;
+                if (contentType.toString().equals(contentTypeString) && (null == candidate || candidate.getPriority() > contentType.getPriority())) {
+                    candidate = contentType;
                 }
+            }
+            if (candidate != null) {
+                return candidate;
             }
         }
         return null;

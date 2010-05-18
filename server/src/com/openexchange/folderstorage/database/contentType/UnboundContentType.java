@@ -86,4 +86,8 @@ public final class UnboundContentType implements ContentType {
         return 4;
     }
 
+    public int getPriority() {
+        return 0;
+    }
+
 }

@@ -74,4 +74,9 @@ public final class SentContentType extends MessagingContentType {
         super();
     }
 
+    @Override
+    public int getPriority() {
+        return 1;
+    }
+
 }

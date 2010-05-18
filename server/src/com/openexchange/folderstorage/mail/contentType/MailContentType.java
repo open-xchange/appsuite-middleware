@@ -86,4 +86,8 @@ public class MailContentType implements ContentType {
         return 7;
     }
 
+    public int getPriority() {
+        return 0;
+    }
+
 }

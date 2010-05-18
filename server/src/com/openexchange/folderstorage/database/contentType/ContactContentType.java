@@ -86,4 +86,8 @@ public final class ContactContentType implements ContentType {
         return 3;
     }
 
+    public int getPriority() {
+        return 0;
+    }
+
 }

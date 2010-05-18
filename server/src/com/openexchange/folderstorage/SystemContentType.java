@@ -84,4 +84,8 @@ public final class SystemContentType implements ContentType {
         return 5;
     }
 
+    public int getPriority() {
+        return 0;
+    }
+
 }

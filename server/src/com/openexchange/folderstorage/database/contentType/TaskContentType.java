@@ -86,4 +86,8 @@ public final class TaskContentType implements ContentType {
         return 1;
     }
 
+    public int getPriority() {
+        return 0;
+    }
+
 }
