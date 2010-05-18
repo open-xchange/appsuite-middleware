@@ -62,127 +62,123 @@ import com.openexchange.api.OXMandatoryFieldException;
  * static.
  */
 public abstract class DataServlet extends PermissionServlet {
-	
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 5088332994969906626L;
 
-	private static final String _invalidParameter = "invalid parameter: ";
-	
-	private static final String _missingField = "missing field: ";
-	
-	public static final int maxEntries = 50000;
-	
-	public static int parseIntParameter(final HttpServletRequest httpServletRequest, final String name) throws OXConflictException {
-		if (containsParameter(httpServletRequest, name)) {
-			try {
-				return Integer.parseInt(httpServletRequest.getParameter(name));
-			} catch (final NumberFormatException exc) {
-				throw new OXConflictException(_invalidParameter + name, exc);
-			}
-		}
-		return 0;
-	}
-	
-	public static Date parseDateParameter(final HttpServletRequest httpServletRequest, final String name) throws OXConflictException {
-		if (containsParameter(httpServletRequest, name)) {
-			try {
-				return new Date(Long.parseLong(httpServletRequest.getParameter(name)));
-			} catch (final NumberFormatException exc) {
-				throw new OXConflictException(_invalidParameter + name, exc);
-			}
-		}
-		return null;
-	}
-	
-	public static String parseStringParameter(final HttpServletRequest httpServletRequest, final String name) {
-		return httpServletRequest.getParameter(name);
-	}
-	
-	public static String parseMandatoryStringParameter(final HttpServletRequest httpServletRequest, final String name) throws OXMandatoryFieldException {
-		if (containsParameter(httpServletRequest, name)) {
-			return parseStringParameter(httpServletRequest, name);
-		}
-		throw new OXMandatoryFieldException(_missingField + name);
-	}
-	
-	public static int parseMandatoryIntParameter(final HttpServletRequest httpServletRequest, final String name) throws OXConflictException, OXMandatoryFieldException {
-		if (containsParameter(httpServletRequest, name)) {
-			return parseIntParameter(httpServletRequest, name);
-		}
-		throw new OXMandatoryFieldException(_missingField + name);
-	}
-	
-	public static int[] parsIntParameterArray(final HttpServletRequest httpServletRequest, final String name) throws OXMandatoryFieldException {
-		if (containsParameter(httpServletRequest, name)) {
-			final String[] s = httpServletRequest.getParameterValues(name);
-			
-			final int[] i = new int[s.length];
-			
-			for (int a = 0; a < i.length; a++) {
-				i[a] = Integer.parseInt(s[a]);
-			}
-			
-			return i;
-		}
-		return null;
-	}
-	
-	public static String[] parseStringParameterArray(final HttpServletRequest httpServletRequest, final String name) throws OXMandatoryFieldException {
-		if (containsParameter(httpServletRequest, name)) {
-			final String[] s = httpServletRequest.getParameterValues(name);
-			return s;
-		}
-		return null;
-	}
-	
-	public static int[] parseMandatoryIntParameterArray(final HttpServletRequest httpServletRequest, final String name) throws OXMandatoryFieldException {
-		if (containsParameter(httpServletRequest, name)) {
-			final String[] s = httpServletRequest.getParameterValues(name);
-			
-			final int[] i = new int[s.length];
-			
-			for (int a = 0; a < i.length; a++) {
-				i[a] = Integer.parseInt(s[a]);
-			}
-			
-			return i;
-		}
-		throw new OXMandatoryFieldException(_missingField + name);
-	}
-	
-	public static Date parseMandatoryDateParameter(final HttpServletRequest httpServletRequest, final String name) throws OXConflictException, OXMandatoryFieldException {
-		if (containsParameter(httpServletRequest, name)) {
-			return parseDateParameter(httpServletRequest, name);
-		}
-		throw new OXMandatoryFieldException(_missingField + name);
-	}
+    private static final long serialVersionUID = 5088332994969906626L;
 
-	public static JSONObject convertParameter2JSONObject(final HttpServletRequest httpServletRequest) throws JSONException {
-		final JSONObject jsonObj = new JSONObject();
-		final Enumeration<?> e = httpServletRequest.getParameterNames();
-		final StringBuilder sb = new StringBuilder();
-		while (e.hasMoreElements()) {
-			final String name = e.nextElement().toString();
-			final String value = httpServletRequest.getParameter(name);
+    private static final String _invalidParameter = "invalid parameter: ";
 
-			if (AJAXServlet.PARAMETER_COLUMNS.equals(name)) {
-				final String[] sa = value.split(" *, *");
-				for (int a = 0; a < sa.length; a++) {
-					sb.append(sa[a]);
-					sb.append(',');
-				}
-				
-				sb.delete(sb.length()-1, sb.length());
-				
-				jsonObj.put(name, sb.toString());
-				sb.delete(0, sb.length());
-			} else {
-				jsonObj.put(name, value);
-			}
-		}
+    private static final String _missingField = "missing field: ";
 
-		return jsonObj;
-	}
+    public static final int maxEntries = 50000;
+
+    public static int parseIntParameter(final HttpServletRequest httpServletRequest, final String name) throws OXConflictException {
+        if (containsParameter(httpServletRequest, name)) {
+            try {
+                return Integer.parseInt(httpServletRequest.getParameter(name));
+            } catch (final NumberFormatException exc) {
+                throw new OXConflictException(_invalidParameter + name, exc);
+            }
+        }
+        return 0;
+    }
+
+    public static Date parseDateParameter(final HttpServletRequest httpServletRequest, final String name) throws OXConflictException {
+        if (containsParameter(httpServletRequest, name)) {
+            try {
+                return new Date(Long.parseLong(httpServletRequest.getParameter(name)));
+            } catch (final NumberFormatException exc) {
+                throw new OXConflictException(_invalidParameter + name, exc);
+            }
+        }
+        return null;
+    }
+
+    public static String parseStringParameter(final HttpServletRequest httpServletRequest, final String name) {
+        return httpServletRequest.getParameter(name);
+    }
+
+    public static String parseMandatoryStringParameter(final HttpServletRequest httpServletRequest, final String name) throws OXMandatoryFieldException {
+        if (containsParameter(httpServletRequest, name)) {
+            return parseStringParameter(httpServletRequest, name);
+        }
+        throw new OXMandatoryFieldException(_missingField + name);
+    }
+
+    public static int parseMandatoryIntParameter(final HttpServletRequest httpServletRequest, final String name) throws OXConflictException, OXMandatoryFieldException {
+        if (containsParameter(httpServletRequest, name)) {
+            return parseIntParameter(httpServletRequest, name);
+        }
+        throw new OXMandatoryFieldException(_missingField + name);
+    }
+
+    public static int[] parsIntParameterArray(final HttpServletRequest httpServletRequest, final String name) throws OXMandatoryFieldException {
+        if (containsParameter(httpServletRequest, name)) {
+            final String[] s = httpServletRequest.getParameterValues(name);
+
+            final int[] i = new int[s.length];
+
+            for (int a = 0; a < i.length; a++) {
+                i[a] = Integer.parseInt(s[a]);
+            }
+
+            return i;
+        }
+        return null;
+    }
+
+    public static String[] parseStringParameterArray(final HttpServletRequest httpServletRequest, final String name) throws OXMandatoryFieldException {
+        if (containsParameter(httpServletRequest, name)) {
+            final String[] s = httpServletRequest.getParameterValues(name);
+            return s;
+        }
+        return null;
+    }
+
+    public static int[] parseMandatoryIntParameterArray(final HttpServletRequest httpServletRequest, final String name) throws OXMandatoryFieldException {
+        if (containsParameter(httpServletRequest, name)) {
+            final String[] s = httpServletRequest.getParameterValues(name);
+
+            final int[] i = new int[s.length];
+
+            for (int a = 0; a < i.length; a++) {
+                i[a] = Integer.parseInt(s[a]);
+            }
+
+            return i;
+        }
+        throw new OXMandatoryFieldException(_missingField + name);
+    }
+
+    public static Date parseMandatoryDateParameter(final HttpServletRequest httpServletRequest, final String name) throws OXConflictException, OXMandatoryFieldException {
+        if (containsParameter(httpServletRequest, name)) {
+            return parseDateParameter(httpServletRequest, name);
+        }
+        throw new OXMandatoryFieldException(_missingField + name);
+    }
+
+    public static JSONObject convertParameter2JSONObject(final HttpServletRequest httpServletRequest) throws JSONException {
+        final JSONObject jsonObj = new JSONObject();
+        final Enumeration<?> e = httpServletRequest.getParameterNames();
+        final StringBuilder sb = new StringBuilder();
+        while (e.hasMoreElements()) {
+            final String name = e.nextElement().toString();
+            final String value = httpServletRequest.getParameter(name);
+
+            if (AJAXServlet.PARAMETER_COLUMNS.equals(name)) {
+                final String[] sa = value.split(" *, *");
+                for (int a = 0; a < sa.length; a++) {
+                    sb.append(sa[a]);
+                    sb.append(',');
+                }
+
+                sb.delete(sb.length()-1, sb.length());
+
+                jsonObj.put(name, sb.toString());
+                sb.delete(0, sb.length());
+            } else {
+                jsonObj.put(name, value);
+            }
+        }
+        return jsonObj;
+    }
 }

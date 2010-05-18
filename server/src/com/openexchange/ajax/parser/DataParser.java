@@ -217,7 +217,7 @@ public abstract class DataParser {
         }
 
         final int offset = timeZone.getOffset(d.getTime());
-        d.setTime(d.getTime()-offset);
+        d.setTime(d.getTime() - offset);
         return d;
     }
 
