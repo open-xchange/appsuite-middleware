@@ -1,4 +1,8 @@
-* 2010-05-12 - thorben.betten@open-xchange.com
+* 2010-05-18 - thorben.betten@open-xchange.com
+
+ - Bugfix #15970: Showing all folders in subscribe dialog
+
+* 2010-05-17 - thorben.betten@open-xchange.com
 
  - Bugfix #15963: Changed text of error message
  - Bugfix #15946: No Unified Mail is not enabled
