@@ -96,7 +96,7 @@ public final class TimeZoneUtils {
      * @return The date millis with time zone offset added
      */
     public static long addTimeZoneOffset(final long date, final String timeZone) {
-        return (date + getTimeZone(timeZone).getOffset(date));
+        return addTimeZoneOffset(date, getTimeZone(timeZone));
     }
 
     /**
