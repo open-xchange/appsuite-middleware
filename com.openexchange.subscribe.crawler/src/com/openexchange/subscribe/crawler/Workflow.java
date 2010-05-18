@@ -51,10 +51,14 @@ package com.openexchange.subscribe.crawler;
 
 import java.util.List;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
+import org.apache.commons.httpclient.cookie.CookiePolicy;
+import org.apache.commons.httpclient.params.DefaultHttpParams;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ho.yaml.Yaml;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
+import com.gargoylesoftware.htmlunit.CrawlerCookieManager;
+import com.gargoylesoftware.htmlunit.CrawlerCookieSpec;
 import com.gargoylesoftware.htmlunit.CrawlerWebConnection;
 import com.gargoylesoftware.htmlunit.NicelyResynchronizingAjaxController;
 import com.gargoylesoftware.htmlunit.ThreadedRefreshHandler;
@@ -123,8 +127,14 @@ public class Workflow {
     public Object[] execute() throws SubscriptionException {
 
         // emulate a known client, hopefully keeping our profile low
-        final WebClient webClient = new WebClient(BrowserVersion.FIREFOX_2);
+        final WebClient webClient = new WebClient(BrowserVersion.FIREFOX_3);
+        
+        // use a custom CookiePolicy to be more lenient and thereby work with more websites
         CrawlerWebConnection crawlerConnection = new CrawlerWebConnection(webClient);
+        CookiePolicy.registerCookieSpec("crawler-special", CrawlerCookieSpec.class);
+        webClient.setCookieManager(new CrawlerCookieManager());        
+        //System.out.println(CookiePolicy.getCookieSpec("crawler-special"));
+        
         webClient.setWebConnection(crawlerConnection);
         // Javascript is disable by default for security reasons but may be activated for single crawlers
         webClient.setJavaScriptEnabled(enableJavascript);

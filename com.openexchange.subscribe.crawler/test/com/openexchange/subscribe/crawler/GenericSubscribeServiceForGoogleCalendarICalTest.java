@@ -70,7 +70,8 @@ public class GenericSubscribeServiceForGoogleCalendarICalTest extends GenericSub
         crawler.setDisplayName("GoogleCalendar");
         crawler.setId("com.openexchange.subscribe.crawler.google.calendar");
         crawler.setModule(FolderObject.CALENDAR);
-        crawler.setCrawlerApiVersion(616);
+        crawler.setCrawlerApiVersion(618);
+        crawler.setPriority(2);
         // crawler.setJavascriptEnabled(true);
 
         ArrayList<Step> steps = new ArrayList<Step>();
@@ -82,7 +83,7 @@ public class GenericSubscribeServiceForGoogleCalendarICalTest extends GenericSub
             "https://www.google.com/accounts/ServiceLoginAuth?service=cl",
             "Email",
             "Passwd",
-            "https:\\/\\/www\\.google\\.com\\/calendar\\/htmlembed.*",
+            "logout",
             1,
             "https://calendar.google.com"));      
         steps.add(new GoogleCalendarICalStep("Call the url to get the calendar-export-file", "https://www.google.com/calendar/exporticalzip"));
