@@ -119,9 +119,8 @@ public class GoogleCalendarICalStep extends AbstractStep<CalendarDataObject[], U
                 }
                 dest.flush();
                 dest.close();
-                String iCalFile = dest.toString("UTF-8");
+                String iCalFile = dest.toString("UTF-8");                                
                 
-
                 if (iCalParser != null) {                
                     tempEvents = (ArrayList<CalendarDataObject>) iCalParser.parseAppointments(
                         iCalFile,
@@ -129,6 +128,8 @@ public class GoogleCalendarICalStep extends AbstractStep<CalendarDataObject[], U
                         new ContextImpl(23),
                         new ArrayList<ConversionError>(),
                         new ArrayList<ConversionWarning>());
+                } else {
+                    LOG.error("No iCal-Parser found!");
                 }
                 events.addAll(tempEvents);
             }
