@@ -151,6 +151,15 @@ public class DatabaseFolder extends AbstractFolder {
         return clone;
     }
 
+    /**
+     * Sets the cachable flag.
+     * 
+     * @param cacheable The cachable flag.
+     */
+    public void setCacheable(boolean cacheable) {
+        this.cacheable = cacheable;
+    }
+
     @Override
     public boolean isCacheable() {
         return cacheable;

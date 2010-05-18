@@ -581,10 +581,13 @@ public final class DatabaseFolderStorage implements FolderStorage {
                                 if (retval.isDefault()) {
                                     if (TaskContentType.getInstance().equals(retval.getContentType())) {
                                         retval.setName(new StringHelper(user.getLocale()).getString(FolderStrings.DEFAULT_TASK_FOLDER_NAME));
+                                        retval.setCacheable(false);
                                     } else if (ContactContentType.getInstance().equals(retval.getContentType())) {
                                         retval.setName(new StringHelper(user.getLocale()).getString(FolderStrings.DEFAULT_CONTACT_FOLDER_NAME));
+                                        retval.setCacheable(false);
                                     } else if (CalendarContentType.getInstance().equals(retval.getContentType())) {
                                         retval.setName(new StringHelper(user.getLocale()).getString(FolderStrings.DEFAULT_CALENDAR_FOLDER_NAME));
+                                        retval.setCacheable(false);
                                     }
                                 }
                             }
