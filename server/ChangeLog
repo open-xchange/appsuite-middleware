@@ -2,6 +2,7 @@
 
  - Bugfix #15970: Showing all folders in subscribe dialog
  - Bugfix #16115: Applying locale-sensitive name to folders
+ - Bugfix #16116: Setting module to "infostore" for virtual infostore folder
 
 * 2010-05-17 - thorben.betten@open-xchange.com
 

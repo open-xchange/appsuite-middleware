@@ -173,7 +173,7 @@ public final class VirtualListFolder {
                 FolderObject.createVirtualFolderObject(
                     folderId,
                     FolderStrings.VIRTUAL_LIST_INFOSTORE_FOLDER_NAME,
-                    FolderObject.SYSTEM_MODULE,
+                    FolderObject.INFOSTORE,
                     true,
                     FolderObject.SYSTEM_TYPE);
             fo.setParentFolderID(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
