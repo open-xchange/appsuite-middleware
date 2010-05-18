@@ -49,12 +49,9 @@
 
 package com.openexchange.ajax.request;
 
-import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import gnu.trove.TIntArrayList;
 import java.util.Date;
 import java.util.TimeZone;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -132,18 +129,14 @@ public class TaskRequest {
 
     private final TimeZone timeZone;
 
-    private static final Log LOG = LogFactory.getLog(TaskRequest.class);
-
     public TaskRequest(final ServerSession session) {
+        this(session, TimeZoneUtils.getTimeZone(session.getUser().getTimeZone()));
+    }
+
+    public TaskRequest(ServerSession session, TimeZone timeZone) {
+        super();
         this.session = session;
-
-        final String sTimeZone = session.getUser().getTimeZone();
-
-        timeZone = TimeZoneUtils.getTimeZone(sTimeZone);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("use timezone string: " + sTimeZone);
-            LOG.debug("use user timezone: " + timeZone);
-        }
+        this.timeZone = timeZone;
     }
 
     public Date getTimestamp() {
@@ -198,7 +191,7 @@ public class TaskRequest {
         return jsonResponseObject;
     }
 
-    public JSONObject actionUpdate(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException, AjaxException {
+    public JSONObject actionUpdate(final JSONObject jsonObj) throws OXMandatoryFieldException, OXException, OXJSONException, AjaxException {
         final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
         final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
         timestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
@@ -227,11 +220,6 @@ public class TaskRequest {
         timestamp = new Date(requestedTimestamp.getTime());
         final int folderId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
         String ignore = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_IGNORE);
-        final TimeZone timeZone;
-        {
-            final String timeZoneId = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_TIMEZONE);
-            timeZone = null == timeZoneId ? this.timeZone : getTimeZone(timeZoneId);
-        }
 
         if (ignore == null) {
             ignore = "deleted";
@@ -292,7 +280,7 @@ public class TaskRequest {
         }
     }
 
-    public JSONArray actionDelete(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXPermissionException, OXConflictException, OXObjectNotFoundException, OXFolderNotFoundException, OXException, OXJSONException, AjaxException {
+    public JSONArray actionDelete(final JSONObject jsonObj) throws OXMandatoryFieldException, OXPermissionException, OXConflictException, OXObjectNotFoundException, OXFolderNotFoundException, OXException, OXJSONException, AjaxException {
         final JSONObject jsonobject = DataParser.checkJSONObject(jsonObj, ResponseFields.DATA);
         final int id = DataParser.checkInt(jsonobject, AJAXServlet.PARAMETER_ID);
         final int inFolder = DataParser.checkInt(jsonobject, AJAXServlet.PARAMETER_INFOLDER);
@@ -318,12 +306,6 @@ public class TaskRequest {
             final JSONObject jObject = jData.getJSONObject(a);
             objectIdAndFolderId[a][0] = DataParser.checkInt(jObject, AJAXServlet.PARAMETER_ID);
             objectIdAndFolderId[a][1] = DataParser.checkInt(jObject, AJAXServlet.PARAMETER_FOLDERID);
-        }
-
-        final TimeZone timeZone;
-        {
-            final String timeZoneId = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_TIMEZONE);
-            timeZone = null == timeZoneId ? this.timeZone : getTimeZone(timeZoneId);
         }
 
         final int[] internalColumns = new int[columnsToLoad.length+1];
@@ -365,11 +347,6 @@ public class TaskRequest {
         final int folderId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
         final int orderBy = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_SORT);
         final String orderDir = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER);
-        final TimeZone timeZone;
-        {
-            final String timeZoneId = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_TIMEZONE);
-            timeZone = null == timeZoneId ? this.timeZone : getTimeZone(timeZoneId);
-        }
 
         final int leftHandLimit = DataParser.parseInt(jsonObj, AJAXServlet.LEFT_HAND_LIMIT);
         final int rightHandLimit = DataParser.parseInt(jsonObj, AJAXServlet.RIGHT_HAND_LIMIT);
@@ -417,11 +394,6 @@ public class TaskRequest {
     public JSONObject actionGet(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException, AjaxException {
         final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
         final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
-        final TimeZone timeZone;
-        {
-            final String timeZoneId = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_TIMEZONE);
-            timeZone = null == timeZoneId ? this.timeZone : getTimeZone(timeZoneId);
-        }
 
         timestamp = new Date(0);
 
@@ -461,11 +433,6 @@ public class TaskRequest {
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
         final int[] columnsToLoad = removeVirtualColumns(columns);
         timestamp = new Date(0);
-        final TimeZone timeZone;
-        {
-            final String timeZoneId = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_TIMEZONE);
-            timeZone = null == timeZoneId ? this.timeZone : getTimeZone(timeZoneId);
-        }
 
         Date lastModified = null;
 

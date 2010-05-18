@@ -1,3 +1,7 @@
+* 2010-05-18 - marcus.klein@open-xchange.com
+
+ - Bugfix #16006: Using time zone parameter when creating a new task. This was the only task action not respecting the time zone parameter.
+
 * 2010-05-18 - karsten.will@open-xchange.com
 
  - Bugfix #16108: Subscription to Google Calendar does not work

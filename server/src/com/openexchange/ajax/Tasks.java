@@ -50,7 +50,7 @@
 package com.openexchange.ajax;
 
 import java.io.IOException;
-import javax.servlet.ServletException;
+import java.util.TimeZone;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
@@ -67,6 +67,7 @@ import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
 import com.openexchange.tools.servlet.AjaxException;
@@ -85,10 +86,11 @@ public class Tasks extends DataServlet {
     private static final Log LOG = LogFactory.getLog(Tasks.class);
 
     @Override
-    protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
+    protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws IOException {
         final Response response = new Response();
         try {
             final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
+            final String sTimeZone = parseStringParameter(httpServletRequest, PARAMETER_TIMEZONE);
             final ServerSession session = getSessionObject(httpServletRequest);
             final JSONObject jsonObj;
             try {
@@ -99,7 +101,13 @@ public class Tasks extends DataServlet {
                 writeResponse(response, httpServletResponse);
                 return;
             }
-            final TaskRequest taskRequest = new TaskRequest(session);
+            final TaskRequest taskRequest;
+            if (null == sTimeZone) {
+                taskRequest = new TaskRequest(session);
+            } else {
+                TimeZone timeZone = TimeZoneUtils.getTimeZone(sTimeZone);
+                taskRequest = new TaskRequest(session, timeZone);
+            }
             final JSONValue responseObj = taskRequest.action(action, jsonObj);
             response.setTimestamp(taskRequest.getTimestamp());
             response.setData(responseObj);
@@ -145,45 +153,51 @@ public class Tasks extends DataServlet {
     }
 
     @Override
-    protected void doPut(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
+    protected void doPut(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws IOException {
         final Response response = new Response();
         try {
             final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
+            final String sTimeZone = parseStringParameter(httpServletRequest, PARAMETER_TIMEZONE);
             final ServerSession session = getSessionObject(httpServletRequest);
 
             final String data = getBody(httpServletRequest);
-            if (data.length() > 0) {
-                final TaskRequest taskRequest = new TaskRequest(session);
-                final JSONObject jsonObj;
-
-                try {
-                    jsonObj = convertParameter2JSONObject(httpServletRequest);
-                } catch (final JSONException e) {
-                    LOG.error(e.getMessage(), e);
-                    response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
-                    writeResponse(response, httpServletResponse);
-                    return;
-                }
-
-                if (data.charAt(0) == '[') {
-                    final JSONArray jsonDataArray = new JSONArray(data);
-                    jsonObj.put(PARAMETER_DATA, jsonDataArray);
-
-                    final JSONValue responseObj = taskRequest.action(action, jsonObj);
-                    response.setTimestamp(taskRequest.getTimestamp());
-                    response.setData(responseObj);
-                } else if (data.charAt(0) == '{') {
-                    final JSONObject jsonDataObject = new JSONObject(data);
-                    jsonObj.put(PARAMETER_DATA, jsonDataObject);
-
-                    final Object responseObj = taskRequest.action(action, jsonObj);
-                    response.setTimestamp(taskRequest.getTimestamp());
-                    response.setData(responseObj);
-                } else {
-                    httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "invalid json object");
-                }
-            } else {
+            if (data.length() == 0) {
                 httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "no data found");
+            }
+            final TaskRequest taskRequest;
+            if (null == sTimeZone) {
+                taskRequest = new TaskRequest(session);
+            } else {
+                TimeZone timeZone = TimeZoneUtils.getTimeZone(sTimeZone);
+                taskRequest = new TaskRequest(session, timeZone);
+            }
+            final JSONObject jsonObj;
+
+            try {
+                jsonObj = convertParameter2JSONObject(httpServletRequest);
+            } catch (final JSONException e) {
+                LOG.error(e.getMessage(), e);
+                response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
+                writeResponse(response, httpServletResponse);
+                return;
+            }
+
+            if (data.charAt(0) == '[') {
+                final JSONArray jsonDataArray = new JSONArray(data);
+                jsonObj.put(PARAMETER_DATA, jsonDataArray);
+
+                final JSONValue responseObj = taskRequest.action(action, jsonObj);
+                response.setTimestamp(taskRequest.getTimestamp());
+                response.setData(responseObj);
+            } else if (data.charAt(0) == '{') {
+                final JSONObject jsonDataObject = new JSONObject(data);
+                jsonObj.put(PARAMETER_DATA, jsonDataObject);
+
+                final Object responseObj = taskRequest.action(action, jsonObj);
+                response.setTimestamp(taskRequest.getTimestamp());
+                response.setData(responseObj);
+            } else {
+                httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "invalid json object");
             }
         } catch (final JSONException e) {
             final OXJSONException oje = new OXJSONException(OXJSONException.Code
