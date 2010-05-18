@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.task.actions;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.TimeZone;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.groupware.tasks.Task;
 
@@ -59,15 +62,23 @@ import com.openexchange.groupware.tasks.Task;
 public class GetRequest extends AbstractTaskRequest<GetResponse> {
 
     private final int folderId;
-
     private final int taskId;
-
-    private boolean failOnError;
+    private final TimeZone timeZone;
+    private final boolean failOnError;
 
     public GetRequest(int folderId, int taskId, boolean failOnError) {
         super();
         this.folderId = folderId;
         this.taskId = taskId;
+        this.timeZone = null;
+        this.failOnError = failOnError;
+    }
+
+    public GetRequest(int folderId, int taskId, TimeZone timeZone, boolean failOnError) {
+        super();
+        this.folderId = folderId;
+        this.taskId = taskId;
+        this.timeZone = timeZone;
         this.failOnError = failOnError;
     }
 
@@ -83,6 +94,10 @@ public class GetRequest extends AbstractTaskRequest<GetResponse> {
         this(task.getParentFolderID(), task.getObjectID());
     }
 
+    public GetRequest(Task task, TimeZone timeZone) {
+        this(task.getParentFolderID(), task.getObjectID(), timeZone, true);
+    }
+
     public Object getBody() {
         return null;
     }
@@ -92,11 +107,14 @@ public class GetRequest extends AbstractTaskRequest<GetResponse> {
     }
 
     public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET),
-            new Parameter(AJAXServlet.PARAMETER_INFOLDER, folderId),
-            new Parameter(AJAXServlet.PARAMETER_ID, taskId)
-        };
+        List<Parameter> retval = new ArrayList<Parameter>(4);
+        retval.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET));
+        retval.add(new Parameter(AJAXServlet.PARAMETER_INFOLDER, folderId));
+        retval.add(new Parameter(AJAXServlet.PARAMETER_ID, taskId));
+        if (null != timeZone) {
+            retval.add(new Parameter(AJAXServlet.PARAMETER_TIMEZONE, timeZone.getID()));
+        }
+        return retval.toArray(new Parameter[retval.size()]);
     }
 
     public GetParser getParser() {

@@ -47,64 +47,70 @@
  *
  */
 
-package com.openexchange.ajax.task.actions;
+package com.openexchange.ajax.task;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.TimeZone;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.config.actions.SetRequest;
+import com.openexchange.ajax.config.actions.Tree;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.task.actions.DeleteRequest;
+import com.openexchange.ajax.task.actions.GetRequest;
+import com.openexchange.ajax.task.actions.GetResponse;
+import com.openexchange.ajax.task.actions.InsertRequest;
+import com.openexchange.ajax.task.actions.InsertResponse;
+import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.java.util.TimeZones;
 
 /**
- * Stores the parameters for inserting the task.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * {@link Bug16006Test}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class InsertRequest extends AbstractTaskRequest<InsertResponse> {
+public class Bug16006Test extends AbstractAJAXSession {
 
-    private final Task task;
-    private final TimeZone timeZone;
-    private final boolean timeZoneParam;
-    private final boolean failOnError;
+    private AJAXClient client;
+    private Task task;
+    private TimeZone origTimeZone;
+    private TimeZone timeZone;
+    private Date alarm;
 
-    public InsertRequest(Task task, TimeZone timeZone, boolean timeZoneParam, boolean failOnError) {
-        super();
-        this.task = task;
-        this.timeZone = timeZone;
-        this.timeZoneParam = timeZoneParam;
-        this.failOnError = failOnError;
+    public Bug16006Test(String name) {
+        super(name);
     }
 
-    public InsertRequest(Task task, TimeZone timeZone, boolean failOnError) {
-        this(task, timeZone, false, failOnError);
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        client = getClient();
+        origTimeZone = client.getValues().getTimeZone();
+        client.execute(new SetRequest(Tree.TimeZone, "Pacific/Honolulu"));
+        timeZone = client.getValues().getTimeZone();
+        task = new Task();
+        task.setParentFolderID(client.getValues().getPrivateTaskFolder());
+        task.setTitle("Test for bug 16006");
+        Calendar calendar = TimeTools.createCalendar(TimeZones.UTC);
+        alarm = calendar.getTime();
+        task.setAlarm(calendar.getTime());
+        InsertRequest request = new InsertRequest(task, TimeZones.UTC, true, true);
+        InsertResponse response = client.execute(request);
+        response.fillTask(task);
     }
 
-    public InsertRequest(Task task, TimeZone timeZone) {
-        this(task, timeZone, false, true);
-    }
-    
-    public JSONObject getBody() throws JSONException {
-        return convert(task, timeZone);
-    }
-
-    public Method getMethod() {
-        return Method.PUT;
+    @Override
+    protected void tearDown() throws Exception {
+        client.execute(new DeleteRequest(task));
+        client.execute(new SetRequest(Tree.TimeZone, origTimeZone.getID()));
+        super.tearDown();
     }
 
-    public Parameter[] getParameters() {
-        List<Parameter> retval = new ArrayList<Parameter>(3);
-        retval.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW));
-        retval.add(new Parameter(AJAXServlet.PARAMETER_FOLDERID, String.valueOf(task.getParentFolderID())));
-        if (timeZoneParam) {
-            retval.add(new Parameter(AJAXServlet.PARAMETER_TIMEZONE, timeZone.getID()));
-        }
-        return retval.toArray(new Parameter[retval.size()]);
-    }
-
-    public InsertParser getParser() {
-        return new InsertParser(failOnError, task.getParentFolderID());
+    public void testAlarm() throws Throwable {
+        GetRequest request = new GetRequest(task, TimeZones.UTC);
+        GetResponse response = client.execute(request);
+        Task testTask = response.getTask(TimeZones.UTC);
+        assertEquals("Alarm matches.", alarm, testTask.getAlarm());
     }
 }
