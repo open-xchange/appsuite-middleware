@@ -51,9 +51,12 @@ package com.openexchange.folderstorage.database.getfolder;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Queue;
+import java.util.Locale;
 import com.openexchange.api2.OXException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.folderstorage.FolderException;
@@ -65,6 +68,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.tools.iterator.FolderObjectIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
@@ -115,7 +119,7 @@ public final class SystemPrivateFolder {
             /*
              * The system private folder
              */
-            final Queue<FolderObject> q =
+            final List<FolderObject> list =
                 ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleSubfoldersIterator(
                     FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
                     user.getId(),
@@ -123,9 +127,41 @@ public final class SystemPrivateFolder {
                     ctx,
                     userConfiguration,
                     null,
-                    con)).asQueue();
-            final List<String> subfolderIds = new ArrayList<String>(q.size());
-            for (final FolderObject folderObject : q) {
+                    con)).asList();
+            StringHelper stringHelper = null;
+            for (final FolderObject folderObject : list) {
+                /*
+                 * Check if folder is user's default folder and set locale-sensitive name
+                 */
+                if (folderObject.isDefaultFolder()) {
+                    final int module = folderObject.getModule();
+                    if (FolderObject.CALENDAR == module) {
+                        if (null == stringHelper) {
+                            stringHelper = new StringHelper(user.getLocale());
+                        }
+                        folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_CALENDAR_FOLDER_NAME));
+                    } else if (FolderObject.CONTACT == module) {
+                        if (null == stringHelper) {
+                            stringHelper = new StringHelper(user.getLocale());
+                        }
+                        folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_CONTACT_FOLDER_NAME));
+                    } else if (FolderObject.TASK == module) {
+                        if (null == stringHelper) {
+                            stringHelper = new StringHelper(user.getLocale());
+                        }
+                        folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_TASK_FOLDER_NAME));
+                    }
+                }
+            }
+            /*
+             * Sort
+             */
+            Collections.sort(list, new NameComparator(user.getLocale()));
+            /*
+             * Extract IDs
+             */
+            final List<String> subfolderIds = new ArrayList<String>(list.size());
+            for (final FolderObject folderObject : list) {
                 subfolderIds.add(String.valueOf(folderObject.getObjectID()));
             }
             return subfolderIds.toArray(new String[subfolderIds.size()]);
@@ -138,6 +174,27 @@ public final class SystemPrivateFolder {
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }
+    }
+
+    /**
+     * {@link NameComparator} - Sorts names with respect to a certain locale
+     * 
+     * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+     */
+    private static final class NameComparator implements Comparator<FolderObject> {
+
+        private final Collator collator;
+
+        public NameComparator(final Locale locale) {
+            super();
+            collator = Collator.getInstance(locale);
+            collator.setStrength(Collator.SECONDARY);
+        }
+
+        public int compare(final FolderObject folder1, final FolderObject folder2) {
+            return collator.compare(folder1.getFolderName(), folder2.getFolderName());
+        }
+
     }
 
 }

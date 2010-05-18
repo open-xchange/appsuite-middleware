@@ -1,6 +1,7 @@
 * 2010-05-18 - thorben.betten@open-xchange.com
 
  - Bugfix #15970: Showing all folders in subscribe dialog
+ - Bugfix #16115: Applying locale-sensitive name to folders
 
 * 2010-05-17 - thorben.betten@open-xchange.com
 

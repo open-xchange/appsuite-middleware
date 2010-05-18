@@ -100,6 +100,7 @@ import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
@@ -574,6 +575,18 @@ public final class DatabaseFolderStorage implements FolderStorage {
                                     subfolderIdentifies.add(id.toString());
                                 }
                                 retval.setSubfolderIDs(subfolderIdentifies.toArray(new String[subfolderIdentifies.size()]));
+                                /*
+                                 * Check if folder is user's default folder and set locale-sensitive name
+                                 */
+                                if (retval.isDefault()) {
+                                    if (TaskContentType.getInstance().equals(retval.getContentType())) {
+                                        retval.setName(new StringHelper(user.getLocale()).getString(FolderStrings.DEFAULT_TASK_FOLDER_NAME));
+                                    } else if (ContactContentType.getInstance().equals(retval.getContentType())) {
+                                        retval.setName(new StringHelper(user.getLocale()).getString(FolderStrings.DEFAULT_CONTACT_FOLDER_NAME));
+                                    } else if (CalendarContentType.getInstance().equals(retval.getContentType())) {
+                                        retval.setName(new StringHelper(user.getLocale()).getString(FolderStrings.DEFAULT_CALENDAR_FOLDER_NAME));
+                                    }
+                                }
                             }
                             if (FolderObject.SYSTEM_LDAP_FOLDER_ID == folderId) {
                                 retval.setName(FolderStrings.SYSTEM_LDAP_FOLDER_NAME);
