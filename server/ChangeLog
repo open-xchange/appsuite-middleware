@@ -1,3 +1,7 @@
+* 2010-05-18 - karsten.will@open-xchange.com
+
+ - Bugfix #16108: Subscription to Google Calendar does not work
+
 * 2010-05-18 - thorben.betten@open-xchange.com
 
  - Bugfix #15970: Showing all folders in subscribe dialog
