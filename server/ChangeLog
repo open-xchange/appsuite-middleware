@@ -1,6 +1,7 @@
 * 2010-05-19 - marcus.klein@open-xchange.com
 
  - Bugfix #16027: Only set sender header of sent emails if from is not from alias list.
+ - Bugfix #16026: Adding header X-Originating-IP in emails containing the IP address of the client using the backend.
 
 * 2010-05-18 - marcus.klein@open-xchange.com
 
