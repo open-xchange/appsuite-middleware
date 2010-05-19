@@ -1,3 +1,7 @@
+* 2010-05-19 - marcus.klein@open-xchange.com
+
+ - Bugfix #16027: Only set sender header of sent emails if from is not from alias list.
+
 * 2010-02-16 - thorben.betten@open-xchange.com
 
  - Bugfix #15378: Auto-detection of proper content type if "name" parameter is present
