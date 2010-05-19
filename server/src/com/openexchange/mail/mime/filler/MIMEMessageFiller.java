@@ -301,6 +301,7 @@ public class MIMEMessageFiller {
              */
             mimeMessage.setHeader(MessageHeaders.HDR_ORGANIZATION, org.toString());
         }
+        mimeMessage.setHeader("X-Originating-IP", session.getLocalIp());
     }
 
     private static final String[] SUPPRESS_HEADERS =
