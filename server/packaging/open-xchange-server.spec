@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 18
+%define		ox_release 19
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -459,6 +459,9 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed May 19 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16027: Only set sender header of sent emails if from is not from alias list.
+ - Bugfix #16026: Adding header X-Originating-IP in emails containing the IP address of the client using the backend.
 * Tue Feb 16 2010 - thorben.betten@open-xchange.com
  - Bugfix #15378: Auto-detection of proper content type if "name" parameter is present
 * Thu Jan 28 2010 - thorben.betten@open-xchange.com
