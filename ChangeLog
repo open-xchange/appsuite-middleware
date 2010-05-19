@@ -1,3 +1,7 @@
+* 2010-04-15 - tobias.prinz@open-xchange.com
+
+ - Bugfix #15886 - Deleting a user should be logged within the admin logfile as INFO (not DEBUG as previous)
+
 * 2010-04-14 - marcus.klein@open-xchange.com
 
  - Bugfix #15786: Checking if primary mail is changed before looking into database if that primary email already is used.
