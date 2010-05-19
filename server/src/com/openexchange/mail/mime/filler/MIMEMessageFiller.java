@@ -56,6 +56,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -97,6 +98,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.tools.StringHelper;
@@ -127,6 +129,7 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.server.ServiceException;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.Version;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -139,6 +142,7 @@ import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
+import com.openexchange.user.UserService;
 
 /**
  * {@link MIMEMessageFiller} - Provides basic methods to fills an instance of {@link MimeMessage} with headers/contents given through an
@@ -198,7 +202,7 @@ public class MIMEMessageFiller {
      * @param ctx The context
      */
     public MIMEMessageFiller(final Session session, final Context ctx) {
-        this(session, ctx, null);
+        this(session, ctx, UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx));
     }
 
     /**
@@ -212,7 +216,7 @@ public class MIMEMessageFiller {
         super();
         this.session = session;
         this.ctx = ctx;
-        this.usm = usm == null ? UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx) : usm;
+        this.usm = usm;
     }
 
     /*
@@ -356,11 +360,24 @@ public class MIMEMessageFiller {
                     LOG.debug(e.getMessage(), e);
                 }
             }
+            final List<InternetAddress> aliases;
+            try {
+                UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class, true);
+                User user = userService.getUser(session.getUserId(), ctx);
+                aliases = new ArrayList<InternetAddress>();
+                for (String alias : user.getAliases()) {
+                    aliases.add(new QuotedInternetAddress(alias));
+                }
+            } catch (ServiceException e) {
+                throw new MailException(e);
+            } catch (UserException e) {
+                throw new MailException(e);
+            }
             /*
              * Taken from RFC 822 section 4.4.2: In particular, the "Sender" field MUST be present if it is NOT the same as the "From"
              * Field.
              */
-            if (sender != null && !from.equals(sender)) {
+            if (sender != null && !from.equals(sender) && !aliases.contains(from)) {
                 mimeMessage.setSender(sender);
             }
         }

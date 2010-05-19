@@ -1,3 +1,7 @@
+* 2010-05-19 - marcus.klein@open-xchange.com
+
+ - Bugfix #16027: Only set sender header of sent emails if from is not from alias list.
+
 * 2010-05-03 - thorben.betten@open-xchange.com
 
  - Bugfix #15975: Properly marking messages as \Deleted prior to expunge on INBOX folder.
