@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 4
+%define		ox_release 5
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -508,8 +508,26 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed May 19 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16027: Only set sender header of sent emails if from is not from alias list.
+ - Bugfix #16026: Adding header X-Originating-IP in emails containing the IP address of the client using the backend.
+* Tue May 18 2010 - thorben.betten@open-xchange.com
+ - Bugfix #15970: Showing all folders in subscribe dialog
+ - Bugfix #16115: Applying locale-sensitive name to folders
+ - Bugfix #16116: Setting module to "infostore" for virtual infostore folder
+* Tue May 18 2010 - karsten.will@open-xchange.com
+ - Bugfix #16108: Subscription to Google Calendar does not work
+* Tue May 18 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16006: Using time zone parameter when creating a new task. This was the only task action not respecting the time zone parameter.
+* Mon May 17 2010 - thorben.betten@open-xchange.com
+ - Bugfix #15963: Changed text of error message
+ - Bugfix #15946: No Unified Mail is not enabled
+* Fri May 14 2010 - steffen.templin@open-xchange.com
+- Bugfix #15740: Now using getUntil() of appointments for deleting old reminders.
 * Wed May 12 2010 - marcus.klein@open-xchange.com
  - Bugfix #16063: Added messaging folder type and changed their identifier to contain the scheme.
+* Wed May 12 2010 - thorben.betten@open-xchange.com
+ - Bugfix #16098: Using existing defaults and laterals for later added caches.
 * Tue May 11 2010 - viktor.pracht@open-xchange.com
   - Bugfix #15507: Opening iCal attachments from invitation e-mail the content is imported immediately
 * Fri May 07 2010 - steffen.templin@open-xchange.com
