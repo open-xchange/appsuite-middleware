@@ -71,14 +71,18 @@ public class PathRequest extends AbstractFolderRequest<PathResponse> {
 
     private final int[] columns;
 
-    public PathRequest(API api, String folder, int[] columns) {
+    public PathRequest(API api, String folderId, int[] columns) {
         super(api);
-        this.folder = folder;
+        this.folder = folderId;
         this.columns = columns;
     }
 
-    public PathRequest(API api, String parentFolder) {
-        this(api, parentFolder, DEFAULT_COLUMNS);
+    public PathRequest(API api, String folderId) {
+        this(api, folderId, DEFAULT_COLUMNS);
+    }
+
+    public PathRequest(API api, int folderId, int[] columns) {
+        this(api, Integer.toString(folderId), columns);
     }
 
     public Object getBody() {

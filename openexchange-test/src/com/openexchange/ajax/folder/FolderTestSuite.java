@@ -50,6 +50,7 @@
 package com.openexchange.ajax.folder;
 
 import com.openexchange.ajax.folder.api2.Bug15752Test;
+import com.openexchange.ajax.folder.api2.Bug15980Test;
 import com.openexchange.ajax.folder.api2.GetTest;
 import com.openexchange.ajax.folder.api2.Bug15995Test;
 import com.openexchange.ajax.folder.api2.ClearTest;
@@ -104,6 +105,7 @@ public final class FolderTestSuite {
         // New folder API bug tests
         tests.addTestSuite(Bug15752Test.class);
         tests.addTestSuite(Bug15995Test.class);
+        tests.addTestSuite(Bug15980Test.class);
 
         return tests;
     }
