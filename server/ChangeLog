@@ -2,6 +2,7 @@
 
  - Bugfix #16027: Only set sender header of sent emails if from is not from alias list.
  - Bugfix #16026: Adding header X-Originating-IP in emails containing the IP address of the client using the backend.
+ - Bugfix #15980: Folder path requests for public folders in Outlook like folder tree now have IPM_ROOT as topmost folder.
 
 * 2010-05-18 - marcus.klein@open-xchange.com
 

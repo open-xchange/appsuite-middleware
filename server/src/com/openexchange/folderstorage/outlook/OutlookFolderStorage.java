@@ -210,7 +210,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         }
     }
 
-    public void commitTransaction(final StorageParameters params) throws FolderException {
+    public void commitTransaction(final StorageParameters params) {
         // Nothing to do
     }
 
@@ -339,7 +339,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         }
     }
 
-    public String[] getDeletedFolderIDs(final String treeId, final Date timeStamp, final StorageParameters storageParameters) throws FolderException {
+    public String[] getDeletedFolderIDs(final String treeId, final Date timeStamp, final StorageParameters storageParameters) {
         return new String[0];
     }
 
@@ -618,6 +618,10 @@ public final class OutlookFolderStorage implements FolderStorage {
                 Select.fillFolder(contextId, tree, user.getId(), user.getLocale(), outlookFolder, storageType, con);
             }
         }
+        // 
+        {
+            doModifications(outlookFolder);
+        }
         return outlookFolder;
     }
 
@@ -625,7 +629,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         return folderType;
     }
 
-    public String[] getModifiedFolderIDs(final String treeId, final Date timeStamp, final ContentType[] includeContentTypes, final StorageParameters storageParameters) throws FolderException {
+    public String[] getModifiedFolderIDs(final String treeId, final Date timeStamp, final ContentType[] includeContentTypes, final StorageParameters storageParameters) {
         return new String[0];
     }
 
@@ -1280,7 +1284,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         // Nothing to do
     }
 
-    public boolean startTransaction(final StorageParameters parameters, final boolean modify) throws FolderException {
+    public boolean startTransaction(final StorageParameters parameters, final boolean modify) {
         return false;
     }
 
@@ -1475,4 +1479,13 @@ public final class OutlookFolderStorage implements FolderStorage {
         return null;
     }
 
+    static void doModifications(OutlookFolder folder) {
+        if (FolderStorage.PUBLIC_ID.equals(folder.getID())) {
+            doPublicRootModifications(folder);
+        }
+    }
+
+    private static void doPublicRootModifications(OutlookFolder folder) {
+        folder.setParentID(FolderStorage.PRIVATE_ID);
+    }
 }
