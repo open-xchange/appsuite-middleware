@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.request;
 
+import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import gnu.trove.TIntArrayList;
 import java.util.Date;
 import java.util.TimeZone;
@@ -127,47 +128,46 @@ public class TaskRequest {
 
     private Date timestamp;
 
-    private final TimeZone timeZone;
+    private TimeZone timeZone;
 
-    public TaskRequest(final ServerSession session) {
-        this(session, TimeZoneUtils.getTimeZone(session.getUser().getTimeZone()));
-    }
-
-    public TaskRequest(ServerSession session, TimeZone timeZone) {
+    public TaskRequest(ServerSession session) {
         super();
         this.session = session;
-        this.timeZone = timeZone;
+        this.timeZone = TimeZoneUtils.getTimeZone(session.getUser().getTimeZone());
     }
 
     public Date getTimestamp() {
         return timestamp;
     }
 
-    public JSONValue action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXObjectNotFoundException, OXConflictException, OXPermissionException, OXFolderNotFoundException, SearchIteratorException, AjaxException, OXException, OXJSONException {
+    public JSONValue action(String action, JSONObject json) throws OXMandatoryFieldException, JSONException, OXObjectNotFoundException, OXConflictException, OXPermissionException, OXFolderNotFoundException, SearchIteratorException, AjaxException, OXException, OXJSONException {
         if (!session.getUserConfiguration().hasTask()) {
             throw new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "task");
         }
-
+        String sTimeZone = DataParser.parseString(json, AJAXServlet.PARAMETER_TIMEZONE);
+        if (null != sTimeZone) {
+            timeZone = getTimeZone(sTimeZone);
+        }
         if (action.equalsIgnoreCase(AJAXServlet.ACTION_CONFIRM)) {
-            return actionConfirm(jsonObject);
+            return actionConfirm(json);
         } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_NEW)) {
-            return actionNew(jsonObject);
+            return actionNew(json);
         } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_DELETE)) {
-            return actionDelete(jsonObject);
+            return actionDelete(json);
         } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATE)) {
-            return actionUpdate(jsonObject);
+            return actionUpdate(json);
         } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATES)) {
-            return actionUpdates(jsonObject);
+            return actionUpdates(json);
         } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_LIST)) {
-            return actionList(jsonObject);
+            return actionList(json);
         } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_ALL)) {
-            return actionAll(jsonObject);
+            return actionAll(json);
         } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_GET)) {
-            return actionGet(jsonObject);
+            return actionGet(json);
         } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_SEARCH)) {
-            return actionSearch(jsonObject);
+            return actionSearch(json);
         } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_COPY)) {
-            return actionCopy(jsonObject);
+            return actionCopy(json);
         } else {
             throw new AjaxException(AjaxException.Code.UnknownAction, action);
         }
@@ -307,7 +307,6 @@ public class TaskRequest {
             objectIdAndFolderId[a][0] = DataParser.checkInt(jObject, AJAXServlet.PARAMETER_ID);
             objectIdAndFolderId[a][1] = DataParser.checkInt(jObject, AJAXServlet.PARAMETER_FOLDERID);
         }
-
         final int[] internalColumns = new int[columnsToLoad.length+1];
         System.arraycopy(columnsToLoad, 0, internalColumns, 0, columnsToLoad.length);
         internalColumns[columnsToLoad.length] = DataObject.LAST_MODIFIED;
@@ -347,7 +346,6 @@ public class TaskRequest {
         final int folderId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
         final int orderBy = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_SORT);
         final String orderDir = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER);
-
         final int leftHandLimit = DataParser.parseInt(jsonObj, AJAXServlet.LEFT_HAND_LIMIT);
         final int rightHandLimit = DataParser.parseInt(jsonObj, AJAXServlet.RIGHT_HAND_LIMIT);
 
@@ -394,7 +392,6 @@ public class TaskRequest {
     public JSONObject actionGet(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, OXException, OXJSONException, AjaxException {
         final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
         final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
-
         timestamp = new Date(0);
 
         final TasksSQLInterface sqlinterface = new TasksSQLImpl(session);
@@ -433,7 +430,6 @@ public class TaskRequest {
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
         final int[] columnsToLoad = removeVirtualColumns(columns);
         timestamp = new Date(0);
-
         Date lastModified = null;
 
         final JSONObject jData = DataParser.checkJSONObject(jsonObj, ResponseFields.DATA);
