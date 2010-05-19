@@ -56,6 +56,7 @@ import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.MultipleRequest;
 import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
 import com.openexchange.ajax.task.actions.GetResponse;
@@ -75,7 +76,6 @@ public class Bug16006Test extends AbstractAJAXSession {
     private AJAXClient client;
     private Task task;
     private TimeZone origTimeZone;
-    private TimeZone timeZone;
     private Date alarm;
 
     public Bug16006Test(String name) {
@@ -88,7 +88,6 @@ public class Bug16006Test extends AbstractAJAXSession {
         client = getClient();
         origTimeZone = client.getValues().getTimeZone();
         client.execute(new SetRequest(Tree.TimeZone, "Pacific/Honolulu"));
-        timeZone = client.getValues().getTimeZone();
         task = new Task();
         task.setParentFolderID(client.getValues().getPrivateTaskFolder());
         task.setTitle("Test for bug 16006");
@@ -108,9 +107,10 @@ public class Bug16006Test extends AbstractAJAXSession {
     }
 
     public void testAlarm() throws Throwable {
-        GetRequest request = new GetRequest(task, TimeZones.UTC);
-        GetResponse response = client.execute(request);
+        GetRequest[] requests = new GetRequest[1];
+        requests[0] = new GetRequest(task, TimeZones.UTC);
+        GetResponse response = client.execute(MultipleRequest.create(requests)).getResponse(0);
         Task testTask = response.getTask(TimeZones.UTC);
-        assertEquals("Alarm matches.", alarm, testTask.getAlarm());
+        assertEquals("Alarm does not match.", alarm, testTask.getAlarm());
     }
 }
