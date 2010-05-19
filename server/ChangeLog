@@ -1,3 +1,7 @@
+* 2010-05-19 - marcus.klein@open-xchange.com
+
+ - Bugfix #16027: Only set sender header of sent emails if from is not from alias list.
+
 * 2010-05-18 - marcus.klein@open-xchange.com
 
  - Bugfix #16006: Using time zone parameter when creating a new task. This was the only task action not respecting the time zone parameter.
