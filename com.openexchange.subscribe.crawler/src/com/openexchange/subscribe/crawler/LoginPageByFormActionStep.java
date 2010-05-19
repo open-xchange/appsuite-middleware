@@ -125,7 +125,8 @@ public class LoginPageByFormActionStep extends AbstractStep<HtmlPage, Object> im
                     }
                 }
                 if (!linkAvailable) {
-                    LOG.error("Page that does not have the link to imply a successful login : " + output.getWebResponse().getContentAsString());
+                	LOG.error("Login for url "+ url +" failed!");                    
+                    LOG.debug("Page that does not have the link to imply a successful login : " + output.getWebResponse().getContentAsString());
                     throw SubscriptionErrorMessage.INVALID_LOGIN.create();
                 }
                 executedSuccessfully = true;

@@ -1,3 +1,7 @@
+* 2010-05-19 - karsten.will@open-xchange.com
+
+ - Bugfix #16108: Subscription to Google Calendar does not work
+
 * 2010-05-19 - marcus.klein@open-xchange.com
 
  - Bugfix #16027: Only set sender header of sent emails if from is not from alias list.
