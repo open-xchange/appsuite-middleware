@@ -71,7 +71,7 @@ import com.openexchange.tools.servlet.AjaxException;
  */
 public class CalendarTestManagerTest extends AbstractAJAXSession {
 
-    private CalendarTestManager calendarMgr;
+    protected CalendarTestManager calendarMgr;
 
     private FolderTestManager folderMgr;
 
@@ -106,7 +106,7 @@ public class CalendarTestManagerTest extends AbstractAJAXSession {
         super.tearDown();
     }
 
-    private Appointment generateAppointment() {
+    protected Appointment generateAppointment() {
         Appointment appointment = new Appointment();
         appointment.setParentFolderID(testFolder.getObjectID());
         appointment.setTitle(getName());
