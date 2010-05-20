@@ -1207,6 +1207,35 @@ public class Mail extends PermissionServlet implements UploadListener {
                             throw e;
                         }
                     }
+                    final boolean wasUnseen = (mail.containsPrevSeen() && !mail.isPrevSeen());
+                    final boolean doUnseen = (unseen && wasUnseen);
+                    if (doUnseen) {
+                        mail.setFlag(MailMessage.FLAG_SEEN, false);
+                        final int unreadMsgs = mail.getUnreadMessages();
+                        mail.setUnreadMessages(unreadMsgs < 0 ? 0 : unreadMsgs + 1);
+                    }
+                    if (doUnseen) {
+                        /*
+                         * Leave mail as unseen
+                         */
+                        mailInterface.updateMessageFlags(folderPath, new String[] { uid }, MailMessage.FLAG_SEEN, false);
+                    } else if (wasUnseen) {
+                        /*
+                         * Trigger contact collector
+                         */
+                        try {
+                            final ServerUserSetting setting = ServerUserSetting.getDefaultInstance();
+                            final int contextId = session.getContextId();
+                            final int userId = session.getUserId();
+                            if (setting.isIContactCollectionEnabled(contextId, userId).booleanValue() && setting.isContactCollectOnMailAccess(
+                                contextId,
+                                userId).booleanValue()) {
+                                triggerContactCollector(session, mail);
+                            }
+                        } catch (final SettingException e) {
+                            LOG.warn("Contact collector could not be triggered.", e);
+                        }
+                    }
                     if (saveToDisk) {
                         /*
                          * Write message source to output stream...
@@ -1240,36 +1269,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         return null;
                     }
                     final ContentType ct = mail.getContentType();
-                    final boolean wasUnseen = (mail.containsPrevSeen() && !mail.isPrevSeen());
-                    final boolean doUnseen = (unseen && wasUnseen);
-                    if (doUnseen) {
-                        mail.setFlag(MailMessage.FLAG_SEEN, false);
-                        final int unreadMsgs = mail.getUnreadMessages();
-                        mail.setUnreadMessages(unreadMsgs < 0 ? 0 : unreadMsgs + 1);
-                    }
                     data = new String(baos.toByteArray(), ct.containsCharsetParameter() ? ct.getCharsetParameter() : STR_UTF8);
-                    if (doUnseen) {
-                        /*
-                         * Leave mail as unseen
-                         */
-                        mailInterface.updateMessageFlags(folderPath, new String[] { uid }, MailMessage.FLAG_SEEN, false);
-                    } else if (wasUnseen) {
-                        /*
-                         * Trigger contact collector
-                         */
-                        try {
-                            final ServerUserSetting setting = ServerUserSetting.getDefaultInstance();
-                            final int contextId = session.getContextId();
-                            final int userId = session.getUserId();
-                            if (setting.isIContactCollectionEnabled(contextId, userId).booleanValue() && setting.isContactCollectOnMailAccess(
-                                contextId,
-                                userId).booleanValue()) {
-                                triggerContactCollector(session, mail);
-                            }
-                        } catch (final SettingException e) {
-                            LOG.warn("Contact collector could not be triggered.", e);
-                        }
-                    }
                 } else if (showMessageHeaders) {
                     /*
                      * Get message

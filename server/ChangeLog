@@ -1,3 +1,7 @@
+* 2010-05-20 - marcus.klein@open-xchange.com
+
+ - Bugfix #16087: Keeping mails as unseen now works when passing the save parameter as true on mail get request.
+
 * 2010-05-20 - karsten.will@open-xchange.com
 
  - Bugfix #15903: Appt is shown, even if i am no participant
