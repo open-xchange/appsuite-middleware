@@ -1,3 +1,7 @@
+* 2010-05-20 - karsten.will@open-xchange.com
+
+ - Bugfix #15903: Appt is shown, even if i am no participant
+
 * 2010-05-19 - marcus.klein@open-xchange.com
 
  - Bugfix #16027: Only set sender header of sent emails if from is not from alias list.
