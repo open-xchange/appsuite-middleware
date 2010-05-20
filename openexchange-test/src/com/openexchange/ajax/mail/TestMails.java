@@ -49,41 +49,29 @@
 
 package com.openexchange.ajax.mail;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 /**
- * {@link MailTestSuite}
+ * {@link TestMails}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class MailTestSuite extends TestSuite {
+public final class TestMails {
 
-    private MailTestSuite() {
-        super();
+    public static final String UMLAUT_MAIL =
+        "From: #ADDR#\n" +
+        "To: #ADDR#\n" +
+        "Subject: Test for bug 15608\n" +
+        "Mime-Version: 1.0\n" +
+        "Content-Type: text/plain; charset=\"UTF-8\"\n" +
+        "Content-Transfer-Encoding: 8bit\n" +
+        "\n" +
+        "Test for bug 15608\n" +
+        "\u00e4\u00f6\u00fc\u00c4\u00d6\u00dc\u00df\n";
+
+    public static final String replaceAddresses(String mail, String address) {
+        return mail.replaceAll("#ADDR#", address);
     }
 
-    public static Test suite() {
-        final TestSuite mailSuite = new TestSuite();
-        mailSuite.addTestSuite(AllTest.class);
-        mailSuite.addTestSuite(ListTest.class);
-        mailSuite.addTestSuite(GetTest.class);
-        mailSuite.addTestSuite(SendTest.class);
-        mailSuite.addTestSuite(CountMailTest.class);
-        mailSuite.addTestSuite(MailSearchTest.class);
-        mailSuite.addTestSuite(ForwardMailTest.class);
-        mailSuite.addTestSuite(ReplyAllTest.class);
-        mailSuite.addTestSuite(ReplyTest.class);
-        mailSuite.addTestSuite(UpdateMailTest.class);
-        mailSuite.addTestSuite(MoveMailTest.class);
-        mailSuite.addTestSuite(ClearTest.class);
-        mailSuite.addTestSuite(CopyMailTest.class);
-        mailSuite.addTestSuite(ViewTest.class);
-        mailSuite.addTestSuite(MultipleAttachmentTest.class);
-        mailSuite.addTestSuite(SearchTest.class);
-        /*mailSuite.addTestSuite(AlwaysTest.class);*/
-        mailSuite.addTestSuite(Bug15608Test.class);
-        mailSuite.addTestSuite(Bug16087Test.class);
-        return mailSuite;
+    private TestMails() {
+        super();
     }
 }

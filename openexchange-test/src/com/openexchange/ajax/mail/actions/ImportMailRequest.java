@@ -49,7 +49,10 @@
 
 package com.openexchange.ajax.mail.actions;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONArray;
@@ -72,16 +75,20 @@ public class ImportMailRequest extends AbstractMailRequest<ImportMailResponse> {
     private final int flags;
     private final boolean failOnError;
 
-    public ImportMailRequest(String folder, int flags, InputStream... rfc822) {
-        this(folder, flags, true, rfc822);
-    }
-
     public ImportMailRequest(String folder, int flags, boolean failOnError, InputStream... rfc822) {
         super();
         this.folder = folder;
         this.rfc822 = rfc822;
         this.flags = flags;
         this.failOnError = failOnError;
+    }
+
+    public ImportMailRequest(String folder, int flags, InputStream... rfc822) {
+        this(folder, flags, true, rfc822);
+    }
+
+    public ImportMailRequest(String folder, int flags, Charset charset, String... mails) {
+        this(folder, flags, true, toStreams(charset, mails));
     }
 
     public boolean isFailOnError() {
@@ -141,5 +148,14 @@ public class ImportMailRequest extends AbstractMailRequest<ImportMailResponse> {
                 return retval;
             }
         };
+    }
+
+    private static final InputStream[] toStreams(Charset charset, String... mails) {
+        InputStream[] retval = new InputStream[mails.length];
+        for (int i = 0; i < mails.length; i++) {
+            ByteBuffer buffer = charset.encode(mails[i]);
+            retval[i] = new ByteArrayInputStream(buffer.array(), buffer.position(), buffer.limit());
+        }
+        return retval;
     }
 }

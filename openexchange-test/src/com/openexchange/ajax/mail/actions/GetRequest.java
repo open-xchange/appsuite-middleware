@@ -51,6 +51,7 @@ package com.openexchange.ajax.mail.actions;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.container.Response;
@@ -68,6 +69,8 @@ public final class GetRequest extends AbstractMailRequest<GetResponse> {
     private final View view;
     private final boolean structure;
     private boolean unseen;
+    private boolean source;
+    private boolean save;
     private final boolean failOnError;
 
     public GetRequest(final String folder, final String id) {
@@ -99,6 +102,14 @@ public final class GetRequest extends AbstractMailRequest<GetResponse> {
         this.unseen = unseen;
     }
 
+    public void setSource(boolean source) {
+        this.source = source;
+    }
+
+    public void setSave(boolean save) {
+        this.save = save;
+    }
+
     public Object getBody() {
         return null;
     }
@@ -108,7 +119,7 @@ public final class GetRequest extends AbstractMailRequest<GetResponse> {
     }
 
     public Parameter[] getParameters() {
-        final List<Parameter> l = new ArrayList<Parameter>(4);
+        final List<Parameter> l = new ArrayList<Parameter>();
         l.add(new Parameter(AJAXServlet.PARAMETER_ACTION, structure ? AJAXServlet.ACTION_GET_STRUCTURE : AJAXServlet.ACTION_GET));
         l.add(new Parameter(AJAXServlet.PARAMETER_FOLDERID, folder));
         l.add(new Parameter(AJAXServlet.PARAMETER_ID, id));
@@ -118,6 +129,12 @@ public final class GetRequest extends AbstractMailRequest<GetResponse> {
         if (unseen) {
             l.add(new Parameter(Mail.PARAMETER_UNSEEN, 1));
         }
+        if (source) {
+            l.add(new Parameter(Mail.PARAMETER_SRC, 1));
+        }
+        if (source && isSave()) {
+            l.add(new Parameter(Mail.PARAMETER_SAVE, 1));
+        }
         return l.toArray(new Parameter[l.size()]);
     }
 
@@ -125,10 +142,22 @@ public final class GetRequest extends AbstractMailRequest<GetResponse> {
         return new GetParser(failOnError);
     }
 
+    public boolean isSave() {
+        return save;
+    }
+
     private class GetParser extends AbstractAJAXParser<GetResponse> {
 
         GetParser(final boolean failOnError) {
             super(failOnError);
+        }
+
+        @Override
+        protected Response getResponse(String body) throws JSONException {
+            if (isSave()) {
+                return null;
+            }
+            return super.getResponse(body);
         }
 
         @Override
