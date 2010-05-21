@@ -1482,10 +1482,16 @@ public final class OutlookFolderStorage implements FolderStorage {
     static void doModifications(OutlookFolder folder) {
         if (FolderStorage.PUBLIC_ID.equals(folder.getID())) {
             doPublicRootModifications(folder);
+        } else if (FolderStorage.SHARED_ID.equals(folder.getID())) {
+            doSharedRootModifications(folder);
         }
     }
 
     private static void doPublicRootModifications(OutlookFolder folder) {
+        folder.setParentID(FolderStorage.PRIVATE_ID);
+    }
+
+    private static void doSharedRootModifications(OutlookFolder folder) {
         folder.setParentID(FolderStorage.PRIVATE_ID);
     }
 }

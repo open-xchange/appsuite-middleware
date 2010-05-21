@@ -1,3 +1,7 @@
+* 2010-05-21 - marcus.klein@open-xchange.com
+
+ - Bugfix #16163: Path requests return now correct path for shared private folders.
+
 * 2010-05-21 - steffen.templin@open-xchange.com
 
 - Bugfix #13173: If you switch several times between done and undone of a recurring task no duplicates for the next occurrence will be created.

@@ -69,6 +69,7 @@ import com.openexchange.folderstorage.internal.Tools;
 import com.openexchange.folderstorage.internal.UserizedFolderImpl;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.SharedType;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
@@ -262,6 +263,16 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
             isShared = true;
         } else {
             isShared = false;
+        }
+        // Modify parent
+        if (isShared) {
+            // Remain tree if parent is viewable, too.
+            FolderStorage parentStorage = getOpenedStorage(treeId, folder.getParentID(), storageParameters, openedStorages);
+            Folder parent = parentStorage.getFolder(treeId, folder.getParentID(), storageParameters);
+            Permission permission = CalculatePermission.calculate(parent, session, getAllowedContentTypes());
+            if (permission.getFolderPermission() < Permission.READ_FOLDER) {
+                userizedFolder.setParentID(FolderObject.SHARED_PREFIX + FolderObject.SYSTEM_SHARED_FOLDER_ID);
+            }
         }
         /*
          * Time zone offset and last-modified in UTC
