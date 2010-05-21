@@ -18,7 +18,7 @@
 
     <!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
-    <property name="bundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
+    <property name="gwbundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
     <property name="adbundle.d" value="${prefix}/etc/admindaemon/osgi/bundle.d"/>
 
     <!-- JAR names for classpath -->
@@ -29,8 +29,13 @@
     <property name="managementjar" value="com.openexchange.management.jar"/>
 
     <!-- Third party libs -->
-    <fileset dir="${basedir}" id="3rdpartyjars">
-        <include name="${lib.dir}/*.jar"/>
+    <fileset dir="${lib.dir}" id="3rdpartyjars">
+        <include name="*.jar"/>
+        <exclude name="CVS"/>
+    </fileset>
+
+    <fileset dir="." id="metainf">
+        <include name="META-INF/**"/>
         <exclude name="CVS"/>
     </fileset>
 
@@ -57,9 +62,8 @@
     </target>
 
     <target name="jar" depends="prepare,compile">
-        <jar jarfile="${tmp.dir}/${bundle.name}" manifest="META-INF/MANIFEST.MF">
+        <jar jarfile="${tmp.dir}/${bundle.name}">
             <fileset dir="${output..}"/>
-            <fileset refid="3rdpartyjars"/>
         </jar>
     </target>
 
@@ -70,18 +74,25 @@
     </target>
 
     <target name="installConfig">
-        <mkdir dir="${destdir}/${bundle.d}"/>
-        <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
+        <mkdir dir="${destdir}/${gwbundle.d}"/>
+        <echo file="${destdir}/${gwbundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${Bundle-SymbolicName}@start${line.separator}"/>
         <mkdir dir="${destdir}/${adbundle.d}"/>
-        <echo file="${destdir}/${adbundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
+        <echo file="${destdir}/${adbundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${Bundle-SymbolicName}@start${line.separator}"/>
     </target>
 
     <target name="installJar" depends="jar">
-        <mkdir dir="${destdir}/${bundlesdir}"/>
-        <copy todir="${destdir}/${bundlesdir}">
-            <fileset dir="${tmp.dir}">
-                <include name="${bundle.name}"/>
-            </fileset>
+        <property name="bundlesdestdir" value="${destdir}${bundlesdir}"/>
+        <mkdir dir="${bundlesdestdir}"/>
+
+        <property name="bundledir" value="${bundlesdestdir}/${Bundle-SymbolicName}"/>
+        <mkdir dir="${bundledir}"/>
+        <copy todir="${bundledir}" file="${tmp.dir}/${bundle.name}"/>
+        <mkdir dir="${bundledir}/lib"/>
+        <copy todir="${bundledir}/lib">
+            <fileset refid="3rdpartyjars"/>
+        </copy>
+        <copy todir="${bundledir}">
+            <fileset refid="metainf"/>
         </copy>
     </target>
 
@@ -104,8 +115,8 @@
     </target>
 
     <target name="clean">
-        <delete dir="${tmp.dir}"/>
         <delete dir="${output..}"/>
+        <delete dir="${tmp.dir}"/>
     </target>
 
 </project>
