@@ -25,6 +25,9 @@
     <property name="conf.install.dir" value="${prefix}/etc/groupware"/>
     <property name="confInstallCopyDir" location="${destdir}${conf.install.dir}"/>
 
+    <!-- Bundle dependencies -->
+    <property name="cachingBundle" value="com.openexchange.caching"/>
+
     <!-- JAR names for classpath -->
     <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar"/>
     <property name="osgiservicesjar" value="org.eclipse.osgi.services_3.1.200.v20070605.jar"/>
@@ -50,7 +53,7 @@
         <pathelement location="${bundlesdir}/${commonsloggingjar}"/>
         <pathelement location="${bundlesdir}/${servletjar}"/>
 
-        <pathelement location="${bundlesdir}/${cachingjar}"/>
+        <pathelement location="${bundlesdir}/${cachingBundle}/${cachingjar}"/>
         <pathelement location="${bundlesdir}/${genericonfjar}"/>
         <pathelement location="${bundlesdir}/${genericonfstoragejar}"/>
         <pathelement location="${bundlesdir}/${globaljar}"/>

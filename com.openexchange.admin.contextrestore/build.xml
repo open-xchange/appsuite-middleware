@@ -20,6 +20,7 @@
 
     <!-- Bundle dependencies -->
     <property name="commonBundle" value="com.openexchange.common"/>
+    <property name="cachingBundle" value="com.openexchange.caching"/>
 
     <!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
@@ -52,7 +53,7 @@
         <pathelement location="${bundlesdir}/${commonsloggingbundle}" />
         <pathelement location="${bundlesdir}/${serverbundle}"/>
         <pathelement location="${bundlesdir}/${globalbundle}"/>
-        <pathelement location="${bundlesdir}/${cachebundle}"/>
+        <pathelement location="${bundlesdir}/${cachingBundle}/${cachebundle}"/>
         <pathelement location="${admin.classpath}"/>
         <pathelement location="${adminhosting.classpath}"/>
     </path>

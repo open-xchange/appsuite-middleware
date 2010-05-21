@@ -22,7 +22,10 @@
     <!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
     <property name="gwbundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
-	<property name="adbundle.d" value="${prefix}/etc/admindaemon/osgi/bundle.d"/>
+    <property name="adbundle.d" value="${prefix}/etc/admindaemon/osgi/bundle.d"/>
+
+    <!-- Bundle dependencies -->
+    <property name="cachingBundle" value="com.openexchange.caching"/>
 
     <!-- JAR names for classpath -->
     <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar"/>
@@ -39,7 +42,7 @@
 
     <property name="mailjar" value="mail-1.4.2.jar"/>
     <property name="activationjar" value="activation-1.1.1.jar"/>
-	<property name="trovejar" value="trove-2.1.0.jar" />
+    <property name="trovejar" value="trove-2.1.0.jar"/>
 
     <!-- Third party libs -->
         <fileset dir="${basedir}" id="3rdpartyjars">
@@ -52,7 +55,7 @@
         <pathelement location="${bundlesdir}/${osgijar}"/>
         <pathelement location="${bundlesdir}/${commonsloggingjar}"/>
 
-        <pathelement location="${bundlesdir}/${cachingjar}"/>
+        <pathelement location="${bundlesdir}/${cachingBundle}/${cachingjar}"/>
         <pathelement location="${bundlesdir}/${cryptojar}"/>
         <pathelement location="${bundlesdir}/${genericonfjar}"/>
         <pathelement location="${bundlesdir}/${genericonfstoragejar}"/>
@@ -61,7 +64,7 @@
         <pathelement location="${bundlesdir}/${serverjar}"/>
 
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${mailjar}"/>
-    	<pathelement location="${bundlesdir}/${commonBundle}/lib/${trovejar}"/>
+        <pathelement location="${bundlesdir}/${commonBundle}/lib/${trovejar}"/>
         <pathelement location="${bundlesdir}/javax.activation/lib/${activationjar}"/>
 
         <fileset refid="3rdpartyjars"/>
@@ -95,8 +98,8 @@
     <target name="installConfig">
         <mkdir dir="${destdir}/${gwbundle.d}"/>
         <echo file="${destdir}/${gwbundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
-    	<mkdir dir="${destdir}/${adbundle.d}"/>
-    	<echo file="${destdir}/${adbundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
+        <mkdir dir="${destdir}/${adbundle.d}"/>
+        <echo file="${destdir}/${adbundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}"/>
     </target>
 
     <target name="installJar" depends="jar">
