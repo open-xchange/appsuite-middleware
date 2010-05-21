@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project name="com.openexchange.xml" default="install" basedir=".">
 
     <!-- Customizable values -->
@@ -25,21 +26,16 @@
 
     <!-- JAR names for classpath -->
     <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar"/>
-   
-    <fileset dir="lib" id="jarfiles">
-        <include name="*"/>
+
+    <!-- Third party libs -->
+    <fileset dir="${lib.dir}" id="3rdpartyjars">
+        <include name="*.jar"/>
         <exclude name="CVS"/>
         <exclude name="src"/>
     </fileset>
 
     <fileset dir="." id="metainf">
         <include name="META-INF/**"/>
-        <exclude name="CVS"/>
-    </fileset>
-
-    <!-- Third party libs -->
-    <fileset dir="${basedir}" id="3rdpartyjars">
-        <include name="${lib.dir}/*.jar"/>
         <exclude name="CVS"/>
     </fileset>
 
@@ -67,7 +63,7 @@
         </jar>
     </target>
 
-    <!-- Install -->
+    <!-- Install targets -->
     <target name="install">
         <antcall target="installJar"/>
         <antcall target="installConfig"/>
@@ -75,8 +71,7 @@
 
     <target name="installConfig">
         <mkdir dir="${destdir}/${gwbundle.d}"/>
-        <echo file="${destdir}/${gwbundle.d}/${Bundle-SymbolicName}.ini"
-            message="${bundlesdir}/${Bundle-SymbolicName}@start${line.separator}"/>
+        <echo file="${destdir}/${gwbundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${Bundle-SymbolicName}@start${line.separator}"/>
         <mkdir dir="${destdir}/${adbundle.d}"/>
         <echo file="${destdir}/${adbundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${Bundle-SymbolicName}@start${line.separator}"/>
     </target>
@@ -90,7 +85,7 @@
         <copy todir="${bundledir}" file="${tmp.dir}/${bundle.name}"/>
         <mkdir dir="${bundledir}/lib"/>
         <copy todir="${bundledir}/lib">
-            <fileset refid="jarfiles"/>
+            <fileset refid="3rdpartyjars"/>
         </copy>
         <copy todir="${bundledir}">
             <fileset refid="metainf"/>
@@ -110,10 +105,8 @@
                 <exclude name="Todo"/>
             </fileset>
         </copy>
-        <tar destfile="../${composite.name}.tar.gz"
-            basedir="${dist-package}"
-            includes="${composite.name}/"
-             compression="gzip"/>        <!-- dpkg-source does not like anything else -->
+        <!-- dpkg-source does not like anything else -->
+        <tar destfile="../${composite.name}.tar.gz" basedir="${dist-package}" includes="${composite.name}/" compression="gzip"/>
         <delete dir="${dist-package}"/>
     </target>
 
