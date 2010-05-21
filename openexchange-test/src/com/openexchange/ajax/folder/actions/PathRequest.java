@@ -68,21 +68,30 @@ public class PathRequest extends AbstractFolderRequest<PathResponse> {
         FolderObject.CREATED_BY };
 
     private final String folder;
-
     private final int[] columns;
+    private final boolean failOnError;
 
-    public PathRequest(API api, String folderId, int[] columns) {
+    public PathRequest(API api, String folderId, int[] columns, boolean failOnError) {
         super(api);
         this.folder = folderId;
         this.columns = columns;
+        this.failOnError = failOnError;
+    }
+
+    public PathRequest(API api, String folderId, int[] columns) {
+        this(api, folderId, columns, true);
     }
 
     public PathRequest(API api, String folderId) {
-        this(api, folderId, DEFAULT_COLUMNS);
+        this(api, folderId, DEFAULT_COLUMNS, true);
+    }
+
+    public PathRequest(API api, int folderId, int[] columns, boolean failOnError) {
+        this(api, Integer.toString(folderId), columns, failOnError);
     }
 
     public PathRequest(API api, int folderId, int[] columns) {
-        this(api, Integer.toString(folderId), columns);
+        this(api, Integer.toString(folderId), columns, true);
     }
 
     public Object getBody() {
@@ -101,7 +110,7 @@ public class PathRequest extends AbstractFolderRequest<PathResponse> {
     }
 
     public PathParser getParser() {
-        return new PathParser(columns, true);
+        return new PathParser(columns, failOnError);
     }
 
     private static class PathParser extends AbstractListParser<PathResponse> {

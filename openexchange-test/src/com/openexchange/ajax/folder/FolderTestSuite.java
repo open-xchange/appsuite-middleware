@@ -51,6 +51,7 @@ package com.openexchange.ajax.folder;
 
 import com.openexchange.ajax.folder.api2.Bug15752Test;
 import com.openexchange.ajax.folder.api2.Bug15980Test;
+import com.openexchange.ajax.folder.api2.Bug16163Test;
 import com.openexchange.ajax.folder.api2.GetTest;
 import com.openexchange.ajax.folder.api2.Bug15995Test;
 import com.openexchange.ajax.folder.api2.ClearTest;
@@ -106,6 +107,7 @@ public final class FolderTestSuite {
         tests.addTestSuite(Bug15752Test.class);
         tests.addTestSuite(Bug15995Test.class);
         tests.addTestSuite(Bug15980Test.class);
+        tests.addTestSuite(Bug16163Test.class);
 
         return tests;
     }
