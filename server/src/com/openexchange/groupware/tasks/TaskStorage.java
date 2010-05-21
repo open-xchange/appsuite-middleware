@@ -217,6 +217,7 @@ abstract class TaskStorage {
 
     /**
      * Searches for tasks. Currently not all search options are available.
+     * Folder lists must not be null but empty lists if there are no such folderId's.
      * 
      * @param session Session.
      * @param search search object with the search parameters.
