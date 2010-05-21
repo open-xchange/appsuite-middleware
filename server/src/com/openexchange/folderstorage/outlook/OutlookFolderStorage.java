@@ -381,7 +381,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         }
         final boolean started = folderStorage.startTransaction(storageParameters, false);
         try {
-            final boolean isEmpty = folderStorage.isEmpty(treeId, folderId, storageParameters);
+            final boolean isEmpty = folderStorage.isEmpty(realTreeId, folderId, storageParameters);
             if (started) {
                 folderStorage.commitTransaction(storageParameters);
             }
