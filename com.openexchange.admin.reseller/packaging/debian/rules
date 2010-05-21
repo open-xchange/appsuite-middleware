@@ -14,7 +14,7 @@ pkgroot=$(CURDIR)/debian/$(pkgname)
 soaproot=$(CURDIR)/debian/open-xchange-admin-plugin-reseller-soap
 oxprefix=/opt/open-xchange
 adminbundle=com.openexchange.admin.jar
-adminhostingbundle=open_xchange_admin_plugin_hosting.jar
+adminhostingbundle=com.openexchange.admin.plugin.hosting.jar
 
 CFLAGS = -Wall -g
 
