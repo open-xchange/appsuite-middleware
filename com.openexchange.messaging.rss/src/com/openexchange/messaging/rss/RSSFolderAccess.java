@@ -92,25 +92,25 @@ public class RSSFolderAccess extends RSSCommon implements MessagingFolderAccess 
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(RSSMessagingService.ID);
     }
 
-    public boolean exists(String folderId) throws MessagingException {
+    public boolean exists(String folderId) {
         return EMPTY.equals(folderId);
     }
 
-    public String getConfirmedHamFolder() throws MessagingException {
+    public String getConfirmedHamFolder() {
         return null;
     }
 
-    public String getConfirmedSpamFolder() throws MessagingException {
+    public String getConfirmedSpamFolder() {
         return null;
     }
 
-    public String getDraftsFolder() throws MessagingException {
+    public String getDraftsFolder() {
         return null;
     }
 
     public MessagingFolder getFolder(String folderId) throws MessagingException {
         checkFolder(folderId);
-        return RSSFolder.getInstance();
+        return new RSSFolder(session.getUserId());
     }
 
     private static final Quota.Type[] MESSAGE = { Quota.Type.MESSAGE };
@@ -122,7 +122,7 @@ public class RSSFolderAccess extends RSSCommon implements MessagingFolderAccess 
 
     private static final MessagingFolder[] EMPTY_PATH = new MessagingFolder[0];
 
-    public MessagingFolder[] getPath2DefaultFolder(String folderId) throws MessagingException {
+    public MessagingFolder[] getPath2DefaultFolder(String folderId) {
         return EMPTY_PATH;
     }
 
@@ -131,15 +131,15 @@ public class RSSFolderAccess extends RSSCommon implements MessagingFolderAccess 
         return Quota.getUnlimitedQuotas(types);
     }
 
-    public MessagingFolder getRootFolder() throws MessagingException {
-        return RSSFolder.getInstance();
+    public MessagingFolder getRootFolder() {
+        return new RSSFolder(session.getUserId());
     }
 
-    public String getSentFolder() throws MessagingException {
+    public String getSentFolder() {
         return null;
     }
 
-    public String getSpamFolder() throws MessagingException {
+    public String getSpamFolder() {
         return null;
     }
 

@@ -49,6 +49,7 @@
 
 package com.openexchange.messaging.rss;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -65,17 +66,11 @@ import com.openexchange.messaging.MessagingPermissions;
  */
 public class RSSFolder implements MessagingFolder {
 
-    private static final RSSFolder INSTANCE = new RSSFolder();
-    
-    public static RSSFolder getInstance() {
-        return INSTANCE;
-    }
-    
     private final MessagingPermission ownPermission;
-    /**
-     * Initializes a new {@link TwitterMessagingFolder}.
-     */
-    private RSSFolder() {
+
+    private final List<MessagingPermission> permissions;
+
+    public RSSFolder(int user) {
         super();
         final MessagingPermission mp = DefaultMessagingPermission.newInstance();
         mp.setAllPermissions(
@@ -84,7 +79,10 @@ public class RSSFolder implements MessagingFolder {
             MessagingPermission.NO_PERMISSIONS,
             MessagingPermission.DELETE_OWN_OBJECTS);
         mp.setAdmin(false);
+        mp.setEntity(user);
+        mp.setGroup(false);
         ownPermission = MessagingPermissions.unmodifiablePermission(mp);
+        permissions = Arrays.asList(ownPermission);
     }
 
     public Set<String> getCapabilities() {
@@ -108,7 +106,7 @@ public class RSSFolder implements MessagingFolder {
     }
 
     public List<MessagingPermission> getPermissions() {
-        return Collections.emptyList();
+        return permissions;
     }
 
     public boolean hasSubfolders() {
@@ -160,7 +158,7 @@ public class RSSFolder implements MessagingFolder {
     }
 
     public DefaultFolderType getDefaultFolderType() {
-        return DefaultFolderType.NONE;
+        return DefaultFolderType.MESSAGING;
     }
 
     public char getSeparator() {

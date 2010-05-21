@@ -1,6 +1,7 @@
 * 2010-05-21 - marcus.klein@open-xchange.com
 
  - Bugfix #16163: Path requests return now correct path for shared private folders.
+ - Bugfix #16102: Implemented RSS messaging folder on the new folder tree.
 
 * 2010-05-21 - steffen.templin@open-xchange.com
 
