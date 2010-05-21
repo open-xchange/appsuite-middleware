@@ -438,7 +438,11 @@ public class TaskException extends AbstractOXException {
         /**
          * In order to accomplish the search, %1$d or more characters are required.
          */
-        PATTERN_TOO_SHORT("In order to accomplish the search, %1$d or more characters are required.", Category.USER_INPUT, Detail.OTHER, 51);
+        PATTERN_TOO_SHORT("In order to accomplish the search, %1$d or more characters are required.", Category.USER_INPUT, Detail.OTHER, 51),
+        /**
+         * 
+         */
+        GROUP_IS_EMPTY("Group %1$d is empty. You can't add an empty group to a task.", Category.USER_INPUT, Detail.OTHER, 52);
 
         /**
          * Message of the exception.

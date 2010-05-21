@@ -477,14 +477,18 @@ public final class TaskLogic {
                 try {
                     final int[] member = GroupStorage.getInstance().getGroup(
                         group.getIdentifier(), ctx).getMember();
-                    for (final int userId : member) {
-                        final TaskParticipant tParticipant =
-                            new InternalParticipant(new UserParticipant(userId),
-                            Integer.valueOf(group.getIdentifier()));
-                        if (!retval.contains(tParticipant)) {
-                            retval.add(tParticipant);
+                    if (member.length == 0) {
+                        throw new TaskException(Code.GROUP_IS_EMPTY, group.getDisplayName());
+                    } else {
+                        for (final int userId : member) {
+                            final TaskParticipant tParticipant =
+                                new InternalParticipant(new UserParticipant(userId),
+                                Integer.valueOf(group.getIdentifier()));
+                            if (!retval.contains(tParticipant)) {
+                                retval.add(tParticipant);
+                            }
                         }
-                    }
+                    }                    
                 } catch (final LdapException e) {
                     throw new TaskException(e);
                 }

@@ -202,6 +202,7 @@ public class CalendarParser extends CommonParser {
         for (int i = 0; i < jparticipants.length(); i++) {
             final JSONObject jparticipant = jparticipants.getJSONObject(i);
             final int type = jparticipant.getInt(ParticipantsFields.TYPE);
+            
             int id;
             try {
                 id = jparticipant.getInt(ParticipantsFields.ID);
@@ -223,6 +224,8 @@ public class CalendarParser extends CommonParser {
                             jparticipant.get(ParticipantsFields.ID));
                     }
                     p = new GroupParticipant(id);
+                    final String groupDisplayName = jparticipant.getString(ParticipantsFields.DISPLAY_NAME);
+                    p.setDisplayName(groupDisplayName);
                     break;
                 case Participant.RESOURCE:
                     if (Participant.NO_ID == id) {
