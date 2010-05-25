@@ -224,7 +224,7 @@ public class CalendarParser extends CommonParser {
                             jparticipant.get(ParticipantsFields.ID));
                     }
                     p = new GroupParticipant(id);
-                    final String groupDisplayName = jparticipant.getString(ParticipantsFields.DISPLAY_NAME);
+                    final String groupDisplayName = DataParser.parseString(jparticipant, ParticipantsFields.DISPLAY_NAME);
                     p.setDisplayName(groupDisplayName);
                     break;
                 case Participant.RESOURCE:
