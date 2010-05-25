@@ -1,3 +1,7 @@
+* 2010-05-25 - marcus.klein@open-xchange.com
+
+ - Bugfix #16117: Corrected identifier check for move to public infostore folder.
+
 * 2010-05-21 - steffen.templin@open-xchange.com
 
  - Bugfix #15113: Adding an empty group to a task now throws an exception.

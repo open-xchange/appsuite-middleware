@@ -983,7 +983,7 @@ final class OXFolderManagerImpl extends OXFolderManager {
         }
     }
 
-    private final int[] SYSTEM_PUBLIC_FOLDERS = { FolderObject.SYSTEM_PUBLIC_FOLDER_ID, FolderObject.SYSTEM_INFOSTORE_FOLDER_ID };
+    private final int[] SYSTEM_PUBLIC_FOLDERS = { FolderObject.SYSTEM_PUBLIC_FOLDER_ID, FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID };
 
     private static boolean isInArray(final int key, final int[] a) {
         Arrays.sort(a);
