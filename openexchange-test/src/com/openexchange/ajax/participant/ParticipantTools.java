@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.participant;
 
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -56,7 +57,6 @@ import java.util.List;
 import java.util.Random;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
-
 import com.meterware.httpunit.WebConversation;
 import com.openexchange.ajax.AbstractAJAXTest;
 import com.openexchange.ajax.ContactTest;
@@ -151,6 +151,19 @@ public final class ParticipantTools {
             if (iter.next().getIdentifier() == creatorId) {
                 iter.remove();
             }
+        }
+    }
+
+    public static void assertParticipants(Participant[] participants, int... userIds) {
+        for (int userId : userIds) {
+            boolean contained = false;
+            for (Participant participant : participants) {
+                if (Participant.USER == participant.getType() && participant.getIdentifier() == userId) {
+                    contained = true;
+                    break;
+                }
+            }
+            assertTrue("Participant with identifier " + userId + " is missing.", contained);
         }
     }
 

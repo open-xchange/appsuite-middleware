@@ -58,25 +58,16 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
  */
 public class UpdateResponse extends AbstractAJAXResponse {
 
-	private int id;
-	
-    /**
-     * @param response
-     */
+    private int id;
+
     UpdateResponse(final Response response) {
         super(response);
     }
-	
-    /**
-     * @return the id
-     */
+
     public int getId() {
         return id;
     }
 
-    /**
-     * @param id the id to set
-     */
     void setId(final int id) {
         this.id = id;
     }

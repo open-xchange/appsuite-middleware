@@ -61,16 +61,10 @@ import static com.openexchange.ajax.appointment.action.AppointmentParserTools.pa
  */
 public class UpdateParser extends AbstractAJAXParser<UpdateResponse> {
 
-    /**
-     * Default constructor.
-     */
     UpdateParser(final boolean failOnError) {
         super(failOnError);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected UpdateResponse createResponse(final Response response) throws JSONException {
         final UpdateResponse retval = new UpdateResponse(response);
