@@ -50,6 +50,7 @@
 
 package com.openexchange.calendar.api;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -81,7 +82,6 @@ import com.openexchange.calendar.CalendarMySQL;
 import com.openexchange.calendar.CalendarOperation;
 import com.openexchange.calendar.CalendarSql;
 import com.openexchange.calendar.CalendarSqlImp;
-import com.openexchange.calendar.RecurrenceChecker;
 import com.openexchange.calendar.RecurringResult;
 import com.openexchange.calendar.Tools;
 import com.openexchange.calendar.recurrence.RecurringCalculation;
@@ -2006,7 +2006,7 @@ public final class CalendarCollection implements CalendarCollectionService {
         final Participant check[] = cdao.getParticipants();
         if (check != null && check.length > 0) {
             try {
-                if (!containsParicipant(check, p, cdao.getContext())) {
+                if (!containsParticipant(check, p, cdao.getContext())) {
                     final Participant newp[] = new Participant[check.length+1];
                     System.arraycopy(check, 0, newp, 0, check.length);
                     newp[check.length] = p;
@@ -2022,7 +2022,7 @@ public final class CalendarCollection implements CalendarCollectionService {
         }
     }
     
-    private boolean containsParicipant(Participant[] participants, Participant p, Context ctx) throws LdapException {
+    private boolean containsParticipant(Participant[] participants, Participant p, Context ctx) throws LdapException {
         for (Participant part : participants) {
             if (part.getType() == p.getType()) {
                 if (part.getIdentifier() == p.getIdentifier()) {
@@ -2934,9 +2934,6 @@ public final class CalendarCollection implements CalendarCollectionService {
         return false;
     }
     
-    /* (non-Javadoc)
-     * @see com.openexchange.calendar.CalendarCommonCollectionInterface#detectFolderMoveAction(com.openexchange.calendar.CalendarDataObject, com.openexchange.calendar.CalendarDataObject)
-     */
     public void detectFolderMoveAction(final CalendarDataObject cdao, final CalendarDataObject edao) throws OXException {
         if (cdao.getFolderMove()) { // TODO: Recurring apointments are not allowed to move, this must be checked !!
             if (FolderObject.SHARED == cdao.getFolderType()) {
@@ -2957,8 +2954,7 @@ public final class CalendarCollection implements CalendarCollectionService {
                     cdao.setParentFolderID(0);
                     cdao.setFolderMoveAction(CalendarOperation.PRIVATE_ALL_PARTICIPANTS);
                 } else {
-                    throw new OXCalendarException(OXCalendarException.Code.MOVE_NOT_SUPPORTED, Integer.valueOf(edao
-                            .getFolderType()), Integer.valueOf(cdao.getFolderType()));
+                    throw new OXCalendarException(Code.MOVE_NOT_SUPPORTED, I(edao.getFolderType()), I(cdao.getFolderType()));
                 }
             }
         }

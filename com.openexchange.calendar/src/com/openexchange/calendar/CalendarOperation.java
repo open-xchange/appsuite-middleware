@@ -179,7 +179,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                     if (DEBUG && action_folder != inFolder) {
                         LOG.debug(StringCollection.convertArraytoString(new Object[] { "Permission Exception 1 (fid!inFolder) for user:oid:fid:inFolder ", Integer.valueOf(so.getUserId()), ":",Integer.valueOf(oid),":",Integer.valueOf(action_folder),":",inFolder }));
                     }
-                    throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.LOAD_PERMISSION_EXCEPTION_1));
+                    throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.LOAD_PERMISSION_EXCEPTION_5));
                 }
                 cdao.setStartDate(setDate(i++, load_resultset));
                 cdao.setEndDate(setDate(i++, load_resultset));
@@ -474,11 +474,16 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         }
 
         if (cdao.getFolderType() == FolderObject.PRIVATE) {
-            if (isInsert || cdao.containsParticipants()) {
-                final UserParticipant up = new UserParticipant(uid);
-                up.setConfirm(CalendarDataObject.ACCEPT);
-                recColl.checkAndFillIfUserIsParticipant(cdao, up);
+            // create in/move to private folder, update in private folder and current user is missing: add it
+            if (!cdao.containsParticipants()) {
+                if (null != edao && null != edao.getParticipants()) {
+                    cdao.setParticipants(edao.getParticipants());
+                    cdao.setUsers(edao.getUsers());
+                }
             }
+            final UserParticipant up = new UserParticipant(uid);
+            up.setConfirm(CalendarDataObject.ACCEPT);
+            recColl.checkAndFillIfUserIsParticipant(cdao, up);
         } else if (cdao.getFolderType() == FolderObject.SHARED) {
             if (cdao.containsParentFolderID()) {
                 cdao.setSharedFolderOwner(ofa.getFolderOwner(cdao.getParentFolderID()));
@@ -512,28 +517,27 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             recColl.checkAndConfirmIfUserUserIsParticipantInPublicFolder(cdao, up);
         }
 
-        UserParticipant p = null;
-        if (cdao.getFolderType() == FolderObject.SHARED) {
-            p = new UserParticipant(cdao.getSharedFolderOwner());
-        } else {
-            p = new UserParticipant(uid);
-        }
-        p.setConfirm(CalendarDataObject.ACCEPT);
         if ((isInsert || cdao.containsUserParticipants()) && cdao.getFolderType() != FolderObject.PUBLIC) {
+            UserParticipant p = null;
+            if (cdao.getFolderType() == FolderObject.SHARED) {
+                p = new UserParticipant(cdao.getSharedFolderOwner());
+            } else {
+                p = new UserParticipant(uid);
+            }
+            p.setConfirm(CalendarDataObject.ACCEPT);
             recColl.checkAndFillIfUserIsUser(cdao, p);
         }
-
-        if (!cdao.containsTimezone()) {
-            cdao.setTimezone(timezone);
-        }
-        
-        simpleDataCheck(cdao, edao, uid);
         if (isInsert && cdao.getParticipants() == null && cdao.getFolderType() == FolderObject.PUBLIC) {
             final Participant np[] = new Participant[1];
             final Participant up = new UserParticipant(uid);
             np[0] = up;
             cdao.setParticipants(np);
         }
+
+        if (!cdao.containsTimezone()) {
+            cdao.setTimezone(timezone);
+        }
+        simpleDataCheck(cdao, edao, uid);
         try {
             fillUserParticipants(cdao);
         } catch (final LdapException e) {
@@ -900,8 +904,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             return;
         }
         Participants userparticipants = null;
-        for (int a = 0; a < participants.length; a++) {
-            final Participant p = participants[a];
+        for (Participant p : participants) {
             if (userparticipants == null) {
                 userparticipants = new Participants(cdao.getUsers());
             }
@@ -923,7 +926,6 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 }
             } else if (p.getType() == Participant.RESOURCE) {
                 cdao.setContainsResources(true);
-
             }
         }
         cdao.setUsers(userparticipants.getUsers());
@@ -954,8 +956,6 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
      *            The current user participants
      * @param op
      *            The old user participants
-     * @param owner
-     *            The appointment's owner
      * @param uid
      *            Current working session user
      * @param sharedFolderOwner
@@ -970,10 +970,8 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
      *         participants otherwise <code>null</code>. If present index
      *         <code>1</code> will contain the modified user participants
      *         otherwise <code>null</code>.
-     * @throws OXPermissionException
-     *             If a permission error occurs
      */
-    static final Participants[] getModifiedUserParticipants(final UserParticipant np[], final UserParticipant op[], final int owner, final int uid, final int sharedFolderOwner, final boolean time_change, final CalendarDataObject cdao) throws OXPermissionException {
+    static final Participants[] getModifiedUserParticipants(final UserParticipant np[], final UserParticipant op[], final int uid, final int sharedFolderOwner, final boolean time_change, final CalendarDataObject cdao) {
         final Participants p[] = new Participants[2];
         for (int a = 0; a < np.length; a++ ) {
             final int bs = Arrays.binarySearch(op, np[a]);

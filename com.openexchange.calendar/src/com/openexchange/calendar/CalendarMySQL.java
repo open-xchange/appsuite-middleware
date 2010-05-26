@@ -2252,10 +2252,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         }
 
         if (cdao.getFolderMove()) {
-            /*
-             * Fake a deletion on MOVE operation for MS Outlook prior to
-             * performing actual UPDATE
-             */
+            // Fake a deletion on MOVE operation for MS Outlook prior to performing actual UPDATE
             backupAppointment(writecon, so.getContextId(), cdao.getObjectID(), so.getUserId());
         }
         
@@ -2527,7 +2524,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         if (users != null) {
             Arrays.sort(users);
             Arrays.sort(old_users);
-            final Participants p[] = CalendarOperation.getModifiedUserParticipants(users, old_users, edao.getCreatedBy(), uid, cdao.getSharedFolderOwner(), time_change, cdao);
+            final Participants p[] = CalendarOperation.getModifiedUserParticipants(users, old_users, uid, cdao.getSharedFolderOwner(), time_change, cdao);
             if (p[0] != null) {
                 new_userparticipants = p[0].getUsers();
                 if (new_userparticipants != null) {
@@ -2742,7 +2739,25 @@ public class CalendarMySQL implements CalendarSqlImp {
                                 }
                             }
                         } else if (FolderObject.PUBLIC == folderType) {
-                            pi.setNull(5, java.sql.Types.INTEGER);
+                            final int pfid;
+                            if (cdao.getFolderMove()) {
+                                if (FolderObject.PRIVATE == cdao.getFolderType()) {
+                                    // move public -> private
+                                    pfid = access.getDefaultFolder(new_userparticipants[a].getIdentifier(), FolderObject.CALENDAR).getObjectID();
+                                } else {
+                                    // TODO needs to be implemented.
+                                    pfid = -1;
+                                }
+                            } else {
+                                // users personal folder is set to zero/null if appointment is located in public folder.
+                                pfid = 0;
+                            }
+                            if (pfid == 0) {
+                                pi.setNull(5, java.sql.Types.INTEGER);
+                            } else {
+                                pi.setInt(5, pfid);
+                            }
+                            new_userparticipants[a].setPersonalFolderId(pfid);
                         } else if (FolderObject.SHARED == folderType) {
                             if (edao.getSharedFolderOwner() == 0) {
                                 throw new OXCalendarException(OXCalendarException.Code.NO_SHARED_FOLDER_OWNER);
