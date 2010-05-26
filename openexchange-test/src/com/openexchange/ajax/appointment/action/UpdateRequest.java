@@ -86,6 +86,13 @@ public class UpdateRequest extends AbstractAppointmentRequest<UpdateResponse> {
 
     }
 
+    /**
+     * Special constructor for moving appointment.
+     * @param originFolder folder where the appointment is located currently.
+     * @param appointment destination appointment object.
+     * @param timezone time zone for correctly shifting times.
+     * @param failOnError <code>false</code> if exception from backend should be ignored.
+     */
     public UpdateRequest(final int originFolder, final Appointment appointment, final TimeZone timezone, final boolean failOnError) {
         super();
         this.appointmentObj = appointment;
@@ -94,23 +101,14 @@ public class UpdateRequest extends AbstractAppointmentRequest<UpdateResponse> {
         this.originFolder = originFolder;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public JSONObject getBody() throws JSONException {
         return convert(appointmentObj, timeZone);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Method getMethod() {
         return Method.PUT;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Parameter[] getParameters() {
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE),
@@ -119,16 +117,10 @@ public class UpdateRequest extends AbstractAppointmentRequest<UpdateResponse> {
             new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(appointmentObj.getLastModified().getTime())) };
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public UpdateParser getParser() {
         return new UpdateParser(failOnError);
     }
 
-    /**
-     * @return the appointment
-     */
     protected Appointment getAppointment() {
         return appointmentObj;
     }
