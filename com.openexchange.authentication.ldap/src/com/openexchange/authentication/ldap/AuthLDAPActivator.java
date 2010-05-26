@@ -60,44 +60,31 @@ import com.openexchange.authentication.LoginException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 
+/**
+ * {@link AuthLDAPActivator}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
 public class AuthLDAPActivator extends DeferredActivator {
 	
-	/**
-	 * Logger.
-	 */
-	private static transient final Log LOG = LogFactory.getLog(AuthLDAPActivator.class);
+	private static final Log LOG = LogFactory.getLog(AuthLDAPActivator.class);
 
-	/**
-	 * Reference to the service registration.
-	 */
 	private ServiceRegistration registration;
 
-	/**
-	 * Default constructor.
-	 */
 	public AuthLDAPActivator() {
 	    super();
 	}
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ConfigurationService.class };
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
         // Nothing to do.
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void handleAvailability(final Class<?> clazz) {
         // Nothing to do.
@@ -122,12 +109,9 @@ public class AuthLDAPActivator extends DeferredActivator {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void stopBundle() {
-        LOG.info("Stoppting ldap authentication service.");
+        LOG.info("Stopping ldap authentication service.");
         if (null != registration) {
             registration.unregister();
             registration = null;
