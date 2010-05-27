@@ -54,66 +54,61 @@ import com.openexchange.ajax.subscribe.test.SubscriptionTestManager;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.SimPublicationTargetDiscoveryService;
 import com.openexchange.subscribe.Subscription;
-import com.openexchange.test.ContactTestManager;
-import com.openexchange.test.FolderTestManager;
+
 
 /**
- * This is a roundtrip test, doing Create-(verify)-update-(verify)-delete-(verify) for a publication and subscription of OXMF.
- * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class OXMFContactLifeCycleTest extends AbstractPubSubRoundtripTest {
+public class DoNotLoseContactsWhenPublishingAndSubscribing extends OXMFContactLifeCycleTest {
 
-    protected ContactTestManager cMgr;
-
-    protected FolderTestManager fMgr;
-
-    protected FolderObject pubFolder;
-
-    protected FolderObject subFolder;
-
-    public OXMFContactLifeCycleTest(String name) {
+    public DoNotLoseContactsWhenPublishingAndSubscribing(String name) {
         super(name);
     }
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    public void testShouldNotLoseContactsWhileRoundtripping() throws Exception {
+        createContact("Herbert", "Meier");
 
-        this.cMgr = getContactManager();
-        this.fMgr = getFolderManager();
+        // prepare pubsub
+        PublicationTestManager pubMgr = getPublishManager();
+        SubscriptionTestManager subMgr = getSubscribeManager();
+        SimPublicationTargetDiscoveryService pubDiscovery = new SimPublicationTargetDiscoveryService();
+        pubMgr.setPublicationTargetDiscoveryService(pubDiscovery);
+        Publication publication = generatePublication("contacts", String.valueOf(pubFolder.getObjectID()), pubDiscovery);
 
-        // setup folders
-        this.pubFolder = fMgr.generateFolder(
-            "publishRoundtripTest",
-            FolderObject.CONTACT,
-            getClient().getValues().getPrivateContactFolder(),
-            getClient().getValues().getUserId());
-        this.subFolder = fMgr.generateFolder(
-            "subscribeRoundtripTest",
-            FolderObject.CONTACT,
-            getClient().getValues().getPrivateContactFolder(),
-            getClient().getValues().getUserId());
-        fMgr.insertFolderOnServer(pubFolder);
-        fMgr.insertFolderOnServer(subFolder);
+        Contact[] contacts;
+
+        // create publication
+        pubMgr.newAction(publication);
+
+        // create subscription for that url
+        DynamicFormDescription formDescription = publication.getTarget().getFormDescription();
+        formDescription.add(FormElement.input("url", "URL"));
+        Subscription subscription = generateOXMFSubscription(formDescription);
+        subscription.setFolderId(subFolder.getObjectID());
+        subMgr.setFormDescription(formDescription);
+        String pubUrl = (String) publication.getConfiguration().get("url");
+        subscription.getConfiguration().put("url", pubUrl);
+
+        subMgr.newAction(subscription);
+
+        // refresh and check subscription
+        subMgr.refreshAction(subscription.getId());
+        contacts = cMgr.allAction(subFolder.getObjectID());
+        assertEquals("Should only contain one contact after first publication", 1, contacts.length);
+
+        // publish another contact
+        createContact("Hubert", "Meier");
+
+        // bypass the 30 sec caching logic
+        Thread.sleep(31 * 1000);
+
+        // refresh and check subscription again
+        subMgr.refreshAction(subscription.getId());
+        contacts = cMgr.allAction(subFolder.getObjectID());
+        assertEquals("Should have two contacts after update", 2, contacts.length);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        cMgr.cleanUp();
-        fMgr.cleanUp();
-        super.tearDown();
-
-    }
-
-    protected Contact createContact(String firstname, String lastname) {
-        Contact contact1 = generateContact(firstname, lastname);
-        contact1.setParentFolderID(pubFolder.getObjectID());
-        cMgr.newAction(contact1);
-        return contact1;
-    }
 }
