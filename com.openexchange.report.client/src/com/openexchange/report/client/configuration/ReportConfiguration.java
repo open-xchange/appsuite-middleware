@@ -95,6 +95,9 @@ public class ReportConfiguration {
 		StringBuilder retval = new StringBuilder();
 
 		for (int currentFetchPosition = 1; properties.getProperty("com.openexchange.licensekey."+currentFetchPosition) != null; currentFetchPosition++) {
+			if (retval.length() > 0) {
+				retval.append(",");
+			}
 			retval.append(properties.getProperty("com.openexchange.licensekey."+currentFetchPosition));
 		}
 

@@ -1,3 +1,8 @@
+* 2010-05-28 - benjamin.otterbach@open-xchange.com
+
+  - Bugfix #15190: Report Server does not add a separator to multiple license keys
+    - Added missing seperator to JSON string
+
 * 2010-04-01 - benjamin.otterbach@open-xchange.com
 
   - Bugfix #15754: Report Client does not send reports with latest HEAD
