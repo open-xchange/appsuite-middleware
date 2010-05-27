@@ -1,3 +1,7 @@
+* 2010-05-27 - tobias.prinz@open-xchange.com
+
+ - Bugfix #15927: Empty contacts (or those with just one name) are not duplicated when synchronizing
+
 * 2010-05-26 - marcus.klein@open-xchange.com
 
  - Bugfix #16194: Implemented move from public to private folder.

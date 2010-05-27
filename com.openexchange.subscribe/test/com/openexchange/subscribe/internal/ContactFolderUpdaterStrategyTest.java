@@ -152,12 +152,21 @@ public class ContactFolderUpdaterStrategyTest extends TestCase {
         contact.setEmail1(null);
         
         Contact contact2 = new Contact();
-        contact.setGivenName("Hans");
-        contact.setEmail1(null);
+        contact2.setGivenName("Hans");
+        contact2.setEmail1(null);
         
         int score = strategy.calculateSimilarityScore(contact, contact2, null);
         
-        assertTrue("Null values should not change result", score < strategy.getThreshhold(null));
+        assertTrue("Two objects with similar content should match", score > strategy.getThreshhold(null));
+    }
+    
+    
+    public void testTwoEmptyContactsAreTheSame() throws AbstractOXException {
+        Contact contact = new Contact();
+        Contact contact2 = new Contact();        
+        int score = strategy.calculateSimilarityScore(contact, contact2, null);
+        
+        assertTrue("Two completely empty objects should match, too", score > strategy.getThreshhold(null));
     }
     
 }

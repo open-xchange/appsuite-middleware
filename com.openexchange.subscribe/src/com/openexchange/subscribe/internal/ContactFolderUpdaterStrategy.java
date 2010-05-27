@@ -79,6 +79,8 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
 
     public int calculateSimilarityScore(Contact original, Contact candidate, Object session) throws AbstractOXException {
         int score = 0;
+        int threshhold = getThreshhold(session);
+        
         // For the sake of simplicity we assume that equal names mean equal contacts
         // TODO: This needs to be diversified in the form of "unique-in-context" later (if there is only one "Max Mustermann" in a folder it
         // is unique and qualifies as identifier. If there are two "Max Mustermann" it does not.)
@@ -104,8 +106,32 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
         if (original.containsBirthday() && candidate.containsBirthday() && eq(original.getBirthday(), candidate.getBirthday())) {
             score += 5;
         }
-
+        
+        if( score < threshhold && original.equalsContentwise(candidate)) { //the score check is only to speed the process up
+            score = threshhold + 1;
+        }
         return score;
+    }
+
+    /**
+     * @param original
+     * @param candidate
+     * @return
+     */
+    private boolean hasEqualContent(Contact original, Contact candidate) {
+        for(int fieldNumber: Contact.ALL_COLUMNS){
+            if(original.get(fieldNumber) == null){
+                if(candidate.get(fieldNumber) != null){
+                    return false;
+                }
+            } else {
+                if(candidate.get(fieldNumber) != null){
+                    if(! original.get(fieldNumber).equals(candidate.get(fieldNumber)))
+                        return false;
+                }
+            }
+        }
+        return false;
     }
 
     private boolean isset(String s) {
