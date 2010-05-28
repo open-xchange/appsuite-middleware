@@ -1,3 +1,7 @@
+* 2010-05-28 - thorben.betten@open-xchange.com
+
+ - Bugfix #16162: Fixed subscribe mail folder dialog
+
 * 2010-05-27 - tobias.prinz@open-xchange.com
 
  - Bugfix #15927: Empty contacts (or those with just one name) are not duplicated when synchronizing

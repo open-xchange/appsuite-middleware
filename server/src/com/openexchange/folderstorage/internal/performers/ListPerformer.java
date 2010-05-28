@@ -248,27 +248,36 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                             /*
                              * Check for access rights and subscribed status dependent on parameter "all"
                              */
-                            final Permission subfolderPermission;
-                            if (null == getSession()) {
-                                subfolderPermission =
-                                    CalculatePermission.calculate(subfolder, getUser(), getContext(), getAllowedContentTypes());
-                            } else {
-                                subfolderPermission = CalculatePermission.calculate(subfolder, getSession(), getAllowedContentTypes());
-                            }
-                            if (subfolderPermission.getFolderPermission() > Permission.NO_PERMISSIONS && (all ? true : subfolder.isSubscribed())) {
-                                final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(2);
-                                try {
-                                    final UserizedFolder userizedFolder =
-                                        getUserizedFolder(subfolder, subfolderPermission, treeId, all, true, newParameters, openedStorages);
-                                    subfolders[index] = userizedFolder;
-                                    for (final FolderStorage openedStorage : openedStorages) {
-                                        openedStorage.commitTransaction(newParameters);
+                            if ((all || subfolder.isSubscribed())) {
+                                final Permission subfolderPermission;
+                                if (null == getSession()) {
+                                    subfolderPermission =
+                                        CalculatePermission.calculate(subfolder, getUser(), getContext(), getAllowedContentTypes());
+                                } else {
+                                    subfolderPermission = CalculatePermission.calculate(subfolder, getSession(), getAllowedContentTypes());
+                                }
+                                if (isReadable(subfolderPermission, all, subfolder)) {
+                                    final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(2);
+                                    try {
+                                        final UserizedFolder userizedFolder =
+                                            getUserizedFolder(
+                                                subfolder,
+                                                subfolderPermission,
+                                                treeId,
+                                                all,
+                                                true,
+                                                newParameters,
+                                                openedStorages);
+                                        subfolders[index] = userizedFolder;
+                                        for (final FolderStorage openedStorage : openedStorages) {
+                                            openedStorage.commitTransaction(newParameters);
+                                        }
+                                    } catch (final Exception e) {
+                                        for (final FolderStorage openedStorage : openedStorages) {
+                                            openedStorage.rollback(newParameters);
+                                        }
+                                        throw e;
                                     }
-                                } catch (final Exception e) {
-                                    for (final FolderStorage openedStorage : openedStorages) {
-                                        openedStorage.rollback(newParameters);
-                                    }
-                                    throw e;
                                 }
                             }
                             return null;
