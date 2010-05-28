@@ -122,7 +122,11 @@ public final class FolderTools {
         changed.setObjectID(folderId);
         changed.setLastModified(getR.getTimestamp());
         List<OCLPermission> permissions = new ArrayList<OCLPermission>();
-        permissions.addAll(origFolder.getPermissions());
+        for (OCLPermission permission : origFolder.getPermissions()) {
+            if (permission.getEntity() != userId) {
+                permissions.add(permission);
+            }
+        }
         OCLPermission addedPerm = new OCLPermission();
         addedPerm.setEntity(userId);
         addedPerm.setAllPermission(fp, opr, opw, opd);
