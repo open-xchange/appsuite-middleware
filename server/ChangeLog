@@ -5,6 +5,7 @@
  - Bugfix #16124: Handling already existing folder entry in virtualTree table
  - Bugfix #16114: Setting locale-sensitive name for the infostore folder names (public and userstore)
  - Bugfix #16085: Fixed name of INBOX folder
+ - Bugfix #16125: Re-Create mail folder if absent
 
 * 2010-05-27 - tobias.prinz@open-xchange.com
 

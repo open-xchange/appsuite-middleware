@@ -440,7 +440,8 @@ public final class MailFolderStorage implements FolderStorage {
             final int accountId = argument.getAccountId();
             final String fullname = argument.getFullname();
 
-            final MailAccess<?, ?> mailAccess = getMailAccessForAccount(accountId, storageParameters.getSession(), accesses);
+            final Session session = storageParameters.getSession();
+            final MailAccess<?, ?> mailAccess = getMailAccessForAccount(accountId, session, accesses);
 
             final MailFolderImpl retval;
             final boolean hasSubfolders;
@@ -476,7 +477,10 @@ public final class MailFolderStorage implements FolderStorage {
                 hasSubfolders = rootFolder.hasSubfolders();
             } else {
                 openMailAccess(mailAccess);
-                final MailFolder mailFolder = mailAccess.getFolderStorage().getFolder(fullname);
+                final MailFolder mailFolder = getMailFolder(treeId, accountId, fullname, true, session, mailAccess);
+                /*
+                 * Generate mail folder from loaded one
+                 */
                 retval =
                     new MailFolderImpl(
                         mailFolder,
@@ -513,8 +517,8 @@ public final class MailFolderStorage implements FolderStorage {
                      */
                     final List<MailFolder> children = Arrays.asList(mailAccess.getFolderStorage().getSubfolders(fullname, true));
                     final String[] names;
-                    if (isDefaultFoldersChecked(accountId, storageParameters.getSession())) {
-                        names = getSortedDefaultMailFolders(accountId, storageParameters.getSession());
+                    if (isDefaultFoldersChecked(accountId, session)) {
+                        names = getSortedDefaultMailFolders(accountId, session);
                     } else {
                         final List<String> tmp = new ArrayList<String>();
                         tmp.add("INBOX");
@@ -559,6 +563,57 @@ public final class MailFolderStorage implements FolderStorage {
         } catch (final MailException e) {
             throw new FolderException(e);
         }
+    }
+
+    private static MailFolder getMailFolder(final String treeId, final int accountId, final String fullname, final boolean createIfAbsent, final Session session, final MailAccess<?, ?> mailAccess) throws MailException {
+        try {
+            return mailAccess.getFolderStorage().getFolder(fullname);
+        } catch (final MailException e) {
+            if (!createIfAbsent) {
+                throw e;
+            }
+            if ((MIMEMailException.Code.FOLDER_NOT_FOUND.getNumber() != e.getDetailNumber()) || FolderStorage.REAL_TREE_ID.equals(treeId)) {
+                throw e;
+            }
+            /*
+             * Recreate the mail folder
+             */
+            final MailFolderDescription mfd = new MailFolderDescription();
+            mfd.setExists(false);
+            mfd.setAccountId(accountId);
+            mfd.setParentAccountId(accountId);
+            /*
+             * Parent fullname & name
+             */
+            final char separator = mailAccess.getFolderStorage().getFolder("INBOX").getSeparator();
+            final String[] parentAndName = splitBySeperator(fullname, separator);
+            mfd.setParentFullname(parentAndName[0]);
+            mfd.setName(parentAndName[1]);
+            mfd.setSeparator(separator);
+            {
+                final MailPermission mailPerm = MailProviderRegistry.getMailProviderBySession(session, accountId).createNewMailPermission();
+                mailPerm.setEntity(session.getUserId());
+                mailPerm.setGroupPermission(false);
+                mailPerm.setFolderAdmin(true);
+                final int max = MailPermission.ADMIN_PERMISSION;
+                mailPerm.setAllPermission(max, max, max, max);
+                mfd.addPermission(mailPerm);
+            }
+            mfd.setSubscribed(true);
+            /*
+             * Create
+             */
+            final String id = mailAccess.getFolderStorage().createFolder(mfd);
+            return mailAccess.getFolderStorage().getFolder(id);
+        }
+    }
+
+    private static String[] splitBySeperator(final String fullname, final char sep) {
+        final int pos = fullname.lastIndexOf(sep);
+        if (pos >= 0) {
+            return new String[] { MailFolder.DEFAULT_FOLDER_ID, fullname };
+        }
+        return new String[] { fullname.substring(0, pos), fullname.substring(pos + 1) };
     }
 
     private boolean isDefaultFoldersChecked(final int accountId, final Session session) {
