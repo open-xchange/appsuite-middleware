@@ -4358,6 +4358,7 @@ public class Contact extends CommonObject implements Serializable{
         return true;
     }
 
-    
-    
+    public boolean equalsContentwise(Contact candidate) {
+        throw new UnsupportedOperationException("Method needs to be implemented.");
+    }
 }
