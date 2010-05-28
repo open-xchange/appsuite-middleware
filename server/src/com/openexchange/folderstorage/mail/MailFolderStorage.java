@@ -801,7 +801,7 @@ public final class MailFolderStorage implements FolderStorage {
         final Set<ContentType> supported = new HashSet<ContentType>(Arrays.asList(getSupportedContentTypes()));
         for (final ContentType includeContentType : includeContentTypes) {
             if (supported.contains(includeContentType)) {
-                final SortableId[] subfolders = getSubfolders(FolderStorage.REAL_TREE_ID, PRIVATE_FOLDER_ID, storageParameters);
+                final SortableId[] subfolders = getSubfolders(treeId, PRIVATE_FOLDER_ID, storageParameters);
                 for (final SortableId sortableId : subfolders) {
                     ret.add(sortableId.getId());
                 }

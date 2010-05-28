@@ -215,6 +215,43 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
                         }
                     }
                 }
+                if (!FolderStorage.REAL_TREE_ID.equals(treeId)) {
+                    final FolderStorage[] storages = folderStorageDiscoverer.getTreeFolderStorages(treeId);
+                    for (final FolderStorage storage : storages) {
+                        final boolean started = storage.startTransaction(storageParameters, false);
+                        try {
+                            final String[] modifiedFolderIDs =
+                                storage.getModifiedFolderIDs(treeId, since, includeContentTypes, storageParameters);
+                            for (int i = 0; i < modifiedFolderIDs.length; i++) {
+                                try {
+                                    modifiedFolders.add(storage.getFolder(
+                                        FolderStorage.REAL_TREE_ID,
+                                        modifiedFolderIDs[i],
+                                        storageParameters));
+                                } catch (final FolderException e) {
+                                    LOG.error(
+                                        new StringBuilder(128).append("Updated folder \"").append(modifiedFolderIDs[i]).append(
+                                            "\" could not be fetched from storage \"").append(storage.getClass().getName()).append("\":\n").append(
+                                            e.getMessage()).toString(),
+                                        e);
+                                }
+                            }
+                            if (started) {
+                                storage.commitTransaction(storageParameters);
+                            }
+                        } catch (final FolderException e) {
+                            if (started) {
+                                storage.rollback(storageParameters);
+                            }
+                            throw e;
+                        } catch (Exception e) {
+                            if (started) {
+                                storage.rollback(storageParameters);
+                            }
+                            FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+                        }
+                    }
+                }
                 addSystemSharedFolder = false;
                 checkVirtualListFolders = false;
                 final boolean sharedFolderAccess = userConfiguration.hasFullSharedFolderAccess();

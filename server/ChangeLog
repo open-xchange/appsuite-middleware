@@ -1,6 +1,7 @@
 * 2010-05-28 - thorben.betten@open-xchange.com
 
  - Bugfix #16162: Fixed subscribe mail folder dialog
+ - Bugfix #15973: Fixed action=updates for tree=1
 
 * 2010-05-27 - tobias.prinz@open-xchange.com
 
