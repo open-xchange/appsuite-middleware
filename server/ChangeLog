@@ -3,6 +3,7 @@
  - Bugfix #16162: Fixed subscribe mail folder dialog
  - Bugfix #15973: Fixed action=updates for tree=1
  - Bugfix #16124: Handling already existing folder entry in virtualTree table
+ - Bugfix #16114: Setting locale-sensitive name for the infostore folder names (public and userstore)
 
 * 2010-05-27 - tobias.prinz@open-xchange.com
 

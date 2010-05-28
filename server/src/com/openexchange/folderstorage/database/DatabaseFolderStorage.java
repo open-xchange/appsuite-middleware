@@ -557,7 +557,15 @@ public final class DatabaseFolderStorage implements FolderStorage {
                              * Check for shared folder, that is folder is of type private and requesting user is different from folder's
                              * owner
                              */
-                            retval = new DatabaseFolder(fo);
+                            if (FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID == folderId) {
+                                retval = new LocalizedDatabaseFolder(fo);
+                                retval.setName(FolderStrings.SYSTEM_PUBLIC_INFOSTORE_FOLDER_NAME);
+                            } else if (FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID == folderId) {
+                                retval = new LocalizedDatabaseFolder(fo);
+                                retval.setName(FolderStrings.SYSTEM_USER_INFOSTORE_FOLDER_NAME);
+                            } else {
+                                retval = new DatabaseFolder(fo);
+                            }
                             if (PrivateType.getInstance().equals(retval.getType()) && storageParameters.getUserId() != retval.getCreatedBy()) {
                                 retval.setType(SharedType.getInstance());
                                 /*
