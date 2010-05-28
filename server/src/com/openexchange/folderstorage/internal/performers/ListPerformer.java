@@ -204,7 +204,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                 } else {
                     parentPermission = CalculatePermission.calculate(parent, getSession(), getAllowedContentTypes());
                 }
-                if (!isReadable(parentPermission, all, parent)) {
+                if (!isReadable(parentPermission, parent.isSubscribed())) {
                     throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
                         parentId,
                         getUser().getDisplayName(),
@@ -256,7 +256,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                                 } else {
                                     subfolderPermission = CalculatePermission.calculate(subfolder, getSession(), getAllowedContentTypes());
                                 }
-                                if (isReadable(subfolderPermission, all, subfolder)) {
+                                if (isReadable(subfolderPermission, subfolder.isSubscribed())) {
                                     final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(2);
                                     try {
                                         final UserizedFolder userizedFolder =
@@ -439,7 +439,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                             } else {
                                 userPermission = CalculatePermission.calculate(subfolder, getSession(), getAllowedContentTypes());
                             }
-                            if (isReadable(userPermission, all, subfolder)) {
+                            if (isReadable(userPermission, subfolder.isSubscribed())) {
                                 subfolders[index] =
                                     getUserizedFolder(subfolder, userPermission, treeId, all, true, newParameters, openedStorages);
                             }
@@ -470,12 +470,8 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
         return trimArray(subfolders);
     }
 
-    protected static boolean isReadable(final Permission permission, final boolean all, final Folder folder) {
-        if (permission.getFolderPermission() >= Permission.READ_FOLDER) {
-            return true;
-        }
-        final String[] subfolderIDs = folder.getSubfolderIDs();
-        return all && (null == subfolderIDs || subfolderIDs.length > 0);
+    protected static boolean isReadable(final Permission permission, final boolean isSubscribed) {
+        return (permission.getFolderPermission() >= Permission.READ_FOLDER) || isSubscribed;
     }
 
     private static final int DEFAULT_MAX_RUNNING_MILLIS = 120000;
