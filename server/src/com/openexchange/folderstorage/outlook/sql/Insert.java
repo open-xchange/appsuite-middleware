@@ -169,6 +169,16 @@ public final class Insert {
             stmt.executeUpdate();
         } catch (final SQLException e) {
             debugSQL(stmt);
+            if (isConstraintViolation(e) && e.getMessage().indexOf("Duplicate entry") >= 0) {
+                /*
+                 * Ignore already existing entry, try to update
+                 */
+                Update.updateFolder(cid, tree, user, folder);
+                return;
+            }
+            /*
+             * Throw appropriate error
+             */
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);
@@ -221,6 +231,11 @@ public final class Insert {
                 DBUtils.closeSQLStuff(stmt);
             }
         }
+    }
+
+    private static boolean isConstraintViolation(final SQLException sqlException) {
+        final String sqlState = sqlException.getSQLState();
+        return ((null != sqlState) && sqlState.startsWith("23"));
     }
 
 }
