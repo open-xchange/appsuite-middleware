@@ -297,8 +297,7 @@ public class Contact extends CommonObject implements Serializable{
      */
     public static final int USE_COUNT_GLOBAL_FIRST = 609;
 
-    public static final int[] ALL_COLUMNS = {
-        // From ContactObject itself
+    public static final int[] CONTENT_COLUMNS = {
         DISPLAY_NAME, GIVEN_NAME, SUR_NAME, MIDDLE_NAME, SUFFIX, TITLE, STREET_HOME, POSTAL_CODE_HOME, CITY_HOME, STATE_HOME, COUNTRY_HOME,
         BIRTHDAY, MARITAL_STATUS, NUMBER_OF_CHILDREN, PROFESSION, NICKNAME, SPOUSE_NAME, ANNIVERSARY, NOTE, DEPARTMENT, POSITION,
         EMPLOYEE_TYPE, ROOM_NUMBER, STREET_BUSINESS, POSTAL_CODE_BUSINESS, CITY_BUSINESS, STATE_BUSINESS, COUNTRY_BUSINESS,
@@ -309,7 +308,11 @@ public class Contact extends CommonObject implements Serializable{
         TELEPHONE_RADIO, TELEPHONE_TELEX, TELEPHONE_TTYTDD, INSTANT_MESSENGER1, INSTANT_MESSENGER2, TELEPHONE_IP, TELEPHONE_ASSISTANT,
         COMPANY, IMAGE1, USERFIELD01, USERFIELD02, USERFIELD03, USERFIELD04, USERFIELD05, USERFIELD06, USERFIELD07, USERFIELD08,
         USERFIELD09, USERFIELD10, USERFIELD11, USERFIELD12, USERFIELD13, USERFIELD14, USERFIELD15, USERFIELD16, USERFIELD17, USERFIELD18,
-        USERFIELD19, USERFIELD20, LINKS, DISTRIBUTIONLIST, INTERNAL_USERID,
+        USERFIELD19, USERFIELD20, LINKS, DISTRIBUTIONLIST
+    };
+    public static final int[] ALL_COLUMNS = com.openexchange.tools.Arrays.addUniquely(CONTENT_COLUMNS, new int[]{
+        // From ContactObject itself
+        INTERNAL_USERID,
         // Produces error: missing field in mapping: 593 (ContactWriter.java:603)// CONTEXTID,
         NUMBER_OF_DISTRIBUTIONLIST, NUMBER_OF_LINKS, // NUMBER_OF_IMAGES,
         // IMAGE_LAST_MODIFIED, FILE_AS,
@@ -325,7 +328,7 @@ public class Contact extends CommonObject implements Serializable{
         // From FolderChildObject
         FOLDER_ID,
         // From DataObject
-        OBJECT_ID, CREATED_BY, MODIFIED_BY, CREATION_DATE, LAST_MODIFIED, LAST_MODIFIED_UTC };
+        OBJECT_ID, CREATED_BY, MODIFIED_BY, CREATION_DATE, LAST_MODIFIED, LAST_MODIFIED_UTC });
 
     protected String display_name;
 
@@ -4338,7 +4341,25 @@ public class Contact extends CommonObject implements Serializable{
             return false;
         }
         Contact other = (Contact) obj;
-        for(int col: ALL_COLUMNS){
+        return matches(other, ALL_COLUMNS);
+    }
+
+    public boolean equalsContentwise(Object obj){
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        Contact other = (Contact) obj;
+        return matches(other, CONTENT_COLUMNS);
+    }
+    
+    private boolean matches(Contact other, int[] fields){
+        for(int col: fields){
             if(! contains(col) && other.contains(col))
                 return false;
             if(contains(col) && !other.contains(col))
@@ -4357,8 +4378,6 @@ public class Contact extends CommonObject implements Serializable{
         }
         return true;
     }
-
-    public boolean equalsContentwise(Contact candidate) {
-        throw new UnsupportedOperationException("Method needs to be implemented.");
-    }
+    
+    
 }
