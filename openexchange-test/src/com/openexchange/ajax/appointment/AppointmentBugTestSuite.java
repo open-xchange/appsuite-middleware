@@ -78,6 +78,7 @@ import com.openexchange.ajax.appointment.bugtests.Bug14679Test;
 import com.openexchange.ajax.appointment.bugtests.Bug15074Test;
 import com.openexchange.ajax.appointment.bugtests.Bug15903Test;
 import com.openexchange.ajax.appointment.bugtests.Bug15937Test;
+import com.openexchange.ajax.appointment.bugtests.Bug16151Test;
 import com.openexchange.ajax.appointment.bugtests.Bug16194Test;
 import com.openexchange.ajax.appointment.bugtests.Bug4392Test;
 import com.openexchange.ajax.appointment.bugtests.Bug4541Test;
@@ -145,6 +146,7 @@ public class AppointmentBugTestSuite extends TestSuite{
         tests.addTestSuite(Bug15074Test.class);
         tests.addTestSuite(Bug15937Test.class);
         tests.addTestSuite(Bug15903Test.class);
+        tests.addTestSuite(Bug16151Test.class);
         tests.addTestSuite(Bug16194Test.class);
         return tests;
     }
