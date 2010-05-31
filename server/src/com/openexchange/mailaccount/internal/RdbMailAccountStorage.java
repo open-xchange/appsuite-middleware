@@ -334,6 +334,7 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
             registry.triggerOnBeforeDeletion(id, user, cid, con);
             // First delete properties
             deleteProperties(cid, user, id, con);
+            deleteTransportProperties(cid, user, id, con);
             // Then delete account data
             stmt = con.prepareStatement(DELETE_MAIL_ACCOUNT);
             stmt.setLong(1, cid);
@@ -934,6 +935,20 @@ final class RdbMailAccountStorage implements MailAccountStorageService {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("DELETE FROM user_mail_account_properties WHERE cid = ? AND user = ? AND id = ?");
+            int pos = 1;
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, user);
+            stmt.setInt(pos++, accountId);
+            stmt.executeUpdate();
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
+    private void deleteTransportProperties(final int cid, final int user, final int accountId, final Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("DELETE FROM user_transport_account_properties WHERE cid = ? AND user = ? AND id = ?");
             int pos = 1;
             stmt.setInt(pos++, cid);
             stmt.setInt(pos++, user);
