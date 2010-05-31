@@ -2,6 +2,7 @@
 
  - Bugfix #16216: Checking passed String instance for null
  - Bugfix #15898: Stripping surrounding quotes from uploaded file's Content-Type header
+ - Bugfix #16132: Generating a unique value for pop3.path property
 
 * 2010-05-31 - steffen.templin@open-xchange.com
 

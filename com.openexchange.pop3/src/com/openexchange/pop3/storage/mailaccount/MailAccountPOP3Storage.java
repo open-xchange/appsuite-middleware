@@ -49,6 +49,7 @@
 
 package com.openexchange.pop3.storage.mailaccount;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -140,9 +141,9 @@ public class MailAccountPOP3Storage implements POP3Storage {
                         POP3Exception.Code.MISSING_PATH,
                         Integer.valueOf(session.getUserId()),
                         Integer.valueOf(session.getContextId()));
-                LOG.warn("Path is null. Error:" + e.getMessage(), e);
+                LOG.warn("Path is null. Error: " + e.getMessage(), e);
                 // Try to compose path
-                tmp = composePath(pop3Access.getAccountId(), session.getUserId(), session.getContextId());
+                tmp = composeUniquePath(pop3Access.getAccountId(), session.getUserId(), session.getContextId());
                 // Add to properties
                 properties.addProperty(POP3StoragePropertyNames.PROPERTY_PATH, tmp);
             }
@@ -157,29 +158,69 @@ public class MailAccountPOP3Storage implements POP3Storage {
         separator = 0;
     }
 
-    private String composePath(final int pop3AccountId, final int user, final int cid) throws MailException {
+    private String composeUniquePath(final int pop3AccountId, final int user, final int cid) throws MailException {
         defaultMailAccess.connect(false);
         try {
-            final String fn = defaultMailAccess.getFolderStorage().getTrashFolder();
+            final String trashFullname = defaultMailAccess.getFolderStorage().getTrashFolder();
             final char sep = defaultMailAccess.getFolderStorage().getFolder("INBOX").getSeparator();
-            final int pos = fn.lastIndexOf(sep);
-            final String accoutnName;
+            /*
+             * Check location of trash folder: beside or below INBOX folder?
+             */
+            final int pos = trashFullname.lastIndexOf(sep);
+            final String accountName;
             try {
                 final MailAccountStorageService storageService =
                     POP3ServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
-                accoutnName = storageService.getMailAccount(pop3AccountId, user, cid).getName();
+                accountName = stripSpecials(storageService.getMailAccount(pop3AccountId, user, cid).getName());
             } catch (final ServiceException e) {
                 throw new MailException(e);
             } catch (final MailAccountException e) {
                 throw new MailException(e);
             }
+            String fullname;
             if (pos == -1) {
-                return accoutnName;
+                /*
+                 * Beside INBOX folder
+                 */
+                fullname = accountName;
+            } else {
+                /*
+                 * Below INBOX folder but beside trash folder
+                 */
+                fullname = new StringBuilder(16).append(trashFullname.substring(0, pos)).append(sep).append(accountName).toString();
             }
-            return new StringBuilder(16).append(fn.substring(0, pos)).append(sep).append(accoutnName).toString();
+            /*
+             * Check existence
+             */
+            if (defaultMailAccess.getFolderStorage().exists(fullname)) {
+                final String pre = fullname;
+                final SecureRandom secureRandom = new SecureRandom();
+                do {
+                    fullname = pre + stripSpecials(String.valueOf(secureRandom.nextLong()));
+                } while (defaultMailAccess.getFolderStorage().exists(fullname));
+            }
+            /*
+             * Return unique path
+             */
+            return fullname;
         } finally {
             defaultMailAccess.close(true);
         }
+    }
+
+    private static String stripSpecials(final String src) {
+        if (null == src || src.length() == 0) {
+            return String.valueOf(System.currentTimeMillis());
+        }
+        final char[] chars = src.toCharArray();
+        final StringBuilder sb = new StringBuilder(chars.length);
+        for (int i = 0; i < chars.length; i++) {
+            char c = chars[i];
+            if (Character.isLetterOrDigit(c)) {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
     }
 
     public Collection<MailException> getWarnings() {
