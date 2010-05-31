@@ -1,3 +1,7 @@
+* 2010-05-31 - thorben.betten@open-xchange.com
+
+ - Bugfix #16216: Checking passed String instance for null
+
 * 2010-05-31 - steffen.templin@open-xchange.com
 
  - Bugfix #15590: Moving an appointment to a shared folder doesn't cause "Unknown SQL-Exception" anymore.

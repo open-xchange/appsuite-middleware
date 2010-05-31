@@ -698,7 +698,10 @@ public final class MIMEStructureHandler implements StructureHandler {
         return parameterJsonObject;
     }
 
-    private JSONObject generateDateObject(final String date) throws JSONException {
+    private Object generateDateObject(final String date) throws JSONException {
+        if (null == date) {
+            return JSONObject.NULL;
+        }
         final JSONObject dateObject = new JSONObject();
         synchronized (MAIL_DATE_FORMAT) {
             try {
