@@ -685,7 +685,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  */
                 final long start = System.currentTimeMillis();
                 final Message[] msgs =
-                    IMAPCommandsCollection.getUnreadMessages(imapFolder, fields, sortField, getIMAPProperties().isFastFetch());
+                    IMAPCommandsCollection.getUnreadMessages(imapFolder, fields, sortField, order, getIMAPProperties().isFastFetch(), limit);
                 mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                 if ((msgs == null) || (msgs.length == 0) || limit == 0) {
                     return EMPTY_RETVAL;

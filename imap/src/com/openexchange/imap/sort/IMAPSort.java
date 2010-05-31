@@ -252,7 +252,7 @@ public final class IMAPSort {
      * @return The sort criteria ready for being used inside IMAP's <i>SORT</i> command
      * @throws IMAPException If an unsupported sort field is specified
      */
-    private static String getSortCritForIMAPCommand(final MailSortField sortField, final boolean descendingDirection) throws IMAPException {
+    public static String getSortCritForIMAPCommand(final MailSortField sortField, final boolean descendingDirection) throws IMAPException {
         final StringBuilder imapSortCritBuilder = new StringBuilder(16).append(descendingDirection ? "REVERSE " : "");
         switch (sortField) {
         case SENT_DATE:

@@ -78,11 +78,13 @@ import com.openexchange.imap.command.FetchIMAPCommand;
 import com.openexchange.imap.command.FlagsIMAPCommand;
 import com.openexchange.imap.command.IMAPNumArgSplitter;
 import com.openexchange.imap.dataobjects.ExtendedIMAPFolder;
+import com.openexchange.imap.sort.IMAPSort;
 import com.openexchange.imap.util.IMAPUpdateableData;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.MailSortField;
+import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.HeaderCollection;
@@ -97,6 +99,7 @@ import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.DefaultFolder;
 import com.sun.mail.imap.IMAPFolder;
+import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
 import com.sun.mail.imap.protocol.BODY;
 import com.sun.mail.imap.protocol.ENVELOPE;
@@ -977,10 +980,11 @@ public final class IMAPCommandsCollection {
      * @param fields The desired fields
      * @param sortField The sort-by field
      * @param fastFetch Whether to perform a fast <code>FETCH</code> or not
+     * @param limit The limit
      * @return All unseen messages in specified folder
      * @throws MessagingException
      */
-    public static Message[] getUnreadMessages(final IMAPFolder folder, final MailField[] fields, final MailSortField sortField, final boolean fastFetch) throws MessagingException {
+    public static Message[] getUnreadMessages(final IMAPFolder folder, final MailField[] fields, final MailSortField sortField, final OrderDirection orderDir, final boolean fastFetch, final int limit) throws MessagingException {
         final IMAPFolder imapFolder = folder;
         final Message[] val = (Message[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
@@ -989,7 +993,35 @@ public final class IMAPCommandsCollection {
                 /*
                  * Result is something like: SEARCH 12 20 24
                  */
-                final int[] newMsgSeqNums = handleSearchResponses(r, p);
+                final int[] newMsgSeqNums;
+                {
+                    int[] tmp = handleSearchResponses(r, p);
+                    final int len = tmp.length;
+                    if (limit > 0 && limit < len) {
+                        try {
+                            /*
+                             * Sort exceeding list on server
+                             */
+                            if (((IMAPStore) folder.getStore()).hasCapability("SORT")) {
+                                final MailSortField sortBy = sortField == null ? MailSortField.RECEIVED_DATE : sortField;
+                                final String sortCriteria = IMAPSort.getSortCritForIMAPCommand(sortBy, orderDir == OrderDirection.DESC);
+                                tmp = IMAPCommandsCollection.getServerSortList(imapFolder, sortCriteria, tmp);
+                            }
+                            /*
+                             * Copy to fitting array
+                             */
+                            final int[] ni = new int[limit];
+                            System.arraycopy(tmp, 0, ni, 0, limit);
+                            newMsgSeqNums = ni;
+                        } catch (final IMAPException e) {
+                            throw wrapException(e, null);
+                        } catch (final MessagingException e) {
+                            throw wrapException(e, null);
+                        }
+                    } else {
+                        newMsgSeqNums = tmp;
+                    }
+                }
                 /*
                  * No new messages found
                  */

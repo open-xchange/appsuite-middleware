@@ -4,6 +4,7 @@
  - Bugfix #15898: Stripping surrounding quotes from uploaded file's Content-Type header
  - Bugfix #16132: Generating a unique value for pop3.path property
  - Bugfix #16182: Added isVisible() method to also consider administrator flag
+ - Bugfix #15820: Passing limit argument to IMAP command
 
 * 2010-05-31 - steffen.templin@open-xchange.com
 
