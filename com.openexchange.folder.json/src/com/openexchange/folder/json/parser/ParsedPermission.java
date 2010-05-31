@@ -76,7 +76,7 @@ public final class ParsedPermission implements Permission {
     private boolean group;
 
     /**
-     * Initializes an empty {@link DummyPermission}.
+     * Initializes an empty {@link ParsedPermission}.
      */
     public ParsedPermission() {
         super();
@@ -134,6 +134,10 @@ public final class ParsedPermission implements Permission {
             return false;
         }
         return true;
+    }
+
+    public boolean isVisible() {
+        return isAdmin() || getFolderPermission() > NO_PERMISSIONS;
     }
 
     public int getDeletePermission() {
