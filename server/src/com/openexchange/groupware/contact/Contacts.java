@@ -424,9 +424,6 @@ public final class Contacts {
                     Integer.valueOf(fid),
                     Integer.valueOf(so.getContextId()),
                     Integer.valueOf(user));
-                // throw new OXException("saveContactObject() called with a
-                // non-Contact-Folder! cid="+so.getContext().getContextId()+"
-                // fid="+fid+" uid="+user);
             }
 
             final EffectivePermission oclPerm = oxfs.getFolderPermission(
@@ -434,17 +431,12 @@ public final class Contacts {
                 user,
                 UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ct));
 
-            // OXFolderTools.getEffectiveFolderOCL(fid, user,group,
-            // so.getContext(),so.getUserConfiguration(), readcon);
             if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
                 throw EXCEPTIONS.createOXPermissionException(
                     4,
                     Integer.valueOf(fid),
                     Integer.valueOf(so.getContextId()),
                     Integer.valueOf(user));
-                // throw new OXConflictException("NOT ALLOWED TO SAVE FOLDER
-                // OBJECTS CONTACT! cid="+so.getContext().getContextId()+"
-                // fid="+fid+" uid="+user);
             }
             if (!oclPerm.canCreateObjects()) {
                 throw EXCEPTIONS.createOXPermissionException(
@@ -452,9 +444,6 @@ public final class Contacts {
                     Integer.valueOf(fid),
                     Integer.valueOf(so.getContextId()),
                     Integer.valueOf(user));
-                // throw new OXConflictException("NOT ALLOWED TO SAVE FOLDER
-                // OBJECTS! cid="+so.getContext().getContextId()+" fid="+fid+"
-                // uid="+user);
             }
 
             if ((contactFolder.getType() != FolderObject.PRIVATE) && co.getPrivateFlag()) {
@@ -463,27 +452,10 @@ public final class Contacts {
                     Integer.valueOf(fid),
                     Integer.valueOf(so.getContextId()),
                     Integer.valueOf(user));
-                // co.setPrivateFlag(false);
             }
-            /*
-             * if (!co.containsDisplayName() || co.getDisplayName() == null || co.getDisplayName().length() < 1){ if (co.getSurName() !=
-             * null && co.getSurName().length() > 0){ if (co.getGivenName() != null && co.getGivenName().length() > 0){ if
-             * (co.getMiddleName() != null && co.getMiddleName().length() > 0){ co.setDisplayName(co.getSurName()+", "+co.getGivenName()+'
-             * '+co.getMiddleName()); }else{ co.setDisplayName(co.getSurName()+", "+co.getGivenName()); } }else{
-             * co.setDisplayName(co.getSurName()); } }else{ if (co.getGivenName() != null && co.getGivenName().length() > 0){ if
-             * (co.getMiddleName() != null && co.getMiddleName().length() > 0){ co.setDisplayName(co.getGivenName()+' '+co.getMiddleName());
-             * }else{ co.setDisplayName(co.getGivenName()); } } else { co.setDisplayName("<unknown>"); } } } else { if (co.getSurName() ==
-             * null || co.getSurName().length() < 1){ co.setSurName(co.getDisplayName()); }
-             */
-            // }
             if (!co.containsFileAs() || ((co.getFileAs() != null) && (co.getFileAs().length() > 0))) {
                 co.setFileAs(co.getDisplayName());
             }
-            /*
-             * if ((!co.containsSurName() || co.getSurName() == null || co.getSurName().length() < 1) && (!co.containsDisplayName() ||
-             * co.getDisplayName() == null || co.getDisplayName().length() < 1)){ throw EXCEPTIONS.createOXConflictException(62,
-             * so.getContext().getContextId()); }
-             */
             co.removeContextID();
             co.removeLastModified();
             co.removeCreationDate();
@@ -511,9 +483,6 @@ public final class Contacts {
             throw oe;
         } catch (final OXException oe) {
             throw oe;
-            // throw EXCEPTIONS.create(6, oe, so.getContext().getContextId());
-            // throw new OXException("ERROR: Unable to Insert Contacts!
-            // cid="+so.getContext().getContextId(),oe);
         } finally {
             try {
                 DBPool.closeReaderSilent(ct, readcon);
@@ -537,7 +506,6 @@ public final class Contacts {
             }
             if (id == -1) {
                 throw EXCEPTIONS.create(7);
-                // throw new OXException("-1 ID from IDGenerator");
             }
             co.setObjectID(id);
 
