@@ -236,7 +236,8 @@ public class ReminderHandler implements ReminderService {
                 stmt.setInt(pos++, reminder.getModule());
                 stmt.setInt(pos++, reminder.getUser());
             }
-            if (1 != stmt.executeUpdate()) {
+            int updateCount = stmt.executeUpdate();
+            if (updateCount > 1) {
                 throw new ReminderException(Code.TOO_MANY);
             }
         } catch (SQLException e) {

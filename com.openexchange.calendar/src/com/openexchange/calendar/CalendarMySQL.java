@@ -2340,7 +2340,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             }
             for (final ReminderObject reminder : toUpdate) {
                 reminder.setFolder(cdao.getParentFolderID());
-                reminderInterface.updateReminder(reminder);
+                reminderInterface.updateReminder(reminder, writecon);
             }
         }
 
@@ -3040,7 +3040,8 @@ public class CalendarMySQL implements CalendarSqlImp {
                     } else {
                         end_date = edao.getEndDate();
                     }
-                    deleteReminder(cdao.getObjectID(), uid, cdao.getContext());
+                    
+                    deleteReminder(cdao.getObjectID(), uid, cdao.getContext(), writecon);
                     //changeReminder(cdao.getObjectID(), uid, -1, cdao.getContext(), cdao.isSequence(true), end_date, new java.util.Date(calc_date.getTime() + deleted_userparticipants[a].getAlarmMinutes()), CalendarOperation.DELETE, false);
                     new_deleted.add(deleted_userparticipants[a]);
                 }
@@ -3819,14 +3820,26 @@ public class CalendarMySQL implements CalendarSqlImp {
     private static final void deleteReminder(final int oid, final int uid, final Context c) throws OXMandatoryFieldException, OXConflictException, OXException {
         changeReminder(oid, uid, -1, c, false, null, null, CalendarOperation.DELETE, false);
     }
-
+    
+    private static final void deleteReminder(final int oid, final int uid, final Context c, Connection con) throws OXMandatoryFieldException, OXConflictException, OXException {
+        changeReminder(oid, uid, -1, c, false, null, null, CalendarOperation.DELETE, false, con);
+    }
+    
     private static final void changeReminder(final int oid, final int uid, final int fid, final Context c, final boolean sequence, final java.util.Date end_date, final java.util.Date reminder_date, final int action, final boolean recurrenceChange) throws OXMandatoryFieldException, OXConflictException, OXException {
+        changeReminder(oid, uid, fid, c, sequence, end_date, reminder_date, action, recurrenceChange, null);
+    }
+
+    private static final void changeReminder(final int oid, final int uid, final int fid, final Context c, final boolean sequence, final java.util.Date end_date, final java.util.Date reminder_date, final int action, final boolean recurrenceChange, Connection con) throws OXMandatoryFieldException, OXConflictException, OXException {
         final ReminderService rsql = new ReminderHandler(c);
         if (action == CalendarOperation.DELETE || action == CalendarOperation.UPDATE && collection.isInThePast(end_date)) {
         //if (action == CalendarOperation.DELETE) {
             if (rsql.existsReminder(oid, uid, Types.APPOINTMENT)) {
                 try {
-                    rsql.deleteReminder(oid, uid, Types.APPOINTMENT);
+                    if (con != null) {
+                        rsql.deleteReminder(oid, uid, Types.APPOINTMENT, con);
+                    } else {
+                        rsql.deleteReminder(oid, uid, Types.APPOINTMENT);
+                    }                    
                 } catch (final ReminderException exc) {
                     if (ReminderException.Code.NOT_FOUND.getDetailNumber() == exc.getDetailNumber()) {
                         LOG.debug("Reminder was not found for deletion", exc);
