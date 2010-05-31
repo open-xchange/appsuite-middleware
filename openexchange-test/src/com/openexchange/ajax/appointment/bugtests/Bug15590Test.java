@@ -78,8 +78,8 @@ public class Bug15590Test extends AbstractAJAXSession {
         testAppointment.setTitle("testBug15590");
 
         Calendar calendar = TimeTools.createCalendar(secondUserValues.getTimeZone());
-        calendar.add(Calendar.DAY_OF_MONTH, 360);
-        calendar.add(Calendar.HOUR, 3);
+        calendar.add(Calendar.DAY_OF_MONTH, 1);
+        //calendar.add(Calendar.HOUR, 1);
         testAppointment.setStartDate(calendar.getTime());
         calendar.add(Calendar.HOUR, 1);
         testAppointment.setEndDate(calendar.getTime());
