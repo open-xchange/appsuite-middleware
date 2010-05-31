@@ -51,7 +51,6 @@ package com.openexchange.contacts.ldap.contacts;
 
 import java.util.Comparator;
 import java.util.Date;
-
 import com.davekoelle.AlphanumComparator;
 import com.openexchange.groupware.container.Contact;
 
@@ -263,26 +262,26 @@ public class ContactComparator implements Comparator<Contact> {
         if (null == string1) {
             if (null == string2) {
                 return 0;
-            } else {
-                return 1;
             }
-        } else if (null == string2) {
-            return -1;
-        } else {
-            return this.alphanumComparator.compare(string1, string2);
+            return 1;
         }
+        if (null == string2) {
+            return -1;
+        }
+        return this.alphanumComparator.compare(string1, string2);
     }
 
     private int compareDate(final Date date1, final Date date2) {
         if (null == date1) {
             if (null == date2) {
                 return 0;
-            } else {
-                return 1;
             }
-        } else {
-            return date1.compareTo(date2);
+            return 1;
         }
+        if (null == date2) {
+            return -1; 
+        }
+        return date1.compareTo(date2);
     }
 
     private int intcompare(final int o1, final int o2) {
