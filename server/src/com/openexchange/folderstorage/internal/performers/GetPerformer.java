@@ -136,7 +136,7 @@ public final class GetPerformer extends AbstractUserizedFolderPerformer {
             } else {
                 ownPermission = CalculatePermission.calculate(folder, getSession(), getAllowedContentTypes());
             }
-            if (ownPermission.getFolderPermission() <= Permission.NO_PERMISSIONS) {
+            if (!ownPermission.isVisible()) {
                 throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
                     folderId,
                     getUser().getDisplayName(),

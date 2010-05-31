@@ -270,7 +270,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
             FolderStorage parentStorage = getOpenedStorage(treeId, folder.getParentID(), storageParameters, openedStorages);
             Folder parent = parentStorage.getFolder(treeId, folder.getParentID(), storageParameters);
             Permission permission = CalculatePermission.calculate(parent, session, getAllowedContentTypes());
-            if (permission.getFolderPermission() < Permission.READ_FOLDER) {
+            if (!permission.isVisible()) {
                 userizedFolder.setParentID(FolderObject.SHARED_PREFIX + FolderObject.SYSTEM_SHARED_FOLDER_ID);
             }
         }
@@ -337,7 +337,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                             final Folder subfolder = curStorage.getFolder(treeId, id, storageParameters);
                             if (all || subfolder.isSubscribed()) {
                                 final Permission p = CalculatePermission.calculate(subfolder, session, getAllowedContentTypes());
-                                if (p.getFolderPermission() > Permission.READ_FOLDER) {
+                                if (p.isVisible()) {
                                     visibleSubfolderIds.add(id);
                                 }
                             }
@@ -367,7 +367,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                     } else {
                         subfolderPermission = CalculatePermission.calculate(subfolder, getSession(), getAllowedContentTypes());
                     }
-                    if (subfolderPermission.getFolderPermission() > Permission.NO_PERMISSIONS && (all || subfolder.isSubscribed())) {
+                    if (subfolderPermission.isVisible() && (all || subfolder.isSubscribed())) {
                         visibleSubfolderIds.add(id);
                     }
                 }

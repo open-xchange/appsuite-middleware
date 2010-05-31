@@ -97,6 +97,10 @@ public final class MailPermissionImpl implements Permission {
         this.writePermission = mailPermission.getWritePermission();
     }
 
+    public boolean isVisible() {
+        return isAdmin() || getFolderPermission() > NO_PERMISSIONS;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;

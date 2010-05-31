@@ -139,7 +139,7 @@ public final class UnsubscribePerformer extends AbstractPerformer {
                 } else {
                     parentPermission = CalculatePermission.calculate(folder, getSession(), ALL_ALLOWED);
                 }
-                if (parentPermission.getFolderPermission() <= Permission.NO_PERMISSIONS) {
+                if (!parentPermission.isVisible()) {
                     throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
                         folderId,
                         getUser().getDisplayName(),

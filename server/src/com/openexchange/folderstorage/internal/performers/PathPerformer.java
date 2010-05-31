@@ -198,7 +198,7 @@ public final class PathPerformer extends AbstractUserizedFolderPerformer {
             }
 
             Permission ownPermission = permissionProvider.getOwnPermission(folder);
-            if (ownPermission.getFolderPermission() <= Permission.NO_PERMISSIONS) {
+            if (!ownPermission.isVisible()) {
                 throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
                     folderId,
                     getUser().getDisplayName(),
@@ -210,7 +210,7 @@ public final class PathPerformer extends AbstractUserizedFolderPerformer {
                 final FolderStorage fs = getOpenedStorage(folder.getParentID(), treeId, storageParameters, openedStorages);
                 folder = fs.getFolder(treeId, folder.getParentID(), storageParameters);
                 ownPermission = permissionProvider.getOwnPermission(folder);
-                if (ownPermission.getFolderPermission() <= Permission.NO_PERMISSIONS) {
+                if (!ownPermission.isVisible()) {
                     throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
                         folderId,
                         getUser().getDisplayName(),

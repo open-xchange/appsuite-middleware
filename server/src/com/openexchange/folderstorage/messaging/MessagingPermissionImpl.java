@@ -99,6 +99,10 @@ public final class MessagingPermissionImpl implements Permission {
         this.writePermission = messagingPermission.getWritePermission();
     }
 
+    public boolean isVisible() {
+        return isAdmin() || getFolderPermission() > NO_PERMISSIONS;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;

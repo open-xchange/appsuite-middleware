@@ -247,4 +247,8 @@ public final class DatabasePermission implements Permission {
         }
     }
 
+    public boolean isVisible() {
+        return isAdmin() || getFolderPermission() > NO_PERMISSIONS;
+    }
+
 }

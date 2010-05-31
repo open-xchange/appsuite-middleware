@@ -157,6 +157,13 @@ public interface Permission extends Cloneable {
     public void setGroup(boolean group);
 
     /**
+     * Checks if this folder is visible.
+     * 
+     * @return <code>true</code> if this folder is visible (either admin or appropriate folder permission); otherwise <code>false</code>
+     */
+    public boolean isVisible();
+
+    /**
      * Gets this folder permission's entity identifier.
      * 
      * @return This folder permission's entity identifier

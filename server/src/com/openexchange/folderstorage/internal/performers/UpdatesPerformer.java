@@ -260,7 +260,7 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
                 for (int i = 0; i < size; i++) {
                     final Folder f = iter.next();
                     final Permission effectivePerm = getEffectivePermission(f);
-                    if (effectivePerm.getFolderPermission() >= Permission.READ_FOLDER) {
+                    if (effectivePerm.isVisible()) {
                         if (isShared(f, getUserId())) {
                             if (sharedFolderAccess) {
                                 /*
@@ -285,7 +285,7 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
                             final String parentID = f.getParentID();
                             final Folder parent = getFolder(FolderStorage.REAL_TREE_ID, parentID, realFolderStorages);
                             final Permission parentPerm = getEffectivePermission(parent);
-                            if (parentPerm.getFolderPermission() >= Permission.READ_FOLDER) {
+                            if (parentPerm.isVisible()) {
                                 /*
                                  * Parent is visible
                                  */

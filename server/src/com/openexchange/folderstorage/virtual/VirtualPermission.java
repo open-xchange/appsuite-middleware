@@ -97,6 +97,10 @@ public final class VirtualPermission implements Permission {
         this.writePermission = oclPermission.getWritePermission();
     }
 
+    public boolean isVisible() {
+        return isAdmin() || getFolderPermission() > NO_PERMISSIONS;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;

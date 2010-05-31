@@ -148,7 +148,7 @@ public final class CreatePerformer extends AbstractPerformer {
             } else {
                 parentPermission = CalculatePermission.calculate(parent, getSession(), ALL_ALLOWED);
             }
-            if (parentPermission.getFolderPermission() <= Permission.NO_PERMISSIONS) {
+            if (!parentPermission.isVisible()) {
                 throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
                     parentId,
                     getUser().getDisplayName(),

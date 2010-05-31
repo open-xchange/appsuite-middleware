@@ -127,6 +127,10 @@ public final class EffectivePermission implements Permission {
         }
     }
 
+    public boolean isVisible() {
+        return isAdmin() || getFolderPermission() > NO_PERMISSIONS;
+    }
+
     @Override
     public int hashCode() {
         return underlyingPerm.hashCode();

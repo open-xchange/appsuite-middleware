@@ -192,7 +192,7 @@ public final class DeletePerformer extends AbstractPerformer {
             } else {
                 permission = CalculatePermission.calculate(folder, getSession(), ALL_ALLOWED);
             }
-            if (permission.getFolderPermission() <= Permission.NO_PERMISSIONS) {
+            if (!permission.isVisible()) {
                 throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
                     folder.getLocalizedName(session.getUser().getLocale()),
                     getUser().getDisplayName(),

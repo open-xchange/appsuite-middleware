@@ -231,6 +231,10 @@ public final class CalculatePermission {
             super();
         }
 
+        public boolean isVisible() {
+            return isAdmin() || getFolderPermission() > NO_PERMISSIONS;
+        }
+
         @Override
         public int hashCode() {
             final int prime = 31;
