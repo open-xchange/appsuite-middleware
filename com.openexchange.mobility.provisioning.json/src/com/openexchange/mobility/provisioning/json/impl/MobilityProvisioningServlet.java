@@ -89,8 +89,7 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 		return true;
 	}
 
-	@Override
-	protected void doGet(final HttpServletRequest req,
+	protected void doPut(final HttpServletRequest req,
 			final HttpServletResponse resp) throws ServletException,
 			IOException {
 		
@@ -101,7 +100,7 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 		}
 
 	}
-
+	
 	/**
 	 * Performs the GET request!
 	 * 
