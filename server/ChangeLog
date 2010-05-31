@@ -1,6 +1,7 @@
 * 2010-05-31 - thorben.betten@open-xchange.com
 
  - Bugfix #16216: Checking passed String instance for null
+ - Bugfix #15898: Stripping surrounding quotes from uploaded file's Content-Type header
 
 * 2010-05-31 - steffen.templin@open-xchange.com
 

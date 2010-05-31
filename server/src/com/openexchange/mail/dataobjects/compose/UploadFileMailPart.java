@@ -77,7 +77,8 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
 
     private static final long serialVersionUID = 257902073011243269L;
 
-    private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(UploadFileMailPart.class);
+    private static final transient org.apache.commons.logging.Log LOG =
+        org.apache.commons.logging.LogFactory.getLog(UploadFileMailPart.class);
 
     private final File uploadFile;
 
@@ -94,13 +95,24 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
     protected UploadFileMailPart(final UploadFile uploadFile) throws MailException {
         super();
         this.uploadFile = uploadFile.getTmpFile();
-        setContentType(uploadFile.getContentType());
+        setContentType(prepareContentType(uploadFile.getContentType()));
         setFileName(uploadFile.getPreparedFileName());
         setSize(uploadFile.getSize());
         final ContentDisposition cd = new ContentDisposition();
         cd.setDisposition(Part.ATTACHMENT);
         cd.setFilenameParameter(getFileName());
         setContentDisposition(cd);
+    }
+
+    private static String prepareContentType(final String contentType) {
+        if (null == contentType || contentType.length() == 0) {
+            return MIMETypes.MIME_APPL_OCTET;
+        }
+        final int mlen = contentType.length() - 1;
+        if (0 == contentType.indexOf('"') && mlen == contentType.lastIndexOf('"')) {
+            return contentType.substring(1, mlen);
+        }
+        return contentType;
     }
 
     private static final String TEXT = "text/";
