@@ -255,16 +255,38 @@ public class MailAccountParser extends DataParser {
         if (json.hasAndNotNull(MailAccountFields.POP3_STORAGE)) {
             props.put("pop3.storage", json.getString(MailAccountFields.POP3_STORAGE).trim());
             attributes.add(Attribute.POP3_STORAGE_LITERAL);
+        } else if ("pop3".equalsIgnoreCase(account.getMailProtocol())) {
+            props.put("pop3.storage", "mailaccount");
+            attributes.add(Attribute.POP3_STORAGE_LITERAL);
         }
         if (json.hasAndNotNull(MailAccountFields.POP3_PATH)) {
             props.put("pop3.path", json.getString(MailAccountFields.POP3_PATH).trim());
             attributes.add(Attribute.POP3_PATH_LITERAL);
-        } else if ("pop3".equalsIgnoreCase(account.getMailProtocol())) {
-            props.put("pop3.path", "mailaccount");
-            attributes.add(Attribute.POP3_PATH_LITERAL);
         }
+        /*-
+         * 
+        else if ("pop3".equalsIgnoreCase(account.getMailProtocol())) {
+            String name = account.getName();
+            if (null != name && (name = name.trim()).length() > 0) {
+                props.put("pop3.path", stripSpecials(name));
+                attributes.add(Attribute.POP3_PATH_LITERAL);
+            }
+        }
+        */
         account.setProperties(props);
         return attributes;
     }
 
+    private static String stripSpecials(final String src) {
+        final char[] chars = src.toCharArray();
+        final StringBuilder sb = new StringBuilder(chars.length);
+        for (int i = 0; i < chars.length; i++) {
+            char c = chars[i];
+            if (Character.isLetterOrDigit(c)) {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
+    }
+    
 }
