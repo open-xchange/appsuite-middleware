@@ -78,6 +78,7 @@ import com.openexchange.sessiond.impl.SessionImpl;
 import com.openexchange.sessiond.impl.SessiondInit;
 import com.openexchange.sessiond.impl.SessiondMBeanImpl;
 import com.openexchange.sessiond.impl.SessiondServiceImpl;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 
 /**
@@ -181,6 +182,7 @@ public final class SessiondActivator extends DeferredActivator {
                     context.ungetService(reference);
                 }
             }));
+            trackers.add(new ServiceTracker(context, ThreadPoolService.class.getName(), new ThreadPoolTracker(context)));
             for (final ServiceTracker tracker : trackers) {
                 tracker.open();
             }

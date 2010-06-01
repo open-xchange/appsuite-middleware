@@ -1,3 +1,7 @@
+* 2010-06-01 - marcus.klein@open-xchange.com
+
+ - Bugfix #16158: Putting session back into first container must be done having a write lock.
+
 * 2010-05-19 - karsten.will@open-xchange.com
 
  - Bugfix #16108: Subscription to Google Calendar does not work

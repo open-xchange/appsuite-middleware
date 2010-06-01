@@ -71,6 +71,7 @@ import com.openexchange.sessiond.cache.SessionCache;
 import com.openexchange.sessiond.exception.SessiondException;
 import com.openexchange.sessiond.exception.SessiondException.Code;
 import com.openexchange.sessiond.services.SessiondServiceRegistry;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
@@ -434,5 +435,13 @@ public final class SessionHandler {
                 LOG.debug("Posted event for removed session container");
             }
         }
+    }
+
+    public static void addThreadPoolService(ThreadPoolService service) {
+        sessionData.addThreadPoolService(service);
+    }
+
+    public static void removeThreadPoolService() {
+        sessionData.removeThreadPoolService();
     }
 }
