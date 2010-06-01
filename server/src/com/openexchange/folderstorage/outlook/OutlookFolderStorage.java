@@ -692,7 +692,7 @@ public final class OutlookFolderStorage implements FolderStorage {
             return getPrivateFolderSubfolders(parentId, tree, storageParameters, user, locale, contextId);
         }
         /*
-         * Other folder than root or private
+         * Other folder than root, INBOX or private
          */
         final List<String[]> l;
         {
@@ -801,6 +801,9 @@ public final class OutlookFolderStorage implements FolderStorage {
                 defIds.add(folderStorage.getDefaultFolderID(user, treeId, SpamContentType.getInstance(), storageParameters));
             }
             final SortableId[] inboxSubfolders = folderStorage.getSubfolders(realTreeId, PREPARED_FULLNAME_INBOX, storageParameters);
+            /*
+             * Filter those mail folders which denote a virtual one
+             */
             final boolean[] contained;
             {
                 final Connection con = checkReadConnection(storageParameters);
@@ -820,6 +823,27 @@ public final class OutlookFolderStorage implements FolderStorage {
                         put2TreeMap(localizedName, id, treeMap);
                     }
                 }
+            }
+            /*
+             * Get virtual subfolders
+             */
+            final List<String[]> ids;
+            {
+                final Connection con = checkReadConnection(storageParameters);
+                if (null == con) {
+                    ids = Select.getSubfolderIds(contextId, tree, user.getId(), parentId, StorageType.WORKING);
+                } else {
+                    ids = Select.getSubfolderIds(contextId, tree, user.getId(), parentId, StorageType.WORKING, con);
+                }
+            }
+            /*
+             * Merge them into tree map
+             */
+            for (final String[] idAndName : ids) {
+                /*
+                 * Names loaded from DB have no locale-sensitive string
+                 */
+                put2TreeMap(idAndName[1], idAndName[0], treeMap);
             }
             if (started) {
                 folderStorage.commitTransaction(storageParameters);
