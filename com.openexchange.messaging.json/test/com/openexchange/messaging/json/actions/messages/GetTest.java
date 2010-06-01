@@ -56,7 +56,6 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.messaging.SimMessageAccess.Call;
 import com.openexchange.messaging.json.MessagingMessageParser;
 import com.openexchange.messaging.json.MessagingMessageWriter;
-import com.openexchange.tools.session.SimServerSession;
 
 /**
  * {@link GetTest}

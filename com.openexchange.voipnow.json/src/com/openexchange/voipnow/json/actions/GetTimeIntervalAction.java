@@ -51,7 +51,6 @@ package com.openexchange.voipnow.json.actions;
 
 import java.rmi.RemoteException;
 import org.apache.axis2.AxisFault;
-import com._4psa.common_xsd._2_0_4.Integer;
 import com._4psa.common_xsd._2_0_4.PositiveInteger;
 import com._4psa.headerdata_xsd._2_0_4.UserCredentials;
 import com._4psa.pbxdata_xsd._2_0_4.TimeIntervalBlock;

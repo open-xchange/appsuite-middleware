@@ -53,7 +53,6 @@ import static com.openexchange.publish.json.FieldNames.ENTITY;
 import static com.openexchange.publish.json.FieldNames.ENTITY_MODULE;
 import static com.openexchange.publish.json.FieldNames.ID;
 import static com.openexchange.publish.json.FieldNames.TARGET;
-import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;

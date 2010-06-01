@@ -69,7 +69,6 @@ import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalItem;
 import com.openexchange.data.conversion.ical.ICalSession;
 import com.openexchange.data.conversion.ical.ITipContainer;
-import com.openexchange.data.conversion.ical.ITipMethod;
 import com.openexchange.data.conversion.ical.ConversionWarning.Code;
 import com.openexchange.data.conversion.ical.ical4j.internal.AppointmentConverters;
 import com.openexchange.data.conversion.ical.ical4j.internal.AttributeConverter;

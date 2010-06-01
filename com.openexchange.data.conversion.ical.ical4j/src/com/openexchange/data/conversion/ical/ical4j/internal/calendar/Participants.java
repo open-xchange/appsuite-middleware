@@ -69,7 +69,6 @@ import net.fortuna.ical4j.model.parameter.PartStat;
 import net.fortuna.ical4j.model.parameter.Role;
 import net.fortuna.ical4j.model.parameter.Rsvp;
 import net.fortuna.ical4j.model.property.Attendee;
-import net.fortuna.ical4j.model.property.Comment;
 import net.fortuna.ical4j.model.property.Resources;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

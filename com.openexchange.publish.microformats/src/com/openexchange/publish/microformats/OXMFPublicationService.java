@@ -77,7 +77,6 @@ import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateException;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.user.UserService;
 
 /**
  * {@link OXMFPublicationService}
