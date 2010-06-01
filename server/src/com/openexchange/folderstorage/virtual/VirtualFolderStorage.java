@@ -84,6 +84,14 @@ public final class VirtualFolderStorage implements FolderStorage {
         folderType = new VirtualFolderType();
     }
 
+    public void checkConsistency(String treeId, StorageParameters storageParameters) throws FolderException {
+        // TODO: Implement it
+    }
+
+    public void restore(String treeId, String folderId, StorageParameters storageParameters) throws FolderException {
+        // No real storage
+    }
+
     public ContentType getDefaultContentType() {
         return null;
     }

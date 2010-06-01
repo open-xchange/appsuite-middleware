@@ -185,6 +185,36 @@ public final class OutlookFolderStorage implements FolderStorage {
         folderStorageRegistry = OutlookFolderStorageRegistry.getInstance();
     }
 
+    public void checkConsistency(final String treeId, final StorageParameters storageParameters) throws FolderException {
+        final List<String> folderIds = Select.getFolders(storageParameters.getContextId(), Tools.getUnsignedInteger(treeId), storageParameters.getUserId());
+        for (final String folderId : folderIds) {
+            final FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, folderId);
+            final boolean started = folderStorage.startTransaction(storageParameters, true);
+            try {
+                if (!folderStorage.containsFolder(realTreeId, folderId, storageParameters)) {
+                    folderStorage.restore(realTreeId, folderId, storageParameters);
+                }
+                if (started) {
+                    folderStorage.commitTransaction(storageParameters);
+                }
+            } catch (final FolderException e) {
+                if (started) {
+                    folderStorage.rollback(storageParameters);
+                }
+                throw e;
+            } catch (final Exception e) {
+                if (started) {
+                    folderStorage.rollback(storageParameters);
+                }
+                throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+            }
+        } 
+    }
+
+    public void restore(String treeId, String folderId, StorageParameters storageParameters) throws FolderException {
+        // Nothing to restore, not a real storage
+    }
+
     public void clearFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
         /*
          * Delegate clear invocation to real storage

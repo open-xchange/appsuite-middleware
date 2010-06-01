@@ -191,6 +191,14 @@ public final class MessagingFolderStorage implements FolderStorage {
         super();
     }
 
+    public void restore(String treeId, String folderId, StorageParameters storageParameters) throws FolderException {
+        // TODO:
+    }
+
+    public void checkConsistency(String treeId, StorageParameters storageParameters) throws FolderException {
+        // Nothing to do
+    }
+
     private MessagingAccountAccess getMessagingAccessForAccount(final String serviceId, final int accountId, final Session session, final ConcurrentMap<Key, MessagingAccountAccess> accesses) throws FolderException {
         final Key key = Key.newInstance(accountId, serviceId);
         MessagingAccountAccess accountAccess = accesses.get(key);

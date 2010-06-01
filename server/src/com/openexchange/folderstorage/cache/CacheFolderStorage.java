@@ -175,6 +175,38 @@ public final class CacheFolderStorage implements FolderStorage {
         }
     }
 
+    public void checkConsistency(String treeId, StorageParameters storageParameters) throws FolderException {
+        for (FolderStorage folderStorage : registry.getFolderStoragesForTreeID(treeId)) {
+            folderStorage.checkConsistency(treeId, storageParameters);
+        }
+    }
+
+    public void restore(String treeId, String folderId, StorageParameters storageParameters) throws FolderException {
+        final FolderStorage storage = registry.getFolderStorage(treeId, folderId);
+        if (null == storage) {
+            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
+        }
+        final boolean started = storage.startTransaction(storageParameters, false);
+        try {
+            storage.restore(treeId, folderId, storageParameters);
+            if (started) {
+                storage.commitTransaction(storageParameters);
+            }
+        } catch (final FolderException e) {
+            if (started) {
+                storage.rollback(storageParameters);
+            }
+            throw e;
+        } catch (final Exception e) {
+            if (started) {
+                storage.rollback(storageParameters);
+            }
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            removeFolder(folderId, treeId, storageParameters);
+        }
+    }
+
     public ContentType getDefaultContentType() {
         return null;
     }

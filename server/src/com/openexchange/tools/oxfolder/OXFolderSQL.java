@@ -1260,6 +1260,75 @@ public final class OXFolderSQL {
         }
     }
 
+    private static final String SQL_RESTORE_OT = "INSERT INTO oxfolder_tree SELECT * FROM del_oxfolder_tree WHERE cid = ? AND fuid = ?";
+
+    private static final String SQL_RESTORE_OP = "INSERT INTO oxfolder_permissions SELECT * FROM del_oxfolder_permissions WHERE cid = ? AND fuid = ?";
+    
+    public static void restore(final int folderId, final Context ctx, final Connection writeConArg) throws DBPoolingException, SQLException {
+        Connection writeCon = writeConArg;
+        boolean closeWriteCon = false;
+        if (writeCon == null) {
+            writeCon = DBPool.pickupWriteable(ctx);
+            closeWriteCon = true;
+        }
+        final boolean isAuto = writeCon.getAutoCommit();
+        if (isAuto) {
+            writeCon.setAutoCommit(false);
+        }
+        PreparedStatement stmt = null;
+        try {
+            /*
+             * Copy backup entries into oxfolder_tree and oxfolder_permissions
+             */
+            stmt = writeCon.prepareStatement(SQL_RESTORE_OT);
+            stmt.setInt(1, ctx.getContextId());
+            stmt.setInt(2, folderId);
+            stmt.executeUpdate();
+            stmt.close();
+            stmt = null;
+            stmt = writeCon.prepareStatement(SQL_RESTORE_OP);
+            stmt.setInt(1, ctx.getContextId());
+            stmt.setInt(2, folderId);
+            stmt.executeUpdate();
+            stmt.close();
+            stmt = null;
+            /*
+             * Clean backup tables
+             */
+            stmt = writeCon.prepareStatement(SQL_DELETE_DELETE.replaceFirst("#TABLE#", STR_DELOXFOLDERPERMS));
+            stmt.setInt(1, ctx.getContextId());
+            stmt.setInt(2, folderId);
+            stmt.executeUpdate();
+            stmt.close();
+            stmt = null;
+            stmt = writeCon.prepareStatement(SQL_DELETE_DELETE.replaceFirst("#TABLE#", STR_DELOXFOLDERTREE));
+            stmt.setInt(1, ctx.getContextId());
+            stmt.setInt(2, folderId);
+            stmt.executeUpdate();
+            stmt.close();
+            stmt = null;
+            /*
+             * Commit
+             */
+            if (isAuto) {
+                writeCon.commit();
+            }
+        } catch (final SQLException e) {
+            if (isAuto) {
+                DBUtils.rollback(writeCon);
+            }
+            throw e;
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+            if (isAuto) {
+                DBUtils.autocommit(writeCon);
+            }
+            if (closeWriteCon) {
+                DBPool.closeWriterSilent(ctx, writeCon);
+            }
+        }
+    }
+
     private static final Lock NEXTSERIAL_LOCK = new ReentrantLock();
 
     /**

@@ -66,6 +66,7 @@ import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.login.LoginHandlerService;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
@@ -140,6 +141,7 @@ public class Activator extends DeferredActivator {
                 MultipleHandlerFactoryService.class.getName(),
                 new FolderMultipleHandlerFactory(),
                 null));
+            serviceRegistrations.add(context.registerService(LoginHandlerService.class.getName(), new FolderConsistenceLoginHandler(), null));
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;

@@ -504,7 +504,7 @@ public final class Select {
         }
         try {
             return fillFolder(cid, tree, user, locale, outlookFolder, storageType, con);
-        }  catch (final Exception e) {
+        } catch (final Exception e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             databaseService.backReadOnly(cid, con);
@@ -769,6 +769,59 @@ public final class Select {
                 }
             }
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+        }
+    }
+
+    public static List<String> getFolders(final int cid, final int tree, final int user) throws FolderException {
+        final DatabaseService databaseService = getDatabaseService();
+        // Get a connection
+        final Connection con;
+        try {
+            con = databaseService.getReadOnly(cid);
+        } catch (final DBPoolingException e) {
+            throw new FolderException(e);
+        }
+        try {
+            return getFolders(cid, tree, user, con);
+        } finally {
+            databaseService.backReadOnly(cid, con);
+        }
+    }
+
+    private static final String SQL_SELECT_ALL = "SELECT folderId FROM virtualTree WHERE cid = ? AND tree = ? AND user = ?";
+
+    public static List<String> getFolders(final int cid, final int tree, final int user, final Connection con) throws FolderException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement(SQL_SELECT_ALL);
+            int pos = 1;
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, tree);
+            stmt.setInt(pos++, user);
+            rs = stmt.executeQuery();
+            final List<String> l = new ArrayList<String>();
+            final int fpos = 1;
+            while (rs.next()) {
+                /*
+                 * Names loaded from DB have no locale-sensitive string
+                 */
+                l.add(rs.getString(fpos));
+            }
+            return l;
+        } catch (final SQLException e) {
+            if (null != stmt) {
+                final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Select.class);
+                if (LOG.isDebugEnabled()) {
+                    final String sql = getSQLString(stmt);
+                    LOG.debug(new StringBuilder(sql.length() + 16).append("Failed SQL:\n\t").append(sql).toString());
+                }
+            }
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } catch (final Exception e) {
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
         }

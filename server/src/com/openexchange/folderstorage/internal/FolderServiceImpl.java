@@ -61,6 +61,7 @@ import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.internal.performers.AllVisibleFoldersPerformer;
 import com.openexchange.folderstorage.internal.performers.ClearPerformer;
+import com.openexchange.folderstorage.internal.performers.ConsistencyPerformer;
 import com.openexchange.folderstorage.internal.performers.CreatePerformer;
 import com.openexchange.folderstorage.internal.performers.DeletePerformer;
 import com.openexchange.folderstorage.internal.performers.GetPerformer;
@@ -86,6 +87,18 @@ public final class FolderServiceImpl implements FolderService {
      */
     public FolderServiceImpl() {
         super();
+    }
+
+    public void checkConsistency(final String treeId, final User user, final Context context) throws FolderException {
+        new ConsistencyPerformer(user, context).doConsistencyCheck(treeId);
+    }
+    
+    public void checkConsistency(final String treeId, final Session session) throws FolderException {
+        try {
+            new ConsistencyPerformer(new ServerSessionAdapter(session)).doConsistencyCheck(treeId);
+        } catch (final ContextException e) {
+            throw new FolderException(e);
+        }
     }
 
     public void clearFolder(final String treeId, final String folderId, final User user, final Context contex) throws FolderException {

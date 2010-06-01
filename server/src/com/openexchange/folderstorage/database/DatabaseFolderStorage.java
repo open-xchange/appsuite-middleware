@@ -132,6 +132,10 @@ public final class DatabaseFolderStorage implements FolderStorage {
         super();
     }
 
+    public void checkConsistency(String treeId, StorageParameters storageParameters) throws FolderException {
+        // Nothing to do
+    }
+
     private static OXFolderAccess getFolderAccess(final StorageParameters storageParameters, final FolderType folderType) {
         OXFolderAccess ret = (OXFolderAccess) storageParameters.getParameter(folderType, DatabaseParameterConstants.PARAM_ACCESS);
         if (null == ret) {
@@ -184,6 +188,31 @@ public final class DatabaseFolderStorage implements FolderStorage {
             params.putParameter(folderType, DatabaseParameterConstants.PARAM_CONNECTION, null);
             params.putParameter(folderType, DatabaseParameterConstants.PARAM_WRITABLE, null);
             params.markCommitted();
+        }
+    }
+
+    public void restore(String treeId, String folderIdentifier, StorageParameters storageParameters) throws FolderException {
+        try {
+            final Connection con = getParameter(Connection.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
+            final Session session = storageParameters.getSession();
+            if (null == session) {
+                throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
+            }
+            final int folderId = Integer.parseInt(folderIdentifier);
+            final Context context = storageParameters.getContext();
+            FolderObject.loadFolderObjectFromDB(folderId, context, con, false, false, "del_oxfolder_tree", "del_oxfolder_permissions");
+            /*
+             * From backup to working table
+             */
+            OXFolderSQL.restore(folderId, context, null);
+        } catch (final NumberFormatException e) {
+            throw FolderExceptionErrorMessage.INVALID_FOLDER_ID.create(folderIdentifier);
+        } catch (final OXException e) {
+            throw new FolderException(e);
+        } catch (final DBPoolingException e) {
+            throw new FolderException(e);
+        } catch (final SQLException e) {
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }
     }
 

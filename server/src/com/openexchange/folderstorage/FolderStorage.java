@@ -166,6 +166,25 @@ public interface FolderStorage {
     boolean containsFolder(String treeId, String folderId, StorageType storageType, StorageParameters storageParameters) throws FolderException;
 
     /**
+     * Checks consistency of the tree.
+     * 
+     * @param treeId The tree identifier
+     * @param storageParameters The storage parameters
+     * @throws FolderException If consistency check fails
+     */
+    void checkConsistency(String treeId, StorageParameters storageParameters) throws FolderException;
+
+    /**
+     * Restores the folder with given folder identifier
+     * 
+     * @param treeId The tree identifier
+     * @param folderId The folder identifier
+     * @param storageParameters The storage parameters
+     * @throws FolderException If restore fails
+     */
+    void restore(String treeId, String folderId, StorageParameters storageParameters) throws FolderException;
+
+    /**
      * Gets the folder denoted by specified folder ID.
      * 
      * @param treeId The tree identifier
@@ -296,7 +315,8 @@ public interface FolderStorage {
      * 
      * @param parameters The parameters
      * @param modify <code>true</code> if started transaction is supposed to modify storage's content; otherwise <code>false</code>
-     * @return <code>true</code> if call started the transaction; otherwise <code>false</code> if transaction has already been started before
+     * @return <code>true</code> if call started the transaction; otherwise <code>false</code> if transaction has already been started
+     *         before
      * @throws FolderException If storage parameters cannot be returned
      */
     boolean startTransaction(StorageParameters parameters, boolean modify) throws FolderException;

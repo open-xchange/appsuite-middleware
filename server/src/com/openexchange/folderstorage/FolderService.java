@@ -70,6 +70,25 @@ public interface FolderService {
     Map<Integer, ContentType> getAvailableContentTypes();
 
     /**
+     * Checks the consistency of given tree.
+     * 
+     * @param treeId The tree identifier
+     * @param user The user
+     * @param context The context
+     * @throws FolderException If check fails
+     */
+    void checkConsistency(String treeId, User user, Context context) throws FolderException;
+
+    /**
+     * Checks the consistency of given tree.
+     * 
+     * @param treeId The tree identifier
+     * @param session The session
+     * @throws FolderException If check fails
+     */
+    void checkConsistency(String treeId, Session session) throws FolderException;
+
+    /**
      * Gets the folder identified by given folder identifier and tree identifier.
      * 
      * @param treeId The tree identifier
