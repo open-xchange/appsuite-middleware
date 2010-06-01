@@ -82,6 +82,7 @@ import com.openexchange.folderstorage.database.DatabaseFolderType;
 import com.openexchange.folderstorage.database.DatabaseParameterConstants;
 import com.openexchange.folderstorage.internal.StorageParametersImpl;
 import com.openexchange.folderstorage.internal.Tools;
+import com.openexchange.folderstorage.mail.MailFolderType;
 import com.openexchange.folderstorage.mail.contentType.DraftsContentType;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
 import com.openexchange.folderstorage.mail.contentType.SentContentType;
@@ -647,8 +648,60 @@ public final class OutlookFolderStorage implements FolderStorage {
             final int contextId = storageParameters.getContextId();
             final int tree = Tools.getUnsignedInteger(treeId);
             final FolderNameComparator comparator = new FolderNameComparator(locale);
-            final TreeMap<String, List<String>> treeMap =
-                new MailFolderCallable(comparator, locale, user, contextId, tree, storageParameters).call();
+            final List<TreeMap<String, List<String>>> maps = new ArrayList<TreeMap<String,List<String>>>(2);
+            /*
+             * From primary mail folder
+             */
+            maps.add(new MailFolderCallable(comparator, locale, user, contextId, tree, storageParameters).call());
+            /*
+             * Callable for the ones from virtual table
+             */
+            maps.add(new Callable<TreeMap<String, List<String>>>() {
+
+                public TreeMap<String, List<String>> call() throws FolderException {
+                    /*
+                     * Get the ones from virtual table
+                     */
+                    final List<String[]> l;
+                    {
+                        final Connection con = checkReadConnection(storageParameters);
+                        if (null == con) {
+                            l = Select.getSubfolderIds(contextId, tree, user.getId(), FolderStorage.PRIVATE_ID, StorageType.WORKING);
+                        } else {
+                            l = Select.getSubfolderIds(contextId, tree, user.getId(), FolderStorage.PRIVATE_ID, StorageType.WORKING, con);
+                        }
+                    }
+                    /*
+                     * Filter only mail folders
+                     */
+                    final TreeMap<String, List<String>> treeMap = new TreeMap<String, List<String>>(comparator);
+                    for (final String[] idAndName : l) {
+                        final String id = idAndName[0];
+                        if (MailFolderType.getInstance().servesFolderId(id)) {
+                            put2TreeMap(idAndName[1], id, treeMap);
+                        }
+                    }
+                    return treeMap;
+                }
+            }.call());
+            /*
+             * Merge
+             */
+            final TreeMap<String, List<String>> treeMap = new TreeMap<String, List<String>>(comparator);
+            for (final TreeMap<String, List<String>> tm : maps) {
+                for (final Entry<String, List<String>> entry : tm.entrySet()) {
+                    final String key = entry.getKey();
+                    final List<String> list = treeMap.get(key);
+                    if (null == list) {
+                        treeMap.put(key, entry.getValue());
+                    } else {
+                        list.addAll(entry.getValue());
+                    }
+                }
+            }
+            /*
+             * Return
+             */
             final Collection<List<String>> values = treeMap.values();
             final List<String> ret = new ArrayList<String>(values.size());
             for (final List<String> list : values) {
@@ -662,6 +715,15 @@ public final class OutlookFolderStorage implements FolderStorage {
          * Empty array
          */
         return new String[0];
+    }
+
+    protected static boolean supportsMail(final ContentType[] types) {
+        for (ContentType contentType : types) {
+            if (MailContentType.getInstance().equals(contentType)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public StoragePriority getStoragePriority() {
