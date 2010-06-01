@@ -434,7 +434,6 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
     public void remove() throws QuotaFileStorageException {
         try {
             fileStorage.remove();
-            setUsage(0);
         } catch (final FileStorageException e) {
             throw new QuotaFileStorageException(e);
         }

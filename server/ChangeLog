@@ -1,3 +1,7 @@
+* 2010-06-01 - steffen.templin@open-xchange.com
+
+ - Bugfix #16155: No ugly exceptions during context delete anymore.
+
 * 2010-06-01 - martin.herfurth@open-xchange.com
 
  - Bugfix #16008: Internal users as external participants.
