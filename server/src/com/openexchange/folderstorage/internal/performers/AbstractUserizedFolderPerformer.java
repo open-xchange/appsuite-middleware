@@ -63,6 +63,7 @@ import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
+import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.internal.Tools;
@@ -257,12 +258,16 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
          * Type
          */
         final boolean isShared;
-        if (userizedFolder.getCreatedBy() != getUserId() && PrivateType.getInstance().equals(userizedFolder.getType())) {
-            userizedFolder.setType(SharedType.getInstance());
-            userizedFolder.setSubfolderIDs(new String[0]);
-            isShared = true;
-        } else {
-            isShared = false;
+        {
+            final Type type = userizedFolder.getType();
+            if (SharedType.getInstance().equals(type) || userizedFolder.getCreatedBy() != getUserId() && PrivateType.getInstance().equals(
+                type)) {
+                userizedFolder.setType(SharedType.getInstance());
+                userizedFolder.setSubfolderIDs(new String[0]);
+                isShared = true;
+            } else {
+                isShared = false;
+            }
         }
         // Modify parent
         if (isShared) {
@@ -290,12 +295,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                 userizedFolder.setLastModifiedUTC(new Date(lm.getTime()));
             }
         }
-        if (isShared) {
-            /*
-             * Mark folder to hold no subfolders
-             */
-            userizedFolder.setSubfolderIDs(new String[0]);
-        } else {
+        if (!isShared) {
             /*
              * Compute user-sensitive subfolders
              */

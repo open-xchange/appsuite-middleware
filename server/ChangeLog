@@ -14,6 +14,7 @@
  - Bugfix #16070: Only appending new-line on paragraph tag
  - Bugfix #15847: Fixed error message to handle with non-numeric mail identifiers
  - Bugfix #15845: Modified JTidy sources to avoid java.lang.StringIndexOutOfBoundsException
+ - Bugfix #16238: Proper check for a shared folder
 
 * 2010-05-31 - thorben.betten@open-xchange.com
 
