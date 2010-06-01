@@ -9,6 +9,7 @@
 * 2010-06-01 - martin.herfurth@open-xchange.com
 
  - Bugfix #16008: Internal users as external participants.
+ - Bugfix #16203: No notification mails for external users about confirmation status.
 
 * 2010-06-01 - thorben.betten@open-xchange.com
 
