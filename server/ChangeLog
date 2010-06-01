@@ -1,3 +1,7 @@
+* 2010-06-01 - martin.herfurth@open-xchange.com
+
+ - Bugfix #16008: Internal users as external participants.
+
 * 2010-06-01 - thorben.betten@open-xchange.com
 
  - Bugfix #15856: Proper resource prefix in notification mail if content is multipart/*
