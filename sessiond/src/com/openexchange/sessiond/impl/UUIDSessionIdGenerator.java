@@ -68,17 +68,17 @@ public final class UUIDSessionIdGenerator extends SessionIdGenerator {
     }
 
     @Override
-    public String createSessionId(final String userId, final String data) throws SessiondException {
+    public String createSessionId(final String userId, final String data) {
         return randomUUID();
     }
 
     @Override
-    public String createSecretId(final String userId, final String data) throws SessiondException {
+    public String createSecretId(final String userId, final String data) {
         return randomUUID();
     }
 
     @Override
-    public String createRandomId() throws SessiondException {
+    public String createRandomId() {
         return randomUUID();
     }
 
