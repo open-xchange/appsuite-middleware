@@ -24,6 +24,7 @@
  - Bugfix #15845: Modified JTidy sources to avoid java.lang.StringIndexOutOfBoundsException
  - Bugfix #16238: Proper check for a shared folder
  - Bugfix #14585: Keeping inline images on reply/forward
+ - Bugfix #15618: Proper update of answered/forwarded flag when selecting a different account
 
 * 2010-05-31 - thorben.betten@open-xchange.com
 

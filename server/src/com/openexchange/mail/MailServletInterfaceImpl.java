@@ -1891,34 +1891,76 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                      */
                     final String fullname = path.getFolder();
                     final String[] uids = new String[] { path.getMailID() };
-                    mailAccess.getMessageStorage().updateMessageFlags(fullname, uids, MailMessage.FLAG_ANSWERED, true);
-                    try {
-                        /*
-                         * Update JSON cache
-                         */
-                        final JSONMessageCache cache = JSONMessageCache.getInstance();
-                        if (null != cache) {
-                            cache.removeFolder(mailAccess.getAccountId(), fullname, session);
-                        }
-                        if (MailMessageCache.getInstance().containsFolderMessages(
-                            mailAccess.getAccountId(),
-                            fullname,
-                            session.getUserId(),
-                            contextId)) {
+                    final int pathAccount = path.getAccountId();
+                    if (mailAccess.getAccountId() == pathAccount) {
+                        mailAccess.getMessageStorage().updateMessageFlags(fullname, uids, MailMessage.FLAG_ANSWERED, true);
+                        try {
                             /*
-                             * Update cache entries
+                             * Update JSON cache
                              */
-                            MailMessageCache.getInstance().updateCachedMessages(
-                                uids,
+                            final JSONMessageCache cache = JSONMessageCache.getInstance();
+                            if (null != cache) {
+                                cache.removeFolder(mailAccess.getAccountId(), fullname, session);
+                            }
+                            if (MailMessageCache.getInstance().containsFolderMessages(
                                 mailAccess.getAccountId(),
                                 fullname,
                                 session.getUserId(),
-                                contextId,
-                                FIELDS_FLAGS,
-                                new Object[] { Integer.valueOf(MailMessage.FLAG_ANSWERED) });
+                                contextId)) {
+                                /*
+                                 * Update cache entries
+                                 */
+                                MailMessageCache.getInstance().updateCachedMessages(
+                                    uids,
+                                    mailAccess.getAccountId(),
+                                    fullname,
+                                    session.getUserId(),
+                                    contextId,
+                                    FIELDS_FLAGS,
+                                    new Object[] { Integer.valueOf(MailMessage.FLAG_ANSWERED) });
+                            }
+                        } catch (final OXCachingException e) {
+                            LOG.error(e.getMessage(), e);
                         }
-                    } catch (final OXCachingException e) {
-                        LOG.error(e.getMessage(), e);
+                    } else {
+                        /*
+                         * Mark as \Answered in foreign account
+                         */
+                        final MailAccess<?, ?> otherAccess = MailAccess.getInstance(session, pathAccount);
+                        otherAccess.connect(true);
+                        try {
+                            otherAccess.getMessageStorage().updateMessageFlags(fullname, uids, MailMessage.FLAG_ANSWERED, true);
+                            try {
+                                /*
+                                 * Update JSON cache
+                                 */
+                                final JSONMessageCache cache = JSONMessageCache.getInstance();
+                                if (null != cache) {
+                                    cache.removeFolder(otherAccess.getAccountId(), fullname, session);
+                                }
+                                if (MailMessageCache.getInstance().containsFolderMessages(
+                                    pathAccount,
+                                    fullname,
+                                    session.getUserId(),
+                                    contextId)) {
+                                    /*
+                                     * Update cache entries
+                                     */
+                                    MailMessageCache.getInstance().updateCachedMessages(
+                                        uids,
+                                        pathAccount,
+                                        fullname,
+                                        session.getUserId(),
+                                        contextId,
+                                        FIELDS_FLAGS,
+                                        new Object[] { Integer.valueOf(MailMessage.FLAG_ANSWERED) });
+                                }
+                            } catch (final OXCachingException e) {
+                                LOG.error(e.getMessage(), e);
+                            }
+                        } finally {
+                            otherAccess.close(false);
+                        }
                     }
                 }
             } else if (ComposeType.FORWARD.equals(type)) {
@@ -1934,28 +1976,61 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                              * Mark referenced mail as forwarded
                              */
                             ids[0] = path.getMailID();
-                            mailAccess.getMessageStorage().updateMessageFlags(path.getFolder(), ids, MailMessage.FLAG_FORWARDED, true);
-                            try {
-                                JSONMessageCache.getInstance().removeFolder(mailAccess.getAccountId(), path.getFolder(), session);
-                                if (MailMessageCache.getInstance().containsFolderMessages(
-                                    mailAccess.getAccountId(),
-                                    path.getFolder(),
-                                    session.getUserId(),
-                                    contextId)) {
-                                    /*
-                                     * Update cache entries
-                                     */
-                                    MailMessageCache.getInstance().updateCachedMessages(
-                                        ids,
+                            final int pathAccount = path.getAccountId();
+                            if (mailAccess.getAccountId() == pathAccount) {
+                                mailAccess.getMessageStorage().updateMessageFlags(path.getFolder(), ids, MailMessage.FLAG_FORWARDED, true);
+                                try {
+                                    JSONMessageCache.getInstance().removeFolder(mailAccess.getAccountId(), path.getFolder(), session);
+                                    if (MailMessageCache.getInstance().containsFolderMessages(
                                         mailAccess.getAccountId(),
                                         path.getFolder(),
                                         session.getUserId(),
-                                        contextId,
-                                        FIELDS_FLAGS,
-                                        new Object[] { Integer.valueOf(MailMessage.FLAG_FORWARDED) });
+                                        contextId)) {
+                                        /*
+                                         * Update cache entries
+                                         */
+                                        MailMessageCache.getInstance().updateCachedMessages(
+                                            ids,
+                                            mailAccess.getAccountId(),
+                                            path.getFolder(),
+                                            session.getUserId(),
+                                            contextId,
+                                            FIELDS_FLAGS,
+                                            new Object[] { Integer.valueOf(MailMessage.FLAG_FORWARDED) });
+                                    }
+                                } catch (final OXCachingException e) {
+                                    LOG.error(e.getMessage(), e);
                                 }
-                            } catch (final OXCachingException e) {
-                                LOG.error(e.getMessage(), e);
+                            } else {
+                                final MailAccess<?, ?> otherAccess = MailAccess.getInstance(session, pathAccount);
+                                otherAccess.connect(true);
+                                try {
+                                    otherAccess.getMessageStorage().updateMessageFlags(path.getFolder(), ids, MailMessage.FLAG_FORWARDED, true);
+                                    try {
+                                        JSONMessageCache.getInstance().removeFolder(otherAccess.getAccountId(), path.getFolder(), session);
+                                        if (MailMessageCache.getInstance().containsFolderMessages(
+                                            otherAccess.getAccountId(),
+                                            path.getFolder(),
+                                            session.getUserId(),
+                                            contextId)) {
+                                            /*
+                                             * Update cache entries
+                                             */
+                                            MailMessageCache.getInstance().updateCachedMessages(
+                                                ids,
+                                                otherAccess.getAccountId(),
+                                                path.getFolder(),
+                                                session.getUserId(),
+                                                contextId,
+                                                FIELDS_FLAGS,
+                                                new Object[] { Integer.valueOf(MailMessage.FLAG_FORWARDED) });
+                                        }
+                                    } catch (final OXCachingException e) {
+                                        LOG.error(e.getMessage(), e);
+                                    }
+                                } finally {
+                                    otherAccess.close(false);
+                                }
                             }
                         }
                     }
@@ -1965,28 +2040,61 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                      */
                     final String fullname = supPath.getFolder();
                     final String[] uids = new String[] { supPath.getMailID() };
-                    mailAccess.getMessageStorage().updateMessageFlags(fullname, uids, MailMessage.FLAG_FORWARDED, true);
-                    try {
-                        JSONMessageCache.getInstance().removeFolder(mailAccess.getAccountId(), fullname, session);
-                        if (MailMessageCache.getInstance().containsFolderMessages(
-                            mailAccess.getAccountId(),
-                            fullname,
-                            session.getUserId(),
-                            contextId)) {
-                            /*
-                             * Update cache entries
-                             */
-                            MailMessageCache.getInstance().updateCachedMessages(
-                                uids,
+                    final int pathAccount = supPath.getAccountId();
+                    if (mailAccess.getAccountId() == pathAccount) {
+                        mailAccess.getMessageStorage().updateMessageFlags(fullname, uids, MailMessage.FLAG_FORWARDED, true);
+                        try {
+                            JSONMessageCache.getInstance().removeFolder(mailAccess.getAccountId(), fullname, session);
+                            if (MailMessageCache.getInstance().containsFolderMessages(
                                 mailAccess.getAccountId(),
                                 fullname,
                                 session.getUserId(),
-                                contextId,
-                                FIELDS_FLAGS,
-                                new Object[] { Integer.valueOf(MailMessage.FLAG_FORWARDED) });
+                                contextId)) {
+                                /*
+                                 * Update cache entries
+                                 */
+                                MailMessageCache.getInstance().updateCachedMessages(
+                                    uids,
+                                    mailAccess.getAccountId(),
+                                    fullname,
+                                    session.getUserId(),
+                                    contextId,
+                                    FIELDS_FLAGS,
+                                    new Object[] { Integer.valueOf(MailMessage.FLAG_FORWARDED) });
+                            }
+                        } catch (final OXCachingException e) {
+                            LOG.error(e.getMessage(), e);
                         }
-                    } catch (final OXCachingException e) {
-                        LOG.error(e.getMessage(), e);
+                    } else {
+                        final MailAccess<?, ?> otherAccess = MailAccess.getInstance(session, pathAccount);
+                        otherAccess.connect(true);
+                        try {
+                            otherAccess.getMessageStorage().updateMessageFlags(fullname, uids, MailMessage.FLAG_FORWARDED, true);
+                            try {
+                                JSONMessageCache.getInstance().removeFolder(otherAccess.getAccountId(), fullname, session);
+                                if (MailMessageCache.getInstance().containsFolderMessages(
+                                    otherAccess.getAccountId(),
+                                    fullname,
+                                    session.getUserId(),
+                                    contextId)) {
+                                    /*
+                                     * Update cache entries
+                                     */
+                                    MailMessageCache.getInstance().updateCachedMessages(
+                                        uids,
+                                        otherAccess.getAccountId(),
+                                        fullname,
+                                        session.getUserId(),
+                                        contextId,
+                                        FIELDS_FLAGS,
+                                        new Object[] { Integer.valueOf(MailMessage.FLAG_FORWARDED) });
+                                }
+                            } catch (final OXCachingException e) {
+                                LOG.error(e.getMessage(), e);
+                            }
+                        } finally {
+                            otherAccess.close(false);
+                        }
                     }
                 }
             }
