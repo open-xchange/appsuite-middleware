@@ -471,7 +471,8 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
     }
 
     protected static boolean isReadable(final Permission permission, final boolean isSubscribed) {
-        return (permission.isVisible()) || isSubscribed;
+        return (permission.isVisible());
+        // return (permission.isVisible()) || isSubscribed;
     }
 
     private static final int DEFAULT_MAX_RUNNING_MILLIS = 120000;

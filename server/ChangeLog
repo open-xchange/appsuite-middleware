@@ -5,6 +5,7 @@
  - Partial fix #16233: Added virtual subfolders to INBOX listing
  - Bugfix #16201: Allowing blank character in filename of a uuencoded part
  - Bugfix #16190: Shared folders have no subfolders
+ - Bugfix #16234: Proper check of folder permissions
 
 * 2010-05-31 - thorben.betten@open-xchange.com
 

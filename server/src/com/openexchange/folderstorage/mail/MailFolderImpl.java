@@ -188,6 +188,14 @@ public final class MailFolderImpl extends AbstractFolder {
             }
         } else {
             mp = mailFolder.getOwnPermission();
+            /*
+             * Check if entity's permission allows to read the folder: Every mail folder listed is at least visible to user
+             */
+            for (final Permission pe : permissions) {
+                if ((pe.getEntity() == mp.getEntity()) && (pe.getFolderPermission() <= Permission.NO_PERMISSIONS)) {
+                    pe.setFolderPermission(Permission.READ_FOLDER);
+                }
+            }
             if (mailFolder.containsDefaultFolderType()) {
                 if (mailFolder.isInbox()) {
                     mailFolderType = MailFolderType.INBOX;
