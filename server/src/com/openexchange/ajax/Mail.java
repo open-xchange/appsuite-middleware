@@ -808,17 +808,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             /*
              * Overwrite settings with request's parameters
              */
-            if (null != view) {
-                if (VIEW_TEXT.equals(view)) {
-                    usmNoSave.setDisplayHtmlInlineContent(false);
-                } else if (VIEW_HTML.equals(view)) {
-                    usmNoSave.setDisplayHtmlInlineContent(true);
-                    usmNoSave.setAllowHTMLImages(true);
-                } else {
-                    LOG.warn(new StringBuilder(64).append("Unknown value in parameter ").append(PARAMETER_VIEW).append(": ").append(view).append(
-                        ". Using user's mail settings as fallback."));
-                }
-            }
+            final DisplayMode displayMode = detectDisplayMode(true, view, usmNoSave);
             /*
              * Get reply message
              */
@@ -834,7 +824,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         folderPath,
                         uid,
                         reply2all,
-                        usmNoSave), DisplayMode.MODIFYABLE, session, usmNoSave);
+                        usmNoSave), displayMode, session, usmNoSave);
             } finally {
                 if (closeMailInterface && mailInterface != null) {
                     mailInterface.close(true);
@@ -906,17 +896,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             /*
              * Overwrite settings with request's parameters
              */
-            if (null != view) {
-                if (VIEW_TEXT.equals(view)) {
-                    usmNoSave.setDisplayHtmlInlineContent(false);
-                } else if (VIEW_HTML.equals(view)) {
-                    usmNoSave.setDisplayHtmlInlineContent(true);
-                    usmNoSave.setAllowHTMLImages(true);
-                } else {
-                    LOG.warn(new StringBuilder(64).append("Unknown value in parameter ").append(PARAMETER_VIEW).append(": ").append(view).append(
-                        ". Using user's mail settings as fallback."));
-                }
-            }
+            final DisplayMode displayMode = detectDisplayMode(true, view, usmNoSave);
             /*
              * Get forward message
              */
@@ -931,7 +911,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     MessageWriter.writeMailMessage(mailInterface.getAccountID(), mailInterface.getForwardMessageForDisplay(
                         new String[] { folderPath },
                         new String[] { uid },
-                        usmNoSave), DisplayMode.MODIFYABLE, session, usmNoSave);
+                        usmNoSave), displayMode, session, usmNoSave);
             } finally {
                 if (closeMailInterface && mailInterface != null) {
                     mailInterface.close(true);
@@ -1460,29 +1440,29 @@ public class Mail extends PermissionServlet implements UploadListener {
         return response;
     }
 
-    private static DisplayMode detectDisplayMode(final boolean editDraft, final String view, final UserSettingMail usmNoSave) {
+    private static DisplayMode detectDisplayMode(final boolean modifyable, final String view, final UserSettingMail usmNoSave) {
         final DisplayMode displayMode;
         if (null != view) {
             if (VIEW_RAW.equals(view)) {
                 displayMode = DisplayMode.RAW;
             } else if (VIEW_TEXT.equals(view)) {
                 usmNoSave.setDisplayHtmlInlineContent(false);
-                displayMode = editDraft ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
+                displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
             } else if (VIEW_HTML.equals(view)) {
                 usmNoSave.setDisplayHtmlInlineContent(true);
                 usmNoSave.setAllowHTMLImages(true);
-                displayMode = editDraft ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
+                displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
             } else if (VIEW_HTML_BLOCKED_IMAGES.equals(view)) {
                 usmNoSave.setDisplayHtmlInlineContent(true);
                 usmNoSave.setAllowHTMLImages(false);
-                displayMode = editDraft ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
+                displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
             } else {
                 LOG.warn(new StringBuilder(64).append("Unknown value in parameter ").append(PARAMETER_VIEW).append(": ").append(view).append(
                     ". Using user's mail settings as fallback."));
-                displayMode = editDraft ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
+                displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
             }
         } else {
-            displayMode = editDraft ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
+            displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
         }
         return displayMode;
     }
