@@ -3,6 +3,7 @@
  - Bugfix #15856: Proper resource prefix in notification mail if content is multipart/*
  - Bugfix #15914: Changed module of root folder to "system"
  - Partial fix #16233: Added virtual subfolders to INBOX listing
+ - Bugfix #16201: Allowing blank character in filename of a uuencoded part
 
 * 2010-05-31 - thorben.betten@open-xchange.com
 

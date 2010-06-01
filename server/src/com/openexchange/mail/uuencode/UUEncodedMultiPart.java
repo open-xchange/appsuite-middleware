@@ -115,7 +115,7 @@ public class UUEncodedMultiPart {
     }
 
     private static final Pattern PAT_UUENCODED = Pattern.compile(
-        "(^begin |\r?\nbegin )([0-7]{3} )(\\S+\r?\n)(.+?)(\r?\n[ \t]*`?[ \t]*\r?\nend)",
+        "(^begin |\r?\nbegin )([0-7]{3} )(\\S[\\p{Alnum}\\p{Punct} \t]*\r?\n)(.+?)(\r?\n[ \t]*`?[ \t]*\r?\nend)",
         Pattern.DOTALL);
 
     /**
