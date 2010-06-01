@@ -49,6 +49,8 @@
 
 package com.openexchange.image.internal;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.conversion.ConversionService;
@@ -416,7 +418,7 @@ public final class ImageRegistry {
         if (null == service) {
             return null;
         }
-        final Object[] objects = ImageIDGenerator.parseId(uniqueId, service);
+        final Object[] objects = ImageIDGenerator.parseId(urlDecodeSafe(uniqueId, "UTF-8"), service);
         if (null == objects) {
             return null;
         }
@@ -447,11 +449,21 @@ public final class ImageRegistry {
         if (null == service) {
             return null;
         }
-        final Object[] objects = ImageIDGenerator.parseId(uniqueId, service);
+        final Object[] objects = ImageIDGenerator.parseId(urlDecodeSafe(uniqueId, "UTF-8"), service);
         if (null == objects) {
             return null;
         }
         return addImageData(contextId, (ImageDataSource) objects[0], (DataArguments) objects[1]);
+    }
+
+    private static String urlDecodeSafe(final String text, final String charset) {
+        try {
+            return URLDecoder.decode(text, charset);
+        } catch (final UnsupportedEncodingException e) {
+            // Cannot occur
+            org.apache.commons.logging.LogFactory.getLog(ImageData.class).error(e.getMessage(), e);
+            return text;
+        }
     }
 
     /**

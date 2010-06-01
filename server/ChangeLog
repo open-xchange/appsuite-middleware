@@ -15,6 +15,7 @@
  - Bugfix #15847: Fixed error message to handle with non-numeric mail identifiers
  - Bugfix #15845: Modified JTidy sources to avoid java.lang.StringIndexOutOfBoundsException
  - Bugfix #16238: Proper check for a shared folder
+ - Bugfix #14585: Keeping inline images on reply/forward
 
 * 2010-05-31 - thorben.betten@open-xchange.com
 
