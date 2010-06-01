@@ -11,6 +11,7 @@
  - Bugfix #16190: Shared folders have no subfolders
  - Bugfix #16234: Proper check of folder permissions
  - Bugfix #15737: Removed useless properties from javamail.properties file
+ - Bugfix #16070: Only appending new-line on paragraph tag
 
 * 2010-05-31 - thorben.betten@open-xchange.com
 
