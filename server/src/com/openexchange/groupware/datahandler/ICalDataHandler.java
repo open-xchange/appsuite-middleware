@@ -65,6 +65,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.CalendarFields;
+import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.TasksSQLInterface;
@@ -123,7 +124,11 @@ public abstract class ICalDataHandler implements DataHandler {
                 objectId = appointmentSql.resolveUid(uid);
                 
             if (objectId != 0 && confirm != null) {
-                updateOwnParticipantStatus(session, ctx, objectId, confirm, appointmentSql);
+                try {
+                    updateOwnParticipantStatus(session, ctx, objectId, confirm, appointmentSql);
+                } catch (OXPermissionException e) {
+                    handleWithoutPermission(session, appointment, calendarFolder, confirm, appointmentSql);
+                }
             } else {
                 appointment.setParentFolderID(calendarFolder);
                 appointment.setIgnoreConflicts(true);
@@ -135,6 +140,21 @@ public abstract class ICalDataHandler implements DataHandler {
         }
     }
     
+    private void handleWithoutPermission(Session session, CalendarDataObject appointment, int calendarFolder, Confirm confirm, AppointmentSQLInterface appointmentSql) throws OXException {
+        appointment.removeUid();
+        appointment.removeObjectID();
+        appointment.removeUsers();
+        appointment.removeParticipants();
+        appointment.setParentFolderID(calendarFolder);
+
+        UserParticipant self = new UserParticipant(session.getUserId());
+        self.setConfirm(confirm.getConfirm());
+        self.setConfirmMessage(confirm.getConfirmMessage());
+        appointment.setUsers(new UserParticipant[] { self });
+
+        appointmentSql.insertAppointmentObject(appointment);
+    }
+
     private void updateOwnParticipantStatus(Session session, Context ctx, int objectId, Confirm confirm, AppointmentSQLInterface appSql) throws OXException, DataException {
         FolderObject calendarFolder = new OXFolderAccess(ctx).getDefaultFolder(session.getUserId(), FolderObject.CALENDAR);
         try {
