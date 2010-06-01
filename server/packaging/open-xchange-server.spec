@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 5
+%define		ox_release 6
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -499,8 +499,18 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Tue Jun 01 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16158: Putting session back into first container must be done having a write lock.
+* Wed May 19 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16027: Only set sender header of sent emails if from is not from alias list.
+ - Bugfix #16026: Adding header X-Originating-IP in emails containing the IP address of the client using the backend.
+* Wed May 19 2010 - karsten.will@open-xchange.com
+ - Bugfix #16108: Subscription to Google Calendar does not work
 * Mon May 03 2010 - marcus.klein@open-xchange.com
  - Bugfix #16021: Fixed NullPointerException on session closing if sessions random was used.
+ - Bugfix #15933: Using DB master server to change the POP3 storage provider name.
+* Mon May 03 2010 - thorben.betten@open-xchange.com
+ - Bugfix #15975: Properly marking messages as \Deleted prior to expunge on INBOX folder.
 * Fri Apr 30 2010 - marcus.klein@open-xchange.com
  - Bugfix #15880: Made path to the UI fully configurable and it can be passed through parameters on easylogin and login redirect requests.
  - Bugfix #15936: Session identifier is not passed anymore as document fragment on login redirect request.

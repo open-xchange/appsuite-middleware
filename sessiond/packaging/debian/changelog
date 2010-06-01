@@ -1,3 +1,9 @@
+open-xchange-sessiond (6.16.1.0-5) unstable; urgency=low
+
+  * Build for PTF 2010050410000053
+
+ -- Benjamin Otterbach <benjamin.otterbach@open-xchange.com>  Tue,  1 Jun 2010 23:07:53 +0200
+
 open-xchange-sessiond (6.16.1.0-4) unstable; urgency=low
 
   * second build for PTF 2010041410000152
