@@ -94,7 +94,7 @@ final class SessionData {
         sessionList = new LinkedList<SessionContainer>();
         userList = new LinkedList<Map<String, String>>();
         randomList = new LinkedList<Map<String, String>>();
-        final ReadWriteLock rwlock = new ReentrantReadWriteLock();
+        final ReadWriteLock rwlock = new ReentrantReadWriteLock(true);
         rlock = rwlock.readLock();
         wlock = rwlock.writeLock();
         this.maxSessions = maxSessions;
@@ -103,7 +103,6 @@ final class SessionData {
             userList.add(0, new ConcurrentHashMap<String, String>(maxSessions));
             randomList.add(0, new ConcurrentHashMap<String, String>(maxSessions));
         }
-
     }
 
     void clear() {
@@ -233,14 +232,14 @@ final class SessionData {
         /*
          * A read-only access to lists
          */
-        rlock.lock();
+        wlock.lock();
         try {
             final SessionControl control = sessionList.getFirst().put(session, lifeTime);
             userList.getFirst().put(session.getLoginName(), session.getSessionID());
             randomList.getFirst().put(session.getRandomToken(), session.getSessionID());
             return control;
         } finally {
-            rlock.unlock();
+            wlock.unlock();
         }
     }
 
