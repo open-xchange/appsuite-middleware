@@ -1,29 +1,31 @@
 package com.openexchange.mobileconfig;
 
+import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.ajax.SessionServlet;
 import com.openexchange.authentication.LoginException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.notify.hostname.HostnameService;
-import com.openexchange.login.Interface;
 import com.openexchange.login.internal.LoginPerformer;
+import com.openexchange.mobileconfig.osgi.CabUtil;
 import com.openexchange.mobileconfig.services.MobileConfigServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.http.Tools;
-import com.openexchange.tools.webdav.OXServlet;
 
 
-public class MobileConfigServlet extends OXServlet {
+public class MobileConfigServlet extends SessionServlet {
 
     private static final transient Log LOG = LogFactory.getLog(MobileConfigServlet.class);
     
@@ -31,45 +33,56 @@ public class MobileConfigServlet extends OXServlet {
      * 
      */
     private static final long serialVersionUID = 7913468326542861986L;
+
+    private static final String CRLF = "\r\n";
     
     @Override
-    protected boolean useHttpAuth() {
-        return false;
-    }
-
-    @Override
     public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        final PrintWriter writer = resp.getWriter();
+        final Session session = getSessionObject(req);
+        Tools.disableCaching(resp);
+        Tools.deleteCookies(req, resp);
         if (!req.isSecure()) {
+            final PrintWriter writer = resp.getWriter();
             writer.println("This page can only be accessed over a secure connection");
             writer.close();
-            Tools.deleteCookies(req, resp);
-            return;
+            resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            if (null != session) {
+                doLogout(session);
+            }
+        } else {
+            if (null == session) {
+                final PrintWriter writer = resp.getWriter();
+                writer.println("No session found");
+                writer.close();
+            } else {
+                final User user = UserStorage.getStorageUser(session.getUserId(), session.getContextId());
+                if (null != user) {
+                    final String pathInfo = req.getPathInfo();
+                    if ("/eas.mobileconfig".equals(pathInfo)) {
+                        final PrintWriter writer = resp.getWriter();
+                        writeMobileConfig(writer, user.getMail(), getHostname(session.getUserId(), session.getContextId()), "OX EAS", session.getLogin(), session.getPassword());
+                        writer.close();
+                    } else if ("/ms.cab".equals(pathInfo)) {
+                        final ServletOutputStream outputStream = resp.getOutputStream();
+                        writeMobileConfigWinMob(outputStream, user.getMail(), getHostname(session.getUserId(), session.getContextId()), "OX EAS", session.getLogin(), session.getPassword());
+                        outputStream.close();
+                    } else {
+                        final PrintWriter writer = resp.getWriter();
+                        writer.println("No known device parameter");
+                        writer.close();
+                    }
+                }
+                doLogout(session);
+            }
         }
-        final HttpServletResponseWrapper noCookieResponse = new HttpServletResponseWrapper(resp) {
 
-            @Override
-            public void addCookie(Cookie cookie) {
-                // cookies will not be added
-            }
-            
-        };
-        if (doAuth(req, noCookieResponse)) {
-            final Session session = getSession(req);
-            final User user = UserStorage.getStorageUser(session.getUserId(), session.getContextId());
-            if (null != user) {
-                writeMobileConfig(writer, user.getMail(), getHostname(session.getUserId(), session.getContextId()), "OX EAS", session.getLogin(), session.getPassword());
-            }
-            Tools.disableCaching(resp);
-            
-            Tools.deleteCookies(req, resp);
-            
-            try {
-                LoginPerformer.getInstance().doLogout(session.getSessionID());
-            } catch (LoginException e) {
-                LOG.error(e.getMessage(), e);
-            }
+    }
 
+    private void doLogout(final Session session) {
+        try {
+            LoginPerformer.getInstance().doLogout(session.getSessionID());
+        } catch (LoginException e) {
+            LOG.error(e.getMessage(), e);
         }
     }
 
@@ -79,21 +92,6 @@ public class MobileConfigServlet extends OXServlet {
         return ((null != service) && (null != service.getHostname(userId, contextId))) ? service.getHostname(userId, contextId) : canonicalHostName;
     }
 
-    @Override
-    protected void decrementRequests() {
-        // Not used here
-    }
-
-    @Override
-    protected void incrementRequests() {
-        // Not used here
-    }
-
-    @Override
-    protected Interface getInterface() {
-        return Interface.MOBILECONFIG;
-    }
-    
     private void writeMobileConfig(final PrintWriter printWriter, final String email, final String host, final String displayname, final String username, final String password) {
         try {
             printWriter.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
@@ -150,7 +148,45 @@ public class MobileConfigServlet extends OXServlet {
         } finally {
             printWriter.close();
         }
-
     }
 
+    public static void writeMobileConfigWinMob(final OutputStream out, final String email, final String host, final String displayname, final String username, final String password) throws IOException {
+        CabUtil.writeCabFile(new DataOutputStream(new BufferedOutputStream(out)), write(email, host, displayname, username, password));
+    }
+
+    public static String write(final String email, final String host, final String displayname, final String username, final String password) {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("<wap-provisioningdoc>" + CRLF);
+        sb.append("   <characteristic type=\"Sync\">" + CRLF);
+        sb.append("        <characteristic type=\"Settings\">" + CRLF);
+        sb.append("        <parm name=\"SyncWhenRoaming\" value=\"1\"/>" + CRLF);
+        sb.append("        </characteristic>" + CRLF);
+        sb.append("        <characteristic type=\"Connection\">" + CRLF);
+        sb.append("            <parm name=\"Domain\" value=\"open-xchange.com\"/>" + CRLF);
+        sb.append("            <parm name=\"Server\" value=\"" + host + "\"/>" + CRLF);
+        sb.append("            <parm name=\"User\" value=\"" + username + "\"/>" + CRLF);
+        sb.append("\t    <parm name=\"SavePassword\" value=\"1\"/>" + CRLF);
+        sb.append("            <parm name=\"URI\" value=\"Microsoft-Server-ActiveSync\"/>" + CRLF);
+        sb.append("        <parm name=\"UseSSL\" value=\"1\"/>" + CRLF);
+        sb.append("        </characteristic>" + CRLF);
+        sb.append("        <characteristic type=\"Mail\">" + CRLF);
+        sb.append("            <parm name=\"Enabled\" value=\"1\"/>" + CRLF);
+        sb.append("        <parm name=\"EmailAgeFilter\" value=\"3\"/>" + CRLF);
+        sb.append("        </characteristic>" + CRLF);
+        sb.append("        <characteristic type=\"Calendar\">" + CRLF);
+        sb.append("            <parm name=\"Enabled\" value=\"1\"/>" + CRLF);
+        sb.append("        <parm name=\"CalendarAgeFilter\" value=\"5\"/>" + CRLF);
+        sb.append("        </characteristic>" + CRLF);
+        sb.append("        <characteristic type=\"Contacts\">" + CRLF);
+        sb.append("            <parm name=\"Enabled\" value=\"1\"/>" + CRLF);
+        sb.append("        </characteristic>" + CRLF);
+        sb.append("   </characteristic>" + CRLF);
+        sb.append("   <characteristic type='BrowserFavorite'>" + CRLF);
+        sb.append("    <characteristic type='Open Xchange'>" + CRLF);
+        sb.append("        <parm name='URL' value='http://www.open-xchange.com'/>" + CRLF);
+        sb.append("    </characteristic>" + CRLF);
+        sb.append("</characteristic>  " + CRLF);
+        sb.append("</wap-provisioningdoc>" + CRLF);
+        return sb.toString();
+    }
 }

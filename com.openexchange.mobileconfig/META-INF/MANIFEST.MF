@@ -6,7 +6,8 @@ Bundle-Version: 6.14.0.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-Activator: com.openexchange.mobileconfig.osgi.Activator
-Import-Package: com.openexchange.authentication,
+Import-Package: com.openexchange.ajax,
+ com.openexchange.authentication,
  com.openexchange.groupware,
  com.openexchange.groupware.ldap,
  com.openexchange.groupware.notify.hostname,

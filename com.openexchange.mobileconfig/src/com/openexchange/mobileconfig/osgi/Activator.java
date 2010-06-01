@@ -17,7 +17,7 @@ public class Activator extends DeferredActivator {
     private static final Log LOG = LogFactory.getLog(Activator.class);
 
     private static final Class<?>[] NEEDED_SERVICES = {};
-    private static final String ALIAS = "/ajax/mobileconfig/eas.mobileconfig";
+    private static final String ALIAS = "/servlet/mobileconfig";
 
     private List<ServiceTracker> serviceTrackerList;
 
