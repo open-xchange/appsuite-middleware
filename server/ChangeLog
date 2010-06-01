@@ -1,3 +1,7 @@
+* 2010-06-01 - marcus.klein@open-xchange.com
+
+ - Bugfix #16158: Putting session back into first container must be done having a write lock.
+
 * 2010-06-01 - steffen.templin@open-xchange.com
 
  - Bugfix #16155: No ugly exceptions during context delete anymore.

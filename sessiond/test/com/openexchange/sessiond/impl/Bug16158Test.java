@@ -50,8 +50,9 @@
 package com.openexchange.sessiond.impl;
 
 import java.util.List;
-import com.openexchange.session.SimSession;
 import junit.framework.TestCase;
+import com.openexchange.session.SimSession;
+import com.openexchange.threadpool.SimThreadPoolService;
 
 /**
  * {@link Bug16158Test}
@@ -68,6 +69,7 @@ public class Bug16158Test extends TestCase {
     private Thread[] finderThreads = new Thread[finders.length];
     private SessionRotator[] rotators = new SessionRotator[2];
     private Thread[] rotatorThreads = new Thread[rotators.length];
+    private SimThreadPoolService threadPoolService;
 
     public Bug16158Test(String name) {
         super(name);
@@ -77,6 +79,8 @@ public class Bug16158Test extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
         sessionData = new SessionData(10, 1);
+        threadPoolService = new SimThreadPoolService();
+        sessionData.addThreadPoolService(threadPoolService);
         SessionIdGenerator idGenerator = new UUIDSessionIdGenerator();
         session = new SimSession();
         session.setSessionID(idGenerator.createSessionId(null, null));
@@ -108,12 +112,12 @@ public class Bug16158Test extends TestCase {
         for (Thread finderThread : finderThreads) {
             finderThread.join();
         }
+        threadPoolService.shutdown();
         super.tearDown();
     }
 
     public void testNotFoundSession() throws Throwable {
         Thread.sleep(RUNTIME);
-        System.out.println("Stopping all threads.");
         for (SessionRotator rotator : rotators) {
             rotator.stop();
         }
