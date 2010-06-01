@@ -54,6 +54,7 @@ import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.SystemContentType;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.mail.contentType.DraftsContentType;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
@@ -82,7 +83,9 @@ public final class MailFolderImpl extends AbstractFolder {
      * The mail folder content type.
      */
     public static enum MailFolderType {
-        NONE(MailContentType.getInstance(), 0), ROOT(MailContentType.getInstance(), 0), INBOX(MailContentType.getInstance(), 7), // FolderObject.MAIL
+        NONE(MailContentType.getInstance(), 0),
+        ROOT(SystemContentType.getInstance(), 0),
+        INBOX(MailContentType.getInstance(), 7), // FolderObject.MAIL
         DRAFTS(DraftsContentType.getInstance(), 9),
         SENT(SentContentType.getInstance(), 10),
         SPAM(SpamContentType.getInstance(), 11),

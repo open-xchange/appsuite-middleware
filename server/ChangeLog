@@ -1,6 +1,7 @@
 * 2010-06-01 - thorben.betten@open-xchange.com
 
  - Bugfix #15856: Proper resource prefix in notification mail if content is multipart/*
+ - Bugfix #15914: Changed module of root folder to "system"
 
 * 2010-05-31 - thorben.betten@open-xchange.com
 
