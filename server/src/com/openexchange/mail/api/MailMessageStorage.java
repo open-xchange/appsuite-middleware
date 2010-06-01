@@ -112,7 +112,7 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
         final MailPartHandler handler = new MailPartHandler(sequenceId);
         new MailMessageParser().parseMailMessage(getMessage(folder, mailId, false), handler);
         if (handler.getMailPart() == null) {
-            throw new MailException(MailException.Code.ATTACHMENT_NOT_FOUND, sequenceId, Long.valueOf(mailId), folder);
+            throw new MailException(MailException.Code.ATTACHMENT_NOT_FOUND, sequenceId, mailId, folder);
         }
         return handler.getMailPart();
     }
@@ -121,7 +121,7 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
         final ImageMessageHandler handler = new ImageMessageHandler(contentId);
         new MailMessageParser().parseMailMessage(getMessage(folder, mailId, false), handler);
         if (handler.getImagePart() == null) {
-            throw new MailException(MailException.Code.IMAGE_ATTACHMENT_NOT_FOUND, contentId, Long.valueOf(mailId), folder);
+            throw new MailException(MailException.Code.IMAGE_ATTACHMENT_NOT_FOUND, contentId, mailId, folder);
         }
         return handler.getImagePart();
     }
