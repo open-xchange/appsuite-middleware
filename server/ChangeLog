@@ -1,3 +1,7 @@
+* 2010-06-01 - karsten.will@open-xchange.com
+
+ - Bugfix #16160 - (Subscriptions) UID collision detected even if the user does not have any other appointments
+
 * 2010-06-01 - marcus.klein@open-xchange.com
 
  - Bugfix #16158: Putting session back into first container must be done having a write lock.

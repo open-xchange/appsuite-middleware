@@ -81,21 +81,23 @@ public class CalendarFolderUpdaterStrategy implements FolderUpdaterStrategy<Cale
 
     public int calculateSimilarityScore(CalendarDataObject original, CalendarDataObject candidate, Object session) throws AbstractOXException {
         int score = 0;
-        // A score of 10 is sufficient for a match
-        if ((isset(original.getUid()) || isset(candidate.getUid())) && eq(original.getUid(), candidate.getUid())) {
+        // A score of 10 is sufficient for a match        
+        // If the UID is the same we can assume it is the same event. Please note the UID is assumed to have been saved with contextid and folder-id as prefix here
+        String candidatesUID = getPrefixForUID(original) + candidate.getUid();
+        if ((isset(original.getUid()) || isset(candidate.getUid())) && eq(original.getUid(), candidatesUID)) {
             score += 10;
         }
         if ((isset(original.getTitle()) || isset(candidate.getTitle())) && eq(original.getTitle(), candidate.getTitle())) {
             score += 5;
         }
         if ((isset(original.getNote()) || isset(candidate.getNote())) && eq(original.getNote(), candidate.getNote())) {
-            score += 5;
+            score += 3;
         }
         if (original.getStartDate() != null && candidate.getStartDate() != null && eq(original.getStartDate(), candidate.getStartDate())) {
-            score += 5;
+            score += 3;
         }
         if (original.getEndDate() != null && candidate.getEndDate() != null && eq(original.getEndDate(), candidate.getEndDate())) {
-            score += 5;
+            score += 3;
         }
 
         return score;
@@ -152,7 +154,7 @@ public class CalendarFolderUpdaterStrategy implements FolderUpdaterStrategy<Cale
         Subscription subscription = (Subscription) getFromSession(SUBSCRIPTION, session);
         newElement.setParentFolderID(subscription.getFolderIdAsInt());
         newElement.setContext(subscription.getContext());
-        //System.out.println("***** Event to save : " + newElement.getTitle());
+        addPrefixToUID(newElement);  
         calendarSql.insertAppointmentObject(newElement);
     }
 
@@ -174,8 +176,21 @@ public class CalendarFolderUpdaterStrategy implements FolderUpdaterStrategy<Cale
         update.setObjectID(original.getObjectID());
         update.setLastModified(original.getLastModified());
         update.setContext(original.getContext());
+        addPrefixToUID(update);
 
         calendarSql.updateAppointmentObject(update, original.getParentFolderID(), original.getLastModified());
     }
+    
+    private void addPrefixToUID (CalendarDataObject cdo){        
+                cdo.setUid(getPrefixForUID(cdo) + cdo.getUid());            
+    }
 
+    private String getPrefixForUID (CalendarDataObject cdo){
+        if (null != cdo.getUid()){
+            if (! cdo.getUid().equals("")){
+                    return Integer.toString(cdo.getContextID() + cdo.getParentFolderID());
+            }
+        }
+        return "";        
+    }
 }
