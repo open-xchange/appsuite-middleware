@@ -290,7 +290,15 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                 userizedFolder.setLastModifiedUTC(new Date(lm.getTime()));
             }
         }
-        if (!isShared) {
+        if (isShared) {
+            /*
+             * Mark folder to hold no subfolders
+             */
+            userizedFolder.setSubfolderIDs(new String[0]);
+        } else {
+            /*
+             * Compute user-sensitive subfolders
+             */
             hasVisibleSubfolderIDs(folder, treeId, all, userizedFolder, nullIsPublicAccess, storageParameters, openedStorages);
         }
         return userizedFolder;
