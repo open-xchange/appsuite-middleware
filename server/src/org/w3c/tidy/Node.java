@@ -61,7 +61,7 @@ package org.w3c.tidy;
  * @author Dave Raggett <a href="mailto:dsr@w3.org">dsr@w3.org </a>
  * @author Andy Quick <a href="mailto:ac.quick@sympatico.ca">ac.quick@sympatico.ca </a> (translation to Java)
  * @author Fabrizio Giustina
- * @version $Revision: 1.2 $ ($Author: thorben $)
+ * @version $Revision: 1.3 $ ($Author: thorben $)
  */
 public class Node implements Cloneable
 {
@@ -314,6 +314,7 @@ public class Node implements Cloneable
      * Used to clone heading nodes when split by an hr.
      * @see java.lang.Object#clone()
      */
+    @Override
     protected Object clone()
     {
         Node node;
@@ -431,12 +432,12 @@ public class Node implements Cloneable
 
                             int end = current.value.length() - 1;
 
-                            if (current.value.charAt(end) == ';')
+                            if (end >= 0 && current.value.charAt(end) == ';')
                             {
                                 // attribute ends with declaration seperator
                                 current.value = current.value + " " + attval.value;
                             }
-                            else if (current.value.charAt(end) == '}')
+                            else if (end >= 0 && current.value.charAt(end) == '}')
                             {
                                 // attribute ends with rule set
                                 current.value = current.value + " { " + attval.value + " }";
@@ -1389,6 +1390,7 @@ public class Node implements Cloneable
     /**
      * @see java.lang.Object#toString()
      */
+    @Override
     public String toString()
     {
         String s = "";

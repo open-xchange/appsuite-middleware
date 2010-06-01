@@ -12,7 +12,8 @@
  - Bugfix #16234: Proper check of folder permissions
  - Bugfix #15737: Removed useless properties from javamail.properties file
  - Bugfix #16070: Only appending new-line on paragraph tag
- - Bugfix #15847: FIxed error message to handle with non-numeric mail identifiers
+ - Bugfix #15847: Fixed error message to handle with non-numeric mail identifiers
+ - Bugfix #15845: Modified JTidy sources to avoid java.lang.StringIndexOutOfBoundsException
 
 * 2010-05-31 - thorben.betten@open-xchange.com
 
