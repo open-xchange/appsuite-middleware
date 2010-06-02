@@ -5,7 +5,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.net.InetAddress;
 import java.net.UnknownHostException;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -60,11 +59,11 @@ public class MobileConfigServlet extends SessionServlet {
                     final String pathInfo = req.getPathInfo();
                     if ("/eas.mobileconfig".equals(pathInfo)) {
                         final PrintWriter writer = resp.getWriter();
-                        writeMobileConfig(writer, user.getMail(), getHostname(session.getUserId(), session.getContextId()), "OX EAS", session.getLogin(), session.getPassword());
+                        writeMobileConfig(writer, user.getMail(), getHostname(session.getUserId(), session.getContextId(), req), "OX EAS", session.getLogin(), session.getPassword());
                         writer.close();
                     } else if ("/ms.cab".equals(pathInfo)) {
                         final ServletOutputStream outputStream = resp.getOutputStream();
-                        writeMobileConfigWinMob(outputStream, user.getMail(), getHostname(session.getUserId(), session.getContextId()), "OX EAS", session.getLogin(), session.getPassword());
+                        writeMobileConfigWinMob(outputStream, user.getMail(), getHostname(session.getUserId(), session.getContextId(), req), "OX EAS", session.getLogin(), session.getPassword());
                         outputStream.close();
                     } else {
                         final PrintWriter writer = resp.getWriter();
@@ -86,9 +85,9 @@ public class MobileConfigServlet extends SessionServlet {
         }
     }
 
-    private String getHostname(final int userId, final int contextId) throws UnknownHostException {
+    private String getHostname(final int userId, final int contextId, final HttpServletRequest req) throws UnknownHostException {
         final HostnameService service = MobileConfigServiceRegistry.getServiceRegistry().getService(HostnameService.class);
-        final String canonicalHostName = InetAddress.getLocalHost().getCanonicalHostName();
+        final String canonicalHostName = req.getServerName();
         return ((null != service) && (null != service.getHostname(userId, contextId))) ? service.getHostname(userId, contextId) : canonicalHostName;
     }
 
