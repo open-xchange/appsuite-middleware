@@ -247,37 +247,46 @@ final class SessionData {
     }
 
     SessionControl getSession(final String sessionId) {
+        SessionControl control = null;
+        int i = 0;
         // Read-only access
         rlock.lock();
         try {
-            for (int i = 0; i < sessionList.size(); i++) {
-                final SessionContainer container = sessionList.get(i);
+            for (i = 0; i < sessionList.size(); i++) {
+                SessionContainer container = sessionList.get(i);
                 if (container.containsSessionId(sessionId)) {
-                    final SessionControl sessionControl = container.getSessionById(sessionId);
-                    final Session session = sessionControl.getSession();
-                    if (sessionControl.isValid()) {
-                        sessionControl.updateLastAccessed();
-                        if (i > 0) {
-                            // Schedule task to put session into first container and remove from latter one. This requires a write lock.
-                            // See bug 16158.
-                            scheduleTask2MoveSession2FirstContainer(sessionId);
-                        }
-                        return sessionControl;
+                    control = container.getSessionById(sessionId);
+                    if (i > 0) {
+                        // Schedule task to put session into first container and remove from latter one. This requires a write lock.
+                        // See bug 16158.
+                        scheduleTask2MoveSession2FirstContainer(sessionId);
                     }
-                    // TODO Removing the session is a write operation and should own a write lock.
-                    LOG.info("Session timed out. ID: " + sessionId);
-                    LOG.info("Session timestamp " + sessionControl.getLastAccessed() + ", lifeTime: " + sessionControl.getLifetime());
-                    container.removeSessionById(sessionId);
-                    userList.get(i).remove(session.getLoginName());
-                    randomList.get(i).remove(session.getRandomToken());
-                    return null;
+                    break;
                 }
             }
         } finally {
             rlock.unlock();
         }
-        LOG.info("Session not found. ID: " + sessionId);
-        return null;
+        if (null == control) {
+            LOG.info("Session not found. ID: " + sessionId);
+            return null;
+        }
+        if (!control.isValid()) {
+            LOG.info("Session timed out. ID: " + sessionId);
+            LOG.info("Session timestamp " + control.getLastAccessed() + ", lifeTime: " + control.getLifetime());
+            wlock.lock();
+            try {
+                sessionList.get(i).removeSessionById(sessionId);
+                Session session = control.getSession();
+                userList.get(i).remove(session.getLoginName());
+                randomList.get(i).remove(session.getRandomToken());
+            } finally {
+                wlock.unlock();
+            }
+            return null;
+        }
+        control.updateLastAccessed();
+        return control;
     }
 
     SessionControl getSessionByRandomToken(final String randomToken, final long randomTimeout, final String localIp) {
@@ -354,10 +363,10 @@ final class SessionData {
                     SessionControl sessionControl = container.removeSessionById(sessionId);
                     sessionList.getFirst().putSessionControl(sessionControl);
                     Session session = sessionControl.getSession();
-                    userList.getFirst().put(session.getLoginName(), session.getSessionID());
                     userList.get(i).remove(session.getLoginName());
-                    randomList.getFirst().put(session.getRandomToken(), session.getSessionID());
+                    userList.getFirst().put(session.getLoginName(), session.getSessionID());
                     randomList.get(i).remove(session.getRandomToken());
+                    randomList.getFirst().put(session.getRandomToken(), session.getSessionID());
                     LOG.trace("Moved from container " + i + " to first one.");
                     movedSession = true;
                 }
@@ -415,7 +424,6 @@ final class SessionData {
         } else {
             threadPoolService.submit(task);
         }
-        LOG.trace("Scheduled thread to put session to first container.");
     }
 
     private void unscheduleTask2MoveSession2FirstContainer(String sessionId) {

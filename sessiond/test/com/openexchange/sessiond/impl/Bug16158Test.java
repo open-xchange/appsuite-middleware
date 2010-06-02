@@ -67,7 +67,7 @@ public class Bug16158Test extends TestCase {
     SimSession session;
     private SessionFinder[] finders = new SessionFinder[2];
     private Thread[] finderThreads = new Thread[finders.length];
-    private SessionRotator[] rotators = new SessionRotator[2];
+    private SessionRotator[] rotators = new SessionRotator[1];
     private Thread[] rotatorThreads = new Thread[rotators.length];
     private SimThreadPoolService threadPoolService;
 
@@ -96,33 +96,33 @@ public class Bug16158Test extends TestCase {
             rotatorThreads[i] = new Thread(rotators[i]);
             
         }
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        threadPoolService.shutdown();
+        super.tearDown();
+    }
+
+    public void testNotFoundSession() throws Throwable {
         for (Thread finderThread : finderThreads) {
             finderThread.start();
         }
         for (Thread rotatorThread : rotatorThreads) {
             rotatorThread.start();
         }
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        for (Thread rotatorThread : rotatorThreads) {
-            rotatorThread.join();
-        }
-        for (Thread finderThread : finderThreads) {
-            finderThread.join();
-        }
-        threadPoolService.shutdown();
-        super.tearDown();
-    }
-
-    public void testNotFoundSession() throws Throwable {
         Thread.sleep(RUNTIME);
         for (SessionRotator rotator : rotators) {
             rotator.stop();
         }
+        for (Thread rotatorThread : rotatorThreads) {
+            rotatorThread.join();
+        }
         for (SessionFinder finder : finders) {
             finder.stop();
+        }
+        for (Thread finderThread : finderThreads) {
+            finderThread.join();
         }
         for (SessionFinder finder : finders) {
             assertFalse("A thread did not find the session.", finder.hasNotFound());
