@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 5
+%define		ox_release 6
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -354,6 +354,8 @@ fi
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Thu Apr 15 2010 - tobias.prinz@open-xchange.com
+ - Bugfix #15886 - Deleting a user should be logged within the admin logfile as INFO (not DEBUG as previous)
 * Wed Apr 14 2010 - marcus.klein@open-xchange.com
  - Bugfix #15786: Checking if primary mail is changed before looking into database if that primary email already is used.
 * Thu Apr 01 2010 - marcus.klein@open-xchange.com
