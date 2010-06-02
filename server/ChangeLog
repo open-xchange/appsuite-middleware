@@ -1,3 +1,7 @@
+* 2010-06-02 - steffen.templin@open-xchange.com
+
+ - Bugfix #15300: Added the possibility to use primary mail address or default sender address as from header in notification mails.
+
 * 2010-06-01 - marcus.klein@open-xchange.com
 
  - Bugfix #16158: Putting session back into first container must be done having a write lock.
