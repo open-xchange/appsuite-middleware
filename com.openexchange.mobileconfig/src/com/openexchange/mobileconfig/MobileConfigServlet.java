@@ -68,7 +68,7 @@ public class MobileConfigServlet extends SessionServlet {
                         outputStream.close();
                     } else {
                         final PrintWriter writer = resp.getWriter();
-                        writer.println("No known device parameter");
+                        writer.println("Device parameter not known");
                         writer.close();
                     }
                 }
