@@ -210,15 +210,17 @@ public class SieveHandler {
      */
     public void initializeConnection() throws IOException, OXSieveHandlerException, UnsupportedEncodingException, OXSieveHandlerInvalidCredentialsException {
         measureStart();
+        final ConfigurationService config = MailFilterServletServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
         s_sieve = new Socket();
         /*
-         * Connect with a connect-timeout of 30sec
+         * Connect with the connect-timeout of the config file
          */
-        s_sieve.connect(new InetSocketAddress(sieve_host, sieve_host_port), 30000);
+        final int timeout = Integer.parseInt(config.getProperty(MailFilterProperties.Values.SIEVE_CONNECTION_TIMEOUT.property));
+        s_sieve.connect(new InetSocketAddress(sieve_host, sieve_host_port), timeout);
         /*
-         * Set timeout to 30sec
+         * Set timeout to the one specified in the config file
          */
-        s_sieve.setSoTimeout(30000);
+        s_sieve.setSoTimeout(timeout);
         bis_sieve = new BufferedReader(new InputStreamReader(s_sieve.getInputStream(), "UTF-8"));
         bos_sieve = new BufferedOutputStream(s_sieve.getOutputStream());
 
@@ -234,7 +236,6 @@ public class SieveHandler {
         List<String> sasl = capa.getSasl();
         measureEnd("capa.getSasl");
 
-        final ConfigurationService config = MailFilterServletServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
         final boolean tlsenabled = Boolean.parseBoolean(config.getProperty(MailFilterProperties.Values.TLS.property));
         
         final boolean issueTLS = tlsenabled && capa.getStarttls().booleanValue();

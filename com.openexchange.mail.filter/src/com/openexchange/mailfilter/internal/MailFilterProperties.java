@@ -70,7 +70,8 @@ public class MailFilterProperties {
         SIEVE_AUTH_ENC("SIEVE_AUTH_ENC", "UTF-8"),
         NON_RFC_COMPLIANT_TLS_REGEX("NON_RFC_COMPLIANT_TLS_REGEX", "^Cyrus.*v([0-1]\\.[0-9].*|2\\.[0-2].*|2\\.3\\.[0-9]|2\\.3\\.[0-9][^0-9].*)$"),
         TLS("TLS", "true"),
-        VACATION_DOMAINS("VACATION_DOMAINS", "");
+        VACATION_DOMAINS("VACATION_DOMAINS", ""),
+        SIEVE_CONNECTION_TIMEOUT("com.openexchange.mail.filter.connectionTimeout", "30000");
         
         public final String property;
         
