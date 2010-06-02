@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 5
+%define		ox_release 6
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -508,9 +508,66 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Tue Jun 01 2010 - thorben.betten@open-xchange.com
+ - Bugfix #15856: Proper resource prefix in notification mail if content is multipart/*
+ - Bugfix #15914: Changed module of root folder to "system"
+ - Partial fix #16233: Added virtual subfolders to INBOX listing
+ - Bugfix #16201: Allowing blank character in filename of a uuencoded part
+ - Bugfix #16190: Shared folders have no subfolders
+ - Bugfix #16234: Proper check of folder permissions
+ - Bugfix #15737: Removed useless properties from javamail.properties file
+ - Bugfix #16070: Only appending new-line on paragraph tag
+ - Bugfix #15847: Fixed error message to handle with non-numeric mail identifiers
+ - Bugfix #15845: Modified JTidy sources to avoid java.lang.StringIndexOutOfBoundsException
+ - Bugfix #16238: Proper check for a shared folder
+ - Bugfix #14585: Keeping inline images on reply/forward
+ - Bugfix #15618: Proper update of answered/forwarded flag when selecting a different account
+ - Bugfix #15642: Allowing "view" parameter from action=get for action=reply and action=forward
+* Tue Jun 01 2010 - martin.herfurth@open-xchange.com
+ - Bugfix #16008: Internal users as external participants.
+ - Bugfix #16203: No notification mails for external users about confirmation status.
+* Tue Jun 01 2010 - steffen.templin@open-xchange.com
+ - Bugfix #16155: No ugly exceptions during context delete anymore.
+* Tue Jun 01 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16158: Putting session back into first container must be done having a write lock.
+* Tue Jun 01 2010 - karsten.will@open-xchange.com
+ - Bugfix #16160 - (Subscriptions) UID collision detected even if the user does not have any other appointments
+* Mon May 31 2010 - steffen.templin@open-xchange.com
+ - Bugfix #15590: Moving an appointment to a shared folder doesn't cause "Unknown SQL-Exception" anymore.
+* Mon May 31 2010 - thorben.betten@open-xchange.com
+ - Bugfix #16216: Checking passed String instance for null
+ - Bugfix #15898: Stripping surrounding quotes from uploaded file's Content-Type header
+ - Bugfix #16132: Generating a unique value for pop3.path property
+ - Bugfix #16182: Added isVisible() method to also consider administrator flag
+ - Bugfix #15820: Passing limit argument to IMAP command
+* Fri May 28 2010 - thorben.betten@open-xchange.com
+ - Bugfix #16162: Fixed subscribe mail folder dialog
+ - Bugfix #15973: Fixed action=updates for tree=1
+ - Bugfix #16124: Handling already existing folder entry in virtualTree table
+ - Bugfix #16114: Setting locale-sensitive name for the infostore folder names (public and userstore)
+ - Bugfix #16085: Fixed name of INBOX folder
+ - Bugfix #16125: Re-Create mail folder if absent
+* Thu May 27 2010 - tobias.prinz@open-xchange.com
+ - Bugfix #15927: Empty contacts (or those with just one name) are not duplicated when synchronizing
+* Wed May 26 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16194: Implemented move from public to private folder.
+* Tue May 25 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16117: Corrected identifier check for move to public infostore folder.
+* Fri May 21 2010 - steffen.templin@open-xchange.com
+- Bugfix #13173: If you switch several times between done and undone of a recurring task no duplicates for the next occurrence will be created.
+* Fri May 21 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16163: Path requests return now correct path for shared private folders.
+ - Bugfix #16102: Implemented RSS messaging folder on the new folder tree.
+* Fri May 21 2010 - steffen.templin@open-xchange.com
+ - Bugfix #15113: Adding an empty group to a task now throws an exception.
+* Thu May 20 2010 - karsten.will@open-xchange.com
+ - Bugfix #15903: Appt is shown, even if i am no participant
+* Thu May 20 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16087: Keeping mails as unseen now works when passing the save parameter as true on mail get request.
 * Wed May 19 2010 - marcus.klein@open-xchange.com
  - Bugfix #16027: Only set sender header of sent emails if from is not from alias list.
  - Bugfix #16026: Adding header X-Originating-IP in emails containing the IP address of the client using the backend.
+ - Bugfix #15980: Folder path requests for public folders in Outlook like folder tree now have IPM_ROOT as topmost folder.
 * Tue May 18 2010 - thorben.betten@open-xchange.com
  - Bugfix #15970: Showing all folders in subscribe dialog
  - Bugfix #16115: Applying locale-sensitive name to folders

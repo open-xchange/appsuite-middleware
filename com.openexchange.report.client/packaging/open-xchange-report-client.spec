@@ -38,7 +38,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:        @OXVERSION@
-%define         ox_release 5
+%define         ox_release 6
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -80,6 +80,9 @@ ant -Dlib.dir=/opt/open-xchange/lib -Ddestdir=%{buildroot} -Dprefix=/opt/open-xc
 /opt/open-xchange/bundles/*
 /opt/open-xchange/sbin/*
 %changelog
+* Fri May 28 2010 - benjamin.otterbach@open-xchange.com
+  - Bugfix #15190: Report Server does not add a separator to multiple license keys
+    - Added missing seperator to JSON string
 * Thu Apr 01 2010 - benjamin.otterbach@open-xchange.com
   - Bugfix #15754: Report Client does not send reports with latest HEAD
     - Added missing Apache library to report script
