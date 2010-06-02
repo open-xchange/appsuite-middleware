@@ -183,5 +183,10 @@ public class Activator extends DeferredActivator {
                 throw new Exception("Property for mailfilter not found: " + type.property);
             }
         }
+        try {
+            Integer.parseInt(file.getProperty(MailFilterProperties.Values.SIEVE_CONNECTION_TIMEOUT.property));
+        } catch (final NumberFormatException e) {
+            throw new Exception("Property " + MailFilterProperties.Values.SIEVE_CONNECTION_TIMEOUT.property + " is no integer value");
+        }
     }
 }

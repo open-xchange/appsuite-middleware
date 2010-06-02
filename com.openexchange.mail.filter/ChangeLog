@@ -1,3 +1,8 @@
+* 2010-06-02 - dennis.sieben@open-xchange.com
+
+  - Bugfix #16149: [L3] connection timeout for SieveHandler
+    - Made timeout configurable
+  
 * 2010-02-16 - dennis.sieben@open-xchange.com
 
   - Added possibility to define if vacation messages should only be sent to
