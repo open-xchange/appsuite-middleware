@@ -204,7 +204,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                 } else {
                     parentPermission = CalculatePermission.calculate(parent, getSession(), getAllowedContentTypes());
                 }
-                if (!isReadable(parentPermission, parent.isSubscribed())) {
+                if (!parentPermission.isVisible()) {
                     throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
                         parentId,
                         getUser().getDisplayName(),
@@ -256,7 +256,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                                 } else {
                                     subfolderPermission = CalculatePermission.calculate(subfolder, getSession(), getAllowedContentTypes());
                                 }
-                                if (isReadable(subfolderPermission, subfolder.isSubscribed())) {
+                                if (subfolderPermission.isVisible()) {
                                     final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(2);
                                     try {
                                         final UserizedFolder userizedFolder =
@@ -439,7 +439,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                             } else {
                                 userPermission = CalculatePermission.calculate(subfolder, getSession(), getAllowedContentTypes());
                             }
-                            if (isReadable(userPermission, subfolder.isSubscribed())) {
+                            if (userPermission.isVisible()) {
                                 subfolders[index] =
                                     getUserizedFolder(subfolder, userPermission, treeId, all, true, newParameters, openedStorages);
                             }
@@ -468,11 +468,6 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
          */
         ThreadPools.pollCompletionService(completionService, size, getMaxRunningMillis(), FACTORY);
         return trimArray(subfolders);
-    }
-
-    protected static boolean isReadable(final Permission permission, final boolean isSubscribed) {
-        return (permission.isVisible());
-        // return (permission.isVisible()) || isSubscribed;
     }
 
     private static final int DEFAULT_MAX_RUNNING_MILLIS = 120000;
