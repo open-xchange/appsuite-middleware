@@ -79,7 +79,7 @@ public class HostnameInstallationServiceListener implements ServiceTrackerCustom
             if (null == MobileConfigServiceRegistry.getServiceRegistry().getService(HostnameService.class)) {
                 MobileConfigServiceRegistry.getServiceRegistry().addService(HostnameService.class, (HostnameService) service);
             } else {
-                LOG.error("Duplicate SpamdInstallationService detected: " + serviceReference.getClass().getName());
+                LOG.error("Duplicate HostnameInstallationService detected: " + serviceReference.getClass().getName());
             }
         }
         return service;
