@@ -49,6 +49,10 @@
 
 package com.openexchange.sessiond.impl;
 
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.AddSessionParameter;
@@ -63,9 +67,8 @@ import com.openexchange.sessiond.exception.SessiondException;
  */
 public class SessiondServiceImpl implements SessiondService {
 
-    /**
-     * Initializes a new {@link SessiondServiceImpl}
-     */
+    private static final Log LOG = LogFactory.getLog(SessiondServiceImpl.class);
+
     public SessiondServiceImpl() {
         super();
     }
@@ -94,20 +97,31 @@ public class SessiondServiceImpl implements SessiondService {
         return SessionHandler.getUserSessions(userId, contextId).length;
     }
 
-    public Session getSession(final String sessionId) {
-        final SessionControl sessionControl = SessionHandler.getSession(sessionId);
-        if (sessionControl != null) {
-            return sessionControl.getSession();
-        }
-        return null;
-    }
+    private final Lock migrateLock = new ReentrantLock();
 
-    public Session getCachedSession(final String sessionId, final String localIP) {
-        final SessionControl sessionControl = SessionHandler.getCachedSession(sessionId, localIP);
-        if (sessionControl != null) {
-            return sessionControl.getSession();
+    public Session getSession(String sessionId) {
+        SessionControl sessionControl = SessionHandler.getSession(sessionId);
+        if (null == sessionControl) {
+            // No local session found. Maybe it should be migrated.
+            // Look for a cached session must be serialized. Multiple threads can reach simultaneously this code part. The first one
+            // migrates the session and the second one will not find a session in the cache.
+            migrateLock.lock();
+            try {
+                // First look again locally. Maybe another thread already migrated the session while this one waits on the lock.
+                sessionControl = SessionHandler.getSession(sessionId);
+                if (null == sessionControl) {
+                    // Migrate session.
+                    sessionControl = SessionHandler.getCachedSession(sessionId);
+                }
+            } finally {
+                migrateLock.unlock();
+            }
         }
-        return null;
+        if (null == sessionControl) {
+            LOG.info("Session not found. ID: " + sessionId);
+            return null;
+        }
+        return sessionControl.getSession();
     }
 
     public Session getSessionByRandomToken(final String randomToken, final String localIp) {

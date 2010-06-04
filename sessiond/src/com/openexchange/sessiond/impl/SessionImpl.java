@@ -116,9 +116,8 @@ public final class SessionImpl implements Session {
      * Initializes a new {@link SessionImpl} from specified cached session.
      * 
      * @param cachedSession The cached session
-     * @param localIP The host's local IP
      */
-    public SessionImpl(final CachedSession cachedSession, final String localIP) {
+    protected SessionImpl(final CachedSession cachedSession) {
         super();
         userId = cachedSession.getUserId();
         contextId = cachedSession.getContextId();
@@ -128,7 +127,7 @@ public final class SessionImpl implements Session {
         secret = cachedSession.getSecret();
         randomToken = cachedSession.getRandomToken();
         login = cachedSession.getLogin();
-        localIp = localIP;
+        localIp = cachedSession.getLocalIp();
         authId = cachedSession.getAuthId();
         final Map<String, Serializable> params = cachedSession.getParameters();
         parameters = new ConcurrentHashMap<String, Object>(params.size());

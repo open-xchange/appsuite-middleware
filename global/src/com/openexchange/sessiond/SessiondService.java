@@ -131,17 +131,6 @@ public interface SessiondService {
     public Session getSessionByRandomToken(final String randomToken, final String localIp);
 
     /**
-     * Gets (and removes) the session bound to given secret cookie identifier in cache.
-     * <p>
-     * Session is going to be added to local session containers on a cache hit.
-     * 
-     * @param sessionId The session identifier (which is sent as <i>"session=..."</i> in every request)
-     * @param localIP The host's local IP address
-     * @return The cached session or <code>null</code> on cache miss.
-     */
-    public Session getCachedSession(final String sessionId, final String localIP);
-
-    /**
      * The number of active sessions.
      * 
      * @return Return the number of active sessions

@@ -88,8 +88,7 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
- * Overridden service method that checks if a valid session can be found for the
- * request.
+ * Overridden service method that checks if a valid session can be found for the request.
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
@@ -97,36 +96,16 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 @OXExceptionSource(classId = Classes.SESSION_SERVLET, component = EnumComponent.SESSION)
 public abstract class SessionServlet extends AJAXServlet {
 
-    /**
-     * Serial version UID for serialization
-     */
     private static final long serialVersionUID = -8308340875362868795L;
 
-    /**
-     * Logger.
-     */
     private static final Log LOG = LogFactory.getLog(SessionServlet.class);
 
-    /**
-     * Whether logger has debug level enabled for this class.
-     */
-    private static final boolean DEBUG = LOG.isDebugEnabled();
-
-    /**
-     * Factory for creating exceptions.
-     */
     private static final SessionExceptionFactory EXCEPTION = new SessionExceptionFactory(SessionServlet.class);
 
-    /**
-     * Name of the key to remember the session for the request.
-     */
     public static final String SESSION_KEY = "sessionObject";
 
     private boolean checkIP = true;
 
-    /**
-     * Default constructor.
-     */
     protected SessionServlet() {
         super();
     }
@@ -139,7 +118,6 @@ public abstract class SessionServlet extends AJAXServlet {
 
     /**
      * Checks the session ID supplied as a query parameter in the request URI.
-     * {@inheritDoc}
      */
     @Override
     @OXThrows(category = Category.TRY_AGAIN, desc = "", exceptionId = 4, msg = "Context is locked.")
@@ -148,10 +126,9 @@ public abstract class SessionServlet extends AJAXServlet {
         try {
             final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
             if (sessiondService == null) {
-                throw new SessiondException(
-                    new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, SessiondService.class.getName()));
+                throw new SessiondException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, SessiondService.class.getName()));
             }
-            final Session session = getSession(req, resp, getSessionId(req), sessiondService);
+            final Session session = getSession(req, getSessionId(req), sessiondService);
             final String sessionId = session.getSessionID();
             final Context ctx = ContextStorage.getStorageContext(session.getContextId());
             if (!ctx.isEnabled()) {
@@ -163,9 +140,7 @@ public abstract class SessionServlet extends AJAXServlet {
             rememberSession(req, new ServerSessionAdapter(session, ctx));
             super.service(req, resp);
         } catch (final SessiondException e) {
-            if (DEBUG) {
-                LOG.debug(e.getMessage(), e);
-            }
+            LOG.debug(e.getMessage(), e);
             final Response response = new Response();
             response.setException(e);
             resp.setContentType(CONTENTTYPE_JAVASCRIPT);
@@ -178,9 +153,7 @@ public abstract class SessionServlet extends AJAXServlet {
                 sendError(resp);
             }
         } catch (final ContextException e) {
-            if (DEBUG) {
-                LOG.debug(e.getMessage(), e);
-            }
+            LOG.debug(e.getMessage(), e);
             final Response response = new Response();
             response.setException(e);
             resp.setContentType(CONTENTTYPE_JAVASCRIPT);
@@ -204,8 +177,7 @@ public abstract class SessionServlet extends AJAXServlet {
      * @param checkIP <code>true</code> to deny request with an exception.
      * @param session session object
      * @param actual IP address of the current request.
-     * @throws SessionException
-     *             if the IP addresses don't match.
+     * @throws SessionException if the IP addresses don't match.
      */
     @OXThrows(
         category = Category.PERMISSION,
@@ -219,7 +191,7 @@ public abstract class SessionServlet extends AJAXServlet {
                 LOG.info("Request to server denied for session: " + session.getSessionID() + ". Client login IP changed from " + session.getLocalIp() + " to " + actual + ".");
                 throw EXCEPTION.create(5);
             }
-            if (DEBUG) {
+            if (LOG.isDebugEnabled()) {
                 final StringBuilder sb = new StringBuilder(64);
                 sb.append("Session ");
                 sb.append(session.getSessionID());
@@ -235,18 +207,20 @@ public abstract class SessionServlet extends AJAXServlet {
     /**
      * Gets the cookie identifier from the request.
      * 
-     * @param req
-     *            servlet request.
+     * @param req servlet request.
      * @return the cookie identifier.
-     * @throws SessionException
-     *             if the cookie identifier can not be found.
+     * @throws SessionException if the cookie identifier can not be found.
      */
-    @OXThrows(category = Category.CODE_ERROR, desc = "Every AJAX request must contain a parameter named session "
-            + "that value contains the identifier of the session cookie.", exceptionId = 1, msg = "The session parameter is missing.")
+    @OXThrows(
+        category = Category.CODE_ERROR,
+        desc = "Every AJAX request must contain a parameter named session that value contains the identifier of the session cookie.",
+        exceptionId = 1,
+        msg = "The session parameter is missing."
+    )
     private static String getSessionId(final ServletRequest req) throws SessiondException {
         final String retval = req.getParameter(PARAMETER_SESSION);
         if (null == retval) {
-            if (DEBUG) {
+            if (LOG.isDebugEnabled()) {
                 final StringBuilder debug = new StringBuilder();
                 debug.append("Parameter session not found: ");
                 final Enumeration<?> enm = req.getParameterNames();
@@ -268,8 +242,7 @@ public abstract class SessionServlet extends AJAXServlet {
      * Gets the session identifier from the cookies.
      * @param req HTTP servlet request.
      * @param cookieId cookie identifier from the session parameter.
-     * @return a found session identifier or <code>null</code> if the session
-     * identifier can not be found.
+     * @return a found session identifier or <code>null</code> if the session identifier can not be found.
      */
     private static String getSecret(final HttpServletRequest req, final String cookieId) {
         final Cookie[] cookies = req.getCookies();
@@ -289,30 +262,25 @@ public abstract class SessionServlet extends AJAXServlet {
     /**
      * Gets the session identifier from the request.
      * 
-     * @param req
-     *            HTTP servlet request.
-     * @param resp
-     *            HTTP servlet response
-     * @param sessionId
-     *            Identifier of the session.
-     * @param sessiondService
-     *            The SessionD service
+     * @param req HTTP servlet request.
+     * @param sessionId Identifier of the session.
+     * @param sessiondService The SessionD service
      * @return The appropriate session.
-     * @throws SessionException
-     *             if either the session identifier can not be found in a cookie
-     *             or the session is missing at all.
+     * @throws SessionException if either the session identifier can not be found in a cookie or the session is missing at all.
      */
-    @OXThrows(category = Category.CODE_ERROR, desc = "Your browser does not send the cookie for identifying your "
-            + "session.", exceptionId = 2, msg = "The cookie with the session identifier is missing.")
-    private static Session getSession(final HttpServletRequest req, final HttpServletResponse resp,
-            final String sessionId, final SessiondService sessiondService)
-            throws SessiondException {
+    @OXThrows(
+        category = Category.CODE_ERROR,
+        desc = "Your browser does not send the cookie for identifying your session.",
+        exceptionId = 2,
+        msg = "The cookie with the session identifier is missing."
+    )
+    private static Session getSession(final HttpServletRequest req, final String sessionId, final SessiondService sessiondService) throws SessiondException {
         // Look for a local session
         final String secret = getSecret(req, sessionId);
         if (null == secret) {
             // A cache miss: throw error
             final Cookie[] cookies = req.getCookies();
-            if (DEBUG && cookies != null) {
+            if (LOG.isDebugEnabled() && cookies != null) {
                 final StringBuilder debug = new StringBuilder(256);
                 debug.append("No cookie for ID: ");
                 debug.append(sessionId);
@@ -326,98 +294,50 @@ public abstract class SessionServlet extends AJAXServlet {
             }
             throw EXCEPTION.create(2);
         }
-        try {
-            return getLocalSession(sessionId, secret, sessiondService);
-        } catch (final SessiondException e) {
-            if (DEBUG) {
-                LOG.debug("No appropriate local session found");
-            }
-            // Look for a cached session on second try
-            final Session session = getCachedSession(req, resp, sessionId, secret, sessiondService);
-            if (null != session) {
-                return session;
-            }
-            // Re-throw original exception to indicate session absence
-            throw e;
-        }
-    }
-
-    /**
-     * Finds appropriate cached session.
-     * 
-     * @param req
-     *            HTTP servlet request
-     * @param resp
-     *            HTTP servlet response
-     * @param sessionId
-     *            Identifier of the session
-     * @param sessiondService
-     *            The SessionD service
-     * @return The session if fetched from cache; otherwise <code>null</code>.
-     * @throws SessiondException 
-     */
-    @OXThrows(category = Category.TRY_AGAIN, desc = "", exceptionId = 7, msg = "Session secret is different. Given %1$s differs from %2$s in session.")
-    private static Session getCachedSession(final HttpServletRequest req, final HttpServletResponse resp,
-            final String sessionId, String secret, final SessiondService sessiondService) throws SessiondException {
-        final Session session = sessiondService.getCachedSession(sessionId, req.getRemoteAddr());
-        if (null != session) {
-            if (!session.getSecret().equals(secret)) {
-                throw EXCEPTION.create(7, secret, session.getSecret());
-            }
-            // Adapt cookie
-            Login.writeCookie(resp, session);
-            return session;
-        }
-        return null;
+        return getSession(sessionId, secret, sessiondService);
     }
 
     /**
      * Finds appropriate local session.
      * 
-     * @param sessionId
-     *            identifier of the session.
-     * @param sessiondService
-     *            The SessionD service
+     * @param sessionId identifier of the session.
+     * @param sessiondService The SessionD service
      * @return the session.
-     * @throws SessionException
-     *             if the session can not be found.
+     * @throws SessionException if the session can not be found.
      */
     @OXThrowsMultiple(
         category = { Category.TRY_AGAIN, Category.TRY_AGAIN },
         desc = { "A session with the given identifier can not be found.", "" },
         exceptionId = { 3, 6 },
-        msg = { "Your session %s expired. Please start a new browser session.", "Session secret is different. Given %1$s differs from %2$s in session." })
-    private static Session getLocalSession(final String sessionId, String secret, final SessiondService sessiondService)
-            throws SessiondException {
-        final Session retval = sessiondService.getSession(sessionId);
-        if (null == retval) {
+        msg = { "Your session %s expired. Please start a new browser session.", "Session secret is different. Given %1$s differs from %2$s in session." }
+    )
+    private static Session getSession(String sessionId, String secret, SessiondService sessiondService) throws SessiondException {
+        final Session session = sessiondService.getSession(sessionId);
+        if (null == session) {
             throw EXCEPTION.create(3, sessionId);
         }
-        if (!retval.getSecret().equals(secret)) {
-            throw EXCEPTION.create(6, secret, retval.getSecret());
+        if (!session.getSecret().equals(secret)) {
+            throw EXCEPTION.create(6, secret, session.getSecret());
         }
         try {
-            final Context context = ContextStorage.getStorageContext(retval.getContextId());
-            final User user = UserStorage.getInstance().getUser(retval.getUserId(), context);
+            final Context context = ContextStorage.getStorageContext(session.getContextId());
+            final User user = UserStorage.getInstance().getUser(session.getUserId(), context);
             if (!user.isMailEnabled()) {
-                throw EXCEPTION.create(3, sessionId);
+                throw EXCEPTION.create(3, session.getSessionID());
             }
-        } catch (final UndeclaredThrowableException e) {
-            throw EXCEPTION.create(3, sessionId);
-        } catch (final AbstractOXException e) {
-            throw EXCEPTION.create(3, sessionId);
+        } catch (UndeclaredThrowableException e) {
+            throw EXCEPTION.create(3, session.getSessionID());
+        } catch (AbstractOXException e) {
+            throw EXCEPTION.create(3, session.getSessionID());
         }
-        return retval;
+        return session;
     }
-
+    
     /**
-     * Convenience method to remember the session for a request in the servlet
-     * attributes.
+     * Convenience method to remember the session for a request in the servlet attributes.
      * 
-     * @param req
-     *            servlet request.
-     * @param session
-     *            session to remember.
+     * @param req servlet request.
+     * @param session session to remember.
      */
     public static void rememberSession(final ServletRequest req, final ServerSession session) {
         req.setAttribute(SESSION_KEY, session);
@@ -426,8 +346,7 @@ public abstract class SessionServlet extends AJAXServlet {
     /**
      * Returns the remembered session.
      * 
-     * @param req
-     *            servlet request.
+     * @param req servlet request.
      * @return the remembered session.
      */
     protected static ServerSession getSessionObject(final ServletRequest req) {

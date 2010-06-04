@@ -283,24 +283,22 @@ public final class SessionHandler {
     /**
      * Gets the session associated with given session ID
      * 
-     * @param sessionid The session ID
+     * @param sessionId The session ID
      * @return The session associated with given session ID; otherwise <code>null</code> if expired or none found
      */
-    protected static SessionControl getSession(final String sessionid) {
+    protected static SessionControl getSession(String sessionId) {
         if (DEBUG) {
-            LOG.debug(new StringBuilder("getSession <").append(sessionid).append('>').toString());
+            LOG.debug(new StringBuilder("getSession <").append(sessionId).append('>').toString());
         }
-        final SessionControl sessionControl = sessionData.getSession(sessionid);
+        final SessionControl sessionControl = sessionData.getSession(sessionId);
         if (null == sessionControl) {
             return null;
         }
-        /*
-         * Look-up cache if current session wrapped by session-control is marked for removal
-         */
+        // Look-up cache if current session wrapped by session-control is marked for removal
         try {
             final SessionCache cache = SessionCache.getInstance();
-            final Session s = sessionControl.getSession();
-            final CachedSession cachedSession = cache.getCachedSessionByUser(s.getUserId(), s.getContextId());
+            final Session session = sessionControl.getSession();
+            final CachedSession cachedSession = cache.getCachedSessionByUser(session.getUserId(), session.getContextId());
             if (null != cachedSession) {
                 if (cachedSession.isMarkedAsRemoved()) {
                     cache.removeCachedSession(cachedSession.getSecret());
@@ -317,15 +315,14 @@ public final class SessionHandler {
     }
 
     /**
-     * Gets (and removes) the session bound to given secret cookie identifier in cache.
+     * Gets (and removes) the session bound to given session identifier in cache.
      * <p>
      * Session is going to be added to local session containers on a cache hit.
      * 
      * @param sessionId The session identifier
-     * @param localIP The host's local IP
      * @return A wrapping instance of {@link SessionControl} or <code>null</code>
      */
-    public static SessionControl getCachedSession(final String sessionId, final String localIP) {
+    public static SessionControl getCachedSession(final String sessionId) {
         if (DEBUG) {
             LOG.debug(new StringBuilder("getCachedSession <").append(sessionId).append('>').toString());
         }
@@ -336,8 +333,8 @@ public final class SessionHandler {
                     removeUserSessions(cachedSession.getUserId(), cachedSession.getContextId(), false);
                 } else {
                     // A cache hit! Add to local session containers
-                    LOG.info("Cached session found. ID: " + cachedSession.getSessionId());
-                    return sessionData.addSession(new SessionImpl(cachedSession, localIP), config.getLifeTime(), noLimit);
+                    LOG.info("Migrate session: " + cachedSession.getSessionId());
+                    return sessionData.addSession(new SessionImpl(cachedSession), config.getLifeTime(), noLimit);
                 }
             }
         } catch (final CacheException e) {

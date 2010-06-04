@@ -268,7 +268,6 @@ final class SessionData {
             rlock.unlock();
         }
         if (null == control) {
-            LOG.info("Session not found. ID: " + sessionId);
             return null;
         }
         if (!control.isValid()) {

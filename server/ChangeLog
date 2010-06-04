@@ -1,6 +1,10 @@
+* 2010-06-04 - marcus.klein@open-xchange.com
+
+ - Bugfix #16227: If session migration takes place multiple threads asking for a session are serialized. 
+
 * 2010-06-01 - karsten.will@open-xchange.com
 
- - Bugfix #16160 - (Subscriptions) UID collision detected even if the user does not have any other appointments
+ - Bugfix #16160: (Subscriptions) UID collision detected even if the user does not have any other appointments.
 
 * 2010-06-01 - marcus.klein@open-xchange.com
 
