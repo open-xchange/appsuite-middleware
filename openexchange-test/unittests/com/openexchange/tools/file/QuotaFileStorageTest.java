@@ -196,10 +196,10 @@ public class QuotaFileStorageTest extends TestCase {
 			return usage;
 		}
 		
-		@Override
-		protected void setUsage(long usage) throws QuotaFileStorageException {
-			this.usage = usage;
-		}
+		//@Override
+        protected void setUsage(long usage) throws QuotaFileStorageException {
+            this.usage = usage;
+        }
 		
 		@Override
 		protected boolean incUsage(long usage)  throws QuotaFileStorageException {
