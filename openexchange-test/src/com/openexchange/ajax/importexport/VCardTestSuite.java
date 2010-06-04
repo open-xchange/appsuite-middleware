@@ -60,6 +60,7 @@ public class VCardTestSuite extends TestSuite{
 		tests.addTestSuite( VCardExportTest.class );
         tests.addTestSuite(Bug9209Test.class);
 		tests.addTestSuite(Bug9475Test.class);
+		tests.addTestSuite(Bug15229Test.class);
 		return tests;
 	}
 }
