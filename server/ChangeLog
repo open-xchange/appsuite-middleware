@@ -1,3 +1,7 @@
+* 2010-06-04 - karsten.will@open-xchange.com
+
+ - Bugfix #16244 - Wizard always checks for e-mail account, even if "Contacts only" is selected
+
 * 2010-06-04 - marcus.klein@open-xchange.com
 
  - Bugfix #16227: If session migration takes place multiple threads asking for a session are serialized. 
