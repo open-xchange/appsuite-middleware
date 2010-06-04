@@ -47,70 +47,59 @@
  *
  */
 
-package com.openexchange.ajax.folder;
+package com.openexchange.ajax.folder.api2;
 
-import com.openexchange.ajax.folder.api2.Bug15752Test;
-import com.openexchange.ajax.folder.api2.Bug15980Test;
-import com.openexchange.ajax.folder.api2.Bug16163Test;
-import com.openexchange.ajax.folder.api2.Bug16243Test;
-import com.openexchange.ajax.folder.api2.GetTest;
-import com.openexchange.ajax.folder.api2.Bug15995Test;
-import com.openexchange.ajax.folder.api2.ClearTest;
-import com.openexchange.ajax.folder.api2.CreateTest;
-import com.openexchange.ajax.folder.api2.MoveTest;
-import com.openexchange.ajax.folder.api2.PathTest;
-import com.openexchange.ajax.folder.api2.UpdateTest;
-import com.openexchange.ajax.folder.api2.UpdatesTest;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import static com.openexchange.java.Autoboxing.I;
+import java.util.Iterator;
+import com.openexchange.ajax.folder.actions.API;
+import com.openexchange.ajax.folder.actions.AllowedModules;
+import com.openexchange.ajax.folder.actions.ListRequest;
+import com.openexchange.ajax.folder.actions.ListResponse;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
+import com.openexchange.groupware.container.FolderObject;
 
 /**
- * Suite for all folder tests.
+ * Verifies that InfoStore folder can be excluded from list requests.
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class FolderTestSuite {
+public class Bug16243Test extends AbstractAJAXSession {
 
-    /**
-     * Prevent instantiation.
-     */
-    private FolderTestSuite() {
-        super();
+    private static final int[] COLUMNS = {
+        FolderObject.OBJECT_ID, FolderObject.FOLDER_ID, FolderObject.CREATED_BY, FolderObject.MODIFIED_BY, FolderObject.FOLDER_NAME,
+        FolderObject.MODULE, FolderObject.TYPE, FolderObject.SUBFOLDERS, FolderObject.OWN_RIGHTS, FolderObject.PERMISSIONS_BITS,
+        FolderObject.SUMMARY, FolderObject.STANDARD_FOLDER, FolderObject.TOTAL, FolderObject.NEW, FolderObject.UNREAD,
+        FolderObject.DELETED, FolderObject.CAPABILITIES, FolderObject.SUBSCRIBED, FolderObject.SUBSCR_SUBFLDS, 316 };
+
+    private AJAXClient client;
+
+    public Bug16243Test(String name) {
+        super(name);
     }
 
-    /**
-     * Generates the task test suite.
-     * @return the task tests suite.
-     */
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        // First the function tests.
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        client = getClient();
+    }
 
-        // Now several single function tests.
-        tests.addTestSuite(GetMailInboxTest.class);
-        tests.addTestSuite(GetVirtualTest.class);
-        tests.addTestSuite(GetSortedMailFolderTest.class);
-        tests.addTestSuite(ExemplaryFolderTestManagerTest.class);
+    @Override
+    protected void tearDown() throws Exception {
+        super.tearDown();
+    }
 
-        // New folder API
-        tests.addTestSuite(ClearTest.class);
-        tests.addTestSuite(CreateTest.class);
-        tests.addTestSuite(GetTest.class);
-        tests.addTestSuite(ListTest.class);
-        tests.addTestSuite(MoveTest.class);
-        tests.addTestSuite(PathTest.class);
-        tests.addTestSuite(UpdatesTest.class);
-        tests.addTestSuite(UpdateTest.class);
-
-        // And finally bug tests.
-        tests.addTestSuite(Bug12393Test.class);
-
-        // New folder API bug tests
-        tests.addTestSuite(Bug15752Test.class);
-        tests.addTestSuite(Bug15995Test.class);
-        tests.addTestSuite(Bug15980Test.class);
-        tests.addTestSuite(Bug16163Test.class);
-        tests.addTestSuite(Bug16243Test.class);
-
-        return tests;
+    public void testListWithoutInfoStore() throws Throwable {
+        ListRequest request = new ListRequest(API.OUTLOOK, FolderStorage.PRIVATE_ID, COLUMNS, false);
+        request.setAllowedModules(AllowedModules.CALENDAR, AllowedModules.MAIL, AllowedModules.CONTACTS, AllowedModules.TASKS);
+        ListResponse response = client.execute(request);
+        Iterator<FolderObject> iter = response.getFolder();
+        assertTrue("List request does not return any folders.", iter.hasNext());
+        while (iter.hasNext()) {
+            FolderObject folder = iter.next();
+            assertNotSame("Found some infostore folder.", I(InfostoreContentType.getInstance().getModule()), I(folder.getModule()));
+        }
     }
 }

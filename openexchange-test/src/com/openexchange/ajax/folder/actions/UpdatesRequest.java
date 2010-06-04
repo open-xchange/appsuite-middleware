@@ -68,7 +68,7 @@ public class UpdatesRequest extends CommonUpdatesRequest<FolderUpdatesResponse> 
     }
 
     public UpdatesRequest(API api, int folderId, int[] columns, int sort, Order order, Date lastModified, CommonUpdatesRequest.Ignore ignore) {
-        super(AbstractFolderRequest.getURL(api), folderId, columns, sort, order, lastModified, ignore, true);
+        super(api.getUrl(), folderId, columns, sort, order, lastModified, ignore, true);
         this.api = api;
     }
 

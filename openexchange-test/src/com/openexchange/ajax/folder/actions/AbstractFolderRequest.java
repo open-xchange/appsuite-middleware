@@ -60,6 +60,7 @@ import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.java.Strings;
 import com.openexchange.server.impl.OCLPermission;
 
 /**
@@ -67,19 +68,8 @@ import com.openexchange.server.impl.OCLPermission;
  */
 abstract class AbstractFolderRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
 
-    public static final String FOLDER_URL = "/ajax/folders";
-
-    public static final String FOLDER_URL_NEW = "/ajax/folders2";
-
-    protected static String[] i2s(final int[] intArr) {
-        final String[] strArr = new String[intArr.length];
-        for (int i = 0; i < intArr.length; i++) {
-            strArr[i] = Integer.valueOf(intArr[i]).toString();
-        }
-        return strArr;
-    }
-
     private API api;
+    private AllowedModules[] allowedModules;
 
     protected AbstractFolderRequest(API api) {
         super();
@@ -142,22 +132,33 @@ abstract class AbstractFolderRequest<T extends AbstractAJAXResponse> implements 
         return retval;
     }
 
+    public void setAllowedModules(AllowedModules... allowedModules) {
+        this.allowedModules = allowedModules;
+    }
+
     public final Parameter[] getParameters() {
         List<Parameter> params = new ArrayList<Parameter>();
         addParameters(params);
         if (api.getTreeId() != -1) {
             params.add(new Parameter("tree", api.getTreeId()));
         }
+        if (null != allowedModules) {
+            String[] tmp = new String[allowedModules.length];
+            for (int i = 0; i < allowedModules.length; i++) {
+                tmp[i] = allowedModules[i].getJSONValue();
+            }
+            params.add(new Parameter("allowed_modules", Strings.join(tmp, ",")));
+        }
         return params.toArray(new Parameter[params.size()]);
     }
 
     protected abstract void addParameters(List<Parameter> params);
 
-    static final String getURL(API api) {
-        return api.getUrl();
-    }
-
-    static final int getTree(API api) {
-        return api.getTreeId();
+    protected static String[] i2s(final int[] intArr) {
+        final String[] strArr = new String[intArr.length];
+        for (int i = 0; i < intArr.length; i++) {
+            strArr[i] = Integer.valueOf(intArr[i]).toString();
+        }
+        return strArr;
     }
 }

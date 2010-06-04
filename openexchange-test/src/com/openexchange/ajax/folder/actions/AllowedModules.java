@@ -47,70 +47,38 @@
  *
  */
 
-package com.openexchange.ajax.folder;
+package com.openexchange.ajax.folder.actions;
 
-import com.openexchange.ajax.folder.api2.Bug15752Test;
-import com.openexchange.ajax.folder.api2.Bug15980Test;
-import com.openexchange.ajax.folder.api2.Bug16163Test;
-import com.openexchange.ajax.folder.api2.Bug16243Test;
-import com.openexchange.ajax.folder.api2.GetTest;
-import com.openexchange.ajax.folder.api2.Bug15995Test;
-import com.openexchange.ajax.folder.api2.ClearTest;
-import com.openexchange.ajax.folder.api2.CreateTest;
-import com.openexchange.ajax.folder.api2.MoveTest;
-import com.openexchange.ajax.folder.api2.PathTest;
-import com.openexchange.ajax.folder.api2.UpdateTest;
-import com.openexchange.ajax.folder.api2.UpdatesTest;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import com.openexchange.folderstorage.database.contentType.CalendarContentType;
+import com.openexchange.folderstorage.database.contentType.ContactContentType;
+import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
+import com.openexchange.folderstorage.database.contentType.TaskContentType;
+import com.openexchange.folderstorage.mail.contentType.MailContentType;
 
 /**
- * Suite for all folder tests.
+ * {@link AllowedModules}
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class FolderTestSuite {
+public enum AllowedModules {
 
-    /**
-     * Prevent instantiation.
-     */
-    private FolderTestSuite() {
-        super();
+    CALENDAR(CalendarContentType.getInstance().toString()),
+
+    MAIL(MailContentType.getInstance().toString()),
+
+    CONTACTS(ContactContentType.getInstance().toString()),
+
+    TASKS(TaskContentType.getInstance().toString()),
+
+    INFOSTORE(InfostoreContentType.getInstance().toString());
+
+    private final String jsonValue;
+
+    AllowedModules(String jsonValue) {
+        this.jsonValue = jsonValue;
     }
 
-    /**
-     * Generates the task test suite.
-     * @return the task tests suite.
-     */
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        // First the function tests.
-
-        // Now several single function tests.
-        tests.addTestSuite(GetMailInboxTest.class);
-        tests.addTestSuite(GetVirtualTest.class);
-        tests.addTestSuite(GetSortedMailFolderTest.class);
-        tests.addTestSuite(ExemplaryFolderTestManagerTest.class);
-
-        // New folder API
-        tests.addTestSuite(ClearTest.class);
-        tests.addTestSuite(CreateTest.class);
-        tests.addTestSuite(GetTest.class);
-        tests.addTestSuite(ListTest.class);
-        tests.addTestSuite(MoveTest.class);
-        tests.addTestSuite(PathTest.class);
-        tests.addTestSuite(UpdatesTest.class);
-        tests.addTestSuite(UpdateTest.class);
-
-        // And finally bug tests.
-        tests.addTestSuite(Bug12393Test.class);
-
-        // New folder API bug tests
-        tests.addTestSuite(Bug15752Test.class);
-        tests.addTestSuite(Bug15995Test.class);
-        tests.addTestSuite(Bug15980Test.class);
-        tests.addTestSuite(Bug16163Test.class);
-        tests.addTestSuite(Bug16243Test.class);
-
-        return tests;
+    public String getJSONValue() {
+        return jsonValue;
     }
 }
