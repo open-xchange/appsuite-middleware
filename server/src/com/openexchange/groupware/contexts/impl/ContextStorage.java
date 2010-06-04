@@ -58,6 +58,7 @@ import com.openexchange.session.Session;
 
 /**
  * This class defines the methods for accessing the storage of contexts.
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -80,6 +81,7 @@ public abstract class ContextStorage {
 
     /**
      * Creates an instance implementing the context storage.
+     * 
      * @return an instance implementing the context storage.
      */
     public static ContextStorage getInstance() {
@@ -87,25 +89,24 @@ public abstract class ContextStorage {
     }
 
     /**
-     * Instantiates an implementation of the context interface and fill its
-     * attributes according to the needs to be able to separate contexts.
+     * Instantiates an implementation of the context interface and fill its attributes according to the needs to be able to separate
+     * contexts.
+     * 
      * @param loginContextInfo the login info for the context.
-     * @return the unique identifier of the context or <code>-1</code> if no
-     * matching context exists.
+     * @return the unique identifier of the context or <code>-1</code> if no matching context exists.
      * @throws ContextException if an error occurs.
      */
     public abstract int getContextId(String loginContextInfo) throws ContextException;
 
-    public final Context getContext(final Session session)
-        throws ContextException {
+    public final Context getContext(final Session session) throws ContextException {
         return getContext(session.getContextId());
     }
 
     /**
      * Creates a context implementation for the given context unique identifier.
+     * 
      * @param contextId unique identifier of the context.
-     * @return an implementation of the context or <code>null</code> if the
-     * context with the given identifier can't be found.
+     * @return an implementation of the context or <code>null</code> if the context with the given identifier can't be found.
      * @throws ContextException if an error occurs.
      */
     public Context getContext(final int contextId) throws ContextException {
@@ -118,41 +119,40 @@ public abstract class ContextStorage {
 
     /**
      * Loads the context object.
+     * 
      * @param contextId unique identifier of the context to load.
      * @return the context object.
      * @throws ContextException if loading the context fails.
      */
-    public abstract ContextExtended loadContext(int contextId)
-        throws ContextException;
+    public abstract ContextExtended loadContext(int contextId) throws ContextException;
 
     /**
      * Invalidates the context object in cache(s).
+     * 
      * @param contextId unique identifier of the context to invalidate
-     * @throws ContextException 
      * @throws ContextException if invalidating the context fails
      */
     public void invalidateContext(final int contextId) throws ContextException {
         if (LOG.isTraceEnabled()) {
-            LOG.trace("invalidateContext not implemented in " + this.getClass()
-                .getCanonicalName());
+            LOG.trace("invalidateContext not implemented in " + this.getClass().getCanonicalName());
         }
     }
 
     /**
      * Invalidates a login information in the cache.
+     * 
      * @param loginContextInfo login information to invalidate.
-     * @throws ContextException 
      * @throws ContextException if invalidating the login information fails.
      */
     public void invalidateLoginInfo(final String loginContextInfo) throws ContextException {
         if (LOG.isTraceEnabled()) {
-            LOG.trace("invalidateLoginInfo not implemented in " + this
-                .getClass().getCanonicalName());
+            LOG.trace("invalidateLoginInfo not implemented in " + this.getClass().getCanonicalName());
         }
     }
 
     /**
      * Gives a list of all context ids which are stored in the config database.
+     * 
      * @return the list of context ids
      * @throws ContextException if reading the contexts fails.
      */
@@ -174,6 +174,7 @@ public abstract class ContextStorage {
 
     /**
      * Initialization.
+     * 
      * @throws ContextException if initialization of contexts fails.
      */
     public static void start() throws ContextException {
@@ -199,23 +200,23 @@ public abstract class ContextStorage {
 
     /**
      * Convenience method for getting the context.
+     * 
      * @param session The session providing the context ID
      * @return the context data object or null if the context with the given identifier can't be found.
      * @throws ContextException if getting the context fails.
      */
-    public static Context getStorageContext(final Session session)
-        throws ContextException {
+    public static Context getStorageContext(final Session session) throws ContextException {
         return getStorageContext(session.getContextId());
     }
 
     /**
      * Convenience method for getting the context.
+     * 
      * @param contextId unique identifier of the context.
      * @return the context data object or null if the context with the given identifier can't be found.
      * @throws ContextException if getting the context fails.
      */
-    public static Context getStorageContext(final int contextId)
-        throws ContextException {
+    public static Context getStorageContext(final int contextId) throws ContextException {
         return getInstance().getContext(contextId);
     }
 }
