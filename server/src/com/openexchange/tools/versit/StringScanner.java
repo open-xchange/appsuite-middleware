@@ -63,6 +63,8 @@ public class StringScanner extends Scanner {
     private String UpcaseText;
 
     private int pos;
+    
+    private Scanner scanner;
 
     /**
      * Creates a scanner for a string.
@@ -70,10 +72,15 @@ public class StringScanner extends Scanner {
      * @param text is the string to scan.
      */
     public StringScanner(final Scanner s, final String text) {
+        scanner = s;
         Line = s.getLine();
         Column = s.getColumn();
         Text = text;
         peek = readImpl();
+    }
+    
+    public Scanner getScanner() {
+        return scanner;
     }
 
     @Override

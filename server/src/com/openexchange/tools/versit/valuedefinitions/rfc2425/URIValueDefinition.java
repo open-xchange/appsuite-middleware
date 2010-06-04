@@ -52,6 +52,8 @@ package com.openexchange.tools.versit.valuedefinitions.rfc2425;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.text.CharacterIterator;
+import java.text.StringCharacterIterator;
 import java.util.regex.Pattern;
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.StringScanner;
@@ -74,18 +76,56 @@ public class URIValueDefinition extends ValueDefinition {
             // Return null on empty URL
             return null;
         }
-
-        final String value = s.regex(URIPattern);
+        
+        StringScanner scanner = deescapeColons(s);
+        //StringScanner scanner = s;
+        
+        final String value = scanner.regex(URIPattern);
         if (value == null) {
-            throw new VersitException(s, "URI expected");
+            throw new VersitException(scanner, "URI expected");
         }
         try {
             return new URI(value);
         } catch (final URISyntaxException e) {
-            final VersitException ve = new VersitException(s, e.getMessage());
+            final VersitException ve = new VersitException(scanner, e.getMessage());
             ve.initCause(e);
             throw ve;
         }
+    }
+    
+    private StringScanner deescapeColons(StringScanner s) {
+        String str = s.getRest();
+        StringBuilder strBuilder = new StringBuilder();
+        StringScanner result;
+        
+        if (str.contains("\\:")) {
+            StringCharacterIterator it = new StringCharacterIterator(str);
+            char c = it.current();
+            while (c != CharacterIterator.DONE) {
+                if (c == '\\') {
+                    if ((c = it.next()) == ':') {
+                        strBuilder.append(':');
+                        c = it.next();
+                    } else {
+                        if (c == CharacterIterator.DONE) {
+                            strBuilder.append('\\');
+                        } else {
+                            strBuilder.append('\\');
+                            strBuilder.append(c);
+                            c = it.next();
+                        }                        
+                    }
+                } else {
+                    strBuilder.append(c);
+                    c = it.next();
+                }
+                		
+            }
+            str = strBuilder.toString();
+        }
+        System.out.println(str);
+        result = new StringScanner(s.getScanner(), str);
+        return result;
     }
 
 }

@@ -1,3 +1,7 @@
+* 2010-06-04 - steffen.templin@open-xchange.com
+
+ - Bugfix #15229 - Escaped colons in VCards don't cause parser exceptions anymore.
+
 * 2010-06-04 - karsten.will@open-xchange.com
 
  - Bugfix #16244 - Wizard always checks for e-mail account, even if "Contacts only" is selected
