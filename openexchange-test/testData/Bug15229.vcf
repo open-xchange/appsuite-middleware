@@ -1,0 +1,18 @@
+BEGIN:VCARD
+
+VERSION:3.0
+
+N:Löfflad;Klaus;(piraten);;
+
+FN:Klaus (piraten) Löfflad
+
+EMAIL;type=INTERNET;type=HOME;type=pref:klaus@der-kapitaen.de
+
+TEL;type=CELL;type=pref:+49 151 22632571
+
+item1.URL;type=pref:http\://wiki.piratenpartei.de/Benutzer\:Magister_Navis
+
+item1.X-ABLabel:Piraten
+
+END:VCARD
+
