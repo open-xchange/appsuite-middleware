@@ -56,6 +56,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.tools.update.Tools;
 
 /**
  * {@link SimpleTableCreationTask}
@@ -68,13 +70,14 @@ public abstract class SimpleTableCreationTask extends UpdateTaskAdapter {
 
     protected abstract String getStatement();
 
+    protected abstract String getTableName();
+
     public void perform(PerformParameters params) throws AbstractOXException {
         int contextId = params.getContextId();
-        final Connection con = Database.get(true);
+        final Connection con = Database.getNoTimeout(contextId, true);
         try {
             con.setAutoCommit(false);
-            Statement statement = con.createStatement();
-            statement.execute(getStatement());
+            innerPerform(con);
             con.commit();
         } catch (SQLException e) {
             rollback(con);
@@ -85,4 +88,16 @@ public abstract class SimpleTableCreationTask extends UpdateTaskAdapter {
         }
     }
 
+    private void innerPerform(Connection con) throws SQLException {
+        if (Tools.tableExists(con, getTableName())) {
+            return;
+        }
+        Statement stmt = null;
+        try {
+            stmt = con.createStatement();
+            stmt.execute(getStatement());
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+    }
 }

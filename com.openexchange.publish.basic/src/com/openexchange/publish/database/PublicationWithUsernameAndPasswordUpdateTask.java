@@ -66,4 +66,9 @@ public class PublicationWithUsernameAndPasswordUpdateTask extends SimpleTableCre
     protected String getStatement() {
         return CreatePublicationTables.CREATE_USER_AND_PASSWORD_CREATE_STATEMENT;
     }
+
+    @Override
+    protected String getTableName() {
+        return "publication_users";
+    }
 }
