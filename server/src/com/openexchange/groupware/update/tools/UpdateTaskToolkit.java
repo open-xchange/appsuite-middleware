@@ -77,6 +77,7 @@ import com.openexchange.groupware.update.SchemaUpdateState;
 import com.openexchange.groupware.update.UpdateException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.groupware.update.internal.DynamicList;
 import com.openexchange.groupware.update.internal.SchemaExceptionCodes;
 import com.openexchange.groupware.update.internal.UpdateExecutor;
 import com.openexchange.tools.sql.DBUtils;
@@ -280,15 +281,13 @@ public final class UpdateTaskToolkit {
      * @throws UpdateException if the update task class can not be determined.
      */
     private static UpdateTask getUpdateTask(final String className) throws UpdateException {
-        try {
-            return Class.forName(className).asSubclass(UpdateTask.class).newInstance();
-        } catch (final InstantiationException e) {
-            throw UpdateExceptionCodes.LOADING_TASK_FAILED.create(e, className);
-        } catch (final IllegalAccessException e) {
-            throw UpdateExceptionCodes.LOADING_TASK_FAILED.create(e, className);
-        } catch (final ClassNotFoundException e) {
-            throw UpdateExceptionCodes.LOADING_TASK_FAILED.create(e, className);
+        List<UpdateTask> taskList = DynamicList.getInstance().getTaskList();
+        for (UpdateTask task : taskList) {
+            if (task.getClass().getName().equals(className)) {
+                return task;
+            }
         }
+        throw UpdateExceptionCodes.UNKNOWN_TASK.create(className);
     }
 
     private static final String SQL_UPDATE_VERSION = "UPDATE version SET version = ?";

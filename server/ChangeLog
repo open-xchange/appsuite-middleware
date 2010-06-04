@@ -8,7 +8,8 @@
 
 * 2010-06-04 - marcus.klein@open-xchange.com
 
- - Bugfix #16227: If session migration takes place multiple threads asking for a session are serialized. 
+ - Bugfix #16227: If session migration takes place multiple threads asking for a session are serialized.
+ - Bugfix #16224: The list of known tasks is searched for the requested update task if they should be started through JMX interface.
 
 * 2010-06-01 - karsten.will@open-xchange.com
 

@@ -104,7 +104,9 @@ public enum UpdateExceptionCodes implements OXErrorMessage {
     /**
      * Blocking tasks (%1$s) must be executed before background tasks can be executed (%2$s).
      */
-    FIRST_BLOCKING(FIRST_BLOCKING_MSG, Category.CODE_ERROR, 23);
+    FIRST_BLOCKING(FIRST_BLOCKING_MSG, Category.CODE_ERROR, 23),
+    /** Unknown task: %1$s */
+    UNKNOWN_TASK(UNKNOWN_TASK_MSG, Category.SETUP_ERROR, 24);
 
     final String message;
 
