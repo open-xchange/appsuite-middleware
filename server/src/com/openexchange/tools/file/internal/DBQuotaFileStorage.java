@@ -245,52 +245,6 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
         }
     }
 
-    /**
-     * set the QuotaUsage to a specific value
-     * 
-     * @param usage new value of the QuotaUsage
-     * @throws QuotaFileStorageException
-     */
-    protected void setUsage(final long usage) throws QuotaFileStorageException {
-        final Connection con;
-        try {
-            con = db.getWritable(context);
-        } catch (final DBPoolingException e) {
-            throw new QuotaFileStorageException(e);
-        }
-
-        PreparedStatement sstmt = null;
-        PreparedStatement ustmt = null;
-        ResultSet result = null;
-        try {
-            con.setAutoCommit(false);
-
-            sstmt = con.prepareStatement("SELECT used FROM filestore_usage WHERE cid=? FOR UPDATE");
-            sstmt.setInt(1, context.getContextId());
-            result = sstmt.executeQuery();
-            if (!result.next()) {
-                throw new QuotaFileStorageException(Code.NO_USAGE, I(context.getContextId()));
-            }
-
-            ustmt = con.prepareStatement("UPDATE filestore_usage SET used=? WHERE cid=?");
-            ustmt.setLong(1, usage);
-            ustmt.setInt(2, context.getContextId());
-            int rows = ustmt.executeUpdate();
-            if (1 != rows) {
-                throw new QuotaFileStorageException(Code.UPDATE_FAILED, I(context.getContextId()));
-            }
-            con.commit();
-        } catch (final SQLException s) {
-            DBUtils.rollback(con);
-            throw new QuotaFileStorageException(QuotaFileStorageException.Code.SQLSTATEMENTERROR, s);
-        } finally {
-            autocommit(con);
-            closeSQLStuff(result, sstmt);
-            closeSQLStuff(ustmt);
-            db.backWritable(context, con);
-        }
-    }
-
     public Set<String> deleteFiles(final String[] identifiers) throws QuotaFileStorageException {
         final HashMap<String, Long> fileSizes = new HashMap<String, Long>();
         final SortedSet<String> set = new TreeSet<String>();
@@ -379,7 +333,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
     }
 
     /**
-     * Recalculates the Usage if it's inconsistent based on all physically existing files.
+     * Recalculates the Usage if it's inconsistent based on all physically existing files and writes it into quota_usage.
      */
     public void recalculateUsage() throws QuotaFileStorageException {
         try {
@@ -393,7 +347,32 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
                 entireFileSize += fileStorage.getFileSize(filename);
             }
 
-            setUsage(entireFileSize);
+            final Connection con;
+            try {
+                con = db.getWritable(context);
+            } catch (final DBPoolingException e) {
+                throw new QuotaFileStorageException(e);
+            }
+
+            PreparedStatement stmt = null;
+            ResultSet result = null;
+            
+            try {
+                stmt = con.prepareStatement("UPDATE filestore_usage SET used=? WHERE cid=?");
+                stmt.setLong(1, entireFileSize);
+                stmt.setInt(2, context.getContextId());
+                int rows = stmt.executeUpdate();
+                if (1 != rows) {
+                    throw new QuotaFileStorageException(Code.UPDATE_FAILED, I(context.getContextId()));
+                }
+            } catch (final SQLException s) {
+                DBUtils.rollback(con);
+                throw new QuotaFileStorageException(QuotaFileStorageException.Code.SQLSTATEMENTERROR, s);
+            } finally {
+                autocommit(con);
+                closeSQLStuff(result, stmt);
+                db.backWritable(context, con);
+            }
         } catch (final FileStorageException e) {
             throw new QuotaFileStorageException(e);
         }
