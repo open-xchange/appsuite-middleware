@@ -92,7 +92,7 @@ public class CabUtilTest extends CabUtil {
     @Test
     public void testFileGeneration() throws FileNotFoundException, IOException {
         final DataOutputStream pw = new DataOutputStream(new FileOutputStream("test.cab"));
-        writeCabFile(pw, MobileConfigServlet.write("xyz@bla.de", "ox6-dev.open-xchange.com", "tara", "user.name", "secret"));
+        writeCabFile(pw, MobileConfigServlet.write("xyz@bla.de", "ox6-dev.open-xchange.com", "tara", "user.name"));
         pw.close();
         
 //        final BufferedInputStream bis1 = new BufferedInputStream(new FileInputStream("test.cab"));
