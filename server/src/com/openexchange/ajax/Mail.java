@@ -2163,6 +2163,9 @@ public class Mail extends PermissionServlet implements UploadListener {
                 } else if (VIEW_HTML.equals(view)) {
                     usmNoSave.setDisplayHtmlInlineContent(true);
                     usmNoSave.setAllowHTMLImages(true);
+                } else if (VIEW_HTML_BLOCKED_IMAGES.equals(view)) {
+                    usmNoSave.setDisplayHtmlInlineContent(true);
+                    usmNoSave.setAllowHTMLImages(false);
                 } else {
                     LOG.warn(new StringBuilder(64).append("Unknown value in parameter ").append(PARAMETER_VIEW).append(": ").append(view).append(
                         ". Using user's mail settings as fallback."));
@@ -2239,7 +2242,14 @@ public class Mail extends PermissionServlet implements UploadListener {
         if (length != 1) {
             throw new IllegalArgumentException("JSON array's length is not 1");
         }
-        final Map<String, String> map = newHashMap(2);
+        final Map<String, String> map = newHashMap(8);
+        for (final String name : paramContainer.getParameterNames()) {
+            try {
+                map.put(name, paramContainer.getStringParam(name));
+            } catch (final AbstractOXException e) {
+                LOG.warn(e.getMessage(), e);
+            }
+        }
         for (int i = 0; i < length; i++) {
             final JSONObject folderAndID = paths.getJSONObject(i);
             map.put(PARAMETER_FOLDERID, folderAndID.getString(PARAMETER_FOLDERID));
