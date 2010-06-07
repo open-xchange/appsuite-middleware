@@ -122,6 +122,13 @@ public final class MIMEStructureHandler implements StructureHandler {
      */
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MIMEStructureHandler.class);
 
+    private static final MailDateFormat MAIL_DATE_FORMAT;
+
+    static {
+        MAIL_DATE_FORMAT = new MailDateFormat();
+        MAIL_DATE_FORMAT.setTimeZone(TimeZoneUtils.getTimeZone("GMT"));
+    }
+
     /*-
      * #####################################################################################
      */
@@ -596,13 +603,6 @@ public final class MIMEStructureHandler implements StructureHandler {
             HeaderName.valueOf("Resent-To"),
             HeaderName.valueOf("Resent-Sender"),
             HeaderName.valueOf("Disposition-Notification-To")));
-
-    private static final MailDateFormat MAIL_DATE_FORMAT;
-
-    static {
-        MAIL_DATE_FORMAT = new MailDateFormat();
-        MAIL_DATE_FORMAT.setTimeZone(TimeZoneUtils.getTimeZone("GMT"));
-    }
 
     private JSONObject generateHeadersObject(final Iterator<Entry<String, String>> iter, final JSONObject parent) throws MailException {
         try {
