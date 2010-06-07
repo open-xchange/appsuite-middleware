@@ -199,7 +199,7 @@ public abstract class ParamContainer {
         }
 
         @Override
-        public Set<String> getParameterNames() throws AbstractOXException {
+        public Set<String> getParameterNames() {
             return map.keySet();
         }
 
@@ -452,7 +452,7 @@ public abstract class ParamContainer {
         }
 
         @Override
-        public Set<String> getParameterNames() throws AbstractOXException {
+        public Set<String> getParameterNames() {
             final Set<String> ret = new HashSet<String>();
             for (final Enumeration<?> enumeration = req.getParameterNames(); enumeration.hasMoreElements();) {
                 ret.add((String) enumeration.nextElement());
@@ -705,7 +705,7 @@ public abstract class ParamContainer {
         }
 
         @Override
-        public Set<String> getParameterNames() throws AbstractOXException {
+        public Set<String> getParameterNames() {
             return jo.keySet();
         }
 
@@ -1001,9 +1001,8 @@ public abstract class ParamContainer {
      * Gets the parameter names.
      * 
      * @return The parameter names
-     * @throws AbstractOXException If names cannot be returned
      */
-    public abstract Set<String> getParameterNames() throws AbstractOXException;
+    public abstract Set<String> getParameterNames();
 
     /**
      * Requires a parameter as <code>String</code>
