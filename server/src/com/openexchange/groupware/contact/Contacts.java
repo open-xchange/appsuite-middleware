@@ -395,7 +395,7 @@ public final class Contacts {
             "Mandatory field last name is not set.", ContactException.PFLAG_IN_PUBLIC_FOLDER
         }
     )
-    public static void performContactStorageInsert(final Contact co, final int user, final Session so) throws OXConflictException, OXException {
+    public static void performContactStorageInsert(final Contact co, final int user, final Session so, boolean override) throws OXConflictException, OXException {
 
         final StringBuilder insert_fields = new StringBuilder();
         final StringBuilder insert_values = new StringBuilder();
@@ -511,8 +511,10 @@ public final class Contacts {
 
             final long lmd = System.currentTimeMillis();
 
-            final StringBuilder insert = cs.iFperformContactStorageInsert(insert_fields, insert_values, user, lmd, so.getContextId(), id);
-
+            StringBuilder insert = cs.iFperformContactStorageInsert(insert_fields, insert_values, user, lmd, so.getContextId(), id);
+            if(override)
+                insert = cs.iFperformOverridingContactStorageInsert(insert_fields, insert_values, user, lmd, so.getContextId(), id);
+            
             ps = writecon.prepareStatement(insert.toString());
             int counter = 1;
             for (int i = 2; i < 650; i++) {

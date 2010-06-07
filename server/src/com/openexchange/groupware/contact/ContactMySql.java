@@ -1084,6 +1084,15 @@ public class ContactMySql implements ContactSql {
         return insert;
     }
 
+    public StringBuilder iFperformOverridingContactStorageInsert(final StringBuilder insert_fields, final StringBuilder insert_values, final int user, final long lmd, final int cid, final int id) {
+        final StringBuilder insert =
+            new StringBuilder("INSERT IGNORE INTO prg_contacts (").append(insert_fields).append("created_from,").append("changed_from,").append(
+                "creating_date,").append("changing_date,").append("intfield01,").append("cid ").append(") VALUES ( ").append(
+                insert_values.toString()).append(user).append(',').append(user).append(',').append(lmd).append(',').append(lmd).append(',').append(
+                id).append(',').append(cid).append(") ");
+        return insert;
+    }
+
     public StringBuilder iFperformContactStorageUpdate(final StringBuilder update, final long lmd, final int id, final int cid) {
         final StringBuilder updater =
             new StringBuilder("UPDATE prg_contacts SET ").append(update).append("changed_from = ").append(user).append(',').append(

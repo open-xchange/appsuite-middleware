@@ -70,6 +70,7 @@ import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
+import com.openexchange.groupware.contact.OverridingContactInterface;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
@@ -211,6 +212,7 @@ public class VCardImporter extends AbstractImporter {
 		final List<ImportResult> list = new ArrayList<ImportResult>();
 
 		try {
+		    boolean canOverrideInCaseOfTruncation = false;
 			oxContainerConverter = new OXContainerConverter(session);
 			final VCardTokenizer tokenizer = new VCardTokenizer(is);
 			final List<VCardFileToken> chunks = tokenizer.split();
@@ -241,27 +243,32 @@ public class VCardImporter extends AbstractImporter {
 						try {
 						    final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
 					            ContactInterfaceDiscoveryService.class).newContactInterface(contactObj.getParentFolderID(), session);
-							contactInterface.insertContactObject(contactObj);
+			                if(contactInterface instanceof OverridingContactInterface){
+			                    ((OverridingContactInterface) contactInterface).forceInsertContactObject(contactObj);
+			                    canOverrideInCaseOfTruncation = true;
+			                } else {
+			                    contactInterface.insertContactObject(contactObj);
+			                }
 						} catch (OXException oxEx) {
 						    if (Category.USER_INPUT.equals(oxEx.getCategory())) {
 				                LOG.debug(oxEx.getMessage(), oxEx);
 				            } else {
 				                LOG.error(oxEx.getMessage(), oxEx);
 				            }
-							oxEx = handleDataTruncation(oxEx);
-							LOG.debug("cannot import contact object", oxEx);
-							importResult.setException(oxEx);
+				            if(oxEx.getCategory() != Category.TRUNCATED 
+				                || (oxEx.getCategory() == Category.TRUNCATED && !canOverrideInCaseOfTruncation)){
+				                importResult.setException(oxEx);
+				                LOG.debug("cannot import contact object", oxEx);
+				            }
 						}
 						importResult.setObjectId(String.valueOf(contactObj.getObjectID()));
 						importResult.setDate(contactObj.getLastModified());
 					} catch (final ConverterException exc) {
 						LOG.error("cannot convert contact object", exc);
 						importResult.setException(importExportExceptionFactory.create(10, exc, exc.getMessage()));
-						//importResult.setException(new OXException(EnumComponent.IMPORT_EXPORT, Category.USER_INPUT, -1, "Cannot convert vcard object, reason: %s", exc, exc.toString()));
 					} catch (final VersitException exc) {
 						LOG.error("cannot parse contact object", exc);
 						importResult.setException(importExportExceptionFactory.create(9, exc, exc.getMessage()));
-						//importResult.setException(new OXException(EnumComponent.IMPORT_EXPORT, Category.USER_INPUT, -1, "Cannot parse vcard object, reason: %s", exc, exc.toString()));
 					}
 				}
 				list.add(importResult);

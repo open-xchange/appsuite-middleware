@@ -73,6 +73,7 @@ import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
+import com.openexchange.groupware.contact.OverridingContactInterface;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactSetter;
 import com.openexchange.groupware.contact.helpers.ContactSwitcher;
@@ -282,6 +283,7 @@ public class CSVContactImporter extends AbstractImporter {
      * @return a report containing either the object ID of the entry created OR an error message
      */
     protected ImportResult writeEntry(final List<String> fields, final List<String> entry, final String folder, final ContactSwitcher conSet, final int lineNumber, final ServerSession session){
+        boolean canOverrideInCaseOfTruncation = false;
         final ImportResult result = new ImportResult();
         result.setFolder(folder);
         try{
@@ -297,7 +299,12 @@ public class CSVContactImporter extends AbstractImporter {
             if(atLeastOneFieldInserted[0]){
                 final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
                     ContactInterfaceDiscoveryService.class).newContactInterface(contactObj.getParentFolderID(), session);
-                contactInterface.insertContactObject(contactObj);
+                if(contactInterface instanceof OverridingContactInterface){
+                    ((OverridingContactInterface) contactInterface).forceInsertContactObject(contactObj);
+                    canOverrideInCaseOfTruncation = true;
+                } else {
+                    contactInterface.insertContactObject(contactObj);
+                }
                 result.setObjectId( Integer.toString( contactObj.getObjectID() ) );
                 result.setDate( contactObj.getLastModified() );
             } else {
@@ -305,9 +312,11 @@ public class CSVContactImporter extends AbstractImporter {
                 result.setDate(new Date());
             }
         } catch (OXException e) {
-            e =    handleDataTruncation(e);
-            result.setException(e);
-            addErrorInformation(result, lineNumber , fields);
+            if(e.getCategory() != Category.TRUNCATED 
+                || (e.getCategory() == Category.TRUNCATED && !canOverrideInCaseOfTruncation)){
+                result.setException(e);
+                addErrorInformation(result, lineNumber , fields);
+            }
         }
         return result;
     }

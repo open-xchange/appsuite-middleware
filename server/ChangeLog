@@ -1,5 +1,9 @@
 * 2010-06-07 - thorben.betten@open-xchange.com
 
+ - Bugfix #15400: If import fields exceed maximum db field lengths, they are truncated instead of not imported.
+
+* 2010-06-07 - thorben.betten@open-xchange.com
+
  - Bugfix #16267: Marking shared folder as non-default folder
  - Bugfix #16228: Proper order of delete listeners and more robust implementation
  - Bugfix #15901: Allowing additional list tags in whitelist.properties (<dl>, <dt>, <dd>)

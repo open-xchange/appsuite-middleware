@@ -63,6 +63,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import javax.swing.text.DefaultEditorKit.InsertContentAction;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api.OXConflictException;
@@ -82,9 +83,11 @@ import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.contact.Classes;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactExceptionFactory;
+import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactMySql;
 import com.openexchange.groupware.contact.ContactSql;
 import com.openexchange.groupware.contact.Contacts;
+import com.openexchange.groupware.contact.OverridingContactInterface;
 import com.openexchange.groupware.contact.Search;
 import com.openexchange.groupware.contact.Contacts.mapper;
 import com.openexchange.groupware.contact.helpers.ContactComparator;
@@ -116,7 +119,7 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.sql.DBUtils;
 
 @OXExceptionSource(classId = Classes.COM_OPENEXCHANGE_API2_DATABASEIMPL_RDBCONTACTSQLIMPL, component = EnumComponent.CONTACT)
-public class RdbContactSQLImpl implements ContactSQLInterface {
+public class RdbContactSQLImpl implements ContactSQLInterface, ContactInterface, OverridingContactInterface {
 
     private static final String ERR_UNABLE_TO_LOAD_OBJECTS_CONTEXT_1$D_USER_2$D = "Unable to load objects. Context %1$d User %2$d";
 
@@ -151,16 +154,20 @@ public class RdbContactSQLImpl implements ContactSQLInterface {
         userConfiguration = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx);
     }
 
-    @OXThrows(category = Category.CODE_ERROR, desc = "0", exceptionId = 0, msg = ContactException.EVENT_QUEUE)
     public void insertContactObject(final Contact co) throws OXException {
+        insertContactObject(co, false);
+    }
+    
+    public void forceInsertContactObject(final Contact co) throws OXException {
+        insertContactObject(co, true);
+    }
+    
+    @OXThrows(category = Category.CODE_ERROR, desc = "0", exceptionId = 0, msg = ContactException.EVENT_QUEUE)
+    protected void insertContactObject(final Contact co, final boolean override) throws OXException {
         try {
-            Contacts.performContactStorageInsert(co, userId, session);
+            Contacts.performContactStorageInsert(co, userId, session, override);
             final EventClient ec = new EventClient(session);
             ec.create(co);
-            /*
-             * ContactObject coo = new ContactObject(); coo.setSurName("Hoeger"); ContactSQLInterface csql = new
-             * RdbContactSQLInterface(sessionobject); csql.insertContactObject(coo);
-             */
         } catch (final EventException ise) {
             throw EXCEPTIONS.create(0, ise);
         } catch (final ContextException ise) {

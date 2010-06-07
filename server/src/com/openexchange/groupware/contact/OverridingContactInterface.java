@@ -47,39 +47,19 @@
  *
  */
 
-package com.openexchange.groupware.importexport;
+package com.openexchange.groupware.contact;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.AbstractOXException.ProblematicAttribute;
-import com.openexchange.groupware.AbstractOXException.Truncated;
-import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionClasses;
-import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionFactory;
+import com.openexchange.groupware.container.Contact;
+
 
 /**
- * This class contains basic helper methods needed by all importers.
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
+ * {@link OverridingContactInterface}
+ *
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-@OXExceptionSource(
-    classId=ImportExportExceptionClasses.ABSTRACTIMPORTER,
-    component=EnumComponent.IMPORT_EXPORT
-)
-@OXThrowsMultiple(
-    category={ Category.TRUNCATED },
-    desc={ "" },
-    exceptionId={ 0 },
-    msg={ "The following field(s) were too long and needed to be truncated: %s" }
-)
-public abstract class AbstractImporter implements Importer {
+public interface OverridingContactInterface extends ContactInterface {
 
-    private static final ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(AbstractImporter.class);
+    public void forceInsertContactObject(final Contact co) throws OXException;
 
-    protected AbstractImporter() {
-        super();
-    }
-
-    protected abstract String getNameForFieldInTruncationError(int id, OXException dataTruncation);
 }

@@ -131,6 +131,7 @@ public interface ContactSql {
     public StringBuilder iFgetContactById(String fieldList);
     public StringBuilder iFperformContactStorageUpdate(StringBuilder update, long lmd, int id, int cid);
     public StringBuilder iFperformContactStorageInsert(StringBuilder insert_fields, StringBuilder insert_values, int user, long lmd, int cid, int id);
+    public StringBuilder iFperformOverridingContactStorageInsert(StringBuilder insert_fields, StringBuilder insert_values, int user, long lmd, int contextId, int id);
     public StringBuilder iFgetColsString(int[] cols);
     public StringBuilder iFgetColsStringFromDeleteTable(int[] cols);
     public String iFdeleteContactObject(int oid, int cid);
@@ -147,5 +148,6 @@ public interface ContactSql {
     public void iFbackupContact(Statement stmt, int cid, int oid, int uid) throws SQLException;
 
     public void iFtrashTheAdmin(final Statement del, final int cid, final int uid) throws SQLException;
+
 
 }
