@@ -1,4 +1,4 @@
-package com.openexchange.mobileconfig.osgi;
+package com.openexchange.mobileconfig;
 
 import java.io.DataOutputStream;
 import java.io.IOException;

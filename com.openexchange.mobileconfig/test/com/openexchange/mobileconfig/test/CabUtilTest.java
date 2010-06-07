@@ -7,8 +7,8 @@ import java.io.IOException;
 import java.util.Calendar;
 import junit.framework.Assert;
 import org.junit.Test;
+import com.openexchange.mobileconfig.CabUtil;
 import com.openexchange.mobileconfig.MobileConfigServlet;
-import com.openexchange.mobileconfig.osgi.CabUtil;
 
 
 public class CabUtilTest extends CabUtil {
