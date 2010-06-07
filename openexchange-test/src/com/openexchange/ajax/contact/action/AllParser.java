@@ -67,37 +67,26 @@ import com.openexchange.groupware.container.Contact;
  */
 public class AllParser extends CommonAllParser {
 
-    /**
-     * Default constructor.
-     */
     public AllParser(final boolean failOnError, final int[] columns) {
         super(failOnError, columns);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    protected CommonAllResponse instanciateResponse(final Response response) {
+    protected CommonAllResponse instantiateResponse(final Response response) {
         return new CommonAllResponse(response);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected CommonAllResponse createResponse(final Response response)
         throws JSONException {
-        final CommonAllResponse retval = (CommonAllResponse) super.createResponse(response);
+        final CommonAllResponse retval = super.createResponse(response);
         final Iterator<Object[]> iter = retval.iterator();
         final ListIDs list = new ListIDs();
         final int folderPos = retval.getColumnPos(Contact.FOLDER_ID);
-        final int identifierPos = retval.getColumnPos(Contact
-            .OBJECT_ID);
+        final int identifierPos = retval.getColumnPos(Contact.OBJECT_ID);
         while (iter.hasNext()) {
             final Object[] row = iter.next();
-            list.add(new ListIDInt(((Integer) row[folderPos]).intValue(),
-                ((Integer) row[identifierPos]).intValue()));
+            list.add(new ListIDInt(((Integer) row[folderPos]).intValue(), ((Integer) row[identifierPos]).intValue()));
         }
         retval.setListIDs(list);
         return retval;

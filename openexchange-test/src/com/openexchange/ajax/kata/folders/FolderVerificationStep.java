@@ -57,9 +57,9 @@ import org.xml.sax.SAXException;
 import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.FolderUpdatesResponse;
 import com.openexchange.ajax.folder.actions.ListRequest;
+import com.openexchange.ajax.folder.actions.ListResponse;
 import com.openexchange.ajax.folder.actions.UpdatesRequest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.kata.NeedExistingStep;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -110,7 +110,7 @@ public class FolderVerificationStep extends NeedExistingStep<FolderObject> {
     private void checkViaList(FolderObject folder) throws AjaxException, IOException, SAXException, JSONException {
         int[] requestedFields = FolderObject.ALL_COLUMNS;//new int[]{FolderObject.OBJECT_ID, FolderObject.FOLDER_ID}; 
         ListRequest listRequest = new ListRequest(API.OX_OLD, Integer.toString(folder.getParentFolderID()), requestedFields, true );
-        CommonListResponse response = client.execute(listRequest);
+        ListResponse response = client.execute(listRequest);
 
         Object[][] rows = response.getArray();
 

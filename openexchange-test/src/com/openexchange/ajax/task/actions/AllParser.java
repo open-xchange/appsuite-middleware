@@ -54,7 +54,7 @@ import java.util.Iterator;
 import org.json.JSONException;
 
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAllParser;
+import com.openexchange.ajax.framework.AbstractColumnsParser;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.ListIDInt;
 import com.openexchange.ajax.framework.ListIDs;
@@ -64,7 +64,7 @@ import com.openexchange.groupware.tasks.Task;
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class AllParser extends AbstractAllParser<CommonAllResponse> {
+public class AllParser extends AbstractColumnsParser<CommonAllResponse> {
 
     /**
      * Default constructor.
@@ -77,7 +77,7 @@ public class AllParser extends AbstractAllParser<CommonAllResponse> {
      * {@inheritDoc}
      */
     @Override
-    protected CommonAllResponse instanciateResponse(final Response response) {
+    protected CommonAllResponse instantiateResponse(final Response response) {
         return new CommonAllResponse(response);
     }
 

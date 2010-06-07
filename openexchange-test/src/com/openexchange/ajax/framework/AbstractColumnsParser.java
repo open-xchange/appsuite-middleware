@@ -51,45 +51,50 @@ package com.openexchange.ajax.framework;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-
 import com.openexchange.ajax.container.Response;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class AbstractAllParser<T extends AbstractColumnsResponse> extends AbstractAJAXParser<T> {
+public abstract class AbstractColumnsParser<T extends AbstractColumnsResponse> extends AbstractAJAXParser<T> {
 
     private final int[] columns;
 
-    protected AbstractAllParser(final boolean failOnError, final int[] columns) {
+    protected AbstractColumnsParser(final boolean failOnError, final int[] columns) {
         super(failOnError);
         this.columns = columns;
     }
 
     @Override
-    protected T createResponse(final Response response)
-        throws JSONException {
-        final T retval = instanciateResponse(response);
+    protected T createResponse(final Response response) throws JSONException {
+        final T retval = instantiateResponse(response);
         retval.setColumns(columns);
         if (isFailOnError()) {
-            final JSONArray array = (JSONArray) retval.getData();
-            final Object[][] values = new Object[array.length()][];
-            for (int i = 0; i < array.length(); i++) {
-                final JSONArray inner = array.getJSONArray(i);
-                values[i] = new Object[inner.length()];
-                for (int j = 0; j < inner.length(); j++) {
-                    if (inner.isNull(j)) {
-                        values[i][j] = null;
-                    } else {
-                        values[i][j] = inner.get(j);
-                    }
-                }
-            }
-            retval.setArray(values);
+            retval.setArray(parseData((JSONArray) retval.getData()));
         }
         return retval;
     }
 
-    protected abstract T instanciateResponse(final Response response);
+    private static Object[][] parseData(final JSONArray array) throws JSONException {
+        final Object[][] values = new Object[array.length()][];
+        for (int i = 0; i < array.length(); i++) {
+            final JSONArray inner = array.getJSONArray(i);
+            values[i] = new Object[inner.length()];
+            for (int j = 0; j < inner.length(); j++) {
+                if (inner.isNull(j)) {
+                    values[i][j] = null;
+                } else {
+                    values[i][j] = inner.get(j);
+                }
+            }
+        }
+        return values;
+    }
+
+    protected abstract T instantiateResponse(final Response response);
+
+    protected int[] getColumns() {
+        return columns;
+    }
 }

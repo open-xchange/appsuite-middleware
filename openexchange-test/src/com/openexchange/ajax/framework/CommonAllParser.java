@@ -55,7 +55,7 @@ import com.openexchange.ajax.container.Response;
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class CommonAllParser extends AbstractAllParser<CommonAllResponse> {
+public class CommonAllParser extends AbstractColumnsParser<CommonAllResponse> {
 
     /**
      * Default constructor.
@@ -65,7 +65,7 @@ public class CommonAllParser extends AbstractAllParser<CommonAllResponse> {
     }
 
     @Override
-    protected CommonAllResponse instanciateResponse(final Response response) {
+    protected CommonAllResponse instantiateResponse(final Response response) {
         return new CommonAllResponse(response);
     }
 }

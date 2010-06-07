@@ -50,27 +50,19 @@
 package com.openexchange.ajax.folder.actions;
 
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractListParser;
+import com.openexchange.ajax.framework.AbstractColumnsParser;
 
 /**
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class ListParser extends AbstractListParser<ListResponse> {
+public class ListParser extends AbstractColumnsParser<ListResponse> {
 
-    /**
-     * @param failOnError
-     */
     public ListParser(final int[] columns, final boolean failOnError) {
         super(failOnError, columns);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    protected ListResponse instanciateReponse(final Response response) {
-        final ListResponse retval = new ListResponse(response);
-        retval.setColumns(getColumns());
-        return retval;
+    protected ListResponse instantiateResponse(final Response response) {
+        return new ListResponse(response);
     }
 }

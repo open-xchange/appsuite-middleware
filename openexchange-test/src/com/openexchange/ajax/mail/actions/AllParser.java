@@ -50,13 +50,12 @@
 package com.openexchange.ajax.mail.actions;
 
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAllParser;
-import com.openexchange.ajax.framework.CommonAllResponse;
+import com.openexchange.ajax.framework.AbstractColumnsParser;
 
 /**
 * @author <a href="karsten.will@open-xchange.com">Karsten Will</a>
 */
-public class AllParser extends AbstractAllParser<AllResponse> {
+public class AllParser extends AbstractColumnsParser<AllResponse> {
 
     /**
      * Default constructor.
@@ -66,7 +65,7 @@ public class AllParser extends AbstractAllParser<AllResponse> {
     }
 
     @Override
-    protected AllResponse instanciateResponse(final Response response) {
+    protected AllResponse instantiateResponse(final Response response) {
         return new AllResponse(response);
     }
 

@@ -49,62 +49,13 @@
 
 package com.openexchange.ajax.framework;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.openexchange.ajax.container.Response;
-
 /**
  * Super class for list parsers.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class AbstractListParser<T extends CommonListResponse> extends AbstractAJAXParser<T> {
+public abstract class AbstractListParser<T extends CommonListResponse> extends AbstractColumnsParser<T> {
 
-    private final int[] columns;
-
-    /**
-     * @param failOnError
-     */
     public AbstractListParser(final boolean failOnError, final int[] columns) {
-        super(failOnError);
-        this.columns = columns;
+        super(failOnError, columns);
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected T createResponse(final Response response)
-        throws JSONException {
-        final T retval = instanciateReponse(response);
-        retval.setColumns(columns);
-        final JSONArray array = (JSONArray) retval.getData();
-        if (null != array) {
-            retval.setArray(parseData(array));
-        }
-        return retval;
-    }
-
-    public static Object[][] parseData(final JSONArray array)
-        throws JSONException {
-        final Object[][] values = new Object[array.length()][];
-        for (int i = 0; i < array.length(); i++) {
-            final JSONArray inner = array.getJSONArray(i);
-            values[i] = new Object[inner.length()];
-            for (int j = 0; j < inner.length(); j++) {
-                values[i][j] = inner.get(j);
-                if (JSONObject.NULL.equals(values[i][j])) {
-                    values[i][j] = null;
-                }
-            }
-        }
-        return values;
-    }
-
-    protected int[] getColumns() {
-        return columns;
-    }
-
-    protected abstract T instanciateReponse(final Response response);
 }

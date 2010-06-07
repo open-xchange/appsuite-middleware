@@ -124,7 +124,7 @@ public abstract class AbstractAllRequest<T extends AbstractColumnsResponse> impl
         return params.toArray(new Parameter[params.size()]);
     }
 
-    public abstract AbstractAllParser<T> getParser();
+    public abstract AbstractColumnsParser<T> getParser();
 
     public int[] getColumns() {
         return columns;

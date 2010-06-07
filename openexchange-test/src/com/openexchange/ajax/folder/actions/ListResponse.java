@@ -53,18 +53,15 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.CommonListResponse;
+import com.openexchange.ajax.framework.AbstractColumnsResponse;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.FolderObject;
 
 /**
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class ListResponse extends CommonListResponse {
+public class ListResponse extends AbstractColumnsResponse {
 
-    /**
-     * @param response
-     */
     public ListResponse(final Response response) {
         super(response);
     }

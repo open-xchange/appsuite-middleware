@@ -65,7 +65,7 @@ public class CommonListParser extends AbstractListParser<CommonListResponse> {
     }
 
     @Override
-    protected CommonListResponse instanciateReponse(final Response response) {
+    protected CommonListResponse instantiateResponse(final Response response) {
         return new CommonListResponse(response);
     }
 }

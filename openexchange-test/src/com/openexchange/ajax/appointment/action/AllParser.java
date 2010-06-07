@@ -77,7 +77,7 @@ public class AllParser extends CommonAllParser {
      * {@inheritDoc}
      */
     @Override
-    protected CommonAllResponse instanciateResponse(final Response response) {
+    protected CommonAllResponse instantiateResponse(final Response response) {
         return new CommonAllResponse(response);
     }
 

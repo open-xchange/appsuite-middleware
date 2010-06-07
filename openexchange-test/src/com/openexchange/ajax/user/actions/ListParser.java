@@ -87,7 +87,7 @@ public class ListParser extends AbstractListParser<ListResponse> {
     }
 
     @Override
-    protected ListResponse instanciateReponse(final Response response) {
+    protected ListResponse instantiateResponse(final Response response) {
         return new ListResponse(response);
     }
 }

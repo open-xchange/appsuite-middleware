@@ -50,14 +50,14 @@
 package com.openexchange.ajax.mail.actions;
 
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAllParser;
+import com.openexchange.ajax.framework.AbstractColumnsParser;
 
 /**
  * {@link SearchParser}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SearchParser extends AbstractAllParser<SearchResponse> {
+public class SearchParser extends AbstractColumnsParser<SearchResponse> {
 
     /**
      * Default constructor.
@@ -67,7 +67,7 @@ public class SearchParser extends AbstractAllParser<SearchResponse> {
     }
 
     @Override
-    protected SearchResponse instanciateResponse(final Response response) {
+    protected SearchResponse instantiateResponse(final Response response) {
         return new SearchResponse(response);
     }
 

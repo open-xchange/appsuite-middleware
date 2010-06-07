@@ -53,7 +53,7 @@ import java.util.List;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractListParser;
+import com.openexchange.ajax.framework.AbstractColumnsParser;
 import com.openexchange.groupware.container.FolderObject;
 
 /**
@@ -113,17 +113,15 @@ public class PathRequest extends AbstractFolderRequest<PathResponse> {
         return new PathParser(columns, failOnError);
     }
 
-    private static class PathParser extends AbstractListParser<PathResponse> {
+    private static class PathParser extends AbstractColumnsParser<PathResponse> {
 
         public PathParser(final int[] columns, final boolean failOnError) {
             super(failOnError, columns);
         }
 
         @Override
-        protected PathResponse instanciateReponse(final Response response) {
-            final PathResponse retval = new PathResponse(response);
-            retval.setColumns(getColumns());
-            return retval;
+        protected PathResponse instantiateResponse(final Response response) {
+            return new PathResponse(response);
         }
     }
 }

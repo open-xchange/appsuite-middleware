@@ -49,37 +49,35 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.TimeZone;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
-import com.openexchange.ajax.appointment.action.GetRequest;
-import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
-import com.openexchange.ajax.appointment.action.UpdateRequest;
-import com.openexchange.ajax.appointment.action.UpdateResponse;
-import com.openexchange.ajax.folder.FolderTools;
+import com.openexchange.ajax.appointment.action.UpdatesRequest;
+import com.openexchange.ajax.appointment.action.UpdatesResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.ajax.framework.AJAXClient.User;
-import com.openexchange.ajax.participant.ParticipantTools;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.server.impl.OCLPermission;
 
 /**
- * Tests move from shared folder to the private folder.
+ * {@link Bug13960Test}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Bug16151Test extends AbstractAJAXSession {
+public class Bug13960Test extends AbstractAJAXSession {
 
+    private static final int[] COLUMNS = { Appointment.OBJECT_ID, Appointment.RECURRENCE_ID };
     private AJAXClient client;
-    private AJAXClient client2;
+    private TimeZone timeZone;
     private Appointment appointment;
-    private TimeZone timeZone2;
 
-    public Bug16151Test(String name) {
+    public Bug13960Test(String name) {
         super(name);
     }
 
@@ -87,57 +85,37 @@ public class Bug16151Test extends AbstractAJAXSession {
     protected void setUp() throws Exception {
         super.setUp();
         client = getClient();
-        client2 = new AJAXClient(User.User2);
-        timeZone2 = client2.getValues().getTimeZone();
-        // client2 shares folder
-        FolderTools.shareFolder(
-            client2,
-            client2.getValues().getPrivateAppointmentFolder(),
-            client.getValues().getUserId(),
-            OCLPermission.READ_FOLDER,
-            OCLPermission.READ_ALL_OBJECTS,
-            OCLPermission.WRITE_ALL_OBJECTS,
-            OCLPermission.DELETE_ALL_OBJECTS);
-        // client2 creates appointment
+        timeZone = client.getValues().getTimeZone();
         appointment = new Appointment();
-        appointment.setTitle("Appointment for bug 16151");
+        appointment.setTitle("Appointment for bug 13960");
         appointment.setIgnoreConflicts(true);
-        appointment.setParentFolderID(client2.getValues().getPrivateAppointmentFolder());
-        Calendar calendar = TimeTools.createCalendar(timeZone2);
+        appointment.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        Calendar calendar = TimeTools.createCalendar(timeZone);
         appointment.setStartDate(calendar.getTime());
         calendar.add(Calendar.HOUR, 1);
         appointment.setEndDate(calendar.getTime());
-        InsertRequest request = new InsertRequest(appointment, timeZone2);
-        AppointmentInsertResponse response = client2.execute(request);
+        InsertRequest request = new InsertRequest(appointment, timeZone);
+        AppointmentInsertResponse response = client.execute(request);
         response.fillAppointment(appointment);
     }
 
     @Override
     protected void tearDown() throws Exception {
-        // client deletes appointment
         client.execute(new DeleteRequest(appointment));
-        // client2 unshares folder
-        FolderTools.unshareFolder(client2, client2.getValues().getPrivateAppointmentFolder(), client.getValues().getUserId());
         super.tearDown();
     }
 
-    public void testMoveFromShared2Private() throws Throwable {
-        // client moves from shared folder to private folder
-        Appointment moveMe = new Appointment();
-        moveMe.setObjectID(appointment.getObjectID());
-        moveMe.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
-        moveMe.setLastModified(appointment.getLastModified());
-        moveMe.setIgnoreConflicts(true);
-        TimeZone timeZone = client.getValues().getTimeZone();
-        UpdateRequest uReq = new UpdateRequest(appointment.getParentFolderID(), moveMe, timeZone, true);
-        UpdateResponse uResp = client.execute(uReq);
-        appointment.setLastModified(uResp.getTimestamp());
-        appointment.setParentFolderID(moveMe.getParentFolderID());
-        // client loads appointment from private folder
-        GetRequest gReq = new GetRequest(moveMe.getParentFolderID(), moveMe.getObjectID());
-        GetResponse gResp = client.execute(gReq);
-        // assert participants
-        Appointment testAppointment = gResp.getAppointment(timeZone);
-        ParticipantTools.assertParticipants(testAppointment.getParticipants(), client.getValues().getUserId());
+    public void testJSONValues() throws Throwable {
+        UpdatesRequest request = new UpdatesRequest(appointment.getParentFolderID(), COLUMNS, new Date(appointment.getLastModified().getTime() - 1), true);
+        UpdatesResponse response = client.execute(request);
+        int idPos = response.getColumnPos(Appointment.OBJECT_ID);
+        int recurrenceIdPos = response.getColumnPos(Appointment.RECURRENCE_ID);
+        int row = 0;
+        while (row < response.getArray().length) {
+            if (response.getArray()[row][idPos].equals(I(appointment.getObjectID()))) {
+                break;
+            }
+        }
+        assertEquals(JSONObject.NULL, ((JSONArray) response.getData()).getJSONArray(row).get(recurrenceIdPos));
     }
 }

@@ -49,47 +49,34 @@
 
 package com.openexchange.ajax.framework;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
-
 import com.openexchange.ajax.container.Response;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class CommonUpdatesResponse extends AbstractAJAXResponse implements
-    Iterable<Object[]> {
+public class CommonUpdatesResponse extends AbstractAJAXResponse implements Iterable<Object[]> {
 
     private int[] columns;
 
     private Object[][] array;
 
-    /**
-     * @param response
-     */
     public CommonUpdatesResponse(final Response response) {
         super(response);
     }
 
-    /**
-     * @return the array
-     */
     public Object[][] getArray() {
         return array;
     }
 
-    /**
-     * @param array the array to set
-     */
     void setArray(final Object[][] array) {
         this.array = array;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Iterator<Object[]> iterator() {
         return Collections.unmodifiableList(Arrays.asList(array)).iterator();
     }
@@ -99,19 +86,13 @@ public class CommonUpdatesResponse extends AbstractAJAXResponse implements
     }
 
     private int getColumnPos(final int attributeId) {
-        return Arrays.asList(columns).indexOf(attributeId);
+        return Arrays.asList(columns).indexOf(I(attributeId));
     }
 
-    /**
-     * @return the columns
-     */
     public int[] getColumns() {
         return columns;
     }
 
-    /**
-     * @param columns the columns to set
-     */
     public void setColumns(final int[] columns) {
         this.columns = columns;
     }
