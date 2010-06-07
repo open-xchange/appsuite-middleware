@@ -179,7 +179,7 @@ public final class HTMLProcessing {
                  * Filter according to white-list
                  */
                 retval = filterWhitelist(retval);
-                if (DisplayMode.DISPLAY.equals(mode) && !usm.isAllowHTMLImages()) {
+                if (!usm.isAllowHTMLImages()) {
                     retval = filterExternalImages(retval, modified);
                 }
                 /*
