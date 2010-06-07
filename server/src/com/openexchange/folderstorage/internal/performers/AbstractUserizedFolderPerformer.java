@@ -292,8 +292,9 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         {
             final Date lm = folder.getLastModified();
             if (null != lm) {
-                userizedFolder.setLastModified(new Date(addTimeZoneOffset(lm.getTime(), getTimeZone())));
-                userizedFolder.setLastModifiedUTC(new Date(lm.getTime()));
+                final long time = lm.getTime();
+                userizedFolder.setLastModified(new Date(addTimeZoneOffset(time, getTimeZone())));
+                userizedFolder.setLastModifiedUTC(new Date(time));
             }
         }
         if (!isShared) {
