@@ -50,7 +50,10 @@
 package com.openexchange.ajax.helper;
 
 import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -193,6 +196,11 @@ public abstract class ParamContainer {
             this.map = map;
             this.component = component;
             errorInfo = getErrorInfo(component);
+        }
+
+        @Override
+        public Set<String> getParameterNames() throws AbstractOXException {
+            return map.keySet();
         }
 
         @Override
@@ -444,6 +452,15 @@ public abstract class ParamContainer {
         }
 
         @Override
+        public Set<String> getParameterNames() throws AbstractOXException {
+            final Set<String> ret = new HashSet<String>();
+            for (final Enumeration<?> enumeration = req.getParameterNames(); enumeration.hasMoreElements();) {
+                ret.add((String) enumeration.nextElement());
+            }
+            return ret;
+        }
+
+        @Override
         public Date checkDateParam(final String paramName) throws AbstractOXException {
             final String tmp = req.getParameter(paramName);
             if (tmp == null) {
@@ -681,9 +698,15 @@ public abstract class ParamContainer {
          * @param component
          */
         public JSONParamContainer(final JSONObject jo, final EnumComponent component) {
+            super();
             this.jo = jo;
             this.component = component;
             errorInfo = getErrorInfo(component);
+        }
+
+        @Override
+        public Set<String> getParameterNames() throws AbstractOXException {
+            return jo.keySet();
         }
 
         @Override
@@ -973,6 +996,14 @@ public abstract class ParamContainer {
      * @throws AbstractOXException
      */
     public abstract String getStringParam(String paramName) throws AbstractOXException;
+
+    /**
+     * Gets the parameter names.
+     * 
+     * @return The parameter names
+     * @throws AbstractOXException If names cannot be returned
+     */
+    public abstract Set<String> getParameterNames() throws AbstractOXException;
 
     /**
      * Requires a parameter as <code>String</code>
