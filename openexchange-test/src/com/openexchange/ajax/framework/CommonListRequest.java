@@ -70,17 +70,11 @@ public class CommonListRequest implements AJAXRequest<CommonListResponse> {
 
     private final boolean failOnError;
 
-    /**
-     * Default constructor.
-     */
     public CommonListRequest(final String servletPath,
         final int[][] folderAndObjectIds, final int[] columns) {
         this(servletPath, folderAndObjectIds, columns, true);
     }
 
-    /**
-     * Constructor with all parameters.
-     */
     public CommonListRequest(final String servletPath,
         final int[][] folderAndObjectIds, final int[] columns,
         final boolean failOnError) {
@@ -93,21 +87,15 @@ public class CommonListRequest implements AJAXRequest<CommonListResponse> {
         for (int i = 0; i < folderAndObjectIds.length; i++) {
             retval.add(new ListIDInt(folderAndObjectIds[i][0],
                 folderAndObjectIds[i][1]));
-		}
+        }
         return retval;
     }
 
-    /**
-     * Default constructor.
-     */
     public CommonListRequest(final String servletPath,
         final String[][] folderAndObjectIds, final int[] columns) {
         this(servletPath, folderAndObjectIds, columns, true);
     }
 
-    /**
-     * Constructor with all parameters.
-     */
     public CommonListRequest(final String servletPath,
         final String[][] folderAndObjectIds, final int[] columns,
         final boolean failOnError) {
@@ -124,9 +112,6 @@ public class CommonListRequest implements AJAXRequest<CommonListResponse> {
         return retval;
     }
 
-    /**
-     * Default constructor.
-     */
     public CommonListRequest(final String servletPath, final ListIDs identifier,
         final int[] columns, final boolean failOnError) {
         super();
@@ -136,16 +121,10 @@ public class CommonListRequest implements AJAXRequest<CommonListResponse> {
         this.failOnError = failOnError;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String getServletPath() {
         return servletPath;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Object getBody() throws JSONException {
         final JSONArray array = new JSONArray();
         for (int i = 0; i < identifier.size(); i++) {
@@ -158,16 +137,10 @@ public class CommonListRequest implements AJAXRequest<CommonListResponse> {
         return array;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Method getMethod() {
         return Method.PUT;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public Parameter[] getParameters() {
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST),
@@ -175,9 +148,6 @@ public class CommonListRequest implements AJAXRequest<CommonListResponse> {
         };
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public CommonListParser getParser() {
         return new CommonListParser(failOnError, columns);
     }

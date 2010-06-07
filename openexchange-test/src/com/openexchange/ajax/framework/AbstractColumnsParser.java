@@ -70,8 +70,9 @@ public abstract class AbstractColumnsParser<T extends AbstractColumnsResponse> e
     protected T createResponse(final Response response) throws JSONException {
         final T retval = instantiateResponse(response);
         retval.setColumns(columns);
-        if (isFailOnError()) {
-            retval.setArray(parseData((JSONArray) retval.getData()));
+        JSONArray array = (JSONArray) retval.getData();
+        if (isFailOnError() || null != array) {
+            retval.setArray(parseData(array));
         }
         return retval;
     }
