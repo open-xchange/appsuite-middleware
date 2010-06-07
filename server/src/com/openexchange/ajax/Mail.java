@@ -815,7 +815,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             MailServletInterface mailInterface = mailInterfaceArg;
             boolean closeMailInterface = false;
             try {
-                if (mailInterfaceArg == null) {
+                if (mailInterface == null) {
                     mailInterface = MailServletInterface.getInstance(session);
                     closeMailInterface = true;
                 }
