@@ -2,6 +2,7 @@
 
  - Bugfix #16267: Marking shared folder as non-default folder
  - Bugfix #16228: Proper order of delete listeners and more robust implementation
+ - Bugfix #15901: Allowing additional list tags in whitelist.properties (<dl>, <dt>, <dd>)
 
 * 2010-06-04 - steffen.templin@open-xchange.com
 
