@@ -2060,8 +2060,8 @@ public final class CalendarCollection implements CalendarCollectionService {
                         throw new OXCalendarException(OXCalendarException.Code.UNABLE_TO_REMOVE_PARTICIPANT, uid);
                     }
                 }
-                cdao.setUsers(ret);
             }
+            cdao.setUsers(ret);
         } else {
             throw new OXCalendarException(OXCalendarException.Code.UNABLE_TO_REMOVE_PARTICIPANT_2);
         }
