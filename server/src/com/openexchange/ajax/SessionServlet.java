@@ -326,9 +326,9 @@ public abstract class SessionServlet extends AJAXServlet {
                 throw EXCEPTION.create(3, session.getSessionID());
             }
         } catch (UndeclaredThrowableException e) {
-            throw EXCEPTION.create(3, session.getSessionID());
+            throw EXCEPTION.create(3, e, session.getSessionID());
         } catch (AbstractOXException e) {
-            throw EXCEPTION.create(3, session.getSessionID());
+            throw EXCEPTION.create(3, e, session.getSessionID());
         }
         return session;
     }
