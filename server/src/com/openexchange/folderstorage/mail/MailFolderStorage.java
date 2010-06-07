@@ -147,6 +147,7 @@ public final class MailFolderStorage implements FolderStorage {
             }
             final MailAccess<?, ?> prev = accesses.putIfAbsent(accountId, ma);
             if (null != prev) {
+                ma.close(true);
                 ma = prev;
             }
         }
