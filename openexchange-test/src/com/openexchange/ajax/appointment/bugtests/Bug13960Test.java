@@ -55,13 +55,21 @@ import java.util.Date;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
+import com.openexchange.ajax.appointment.action.GetRequest;
+import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
+import com.openexchange.ajax.appointment.action.ListRequest;
 import com.openexchange.ajax.appointment.action.UpdatesRequest;
 import com.openexchange.ajax.appointment.action.UpdatesResponse;
+import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.CommonAllResponse;
+import com.openexchange.ajax.framework.CommonListResponse;
+import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 
@@ -72,7 +80,7 @@ import com.openexchange.groupware.container.Appointment;
  */
 public class Bug13960Test extends AbstractAJAXSession {
 
-    private static final int[] COLUMNS = { Appointment.OBJECT_ID, Appointment.RECURRENCE_ID };
+    private static final int[] COLUMNS = { Appointment.OBJECT_ID, Appointment.RECURRENCE_ID, Appointment.RECURRENCE_POSITION };
     private AJAXClient client;
     private TimeZone timeZone;
     private Appointment appointment;
@@ -106,16 +114,54 @@ public class Bug13960Test extends AbstractAJAXSession {
     }
 
     public void testJSONValues() throws Throwable {
-        UpdatesRequest request = new UpdatesRequest(appointment.getParentFolderID(), COLUMNS, new Date(appointment.getLastModified().getTime() - 1), true);
-        UpdatesResponse response = client.execute(request);
-        int idPos = response.getColumnPos(Appointment.OBJECT_ID);
-        int recurrenceIdPos = response.getColumnPos(Appointment.RECURRENCE_ID);
-        int row = 0;
-        while (row < response.getArray().length) {
-            if (response.getArray()[row][idPos].equals(I(appointment.getObjectID()))) {
-                break;
-            }
+        {
+            GetRequest request = new GetRequest(appointment);
+            GetResponse response = client.execute(request);
+            JSONObject json = (JSONObject) response.getData();
+            assertFalse(json.has(AppointmentFields.RECURRENCE_ID));
+            assertFalse(json.has(AppointmentFields.RECURRENCE_POSITION));
         }
-        assertEquals(JSONObject.NULL, ((JSONArray) response.getData()).getJSONArray(row).get(recurrenceIdPos));
+        {
+            UpdatesRequest request = new UpdatesRequest(appointment.getParentFolderID(), COLUMNS, new Date(appointment.getLastModified().getTime() - 1), true);
+            UpdatesResponse response = client.execute(request);
+            int idPos = response.getColumnPos(Appointment.OBJECT_ID);
+            int row = 0;
+            while (row < response.getArray().length) {
+                if (response.getArray()[row][idPos].equals(I(appointment.getObjectID()))) {
+                    break;
+                }
+            }
+            JSONArray array = ((JSONArray) response.getData()).getJSONArray(row);
+            int recurrenceIdPos = response.getColumnPos(Appointment.RECURRENCE_ID);
+            assertEquals(JSONObject.NULL, array.get(recurrenceIdPos));
+            int recurrencePositionPos = response.getColumnPos(Appointment.RECURRENCE_POSITION);
+            assertEquals(JSONObject.NULL, array.get(recurrencePositionPos));
+        }
+        {
+            ListRequest request = new ListRequest(ListIDs.l(new int[] { appointment.getParentFolderID(), appointment.getObjectID()}), COLUMNS);
+            CommonListResponse response = client.execute(request);
+            JSONArray array = ((JSONArray) response.getData()).getJSONArray(0);
+            int recurrenceIdPos = response.getColumnPos(Appointment.RECURRENCE_ID);
+            assertEquals(JSONObject.NULL, array.get(recurrenceIdPos));
+            int recurrencePositionPos = response.getColumnPos(Appointment.RECURRENCE_POSITION);
+            assertEquals(JSONObject.NULL, array.get(recurrencePositionPos));
+        }
+        {
+            AllRequest request = new AllRequest(appointment.getParentFolderID(), COLUMNS, appointment.getStartDate(), appointment.getEndDate(), timeZone);
+            CommonAllResponse response = client.execute(request);
+            int idPos = response.getColumnPos(Appointment.OBJECT_ID);
+            int row = 0;
+            while (row < response.getArray().length) {
+                if (response.getArray()[row][idPos].equals(I(appointment.getObjectID()))) {
+                    break;
+                }
+                row++;
+            }
+            JSONArray array = ((JSONArray) response.getData()).getJSONArray(row);
+            int recurrenceIdPos = response.getColumnPos(Appointment.RECURRENCE_ID);
+            assertEquals(JSONObject.NULL, array.get(recurrenceIdPos));
+            int recurrencePositionPos = response.getColumnPos(Appointment.RECURRENCE_POSITION);
+            assertEquals(JSONObject.NULL, array.get(recurrencePositionPos));
+        }
     }
 }
