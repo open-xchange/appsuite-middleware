@@ -705,7 +705,10 @@ public final class MIMEStructureHandler implements StructureHandler {
         final JSONObject dateObject = new JSONObject();
         synchronized (MAIL_DATE_FORMAT) {
             try {
-                dateObject.put("utc", MAIL_DATE_FORMAT.parse(date).getTime());
+                final Date parsedDate = MAIL_DATE_FORMAT.parse(date);
+                if (null != parsedDate) {
+                    dateObject.put("utc", parsedDate.getTime());
+                }
             } catch (final ParseException pex) {
                 LOG.warn("Date string could not be parsed: " + date);
             }
