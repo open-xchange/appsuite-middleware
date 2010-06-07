@@ -1,6 +1,7 @@
 * 2010-06-07 - thorben.betten@open-xchange.com
 
  - Bugfix #16267: Marking shared folder as non-default folder
+ - Bugfix #16228: Proper order of delete listeners and more robust implementation
 
 * 2010-06-04 - steffen.templin@open-xchange.com
 

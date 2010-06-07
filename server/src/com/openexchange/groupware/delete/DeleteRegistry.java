@@ -163,6 +163,10 @@ public final class DeleteRegistry {
     private DeleteListener[] getStaticListeners() {
         return new DeleteListener[] {
             /*
+             * Remove stored images
+             */
+            new ImageRegistryDeleteListener(),
+            /*
              * Insert module delete listener
              */
             new TasksDelete(),
@@ -186,9 +190,8 @@ public final class DeleteRegistry {
              */
             new FileStorageRemover(),
             /*
-             * Remove stored images
+             * Remove other stuff
              */
-            new ImageRegistryDeleteListener(),
             new UserSettingServerDeleteListener(),
             new POP3DeleteListener(),
             new MailAccountDeleteListener()

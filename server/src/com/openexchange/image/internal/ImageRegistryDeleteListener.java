@@ -88,11 +88,17 @@ public final class ImageRegistryDeleteListener implements DeleteListener {
                 final RdbContactSQLImpl contactSql = new RdbContactSQLImpl(session);
                 contact = contactSql.getUserById(deleteEvent.getId(), false, writeCon);
             } catch (final ContextException e) {
-                // Ignore removing image if user contact can not be loaded. Then already a lot is broken.
+                /*
+                 * Ignore removing image if user contact can not be loaded. Then already a lot is broken.
+                 */
                 LOG.warn(e.getMessage(), e);
                 return;
             } catch (final OXException e) {
-                throw new DeleteFailedException(e);
+                /*
+                 * Ignore removing image if user contact can not be loaded. Then already a lot is broken.
+                 */
+                LOG.warn(e.getMessage(), e);
+                return;
             }
             final String id;
             {
