@@ -278,6 +278,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
             if (!permission.isVisible()) {
                 userizedFolder.setParentID(FolderObject.SHARED_PREFIX + FolderObject.SYSTEM_SHARED_FOLDER_ID);
             }
+            userizedFolder.setDefault(false);
         }
         /*
          * Time zone offset and last-modified in UTC
