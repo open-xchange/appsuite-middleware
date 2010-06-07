@@ -17,15 +17,63 @@ import org.apache.commons.logging.LogFactory;
 
 public class MobileConfigServlet extends HttpServlet {
 
-    private static final transient Log LOG = LogFactory.getLog(MobileConfigServlet.class);
+    private static final String CRLF = "\r\n";
     
+    private static final transient Log LOG = LogFactory.getLog(MobileConfigServlet.class);
+
     /**
      * 
      */
     private static final long serialVersionUID = 7913468326542861986L;
-
-    private static final String CRLF = "\r\n";
     
+    public static String write(final String email, final String host, final String displayname, final String username) {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("<wap-provisioningdoc>" + CRLF);
+        sb.append("   <characteristic type=\"Sync\">" + CRLF);
+        sb.append("        <characteristic type=\"Settings\">" + CRLF);
+        sb.append("        <parm name=\"SyncWhenRoaming\" value=\"1\"/>" + CRLF);
+        sb.append("        </characteristic>" + CRLF);
+        sb.append("        <characteristic type=\"Connection\">" + CRLF);
+        sb.append("            <parm name=\"Domain\" value=\"open-xchange.com\"/>" + CRLF);
+        sb.append("            <parm name=\"Server\" value=\"" + host + "\"/>" + CRLF);
+        sb.append("            <parm name=\"User\" value=\"" + username + "\"/>" + CRLF);
+        sb.append("\t    <parm name=\"SavePassword\" value=\"1\"/>" + CRLF);
+        sb.append("            <parm name=\"URI\" value=\"Microsoft-Server-ActiveSync\"/>" + CRLF);
+        sb.append("        <parm name=\"UseSSL\" value=\"1\"/>" + CRLF);
+        sb.append("        </characteristic>" + CRLF);
+        sb.append("        <characteristic type=\"Mail\">" + CRLF);
+        sb.append("            <parm name=\"Enabled\" value=\"1\"/>" + CRLF);
+        sb.append("        <parm name=\"EmailAgeFilter\" value=\"3\"/>" + CRLF);
+        sb.append("        </characteristic>" + CRLF);
+        sb.append("        <characteristic type=\"Calendar\">" + CRLF);
+        sb.append("            <parm name=\"Enabled\" value=\"1\"/>" + CRLF);
+        sb.append("        <parm name=\"CalendarAgeFilter\" value=\"5\"/>" + CRLF);
+        sb.append("        </characteristic>" + CRLF);
+        sb.append("        <characteristic type=\"Contacts\">" + CRLF);
+        sb.append("            <parm name=\"Enabled\" value=\"1\"/>" + CRLF);
+        sb.append("        </characteristic>" + CRLF);
+        sb.append("   </characteristic>" + CRLF);
+        sb.append("   <characteristic type='BrowserFavorite'>" + CRLF);
+        sb.append("    <characteristic type='Open Xchange'>" + CRLF);
+        sb.append("        <parm name='URL' value='http://www.open-xchange.com'/>" + CRLF);
+        sb.append("    </characteristic>" + CRLF);
+        sb.append("</characteristic>  " + CRLF);
+        sb.append("</wap-provisioningdoc>" + CRLF);
+        return sb.toString();
+    }
+
+    public static void writeMobileConfigWinMob(final OutputStream out, final String email, final String host, final String displayname, final String username) throws IOException {
+        CabUtil.writeCabFile(new DataOutputStream(new BufferedOutputStream(out)), write(email, host, displayname, username));
+    }
+
+//    private void doLogout(final Session session) {
+//        try {
+//            LoginPerformer.getInstance().doLogout(session.getSessionID());
+//        } catch (LoginException e) {
+//            LOG.error(e.getMessage(), e);
+//        }
+//    }
+
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         final String login = req.getParameter("login");
@@ -81,14 +129,6 @@ public class MobileConfigServlet extends HttpServlet {
             writer.close();
         }
     }
-
-//    private void doLogout(final Session session) {
-//        try {
-//            LoginPerformer.getInstance().doLogout(session.getSessionID());
-//        } catch (LoginException e) {
-//            LOG.error(e.getMessage(), e);
-//        }
-//    }
 
     private String getHostname(final HttpServletRequest req) throws UnknownHostException {
         //final HostnameService service = MobileConfigServiceRegistry.getServiceRegistry().getService(HostnameService.class);
@@ -155,45 +195,5 @@ public class MobileConfigServlet extends HttpServlet {
         } finally {
             printWriter.close();
         }
-    }
-
-    public static void writeMobileConfigWinMob(final OutputStream out, final String email, final String host, final String displayname, final String username) throws IOException {
-        CabUtil.writeCabFile(new DataOutputStream(new BufferedOutputStream(out)), write(email, host, displayname, username));
-    }
-
-    public static String write(final String email, final String host, final String displayname, final String username) {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("<wap-provisioningdoc>" + CRLF);
-        sb.append("   <characteristic type=\"Sync\">" + CRLF);
-        sb.append("        <characteristic type=\"Settings\">" + CRLF);
-        sb.append("        <parm name=\"SyncWhenRoaming\" value=\"1\"/>" + CRLF);
-        sb.append("        </characteristic>" + CRLF);
-        sb.append("        <characteristic type=\"Connection\">" + CRLF);
-        sb.append("            <parm name=\"Domain\" value=\"open-xchange.com\"/>" + CRLF);
-        sb.append("            <parm name=\"Server\" value=\"" + host + "\"/>" + CRLF);
-        sb.append("            <parm name=\"User\" value=\"" + username + "\"/>" + CRLF);
-        sb.append("\t    <parm name=\"SavePassword\" value=\"1\"/>" + CRLF);
-        sb.append("            <parm name=\"URI\" value=\"Microsoft-Server-ActiveSync\"/>" + CRLF);
-        sb.append("        <parm name=\"UseSSL\" value=\"1\"/>" + CRLF);
-        sb.append("        </characteristic>" + CRLF);
-        sb.append("        <characteristic type=\"Mail\">" + CRLF);
-        sb.append("            <parm name=\"Enabled\" value=\"1\"/>" + CRLF);
-        sb.append("        <parm name=\"EmailAgeFilter\" value=\"3\"/>" + CRLF);
-        sb.append("        </characteristic>" + CRLF);
-        sb.append("        <characteristic type=\"Calendar\">" + CRLF);
-        sb.append("            <parm name=\"Enabled\" value=\"1\"/>" + CRLF);
-        sb.append("        <parm name=\"CalendarAgeFilter\" value=\"5\"/>" + CRLF);
-        sb.append("        </characteristic>" + CRLF);
-        sb.append("        <characteristic type=\"Contacts\">" + CRLF);
-        sb.append("            <parm name=\"Enabled\" value=\"1\"/>" + CRLF);
-        sb.append("        </characteristic>" + CRLF);
-        sb.append("   </characteristic>" + CRLF);
-        sb.append("   <characteristic type='BrowserFavorite'>" + CRLF);
-        sb.append("    <characteristic type='Open Xchange'>" + CRLF);
-        sb.append("        <parm name='URL' value='http://www.open-xchange.com'/>" + CRLF);
-        sb.append("    </characteristic>" + CRLF);
-        sb.append("</characteristic>  " + CRLF);
-        sb.append("</wap-provisioningdoc>" + CRLF);
-        return sb.toString();
     }
 }
