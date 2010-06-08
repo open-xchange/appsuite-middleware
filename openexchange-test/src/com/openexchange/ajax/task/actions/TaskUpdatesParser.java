@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.task.actions;
 
+import static com.openexchange.java.Autoboxing.l;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -57,7 +58,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.CommonUpdatesParser;
+import com.openexchange.ajax.framework.AbstractColumnsParser;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.Participant;
@@ -69,7 +70,7 @@ import com.openexchange.groupware.tasks.Task;
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class TaskUpdatesParser extends CommonUpdatesParser<TaskUpdatesResponse> {
+public class TaskUpdatesParser extends AbstractColumnsParser<TaskUpdatesResponse> {
 
     private int[] columns;
 
@@ -81,6 +82,7 @@ public class TaskUpdatesParser extends CommonUpdatesParser<TaskUpdatesResponse> 
         this.timeZone = timeZone;
     }
 
+    @Override
     protected TaskUpdatesResponse createResponse(Response response) throws JSONException {
         TaskUpdatesResponse taskUpdatesResponse = super.createResponse(response);
         JSONArray rows = (JSONArray) response.getData();
@@ -110,11 +112,11 @@ public class TaskUpdatesParser extends CommonUpdatesParser<TaskUpdatesResponse> 
             tasks.add(task);
         }
         taskUpdatesResponse.setTasks(tasks);
-   
         return taskUpdatesResponse;
     }
-    
-    protected TaskUpdatesResponse instanciateResponse(Response response) {
+
+    @Override
+    protected TaskUpdatesResponse instantiateResponse(Response response) {
         return new TaskUpdatesResponse(response);
     }
 
@@ -124,13 +126,11 @@ public class TaskUpdatesParser extends CommonUpdatesParser<TaskUpdatesResponse> 
         case Task.END_DATE:
         case Task.CREATION_DATE:
         case Task.LAST_MODIFIED:
-            return new Date((Long) actual);
+            return new Date(l((Long) actual));
         case Task.PARTICIPANTS:
             return buildParticipantArray((JSONArray) actual);
         }
-
         return actual;
-
     }
 
     private Object buildParticipantArray(JSONArray actual) throws JSONException {

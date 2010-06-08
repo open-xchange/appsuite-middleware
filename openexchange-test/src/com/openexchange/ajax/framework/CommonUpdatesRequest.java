@@ -49,126 +49,24 @@
 
 package com.openexchange.ajax.framework;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-
-import org.json.JSONException;
-
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.groupware.search.Order;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class CommonUpdatesRequest<T extends CommonUpdatesResponse> implements AJAXRequest<T> {
+public class CommonUpdatesRequest<T extends CommonUpdatesResponse> extends AbstractUpdatesRequest<T> {
 
-    private final String servletPath;
-
-    private final int folderId;
-
-    private final int[] columns;
-
-    private final int sort;
-
-    private final Order order;
-
-    private final Date lastModified;
-
-    private final Ignore ignore;
-
-    private final boolean failOnError;
-
-    /**
-     * Default constructor.
-     */
-    public CommonUpdatesRequest(final String servletPath, final int folderId,
-        final int[] columns, final int sort, final Order order,
-        final Date lastModified, final boolean failOnError) {
-        this(servletPath, folderId, columns, sort, order, lastModified,
-            Ignore.DELETED, failOnError);
+    public CommonUpdatesRequest(String servletPath, int folderId, int[] columns, int sort, Order order, Date lastModified, boolean failOnError) {
+        this(servletPath, folderId, columns, sort, order, lastModified, Ignore.DELETED, failOnError);
     }
 
-    /**
-     * Full constructor.
-     */
-    public CommonUpdatesRequest(final String servletPath, final int folderId,
-        final int[] columns, final int sort, final Order order,
-        final Date lastModified, final Ignore ignore, final boolean failOnError) {
-        super();
-        this.servletPath = servletPath;
-        this.folderId = folderId;
-        this.columns = columns;
-        this.sort = sort;
-        this.order = order;
-        this.lastModified = lastModified;
-        this.ignore = ignore;
-        this.failOnError = failOnError;
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    public String getServletPath() {
-        return servletPath;
+    public CommonUpdatesRequest(String servletPath, int folderId, int[] columns, int sort, Order order, Date lastModified, Ignore ignore, boolean failOnError) {
+        super(servletPath, folderId, columns, sort, order, lastModified, ignore, failOnError);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public Object getBody() throws JSONException {
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Method getMethod() {
-        return Method.GET;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Parameter[] getParameters() {
-        final List<Parameter> params = new ArrayList<Parameter>();
-        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
-            .ACTION_UPDATES));
-        params.add(new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderId));
-        params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, getColumns()));
-        if (null != order) {
-            params.add(new Parameter(AJAXServlet.PARAMETER_SORT, sort));
-            params.add(new Parameter(AJAXServlet.PARAMETER_ORDER, OrderFields
-                .write(order)));
-        }
-        params.add(new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, lastModified));
-        params.add(new Parameter(AJAXServlet.PARAMETER_IGNORE, ignore.value));
-        return params.toArray(new Parameter[params.size()]);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public CommonUpdatesParser<T> getParser() {
         return new CommonUpdatesParser<T>(isFailOnError(), getColumns());
-    }
-
-    public int[] getColumns() {
-        return columns;
-    }
-
-    public boolean isFailOnError() {
-        return failOnError;
-    }
-
-    public enum Ignore {
-        DELETED("deleted"),
-        NONE("none");
-        private final String value;
-        private Ignore(final String value) {
-            this.value = value;
-        }
     }
 }

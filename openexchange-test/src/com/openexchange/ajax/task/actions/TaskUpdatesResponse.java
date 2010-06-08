@@ -52,7 +52,7 @@ package com.openexchange.ajax.task.actions;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.CommonUpdatesResponse;
+import com.openexchange.ajax.framework.AbstractColumnsResponse;
 import com.openexchange.groupware.tasks.Task;
 
 /**
@@ -60,10 +60,9 @@ import com.openexchange.groupware.tasks.Task;
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class TaskUpdatesResponse extends CommonUpdatesResponse {
+public class TaskUpdatesResponse extends AbstractColumnsResponse {
 
     private List<Task> tasks = new ArrayList<Task>();
-
 
     public TaskUpdatesResponse(Response response) {
         super(response);
@@ -76,5 +75,4 @@ public class TaskUpdatesResponse extends CommonUpdatesResponse {
     public void setTasks(List<Task> tasks) {
         this.tasks = tasks;
     }
-
 }

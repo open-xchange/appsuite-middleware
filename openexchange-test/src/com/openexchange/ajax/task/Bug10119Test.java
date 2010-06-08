@@ -52,13 +52,13 @@ package com.openexchange.ajax.task;
 import java.util.Date;
 import java.util.TimeZone;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.CommonUpdatesResponse;
 import com.openexchange.ajax.framework.MultipleRequest;
 import com.openexchange.ajax.framework.MultipleResponse;
-import com.openexchange.ajax.framework.CommonUpdatesRequest.Ignore;
+import com.openexchange.ajax.framework.AbstractUpdatesRequest.Ignore;
 import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.InsertResponse;
+import com.openexchange.ajax.task.actions.TaskUpdatesResponse;
 import com.openexchange.ajax.task.actions.UpdatesRequest;
 import com.openexchange.groupware.tasks.Task;
 
@@ -94,7 +94,7 @@ public class Bug10119Test extends AbstractTaskTest {
             mInsert =  client.execute(MultipleRequest.create(initialInserts));
         }
         final int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID, Task.FOLDER_ID };
-        final CommonUpdatesResponse uResponse;
+        final TaskUpdatesResponse uResponse;
         {
             final UpdatesRequest uRequest = new UpdatesRequest(folderId, columns, 0, null, beforeInsert);
             uResponse = client.execute(uRequest);
@@ -115,7 +115,7 @@ public class Bug10119Test extends AbstractTaskTest {
         }
         // Check if we see 2 updates, 1 insert and 1 delete.
         {
-            final CommonUpdatesResponse uResponse2 = client.execute(new UpdatesRequest(folderId, columns, 0, null, uResponse.getTimestamp(), Ignore.NONE));
+            final TaskUpdatesResponse uResponse2 = client.execute(new UpdatesRequest(folderId, columns, 0, null, uResponse.getTimestamp(), Ignore.NONE));
             assertTrue("Can't get created and deleted item.", uResponse2.size() >= 2);
         }
         // Delete all.

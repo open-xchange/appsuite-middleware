@@ -51,17 +51,16 @@ package com.openexchange.ajax.task;
 
 import java.util.Date;
 import java.util.TimeZone;
-
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonAllResponse;
-import com.openexchange.ajax.framework.CommonUpdatesResponse;
 import com.openexchange.ajax.framework.MultipleRequest;
 import com.openexchange.ajax.framework.MultipleResponse;
-import com.openexchange.ajax.framework.CommonUpdatesRequest.Ignore;
+import com.openexchange.ajax.framework.AbstractUpdatesRequest.Ignore;
 import com.openexchange.ajax.task.actions.AllRequest;
 import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.InsertResponse;
+import com.openexchange.ajax.task.actions.TaskUpdatesResponse;
 import com.openexchange.ajax.task.actions.UpdateRequest;
 import com.openexchange.ajax.task.actions.UpdateResponse;
 import com.openexchange.ajax.task.actions.UpdatesRequest;
@@ -135,13 +134,7 @@ public class UpdatesTest extends AbstractTaskTest {
         columns = new int[] { Task.OBJECT_ID, Task.FOLDER_ID, Task.TITLE,
             Task.START_DATE, Task.END_DATE, Task.PERCENT_COMPLETED,
             Task.PRIORITY, Task.PARTICIPANTS };
-        final CommonUpdatesResponse updatesR = client.execute(new UpdatesRequest(
-            folderId,
-            columns,
-            0,
-            null,
-            allR.getTimestamp(),
-            Ignore.NONE));
+        final TaskUpdatesResponse updatesR = client.execute(new UpdatesRequest(folderId, columns, 0, null, allR.getTimestamp(), Ignore.NONE));
         assertTrue("Only found " + updatesR.size()
             + " updated tasks but should be more than "
             + (UPDATES + DELETES) + '.', updatesR.size() >= UPDATES + DELETES);
