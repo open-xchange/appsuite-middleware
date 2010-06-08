@@ -107,8 +107,7 @@ public class Bug7377Test extends AbstractTaskTest {
         task.setTitle("Test bug #7377");
         final int folderId = getPrivateFolder();
         task.setParentFolderID(folderId);
-        final InsertResponse iResponse = TaskTools.insert(client1,
-            new InsertRequest(task, tz1));
+        final InsertResponse iResponse = client1.execute(new InsertRequest(task, tz1));
         task.setObjectID(iResponse.getId());
         try {
             // Update timestamp
@@ -158,8 +157,7 @@ public class Bug7377Test extends AbstractTaskTest {
         FolderObject folder = null;
         try {
         {
-            final InsertResponse response = TaskTools.insert(client1,
-                new InsertRequest(task, tz1));
+            final InsertResponse response = client1.execute(new InsertRequest(task, tz1));
             response.fillTask(task);
         }
         // Check if user 2 sees the task.

@@ -89,8 +89,7 @@ public final class Bug11397Test extends AbstractTaskTest {
         task.setParticipants(new Participant[] {
             new ExternalUserParticipant("test@example.org")
         });
-        final InsertResponse insertR = TaskTools.insert(client,
-            new InsertRequest(task, getTimeZone()));
+        final InsertResponse insertR = client.execute(new InsertRequest(task, getTimeZone()));
         try {
             final GetResponse getR = TaskTools.get(client, new GetRequest(insertR));
             task = getR.getTask(getTimeZone());

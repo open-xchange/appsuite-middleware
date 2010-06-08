@@ -82,8 +82,7 @@ public class CharsetTest extends AbstractTaskTest {
         final int folderId = getPrivateFolder();
 
         task.setParentFolderID(folderId);
-        final InsertResponse insertR = TaskTools.insert(client,
-            new InsertRequest(task, getTimeZone()));
+        final InsertResponse insertR = client.execute(new InsertRequest(task, getTimeZone()));
 
         final GetResponse getR = TaskTools.get(client, new GetRequest(
             insertR));

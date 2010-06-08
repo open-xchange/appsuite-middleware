@@ -97,8 +97,7 @@ public class Bug8935Test extends AbstractTaskTest {
         final Task task = Create.createWithDefaults();
         task.setTitle("null");
         task.setParentFolderID(client.getValues().getPrivateTaskFolder());
-        final InsertResponse iResponse = TaskTools.insert(client,
-            new InsertRequest(task, client.getValues().getTimeZone()));
+        final InsertResponse iResponse = client.execute(new InsertRequest(task, client.getValues().getTimeZone()));
         final GetResponse gResponse = TaskTools.get(client,
             new GetRequest(iResponse));
         final Task reload = gResponse.getTask(client.getValues().getTimeZone());
@@ -110,8 +109,7 @@ public class Bug8935Test extends AbstractTaskTest {
         final Task task = Create.createWithDefaults();
         task.removeTitle();
         task.setParentFolderID(client.getValues().getPrivateTaskFolder());
-        final InsertResponse iResponse = TaskTools.insert(client,
-            new SpecialInsertRequest(task, client.getValues().getTimeZone()));
+        final InsertResponse iResponse = client.execute(new SpecialInsertRequest(task, client.getValues().getTimeZone()));
         final GetResponse gResponse = TaskTools.get(client,
             new GetRequest(iResponse));
         final Task reload = gResponse.getTask(client.getValues().getTimeZone());
@@ -141,8 +139,7 @@ public class Bug8935Test extends AbstractTaskTest {
         // Empty string must be interpreted as null.
         task.setTitle("");
         task.setParentFolderID(client.getValues().getPrivateTaskFolder());
-        final InsertResponse iResponse = TaskTools.insert(client,
-            new SpecialInsertRequest(task, client.getValues().getTimeZone()));
+        final InsertResponse iResponse = client.execute(new SpecialInsertRequest(task, client.getValues().getTimeZone()));
         // remove it because server won't sent empty fields.
         task.removeTitle();
         final GetResponse gResponse = TaskTools.get(client,

@@ -107,8 +107,7 @@ public class Bug9252Test extends AbstractTaskTest {
                 .createWithDefaults();
             task.setParentFolderID(folder.getObjectID());
             task.setTitle("Test bug #9295");
-            final InsertResponse iResponse = TaskTools.insert(client1,
-                new InsertRequest(task, client1.getValues().getTimeZone()));
+            final InsertResponse iResponse = client1.execute(new InsertRequest(task, client1.getValues().getTimeZone()));
             task.setObjectID(iResponse.getId());
             // Now second user tries to read the task.
             final GetResponse gResponse = TaskTools.get(client2,

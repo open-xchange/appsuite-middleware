@@ -93,8 +93,7 @@ public final class Bug11195Test extends AbstractTaskTest {
         try {
             // Insert task
             {
-                final InsertResponse response = TaskTools.insert(client,
-                    new InsertRequest(task, tz));
+                final InsertResponse response = client.execute(new InsertRequest(task, tz));
                 response.fillTask(task);
             }
             // Create folder to move task to

@@ -111,8 +111,7 @@ public class Bug7276Test extends AbstractTaskTest {
         task.setParticipants(ParticipantTools.createParticipants(client1
             .getValues().getUserId(), client2.getValues().getUserId()));
         {
-            final InsertResponse response = TaskTools.insert(client1,
-                new InsertRequest(task, client1.getValues().getTimeZone()));
+            final InsertResponse response = client1.execute(new InsertRequest(task, client1.getValues().getTimeZone()));
             response.fillTask(task);
         }
         // User 2 checks if he can see it.

@@ -93,8 +93,7 @@ public class Bug7380Test extends AbstractTaskTest {
             .Property.HOSTNAME), session.getId(), 1, true, client.getValues()
             .getUserId());
         task.setParticipants(participants);
-        final InsertResponse iResponse = TaskTools.insert(client,
-            new InsertRequest(task, client.getValues().getTimeZone()));
+        final InsertResponse iResponse = client.execute(new InsertRequest(task, client.getValues().getTimeZone()));
         task.setObjectID(iResponse.getId());
         final GetResponse gResponse = TaskTools.get(client,
             new GetRequest(getPrivateFolder(), task.getObjectID()));

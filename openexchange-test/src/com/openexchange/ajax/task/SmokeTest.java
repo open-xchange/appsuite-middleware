@@ -100,8 +100,7 @@ public class SmokeTest extends AbstractTaskTest {
         task.setPercentComplete(75);
         task.setTargetDuration(L(2));
         task.setActualDuration(L(2));
-        final InsertResponse insertR = TaskTools.insert(client,
-            new InsertRequest(task, timeZone));
+        final InsertResponse insertR = client.execute(new InsertRequest(task, timeZone));
         final GetResponse getR = TaskTools.get(client, new GetRequest(insertR));
         final Task reload = getR.getTask(timeZone);
         TaskTools.compareAttributes(task, reload);

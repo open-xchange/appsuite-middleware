@@ -75,7 +75,6 @@ import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
-import com.openexchange.ajax.framework.CommonUpdatesResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.MultipleRequest;
 import com.openexchange.ajax.framework.MultipleResponse;
@@ -90,7 +89,6 @@ import com.openexchange.ajax.task.actions.SearchRequest;
 import com.openexchange.ajax.task.actions.SearchResponse;
 import com.openexchange.ajax.task.actions.UpdateRequest;
 import com.openexchange.ajax.task.actions.UpdateResponse;
-import com.openexchange.ajax.task.actions.UpdatesRequest;
 import com.openexchange.ajax.writer.TaskWriter;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.tools.URLParameter;
@@ -98,46 +96,17 @@ import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
 
 /**
- * Utility class that contains all methods for making task requests to the
- * server.
+ * Utility class that contains all methods for making task requests to the server.
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public final class TaskTools extends Assert {
 
-    /**
-     * Logger.
-     */
     private static final Log LOG = LogFactory.getLog(TaskTools.class);
-
-    /**
-     * To use character encoding.
-     */
     private static final String ENCODING = "UTF-8";
-
-    /**
-     * URL of the tasks AJAX interface.
-     */
     private static final String TASKS_URL = "/ajax/tasks";
-
-    /**
-     * zero unix timestamp.
-     */
-    private static final Date ZERO = new Date(0);
     
-    /**
-     * Timeout for master slave synchronisation.
-     */
-    public static final long TIMEOUT = 10000;
-    
-    /**
-     * Prevent instantiation
-     */
     private TaskTools() {
         super();
-    }
-
-    public static boolean timeout(final long start) {
-        return System.currentTimeMillis() > (start + TIMEOUT);
     }
     
     /**
@@ -166,45 +135,18 @@ public final class TaskTools extends Assert {
      * @throws JSONException if parsing of serialized json fails.
      * @throws SAXException if a SAX error occurs.
      * @throws IOException if the communication with the server fails.
-     * @deprecated use {@link #insert(AJAXClient, TaskInsertRequest)}
+     * @deprecated use {@link AJAXClient#execute(com.openexchange.ajax.framework.AJAXRequest)}
      */
     @Deprecated
-    public static Response insertTask(final WebConversation conversation,
-        final String hostName, final String sessionId, final Task task)
-        throws JSONException, IOException, SAXException, AjaxException {
+    public static Response insertTask(final WebConversation conversation, final String hostName, final String sessionId, final Task task) throws JSONException, IOException, SAXException, AjaxException {
         LOG.trace("Inserting task.");
-        final AJAXClient client = new AJAXClient(new AJAXSession(conversation,
-            sessionId));
-        final InsertResponse insertR = client.execute(new InsertRequest(task,
-            client.getValues().getTimeZone()));
+        final AJAXClient client = new AJAXClient(new AJAXSession(conversation, sessionId));
+        final InsertResponse insertR = client.execute(new InsertRequest(task, client.getValues().getTimeZone()));
         return insertR.getResponse();
     }
 
     /**
-     * @deprecated use {@link #insert(AJAXClient, InsertRequest)}.
-     */
-    @Deprecated
-    public static InsertResponse insert(final AJAXSession session,
-        final InsertRequest request) throws AjaxException, IOException,
-        SAXException, JSONException {
-        return Executor.execute(session, request);
-    }
-
-    public static InsertResponse insert(final AJAXClient client,
-        final InsertRequest request) throws AjaxException, IOException,
-        SAXException, JSONException {
-        return Executor.execute(client, request);
-    }
-
-    public static InsertResponse insert(final WebConversation conversation, 
-        final String hostName, final String sessionId, final String protocol, 
-        final InsertRequest request) throws AjaxException, IOException, 
-        SAXException, JSONException {
-        return Executor.execute(new AJAXSession(conversation, sessionId), request, protocol, hostName);
-    }
-
-    /**
-     * @deprecated use {@link #update(AJAXSession, UpdateRequest)}
+     * @deprecated use {@link AJAXClient#execute(com.openexchange.ajax.framework.AJAXRequest)}
      */
     @Deprecated
     public static Response updateTask(final WebConversation conversation,
@@ -238,7 +180,7 @@ public final class TaskTools extends Assert {
     }
 
     /**
-     * @deprecated use {@link #update(AJAXSession, UpdateRequest)}
+     * @deprecated use {@link AJAXClient#execute(com.openexchange.ajax.framework.AJAXRequest)}
      */
     @Deprecated
     public static Response updateTask(final WebConversation conversation,
@@ -247,20 +189,10 @@ public final class TaskTools extends Assert {
         IOException, SAXException, AjaxException {
         final TimeZone timeZone = new AJAXClient(new AJAXSession(conversation,
             sessionId)).getValues().getTimeZone();
-		final JSONObject jsonObj = new JSONObject();
+        final JSONObject jsonObj = new JSONObject();
         new TaskWriter( timeZone).writeTask(task, jsonObj);
         return updateTask(conversation, hostName, sessionId, folderId, task
             .getObjectID(), jsonObj, lastModified);
-    }
-
-    /**
-     * @deprecated use {@link #update(AJAXClient, UpdateRequest)}.
-     */
-    @Deprecated
-    public static UpdateResponse update(final AJAXSession session,
-        final UpdateRequest request) throws AjaxException, IOException,
-        SAXException, JSONException {
-        return Executor.execute(session, request);
     }
 
     public static UpdateResponse update(final AJAXClient client,
@@ -285,14 +217,6 @@ public final class TaskTools extends Assert {
         final Response response = getR.getResponse();
         response.setData(getR.getTask(client.getValues().getTimeZone()));
         return response;
-    }
-
-    /**
-     * @deprecated use {@link AJAXClient#execute(com.openexchange.ajax.framework.AJAXRequest)}.
-     */
-    @Deprecated
-    public static GetResponse get(final AJAXSession session, final GetRequest request) throws AjaxException, IOException, SAXException, JSONException {
-        return Executor.execute(session, request);
     }
 
     public static GetResponse get(final AJAXClient client, final GetRequest request) throws AjaxException, IOException, SAXException, JSONException {
@@ -376,16 +300,8 @@ public final class TaskTools extends Assert {
         return response;
     }
 
-    public static CommonAllResponse all(final AJAXSession session,
-        final AllRequest request) throws AjaxException, IOException,
-        SAXException, JSONException {
-        return Executor.execute(session, request);
-    }
-
-    public static CommonAllResponse all(final AJAXClient client,
-        final AllRequest request) throws AjaxException, IOException,
-        SAXException, JSONException {
-        return all(client.getSession(), request);
+    public static CommonAllResponse all(final AJAXClient client, final AllRequest request) throws AjaxException, IOException, SAXException, JSONException {
+        return client.execute(request);
     }
 
     public static CommonAllResponse all(final WebConversation conversation, 
@@ -395,19 +311,6 @@ public final class TaskTools extends Assert {
     	return Executor.execute(new AJAXSession(conversation, 
     		sessionId), request, protocol, hostName);
 	}
-
-    public static CommonUpdatesResponse updates(final AJAXClient client,
-        final UpdatesRequest request) throws AjaxException, IOException,
-        SAXException, JSONException {
-        return (CommonUpdatesResponse) Executor.execute(client.getSession(),
-            request);
-    }
-
-    public static CommonListResponse list(final AJAXClient client,
-        final ListRequest request) throws AjaxException, IOException,
-        SAXException, JSONException {
-        return Executor.execute(client.getSession(), request);
-    }
 
     public static void confirmTask(final WebConversation conversation,
         final String hostName, final String sessionId, final int folderId,

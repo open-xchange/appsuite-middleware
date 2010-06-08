@@ -86,8 +86,7 @@ public final class Bug11619Test extends AbstractTaskTest {
         final AJAXClient client = getClient();
         final TimeZone tz = getTimeZone();
         Task task = Create.createWithDefaults(getPrivateFolder(), "Bug 11619 test");
-        final InsertResponse insertR = TaskTools.insert(client,
-            new InsertRequest(task, tz));
+        final InsertResponse insertR = client.execute(new InsertRequest(task, tz));
         try {
             {
                 final GetRequest request = new GetRequest(insertR);

@@ -78,8 +78,7 @@ public class FloatTest extends AbstractTaskTest {
         task.setActualCosts(1f);
         task.setTargetCosts(1f);
         task.setParentFolderID(getPrivateFolder());
-        final InsertResponse insertR = TaskTools.insert(getClient(),
-            new InsertRequest(task, getTimeZone()));
+        final InsertResponse insertR = getClient().execute(new InsertRequest(task, getTimeZone()));
 
         final GetResponse getR = TaskTools.get(getClient(), new GetRequest(
             insertR));

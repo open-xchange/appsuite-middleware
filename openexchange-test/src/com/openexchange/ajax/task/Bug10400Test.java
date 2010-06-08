@@ -93,8 +93,7 @@ public class Bug10400Test extends AbstractTaskTest {
         task.setTitle("Bug10400Test1");
         task.setParentFolderID(antonFID);
         task.addParticipant(new UserParticipant(berta.getValues().getUserId()));
-        final InsertResponse insert = TaskTools.insert(anton,
-            new InsertRequest(task, anton.getValues().getTimeZone()));
+        final InsertResponse insert = anton.execute(new InsertRequest(task, anton.getValues().getTimeZone()));
         task.setLastModified(insert.getTimestamp());
         try {
             final GetResponse get = TaskTools.get(berta, new GetRequest(berta
@@ -125,8 +124,7 @@ public class Bug10400Test extends AbstractTaskTest {
         final Task task = Create.createWithDefaults();
         task.setTitle("Bug10400Test2");
         task.setParentFolderID(antonFID);
-        final InsertResponse insert = TaskTools.insert(anton,
-            new InsertRequest(task, antonTZ));
+        final InsertResponse insert = anton.execute(new InsertRequest(task, antonTZ));
         task.setObjectID(insert.getId());
         task.setLastModified(insert.getTimestamp());
         try {
@@ -159,8 +157,7 @@ public class Bug10400Test extends AbstractTaskTest {
         task.setTitle("Bug10400Test2");
         task.setParentFolderID(antonFID);
         task.addParticipant(new UserParticipant(berta.getValues().getUserId()));
-        final InsertResponse insert = TaskTools.insert(anton,
-            new InsertRequest(task, anton.getValues().getTimeZone()));
+        final InsertResponse insert = anton.execute(new InsertRequest(task, anton.getValues().getTimeZone()));
         task.setLastModified(insert.getTimestamp());
         try {
             final GetResponse get = TaskTools.get(berta, new GetRequest(berta

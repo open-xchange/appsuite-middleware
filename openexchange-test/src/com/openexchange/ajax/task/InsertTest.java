@@ -85,8 +85,7 @@ public class InsertTest extends AbstractTaskTest {
         final TimeZone timeZone = client.getValues().getTimeZone();
         final Task task = Create.createTask();
         task.setParentFolderID(folderId);
-        final InsertResponse insertR = TaskTools.insert(client,
-            new InsertRequest(task, timeZone));
+        final InsertResponse insertR = client.execute(new InsertRequest(task, timeZone));
         final GetResponse getR = TaskTools.get(client, new GetRequest(insertR));
         final Task reload = getR.getTask(timeZone);
         TaskTools.compareAttributes(task, reload);

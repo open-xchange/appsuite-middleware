@@ -156,9 +156,9 @@ public final class FunctionTests extends AbstractAJAXSession {
         {
             task.setTitle("Link contact and task test.");
             task.setParentFolderID(taskFolder);
-            final com.openexchange.ajax.task.actions.InsertResponse response =
-                TaskTools.insert(client, new com.openexchange.ajax.task.actions
-                .InsertRequest(task, client.getValues().getTimeZone()));
+            final com.openexchange.ajax.task.actions.InsertResponse response = client.execute(new com.openexchange.ajax.task.actions.InsertRequest(
+                task,
+                client.getValues().getTimeZone()));
             task.setObjectID(response.getId());
             task.setLastModified(response.getTimestamp());
         }
