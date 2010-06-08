@@ -66,6 +66,24 @@ public final class TestMails {
         "\n" +
         "Test for bug 15608\n" +
         "\u00e4\u00f6\u00fc\u00c4\u00d6\u00dc\u00df\n";
+    
+    public static final String DDDTDL_MAIL = 
+        "From: #ADDR#\n" + 
+        "To: #ADDR#\n" + 
+        "Subject: Test for bug 15901\n" + 
+        "Mime-Version: 1.0\n" + 
+        "Content-Type: text/html; charset=\"UTF-8\"\n" + 
+        "Content-Transfer-Encoding: 8bit\n" + 
+        "\n" +
+        "Some plain text... <br> blah <a href=\"www.xyz.de\">blubb</a>" +
+        "<dl>" + 
+        "<dt>AA</dt>" + 
+        "<dd>Auto Answer (Modem)</dd>" + 
+        "<dt>AAE</dt>" + 
+        "<dd>Allgemeine Anschalte-Erlaubnis</dd>" + 
+        "<dt>AARP</dt>" + 
+        "<dd>Appletalk Address Resolution Protocol</dd>" + 
+        "</dl>";
 
     public static final String replaceAddresses(String mail, String address) {
         return mail.replaceAll("#ADDR#", address);
