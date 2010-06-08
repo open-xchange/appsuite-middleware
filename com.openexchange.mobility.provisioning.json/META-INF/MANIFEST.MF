@@ -38,5 +38,7 @@ Import-Package: com.openexchange.ajax,
  org.json,
  org.osgi.framework,
  org.osgi.service.http,
- org.osgi.util.tracker
-
+ org.osgi.util.tracker,
+ com.openexchange.mail.dataobjects.compose
+Require-Bundle: com.openexchange.server,
+ com.openexchange.common

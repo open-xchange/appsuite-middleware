@@ -36,7 +36,7 @@ public class ServletRegisterer {
 			return;
 		}
 		try {
-			http_service.registerServlet(SERVLET_PATH, new com.openexchange.mobility.provisioning.json.impl.MobilityProvisioningServlet(), null, null);
+			http_service.registerServlet(SERVLET_PATH, new com.openexchange.mobility.provisioning.json.servlet.MobilityProvisioningServlet(), null, null);
 		} catch (ServletException e) {
 			LOG.error("Error registering mobility provisioning servlet!", e);
 		} catch (NamespaceException e) {
