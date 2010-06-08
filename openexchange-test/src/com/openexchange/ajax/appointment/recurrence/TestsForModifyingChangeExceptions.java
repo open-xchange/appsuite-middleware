@@ -51,11 +51,8 @@ package com.openexchange.ajax.appointment.recurrence;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import com.openexchange.ajax.appointment.helper.OXError;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Changes;
-import com.openexchange.groupware.container.Expectations;
-
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
@@ -63,13 +60,15 @@ import com.openexchange.groupware.container.Expectations;
 public class TestsForModifyingChangeExceptions extends ManagedAppointmentTest {
 
     private Changes changes;
+
     private Appointment update;
+
     private Appointment app;
 
     public TestsForModifyingChangeExceptions(String name) {
         super(name);
     }
-    
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
@@ -77,19 +76,19 @@ public class TestsForModifyingChangeExceptions extends ManagedAppointmentTest {
         app.setOccurrence(3);
 
         calendarManager.insert(app);
-        
+
         changes = new Changes();
         changes.put(Appointment.RECURRENCE_POSITION, 2);
         changes.put(Appointment.START_DATE, D("2/1/2008 1:00", utc));
         changes.put(Appointment.END_DATE, D("2/1/2008 2:00", utc));
-        
+
         update = app.clone();
         changes.update(update);
         calendarManager.update(update);
-        
+
     }
-    
-    public void testShouldNotAllowTurningAChangeExceptionIntoASeries(){
+
+    public void testShouldNotAllowTurningAChangeExceptionIntoASeries() {
         Changes secondChange = new Changes();
         secondChange.put(Appointment.RECURRENCE_TYPE, Appointment.DAILY);
         secondChange.put(Appointment.INTERVAL, 1);
@@ -99,9 +98,9 @@ public class TestsForModifyingChangeExceptions extends ManagedAppointmentTest {
         secondUpdate.setObjectID(update.getObjectID());
         secondUpdate.setLastModified(update.getLastModified());
         secondChange.update(secondUpdate);
-        
+
         calendarManager.update(secondUpdate);
-        
+
         assertTrue("Should get exception when trying to make a change exception a series", calendarManager.hasLastException());
         assertTrue("Should have correct exception", new OXError("APP", 99).matches(calendarManager.getLastException()));
     }
