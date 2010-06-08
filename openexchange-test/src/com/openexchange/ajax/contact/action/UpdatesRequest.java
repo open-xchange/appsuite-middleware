@@ -46,19 +46,17 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.ajax.contact.action;
 
 import java.util.Date;
-
-import com.openexchange.ajax.framework.CommonUpdatesParser;
-import com.openexchange.ajax.framework.CommonUpdatesRequest;
-import com.openexchange.ajax.task.actions.TaskUpdatesParser;
+import com.openexchange.ajax.framework.AbstractUpdatesRequest;
 import com.openexchange.groupware.search.Order;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class UpdatesRequest extends CommonUpdatesRequest<ContactUpdatesResponse> {
+public class UpdatesRequest extends AbstractUpdatesRequest<ContactUpdatesResponse> {
 
     private int[] columns;
 
@@ -81,8 +79,8 @@ public class UpdatesRequest extends CommonUpdatesRequest<ContactUpdatesResponse>
             lastModified, ignore, true);
         this.columns = columns;
     }
-    
-    public CommonUpdatesParser getParser() {
+
+    public ContactUpdatesParser getParser() {
         return new ContactUpdatesParser(true, columns);
     }
 }

@@ -117,4 +117,8 @@ public abstract class AbstractColumnsResponse extends AbstractAJAXResponse imple
     public void setColumns(final int[] columns) {
         this.columns = columns;
     }
+
+    public int size() {
+        return array.length;
+    }
 }

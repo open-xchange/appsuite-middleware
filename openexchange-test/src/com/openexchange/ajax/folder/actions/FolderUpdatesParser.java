@@ -92,7 +92,7 @@ public class FolderUpdatesParser extends CommonUpdatesParser<FolderUpdatesRespon
     }
 
     @Override
-    protected FolderUpdatesResponse instanciateResponse(final Response response) {
+    protected FolderUpdatesResponse instantiateResponse(final Response response) {
         return new FolderUpdatesResponse(response);
     }
 

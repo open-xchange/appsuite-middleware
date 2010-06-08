@@ -50,14 +50,9 @@
 package com.openexchange.ajax.contact.action;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.CommonUpdatesResponse;
+import com.openexchange.ajax.framework.AbstractColumnsResponse;
 import com.openexchange.groupware.container.Contact;
 
 /**
@@ -65,14 +60,13 @@ import com.openexchange.groupware.container.Contact;
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class ContactUpdatesResponse extends CommonUpdatesResponse {
+public class ContactUpdatesResponse extends AbstractColumnsResponse {
 
     private List<Contact> contacts = new ArrayList<Contact>();
 
     public ContactUpdatesResponse(Response response) {
         super(response);
     }
-
     
     public void setContacts(List<Contact> contacts) {
         this.contacts = contacts;

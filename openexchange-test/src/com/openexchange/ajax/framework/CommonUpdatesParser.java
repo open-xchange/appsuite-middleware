@@ -49,53 +49,16 @@
 
 package com.openexchange.ajax.framework;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-
 import com.openexchange.ajax.container.Response;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class CommonUpdatesParser<T extends CommonUpdatesResponse> extends AbstractAJAXParser<T> {
+public class CommonUpdatesParser<T extends CommonUpdatesResponse> extends AbstractColumnsParser<T> {
 
-    private final int[] columns;
-
-    /**
-     * Default constructor.
-     */
     protected CommonUpdatesParser(final boolean failOnError, final int[] columns) {
-        super(failOnError);
-        this.columns = columns;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected T createResponse(final Response response) throws JSONException {
-        final T retval = instanciateResponse(response);
-        retval.setColumns(getColumns());
-        if (isFailOnError()) {
-            final JSONArray array = (JSONArray) retval.getData();
-            final Object[][] values = new Object[array.length()][];
-            for (int i = 0; i < array.length(); i++) {
-                try {
-                    // insert or update
-                    final JSONArray inner = array.getJSONArray(i);
-                    values[i] = new Object[inner.length()];
-                    for (int j = 0; j < inner.length(); j++) {
-                        values[i][j] = inner.get(j);
-                    }
-                } catch (final JSONException e) {
-                    // delete
-                    values[i] = new Integer[] { Integer.valueOf(array.getInt(i)) };
-                }
-            }
-            retval.setArray(values);
-        }
-        return retval;
+        super(failOnError, columns);
     }
 
     /**
@@ -103,12 +66,10 @@ public class CommonUpdatesParser<T extends CommonUpdatesResponse> extends Abstra
      * @param response the general response object containing methods and data for handling the general JSON response object.
      * @return a detailed response object corresponding to the request and NEVER <code>null</code>. 
      */
-    protected T instanciateResponse(final Response response) {
+    @SuppressWarnings("unchecked")
+    @Override
+    protected T instantiateResponse(final Response response) {
         // I don't quite get this.
         return (T) new CommonUpdatesResponse(response);
-    }
-
-    public int[] getColumns() {
-        return columns;
     }
 }

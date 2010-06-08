@@ -49,55 +49,49 @@
 
 package com.openexchange.ajax.contact.action;
 
+import static com.openexchange.java.Autoboxing.i;
+import static com.openexchange.java.Autoboxing.l;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.CommonUpdatesParser;
-import com.openexchange.ajax.framework.CommonUpdatesResponse;
-import com.openexchange.ajax.task.actions.TaskUpdatesResponse;
+import com.openexchange.ajax.framework.AbstractColumnsParser;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.LinkEntryObject;
 
-
 /**
  * {@link ContactUpdatesParser}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
-public class ContactUpdatesParser extends CommonUpdatesParser<ContactUpdatesResponse> {
-    private int[] columns;
-    
+public class ContactUpdatesParser extends AbstractColumnsParser<ContactUpdatesResponse> {
+
     protected ContactUpdatesParser(boolean failOnError, int[] columns) {
         super(failOnError, columns);
-        this.columns = columns;
-        
     }
-  
+
     @Override
     protected ContactUpdatesResponse createResponse(Response response) throws JSONException {
-        ContactUpdatesResponse contactUpdatesResponse = super.createResponse(response);
-        List<Contact> contacts = new ArrayList<Contact>();
+        ContactUpdatesResponse retval = super.createResponse(response);
         JSONArray rows = (JSONArray) response.getData();
         if (rows == null) {
-            return contactUpdatesResponse;
+            return retval;
         }
+        List<Contact> contacts = new ArrayList<Contact>();
         for (int i = 0, size = rows.length(); i < size; i++) {
             JSONArray row = rows.getJSONArray(i);
             Contact contact = new Contact();
-            for (int colIndex = 0; colIndex < columns.length; colIndex++) {
+            for (int colIndex = 0; colIndex < getColumns().length; colIndex++) {
                 Object value = row.get(colIndex);
                 if (value == JSONObject.NULL) {
                     continue;
                 }
-                int column = columns[colIndex];
+                int column = getColumns()[colIndex];
                 if (column == Contact.LAST_MODIFIED_UTC) {
                     continue;
                 }
@@ -106,59 +100,62 @@ public class ContactUpdatesParser extends CommonUpdatesParser<ContactUpdatesResp
             }
             contacts.add(contact);
         }
-        contactUpdatesResponse.setContacts(contacts);
-        return contactUpdatesResponse;
-
+        retval.setContacts(contacts);
+        return retval;
     }
-    
-    protected ContactUpdatesResponse instanciateResponse(Response response)  {
+
+    @Override
+    protected ContactUpdatesResponse instantiateResponse(Response response) {
         return new ContactUpdatesResponse(response);
     }
-    
+
     private Object transform(Object actual, int column) throws JSONException {
         switch (column) {
             case Contact.CREATION_DATE:
             case Contact.LAST_MODIFIED:
             case Contact.ANNIVERSARY:
             case Contact.BIRTHDAY:
-                return new Date( ( (Long) actual ).intValue() );
+                return new Date(l((Long) actual));
             case Contact.IMAGE1:
                 return ((String) actual).getBytes();
             case Contact.LINKS:
-                return transformLinks( (JSONArray) actual );
+                return transformLinks((JSONArray) actual);
             case Contact.DISTRIBUTIONLIST:
-                return transformDistributionList( (JSONArray) actual);
+                return transformDistributionList((JSONArray) actual);
 
         }
         return actual;
     }
-    
-    private LinkEntryObject[] transformLinks(JSONArray arr) throws JSONException{
+
+    private LinkEntryObject[] transformLinks(JSONArray arr) throws JSONException {
         LinkEntryObject[] results = new LinkEntryObject[arr.length()];
         for (int i = 0; i < arr.length(); i++) {
             JSONObject obj = (JSONObject) arr.get(i);
             LinkEntryObject entry = new LinkEntryObject();
-            entry.setLinkID( ( (Integer) obj.get("id") ).intValue());
+            entry.setLinkID(i((Integer) obj.get("id")));
             results[i] = entry;
         }
         return results;
     }
-    
-    private DistributionListEntryObject[] transformDistributionList(JSONArray arr) throws JSONException{
+
+    private DistributionListEntryObject[] transformDistributionList(JSONArray arr) throws JSONException {
         DistributionListEntryObject[] results = new DistributionListEntryObject[arr.length()];
         for (int i = 0; i < arr.length(); i++) {
             JSONObject obj = (JSONObject) arr.get(i);
             DistributionListEntryObject entry = new DistributionListEntryObject();
-            if(obj.has("display_name"))
-                entry.setDisplayname( obj.getString("display_name") );
-            if(obj.has("mail"))
+            if (obj.has("display_name")) {
+                entry.setDisplayname(obj.getString("display_name"));
+            }
+            if (obj.has("mail")) {
                 try {
                     entry.setEmailaddress( obj.getString("mail") );
                 } catch (ContactException e) {
                     // don't set E-Mail at all
                 }
-            if(obj.has("mail_field"))
+            }
+            if (obj.has("mail_field")) {
                 entry.setEmailfield( obj.getInt("mail_field"));
+            }
         }
         return results;
     }

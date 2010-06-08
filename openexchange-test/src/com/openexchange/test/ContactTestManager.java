@@ -49,8 +49,8 @@
 
 package com.openexchange.test;
 
-import static org.junit.Assert.fail;
 import static com.openexchange.java.Autoboxing.I;
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
@@ -64,6 +64,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.contact.action.AllRequest;
+import com.openexchange.ajax.contact.action.ContactUpdatesResponse;
 import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.contact.action.GetResponse;
@@ -79,7 +80,6 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
-import com.openexchange.ajax.framework.CommonUpdatesResponse;
 import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.ajax.parser.ContactParser;
 import com.openexchange.api2.OXException;
@@ -352,7 +352,7 @@ public class ContactTestManager implements TestManager {
         Vector<Contact> allContacts = new Vector<Contact>();
         UpdatesRequest request = new UpdatesRequest(folderId, Contact.ALL_COLUMNS, -1, null, lastModified);
         try {
-            CommonUpdatesResponse response = getClient().execute(request);
+            ContactUpdatesResponse response = getClient().execute(request);
             lastResponse = response;
             final JSONArray data = (JSONArray) response.getResponse().getData();
             this.convertJSONArray2Vector(data, allContacts);
