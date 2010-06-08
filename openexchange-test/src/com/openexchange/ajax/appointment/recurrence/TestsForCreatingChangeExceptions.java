@@ -50,7 +50,6 @@
 package com.openexchange.ajax.appointment.recurrence;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
-import org.json.JSONException;
 import com.openexchange.ajax.appointment.helper.OXError;
 import com.openexchange.ajax.user.UserResolver;
 import com.openexchange.api2.OXException;
@@ -63,7 +62,6 @@ import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.resource.Resource;
-import com.openexchange.tools.Arrays;
 
 /**
  * These tests use the recurrence_position field to access change exceptions.
@@ -299,7 +297,7 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
         assertTrue("Expecting " + expected + ", but got " + actual, expected.matches(actual));
     }
 
-    public void testShouldFailChangeExceptionIfCreatingOneOnADeleteException() throws OXException {
+    public void testShouldFailChangeExceptionIfCreatingOneOnADeleteException() {
         Appointment app = generateDailyAppointment();
         app.setOccurrence(3);
 
