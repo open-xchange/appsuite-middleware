@@ -25,6 +25,13 @@ postFix() {
 
   GLOBIGNORE='*'
 
+  # SoftwareChange_Request-305
+  # -----------------------------------------------------------------------
+  local pfile=/opt/open-xchange/etc/groupware/mailfilter.properties
+  if ! ox_exists_property com.openexchange.mail.filter.connectionTimeout $pfile; then
+      ox_set_property com.openexchange.mail.filter.connectionTimeout 30000 $pfile
+  fi
+
   # SoftwareChange_Request-228
   # -----------------------------------------------------------------------
   local pfile=/opt/open-xchange/etc/groupware/mailfilter.properties
