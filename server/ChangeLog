@@ -1,3 +1,7 @@
+* 2010-06-08 - marcus.klein@open-xchange.com
+
+ - Bugfix #13960: Corrected values in columns responses of appointments and contacts to get a consistent response to normal get values.
+
 * 2010-06-08 - thorben.betten@open-xchange.com
 
  - Bugfix #15930: Error on creating a mail folder below a public folder

@@ -489,7 +489,7 @@ public class ContactWriter extends CommonWriter {
         m.put(Contact.DEFAULT_ADDRESS, new ContactFieldWriter() {
 
             public void write(final Contact contactObject, final JSONArray jsonArray) {
-                writeValue(contactObject.getDefaultAddress(), jsonArray);
+                writeValue(contactObject.getDefaultAddress(), jsonArray, contactObject.containsDefaultAddress());
             }
         });
 

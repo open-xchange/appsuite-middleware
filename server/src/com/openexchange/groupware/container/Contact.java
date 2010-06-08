@@ -264,7 +264,7 @@ public class Contact extends CommonObject implements Serializable{
 
     public static final int NUMBER_OF_DISTRIBUTIONLIST = 594;
 
-    public static final int NUMBER_OF_LINKS = 595;
+    public static final int CONTACT_NUMBER_OF_LINKS = 595;
 
     public static final int NUMBER_OF_IMAGES = 596;
 
@@ -314,7 +314,7 @@ public class Contact extends CommonObject implements Serializable{
         // From ContactObject itself
         INTERNAL_USERID,
         // Produces error: missing field in mapping: 593 (ContactWriter.java:603)// CONTEXTID,
-        NUMBER_OF_DISTRIBUTIONLIST, NUMBER_OF_LINKS, // NUMBER_OF_IMAGES,
+        NUMBER_OF_DISTRIBUTIONLIST, CONTACT_NUMBER_OF_LINKS, // NUMBER_OF_IMAGES,
         // IMAGE_LAST_MODIFIED, FILE_AS,
         // Produces a MySQLDataException// ATTACHMENT,
         // IMAGE1_CONTENT_TYPE, MARK_AS_DISTRIBUTIONLIST,
@@ -729,10 +729,6 @@ public class Contact extends CommonObject implements Serializable{
     protected boolean b_internal_userId;
 
     protected boolean b_image_last_modified;
-
-    protected boolean b_number_of_links;
-
-    protected int number_of_links;
 
     protected LinkEntryObject[] links;
 
@@ -3483,7 +3479,7 @@ public class Contact extends CommonObject implements Serializable{
         case NUMBER_OF_DISTRIBUTIONLIST:
             setNumberOfDistributionLists( ( (Integer) value ).intValue() );
             break;
-        case NUMBER_OF_LINKS:
+        case CONTACT_NUMBER_OF_LINKS:
             setNumberOfLinks( ((Integer) value).intValue() );
             break;
         case USE_COUNT:
@@ -3702,7 +3698,7 @@ public class Contact extends CommonObject implements Serializable{
             return getDistributionList();
         case NUMBER_OF_DISTRIBUTIONLIST:
             return Integer.valueOf( getNumberOfDistributionLists() );
-        case NUMBER_OF_LINKS:
+        case CONTACT_NUMBER_OF_LINKS:
             return Integer.valueOf( getNumberOfLinks() );
         case USE_COUNT:
             return Integer.valueOf(getUseCount());
@@ -3917,7 +3913,7 @@ public class Contact extends CommonObject implements Serializable{
             return containsDistributionLists();
         case NUMBER_OF_DISTRIBUTIONLIST:
             return containsNumberOfDistributionLists();
-        case NUMBER_OF_LINKS:
+        case CONTACT_NUMBER_OF_LINKS:
             return containsNumberOfLinks();
         case USE_COUNT:
             return containsUseCount();
@@ -4233,7 +4229,7 @@ public class Contact extends CommonObject implements Serializable{
         case NUMBER_OF_DISTRIBUTIONLIST:
             removeNumberOfDistributionLists();
             break;
-        case NUMBER_OF_LINKS:
+        case CONTACT_NUMBER_OF_LINKS:
             removeNumberOfLinks();
             break;
         case USE_COUNT:
