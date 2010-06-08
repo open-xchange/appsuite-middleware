@@ -60,6 +60,7 @@ import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
@@ -214,6 +215,31 @@ public final class UpdatePerformer extends AbstractPerformer {
                 }
                 if (equallyNamedSibling(folder.getName(), treeId, newParentId, openedStorages)) {
                     throw FolderExceptionErrorMessage.EQUAL_NAME.create(folder.getName(), newParentId, treeId);
+                }
+                /*
+                 * Check for forbidden public mail folder
+                 */
+                {
+                    final boolean started = newRealParentStorage.startTransaction(storageParameters, false);
+                    try {
+                        final Folder newParent = newRealParentStorage.getFolder(FolderStorage.REAL_TREE_ID, newParentId, storageParameters);
+                        if ((FolderStorage.PUBLIC_ID.equals(newParent.getID()) || PublicType.getInstance().equals(newParent.getType())) && "mail".equals(storageFolder.getContentType().toString())) {
+                            throw FolderExceptionErrorMessage.NO_PUBLIC_MAIL_FOLDER.create();
+                        }
+                        if (started) {
+                            newRealParentStorage.commitTransaction(storageParameters);
+                        }
+                    } catch (final FolderException e) {
+                        if (started) {
+                            newRealParentStorage.rollback(storageParameters);
+                        }
+                        throw e;
+                    } catch (final Exception e) {
+                        if (started) {
+                            newRealParentStorage.rollback(storageParameters);
+                        }
+                        throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+                    }
                 }
 
                 /*

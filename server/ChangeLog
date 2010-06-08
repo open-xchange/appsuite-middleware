@@ -1,3 +1,7 @@
+* 2010-06-08 - thorben.betten@open-xchange.com
+
+ - Bugfix #15930: Error on creating a mail folder below a public folder
+
 * 2010-06-07 - thorben.betten@open-xchange.com
 
  - Bugfix #15400: If import fields exceed maximum db field lengths, they are truncated instead of not imported.

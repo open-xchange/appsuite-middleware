@@ -61,6 +61,7 @@ import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.internal.CalculatePermission;
+import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
@@ -153,6 +154,9 @@ public final class CreatePerformer extends AbstractPerformer {
                     parentId,
                     getUser().getDisplayName(),
                     Integer.valueOf(getContextId()));
+            }
+            if ((FolderStorage.PUBLIC_ID.equals(parent.getID()) || PublicType.getInstance().equals(parent.getType())) && "mail".equals(toCreate.getContentType().toString())) {
+                throw FolderExceptionErrorMessage.NO_PUBLIC_MAIL_FOLDER.create();
             }
             /*
              * Create folder dependent on folder is virtual or not
