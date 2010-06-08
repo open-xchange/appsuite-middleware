@@ -147,6 +147,13 @@ if [ ${1:-0} -eq 2 ]; then
    # prevent bash from expanding, see bug 13316
    GLOBIGNORE='*'
 
+   # SoftwareChange_Request-293
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/notification.properties
+   if ! ox_exists_property com.openexchange.notification.fromSource $pfile; then
+       ox_set_property com.openexchange.notification.fromSource "primaryMail" $pfile
+   fi
+
    # SoftwareChange_Request-285
    # -----------------------------------------------------------------------
    pfile=/opt/open-xchange/etc/groupware/server.properties
