@@ -27,6 +27,18 @@ postFix() {
   # prevent bash from expanding, see bug 13316
   GLOBIGNORE='*'
 
+  # SoftwareChange_Request-294
+  # -----------------------------------------------------------------------
+  local pfile=/opt/open-xchange/etc/groupware/mailcache.ccf
+  local ptmp=${pfile}.$$
+  if grep -E "^jcs.default" $pfile > /dev/null; then
+      grep -vE "^jcs.default" $pfile > $ptmp
+      if [ -s $ptmp ]; then
+	  cp $ptmp $pfile
+      fi
+      rm -f $ptmp
+  fi
+
   # SoftwareChange_Request-293
   # -----------------------------------------------------------------------
   local pfile=/opt/open-xchange/etc/groupware/notification.properties

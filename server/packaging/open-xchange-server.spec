@@ -147,6 +147,18 @@ if [ ${1:-0} -eq 2 ]; then
    # prevent bash from expanding, see bug 13316
    GLOBIGNORE='*'
 
+   # SoftwareChange_Request-294
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/mailcache.ccf
+   ptmp=${pfile}.$$
+   if grep -E "^jcs.default" $pfile > /dev/null; then
+      grep -vE "^jcs.default" $pfile > $ptmp
+      if [ -s $ptmp ]; then
+	  cp $ptmp $pfile
+      fi
+      rm -f $ptmp
+   fi
+
    # SoftwareChange_Request-293
    # -----------------------------------------------------------------------
    pfile=/opt/open-xchange/etc/groupware/notification.properties
