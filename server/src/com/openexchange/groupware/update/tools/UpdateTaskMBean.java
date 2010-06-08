@@ -213,6 +213,9 @@ public final class UpdateTaskMBean implements DynamicMBean {
             } catch (final RuntimeException e) {
                 LOG.error(e.getMessage(), e);
                 throw e;
+            } catch (final Error e) {
+                LOG.error(e.getMessage(), e);
+                throw e;
             }
             // Void
             return null;
@@ -238,6 +241,9 @@ public final class UpdateTaskMBean implements DynamicMBean {
             } catch (final RuntimeException e) {
                 LOG.error(e.getMessage(), e);
                 throw e;
+            } catch (final Error e) {
+                LOG.error(e.getMessage(), e);
+                throw e;
             }
             // Void
             return null;
@@ -256,6 +262,9 @@ public final class UpdateTaskMBean implements DynamicMBean {
                 final Exception wrapMe = new Exception(e.getMessage());
                 throw new MBeanException(wrapMe);
             } catch (final RuntimeException e) {
+                LOG.error(e.getMessage(), e);
+                throw e;
+            } catch (final Error e) {
                 LOG.error(e.getMessage(), e);
                 throw e;
             }
@@ -280,6 +289,9 @@ public final class UpdateTaskMBean implements DynamicMBean {
             } catch (final RuntimeException e) {
                 LOG.error(e.getMessage(), e);
                 throw e;
+            } catch (final Error e) {
+                LOG.error(e.getMessage(), e);
+                throw e;
             }
             // Void
             return null;
@@ -293,6 +305,9 @@ public final class UpdateTaskMBean implements DynamicMBean {
             } catch (final RuntimeException e) {
                 LOG.error(e.getMessage(), e);
                 throw e;
+            } catch (final Error e) {
+                LOG.error(e.getMessage(), e);
+                throw e;
             }
             // Void
             return null;
@@ -303,6 +318,9 @@ public final class UpdateTaskMBean implements DynamicMBean {
                 LOG.error(e.getMessage(), e);
                 throw new MBeanException(new Exception(e.getMessage()), e.getMessage());
             } catch (final RuntimeException e) {
+                LOG.error(e.getMessage(), e);
+                throw e;
+            } catch (final Error e) {
                 LOG.error(e.getMessage(), e);
                 throw e;
             }
