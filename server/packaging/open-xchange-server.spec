@@ -147,6 +147,15 @@ if [ ${1:-0} -eq 2 ]; then
    # prevent bash from expanding, see bug 13316
    GLOBIGNORE='*'
 
+   # SoftwareChange_Request-308
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/whitelist.properties
+   for prop in html.tag.dd html.tag.dt; do
+      if ! ox_exists_property $prop $pfile; then
+	  ox_set_property $prop '""' $pfile
+      fi
+   done
+
    # SoftwareChange_Request-294
    # -----------------------------------------------------------------------
    pfile=/opt/open-xchange/etc/groupware/mailcache.ccf
