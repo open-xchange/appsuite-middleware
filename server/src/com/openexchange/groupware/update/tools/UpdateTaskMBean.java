@@ -95,7 +95,7 @@ public final class UpdateTaskMBean implements DynamicMBean {
 
     private final MBeanInfo mbeanInfo;
 
-    private String[] taskTypeNames = { "taskName", "successful", "lastModified" };
+    private final String[] taskTypeNames = { "taskName", "successful", "lastModified" };
     private CompositeType taskType;
     private TabularType taskListType;
 
@@ -210,6 +210,9 @@ public final class UpdateTaskMBean implements DynamicMBean {
                 LOG.error(e.getMessage(), e);
                 final Exception wrapMe = new Exception(e.getMessage());
                 throw new MBeanException(wrapMe);
+            } catch (final RuntimeException e) {
+                LOG.error(e.getMessage(), e);
+                throw e;
             }
             // Void
             return null;
@@ -232,6 +235,9 @@ public final class UpdateTaskMBean implements DynamicMBean {
                 LOG.error(e.getMessage(), e);
                 final Exception wrapMe = new Exception(e.getMessage());
                 throw new MBeanException(wrapMe);
+            } catch (final RuntimeException e) {
+                LOG.error(e.getMessage(), e);
+                throw e;
             }
             // Void
             return null;
@@ -249,6 +255,9 @@ public final class UpdateTaskMBean implements DynamicMBean {
                 LOG.error(e.getMessage(), e);
                 final Exception wrapMe = new Exception(e.getMessage());
                 throw new MBeanException(wrapMe);
+            } catch (final RuntimeException e) {
+                LOG.error(e.getMessage(), e);
+                throw e;
             }
         } else if (actionName.equals("force")) {
             try {
@@ -268,6 +277,9 @@ public final class UpdateTaskMBean implements DynamicMBean {
                 LOG.error(e.getMessage(), e);
                 final Exception wrapMe = new Exception(e.getMessage());
                 throw new MBeanException(wrapMe);
+            } catch (final RuntimeException e) {
+                LOG.error(e.getMessage(), e);
+                throw e;
             }
             // Void
             return null;
@@ -278,6 +290,9 @@ public final class UpdateTaskMBean implements DynamicMBean {
                 LOG.error(e.getMessage(), e);
                 final Exception wrapMe = new Exception(e.getMessage());
                 throw new MBeanException(wrapMe);
+            } catch (final RuntimeException e) {
+                LOG.error(e.getMessage(), e);
+                throw e;
             }
             // Void
             return null;
@@ -287,9 +302,14 @@ public final class UpdateTaskMBean implements DynamicMBean {
             } catch (UpdateException e) {
                 LOG.error(e.getMessage(), e);
                 throw new MBeanException(new Exception(e.getMessage()), e.getMessage());
+            } catch (final RuntimeException e) {
+                LOG.error(e.getMessage(), e);
+                throw e;
             }
         }
-        throw new ReflectionException(new NoSuchMethodException(actionName));
+        final ReflectionException e = new ReflectionException(new NoSuchMethodException(actionName));
+        LOG.error(e.getMessage(), e);
+        throw e;
     }
 
     public void setAttribute(final Attribute attribute) throws AttributeNotFoundException {
