@@ -96,8 +96,6 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 	 * 
 	 */
 	private static final long serialVersionUID = 1541427953784271108L;
-		
-	private static final String urlEncodingFormat = "iso-8859-1";
 	
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MobilityProvisioningServlet.class);
 
@@ -198,16 +196,16 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 			msg.setSubject(getProvisioningMailSubject());
 
 			String provisioningUrl = getProvisioningURL();
-			provisioningUrl = provisioningUrl.replace("%l", URLEncoder.encode(session.getLogin(), urlEncodingFormat));
-			provisioningUrl = provisioningUrl.replace("%c", URLEncoder.encode(String.valueOf(session.getContextId()), urlEncodingFormat));
-			provisioningUrl = provisioningUrl.replace("%u", URLEncoder.encode(session.getUserlogin(), urlEncodingFormat));
+			provisioningUrl = provisioningUrl.replace("%l", URLEncoder.encode(session.getLogin(), getProvisioningURLEncoding()));
+			provisioningUrl = provisioningUrl.replace("%c", URLEncoder.encode(String.valueOf(session.getContextId()), getProvisioningURLEncoding()));
+			provisioningUrl = provisioningUrl.replace("%u", URLEncoder.encode(session.getUserlogin(), getProvisioningURLEncoding()));
 			
 			if (deviceId == Device.IPHONE) {
-				provisioningUrl = provisioningUrl.replace("%d", URLEncoder.encode("i", urlEncodingFormat));
+				provisioningUrl = provisioningUrl.replace("%d", URLEncoder.encode("i", getProvisioningURLEncoding()));
 			} else if (deviceId == Device.WINDOWSMOBILE) {
-				provisioningUrl = provisioningUrl.replace("%d", URLEncoder.encode("w", urlEncodingFormat));
+				provisioningUrl = provisioningUrl.replace("%d", URLEncoder.encode("w", getProvisioningURLEncoding()));
 			} else {
-				provisioningUrl = provisioningUrl.replace("%d", URLEncoder.encode("u", urlEncodingFormat));
+				provisioningUrl = provisioningUrl.replace("%d", URLEncoder.encode("u", getProvisioningURLEncoding()));
 			}
 			
 			final TextBodyMailPart textPart = provider.getNewTextBodyPart(provisioningUrl);
@@ -228,6 +226,11 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 	private String getProvisioningURL() throws ServiceException {
 		ConfigurationService configservice = MobilityProvisioningServiceRegistry.getServiceRegistry().getService(ConfigurationService.class,true);
 		return configservice.getProperty("com.openexchange.mobility.provisioning.url"); 
+	}
+	
+	private String getProvisioningURLEncoding() throws ServiceException {
+		ConfigurationService configservice = MobilityProvisioningServiceRegistry.getServiceRegistry().getService(ConfigurationService.class,true);
+		return configservice.getProperty("com.openexchange.mobility.provisioning.urlencoding"); 
 	}
 	
 	private String getProvisioningMailFrom() throws ServiceException {
