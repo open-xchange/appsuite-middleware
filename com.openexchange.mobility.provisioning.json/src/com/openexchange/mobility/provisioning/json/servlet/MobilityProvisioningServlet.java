@@ -184,9 +184,9 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 			Context ctx = ContextStorage.getStorageContext(session);
 			User user = UserStorage.getInstance().getUser(session.getUserId(), ctx);
 			
-			InternetAddress fromAddress = new InternetAddress(getProvisioningMailFrom(), true);
-			if (getProvisioningMailFrom().trim().toUpperCase().equals("USER")) {
-				fromAddress = new InternetAddress(user.getMail(), true);
+			InternetAddress fromAddress = new InternetAddress(user.getMail(), true);
+			if (!getProvisioningMailFrom().trim().toUpperCase().equals("USER")) {
+				fromAddress = new InternetAddress(getProvisioningMailFrom(), true);
 			}
 
 			final com.openexchange.mail.transport.TransportProvider provider =
@@ -198,14 +198,16 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 			msg.setSubject(getProvisioningMailSubject());
 
 			String provisioningUrl = getProvisioningURL();
-			provisioningUrl.replace("%l", URLEncoder.encode(session.getLogin(), urlEncodingFormat));
-			provisioningUrl.replace("%c", URLEncoder.encode(String.valueOf(session.getContextId()), urlEncodingFormat));
-			provisioningUrl.replace("%u", URLEncoder.encode(session.getUserlogin(), urlEncodingFormat));
+			provisioningUrl = provisioningUrl.replace("%l", URLEncoder.encode(session.getLogin(), urlEncodingFormat));
+			provisioningUrl = provisioningUrl.replace("%c", URLEncoder.encode(String.valueOf(session.getContextId()), urlEncodingFormat));
+			provisioningUrl = provisioningUrl.replace("%u", URLEncoder.encode(session.getUserlogin(), urlEncodingFormat));
 			
 			if (deviceId == Device.IPHONE) {
-				provisioningUrl.replace("%d", URLEncoder.encode("i", urlEncodingFormat));
+				provisioningUrl = provisioningUrl.replace("%d", URLEncoder.encode("i", urlEncodingFormat));
 			} else if (deviceId == Device.WINDOWSMOBILE) {
-				provisioningUrl.replace("%d", URLEncoder.encode("w", urlEncodingFormat));
+				provisioningUrl = provisioningUrl.replace("%d", URLEncoder.encode("w", urlEncodingFormat));
+			} else {
+				provisioningUrl = provisioningUrl.replace("%d", URLEncoder.encode("u", urlEncodingFormat));
 			}
 			
 			final TextBodyMailPart textPart = provider.getNewTextBodyPart(provisioningUrl);
