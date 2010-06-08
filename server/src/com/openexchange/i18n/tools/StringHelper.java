@@ -67,6 +67,8 @@ public class StringHelper {
 
     private static final Log LOG = LogFactory.getLog(StringHelper.class);
 
+    private static final boolean DEBUG = LOG.isDebugEnabled();
+
     private Locale locale;
 
     /**
@@ -97,15 +99,15 @@ public class StringHelper {
         try {
             tool = I18nServices.getInstance().getService(locale);
             if (tool == null) {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("No service for " + locale + "  found. Using default for bundle ");
+                if (DEBUG) {
+                    LOG.debug("No service for " + locale + "  found. Using default for bundle ");
                 }
                 return key;
             }
             return tool.getLocalized(key);
         } catch (final MissingResourceException x) {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("MissingResource for " + locale + ". Using default for bundle ");
+            if (DEBUG) {
+                LOG.debug("MissingResource for " + locale + ". Using default for bundle ");
             }
             return key;
         }
