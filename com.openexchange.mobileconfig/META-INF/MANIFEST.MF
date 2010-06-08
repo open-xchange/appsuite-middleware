@@ -8,6 +8,7 @@ Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-Activator: com.openexchange.mobileconfig.osgi.Activator
 Import-Package: com.openexchange.ajax,
  com.openexchange.authentication,
+ com.openexchange.config,
  com.openexchange.groupware,
  com.openexchange.groupware.ldap,
  com.openexchange.groupware.notify.hostname,

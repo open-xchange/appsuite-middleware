@@ -5,8 +5,11 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.mobileconfig.MobileConfigServlet;
+import com.openexchange.mobileconfig.configuration.ConfigurationException;
+import com.openexchange.mobileconfig.configuration.MobileConfigProperties;
 import com.openexchange.mobileconfig.services.MobileConfigServiceRegistry;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
@@ -16,7 +19,7 @@ public class Activator extends DeferredActivator {
 
     private static final Log LOG = LogFactory.getLog(Activator.class);
 
-    private static final Class<?>[] NEEDED_SERVICES = {};
+    private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class };
     private static final String ALIAS = "/servlet/mobileconfig";
 
     private List<ServiceTracker> serviceTrackerList;
@@ -65,6 +68,9 @@ public class Activator extends DeferredActivator {
                 }
             }
         }
+        
+        checkConfiguration();
+        
         serviceTrackerList.add(new ServiceTracker(context, HostnameService.class.getName(), new HostnameInstallationServiceListener(context)));
         
         // Open service trackers
@@ -73,6 +79,10 @@ public class Activator extends DeferredActivator {
         }
 
         register();
+    }
+
+    private void checkConfiguration() throws ConfigurationException {
+        MobileConfigProperties.check(MobileConfigServiceRegistry.getServiceRegistry().getService(ConfigurationService.class));
     }
 
     @Override

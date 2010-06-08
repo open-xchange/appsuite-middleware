@@ -9,6 +9,7 @@ import junit.framework.Assert;
 import org.junit.Test;
 import com.openexchange.mobileconfig.CabUtil;
 import com.openexchange.mobileconfig.MobileConfigServlet;
+import com.openexchange.mobileconfig.configuration.ConfigurationException;
 
 
 public class CabUtilTest extends CabUtil {
@@ -90,7 +91,7 @@ public class CabUtilTest extends CabUtil {
     }
     
     @Test
-    public void testFileGeneration() throws FileNotFoundException, IOException {
+    public void testFileGeneration() throws FileNotFoundException, IOException, ConfigurationException {
         final DataOutputStream pw = new DataOutputStream(new FileOutputStream("test.cab"));
         writeCabFile(pw, MobileConfigServlet.write("xyz@bla.de", "ox6-dev.open-xchange.com", "tara", "user.name"));
         pw.close();

@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.UnknownHostException;
+import java.util.Arrays;
+import java.util.regex.Pattern;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
@@ -13,10 +15,19 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.mobileconfig.configuration.ConfigurationException;
+import com.openexchange.mobileconfig.configuration.MobileConfigProperties;
+import com.openexchange.mobileconfig.services.MobileConfigServiceRegistry;
 
 
 public class MobileConfigServlet extends HttpServlet {
 
+    private enum Device {
+        iPhone,
+        winMob;
+    }
+    
     private static final String CRLF = "\r\n";
     
     private static final transient Log LOG = LogFactory.getLog(MobileConfigServlet.class);
@@ -26,7 +37,8 @@ public class MobileConfigServlet extends HttpServlet {
      */
     private static final long serialVersionUID = 7913468326542861986L;
     
-    public static String write(final String email, final String host, final String displayname, final String username) {
+    public static String write(final String email, final String host, final String displayname, final String username) throws ConfigurationException {
+        final String[] usernameAndDomain = splitUsernameAndDomain(username);
         final StringBuilder sb = new StringBuilder();
         sb.append("<wap-provisioningdoc>" + CRLF);
         sb.append("   <characteristic type=\"Sync\">" + CRLF);
@@ -34,9 +46,9 @@ public class MobileConfigServlet extends HttpServlet {
         sb.append("        <parm name=\"SyncWhenRoaming\" value=\"1\"/>" + CRLF);
         sb.append("        </characteristic>" + CRLF);
         sb.append("        <characteristic type=\"Connection\">" + CRLF);
-        sb.append("            <parm name=\"Domain\" value=\"open-xchange.com\"/>" + CRLF);
-        sb.append("            <parm name=\"Server\" value=\"" + host + "\"/>" + CRLF);
-        sb.append("            <parm name=\"User\" value=\"" + username + "\"/>" + CRLF);
+        sb.append("            <parm name=\"Domain\" value=\"" + usernameAndDomain[1] + "\"/>" + CRLF);
+        sb.append("            <parm name=\"Server\" value=\"" + "ox6-dev.open-xchange.com" + "\"/>" + CRLF);
+        sb.append("            <parm name=\"User\" value=\"" + usernameAndDomain[0] + "\"/>" + CRLF);
         sb.append("\t    <parm name=\"SavePassword\" value=\"1\"/>" + CRLF);
         sb.append("            <parm name=\"URI\" value=\"Microsoft-Server-ActiveSync\"/>" + CRLF);
         sb.append("        <parm name=\"UseSSL\" value=\"1\"/>" + CRLF);
@@ -62,7 +74,28 @@ public class MobileConfigServlet extends HttpServlet {
         return sb.toString();
     }
 
-    public static void writeMobileConfigWinMob(final OutputStream out, final String email, final String host, final String displayname, final String username) throws IOException {
+    /**
+     * Splits the given login into a username and a domain part
+     * @param username
+     * @return An array. Index 0 is the username. Index 1 is the domain
+     * @throws ConfigurationException
+     */
+    protected static String[] splitUsernameAndDomain(String username) throws ConfigurationException {
+        final String domain_user = MobileConfigProperties.getProperty(MobileConfigServiceRegistry.getServiceRegistry().getService(ConfigurationService.class), MobileConfigProperties.Property.DomainUser);
+        final String separator = domain_user.replaceAll("\\$USER|\\$DOMAIN", "");
+        final String[] split = username.split(Pattern.quote(separator));
+        if (split.length != 2) {
+            throw new ConfigurationException("Splitting of login returned wrong length. Array is " + Arrays.toString(split));
+        }
+        if (domain_user.indexOf("$USER") < domain_user.indexOf("$DOMAIN")) {
+            return split;
+        } else {
+            // change position in array...
+            return new String[]{split[1], split[0]};
+        }
+    }
+
+    public static void writeMobileConfigWinMob(final OutputStream out, final String email, final String host, final String displayname, final String username) throws IOException, ConfigurationException {
         CabUtil.writeCabFile(new DataOutputStream(new BufferedOutputStream(out)), write(email, host, displayname, username));
     }
 
@@ -76,13 +109,62 @@ public class MobileConfigServlet extends HttpServlet {
 
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        final String login = req.getParameter("login");
-        if (null == login) {
+        final String iphoneRegEx;
+        final String winMobRegEx;
+        try {
+            iphoneRegEx = MobileConfigProperties.getProperty(MobileConfigServiceRegistry.getServiceRegistry().getService(ConfigurationService.class), MobileConfigProperties.Property.iPhoneRegex);
+            winMobRegEx = MobileConfigProperties.getProperty(MobileConfigServiceRegistry.getServiceRegistry().getService(ConfigurationService.class), MobileConfigProperties.Property.WinMobRegex);
+        } catch (final ConfigurationException e) {
+            LOG.error("A configuration exception occurred, which should not happen: " + e.getMessage(), e);
             final PrintWriter writer = resp.getWriter();
-            writer.println("Parameter login is missing");
+            writer.println("An internal error occurred, please try again later...");
             writer.close();
+            return;
         }
-        generateConfig(req, resp, login);
+        
+        final Device device = detectDevice(req);
+        final String login = req.getParameter("login");
+        if (null == device) {
+            if (null == login) {
+                final PrintWriter writer = resp.getWriter();
+                writer.println("Parameter login is missing");
+                writer.close();
+                return;
+            }
+            String mailpart = "";
+            final String mail = req.getParameter("mail");
+            if (null != mail) {
+                mailpart = "&mail=" + mail;
+            }
+
+            final String header = req.getHeader("user-agent");
+            if (null != header) {
+                if (header.matches(iphoneRegEx)) {
+                    // iPhone part
+                    resp.sendRedirect(resp.encodeRedirectURL("mobileconfig/eas.mobileconfig?login=" + req.getParameter("login") + mailpart));
+                    return;
+                } else if (header.matches(winMobRegEx)) {
+                    // WinMob part
+                    resp.sendRedirect(resp.encodeRedirectURL("mobileconfig/ms.cab?login=" + req.getParameter("login") + mailpart));
+                    return;
+                } else {
+                    final PrintWriter writer = resp.getWriter();
+                    writer.println("No supported device found from header");
+                    writer.close();
+                    return;
+                }
+            }
+        } else {
+            try {
+                generateConfig(req, resp, login, device);
+            } catch (final ConfigurationException e) {
+                LOG.error("A configuration exception occurred, which should not happen: " + e.getMessage(), e);
+                final PrintWriter writer = resp.getWriter();
+                writer.println("An internal error occurred, please try again later...");
+                writer.close();
+                return;
+            }
+        }
 //        final Session session = getSessionObject(req);
 //        Tools.disableCaching(resp);
 //        Tools.deleteCookies(req, resp);
@@ -108,25 +190,31 @@ public class MobileConfigServlet extends HttpServlet {
 //        }
     }
 
-    private void generateConfig(HttpServletRequest req, HttpServletResponse resp, final String login) throws UnknownHostException, IOException {
+    private Device detectDevice(HttpServletRequest req) {
         final String pathInfo = req.getPathInfo();
+        if ("/eas.mobileconfig".equals(pathInfo)) {
+            return Device.iPhone;
+        } else if ("/ms.cab".equals(pathInfo)) {
+            return Device.winMob;
+        } else {
+            return null;
+        }
+    }
+
+    private void generateConfig(HttpServletRequest req, HttpServletResponse resp, final String login, final Device device) throws UnknownHostException, IOException, ConfigurationException {
         String mail = login;
         final String parameter = req.getParameter("mail");
         if (null != parameter) {
             mail = parameter;
         }
-        if ("/eas.mobileconfig".equals(pathInfo)) {
+        if (Device.iPhone.equals(device)) {
             final PrintWriter writer = resp.getWriter();
             writeMobileConfig(writer, mail, getHostname(req), "OX EAS", login);
             writer.close();
-        } else if ("/ms.cab".equals(pathInfo)) {
+        } else if (Device.winMob.equals(device)) {
             final ServletOutputStream outputStream = resp.getOutputStream();
             writeMobileConfigWinMob(outputStream, mail, getHostname(req), "OX EAS", login);
             outputStream.close();
-        } else {
-            final PrintWriter writer = resp.getWriter();
-            writer.println("Device parameter not known");
-            writer.close();
         }
     }
 
