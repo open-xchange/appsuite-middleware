@@ -64,6 +64,7 @@ public final class ContactBugTestSuite extends TestSuite {
         tests.addTestSuite(Bug6335Test.class);
         tests.addTestSuite(Bug12716Test.class);
         tests.addTestSuite(Bug13931Test.class);
+        tests.addTestSuite(Bug13960Test.class);
         tests.addTestSuite(Bug15317Test.class);
         tests.addTestSuite(Bug15315Test.class);
         tests.addTestSuite(Bug15937Test.class);
