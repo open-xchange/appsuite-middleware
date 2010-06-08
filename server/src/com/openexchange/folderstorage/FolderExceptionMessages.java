@@ -148,6 +148,9 @@ public class FolderExceptionMessages implements LocalizableStrings {
     // User "%2$s" must not create subfolders below folder "%2$s" in context "%3$s".
     public static final String NO_CREATE_SUBFOLDERS_MSG = "User \"%2$s\" must not create subfolders below folder \"%2$s\" in context \"%3$s\".";
 
+    // No mail folder allowed below a public folder.
+    public static final String NO_PUBLIC_MAIL_FOLDER_MSG = "No mail folder allowed below a public folder.";
+
     /**
      * Initializes a new {@link FolderExceptionMessages}
      */

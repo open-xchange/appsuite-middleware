@@ -182,7 +182,11 @@ public enum FolderExceptionErrorMessage implements OXErrorMessage {
     /**
      * User "%2$s" must not create subfolders below folder "%2$s" in context "%3$s".
      */
-    NO_CREATE_SUBFOLDERS(FolderExceptionMessages.NO_CREATE_SUBFOLDERS_MSG, Category.PERMISSION, 29);
+    NO_CREATE_SUBFOLDERS(FolderExceptionMessages.NO_CREATE_SUBFOLDERS_MSG, Category.PERMISSION, 29),
+    /**
+     * No mail folder allowed below a public folder.
+     */
+    NO_PUBLIC_MAIL_FOLDER(FolderExceptionMessages.NO_PUBLIC_MAIL_FOLDER_MSG, Category.PERMISSION, 30);
 
     private final Category category;
 
