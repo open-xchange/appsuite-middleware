@@ -1086,7 +1086,7 @@ public class ContactWriter extends CommonWriter {
             };
 
             m.put(CommonObject.NUMBER_OF_LINKS, fieldWriter);
-            m.put(Contact.NUMBER_OF_LINKS, fieldWriter);
+            m.put(Contact.CONTACT_NUMBER_OF_LINKS, fieldWriter);
         }
 
         m.put(Contact.NUMBER_OF_DISTRIBUTIONLIST, new ContactFieldWriter() {
