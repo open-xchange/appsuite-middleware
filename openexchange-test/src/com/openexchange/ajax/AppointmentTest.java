@@ -550,17 +550,13 @@ public class AppointmentTest extends AbstractAJAXTest {
         return listAppointment(webCon, appointmentArray, cols, userTimeZone, host, session);
     }
 
-    public static Appointment[] listAppointment(final WebConversation webCon,
-            final Appointment[] appointmentArray, final int[] cols, final TimeZone userTimeZone,
-            String host, final String session) throws Exception {
+    public static Appointment[] listAppointment(final WebConversation webCon, final Appointment[] appointmentArray, final int[] cols, final TimeZone userTimeZone, String host, final String session) throws Exception {
         host = appendPrefix(host);
 
         final URLParameter parameter = new URLParameter();
         parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
-        parameter.setParameter(AJAXServlet.PARAMETER_ACTION,
-                AJAXServlet.ACTION_LIST);
-        parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, URLParameter
-                .colsArray2String(cols));
+        parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST);
+        parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, URLParameter.colsArray2String(cols));
 
         final JSONArray jsonArray = new JSONArray();
 
@@ -576,12 +572,10 @@ public class AppointmentTest extends AbstractAJAXTest {
             jsonArray.put(jsonObj);
         }
 
-        final ByteArrayInputStream bais = new ByteArrayInputStream(jsonArray
-                .toString().getBytes());
-        final WebRequest req = new PutMethodWebRequest(host + APPOINTMENT_URL
-                + parameter.getURLParameters(), bais, "text/javascript");
+        final ByteArrayInputStream bais = new ByteArrayInputStream(jsonArray.toString().getBytes());
+        final WebRequest req = new PutMethodWebRequest(host + APPOINTMENT_URL + parameter.getURLParameters(), bais, "text/javascript");
         final WebResponse resp = webCon.getResponse(req);
-        final Response response = Response.parse(resp.getText());
+        final Response response = ResponseParser.parse(resp.getText());
 
         if (response.hasError()) {
             throw new TestException("json error: " + response.getErrorMessage());
@@ -591,8 +585,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 
         assertEquals(200, resp.getResponseCode());
 
-        return jsonArray2AppointmentArray((JSONArray) response.getData(), cols,
-                userTimeZone);
+        return jsonArray2AppointmentArray((JSONArray) response.getData(), cols, userTimeZone);
     }
 
     public static Appointment loadAppointment(final WebConversation webCon,
@@ -966,11 +959,8 @@ public class AppointmentTest extends AbstractAJAXTest {
         return appointmentArray;
     }
 
-    public static Appointment[] jsonArray2AppointmentArray(
-            final JSONArray jsonArray, final int[] cols, final TimeZone userTimeZone)
-            throws JSONException, OXConflictException {
-        final Appointment[] appointmentArray = new Appointment[jsonArray
-                .length()];
+    public static Appointment[] jsonArray2AppointmentArray(final JSONArray jsonArray, final int[] cols, final TimeZone userTimeZone) throws JSONException, OXConflictException {
+        final Appointment[] appointmentArray = new Appointment[jsonArray.length()];
 
         for (int a = 0; a < appointmentArray.length; a++) {
             appointmentArray[a] = new Appointment();
@@ -1054,7 +1044,9 @@ public class AppointmentTest extends AbstractAJAXTest {
                 appointmentObj.setNote(jsonArray.getString(pos));
                 break;
             case Appointment.RECURRENCE_POSITION:
-                appointmentObj.setRecurrencePosition(jsonArray.getInt(pos));
+                if (!jsonArray.isNull(pos)) {
+                    appointmentObj.setRecurrencePosition(jsonArray.getInt(pos));
+                }
                 break;
             case Appointment.RECURRENCE_TYPE:
                 if (!jsonArray.isNull(pos)) {
