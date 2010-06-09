@@ -124,7 +124,7 @@ public class GetTest extends AppointmentTest {
         appointmentObj.setLocation("Location");
         appointmentObj.setShownAs(Appointment.FREE);
         appointmentObj.setParentFolderID(appointmentFolderId);
-        appointmentObj.setPrivateFlag(true);
+        appointmentObj.setPrivateFlag(false);
         appointmentObj.setFullTime(true);
         appointmentObj.setLabel(2);
         appointmentObj.setNote("note");
@@ -135,14 +135,10 @@ public class GetTest extends AppointmentTest {
         final int resourceParticipantId = ResourceTest.searchResource(getWebConversation(), resourceParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
 
         final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[4];
-        participants[0] = new UserParticipant();
-        participants[0].setIdentifier(userId);
-        participants[1] = new UserParticipant();
-        participants[1].setIdentifier(userParticipantId);
-        participants[2] = new GroupParticipant();
-        participants[2].setIdentifier(groupParticipantId);
-        participants[3] = new ResourceParticipant();
-        participants[3].setIdentifier(resourceParticipantId);
+        participants[0] = new UserParticipant(userId);
+        participants[1] = new UserParticipant(userParticipantId);
+        participants[2] = new GroupParticipant(groupParticipantId);
+        participants[3] = new ResourceParticipant(resourceParticipantId);
 
         appointmentObj.setParticipants(participants);
 
@@ -178,7 +174,7 @@ public class GetTest extends AppointmentTest {
 
         appointmentObj.setLocation("Location");
         appointmentObj.setShownAs(Appointment.FREE);
-        appointmentObj.setPrivateFlag(true);
+        appointmentObj.setPrivateFlag(false);
         appointmentObj.setFullTime(true);
         appointmentObj.setLabel(2);
         appointmentObj.setNote("note");
