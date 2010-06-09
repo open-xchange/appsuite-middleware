@@ -20,7 +20,7 @@ public class Activator extends DeferredActivator {
     private static final Log LOG = LogFactory.getLog(Activator.class);
 
     private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class };
-    private static final String ALIAS = "/servlet/mobileconfig";
+    public static final String ALIAS = "/servlet/mobileconfig";
 
     private List<ServiceTracker> serviceTrackerList;
 

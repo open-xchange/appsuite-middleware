@@ -4,8 +4,12 @@ import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.UnknownHostException;
+import java.nio.charset.Charset;
+import java.nio.charset.IllegalCharsetNameException;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 import javax.servlet.ServletException;
@@ -18,6 +22,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.mobileconfig.configuration.ConfigurationException;
 import com.openexchange.mobileconfig.configuration.MobileConfigProperties;
+import com.openexchange.mobileconfig.osgi.Activator;
 import com.openexchange.mobileconfig.services.MobileConfigServiceRegistry;
 
 
@@ -37,8 +42,8 @@ public class MobileConfigServlet extends HttpServlet {
      */
     private static final long serialVersionUID = 7913468326542861986L;
     
-    public static String write(final String email, final String host, final String displayname, final String username) throws ConfigurationException {
-        final String[] usernameAndDomain = splitUsernameAndDomain(username);
+    public static String write(final String host, final String username, final String domain) throws ConfigurationException {
+        
         final StringBuilder sb = new StringBuilder();
         sb.append("<wap-provisioningdoc>" + CRLF);
         sb.append("   <characteristic type=\"Sync\">" + CRLF);
@@ -46,9 +51,9 @@ public class MobileConfigServlet extends HttpServlet {
         sb.append("        <parm name=\"SyncWhenRoaming\" value=\"1\"/>" + CRLF);
         sb.append("        </characteristic>" + CRLF);
         sb.append("        <characteristic type=\"Connection\">" + CRLF);
-        sb.append("            <parm name=\"Domain\" value=\"" + usernameAndDomain[1] + "\"/>" + CRLF);
-        sb.append("            <parm name=\"Server\" value=\"" + "ox6-dev.open-xchange.com" + "\"/>" + CRLF);
-        sb.append("            <parm name=\"User\" value=\"" + usernameAndDomain[0] + "\"/>" + CRLF);
+        sb.append("            <parm name=\"Domain\" value=\"" + domain + "\"/>" + CRLF);
+        sb.append("            <parm name=\"Server\" value=\"" + host + "\"/>" + CRLF);
+        sb.append("            <parm name=\"User\" value=\"" + username + "\"/>" + CRLF);
         sb.append("\t    <parm name=\"SavePassword\" value=\"1\"/>" + CRLF);
         sb.append("            <parm name=\"URI\" value=\"Microsoft-Server-ActiveSync\"/>" + CRLF);
         sb.append("        <parm name=\"UseSSL\" value=\"1\"/>" + CRLF);
@@ -74,6 +79,10 @@ public class MobileConfigServlet extends HttpServlet {
         return sb.toString();
     }
 
+    private static void writeMobileConfigWinMob(final OutputStream out, final String host, final String username, final String domain) throws IOException, ConfigurationException {
+        CabUtil.writeCabFile(new DataOutputStream(new BufferedOutputStream(out)), write(host, username, domain));
+    }
+
     /**
      * Splits the given login into a username and a domain part
      * @param username
@@ -95,10 +104,6 @@ public class MobileConfigServlet extends HttpServlet {
         }
     }
 
-    public static void writeMobileConfigWinMob(final OutputStream out, final String email, final String host, final String displayname, final String username) throws IOException, ConfigurationException {
-        CabUtil.writeCabFile(new DataOutputStream(new BufferedOutputStream(out)), write(email, host, displayname, username));
-    }
-
 //    private void doLogout(final Session session) {
 //        try {
 //            LoginPerformer.getInstance().doLogout(session.getSessionID());
@@ -116,9 +121,7 @@ public class MobileConfigServlet extends HttpServlet {
             winMobRegEx = MobileConfigProperties.getProperty(MobileConfigServiceRegistry.getServiceRegistry().getService(ConfigurationService.class), MobileConfigProperties.Property.WinMobRegex);
         } catch (final ConfigurationException e) {
             LOG.error("A configuration exception occurred, which should not happen: " + e.getMessage(), e);
-            final PrintWriter writer = resp.getWriter();
-            writer.println("An internal error occurred, please try again later...");
-            writer.close();
+            printError(resp, "An internal error occurred, please try again later...");
             return;
         }
         
@@ -126,9 +129,7 @@ public class MobileConfigServlet extends HttpServlet {
         final String login = req.getParameter("login");
         if (null == device) {
             if (null == login) {
-                final PrintWriter writer = resp.getWriter();
-                writer.println("Parameter login is missing");
-                writer.close();
+                printError(resp, "Parameter login is missing");
                 return;
             }
             String mailpart = "";
@@ -141,16 +142,14 @@ public class MobileConfigServlet extends HttpServlet {
             if (null != header) {
                 if (header.matches(iphoneRegEx)) {
                     // iPhone part
-                    resp.sendRedirect(resp.encodeRedirectURL("mobileconfig/eas.mobileconfig?login=" + req.getParameter("login") + mailpart));
+                    resp.sendRedirect(Activator.ALIAS + "/eas.mobileconfig?login=" + req.getParameter("login") + mailpart);
                     return;
                 } else if (header.matches(winMobRegEx)) {
                     // WinMob part
-                    resp.sendRedirect(resp.encodeRedirectURL("mobileconfig/ms.cab?login=" + req.getParameter("login") + mailpart));
+                    resp.sendRedirect(Activator.ALIAS + "/ms.cab?login=" + req.getParameter("login") + mailpart);
                     return;
                 } else {
-                    final PrintWriter writer = resp.getWriter();
-                    writer.println("No supported device found from header");
-                    writer.close();
+                    printError(resp, "No supported device found from header");
                     return;
                 }
             }
@@ -159,9 +158,7 @@ public class MobileConfigServlet extends HttpServlet {
                 generateConfig(req, resp, login, device);
             } catch (final ConfigurationException e) {
                 LOG.error("A configuration exception occurred, which should not happen: " + e.getMessage(), e);
-                final PrintWriter writer = resp.getWriter();
-                writer.println("An internal error occurred, please try again later...");
-                writer.close();
+                printError(resp, "An internal error occurred, please try again later...");
                 return;
             }
         }
@@ -207,13 +204,14 @@ public class MobileConfigServlet extends HttpServlet {
         if (null != parameter) {
             mail = parameter;
         }
+        final String[] usernameAndDomain = splitUsernameAndDomain(login);
         if (Device.iPhone.equals(device)) {
-            final PrintWriter writer = resp.getWriter();
-            writeMobileConfig(writer, mail, getHostname(req), "OX EAS", login);
+            final PrintWriter writer = getWriterFromOutputStream(resp.getOutputStream());
+            writeMobileConfig(writer, mail, getHostname(req), "OX EAS", usernameAndDomain[0], usernameAndDomain[1]);
             writer.close();
         } else if (Device.winMob.equals(device)) {
             final ServletOutputStream outputStream = resp.getOutputStream();
-            writeMobileConfigWinMob(outputStream, mail, getHostname(req), "OX EAS", login);
+            writeMobileConfigWinMob(outputStream, getHostname(req), usernameAndDomain[0], usernameAndDomain[1]);
             outputStream.close();
         }
     }
@@ -227,7 +225,41 @@ public class MobileConfigServlet extends HttpServlet {
         return canonicalHostName;
     }
 
-    private void writeMobileConfig(final PrintWriter printWriter, final String email, final String host, final String displayname, final String username) {
+    private PrintWriter getWriterFromOutputStream(ServletOutputStream outputStream) {
+        try {
+            return new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(outputStream), Charset.forName("UTF-8")));
+        } catch (final IllegalCharsetNameException e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
+        } catch (final UnsupportedCharsetException e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    private void printError(final HttpServletResponse resp, final String string) throws IOException {
+        resp.setContentType("text/html");
+        final PrintWriter writer = getWriterFromOutputStream(resp.getOutputStream());
+        writer.println("<html><head>");
+        writer.println("<meta name=\"viewport\" content=\"width=320\" />");
+        writer.println("<meta name=\"mobileoptimized\" content=\"0\" />");
+        writer.println("<title>Error</title>");
+        writer.println("<style type=\"text/css\">");
+        writer.println("table { height: 100%; width:100% }");
+        writer.println("td { text-align:center; vertical-align:middle; }");
+        writer.println("</style>");
+        writer.println("</head>");
+        writer.println("<body>");
+        writer.println("<table>");
+        writer.println("<tr>");
+        writer.println("<td><h1>" + string + "</h1></td>");
+        writer.println("</tr>");
+        writer.println("</table>");
+        writer.println("</body></html>");
+        writer.close();
+    }
+
+    private void writeMobileConfig(final PrintWriter printWriter, final String email, final String host, final String displayname, final String username, String domain) {
         try {
             printWriter.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
             printWriter.println("<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">");
@@ -242,8 +274,8 @@ public class MobileConfigServlet extends HttpServlet {
             printWriter.println("           <string>" + host + "</string>");
 //            printWriter.println("           <key>Password</key>");
 //            printWriter.println("           <string>" + password + "</string>");
-            printWriter.println("           <key>PayloadDescription</key>");
-            printWriter.println("           <string>Geräte für die Verwendung mit Microsoft Exchange-ActiveSync-Diensten konfigurieren.</string>");
+            //printWriter.println("           <key>PayloadDescription</key>");
+            //printWriter.println("           <string>Geräte für die Verwendung mit Microsoft Exchange-ActiveSync-Diensten konfigurieren.</string>");
             printWriter.println("           <key>PayloadDisplayName</key>");
             printWriter.println("           <string>" + displayname + "</string>");
             printWriter.println("           <key>PayloadIdentifier</key>");
