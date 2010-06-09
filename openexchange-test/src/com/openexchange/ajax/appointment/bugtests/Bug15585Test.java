@@ -59,7 +59,7 @@ import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.resource.ResourceTools;
-import com.openexchange.groupware.calendar.ConflictTools;
+import com.openexchange.calendar.ConflictTools;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.ResourceParticipant;
