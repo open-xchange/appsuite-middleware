@@ -86,6 +86,7 @@
 	<target name="installConfig">
 		<mkdir dir="${destdir}/${bundle.d}" />
 		<echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}" />
+	    <copy file="etc/mobileconfig.properties" todir="${destdir}/${conf.install.dir}"/>
 	</target>
 
 	<target name="installJar" depends="jar">
