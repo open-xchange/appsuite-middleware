@@ -437,7 +437,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
     /* (non-Javadoc)
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#getAllVisibleAndReadableFolderObject(int, int[], com.openexchange.groupware.contexts.Context, com.openexchange.groupware.userconfiguration.UserConfiguration, java.sql.Connection)
      */
-    public CalendarFolderObject getAllVisibleAndReadableFolderObject(int uid, int[] groups, Context c, UserConfiguration uc, Connection readcon) throws SQLException, DBPoolingException, SearchIteratorException, OXException {
+    public CalendarFolderObject getAllVisibleAndReadableFolderObject(int uid, int[] groups, Context c, UserConfiguration uc) throws SQLException, DBPoolingException, SearchIteratorException, OXException {
         // TODO Auto-generated method stub
         return null;
     }
