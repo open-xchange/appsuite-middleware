@@ -1,3 +1,7 @@
+* 2010-06-09 - marcus.klein@open-xchange.com
+
+ - Bugfix #15585: Corrected SQL query for finding the private folder information for free busy results.
+
 * 2010-06-08 - marcus.klein@open-xchange.com
 
  - Bugfix #13960: Corrected values in columns responses of appointments and contacts to get a consistent response to normal get values.

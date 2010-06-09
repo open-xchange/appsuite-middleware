@@ -467,7 +467,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     public final PreparedStatement getResourceConflictsPrivateFolderInformation(final Context c, final java.util.Date d1, final java.util.Date d2, final java.util.Date d3, final java.util.Date d4, final Connection readcon, final String resource_sql_in) throws SQLException {
         final StringBuilder sb = new StringBuilder(184);
-        sb.append("SELECT pdm.object_id, pdm.pfid, pdm.member_uid FROM prg_dates ");
+        sb.append("SELECT pdm.object_id, pdm.pfid, pdm.member_uid FROM prg_dates");
         sb.append(JOIN_PARTICIPANTS);
         sb.append(c.getContextId());
         sb.append(" AND pdr.cid = ");
@@ -475,17 +475,15 @@ public class CalendarMySQL implements CalendarSqlImp {
         sb.append(" JOIN prg_dates_members pdm ON pd.intfield01 = pdm.object_id AND pdm.cid = ");
         sb.append(c.getContextId());
         sb.append(WHERE);
-        getConflictRangeFullTime(sb);
+        getConflictRange(sb);
         sb.append(" AND pdr.id IN ");
         sb.append(resource_sql_in);
         sb.append(" AND pdr.type = ");
         sb.append(Participant.RESOURCE);
         sb.append(" AND pd.intfield06 != ");
         sb.append(Appointment.FREE);
-
         sb.append(UNION);
-
-        sb.append("SELECT pdm.object_id, pdm.pfid, pdm.member_uid FROM prg_dates ");
+        sb.append("SELECT pdm.object_id, pdm.pfid, pdm.member_uid FROM prg_dates");
         sb.append(JOIN_PARTICIPANTS);
         sb.append(c.getContextId());
         sb.append(" AND pdr.cid = ");
@@ -500,9 +498,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         sb.append(Participant.RESOURCE);
         sb.append(" AND pd.intfield06 != ");
         sb.append(Appointment.FREE);
-
         sb.append(PDM_GROUP_BY_INTFIELD01);
-        // sb.append(ORDER_BY_TS1);
         final PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
         pst.setTimestamp(1, new Timestamp(d2.getTime()));
         pst.setTimestamp(2, new Timestamp(d1.getTime()));
