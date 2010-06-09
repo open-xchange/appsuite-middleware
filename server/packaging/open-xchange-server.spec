@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 6
+%define		ox_release 7
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -536,6 +536,23 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Tue Jun 08 2010 - thorben.betten@open-xchange.com
+ - Bugfix #15930: Error on creating a mail folder below a public folder
+* Tue Jun 08 2010 - marcus.klein@open-xchange.com
+ - Bugfix #13960: Corrected values in columns responses of appointments and contacts to get a consistent response to normal get values.
+* Mon Jun 07 2010 - thorben.betten@open-xchange.com
+ - Bugfix #16267: Marking shared folder as non-default folder
+ - Bugfix #16228: Proper order of delete listeners and more robust implementation
+ - Bugfix #15901: Allowing additional list tags in whitelist.properties (<dl>, <dt>, <dd>)
+* Mon Jun 07 2010 - thorben.betten@open-xchange.com
+ - Bugfix #15400: If import fields exceed maximum db field lengths, they are truncated instead of not imported.
+* Fri Jun 04 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16227: If session migration takes place multiple threads asking for a session are serialized.
+ - Bugfix #16224: The list of known tasks is searched for the requested update task if they should be started through JMX interface.
+* Fri Jun 04 2010 - karsten.will@open-xchange.com
+ - Bugfix #16244 - Wizard always checks for e-mail account, even if "Contacts only" is selected
+* Fri Jun 04 2010 - steffen.templin@open-xchange.com
+ - Bugfix #15229 - Escaped colons in VCards don't cause parser exceptions anymore.
 * Tue Jun 01 2010 - thorben.betten@open-xchange.com
  - Bugfix #15856: Proper resource prefix in notification mail if content is multipart/*
  - Bugfix #15914: Changed module of root folder to "system"
@@ -559,7 +576,7 @@ fi
 * Tue Jun 01 2010 - marcus.klein@open-xchange.com
  - Bugfix #16158: Putting session back into first container must be done having a write lock.
 * Tue Jun 01 2010 - karsten.will@open-xchange.com
- - Bugfix #16160 - (Subscriptions) UID collision detected even if the user does not have any other appointments
+ - Bugfix #16160: (Subscriptions) UID collision detected even if the user does not have any other appointments.
 * Mon May 31 2010 - steffen.templin@open-xchange.com
  - Bugfix #15590: Moving an appointment to a shared folder doesn't cause "Unknown SQL-Exception" anymore.
 * Mon May 31 2010 - thorben.betten@open-xchange.com

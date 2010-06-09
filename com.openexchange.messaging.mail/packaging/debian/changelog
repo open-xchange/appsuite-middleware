@@ -1,3 +1,9 @@
+open-xchange-messaging-mail (6.17.0.0-6) unstable; urgency=low
+
+  * first build for 6.17-rev7
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed,  9 Jun 2010 14:25:31 +0200
+
 open-xchange-messaging-mail (6.17.0.0-5) unstable; urgency=low
 
   * First build for 6.17 Rev6

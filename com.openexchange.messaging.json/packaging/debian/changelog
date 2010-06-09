@@ -1,3 +1,9 @@
+open-xchange-messaging-json (6.17.0.0-7) unstable; urgency=low
+
+  * first build for 6.17-rev7
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed,  9 Jun 2010 14:25:24 +0200
+
 open-xchange-messaging-json (6.17.0.0-6) unstable; urgency=low
 
   * First build for 6.17 Rev6
