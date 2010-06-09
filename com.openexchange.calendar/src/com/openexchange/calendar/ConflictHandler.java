@@ -262,11 +262,13 @@ public class ConflictHandler {
         } catch (final DBPoolingException dbpe) {
             throw new OXException(dbpe);
         } finally {
-            if (close_connection && si != null) {
-                try {
-                    si.close();
-                } catch (final SearchIteratorException sie) {
-                    LOG.error("Error closing SearchIterator" ,sie);
+            if (close_connection) {
+                if (null != si) {
+                    try {
+                        si.close();
+                    } catch (final SearchIteratorException sie) {
+                        LOG.error("Error closing SearchIterator" ,sie);
+                    }
                 }
                 recColl.closeResultSet(rs);
                 recColl.closePreparedStatement(prep);
