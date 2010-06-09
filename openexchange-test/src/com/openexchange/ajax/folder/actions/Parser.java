@@ -79,7 +79,12 @@ public final class Parser {
             if (value instanceof Integer) {
                 folder.setObjectID(((Integer) value).intValue());
             } else if (value instanceof String) {
-                folder.setFullName((String) value);
+                String valueS = (String) value;
+                try {
+                    folder.setObjectID(Integer.parseInt(valueS));
+                } catch (NumberFormatException e) {
+                    folder.setFullName((String) value);
+                }
             }
             break;
         case FolderObject.MODULE:
