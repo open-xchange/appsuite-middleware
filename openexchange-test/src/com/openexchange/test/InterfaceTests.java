@@ -52,10 +52,19 @@ package com.openexchange.test;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-public class InterfaceTests {
+/**
+ * Test suite for all AJAX interface tests.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
+public final class InterfaceTests {
 
-    public static Test suite() {
-		final TestSuite tests = new TestSuite();
+    private InterfaceTests() {
+        super();
+    }
+
+    public static final Test suite() {
+        final TestSuite tests = new TestSuite();
         // First of all the smoke tests.
         tests.addTest(com.openexchange.SmokeTestSuite.suite());
 
@@ -86,20 +95,19 @@ public class InterfaceTests {
         tests.addTest(com.openexchange.ajax.user.UserAJAXSuite.suite());
         tests.addTest(com.openexchange.ajax.importexport.VCardTestSuite.suite());
 
-		tests.addTest(com.openexchange.webdav.xml.appointment.AppointmentWebdavSuite.suite());
-		tests.addTest(com.openexchange.webdav.xml.contact.ContactWebdavSuite.suite());
-		tests.addTest(com.openexchange.webdav.xml.folder.FolderWebdavSuite.suite());
-		tests.addTest(com.openexchange.webdav.xml.task.TaskWebdavSuite.suite());
-		tests.addTest(com.openexchange.webdav.xml.attachment.AttachmentWebdavSuite.suite());
-		
-		tests.addTestSuite(com.openexchange.ajax.roundtrip.pubsub.OXMFContactLifeCycleTest.class);
-		tests.addTestSuite(com.openexchange.webdav.xml.GroupUserTest.class);
-		/* TODO Enable the following test again. But this requires fixing the server. Currently the request fails.
-		tests.addTestSuite(com.openexchange.webdav.client.NaughtyClientTest.class); */
-		tests.addTestSuite(com.openexchange.ajax.FunambolTests.class);
-		tests.addTestSuite(com.openexchange.webdav.client.SmokeTest.class);
-        
-		return tests;
-	}
+        tests.addTest(com.openexchange.webdav.xml.appointment.AppointmentWebdavSuite.suite());
+        tests.addTest(com.openexchange.webdav.xml.contact.ContactWebdavSuite.suite());
+        tests.addTest(com.openexchange.webdav.xml.folder.FolderWebdavSuite.suite());
+        tests.addTest(com.openexchange.webdav.xml.task.TaskWebdavSuite.suite());
+        tests.addTest(com.openexchange.webdav.xml.attachment.AttachmentWebdavSuite.suite());
 
+        tests.addTest(com.openexchange.ajax.roundtrip.pubsub.PubSubSuite.suite());
+        tests.addTestSuite(com.openexchange.webdav.xml.GroupUserTest.class);
+        /* TODO Enable the following test again. But this requires fixing the server. Currently the request fails.
+        tests.addTestSuite(com.openexchange.webdav.client.NaughtyClientTest.class); */
+        tests.addTestSuite(com.openexchange.ajax.FunambolTests.class);
+        tests.addTestSuite(com.openexchange.webdav.client.SmokeTest.class);
+        
+        return tests;
+    }
 }
