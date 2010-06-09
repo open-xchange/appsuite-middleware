@@ -124,7 +124,7 @@ public class UserStory1085Test extends AppointmentTest {
         insertResponse.fillObject(appointmenShare);
         
         appointmentPrivate = new Appointment();
-        appointmentPrivate.setTitle("Private");
+        appointmentPrivate.setTitle("Title of private flagged appointment");
         appointmentPrivate.setStartDate(D("01.02.2009 12:00"));
         appointmentPrivate.setEndDate(D("01.02.2009 14:00"));
         appointmentPrivate.setPrivateFlag(true);
@@ -134,7 +134,7 @@ public class UserStory1085Test extends AppointmentTest {
         insertResponse.fillObject(appointmentPrivate);
         
         appointmentNormal = new Appointment();
-        appointmentNormal.setTitle("Title");
+        appointmentNormal.setTitle("Title of appointment in not shared folder");
         appointmentNormal.setStartDate(D("01.02.2009 12:00"));
         appointmentNormal.setEndDate(D("01.02.2009 14:00"));
         appointmentNormal.setIgnoreConflicts(true);
@@ -187,12 +187,12 @@ public class UserStory1085Test extends AppointmentTest {
     }
     
     private void validatePrivate(Appointment app) {
-        assertNull("No title expected", app.getTitle());
+        assertFalse("No title for private flagged appointment expected but found: " + app.getTitle(), appointmentPrivate.getTitle().equals(app.getTitle()));
         assertFalse("No folderId expected", app.containsParentFolderID());
     }
 
     private void validateNormal(Appointment app) {
-        assertNull("No title expected", app.getTitle());
+        assertFalse("No title for appointment in not shared folder expected but found: " + app.getTitle(), appointmentNormal.getTitle().equals(app.getTitle()));
         assertFalse("No folderId expected", app.containsParentFolderID());
     }
 
