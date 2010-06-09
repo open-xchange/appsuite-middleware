@@ -310,8 +310,8 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
 
     private void fillDetails(final CalendarDataObject cdao) throws OXException {
         if (show_details) {
-            cdao.setTitle(title);
-            if(checkPermissions()) {                
+            if (checkPermissions()) {                
+                cdao.setTitle(title);
                 cdao.setParentFolderID(readFolderId);
                 cdao.setLabel(colorLabel);
                 cdao.setCategories(categories);
