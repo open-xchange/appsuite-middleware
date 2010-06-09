@@ -624,8 +624,8 @@ public class FolderTest extends AbstractAJAXTest {
             "" + FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
             false,
             true);
-        for (final Iterator iter = subfolders.iterator(); iter.hasNext();) {
-            final FolderObject subfolder = (FolderObject) iter.next();
+        for (final Iterator<FolderObject> iter = subfolders.iterator(); iter.hasNext();) {
+            final FolderObject subfolder = iter.next();
             if (subfolder.getModule() == FolderObject.CALENDAR && subfolder.isDefaultFolder()) {
                 return subfolder;
             }
