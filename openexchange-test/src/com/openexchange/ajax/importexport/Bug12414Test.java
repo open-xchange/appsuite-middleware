@@ -102,14 +102,7 @@ public final class Bug12414Test extends AbstractAJAXSession {
         final VCardImportResponse importR = client.execute(request);
         assertEquals("Missing import response.", 1, importR.size());
         final Response response = importR.get(0);
-        assertTrue("To long field not detected.", response.hasError());
-        final AbstractOXException e = response.getException();
-        assertEquals("Truncated information missing.", 1, e.getProblematics().length);
-        ProblematicAttribute problem = e.getProblematics()[0];
-        assertTrue("Not a truncated problem.", problem instanceof Truncated);
-        Truncated truncated = (Truncated) problem;
-        assertEquals("Some other attribute is reported as truncated.",
-            Contact.DISPLAY_NAME, truncated.getId());
+        assertFalse("No error occurs.", response.hasError());
     }
 
     public static final String vCard =
