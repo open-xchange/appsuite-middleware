@@ -57,14 +57,12 @@ import com.openexchange.ajax.subscribe.test.SubscriptionTestManager;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.SimPublicationTargetDiscoveryService;
 import com.openexchange.publish.json.PublicationJSONException;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.tools.servlet.AjaxException;
-
 
 /**
  * {@link DoNotDuplicateEmptyContactsTest}
