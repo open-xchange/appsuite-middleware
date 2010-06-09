@@ -459,6 +459,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              */
             try {
                 imapStore.connect(config.getServer(), config.getPort(), login, tmpPass);
+                // final Throwable stack = new Throwable();
             } catch (final AuthenticationFailedException e) {
                 /*
                  * Remember failed authentication's credentials (for a short amount of time) to fasten subsequent connect trials
@@ -470,12 +471,15 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                  * TODO: Re-think if exception's message should be part of condition or just checking if nested exception is an instance of
                  * SocketTimeoutException
                  */
-                if (tmpDownEnabled && SocketTimeoutException.class.isInstance(e.getNextException()) && ((SocketTimeoutException) e.getNextException()).getMessage().toLowerCase(
-                    Locale.ENGLISH).indexOf(ERR_CONNECT_TIMEOUT) != -1) {
-                    /*
-                     * Remember a timed-out IMAP server on connect attempt
-                     */
-                    timedOutServers.put(new HostAndPort(config.getServer(), config.getPort()), Long.valueOf(System.currentTimeMillis()));
+                if (tmpDownEnabled) {
+                    final Exception nextException = e.getNextException();
+                    if (SocketTimeoutException.class.isInstance(nextException) && ((SocketTimeoutException) nextException).getMessage().toLowerCase(
+                        Locale.ENGLISH).indexOf(ERR_CONNECT_TIMEOUT) != -1) {
+                        /*
+                         * Remember a timed-out IMAP server on connect attempt
+                         */
+                        timedOutServers.put(new HostAndPort(config.getServer(), config.getPort()), Long.valueOf(System.currentTimeMillis()));
+                    }
                 }
                 throw e;
             }
