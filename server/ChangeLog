@@ -2,6 +2,9 @@
 
  - Bugfix #16035: checkconfigconsistency should check if correct cache.ccf is
    used in system.properties
+ - Bugfix #14500 - Warnings due to missing LSB information
+  added LSB Headers to debian init-script, which are not interpreted at all...
+
 
 * 2010-06-09 - marcus.klein@open-xchange.com
 
