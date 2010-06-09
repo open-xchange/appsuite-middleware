@@ -47,54 +47,12 @@
  *
  */
 
-package com.openexchange.ajax.appointment;
-
-import com.openexchange.ajax.appointment.bugtests.Bug10154Test;
-import com.openexchange.ajax.appointment.bugtests.Bug10733Test;
-import com.openexchange.ajax.appointment.bugtests.Bug10836Test;
-import com.openexchange.ajax.appointment.bugtests.Bug11250Test;
-import com.openexchange.ajax.appointment.bugtests.Bug11865Test;
-import com.openexchange.ajax.appointment.bugtests.Bug12099Test;
-import com.openexchange.ajax.appointment.bugtests.Bug12264Test;
-import com.openexchange.ajax.appointment.bugtests.Bug12326Test;
-import com.openexchange.ajax.appointment.bugtests.Bug12372Test;
-import com.openexchange.ajax.appointment.bugtests.Bug12432Test;
-import com.openexchange.ajax.appointment.bugtests.Bug12444Test;
-import com.openexchange.ajax.appointment.bugtests.Bug12463Test;
-import com.openexchange.ajax.appointment.bugtests.Bug12509Test;
-import com.openexchange.ajax.appointment.bugtests.Bug12610Test;
-import com.openexchange.ajax.appointment.bugtests.Bug12842Test;
-import com.openexchange.ajax.appointment.bugtests.Bug13027Test;
-import com.openexchange.ajax.appointment.bugtests.Bug13214Test;
-import com.openexchange.ajax.appointment.bugtests.Bug13447Test;
-import com.openexchange.ajax.appointment.bugtests.Bug13501Test;
-import com.openexchange.ajax.appointment.bugtests.Bug13505Test;
-import com.openexchange.ajax.appointment.bugtests.Bug13625Test;
-import com.openexchange.ajax.appointment.bugtests.Bug13788Test;
-import com.openexchange.ajax.appointment.bugtests.Bug13826Test;
-import com.openexchange.ajax.appointment.bugtests.Bug13942Test;
-import com.openexchange.ajax.appointment.bugtests.Bug13960Test;
-import com.openexchange.ajax.appointment.bugtests.Bug14357Test;
-import com.openexchange.ajax.appointment.bugtests.Bug14679Test;
-import com.openexchange.ajax.appointment.bugtests.Bug15074Test;
-import com.openexchange.ajax.appointment.bugtests.Bug15585Test;
-import com.openexchange.ajax.appointment.bugtests.Bug15590Test;
-import com.openexchange.ajax.appointment.bugtests.Bug15903Test;
-import com.openexchange.ajax.appointment.bugtests.Bug15937Test;
-import com.openexchange.ajax.appointment.bugtests.Bug16151Test;
-import com.openexchange.ajax.appointment.bugtests.Bug16194Test;
-import com.openexchange.ajax.appointment.bugtests.Bug4392Test;
-import com.openexchange.ajax.appointment.bugtests.Bug4541Test;
-import com.openexchange.ajax.appointment.bugtests.Bug6055Test;
-import com.openexchange.ajax.appointment.bugtests.Bug8317Test;
-import com.openexchange.ajax.appointment.bugtests.Bug8724Test;
-import com.openexchange.ajax.appointment.bugtests.Bug8836Test;
-import com.openexchange.ajax.appointment.bugtests.Bug9089Test;
-import com.openexchange.ajax.appointment.recurrence.Bug12212Test;
-import com.openexchange.ajax.appointment.recurrence.Bug12495Test;
+package com.openexchange.ajax.appointment.bugtests;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import com.openexchange.ajax.appointment.recurrence.Bug12212Test;
+import com.openexchange.ajax.appointment.recurrence.Bug12495Test;
 
 /**
  * Suite for appointment bug tests.
