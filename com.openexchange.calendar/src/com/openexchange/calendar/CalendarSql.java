@@ -1087,7 +1087,7 @@ public class CalendarSql implements AppointmentSQLInterface {
             cols = recColl.checkAndAlterCols(cols);
             CalendarFolderObject cfo = null;
             try {
-                cfo = recColl.getAllVisibleAndReadableFolderObject(session.getUserId(), user.getGroups(), ctx, userConfig, readcon);
+                cfo = recColl.getAllVisibleAndReadableFolderObject(session.getUserId(), user.getGroups(), ctx, userConfig);
             } catch (final DBPoolingException dbpe) {
                 throw new OXException(dbpe);
             } catch (final SearchIteratorException sie) {

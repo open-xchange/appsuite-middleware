@@ -78,12 +78,11 @@ import com.openexchange.server.impl.DBPool;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 
-
 /**
  * FreeBusyResults
+ *
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  */
-
 public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
     
     public final static int MAX_SHOW_USER_PARTICIPANTS = 5;
@@ -409,9 +408,8 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
     }
     
     private final void preFillPermissionArray(final int groups[], final UserConfiguration uc) throws OXException {
-        final Connection readcon = null;
         try {
-            cfo = recColl.getAllVisibleAndReadableFolderObject(uid, groups, c, uc, readcon);
+            cfo = recColl.getAllVisibleAndReadableFolderObject(uid, groups, c, uc);
         } catch (final OXException ex) {
             throw new OXException(ex);
         } catch (final DBPoolingException ex) {
@@ -420,10 +418,6 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
             throw new OXException(ex);
         } catch (final SQLException ex) {
             throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, ex);
-        } finally {
-            if (readcon != null) {
-                DBPool.closeReaderSilent(c, readcon);
-            }
         }
     }
     
@@ -506,32 +500,32 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
         try {
             
 
-            ResultSet rs = private_folder_information.executeQuery();
-            while (rs.next()) {
-                object_id = rs.getInt(1);
-                pfid = rs.getInt(2);
-                uid = rs.getInt(3);
-                if (!rs.wasNull()) {
+            ResultSet result = private_folder_information.executeQuery();
+            while (result.next()) {
+                object_id = result.getInt(1);
+                pfid = result.getInt(2);
+                uid = result.getInt(3);
+                if (!result.wasNull()) {
                     final PrivateFolderInformationObject pfio = new PrivateFolderInformationObject(object_id, pfid, uid);
                     list.add(pfio);
                 }
             }
-            rs.close();
+            result.close();
             // Add shared folders and check if there are such shared folders
             if (! cfo.getSharedFolderList().isEmpty()) {
                 shared_folder_info = calendarsqlimp.getSharedAppointmentFolderQuery(c, cfo, con);
     
-                rs = shared_folder_info.executeQuery();
-                while (rs.next()) {
-                    object_id = rs.getInt(1);
-                    pfid = rs.getInt(2);
-                    uid = rs.getInt(3);
-                    if (!rs.wasNull()) {
+                result = shared_folder_info.executeQuery();
+                while (result.next()) {
+                    object_id = result.getInt(1);
+                    pfid = result.getInt(2);
+                    uid = result.getInt(3);
+                    if (!result.wasNull()) {
                         final PrivateFolderInformationObject pfio = new PrivateFolderInformationObject(object_id, pfid, uid);
                         list.add(pfio);
                     }
                 }
-                rs.close();
+                result.close();
             }
         } catch(final SQLException sqle) {
             LOG.error(sqle.getMessage(), sqle);

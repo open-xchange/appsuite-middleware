@@ -2473,22 +2473,12 @@ public final class CalendarCollection implements CalendarCollectionService {
         return false;
     }
     
-    /* (non-Javadoc)
-     * @see com.openexchange.calendar.CalendarCommonCollectionInterface#getVisibleAndReadableFolderObject(int, int[], com.openexchange.groupware.contexts.Context, com.openexchange.groupware.userconfiguration.UserConfiguration, java.sql.Connection)
-     */
-    public CalendarFolderObject getVisibleAndReadableFolderObject(final int uid, final int groups[],
-            final Context c, final UserConfiguration uc, final Connection readcon) throws SQLException,
-            DBPoolingException, SearchIteratorException, OXException {
+    public CalendarFolderObject getVisibleAndReadableFolderObject(final int uid, final int groups[], final Context c, final UserConfiguration uc, final Connection readcon) throws SQLException, DBPoolingException, SearchIteratorException, OXException {
         return _getVisibleAndReadableFolderObject(uid, groups, c, uc, readcon, false);
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.calendar.CalendarCommonCollectionInterface#getAllVisibleAndReadableFolderObject(int, int[], com.openexchange.groupware.contexts.Context, com.openexchange.groupware.userconfiguration.UserConfiguration, java.sql.Connection)
-     */
-    public CalendarFolderObject getAllVisibleAndReadableFolderObject(final int uid, final int groups[],
-            final Context c, final UserConfiguration uc, final Connection readcon) throws SQLException,
-            DBPoolingException, SearchIteratorException, OXException {
-        return _getVisibleAndReadableFolderObject(uid, groups, c, uc, readcon, true);
+    public CalendarFolderObject getAllVisibleAndReadableFolderObject(final int uid, final int groups[], final Context c, final UserConfiguration uc) throws SQLException, DBPoolingException, SearchIteratorException, OXException {
+        return _getVisibleAndReadableFolderObject(uid, groups, c, uc, null, true);
     }
 
     private CalendarFolderObject _getVisibleAndReadableFolderObject(final int uid, final int groups[],

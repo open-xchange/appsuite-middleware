@@ -266,7 +266,7 @@ public interface CalendarCollectionService {
 
     public CalendarFolderObject getVisibleAndReadableFolderObject(final int uid, final int groups[], final Context c, final UserConfiguration uc, final Connection readcon) throws SQLException, DBPoolingException, SearchIteratorException, OXException;
 
-    public CalendarFolderObject getAllVisibleAndReadableFolderObject(final int uid, final int groups[], final Context c, final UserConfiguration uc, final Connection readcon) throws SQLException, DBPoolingException, SearchIteratorException, OXException;
+    public CalendarFolderObject getAllVisibleAndReadableFolderObject(final int uid, final int groups[], final Context c, final UserConfiguration uc) throws SQLException, DBPoolingException, SearchIteratorException, OXException;
 
     public void getVisibleFolderSQLInString(final StringBuilder sb, final int uid, final int groups[], final Context c, final UserConfiguration uc, final Connection readcon) throws SQLException, OXException, OXCalendarException;
 
