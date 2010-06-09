@@ -517,7 +517,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     }
 
     private void checkTemporaryDown(final IIMAPProperties imapConfProps) throws MailException, IMAPException {
-        final HostAndPort key = new HostAndPort(getMailConfig().getServer(), getMailConfig().getPort());
+        final MailConfig mailConfig = getMailConfig();
+        final HostAndPort key = new HostAndPort(mailConfig.getServer(), mailConfig.getPort());
         final Map<HostAndPort, Long> map = timedOutServers;
         final Long range = map.get(key);
         if (range != null) {
@@ -525,7 +526,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 /*
                  * Still treated as being temporary broken
                  */
-                throw IMAPException.create(IMAPException.Code.CONNECT_ERROR, getMailConfig().getServer(), getMailConfig().getLogin());
+                throw IMAPException.create(IMAPException.Code.CONNECT_ERROR, mailConfig.getServer(), mailConfig.getLogin());
             }
             map.remove(key);
         }
