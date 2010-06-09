@@ -1,3 +1,8 @@
+* 2010-06-09 - choeger@open-xchange.com
+
+ - Bugfix #16035: checkconfigconsistency should check if correct cache.ccf is
+   used in system.properties
+
 * 2010-06-09 - marcus.klein@open-xchange.com
 
  - Bugfix #15585: Corrected SQL query for finding the private folder information for free busy results.

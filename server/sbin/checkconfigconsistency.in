@@ -160,6 +160,17 @@ if [ -n "$SESSIONLPORT" ] && [ -n "$SERVERLPORT" ] && \
 fi
 
 ADMINCACHECCF=$OXPREFIX/etc/admindaemon/cache.ccf
+ADMINSYSTEMPROPS=$OXPREFIX/etc/admindaemon/system.properties
+
+if [ -s $ADMINSYSTEMPROPS ]; then
+    ADMINCACHECCFPATH=$(readProp com.openexchange.caching.configfile $ADMINSYSTEMPROPS)
+    if [ -z "$ADMINCACHECCFPATH" ] || \
+	[ "$ADMINCACHECCFPATH" != "etc/admindaemon/cache.ccf" ]; then
+	warn "com.openexchange.caching.configfile in $ADMINSYSTEMPROPS is either empty"
+	warn "or contains the wrong path."
+	warn "correct path must be etc/admindaemon/cache.ccf"
+    fi
+fi
 
 if [ -s $ADMINCACHECCF ]; then
 
