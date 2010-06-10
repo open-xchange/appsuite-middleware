@@ -29,17 +29,17 @@
 # to use this template.
 #
 # chkconfig: 345 99 00
-# description: Open Xchange Admin Daemon
+# description: Open Xchange Groupware Daemon
 # 
 ### BEGIN INIT INFO
 # Provides:          open-xchange-groupware
 # Required-Start:    $syslog $remote_fs
 # Should-Start: $time ypbind sendmail cyrus
 # Required-Stop:     $syslog $remote_fs
-# Should-Stop: $time ypbind sendmail cyrzs
+# Should-Stop: $time ypbind sendmail cyrus
 # Default-Start:     3 4 5
 # Default-Stop:      0 1 2 6
-# Short-Description: Open Xchange Admin Daemon
+# Short-Description: Open Xchange Groupware Daemon
 # Description:       Start open-xchange-groupware daemon
 ### END INIT INFO
 
