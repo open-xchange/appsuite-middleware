@@ -164,7 +164,7 @@ public class EasyLogin extends HttpServlet {
             LOG.info("Set allowInsecure to " + allowInsecure);
         }
         if (null == config.getInitParameter("com.openexchange.easylogin.errorPageTemplate")) {
-            errorPageTemplate = "<html><body><h1>ERROR_MESSAGE</h1></body></html>";
+            errorPageTemplate = ERROR_PAGE_TEMPLATE;
             LOG.error("No errorPage-template was specified, using default.");
         } else {
             String templateFileLocation = config.getInitParameter("com.openexchange.easylogin.errorPageTemplate");
@@ -386,4 +386,36 @@ public class EasyLogin extends HttpServlet {
         }
         return stringBuilder.toString();
     }
+
+    private static final String ERROR_PAGE_TEMPLATE =
+        "<html>\n" +
+        "<script type=\"text/javascript\">\n" +
+        "\n" +
+        "// Display normal HTML for 3 seconds, then redirect via referrer.\n" +
+        "setTimeout(redirect,3000);\n" +
+        "\n" +
+        "function redirect(){\n" +
+        " var referrer=document.referrer;\n" +
+        " var redirect_url;\n" +
+        " // If referrer already contains failed parameter, we don't add a 2nd one.\n" +
+        " if(referrer.indexOf(\"login=failed\")>=0){\n" +
+        "  redirect_url=referrer;\n" +
+        " }else{\n" +
+        "  // Check if referrer contains multiple parameter\n" +
+        "  if(referrer.indexOf(\"?\")<0){\n" +
+        "   redirect_url=referrer+\"?login=failed\";\n" +
+        "  }else{\n" +
+        "   redirect_url=referrer+\"&login=failed\";\n" +
+        "  }\n" +
+        " }\n" +
+        " // Redirect to referrer\n" +
+        " window.location.href=redirect_url;\n" +
+        "}\n" +
+        "\n" +
+        "</script>\n" +
+        "<body>\n" +
+        "<h1>ERROR_MESSAGE</h1>\n" +
+        "</body>\n" +
+        "</html>\n";
+
 }
