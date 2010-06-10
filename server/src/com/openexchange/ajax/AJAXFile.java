@@ -256,11 +256,10 @@ public final class AJAXFile extends PermissionServlet {
             } catch (final JSONException e1) {
                 LOG.error(e1.getMessage(), e1);
             }
-            throw new UploadServletException(resp, JS_FRAGMENT.replaceFirst(
-                JS_FRAGMENT_JSON,
-                responseObj == null ? STR_NULL : Matcher.quoteReplacement(responseObj.toString())).replaceFirst(
-                JS_FRAGMENT_ACTION,
-                e.getAction() == null ? STR_NULL : e.getAction()), e.getMessage(), e);
+			throw new UploadServletException(resp, substituteJS(
+					responseObj == null ? STR_NULL : responseObj.toString(),
+					e.getAction() == null ? STR_NULL : e.getAction()),
+					e.getMessage(), e);
         } catch (final AbstractOXException e) {
             LOG.error(e.getMessage(), e);
             resp.setContentType(MIME_TEXT_HTML_CHARSET_UTF_8);
@@ -273,11 +272,9 @@ public final class AJAXFile extends PermissionServlet {
             } catch (final JSONException e1) {
                 LOG.error(e1.getMessage(), e1);
             }
-            throw new UploadServletException(resp, JS_FRAGMENT.replaceFirst(
-                JS_FRAGMENT_JSON,
-                responseObj == null ? STR_NULL : Matcher.quoteReplacement(responseObj.toString())).replaceFirst(
-                JS_FRAGMENT_ACTION,
-                ACTION_GET), e.getMessage(), e);
+			throw new UploadServletException(resp, substituteJS(
+					responseObj == null ? STR_NULL : responseObj.toString(),
+					ACTION_GET), e.getMessage(), e);
         }
     }
 
@@ -373,10 +370,8 @@ public final class AJAXFile extends PermissionServlet {
                  */
                 final Response response = new Response();
                 response.setData(jArray);
-                final String jsResponse =
-                    JS_FRAGMENT.replaceFirst(JS_FRAGMENT_JSON, Matcher.quoteReplacement(ResponseWriter.getJSON(response).toString())).replaceFirst(
-                        JS_FRAGMENT_ACTION,
-                        action);
+				final String jsResponse = substituteJS(
+						ResponseWriter.getJSON(response).toString(), action);
                 final Writer writer = resp.getWriter();
                 writer.write(jsResponse);
                 writer.flush();
@@ -392,11 +387,10 @@ public final class AJAXFile extends PermissionServlet {
             } catch (final JSONException e1) {
                 LOG.error(e1.getMessage(), e1);
             }
-            throw new UploadServletException(resp, JS_FRAGMENT.replaceFirst(
-                JS_FRAGMENT_JSON,
-                responseObj == null ? STR_NULL : Matcher.quoteReplacement(responseObj.toString())).replaceFirst(
-                JS_FRAGMENT_ACTION,
-                e.getAction() == null ? STR_NULL : e.getAction()), e.getMessage(), e);
+			throw new UploadServletException(resp, substituteJS(
+					responseObj == null ? STR_NULL : responseObj.toString(),
+					e.getAction() == null ? STR_NULL : e.getAction()),
+					e.getMessage(), e);
         } catch (final JSONException e) {
             final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]);
             JSONObject responseObj = null;
@@ -407,11 +401,9 @@ public final class AJAXFile extends PermissionServlet {
             } catch (final JSONException e1) {
                 LOG.error(e1.getMessage(), e1);
             }
-            throw new UploadServletException(resp, JS_FRAGMENT.replaceFirst(
-                JS_FRAGMENT_JSON,
-                responseObj == null ? STR_NULL : Matcher.quoteReplacement(responseObj.toString())).replaceFirst(
-                JS_FRAGMENT_ACTION,
-                action == null ? STR_NULL : action), e.getMessage(), e);
+			throw new UploadServletException(resp, substituteJS(
+					responseObj == null ? STR_NULL : responseObj.toString(),
+					action == null ? STR_NULL : action), e.getMessage(), e);
         }
     }
 

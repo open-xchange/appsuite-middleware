@@ -1,3 +1,7 @@
+* 2010-06-10 - viktor.pracht@open-xchange.com
+
+  - Bugfix #16299: Unable to download infostore items
+
 * 2010-06-10 - marcus.klein@open-xchange.com
 
  - Bugfix #16226: Default error page template for easy login returns to login page after 3 seconds.

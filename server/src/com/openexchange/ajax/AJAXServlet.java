@@ -351,19 +351,18 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     private static final String STR_ERROR_PARAMS = "error_params";
 
-    // Javascript
-
-    public static final String JS_FRAGMENT =
-        "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\"" + "\"http://www.w3.org/TR/html4/strict.dtd\"><html><head>" + "<META http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"> " + "<script type=\"text/javascript\"> function callback(arg) { " + "parent.callback_**action**(arg); }; callback(**json**);</script></head></html> ";
-
-    protected static final String JS_FRAGMENT_POPUP =
-        "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\"" + "\"http://www.w3.org/TR/html4/strict.dtd\"><html><head>" + "<META http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"> " + "<script type=\"text/javascript\"> function callback(arg) { " + "window.opener.callback_**action**(arg); }; callback(**json**);</script></head></html> ";
-
+	// JavaScript for substituteJS()
+	private static final String JS_FRAGMENT = "<!DOCTYPE HTML PUBLIC "
+			+ "\"-//W3C//DTD HTML 4.01//EN\" "
+			+ "\"http://www.w3.org/TR/html4/strict.dtd\"><html><head>"
+			+ "<META http-equiv=\"Content-Type\" "
+			+ "content=\"text/html; charset=UTF-8\">"
+			+ "<script type=\"text/javascript\">"
+			+ "(parent.callback_**action** || window.opener && "
+			+ "window.opener.callback_**action**)(**json**)"
+			+ "</script></head></html>";
+	
     protected static final String SAVE_AS_TYPE = "application/octet-stream";
-
-    public static final String JS_FRAGMENT_JSON = "\\*\\*json\\*\\*";
-
-    public static final String JS_FRAGMENT_ACTION = "\\*\\*action\\*\\*";
 
     protected static final String _doGet = "doGet";
 
@@ -555,7 +554,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             final JSONObject obj = new JSONObject();
             obj.put(STR_ERROR, error);
             obj.put(STR_ERROR_PARAMS, Collections.emptyList());
-            w.write(substitute(JS_FRAGMENT, "json", obj.toString(), "action", action));
+			w.write(substituteJS(obj.toString(), action));
         } catch (final JSONException e) {
             LOG.error(e);
         } finally {
@@ -599,24 +598,10 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         sendErrorAsJS(res, msg);
     }
 
-    public static String substitute(final String text, final String... substitutions) {
-        String s = text;
-        assert (substitutions.length % 2 == 0);
-        for (int i = 0; i < substitutions.length; i++) {
-            final String key = substitutions[i];
-            String value = substitutions[++i];
-            value = value.replaceAll("\\\\", "\\\\\\\\"); // fix for 7583:
-            // replaces \ with
-            // \\, because \\ is
-            // later replaced
-            // with \ in
-            // String.replaceAll()
-            value = value.replaceAll("\\$", "\\\\\\$"); // Escape-O-Rama. Turn
-            // all $ in \$
-            s = s.replaceAll("\\*\\*" + key + "\\*\\*", value);
-        }
-        return s;
-    }
+	public static String substituteJS(final String json, final String action) {
+		return JS_FRAGMENT.replace("**json**", json).replace("**action**",
+				action);
+	}
 
     /* --------------------- STUFF FOR UPLOAD --------------------- */
 

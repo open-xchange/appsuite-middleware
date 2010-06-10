@@ -356,12 +356,8 @@ public class Contact extends DataServlet {
         }
         try {
             // Replaces every 2+2x parameter through the 3+2x parameter in the first parameter string
-            callbackSite = AJAXServlet.substitute(
-                AJAXServlet.JS_FRAGMENT,
-                AJAXServlet.PARAMETER_JSON,
-                response.getJSON().toString(),
-                AJAXServlet.PARAMETER_ACTION,
-                action);
+			callbackSite = AJAXServlet.substituteJS(response.getJSON()
+					.toString(), action);
             final PrintWriter pw = httpServletResponse.getWriter();
             pw.print(callbackSite);
         } catch (final JSONException e) {

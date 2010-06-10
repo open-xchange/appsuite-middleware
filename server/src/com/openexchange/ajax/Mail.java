@@ -2038,10 +2038,8 @@ public class Mail extends PermissionServlet implements UploadListener {
             resp.setHeader(STR_CONTENT_DISPOSITION, null);
             final Response response = new Response();
             response.setException(e);
-            final String callback = saveToDisk ? JS_FRAGMENT : JS_FRAGMENT_POPUP;
-            writer.write(callback.replaceFirst(JS_FRAGMENT_JSON, Matcher.quoteReplacement(ResponseWriter.getJSON(response).toString())).replaceFirst(
-                JS_FRAGMENT_ACTION,
-                "error"));
+			writer.write(substituteJS(ResponseWriter.getJSON(response)
+					.toString(), "error"));
             writer.flush();
         } catch (final UnsupportedEncodingException uee) {
             uee.initCause(e);
@@ -4053,11 +4051,10 @@ public class Mail extends PermissionServlet implements UploadListener {
             } catch (final JSONException e1) {
                 LOG.error(e1.getMessage(), e1);
             }
-            throw new UploadServletException(resp, JS_FRAGMENT.replaceFirst(
-                JS_FRAGMENT_JSON,
-                responseObj == null ? STR_NULL : Matcher.quoteReplacement(responseObj.toString())).replaceFirst(
-                JS_FRAGMENT_ACTION,
-                e.getAction() == null ? STR_NULL : e.getAction()), e.getMessage(), e);
+			throw new UploadServletException(resp, substituteJS(
+					responseObj == null ? STR_NULL : responseObj.toString(),
+					e.getAction() == null ? STR_NULL : e.getAction()),
+					e.getMessage(), e);
         } catch (final AbstractOXException e) {
             LOG.error(e.getMessage(), e);
             JSONObject responseObj = null;
@@ -4068,11 +4065,10 @@ public class Mail extends PermissionServlet implements UploadListener {
             } catch (final JSONException e1) {
                 LOG.error(e1.getMessage(), e1);
             }
-            throw new UploadServletException(resp, JS_FRAGMENT.replaceFirst(
-                JS_FRAGMENT_JSON,
-                responseObj == null ? STR_NULL : Matcher.quoteReplacement(responseObj.toString())).replaceFirst(
-                JS_FRAGMENT_ACTION,
-                actionStr == null ? STR_NULL : actionStr), e.getMessage(), e);
+			throw new UploadServletException(resp, substituteJS(
+					responseObj == null ? STR_NULL : responseObj.toString(),
+					actionStr == null ? STR_NULL : actionStr), e.getMessage(),
+					e);
         } catch (final Exception e) {
             final AbstractOXException wrapper = getWrappingOXException(e);
             LOG.error(wrapper.getMessage(), wrapper);
@@ -4084,11 +4080,10 @@ public class Mail extends PermissionServlet implements UploadListener {
             } catch (final JSONException e1) {
                 LOG.error(e1.getMessage(), e1);
             }
-            throw new UploadServletException(resp, JS_FRAGMENT.replaceFirst(
-                JS_FRAGMENT_JSON,
-                responseObj == null ? STR_NULL : Matcher.quoteReplacement(responseObj.toString())).replaceFirst(
-                JS_FRAGMENT_ACTION,
-                actionStr == null ? STR_NULL : actionStr), wrapper.getMessage(), wrapper);
+			throw new UploadServletException(resp, substituteJS(
+					responseObj == null ? STR_NULL : responseObj.toString(),
+					actionStr == null ? STR_NULL : actionStr),
+					wrapper.getMessage(), wrapper);
         }
     }
 
@@ -4193,10 +4188,8 @@ public class Mail extends PermissionServlet implements UploadListener {
                      */
                     final Response response = new Response();
                     response.setData(msgIdentifier);
-                    final String jsResponse =
-                        JS_FRAGMENT.replaceFirst(JS_FRAGMENT_JSON, Matcher.quoteReplacement(ResponseWriter.getJSON(response).toString())).replaceFirst(
-                            JS_FRAGMENT_ACTION,
-                            actionStr);
+					final String jsResponse = substituteJS(ResponseWriter
+							.getJSON(response).toString(), actionStr);
                     writer.write(jsResponse);
                     writer.flush();
                     return true;
@@ -4255,10 +4248,8 @@ public class Mail extends PermissionServlet implements UploadListener {
                      */
                     final Response response = new Response();
                     response.setData(msgIdentifier);
-                    final String jsResponse =
-                        JS_FRAGMENT.replaceFirst(JS_FRAGMENT_JSON, Matcher.quoteReplacement(ResponseWriter.getJSON(response).toString())).replaceFirst(
-                            JS_FRAGMENT_ACTION,
-                            actionStr);
+					final String jsResponse = substituteJS(ResponseWriter
+							.getJSON(response).toString(), actionStr);
                     writer.write(jsResponse);
                     writer.flush();
                     return true;
@@ -4273,10 +4264,8 @@ public class Mail extends PermissionServlet implements UploadListener {
                 LOG.error(e.getMessage(), e);
                 final Response response = new Response();
                 response.setException(e);
-                final String jsResponse =
-                    JS_FRAGMENT.replaceFirst(JS_FRAGMENT_JSON, Matcher.quoteReplacement(ResponseWriter.getJSON(response).toString())).replaceFirst(
-                        JS_FRAGMENT_ACTION,
-                        actionStr);
+				final String jsResponse = substituteJS(
+						ResponseWriter.getJSON(response).toString(), actionStr);
                 writer.write(jsResponse);
                 writer.flush();
                 return true;

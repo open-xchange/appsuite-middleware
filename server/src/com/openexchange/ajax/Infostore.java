@@ -184,13 +184,13 @@ public class Infostore extends PermissionServlet {
                     throw se;
                 }
                 res.setContentType(MIME_TEXT_HTML);
-                res.getWriter().write(substitute(JS_FRAGMENT, STR_ACTION, STR_ERROR, STR_JSON, w.toString()));
+                res.getWriter().write(substituteJS(w.toString(), STR_ERROR));
             }
             int id;
             try {
                 id = Integer.valueOf(req.getParameter(PARAMETER_ID));
             } catch (final NumberFormatException x) {
-                handleOXException(res, new AbstractOXException("Invalid number"), STR_ERROR, true, JS_FRAGMENT);
+                handleOXException(res, new AbstractOXException("Invalid number"), STR_ERROR, true);
                 return;
             }
 
@@ -336,18 +336,15 @@ public class Infostore extends PermissionServlet {
                 }
             }
         } catch (final OXException x) {
-            handleOXException(res, x, action, true, null);
+            handleOXException(res, x, action, true);
         } catch (final UploadException x) {
             final Response resp = new Response();
             resp.setException(new AbstractOXException(x.getMessage())); // FIXME
             try {
                 res.setContentType("text/html; charset=UTF-8");
-                throw new UploadServletException(res, substitute(
-                    JS_FRAGMENT,
-                    STR_JSON,
-                    ResponseWriter.getJSON(resp).toString(),
-                    STR_ACTION,
-                    action), x.getMessage(), x);
+				throw new UploadServletException(res, substituteJS(
+						ResponseWriter.getJSON(resp).toString(), action),
+						x.getMessage(), x);
             } catch (final JSONException e) {
                 LOG.error("Giving up", e);
             }
@@ -356,12 +353,9 @@ public class Infostore extends PermissionServlet {
             resp.setException(new AbstractOXException(t.getMessage())); // FIXME
             try {
                 res.setContentType("text/html; charset=UTF-8");
-                throw new UploadServletException(res, substitute(
-                    JS_FRAGMENT,
-                    STR_JSON,
-                    ResponseWriter.getJSON(resp).toString(),
-                    STR_ACTION,
-                    action), t.getMessage(), t);
+				throw new UploadServletException(res, substituteJS(
+						ResponseWriter.getJSON(resp).toString(), action),
+						t.getMessage(), t);
             } catch (final JSONException e) {
                 LOG.error("Giving up", e);
             }
@@ -441,7 +435,7 @@ public class Infostore extends PermissionServlet {
             w = res.getWriter();
             final JSONObject obj = new JSONObject();
             obj.put(ResponseFields.DATA, newDocument.getId());
-            w.print(substitute(JS_FRAGMENT, STR_JSON, obj.toString(), STR_ACTION, ACTION_NEW));
+			w.print(substituteJS(obj.toString(), ACTION_NEW));
 
             w.flush();
         } catch (final IOException e) {
@@ -508,7 +502,7 @@ public class Infostore extends PermissionServlet {
         PrintWriter w = null;
         try {
             w = res.getWriter();
-            w.write(substitute(JS_FRAGMENT, STR_JSON, "{}", STR_ACTION, ACTION_UPDATE));
+			w.write(substituteJS("{}", ACTION_UPDATE));
             close(w);
         } catch (final IOException e) {
             LOG.warn(e);
@@ -579,7 +573,7 @@ public class Infostore extends PermissionServlet {
             w = res.getWriter();
             final JSONObject obj = new JSONObject();
             obj.put(ResponseFields.DATA, metadata.getId());
-            w.print(substitute(JS_FRAGMENT, STR_JSON, obj.toString(), STR_ACTION, ACTION_NEW));
+			w.print(substituteJS(obj.toString(), ACTION_NEW));
             w.flush();
         } catch (final IOException e) {
             LOG.debug("", e);
@@ -633,7 +627,7 @@ public class Infostore extends PermissionServlet {
 
         } catch (final AbstractOXException x) {
             LOG.debug(x.getMessage(), x);
-            handleOXException(res, x, STR_ERROR, true, JS_FRAGMENT);
+            handleOXException(res, x, STR_ERROR, true);
             return;
         } finally {
 
@@ -659,7 +653,7 @@ public class Infostore extends PermissionServlet {
         }
     }
 
-    private final boolean handleOXException(final HttpServletResponse res, final Throwable t, final String action, final boolean post, final String fragmentOverride) {
+    private final boolean handleOXException(final HttpServletResponse res, final Throwable t, final String action, final boolean post) {
         res.setContentType("text/html; charset=UTF-8");
         final AbstractOXException e;
         if (t instanceof AbstractOXException) {
@@ -677,15 +671,9 @@ public class Infostore extends PermissionServlet {
                 writer = res.getWriter();
             }
             ResponseWriter.write(resp, writer);
-            if (post) {
-                res.getWriter().write(
-                    substitute(
-                        fragmentOverride != null ? fragmentOverride : JS_FRAGMENT,
-                        STR_JSON,
-                        writer.toString(),
-                        STR_ACTION,
-                        action));
-            }
+			if (post) {
+				res.getWriter().write(substituteJS(writer.toString(), action));
+			}
         } catch (final JSONException e1) {
             LOG.error("", t);
         } catch (final IOException e1) {
@@ -763,7 +751,7 @@ public class Infostore extends PermissionServlet {
                 LOG.error("", e);
             }
         }
-        if (!handleOXException(res, t, action, post, null)) {
+        if (!handleOXException(res, t, action, post)) {
             try {
                 sendErrorAsJSHTML(res, t.toString(), action);
                 LOG.error("Got non OXException", t);

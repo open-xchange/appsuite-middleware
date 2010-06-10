@@ -166,7 +166,7 @@ public class Attachment extends PermissionServlet {
         try {
             session = new ServerSessionAdapter(getSessionObject(req));
         } catch (final ContextException e) {
-            handle(res, e, action, JS_FRAGMENT_POPUP);
+            handle(res, e, action);
             return;
         }
 
@@ -180,7 +180,7 @@ public class Attachment extends PermissionServlet {
             try {
                 require(req, res, PARAMETER_FOLDERID, PARAMETER_ATTACHEDID, PARAMETER_MODULE, PARAMETER_ID);
             } catch (final UploadException e) {
-                handle(res, e, action, JS_FRAGMENT_POPUP);
+                handle(res, e, action);
                 return;
             }
             int folderId, attachedId, moduleId, id;
@@ -236,7 +236,7 @@ public class Attachment extends PermissionServlet {
             return Integer.parseInt(value);
         } catch (final NumberFormatException nfe) {
             final AttachmentException t = EXCEPTIONS.create(1, parameter, value);
-            handle(res, t, action, contentType == null ? JS_FRAGMENT_POPUP : null);
+            handle(res, t, action);
             throw new OXAborted();
         }
     }
@@ -254,7 +254,7 @@ public class Attachment extends PermissionServlet {
         try {
             session = new ServerSessionAdapter(getSessionObject(req));
         } catch (final ContextException e) {
-            handle(res, e, action, JS_FRAGMENT_POPUP);
+            handle(res, e, action);
             return;
         }
 
@@ -292,7 +292,7 @@ public class Attachment extends PermissionServlet {
         try {
             session = new ServerSessionAdapter(getSessionObject(req));
         } catch (final ContextException e) {
-            handle(res, e, action, JS_FRAGMENT_POPUP);
+            handle(res, e, action);
             return;
         }
 
@@ -355,12 +355,9 @@ public class Attachment extends PermissionServlet {
             try {
                 res.setContentType(MIME_TEXT_HTML_CHARSET_UTF8);
 
-                throw new UploadServletException(res, substitute(
-                    JS_FRAGMENT,
-                    "json",
-                    ResponseWriter.getJSON(resp).toString(),
-                    "action",
-                    "error"), x.getMessage(), x);
+				throw new UploadServletException(res, substituteJS(
+						ResponseWriter.getJSON(resp).toString(), "error"),
+						x.getMessage(), x);
             } catch (final JSONException e) {
                 LOG.error("Giving up", e);
             }
@@ -438,7 +435,7 @@ public class Attachment extends PermissionServlet {
             // in a new window. To call the JS callback routine from a popup we
             // can use parent.callback_error() but
             // must use window.opener.callback_error()
-            rollback(t, res, ResponseFields.ERROR, contentType == null ? JS_FRAGMENT_POPUP : null);
+			rollback(t, res, ResponseFields.ERROR);
             return;
         } finally {
             if (documentData != null) {
@@ -466,16 +463,16 @@ public class Attachment extends PermissionServlet {
         }
     }
 
-    private void rollback(final Throwable t, final HttpServletResponse res, final String action, final String fragmentOverride) {
+    private void rollback(final Throwable t, final HttpServletResponse res, final String action) {
         try {
             ATTACHMENT_BASE.rollback();
         } catch (final TransactionException e) {
             LOG.debug("", e);
         }
         if (t instanceof AbstractOXException) {
-            handle(res, (AbstractOXException) t, action, fragmentOverride);
+            handle(res, (AbstractOXException) t, action);
         } else {
-            handle(res, new OXException(t), action, fragmentOverride);
+            handle(res, new OXException(t), action);
         }
     }
 
@@ -510,7 +507,7 @@ public class Attachment extends PermissionServlet {
             result.put(ResponseFields.DATA, arr);
             result.put(ResponseFields.TIMESTAMP, timestamp);
             w = res.getWriter();
-            w.print(substitute(JS_FRAGMENT, "json", result.toString(), "action", ACTION_ATTACH));
+			w.print(substituteJS(result.toString(), ACTION_ATTACH));
             ATTACHMENT_BASE.commit();
         } catch (final OXException t) {
             try {
@@ -518,7 +515,7 @@ public class Attachment extends PermissionServlet {
             } catch (final TransactionException e) {
                 LOG.error(e);
             }
-            handle(res, t, ResponseFields.ERROR, null);
+            handle(res, t, ResponseFields.ERROR);
             return;
         } catch (final JSONException e) {
             try {
@@ -526,7 +523,7 @@ public class Attachment extends PermissionServlet {
             } catch (final TransactionException x) {
                 LOG.error(e);
             }
-            handle(res, new OXException(e), ResponseFields.ERROR, null);
+            handle(res, new OXException(e), ResponseFields.ERROR);
             return;
         } catch (final IOException e) {
             try {
@@ -534,7 +531,7 @@ public class Attachment extends PermissionServlet {
             } catch (final TransactionException x) {
                 LOG.error(e);
             }
-            handle(res, new OXException(e), ResponseFields.ERROR, null);
+            handle(res, new OXException(e), ResponseFields.ERROR);
             return;
         } finally {
             try {
@@ -579,7 +576,7 @@ public class Attachment extends PermissionServlet {
         }
     }
 
-    private void handle(final HttpServletResponse res, final AbstractOXException t, final String action, final String fragmentOverride) {
+    private void handle(final HttpServletResponse res, final AbstractOXException t, final String action) {
         LL.log(t);
 
         res.setContentType(MIME_TEXT_HTML_CHARSET_UTF8);
@@ -591,8 +588,7 @@ public class Attachment extends PermissionServlet {
         try {
             writer = new UnsynchronizedStringWriter();
             ResponseWriter.write(resp, writer);
-            res.getWriter().write(
-                substitute((fragmentOverride != null) ? fragmentOverride : JS_FRAGMENT, "json", writer.toString(), "action", action));
+			res.getWriter().write(substituteJS(writer.toString(), action));
         } catch (final JSONException e) {
             LOG.error("", t);
         } catch (final IOException e) {
