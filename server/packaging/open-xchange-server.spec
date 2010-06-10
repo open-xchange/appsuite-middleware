@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 7
+%define		ox_release 8
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -499,6 +499,8 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Thu Jun 10 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16226: Default error page template for easy login returns to login page after 3 seconds.
 * Wed Jun 02 2010 - steffen.templin@open-xchange.com
  - Bugfix #15300: Added the possibility to use primary mail address or default sender address as from header in notification mails.
 * Tue Jun 01 2010 - marcus.klein@open-xchange.com

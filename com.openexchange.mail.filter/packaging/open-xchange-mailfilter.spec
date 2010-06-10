@@ -38,7 +38,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 3
+%define		ox_release 4
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -113,6 +113,9 @@ fi
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
 %config(noreplace) /opt/open-xchange/etc/groupware/mailfilter.properties
 %changelog
+* Wed Jun 02 2010 - dennis.sieben@open-xchange.com
+  - Bugfix #16149: [L3] connection timeout for SieveHandler
+    - Made timeout configurable
 * Tue Feb 16 2010 - dennis.sieben@open-xchange.com
   - Added possibility to define if vacation messages should only be sent to
     specific domains
