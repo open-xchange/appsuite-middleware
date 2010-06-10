@@ -404,9 +404,9 @@ public abstract class SessionServlet extends AJAXServlet {
                 throw EXCEPTION.create(3, sessionId);
             }
         } catch (final UndeclaredThrowableException e) {
-            throw EXCEPTION.create(3, sessionId);
+            throw EXCEPTION.create(3, e, sessionId);
         } catch (final AbstractOXException e) {
-            throw EXCEPTION.create(3, sessionId);
+            throw EXCEPTION.create(3, e, sessionId);
         }
         return retval;
     }
