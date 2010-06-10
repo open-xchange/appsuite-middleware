@@ -34,9 +34,9 @@
 ### BEGIN INIT INFO
 # Provides:          open-xchange-admin
 # Required-Start:    $syslog $remote_fs
-# Should-Start: $time ypbind sendmail cyrus
+# Should-Start: $time ypbind sendmail cyrus open-xchange-groupware
 # Required-Stop:     $syslog $remote_fs
-# Should-Stop: $time ypbind sendmail cyrzs
+# Should-Stop: $time ypbind sendmail cyrus
 # Default-Start:     3 4 5
 # Default-Stop:      0 1 2 6
 # Short-Description: Open Xchange Admin Daemon
