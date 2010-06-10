@@ -1,3 +1,7 @@
+* 2010-06-10 - marcus.klein@open-xchange.com
+
+ - Bugfix #16226: Default error page template for easy login returns to login page after 3 seconds.
+
 * 2010-06-02 - steffen.templin@open-xchange.com
 
  - Bugfix #15300: Added the possibility to use primary mail address or default sender address as from header in notification mails.
