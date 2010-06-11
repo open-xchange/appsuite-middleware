@@ -203,22 +203,33 @@ public class ListTest extends AbstractAJAXSession {
             OCLPermission.NO_PERMISSIONS,
             OCLPermission.NO_PERMISSIONS);
         // List root's subfolders
-        final ListRequest request = new ListRequest(API.OX_NEW, String.valueOf(FolderObject.SYSTEM_SHARED_FOLDER_ID));
-        final ListResponse response = client.execute(request);
+        ListRequest request1 = new ListRequest(API.OX_NEW, FolderObject.SYSTEM_SHARED_FOLDER_ID);
+        ListResponse response = client.execute(request1);
 
-        final JSONArray jsonArray = (JSONArray) response.getResponse().getData();
-        final int length = jsonArray.length();
-        assertTrue("Subfolders expected below shared folder.", length > 0);
-
-        System.out.println("\n\n#######################################\n\n");
-        for (int i = 0; i < length; i++) {
-            final JSONArray folderArray = jsonArray.getJSONArray(i);
-            System.out.println(folderArray);
+        String expectedId = FolderObject.SHARED_PREFIX + client2.getValues().getUserId();
+        Iterator<FolderObject> iter = response.getFolder();
+        FolderObject foundUserShared = null;
+        while (iter.hasNext()) {
+            FolderObject folder = iter.next();
+            if (expectedId.equals(folder.getFullName())) {
+                foundUserShared = folder;
+            }
         }
+        assertNotNull("Expected user named shared folder below root shared folder.", foundUserShared);
 
-        // final JSONArray email = jsonArray.getJSONArray(0);
-        // System.out.println(email);
+        @SuppressWarnings("null")
+        ListRequest request2 = new ListRequest(API.OX_NEW, foundUserShared.getFullName());
+        response = client.execute(request2);
+        iter = response.getFolder();
+        FolderObject foundShared = null;
+        while (iter.hasNext()) {
+            FolderObject folder = iter.next();
+            if (folderId == folder.getObjectID()) {
+                foundShared = folder;
+            }
+        }
+        assertNotNull("Shared folder expected below shared parent folder.", foundShared);
+        
         FolderTools.unshareFolder(client2, API.OX_NEW, folderId, userId);
     }
-
 }
