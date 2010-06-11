@@ -8,7 +8,7 @@ workflowString: |
   --- !com.openexchange.subscribe.crawler.Workflow
   steps: 
     - !com.openexchange.subscribe.crawler.LoginPageByFormActionStep
-      actionOfLoginForm: "https://www.google.com/accounts/ServiceLoginAuth?service=cl"
+      actionOfLoginForm: "https://www.google.com/accounts/ServiceLoginAuth"
       baseUrl: "https://calendar.google.com"
       description: Log into Google Calendar
       linkAvailableAfterLogin: logout
