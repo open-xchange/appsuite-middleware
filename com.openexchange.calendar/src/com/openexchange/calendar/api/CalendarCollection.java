@@ -2828,7 +2828,7 @@ public final class CalendarCollection implements CalendarCollectionService {
             return cdao;
         }
         
-        final CalendarDataObject clone = (CalendarDataObject)cdao.clone();
+        final CalendarDataObject clone = cdao.clone();
         if (!clone.containsShownAs()) {
             clone.setShownAs(edao.getShownAs());
         }
