@@ -113,7 +113,7 @@ public final class SystemSharedFolder {
         /*
          * The system shared folder
          */
-        final DatabaseFolder retval = new LocalizedDatabaseFolder(fo);
+        final DatabaseFolder retval = new LocalizedDatabaseFolder(fo, false);
         retval.setName(FolderStrings.SYSTEM_SHARED_FOLDER_NAME);
         // Enforce getSubfolders() from storage if at least one shared folder is accessible for user
         final SearchIterator<FolderObject> searchIterator;
