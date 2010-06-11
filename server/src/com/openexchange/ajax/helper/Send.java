@@ -96,7 +96,8 @@ public final class Send {
         Tools.disableCaching(resp);
         resp.setStatus(HttpServletResponse.SC_OK);
         resp.setContentType(AJAXServlet.CONTENTTYPE_HTML);
-        resp.getWriter().write(AJAXServlet.substitute(AJAXServlet.JS_FRAGMENT, "json", sWriter.toString(), "action", module));
+		resp.getWriter().write(
+				AJAXServlet.substituteJS(sWriter.toString(), module));
     }
 
     public static void sendResponse(final Response response, final HttpServletResponse resp) throws IOException {
