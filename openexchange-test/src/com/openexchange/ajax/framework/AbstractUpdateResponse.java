@@ -47,28 +47,26 @@
  *
  */
 
-package com.openexchange.ajax.appointment.action;
+package com.openexchange.ajax.framework;
 
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractUpdateResponse;
+import com.openexchange.groupware.container.DataObject;
 
 /**
- * 
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ * {@link AbstractUpdateResponse}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class UpdateResponse extends AbstractUpdateResponse {
+public abstract class AbstractUpdateResponse extends AbstractAJAXResponse {
 
-    private int id;
-
-    UpdateResponse(final Response response) {
+    public AbstractUpdateResponse(Response response) {
         super(response);
     }
 
-    public int getId() {
-        return id;
-    }
-
-    void setId(final int id) {
-        this.id = id;
+    /**
+     * Puts the data of this update response into the object. This are especially the modified time stamp. 
+     */
+    public void fillObject(final DataObject obj) {
+        obj.setLastModified(getTimestamp());
     }
 }
