@@ -146,7 +146,7 @@ public interface GeneralControlMBean {
     public List<Map<String, Object>> services();
 
     /**
-     * Gets the verion of the OX groupware.
+     * Gets the version of the OX groupware.
      * 
      * @return The version number.
      */
