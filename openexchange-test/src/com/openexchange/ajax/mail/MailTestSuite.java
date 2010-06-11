@@ -85,6 +85,7 @@ public final class MailTestSuite extends TestSuite {
         mailSuite.addTestSuite(Bug15608Test.class);
         mailSuite.addTestSuite(Bug16087Test.class);
         mailSuite.addTestSuite(Bug15901Test.class);
+        mailSuite.addTestSuite(Bug15777Test.class);
         return mailSuite;
     }
 }
