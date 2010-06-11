@@ -114,8 +114,8 @@ public final class FolderTools {
         return retval;
     }
 
-    public static void shareFolder(AJAXClient client, int folderId, int userId, int fp, int opr, int opw, int opd) throws AjaxException, IOException, SAXException, JSONException, OXJSONException, OXException {
-        GetRequest getQ = new GetRequest(API.OX_OLD, folderId);
+    public static void shareFolder(AJAXClient client, API api, int folderId, int userId, int fp, int opr, int opw, int opd) throws AjaxException, IOException, SAXException, JSONException, OXJSONException, OXException {
+        GetRequest getQ = new GetRequest(api, folderId);
         GetResponse getR = client.execute(getQ);
         FolderObject origFolder = getR.getFolder();
         FolderObject changed = new FolderObject();
@@ -132,12 +132,12 @@ public final class FolderTools {
         addedPerm.setAllPermission(fp, opr, opw, opd);
         permissions.add(addedPerm);
         changed.setPermissions(permissions);
-        UpdateRequest updQ = new UpdateRequest(API.OX_OLD, changed);
+        UpdateRequest updQ = new UpdateRequest(api, changed);
         client.execute(updQ);
     }
 
-    public static void unshareFolder(AJAXClient client, int folderId, int userId) throws AjaxException, IOException, SAXException, JSONException, OXJSONException, OXException {
-        GetRequest getQ = new GetRequest(API.OX_OLD, folderId);
+    public static void unshareFolder(AJAXClient client, API api, int folderId, int userId) throws AjaxException, IOException, SAXException, JSONException, OXJSONException, OXException {
+        GetRequest getQ = new GetRequest(api, folderId);
         GetResponse getR = client.execute(getQ);
         FolderObject origFolder = getR.getFolder();
         List<OCLPermission> permissions = new ArrayList<OCLPermission>();
@@ -152,7 +152,7 @@ public final class FolderTools {
         changed.setObjectID(folderId);
         changed.setLastModified(getR.getTimestamp());
         changed.setPermissions(permissions);
-        UpdateRequest updQ = new UpdateRequest(API.OX_OLD, changed);
+        UpdateRequest updQ = new UpdateRequest(api, changed);
         client.execute(updQ);
     }
 }

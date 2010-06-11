@@ -49,14 +49,19 @@
 
 package com.openexchange.ajax.folder;
 
+import java.util.Iterator;
 import org.json.JSONArray;
 import com.openexchange.ajax.folder.actions.API;
+import com.openexchange.ajax.folder.actions.GetRequest;
+import com.openexchange.ajax.folder.actions.GetResponse;
 import com.openexchange.ajax.folder.actions.ListRequest;
 import com.openexchange.ajax.folder.actions.ListResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.server.impl.OCLPermission;
 
 /**
@@ -87,8 +92,8 @@ public class ListTest extends AbstractAJAXSession {
 
     public void testListRoot() throws Throwable {
         // List root's subfolders
-        final ListRequest request = new ListRequest(API.OX_NEW, FolderObject.SYSTEM_ROOT_FOLDER_ID);
-        final ListResponse response = client.execute(request);
+        ListRequest request = new ListRequest(API.OX_NEW, FolderObject.SYSTEM_ROOT_FOLDER_ID);
+        ListResponse response = client.execute(request);
 
         final JSONArray jsonArray = (JSONArray) response.getResponse().getData();
         final int length = jsonArray.length();
@@ -110,9 +115,8 @@ public class ListTest extends AbstractAJAXSession {
             }
         }
 
-/*
-        ListRequest request = new ListRequest(String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID));
-        ListResponse response = client.execute(request);
+        request = new ListRequest(API.OX_NEW, String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID));
+        response = client.execute(request);
         Iterator<FolderObject> iter = response.getFolder();
         FolderObject defaultIMAPFolder = null;
         String primaryMailFolder = MailFolderUtility.prepareFullname(0, MailFolder.DEFAULT_FOLDER_ID);
@@ -124,8 +128,10 @@ public class ListTest extends AbstractAJAXSession {
             }
         }
         assertNotNull("Default email folder not found.", defaultIMAPFolder);
-        assertTrue("Default email folder has no subfolders.", defaultIMAPFolder.hasSubfolders());
-        request = new ListRequest(defaultIMAPFolder.getFullName());
+        @SuppressWarnings("null")
+        boolean subFolders = defaultIMAPFolder.hasSubfolders();
+        assertTrue("Default email folder has no subfolders.", subFolders);
+        request = new ListRequest(API.OX_NEW, defaultIMAPFolder.getFullName());
         response = client.execute(request);
         iter = response.getFolder();
         FolderObject inboxFolder = null;
@@ -137,11 +143,11 @@ public class ListTest extends AbstractAJAXSession {
             }
         }
         assertNotNull("Inbox folder for default mail account not found.", inboxFolder);
-        GetRequest request2 = new GetRequest(inboxFolder.getFullName(), new int[] {
+        @SuppressWarnings("null")
+        GetRequest request2 = new GetRequest(API.OX_NEW, inboxFolder.getFullName(), new int[] {
             FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME, FolderObject.OWN_RIGHTS, FolderObject.PERMISSIONS_BITS });
         GetResponse response2 = client.execute(request2);
         assertFalse("Get failed.", response2.hasError());
-*/
     }
 
     public void testListPrivate() throws Throwable {
@@ -183,10 +189,13 @@ public class ListTest extends AbstractAJAXSession {
     }
 
     public void testListShared() throws Throwable {
+        client.execute(new ListRequest(API.OX_NEW, FolderObject.SYSTEM_ROOT_FOLDER_ID));
+        client.execute(new ListRequest(API.OX_NEW, FolderObject.SYSTEM_SHARED_FOLDER_ID));
         int folderId = client2.getValues().getPrivateAppointmentFolder();
         int userId = client.getValues().getUserId();
         FolderTools.shareFolder(
             client2,
+            API.OX_NEW,
             folderId,
             userId,
             OCLPermission.READ_FOLDER,
@@ -209,7 +218,7 @@ public class ListTest extends AbstractAJAXSession {
 
         // final JSONArray email = jsonArray.getJSONArray(0);
         // System.out.println(email);
-        FolderTools.unshareFolder(client2, folderId, userId);
+        FolderTools.unshareFolder(client2, API.OX_NEW, folderId, userId);
     }
 
 }

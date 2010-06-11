@@ -66,6 +66,7 @@ public class Bug15590Test extends AbstractAJAXSession {
 
         FolderTools.shareFolder(
             client,
+            API.OX_NEW,
             testFolder.getObjectID(),
             secondUserValues.getUserId(),
             OCLPermission.CREATE_OBJECTS_IN_FOLDER,
