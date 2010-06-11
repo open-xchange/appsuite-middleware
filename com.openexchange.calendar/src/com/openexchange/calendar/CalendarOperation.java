@@ -471,6 +471,11 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             } else {
                 cdao.setFolderType(ofa.getFolderType(inFolder, uid));
             }
+            if (!cdao.containsParticipants() && !cdao.containsUserParticipants()) {
+                // no participants defined at all. Reuse old participants if conflicts need to be checked.
+                cdao.setParticipants(edao.getParticipants());
+                cdao.setUsers(edao.getUsers());
+            }
         }
 
         if (cdao.getFolderType() == FolderObject.PRIVATE) {
