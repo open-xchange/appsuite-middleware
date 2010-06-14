@@ -68,6 +68,7 @@ public class RecurrenceTestSuite extends TestSuite{
         tests.addTestSuite(Bug12614Test.class);
         tests.addTestSuite(Bug14074Test.class);
         tests.addTestSuite(DeleteExceptionTimestampTest.class);
+        tests.addTestSuite(UsmFailureDuringRecurrenceTest.class)
         return tests;
     }
 }
