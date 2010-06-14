@@ -13,7 +13,7 @@
 * 2010-06-09 - choeger@open-xchange.com
 
  - Bugfix #16035: checkconfigconsistency should check if correct cache.ccf is used in system.properties
- - Bugfix #14500 - Warnings due to missing LSB information added LSB Headers to debian init-script, which are not interpreted at all...
+ - Bugfix #14500: Warnings due to missing LSB information added LSB Headers to debian init-script, which are not interpreted at all...
 
 * 2010-06-09 - marcus.klein@open-xchange.com
 
@@ -27,7 +27,7 @@
 
  - Bugfix #15930: Error on creating a mail folder below a public folder
 
-* 2010-06-07 - thorben.betten@open-xchange.com
+* 2010-06-07 - tobias.prinz@open-xchange.com
 
  - Bugfix #15400: If import fields exceed maximum db field lengths, they are truncated instead of not imported.
 
