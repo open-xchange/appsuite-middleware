@@ -86,6 +86,7 @@ public class VCardImportTest extends AbstractVCardTest {
 		//setup: building an VCard file with a summary longer than 255 characters.
 		folderId = createTestFolder(FolderObject.CONTACT, sessObj,ctx, "vcard6825Folder");
 		final String stringTooLong = "zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... ";
+		final String expected = "zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig";
 		final String vcard = "BEGIN:VCARD\nVERSION:3.0\n\nN:"+stringTooLong+";givenName;;;\nEND:VCARD\n";
 		final List <String> folders = Arrays.asList( Integer.toString(folderId) );
 		//import and tests
@@ -96,7 +97,7 @@ public class VCardImportTest extends AbstractVCardTest {
 		ImportResult res = results.get(0);
 	    final ContactSQLInterface contacts = new RdbContactSQLImpl(sessObj);
 	    final Contact co = contacts.getObjectById(Integer.parseInt( res.getObjectId()), Integer.parseInt( res.getFolder() ) );
-	    assertEquals("Should have truncated name", stringTooLong.subSequence(0, 255), co.getSurName());
+	    assertEquals("Should have truncated name", expected, co.getSurName());
 	}
 	
 	/*
