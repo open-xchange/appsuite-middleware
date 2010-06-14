@@ -499,6 +499,8 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Mon Jun 14 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16326: Using default error page template for EasyLogin if the configured file is not found.
 * Thu Jun 10 2010 - marcus.klein@open-xchange.com
  - Bugfix #16226: Default error page template for easy login returns to login page after 3 seconds.
 * Wed Jun 02 2010 - steffen.templin@open-xchange.com
