@@ -174,6 +174,7 @@ public class EasyLogin extends HttpServlet {
                 LOG.info("Found an error page template at " + templateFileLocation);
             } else {
                 LOG.error("Could not find an error page template at " + templateFileLocation + ", using default.");
+                errorPageTemplate = ERROR_PAGE_TEMPLATE;
             }
         }
         loadBalancer = config.getInitParameter("com.openexchange.easylogin.loadBalancer");

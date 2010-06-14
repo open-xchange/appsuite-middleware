@@ -1,3 +1,7 @@
+* 2010-06-14 - marcus.klein@open-xchange.com
+
+ - Bugfix #16326: Using default error page template for EasyLogin if the configured file is not found.
+
 * 2010-06-10 - marcus.klein@open-xchange.com
 
  - Bugfix #16226: Default error page template for easy login returns to login page after 3 seconds.
