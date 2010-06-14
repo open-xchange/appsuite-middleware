@@ -79,10 +79,6 @@ public class MobileConfigServlet extends HttpServlet {
         return sb.toString();
     }
 
-    private static void writeMobileConfigWinMob(final OutputStream out, final String host, final String username, final String domain) throws IOException, ConfigurationException {
-        CabUtil.writeCabFile(new DataOutputStream(new BufferedOutputStream(out)), write(host, username, domain));
-    }
-
     /**
      * Splits the given login into a username and a domain part
      * @param username
@@ -104,6 +100,10 @@ public class MobileConfigServlet extends HttpServlet {
         }
     }
 
+    private static void writeMobileConfigWinMob(final OutputStream out, final String host, final String username, final String domain) throws IOException, ConfigurationException {
+        CabUtil.writeCabFile(new DataOutputStream(new BufferedOutputStream(out)), write(host, username, domain));
+    }
+
 //    private void doLogout(final Session session) {
 //        try {
 //            LoginPerformer.getInstance().doLogout(session.getSessionID());
@@ -114,11 +114,21 @@ public class MobileConfigServlet extends HttpServlet {
 
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        final ConfigurationService service = MobileConfigServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+        
+        
         final String iphoneRegEx;
         final String winMobRegEx;
         try {
-            iphoneRegEx = MobileConfigProperties.getProperty(MobileConfigServiceRegistry.getServiceRegistry().getService(ConfigurationService.class), MobileConfigProperties.Property.iPhoneRegex);
-            winMobRegEx = MobileConfigProperties.getProperty(MobileConfigServiceRegistry.getServiceRegistry().getService(ConfigurationService.class), MobileConfigProperties.Property.WinMobRegex);
+            iphoneRegEx = MobileConfigProperties.getProperty(service, MobileConfigProperties.Property.iPhoneRegex);
+            winMobRegEx = MobileConfigProperties.getProperty(service, MobileConfigProperties.Property.WinMobRegex);
+            final Boolean secureConnect = MobileConfigProperties.getProperty(service, MobileConfigProperties.Property.OnlySecureConnect);
+            if (secureConnect) {
+                if (!req.isSecure()) {
+                    printError(resp, "Unsecure access with http is not allowed. Use https instead.");
+                    return;
+                }
+            }
         } catch (final ConfigurationException e) {
             LOG.error("A configuration exception occurred, which should not happen: " + e.getMessage(), e);
             printError(resp, "An internal error occurred, please try again later...");
@@ -294,10 +304,10 @@ public class MobileConfigServlet extends HttpServlet {
             printWriter.println("           <string>" + username + "</string>");
             printWriter.println("       </dict>");
             printWriter.println("   </array>");
-            printWriter.println("   <key>PayloadDescription</key>");
-            printWriter.println("   <string>Profilbeschreibung</string>");
+//            printWriter.println("   <key>PayloadDescription</key>");
+//            printWriter.println("   <string>Profilbeschreibung</string>");
             printWriter.println("   <key>PayloadDisplayName</key>");
-            printWriter.println("   <string>EAS</string>");
+            printWriter.println("   <string>" + displayname + "</string>");
             printWriter.println("   <key>PayloadIdentifier</key>");
             printWriter.println("   <string>eas.profile</string>");
             printWriter.println("   <key>PayloadOrganization</key>");

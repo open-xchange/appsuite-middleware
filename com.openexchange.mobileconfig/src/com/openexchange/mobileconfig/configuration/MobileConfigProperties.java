@@ -4,9 +4,20 @@ import com.openexchange.config.ConfigurationService;
 
 
 public class MobileConfigProperties {
-    public enum Property {
+    
+    public interface PropertyInterface {
+        
+        public Class<? extends Object> getClazz();
+        
+        public boolean isRequired();
+        
+        public String getName();
+    }
+
+    public enum Property implements PropertyInterface {
         iPhoneRegex(String.class, true, "com.openexchange.mobileconfig.iPhoneRegex"),
         WinMobRegex(String.class, true, "com.openexchange.mobileconfig.WinMobRegex"),
+        OnlySecureConnect(Boolean.class, true, "com.openexchange.mobileconfig.OnlySecureConnect"),
         DomainUser(String.class, true, "com.openexchange.usm.eas.login_pattern.domain_user");
         
         private final Class<?> clazz;
@@ -32,7 +43,7 @@ public class MobileConfigProperties {
         public String getName() {
             return name;
         }
-        
+
     }
 
     /**
@@ -45,17 +56,24 @@ public class MobileConfigProperties {
      * @throws ConfigurationException
      */
     @SuppressWarnings("unchecked")
-    public static <T extends Object> T getProperty(final ConfigurationService configuration, final Property prop) throws ConfigurationException {
+    public static <T extends Object> T getProperty(final ConfigurationService configuration, final PropertyInterface prop) throws ConfigurationException {
         final Class<? extends Object> clazz = prop.getClazz();
         final String completePropertyName = prop.getName();
-        if (String.class.equals(clazz)) {
-            // no conversion done just output
-            return (T) clazz.cast(configuration.getProperty(completePropertyName));
-        } else if (Integer.class.equals(clazz)) {
-            try {
-                return (T) clazz.cast(Integer.valueOf(configuration.getProperty(completePropertyName)));
-            } catch (final NumberFormatException e) {
-                throw new ConfigurationException("The value given in the property " + completePropertyName + " is no integer value");
+        final String property = configuration.getProperty(completePropertyName);
+        if (null != property && property.length() != 0) {
+            if (String.class.equals(clazz)) {
+                // no conversion done just output
+                return (T) clazz.cast(property);
+            } else if (Integer.class.equals(clazz)) {
+                try {
+                    return (T) clazz.cast(Integer.valueOf(property));
+                } catch (final NumberFormatException e) {
+                    throw new ConfigurationException("The value given in the property " + completePropertyName + " is no integer value");
+                }
+            } else if (Boolean.class.equals(clazz)) {
+                return (T) clazz.cast(Boolean.valueOf(property));
+            } else {
+                return null;
             }
         } else {
             return null;
@@ -67,9 +85,9 @@ public class MobileConfigProperties {
      * 
      * @throws ConfigurationException
      */
-    public static void check(final ConfigurationService configuration) throws ConfigurationException {
-        for (final MobileConfigProperties.Property prop : MobileConfigProperties.Property.values()) {
-            final Object property = MobileConfigProperties.getProperty(configuration, prop);
+    public static void check(final ConfigurationService configuration, final PropertyInterface[] props) throws ConfigurationException {
+        for (final PropertyInterface prop : props) {
+            final Object property = getProperty(configuration, prop);
             if (prop.isRequired() && null == property) {
                 throw new ConfigurationException("Property " + prop.getName() + " not set but required.");
             }

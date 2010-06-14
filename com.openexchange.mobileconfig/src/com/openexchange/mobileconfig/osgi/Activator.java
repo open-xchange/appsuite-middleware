@@ -82,7 +82,7 @@ public class Activator extends DeferredActivator {
     }
 
     private void checkConfiguration() throws ConfigurationException {
-        MobileConfigProperties.check(MobileConfigServiceRegistry.getServiceRegistry().getService(ConfigurationService.class));
+        MobileConfigProperties.check(MobileConfigServiceRegistry.getServiceRegistry().getService(ConfigurationService.class), MobileConfigProperties.Property.values());
     }
 
     @Override
