@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.importexport;
 
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -81,7 +82,7 @@ public class VCardImportTest extends AbstractVCardTest {
 		return new JUnit4TestAdapter(VCardImportTest.class);
 	}
 	
-	@Test public void test6825_tooMuchInformation() throws DBPoolingException, SQLException, OXObjectNotFoundException, NumberFormatException, OXException, UnsupportedEncodingException, LdapException {
+	@Test public void test6825_tooMuchInformation() throws DBPoolingException, SQLException, OXObjectNotFoundException, NumberFormatException, OXException, UnsupportedEncodingException, LdapException, ContextException {
 		//setup: building an VCard file with a summary longer than 255 characters.
 		folderId = createTestFolder(FolderObject.CONTACT, sessObj,ctx, "vcard6825Folder");
 		final String stringTooLong = "zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... ";
@@ -90,10 +91,12 @@ public class VCardImportTest extends AbstractVCardTest {
 		//import and tests
 		final List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(vcard.getBytes("UTF-8")), folders, null);
 		assertTrue("One import?", 1 == results.size());
-		assertTrue("Should have an error" , results.get(0).hasError() );
-		final AbstractOXException e = results.get(0).getException();
-		assertEquals("Should be truncation error" , Category.TRUNCATED , e.getCategory());
-		assertEquals("GIVEN NAME was too long" , ContactField.SUR_NAME.getVCardElementName() , e.getMessageArgs()[0]);
+		assertFalse("Should have no error" , results.get(0).hasError() );
+
+		ImportResult res = results.get(0);
+	    final ContactSQLInterface contacts = new RdbContactSQLImpl(sessObj);
+	    final Contact co = contacts.getObjectById(Integer.parseInt( res.getObjectId()), Integer.parseInt( res.getFolder() ) );
+	    assertEquals("Should have truncated name", stringTooLong.subSequence(0, 255), co.getSurName());
 	}
 	
 	/*
