@@ -59,6 +59,8 @@ import com.openexchange.groupware.container.Changes;
  */
 public class TestsForModifyingChangeExceptions extends ManagedAppointmentTest {
 
+    private int exceptionPosition = 2;
+    
     private Changes changes;
 
     private Appointment update;
@@ -78,7 +80,7 @@ public class TestsForModifyingChangeExceptions extends ManagedAppointmentTest {
         calendarManager.insert(app);
 
         changes = new Changes();
-        changes.put(Appointment.RECURRENCE_POSITION, 2);
+        changes.put(Appointment.RECURRENCE_POSITION, exceptionPosition);
         changes.put(Appointment.START_DATE, D("2/1/2008 1:00", utc));
         changes.put(Appointment.END_DATE, D("2/1/2008 2:00", utc));
 
@@ -103,5 +105,18 @@ public class TestsForModifyingChangeExceptions extends ManagedAppointmentTest {
 
         assertTrue("Should get exception when trying to make a change exception a series", calendarManager.hasLastException());
         assertTrue("Should have correct exception", new OXError("APP", 99).matches(calendarManager.getLastException()));
+    }
+    
+    public void testDeletingAChangeException(){
+        Appointment secondUpdate = new Appointment();
+        secondUpdate.setParentFolderID(update.getParentFolderID());
+        secondUpdate.setObjectID(update.getObjectID());
+        secondUpdate.setLastModified(update.getLastModified());
+        secondUpdate.setRecurrencePosition(exceptionPosition);
+        secondUpdate.setRecurrenceType(Appointment.MONTHLY);
+
+        calendarManager.delete(secondUpdate);
+
+        assertFalse("Should get no error when trying to delete a change exception", calendarManager.hasLastException());
     }
 }
