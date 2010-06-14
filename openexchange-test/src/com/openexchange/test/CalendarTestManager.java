@@ -105,8 +105,16 @@ public class CalendarTestManager implements TestManager {
     private boolean failOnError;
 
     private Exception lastException;
-    
+
     private Date lastModification;
+    
+    public TimeZone getTimezone() {
+        return timezone;
+    }
+    
+    public void setTimezone(TimeZone timezone) {
+        this.timezone = timezone;
+    }
 
     public CalendarTestManager(AJAXClient client) {
         this.setClient(client);
@@ -184,7 +192,7 @@ public class CalendarTestManager implements TestManager {
     public void cleanUp() {
         boolean old = getFailOnError();
         setFailOnError(false); // switching off, because there are other ways to delete an appointment, for example creating enough delete
-                               // exceptions
+        // exceptions
         for (Appointment appointment : new ArrayList<Appointment>(createdEntities)) {
             delete(appointment);
         }
@@ -266,8 +274,8 @@ public class CalendarTestManager implements TestManager {
             return null;
         }
     }
-    
-    public void confirm(Appointment app, int status, String message){
+
+    public void confirm(Appointment app, int status, String message) {
         ConfirmRequest confirmRequest = new ConfirmRequest(app.getParentFolderID(), app.getObjectID(), status, message, getFailOnError());
         ConfirmResponse resp = execute(confirmRequest);
         setLastResponse(resp);
@@ -316,7 +324,7 @@ public class CalendarTestManager implements TestManager {
             Appointment temp = new Appointment();
             list.add(temp);
             for (int i = 0; i < cols.length; i++)
-                if(values[i] != null)
+                if (values[i] != null)
                     temp.set(cols[i], conv(cols[i], values[i]));
                 else
                     temp.remove(cols[i]);
@@ -327,11 +335,11 @@ public class CalendarTestManager implements TestManager {
     }
 
     private void fixDates(Appointment temp) {
-        if(temp.getFullTime())
-            return;        
-        if(temp.containsStartDate())
+        if (temp.getFullTime())
+            return;
+        if (temp.containsStartDate())
             temp.setStartDate(moveOffset(temp.getStartDate()));
-        if(temp.containsEndDate())
+        if (temp.containsEndDate())
             temp.setEndDate(moveOffset(temp.getEndDate()));
     }
 
@@ -416,7 +424,7 @@ public class CalendarTestManager implements TestManager {
 
     public void createDeleteException(Appointment master, int recurrencePos) {
         createDeleteException(master.getParentFolderID(), master.getObjectID(), recurrencePos);
-        master.setLastModified( getLastModification());
+        master.setLastModified(getLastModification());
     }
 
     /*
