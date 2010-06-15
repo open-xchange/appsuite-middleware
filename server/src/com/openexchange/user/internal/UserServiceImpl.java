@@ -118,6 +118,22 @@ public final class UserServiceImpl implements UserService {
             throw new UserException(e);
         }
     }
+    
+    public User searchUserByAlias(String email, Context context) throws UserException {
+        /* This is a rather stupid implementation.
+         * It will solve US4303, but may be too slow for regular use.
+         */
+        UserStorage storage = UserStorage.getInstance();
+        User[] users = storage.getUser(context);
+        for(User user:users){
+            String[] aliases = user.getAliases();
+            for(String alias: aliases){
+                if(email.equals(alias))
+                    return user;
+            }
+        }
+        return null;
+    }
 
     public void updateUser(final User user, final Context context) throws UserException {
         try {
@@ -133,4 +149,5 @@ public final class UserServiceImpl implements UserService {
     public boolean authenticate(final User user, final String password) throws UserException {
         return UserStorage.authenticate(user, password);
     }
+
 }
