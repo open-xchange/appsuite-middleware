@@ -1397,4 +1397,9 @@ public abstract class CalendarObject extends CommonObject {
 
         }
     }
+    
+    @Override
+    public String toString() {
+        return "[" + this.getObjectID() + "] " + this.getTitle();
+    }
 }
