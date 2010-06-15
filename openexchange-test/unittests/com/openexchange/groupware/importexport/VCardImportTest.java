@@ -49,28 +49,19 @@
 
 package com.openexchange.groupware.importexport;
 
-import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
-
 import junit.framework.JUnit4TestAdapter;
-
 import org.junit.Test;
-
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLImpl;
-import com.openexchange.database.DBPoolingException;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -82,11 +73,11 @@ public class VCardImportTest extends AbstractVCardTest {
 		return new JUnit4TestAdapter(VCardImportTest.class);
 	}
 	
-	@Test public void test6825_tooMuchInformation() throws DBPoolingException, SQLException, OXObjectNotFoundException, NumberFormatException, OXException, UnsupportedEncodingException, LdapException, ContextException {
+	@Test public void test6825_tooMuchInformation() throws OXObjectNotFoundException, NumberFormatException, OXException, UnsupportedEncodingException, LdapException, ContextException {
 		//setup: building an VCard file with a summary longer than 255 characters.
 		folderId = createTestFolder(FolderObject.CONTACT, sessObj,ctx, "vcard6825Folder");
-		final String stringTooLong = "zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... ";
-		final String expected = "zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig";
+		final String stringTooLong = "aaaaaaaaaabbbbbbbbbbccccccccccddddddddddeeeeeeeeeeffffffffffgggggggggghhhhhhhhhhiiiiiiiiiijjjjjjjjjjkkkkkkkkkkllllllllllmmmmmmmmmmnnnnnnnnnnooooooooooppppppppppqqqqqqqqqqrrrrrrrrrrttttttttttuuuuuuuuuvvvvvvvvvwwwwwwwwwwxxxxxxxxxxyyyyyyyyyyzzzzzzzzzz";
+		final String expected = "aaaaaaaaaabbbbbbbbbbccccccccccddddddddddeeeeeeeeeeffffffffffgggggggggghhhhhhhhhhiiiiiiiiiijjjjjjjjjjkkkkkkkkkkllllllllllmmmmmmmmmmnnnnnnnnnnooooooooooppppppppppqqqqqqqqqqrrrrrrrrrrttttttttttuuuuuuuuuvvvvvvvvvwwwwwwwwwwxxxxxxxxxxyyyyyyyyyyzzzzzzzzzz";
 		final String vcard = "BEGIN:VCARD\nVERSION:3.0\n\nN:"+stringTooLong+";givenName;;;\nEND:VCARD\n";
 		final List <String> folders = Arrays.asList( Integer.toString(folderId) );
 		//import and tests
@@ -103,7 +94,7 @@ public class VCardImportTest extends AbstractVCardTest {
 	/*
 	 * TELEX is not read.
 	 */
-	@Test public void test7719() throws DBPoolingException, SQLException, OXObjectNotFoundException, NumberFormatException, OXException, UnsupportedEncodingException, LdapException, ContextException {
+	@Test public void test7719() throws OXObjectNotFoundException, NumberFormatException, OXException, UnsupportedEncodingException, LdapException, ContextException {
 		//setup
 		folderId = createTestFolder(FolderObject.CONTACT, sessObj,ctx, "vcard7719Folder");
 		final String telex = "7787987897897897897";
@@ -121,7 +112,7 @@ public class VCardImportTest extends AbstractVCardTest {
 		assertEquals("Has telex" , telex , co.getTelephoneTelex());
 	}
 	
-	@Test public void testEmpty() throws DBPoolingException, SQLException, UnsupportedEncodingException, NumberFormatException, OXException, LdapException, ContextException {
+	@Test public void testEmpty() throws UnsupportedEncodingException, NumberFormatException, OXException, LdapException, ContextException {
 		folderId = createTestFolder(FolderObject.CONTACT, sessObj,ctx, "vcard7719Folder");
 		final String vcard = "BEGIN:VCARD\nVERSION:2.1\nN:;;;;\nEND:VCARD\n";
 		final List <String> folders = Arrays.asList( Integer.toString(folderId) );
