@@ -48,6 +48,6 @@ Description: The Open-Xchange Meta package for OX on a single server
 
 Package: open-xchange-meta-mobility
 Architecture: all
-Depends: open-xchange-usm, open-xchange-help-usm-eas
+Depends: open-xchange-eas, open-xchange-usm, open-xchange-help-usm-eas
 Description: The Open-Xchange Meta package for Business Mobility
 
