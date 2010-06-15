@@ -79,6 +79,7 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.CommonAllResponse;
+import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.api2.OXException;
@@ -401,20 +402,29 @@ public class CalendarTestManager implements TestManager {
     }
 
     public void delete(Appointment appointment, boolean failOnErrorOverride) {
-        createdEntities.remove(appointment);
-        DeleteRequest deleteRequest = new DeleteRequest(
-            appointment.getObjectID(),
-            appointment.getParentFolderID(),
-            new Date(Long.MAX_VALUE),
-            failOnErrorOverride);
-        extractInfo(execute(deleteRequest));
+        createdEntities.remove(appointment); // TODO: Does this remove the right object or does equals() suck?
+        DeleteRequest deleteRequest;
+        if(appointment.containsRecurrencePosition()){
+            deleteRequest = new DeleteRequest(
+                appointment.getObjectID(),
+                appointment.getParentFolderID(),
+                appointment.getRecurrencePosition(),
+                new Date(Long.MAX_VALUE),
+                failOnErrorOverride); 
+        } else {
+            deleteRequest = new DeleteRequest(
+                appointment.getObjectID(),
+                appointment.getParentFolderID(),
+                new Date(Long.MAX_VALUE),
+                failOnErrorOverride);
+        }
+        CommonDeleteResponse response = execute(deleteRequest);
+        if(response != null)
+            extractInfo(response);
     }
 
     public void delete(Appointment appointment) {
-        createdEntities.remove(appointment); // TODO: Does this remove the right object or does equals() suck?
-        appointment.setLastModified(new Date(Long.MAX_VALUE));
-        DeleteRequest deleteRequest = new DeleteRequest(appointment, getFailOnError());
-        extractInfo(execute(deleteRequest));
+        delete(appointment, getFailOnError());
     }
 
     public void createDeleteException(int folder, int seriesId, int recurrencePos) {
