@@ -145,15 +145,20 @@ public class UsmFailureDuringRecurrenceTest extends ManagedAppointmentTest {
         succeedTest(changes, null, expectationsForException);
     }
     
-//    public void testSucceedWhenChangingTheDateOfASeries() throws Exception {
-//        Changes changes = new Changes();
-//        changes.put(Appointment.DAY_IN_MONTH, 23);
-//        changes.put(Appointment.MONTH, 3);
-//        
-//        Expectations expectationsForSeries = new Expectations(changes);
-//        
-//        succeedTest(changes, expectationsForSeries, null);
-//    }
+    public void testShouldFailWhenTryingToDeleteExceptionOnNormalAppointment() throws Exception {
+        app = new Appointment();
+        app.setParentFolderID(folder.getObjectID());
+        app.setStartDate( D("31.12.2025 00:00") );
+        app.setEndDate( D("31.12.2025 01:00") );
+        
+        calendarManager.insert(app);
+        app.setRecurrencePosition(1);
+        calendarManager.delete(app, false);
+        assertTrue("Should fail", calendarManager.hasLastException()); 
+        /* won't go further because exception is not wrapped nicely, 
+         * so this is just a boring JSON exception on the client side.
+         */
+    }
     
 
     private void succeedTest(Changes changes, Expectations expectationsForSeries, Expectations expectationsForException) throws OXException {
