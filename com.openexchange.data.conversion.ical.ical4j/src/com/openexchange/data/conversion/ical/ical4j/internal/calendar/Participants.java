@@ -264,15 +264,20 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
 
         for(final User user : users) {
             UserParticipant up = new UserParticipant(user.getId());
-            ICalParticipant icalP = mails.get(user.getMail());
-            
+            ICalParticipant icalP = null;
+            for(String alias: user.getAliases()){
+                icalP = mails.get(alias);
+                if(icalP != null) {
+                    mails.remove(alias);
+                    continue;
+                }
+            }
             if (icalP.message != null)
                 up.setConfirmMessage(icalP.message);
             if (icalP.status != -1)
                 up.setConfirm(icalP.status);
             
-            cObj.addParticipant( new UserParticipant(user.getId()) );
-            mails.remove(user.getMail());
+            cObj.addParticipant( new UserParticipant(user.getId()) ); //TODO Is that a bug? Which one?
         }
 
         List<ConfirmableParticipant> confirmableParticipants = new ArrayList<ConfirmableParticipant>();
