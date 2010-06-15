@@ -86,7 +86,7 @@ public class VCardImportTest extends AbstractVCardTest {
 		//setup: building an VCard file with a summary longer than 255 characters.
 		folderId = createTestFolder(FolderObject.CONTACT, sessObj,ctx, "vcard6825Folder");
 		final String stringTooLong = "zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... ";
-		final String expected = "zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig";
+		final String expected = "zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig";
 		final String vcard = "BEGIN:VCARD\nVERSION:3.0\n\nN:"+stringTooLong+";givenName;;;\nEND:VCARD\n";
 		final List <String> folders = Arrays.asList( Integer.toString(folderId) );
 		//import and tests
