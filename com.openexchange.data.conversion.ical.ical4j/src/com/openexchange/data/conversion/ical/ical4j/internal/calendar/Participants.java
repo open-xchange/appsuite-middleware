@@ -88,6 +88,10 @@ import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.groupware.notify.NotificationConfig;
+import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
+import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceException;
 import com.openexchange.server.ServiceException;
@@ -166,7 +170,20 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
     protected void addUserAttendee(int index, UserParticipant userParticipant, Context ctx, T component, U obj) throws ConversionError {
         final Attendee attendee = new Attendee();
         try {
-            String address = resolveUserMail(index, userParticipant, ctx);
+            String address ="";
+            //This sets the attendees email-addresses to their DefaultSenderAddress if configured via com.openexchange.notification.fromSource in notification.properties
+            String senderSource = NotificationConfig.getProperty(NotificationProperty.FROM_SOURCE, "primaryMail");
+            if (senderSource.equals("defaultSenderAddress")) { 
+            try {
+                address = UserSettingMailStorage.getInstance().loadUserSettingMail(userParticipant.getIdentifier(), ctx).getSendAddr();
+            } catch (UserConfigurationException e) {
+                LOG.error(e.getMessage(), e);
+                address = resolveUserMail(index, userParticipant, ctx);
+            }
+            } else{
+                address = resolveUserMail(index, userParticipant, ctx);
+            }
+            
             attendee.setValue("mailto:"+ address);
             ParameterList parameters = attendee.getParameters();
             parameters.add(Role.REQ_PARTICIPANT);
