@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 8
+%define		ox_release 9
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -499,6 +499,8 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed Jun 16 2010 - karsten.will@open-xchange.com
+ - Bugfix #16295: DefaultSenderAddress now correctly used in .ics-files for all attendees (if configured in notification.properties)
 * Mon Jun 14 2010 - marcus.klein@open-xchange.com
  - Bugfix #16326: Using default error page template for EasyLogin if the configured file is not found.
 * Thu Jun 10 2010 - marcus.klein@open-xchange.com
