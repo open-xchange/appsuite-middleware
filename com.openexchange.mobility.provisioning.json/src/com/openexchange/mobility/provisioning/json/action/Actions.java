@@ -47,11 +47,11 @@
  *
  */
 
-package com.openexchange.mobility.provisioning.json.servlet;
+package com.openexchange.mobility.provisioning.json.action;
 
-public class ResponseCodes {
+public class Actions {
 
-	public static final String SUCCESS_OK = "true";
-	public static final String SUCCESS_ERROR = "false";
+	public static String ACTION_EMAIL = "email";
+	public static String ACTION_SMS = "sms";
 	
 }

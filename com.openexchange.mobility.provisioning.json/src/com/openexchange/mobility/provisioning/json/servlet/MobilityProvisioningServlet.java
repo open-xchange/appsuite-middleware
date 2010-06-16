@@ -51,9 +51,7 @@ package com.openexchange.mobility.provisioning.json.servlet;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 
-import javax.mail.Address;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.servlet.ServletException;
@@ -73,13 +71,9 @@ import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
-import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
-import com.openexchange.mail.transport.MailTransport;
-import com.openexchange.mobility.provisioning.json.configuration.MobilityProvisioningConfiguration;
+import com.openexchange.mobility.provisioning.json.action.ActionEmail;
+import com.openexchange.mobility.provisioning.json.action.Actions;
 import com.openexchange.server.ServiceException;
-import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
 
@@ -137,18 +131,26 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 			final HttpServletResponse resp) throws JSONException, IOException {
 		final Response response = new Response();
 		
+		String success = ResponseCodes.SUCCESS_ERROR;
+		String message = "";
+		
 		JSONObject obj = new JSONObject();	
-		obj.put("success", ResponseCodes.SUCCESS_ERROR);
+		
 
-		final ServerSession session = getSessionObject(request);
 		try {
+			final ServerSession session = getSessionObject(request);
 			Context ctx = ContextStorage.getStorageContext(session);
 			User user = UserStorage.getInstance().getUser(session.getUserId(), ctx);
 			
-			sendMail(new InternetAddress(user.getMail(), true), session);
-			
-			obj.put("message", "Provisioning mail has been send to " + user.getMail());
-			obj.put("success", ResponseCodes.SUCCESS_OK);
+			if (JSONUtility.checkStringParameter(request, "action").equals(Actions.ACTION_EMAIL)) {
+				new ActionEmail(new InternetAddress(user.getMail(), true)).sendMail(session);
+				message = "Provisioning mail has been send to " + user.getMail();
+				success = ResponseCodes.SUCCESS_OK;
+			} else if (JSONUtility.checkStringParameter(request, "action").equals(Actions.ACTION_SMS)) {
+				message = "Action SMS not implemented yet.";
+			} else {
+				message = "Missing or wrong field action in JSON request.";
+			}
 		} catch (MailException e) {
 			LOG.error("Couldn't send provisioning mail", e);
 		} catch (ContextException e) {
@@ -161,8 +163,12 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 			LOG.error("Cannot get configuration", e);
 		} catch (UnsupportedEncodingException e) {
 			LOG.error("Error on correcting provisioning url", e);
+		} catch (AjaxException e) {
+			LOG.error("Missing or wrong field action in JSON request", e);
 		}
-
+		
+		obj.put("success", success);
+		obj.put("message", message);
 		response.setData(obj);
 
 		/*
@@ -170,64 +176,5 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 		 */
 		ResponseWriter.write(response, resp.getWriter());
 	}
-	
-	private void sendMail(InternetAddress targetAddress, final Session session) throws MailException, ContextException, LdapException, AddressException, UnsupportedEncodingException, ServiceException {
-		final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
-		mailAccess.connect();
-		final MailTransport transport = MailTransport.getInstance(session);
-
-		try {
-			Context ctx = ContextStorage.getStorageContext(session);
-			User user = UserStorage.getInstance().getUser(session.getUserId(), ctx);
-			
-			InternetAddress fromAddress = new InternetAddress(user.getMail(), true);
-			if (!MobilityProvisioningConfiguration.getProvisioningMailFrom().trim().toUpperCase().equals("USER")) {
-				fromAddress = new InternetAddress(MobilityProvisioningConfiguration.getProvisioningMailFrom(), true);
-			}
-
-			final com.openexchange.mail.transport.TransportProvider provider =
-				com.openexchange.mail.transport.TransportProviderRegistry.getTransportProviderBySession(session, 0);
-
-			ComposedMailMessage msg = provider.getNewComposedMailMessage(session, ctx);
-			msg.addFrom(fromAddress);
-			msg.addTo(targetAddress);
-			msg.setSubject(MobilityProvisioningConfiguration.getProvisioningMailSubject());
-
-			String provisioningUrl = MobilityProvisioningConfiguration.getProvisioningURL();
-			provisioningUrl = provisioningUrl.replace("%l", URLEncoder.encode(session.getLogin(), MobilityProvisioningConfiguration.getProvisioningURLEncoding()));
-			provisioningUrl = provisioningUrl.replace("%c", URLEncoder.encode(String.valueOf(session.getContextId()), MobilityProvisioningConfiguration.getProvisioningURLEncoding()));
-			provisioningUrl = provisioningUrl.replace("%u", URLEncoder.encode(session.getUserlogin(), MobilityProvisioningConfiguration.getProvisioningURLEncoding()));
-			provisioningUrl = provisioningUrl.replace("%p", URLEncoder.encode(user.getMail(), MobilityProvisioningConfiguration.getProvisioningURLEncoding()));
-			
-			final TextBodyMailPart textPart = provider.getNewTextBodyPart(provisioningUrl);
-			msg.setBodyPart(textPart);
-			msg.setContentType("text/plain");
-
-			try {
-				transport.sendMailMessage(msg, com.openexchange.mail.dataobjects.compose.ComposeType.NEW, new Address[] { targetAddress });
-			} finally {
-				transport.close();
-			}
-		} finally {
-			transport.close();
-			mailAccess.close(true);
-		}
-	}
-	
-    /**
-     * Parses specified parameter into an <code>String</code>.
-     * 
-     * @param request The request
-     * @param parameterName The parameter name
-     * @return The parsed <code>String</code> value
-     * @throws AjaxException If parameter is not present or invalid in given request
-     */
-    protected static String checkStringParameter(final HttpServletRequest request, final String parameterName) throws AjaxException {
-        final String tmp = request.getParameter(parameterName);
-        if (null == tmp || 0 == tmp.length()) {
-            throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, parameterName);
-        }
-        return tmp;
-    }
 	
 }
