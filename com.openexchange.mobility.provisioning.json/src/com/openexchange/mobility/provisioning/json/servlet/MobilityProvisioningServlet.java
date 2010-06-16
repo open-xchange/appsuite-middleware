@@ -132,7 +132,7 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 		final Response response = new Response();
 		
 		boolean success = false;
-		String message = "";
+		String message = "Couldn't send provisioning message.";
 		
 		JSONObject obj = new JSONObject();	
 		
