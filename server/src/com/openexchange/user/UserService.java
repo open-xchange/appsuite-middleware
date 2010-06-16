@@ -107,16 +107,6 @@ public interface UserService {
      * @throws UserException if an error occurs.
      */
     User searchUser(String email, Context context) throws UserException;
-
-    /**
-     * Searches a user by its alias email address. This is used for converting iCal to appointments.
-     * 
-     * @param email the email address of the user, which can be an alias.
-     * @param context The context.
-     * @return a User object if the user was found by its email address or <code>null</code> if no user could be found.
-     * @throws UserException if an error occurs.
-     */
-    User searchUserByAlias(String email, Context context) throws UserException;
     
     /**
      * Returns an array with all user identifier of the context.
