@@ -49,6 +49,11 @@
 
 package com.openexchange.mobility.provisioning.json.action;
 
+/**
+ * 
+ * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
+ * 
+ */
 public class Actions {
 
 	public static String ACTION_EMAIL = "email";

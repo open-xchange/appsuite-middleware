@@ -60,8 +60,9 @@ import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
- * @author Benjamin Otterbach
- *
+ * 
+ * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
+ * 
  */
 public class Activator extends DeferredActivator {
 	

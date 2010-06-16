@@ -49,6 +49,11 @@
 
 package com.openexchange.mobility.provisioning.json.servlet;
 
+/**
+ * 
+ * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
+ * 
+ */
 public class ResponseCodes {
 
 	public static final String SUCCESS_OK = "true";

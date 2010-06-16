@@ -71,6 +71,11 @@ import com.openexchange.mobility.provisioning.json.configuration.MobilityProvisi
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 
+/**
+ * 
+ * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
+ * 
+ */
 public class ActionEmail {
 
 	private InternetAddress targetAddress;
