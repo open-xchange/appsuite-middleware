@@ -170,21 +170,20 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
     protected void addUserAttendee(int index, UserParticipant userParticipant, Context ctx, T component, U obj) throws ConversionError {
         final Attendee attendee = new Attendee();
         try {
-            String address ="";
+            String address;
             //This sets the attendees email-addresses to their DefaultSenderAddress if configured via com.openexchange.notification.fromSource in notification.properties
             String senderSource = NotificationConfig.getProperty(NotificationProperty.FROM_SOURCE, "primaryMail");
-            if (senderSource.equals("defaultSenderAddress")) { 
-            try {
-                address = UserSettingMailStorage.getInstance().loadUserSettingMail(userParticipant.getIdentifier(), ctx).getSendAddr();
-            } catch (UserConfigurationException e) {
-                LOG.error(e.getMessage(), e);
+            if ("defaultSenderAddress".equals(senderSource)) { 
+                try {
+                    address = UserSettingMailStorage.getInstance().loadUserSettingMail(userParticipant.getIdentifier(), ctx).getSendAddr();
+                } catch (UserConfigurationException e) {
+                    LOG.error(e.getMessage(), e);
+                    address = resolveUserMail(index, userParticipant, ctx);
+                }
+            } else {
                 address = resolveUserMail(index, userParticipant, ctx);
             }
-            } else{
-                address = resolveUserMail(index, userParticipant, ctx);
-            }
-            
-            attendee.setValue("mailto:"+ address);
+            attendee.setValue("mailto:" + address);
             ParameterList parameters = attendee.getParameters();
             parameters.add(Role.REQ_PARTICIPANT);
             parameters.add(CuType.INDIVIDUAL);
@@ -265,9 +264,9 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
         for(final User user : users) {
             UserParticipant up = new UserParticipant(user.getId());
             ICalParticipant icalP = null;
-            for(String alias: user.getAliases()){
+            for (String alias: user.getAliases()) {
                 icalP = mails.get(alias);
-                if(icalP != null) {
+                if (icalP != null) {
                     mails.remove(alias);
                     continue;
                 }

@@ -55,14 +55,18 @@ import java.util.TimeZone;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.property.Organizer;
-import com.openexchange.data.conversion.ical.ConversionError;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.data.conversion.ical.ical4j.internal.UserResolver;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.groupware.notify.NotificationConfig;
+import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
+import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.ServiceException;
 
 /**
@@ -72,17 +76,28 @@ import com.openexchange.server.ServiceException;
  */
 public class CreatedBy<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T, U> {
 
+    private static final Log LOG = LogFactory.getLog(CreatedBy.class);
+
     public static UserResolver userResolver = UserResolver.EMPTY;
 
-    public void emit(int index, U calendar, T component, List<ConversionWarning> warnings, Context ctx, Object... args) throws ConversionError {
+    public void emit(int index, U calendar, T component, List<ConversionWarning> warnings, Context ctx, Object... args) {
         Organizer organizer = new Organizer();
         try {
+            String senderSource = NotificationConfig.getProperty(NotificationProperty.FROM_SOURCE, "primaryMail");
+            String address;
             if (calendar.containsOrganizer()) {
-                organizer.setValue("mailto:" + calendar.getOrganizer());
+                address = calendar.getOrganizer();
+            } else if ("defaultSenderAddress".equals(senderSource)) { 
+                try {
+                    address = UserSettingMailStorage.getInstance().loadUserSettingMail(calendar.getCreatedBy(), ctx).getSendAddr();
+                } catch (UserConfigurationException e) {
+                    LOG.error(e.getMessage(), e);
+                    address = userResolver.loadUser(calendar.getCreatedBy(), ctx).getMail();
+                }
             } else {
-                User user = userResolver.loadUser(calendar.getCreatedBy(), ctx);
-                organizer.setValue("mailto:" + user.getMail());
+                address = userResolver.loadUser(calendar.getCreatedBy(), ctx).getMail();
             }
+            organizer.setValue("mailto:" + address);
         } catch (URISyntaxException e) {
             warnings.add(new ConversionWarning(index, "URI problem.", e));
         } catch (UserException e) {
@@ -101,7 +116,7 @@ public class CreatedBy<T extends CalendarComponent, U extends CalendarObject> ex
         return calendar.containsOrganizer() || calendar.containsCreatedBy();
     }
 
-    public void parse(int index, T component, U calendar, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
+    public void parse(int index, T component, U calendar, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) {
         String organizer = component.getProperty(Property.ORGANIZER).getValue();
         calendar.setOrganizer(organizer.toLowerCase().startsWith("mailto:") ? organizer.substring(7, organizer.length()) : organizer);
     }
