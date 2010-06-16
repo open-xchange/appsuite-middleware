@@ -61,11 +61,11 @@ import com.openexchange.ajax.contact.action.GetResponse;
 import com.openexchange.ajax.contact.action.InsertRequest;
 import com.openexchange.ajax.contact.action.InsertResponse;
 import com.openexchange.ajax.contact.action.UpdatesRequest;
+import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.Order;
-import com.openexchange.webdav.xml.fields.ContactFields;
 
 /**
  * {@link Bug13960Test}
@@ -74,7 +74,7 @@ import com.openexchange.webdav.xml.fields.ContactFields;
  */
 public class Bug13960Test extends AbstractAJAXSession {
 
-    private static final int[] COLUMNS = { Contact.OBJECT_ID, Contact.DEFAULT_ADDRESS, Contact.FILE_AS };
+    private static final int[] COLUMNS = { Contact.OBJECT_ID, Contact.DEFAULT_ADDRESS, Contact.FILE_AS, Contact.NUMBER_OF_IMAGES };
 
     private AJAXClient client;
     private TimeZone timeZone;
@@ -106,8 +106,10 @@ public class Bug13960Test extends AbstractAJAXSession {
             GetRequest request = new GetRequest(contact, timeZone);
             GetResponse response = client.execute(request);
             JSONObject json = (JSONObject) response.getData();
-            assertFalse(json.has(ContactFields.DEFAULTADDRESS));
-            assertFalse(json.has(ContactFields.FILE_AS));
+            assertFalse("'Default address' should not be contained if not set.", json.has(ContactFields.DEFAULT_ADDRESS));
+            assertFalse("'File as should' not be contained if not set.", json.has(ContactFields.FILE_AS));
+            assertTrue("'Number of images' should be contained always.", json.has(ContactFields.NUMBER_OF_IMAGES));
+            assertEquals("'Number of images' should be zero.", 0, json.getInt(ContactFields.NUMBER_OF_IMAGES));
         }
         {
             UpdatesRequest request = new UpdatesRequest(contact.getParentFolderID(), COLUMNS, 0, Order.ASCENDING, new Date(contact.getLastModified().getTime() - 1));
@@ -121,9 +123,11 @@ public class Bug13960Test extends AbstractAJAXSession {
             }
             JSONArray array = ((JSONArray) response.getData()).getJSONArray(row);
             int defaultAddressPos = response.getColumnPos(Contact.DEFAULT_ADDRESS);
-            assertEquals(JSONObject.NULL, array.get(defaultAddressPos));
+            assertEquals("Default address should not be contained if not set.", JSONObject.NULL, array.get(defaultAddressPos));
             int fileAsPos = response.getColumnPos(Contact.FILE_AS);
             assertEquals(JSONObject.NULL, array.get(fileAsPos));
+            int numberOfImagesPos = response.getColumnPos(Contact.NUMBER_OF_IMAGES);
+            assertEquals("'Number of images' should be zero.", 0, array.getInt(numberOfImagesPos));
         }
     }
 }
