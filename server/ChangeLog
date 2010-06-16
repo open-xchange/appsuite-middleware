@@ -1,3 +1,7 @@
+* 2010-06-16 - marcus.klein@open-xchange.com
+
+ - Bugfix #13960: Corrected values in columns responses of appointments and contacts to get a consistent response to normal get values.
+
 * 2010-06-15 - karsten.will@open-xchange.com
 
  - Bugfix #16295 - DefaultSenderAddress now correctly used in .ics-files for all attendees (if configured in notification.properties)

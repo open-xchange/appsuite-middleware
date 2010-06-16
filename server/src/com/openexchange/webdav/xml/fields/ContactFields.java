@@ -47,118 +47,116 @@
  *
  */
 
-
-
 package com.openexchange.webdav.xml.fields;
 
 public interface ContactFields extends CommonFields {
-	
-	public static final String DISPLAY_NAME = "displayname";
-	public static final String LAST_NAME = "last_name";
-	public static final String FIRST_NAME = "first_name";
-	public static final String SECOND_NAME = "second_name";
-	public static final String SUFFIX = "suffix";
-	public static final String TITLE = "title";
-	public static final String STREET = "street";
-	public static final String POSTAL_CODE = "postal_code";
-	public static final String CITY = "city";
-	public static final String STATE = "state";
-	public static final String COUNTRY = "country";
-	public static final String BIRTHDAY = "birthday";
-	public static final String MARTITAL_STATUS = "martital_status";
-	public static final String NUMBER_OF_CHILDREN = "number_of_children";
-	public static final String PROFESSION = "profession";
-	public static final String NICKNAME = "nickname";
-	public static final String SPOUSE_NAME = "spouse_name";
-	public static final String ANNIVERSARY = "anniversary";
-	public static final String NOTE = "note";
-	public static final String DEPARTMENT = "department";
-	public static final String POSITION = "position";
-	public static final String EMPLOYEE_TYPE = "employee_type";
-	public static final String ROOM_NUMBER = "room_number";
-	public static final String BUSINESS_STREET = "business_street";
-	public static final String BUSINESS_POSTAL_CODE = "business_postal_code";
-	public static final String BUSINESS_CITY = "business_city";
-	public static final String BUSINESS_STATE = "business_state";
-	public static final String BUSINESS_COUNTRY = "business_country";
-	public static final String NUMBER_OF_EMPLOYEE = "number_of_employee";
-	public static final String SALES_VOLUME = "sales_volume";
-	public static final String TAX_ID = "tax_id";
-	public static final String COMMERCIAL_REGISTER = "commercial_register";
-	public static final String BRANCHES = "branches";
-	public static final String BUSINESS_CATEGORY = "business_category";
-	public static final String MORE_INFO = "more_info";
-	public static final String MANAGERS_NAME = "managers_name";
-	public static final String ASSISTANTS_NAME = "assistants_name";
-	
-	public static final String SECOND_STREET = "second_street";
-	public static final String SECOND_POSTAL_CODE = "second_postal_code";
-	public static final String SECOND_CITY = "second_city";
-	public static final String SECOND_STATE = "second_state";
-	public static final String SECOND_COUNTRY = "second_country";
-	
-	public static final String PHONE_BUSINESS = "phone_business";
-	public static final String PHONE_BUSINESS2 = "phone_business2";
-	public static final String FAX_BUSINESS = "fax_business";
-	public static final String CALLBACK = "callback";
-	public static final String PHONE_CAR = "phone_car";
-	public static final String PHONE_COMPANY = "phone_company";
-	public static final String PHONE_HOME = "phone_home";
-	public static final String PHONE_HOME2 = "phone_home2";
-	public static final String FAX_HOME = "fax_home";
-	public static final String MOBILE1 = "mobile1";
-	public static final String MOBILE2 = "mobile2";
-	public static final String PHONE_OTHER = "phone_other";
-	public static final String FAX_OTHER = "fax_other";
-	public static final String FILE_AS = "fileas";
-	public static final String EMAIL1 = "email1";
-	public static final String EMAIL2 = "email2";
-	public static final String EMAIL3 = "email3";
-	public static final String URL = "url";
-	
-	public static final String ISDN = "isdn";
-	public static final String PAGER = "pager";
-	public static final String PRIMARY = "primary";
-	public static final String RADIO = "radio";
-	public static final String TELEX = "telex";
-	public static final String TTY_TDD = "tty_tdd";
-	public static final String INSTANT_MESSENGER = "instant_messenger";
-	public static final String INSTANT_MESSENGER2 = "instant_messenger2";
-	public static final String IP_PHONE = "ip_phone";
-	
-	public static final String USERFIELD01 = "userfield01";
-	public static final String USERFIELD02 = "userfield02";
-	public static final String USERFIELD03 = "userfield03";
-	public static final String USERFIELD04 = "userfield04";
-	public static final String USERFIELD05 = "userfield05";
-	public static final String USERFIELD06 = "userfield06";
-	public static final String USERFIELD07 = "userfield07";
-	public static final String USERFIELD08 = "userfield08";
-	public static final String USERFIELD09 = "userfield09";
-	public static final String USERFIELD10 = "userfield10";
-	public static final String USERFIELD11 = "userfield11";
-	public static final String USERFIELD12 = "userfield12";
-	public static final String USERFIELD13 = "userfield13";
-	public static final String USERFIELD14 = "userfield14";
-	public static final String USERFIELD15 = "userfield15";
-	public static final String USERFIELD16 = "userfield16";
-	public static final String USERFIELD17 = "userfield17";
-	public static final String USERFIELD18 = "userfield18";
-	public static final String USERFIELD19 = "userfield19";
-	public static final String USERFIELD20 = "userfield20";
-	
-	public static final String PHONE_ASSISTANT = "phone_assistant";
-	public static final String DEFAULTADDRESS = "defaultaddress";
-	
-	public static final String COMPANY = "company";
-	
-	public static final String DISTRIBUTIONLIST = "distributionlist";
-	public static final String DISTRIBUTIONLIST_FLAG = "distributionlist_flag";
-	public static final String LINKS = "links";
-	public static final String LINK_FLAG = "link_flag";
-	
-	public static final String IMAGE1 = "image1";
 
-	public static final String IMAGE_CONTENT_TYPE = "image_content_type";
-		
+    String DISPLAY_NAME = "displayname";
+    String LAST_NAME = "last_name";
+    String FIRST_NAME = "first_name";
+    String SECOND_NAME = "second_name";
+    String SUFFIX = "suffix";
+    String TITLE = "title";
+    String STREET = "street";
+    String POSTAL_CODE = "postal_code";
+    String CITY = "city";
+    String STATE = "state";
+    String COUNTRY = "country";
+    String BIRTHDAY = "birthday";
+    String MARTITAL_STATUS = "martital_status";
+    String NUMBER_OF_CHILDREN = "number_of_children";
+    String PROFESSION = "profession";
+    String NICKNAME = "nickname";
+    String SPOUSE_NAME = "spouse_name";
+    String ANNIVERSARY = "anniversary";
+    String NOTE = "note";
+    String DEPARTMENT = "department";
+    String POSITION = "position";
+    String EMPLOYEE_TYPE = "employee_type";
+    String ROOM_NUMBER = "room_number";
+    String BUSINESS_STREET = "business_street";
+    String BUSINESS_POSTAL_CODE = "business_postal_code";
+    String BUSINESS_CITY = "business_city";
+    String BUSINESS_STATE = "business_state";
+    String BUSINESS_COUNTRY = "business_country";
+    String NUMBER_OF_EMPLOYEE = "number_of_employee";
+    String SALES_VOLUME = "sales_volume";
+    String TAX_ID = "tax_id";
+    String COMMERCIAL_REGISTER = "commercial_register";
+    String BRANCHES = "branches";
+    String BUSINESS_CATEGORY = "business_category";
+    String MORE_INFO = "more_info";
+    String MANAGERS_NAME = "managers_name";
+    String ASSISTANTS_NAME = "assistants_name";
+
+    String SECOND_STREET = "second_street";
+    String SECOND_POSTAL_CODE = "second_postal_code";
+    String SECOND_CITY = "second_city";
+    String SECOND_STATE = "second_state";
+    String SECOND_COUNTRY = "second_country";
+
+    String PHONE_BUSINESS = "phone_business";
+    String PHONE_BUSINESS2 = "phone_business2";
+    String FAX_BUSINESS = "fax_business";
+    String CALLBACK = "callback";
+    String PHONE_CAR = "phone_car";
+    String PHONE_COMPANY = "phone_company";
+    String PHONE_HOME = "phone_home";
+    String PHONE_HOME2 = "phone_home2";
+    String FAX_HOME = "fax_home";
+    String MOBILE1 = "mobile1";
+    String MOBILE2 = "mobile2";
+    String PHONE_OTHER = "phone_other";
+    String FAX_OTHER = "fax_other";
+    String FILE_AS = com.openexchange.ajax.fields.ContactFields.FILE_AS;
+    String EMAIL1 = "email1";
+    String EMAIL2 = "email2";
+    String EMAIL3 = "email3";
+    String URL = "url";
+
+    String ISDN = "isdn";
+    String PAGER = "pager";
+    String PRIMARY = "primary";
+    String RADIO = "radio";
+    String TELEX = "telex";
+    String TTY_TDD = "tty_tdd";
+    String INSTANT_MESSENGER = "instant_messenger";
+    String INSTANT_MESSENGER2 = "instant_messenger2";
+    String IP_PHONE = "ip_phone";
+
+    String USERFIELD01 = "userfield01";
+    String USERFIELD02 = "userfield02";
+    String USERFIELD03 = "userfield03";
+    String USERFIELD04 = "userfield04";
+    String USERFIELD05 = "userfield05";
+    String USERFIELD06 = "userfield06";
+    String USERFIELD07 = "userfield07";
+    String USERFIELD08 = "userfield08";
+    String USERFIELD09 = "userfield09";
+    String USERFIELD10 = "userfield10";
+    String USERFIELD11 = "userfield11";
+    String USERFIELD12 = "userfield12";
+    String USERFIELD13 = "userfield13";
+    String USERFIELD14 = "userfield14";
+    String USERFIELD15 = "userfield15";
+    String USERFIELD16 = "userfield16";
+    String USERFIELD17 = "userfield17";
+    String USERFIELD18 = "userfield18";
+    String USERFIELD19 = "userfield19";
+    String USERFIELD20 = "userfield20";
+
+    String PHONE_ASSISTANT = "phone_assistant";
+    String DEFAULTADDRESS = "defaultaddress";
+
+    String COMPANY = "company";
+
+    String DISTRIBUTIONLIST = "distributionlist";
+    String DISTRIBUTIONLIST_FLAG = "distributionlist_flag";
+    String LINKS = "links";
+    String LINK_FLAG = "link_flag";
+
+    String IMAGE1 = "image1";
+
+    String IMAGE_CONTENT_TYPE = "image_content_type";
+
 }

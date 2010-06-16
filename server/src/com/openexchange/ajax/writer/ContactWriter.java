@@ -93,139 +93,139 @@ public class ContactWriter extends CommonWriter {
         }
     }
 
-    public void writeContact(final Contact contactobject, final JSONObject jsonObj) throws JSONException {
-        writeCommonFields(contactobject, jsonObj);
+    public void writeContact(final Contact contact, final JSONObject json) throws JSONException {
+        writeCommonFields(contact, json);
 
-        writeParameter(ContactFields.LAST_NAME, contactobject.getSurName(), jsonObj);
-        writeParameter(ContactFields.FIRST_NAME, contactobject.getGivenName(), jsonObj);
-        writeParameter(ContactFields.ANNIVERSARY, contactobject.getAnniversary(), jsonObj);
-        writeParameter(ContactFields.ASSISTANT_NAME, contactobject.getAssistantName(), jsonObj);
-        writeParameter(ContactFields.BIRTHDAY, contactobject.getBirthday(), jsonObj);
-        writeParameter(ContactFields.BRANCHES, contactobject.getBranches(), jsonObj);
-        writeParameter(ContactFields.BUSINESS_CATEGORY, contactobject.getBusinessCategory(), jsonObj);
-        writeParameter(ContactFields.CELLULAR_TELEPHONE1, contactobject.getCellularTelephone1(), jsonObj);
-        writeParameter(ContactFields.CELLULAR_TELEPHONE2, contactobject.getCellularTelephone2(), jsonObj);
-        writeParameter(ContactFields.CITY_HOME, contactobject.getCityHome(), jsonObj);
-        writeParameter(ContactFields.CITY_BUSINESS, contactobject.getCityBusiness(), jsonObj);
-        writeParameter(ContactFields.CITY_OTHER, contactobject.getCityOther(), jsonObj);
-        writeParameter(ContactFields.COMMERCIAL_REGISTER, contactobject.getCommercialRegister(), jsonObj);
-        writeParameter(ContactFields.COMPANY, contactobject.getCompany(), jsonObj);
-        writeParameter(ContactFields.COUNTRY_HOME, contactobject.getCountryHome(), jsonObj);
-        writeParameter(ContactFields.COUNTRY_BUSINESS, contactobject.getCountryBusiness(), jsonObj);
-        writeParameter(ContactFields.COUNTRY_OTHER, contactobject.getCountryOther(), jsonObj);
-        writeParameter(ContactFields.DEFAULT_ADDRESS, contactobject.getDefaultAddress(), jsonObj, contactobject.containsDefaultAddress());
-        writeParameter(ContactFields.DEPARTMENT, contactobject.getDepartment(), jsonObj);
-        writeParameter(ContactFields.DISPLAY_NAME, contactobject.getDisplayName(), jsonObj);
-        writeParameter(ContactFields.EMAIL1, contactobject.getEmail1(), jsonObj);
-        writeParameter(ContactFields.EMAIL2, contactobject.getEmail2(), jsonObj);
-        writeParameter(ContactFields.EMAIL3, contactobject.getEmail3(), jsonObj);
-        writeParameter(ContactFields.EMPLOYEE_TYPE, contactobject.getEmployeeType(), jsonObj);
-        writeParameter(ContactFields.FAX_BUSINESS, contactobject.getFaxBusiness(), jsonObj);
-        writeParameter(ContactFields.FAX_HOME, contactobject.getFaxHome(), jsonObj);
-        writeParameter(ContactFields.FAX_OTHER, contactobject.getFaxOther(), jsonObj);
-        if (contactobject.containsImage1()) {
-            writeParameter(ContactFields.CONTAINS_IMAGE1, contactobject.getNumberOfImages(), jsonObj);
-            if (contactobject.containsContextId()) {
-                final byte[] imageData = contactobject.getImage1();
+        writeParameter(ContactFields.LAST_NAME, contact.getSurName(), json);
+        writeParameter(ContactFields.FIRST_NAME, contact.getGivenName(), json);
+        writeParameter(ContactFields.ANNIVERSARY, contact.getAnniversary(), json);
+        writeParameter(ContactFields.ASSISTANT_NAME, contact.getAssistantName(), json);
+        writeParameter(ContactFields.BIRTHDAY, contact.getBirthday(), json);
+        writeParameter(ContactFields.BRANCHES, contact.getBranches(), json);
+        writeParameter(ContactFields.BUSINESS_CATEGORY, contact.getBusinessCategory(), json);
+        writeParameter(ContactFields.CELLULAR_TELEPHONE1, contact.getCellularTelephone1(), json);
+        writeParameter(ContactFields.CELLULAR_TELEPHONE2, contact.getCellularTelephone2(), json);
+        writeParameter(ContactFields.CITY_HOME, contact.getCityHome(), json);
+        writeParameter(ContactFields.CITY_BUSINESS, contact.getCityBusiness(), json);
+        writeParameter(ContactFields.CITY_OTHER, contact.getCityOther(), json);
+        writeParameter(ContactFields.COMMERCIAL_REGISTER, contact.getCommercialRegister(), json);
+        writeParameter(ContactFields.COMPANY, contact.getCompany(), json);
+        writeParameter(ContactFields.COUNTRY_HOME, contact.getCountryHome(), json);
+        writeParameter(ContactFields.COUNTRY_BUSINESS, contact.getCountryBusiness(), json);
+        writeParameter(ContactFields.COUNTRY_OTHER, contact.getCountryOther(), json);
+        writeParameter(ContactFields.DEFAULT_ADDRESS, contact.getDefaultAddress(), json, contact.containsDefaultAddress());
+        writeParameter(ContactFields.DEPARTMENT, contact.getDepartment(), json);
+        writeParameter(ContactFields.DISPLAY_NAME, contact.getDisplayName(), json);
+        writeParameter(ContactFields.EMAIL1, contact.getEmail1(), json);
+        writeParameter(ContactFields.EMAIL2, contact.getEmail2(), json);
+        writeParameter(ContactFields.EMAIL3, contact.getEmail3(), json);
+        writeParameter(ContactFields.EMPLOYEE_TYPE, contact.getEmployeeType(), json);
+        writeParameter(ContactFields.FAX_BUSINESS, contact.getFaxBusiness(), json);
+        writeParameter(ContactFields.FAX_HOME, contact.getFaxHome(), json);
+        writeParameter(ContactFields.FAX_OTHER, contact.getFaxOther(), json);
+        writeParameter(ContactFields.NUMBER_OF_IMAGES, contact.getNumberOfImages(), json);
+        if (contact.containsImage1()) {
+            if (contact.containsContextId()) {
+                final byte[] imageData = contact.getImage1();
                 if (imageData != null) {
                     final String imageURL;
                     {
                         final ContactImageDataSource imgSource = new ContactImageDataSource();
                         final DataArguments args = new DataArguments();
                         final String[] argsNames = imgSource.getRequiredArguments();
-                        args.put(argsNames[0], String.valueOf(contactobject.getParentFolderID()));
-                        args.put(argsNames[1], String.valueOf(contactobject.getObjectID()));
+                        args.put(argsNames[0], String.valueOf(contact.getParentFolderID()));
+                        args.put(argsNames[1], String.valueOf(contact.getObjectID()));
                         imageURL =
                             ServerServiceRegistry.getInstance().getService(ImageService.class).addImageData(
-                                contactobject.getContextId(),
+                                contact.getContextId(),
                                 imgSource,
                                 args).getImageURL();
                     }
-                    writeParameter(ContactFields.IMAGE1_URL, imageURL, jsonObj);
+                    writeParameter(ContactFields.IMAGE1_URL, imageURL, json);
                 }
             }
         }
         // writeParameter(ContactFields.IMAGE1, contactobject.getImage1());
-        writeParameter(ContactFields.INFO, contactobject.getInfo(), jsonObj);
-        writeParameter(ContactFields.NOTE, contactobject.getNote(), jsonObj);
-        writeParameter(ContactFields.INSTANT_MESSENGER1, contactobject.getInstantMessenger1(), jsonObj);
-        writeParameter(ContactFields.INSTANT_MESSENGER2, contactobject.getInstantMessenger2(), jsonObj);
-        writeParameter(ContactFields.MARITAL_STATUS, contactobject.getMaritalStatus(), jsonObj);
-        writeParameter(ContactFields.MANAGER_NAME, contactobject.getManagerName(), jsonObj);
-        writeParameter(ContactFields.SECOND_NAME, contactobject.getMiddleName(), jsonObj);
-        writeParameter(ContactFields.NICKNAME, contactobject.getNickname(), jsonObj);
-        writeParameter(ContactFields.NUMBER_OF_CHILDREN, contactobject.getNumberOfChildren(), jsonObj);
-        writeParameter(ContactFields.NUMBER_OF_EMPLOYEE, contactobject.getNumberOfEmployee(), jsonObj);
-        writeParameter(ContactFields.POSITION, contactobject.getPosition(), jsonObj);
-        writeParameter(ContactFields.POSTAL_CODE_HOME, contactobject.getPostalCodeHome(), jsonObj);
-        writeParameter(ContactFields.POSTAL_CODE_BUSINESS, contactobject.getPostalCodeBusiness(), jsonObj);
-        writeParameter(ContactFields.POSTAL_CODE_OTHER, contactobject.getPostalCodeOther(), jsonObj);
-        writeParameter(ContactFields.PROFESSION, contactobject.getProfession(), jsonObj);
-        writeParameter(ContactFields.ROOM_NUMBER, contactobject.getRoomNumber(), jsonObj);
-        writeParameter(ContactFields.SALES_VOLUME, contactobject.getSalesVolume(), jsonObj);
-        writeParameter(ContactFields.SPOUSE_NAME, contactobject.getSpouseName(), jsonObj);
-        writeParameter(ContactFields.STATE_HOME, contactobject.getStateHome(), jsonObj);
-        writeParameter(ContactFields.STATE_BUSINESS, contactobject.getStateBusiness(), jsonObj);
-        writeParameter(ContactFields.STATE_OTHER, contactobject.getStateOther(), jsonObj);
-        writeParameter(ContactFields.STREET_HOME, contactobject.getStreetHome(), jsonObj);
-        writeParameter(ContactFields.STREET_BUSINESS, contactobject.getStreetBusiness(), jsonObj);
-        writeParameter(ContactFields.STREET_OTHER, contactobject.getStreetOther(), jsonObj);
-        writeParameter(ContactFields.SUFFIX, contactobject.getSuffix(), jsonObj);
-        writeParameter(ContactFields.TAX_ID, contactobject.getTaxID(), jsonObj);
-        writeParameter(ContactFields.TELEPHONE_ASSISTANT, contactobject.getTelephoneAssistant(), jsonObj);
-        writeParameter(ContactFields.TELEPHONE_BUSINESS1, contactobject.getTelephoneBusiness1(), jsonObj);
-        writeParameter(ContactFields.TELEPHONE_BUSINESS2, contactobject.getTelephoneBusiness2(), jsonObj);
-        writeParameter(ContactFields.TELEPHONE_CALLBACK, contactobject.getTelephoneCallback(), jsonObj);
-        writeParameter(ContactFields.TELEPHONE_CAR, contactobject.getTelephoneCar(), jsonObj);
-        writeParameter(ContactFields.TELEPHONE_COMPANY, contactobject.getTelephoneCompany(), jsonObj);
-        writeParameter(ContactFields.TELEPHONE_HOME1, contactobject.getTelephoneHome1(), jsonObj);
-        writeParameter(ContactFields.TELEPHONE_HOME2, contactobject.getTelephoneHome2(), jsonObj);
-        writeParameter(ContactFields.TELEPHONE_IP, contactobject.getTelephoneIP(), jsonObj);
-        writeParameter(ContactFields.TELEPHONE_ISDN, contactobject.getTelephoneISDN(), jsonObj);
-        writeParameter(ContactFields.TELEPHONE_OTHER, contactobject.getTelephoneOther(), jsonObj);
-        writeParameter(ContactFields.TELEPHONE_PAGER, contactobject.getTelephonePager(), jsonObj);
-        writeParameter(ContactFields.TELEPHONE_PRIMARY, contactobject.getTelephonePrimary(), jsonObj);
-        writeParameter(ContactFields.TELEPHONE_RADIO, contactobject.getTelephoneRadio(), jsonObj);
-        writeParameter(ContactFields.TELEPHONE_TELEX, contactobject.getTelephoneTelex(), jsonObj);
-        writeParameter(ContactFields.TELEPHONE_TTYTDD, contactobject.getTelephoneTTYTTD(), jsonObj);
-        writeParameter(ContactFields.TITLE, contactobject.getTitle(), jsonObj);
-        writeParameter(ContactFields.URL, contactobject.getURL(), jsonObj);
-        writeParameter(ContactFields.USERFIELD01, contactobject.getUserField01(), jsonObj);
-        writeParameter(ContactFields.USERFIELD02, contactobject.getUserField02(), jsonObj);
-        writeParameter(ContactFields.USERFIELD03, contactobject.getUserField03(), jsonObj);
-        writeParameter(ContactFields.USERFIELD04, contactobject.getUserField04(), jsonObj);
-        writeParameter(ContactFields.USERFIELD05, contactobject.getUserField05(), jsonObj);
-        writeParameter(ContactFields.USERFIELD06, contactobject.getUserField06(), jsonObj);
-        writeParameter(ContactFields.USERFIELD07, contactobject.getUserField07(), jsonObj);
-        writeParameter(ContactFields.USERFIELD08, contactobject.getUserField08(), jsonObj);
-        writeParameter(ContactFields.USERFIELD09, contactobject.getUserField09(), jsonObj);
-        writeParameter(ContactFields.USERFIELD10, contactobject.getUserField10(), jsonObj);
-        writeParameter(ContactFields.USERFIELD11, contactobject.getUserField11(), jsonObj);
-        writeParameter(ContactFields.USERFIELD12, contactobject.getUserField12(), jsonObj);
-        writeParameter(ContactFields.USERFIELD13, contactobject.getUserField13(), jsonObj);
-        writeParameter(ContactFields.USERFIELD14, contactobject.getUserField14(), jsonObj);
-        writeParameter(ContactFields.USERFIELD15, contactobject.getUserField15(), jsonObj);
-        writeParameter(ContactFields.USERFIELD16, contactobject.getUserField16(), jsonObj);
-        writeParameter(ContactFields.USERFIELD17, contactobject.getUserField17(), jsonObj);
-        writeParameter(ContactFields.USERFIELD18, contactobject.getUserField18(), jsonObj);
-        writeParameter(ContactFields.USERFIELD19, contactobject.getUserField19(), jsonObj);
-        writeParameter(ContactFields.USERFIELD20, contactobject.getUserField20(), jsonObj);
-        writeParameter(ContactFields.USER_ID, contactobject.getInternalUserId(), jsonObj);
+        writeParameter(ContactFields.INFO, contact.getInfo(), json);
+        writeParameter(ContactFields.NOTE, contact.getNote(), json);
+        writeParameter(ContactFields.INSTANT_MESSENGER1, contact.getInstantMessenger1(), json);
+        writeParameter(ContactFields.INSTANT_MESSENGER2, contact.getInstantMessenger2(), json);
+        writeParameter(ContactFields.MARITAL_STATUS, contact.getMaritalStatus(), json);
+        writeParameter(ContactFields.MANAGER_NAME, contact.getManagerName(), json);
+        writeParameter(ContactFields.SECOND_NAME, contact.getMiddleName(), json);
+        writeParameter(ContactFields.NICKNAME, contact.getNickname(), json);
+        writeParameter(ContactFields.NUMBER_OF_CHILDREN, contact.getNumberOfChildren(), json);
+        writeParameter(ContactFields.NUMBER_OF_EMPLOYEE, contact.getNumberOfEmployee(), json);
+        writeParameter(ContactFields.POSITION, contact.getPosition(), json);
+        writeParameter(ContactFields.POSTAL_CODE_HOME, contact.getPostalCodeHome(), json);
+        writeParameter(ContactFields.POSTAL_CODE_BUSINESS, contact.getPostalCodeBusiness(), json);
+        writeParameter(ContactFields.POSTAL_CODE_OTHER, contact.getPostalCodeOther(), json);
+        writeParameter(ContactFields.PROFESSION, contact.getProfession(), json);
+        writeParameter(ContactFields.ROOM_NUMBER, contact.getRoomNumber(), json);
+        writeParameter(ContactFields.SALES_VOLUME, contact.getSalesVolume(), json);
+        writeParameter(ContactFields.SPOUSE_NAME, contact.getSpouseName(), json);
+        writeParameter(ContactFields.STATE_HOME, contact.getStateHome(), json);
+        writeParameter(ContactFields.STATE_BUSINESS, contact.getStateBusiness(), json);
+        writeParameter(ContactFields.STATE_OTHER, contact.getStateOther(), json);
+        writeParameter(ContactFields.STREET_HOME, contact.getStreetHome(), json);
+        writeParameter(ContactFields.STREET_BUSINESS, contact.getStreetBusiness(), json);
+        writeParameter(ContactFields.STREET_OTHER, contact.getStreetOther(), json);
+        writeParameter(ContactFields.SUFFIX, contact.getSuffix(), json);
+        writeParameter(ContactFields.TAX_ID, contact.getTaxID(), json);
+        writeParameter(ContactFields.TELEPHONE_ASSISTANT, contact.getTelephoneAssistant(), json);
+        writeParameter(ContactFields.TELEPHONE_BUSINESS1, contact.getTelephoneBusiness1(), json);
+        writeParameter(ContactFields.TELEPHONE_BUSINESS2, contact.getTelephoneBusiness2(), json);
+        writeParameter(ContactFields.TELEPHONE_CALLBACK, contact.getTelephoneCallback(), json);
+        writeParameter(ContactFields.TELEPHONE_CAR, contact.getTelephoneCar(), json);
+        writeParameter(ContactFields.TELEPHONE_COMPANY, contact.getTelephoneCompany(), json);
+        writeParameter(ContactFields.TELEPHONE_HOME1, contact.getTelephoneHome1(), json);
+        writeParameter(ContactFields.TELEPHONE_HOME2, contact.getTelephoneHome2(), json);
+        writeParameter(ContactFields.TELEPHONE_IP, contact.getTelephoneIP(), json);
+        writeParameter(ContactFields.TELEPHONE_ISDN, contact.getTelephoneISDN(), json);
+        writeParameter(ContactFields.TELEPHONE_OTHER, contact.getTelephoneOther(), json);
+        writeParameter(ContactFields.TELEPHONE_PAGER, contact.getTelephonePager(), json);
+        writeParameter(ContactFields.TELEPHONE_PRIMARY, contact.getTelephonePrimary(), json);
+        writeParameter(ContactFields.TELEPHONE_RADIO, contact.getTelephoneRadio(), json);
+        writeParameter(ContactFields.TELEPHONE_TELEX, contact.getTelephoneTelex(), json);
+        writeParameter(ContactFields.TELEPHONE_TTYTDD, contact.getTelephoneTTYTTD(), json);
+        writeParameter(ContactFields.TITLE, contact.getTitle(), json);
+        writeParameter(ContactFields.URL, contact.getURL(), json);
+        writeParameter(ContactFields.USERFIELD01, contact.getUserField01(), json);
+        writeParameter(ContactFields.USERFIELD02, contact.getUserField02(), json);
+        writeParameter(ContactFields.USERFIELD03, contact.getUserField03(), json);
+        writeParameter(ContactFields.USERFIELD04, contact.getUserField04(), json);
+        writeParameter(ContactFields.USERFIELD05, contact.getUserField05(), json);
+        writeParameter(ContactFields.USERFIELD06, contact.getUserField06(), json);
+        writeParameter(ContactFields.USERFIELD07, contact.getUserField07(), json);
+        writeParameter(ContactFields.USERFIELD08, contact.getUserField08(), json);
+        writeParameter(ContactFields.USERFIELD09, contact.getUserField09(), json);
+        writeParameter(ContactFields.USERFIELD10, contact.getUserField10(), json);
+        writeParameter(ContactFields.USERFIELD11, contact.getUserField11(), json);
+        writeParameter(ContactFields.USERFIELD12, contact.getUserField12(), json);
+        writeParameter(ContactFields.USERFIELD13, contact.getUserField13(), json);
+        writeParameter(ContactFields.USERFIELD14, contact.getUserField14(), json);
+        writeParameter(ContactFields.USERFIELD15, contact.getUserField15(), json);
+        writeParameter(ContactFields.USERFIELD16, contact.getUserField16(), json);
+        writeParameter(ContactFields.USERFIELD17, contact.getUserField17(), json);
+        writeParameter(ContactFields.USERFIELD18, contact.getUserField18(), json);
+        writeParameter(ContactFields.USERFIELD19, contact.getUserField19(), json);
+        writeParameter(ContactFields.USERFIELD20, contact.getUserField20(), json);
+        writeParameter(ContactFields.USER_ID, contact.getInternalUserId(), json);
         writeParameter(
             ContactFields.MARK_AS_DISTRIBUTIONLIST,
-            contactobject.getMarkAsDistribtuionlist(),
-            jsonObj,
-            contactobject.containsMarkAsDistributionlist());
-        writeParameter(ContactFields.USE_COUNT, contactobject.getUseCount(), jsonObj);
+            contact.getMarkAsDistribtuionlist(),
+            json,
+            contact.containsMarkAsDistributionlist());
+        writeParameter(ContactFields.USE_COUNT, contact.getUseCount(), json);
 
-        final JSONArray jsonLinkArray = getLinksAsJSONArray(contactobject);
+        final JSONArray jsonLinkArray = getLinksAsJSONArray(contact);
         if (jsonLinkArray != null) {
-            jsonObj.put(ContactFields.LINKS, jsonLinkArray);
+            json.put(ContactFields.LINKS, jsonLinkArray);
         }
 
-        final JSONArray jsonDistributionListArray = getDistributionListAsJSONArray(contactobject);
+        final JSONArray jsonDistributionListArray = getDistributionListAsJSONArray(contact);
         if (jsonDistributionListArray != null) {
-            jsonObj.put(ContactFields.DISTRIBUTIONLIST, jsonDistributionListArray);
+            json.put(ContactFields.DISTRIBUTIONLIST, jsonDistributionListArray);
         }
     }
 
@@ -603,14 +603,11 @@ public class ContactWriter extends CommonWriter {
                 }
             }
         });
-
         m.put(Contact.NUMBER_OF_IMAGES, new ContactFieldWriter() {
-
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
-                writeValue(contactObject.getNumberOfImages(), jsonArray);
+            public void write(Contact contact, JSONArray json) {
+                writeValue(contact.getNumberOfImages(), json);
             }
         });
-
         m.put(Contact.INFO, new ContactFieldWriter() {
 
             public void write(final Contact contactObject, final JSONArray jsonArray) {
