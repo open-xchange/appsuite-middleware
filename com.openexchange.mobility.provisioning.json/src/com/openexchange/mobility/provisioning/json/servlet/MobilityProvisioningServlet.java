@@ -142,9 +142,11 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 			Context ctx = ContextStorage.getStorageContext(session);
 			User user = UserStorage.getInstance().getUser(session.getUserId(), ctx);
 			
+			String target = JSONUtility.checkStringParameter(request, "target");
+			
 			if (JSONUtility.checkStringParameter(request, "action").equals(Actions.ACTION_EMAIL)) {
-				new ActionEmail(new InternetAddress(user.getMail(), true)).sendMail(session);
-				message = "Provisioning mail has been send to " + user.getMail();
+				new ActionEmail(new InternetAddress(target, true)).sendMail(session);
+				message = "Provisioning mail has been send to " + target;
 				success = true;
 			} else if (JSONUtility.checkStringParameter(request, "action").equals(Actions.ACTION_SMS)) {
 				message = "Action SMS not implemented yet.";
