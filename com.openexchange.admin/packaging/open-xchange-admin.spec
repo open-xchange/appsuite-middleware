@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 7
+%define		ox_release 8
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -354,6 +354,9 @@ fi
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Wed Jun 09 2010 - choeger@open-xchange.com
+ - Bugfix #14500 - Warnings due to missing LSB information
+  added LSB Headers to debian init-script, which are not interpreted at all...
 * Thu Apr 15 2010 - tobias.prinz@open-xchange.com
  - Bugfix #15886 - Deleting a user should be logged within the admin logfile as INFO (not DEBUG as previous)
 * Wed Apr 14 2010 - marcus.klein@open-xchange.com
