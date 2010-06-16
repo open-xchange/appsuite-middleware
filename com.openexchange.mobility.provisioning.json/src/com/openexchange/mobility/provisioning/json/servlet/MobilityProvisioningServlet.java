@@ -1,5 +1,3 @@
-package com.openexchange.mobility.provisioning.json.servlet;
-
 /*
  *
  *    OPEN-XCHANGE legal information
@@ -30,7 +28,7 @@ package com.openexchange.mobility.provisioning.json.servlet;
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -48,6 +46,8 @@ package com.openexchange.mobility.provisioning.json.servlet;
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
+package com.openexchange.mobility.provisioning.json.servlet;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -78,6 +78,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 import com.openexchange.mail.transport.MailTransport;
+import com.openexchange.mobility.provisioning.json.configuration.MobilityProvisioningConfiguration;
 import com.openexchange.mobility.provisioning.json.container.Device;
 import com.openexchange.mobility.provisioning.json.osgi.MobilityProvisioningServiceRegistry;
 import com.openexchange.server.ServiceException;
@@ -183,8 +184,8 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 			User user = UserStorage.getInstance().getUser(session.getUserId(), ctx);
 			
 			InternetAddress fromAddress = new InternetAddress(user.getMail(), true);
-			if (!getProvisioningMailFrom().trim().toUpperCase().equals("USER")) {
-				fromAddress = new InternetAddress(getProvisioningMailFrom(), true);
+			if (!MobilityProvisioningConfiguration.getProvisioningMailFrom().trim().toUpperCase().equals("USER")) {
+				fromAddress = new InternetAddress(MobilityProvisioningConfiguration.getProvisioningMailFrom(), true);
 			}
 
 			final com.openexchange.mail.transport.TransportProvider provider =
@@ -193,20 +194,20 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 			ComposedMailMessage msg = provider.getNewComposedMailMessage(session, ctx);
 			msg.addFrom(fromAddress);
 			msg.addTo(targetAddress);
-			msg.setSubject(getProvisioningMailSubject());
+			msg.setSubject(MobilityProvisioningConfiguration.getProvisioningMailSubject());
 
-			String provisioningUrl = getProvisioningURL();
-			provisioningUrl = provisioningUrl.replace("%l", URLEncoder.encode(session.getLogin(), getProvisioningURLEncoding()));
-			provisioningUrl = provisioningUrl.replace("%c", URLEncoder.encode(String.valueOf(session.getContextId()), getProvisioningURLEncoding()));
-			provisioningUrl = provisioningUrl.replace("%u", URLEncoder.encode(session.getUserlogin(), getProvisioningURLEncoding()));
-			provisioningUrl = provisioningUrl.replace("%p", URLEncoder.encode(user.getMail(), getProvisioningURLEncoding()));
+			String provisioningUrl = MobilityProvisioningConfiguration.getProvisioningURL();
+			provisioningUrl = provisioningUrl.replace("%l", URLEncoder.encode(session.getLogin(), MobilityProvisioningConfiguration.getProvisioningURLEncoding()));
+			provisioningUrl = provisioningUrl.replace("%c", URLEncoder.encode(String.valueOf(session.getContextId()), MobilityProvisioningConfiguration.getProvisioningURLEncoding()));
+			provisioningUrl = provisioningUrl.replace("%u", URLEncoder.encode(session.getUserlogin(), MobilityProvisioningConfiguration.getProvisioningURLEncoding()));
+			provisioningUrl = provisioningUrl.replace("%p", URLEncoder.encode(user.getMail(), MobilityProvisioningConfiguration.getProvisioningURLEncoding()));
 			
 			if (deviceId == Device.IPHONE) {
-				provisioningUrl = provisioningUrl.replace("%d", URLEncoder.encode("i", getProvisioningURLEncoding()));
+				provisioningUrl = provisioningUrl.replace("%d", URLEncoder.encode("i", MobilityProvisioningConfiguration.getProvisioningURLEncoding()));
 			} else if (deviceId == Device.WINDOWSMOBILE) {
-				provisioningUrl = provisioningUrl.replace("%d", URLEncoder.encode("w", getProvisioningURLEncoding()));
+				provisioningUrl = provisioningUrl.replace("%d", URLEncoder.encode("w", MobilityProvisioningConfiguration.getProvisioningURLEncoding()));
 			} else {
-				provisioningUrl = provisioningUrl.replace("%d", URLEncoder.encode("u", getProvisioningURLEncoding()));
+				provisioningUrl = provisioningUrl.replace("%d", URLEncoder.encode("u", MobilityProvisioningConfiguration.getProvisioningURLEncoding()));
 			}
 			
 			final TextBodyMailPart textPart = provider.getNewTextBodyPart(provisioningUrl);
@@ -222,26 +223,6 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 			transport.close();
 			mailAccess.close(true);
 		}
-	}
-
-	private String getProvisioningURL() throws ServiceException {
-		ConfigurationService configservice = MobilityProvisioningServiceRegistry.getServiceRegistry().getService(ConfigurationService.class,true);
-		return configservice.getProperty("com.openexchange.mobility.provisioning.url"); 
-	}
-	
-	private String getProvisioningURLEncoding() throws ServiceException {
-		ConfigurationService configservice = MobilityProvisioningServiceRegistry.getServiceRegistry().getService(ConfigurationService.class,true);
-		return configservice.getProperty("com.openexchange.mobility.provisioning.urlencoding"); 
-	}
-	
-	private String getProvisioningMailFrom() throws ServiceException {
-		ConfigurationService configservice = MobilityProvisioningServiceRegistry.getServiceRegistry().getService(ConfigurationService.class,true);
-		return configservice.getProperty("com.openexchange.mobility.provisioning.mail.from"); 
-	}
-
-	private String getProvisioningMailSubject() throws ServiceException {
-		ConfigurationService configservice = MobilityProvisioningServiceRegistry.getServiceRegistry().getService(ConfigurationService.class,true);
-		return configservice.getProperty("com.openexchange.mobility.provisioning.mail.subject"); 
 	}
 	
     /**
