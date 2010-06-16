@@ -1,3 +1,9 @@
+* 2010-06-16 - dennis.sieben@open-xchange.com
+
+  - Bugfix #16335: [L3] Mailfilter bundle isn't started because of missing
+                   configuration parameter
+    - Parameter is not mandatory any more  
+
 * 2010-06-02 - dennis.sieben@open-xchange.com
 
   - Bugfix #16149: [L3] connection timeout for SieveHandler

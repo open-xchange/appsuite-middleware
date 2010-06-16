@@ -179,14 +179,13 @@ public class Activator extends DeferredActivator {
             throw new Exception("No configfile found for mailfilter bundle");
         }
         for (final MailFilterProperties.Values type : MailFilterProperties.Values.values()) {
-            if (null == file.getProperty(type.property)) {
-                throw new Exception("Property for mailfilter not found: " + type.property);
+            if (type.required ) {
+                if (null == file.getProperty(type.property)) {
+                    throw new Exception("Property for mailfilter not found: " + type.property);
+                }
+            } else {
+                LOG.warn("Property " + type.property + " is not defined. Using fallback: " + MailFilterProperties.Values.SIEVE_CONNECTION_TIMEOUT.def);
             }
-        }
-        try {
-            Integer.parseInt(file.getProperty(MailFilterProperties.Values.SIEVE_CONNECTION_TIMEOUT.property));
-        } catch (final NumberFormatException e) {
-            throw new Exception("Property " + MailFilterProperties.Values.SIEVE_CONNECTION_TIMEOUT.property + " is no integer value");
         }
     }
 }

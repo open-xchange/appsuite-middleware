@@ -215,7 +215,11 @@ public class SieveHandler {
         /*
          * Connect with the connect-timeout of the config file
          */
-        final int timeout = Integer.parseInt(config.getProperty(MailFilterProperties.Values.SIEVE_CONNECTION_TIMEOUT.property));
+        String property = config.getProperty(MailFilterProperties.Values.SIEVE_CONNECTION_TIMEOUT.property);
+        if (null == property || property.length() == 0) {
+            property = MailFilterProperties.Values.SIEVE_CONNECTION_TIMEOUT.def;
+        }
+        final int timeout = Integer.parseInt(property);
         s_sieve.connect(new InetSocketAddress(sieve_host, sieve_host_port), timeout);
         /*
          * Set timeout to the one specified in the config file
