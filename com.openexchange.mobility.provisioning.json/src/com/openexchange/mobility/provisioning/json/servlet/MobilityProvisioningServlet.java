@@ -131,7 +131,7 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 			final HttpServletResponse resp) throws JSONException, IOException {
 		final Response response = new Response();
 		
-		String success = ResponseCodes.SUCCESS_ERROR;
+		boolean success = false;
 		String message = "";
 		
 		JSONObject obj = new JSONObject();	
@@ -145,7 +145,7 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 			if (JSONUtility.checkStringParameter(request, "action").equals(Actions.ACTION_EMAIL)) {
 				new ActionEmail(new InternetAddress(user.getMail(), true)).sendMail(session);
 				message = "Provisioning mail has been send to " + user.getMail();
-				success = ResponseCodes.SUCCESS_OK;
+				success = true;
 			} else if (JSONUtility.checkStringParameter(request, "action").equals(Actions.ACTION_SMS)) {
 				message = "Action SMS not implemented yet.";
 			} else {
