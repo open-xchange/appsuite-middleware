@@ -38,7 +38,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 4
+%define		ox_release 5
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -120,6 +120,10 @@ fi
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
 %config(noreplace) /opt/open-xchange/etc/groupware/mailfilter.properties
 %changelog
+* Wed Jun 16 2010 - dennis.sieben@open-xchange.com
+  - Bugfix #16335: [L3] Mailfilter bundle isn't started because of missing
+                   configuration parameter
+    - Parameter is not mandatory any more  
 * Wed Jun 02 2010 - dennis.sieben@open-xchange.com
   - Bugfix #16149: [L3] connection timeout for SieveHandler
     - Made timeout configurable
