@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 7
+%define		ox_release 8
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -536,6 +536,23 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed Jun 16 2010 - marcus.klein@open-xchange.com
+ - Bugfix #13960: Corrected values in columns responses of appointments and contacts to get a consistent response to normal get values.
+* Tue Jun 15 2010 - karsten.will@open-xchange.com
+ - Bugfix #16295 - DefaultSenderAddress now correctly used in .ics-files for all attendees (if configured in notification.properties)
+* Mon Jun 14 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16326: Using default error page template for EasyLogin if the configured file is not found.
+* Fri Jun 11 2010 - marcus.klein@open-xchange.com
+ - Bugfix #15986: Avoid a NullPointerException when updating an appointment with some special circumstances.
+* Thu Jun 10 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16226: Default error page template for easy login returns to login page after 3 seconds.
+* Thu Jun 10 2010 - viktor.pracht@open-xchange.com
+  - Bugfix #16299: Unable to download infostore items
+* Wed Jun 09 2010 - marcus.klein@open-xchange.com
+ - Bugfix #15585: Corrected SQL query for finding the private folder information for free busy results.
+* Wed Jun 09 2010 - choeger@open-xchange.com
+ - Bugfix #16035: checkconfigconsistency should check if correct cache.ccf is used in system.properties
+ - Bugfix #14500: Warnings due to missing LSB information added LSB Headers to debian init-script, which are not interpreted at all...
 * Tue Jun 08 2010 - thorben.betten@open-xchange.com
  - Bugfix #15930: Error on creating a mail folder below a public folder
 * Tue Jun 08 2010 - marcus.klein@open-xchange.com
@@ -544,7 +561,7 @@ fi
  - Bugfix #16267: Marking shared folder as non-default folder
  - Bugfix #16228: Proper order of delete listeners and more robust implementation
  - Bugfix #15901: Allowing additional list tags in whitelist.properties (<dl>, <dt>, <dd>)
-* Mon Jun 07 2010 - thorben.betten@open-xchange.com
+* Mon Jun 07 2010 - tobias.prinz@open-xchange.com
  - Bugfix #15400: If import fields exceed maximum db field lengths, they are truncated instead of not imported.
 * Fri Jun 04 2010 - marcus.klein@open-xchange.com
  - Bugfix #16227: If session migration takes place multiple threads asking for a session are serialized.
