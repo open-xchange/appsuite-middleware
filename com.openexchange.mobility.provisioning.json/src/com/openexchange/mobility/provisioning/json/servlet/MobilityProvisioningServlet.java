@@ -199,6 +199,7 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 			provisioningUrl = provisioningUrl.replace("%l", URLEncoder.encode(session.getLogin(), getProvisioningURLEncoding()));
 			provisioningUrl = provisioningUrl.replace("%c", URLEncoder.encode(String.valueOf(session.getContextId()), getProvisioningURLEncoding()));
 			provisioningUrl = provisioningUrl.replace("%u", URLEncoder.encode(session.getUserlogin(), getProvisioningURLEncoding()));
+			provisioningUrl = provisioningUrl.replace("%p", URLEncoder.encode(user.getMail(), getProvisioningURLEncoding()));
 			
 			if (deviceId == Device.IPHONE) {
 				provisioningUrl = provisioningUrl.replace("%d", URLEncoder.encode("i", getProvisioningURLEncoding()));
