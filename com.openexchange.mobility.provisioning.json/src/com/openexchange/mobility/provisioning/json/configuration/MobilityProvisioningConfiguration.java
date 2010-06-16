@@ -53,6 +53,12 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.mobility.provisioning.json.osgi.MobilityProvisioningServiceRegistry;
 import com.openexchange.server.ServiceException;
 
+/**
+ * 
+ * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
+ * 
+ */
+
 public class MobilityProvisioningConfiguration {
 
 	public static String getProvisioningURL() throws ServiceException {

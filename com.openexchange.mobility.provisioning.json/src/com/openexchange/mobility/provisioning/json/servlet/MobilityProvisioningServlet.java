@@ -66,7 +66,6 @@ import org.json.JSONObject;
 import com.openexchange.ajax.PermissionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ResponseWriter;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -79,8 +78,6 @@ import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mobility.provisioning.json.configuration.MobilityProvisioningConfiguration;
-import com.openexchange.mobility.provisioning.json.container.Device;
-import com.openexchange.mobility.provisioning.json.osgi.MobilityProvisioningServiceRegistry;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxException;
@@ -140,16 +137,18 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 			final HttpServletResponse resp) throws JSONException, IOException {
 		final Response response = new Response();
 		
-		JSONObject obj = new JSONObject();		
+		JSONObject obj = new JSONObject();	
+		obj.put("success", ResponseCodes.SUCCESS_ERROR);
 
 		final ServerSession session = getSessionObject(request);
 		try {
 			Context ctx = ContextStorage.getStorageContext(session);
 			User user = UserStorage.getInstance().getUser(session.getUserId(), ctx);
 			
-			sendMail(new InternetAddress(user.getMail(), true), Device.getDeviceId(checkStringParameter(request, "device")), session);
+			sendMail(new InternetAddress(user.getMail(), true), session);
 			
 			obj.put("message", "Provisioning mail has been send to " + user.getMail());
+			obj.put("success", ResponseCodes.SUCCESS_OK);
 		} catch (MailException e) {
 			LOG.error("Couldn't send provisioning mail", e);
 		} catch (ContextException e) {
@@ -162,8 +161,6 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 			LOG.error("Cannot get configuration", e);
 		} catch (UnsupportedEncodingException e) {
 			LOG.error("Error on correcting provisioning url", e);
-		} catch (AjaxException e) {
-			LOG.error("Missing Parameter", e);
 		}
 
 		response.setData(obj);
@@ -174,7 +171,7 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 		ResponseWriter.write(response, resp.getWriter());
 	}
 	
-	private void sendMail(InternetAddress targetAddress, int deviceId, final Session session) throws MailException, ContextException, LdapException, AddressException, UnsupportedEncodingException, ServiceException {
+	private void sendMail(InternetAddress targetAddress, final Session session) throws MailException, ContextException, LdapException, AddressException, UnsupportedEncodingException, ServiceException {
 		final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 		mailAccess.connect();
 		final MailTransport transport = MailTransport.getInstance(session);
@@ -201,14 +198,6 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 			provisioningUrl = provisioningUrl.replace("%c", URLEncoder.encode(String.valueOf(session.getContextId()), MobilityProvisioningConfiguration.getProvisioningURLEncoding()));
 			provisioningUrl = provisioningUrl.replace("%u", URLEncoder.encode(session.getUserlogin(), MobilityProvisioningConfiguration.getProvisioningURLEncoding()));
 			provisioningUrl = provisioningUrl.replace("%p", URLEncoder.encode(user.getMail(), MobilityProvisioningConfiguration.getProvisioningURLEncoding()));
-			
-			if (deviceId == Device.IPHONE) {
-				provisioningUrl = provisioningUrl.replace("%d", URLEncoder.encode("i", MobilityProvisioningConfiguration.getProvisioningURLEncoding()));
-			} else if (deviceId == Device.WINDOWSMOBILE) {
-				provisioningUrl = provisioningUrl.replace("%d", URLEncoder.encode("w", MobilityProvisioningConfiguration.getProvisioningURLEncoding()));
-			} else {
-				provisioningUrl = provisioningUrl.replace("%d", URLEncoder.encode("u", MobilityProvisioningConfiguration.getProvisioningURLEncoding()));
-			}
 			
 			final TextBodyMailPart textPart = provider.getNewTextBodyPart(provisioningUrl);
 			msg.setBodyPart(textPart);
