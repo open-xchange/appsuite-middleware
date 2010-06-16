@@ -1,3 +1,7 @@
+* 2010-06-16 - karsten.will@open-xchange.com
+
+ - Bugfix #16295: DefaultSenderAddress now correctly used in .ics-files for all attendees (if configured in notification.properties)
+
 * 2010-06-14 - marcus.klein@open-xchange.com
 
  - Bugfix #16326: Using default error page template for EasyLogin if the configured file is not found.
