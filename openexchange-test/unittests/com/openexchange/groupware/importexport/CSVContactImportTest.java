@@ -269,13 +269,16 @@ public class CSVContactImportTest extends AbstractContactTest {
     /*
      * This was listed as 6825, 7107 or 7386
      */
-    @Test public void bugTooMuchInformation() throws ImportExportException, UnsupportedEncodingException{
+    @Test public void bugTooMuchInformation() throws UnsupportedEncodingException, NumberFormatException, OXException, ContextException{
         final List<ImportResult> results = importStuff(ContactField.DISPLAY_NAME.getReadableName()+", "+ContactField.GIVEN_NAME.getReadableName() + "," + ContactField.SUFFIX.getReadableName() + "\nAli, Hadschi Halef Omar, Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd al Gossarah");
         String expected = "Ali, Hadschi Halef Omar, Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd al Gossarah";
         assertTrue("One result?" , 1 == results.size());
         final ImportResult res = results.get(0);
         assertFalse("Should not fail", res.hasError());
-        assertEquals("Fields correct?" ,  expected, ContactField.SUFFIX.getReadableName());
+        
+        final Contact conObj = getEntry( Integer.parseInt( res.getObjectId() ) );
+
+        assertEquals("Fields correct?" ,  expected, conObj.getSuffix());
     }
 
     /*
