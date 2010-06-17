@@ -1,3 +1,7 @@
+* 2010-06-17 - karsten.will@open-xchange.com
+
+ - Bugfix #16334: Crawler for gmx.com does not work
+
 * 2010-06-16 - tobias.prinz@open-xchange.com
 
  - US #4303: If you get an IMiP appointment sent to an e-mail alias of yours and you accept it, you will be listed as internal participant instead of an external participant, gaining all the nice features of that.
