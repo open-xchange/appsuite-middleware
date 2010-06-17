@@ -1,3 +1,7 @@
+* 2010-06-16 - tobias.prinz@open-xchange.com
+
+ - US #4303: If you get an IMiP appointment sent to an e-mail alias of yours and you accept it, you will be listed as internal participant instead of an external participant, gaining all the nice features of that.
+
 * 2010-06-16 - marcus.klein@open-xchange.com
 
  - Bugfix #13960: Corrected values in columns responses of appointments and contacts to get a consistent response to normal get values.
