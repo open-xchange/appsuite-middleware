@@ -152,22 +152,6 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
 		//cleaning up
 		contactSql.deleteContactObject(Integer.parseInt(res.getObjectId()), Integer.parseInt(res.getFolder()), res.getDate());
 	}
-	
-	@Test
-	public void bug6825_tooMuchInformation() throws ImportExportException, UnsupportedEncodingException {
-		final List<ImportResult> results = importStuff(
-				IMPORT_HEADERS + 
-				"my name is definately too long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long"+
-				", "
-				+EMAIL1+
-				", 1.4.1981"); 
-		assertEquals("One result?" , (Integer) 1, (Integer) results.size());
-		final ImportResult res = results.get(0);
-		assertTrue("Has error" , res.hasError());
-		final AbstractOXException dirk = res.getException();
-		assertEquals("Is truncation error?" , Category.TRUNCATED , dirk.getCategory());
-		assertEquals("GIVEN_NAME is too long?" , ContactField.GIVEN_NAME.getEnglishOutlookName() , dirk.getMessageArgs()[0]);
-	}
 
 	/*
 	 * "private" flag is being set
@@ -263,6 +247,18 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
         final Contact conObj = getEntry( Integer.parseInt( res.getObjectId() ) );
         assertFalse("Should not set e-mail address", conObj.containsEmail1());
         assertEquals("Should only criticize that 'Account' cannot be translated", "I_E-0803" , res.getException().getErrorCode());
+    }
+    
+    //bug 15400, replaces testing bug 6825
+    @Test public void dontFuzzAboutTruncations() throws Exception{
+        
+        final String file = "Last Name\nHadschi Halef Omar Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd al Gossarah Hadschi Halef Omar Ben Hadschi Abul Abbas Ibn Hadschi D...as War Knapp Und Wird Hier Abgeschnitten";
+        final List<ImportResult> results = importStuff(file);
+        assertEquals("Should give one result", 1, results.size());
+        ImportResult res = results.get(0);
+        assertFalse("Should not contain error", res.hasError());
+        final Contact conObj = getEntry( Integer.parseInt( res.getObjectId() ) );
+        assertEquals("Hadschi Halef Omar Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd al Gossarah Hadschi Halef Omar Ben Hadschi Abul Abbas Ibn Hadschi D", conObj.getSurName());
     }
     
     //not implemented yet
