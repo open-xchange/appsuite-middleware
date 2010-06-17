@@ -217,6 +217,7 @@ public class ContactWriter extends CommonWriter {
             json,
             contact.containsMarkAsDistributionlist());
         writeParameter(ContactFields.USE_COUNT, contact.getUseCount(), json);
+        writeParameter(ContactFields.FILE_AS, contact.getFileAs(), json, contact.containsFileAs());
 
         final JSONArray jsonLinkArray = getLinksAsJSONArray(contact);
         if (jsonLinkArray != null) {
@@ -1099,14 +1100,11 @@ public class ContactWriter extends CommonWriter {
                 writeValue(contactObject.getImageLastModified(), jsonArray);
             }
         });
-
         m.put(Contact.FILE_AS, new ContactFieldWriter() {
-
-            public void write(final Contact contactObject, final JSONArray jsonArray) {
-                writeValue(contactObject.getFileAs(), jsonArray);
+            public void write(Contact contact, JSONArray json) {
+                writeValue(contact.getFileAs(), json, contact.containsFileAs());
             }
         });
-
         m.put(Contact.IMAGE1_CONTENT_TYPE, new ContactFieldWriter() {
 
             public void write(final Contact contactObject, final JSONArray jsonArray) {
