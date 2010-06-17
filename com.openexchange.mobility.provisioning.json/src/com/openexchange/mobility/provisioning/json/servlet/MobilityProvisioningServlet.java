@@ -64,12 +64,8 @@ import org.json.JSONObject;
 import com.openexchange.ajax.PermissionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ResponseWriter;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.MailException;
 import com.openexchange.mobility.provisioning.json.action.ActionEmail;
 import com.openexchange.mobility.provisioning.json.action.Actions;
@@ -139,8 +135,6 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 
 		try {
 			final ServerSession session = getSessionObject(request);
-			Context ctx = ContextStorage.getStorageContext(session);
-			User user = UserStorage.getInstance().getUser(session.getUserId(), ctx);
 			
 			String target = JSONUtility.checkStringParameter(request, "target");
 			
