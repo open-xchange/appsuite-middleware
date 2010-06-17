@@ -84,3 +84,6 @@ fi
 /opt/open-xchange/bundles/*
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
 
+%changelog
+* Fri May 28 2010 - benjamin.otterbach@open-xchange.com
+  - Initial import
