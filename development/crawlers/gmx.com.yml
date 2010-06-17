@@ -3,12 +3,12 @@ crawlerApiVersion: 618
 displayName: gmx.com
 id: com.openexchange.subscribe.gmx.com
 javascriptEnabled: true
-priority: 1
+priority: 2
 workflowString: |
   --- !com.openexchange.subscribe.crawler.Workflow
   steps: 
     - !com.openexchange.subscribe.crawler.LoginPageByFormActionReturningStringStep
-      actionOfLoginForm: "?wicket:interface"
+      actionOfLoginForm: ".*wicket\\:interface.*"
       baseUrl: ""
       description: Log into gmx.com
       nameOfPasswordField: TextfieldPassword
@@ -32,7 +32,7 @@ workflowString: |
           name: format
           value: csv_Outlook2003_eng
       specialParameterName: accountId
-      url: "https://www.gmx.com/callgate-6.4.12.0/coms8/ImportExportService/exportContacts"
+      url: "https://www.gmx.com/callgate-6.11.0.0/coms8/ImportExportService/exportContacts"
     - !com.openexchange.subscribe.crawler.ContactsByCsvFileStep
       description: Map csv fields to Contact-Fields
       fields: 
