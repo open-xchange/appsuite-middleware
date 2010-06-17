@@ -359,7 +359,7 @@ public class MockUser implements User {
      * {@inheritDoc}
      */
     public String[] getAliases() {
-        return new String[0];
+        return new String[]{getMail()};
     }
 
     public Map<String, Set<String>> getAttributes() {
