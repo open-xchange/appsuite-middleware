@@ -601,6 +601,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                                  * A shared folder has no subfolders in real tree
                                  */
                                 retval.setSubfolderIDs(null);
+                                retval.setCacheable(false);
                             } else if (FolderObject.SYSTEM_PRIVATE_FOLDER_ID != folderId) {
                                 /*
                                  * Set subfolders for non-private folder. For private folder FolderStorage.getSubfolders() is supposed to be

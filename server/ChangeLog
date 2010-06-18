@@ -1,6 +1,7 @@
 * 2010-06-18 - marcus.klein@open-xchange.com
 
  - Bugfix #15526: Other bundles can now register at caching bundle for buddy class loading to be able to put own classes into the cache.
+ - Bugfix #16303: Fixed a caching problem if some users request loads anothers private folders.
 
 * 2010-06-17 - karsten.will@open-xchange.com
 
