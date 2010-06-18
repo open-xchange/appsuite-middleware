@@ -1,10 +1,15 @@
+* 2010-06-18 - marcus.klein@open-xchange.com
+
+ - Bugfix #15526: Other bundles can now register at caching bundle for buddy class loading to be able to put own classes into the cache.
+
 * 2010-06-17 - karsten.will@open-xchange.com
 
  - Bugfix #16334: Crawler for gmx.com does not work
 
 * 2010-06-16 - tobias.prinz@open-xchange.com
 
- - US #4303: If you get an IMiP appointment sent to an e-mail alias of yours and you accept it, you will be listed as internal participant instead of an external participant, gaining all the nice features of that.
+ - US #4303: If you get an IMiP appointment sent to an e-mail alias of yours and you accept it, you will be listed as internal participant
+   instead of an external participant, gaining all the nice features of that.
 
 * 2010-06-16 - marcus.klein@open-xchange.com
 
