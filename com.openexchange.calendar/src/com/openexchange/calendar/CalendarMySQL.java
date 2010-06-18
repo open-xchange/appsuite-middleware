@@ -2739,7 +2739,17 @@ public class CalendarMySQL implements CalendarSqlImp {
                             if (cdao.getFolderMove()) {
                                 if (FolderObject.PRIVATE == cdao.getFolderType()) {
                                     // move public -> private
-                                    pfid = access.getDefaultFolder(new_userparticipants[a].getIdentifier(), FolderObject.CALENDAR).getObjectID();
+                                    int defaultId = access.getDefaultFolder(new_userparticipants[a].getIdentifier(), FolderObject.CALENDAR).getObjectID();
+                                    if (new_userparticipants[a].getIdentifier() == uid) {
+                                        if (cdao.getActionFolder() != defaultId) {
+                                            pfid = cdao.getActionFolder();
+                                        } else {
+                                            pfid = defaultId;
+                                        }
+                                    } else {
+                                        pfid = defaultId;
+                                    }
+             
                                 } else {
                                     // TODO needs to be implemented.
                                     pfid = -1;
