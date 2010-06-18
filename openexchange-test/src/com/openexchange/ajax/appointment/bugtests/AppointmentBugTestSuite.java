@@ -115,6 +115,7 @@ public class AppointmentBugTestSuite extends TestSuite{
         // TODO Enable the following test when the bug is fixed.
         // tests.addTestSuite(Bug16151Test.class);
         tests.addTestSuite(Bug16194Test.class);
+        tests.addTestSuite(Bug16211Test.class);
         return tests;
     }
 }
