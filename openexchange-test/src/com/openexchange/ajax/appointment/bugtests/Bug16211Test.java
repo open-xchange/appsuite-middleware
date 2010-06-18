@@ -14,15 +14,14 @@ import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.FolderTools;
 import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
-import com.openexchange.ajax.request.ReminderRequest;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
@@ -46,7 +45,7 @@ public class Bug16211Test extends AbstractAJAXSession {
 
     private TimeZone tz;
 
-    public Bug16211Test(String name) {
+    public Bug16211Test(final String name) {
         super(name);
     }
 
@@ -78,30 +77,31 @@ public class Bug16211Test extends AbstractAJAXSession {
             client.getValues().getUserId());
 
         personalAppointmentFolder.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
-        com.openexchange.ajax.folder.actions.InsertRequest insertFolderReq = new com.openexchange.ajax.folder.actions.InsertRequest(
+        final com.openexchange.ajax.folder.actions.InsertRequest insertFolderReq = new com.openexchange.ajax.folder.actions.InsertRequest(
             API.OX_NEW,
             personalAppointmentFolder,
             false);
-        InsertResponse insertFolderResp = client.execute(insertFolderReq);
+        final InsertResponse insertFolderResp = client.execute(insertFolderReq);
         insertFolderResp.fillObject(personalAppointmentFolder);
     }
 
-    public void testMoveToPersonalFolder() throws Exception {   
-        appointment.setAlarm(15);
-        UpdateRequest reminderAppointmentReq = new UpdateRequest(appointment, tz, false);
-        UpdateResponse reminderAppointmentResp = client.execute(reminderAppointmentReq);     
-        reminderAppointmentResp.fillObject(appointment);
-        
+    public void testMoveToPersonalFolder() throws Exception {
+//        Use this to test if reminder of the moving user also has been updated. See Bug 16358
+//        appointment.setAlarm(15);
+//        final UpdateRequest reminderAppointmentReq = new UpdateRequest(appointment, tz, false);
+//        final UpdateResponse reminderAppointmentResp = client.execute(reminderAppointmentReq);
+//        reminderAppointmentResp.fillObject(appointment);
+
         appointment.setParentFolderID(personalAppointmentFolder.getObjectID());
-        UpdateRequest moveAppointmentReq = new UpdateRequest(sharedAppointmentFolder.getObjectID(), appointment, tz, false);
-        UpdateResponse moveAppointmentResp = client.execute(moveAppointmentReq);
+        final UpdateRequest moveAppointmentReq = new UpdateRequest(sharedAppointmentFolder.getObjectID(), appointment, tz, false);
+        final UpdateResponse moveAppointmentResp = client.execute(moveAppointmentReq);
         moveAppointmentResp.fillObject(appointment);
 
-        GetRequest getAppointmentReq = new GetRequest(appointment, false);
-        GetResponse getAppointmentResp = client.execute(getAppointmentReq);
-        
-        JSONObject respObj = (JSONObject) getAppointmentResp.getData();
-        
+        final GetRequest getAppointmentReq = new GetRequest(appointment, false);
+        final GetResponse getAppointmentResp = client.execute(getAppointmentReq);
+
+        final JSONObject respObj = (JSONObject) getAppointmentResp.getData();
+
         if (respObj == null) {
             fail("Appointment wasn't found in folder");
         }
@@ -118,7 +118,7 @@ public class Bug16211Test extends AbstractAJAXSession {
         // Delete folders
         client.execute(new DeleteRequest(API.OX_NEW, personalAppointmentFolder.getObjectID(), new Date()));
         client2.execute(new DeleteRequest(API.OX_NEW, sharedAppointmentFolder.getObjectID(), new Date()));
-        
+
         client2.logout();
 
         super.tearDown();
