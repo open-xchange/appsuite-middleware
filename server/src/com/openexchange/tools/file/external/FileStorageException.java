@@ -125,8 +125,8 @@ public class FileStorageException extends AbstractOXException {
         DEPTH_MISMATCH("'Depth' mismatch while computing next entry.", Category.CODE_ERROR, 12),
         /** Cannot remove lock file. */
         UNLOCK("Cannot remove lock file.", Category.SUBSYSTEM_OR_SERVICE_DOWN, 13),
-        /** Cannot create lock file. */
-        LOCK("Cannot create lock file.", Category.SUBSYSTEM_OR_SERVICE_DOWN, 14),
+        /** Cannot create lock file here %1$s. Please check for a stale .lock file, permissions or too long usage of the filestore. */
+        LOCK("Cannot create lock file here %1$s. Please check for a stale .lock file, permissions or too long usage of the filestore.", Category.SUBSYSTEM_OR_SERVICE_DOWN, 14),
         /** Eliminating the FileStorage failed. */
         NOT_ELIMINATED("Eliminating the FileStorage failed.", Category.SUBSYSTEM_OR_SERVICE_DOWN, 16),
         /** File does not exist in filestore \"%1$s\". Consider running consistency tool. */
