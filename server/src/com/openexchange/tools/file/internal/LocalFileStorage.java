@@ -654,8 +654,7 @@ public class LocalFileStorage implements FileStorage {
             }
         } while (!created && System.currentTimeMillis() < failTime);
         if (!created) {
-            LOG.error("Cannot create lock file. Either there is a stale .lock file here " + lock.getAbsolutePath() + " or the filestore was used too long.");
-            throw null == ioe ? new FileStorageException(Code.LOCK) : new FileStorageException(Code.LOCK, ioe);
+            throw null == ioe ? new FileStorageException(Code.LOCK, lock.getAbsolutePath()) : new FileStorageException(Code.LOCK, ioe, lock.getAbsolutePath());
         }
     }
 
