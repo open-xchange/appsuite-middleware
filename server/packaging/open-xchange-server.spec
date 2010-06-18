@@ -34,7 +34,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	6.8.1
-Release:	17
+Release:	18
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -303,6 +303,8 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Fri Dec 18 2009 - thorben.betten@open-xchange.com
+ - Bugfix #15108: Fixed error handling on failing move operation of IMAP folders
 * Tue Oct 06 2009 - thorben.betten@open-xchange.com
  - Bugfix #14578: Checking for empty first multipart in broken mails.
 * Mon Oct 05 2009 - thorben.betten@open-xchange.com
