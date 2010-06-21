@@ -65,7 +65,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.user.UserService;
 
 /**
- *
+ * Dependently registers the AuthenticationService.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class AuthenticationRegisterer implements ServiceTrackerCustomizer {
@@ -73,31 +73,18 @@ public final class AuthenticationRegisterer implements ServiceTrackerCustomizer 
     private static final Log LOG = LogFactory.getLog(AuthenticationRegisterer.class);
 
     private final BundleContext context;
-
     private final Lock lock = new ReentrantLock();
 
-    /**
-     * Reference to the service registration.
-     */
     private ServiceRegistration registration;
-
     private ContextService contextService;
-
     private UserService userService;
 
-    /**
-     * @param context 
-     * 
-     */
     public AuthenticationRegisterer(BundleContext context) {
         super();
         this.context = context;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public Object addingService(final ServiceReference reference) {
+    public Object addingService(ServiceReference reference) {
         final Object obj = context.getService(reference);
         final boolean needsRegistration;
         lock.lock();
@@ -108,8 +95,7 @@ public final class AuthenticationRegisterer implements ServiceTrackerCustomizer 
             if (obj instanceof UserService) {
                 userService = (UserService) obj;
             }
-            needsRegistration = null != contextService && null != userService
-                && registration == null;
+            needsRegistration = null != contextService && null != userService && registration == null;
         } finally {
             lock.unlock();
         }
@@ -121,19 +107,11 @@ public final class AuthenticationRegisterer implements ServiceTrackerCustomizer 
         return obj;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public void modifiedService(final ServiceReference reference,
-        final Object service) {
+    public void modifiedService(ServiceReference reference, Object service) {
         // Nothing to do.
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public void removedService(final ServiceReference reference,
-        final Object service) {
+    public void removedService(ServiceReference reference, Object service) {
         ServiceRegistration unregister = null;
         lock.lock();
         try {
