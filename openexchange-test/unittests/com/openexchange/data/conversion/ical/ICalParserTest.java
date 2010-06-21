@@ -53,6 +53,7 @@ import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.recalculate;
 
 import java.util.*;
+import org.junit.Test;
 
 import junit.framework.TestCase;
 
@@ -1234,6 +1235,127 @@ public class ICalParserTest extends TestCase {
     	final Appointment appointment = parseAppointment(icalText);
     	assertEquals("Unfolded summary does not match transformed title", unfoldedSummary, appointment.getTitle());
     }
+    
+    // Bug 16110
+    public void testShouldImportTheShinseiAppointment() throws Exception{
+            String ical = "BEGIN:VCALENDAR\n"
+                +"METHOD:REQUEST\n"
+                +"PRODID:Microsoft CDO for Microsoft Exchange\n"
+                +"VERSION:2.0\n"
+                +"BEGIN:VTIMEZONE\n"
+                +"TZID:(GMT+09.00) Tokyo/Osaka/Sapporo\n"
+                +"X-MICROSOFT-CDO-TZID:20\n"
+                +"BEGIN:STANDARD\n"
+                +"DTSTART:16010101T000000\n"
+                +"TZOFFSETFROM:+0900\n"
+                +"TZOFFSETTO:+0900\n"
+                +"END:STANDARD\n"
+                +"BEGIN:DAYLIGHT\n"
+                +"DTSTART:16010101T000000\n"
+                +"TZOFFSETFROM:+0900\n"
+                +"TZOFFSETTO:+0900\n"
+                +"END:DAYLIGHT\n"
+                +"END:VTIMEZONE\n"
+                +"BEGIN:VEVENT\n"
+                +"DTSTAMP:20100514T031141Z\n"
+                +"DTSTART;TZID=\"(GMT+09.00) Tokyo/Osaka/Sapporo\":20100514T143000\n"
+                +"SUMMARY:Updated: OX status Meeting\n"
+                +"UID:040000008200E00074C5B7101A82E0080000000020EEAA4753F3CA01000000000000000\n"
+                +" 0100000009A5B902A6C1C7E43AF1988197DCE07C2\n"
+                +"ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=FALSE;CN=\"Ramesh G\n"
+                +" opal\":MAILTO:Ramesh.Gopal@shinsei-it.com\n"
+                +"ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=FALSE;CN=\"Imai Tom\n"
+                +" oko\":MAILTO:Tomoko.Imai@shinseibank.com\n"
+                +"ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=FALSE;CN=\"PengSeng\n"
+                +"  Fong\":MAILTO:PengSeng.Fong@shinsei-it.com\n"
+                +"ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=FALSE;CN=\"Okuyama \n"
+                +" Makoto\":MAILTO:Makoto.Okuyama@shinsei-it.com\n"
+                +"ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=FALSE;CN=\"Nakamura\n"
+                +"  Nanako\":MAILTO:Nanako.Nakamura@shinsei-it.com\n"
+                +"ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;X-REPLYTIME=20100514T02\n"
+                +" 5600Z;RSVP=FALSE;CN=\"Suresh Bollu\":MAILTO:Suresh.Bollu@shinsei-it.com\n"
+                +"ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=FALSE;CN=\"Zhuang, \n"
+                +" Xiaoye\":MAILTO:xiaoye.zhuang@shinseifinancial.co.jp\n"
+                +"ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=FALSE;CN=\"Anand Ku\n"
+                +" mbhare\":MAILTO:Anand.Kumbhare@shinsei-it.com\n"
+                +"ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=FALSE;CN=\"Praveen \n"
+                +" Kumar\":MAILTO:Praveen.Kumar@shinsei-it.com\n"
+                +"ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=FALSE;CN=\"Amogh Ku\n"
+                +" lkarni\":MAILTO:Amogh.Kulkarni@shinsei-it.com\n"
+                +"ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=FALSE;CN=\"Carsten \n"
+                +" Hoeger\":MAILTO:choeger@open-xchange.com\n"
+                +"ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=FALSE;CN=\"Mathews \n"
+                +" Jacob\":MAILTO:Mathews.Jacob@shinsei-it.com\n"
+                +"ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=FALSE;CN=\"Holger A\n"
+                +" chtziger\":MAILTO:Holger.Achtziger@open-xchange.com\n"
+                +"ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;X-REPLYTIME=20100514T02\n"
+                +" 5400Z;RSVP=FALSE;CN=\"Ido Nansyuu\":MAILTO:Nansyuu.Ido@shinsei-it.com\n"
+                +"ATTENDEE;ROLE=OPT-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=FALSE;CN=\"Pieter F\n"
+                +" ranken\":MAILTO:Pieter.Franken@shinseibank.com\n"
+                +"ATTENDEE;ROLE=OPT-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=FALSE;CN=\"Yamazaki\n"
+                +"  Chika\":MAILTO:Chika.Yamazaki@shinsei-it.com\n"
+                +"ATTENDEE;ROLE=OPT-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=FALSE;CN=\"Wenlong \n"
+                +" Wu\":MAILTO:Wenlong.Wu@shinsei-it.com\n"
+                +"ORGANIZER;CN=\"ChinShimVeron Koh\":MAILTO:ChinShimVeron.Koh@shinsei-it.com\n"
+                +"LOCATION:\n"
+                +"DTEND;TZID=\"(GMT+09.00) Tokyo/Osaka/Sapporo\":20100514T153000\n"
+                +"DESCRIPTION:Please note that the meeting is today 14 May.\\N\\NDear all\\,\\N\\N\n"
+                +" We are targeting to migrate 300 users to Open Xchange in Production on Mon\n"
+                +" day. Please attend the meeting for activity and status updates.\\N\\NPune te\n"
+                +" am\\, please help to connect VC.\\NCan someone help to book the meeting room\n"
+                +" s in Japan as I am unable to book any from my side.\\N\\N\\N[Date and Venue]\\n"
+                +" N14 May 2010 2:30-3:30 JST   @Meeting Room 2/Singapore\\N\\N[Agenda]\\N1) Perfo\n"
+                +" rmance issue fix status\\N2) H/W availability\\N3) Monitoring & Security\\N4)\n"
+                +"  Migration plan including communication plan\\N5) Weekend Support/Personnel\n"
+                +"  required\\N\\NThanks & Regards\\,\\NVeron Koh\\N \\NProject Management Unit (PM\n"
+                +" U)\\NPhone: +65 6403 5049 (External)\\NPhone: 35049 (Internal)\\NEmail:  Chin\n"
+                +" ShimVeron.Koh@shinsei-it.com\\N\n"
+                +"SEQUENCE:0\n"
+                +"PRIORITY:5\n"
+                +"CLASS:\n"
+                +"CREATED:20100514T031142Z\n"
+                +"LAST-MODIFIED:20100514T031143Z\n"
+                +"STATUS:CONFIRMED\n"
+                +"TRANSP:OPAQUE\n"
+                +"X-MICROSOFT-CDO-BUSYSTATUS:BUSY\n"
+                +"X-MICROSOFT-CDO-INSTTYPE:0\n"
+                +"X-MICROSOFT-CDO-INTENDEDSTATUS:BUSY\n"
+                +"X-MICROSOFT-CDO-ALLDAYEVENT:FALSE\n"
+                +"X-MICROSOFT-CDO-IMPORTANCE:1\n"
+                +"X-MICROSOFT-CDO-OWNERAPPTID:1968068570\n"
+                +"X-MICROSOFT-CDO-APPT-SEQUENCE:1\n"
+                +"X-MICROSOFT-CDO-ATTENDEE-CRITICAL-CHANGE:20100514T031141Z\n"
+                +"X-MICROSOFT-CDO-OWNER-CRITICAL-CHANGE:20100514T031141Z\n"
+                +"BEGIN:VALARM\n"
+                +"ACTION:DISPLAY\n"
+                +"DESCRIPTION:REMINDER\n"
+                +"TRIGGER;RELATED=START:-PT00H15M00S\n"
+                +"END:VALARM\n"
+                +"END:VEVENT\n"
+                +"END:VCALENDAR\n";
+            final Appointment appointment = parseAppointment(ical);
+            assertEquals("All participants should be external", 17, appointment.getParticipants().length);
+            assertEquals("Organizer should match", "ChinShimVeron.Koh@shinsei-it.com", appointment.getOrganizer());
+            boolean choegerFound = false, holgerFound = false;
+            for(Participant p : appointment.getParticipants()){
+                if(p.getEmailAddress().matches("choeger@open-xchange.com"))
+                    choegerFound = true;
+                if(p.getEmailAddress().matches("Holger.Achtziger@open-xchange.com"))
+                    holgerFound = true;
+            }
+            assertTrue("Should contain CHoeger", choegerFound);
+            assertTrue("Should contain Holger", holgerFound);
+    }
+    
+    
+    
+    
+    
+    /******************
+     * Helper Methods *
+     ******************/
+    
+    
 
     @Override
     protected void setUp() throws Exception {
