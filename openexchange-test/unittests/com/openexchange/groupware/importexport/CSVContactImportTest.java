@@ -270,8 +270,9 @@ public class CSVContactImportTest extends AbstractContactTest {
      * This was listed as 6825, 7107 or 7386
      */
     @Test public void bugTooMuchInformation() throws UnsupportedEncodingException, NumberFormatException, OXException, ContextException{
-        final List<ImportResult> results = importStuff(ContactField.DISPLAY_NAME.getReadableName()+", "+ContactField.GIVEN_NAME.getReadableName() + "," + ContactField.SUFFIX.getReadableName() + "\nAli, Hadschi Halef Omar, Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd al Gossarah");
-        String expected = "Ali, Hadschi Halef Omar, Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd al Gossarah";
+        final String stringTooLong = "aaaaaaaaaabbbbbbbbbbccccccccccddddddddddeeeeeeeeeeffffffffffgggggggggghhhhhhhhhhiiiiiiiiiijjjjjjjjjjkkkkkkkkkkllllllllllmmmmmmmmmmnnnnnnnnnnooooooooooppppppppppqqqqqqqqqqrrrrrrrrrrttttttttttuuuuuuuuuvvvvvvvvvwwwwwwwwwwxxxxxxxxxxyyyyyyyyyyzzzzzzzzzz00000000001111111111222222222233333333334444444444455555555556666666666777777777788888888889999999999";
+        final String expected = "aaaaaaaaaabbbbbbbbbbccccccccccddddddddddeeeeeeeeeeffffffffffgggggggggghhhhhhhhhhiiiiiiiiiijjjjjjjjjjkkkkkkkkkkllllllllllmmmmmmmm";
+        final List<ImportResult> results = importStuff(ContactField.SUFFIX.getReadableName() + "\n" + expected);
         assertTrue("One result?" , 1 == results.size());
         final ImportResult res = results.get(0);
         assertFalse("Should not fail", res.hasError());
