@@ -79,8 +79,17 @@ public class AbstractVCardTest extends AbstractContactTest {
 	public static void initialize() throws Exception {
 		Init.startServer();
 		final UserStorage uStorage = UserStorage.getInstance();
-        ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext"));
-        userId = uStorage.getUserId(AjaxInit.getAJAXProperty("login"), ctx);
+		
+		String[] loginParts = AjaxInit.getAJAXProperty("login").split("@");;
+		String name = loginParts[0];
+		String context = null;
+		if(loginParts.length > 0)
+		    context = loginParts[1];
+		else 
+		    context = "defaultcontext";
+		
+        ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId(context));
+        userId = uStorage.getUserId(name, ctx);
 	    sessObj = ServerSessionFactory.createServerSession(userId, 1, "vcard-tests");
 		userId = sessObj.getUserId();
 	}
