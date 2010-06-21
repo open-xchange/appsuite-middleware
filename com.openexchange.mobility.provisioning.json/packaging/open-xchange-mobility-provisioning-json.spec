@@ -80,9 +80,11 @@ fi
 %files
 %defattr(-,root,root)
 %dir /opt/open-xchange/etc/groupware/osgi/bundle.d
+%dir /opt/open-xchange/etc/groupware
 %dir /opt/open-xchange/bundles
 /opt/open-xchange/bundles/*
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
+%config(noreplace) /opt/open-xchange/etc/groupware/*
 
 %changelog
 * Fri May 28 2010 - benjamin.otterbach@open-xchange.com
