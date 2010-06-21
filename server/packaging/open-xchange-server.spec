@@ -74,7 +74,8 @@ Requires:  java-icedtea
 %endif
 %endif
 %if 0%{?rhel_version}
-Requires:  java-1.5.0-sun
+# RHEL5 removed sun-java5, but some might still use it, so just depend on sun-java
+Requires:  java-sun
 %endif
 #
 

@@ -1,3 +1,7 @@
+* 2010-06-21 - choeger@open-xchange.com
+
+ - Bugfix #16359: java-1.5.0-sun package obsoleted on rhel5
+
 * 2010-06-18 - marcus.klein@open-xchange.com
 
  - Bugfix #15526: Other bundles can now register at caching bundle for buddy class loading to be able to put own classes into the cache.
