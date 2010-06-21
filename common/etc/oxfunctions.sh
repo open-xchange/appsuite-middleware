@@ -332,7 +332,7 @@ use strict;
 my $file=$ENV{"propfile"};
 my $search=$ENV{"prop"};
 open(FILE,$file) || die "unable to open $file: $!";
-my $val;
+my $val=undef;
 while(<FILE>) {
     chomp;
     my $len=length($search);
@@ -342,6 +342,7 @@ while(<FILE>) {
            if( $idx >= $len ) {
               $val=substr($_,$idx+1);
            }
+	   last if defined($val);
         }
         last;
     }
