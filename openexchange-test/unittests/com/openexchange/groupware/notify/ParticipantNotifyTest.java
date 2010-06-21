@@ -58,14 +58,19 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.TimeZone;
 import junit.framework.TestCase;
 import com.openexchange.api2.OXException;
+import com.openexchange.data.conversion.ical.ConversionError;
+import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.ical4j.ICal4JParser;
 import com.openexchange.group.Group;
 import com.openexchange.groupware.Init;
+import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
@@ -163,15 +168,9 @@ public class ParticipantNotifyTest extends TestCase {
 
 
     public Appointment convertFromICal(final InputStream icalFile) throws Exception{
-        OXContainerConverter oxContainerConverter = null;
-
-        oxContainerConverter = new OXContainerConverter(session.getContext(), TimeZone.getDefault());
-        final VersitDefinition def = ICalendar.definition;
-        final VersitDefinition.Reader versitReader = def.getReader(icalFile, "UTF-8");
-        final VersitObject rootVersitObject = def.parseBegin(versitReader);
-        VersitObject versitObject = null;
-        versitObject = def.parseChild(versitReader, rootVersitObject);
-        return oxContainerConverter.convertAppointment(versitObject);
+        ICal4JParser parser = new ICal4JParser();
+        List<CalendarDataObject> apps = parser.parseAppointments(icalFile, TimeZone.getDefault(), session.getContext(), new LinkedList<ConversionError>(), new LinkedList<ConversionWarning>());
+        return apps.get(0);
     }
 
 
