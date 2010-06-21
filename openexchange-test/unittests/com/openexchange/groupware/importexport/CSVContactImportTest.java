@@ -271,8 +271,8 @@ public class CSVContactImportTest extends AbstractContactTest {
      */
     @Test public void bugTooMuchInformation() throws UnsupportedEncodingException, NumberFormatException, OXException, ContextException{
         final String stringTooLong = "aaaaaaaaaabbbbbbbbbbccccccccccddddddddddeeeeeeeeeeffffffffffgggggggggghhhhhhhhhhiiiiiiiiiijjjjjjjjjjkkkkkkkkkkllllllllllmmmmmmmmmmnnnnnnnnnnooooooooooppppppppppqqqqqqqqqqrrrrrrrrrrttttttttttuuuuuuuuuvvvvvvvvvwwwwwwwwwwxxxxxxxxxxyyyyyyyyyyzzzzzzzzzz00000000001111111111222222222233333333334444444444455555555556666666666777777777788888888889999999999";
-        final String expected = "aaaaaaaaaabbbbbbbbbbccccccccccddddddddddeeeeeeeeeeffffffffffgggggggggghhhhhhhhhhiiiiiiiiiijjjjjjjjjjkkkkkkkkkkllllllllllmmmmmmmm";
-        final List<ImportResult> results = importStuff(ContactField.GIVEN_NAME.getReadableName() + " , " +ContactField.SUFFIX.getReadableName() + "\nElvis," + expected);
+        final String expected = "aaaaaaaaaabbbbbbbbbbccccccccccddddddddddeeeeeeeeeeffffffffffgggg";
+        final List<ImportResult> results = importStuff(ContactField.GIVEN_NAME.getReadableName() + " , " +ContactField.SUFFIX.getReadableName() + "\nElvis," + stringTooLong);
         assertTrue("One result?" , 1 == results.size());
         final ImportResult res = results.get(0);
         assertFalse("Should not fail", res.hasError());
