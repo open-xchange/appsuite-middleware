@@ -3211,10 +3211,6 @@ public class Mail extends PermissionServlet implements UploadListener {
         final Response response = new Response();
         JSONValue responseData = null;
         try {
-            final String src = paramContainer.checkStringParam(PARAMETER_SRC);
-            if (!STR_1.equals(src) && !Boolean.parseBoolean(src)) {
-                throw new MailException(MailException.Code.MISSING_PARAMETER, PARAMETER_SRC);
-            }
             final String folder = paramContainer.getStringParam(PARAMETER_FOLDERID);
             final int flags;
             {
