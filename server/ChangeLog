@@ -1,6 +1,8 @@
 * 2010-06-21 - choeger@open-xchange.com
 
  - Bugfix #16359: java-1.5.0-sun package obsoleted on rhel5
+ - Bugfix #16364: Got message about not proper configured cache ports although
+   they are
 
 * 2010-06-18 - marcus.klein@open-xchange.com
 

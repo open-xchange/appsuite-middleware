@@ -224,7 +224,13 @@ if [ -s $ADMINCACHECCF ]; then
 	echo
 	echo
     elif [ -z "$ADMINUDPDISCENABLED" ] || [ "$ADMINUDPDISCENABLED" == "false" ]; then
-	if [ "$SERVERLPORT" != "${ADMINTCPSERVER/*:}" ]; then
+        portfound=
+        for i in ${ADMINTCPSERVER/,/ }; do
+	    if [ "$SERVERLPORT" == "${i/*:}" ]; then
+		portfound=true
+	    fi
+	done
+	if [ -z "$portfound" ]; then
 	    warn "TcpListenerPort in"
 	    warn "$CACHECCF"
 	    warn "must be the same port as in"
@@ -234,7 +240,13 @@ if [ -s $ADMINCACHECCF ]; then
 	    echo
 	    echo
 	fi
-	if [ "$ADMINLPORT" != "${SERVERTCPSERVER/*:}" ]; then
+        portfound=
+        for i in ${SERVERTCPSERVER/,/ }; do
+	    if [ "$ADMINLPORT" == "${i/*:}" ]; then
+		portfound=true
+	    fi
+	done
+	if [ -z "$portfound" ]; then
 	    warn "TcpListenerPort in"
 	    warn "$ADMINCACHECCF"
 	    warn "must be the same port as in"
