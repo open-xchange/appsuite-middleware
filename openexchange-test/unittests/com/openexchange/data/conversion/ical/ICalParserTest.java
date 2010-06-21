@@ -1237,7 +1237,7 @@ public class ICalParserTest extends TestCase {
     }
     
     // Bug 16110
-    public void testShouldImportTheShinseiAppointment() throws Exception{
+    public void testBug16110() throws Exception{
             String ical = "BEGIN:VCALENDAR\n"
                 +"METHOD:REQUEST\n"
                 +"PRODID:Microsoft CDO for Microsoft Exchange\n"
@@ -1263,40 +1263,40 @@ public class ICalParserTest extends TestCase {
                 +"UID:040000008200E00074C5B7101A82E0080000000020EEAA4753F3CA01000000000000000\n"
                 +" 0100000009A5B902A6C1C7E43AF1988197DCE07C2\n"
                 +"ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=FALSE;CN=\"Ramesh G\n"
-                +" opal\":MAILTO:Ramesh.Gopal@shinsei-it.com\n"
+                +" opal\":MAILTO:Ramesh.Gopal@some-it.invalid\n"
                 +"ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=FALSE;CN=\"Imai Tom\n"
                 +" oko\":MAILTO:Tomoko.Imai@shinseibank.com\n"
                 +"ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=FALSE;CN=\"PengSeng\n"
-                +"  Fong\":MAILTO:PengSeng.Fong@shinsei-it.com\n"
+                +"  Fong\":MAILTO:PengSeng.Fong@some-it.invalid\n"
                 +"ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=FALSE;CN=\"Okuyama \n"
-                +" Makoto\":MAILTO:Makoto.Okuyama@shinsei-it.com\n"
+                +" Makoto\":MAILTO:Makoto.Okuyama@some-it.invalid\n"
                 +"ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=FALSE;CN=\"Nakamura\n"
-                +"  Nanako\":MAILTO:Nanako.Nakamura@shinsei-it.com\n"
+                +"  Nanako\":MAILTO:Nanako.Nakamura@some-it.invalid\n"
                 +"ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;X-REPLYTIME=20100514T02\n"
-                +" 5600Z;RSVP=FALSE;CN=\"Suresh Bollu\":MAILTO:Suresh.Bollu@shinsei-it.com\n"
+                +" 5600Z;RSVP=FALSE;CN=\"Suresh Bollu\":MAILTO:Suresh.Bollu@some-it.invalid\n"
                 +"ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=FALSE;CN=\"Zhuang, \n"
-                +" Xiaoye\":MAILTO:xiaoye.zhuang@shinseifinancial.co.jp\n"
+                +" Xiaoye\":MAILTO:xiaoye.zhuang@somefinancial.invalid\n"
                 +"ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=FALSE;CN=\"Anand Ku\n"
-                +" mbhare\":MAILTO:Anand.Kumbhare@shinsei-it.com\n"
+                +" mbhare\":MAILTO:Anand.Kumbhare@some-it.invalid\n"
                 +"ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=FALSE;CN=\"Praveen \n"
-                +" Kumar\":MAILTO:Praveen.Kumar@shinsei-it.com\n"
+                +" Kumar\":MAILTO:Praveen.Kumar@some-it.invalid\n"
                 +"ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=FALSE;CN=\"Amogh Ku\n"
-                +" lkarni\":MAILTO:Amogh.Kulkarni@shinsei-it.com\n"
+                +" lkarni\":MAILTO:Amogh.Kulkarni@some-it.invalid\n"
                 +"ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=FALSE;CN=\"Carsten \n"
                 +" Hoeger\":MAILTO:choeger@open-xchange.com\n"
                 +"ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=FALSE;CN=\"Mathews \n"
-                +" Jacob\":MAILTO:Mathews.Jacob@shinsei-it.com\n"
+                +" Jacob\":MAILTO:Mathews.Jacob@some-it.invalid\n"
                 +"ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=FALSE;CN=\"Holger A\n"
                 +" chtziger\":MAILTO:Holger.Achtziger@open-xchange.com\n"
                 +"ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;X-REPLYTIME=20100514T02\n"
-                +" 5400Z;RSVP=FALSE;CN=\"Ido Nansyuu\":MAILTO:Nansyuu.Ido@shinsei-it.com\n"
+                +" 5400Z;RSVP=FALSE;CN=\"Ido Nansyuu\":MAILTO:Nansyuu.Ido@some-it.invalid\n"
                 +"ATTENDEE;ROLE=OPT-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=FALSE;CN=\"Pieter F\n"
-                +" ranken\":MAILTO:Pieter.Franken@shinseibank.com\n"
+                +" ranken\":MAILTO:Pieter.Franken@somebank.com\n"
                 +"ATTENDEE;ROLE=OPT-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=FALSE;CN=\"Yamazaki\n"
-                +"  Chika\":MAILTO:Chika.Yamazaki@shinsei-it.com\n"
+                +"  Chika\":MAILTO:Chika.Yamazaki@some-it.invalid\n"
                 +"ATTENDEE;ROLE=OPT-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=FALSE;CN=\"Wenlong \n"
-                +" Wu\":MAILTO:Wenlong.Wu@shinsei-it.com\n"
-                +"ORGANIZER;CN=\"ChinShimVeron Koh\":MAILTO:ChinShimVeron.Koh@shinsei-it.com\n"
+                +" Wu\":MAILTO:Wenlong.Wu@some-it.invalid\n"
+                +"ORGANIZER;CN=\"ChinShimVeron Koh\":MAILTO:ChinShimVeron.Koh@some-it.invalid\n"
                 +"LOCATION:\n"
                 +"DTEND;TZID=\"(GMT+09.00) Tokyo/Osaka/Sapporo\":20100514T153000\n"
                 +"DESCRIPTION:Please note that the meeting is today 14 May.\\N\\NDear all\\,\\N\\N\n"
@@ -1309,7 +1309,7 @@ public class ICalParserTest extends TestCase {
                 +"  Migration plan including communication plan\\N5) Weekend Support/Personnel\n"
                 +"  required\\N\\NThanks & Regards\\,\\NVeron Koh\\N \\NProject Management Unit (PM\n"
                 +" U)\\NPhone: +65 6403 5049 (External)\\NPhone: 35049 (Internal)\\NEmail:  Chin\n"
-                +" ShimVeron.Koh@shinsei-it.com\\N\n"
+                +" ShimVeron.Koh@some-it.invalid\\N\n"
                 +"SEQUENCE:0\n"
                 +"PRIORITY:5\n"
                 +"CLASS:\n"
@@ -1335,7 +1335,7 @@ public class ICalParserTest extends TestCase {
                 +"END:VCALENDAR\n";
             final Appointment appointment = parseAppointment(ical);
             assertEquals("All participants should be external", 17, appointment.getParticipants().length);
-            assertEquals("Organizer should match", "ChinShimVeron.Koh@shinsei-it.com", appointment.getOrganizer());
+            assertEquals("Organizer should match", "ChinShimVeron.Koh@some-it.invalid", appointment.getOrganizer());
             boolean choegerFound = false, holgerFound = false;
             for(Participant p : appointment.getParticipants()){
                 if(p.getEmailAddress().matches("choeger@open-xchange.com"))
