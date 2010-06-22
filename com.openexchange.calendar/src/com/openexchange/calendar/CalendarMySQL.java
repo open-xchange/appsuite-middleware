@@ -3418,11 +3418,11 @@ public class CalendarMySQL implements CalendarSqlImp {
         return CalendarObject.NONE;
     }
 
-    public final long attachmentAction(final int oid, final int uid, final Context c, final boolean action) throws OXException {
+    public final long attachmentAction(final int oid, final int uid, final Context c, final int numberOfAttachments) throws OXException {
         Connection readcon = null, writecon = null;
         int changes[];
         PreparedStatement pst = null;
-        int number_of_attachments = 0;
+        int oldAmount = 0;
         ResultSet rs = null;
         PreparedStatement prep = null;
         long last_modified = 0L;
@@ -3436,7 +3436,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             prep = getPreparedStatement(readcon, sb.toString());
             rs = getResultSet(prep);
             if (rs.next()) {
-                number_of_attachments = rs.getInt(1);
+                oldAmount = rs.getInt(1);
             } else {
                 LOG.error("Object Not Found: " + "Unable to handle attachment action", new Throwable());
                 throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.EnumComponent.APPOINTMENT, "");
@@ -3453,14 +3453,10 @@ public class CalendarMySQL implements CalendarSqlImp {
             }
         }
 
-        if (action) {
-            number_of_attachments++;
-        } else {
-            number_of_attachments--;
-            if (number_of_attachments < 0) {
-                LOG.error(StringCollection.convertArraytoString(new Object[] { "Object seems to be corrupted: attachmentAction:", Boolean.valueOf(action), " oid:cid:uid ", Integer.valueOf(oid), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(c.getContextId()), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(uid) }), new Throwable());
-                throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.EnumComponent.APPOINTMENT, "");
-            }
+        oldAmount += numberOfAttachments;
+        if (oldAmount < 0) {
+            LOG.error(StringCollection.convertArraytoString(new Object[] { "Object seems to be corrupted: new number of attachments:", Integer.valueOf(oldAmount), " oid:cid:uid ", Integer.valueOf(oid), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(c.getContextId()), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(uid) }), new Throwable());
+            throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.EnumComponent.APPOINTMENT, "");
         }
 
         try {
@@ -3470,7 +3466,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             last_modified = System.currentTimeMillis();
             pst.setLong(1, last_modified);
             pst.setInt(2, uid);
-            pst.setInt(3, number_of_attachments);
+            pst.setInt(3, oldAmount);
             pst.setInt(4, oid);
             pst.setInt(5, c.getContextId());
             pst.addBatch();

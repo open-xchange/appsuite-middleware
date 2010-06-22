@@ -312,11 +312,11 @@ public interface AppointmentSQLInterface {
      * The user ID
      * @param Context
      * The context
-     * @param action
-     * true = attach, false = detach
+     * @param numberOfAttachments
+     * Amount of attached attachments.
      * @throws OXException
      */
-    long attachmentAction(int objectId, int uid, Context c, boolean action) throws OXException;
+    long attachmentAction(int objectId, int uid, Context c, int numberOfAttachments) throws OXException;
 
 
     /**

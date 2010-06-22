@@ -147,7 +147,7 @@ public interface CalendarSqlImp {
 
     PreparedStatement getSharedFolderDeletedSinceSQL(Context c, int uid, int shared_folder_owner, int fid, Date d1, String select, Connection readcon) throws SQLException;
 
-    long attachmentAction(int oid, int uid, Context c, boolean action) throws OXException;
+    long attachmentAction(int oid, int uid, Context c, int numberOfAttachments) throws OXException;
 
     PreparedStatement getSearchQuery(String select,  int uid, int groups[], UserConfiguration uc, int orderBy, String orderDir, AppointmentSearchObject searchobject, Context c, Connection readcon, CalendarFolderObject cfo) throws SQLException, OXException;
 

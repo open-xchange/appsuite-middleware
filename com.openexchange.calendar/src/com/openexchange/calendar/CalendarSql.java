@@ -1146,8 +1146,8 @@ public class CalendarSql implements AppointmentSQLInterface {
         }
     }
 
-    public final long attachmentAction(final int oid, final int uid, final Context c, final boolean action) throws OXException {
-        return cimp.attachmentAction(oid, uid, c, action);
+    public final long attachmentAction(final int oid, final int uid, final Context c, final int numberOfAttachments) throws OXException {
+        return cimp.attachmentAction(oid, uid, c, numberOfAttachments);
     }
 
     public SearchIterator<Appointment> getFreeBusyInformation(final int uid, final int type, final Date start, final Date end) throws OXException {
