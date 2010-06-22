@@ -1,3 +1,7 @@
+* 2010-06-22 - tobias.prinz@open-xchange.com
+
+ - Bug 16110: IMiP invitations to primary mail addresses of an of user now work again. They failed since 06-22 in case they were sorted before alias e-mail addresses on the server side.
+
 * 2010-06-22 - thorben.betten@open-xchange.com
 
  - Possible fix for bug #16273: Replaced ByteBuffer with ByteArrayInputStream to avoid an infinite blocking read() attempt
