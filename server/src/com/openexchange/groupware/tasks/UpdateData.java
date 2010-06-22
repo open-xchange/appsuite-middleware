@@ -58,6 +58,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -182,6 +183,11 @@ class UpdateData {
      * Removed participants.
      */
     private final Set<TaskParticipant> removed = new HashSet<TaskParticipant>();
+
+    /**
+     * Participants that are moved to a group.
+     */
+    private final Set<InternalParticipant> changedGroup = new HashSet<InternalParticipant>();
 
     /**
      * Folders in that the task must appear additionally.
@@ -452,6 +458,15 @@ class UpdateData {
         }
     }
 
+    private Set<InternalParticipant> addedGroupParticipants = null;
+
+    private Set<InternalParticipant> getGroupParticipants() throws TaskException {
+        if (null == addedGroupParticipants) {
+            addedGroupParticipants = TaskLogic.getGroupParticipants(ctx, changed.getParticipants());
+        }
+        return addedGroupParticipants;
+    }
+
     private boolean preparedParts;
 
     private void prepareParticipants() throws TaskException {
@@ -462,6 +477,12 @@ class UpdateData {
             // Find added participants
             added.addAll(getChangedParticipants());
             added.removeAll(getOrigParticipants());
+
+            // Find all participants that contain a group id now
+            changedGroup.addAll(getGroupParticipants());
+            changedGroup.retainAll(getOrigParticipants());
+            prepareParticipantsWithChangedGroup();
+
             // Replace added participants with the values from the removed
             // one to get folder and confirmation information.
             // Only internal participants can be selected here because of
@@ -476,6 +497,32 @@ class UpdateData {
             removed.removeAll(getChangedParticipants());
         }
         preparedParts = true;
+    }
+
+    private void prepareParticipantsWithChangedGroup() throws TaskException {
+        final Set<TaskParticipant> toCheck = new HashSet<TaskParticipant>();
+        final Set<TaskParticipant> orig = getOrigParticipants();
+        final HashMap<Integer, InternalParticipant> changedInternals = new HashMap<Integer, InternalParticipant>(getChangedParticipants().size());
+        for (final TaskParticipant changedParticipant : getChangedParticipants()) {
+            if (changedParticipant.getType() == TaskParticipant.Type.INTERNAL) {
+                final InternalParticipant cip = (InternalParticipant) changedParticipant;
+                changedInternals.put(cip.getIdentifier(), cip);
+            }
+        }
+
+        // Retain the participants with changes
+        toCheck.addAll(orig);
+        toCheck.retainAll(getChangedParticipants());
+
+        for (final TaskParticipant tp : toCheck) {
+            if (tp.getType() == TaskParticipant.Type.INTERNAL) {
+                final InternalParticipant ip = (InternalParticipant) tp;
+                final InternalParticipant cp = changedInternals.get(ip.getIdentifier());
+                if (cp != null) {
+                    changedGroup.add(cp);
+                }
+            }
+        }
     }
 
     private void generateUpdated() throws TaskException {
@@ -513,6 +560,14 @@ class UpdateData {
     Set<TaskParticipant> getAdded() throws TaskException {
         prepareParticipants();
         return added;
+    }
+
+    /**
+     * @return the participants who belong to group after the update.
+     */
+    Set<InternalParticipant> getChangedGroup() throws TaskException {
+        prepareParticipants();
+        return changedGroup;
     }
 
     /**
@@ -613,6 +668,7 @@ class UpdateData {
                 getModifiedFields(),
                 getAdded(),
                 getRemoved(),
+                getChangedGroup(),
                 getAddedFolder(),
                 getRemovedFolder(),
                 type);
@@ -641,7 +697,11 @@ class UpdateData {
     }
 
     static void updateTask(final Context ctx, final Connection con, final Task task, final Date lastRead, final int[] modified, final Set<TaskParticipant> add, final Set<TaskParticipant> remove, final Set<Folder> addFolder, final Set<Folder> removeFolder) throws TaskException {
-        updateTask(ctx, con, task, lastRead, modified, add, remove, addFolder, removeFolder, ACTIVE);
+        updateTask(ctx, con, task, lastRead, modified, add, remove, null, addFolder, removeFolder, ACTIVE);
+    }
+
+    static void updateTask(final Context ctx, final Connection con, final Task task, final Date lastRead, final int[] modified, final Set<TaskParticipant> add, final Set<TaskParticipant> remove, final Set<InternalParticipant> changedGroup, final Set<Folder> addFolder, final Set<Folder> removeFolder) throws TaskException {
+        updateTask(ctx, con, task, lastRead, modified, add, remove, changedGroup, addFolder, removeFolder, ACTIVE);
     }
 
     /**
@@ -658,7 +718,7 @@ class UpdateData {
      * @param removeFolder removed folder mappings for the participants.
      * @throws TaskException if some SQL command fails.
      */
-    static void updateTask(final Context ctx, final Connection con, final Task task, final Date lastRead, final int[] modified, final Set<TaskParticipant> add, final Set<TaskParticipant> remove, final Set<Folder> addFolder, final Set<Folder> removeFolder, final StorageType type) throws TaskException {
+    static void updateTask(final Context ctx, final Connection con, final Task task, final Date lastRead, final int[] modified, final Set<TaskParticipant> add, final Set<TaskParticipant> remove, final Set<InternalParticipant> changedGroup, final Set<Folder> addFolder, final Set<Folder> removeFolder, final StorageType type) throws TaskException {
         final int taskId = task.getObjectID();
         storage.updateTask(ctx, con, task, lastRead, modified, type);
         if (null != add) {
@@ -672,6 +732,9 @@ class UpdateData {
                 partStor.insertParticipants(ctx, con, taskId, remove, REMOVED);
             }
             partStor.deleteParticipants(ctx, con, taskId, remove, type, true);
+        }
+        if (null != changedGroup) {
+            partStor.updateInternal(ctx, con, taskId, changedGroup, type);
         }
         if (null != removeFolder) {
             foldStor.deleteFolder(ctx, con, taskId, removeFolder, type);
@@ -711,20 +774,20 @@ class UpdateData {
             getModifiedFields(),
             Status.SINGLETON.getId())) {
 
-            TaskSearchObject search = new TaskSearchObject();
+            final TaskSearchObject search = new TaskSearchObject();
             search.setTitle(updated.getTitle());
             search.setStatus(updated.getStatus());
             search.setPriority(updated.getPriority());
 
             try {
                 Permission.checkReadInFolder(ctx, user, userConfig, folder);
-            } catch (TaskException e) {
+            } catch (final TaskException e) {
                 throw new TaskException(e);
             }
 
-            boolean own = Permission.canReadInFolder(ctx, user, userConfig, destFolder);
-            List<Integer> emptyList = new ArrayList<Integer>();
-            List<Integer> listWithFolder = new ArrayList<Integer>();
+            final boolean own = Permission.canReadInFolder(ctx, user, userConfig, destFolder);
+            final List<Integer> emptyList = new ArrayList<Integer>();
+            final List<Integer> listWithFolder = new ArrayList<Integer>();
             listWithFolder.add(destFolder.getObjectID());
 
             TaskIterator ti;
@@ -741,14 +804,14 @@ class UpdateData {
             boolean duplicateExists = false;
             while (ti.hasNext()) {
                 try {
-                    Task actual = ti.next();
-                    boolean percentComplete = actual.getPercentComplete() == updated.getPercentComplete();
-                    boolean createdBy = actual.getCreatedBy() == updated.getCreatedBy();
+                    final Task actual = ti.next();
+                    final boolean percentComplete = actual.getPercentComplete() == updated.getPercentComplete();
+                    final boolean createdBy = actual.getCreatedBy() == updated.getCreatedBy();
                     boolean startDate;
 
                     if (actual.getStartDate() != null) {
-                        Long aStartDateLong = actual.getStartDate().getTime();
-                        Long uStartDateLong = updated.getStartDate().getTime();
+                        final Long aStartDateLong = actual.getStartDate().getTime();
+                        final Long uStartDateLong = updated.getStartDate().getTime();
                         startDate = aStartDateLong / 1000 == uStartDateLong / 1000;
                     } else {
                         if (updated.getStartDate() == null) {
@@ -762,7 +825,7 @@ class UpdateData {
                         duplicateExists = true;
                         break;
                     }
-                } catch (SearchIteratorException e) {
+                } catch (final SearchIteratorException e) {
                     throw new TaskException(e);
                 }
             }

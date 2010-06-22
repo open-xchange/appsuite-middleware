@@ -1,3 +1,7 @@
+* 2010-06-22 - steffen.templin@open-xchange.com
+
+ - Bugfix #15291: Adding groups with participants who already exists is working correctly now.
+ 
 * 2010-06-22 - martin.herfurth@open-xchange.com
 
  - Bugfix #16297: Fixed attachment tracking in calendar.
