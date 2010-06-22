@@ -2740,16 +2740,11 @@ public class CalendarMySQL implements CalendarSqlImp {
                                 if (FolderObject.PRIVATE == cdao.getFolderType()) {
                                     // move public -> private
                                     int defaultId = access.getDefaultFolder(new_userparticipants[a].getIdentifier(), FolderObject.CALENDAR).getObjectID();
-                                    if (new_userparticipants[a].getIdentifier() == uid) {
-                                        if (cdao.getActionFolder() != defaultId) {
-                                            pfid = cdao.getActionFolder();
-                                        } else {
-                                            pfid = defaultId;
-                                        }
+                                    if (new_userparticipants[a].getIdentifier() == uid && cdao.getActionFolder() != defaultId) {
+                                        pfid = cdao.getActionFolder();
                                     } else {
                                         pfid = defaultId;
-                                    }
-             
+                                    }             
                                 } else {
                                     // TODO needs to be implemented.
                                     pfid = -1;
@@ -2886,6 +2881,10 @@ public class CalendarMySQL implements CalendarSqlImp {
                                         // Integer.valueOf(OXFolderTools.getCalendarDefaultFolder(modified_userparticipants[a].getIdentifier(),
                                         // cdao.getContext()));
                                         modified_userparticipants[a].setPersonalFolderId(pfid);
+                                    }
+                                    
+                                    if (edao.getFolderType() == FolderObject.PUBLIC) {
+                                        pfid = cdao.getActionFolder();
                                     }
                                     pu.setInt(3, pfid);
                                 } catch (final Exception fe) {
