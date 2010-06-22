@@ -68,7 +68,10 @@ import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.mail.MailException;
 import com.openexchange.mobility.provisioning.json.action.ActionEmail;
+import com.openexchange.mobility.provisioning.json.action.ActionException;
+import com.openexchange.mobility.provisioning.json.action.ActionSMSService;
 import com.openexchange.mobility.provisioning.json.action.Actions;
+import com.openexchange.mobility.provisioning.json.osgi.MobilityProvisioningServiceRegistry;
 import com.openexchange.server.ServiceException;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
@@ -143,6 +146,13 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 				message = "Provisioning mail has been send to " + target;
 				success = true;
 			} else if (JSONUtility.checkStringParameter(request, "action").equals(Actions.ACTION_SMS)) {
+			    final ActionSMSService service = MobilityProvisioningServiceRegistry.getServiceRegistry().getService(ActionSMSService.class);
+			    try {
+                    service.sendMail(session);
+                } catch (ActionException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
 				message = "Action SMS not implemented yet.";
 			} else {
 				message = "Missing or wrong field action in JSON request.";
