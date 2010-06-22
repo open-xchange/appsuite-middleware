@@ -56,27 +56,33 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 
+/**
+ * {@link AttachmentEvent}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ */
 public interface AttachmentEvent {
-	
-	public int[] getDetached();
-	
-	public AttachmentMetadata getAttachment();
-	
-	public InputStream getAttachedFile() throws OXException;
-	
-	public AttachmentBase getSource();
-	
-	public Connection getWriteConnection() throws OXException;
-	
-	public Context getContext();
-	
-	public User getUser();
-	
-	public int getFolderId();
-	
-	public int getAttachedId();
-	
-	public int getModuleId();
-	
-	public UserConfiguration getUserConfig();
+
+    int[] getDetached();
+
+    AttachmentMetadata getAttachment();
+
+    InputStream getAttachedFile() throws OXException;
+
+    AttachmentBase getSource();
+
+    Connection getWriteConnection() throws OXException;
+
+    Context getContext();
+
+    User getUser();
+
+    int getFolderId();
+
+    int getAttachedId();
+
+    int getModuleId();
+
+    UserConfiguration getUserConfig();
+
 }
