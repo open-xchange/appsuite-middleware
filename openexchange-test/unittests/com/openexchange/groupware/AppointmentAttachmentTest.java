@@ -61,20 +61,20 @@ public class AppointmentAttachmentTest extends TestCase {
         assertTrue("Got no object_id", oid != 0);
         assertTrue("Got no conflicts ", conflicts == null);
         
-        csql.attachmentAction(oid, userid, context, true);
-        csql.attachmentAction(oid, userid, context, true);
-        csql.attachmentAction(oid, userid, context, true);
-        csql.attachmentAction(oid, userid, context, true);
+        csql.attachmentAction(oid, userid, context, 1);
+        csql.attachmentAction(oid, userid, context, 1);
+        csql.attachmentAction(oid, userid, context, 1);
+        csql.attachmentAction(oid, userid, context, 1);
         
-        csql.attachmentAction(oid, userid, context, false);
-        csql.attachmentAction(oid, userid, context, false);
-        csql.attachmentAction(oid, userid, context, false);
-        csql.attachmentAction(oid, userid, context, false);
+        csql.attachmentAction(oid, userid, context, -1);
+        csql.attachmentAction(oid, userid, context, -1);
+        csql.attachmentAction(oid, userid, context, -1);
+        csql.attachmentAction(oid, userid, context, -1);
         
         long last_modified = 0;
         try {
             final long check_modified = System.currentTimeMillis();
-            last_modified = csql.attachmentAction(oid, userid, context, false);
+            last_modified = csql.attachmentAction(oid, userid, context, -1);
             assertTrue("Check for last_modified ", last_modified > check_modified);
         } catch(final Exception e) {
             return; 
