@@ -101,7 +101,7 @@ public class OXCalendarException extends OXException {
         UPDATE_USER_SHARED_MISMATCH("Folder type \"SHARED\" is not allowed in this situation.", 10, AbstractOXException.Category.USER_INPUT),
         RECURRING_UNEXPECTED_DELETE_STATE("Unexpected state for deleting a virtual appointment (exception). uid:oid:position %d:%d:%d", 11, AbstractOXException.Category.INTERNAL_ERROR),
         ERROR_SESSIONOBJECT_IS_NULL("SessionObject not initialized", 12, AbstractOXException.Category.CODE_ERROR),
-        NO_PERMISSION("You do not have the necessary permissions", 13, AbstractOXException.Category.PERMISSION),
+        NO_PERMISSION("You do not have the necessary permissions for appointments in folder %1$d.", 13, AbstractOXException.Category.PERMISSION),
         INSERT_WITH_OBJECT_ID("Insert expected but the object id is already given. Aborting action...", 14, AbstractOXException.Category.CODE_ERROR),
         UPDATE_WITHOUT_OBJECT_ID("Update expected but no object id is given. Aborting action...", 15, AbstractOXException.Category.CODE_ERROR),
         FOLDER_DELETE_INVALID_REQUEST("Invalid request. Folder is shared!", 16, AbstractOXException.Category.CODE_ERROR),

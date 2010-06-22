@@ -49,6 +49,7 @@
 
 package com.openexchange.calendar;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
@@ -59,7 +60,6 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.omg.CORBA.CTX_RESTRICT_SCOPE;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.AppointmentSQLInterface;
@@ -195,7 +195,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                     close_connection = false;
                     return new AppointmentIteratorAdapter(new CachedCalendarIterator(co, ctx, session.getUserId()));
                 } else {
-                    throw new OXCalendarException(OXCalendarException.Code.NO_PERMISSION);
+                    throw new OXCalendarException(OXCalendarException.Code.NO_PERMISSION, I(fid));
                 }
             } else if (folderType == FolderObject.PUBLIC) {
                 final CalendarOperation co = new CalendarOperation();
@@ -215,7 +215,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                     close_connection = false;
                     return new AppointmentIteratorAdapter(new CachedCalendarIterator(co, ctx, session.getUserId()));
                 } else {
-                    throw new OXCalendarException(OXCalendarException.Code.NO_PERMISSION);
+                    throw new OXCalendarException(OXCalendarException.Code.NO_PERMISSION, I(fid));
                 }
             } else {
                 final CalendarOperation co = new CalendarOperation();
@@ -236,7 +236,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                     close_connection = false;
                     return new AppointmentIteratorAdapter(new CachedCalendarIterator(co, ctx, session.getUserId()));
                 } else {
-                    throw new OXCalendarException(OXCalendarException.Code.NO_PERMISSION);
+                    throw new OXCalendarException(OXCalendarException.Code.NO_PERMISSION, I(fid));
                 }
             }
         } catch (final IndexOutOfBoundsException ioobe) {
@@ -310,7 +310,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                 return new AppointmentIteratorAdapter(new CachedCalendarIterator(co, ctx, session.getUserId()));
             }
         } catch (final IndexOutOfBoundsException ioobe) {
-            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, ioobe, Integer.valueOf(21));
+            throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, ioobe, I(21));
         } catch (final OXPermissionException oxpe) {
             throw oxpe;
         } catch(final OXCalendarException oxc) {
@@ -333,8 +333,8 @@ public class CalendarSql implements AppointmentSQLInterface {
     }
 
     private void mayRead(final EffectivePermission oclp) throws OXCalendarException {
-        if(!oclp.canReadAllObjects() && !oclp.canReadOwnObjects()) {
-            throw new OXCalendarException(OXCalendarException.Code.NO_PERMISSION);   
+        if (!oclp.canReadAllObjects() && !oclp.canReadOwnObjects()) {
+            throw new OXCalendarException(OXCalendarException.Code.NO_PERMISSION, I(oclp.getFuid()));   
         }
     }
 
