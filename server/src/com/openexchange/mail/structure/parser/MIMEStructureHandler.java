@@ -104,10 +104,9 @@ import com.openexchange.mail.structure.StructureMailMessageParser;
 import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedPart;
-import com.openexchange.tools.ByteBuffers;
 import com.openexchange.tools.TimeZoneUtils;
-import com.openexchange.tools.encoding.Charsets;
 import com.openexchange.tools.regex.MatcherReplacer;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
@@ -296,7 +295,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         addBodyPart(size, new InputStreamProvider() {
 
             public InputStream getInputStream() throws IOException {
-                return ByteBuffers.newUnsynchronizedInputStream(Charsets.UTF_8.encode(decodedTextContent));
+                return new UnsynchronizedByteArrayInputStream(decodedTextContent.getBytes("UTF-8"));
             }
         }, contentType, id, headers.entrySet().iterator());
         return true;
@@ -815,7 +814,12 @@ public final class MIMEStructureHandler implements StructureHandler {
     private static String getCharset(final InputStreamProvider isp, final ContentType contentType) throws IOException {
         final String charset;
         if (contentType.startsWith(PRIMARY_TEXT)) {
-            charset = CharsetDetector.detectCharset(isp.getInputStream());
+            final String cs = contentType.getCharsetParameter();
+            if (!CharsetDetector.isValid(cs)) {
+                charset = CharsetDetector.detectCharset(isp.getInputStream());
+            } else {
+                charset = cs;
+            }
         } else {
             charset = MailProperties.getInstance().getDefaultMimeCharset();
         }

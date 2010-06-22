@@ -1,3 +1,7 @@
+* 2010-06-22 - thorben.betten@open-xchange.com
+
+ - Possible fix for bug #16273: Replaced ByteBuffer with ByteArrayInputStream to avoid an infinite blocking read() attempt
+
 * 2010-06-22 - steffen.templin@open-xchange.com
 
  - Bugfix #15291: Adding groups with participants who already exists is working correctly now.
