@@ -50,14 +50,19 @@
 package com.openexchange.mobility.provisioning.json.osgi;
 
 import static com.openexchange.mobility.provisioning.json.osgi.MobilityProvisioningServiceRegistry.getServiceRegistry;
+
+import java.util.Hashtable;
 import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
+
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.mobility.provisioning.json.action.ActionSMSGeneral;
-import com.openexchange.mobility.provisioning.json.action.ActionSMSService;
+import com.openexchange.mobility.provisioning.json.action.ActionSMS;
+import com.openexchange.mobility.provisioning.json.action.ActionService;
+import com.openexchange.mobility.provisioning.json.action.ActionTypes;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 
@@ -126,16 +131,18 @@ public class Activator extends DeferredActivator {
 			servletRegisterer = new ServletRegisterer();
 			servletRegisterer.registerServlet();
 			
-            serviceTrackerList.add(new ServiceTracker(context, ActionSMSService.class.getName(), new ActionSMSServiceListener(context)));
+            serviceTrackerList.add(new ServiceTracker(context, ActionService.class.getName(), new ActionServiceListener(context)));
             
             // Open service trackers
             for (final ServiceTracker tracker : serviceTrackerList) {
                 tracker.open();
             }
 
-			
 			// in the implementation
-			context.registerService(ActionSMSService.class.getName(), new ActionSMSGeneral(), null);
+	        final Hashtable<Object, ActionTypes> ht = new Hashtable<Object, ActionTypes>();
+	        ht.put("action", ActionTypes.TELEPHONE);
+	        context.registerService(ActionService.class.getName(), new ActionSMS(), ht);
+	        
 		} catch (final Throwable t) {
 			LOG.error(t.getMessage(), t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);

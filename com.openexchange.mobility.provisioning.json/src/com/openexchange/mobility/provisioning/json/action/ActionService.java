@@ -47,44 +47,12 @@
  *
  */
 
-package com.openexchange.mobility.provisioning.json.osgi;
+package com.openexchange.mobility.provisioning.json.action;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.mobility.provisioning.json.action.ActionSMSService;
+import com.openexchange.session.Session;
 
-public class ActionSMSServiceListener implements ServiceTrackerCustomizer {
-
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ActionSMSServiceListener.class);
-
-    private final BundleContext context;
-
-    public ActionSMSServiceListener(BundleContext context) {
-        this.context = context;
-    }
-
-    public Object addingService(ServiceReference serviceReference) {
-        final Object service = context.getService(serviceReference);
-        if (service instanceof ActionSMSService) {
-            if (null == MobilityProvisioningServiceRegistry.getServiceRegistry().getService(ActionSMSService.class)) {
-                MobilityProvisioningServiceRegistry.getServiceRegistry().addService(ActionSMSService.class, (ActionSMSService) service);
-            } else {
-                LOG.error("Duplicate SpamdInstallationService detected: " + serviceReference.getClass().getName());
-            }
-        }
-        return service;
-    }
-
-    public void modifiedService(ServiceReference arg0, Object arg1) {
-        // Nothing to do
-    }
-
-    public void removedService(ServiceReference arg0, Object o) {
-        if (o instanceof ActionSMSService) {
-            MobilityProvisioningServiceRegistry.getServiceRegistry().removeService(ActionSMSService.class);
-        }
-        context.ungetService(arg0);
-    }
+public interface ActionService {
+    
+    public void handleAction(final Session session) throws ActionException;
 
 }

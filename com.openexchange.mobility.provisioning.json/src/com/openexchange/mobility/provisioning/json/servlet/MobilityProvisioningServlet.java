@@ -69,7 +69,7 @@ import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.mail.MailException;
 import com.openexchange.mobility.provisioning.json.action.ActionEmail;
 import com.openexchange.mobility.provisioning.json.action.ActionException;
-import com.openexchange.mobility.provisioning.json.action.ActionSMSService;
+import com.openexchange.mobility.provisioning.json.action.ActionService;
 import com.openexchange.mobility.provisioning.json.action.Actions;
 import com.openexchange.mobility.provisioning.json.osgi.MobilityProvisioningServiceRegistry;
 import com.openexchange.server.ServiceException;
@@ -146,9 +146,9 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 				message = "Provisioning mail has been send to " + target;
 				success = true;
 			} else if (JSONUtility.checkStringParameter(request, "action").equals(Actions.ACTION_SMS)) {
-			    final ActionSMSService service = MobilityProvisioningServiceRegistry.getServiceRegistry().getService(ActionSMSService.class);
+			    final ActionService service = MobilityProvisioningServiceRegistry.getServiceRegistry().getService(ActionService.class);
 			    try {
-                    service.sendMail(session);
+                    service.handleAction(session);
                 } catch (ActionException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
