@@ -46,15 +46,11 @@ public class MobileConfigServlet extends HttpServlet {
      */
     private static final long serialVersionUID = 7913468326542861986L;
     
-    public static String write(final String host, final String username, final String domain) throws ConfigurationException, TemplateException {
+    public static String write(final String email, final String host, final String username, final String domain) throws ConfigurationException, TemplateException {
             final TemplateService service = MobileConfigServiceRegistry.getServiceRegistry().getService(TemplateService.class);
             final OXTemplate loadTemplate = service.loadTemplate("winMobileTemplate.tmpl");
             final StringWriter writer = new StringWriter();
-            final HashMap<String, String> hashMap = new HashMap<String, String>();
-            hashMap.put("domain", domain);
-            hashMap.put("host", host);
-            hashMap.put("username", username);
-            loadTemplate.process(hashMap, writer);
+            loadTemplate.process(generateHashMap(email, host, username, domain), writer);
             return writer.toString();
     }
 
@@ -79,8 +75,8 @@ public class MobileConfigServlet extends HttpServlet {
         }
     }
 
-    private static void writeMobileConfigWinMob(final OutputStream out, final String host, final String username, final String domain) throws IOException, ConfigurationException, TemplateException {
-        CabUtil.writeCabFile(new DataOutputStream(new BufferedOutputStream(out)), write(host, username, domain));
+    private static void writeMobileConfigWinMob(final OutputStream out, final String email, final String host, final String username, final String domain) throws IOException, ConfigurationException, TemplateException {
+        CabUtil.writeCabFile(new DataOutputStream(new BufferedOutputStream(out)), write(email, host, username, domain));
     }
 
     @Override
@@ -170,13 +166,22 @@ public class MobileConfigServlet extends HttpServlet {
         if (Device.iPhone.equals(device)) {
             resp.setContentType("application/x-apple-aspen-config");
             final PrintWriter writer = getWriterFromOutputStream(resp.getOutputStream());
-            writeMobileConfig(writer, mail, getHostname(req), "OX EAS", usernameAndDomain[0], usernameAndDomain[1]);
+            writeMobileConfig(writer, mail, getHostname(req), usernameAndDomain[0], usernameAndDomain[1]);
             writer.close();
         } else if (Device.winMob.equals(device)) {
             final ServletOutputStream outputStream = resp.getOutputStream();
-            writeMobileConfigWinMob(outputStream, getHostname(req), usernameAndDomain[0], usernameAndDomain[1]);
+            writeMobileConfigWinMob(outputStream, mail, getHostname(req), usernameAndDomain[0], usernameAndDomain[1]);
             outputStream.close();
         }
+    }
+
+    private static HashMap<String, String> generateHashMap(final String email, final String host, final String username, final String domain) {
+        final HashMap<String, String> hashMap = new HashMap<String, String>();
+        hashMap.put("email", email);
+        hashMap.put("host", host);
+        hashMap.put("username", username);
+        hashMap.put("domain", domain);
+        return hashMap;
     }
 
     private String getHostname(final HttpServletRequest req) throws UnknownHostException {
@@ -218,15 +223,11 @@ public class MobileConfigServlet extends HttpServlet {
         writer.close();
     }
 
-    private void writeMobileConfig(final PrintWriter printWriter, final String email, final String host, final String displayname, final String username, String domain) throws IOException, TemplateException {
+    private void writeMobileConfig(final PrintWriter printWriter, final String email, final String host, final String username, final String domain) throws IOException, TemplateException {
         try {
             final TemplateService service = MobileConfigServiceRegistry.getServiceRegistry().getService(TemplateService.class);
             final OXTemplate loadTemplate = service.loadTemplate("iPhoneTemplate.tmpl");
-            final HashMap<String, String> hashMap = new HashMap<String, String>();
-            hashMap.put("email", email);
-            hashMap.put("host", host);
-            hashMap.put("username", username);
-            loadTemplate.process(hashMap, printWriter);
+            loadTemplate.process(generateHashMap(email, host, username, domain), printWriter);
         } finally {
             printWriter.close();
         }
