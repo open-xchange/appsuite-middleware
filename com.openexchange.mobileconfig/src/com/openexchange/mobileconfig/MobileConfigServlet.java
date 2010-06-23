@@ -6,11 +6,13 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.regex.Pattern;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -24,6 +26,9 @@ import com.openexchange.mobileconfig.configuration.ConfigurationException;
 import com.openexchange.mobileconfig.configuration.MobileConfigProperties;
 import com.openexchange.mobileconfig.osgi.Activator;
 import com.openexchange.mobileconfig.services.MobileConfigServiceRegistry;
+import com.openexchange.templating.OXTemplate;
+import com.openexchange.templating.TemplateException;
+import com.openexchange.templating.TemplateService;
 
 
 public class MobileConfigServlet extends HttpServlet {
@@ -33,8 +38,6 @@ public class MobileConfigServlet extends HttpServlet {
         winMob;
     }
     
-    private static final String CRLF = "\r\n";
-    
     private static final transient Log LOG = LogFactory.getLog(MobileConfigServlet.class);
 
     /**
@@ -42,41 +45,51 @@ public class MobileConfigServlet extends HttpServlet {
      */
     private static final long serialVersionUID = 7913468326542861986L;
     
-    public static String write(final String host, final String username, final String domain) throws ConfigurationException {
+    public static String write(final String host, final String username, final String domain) throws ConfigurationException, TemplateException {
         
-        final StringBuilder sb = new StringBuilder();
-        sb.append("<wap-provisioningdoc>" + CRLF);
-        sb.append("   <characteristic type=\"Sync\">" + CRLF);
-        sb.append("        <characteristic type=\"Settings\">" + CRLF);
-        sb.append("        <parm name=\"SyncWhenRoaming\" value=\"1\"/>" + CRLF);
-        sb.append("        </characteristic>" + CRLF);
-        sb.append("        <characteristic type=\"Connection\">" + CRLF);
-        sb.append("            <parm name=\"Domain\" value=\"" + domain + "\"/>" + CRLF);
-        sb.append("            <parm name=\"Server\" value=\"" + host + "\"/>" + CRLF);
-        sb.append("            <parm name=\"User\" value=\"" + username + "\"/>" + CRLF);
-        sb.append("\t    <parm name=\"SavePassword\" value=\"1\"/>" + CRLF);
-        sb.append("            <parm name=\"URI\" value=\"Microsoft-Server-ActiveSync\"/>" + CRLF);
-        sb.append("        <parm name=\"UseSSL\" value=\"1\"/>" + CRLF);
-        sb.append("        </characteristic>" + CRLF);
-        sb.append("        <characteristic type=\"Mail\">" + CRLF);
-        sb.append("            <parm name=\"Enabled\" value=\"1\"/>" + CRLF);
-        sb.append("        <parm name=\"EmailAgeFilter\" value=\"3\"/>" + CRLF);
-        sb.append("        </characteristic>" + CRLF);
-        sb.append("        <characteristic type=\"Calendar\">" + CRLF);
-        sb.append("            <parm name=\"Enabled\" value=\"1\"/>" + CRLF);
-        sb.append("        <parm name=\"CalendarAgeFilter\" value=\"5\"/>" + CRLF);
-        sb.append("        </characteristic>" + CRLF);
-        sb.append("        <characteristic type=\"Contacts\">" + CRLF);
-        sb.append("            <parm name=\"Enabled\" value=\"1\"/>" + CRLF);
-        sb.append("        </characteristic>" + CRLF);
-        sb.append("   </characteristic>" + CRLF);
-        sb.append("   <characteristic type='BrowserFavorite'>" + CRLF);
-        sb.append("    <characteristic type='Open Xchange'>" + CRLF);
-        sb.append("        <parm name='URL' value='http://www.open-xchange.com'/>" + CRLF);
-        sb.append("    </characteristic>" + CRLF);
-        sb.append("</characteristic>  " + CRLF);
-        sb.append("</wap-provisioningdoc>" + CRLF);
-        return sb.toString();
+            final TemplateService service = MobileConfigServiceRegistry.getServiceRegistry().getService(TemplateService.class);
+            final OXTemplate loadTemplate = service.loadTemplate("winMobileTemplate.tmpl");
+            final StringWriter writer = new StringWriter();
+            final HashMap<String, String> hashMap = new HashMap<String, String>();
+            hashMap.put("domain", domain);
+            hashMap.put("host", host);
+            hashMap.put("username", username);
+            loadTemplate.process(hashMap, writer);
+            return writer.toString();
+
+//        final StringBuilder sb = new StringBuilder();
+//        sb.append("<wap-provisioningdoc>" + CRLF);
+//        sb.append("   <characteristic type=\"Sync\">" + CRLF);
+//        sb.append("        <characteristic type=\"Settings\">" + CRLF);
+//        sb.append("        <parm name=\"SyncWhenRoaming\" value=\"1\"/>" + CRLF);
+//        sb.append("        </characteristic>" + CRLF);
+//        sb.append("        <characteristic type=\"Connection\">" + CRLF);
+//        sb.append("            <parm name=\"Domain\" value=\"" + domain + "\"/>" + CRLF);
+//        sb.append("            <parm name=\"Server\" value=\"" + host + "\"/>" + CRLF);
+//        sb.append("            <parm name=\"User\" value=\"" + username + "\"/>" + CRLF);
+//        sb.append("\t    <parm name=\"SavePassword\" value=\"1\"/>" + CRLF);
+//        sb.append("            <parm name=\"URI\" value=\"Microsoft-Server-ActiveSync\"/>" + CRLF);
+//        sb.append("        <parm name=\"UseSSL\" value=\"1\"/>" + CRLF);
+//        sb.append("        </characteristic>" + CRLF);
+//        sb.append("        <characteristic type=\"Mail\">" + CRLF);
+//        sb.append("            <parm name=\"Enabled\" value=\"1\"/>" + CRLF);
+//        sb.append("        <parm name=\"EmailAgeFilter\" value=\"3\"/>" + CRLF);
+//        sb.append("        </characteristic>" + CRLF);
+//        sb.append("        <characteristic type=\"Calendar\">" + CRLF);
+//        sb.append("            <parm name=\"Enabled\" value=\"1\"/>" + CRLF);
+//        sb.append("        <parm name=\"CalendarAgeFilter\" value=\"5\"/>" + CRLF);
+//        sb.append("        </characteristic>" + CRLF);
+//        sb.append("        <characteristic type=\"Contacts\">" + CRLF);
+//        sb.append("            <parm name=\"Enabled\" value=\"1\"/>" + CRLF);
+//        sb.append("        </characteristic>" + CRLF);
+//        sb.append("   </characteristic>" + CRLF);
+//        sb.append("   <characteristic type='BrowserFavorite'>" + CRLF);
+//        sb.append("    <characteristic type='Open Xchange'>" + CRLF);
+//        sb.append("        <parm name='URL' value='http://www.open-xchange.com'/>" + CRLF);
+//        sb.append("    </characteristic>" + CRLF);
+//        sb.append("</characteristic>  " + CRLF);
+//        sb.append("</wap-provisioningdoc>" + CRLF);
+//        return sb.toString();
     }
 
     /**
@@ -100,7 +113,7 @@ public class MobileConfigServlet extends HttpServlet {
         }
     }
 
-    private static void writeMobileConfigWinMob(final OutputStream out, final String host, final String username, final String domain) throws IOException, ConfigurationException {
+    private static void writeMobileConfigWinMob(final OutputStream out, final String host, final String username, final String domain) throws IOException, ConfigurationException, TemplateException {
         CabUtil.writeCabFile(new DataOutputStream(new BufferedOutputStream(out)), write(host, username, domain));
     }
 
@@ -115,7 +128,6 @@ public class MobileConfigServlet extends HttpServlet {
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         final ConfigurationService service = MobileConfigServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
-        
         
         final String iphoneRegEx;
         final String winMobRegEx;
@@ -160,6 +172,7 @@ public class MobileConfigServlet extends HttpServlet {
                     return;
                 } else {
                     printError(resp, "No supported device found from header");
+                    LOG.info("Unsupported device header: \"" + header + "\"");
                     return;
                 }
             }
@@ -168,6 +181,10 @@ public class MobileConfigServlet extends HttpServlet {
                 generateConfig(req, resp, login, device);
             } catch (final ConfigurationException e) {
                 LOG.error("A configuration exception occurred, which should not happen: " + e.getMessage(), e);
+                printError(resp, "An internal error occurred, please try again later...");
+                return;
+            } catch (final TemplateException e) {
+                LOG.error("A template exception occurred, which should not happen: " + e.getMessage(), e);
                 printError(resp, "An internal error occurred, please try again later...");
                 return;
             }
@@ -208,7 +225,7 @@ public class MobileConfigServlet extends HttpServlet {
         }
     }
 
-    private void generateConfig(HttpServletRequest req, HttpServletResponse resp, final String login, final Device device) throws UnknownHostException, IOException, ConfigurationException {
+    private void generateConfig(HttpServletRequest req, HttpServletResponse resp, final String login, final Device device) throws UnknownHostException, IOException, ConfigurationException, TemplateException {
         String mail = login;
         final String parameter = req.getParameter("mail");
         if (null != parameter) {
@@ -269,61 +286,23 @@ public class MobileConfigServlet extends HttpServlet {
         writer.close();
     }
 
-    private void writeMobileConfig(final PrintWriter printWriter, final String email, final String host, final String displayname, final String username, String domain) {
+    private void writeMobileConfig(final PrintWriter printWriter, final String email, final String host, final String displayname, final String username, String domain) throws IOException, TemplateException {
         try {
-            printWriter.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-            printWriter.println("<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">");
-            printWriter.println("<plist version=\"1.0\">");
-            printWriter.println("<dict>");
-            printWriter.println("   <key>PayloadContent</key>");
-            printWriter.println("   <array>");
-            printWriter.println("       <dict>");
-            printWriter.println("           <key>EmailAddress</key>");
-            printWriter.println("           <string>" + email + "</string>");
-            printWriter.println("           <key>Host</key>");
-            printWriter.println("           <string>" + host + "</string>");
-//            printWriter.println("           <key>Password</key>");
-//            printWriter.println("           <string>" + password + "</string>");
-            //printWriter.println("           <key>PayloadDescription</key>");
-            //printWriter.println("           <string>Geräte für die Verwendung mit Microsoft Exchange-ActiveSync-Diensten konfigurieren.</string>");
-            printWriter.println("           <key>PayloadDisplayName</key>");
-            printWriter.println("           <string>" + displayname + "</string>");
-            printWriter.println("           <key>PayloadIdentifier</key>");
-            printWriter.println("           <string>eas.profile.eas</string>");
-            printWriter.println("           <key>PayloadOrganization</key>");
-            printWriter.println("           <string>OX</string>");
-            printWriter.println("           <key>PayloadType</key>");
-            printWriter.println("           <string>com.apple.eas.account</string>");
-            printWriter.println("           <key>PayloadUUID</key>");
-            printWriter.println("           <string>077E36E4-9579-47F0-BACF-62A55FEA11E8</string>");
-            printWriter.println("           <key>PayloadVersion</key>");
-            printWriter.println("           <integer>1</integer>");
-            printWriter.println("           <key>SSL</key>");
-            printWriter.println("           <true/>");
-            printWriter.println("           <key>UserName</key>");
-            printWriter.println("           <string>" + username + "</string>");
-            printWriter.println("       </dict>");
-            printWriter.println("   </array>");
-//            printWriter.println("   <key>PayloadDescription</key>");
-//            printWriter.println("   <string>Profilbeschreibung</string>");
-            printWriter.println("   <key>PayloadDisplayName</key>");
-            printWriter.println("   <string>" + displayname + "</string>");
-            printWriter.println("   <key>PayloadIdentifier</key>");
-            printWriter.println("   <string>eas.profile</string>");
-            printWriter.println("   <key>PayloadOrganization</key>");
-            printWriter.println("   <string>OX</string>");
-            printWriter.println("   <key>PayloadRemovalDisallowed</key>");
-            printWriter.println("   <false/>");
-            printWriter.println("   <key>PayloadType</key>");
-            printWriter.println("   <string>Configuration</string>");
-            printWriter.println("   <key>PayloadUUID</key>");
-            printWriter.println("   <string>E4DB69E7-EC59-418E-A883-14944D5BC48F</string>");
-            printWriter.println("   <key>PayloadVersion</key>");
-            printWriter.println("   <integer>1</integer>");
-            printWriter.println("</dict>");
-            printWriter.println("</plist>");
+            final TemplateService service = MobileConfigServiceRegistry.getServiceRegistry().getService(TemplateService.class);
+            final OXTemplate loadTemplate = service.loadTemplate("iPhoneTemplate.tmpl");
+            final HashMap<String, String> hashMap = new HashMap<String, String>();
+            hashMap.put("email", email);
+            hashMap.put("host", host);
+            hashMap.put("username", username);
+            loadTemplate.process(hashMap, printWriter);
+
+////            printWriter.println("           <key>Password</key>");
+////            printWriter.println("           <string>" + password + "</string>");
+////            printWriter.println("   <key>PayloadDescription</key>");
+////            printWriter.println("   <string>Profilbeschreibung</string>");
         } finally {
             printWriter.close();
         }
     }
+
 }

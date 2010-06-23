@@ -59,4 +59,5 @@ public class MobileConfigServletTest extends MobileConfigServlet  {
         Assert.assertEquals("Value at index 0 wrong", "ox.de", splitUsernameAndDomain[0]);
         Assert.assertEquals("Value at index 1 wrong", "seppel", splitUsernameAndDomain[1]);
     }
+    
 }

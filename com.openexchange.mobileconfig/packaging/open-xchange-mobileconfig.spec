@@ -4,7 +4,7 @@
 Name:           open-xchange-mobileconfig
 BuildArch:	    noarch
 #!BuildIgnore:  post-build-checks
-BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-server >= @OXVERSION@
+BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-templating >= @OXVERSION@
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
@@ -46,7 +46,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        This bundle provides methods to configure mobile devices for Active Sync
-Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange >= @OXVERSION@
+Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange >= @OXVERSION@ open-xchange-templating >= @OXVERSION@
 %description
 This bundle provides methods to configure mobile devices for Active Sync
 
@@ -73,9 +73,11 @@ ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 %files
 %defattr(-,root,root)
 %dir /opt/open-xchange/etc/groupware/osgi/bundle.d/
+%dir /opt/open-xchange/templates/
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
 /opt/open-xchange/bundles/com.openexchange.mobileconfig.jar
 %config(noreplace) /opt/open-xchange/etc/groupware/mobileconfig.properties
+%config(noreplace) /opt/open-xchange/templates/*
 
 %changelog
 * Wed May 09 2010 - dennis.sieben@open-xchange.com

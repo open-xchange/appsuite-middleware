@@ -1,33 +1,27 @@
 package com.openexchange.mobileconfig.osgi;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.mobileconfig.MobileConfigServlet;
 import com.openexchange.mobileconfig.configuration.ConfigurationException;
 import com.openexchange.mobileconfig.configuration.MobileConfigProperties;
 import com.openexchange.mobileconfig.services.MobileConfigServiceRegistry;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.templating.TemplateService;
 import com.openexchange.tools.service.ServletRegistration;
 
 public class Activator extends DeferredActivator {
 
     private static final Log LOG = LogFactory.getLog(Activator.class);
 
-    private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class };
+    private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class, TemplateService.class };
     public static final String ALIAS = "/servlet/mobileconfig";
-
-    private List<ServiceTracker> serviceTrackerList;
 
     private ServletRegistration registration;
 
     public Activator() {
-        serviceTrackerList = new ArrayList<ServiceTracker>();
     }
     
     @Override
@@ -71,14 +65,8 @@ public class Activator extends DeferredActivator {
         
         checkConfiguration();
         
-        serviceTrackerList.add(new ServiceTracker(context, HostnameService.class.getName(), new HostnameInstallationServiceListener(context)));
-        
-        // Open service trackers
-        for (final ServiceTracker tracker : serviceTrackerList) {
-            tracker.open();
-        }
-
         register();
+        
     }
 
     private void checkConfiguration() throws ConfigurationException {
@@ -88,14 +76,6 @@ public class Activator extends DeferredActivator {
     @Override
     protected void stopBundle() throws Exception {
         unregister();
-
-        /*
-         * Close service trackers
-         */
-        for (final ServiceTracker tracker : serviceTrackerList) {
-            tracker.close();
-        }
-        serviceTrackerList.clear();
 
         MobileConfigServiceRegistry.getServiceRegistry().clearRegistry();
     }
