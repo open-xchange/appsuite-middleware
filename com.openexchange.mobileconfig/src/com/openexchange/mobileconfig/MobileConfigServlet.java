@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
@@ -114,18 +115,18 @@ public class MobileConfigServlet extends HttpServlet {
             String mailpart = "";
             final String mail = req.getParameter("mail");
             if (null != mail) {
-                mailpart = "&mail=" + mail;
+                mailpart = "&mail=" + URLEncoder.encode(mail, "UTF-8");
             }
 
             final String header = req.getHeader("user-agent");
             if (null != header) {
                 if (header.matches(iphoneRegEx)) {
                     // iPhone part
-                    resp.sendRedirect(Activator.ALIAS + "/eas.mobileconfig?login=" + req.getParameter("login") + mailpart);
+                    resp.sendRedirect(Activator.ALIAS + "/eas.mobileconfig?login=" + URLEncoder.encode(req.getParameter("login"),"UTF-8") + mailpart);
                     return;
                 } else if (header.matches(winMobRegEx)) {
                     // WinMob part
-                    resp.sendRedirect(Activator.ALIAS + "/ms.cab?login=" + req.getParameter("login") + mailpart);
+                    resp.sendRedirect(Activator.ALIAS + "/ms.cab?login=" + URLEncoder.encode(req.getParameter("login"),"UTF-8") + mailpart);
                     return;
                 } else {
                     printError(resp, "No supported device found from header");
@@ -167,6 +168,7 @@ public class MobileConfigServlet extends HttpServlet {
         }
         final String[] usernameAndDomain = splitUsernameAndDomain(login);
         if (Device.iPhone.equals(device)) {
+            resp.setContentType("application/x-apple-aspen-config");
             final PrintWriter writer = getWriterFromOutputStream(resp.getOutputStream());
             writeMobileConfig(writer, mail, getHostname(req), "OX EAS", usernameAndDomain[0], usernameAndDomain[1]);
             writer.close();
