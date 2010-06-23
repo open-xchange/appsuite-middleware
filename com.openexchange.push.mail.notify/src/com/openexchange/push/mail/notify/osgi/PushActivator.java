@@ -87,10 +87,14 @@ public final class PushActivator extends DeferredActivator {
     private static final String PROP_UDP_LISTEN_HOST = "com.openexchange.push.mail.notify.udp_listen_host";
 
     private static final String PROP_UDP_LISTEN_PORT = "com.openexchange.push.mail.notify.udp_listen_port";
+    
+    private static final String PROP_IMAP_LOGIN_DELIMITER = "com.openexchange.push.mail.notify.imap_login_delimiter";
 
     private List<ServiceRegistration> serviceRegistrations;
 
     private String udpListenHost;
+
+    private String imapLoginDelimiter;
 
     private int udpListenPort;
 
@@ -195,17 +199,25 @@ public final class PushActivator extends DeferredActivator {
          * Read configuration
          */
         final ConfigurationService configurationService = getService(ConfigurationService.class);
-        final String tmp = configurationService.getProperty(PROP_UDP_LISTEN_HOST);
+        String tmp = configurationService.getProperty(PROP_UDP_LISTEN_HOST);
         if (null != tmp) {
             udpListenHost = tmp.trim();
             sb.append("\t" + PROP_UDP_LISTEN_HOST + ": " + udpListenHost + CRLF);
         } else {
             throw new ConfigurationException(ConfigurationException.Code.PROPERTY_MISSING, PROP_UDP_LISTEN_HOST);
         }
-        final String tmp2 = configurationService.getProperty(PROP_UDP_LISTEN_PORT);
-        if (null != tmp2) {
+        tmp = configurationService.getProperty(PROP_IMAP_LOGIN_DELIMITER);
+        if (null != tmp) {
+            imapLoginDelimiter = tmp.trim();
+            sb.append("\t" + PROP_IMAP_LOGIN_DELIMITER + ": " + imapLoginDelimiter + CRLF);
+        } else {
+            imapLoginDelimiter = null;
+            sb.append("\t" + PROP_IMAP_LOGIN_DELIMITER + ": not set" + CRLF);
+        }
+        tmp = configurationService.getProperty(PROP_UDP_LISTEN_PORT);
+        if (null != tmp) {
             try {
-                udpListenPort = Integer.parseInt(tmp2.trim());
+                udpListenPort = Integer.parseInt(tmp.trim());
                 sb.append("\t" + PROP_UDP_LISTEN_PORT + ": " + udpListenPort + CRLF);
             } catch (final NumberFormatException e) {
                 throw new ConfigurationException(ConfigurationException.Code.PROPERTY_NOT_AN_INTEGER, PROP_UDP_LISTEN_PORT);
@@ -218,7 +230,7 @@ public final class PushActivator extends DeferredActivator {
 
     private void startUdpListener() throws UnknownHostException, SocketException, ConfigurationException {
         final ThreadPoolService threadPoolService = getService(ThreadPoolService.class);
-        udpThread = threadPoolService.submit(ThreadPools.task(new MailNotifyPushUdpSocketListener(udpListenHost, udpListenPort)));
+        udpThread = threadPoolService.submit(ThreadPools.task(new MailNotifyPushUdpSocketListener(udpListenHost, udpListenPort, imapLoginDelimiter)));
     }
 
     private void stopUdpListener() {

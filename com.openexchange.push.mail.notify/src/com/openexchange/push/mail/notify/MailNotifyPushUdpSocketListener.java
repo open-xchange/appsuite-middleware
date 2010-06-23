@@ -23,9 +23,12 @@ public class MailNotifyPushUdpSocketListener implements Runnable {
     
     private static DatagramSocket datagramSocket;
     
-    public MailNotifyPushUdpSocketListener(final String udpListenHost, final int udpListenPort) throws UnknownHostException, SocketException, ConfigurationException {
+    private final String imapLoginDelimiter;
+    
+    public MailNotifyPushUdpSocketListener(final String udpListenHost, final int udpListenPort, final String imapLoginDelimiter) throws UnknownHostException, SocketException, ConfigurationException {
         InetAddress senderAddress = InetAddress.getByName(udpListenHost);
 
+        this.imapLoginDelimiter = imapLoginDelimiter;
         if (senderAddress != null) {
             datagramSocket = new DatagramSocket(udpListenPort, senderAddress);
         } else {
@@ -71,6 +74,7 @@ public class MailNotifyPushUdpSocketListener implements Runnable {
         String packetDataString = new String(datagramPacket.getData());
         // user name at position 3, see above
         packetDataString = packetDataString.split("\0")[3];
+        packetDataString = packetDataString.substring(0, packetDataString.indexOf(imapLoginDelimiter));
         LOG.debug("Username=" + packetDataString);
         if (null != packetDataString && packetDataString.length() > 0) {
             return packetDataString;

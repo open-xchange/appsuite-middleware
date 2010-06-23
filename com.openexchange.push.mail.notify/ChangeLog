@@ -1,3 +1,7 @@
+* 2010-06-22 - choeger@open-xchange.com
+
+ - Bugfix #16001 - mail push bundle does not work on installations with cyrus virtdomains switched on
+ 
 * 2010-04-08 - choeger@open-xchange.com
 
  - Bugfix #15822: open-xchange-push-mailnotify uses wrong configuration option names

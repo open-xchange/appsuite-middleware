@@ -103,7 +103,7 @@ public final class MailNotifyPushListenerRegistry {
     public void fireEvent(final String mboxid) throws PushException {
         final PushListener listener;
         if (null != (listener = map.get(mboxid))) {
-            LOG.debug("fireEvent: mboxid=" + mboxid + "listener=" + listener);
+            LOG.debug("fireEvent, mboxid=" + mboxid);
             listener.notifyNewMail();
         }
         
