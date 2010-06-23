@@ -326,7 +326,10 @@ public final class InternalList {
         // +++++++++++++++++++++++++++++++++ Version 6.18 starts here. +++++++++++++++++++++++++++++++++
 
         // Adds a column to the table user_setting_server named folderTree to store the selected folder tree.
-        new com.openexchange.groupware.update.tasks.FolderTreeSelectionTask()
+        new com.openexchange.groupware.update.tasks.FolderTreeSelectionTask(),
+        
+        // Repairs appointments where the number of attachments does not match the real amount of attachments.
+        new com.openexchange.groupware.update.tasks.AttachmentCountUpdateTask()
 
         // TODO: Enable virtual folder tree update task when needed
         // Migrates existing folder data to new outlook-like folder tree structure
