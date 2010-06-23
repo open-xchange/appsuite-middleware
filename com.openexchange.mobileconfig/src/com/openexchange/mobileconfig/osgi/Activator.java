@@ -1,5 +1,7 @@
 package com.openexchange.mobileconfig.osgi;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
@@ -67,6 +69,13 @@ public class Activator extends DeferredActivator {
         
         register();
         
+        // Test encoding:
+        try {
+            URLEncoder.encode("test", "UTF-8");
+        } catch (final UnsupportedEncodingException e) {
+            LOG.error("Stopping mobileconfig bundle because UTF-8 charset encoding is not available: ", e);
+            throw e;
+        }
     }
 
     private void checkConfiguration() throws ConfigurationException {
