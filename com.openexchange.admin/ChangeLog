@@ -65,6 +65,10 @@
 
  - Bugfix #14730: Fixed command-line parsing
 
+* 2010-06-23 - marcus.klein@open-xchange.com
+
+ - Bugfix #16353: Listing contexts now works with multiple threads to improve performance.
+
 * 2009-10-20 - marcus.klein@open-xchange.com
 
  - Bugfix #14637: Creating a context is now as far as possible a transaction. This avoids breaking a schema.

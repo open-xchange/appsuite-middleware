@@ -64,11 +64,6 @@ public final class AdminServiceRegistry extends AbstractServiceRegistry {
         super();
     }
 
-    /**
-     * Gets the admin's service registry.
-     * 
-     * @return The admin's service registry
-     */
     public static AdminServiceRegistry getInstance() {
         return SINGLETON;
     }

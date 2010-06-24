@@ -69,6 +69,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
+import com.openexchange.tools.pipesnfilters.PipesAndFiltersService;
 
 public class Activator implements BundleActivator {
 
@@ -79,6 +80,13 @@ public class Activator implements BundleActivator {
     private Stack<ServiceTracker> trackers = new Stack<ServiceTracker>();
 
     public void start(BundleContext context) throws Exception {
+        trackers.push(new ServiceTracker(
+            context,
+            PipesAndFiltersService.class.getName(),
+            new RegistryServiceTrackerCustomizer<PipesAndFiltersService>(
+                context,
+                AdminServiceRegistry.getInstance(),
+                PipesAndFiltersService.class)));
         trackers.push(new ServiceTracker(context, ContextService.class.getName(), new RegistryServiceTrackerCustomizer<ContextService>(
             context,
             AdminServiceRegistry.getInstance(),

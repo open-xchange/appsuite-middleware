@@ -57,27 +57,28 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-
+import java.util.SortedMap;
+import java.util.TreeMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
-import com.openexchange.admin.rmi.dataobjects.User;
-import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
-import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
+import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.database.DBPoolingException;
+import com.openexchange.server.ServiceException;
+import com.openexchange.tools.pipesnfilters.DataSource;
+import com.openexchange.tools.pipesnfilters.PipesAndFiltersException;
+import com.openexchange.tools.pipesnfilters.PipesAndFiltersService;
 
 public class OXContextMySQLStorageCommon {
 
@@ -201,6 +202,34 @@ public class OXContextMySQLStorageCommon {
                 log.error("Pool Error pushing ox read connection to pool!",exp);
             }
         }
+    }
+
+    public Context[] loadContexts(Collection<Integer> cids, long averageSize) throws StorageException {
+        PipesAndFiltersService pnfService;
+        try {
+            pnfService = AdminServiceRegistry.getInstance().getService(PipesAndFiltersService.class, true);
+        } catch (ServiceException e) {
+            throw new StorageException(e.getMessage(), e);
+        }
+        DataSource<Context> output = pnfService.create(cids).addFilter(new ContextLoader(cache)).addFilter(new LoginInfoLoader(cache))
+            .addFilter(new FilestoreUsageLoader(cache, averageSize));
+        SortedMap<Integer, Context> retval = new TreeMap<Integer, Context>();
+        try {
+            while (output.hasData()) {
+                List<Context> tmp = new ArrayList<Context>();
+                output.getData(tmp);
+                for (Context context : tmp) {
+                    retval.put(context.getId(), context);
+                }
+            }
+        } catch (PipesAndFiltersException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof StorageException) {
+                throw (StorageException) cause;
+            }
+            throw new StorageException(cause.getMessage(), cause);
+        }
+        return retval.values().toArray(new Context[retval.size()]);
     }
 
     public final void createStandardGroupForContext(final int context_id, final Connection ox_write_con, final String display_name, final int group_id, final int gid_number) throws SQLException {
