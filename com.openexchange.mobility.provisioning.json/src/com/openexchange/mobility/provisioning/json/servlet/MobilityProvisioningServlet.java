@@ -96,34 +96,48 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 		return true;
 	}
 
-	protected void doPut(final HttpServletRequest request,
+	protected void doGet(final HttpServletRequest request,
 			final HttpServletResponse resp) throws ServletException,
 			IOException {
-		
+		final Response response = new Response();
+
+		JSONObject obj = new JSONObject();
+
 		try {
-			actionGetData(request, resp);
+			String action = JSONUtility.checkStringParameter(request, "action");
+			if (action.equals(Actions.ACTION_LISTSERVICES)) {
+				JSONArray services = new JSONArray();
+				if (MobilityProvisioningServiceRegistry.getInstance().containsService(ActionTypes.EMAIL)) {
+					services.put(Actions.ACTION_EMAIL);
+				}
+				if (MobilityProvisioningServiceRegistry.getInstance().containsService(ActionTypes.TELEPHONE)) {
+					services.put(Actions.ACTION_TELEPHONE);
+				}
+				if (MobilityProvisioningServiceRegistry.getInstance().containsService(ActionTypes.OTHER)) {
+					services.put(Actions.ACTION_OTHER);
+				}
+			}
+		} catch (AjaxException e) {
+			LOG.error("Missing or wrong field action in JSON request", e);
+		}
+		
+		response.setData(obj);
+
+		/*
+		 * Close response and flush print writer
+		 */
+		try {
+			ResponseWriter.write(response, resp.getWriter());
 		} catch (final JSONException e) {
 			LOG.error(e.getLocalizedMessage(), e);
 		}
-
 	}
 	
-	/**
-	 * Performs the GET request!
-	 * 
-	 * @param request
-	 *            The servlet request
-	 * @param resp
-	 *            The servlet response
-	 * @throws JSONException
-	 *             If JSON data cannot be composed
-	 * @throws IOException
-	 *             If an I/O error occurs
-	 */
-	private void actionGetData(final HttpServletRequest request,
-			final HttpServletResponse resp) throws JSONException, IOException {
+	protected void doPut(final HttpServletRequest request,
+			final HttpServletResponse resp) throws ServletException,
+			IOException {
 		final Response response = new Response();
-		
+
 		JSONObject obj = new JSONObject();
 
 		try {
@@ -180,14 +194,21 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 			}
 		} catch (AjaxException e) {
 			LOG.error("Missing or wrong field action in JSON request", e);
+		} catch (final JSONException e) {
+			LOG.error(e.getLocalizedMessage(), e);
 		}
 		
 		response.setData(obj);
-
+		
 		/*
 		 * Close response and flush print writer
 		 */
-		ResponseWriter.write(response, resp.getWriter());
+		try {
+			ResponseWriter.write(response, resp.getWriter());
+		} catch (final JSONException e) {
+			LOG.error(e.getLocalizedMessage(), e);
+		}
+
 	}
 	
 }
