@@ -131,21 +131,15 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 			String action = JSONUtility.checkStringParameter(request, "action");
 
 			if (action.equals(Actions.ACTION_LISTSERVICES)) {
-				String services = "";
+				JSONObject services = new JSONObject();
 				if (MobilityProvisioningServiceRegistry.getInstance().containsService(ActionTypes.EMAIL)) {
-					if (services.length() > 0)
-						services += ",";
-					services += Actions.ACTION_EMAIL;
+					services.put(Actions.ACTION_EMAIL, true);
 				}
 				if (MobilityProvisioningServiceRegistry.getInstance().containsService(ActionTypes.TELEPHONE)) {
-					if (services.length() > 0)
-						services += ",";
-					services += Actions.ACTION_TELEPHONE;
+					services.put(Actions.ACTION_TELEPHONE, true);
 				}
 				if (MobilityProvisioningServiceRegistry.getInstance().containsService(ActionTypes.OTHER)) {
-					if (services.length() > 0)
-						services += ",";
-					services += Actions.ACTION_OTHER;
+					services.put(Actions.ACTION_OTHER, true);
 				}
 				
 				obj.put("services", services);
