@@ -173,6 +173,39 @@ public interface ThreadPoolService {
     <T> CompletionFuture<T> invoke(Collection<? extends Task<T>> tasks);
 
     /**
+     * Executes the given taskd using this thread pool. Returned {@link CompletionFuture} can then be used to await completion of given
+     * tasks. Unlike <tt>invokeAll()</tt> tasks' execution is completely decoupled from the consumption of the tasks through returned
+     * {@link CompletionFuture}.
+     * <p>
+     * When awaiting completion of given tasks, programmer should obey the following pattern:
+     * 
+     * <pre>
+     * try {
+     *     for (int i = tasks.size(); i &gt; 0; i--) {
+     *         // Waits until next task has completed; otherwise poll() method needs to be used to define a timeout
+     *         final Future&lt;V&gt; f = completionFuture.take();
+     *         /* Do something &#42;/
+     *     }
+     * } catch (InterruptedException e) {
+     *     // Keep interrupted status
+     *     Thread.currentThread().interrupt();
+     *     throw new MailException(MailException.Code.INTERRUPT_ERROR, e);
+     * } catch (CancellationException e) {
+     *     // Can only occur if task was canceled
+     *     /* Do something &#42;/
+     * } catch (ExecutionException e) {
+     *      throw ThreadPools.launderThrowable(e, ExpectedException.class);
+     * }
+     * </pre>
+     *
+     * @param tasks The collection of tasks
+     * @return A {@link CompletionFuture} instance to await completion of given tasks
+     * @throws RejectedExecutionException If task cannot be scheduled for execution
+     * @throws NullPointerException If tasks or any of its elements are <tt>null</tt>
+     */
+    <T> CompletionFuture<T> invoke(Task<T>[] tasks);
+
+    /**
      * Executes the given task using this thread pool. Given refused execution behavior is triggered for each task that cannot be executed.
      * Returned {@link CompletionFuture} can then be used to await completion of given tasks. Unlike <tt>invokeAll()</tt> tasks' execution
      * is completely decoupled from the consumption of the tasks through returned {@link CompletionFuture}.

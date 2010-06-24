@@ -331,6 +331,17 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
         return new CompletionFutureImpl<T>(completionService);
     }
 
+    public <T> CompletionFuture<T> invoke(Task<T>[] tasks) {
+        if (tasks == null) {
+            throw new NullPointerException();
+        }
+        final CompletionService<T> completionService = new ExecutorCompletionService<T>(threadPoolExecutor);
+        for (final Task<T> task : tasks) {
+            completionService.submit(task);
+        }
+        return new CompletionFutureImpl<T>(completionService);
+    }
+
     public <T> CompletionFuture<T> invoke(final Collection<? extends Task<T>> tasks, final RefusedExecutionBehavior<T> behavior) {
         if (tasks == null) {
             throw new NullPointerException();

@@ -98,6 +98,10 @@ public class SimThreadPoolService implements ThreadPoolService {
         throw new UnsupportedOperationException();
     }
 
+    public <T> CompletionFuture<T> invoke(Task<T>[] tasks) {
+        throw new UnsupportedOperationException();
+    }
+
     public <T> CompletionFuture<T> invoke(Collection<? extends Task<T>> tasks, RefusedExecutionBehavior<T> refusedExecutionBehavior) {
         throw new UnsupportedOperationException();
     }
