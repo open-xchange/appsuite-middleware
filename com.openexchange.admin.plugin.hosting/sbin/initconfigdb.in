@@ -71,6 +71,10 @@ CONFIGDB_PORT=3306
 CONFIGDB_PORT_LONG=configdb-port
 CONFIGDB_DBNAME=configdb
 CONFIGDB_DBNAME_LONG=configdb-dbname
+MYSQL_ROOT_USER=root
+MYSQL_ROOT_USER_LONG=mysql-root-user
+MYSQL_ROOT_PASSWD=
+MYSQL_ROOT_PASSWD_LONG=mysql-root-passwd
 ADDON_SQL=
 ADDON_SQL_LONG=addon-sql
 
@@ -79,7 +83,7 @@ CREATEADMIN=
 DLETETECONFIGDB=
 
 MUSTOPTS="CONFIGDB_PASS"
-LONGOPTS='$CONFIGDB_USER_LONG:,$CONFIGDB_PASS_LONG:,$CONFIGDB_HOST_LONG:,$CONFIGDB_PORT_LONG:,$CONFIGDB_DBNAME_LONG:,$ADDON_SQL_LONG:'
+LONGOPTS='$CONFIGDB_USER_LONG:,$CONFIGDB_PASS_LONG:,$CONFIGDB_HOST_LONG:,$CONFIGDB_PORT_LONG:,$CONFIGDB_DBNAME_LONG:,$ADDON_SQL_LONG:,$MYSQL_ROOT_USER_LONG:,$MYSQL_ROOT_PASSWD_LONG:'
 
 usage() {
     echo
@@ -132,6 +136,14 @@ while true; do
 	    ;;
 	--$CONFIGDB_DBNAME_LONG)
 	    CONFIGDB_DBNAME=$2
+	    shift 2
+	    ;;
+	--$MYSQL_ROOT_USER_LONG)
+	    MYSQL_ROOT_USER=$2
+	    shift 2
+	    ;;
+	--$MYSQL_ROOT_PASSWD_LONG)
+	    MYSQL_ROOT_PASSWD=$2
 	    shift 2
 	    ;;
 	--$ADDON_SQL_LONG)
@@ -197,13 +209,17 @@ fi
 echo -n "initializing configdb from scratch..."
 
 if [ -n "$CREATEADMIN" ]; then
-    cat<<EOF | mysql || die
+    ROOTAUTH=
+    if [ -n "$MYSQL_ROOT_PASSWD" ]; then
+	ROOTAUTH="-u $MYSQL_ROOT_USER -p${MYSQL_ROOT_PASSWD}"
+    fi
+    cat<<EOF | mysql $(eval echo $ROOTAUTH) || die
 drop database if exists \`${CONFIGDB_DBNAME}\`;
 GRANT ALL PRIVILEGES ON *.* TO '$CONFIGDB_USER'@'%' IDENTIFIED BY '$CONFIGDB_PASS' WITH GRANT OPTION;
 GRANT ALL PRIVILEGES ON *.* TO '$CONFIGDB_USER'@'localhost' IDENTIFIED BY '$CONFIGDB_PASS' WITH GRANT OPTION;
 create database \`${CONFIGDB_DBNAME}\`;
 EOF
-    mysqladmin flush-privileges || die
+    mysqladmin $(eval echo $ROOTAUTH) flush-privileges || die
 else
     cat<<EOF | mysql -h $CONFIGDB_HOST -P $CONFIGDB_PORT -u $CONFIGDB_USER -p${CONFIGDB_PASS} || die
 drop database if exists \`${CONFIGDB_DBNAME}\`;
