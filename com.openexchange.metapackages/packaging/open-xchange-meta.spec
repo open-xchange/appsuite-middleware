@@ -37,7 +37,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 8
+%define		ox_release 9
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -235,3 +235,5 @@ Authors:
 %changelog
 * Thu Jun 24 2010 - choeger@open-xchange.com
  - Bugfix #16354 - strange package dependencies for open-xchange-meta-singleserver
+ - Bugfix #16000 - Add open-xchange-mail-pushnotify to package dependency list
+   in open-xchange-meta-oxucs.

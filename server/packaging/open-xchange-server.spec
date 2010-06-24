@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 8
+%define		ox_release 9
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -537,10 +537,30 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Tue Jun 22 2010 - martin.herfurth@open-xchange.com
+ - Bugfix #16297: Fixed attachment tracking in calendar.
+* Tue Jun 22 2010 - steffen.templin@open-xchange.com
+ - Bugfix #15291: Adding groups with participants who already exists is working correctly now.
+* Tue Jun 22 2010 - thorben.betten@open-xchange.com
+ - Possible fix for bug #16273: Replaced ByteBuffer with ByteArrayInputStream to avoid an infinite blocking read() attempt
+* Tue Jun 22 2010 - tobias.prinz@open-xchange.com
+ - US4303: IMiP invitations to primary mail addresses of an of user now work again. They failed since 06-22 in case they were sorted before alias e-mail addresses on the server side.
+* Mon Jun 21 2010 - choeger@open-xchange.com
+ - Bugfix #16359: java-1.5.0-sun package obsoleted on rhel5
+ - Bugfix #16364: Got message about not proper configured cache ports although
+   they are
+* Fri Jun 18 2010 - marcus.klein@open-xchange.com
+ - Bugfix #15526: Other bundles can now register at caching bundle for buddy class loading to be able to put own classes into the cache.
+ - Bugfix #16303: Fixed a caching problem if some users request loads anothers private folders.
+* Thu Jun 17 2010 - karsten.will@open-xchange.com
+ - Bugfix #16334: Crawler for gmx.com does not work
 * Wed Jun 16 2010 - marcus.klein@open-xchange.com
  - Bugfix #13960: Corrected values in columns responses of appointments and contacts to get a consistent response to normal get values.
+* Wed Jun 16 2010 - tobias.prinz@open-xchange.com
+ - US #4303: If you get an IMiP appointment sent to an e-mail alias of yours and you accept it, you will be listed as internal participant
+   instead of an external participant, gaining all the nice features of that.
 * Tue Jun 15 2010 - karsten.will@open-xchange.com
- - Bugfix #16295 - DefaultSenderAddress now correctly used in .ics-files for all attendees (if configured in notification.properties)
+ - Bugfix #16295: DefaultSenderAddress now correctly used in .ics-files for all attendees (if configured in notification.properties)
 * Mon Jun 14 2010 - marcus.klein@open-xchange.com
  - Bugfix #16326: Using default error page template for EasyLogin if the configured file is not found.
 * Fri Jun 11 2010 - marcus.klein@open-xchange.com
