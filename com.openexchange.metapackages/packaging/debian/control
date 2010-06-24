@@ -8,7 +8,7 @@ Standards-Version: 3.6.1
 
 Package: open-xchange-meta-oxucs
 Architecture: all
-Depends: ${oxcommon}, univention-config-registry, open-xchange-authentication-ucs, open-xchange-spamhandler-spamassassin, open-xchange-mailfilter, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-meta-gui, open-xchange-lang-es-es, open-xchange-lang-nl-nl, open-xchange-gui-lang-es-es, open-xchange-gui-lang-es-es, open-xchange-online-help-es, open-xchange-online-help-nl
+Depends: ${oxcommon}, univention-config-registry, open-xchange-authentication-ucs, open-xchange-spamhandler-spamassassin, open-xchange-mailfilter, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-meta-gui, open-xchange-lang-es-es, open-xchange-lang-nl-nl, open-xchange-gui-lang-es-es, open-xchange-gui-lang-es-es, open-xchange-online-help-es, open-xchange-online-help-nl, open-xchange-push-mailnotify
 Description: The Open-Xchange Meta package for OX into UCS integration
 
 Package: open-xchange-meta-parallels
