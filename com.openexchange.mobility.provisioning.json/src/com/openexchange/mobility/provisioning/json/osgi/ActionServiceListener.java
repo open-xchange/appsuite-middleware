@@ -49,9 +49,12 @@
 
 package com.openexchange.mobility.provisioning.json.osgi;
 
+import static com.openexchange.mobility.provisioning.json.osgi.MobilityProvisioningServiceRegistry.getInstance;
+
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+
 import com.openexchange.mobility.provisioning.json.action.ActionService;
 
 public class ActionServiceListener implements ServiceTrackerCustomizer {
@@ -66,25 +69,44 @@ public class ActionServiceListener implements ServiceTrackerCustomizer {
 
     public Object addingService(ServiceReference serviceReference) {
         final Object service = context.getService(serviceReference);
+        if (null == service) {
+            LOG.warn("Added service is null!", new Throwable());
+        }
+        
         if (service instanceof ActionService) {
-            if (null == MobilityProvisioningServiceRegistry.getServiceRegistry().getService(ActionService.class)) {
-                MobilityProvisioningServiceRegistry.getServiceRegistry().addService(ActionService.class, (ActionService) service);
-            } else {
-                LOG.error("Duplicate SpamdInstallationService detected: " + serviceReference.getClass().getName());
+            final Object identifier = serviceReference.getProperty("action");
+            if (null == identifier) {
+                LOG.error("Missing identifier in action service: " + serviceReference.getClass().getName());
+                return service;
             }
+            if (getInstance().getActionService(identifier.toString()) != null) {
+                LOG.error("A action service is already registered for identifier: " + identifier.toString());
+                return service;
+            }
+            getInstance().putActionService(identifier.toString(), (ActionService) serviceReference);
+            LOG.info(new StringBuilder(64).append("Action service for identifier '").append(identifier.toString()).append("' successfully registered"));
         }
         return service;
     }
 
-    public void modifiedService(ServiceReference arg0, Object arg1) {
+    public void modifiedService(final ServiceReference reference, final Object service) {
         // Nothing to do
     }
 
-    public void removedService(ServiceReference arg0, Object o) {
-        if (o instanceof ActionService) {
-            MobilityProvisioningServiceRegistry.getServiceRegistry().removeService(ActionService.class);
+    public void removedService(final ServiceReference reference, final Object service) {
+        try {
+            if (service instanceof ActionService) {
+                final Object identifier = reference.getProperty("action");
+                if (null == identifier) {
+                    LOG.error("Missing identifier in action service: " + service.getClass().getName());
+                    return;
+                }
+                getInstance().removeActionService(identifier.toString());
+                LOG.info(new StringBuilder(64).append("Action service for identifier '").append(identifier.toString()).append("' successfully unregistered"));
+            }
+        } finally {
+            context.ungetService(reference);
         }
-        context.ungetService(arg0);
     }
 
 }

@@ -146,7 +146,7 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 				message = "Provisioning mail has been send to " + target;
 				success = true;
 			} else if (JSONUtility.checkStringParameter(request, "action").equals(Actions.ACTION_SMS)) {
-			    final ActionService service = MobilityProvisioningServiceRegistry.getServiceRegistry().getService(ActionService.class);
+			    final ActionService service = MobilityProvisioningServiceRegistry.getInstance().getActionService(Actions.ACTION_SMS);
 			    try {
                     service.handleAction(session);
                 } catch (ActionException e) {

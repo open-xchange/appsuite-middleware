@@ -61,22 +61,22 @@ import com.openexchange.server.ServiceException;
 public class MobilityProvisioningConfiguration {
 
 	public static String getProvisioningURL() throws ServiceException {
-		ConfigurationService configservice = MobilityProvisioningServiceRegistry.getServiceRegistry().getService(ConfigurationService.class,true);
+		ConfigurationService configservice = MobilityProvisioningServiceRegistry.getInstance().getService(ConfigurationService.class,true);
 		return configservice.getProperty("com.openexchange.mobility.provisioning.url"); 
 	}
 	
 	public static String getProvisioningURLEncoding() throws ServiceException {
-		ConfigurationService configservice = MobilityProvisioningServiceRegistry.getServiceRegistry().getService(ConfigurationService.class,true);
+		ConfigurationService configservice = MobilityProvisioningServiceRegistry.getInstance().getService(ConfigurationService.class,true);
 		return configservice.getProperty("com.openexchange.mobility.provisioning.urlencoding"); 
 	}
 	
 	public static String getProvisioningMailFrom() throws ServiceException {
-		ConfigurationService configservice = MobilityProvisioningServiceRegistry.getServiceRegistry().getService(ConfigurationService.class,true);
+		ConfigurationService configservice = MobilityProvisioningServiceRegistry.getInstance().getService(ConfigurationService.class,true);
 		return configservice.getProperty("com.openexchange.mobility.provisioning.mail.from"); 
 	}
 
 	public static String getProvisioningMailSubject() throws ServiceException {
-		ConfigurationService configservice = MobilityProvisioningServiceRegistry.getServiceRegistry().getService(ConfigurationService.class,true);
+		ConfigurationService configservice = MobilityProvisioningServiceRegistry.getInstance().getService(ConfigurationService.class,true);
 		return configservice.getProperty("com.openexchange.mobility.provisioning.mail.subject"); 
 	}
 	

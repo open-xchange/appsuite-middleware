@@ -49,8 +49,9 @@
 
 package com.openexchange.mobility.provisioning.json.osgi;
 
-import static com.openexchange.mobility.provisioning.json.osgi.MobilityProvisioningServiceRegistry.getServiceRegistry;
+import static com.openexchange.mobility.provisioning.json.osgi.MobilityProvisioningServiceRegistry.getInstance;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
@@ -63,6 +64,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.mobility.provisioning.json.action.ActionSMS;
 import com.openexchange.mobility.provisioning.json.action.ActionService;
 import com.openexchange.mobility.provisioning.json.action.ActionTypes;
+import com.openexchange.mobility.provisioning.json.action.Actions;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 
@@ -71,9 +73,9 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
  * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
  * 
  */
-public class Activator extends DeferredActivator {
+public class MobilityProvisioningActivator extends DeferredActivator {
     
-    private static transient final Log LOG = LogFactory.getLog(Activator.class);
+    private static transient final Log LOG = LogFactory.getLog(MobilityProvisioningActivator.class);
 
 	private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class,HttpService.class };
 	
@@ -81,8 +83,9 @@ public class Activator extends DeferredActivator {
 	
 	private List<ServiceTracker> serviceTrackerList;
 
-	public Activator() {
-		super();		
+	public MobilityProvisioningActivator() {
+		super();
+		serviceTrackerList = new ArrayList<ServiceTracker>();
 	}
 	
 	@Override
@@ -96,7 +99,7 @@ public class Activator extends DeferredActivator {
 			LOG.warn("Absent service: " + clazz.getName());
 		}
 		
-		getServiceRegistry().addService(clazz, getService(clazz));
+		getInstance().addService(clazz, getService(clazz));
 		if (HttpService.class.equals(clazz)) {
 			servletRegisterer.registerServlet();
 		}
@@ -110,7 +113,7 @@ public class Activator extends DeferredActivator {
 		if (HttpService.class.equals(clazz)) {
 			servletRegisterer.unregisterServlet();
 		}
-		getServiceRegistry().removeService(clazz);
+		getInstance().removeService(clazz);
 		
 	}
 
@@ -118,7 +121,7 @@ public class Activator extends DeferredActivator {
 	protected void startBundle() throws Exception {
 		try {
 			{
-				final ServiceRegistry registry = getServiceRegistry();
+				final ServiceRegistry registry = getInstance();
 				registry.clearRegistry();
 				final Class<?>[] classes = getNeededServices();
 				for (int i = 0; i < classes.length; i++) {
@@ -139,9 +142,11 @@ public class Activator extends DeferredActivator {
             }
 
 			// in the implementation
-	        final Hashtable<Object, ActionTypes> ht = new Hashtable<Object, ActionTypes>();
-	        ht.put("action", ActionTypes.TELEPHONE);
-	        context.registerService(ActionService.class.getName(), new ActionSMS(), ht);
+//	        final Hashtable<Object, ActionTypes> ht = new Hashtable<Object, ActionTypes>();
+//	        ht.put("action", ActionTypes.TELEPHONE);
+//	        context.registerService(ActionService.class.getName(), new ActionSMS(), ht);
+
+	        MobilityProvisioningServiceRegistry.getInstance().putActionService(Actions.ACTION_SMS, new ActionSMS());
 	        
 		} catch (final Throwable t) {
 			LOG.error(t.getMessage(), t);
@@ -165,7 +170,7 @@ public class Activator extends DeferredActivator {
             serviceTrackerList.clear();
 
 			
-			getServiceRegistry().clearRegistry();
+            getInstance().clearRegistry();
 		} catch (final Throwable t) {
 			LOG.error(t.getMessage(), t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);

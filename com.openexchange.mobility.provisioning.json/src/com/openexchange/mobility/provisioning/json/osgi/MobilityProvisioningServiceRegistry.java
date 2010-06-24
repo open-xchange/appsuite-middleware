@@ -49,25 +49,42 @@
 
 package com.openexchange.mobility.provisioning.json.osgi;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import com.openexchange.mobility.provisioning.json.action.ActionService;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
 * {@link MobilityProvisioningServiceRegistry} - A registry for services 
 * 
 */
-public final class MobilityProvisioningServiceRegistry {
+public final class MobilityProvisioningServiceRegistry extends ServiceRegistry {
+	
+	private final static MobilityProvisioningServiceRegistry instance = new MobilityProvisioningServiceRegistry();
 
-	private static final ServiceRegistry REGISTRY = new ServiceRegistry();
+	private final Map<String, ActionService> actionServices = new ConcurrentHashMap<String, ActionService>();
+	
+    public static MobilityProvisioningServiceRegistry getInstance() {
+        return instance;
+    }
 
-	/**
-	 * Gets the service registry
-	 * 
-	 * @return The service registry
-	 */
-	public static ServiceRegistry getServiceRegistry() {
-		return REGISTRY;
-	}
-
+    public void putActionService(final String identifier, final ActionService actionService) {
+        actionServices.put(identifier, actionService);
+    }
+    
+    public ActionService getActionService(final String identifier) {
+        return actionServices.get(identifier);
+    }
+    
+    public ActionService removeActionService(final String identifier) {
+        return actionServices.remove(identifier);
+    }
+    
+    public void clearAllActionServices() {
+        actionServices.clear();
+    }
+	
 	/**
 	 * Initializes a new {@link MobilityProvisioningServiceRegistry}
 	 */

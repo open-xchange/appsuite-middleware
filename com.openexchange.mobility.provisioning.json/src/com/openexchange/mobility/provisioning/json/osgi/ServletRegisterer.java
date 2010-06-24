@@ -76,7 +76,7 @@ public class ServletRegisterer {
 	public void registerServlet() {
 		final HttpService http_service;
 		try {
-			http_service = MobilityProvisioningServiceRegistry.getServiceRegistry().getService(HttpService.class, true);
+			http_service = MobilityProvisioningServiceRegistry.getInstance().getService(HttpService.class, true);
 		} catch (ServiceException e) {
 			LOG.error("Error registering mobility provisioning servlet!", e);
 			return;
@@ -94,7 +94,7 @@ public class ServletRegisterer {
 	public void unregisterServlet() {
 		final HttpService http_service;
 		try {
-			http_service = MobilityProvisioningServiceRegistry.getServiceRegistry().getService(HttpService.class, true);
+			http_service = MobilityProvisioningServiceRegistry.getInstance().getService(HttpService.class, true);
 		} catch (ServiceException e) {
 			LOG.error("Error unregistering mobility provisioning servlet!", e);
 			return;
