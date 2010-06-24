@@ -56,6 +56,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 import com.openexchange.mobility.provisioning.json.action.ActionService;
+import com.openexchange.mobility.provisioning.json.action.ActionTypes;
 
 public class ActionServiceListener implements ServiceTrackerCustomizer {
 
@@ -79,11 +80,11 @@ public class ActionServiceListener implements ServiceTrackerCustomizer {
                 LOG.error("Missing identifier in action service: " + serviceReference.getClass().getName());
                 return service;
             }
-            if (getInstance().getActionService(identifier.toString()) != null) {
+            if (getInstance().getActionService((ActionTypes)identifier) != null) {
                 LOG.error("A action service is already registered for identifier: " + identifier.toString());
                 return service;
-            }
-            getInstance().putActionService(identifier.toString(), (ActionService) serviceReference);
+            }            
+            getInstance().putActionService((ActionTypes)identifier, (ActionService) service);            
             LOG.info(new StringBuilder(64).append("Action service for identifier '").append(identifier.toString()).append("' successfully registered"));
         }
         return service;
@@ -101,7 +102,7 @@ public class ActionServiceListener implements ServiceTrackerCustomizer {
                     LOG.error("Missing identifier in action service: " + service.getClass().getName());
                     return;
                 }
-                getInstance().removeActionService(identifier.toString());
+                getInstance().removeActionService((ActionTypes)identifier);
                 LOG.info(new StringBuilder(64).append("Action service for identifier '").append(identifier.toString()).append("' successfully unregistered"));
             }
         } finally {

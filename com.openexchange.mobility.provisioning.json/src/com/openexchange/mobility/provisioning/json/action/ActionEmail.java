@@ -63,11 +63,11 @@ import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mobility.provisioning.json.configuration.MobilityProvisioningConfiguration;
+import com.openexchange.mobility.provisioning.json.servlet.MobilityProvisioningServlet;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 
@@ -76,28 +76,14 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
  * 
  */
-public class ActionEmail {
+public class ActionEmail implements ActionService {
 
-	private InternetAddress targetAddress;
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MobilityProvisioningServlet.class);
 	
-	public ActionEmail(InternetAddress targetAddress) {
-		this.targetAddress = targetAddress;
-	}
-
-	public InternetAddress getTargetAddress() {
-		return targetAddress;
-	}
-
-	public void setTargetAddress(InternetAddress targetAddress) {
-		this.targetAddress = targetAddress;
-	}
-
-	public void sendMail(final Session session) throws MailException, ContextException, LdapException, AddressException, UnsupportedEncodingException, ServiceException {
-		final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
-		mailAccess.connect();
-		final MailTransport transport = MailTransport.getInstance(session);
-
-		try {
+    public String handleAction(String target, Session session) throws ActionException {
+    	String message = "";
+    	
+    	try {
 			Context ctx = ContextStorage.getStorageContext(session);
 			User user = UserStorage.getInstance().getUser(session.getUserId(), ctx);
 			
@@ -111,7 +97,7 @@ public class ActionEmail {
 
 			ComposedMailMessage msg = provider.getNewComposedMailMessage(session, ctx);
 			msg.addFrom(fromAddress);
-			msg.addTo(targetAddress);
+			msg.addTo(new InternetAddress(target));
 			msg.setSubject(MobilityProvisioningConfiguration.getProvisioningMailSubject());
 
 			String provisioningUrl = MobilityProvisioningConfiguration.getProvisioningURL();
@@ -124,15 +110,34 @@ public class ActionEmail {
 			msg.setBodyPart(textPart);
 			msg.setContentType("text/plain");
 
+			final MailTransport transport = MailTransport.getInstance(session);
 			try {
-				transport.sendMailMessage(msg, com.openexchange.mail.dataobjects.compose.ComposeType.NEW, new Address[] { targetAddress });
+				transport.sendMailMessage(msg, com.openexchange.mail.dataobjects.compose.ComposeType.NEW, new Address[] { new InternetAddress(target) });
 			} finally {
 				transport.close();
 			}
-		} finally {
-			transport.close();
-			mailAccess.close(true);
+			
+			message = "Provisioning mail has been send to " + target;
+		} catch (MailException e) {
+			message = logError("Couldn't send provisioning mail", e);
+		} catch (ContextException e) {
+			message = logError("Cannot find context for user", e);
+		} catch (LdapException e) {
+			message = logError("Cannot get user object", e);
+		} catch (AddressException e) {
+			message = logError("Target Spam email address cannot be parsed", e);
+		} catch (ServiceException e) {
+			message = logError("Cannot get configuration", e);
+		} catch (UnsupportedEncodingException e) {
+			message = logError("Error on correcting provisioning url", e);
 		}
-	}
+    	
+    	return message;
+    }
+    
+    private String logError(String message, Exception e) {
+    	LOG.error(message, e);
+    	return message;
+    }
 	
 }

@@ -53,6 +53,6 @@ import com.openexchange.session.Session;
 
 public interface ActionService {
     
-    public void handleAction(final Session session) throws ActionException;
+    public String handleAction(String target, final Session session) throws ActionException;
 
 }

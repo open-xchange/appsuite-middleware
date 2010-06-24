@@ -54,7 +54,8 @@ import com.openexchange.session.Session;
 
 public class ActionSMS implements ActionService {
 
-    public void handleAction(Session session) throws ActionException {
+    public String handleAction(String target, Session session) throws ActionException {
+    	return "";
     }
 
 }

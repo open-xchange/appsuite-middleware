@@ -56,7 +56,10 @@ package com.openexchange.mobility.provisioning.json.action;
  */
 public class Actions {
 
+	public static String ACTION_LISTSERVICES = "listservices";
+	
 	public static String ACTION_EMAIL = "email";
-	public static String ACTION_SMS = "sms";
+	public static String ACTION_TELEPHONE = "telephone";
+	public static String ACTION_OTHER = "other";	
 	
 }

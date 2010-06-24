@@ -61,12 +61,11 @@ import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.mobility.provisioning.json.action.ActionEmail;
 import com.openexchange.mobility.provisioning.json.action.ActionSMS;
 import com.openexchange.mobility.provisioning.json.action.ActionService;
 import com.openexchange.mobility.provisioning.json.action.ActionTypes;
-import com.openexchange.mobility.provisioning.json.action.Actions;
 import com.openexchange.server.osgiservice.DeferredActivator;
-import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
  * 
@@ -121,8 +120,9 @@ public class MobilityProvisioningActivator extends DeferredActivator {
 	protected void startBundle() throws Exception {
 		try {
 			{
-				final ServiceRegistry registry = getInstance();
+				final MobilityProvisioningServiceRegistry registry = getInstance();
 				registry.clearRegistry();
+				registry.clearActionServices();
 				final Class<?>[] classes = getNeededServices();
 				for (int i = 0; i < classes.length; i++) {
 					final Object service = getService(classes[i]);
@@ -142,11 +142,13 @@ public class MobilityProvisioningActivator extends DeferredActivator {
             }
 
 			// in the implementation
-//	        final Hashtable<Object, ActionTypes> ht = new Hashtable<Object, ActionTypes>();
-//	        ht.put("action", ActionTypes.TELEPHONE);
-//	        context.registerService(ActionService.class.getName(), new ActionSMS(), ht);
+	        final Hashtable<Object, ActionTypes> ht = new Hashtable<Object, ActionTypes>();
+	        ht.put("action", ActionTypes.TELEPHONE);
+	        context.registerService(ActionService.class.getName(), new ActionSMS(), ht);
 
-	        MobilityProvisioningServiceRegistry.getInstance().putActionService(Actions.ACTION_SMS, new ActionSMS());
+	        final Hashtable<Object, ActionTypes> ht2 = new Hashtable<Object, ActionTypes>();
+	        ht2.put("action", ActionTypes.EMAIL);
+	        context.registerService(ActionService.class.getName(), new ActionEmail(), ht2);
 	        
 		} catch (final Throwable t) {
 			LOG.error(t.getMessage(), t);
@@ -168,9 +170,9 @@ public class MobilityProvisioningActivator extends DeferredActivator {
                 tracker.close();
             }
             serviceTrackerList.clear();
-
 			
             getInstance().clearRegistry();
+            getInstance().clearActionServices();
 		} catch (final Throwable t) {
 			LOG.error(t.getMessage(), t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);

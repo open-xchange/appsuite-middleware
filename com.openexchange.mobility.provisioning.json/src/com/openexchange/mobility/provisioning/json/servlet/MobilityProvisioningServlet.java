@@ -50,10 +50,7 @@
 package com.openexchange.mobility.provisioning.json.servlet;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -64,15 +61,11 @@ import org.json.JSONObject;
 import com.openexchange.ajax.PermissionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ResponseWriter;
-import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.mail.MailException;
-import com.openexchange.mobility.provisioning.json.action.ActionEmail;
 import com.openexchange.mobility.provisioning.json.action.ActionException;
 import com.openexchange.mobility.provisioning.json.action.ActionService;
+import com.openexchange.mobility.provisioning.json.action.ActionTypes;
 import com.openexchange.mobility.provisioning.json.action.Actions;
 import com.openexchange.mobility.provisioning.json.osgi.MobilityProvisioningServiceRegistry;
-import com.openexchange.server.ServiceException;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
 
@@ -130,51 +123,68 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 			final HttpServletResponse resp) throws JSONException, IOException {
 		final Response response = new Response();
 		
-		boolean success = false;
-		String message = "Couldn't send provisioning message.";
-		
-		JSONObject obj = new JSONObject();	
-		
+		JSONObject obj = new JSONObject();
 
 		try {
 			final ServerSession session = getSessionObject(request);
-			
-			String target = JSONUtility.checkStringParameter(request, "target");
-			
-			if (JSONUtility.checkStringParameter(request, "action").equals(Actions.ACTION_EMAIL)) {
-				new ActionEmail(new InternetAddress(target, true)).sendMail(session);
-				message = "Provisioning mail has been send to " + target;
-				success = true;
-			} else if (JSONUtility.checkStringParameter(request, "action").equals(Actions.ACTION_SMS)) {
-			    final ActionService service = MobilityProvisioningServiceRegistry.getInstance().getActionService(Actions.ACTION_SMS);
-			    try {
-                    service.handleAction(session);
-                } catch (ActionException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-				message = "Action SMS not implemented yet.";
+
+			String action = JSONUtility.checkStringParameter(request, "action");
+
+			if (action.equals(Actions.ACTION_LISTSERVICES)) {
+				String services = "";
+				if (MobilityProvisioningServiceRegistry.getInstance().containsService(ActionTypes.EMAIL)) {
+					if (services.length() > 0)
+						services += ",";
+					services += Actions.ACTION_EMAIL;
+				}
+				if (MobilityProvisioningServiceRegistry.getInstance().containsService(ActionTypes.TELEPHONE)) {
+					if (services.length() > 0)
+						services += ",";
+					services += Actions.ACTION_TELEPHONE;
+				}
+				if (MobilityProvisioningServiceRegistry.getInstance().containsService(ActionTypes.OTHER)) {
+					if (services.length() > 0)
+						services += ",";
+					services += Actions.ACTION_OTHER;
+				}
+				
+				obj.put("services", services);
 			} else {
-				message = "Missing or wrong field action in JSON request.";
+				boolean success = false;
+				String message = "Couldn't send provisioning message.";
+				
+				final ActionService service;
+				
+				if (action.equals(Actions.ACTION_EMAIL)) {
+				    service = MobilityProvisioningServiceRegistry.getInstance().getActionService(ActionTypes.EMAIL);
+				} else if (action.equals(Actions.ACTION_TELEPHONE)) {
+				    service = MobilityProvisioningServiceRegistry.getInstance().getActionService(ActionTypes.TELEPHONE);
+				} else {
+				    service = MobilityProvisioningServiceRegistry.getInstance().getActionService(ActionTypes.OTHER);
+				}
+				
+			    if (service != null) {
+			    	try {
+			    		message = service.handleAction(JSONUtility.checkStringParameter(request, "target"), session);
+			    		success = true;
+			    	} catch (ActionException e) {
+			    		e.printStackTrace();
+			    	}
+			    } else {
+			    	message = "Service " + action + " provisioning is not available.";
+			    }
+			    
+				if (message.trim().length() <= 0) {
+					message = "Couldn't send provisioning message.";
+				}
+
+				obj.put("success", success);
+				obj.put("message", message);
 			}
-		} catch (MailException e) {
-			LOG.error("Couldn't send provisioning mail", e);
-		} catch (ContextException e) {
-			LOG.error("Cannot find context for user", e);
-		} catch (LdapException e) {
-			LOG.error("Cannot get user object", e);
-		} catch (AddressException e) {
-			LOG.error("Target Spam email address cannot be parsed", e);
-		} catch (ServiceException e) {
-			LOG.error("Cannot get configuration", e);
-		} catch (UnsupportedEncodingException e) {
-			LOG.error("Error on correcting provisioning url", e);
 		} catch (AjaxException e) {
 			LOG.error("Missing or wrong field action in JSON request", e);
 		}
 		
-		obj.put("success", success);
-		obj.put("message", message);
 		response.setData(obj);
 
 		/*

@@ -53,6 +53,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.openexchange.mobility.provisioning.json.action.ActionService;
+import com.openexchange.mobility.provisioning.json.action.ActionTypes;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
@@ -63,25 +64,29 @@ public final class MobilityProvisioningServiceRegistry extends ServiceRegistry {
 	
 	private final static MobilityProvisioningServiceRegistry instance = new MobilityProvisioningServiceRegistry();
 
-	private final Map<String, ActionService> actionServices = new ConcurrentHashMap<String, ActionService>();
+	private final Map<ActionTypes, ActionService> actionServices = new ConcurrentHashMap<ActionTypes, ActionService>();
 	
     public static MobilityProvisioningServiceRegistry getInstance() {
         return instance;
     }
 
-    public void putActionService(final String identifier, final ActionService actionService) {
+    public void putActionService(final ActionTypes identifier, final ActionService actionService) {
         actionServices.put(identifier, actionService);
     }
     
-    public ActionService getActionService(final String identifier) {
+    public ActionService getActionService(final ActionTypes identifier) {
         return actionServices.get(identifier);
     }
     
-    public ActionService removeActionService(final String identifier) {
+    public ActionService removeActionService(final ActionTypes identifier) {
         return actionServices.remove(identifier);
     }
     
-    public void clearAllActionServices() {
+    public boolean containsService(final ActionTypes identifier) {
+    	return actionServices.containsKey(identifier);
+    }
+    
+    public void clearActionServices() {
         actionServices.clear();
     }
 	
