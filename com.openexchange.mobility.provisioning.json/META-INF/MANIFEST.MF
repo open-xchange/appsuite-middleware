@@ -42,3 +42,4 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.mail.dataobjects.compose
 Require-Bundle: com.openexchange.server,
  com.openexchange.common
+Export-Package: com.openexchange.mobility.provisioning.json.servlet
