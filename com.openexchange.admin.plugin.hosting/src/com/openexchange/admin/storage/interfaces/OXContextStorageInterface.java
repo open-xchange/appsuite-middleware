@@ -84,14 +84,9 @@ public abstract class OXContextStorageInterface {
 
     private static final Log log = LogFactory.getLog(OXContextStorageInterface.class);
     
-    protected static AdminCacheExtended cache = null;
+    protected static final AdminCacheExtended cache = ClientAdminThreadExtended.cache;
 
-    protected static PropertyHandlerExtended prop = null;
-
-    static {
-        cache = ClientAdminThreadExtended.cache;
-        prop = cache.getProperties();
-    }
+    protected static final PropertyHandlerExtended prop = cache.getProperties();
 
     /**
      * Creates a new instance implementing the group storage interface.
