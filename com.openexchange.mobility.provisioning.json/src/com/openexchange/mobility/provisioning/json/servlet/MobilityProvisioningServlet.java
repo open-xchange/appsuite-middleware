@@ -154,8 +154,10 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 				    service = MobilityProvisioningServiceRegistry.getInstance().getActionService(ActionTypes.EMAIL);
 				} else if (action.equals(Actions.ACTION_TELEPHONE)) {
 				    service = MobilityProvisioningServiceRegistry.getInstance().getActionService(ActionTypes.TELEPHONE);
-				} else {
+				} else if (action.equals(Actions.ACTION_OTHER)) {
 				    service = MobilityProvisioningServiceRegistry.getInstance().getActionService(ActionTypes.OTHER);
+				} else {
+					service = null;
 				}
 				
 			    if (service != null) {
