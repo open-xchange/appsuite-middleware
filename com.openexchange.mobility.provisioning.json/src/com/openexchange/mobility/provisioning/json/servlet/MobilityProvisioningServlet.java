@@ -55,6 +55,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -131,15 +132,15 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 			String action = JSONUtility.checkStringParameter(request, "action");
 
 			if (action.equals(Actions.ACTION_LISTSERVICES)) {
-				JSONObject services = new JSONObject();
+				JSONArray services = new JSONArray();
 				if (MobilityProvisioningServiceRegistry.getInstance().containsService(ActionTypes.EMAIL)) {
-					services.put(Actions.ACTION_EMAIL, true);
+					services.put(Actions.ACTION_EMAIL);
 				}
 				if (MobilityProvisioningServiceRegistry.getInstance().containsService(ActionTypes.TELEPHONE)) {
-					services.put(Actions.ACTION_TELEPHONE, true);
+					services.put(Actions.ACTION_TELEPHONE);
 				}
 				if (MobilityProvisioningServiceRegistry.getInstance().containsService(ActionTypes.OTHER)) {
-					services.put(Actions.ACTION_OTHER, true);
+					services.put(Actions.ACTION_OTHER);
 				}
 				
 				obj.put("services", services);
