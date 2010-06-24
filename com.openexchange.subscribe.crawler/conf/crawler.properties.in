@@ -28,3 +28,4 @@ com.openexchange.subscribe.crawler.facebook=true
 com.openexchange.subscribe.crawler.gmx=true
 com.openexchange.subscribe.linkedin=true
 com.openexchange.subscribe.crawler.t-online.de=true
+com.openexchange.subscribe.crawler.gmx.com=true

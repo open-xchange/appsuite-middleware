@@ -74,7 +74,7 @@ public class GenericSubscribeServiceForGMXComTest extends GenericSubscribeServic
         // create a CrawlerDescription
         CrawlerDescription crawler = new CrawlerDescription();
         crawler.setDisplayName("gmx.com");
-        crawler.setId("com.openexchange.subscribe.gmx.com");
+        crawler.setId("com.openexchange.subscribe.crawler.gmx.com");
         crawler.setCrawlerApiVersion(618);
         crawler.setJavascriptEnabled(true);
         crawler.setPriority(2);       
