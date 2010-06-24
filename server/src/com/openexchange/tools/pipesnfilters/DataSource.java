@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,38 +47,31 @@
  *
  */
 
-package com.openexchange.server.osgi;
+package com.openexchange.tools.pipesnfilters;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import java.util.Collection;
 
 /**
- * {@link Activator} combines several activators in the server bundle that have been prepared to split up the server bundle into several
- * bundles. Currently this is not done to keep number of packages low.
+ * The {@link DataSource} can be used in 2 different ways which should not be mixed up. Either use it as the end of the pipes & filters
+ * construct and read the outcoming data through methods {@link #hasData()} and {@link #getData(Collection)} or append a {@link Filter} that
+ * uses this {@link DataSource} as input. Reading the data can be done as followed:
+ * <pre>
+ * Collection&lt;I&gt; input;
+ * DataSource&lt;O&gt; output = PipesAndFiltersService.create(input).addFilter(new SomeFilter&lt;I, O&gt;());
+ * Collection&lt;O&gt; data;
+ * while (output.hasData()) {
+ *     output.getData(data);
+ * }
+ * </pre>
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Activator extends CompositeBundleActivator {
+public interface DataSource<I> {
 
-    private final BundleActivator[] activators = {
-        new com.openexchange.tools.pipesnfilters.osgi.PipesAndFiltersActivator(),
-        new com.openexchange.tools.file.osgi.LocalFileStorageActivator(),
-        new com.openexchange.database.osgi.Activator(),
-        new com.openexchange.tools.file.osgi.DBQuotaFileStorageActivator(),
-        new com.openexchange.tools.file.osgi.FileStorageWrapperActivator(),
-        new com.openexchange.groupware.update.osgi.Activator(),
-        new com.openexchange.groupware.reminder.osgi.Activator(),
-        new com.openexchange.server.osgi.ServerActivator(),
-        new com.openexchange.groupware.tasks.osgi.Activator(),
-        new com.openexchange.groupware.infostore.osgi.InfostoreActivator()
-    };
+    boolean hasData();
 
-    public Activator() {
-        super();
-    }
+    int getData(Collection<I> col) throws PipesAndFiltersException;
 
-    @Override
-    protected BundleActivator[] getActivators() {
-        return activators;
-    }
+    <O> DataSource<O> addFilter(Filter<I, O> filter);
+
 }

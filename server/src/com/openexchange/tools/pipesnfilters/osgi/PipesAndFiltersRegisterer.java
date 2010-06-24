@@ -47,38 +47,48 @@
  *
  */
 
-package com.openexchange.server.osgi;
+package com.openexchange.tools.pipesnfilters.osgi;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.tools.pipesnfilters.PipesAndFiltersService;
+import com.openexchange.tools.pipesnfilters.internal.PipesAndFiltersFactory;
 
 /**
- * {@link Activator} combines several activators in the server bundle that have been prepared to split up the server bundle into several
- * bundles. Currently this is not done to keep number of packages low.
+ * {@link PipesAndFiltersRegisterer}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Activator extends CompositeBundleActivator {
+public class PipesAndFiltersRegisterer implements ServiceTrackerCustomizer {
 
-    private final BundleActivator[] activators = {
-        new com.openexchange.tools.pipesnfilters.osgi.PipesAndFiltersActivator(),
-        new com.openexchange.tools.file.osgi.LocalFileStorageActivator(),
-        new com.openexchange.database.osgi.Activator(),
-        new com.openexchange.tools.file.osgi.DBQuotaFileStorageActivator(),
-        new com.openexchange.tools.file.osgi.FileStorageWrapperActivator(),
-        new com.openexchange.groupware.update.osgi.Activator(),
-        new com.openexchange.groupware.reminder.osgi.Activator(),
-        new com.openexchange.server.osgi.ServerActivator(),
-        new com.openexchange.groupware.tasks.osgi.Activator(),
-        new com.openexchange.groupware.infostore.osgi.InfostoreActivator()
-    };
+    private final BundleContext context;
+    private ServiceRegistration registration;
 
-    public Activator() {
+    public PipesAndFiltersRegisterer(BundleContext context) {
         super();
+        this.context = context;
     }
 
-    @Override
-    protected BundleActivator[] getActivators() {
-        return activators;
+    public Object addingService(ServiceReference reference) {
+        ThreadPoolService service = (ThreadPoolService) context.getService(reference);
+        if (null == registration) {
+            registration = context.registerService(PipesAndFiltersService.class.getName(), new PipesAndFiltersFactory(service), null);
+        }
+        return service;
+    }
+
+    public void modifiedService(ServiceReference reference, Object service) {
+        // Nothing to do.
+    }
+
+    public void removedService(ServiceReference reference, Object service) {
+        if (null != registration) {
+            registration.unregister();
+            registration = null;
+        }
+        context.ungetService(reference);
     }
 }

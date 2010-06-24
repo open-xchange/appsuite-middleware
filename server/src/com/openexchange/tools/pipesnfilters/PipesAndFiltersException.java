@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,38 +47,30 @@
  *
  */
 
-package com.openexchange.server.osgi;
+package com.openexchange.tools.pipesnfilters;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import com.openexchange.exceptions.ErrorMessage;
+import com.openexchange.exceptions.StringComponent;
+import com.openexchange.groupware.AbstractOXException;
 
 /**
- * {@link Activator} combines several activators in the server bundle that have been prepared to split up the server bundle into several
- * bundles. Currently this is not done to keep number of packages low.
+ * {@link PipesAndFiltersException}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Activator extends CompositeBundleActivator {
+public class PipesAndFiltersException extends AbstractOXException {
 
-    private final BundleActivator[] activators = {
-        new com.openexchange.tools.pipesnfilters.osgi.PipesAndFiltersActivator(),
-        new com.openexchange.tools.file.osgi.LocalFileStorageActivator(),
-        new com.openexchange.database.osgi.Activator(),
-        new com.openexchange.tools.file.osgi.DBQuotaFileStorageActivator(),
-        new com.openexchange.tools.file.osgi.FileStorageWrapperActivator(),
-        new com.openexchange.groupware.update.osgi.Activator(),
-        new com.openexchange.groupware.reminder.osgi.Activator(),
-        new com.openexchange.server.osgi.ServerActivator(),
-        new com.openexchange.groupware.tasks.osgi.Activator(),
-        new com.openexchange.groupware.infostore.osgi.InfostoreActivator()
-    };
+    private static final long serialVersionUID = 600136457840868035L;
 
-    public Activator() {
-        super();
+    public PipesAndFiltersException(AbstractOXException cause) {
+        super(cause);
     }
 
-    @Override
-    protected BundleActivator[] getActivators() {
-        return activators;
+    public PipesAndFiltersException(InterruptedException e) {
+        super(new ErrorMessage(1, new StringComponent("PAF"), "com.openexchange.pipe&filters", Category.CODE_ERROR, "Waiting in pipe failed.", "Please contact administrator."), e);
+    }
+
+    public PipesAndFiltersException(Throwable t) {
+        super(new ErrorMessage(1, new StringComponent("PAF"), "com.openexchange.pipe&filters", Category.CODE_ERROR, t.getMessage(), "Please contact administrator."), t);
     }
 }

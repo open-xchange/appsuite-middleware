@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,38 +47,48 @@
  *
  */
 
-package com.openexchange.server.osgi;
+package com.openexchange.tools.pipesnfilters.internal;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import java.util.Collection;
+import java.util.Iterator;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.tools.pipesnfilters.DataSource;
+import com.openexchange.tools.pipesnfilters.Filter;
 
 /**
- * {@link Activator} combines several activators in the server bundle that have been prepared to split up the server bundle into several
- * bundles. Currently this is not done to keep number of packages low.
+ * {@link CollectionDataSource}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Activator extends CompositeBundleActivator {
+class CollectionDataSource<I> implements DataSource<I> {
 
-    private final BundleActivator[] activators = {
-        new com.openexchange.tools.pipesnfilters.osgi.PipesAndFiltersActivator(),
-        new com.openexchange.tools.file.osgi.LocalFileStorageActivator(),
-        new com.openexchange.database.osgi.Activator(),
-        new com.openexchange.tools.file.osgi.DBQuotaFileStorageActivator(),
-        new com.openexchange.tools.file.osgi.FileStorageWrapperActivator(),
-        new com.openexchange.groupware.update.osgi.Activator(),
-        new com.openexchange.groupware.reminder.osgi.Activator(),
-        new com.openexchange.server.osgi.ServerActivator(),
-        new com.openexchange.groupware.tasks.osgi.Activator(),
-        new com.openexchange.groupware.infostore.osgi.InfostoreActivator()
-    };
+    private final ThreadPoolService threadPool;
+    private final Iterator<I> iter;
+    private final int blockSize = 100;
 
-    public Activator() {
+    public CollectionDataSource(ThreadPoolService threadPool, Collection<I> source) {
         super();
+        this.threadPool = threadPool;
+        this.iter = source.iterator();
     }
 
-    @Override
-    protected BundleActivator[] getActivators() {
-        return activators;
+    public int getData(Collection<I> col) {
+        int count = 0;
+        while (count < blockSize && iter.hasNext()) {
+            col.add(iter.next());
+            count++;
+        }
+        return count;
+    }
+
+    public boolean hasData() {
+        return iter.hasNext();
+    }
+
+    public <O> DataSource<O> addFilter(Filter<I, O> filter) {
+        Pipe<O> pipe = new Pipe<O>(threadPool);
+        FilterTask<I, O> task = new FilterTask<I, O>(this, filter, pipe);
+        threadPool.submit(task);
+        return pipe;
     }
 }

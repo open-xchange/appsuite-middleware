@@ -47,38 +47,32 @@
  *
  */
 
-package com.openexchange.server.osgi;
+package com.openexchange.tools.pipesnfilters.osgi;
 
 import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.threadpool.ThreadPoolService;
 
 /**
- * {@link Activator} combines several activators in the server bundle that have been prepared to split up the server bundle into several
- * bundles. Currently this is not done to keep number of packages low.
+ * {@link PipesAndFiltersActivator}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Activator extends CompositeBundleActivator {
+public class PipesAndFiltersActivator implements BundleActivator {
 
-    private final BundleActivator[] activators = {
-        new com.openexchange.tools.pipesnfilters.osgi.PipesAndFiltersActivator(),
-        new com.openexchange.tools.file.osgi.LocalFileStorageActivator(),
-        new com.openexchange.database.osgi.Activator(),
-        new com.openexchange.tools.file.osgi.DBQuotaFileStorageActivator(),
-        new com.openexchange.tools.file.osgi.FileStorageWrapperActivator(),
-        new com.openexchange.groupware.update.osgi.Activator(),
-        new com.openexchange.groupware.reminder.osgi.Activator(),
-        new com.openexchange.server.osgi.ServerActivator(),
-        new com.openexchange.groupware.tasks.osgi.Activator(),
-        new com.openexchange.groupware.infostore.osgi.InfostoreActivator()
-    };
+    private ServiceTracker tracker;
 
-    public Activator() {
+    public PipesAndFiltersActivator() {
         super();
     }
 
-    @Override
-    protected BundleActivator[] getActivators() {
-        return activators;
+    public void start(BundleContext context) throws Exception {
+        tracker = new ServiceTracker(context, ThreadPoolService.class.getName(), new PipesAndFiltersRegisterer(context));
+        tracker.open();
+    }
+
+    public void stop(BundleContext context) throws Exception {
+        tracker.close();
     }
 }
