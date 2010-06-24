@@ -121,7 +121,7 @@ Authors:
 %package -n	open-xchange-meta-singleserver
 Group:          Applications/Productivity
 Summary:	The Open-Xchange Meta package for OX on a single server
-Requires:	open-xchange-meta-server, open-xchange-meta-gui, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-mailfilter, open-xchange-passwordchange-database, open-xchange-passwordchange-servlet, open-xchange-resource-managerequest, open-xchange-group-managerequest
+Requires:	open-xchange-meta-server, open-xchange-meta-gui, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging
 
 
 %description -n open-xchange-meta-singleserver
@@ -130,6 +130,21 @@ The Open-Xchange Meta package for OX on a single server
 Authors:
 --------
     Open-Xchange
+
+# ----------------------------------------------------------------------------------------------------
+%package -n	open-xchange-meta-databaseonly
+Group:          Applications/Productivity
+Summary:	The Open-Xchange Meta package for OX managed via database only
+Requires:	open-xchange-passwordchange-database, open-xchange-passwordchange-servlet, open-xchange-resource-managerequest, open-xchange-group-managerequest
+
+
+%description -n open-xchange-meta-databaseonly
+The Open-Xchange Meta package for OX managed via database only
+
+Authors:
+--------
+    Open-Xchange
+
 
 # ----------------------------------------------------------------------------------------------------
 %package -n	open-xchange-meta-mobility
@@ -189,6 +204,10 @@ Authors:
 %defattr(-,root,root)
 %doc README.TXT
 
+%files -n open-xchange-meta-databaseonly
+%defattr(-,root,root)
+%doc README.TXT
+
 %files -n open-xchange-meta-gui
 %defattr(-,root,root)
 %doc README.TXT
@@ -214,3 +233,5 @@ Authors:
 %doc README.TXT
 
 %changelog
+* Thu Jun 24 2010 - choeger@open-xchange.com
+ - Bugfix #16354 - strange package dependencies for open-xchange-meta-singleserver

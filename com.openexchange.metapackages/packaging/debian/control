@@ -43,8 +43,13 @@ Description: The Open-Xchange Meta package for OX GUI
 
 Package: open-xchange-meta-singleserver
 Architecture: all
-Depends: open-xchange-meta-server, open-xchange-meta-gui, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-mailfilter, open-xchange-passwordchange-database, open-xchange-passwordchange-servlet, open-xchange-resource-managerequest, open-xchange-group-managerequest
+Depends: open-xchange-meta-server, open-xchange-meta-gui, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging
 Description: The Open-Xchange Meta package for OX on a single server
+
+Package: open-xchange-meta-databaseonly
+Architecture: all
+Depends: open-xchange-passwordchange-database, open-xchange-passwordchange-servlet, open-xchange-resource-managerequest, open-xchange-group-managerequest
+Description: The Open-Xchange Meta package for OX managed via database only
 
 Package: open-xchange-meta-mobility
 Architecture: all

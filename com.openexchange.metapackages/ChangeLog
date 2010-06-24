@@ -1,0 +1,4 @@
+* 2010-06-24 - choeger@open-xchange.com
+
+ - Bugfix #16354 - strange package dependencies for open-xchange-meta-singleserver
+
