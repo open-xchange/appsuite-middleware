@@ -162,7 +162,7 @@ while true; do
     esac
 done
 
-if [ "$USER" != "root" ]; then
+if [ $(id -u) -ne 0 ]; then
     die "need to be root in order to collect all needed data"
 fi
 

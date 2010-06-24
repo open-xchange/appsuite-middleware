@@ -1,3 +1,7 @@
+* 2010-06-24 - choeger@open-xchange.com
+
+ - Bugfix #13441 - Installation fails if not 'root'
+
 * 2010-03-05 - choeger@open-xchange.com
 
  - Bugfix #15554 -[L3] unable to create new contexts even if max unit is not reached
