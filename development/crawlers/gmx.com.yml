@@ -1,7 +1,7 @@
 --- !com.openexchange.subscribe.crawler.CrawlerDescription
 crawlerApiVersion: 618
 displayName: gmx.com
-id: com.openexchange.subscribe.gmx.com
+id: com.openexchange.subscribe.crawler.gmx.com
 javascriptEnabled: true
 priority: 2
 workflowString: |
