@@ -64,11 +64,16 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.Vector;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -114,6 +119,9 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.server.ServiceException;
+import com.openexchange.threadpool.CompletionFuture;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.file.external.FileStorageException;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
@@ -726,127 +734,32 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         return listContext(search_pattern, null, null);
     }
 
-    /**
-     *
-     * @see com.openexchange.admin.storage.OXContextSQLStorage#listContext(java.lang.String)
-     */
     @Override
-    public Context[] listContext(final String search_pattern, final String additionaltable, final String sqlconjunction) throws StorageException {
-        Connection configdb_read = null;
-        PreparedStatement stmt = null;
-        PreparedStatement mapping = null;
-        ResultSet rs = null;
-        ResultSet rs2 = null;
+    public Context[] listContext(final String pattern, final String additionaltable, final String sqlconjunction) throws StorageException {
+        final String sqlPattern = pattern.replace('*', '%');
+        ThreadPoolService threadPoolS;
         try {
-            configdb_read = cache.getConnectionForConfigDB();
-
-            final String search_patterntmp = search_pattern.replace('*', '%');
-            String query = "SELECT DISTINCT context.cid, context.name, context.enabled, context.reason_id, context.filestore_id, context.filestore_name, context.quota_max, context_server2db_pool.write_db_pool_id, context_server2db_pool.read_db_pool_id, context_server2db_pool.db_schema " +
-            "FROM context, context_server2db_pool, server, login2context" + (additionaltable != null ? "," + additionaltable : "" ) +
-            " WHERE ( context.cid = context_server2db_pool.cid AND context.cid = login2context.cid AND context_server2db_pool.server_id = server.server_id AND server.name = ? ) AND (context.name LIKE ? OR context.cid LIKE ? OR login2context.login_info LIKE ?) " +
-            (sqlconjunction != null ? sqlconjunction : "");
-            stmt = configdb_read.prepareStatement(query);
-            mapping = configdb_read.prepareStatement("SELECT login_info FROM login2context WHERE cid=?");
-            stmt.setString(1, prop.getProp(AdminProperties.Prop.SERVER_NAME, "local"));
-            stmt.setString(2, search_patterntmp);
-            stmt.setString(3, search_patterntmp);
-            stmt.setString(4, search_patterntmp);
-            rs = stmt.executeQuery();
-
-            final ArrayList<Context> list = new ArrayList<Context>();
-
-            while (rs.next()) {
-                final Context cs = new Context();
-                final int context_id = rs.getInt(1);
-                cs.setId(context_id);
-
-                // filestore_id | filestore_name | filestore_login |
-                // filestore_passwd | quota_max
-                final String name = rs.getString(2); // name
-                // name of the context, currently same with contextid
-                if (name != null) {
-                    cs.setName(name);
-                }
-
-                cs.setEnabled(rs.getBoolean(3)); // enabled
-                int reason_id = rs.getInt(4); // reason
-                // CONTEXT STATE INFOS #
-                if (-1 != reason_id) {
-                    cs.setMaintenanceReason(new MaintenanceReason(reason_id));
-                }
-                cs.setFilestoreId(rs.getInt(5)); // filestore_id
-                cs.setFilestore_name(rs.getString(6)); // filestorename
-                long quota_max = rs.getLong(7); // quota max
-                if (quota_max != -1) {
-                    quota_max /= Math.pow(2, 20);
-                    // set quota max also in context setup object
-                    cs.setMaxQuota(quota_max);
-                }
-                final String db_schema = rs.getString(10); // db_schema
-                if (null != db_schema) {
-                    cs.setReadDatabase(new Database(rs.getInt(9), db_schema)); // read_db_pool_id
-                    cs.setWriteDatabase(new Database(rs.getInt(8), db_schema)); // write_db_pool_id
-                }
-                mapping.setInt(1, context_id);
-                rs2 = mapping.executeQuery();
-                while (rs2.next()) {
-                        String login_mapping = rs2.getString(1);
-                        // DO NOT RETURN THE CONTEXT ID AS A MAPPING!!
-                        // THIS CAN CAUSE ERRORS IF CHANGING LOGINMAPPINGS AFTERWARDS!
-                        // SEE #11094 FOR DETAILS!
-                        if(!cs.getIdAsString().equals(login_mapping)){
-                                cs.addLoginMapping(login_mapping);
-                        }
-                }
-                rs2.close();
-
-                PreparedStatement stmt2 = null;
-                Connection oxdb_read = null;
-                try {
-                    oxdb_read = cache.getConnectionForContext(context_id);
-                    stmt2 = oxdb_read.prepareStatement("SELECT filestore_usage.used FROM filestore_usage WHERE filestore_usage.cid = ?");
-                    stmt2.setInt(1, context_id);
-                    rs2 = stmt2.executeQuery();
-                    long quota_used = 0;
-                    if (rs2.next()) {
-                        quota_used = rs2.getLong(1);
-                    }
-                    quota_used /= Math.pow(2, 20);
-                    // set used quota in context setup
-                    cs.setUsedQuota(quota_used);
-                } finally {
-                    closePreparedStatement(stmt2);
-                    if (null != oxdb_read) {
-                        cache.pushConnectionForContext(context_id, oxdb_read);
-                    }
-                }
-
-                cs.setAverage_size(Long.parseLong(prop.getProp("AVERAGE_CONTEXT_SIZE", "100")));
-
-                cs.setListrun(true);
-                list.add(cs);
-            }
-
-            return list.toArray(new Context[list.size()]);
-        } catch (final SQLException e) {
-            LOG.error("SQL Error", e);
-            throw new StorageException(e);
-        } catch (final PoolException e) {
-            LOG.error("Pool Error", e);
-            throw new StorageException(e);
-        } finally {
-            closePreparedStatement(stmt);
-            closePreparedStatement(mapping);
-            closeRecordset(rs);
-            closeRecordset(rs2);
-            try {
-                if (configdb_read != null) {
-                    cache.pushConnectionForConfigDB(configdb_read);
-                }
-            } catch (final PoolException exp) {
-                LOG.error("Error pushing configdb connection to pool!", exp);
-            }
+            threadPoolS = AdminServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
+        } catch (ServiceException e) {
+            throw new StorageException(e.getMessage(), e);
         }
+        ContextSearcher[] searchers = { new ContextSearcher(cache, "SELECT cid FROM context WHERE name LIKE ?", sqlPattern), new ContextSearcher(cache, "SELECT cid FROM context WHERE cid LIKE ?", sqlPattern), new ContextSearcher(cache, "SELECT cid FROM login2context WHERE login_info LIKE ?", sqlPattern) };
+        CompletionFuture<Collection<Integer>> completion = threadPoolS.invoke(searchers);
+        Set<Integer> cids = new HashSet<Integer>();
+        try {
+            for (int i = 0; i < searchers.length; i++) {
+                Future<Collection<Integer>> future = completion.take();
+                cids.addAll(future.get());
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new StorageException(e.getMessage(), e);
+        } catch (CancellationException e) {
+            throw new StorageException(e.getMessage(), e);
+        } catch (ExecutionException e) {
+             throw ThreadPools.launderThrowable(e, StorageException.class);
+        }
+        return contextCommon.loadContexts(cids, Long.parseLong(prop.getProp("AVERAGE_CONTEXT_SIZE", "100")));
     }
 
     @Override
