@@ -78,7 +78,7 @@ public class Bug16158Test extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        sessionData = new SessionData(10, 1);
+        sessionData = new SessionData(20, 1);
         threadPoolService = new SimThreadPoolService();
         sessionData.addThreadPoolService(threadPoolService);
         SessionIdGenerator idGenerator = new UUIDSessionIdGenerator();
