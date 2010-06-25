@@ -53,12 +53,6 @@ import javax.mail.Address;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
@@ -81,11 +75,8 @@ public class ActionEmail implements ActionService {
     public ProvisioningResponse handleAction(ProvisioningInformation provisioningInformation) throws ActionException {
     	ProvisioningResponse provisioningResponse = new ProvisioningResponse();
     	
-    	try {
-			Context ctx = ContextStorage.getStorageContext(provisioningInformation.getSession());
-			User user = UserStorage.getInstance().getUser(provisioningInformation.getSession().getUserId(), ctx);
-			
-			InternetAddress fromAddress = new InternetAddress(user.getMail(), true);
+    	try {		
+			InternetAddress fromAddress = new InternetAddress(provisioningInformation.getUser().getMail(), true);
 			if (!provisioningInformation.getMailFrom().trim().toUpperCase().equals("USER")) {
 				fromAddress = new InternetAddress(provisioningInformation.getMailFrom(), true);
 			}
@@ -93,7 +84,7 @@ public class ActionEmail implements ActionService {
 			final com.openexchange.mail.transport.TransportProvider provider =
 				com.openexchange.mail.transport.TransportProviderRegistry.getTransportProviderBySession(provisioningInformation.getSession(), 0);
 
-			ComposedMailMessage msg = provider.getNewComposedMailMessage(provisioningInformation.getSession(), ctx);
+			ComposedMailMessage msg = provider.getNewComposedMailMessage(provisioningInformation.getSession(), provisioningInformation.getCtx());
 			msg.addFrom(fromAddress);
 			msg.addTo(new InternetAddress(provisioningInformation.getTarget()));
 			msg.setSubject(provisioningInformation.getMailSubject());
@@ -113,10 +104,6 @@ public class ActionEmail implements ActionService {
 			provisioningResponse.setSuccess(true);
 		} catch (MailException e) {
 			logError("Couldn't send provisioning mail", e, provisioningResponse);
-		} catch (ContextException e) {
-			logError("Cannot find context for user", e, provisioningResponse);
-		} catch (LdapException e) {
-			logError("Cannot get user object", e, provisioningResponse);
 		} catch (AddressException e) {
 			logError("Target Spam email address cannot be parsed", e, provisioningResponse);
 		}

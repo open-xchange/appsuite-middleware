@@ -49,6 +49,8 @@
 
 package com.openexchange.mobility.provisioning.json.container;
 
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
 
 public class ProvisioningInformation {
@@ -59,16 +61,21 @@ public class ProvisioningInformation {
 	private String mailFrom;
 	private String mailSubject;
 	private ServerSession session;
-	
+	private Context ctx;
+	private User user;
+
 	public ProvisioningInformation(String target, String url,
 			String urlEncoding, String mailFrom, String mailSubject,
-			ServerSession session) {
+			ServerSession session, Context ctx, User user) {
+		super();
 		this.target = target;
 		this.url = url;
 		this.urlEncoding = urlEncoding;
 		this.mailFrom = mailFrom;
 		this.mailSubject = mailSubject;
 		this.session = session;
+		this.ctx = ctx;
+		this.user = user;
 	}
 
 	public String getTarget() {
@@ -118,5 +125,21 @@ public class ProvisioningInformation {
 	public void setSession(ServerSession session) {
 		this.session = session;
 	}
-		
+
+	public Context getCtx() {
+		return ctx;
+	}
+
+	public void setCtx(Context ctx) {
+		this.ctx = ctx;
+	}
+
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
+	}
+	
 }
