@@ -166,6 +166,10 @@ public final class StructureMailMessageParser {
      * +++++++++++++++++++ MEMBERS +++++++++++++++++++
      */
 
+    private boolean parseTNEFParts;
+
+    private boolean parseUUEncodedParts;
+
     private boolean stop;
 
     private boolean multipartDetected;
@@ -188,6 +192,28 @@ public final class StructureMailMessageParser {
      */
     public StructureMailMessageParser setInlineDetectorBehavior(final boolean strict) {
         inlineDetector = strict ? STRICT_DETECTOR : LENIENT_DETECTOR;
+        return this;
+    }
+
+    /**
+     * Sets whether TNEF parts should be parsed or not.
+     * 
+     * @param parseTNEFParts <code>true</code> to parse TNEF parts; otherwise <code>false</code>
+     * @return This parser with new behavior applied
+     */
+    public StructureMailMessageParser setParseTNEFParts(final boolean parseTNEFParts) {
+        this.parseTNEFParts = parseTNEFParts;
+        return this;
+    }
+
+    /**
+     * Sets whether UUEncoded parts should be parsed or not.
+     * 
+     * @param parseUUEncodedParts <code>true</code> to parse UUEncoded parts; otherwise <code>false</code>
+     * @return This parser with new behavior applied
+     */
+    public StructureMailMessageParser setParseUUEncodedParts(final boolean parseUUEncodedParts) {
+        this.parseUUEncodedParts = parseUUEncodedParts;
         return this;
     }
 
@@ -273,8 +299,8 @@ public final class StructureMailMessageParser {
         if (isText(lcct)) {
             if (isInline) {
                 final String content = readContent(mailPart, contentType);
-                final UUEncodedMultiPart uuencodedMP = new UUEncodedMultiPart(content);
-                if (uuencodedMP.isUUEncoded()) {
+                final UUEncodedMultiPart uuencodedMP = parseUUEncodedParts ? new UUEncodedMultiPart(content) : null;
+                if (parseUUEncodedParts && uuencodedMP.isUUEncoded()) {
                     /*
                      * UUEncoded content detected. Handle normal text.
                      */
@@ -370,7 +396,7 @@ public final class StructureMailMessageParser {
                     return;
                 }
             }
-        } else if (TNEFUtils.isTNEFMimeType(lcct)) {
+        } else if (parseTNEFParts && TNEFUtils.isTNEFMimeType(lcct)) {
             try {
                 /*
                  * Here go with TNEF encoded messages. Since TNEF library is based on JavaMail API we are forced to use JavaMail-specific
