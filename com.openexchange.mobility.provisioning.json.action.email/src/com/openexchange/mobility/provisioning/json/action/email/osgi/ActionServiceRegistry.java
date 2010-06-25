@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mobility.provisioning.json.osgi;
+package com.openexchange.mobility.provisioning.json.action.email.osgi;
 
 import com.openexchange.server.osgiservice.ServiceRegistry;
 

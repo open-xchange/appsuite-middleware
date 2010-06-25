@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mobility.provisioning.json.action;
+package com.openexchange.mobility.provisioning.json.action.email.impl;
 
 import javax.mail.Address;
 import javax.mail.internet.AddressException;
@@ -63,6 +63,8 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 import com.openexchange.mail.transport.MailTransport;
+import com.openexchange.mobility.provisioning.json.action.ActionException;
+import com.openexchange.mobility.provisioning.json.action.ActionService;
 import com.openexchange.mobility.provisioning.json.container.ProvisioningInformation;
 import com.openexchange.mobility.provisioning.json.container.ProvisioningResponse;
 import com.openexchange.mobility.provisioning.json.servlet.MobilityProvisioningServlet;

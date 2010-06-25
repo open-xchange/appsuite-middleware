@@ -47,9 +47,9 @@
  *
  */
 
-package com.openexchange.mobility.provisioning.json.osgi;
+package com.openexchange.mobility.provisioning.json.action.email.osgi;
 
-import static com.openexchange.mobility.provisioning.json.osgi.ActionServiceRegistry.getServiceRegistry;
+import static com.openexchange.mobility.provisioning.json.action.email.osgi.ActionServiceRegistry.getServiceRegistry;
 
 import java.util.Hashtable;
 
@@ -57,9 +57,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.mobility.provisioning.json.action.ActionEmail;
 import com.openexchange.mobility.provisioning.json.action.ActionService;
 import com.openexchange.mobility.provisioning.json.action.ActionTypes;
+import com.openexchange.mobility.provisioning.json.action.email.impl.ActionEmail;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 
