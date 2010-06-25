@@ -120,6 +120,7 @@ public final class MailAPITestSuite extends TestSuite {
 		mailSuite.addTestSuite(com.openexchange.mail.structure.MailMultipartMixedStructureTest.class);
 		mailSuite.addTestSuite(com.openexchange.mail.structure.MailNestedMessageStructureTest.class);
 		mailSuite.addTestSuite(com.openexchange.mail.structure.MailTNEFStructureTest.class);
+		mailSuite.addTestSuite(com.openexchange.mail.structure.MailUUEncodedStructureTest.class);
 		return mailSuite;
 	}
 }
