@@ -49,13 +49,13 @@
 
 package com.openexchange.mobility.provisioning.json.action;
 
-import com.openexchange.session.Session;
-
+import com.openexchange.mobility.provisioning.json.container.ProvisioningInformation;
+import com.openexchange.mobility.provisioning.json.container.ProvisioningResponse;
 
 public class ActionSMS implements ActionService {
 
-    public String handleAction(String target, Session session) throws ActionException {
-    	return "";
+    public ProvisioningResponse handleAction(ProvisioningInformation provisioningInformation) throws ActionException {
+    	return new ProvisioningResponse();
     }
 
 }

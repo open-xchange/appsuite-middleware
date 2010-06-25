@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,12 +47,76 @@
  *
  */
 
-package com.openexchange.mobility.provisioning.json.action;
+package com.openexchange.mobility.provisioning.json.container;
 
-import com.openexchange.mobility.provisioning.json.container.ProvisioningInformation;
+import com.openexchange.tools.session.ServerSession;
 
-public interface ActionService {
-    
-    public com.openexchange.mobility.provisioning.json.container.ProvisioningResponse handleAction(ProvisioningInformation provisioningInformation) throws ActionException;
+public class ProvisioningInformation {
 
+	private String target;
+	private String url;
+	private String urlEncoding;
+	private String mailFrom;
+	private String mailSubject;
+	private ServerSession session;
+	
+	public ProvisioningInformation(String target, String url,
+			String urlEncoding, String mailFrom, String mailSubject,
+			ServerSession session) {
+		this.target = target;
+		this.url = url;
+		this.urlEncoding = urlEncoding;
+		this.mailFrom = mailFrom;
+		this.mailSubject = mailSubject;
+		this.session = session;
+	}
+
+	public String getTarget() {
+		return target;
+	}
+	
+	public void setTarget(String target) {
+		this.target = target;
+	}
+	
+	public String getUrl() {
+		return url;
+	}
+	
+	public void setUrl(String url) {
+		this.url = url;
+	}
+	
+	public String getUrlEncoding() {
+		return urlEncoding;
+	}
+	
+	public void setUrlEncoding(String urlEncoding) {
+		this.urlEncoding = urlEncoding;
+	}
+	
+	public String getMailFrom() {
+		return mailFrom;
+	}
+	
+	public void setMailFrom(String mailFrom) {
+		this.mailFrom = mailFrom;
+	}
+	
+	public String getMailSubject() {
+		return mailSubject;
+	}
+	
+	public void setMailSubject(String mailSubject) {
+		this.mailSubject = mailSubject;
+	}
+	
+	public ServerSession getSession() {
+		return session;
+	}
+	
+	public void setSession(ServerSession session) {
+		this.session = session;
+	}
+		
 }

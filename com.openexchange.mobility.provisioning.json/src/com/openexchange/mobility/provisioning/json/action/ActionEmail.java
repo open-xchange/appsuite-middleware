@@ -49,9 +49,6 @@
 
 package com.openexchange.mobility.provisioning.json.action;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-
 import javax.mail.Address;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
@@ -66,10 +63,9 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 import com.openexchange.mail.transport.MailTransport;
-import com.openexchange.mobility.provisioning.json.configuration.MobilityProvisioningConfiguration;
+import com.openexchange.mobility.provisioning.json.container.ProvisioningInformation;
+import com.openexchange.mobility.provisioning.json.container.ProvisioningResponse;
 import com.openexchange.mobility.provisioning.json.servlet.MobilityProvisioningServlet;
-import com.openexchange.server.ServiceException;
-import com.openexchange.session.Session;
 
 /**
  * 
@@ -80,64 +76,56 @@ public class ActionEmail implements ActionService {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MobilityProvisioningServlet.class);
 	
-    public String handleAction(String target, Session session) throws ActionException {
-    	String message = "";
+    public ProvisioningResponse handleAction(ProvisioningInformation provisioningInformation) throws ActionException {
+    	ProvisioningResponse provisioningResponse = new ProvisioningResponse();
     	
     	try {
-			Context ctx = ContextStorage.getStorageContext(session);
-			User user = UserStorage.getInstance().getUser(session.getUserId(), ctx);
+			Context ctx = ContextStorage.getStorageContext(provisioningInformation.getSession());
+			User user = UserStorage.getInstance().getUser(provisioningInformation.getSession().getUserId(), ctx);
 			
 			InternetAddress fromAddress = new InternetAddress(user.getMail(), true);
-			if (!MobilityProvisioningConfiguration.getProvisioningMailFrom().trim().toUpperCase().equals("USER")) {
-				fromAddress = new InternetAddress(MobilityProvisioningConfiguration.getProvisioningMailFrom(), true);
+			if (!provisioningInformation.getMailFrom().trim().toUpperCase().equals("USER")) {
+				fromAddress = new InternetAddress(provisioningInformation.getMailFrom(), true);
 			}
 
 			final com.openexchange.mail.transport.TransportProvider provider =
-				com.openexchange.mail.transport.TransportProviderRegistry.getTransportProviderBySession(session, 0);
+				com.openexchange.mail.transport.TransportProviderRegistry.getTransportProviderBySession(provisioningInformation.getSession(), 0);
 
-			ComposedMailMessage msg = provider.getNewComposedMailMessage(session, ctx);
+			ComposedMailMessage msg = provider.getNewComposedMailMessage(provisioningInformation.getSession(), ctx);
 			msg.addFrom(fromAddress);
-			msg.addTo(new InternetAddress(target));
-			msg.setSubject(MobilityProvisioningConfiguration.getProvisioningMailSubject());
-
-			String provisioningUrl = MobilityProvisioningConfiguration.getProvisioningURL();
-			provisioningUrl = provisioningUrl.replace("%l", URLEncoder.encode(session.getLogin(), MobilityProvisioningConfiguration.getProvisioningURLEncoding()));
-			provisioningUrl = provisioningUrl.replace("%c", URLEncoder.encode(String.valueOf(session.getContextId()), MobilityProvisioningConfiguration.getProvisioningURLEncoding()));
-			provisioningUrl = provisioningUrl.replace("%u", URLEncoder.encode(session.getUserlogin(), MobilityProvisioningConfiguration.getProvisioningURLEncoding()));
-			provisioningUrl = provisioningUrl.replace("%p", URLEncoder.encode(user.getMail(), MobilityProvisioningConfiguration.getProvisioningURLEncoding()));
+			msg.addTo(new InternetAddress(provisioningInformation.getTarget()));
+			msg.setSubject(provisioningInformation.getMailSubject());
 			
-			final TextBodyMailPart textPart = provider.getNewTextBodyPart(provisioningUrl);
+			final TextBodyMailPart textPart = provider.getNewTextBodyPart(provisioningInformation.getUrl());
 			msg.setBodyPart(textPart);
 			msg.setContentType("text/plain");
 
-			final MailTransport transport = MailTransport.getInstance(session);
+			final MailTransport transport = MailTransport.getInstance(provisioningInformation.getSession());
 			try {
-				transport.sendMailMessage(msg, com.openexchange.mail.dataobjects.compose.ComposeType.NEW, new Address[] { new InternetAddress(target) });
+				transport.sendMailMessage(msg, com.openexchange.mail.dataobjects.compose.ComposeType.NEW, new Address[] { new InternetAddress(provisioningInformation.getTarget()) });
 			} finally {
 				transport.close();
 			}
 			
-			message = "Provisioning mail has been send to " + target;
+			provisioningResponse.setMessage("Provisioning mail has been send to " + provisioningInformation.getTarget());
+			provisioningResponse.setSuccess(true);
 		} catch (MailException e) {
-			message = logError("Couldn't send provisioning mail", e);
+			logError("Couldn't send provisioning mail", e, provisioningResponse);
 		} catch (ContextException e) {
-			message = logError("Cannot find context for user", e);
+			logError("Cannot find context for user", e, provisioningResponse);
 		} catch (LdapException e) {
-			message = logError("Cannot get user object", e);
+			logError("Cannot get user object", e, provisioningResponse);
 		} catch (AddressException e) {
-			message = logError("Target Spam email address cannot be parsed", e);
-		} catch (ServiceException e) {
-			message = logError("Cannot get configuration", e);
-		} catch (UnsupportedEncodingException e) {
-			message = logError("Error on correcting provisioning url", e);
+			logError("Target Spam email address cannot be parsed", e, provisioningResponse);
 		}
     	
-    	return message;
+    	return provisioningResponse;
     }
     
-    private String logError(String message, Exception e) {
+    private void logError(String message, Exception e, ProvisioningResponse provisioningResponse) {
     	LOG.error(message, e);
-    	return message;
+    	provisioningResponse.setMessage(message);
+    	provisioningResponse.setSuccess(false);
     }
 	
 }

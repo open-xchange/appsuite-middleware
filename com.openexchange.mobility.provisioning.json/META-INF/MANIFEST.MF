@@ -43,4 +43,5 @@ Import-Package: com.openexchange.ajax,
 Require-Bundle: com.openexchange.server,
  com.openexchange.common
 Export-Package: com.openexchange.mobility.provisioning.json.action,
+ com.openexchange.mobility.provisioning.json.container,
  com.openexchange.mobility.provisioning.json.servlet

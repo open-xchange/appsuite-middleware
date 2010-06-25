@@ -50,6 +50,7 @@
 package com.openexchange.mobility.provisioning.json.servlet;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -62,11 +63,21 @@ import org.json.JSONObject;
 import com.openexchange.ajax.PermissionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mobility.provisioning.json.action.ActionException;
 import com.openexchange.mobility.provisioning.json.action.ActionService;
 import com.openexchange.mobility.provisioning.json.action.ActionTypes;
 import com.openexchange.mobility.provisioning.json.action.Actions;
+import com.openexchange.mobility.provisioning.json.configuration.MobilityProvisioningConfiguration;
+import com.openexchange.mobility.provisioning.json.container.ProvisioningInformation;
+import com.openexchange.mobility.provisioning.json.container.ProvisioningResponse;
 import com.openexchange.mobility.provisioning.json.osgi.MobilityProvisioningServiceRegistry;
+import com.openexchange.server.ServiceException;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.session.ServerSession;
 
@@ -80,7 +91,7 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 1541427953784271108L;
+	private static final long serialVersionUID = 8555223354984992000L;
 	
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MobilityProvisioningServlet.class);
 
@@ -159,9 +170,6 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 				
 				obj.put("services", services);
 			} else {
-				boolean success = false;
-				String message = "Couldn't send provisioning message.";
-				
 				final ActionService service;
 				
 				if (action.equals(Actions.ACTION_EMAIL)) {
@@ -173,24 +181,50 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 				} else {
 					service = null;
 				}
-				
+
+				ProvisioningResponse provisioningResponse = null;
 			    if (service != null) {
 			    	try {
-			    		message = service.handleAction(JSONUtility.checkStringParameter(request, "target"), session);
-			    		success = true;
+						Context ctx = ContextStorage.getStorageContext(session);
+						User user = UserStorage.getInstance().getUser(session.getUserId(), ctx);
+				
+						String url = MobilityProvisioningConfiguration.getProvisioningURL();
+						url = url.replace("%l", URLEncoder.encode(session.getLogin(), MobilityProvisioningConfiguration.getProvisioningURLEncoding()));
+						url = url.replace("%c", URLEncoder.encode(String.valueOf(session.getContextId()), MobilityProvisioningConfiguration.getProvisioningURLEncoding()));
+						url = url.replace("%u", URLEncoder.encode(session.getUserlogin(), MobilityProvisioningConfiguration.getProvisioningURLEncoding()));
+						url = url.replace("%p", URLEncoder.encode(user.getMail(), MobilityProvisioningConfiguration.getProvisioningURLEncoding()));
+			    		
+						ProvisioningInformation provisioningInformation = new com.openexchange.mobility.provisioning.json.container.ProvisioningInformation(
+								JSONUtility.checkStringParameter(request, "target"), url,
+								MobilityProvisioningConfiguration.getProvisioningURLEncoding(),
+								MobilityProvisioningConfiguration.getProvisioningMailFrom(),
+								MobilityProvisioningConfiguration.getProvisioningMailSubject(),
+								session);
+						
+			    		provisioningResponse = service.handleAction(provisioningInformation);
 			    	} catch (ActionException e) {
+						// TODO Auto-generated catch block
 			    		e.printStackTrace();
-			    	}
+			    	} catch (ContextException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (LdapException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (ServiceException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 			    } else {
-			    	message = "Service " + action + " provisioning is not available.";
+			    	provisioningResponse = new ProvisioningResponse(false, "Service " + action + " provisioning is not available.");
 			    }
 			    
-				if (message.trim().length() <= 0) {
-					message = "Couldn't send provisioning message.";
+				if (provisioningResponse == null) {
+					provisioningResponse = new ProvisioningResponse(false, "Unkown error");
 				}
 
-				obj.put("success", success);
-				obj.put("message", message);
+				obj.put("success", provisioningResponse.isSuccess());
+				obj.put("message", provisioningResponse.getMessage());
 			}
 		} catch (AjaxException e) {
 			LOG.error("Missing or wrong field action in JSON request", e);

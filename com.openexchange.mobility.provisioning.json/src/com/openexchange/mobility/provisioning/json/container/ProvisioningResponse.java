@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,12 +47,37 @@
  *
  */
 
-package com.openexchange.mobility.provisioning.json.action;
+package com.openexchange.mobility.provisioning.json.container;
 
-import com.openexchange.mobility.provisioning.json.container.ProvisioningInformation;
+public class ProvisioningResponse {
 
-public interface ActionService {
-    
-    public com.openexchange.mobility.provisioning.json.container.ProvisioningResponse handleAction(ProvisioningInformation provisioningInformation) throws ActionException;
+	private boolean success;
+	private String message;
+	
+	public ProvisioningResponse() {
+		this.success = false;
+		this.message = "";
+	}
 
+	public ProvisioningResponse(boolean success, String message) {
+		this.success = success;
+		this.message = message;
+	}
+
+	public boolean isSuccess() {
+		return success;
+	}
+
+	public void setSuccess(boolean success) {
+		this.success = success;
+	}
+
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
+	}	
+	
 }
