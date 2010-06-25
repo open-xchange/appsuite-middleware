@@ -127,9 +127,13 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 				if (MobilityProvisioningServiceRegistry.getInstance().containsService(ActionTypes.OTHER)) {
 					services.put(Actions.ACTION_OTHER);
 				}
+				
+				obj.put("services", services);
 			}
 		} catch (AjaxException e) {
 			LOG.error("Missing or wrong field action in JSON request", e);
+		} catch (final JSONException e) {
+			LOG.error(e.getLocalizedMessage(), e);
 		}
 		
 		response.setData(obj);
