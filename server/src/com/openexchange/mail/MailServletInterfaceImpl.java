@@ -1255,7 +1255,26 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 mail.setFlag(MailMessage.FLAG_DRAFT, true);
             }
         }
-        return mailAccess.getMessageStorage().appendMessages(fullname, mails);
+        
+        IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
+        ArrayList<String> idList = new ArrayList<String>();
+        for (MailMessage mail : mails) {
+            try {
+                String[] idStr = messageStorage.appendMessages(fullname, new MailMessage[] {mail});
+                idList.add(idStr[0]);
+            } catch (MailException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+        
+        String[] ids = new String[idList.size()];
+        for (int i = 0; i < idList.size(); i++) {
+            ids[i] = idList.get(i);
+        }
+        
+        return ids;
+        
+//        return mailAccess.getMessageStorage().appendMessages(fullname, mails);
     }
 
     @Override
