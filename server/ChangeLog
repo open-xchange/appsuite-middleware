@@ -1,6 +1,7 @@
 * 2010-06-25 - thorben.betten@open-xchange.com
 
  - Bugfix #16360: No parsing of TNEF attachments when writing as structured JSON object
+ - Bugfix #16273: No parsing of UUEncoded attachments (by default) when writing as structured JSON object
 
 * 2010-06-22 - tobias.prinz@open-xchange.com
 

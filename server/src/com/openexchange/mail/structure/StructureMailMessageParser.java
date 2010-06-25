@@ -304,27 +304,50 @@ public final class StructureMailMessageParser {
                     /*
                      * UUEncoded content detected. Handle normal text.
                      */
-                    if (!handler.handleInlineUUEncodedPlainText(
-                        uuencodedMP.getCleanText(),
-                        contentType,
-                        uuencodedMP.getCleanText().length(),
-                        filename,
-                        getSequenceId(prefix, partCount))) {
-                        stop = true;
-                        return;
-                    }
-                    /*
-                     * Now handle uuencoded attachments
-                     */
                     final int count = uuencodedMP.getCount();
-                    for (int a = 0; a < count; a++) {
+                    if (count > 0) {
                         /*
-                         * Increment part count by 1
+                         * Handle as a multipart
                          */
-                        partCount++;
-                        if (!handler.handleInlineUUEncodedAttachment(uuencodedMP.getBodyPart(a), StructureMailMessageParser.getSequenceId(
-                            prefix,
-                            partCount))) {
+                        if (!handler.handleMultipartStart(new ContentType("multipart/mixed"), count, prefix)) {
+                            stop = true;
+                            return;
+                        }
+                        if (!handler.handleInlineUUEncodedPlainText(
+                            uuencodedMP.getCleanText(),
+                            contentType,
+                            uuencodedMP.getCleanText().length(),
+                            filename,
+                            getSequenceId(prefix, partCount))) {
+                            stop = true;
+                            return;
+                        }
+                        /*
+                         * Now handle uuencoded attachments
+                         */
+                        for (int a = 0; a < count; a++) {
+                            /*
+                             * Increment part count by 1
+                             */
+                            partCount++;
+                            if (!handler.handleInlineUUEncodedAttachment(uuencodedMP.getBodyPart(a), StructureMailMessageParser.getSequenceId(
+                                prefix,
+                                partCount))) {
+                                stop = true;
+                                return;
+                            }
+                        }
+                        if (!handler.handleMultipartEnd()) {
+                            stop = true;
+                            return;
+                        }
+                    } else {
+                        if (!handler.handleInlineUUEncodedPlainText(
+                            uuencodedMP.getCleanText(),
+                            contentType,
+                            uuencodedMP.getCleanText().length(),
+                            filename,
+                            getSequenceId(prefix, partCount))) {
                             stop = true;
                             return;
                         }
@@ -362,7 +385,7 @@ public final class StructureMailMessageParser {
             if (!mailPart.containsSequenceId()) {
                 mailPart.setSequenceId(mpId);
             }
-            if (!handler.handleMultipartStart(mailPart, count, mpId)) {
+            if (!handler.handleMultipartStart(mailPart.getContentType(), count, mpId)) {
                 stop = true;
                 return;
             }
@@ -377,7 +400,7 @@ public final class StructureMailMessageParser {
                 final MailPart enclosedContent = mailPart.getEnclosedMailPart(i);
                 parseMailContent(enclosedContent, handler, mpPrefix, i + 1);
             }
-            if (!handler.handleMultipartEnd(mailPart, count, mpId)) {
+            if (!handler.handleMultipartEnd()) {
                 stop = true;
                 return;
             }

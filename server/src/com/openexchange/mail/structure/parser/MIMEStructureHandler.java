@@ -301,7 +301,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         return true;
     }
 
-    public boolean handleMultipartStart(final MailPart mp, final int bodyPartCount, final String id) throws MailException {
+    public boolean handleMultipartStart(final ContentType contentType, final int bodyPartCount, final String id) throws MailException {
         try {
             // Increment
             if (++multipartCount > 1) { // Enqueue nested multipart
@@ -315,8 +315,24 @@ public final class MIMEStructureHandler implements StructureHandler {
                 currentBodyObject = null;
                 // Add multipart's headers
                 final Map<String, String> headers = new HashMap<String, String>(1);
-                headers.put(CONTENT_TYPE, mp.getContentType().toString());
+                headers.put(CONTENT_TYPE, contentType.toString());
                 generateHeadersObject(headers.entrySet().iterator(), currentMailObject);
+            } else {
+                /*
+                 * Ensure proper content type
+                 */
+                final JSONObject headers = currentMailObject.getJSONObject(KEY_HEADERS);
+                if (null == headers) {
+                    // Add multipart's headers
+                    final Map<String, String> headersMap = new HashMap<String, String>(1);
+                    headersMap.put(CONTENT_TYPE, contentType.toString());
+                    generateHeadersObject(headersMap.entrySet().iterator(), currentMailObject);
+                } else {
+                    // Set content type in existing headers
+                    headers.put(CONTENT_TYPE, generateParameterizedHeader(
+                        contentType,
+                        contentType.getBaseType().toLowerCase(Locale.ENGLISH)));
+                }
             }
             return true;
         } catch (final JSONException e) {
@@ -324,7 +340,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         }
     }
 
-    public boolean handleMultipartEnd(final MailPart mp, final int bodyPartCount, final String id) throws MailException {
+    public boolean handleMultipartEnd() throws MailException {
         // Decrement
         if (--multipartCount > 0) { // Dequeue nested multipart
             // Dequeue
@@ -693,7 +709,9 @@ public final class MIMEStructureHandler implements StructureHandler {
                 paramListJsonObject.put(paramName.toLowerCase(Locale.ENGLISH), parameterizedHeader.getParameter(paramName));
             }
         }
-        parameterJsonObject.put("params", paramListJsonObject);
+        if (paramListJsonObject.length() > 0) {
+            parameterJsonObject.put("params", paramListJsonObject);
+        }
         return parameterJsonObject;
     }
 

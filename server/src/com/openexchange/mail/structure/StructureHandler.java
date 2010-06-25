@@ -72,9 +72,9 @@ public interface StructureHandler {
 
     boolean handleInlineUUEncodedPlainText(final String decodedTextContent, final ContentType contentType, final int size, final String fileName, final String id) throws MailException;
 
-    boolean handleMultipartStart(final MailPart mp, final int bodyPartCount, final String id) throws MailException;
+    boolean handleMultipartStart(final ContentType contentType, final int bodyPartCount, final String id) throws MailException;
 
-    boolean handleMultipartEnd(final MailPart mp, final int bodyPartCount, final String id) throws MailException;
+    boolean handleMultipartEnd() throws MailException;
 
     boolean handleNestedMessage(final MailPart mailPart, final String id) throws MailException;
 
