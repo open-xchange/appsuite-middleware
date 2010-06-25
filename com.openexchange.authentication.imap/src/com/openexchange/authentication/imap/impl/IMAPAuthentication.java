@@ -149,7 +149,6 @@ public class IMAPAuthentication implements AuthenticationService {
 
             final String[] splitted = split(loginInfo.getUsername());
 
-            final String context_or_domain = splitted[0];
             final String uid = splitted[1];
             String password = loginInfo.getPassword();
             if ("".equals(uid.trim()) || "".equals(password.trim())) {
@@ -196,7 +195,7 @@ public class IMAPAuthentication implements AuthenticationService {
 
             // set imap username
             if (use_full_login) {
-                user = uid + "@" + context_or_domain;
+                user = uid + "@" + splitted[0];
             } else {
                 user = uid;
             }
@@ -324,8 +323,7 @@ public class IMAPAuthentication implements AuthenticationService {
              * full login was configured, we assume that only 1 context is in the system which is named "defaultcontext".
              */
             if (use_full_login) {
-                LOG.debug("Using domain: " + context_or_domain + " as context name!");
-                splitted[0] = context_or_domain;
+                LOG.debug("Using domain: " + splitted[0] + " as context name!");
             } else {
                 LOG.debug("Using \"defaultcontext\" as context name!");
                 splitted[0] = "defaultcontext";
