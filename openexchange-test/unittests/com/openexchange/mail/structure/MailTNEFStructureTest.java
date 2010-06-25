@@ -228,7 +228,7 @@ public class MailTNEFStructureTest extends AbstractMailTest {
                 final Object bodyObject = jsonMailObject.opt("body");
                 assertNotNull("Missing mail body.", bodyObject);
 
-                assertTrue("Body object is not a JSON object.", (bodyObject instanceof JSONArray));
+                assertTrue("Body object is not a JSON array.", (bodyObject instanceof JSONArray));
                 jsonBodyObject = (JSONArray) bodyObject;
             }
             
