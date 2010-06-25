@@ -72,7 +72,6 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mobility.provisioning.json.action.ActionException;
 import com.openexchange.mobility.provisioning.json.action.ActionService;
 import com.openexchange.mobility.provisioning.json.action.ActionTypes;
-import com.openexchange.mobility.provisioning.json.action.Actions;
 import com.openexchange.mobility.provisioning.json.configuration.MobilityProvisioningConfiguration;
 import com.openexchange.mobility.provisioning.json.container.ProvisioningInformation;
 import com.openexchange.mobility.provisioning.json.container.ProvisioningResponse;
@@ -116,16 +115,16 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 
 		try {
 			String action = JSONUtility.checkStringParameter(request, "action");
-			if (action.equals(Actions.ACTION_LISTSERVICES)) {
+			if (action.equals(ActionTypes.LISTSERVICES.code)) {
 				JSONArray services = new JSONArray();
 				if (MobilityProvisioningServiceRegistry.getInstance().containsService(ActionTypes.EMAIL)) {
-					services.put(Actions.ACTION_EMAIL);
+					services.put(ActionTypes.EMAIL.code);
 				}
 				if (MobilityProvisioningServiceRegistry.getInstance().containsService(ActionTypes.TELEPHONE)) {
-					services.put(Actions.ACTION_TELEPHONE);
+					services.put(ActionTypes.TELEPHONE.code);
 				}
 				if (MobilityProvisioningServiceRegistry.getInstance().containsService(ActionTypes.OTHER)) {
-					services.put(Actions.ACTION_OTHER);
+					services.put(ActionTypes.OTHER.code);
 				}
 				
 				obj.put("services", services);
@@ -160,27 +159,27 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 
 			String action = JSONUtility.checkStringParameter(request, "action");
 
-			if (action.equals(Actions.ACTION_LISTSERVICES)) {
+			if (action.equals(ActionTypes.LISTSERVICES.code)) {
 				JSONArray services = new JSONArray();
 				if (MobilityProvisioningServiceRegistry.getInstance().containsService(ActionTypes.EMAIL)) {
-					services.put(Actions.ACTION_EMAIL);
+					services.put(ActionTypes.EMAIL.code);
 				}
 				if (MobilityProvisioningServiceRegistry.getInstance().containsService(ActionTypes.TELEPHONE)) {
-					services.put(Actions.ACTION_TELEPHONE);
+					services.put(ActionTypes.TELEPHONE.code);
 				}
 				if (MobilityProvisioningServiceRegistry.getInstance().containsService(ActionTypes.OTHER)) {
-					services.put(Actions.ACTION_OTHER);
+					services.put(ActionTypes.OTHER.code);
 				}
 				
 				obj.put("services", services);
 			} else {
 				final ActionService service;
 				
-				if (action.equals(Actions.ACTION_EMAIL)) {
+				if (action.equals(ActionTypes.EMAIL.code)) {
 				    service = MobilityProvisioningServiceRegistry.getInstance().getActionService(ActionTypes.EMAIL);
-				} else if (action.equals(Actions.ACTION_TELEPHONE)) {
+				} else if (action.equals(ActionTypes.TELEPHONE.code)) {
 				    service = MobilityProvisioningServiceRegistry.getInstance().getActionService(ActionTypes.TELEPHONE);
-				} else if (action.equals(Actions.ACTION_OTHER)) {
+				} else if (action.equals(ActionTypes.OTHER.code)) {
 				    service = MobilityProvisioningServiceRegistry.getInstance().getActionService(ActionTypes.OTHER);
 				} else {
 					service = null;

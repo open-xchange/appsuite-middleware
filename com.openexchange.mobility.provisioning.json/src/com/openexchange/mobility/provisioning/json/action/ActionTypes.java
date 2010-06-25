@@ -56,8 +56,15 @@ package com.openexchange.mobility.provisioning.json.action;
  */
 public enum ActionTypes {
 
-	EMAIL,
-	TELEPHONE,
-	OTHER
+	LISTSERVICES("listservices"),
+	EMAIL("email"),
+	TELEPHONE("telephone"),
+	OTHER("other");
 	
+    public final String code;
+    
+    private ActionTypes(final String code) {
+        this.code = code; 
+    }
+    
 }
