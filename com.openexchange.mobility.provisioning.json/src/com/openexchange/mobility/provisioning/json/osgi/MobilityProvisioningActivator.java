@@ -52,7 +52,6 @@ package com.openexchange.mobility.provisioning.json.osgi;
 import static com.openexchange.mobility.provisioning.json.osgi.MobilityProvisioningServiceRegistry.getInstance;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -61,10 +60,7 @@ import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.mobility.provisioning.json.action.ActionEmail;
-import com.openexchange.mobility.provisioning.json.action.ActionSMS;
 import com.openexchange.mobility.provisioning.json.action.ActionService;
-import com.openexchange.mobility.provisioning.json.action.ActionTypes;
 import com.openexchange.server.osgiservice.DeferredActivator;
 
 /**
@@ -140,16 +136,6 @@ public class MobilityProvisioningActivator extends DeferredActivator {
             for (final ServiceTracker tracker : serviceTrackerList) {
                 tracker.open();
             }
-
-			// in the implementation
-	        final Hashtable<Object, ActionTypes> ht = new Hashtable<Object, ActionTypes>();
-	        ht.put("action", ActionTypes.TELEPHONE);
-	        context.registerService(ActionService.class.getName(), new ActionSMS(), ht);
-
-	        final Hashtable<Object, ActionTypes> ht2 = new Hashtable<Object, ActionTypes>();
-	        ht2.put("action", ActionTypes.EMAIL);
-	        context.registerService(ActionService.class.getName(), new ActionEmail(), ht2);
-	        
 		} catch (final Throwable t) {
 			LOG.error(t.getMessage(), t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);
