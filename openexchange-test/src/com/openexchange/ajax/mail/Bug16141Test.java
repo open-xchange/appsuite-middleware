@@ -54,6 +54,7 @@ import java.io.InputStream;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.UserValues;
+import com.openexchange.ajax.mail.actions.DeleteRequest;
 import com.openexchange.ajax.mail.actions.ImportMailRequest;
 import com.openexchange.ajax.mail.actions.ImportMailResponse;
 
@@ -72,6 +73,8 @@ public class Bug16141Test extends AbstractAJAXSession {
 
     private UserValues values;
     
+    private String[][] ids = null;
+    
     public Bug16141Test(String name) {
         super(name);
     }
@@ -89,8 +92,9 @@ public class Bug16141Test extends AbstractAJAXSession {
         InputStream[] is = createABunchOfMails();
         final ImportMailRequest importReq = new ImportMailRequest(folder, MailFlag.SEEN.getValue(), is);
         final ImportMailResponse importResp = client.execute(importReq);
+        ids = importResp.getIds();
         
-        assertTrue("Did not import all mails with correct headers.", importResp.getIds().length == 3);
+        assertTrue("Did not import all mails with correct headers.", ids.length == 3);
     }
     
     private InputStream[] createABunchOfMails() {        
@@ -135,13 +139,19 @@ public class Bug16141Test extends AbstractAJAXSession {
             "\n" +
             "I'm just some mail content...";
 
-        final ByteArrayInputStream mail[] = {new ByteArrayInputStream(workingMail_1.toString().getBytes()), new ByteArrayInputStream(workingMail_2.toString().getBytes()), new ByteArrayInputStream(brokenMail_1.toString().getBytes()), new ByteArrayInputStream(workingMail_3.toString().getBytes())};
+        final ByteArrayInputStream mail[] = {new ByteArrayInputStream(workingMail_1.toString().getBytes()), 
+            new ByteArrayInputStream(workingMail_2.toString().getBytes()), 
+            new ByteArrayInputStream(brokenMail_1.toString().getBytes()), 
+            new ByteArrayInputStream(workingMail_3.toString().getBytes())};
         
         return mail;
     }
     
     @Override
     public void tearDown() throws Exception {
+        if (ids != null) {
+            client.execute(new DeleteRequest(ids));
+        }
         super.tearDown();
     }
 
