@@ -87,10 +87,17 @@ public class ActionEmail implements ActionService {
 			ComposedMailMessage msg = provider.getNewComposedMailMessage(provisioningInformation.getSession(), provisioningInformation.getCtx());
 			msg.addFrom(fromAddress);
 			msg.addTo(new InternetAddress(provisioningInformation.getTarget()));
-			msg.setSubject(provisioningInformation.getMailSubject());
 			
-			final TextBodyMailPart textPart = provider.getNewTextBodyPart(provisioningInformation.getUrl());
-			msg.setBodyPart(textPart);
+			if (provisioningInformation.containsProvisioningEmailMessage(provisioningInformation.getUser().getLocale().toString())) {
+				msg.setSubject(provisioningInformation.getProvisioningEmailMessage(provisioningInformation.getUser().getLocale().toString()).getSubject());
+				
+				final TextBodyMailPart textPart = provider.getNewTextBodyPart(provisioningInformation.getProvisioningEmailMessage(provisioningInformation.getUser().getLocale().toString()).getMessage());
+				msg.setBodyPart(textPart);
+			} else {
+				final TextBodyMailPart textPart = provider.getNewTextBodyPart(provisioningInformation.getUrl());
+				msg.setBodyPart(textPart);
+			}
+						
 			msg.setContentType("text/plain");
 
 			final MailTransport transport = MailTransport.getInstance(provisioningInformation.getSession());

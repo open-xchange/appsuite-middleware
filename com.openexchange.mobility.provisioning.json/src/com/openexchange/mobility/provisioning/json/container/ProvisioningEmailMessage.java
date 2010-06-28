@@ -47,37 +47,55 @@
  *
  */
 
-package com.openexchange.mobility.provisioning.json.configuration;
+package com.openexchange.mobility.provisioning.json.container;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.mobility.provisioning.json.osgi.MobilityProvisioningServiceRegistry;
-import com.openexchange.server.ServiceException;
 
 /**
  * 
  * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
  * 
  */
-public class MobilityProvisioningConfiguration {
+public class ProvisioningEmailMessage {
 
-	public static String getProvisioningURL() throws ServiceException {
-		ConfigurationService configservice = MobilityProvisioningServiceRegistry.getInstance().getService(ConfigurationService.class,true);
-		return configservice.getProperty("com.openexchange.mobility.provisioning.url"); 
+	private String locale;
+	private String subject;
+	private String message;
+
+	public ProvisioningEmailMessage(String locale) {
+		this.locale = locale;
+		this.subject = "";
+		this.message = "";
 	}
 	
-	public static String getProvisioningURLEncoding() throws ServiceException {
-		ConfigurationService configservice = MobilityProvisioningServiceRegistry.getInstance().getService(ConfigurationService.class,true);
-		return configservice.getProperty("com.openexchange.mobility.provisioning.urlencoding"); 
-	}
-	
-	public static String getProvisioningMailFrom() throws ServiceException {
-		ConfigurationService configservice = MobilityProvisioningServiceRegistry.getInstance().getService(ConfigurationService.class,true);
-		return configservice.getProperty("com.openexchange.mobility.provisioning.mail.from"); 
+	public ProvisioningEmailMessage(String locale, String subject,
+			String message) {
+		this.locale = locale;
+		this.subject = subject;
+		this.message = message;
 	}
 
-	public static String getProvisioningMailSubject() throws ServiceException {
-		ConfigurationService configservice = MobilityProvisioningServiceRegistry.getInstance().getService(ConfigurationService.class,true);
-		return configservice.getProperty("com.openexchange.mobility.provisioning.mail.subject"); 
+	public String getLocale() {
+		return locale;
+	}
+
+	public void setLocale(String locale) {
+		this.locale = locale;
+	}
+
+	public String getSubject() {
+		return subject;
+	}
+
+	public void setSubject(String subject) {
+		this.subject = subject;
+	}
+
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
 	}
 	
 }

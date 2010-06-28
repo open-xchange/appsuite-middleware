@@ -49,6 +49,11 @@
 
 package com.openexchange.mobility.provisioning.json.container;
 
+/**
+ * 
+ * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
+ * 
+ */
 public class ProvisioningResponse {
 
 	private boolean success;

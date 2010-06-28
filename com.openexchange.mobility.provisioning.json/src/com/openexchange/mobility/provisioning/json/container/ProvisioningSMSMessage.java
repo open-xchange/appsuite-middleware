@@ -49,120 +49,41 @@
 
 package com.openexchange.mobility.provisioning.json.container;
 
-import java.util.HashMap;
-
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * 
  * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
  * 
  */
-public class ProvisioningInformation {
-	
-	private String target;
-	private String url;
-	private String urlEncoding;
-	private String mailFrom;
-	
-	private HashMap<String, ProvisioningEmailMessage> provisioningEmailMessages;
-	private HashMap<String, ProvisioningSMSMessage> provisioningSMSMessages;
-	
-	private ServerSession session;
-	private Context ctx;
-	private User user;
+public class ProvisioningSMSMessage {
 
-	public ProvisioningInformation(
-			String target,
-			String url,
-			String urlEncoding,
-			String mailFrom,
-			HashMap<String, ProvisioningEmailMessage> provisioningEmailMessages,
-			HashMap<String, ProvisioningSMSMessage> provisioningSMSMessages,
-			ServerSession session, Context ctx, User user) {
-		this.target = target;
-		this.url = url;
-		this.urlEncoding = urlEncoding;
-		this.mailFrom = mailFrom;
-		this.provisioningEmailMessages = provisioningEmailMessages;
-		this.provisioningSMSMessages = provisioningSMSMessages;
-		this.session = session;
-		this.ctx = ctx;
-		this.user = user;
-	}
+	private String locale;
+	private String smsText;
 
-	public String getTarget() {
-		return target;
+	public ProvisioningSMSMessage(String locale) {
+		this.locale = locale;
+		this.smsText = "";
 	}
 	
-	public void setTarget(String target) {
-		this.target = target;
+	public ProvisioningSMSMessage(String locale, String smsText) {
+		this.locale = locale;
+		this.smsText = smsText;
 	}
 	
-	public String getUrl() {
-		return url;
+	public String getLocale() {
+		return locale;
 	}
 	
-	public void setUrl(String url) {
-		this.url = url;
+	public void setLocale(String locale) {
+		this.locale = locale;
 	}
 	
-	public String getUrlEncoding() {
-		return urlEncoding;
+	public String getSmsText() {
+		return smsText;
 	}
 	
-	public void setUrlEncoding(String urlEncoding) {
-		this.urlEncoding = urlEncoding;
-	}
-	
-	public String getMailFrom() {
-		return mailFrom;
-	}
-	
-	public void setMailFrom(String mailFrom) {
-		this.mailFrom = mailFrom;
-	}
-	
-	public ServerSession getSession() {
-		return session;
-	}
-	
-	public void setSession(ServerSession session) {
-		this.session = session;
-	}
-
-	public Context getCtx() {
-		return ctx;
-	}
-
-	public void setCtx(Context ctx) {
-		this.ctx = ctx;
-	}
-
-	public User getUser() {
-		return user;
-	}
-
-	public void setUser(User user) {
-		this.user = user;
-	}
-	
-	public boolean containsProvisioningEmailMessage(String locale) {
-		return provisioningEmailMessages.containsKey(locale);
-	}
-	
-	public ProvisioningEmailMessage getProvisioningEmailMessage(String locale) {
-		return provisioningEmailMessages.get(locale);
-	}
-	
-	public boolean containsProvisioningSMSMessage(String locale) {
-		return provisioningSMSMessages.containsKey(locale);
-	}
-	
-	public ProvisioningSMSMessage getProvisioningSMSMessage(String locale) {
-		return provisioningSMSMessages.get(locale);
+	public void setSmsText(String smsText) {
+		this.smsText = smsText;
 	}
 	
 }

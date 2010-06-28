@@ -72,7 +72,6 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mobility.provisioning.json.action.ActionException;
 import com.openexchange.mobility.provisioning.json.action.ActionService;
 import com.openexchange.mobility.provisioning.json.action.ActionTypes;
-import com.openexchange.mobility.provisioning.json.configuration.MobilityProvisioningConfiguration;
 import com.openexchange.mobility.provisioning.json.container.ProvisioningInformation;
 import com.openexchange.mobility.provisioning.json.container.ProvisioningResponse;
 import com.openexchange.mobility.provisioning.json.osgi.MobilityProvisioningServiceRegistry;
@@ -151,7 +150,7 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 			final HttpServletResponse resp) throws ServletException,
 			IOException {
 		final Response response = new Response();
-
+		
 		JSONObject obj = new JSONObject();
 
 		try {
@@ -190,22 +189,24 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 			    	try {
 						Context ctx = ContextStorage.getStorageContext(session);
 						User user = UserStorage.getInstance().getUser(session.getUserId(), ctx);
-				
-						String url = MobilityProvisioningConfiguration.getProvisioningURL();
-						url = url.replace("%l", URLEncoder.encode(session.getLogin(), MobilityProvisioningConfiguration.getProvisioningURLEncoding()));
-						url = url.replace("%c", URLEncoder.encode(String.valueOf(session.getContextId()), MobilityProvisioningConfiguration.getProvisioningURLEncoding()));
-						url = url.replace("%u", URLEncoder.encode(session.getUserlogin(), MobilityProvisioningConfiguration.getProvisioningURLEncoding()));
-						url = url.replace("%p", URLEncoder.encode(user.getMail(), MobilityProvisioningConfiguration.getProvisioningURLEncoding()));
+
+						String url = MobilityProvisioningServletConfiguration.getProvisioningURL();
+						url = url.replace("%l", URLEncoder.encode(session.getLogin(), MobilityProvisioningServletConfiguration.getProvisioningURLEncoding()));
+						url = url.replace("%c", URLEncoder.encode(String.valueOf(session.getContextId()), MobilityProvisioningServletConfiguration.getProvisioningURLEncoding()));
+						url = url.replace("%u", URLEncoder.encode(session.getUserlogin(), MobilityProvisioningServletConfiguration.getProvisioningURLEncoding()));
+						url = url.replace("%p", URLEncoder.encode(user.getMail(), MobilityProvisioningServletConfiguration.getProvisioningURLEncoding()));
 			    		
 						ProvisioningInformation provisioningInformation = new com.openexchange.mobility.provisioning.json.container.ProvisioningInformation(
-								JSONUtility.checkStringParameter(request, "target"), url,
-								MobilityProvisioningConfiguration.getProvisioningURLEncoding(),
-								MobilityProvisioningConfiguration.getProvisioningMailFrom(),
-								MobilityProvisioningConfiguration.getProvisioningMailSubject(),
+								JSONUtility.checkStringParameter(request, "target"),
+								url,
+								MobilityProvisioningServletConfiguration.getProvisioningURLEncoding(),
+								MobilityProvisioningServletConfiguration.getProvisioningMailFrom(),
+								MobilityProvisioningServletConfiguration.getProvisioningEmailMessages(url),
+								MobilityProvisioningServletConfiguration.getProvisioningSMSMessages(url),
 								session,
 								ctx,
 								user);
-						
+												
 			    		provisioningResponse = service.handleAction(provisioningInformation);
 			    	} catch (ActionException e) {
 						// TODO Auto-generated catch block
