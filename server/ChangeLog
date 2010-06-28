@@ -4,6 +4,7 @@
  - Bugfix #16311: Proper parent identifier for shared database folders
  - Bugfix #16378: Checking empty list prior to generating IMAP number argument
  - Bugfix #16346: Added appropriate error message when authentication to SMTP server fails
+ - Bugfix #16385: i18n for global address book folder
 
 * 2010-06-25 - steffen.templin@open-xchange.com
 
