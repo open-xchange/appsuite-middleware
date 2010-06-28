@@ -98,6 +98,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.messaging.MailMessagingService;
+import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountException;
@@ -201,12 +202,12 @@ public final class OutlookFolderStorage implements FolderStorage {
                 if (started) {
                     folderStorage.rollback(storageParameters);
                 }
-                throw e;
+                LOG.warn("Checking consistency failed for tree " + treeId, e);
             } catch (final Exception e) {
                 if (started) {
                     folderStorage.rollback(storageParameters);
                 }
-                throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+                LOG.warn("Checking consistency failed for tree " + treeId, e);
             }
         } 
     }
@@ -1487,7 +1488,16 @@ public final class OutlookFolderStorage implements FolderStorage {
                     final Throwable cause = e.getCause();
                     if (cause instanceof MailException) {
                         final MailException me = (MailException) cause;
-                        if (MailException.Code.ACCOUNT_DOES_NOT_EXIST.getNumber() == me.getDetailNumber()) {
+                        final int number = me.getDetailNumber();
+                        if (MailException.Code.ACCOUNT_DOES_NOT_EXIST.getNumber() == number) {
+                            if (LOG.isDebugEnabled()) {
+                                LOG.debug(e.getMessage(), e);
+                            }
+                            /*
+                             * Return empty map
+                             */
+                            return new TreeMap<String, List<String>>(comparator);
+                        } else if (MIMEMailException.Code.INVALID_CREDENTIALS.getNumber() == number) {
                             if (LOG.isDebugEnabled()) {
                                 LOG.debug(e.getMessage(), e);
                             }
