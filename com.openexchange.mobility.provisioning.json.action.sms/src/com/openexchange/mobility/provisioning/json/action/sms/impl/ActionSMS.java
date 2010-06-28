@@ -49,34 +49,98 @@
 
 package com.openexchange.mobility.provisioning.json.action.sms.impl;
 
+import java.net.MalformedURLException;
+import java.util.Map;
+
+import org.apache.xmlrpc.XmlRpcException;
+
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.mobility.provisioning.json.action.ActionException;
 import com.openexchange.mobility.provisioning.json.action.ActionService;
+import com.openexchange.mobility.provisioning.json.action.sms.osgi.ActionServiceRegistry;
 import com.openexchange.mobility.provisioning.json.container.ProvisioningInformation;
 import com.openexchange.mobility.provisioning.json.container.ProvisioningResponse;
 import com.openexchange.mobility.provisioning.json.servlet.MobilityProvisioningServlet;
+import com.openexchange.server.ServiceException;
 
 /**
  * 
- * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
+ * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
  * 
  */
 public class ActionSMS implements ActionService {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MobilityProvisioningServlet.class);
-	
-    public ProvisioningResponse handleAction(ProvisioningInformation provisioningInformation) throws ActionException {
-    	ProvisioningResponse provisioningResponse = new ProvisioningResponse();
-    	
-    	provisioningResponse.setSuccess(true);
-    	provisioningResponse.setMessage("SMS transport is empty.");
-    	
-    	return provisioningResponse;
-    }
-    
-    private void logError(String message, Exception e, ProvisioningResponse provisioningResponse) {
-    	LOG.error(message, e);
-    	provisioningResponse.setMessage(message);
-    	provisioningResponse.setSuccess(false);
-    }
-	
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(MobilityProvisioningServlet.class);
+
+	public ProvisioningResponse handleAction(
+			ProvisioningInformation provisioningInformation)
+			throws ActionException {
+		ProvisioningResponse provisioningResponse = new ProvisioningResponse();
+		int cid = provisioningInformation.getCtx().getContextId();
+		int userid = provisioningInformation.getUser().getId();
+		// init sms
+		SMS smssend = new SMS();
+
+		// fix up number/remove leading 00, if number is incorrect
+		String to = provisioningInformation.getTarget(); // initial number
+		String to_formatted = null;
+		try {
+			// check number and set it to SMS object
+			to_formatted = smssend.checkAndFormatRecipient(to);
+			smssend.setSMSNumber(to_formatted);
+
+		} catch (Exception e) {
+			LOG.error("Invalid recipient detected. SMS to recipient "+ to_formatted + " (unformatted nr:" + to+ ") could not be send for user " + userid + " in context "+ cid, e);
+			provisioningResponse.setMessage("Invalid recipient number detected.");
+			provisioningResponse.setSuccess(false);
+		}
+
+		// set sipgate setting
+		smssend.setServerUrl(getFromConfig("com.openexchange.mobility.provisioning.json.action.sms.sipgat.api.url"));
+		smssend.setSipgateuser(getFromConfig("com.openexchange.mobility.provisioning.json.action.sms.sipgat.api.username"));
+		smssend.setSipgatepass(getFromConfig("com.openexchange.mobility.provisioning.json.action.sms.sipgat.api.password"));
+
+		// set prov. URL in SMS
+		smssend.setText(provisioningInformation.getUrl());
+
+		// send sms and check response code
+		try {
+			Map map = smssend.send();
+			if(smssend.wasSuccessfull()){
+				provisioningResponse.setMessage("SMS sent successfully...");
+				provisioningResponse.setSuccess(true);
+				LOG.info("SMS to recipient " + to_formatted + " (unformatted nr:" + to+ ") sent successfully for user " + userid + " in context "+ cid);
+			}else{
+				smssend.getErrorMessage();
+				provisioningResponse.setMessage("SMS could not be sent. Details: "+smssend.getErrorMessage());
+				provisioningResponse.setSuccess(false);
+				LOG.error("API error occured while sending sms to recipient " + to_formatted + " (unformatted nr:" + to+ ")  for user " + userid + " in context "+ cid);
+			}
+		} catch (MalformedURLException e) {
+			LOG.error("internal error occured while sending sms to recipient " + to_formatted + " (unformatted nr:" + to+ ")  for user " + userid + " in context "+ cid,e);
+			provisioningResponse.setMessage("Internal error occured while sending SMS...");
+			provisioningResponse.setSuccess(false);
+		} catch (XmlRpcException e) {
+			LOG.error("internal error occured while sending sms to recipient " + to_formatted + " (unformatted nr:" + to+ ")  for user " + userid + " in context "+ cid,e);
+			provisioningResponse.setMessage("Internal error occured while sending SMS...");
+			provisioningResponse.setSuccess(false);
+		}
+		
+		
+		return provisioningResponse;
+	}
+
+	private String getFromConfig(String key) {
+		ConfigurationService configservice;
+		String retval = null;
+		try {
+			configservice = ActionServiceRegistry.getServiceRegistry().getService(ConfigurationService.class, true);
+			retval = configservice.getProperty(key);
+		} catch (ServiceException e) {
+			LOG.error("value for key " + key + " was not found for ACTIONSMS configuration");
+		}
+		return retval;
+	}
+
 }
