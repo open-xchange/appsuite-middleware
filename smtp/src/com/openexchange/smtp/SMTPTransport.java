@@ -427,14 +427,18 @@ public final class SMTPTransport extends MailTransport {
              */
             final long start = System.currentTimeMillis();
             final Transport transport = getSMTPSession().getTransport(SMTPProvider.PROTOCOL_SMTP.getName());
-            if (smtpConfig.getSMTPProperties().isSmtpAuth()) {
-                transport.connect(
-                    smtpConfig.getServer(),
-                    smtpConfig.getPort(),
-                    smtpConfig.getLogin(),
-                    encodePassword(smtpConfig.getPassword()));
-            } else {
-                transport.connect();
+            try {
+                if (smtpConfig.getSMTPProperties().isSmtpAuth()) {
+                    transport.connect(
+                        smtpConfig.getServer(),
+                        smtpConfig.getPort(),
+                        smtpConfig.getLogin(),
+                        encodePassword(smtpConfig.getPassword()));
+                } else {
+                    transport.connect();
+                }
+            } catch (final javax.mail.AuthenticationFailedException e) {
+                throw new MIMEMailException(MIMEMailException.Code.TRANSPORT_INVALID_CREDENTIALS, e, smtpConfig.getServer(), e.getMessage());
             }
             try {
                 saveChangesSafe(smtpMessage);
@@ -463,11 +467,20 @@ public final class SMTPTransport extends MailTransport {
             try {
                 final long start = System.currentTimeMillis();
                 final Transport transport = getSMTPSession().getTransport(SMTPProvider.PROTOCOL_SMTP.getName());
-                if (getTransportConfig0().getSMTPProperties().isSmtpAuth()) {
-                    final SMTPConfig config = getTransportConfig0();
-                    transport.connect(config.getServer(), config.getPort(), config.getLogin(), encodePassword(config.getPassword()));
-                } else {
-                    transport.connect();
+                final SMTPConfig smtpConfig = getTransportConfig0();
+                try {
+                    if (smtpConfig.getSMTPProperties().isSmtpAuth()) {
+                        final String encPass = encodePassword(smtpConfig.getPassword());
+                        transport.connect(smtpConfig.getServer(), smtpConfig.getPort(), smtpConfig.getLogin(), encPass);
+                    } else {
+                        transport.connect();
+                    }
+                } catch (final javax.mail.AuthenticationFailedException e) {
+                    throw new MIMEMailException(
+                        MIMEMailException.Code.TRANSPORT_INVALID_CREDENTIALS,
+                        e,
+                        smtpConfig.getServer(),
+                        e.getMessage());
                 }
                 try {
                     saveChangesSafe(smtpMessage);
@@ -522,14 +535,21 @@ public final class SMTPTransport extends MailTransport {
                     LOG.debug(new StringBuilder(128).append("SMTP mail prepared for transport in ").append(
                         System.currentTimeMillis() - startPrep).append("msec").toString());
                 }
-
                 final long start = System.currentTimeMillis();
                 final Transport transport = getSMTPSession().getTransport(SMTPProvider.PROTOCOL_SMTP.getName());
-                if (smtpConfig.getSMTPProperties().isSmtpAuth()) {
-                    final String encPass = encodePassword(smtpConfig.getPassword());
-                    transport.connect(smtpConfig.getServer(), smtpConfig.getPort(), smtpConfig.getLogin(), encPass);
-                } else {
-                    transport.connect();
+                try {
+                    if (smtpConfig.getSMTPProperties().isSmtpAuth()) {
+                        final String encPass = encodePassword(smtpConfig.getPassword());
+                        transport.connect(smtpConfig.getServer(), smtpConfig.getPort(), smtpConfig.getLogin(), encPass);
+                    } else {
+                        transport.connect();
+                    }
+                } catch (final javax.mail.AuthenticationFailedException e) {
+                    throw new MIMEMailException(
+                        MIMEMailException.Code.TRANSPORT_INVALID_CREDENTIALS,
+                        e,
+                        smtpConfig.getServer(),
+                        e.getMessage());
                 }
                 try {
                     saveChangesSafe(smtpMessage);
@@ -604,13 +624,15 @@ public final class SMTPTransport extends MailTransport {
         boolean close = false;
         try {
             final SMTPConfig config = getTransportConfig0();
-            if (config.getSMTPProperties().isSmtpAuth()) {
-                final String encPass = encodePassword(config.getPassword());
-                transport.connect(config.getServer(), config.getPort(), config.getLogin(), encPass);
-                close = true;
-            } else {
-                transport.connect();
-                close = true;
+            try {
+                if (config.getSMTPProperties().isSmtpAuth()) {
+                    final String encPass = encodePassword(config.getPassword());
+                    transport.connect(config.getServer(), config.getPort(), config.getLogin(), encPass);
+                } else {
+                    transport.connect();
+                }
+            } catch (final javax.mail.AuthenticationFailedException e) {
+                throw new MIMEMailException(MIMEMailException.Code.TRANSPORT_INVALID_CREDENTIALS, e, config.getServer(), e.getMessage());
             }
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);

@@ -272,8 +272,16 @@ public class MIMEMailException extends MailException {
         /**
          * Message cannot be displayed.
          */
-        MESSAGE_NOT_DISPLAYED("Message cannot be displayed.", Category.SUBSYSTEM_OR_SERVICE_DOWN, 1029);
-
+        MESSAGE_NOT_DISPLAYED("Message cannot be displayed.", Category.SUBSYSTEM_OR_SERVICE_DOWN, 1029),
+        /**
+         * Wrong or missing login data to access mail transport server %1$s. Error message from mail transport server: %2$s
+         */
+        TRANSPORT_INVALID_CREDENTIALS("Wrong or missing login data to access mail transport server %1$s. Error message from mail transport server: %2$s", Category.PERMISSION, 1030),
+        /**
+         * Wrong or missing login data to access mail transport server %1$s with login %2$s (user=%3$s, context=%4$s). Error message from mail transport server: %5$s
+         */
+        TRANSPORT_INVALID_CREDENTIALS_EXT("Wrong or missing login data to access mail transport server %1$s with login %2$s (user=%3$s, context=%4$s). Error message from mail transport server: %5$s", Category.PERMISSION, TRANSPORT_INVALID_CREDENTIALS.detailNumber);
+        
         private final String message;
 
         private final int detailNumber;
@@ -299,26 +307,26 @@ public class MIMEMailException extends MailException {
         }
     }
 
-    protected MIMEMailException(final AbstractOXException cause) {
+    public MIMEMailException(final AbstractOXException cause) {
         super(cause);
     }
 
-    protected MIMEMailException(final Code code, final Object... messageArgs) {
+    public MIMEMailException(final Code code, final Object... messageArgs) {
         this(code, null, messageArgs);
     }
 
-    protected MIMEMailException(final Code code, final Throwable cause, final Object... messageArgs) {
+    public MIMEMailException(final Code code, final Throwable cause, final Object... messageArgs) {
         super(EnumComponent.MAIL, code.getCategory(), code.getNumber(), code.getMessage(), cause);
         super.setMessageArgs(messageArgs);
     }
 
     private static final transient Object[] EMPTY_ARGS = new Object[0];
 
-    protected MIMEMailException(final Code code) {
+    public MIMEMailException(final Code code) {
         this(code, EMPTY_ARGS);
     }
 
-    protected MIMEMailException(final Component component, final Category category, final int detailNumber, final String message, final Throwable cause) {
+    public MIMEMailException(final Component component, final Category category, final int detailNumber, final String message, final Throwable cause) {
         super(component, category, detailNumber, message, cause);
     }
 
