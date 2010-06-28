@@ -3,6 +3,7 @@ package com.openexchange.webdav.xml;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -15,6 +16,8 @@ import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
 import org.jdom.output.XMLOutputter;
+import org.xml.sax.SAXException;
+import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
@@ -604,6 +607,17 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
         assertEquals("check response status", 200, response[0].getStatus());
 
         return (Appointment) response[0].getDataObject();
+    }
+    
+    
+    protected int getFreeBusyState(final WebConversation webCon, String contextid, String username, String context, Date start, Date end) throws IOException, SAXException {
+        
+        String url = "http://"+getHostName()+"/servlet/webdav.freebusy?contextid="+contextid+"&username="+username+"&server="+context+"&start="+start.getTime()+"&end="+end.getTime();
+        WebRequest request = new GetMethodWebRequest(url);
+        WebResponse response = webCon.getResponse(request);
+        String text = response.getText();
+        System.out.println(text);
+        return -1;
     }
 
     private static HashSet participants2String(final Participant[] participant) throws Exception {
