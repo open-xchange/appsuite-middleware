@@ -251,6 +251,15 @@ public final class OutlookFolderStorage implements FolderStorage {
     }
 
     public boolean containsFolder(final String treeId, final String folderId, final StorageType storageType, final StorageParameters storageParameters) throws FolderException {
+        /*
+         * No primary mail account root folder in this tree
+         */
+        if (MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, MailFolder.DEFAULT_FOLDER_ID).equals(folderId)) {
+            return false;
+        }
+        /*
+         * Check
+         */
         final FolderStorage dedicatedFolderStorage = folderStorageRegistry.getDedicatedFolderStorage(FolderStorage.REAL_TREE_ID, folderId);
         if (!dedicatedFolderStorage.containsFolder(FolderStorage.REAL_TREE_ID, folderId, storageType, storageParameters)) {
             return false;
@@ -482,6 +491,12 @@ public final class OutlookFolderStorage implements FolderStorage {
     }
 
     public Folder getFolder(final String treeId, final String folderId, final StorageType storageType, final StorageParameters storageParameters) throws FolderException {
+        /*
+         * Primary account's root folder does not exist in tis folder tree
+         */
+        if (MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, MailFolder.DEFAULT_FOLDER_ID).equals(folderId)) {
+            throw FolderExceptionErrorMessage.NOT_FOUND.create(folderId, treeId);
+        }
         /*
          * Check for root folder
          */
