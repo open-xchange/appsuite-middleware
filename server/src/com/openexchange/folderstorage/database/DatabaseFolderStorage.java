@@ -602,6 +602,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                                  */
                                 retval.setSubfolderIDs(null);
                                 retval.setCacheable(false);
+                                retval.setParentID(new StringBuilder(20).append(FolderObject.SHARED_PREFIX).append(retval.getCreatedBy()).toString());
                             } else if (FolderObject.SYSTEM_PRIVATE_FOLDER_ID != folderId) {
                                 /*
                                  * Set subfolders for non-private folder. For private folder FolderStorage.getSubfolders() is supposed to be

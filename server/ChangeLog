@@ -1,6 +1,7 @@
 * 2010-06-28 - thorben.betten@open-xchange.com
 
  - Bugfix #16284: Primary mail account's root folder does not exist in Outlook folder tree
+ - Bugfix #16311: Proper parent identifier for shared database folders
 
 * 2010-06-25 - steffen.templin@open-xchange.com
 
