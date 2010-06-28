@@ -75,6 +75,13 @@
 
 	<target name="install" depends="installJar,installConfig" />
 
+	<target name="installConfig">
+		<copy todir="${destdir}/${prefix}/etc/groupware/" overwrite="true">
+			<fileset dir="conf/" includes="mobility_provisioning_action_sms.properties" />
+		</copy>
+		<mkdir dir="${destdir}/${bundle.d}" />
+		<echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}" />
+	</target>
 	<target name="installJar" depends="jar">
 		<mkdir dir="${destdir}/${bundlesdir}" />
 		<copy todir="${destdir}/${bundlesdir}">
@@ -82,12 +89,6 @@
 				<include name="${bundle.name}" />
 			</fileset>
 		</copy>
-	</target>
-	
-	<target name="installConfig">
-			<copy todir="${destdir}/${prefix}/etc/groupware/" overwrite="true">
-				<fileset dir="conf/" includes="mobility_provisioning_action_sms.properties" />
-			</copy>
 	</target>
 
 	<!-- Dist -->
