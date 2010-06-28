@@ -10,7 +10,11 @@ import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 
+import com.openexchange.mobility.provisioning.json.servlet.MobilityProvisioningServlet;
+
 public class SMS {
+	
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MobilityProvisioningServlet.class);
 
 	private String sipgateuser = "";
 	private String sipgatepass = ""; // openexchange
@@ -108,7 +112,9 @@ public class SMS {
 			result = (Map) client.execute("samurai.ClientIdentify", params);
 			// System.err.println(result);
 		} catch (Exception e) {
-			e.printStackTrace();
+			 wassendingsuccessfull = false;
+			 this.senderrormessage = e.getMessage();
+			 LOG.error("API error occured while executing samurai.ClientIdentify",e);
 		}
 
 		params = new Vector();
@@ -130,15 +136,19 @@ public class SMS {
 			// execute SMS sending......
 			result = (Map) client.execute("samurai.SessionInitiateMulti",params);
 		} catch (Exception e) {
-			e.printStackTrace();
+			wassendingsuccessfull = false;
+			this.senderrormessage = e.getMessage();
+			LOG.error("API error occured while executing samurai.SessionInitiateMulti",e);
 		}
 
 		 //check if sending was OK
-		 if(result.get("StatusCode").toString().trim().equalsIgnoreCase("200")){
-			 wassendingsuccessfull = true;
-		 }else{
-			 wassendingsuccessfull = false;
-			 this.senderrormessage = result.get("StatusString").toString();
+		 if(result!=null){
+			 if(result.get("StatusCode").toString().trim().equalsIgnoreCase("200")){
+				 wassendingsuccessfull = true;
+			 }else{
+				 wassendingsuccessfull = false;
+				 this.senderrormessage = result.get("StatusString").toString();
+			 }
 		 }
 
 		return result;

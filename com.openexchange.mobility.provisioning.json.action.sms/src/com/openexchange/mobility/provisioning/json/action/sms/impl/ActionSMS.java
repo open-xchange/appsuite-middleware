@@ -70,8 +70,7 @@ import com.openexchange.server.ServiceException;
  */
 public class ActionSMS implements ActionService {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(MobilityProvisioningServlet.class);
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MobilityProvisioningServlet.class);
 
 	public ProvisioningResponse handleAction(
 			ProvisioningInformation provisioningInformation)
@@ -100,7 +99,11 @@ public class ActionSMS implements ActionService {
 		smssend.setServerUrl(getFromConfig("com.openexchange.mobility.provisioning.json.action.sms.sipgat.api.url"));
 		smssend.setSipgateuser(getFromConfig("com.openexchange.mobility.provisioning.json.action.sms.sipgat.api.username"));
 		smssend.setSipgatepass(getFromConfig("com.openexchange.mobility.provisioning.json.action.sms.sipgat.api.password"));
-
+		if(LOG.isDebugEnabled()){
+			LOG.debug("Using API URL: "+getFromConfig("com.openexchange.mobility.provisioning.json.action.sms.sipgat.api.url") +" ");
+			LOG.debug("Using API Username: "+getFromConfig("com.openexchange.mobility.provisioning.json.action.sms.sipgat.api.username") +" ");
+		}
+		
 		// set prov. URL in SMS
 		smssend.setText(provisioningInformation.getUrl());
 
