@@ -192,6 +192,9 @@ public final class IMAPNumArgSplitter {
                 l.add(seqNum);
             }
         }
+        if (l.isEmpty()) {
+            return new String[0];
+        }
         if (!keepOrder) {
             l.sort();
         }
@@ -219,6 +222,9 @@ public final class IMAPNumArgSplitter {
                 l.add(messageNumber);
             }
         }
+        if (l.isEmpty()) {
+            return new String[0];
+        }
         if (!keepOrder) {
             l.sort();
         }
@@ -243,6 +249,9 @@ public final class IMAPNumArgSplitter {
             if (uid >= 0) {
                 l.add(uid);
             }
+        }
+        if (l.isEmpty()) {
+            return new String[0];
         }
         if (!keepOrder) {
             l.sort();
@@ -362,6 +371,9 @@ public final class IMAPNumArgSplitter {
     private static String[] split(final String numArg, final int maxLen) {
         final int len = numArg.length();
         if (len <= maxLen) {
+            if (len == 0) {
+                return new String[0];
+            }
             return new String[] { numArg };
         }
         /*
