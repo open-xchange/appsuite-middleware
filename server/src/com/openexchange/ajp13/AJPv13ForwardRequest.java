@@ -523,7 +523,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
             cookieList.add(c);
         }
         final int len = headerValue.length();
-        if (len > prevEnd) {
+        if (len > prevEnd && prevEnd >= 0) {
             // Last cookie skipped some characters
             final String skipped = prepare(headerValue.substring(prevEnd, len));
             if (skipped.length() > 0) {
