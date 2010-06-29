@@ -103,9 +103,9 @@ public class MIMEMailException extends MailException {
          */
         FOLDER_NOT_FOUND("Mail folder \"%1$s\" could not be found.", Category.CODE_ERROR, 1002),
         /**
-         * Mail folder "%1$s" could not be found on server %2$s with login %3$s (user=%4$s, context=%5$s).
+         * Mail folder "%1$s" could not be found on mail server %2$s with login %3$s (user=%4$s, context=%5$s).
          */
-        FOLDER_NOT_FOUND_EXT("Mail folder \"%1$s\" could not be found on server %2$s with login %3$s (user=%4$s, context=%5$s).", Category.CODE_ERROR, FOLDER_NOT_FOUND.detailNumber),
+        FOLDER_NOT_FOUND_EXT("Mail folder \"%1$s\" could not be found on mail server %2$s with login %3$s (user=%4$s, context=%5$s).", Category.CODE_ERROR, FOLDER_NOT_FOUND.detailNumber),
         /**
          * Folder "%1$s" has been closed due to some reason.<br>
          * Probably your request took too long.
@@ -116,10 +116,10 @@ public class MIMEMailException extends MailException {
          */
         FOLDER_CLOSED("Folder \"%1$s\" is closed due to some reason.\nProbably your request took too long", Category.CODE_ERROR, 1003),
         /**
-         * Folder "%1$s" has been closed on server %2$s with login %3$s (user=%4$s, context=%5$s) due to some reason.<br>
+         * Folder "%1$s" has been closed on mail server %2$s with login %3$s (user=%4$s, context=%5$s) due to some reason.<br>
          * Probably your request took too long.
          */
-        FOLDER_CLOSED_EXT("Folder \"%1$s\" has been closed on server %2$s with login %3$s (user=%4$s, context=%5$s) due to some reason.\nProbably your request took too long.", Category.CODE_ERROR, FOLDER_CLOSED.detailNumber),
+        FOLDER_CLOSED_EXT("Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user=%4$s, context=%5$s) due to some reason.\nProbably your request took too long.", Category.CODE_ERROR, FOLDER_CLOSED.detailNumber),
         /**
          * Illegal write attempt: %1$s
          * <p>
@@ -162,9 +162,9 @@ public class MIMEMailException extends MailException {
          */
         READ_ONLY_FOLDER("An attempt was made to open a read-only folder with read-write \"%1$s\"", Category.PERMISSION, 1010),
         /**
-         * An attempt was made to open a read-only folder with read-write "%1$s" on server %2$s with login %3$s (user=%4$s, context=%5$s)
+         * An attempt was made to open a read-only folder with read-write "%1$s" on mail server %2$s with login %3$s (user=%4$s, context=%5$s)
          */
-        READ_ONLY_FOLDER_EXT("An attempt was made to open a read-only folder with read-write \"%1$s\" on server %2$s with login %3$s (user=%4$s, context=%5$s)", Category.PERMISSION, 1010),
+        READ_ONLY_FOLDER_EXT("An attempt was made to open a read-only folder with read-write \"%1$s\" on mail server %2$s with login %3$s (user=%4$s, context=%5$s)", Category.PERMISSION, 1010),
         /**
          * Invalid search expression: %1$s
          */
@@ -186,9 +186,9 @@ public class MIMEMailException extends MailException {
          */
         STORE_CLOSED("Store already closed: %1$s", Category.CODE_ERROR, 1014),
         /**
-         * Connection closed to server %1$s with login %2$s (user=%3$s, context=%4$s): %5$s
+         * Connection closed to mail server %1$s with login %2$s (user=%3$s, context=%4$s): %5$s
          */
-        STORE_CLOSED_EXT("Connection closed to server %1$s with login %2$s (user=%3$s, context=%4$s): %5$s", STORE_CLOSED.category, STORE_CLOSED.detailNumber),
+        STORE_CLOSED_EXT("Connection closed to mail server %1$s with login %2$s (user=%3$s, context=%4$s): %5$s", STORE_CLOSED.category, STORE_CLOSED.detailNumber),
         /**
          * Could not bind mail connection to local port %1$s
          * <p>
