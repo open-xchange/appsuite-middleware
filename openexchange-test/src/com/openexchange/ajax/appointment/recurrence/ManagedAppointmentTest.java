@@ -50,6 +50,7 @@
 package com.openexchange.ajax.appointment.recurrence;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.TimeZone;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.helper.AbstractAssertion;
@@ -116,7 +117,7 @@ public abstract class ManagedAppointmentTest extends AppointmentTest {
         UserValues values = getClient().getValues();
         userTimeZone = values.getTimeZone();
         this.folder = folderManager.generateFolder(
-            "ManagedAppointmentTests",
+            "MAP_"+ (new Date()).getTime(),
             Module.CALENDAR.getFolderConstant(),
             values.getPrivateAppointmentFolder(),
             values.getUserId());
