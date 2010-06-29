@@ -95,6 +95,7 @@ import com.openexchange.folderstorage.outlook.sql.Select;
 import com.openexchange.folderstorage.outlook.sql.Update;
 import com.openexchange.folderstorage.outlook.sql.Utility;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.messaging.MailMessagingService;
@@ -187,7 +188,8 @@ public final class OutlookFolderStorage implements FolderStorage {
     }
 
     public void checkConsistency(final String treeId, final StorageParameters storageParameters) throws FolderException {
-        final List<String> folderIds = Select.getFolders(storageParameters.getContextId(), Tools.getUnsignedInteger(treeId), storageParameters.getUserId());
+        final List<String> folderIds =
+            Select.getFolders(storageParameters.getContextId(), Tools.getUnsignedInteger(treeId), storageParameters.getUserId());
         for (final String folderId : folderIds) {
             final FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, folderId);
             final boolean started = folderStorage.startTransaction(storageParameters, true);
@@ -209,10 +211,10 @@ public final class OutlookFolderStorage implements FolderStorage {
                 }
                 LOG.warn("Checking consistency failed for tree " + treeId, e);
             }
-        } 
+        }
     }
 
-    public void restore(String treeId, String folderId, StorageParameters storageParameters) throws FolderException {
+    public void restore(final String treeId, final String folderId, final StorageParameters storageParameters) throws FolderException {
         // Nothing to restore, not a real storage
     }
 
@@ -667,7 +669,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                 presentInTable = Select.fillFolder(contextId, tree, user.getId(), user.getLocale(), outlookFolder, storageType, con);
             }
         }
-        // 
+        //
         if (!presentInTable) {
             doModifications(outlookFolder);
         }
@@ -695,7 +697,7 @@ public final class OutlookFolderStorage implements FolderStorage {
             final int contextId = storageParameters.getContextId();
             final int tree = Tools.getUnsignedInteger(treeId);
             final FolderNameComparator comparator = new FolderNameComparator(locale);
-            final List<TreeMap<String, List<String>>> maps = new ArrayList<TreeMap<String,List<String>>>(2);
+            final List<TreeMap<String, List<String>>> maps = new ArrayList<TreeMap<String, List<String>>>(2);
             /*
              * From primary mail folder
              */
@@ -765,7 +767,7 @@ public final class OutlookFolderStorage implements FolderStorage {
     }
 
     protected static boolean supportsMail(final ContentType[] types) {
-        for (ContentType contentType : types) {
+        for (final ContentType contentType : types) {
             if (MailContentType.getInstance().equals(contentType)) {
                 return true;
             }
@@ -1682,6 +1684,30 @@ public final class OutlookFolderStorage implements FolderStorage {
             doPublicRootModifications(folder);
         } else if (FolderStorage.SHARED_ID.equals(folder.getID())) {
             doSharedRootModifications(folder);
+        } else if (isDefaultMailFolder(folder)) {
+            folder.setParentID(FolderStorage.PRIVATE_ID);
+        } else if (isNonPrimaryMailAccountFolder(folder)) {
+            folder.setParentID(FolderStorage.PRIVATE_ID);
+        }
+    }
+
+    private static boolean isDefaultMailFolder(final OutlookFolder folder) {
+        return folder.isDefault() && (MailContentType.getInstance().getModule() == folder.getContentType().getModule());
+    }
+
+    private static boolean isNonPrimaryMailAccountFolder(final OutlookFolder folder) {
+        String id = folder.getID();
+        if (!id.startsWith(MailFolder.DEFAULT_FOLDER_ID)) {
+            return false;
+        }
+        try {
+            FullnameArgument argument = MailFolderUtility.prepareMailFolderParam(id);
+            return argument.getAccountId() != MailAccount.DEFAULT_ID;
+        } catch (final RuntimeException e) {
+            /*
+             * Parsing failed
+             */
+            return false;
         }
     }
 
