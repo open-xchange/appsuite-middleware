@@ -212,7 +212,7 @@ public final class MessageParser {
             /*
              * Parse transport message plus its text body
              */
-            parse(composedMail, jsonObj, session, accountId, provider, attachmentHandler, ctx);
+            parse(composedMail, jsonObj, session, accountId, provider, attachmentHandler, ctx, prepare4Transport);
             if (null != uploadEvent) {
                 /*
                  * Uploaded files
@@ -329,7 +329,7 @@ public final class MessageParser {
         return new StringBuilder(8).append(UPLOAD_FILE_ATTACHMENT_PREFIX).append(num).toString();
     }
 
-    private static void parse(final ComposedMailMessage transportMail, final JSONObject jsonObj, final Session session, final int accountId, final TransportProvider provider, final IAttachmentHandler attachmentHandler, final Context ctx) throws MailException {
+    private static void parse(final ComposedMailMessage transportMail, final JSONObject jsonObj, final Session session, final int accountId, final TransportProvider provider, final IAttachmentHandler attachmentHandler, final Context ctx, final boolean prepare4Transport) throws MailException {
         parse(
             jsonObj,
             transportMail,
@@ -337,7 +337,8 @@ public final class MessageParser {
             provider,
             session,
             accountId,
-            attachmentHandler);
+            attachmentHandler,
+            prepare4Transport);
     }
 
     /**
@@ -379,12 +380,13 @@ public final class MessageParser {
             TransportProviderRegistry.getTransportProviderBySession(session, accountId),
             session,
             accountId,
-            new AbortAttachmentHandler(session));
+            new AbortAttachmentHandler(session),
+            false);
     }
 
-    private static void parse(final JSONObject jsonObj, final MailMessage mail, final TimeZone timeZone, final TransportProvider provider, final Session session, final int accountId, final IAttachmentHandler attachmentHandler) throws MailException {
+    private static void parse(final JSONObject jsonObj, final MailMessage mail, final TimeZone timeZone, final TransportProvider provider, final Session session, final int accountId, final IAttachmentHandler attachmentHandler, final boolean prepare4Transport) throws MailException {
         try {
-            parseBasics(jsonObj, mail, timeZone);
+            parseBasics(jsonObj, mail, timeZone, prepare4Transport);
             /*
              * Prepare msgref
              */
@@ -439,6 +441,10 @@ public final class MessageParser {
      * @throws MailException
      */
     public static void parseBasics(final JSONObject jsonObj, final MailMessage mail, final TimeZone timeZone) throws JSONException, AddressException, MailException {
+        parseBasics(jsonObj, mail, timeZone, false);
+    }
+
+    private static void parseBasics(final JSONObject jsonObj, final MailMessage mail, final TimeZone timeZone, final boolean prepare4Transport) throws JSONException, AddressException, MailException {
         /*
          * System flags
          */
@@ -482,19 +488,19 @@ public final class MessageParser {
         /*
          * From Only mandatory if non-draft message
          */
-        mail.addFrom(parseAddressKey(MailJSONField.FROM.getKey(), jsonObj));
+        mail.addFrom(parseAddressKey(MailJSONField.FROM.getKey(), jsonObj, prepare4Transport));
         /*
          * To Only mandatory if non-draft message
          */
-        mail.addTo(parseAddressKey(MailJSONField.RECIPIENT_TO.getKey(), jsonObj));
+        mail.addTo(parseAddressKey(MailJSONField.RECIPIENT_TO.getKey(), jsonObj, prepare4Transport));
         /*
          * Cc
          */
-        mail.addCc(parseAddressKey(MailJSONField.RECIPIENT_CC.getKey(), jsonObj));
+        mail.addCc(parseAddressKey(MailJSONField.RECIPIENT_CC.getKey(), jsonObj, prepare4Transport));
         /*
          * Bcc
          */
-        mail.addBcc(parseAddressKey(MailJSONField.RECIPIENT_BCC.getKey(), jsonObj));
+        mail.addBcc(parseAddressKey(MailJSONField.RECIPIENT_BCC.getKey(), jsonObj, prepare4Transport));
         /*
          * Disposition notification
          */
@@ -804,6 +810,19 @@ public final class MessageParser {
         return parseAddressKey(MailJSONField.FROM.getKey(), jo);
     }
 
+    /**
+     * Parses address field out of passed JSON object.
+     * 
+     * @param key The key of the address field
+     * @param jo The JSON object
+     * @return The parsed address(es)
+     * @throws JSONException If a JSON error occurred
+     * @throws AddressException If parsing an address fails
+     */
+    public static InternetAddress[] parseAddressKey(final String key, final JSONObject jo) throws JSONException, AddressException {
+        return parseAddressKey(key, jo, false);
+    }
+
     private static final InternetAddress[] EMPTY_ADDRS = new InternetAddress[0];
 
     /**
@@ -815,7 +834,7 @@ public final class MessageParser {
      * @throws JSONException If a JSON error occurred
      * @throws AddressException If parsing an address fails
      */
-    public static InternetAddress[] parseAddressKey(final String key, final JSONObject jo) throws JSONException, AddressException {
+    public static InternetAddress[] parseAddressKey(final String key, final JSONObject jo, final boolean failOnError) throws JSONException, AddressException {
         String value = null;
         if (!jo.has(key) || jo.isNull(key) || (value = jo.getString(key)).length() == 0) {
             return EMPTY_ADDRS;
@@ -839,7 +858,7 @@ public final class MessageParser {
                 value = jo.getString(key);
             }
         }
-        return parseAddressList(value, false);
+        return parseAddressList(value, false, true);
     }
 
     /**

@@ -1,6 +1,7 @@
 * 2010-06-29 - thorben.betten@open-xchange.com
 
  - Bugfix #16357: Proper registration of new folder tree's delete listener (for user deletion)
+ - Bugfix #16007: Throwing appropriate error on invalid entered email addresses
 
 * 2010-06-28 - thorben.betten@open-xchange.com
 
