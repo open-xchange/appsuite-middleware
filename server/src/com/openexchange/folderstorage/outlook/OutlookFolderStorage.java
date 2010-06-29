@@ -61,9 +61,9 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import com.openexchange.database.DBPoolingException;
@@ -94,6 +94,7 @@ import com.openexchange.folderstorage.outlook.sql.Insert;
 import com.openexchange.folderstorage.outlook.sql.Select;
 import com.openexchange.folderstorage.outlook.sql.Update;
 import com.openexchange.folderstorage.outlook.sql.Utility;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -658,16 +659,17 @@ public final class OutlookFolderStorage implements FolderStorage {
         /*
          * Load folder data from database
          */
+        final boolean presentInTable;
         {
             final Connection con = checkReadConnection(storageParameters);
             if (null == con) {
-                Select.fillFolder(contextId, tree, user.getId(), user.getLocale(), outlookFolder, storageType);
+                presentInTable = Select.fillFolder(contextId, tree, user.getId(), user.getLocale(), outlookFolder, storageType);
             } else {
-                Select.fillFolder(contextId, tree, user.getId(), user.getLocale(), outlookFolder, storageType, con);
+                presentInTable = Select.fillFolder(contextId, tree, user.getId(), user.getLocale(), outlookFolder, storageType, con);
             }
         }
         // 
-        {
+        if (!presentInTable) {
             doModifications(outlookFolder);
         }
         return outlookFolder;
@@ -1681,6 +1683,10 @@ public final class OutlookFolderStorage implements FolderStorage {
             doPublicRootModifications(folder);
         } else if (FolderStorage.SHARED_ID.equals(folder.getID())) {
             doSharedRootModifications(folder);
+        } else if (FolderStorage.GLOBAL_ADDRESS_BOOK_ID.equals(folder.getID())) {
+            folder.setParentID(FolderStorage.PUBLIC_ID);
+        } else if (String.valueOf(FolderObject.SYSTEM_GLOBAL_FOLDER_ID).equals(folder.getID())) { // Should never be reached since GLOBAL_FOLDER is deactivated by default
+            folder.setParentID(FolderStorage.PUBLIC_ID);
         }
     }
 
