@@ -213,6 +213,7 @@ public final class POP3StoreConnector {
             /*
              * Check capabilities
              */
+            final IPOP3Properties pop3ConfProps = (IPOP3Properties) pop3Config.getMailProperties();
             final String server = pop3Config.getServer();
             final int port = pop3Config.getPort();
             final String capabilities;
@@ -222,7 +223,7 @@ public final class POP3StoreConnector {
                         InetAddress.getByName(server),
                         port,
                         pop3Config.isSecure(),
-                        (IPOP3Properties) pop3Config.getMailProperties());
+                        pop3ConfProps);
             } catch (final UnknownHostException e) {
                 throw new MessagingException(e.getMessage(), e);
             } catch (final IOException e) {
@@ -252,6 +253,17 @@ public final class POP3StoreConnector {
             final Properties pop3Props = POP3SessionProperties.getDefaultSessionProperties();
             if ((null != pop3Properties) && !pop3Properties.isEmpty()) {
                 pop3Props.putAll(pop3Properties);
+            }
+            /*
+             * Set timeouts
+             */
+            final int timeout = pop3ConfProps.getPOP3Timeout();
+            if (timeout > 0) {
+                pop3Props.put("mail.pop3.timeout", String.valueOf(timeout));
+            }
+            final int connectionTimeout = pop3ConfProps.getPOP3ConnectionTimeout();
+            if (connectionTimeout > 0) {
+                pop3Props.put("mail.pop3.connectiontimeout", String.valueOf(connectionTimeout));
             }
             /*-
              * Check if a secure POP3 connection should be established.
