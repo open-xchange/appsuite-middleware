@@ -466,6 +466,18 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 		
     	return createUserCommon(ctx, usrdata, access, auth);
     }
+    
+    public UserModuleAccess getContextAdminUserModuleAccess(Context ctx, Credentials auth)  throws StorageException,InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
+        basicauth.doAuthentication(auth, ctx);
+        
+        /*
+         * Resolve admin user of specified context via tools and then get his current module access rights
+         */     
+        
+        final int admin_id = tool.getAdminForContext(ctx);
+        final UserModuleAccess access = oxu.getModuleAccess(ctx, admin_id);
+        return access;
+    }
 
     /*
      * Main method to create a user. Which all inner create methods MUST use after resolving the access rights!
