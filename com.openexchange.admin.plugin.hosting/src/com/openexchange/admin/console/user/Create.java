@@ -87,28 +87,16 @@ public class Create extends CreateCore {
         	final Integer id = oxusr.create(ctx, usr,accesscombinationname, auth).getId();
         	displayCreatedMessage(String.valueOf(id), ctx.getId(), parser);
         }else{
-        	// to check if access rights were not supplied
-        	final UserModuleAccess EMPTY_ACCESS_RIGHTS = new UserModuleAccess(); 
-        	EMPTY_ACCESS_RIGHTS.disableAll();
         	
-        	final UserModuleAccess access = new UserModuleAccess();
-            // webmail package access per default
-            access.disableAll();            
-            // set module access rights supplied from cmd line
+        	// get the context-admins module access rights as baseline
+        	final UserModuleAccess access = oxusr.getContextAdminUserModuleAccess(ctx, auth);
+                       
+            // adjust module access rights according to parameters given on the command line
             setModuleAccessOptions(parser, access);
             
-            // if NO rights were supplied from cmd line
-            // we will call the create user method without any access
-            // because then the create will use the context(admin) access rights.
-            if(access.equals(EMPTY_ACCESS_RIGHTS)){
-            	// call create without any access rights object
-            	final Integer id = oxusr.create(ctx, usr, auth).getId();
-            	displayCreatedMessage(String.valueOf(id), ctx.getId(), parser);
-            }else{
-            	// call OLD create with supplied access rights from cmd line
-            	final Integer id = oxusr.create(ctx, usr,access, auth).getId();
-            	displayCreatedMessage(String.valueOf(id), ctx.getId(), parser);
-            }
+            // create the user with the adjusted module access rights
+        	final Integer id = oxusr.create(ctx, usr, access, auth).getId();
+        	displayCreatedMessage(String.valueOf(id), ctx.getId(), parser);            
         }
         
     }
