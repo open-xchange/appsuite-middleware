@@ -188,6 +188,31 @@ public interface OXUserInterface extends Remote {
      * @throws DatabaseUpdateException
      */
     public User create(final Context ctx, final User usrdata, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
+    
+    
+    /**
+     * Returns the module access rights of the context-admin  
+     * 
+     * @param context
+     *            Context
+     * @param auth
+     *            Credentials for authenticating against server.     
+     *            
+     * @return int containing the id of the new user. 
+     * 
+     * @throws RemoteException
+     *             General RMI Exception
+     * @throws StorageException
+     *             When an error in the subsystems occurred.
+     * @throws InvalidCredentialsException
+     *             When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException
+     *             If the context does not exist in the system.
+     * @throws InvalidDataException
+     *             If the data sent within the method contained invalid data.
+     * @throws DatabaseUpdateException
+     */
+    public UserModuleAccess getContextAdminUserModuleAccess(Context ctx, Credentials auth)  throws RemoteException, StorageException,InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException;
 
     
     /**
