@@ -91,13 +91,13 @@ public class MIMEMailException extends MailException {
          */
         LOGIN_FAILED("There was an issue in authenticating your E-Mail password. This may be because of a recent password change. " + "To continue please logout now and then log back in with your most current password. (server=%1$s | user=%2$s)", Category.PERMISSION, 1000),
         /**
-         * Wrong or missing login data to access server %1$s. Error message from server: %2$s
+         * Wrong or missing login data to access mail server %1$s. Error message from mail server: %2$s
          */
-        INVALID_CREDENTIALS("Wrong or missing login data to access server %1$s. Error message from server: %2$s", Category.PERMISSION, 1001),
+        INVALID_CREDENTIALS("Wrong or missing login data to access mail server %1$s. Error message from mail server: %2$s", Category.PERMISSION, 1001),
         /**
-         * Wrong or missing login data to access server %1$s with login %2$s (user=%3$s, context=%4$s). Error message from server: %5$s
+         * Wrong or missing login data to access mail server %1$s with login %2$s (user=%3$s, context=%4$s). Error message from mail server: %5$s
          */
-        INVALID_CREDENTIALS_EXT("Wrong or missing login data to access server %1$s with login %2$s (user=%3$s, context=%4$s). Error message from server: %5$s", Category.PERMISSION, INVALID_CREDENTIALS.detailNumber),
+        INVALID_CREDENTIALS_EXT("Wrong or missing login data to access mail server %1$s with login %2$s (user=%3$s, context=%4$s). Error message from mail server: %5$s", Category.PERMISSION, INVALID_CREDENTIALS.detailNumber),
         /**
          * Mail folder "%1$s" could not be found.
          */
