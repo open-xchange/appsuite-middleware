@@ -100,7 +100,6 @@ import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
@@ -600,6 +599,22 @@ public final class DatabaseFolderStorage implements FolderStorage {
                                 retval = new LocalizedDatabaseFolder(fo);
                                 retval.setName(FolderStrings.SYSTEM_GLOBAL_FOLDER_NAME);
                                 retval.setParentID(FolderStorage.PUBLIC_ID);
+                            } else if (fo.isDefaultFolder()) {
+                                /*
+                                 * A default folder: set locale-sensitive name
+                                 */
+                                if (fo.getModule() == FolderObject.TASK) {
+                                    retval = new LocalizedDatabaseFolder(fo);
+                                    retval.setName(FolderStrings.DEFAULT_TASK_FOLDER_NAME);
+                                } else if (fo.getModule() == FolderObject.CONTACT) {
+                                    retval = new LocalizedDatabaseFolder(fo);
+                                    retval.setName(FolderStrings.DEFAULT_CONTACT_FOLDER_NAME);
+                                } else if (fo.getModule() == FolderObject.CALENDAR) {
+                                    retval = new LocalizedDatabaseFolder(fo);
+                                    retval.setName(FolderStrings.DEFAULT_CALENDAR_FOLDER_NAME);
+                                } else {
+                                    retval = new DatabaseFolder(fo);
+                                }
                             } else {
                                 retval = new DatabaseFolder(fo);
                             }
@@ -610,7 +625,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                                  */
                                 retval.setSubfolderIDs(null);
                                 retval.setCacheable(false);
-                                retval.setParentID(new StringBuilder(20).append(FolderObject.SHARED_PREFIX).append(retval.getCreatedBy()).toString());
+                                retval.setParentID(new StringBuilder(16).append(FolderObject.SHARED_PREFIX).append(retval.getCreatedBy()).toString());
                             } else if (FolderObject.SYSTEM_PRIVATE_FOLDER_ID != folderId) {
                                 /*
                                  * Set subfolders for non-private folder. For private folder FolderStorage.getSubfolders() is supposed to be
@@ -622,21 +637,6 @@ public final class DatabaseFolderStorage implements FolderStorage {
                                     subfolderIdentifies.add(id.toString());
                                 }
                                 retval.setSubfolderIDs(subfolderIdentifies.toArray(new String[subfolderIdentifies.size()]));
-                                /*
-                                 * Check if folder is user's default folder and set locale-sensitive name
-                                 */
-                                if (retval.isDefault()) {
-                                    if (TaskContentType.getInstance().equals(retval.getContentType())) {
-                                        retval.setName(new StringHelper(user.getLocale()).getString(FolderStrings.DEFAULT_TASK_FOLDER_NAME));
-                                        retval.setCacheable(false);
-                                    } else if (ContactContentType.getInstance().equals(retval.getContentType())) {
-                                        retval.setName(new StringHelper(user.getLocale()).getString(FolderStrings.DEFAULT_CONTACT_FOLDER_NAME));
-                                        retval.setCacheable(false);
-                                    } else if (CalendarContentType.getInstance().equals(retval.getContentType())) {
-                                        retval.setName(new StringHelper(user.getLocale()).getString(FolderStrings.DEFAULT_CALENDAR_FOLDER_NAME));
-                                        retval.setCacheable(false);
-                                    }
-                                }
                             }
                             if (FolderObject.SYSTEM_LDAP_FOLDER_ID == folderId) {
                                 retval.setName(FolderStrings.SYSTEM_LDAP_FOLDER_NAME);
