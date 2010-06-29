@@ -187,6 +187,10 @@ public final class UpdatePerformer extends AbstractPerformer {
                     }
                 }
             }
+            final boolean changeSubscription;
+            {
+                changeSubscription = (storageFolder.isSubscribed() != folder.isSubscribed());
+            }
             /*
              * Do move?
              */
@@ -269,6 +273,25 @@ public final class UpdatePerformer extends AbstractPerformer {
             } else if (changePermissions) {
                 /*
                  * Change permissions either in real or in virtual storage
+                 */
+                if (FolderStorage.REAL_TREE_ID.equals(folder.getTreeID())) {
+                    storage.updateFolder(folder, storageParameters);
+                } else {
+                    final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, folder.getID());
+                    if (null == realStorage) {
+                        throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folder.getID());
+                    }
+                    if (storage.equals(realStorage)) {
+                        storage.updateFolder(folder, storageParameters);
+                    } else {
+                        checkOpenedStorage(realStorage, openedStorages);
+                        realStorage.updateFolder(folder, storageParameters);
+                        storage.updateFolder(folder, storageParameters);
+                    }
+                }
+            } else if (changeSubscription) {
+                /*
+                 * Change subscription either in real or in virtual storage
                  */
                 if (FolderStorage.REAL_TREE_ID.equals(folder.getTreeID())) {
                     storage.updateFolder(folder, storageParameters);
