@@ -32,6 +32,7 @@
 	<property name="osgiservicesjar" value="org.eclipse.osgi.services_3.1.200.v20070605.jar" />
     <property name="servletjar" value="javax.servlet_2.4.0.v200706111738.jar" />
 	<property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
+    <property name="threadpooljar" value="com.openexchange.threadpool.jar" />
     <property name="templatingjar" value="com.openexchange.templating.jar"/>
 	<property name="globaljar" value="com.openexchange.global.jar" />
 	<property name="serverjar" value="com.openexchange.server.jar" />
@@ -51,6 +52,7 @@
 	    <pathelement location="${bundlesdir}/${servletjar}" />
 		<pathelement location="${bundlesdir}/${commonsloggingjar}" />
 		<pathelement location="${bundlesdir}/${globaljar}" />
+	    <pathelement location="${bundlesdir}/${threadpooljar}" />
 	    <pathelement location="${bundlesdir}/${templatingBundle}/${templatingjar}"/>
 		<pathelement location="${bundlesdir}/${pushjar}" />
 		<pathelement location="${bundlesdir}/${serverjar}" />

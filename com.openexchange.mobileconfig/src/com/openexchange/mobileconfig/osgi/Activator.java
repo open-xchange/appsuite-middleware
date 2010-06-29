@@ -8,17 +8,19 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.mobileconfig.MobileConfigServlet;
 import com.openexchange.mobileconfig.configuration.ConfigurationException;
 import com.openexchange.mobileconfig.configuration.MobileConfigProperties;
+import com.openexchange.mobileconfig.configuration.Property;
 import com.openexchange.mobileconfig.services.MobileConfigServiceRegistry;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.templating.TemplateService;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.service.ServletRegistration;
 
 public class Activator extends DeferredActivator {
 
     private static final Log LOG = LogFactory.getLog(Activator.class);
 
-    private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class, TemplateService.class };
+    private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class, TemplateService.class, ThreadPoolService.class };
     public static final String ALIAS = "/servlet/mobileconfig";
 
     private ServletRegistration registration;
@@ -79,7 +81,7 @@ public class Activator extends DeferredActivator {
     }
 
     private void checkConfiguration() throws ConfigurationException {
-        MobileConfigProperties.check(MobileConfigServiceRegistry.getServiceRegistry().getService(ConfigurationService.class), MobileConfigProperties.Property.values());
+        MobileConfigProperties.check(MobileConfigServiceRegistry.getServiceRegistry(), Property.values(), "Mobileconfig");
     }
 
     @Override
