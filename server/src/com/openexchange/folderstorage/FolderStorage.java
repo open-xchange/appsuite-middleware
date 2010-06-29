@@ -90,6 +90,11 @@ public interface FolderStorage {
     public static final String SHARED_ID = "3";
 
     /**
+     * The reserved identifier for global address book folder: <code>"6"</code>.
+     */
+    public static final String GLOBAL_ADDRESS_BOOK_ID = "6";
+
+    /**
      * Gets the content types supported by this folder storage.
      * <p>
      * A zero length array means this folder storage supports all content types for a certain tree identifier.
