@@ -1,3 +1,7 @@
+* 2010-06-29 - steffen.templin@open-xchange.com
+
+ - Bugfix #16358: Defect folder ids in reminders after moving appointments from public to private
+
 * 2010-06-29 - thorben.betten@open-xchange.com
 
  - Bugfix #16357: Proper registration of new folder tree's delete listener (for user deletion)

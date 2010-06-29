@@ -2319,6 +2319,7 @@ public class CalendarMySQL implements CalendarSqlImp {
              * Update reminders' folder ID on move operation
              */
             final ReminderService reminderInterface = new ReminderHandler(ctx);
+            
             final SearchIterator<?> it = reminderInterface.listReminder(Types.APPOINTMENT, cdao.getObjectID());
             final List<ReminderObject> toUpdate = new ArrayList<ReminderObject>();
             try {
@@ -2335,7 +2336,17 @@ public class CalendarMySQL implements CalendarSqlImp {
                 }
             }
             for (final ReminderObject reminder : toUpdate) {
-                reminder.setFolder(cdao.getParentFolderID());
+                // Check for public->private move
+                if (edao.getFolderType() == FolderObject.PUBLIC && cdao.getFolderType() == FolderObject.PRIVATE) {
+                    if (reminder.getUser() == so.getUserId()) {
+                        reminder.setFolder(cdao.getActionFolder());
+                    } else {
+                        final OXFolderAccess access = new OXFolderAccess(cdao.getContext());
+                        reminder.setFolder(access.getDefaultFolder(reminder.getUser(), FolderObject.CALENDAR).getObjectID());
+                    }
+                } else {
+                    reminder.setFolder(cdao.getParentFolderID());
+                }        
                 reminderInterface.updateReminder(reminder, writecon);
             }
         }
