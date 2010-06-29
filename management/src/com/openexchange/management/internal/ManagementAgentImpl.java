@@ -118,7 +118,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
             /*
              * Create a JMX connector and start it
              */
-            final String ip = getIPAddress(jmxBindAddr.charAt(0) == '*' ? "localhost" : jmxBindAddr);
+            final String ip = getHostName(jmxBindAddr.charAt(0) == '*' ? "localhost" : jmxBindAddr);
             final String jmxURLStr = new StringBuilder(128).append("service:jmx:rmi:///jndi/rmi://").append(ip == null ? "localhost" : ip).append(
                 ':').append(jmxPort).append("/server").toString();
             jmxURL = addConnectorServer(jmxURLStr, jmxLogin, jmxPassword);
@@ -153,12 +153,12 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
         running.set(false);
     }
 
-    private static String getIPAddress(final String host) {
+    private static String getHostName(final String host) {
         if (host == null) {
             return null;
         }
         try {
-            return InetAddress.getByName(host).getHostAddress();
+            return InetAddress.getByName(host).getHostName();
         } catch (final UnknownHostException e) {
             LOG.error(e.getMessage(), e);
             return null;
