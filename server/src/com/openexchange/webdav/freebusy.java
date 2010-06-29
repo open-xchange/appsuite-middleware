@@ -288,9 +288,9 @@ public class freebusy extends HttpServlet {
     }
 
     private void writeFreeBusy(final Appointment appointment, final PrintWriter pw, final DateFormat format) {
-        if (Appointment.FREE == appointment.getShownAs()) {
-            return;
-        }
+        //if (Appointment.FREE == appointment.getShownAs()) {
+        //    return;
+        //}
         pw.print("FREEBUSY;");
         switch (appointment.getShownAs()) {
         case Appointment.ABSENT:
@@ -301,6 +301,9 @@ public class freebusy extends HttpServlet {
             break;
         case Appointment.TEMPORARY:
             pw.print("FBTYPE=BUSY-UNAVAILABLE:");
+            break;
+        case Appointment.FREE:
+            pw.print("FBTYPE=FREE:");
             break;
         default:
             pw.print("FBTYPE=BUSY:");
