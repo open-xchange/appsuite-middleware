@@ -13,6 +13,10 @@
  - Bugfix #15708: Fixed java.lang.StringIndexOutOfBoundsException in AJP module
  - Bugfix #15709: Added POP3 timeout
 
+* 2010-06-28 - karsten.will@open-xchange.com
+
+ - Bugfix #16334: Crawler for gmx.com does not work (again)
+
 * 2010-06-28 - thorben.betten@open-xchange.com
 
  - Bugfix #16284: Primary mail account's root folder does not exist in Outlook folder tree
