@@ -595,9 +595,11 @@ public final class DatabaseFolderStorage implements FolderStorage {
                             } else if (FolderObject.SYSTEM_LDAP_FOLDER_ID == folderId) {
                                 retval = new LocalizedDatabaseFolder(fo);
                                 retval.setName(FolderStrings.SYSTEM_LDAP_FOLDER_NAME);
+                                retval.setParentID(FolderStorage.PUBLIC_ID);
                             } else if (FolderObject.SYSTEM_GLOBAL_FOLDER_ID == folderId) {
                                 retval = new LocalizedDatabaseFolder(fo);
                                 retval.setName(FolderStrings.SYSTEM_GLOBAL_FOLDER_NAME);
+                                retval.setParentID(FolderStorage.PUBLIC_ID);
                             } else {
                                 retval = new DatabaseFolder(fo);
                             }

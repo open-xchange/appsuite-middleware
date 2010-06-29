@@ -94,7 +94,6 @@ import com.openexchange.folderstorage.outlook.sql.Insert;
 import com.openexchange.folderstorage.outlook.sql.Select;
 import com.openexchange.folderstorage.outlook.sql.Update;
 import com.openexchange.folderstorage.outlook.sql.Utility;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -1683,10 +1682,6 @@ public final class OutlookFolderStorage implements FolderStorage {
             doPublicRootModifications(folder);
         } else if (FolderStorage.SHARED_ID.equals(folder.getID())) {
             doSharedRootModifications(folder);
-        } else if (FolderStorage.GLOBAL_ADDRESS_BOOK_ID.equals(folder.getID())) {
-            folder.setParentID(FolderStorage.PUBLIC_ID);
-        } else if (String.valueOf(FolderObject.SYSTEM_GLOBAL_FOLDER_ID).equals(folder.getID())) { // Should never be reached since GLOBAL_FOLDER is deactivated by default
-            folder.setParentID(FolderStorage.PUBLIC_ID);
         }
     }
 
