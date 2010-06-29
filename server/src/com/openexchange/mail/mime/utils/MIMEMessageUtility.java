@@ -89,6 +89,7 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.HeaderName;
+import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.PlainTextAddress;
@@ -852,6 +853,35 @@ public final class MIMEMessageUtility {
      * @return An array of <code>InternetAddress</code> objects
      */
     public static InternetAddress[] parseAddressList(final String addresslist, final boolean strict) {
+        try {
+            return parseAddressList(addresslist, strict, false);
+        } catch (final MIMEMailException e) {
+            /*
+             * Cannot occur
+             */
+            throw new IllegalStateException("Unexpected exception.", e);
+        }
+    }
+
+    /**
+     * Parse the given sequence of addresses into InternetAddress objects by invoking
+     * <code>{@link InternetAddress#parse(String, boolean)}</code>. If <code>strict</code> is false, simple email addresses separated by
+     * spaces are also allowed. If <code>strict</code> is true, many (but not all) of the RFC822 syntax rules are enforced. In particular,
+     * even if <code>strict</code> is true, addresses composed of simple names (with no "@domain" part) are allowed. Such "illegal"
+     * addresses are not uncommon in real messages.
+     * <p>
+     * Non-strict parsing is typically used when parsing a list of mail addresses entered by a human. Strict parsing is typically used when
+     * parsing address headers in mail messages.
+     * <p>
+     * Additionally the personal parts are MIME encoded using default MIME charset.
+     * 
+     * @param addresslist - comma separated address strings
+     * @param strict - <code>true</code> to enforce RFC822 syntax; otherwise <code>false</code>
+     * @param failOnError - <code>true</code> to fail if parsing fails; otherwise <code>false</code> to get a plain-text representation
+     * @return An array of <code>InternetAddress</code> objects
+     * @throws MIMEMailException If parsing fails and <code>failOnError</code> is <code>true</code>
+     */
+    public static InternetAddress[] parseAddressList(final String addresslist, final boolean strict, final boolean failOnError) throws MIMEMailException {
         if (null == addresslist) {
             return new InternetAddress[0];
         }
@@ -860,6 +890,9 @@ public final class MIMEMessageUtility {
         try {
             addrs = QuotedInternetAddress.parse(al, strict);
         } catch (final AddressException e) {
+            if (failOnError) {
+                throw MIMEMailException.handleMessagingException(e);
+            }
             if (LOG.isDebugEnabled()) {
                 LOG.debug(new StringBuilder(128).append("Internet addresses could not be properly parsed, ").append(
                     "using plain addresses' string representation instead.").toString(), e);
