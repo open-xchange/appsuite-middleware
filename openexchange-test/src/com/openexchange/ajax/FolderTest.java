@@ -342,7 +342,12 @@ public class FolderTest extends AbstractAJAXTest {
         JSONObject jsonPermission = new JSONObject();
         jsonPermission.put("entity", entityId);
         jsonPermission.put("group", isGroup);
-        jsonPermission.put("bits", createPermissionBits(8, 8, 8, 8, true));
+        jsonPermission.put("bits", createPermissionBits(
+            OCLPermission.CREATE_SUB_FOLDERS,
+            OCLPermission.READ_ALL_OBJECTS,
+            OCLPermission.WRITE_ALL_OBJECTS,
+            OCLPermission.DELETE_ALL_OBJECTS,
+            true));
         perms.put(jsonPermission);
         if (sharedForUserId != -1) {
             jsonPermission = new JSONObject();
