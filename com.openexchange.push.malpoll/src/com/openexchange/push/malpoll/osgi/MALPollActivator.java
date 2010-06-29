@@ -242,6 +242,10 @@ public final class MALPollActivator extends DeferredActivator {
                 serviceRegistrations = null;
             }
             /*
+             * Clear all running listeners
+             */
+            MALPollPushListenerRegistry.getInstance().purgeAllPushListener();
+            /*
              * Shut down
              */
             stopScheduledTask(getService(TimerService.class));

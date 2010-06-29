@@ -51,6 +51,7 @@ package com.openexchange.push.malpoll;
 
 import java.text.MessageFormat;
 import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.apache.commons.logging.Log;
@@ -166,6 +167,28 @@ public final class MALPollPushListenerRegistry {
      */
     public boolean purgeUserPushListener(final int contextId, final int userId) {
         return removeListener(SimpleKey.valueOf(contextId, userId));
+    }
+
+    /**
+     * Purges all listeners and their data.
+     * 
+     * @return <code>true</code> on success; otherwise <code>false</code>
+     */
+    public boolean purgeAllPushListener() {
+        for (final Iterator<Entry<MALPollPushListenerRegistry.SimpleKey, MALPollPushListener>> iterator = map.entrySet().iterator(); iterator.hasNext();) {
+            final Entry<MALPollPushListenerRegistry.SimpleKey, MALPollPushListener> entry = iterator.next();
+            final MALPollPushListener listener = entry.getValue();
+            if (null != listener) {
+                listener.close();
+            }
+            final SimpleKey key = entry.getKey();
+            try {
+                MALPollDBUtility.dropMailIDs(key.cid, key.user);
+            } catch (final PushException e) {
+                LOG.error("DB tables could not be cleansed for removed push listener. User=" + key.user + ", context=" + key.cid, e);
+            }
+        }
+        return true;
     }
 
     private boolean removeListener(final SimpleKey key) {
