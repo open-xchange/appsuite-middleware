@@ -49,83 +49,41 @@
 
 package com.openexchange.webdav.xml.appointment;
 
-import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
-import org.xml.sax.SAXException;
-import com.openexchange.api2.OXException;
+import java.util.TimeZone;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.webdav.xml.AppointmentTest;
-
 
 /**
+ * {@link FreeBusyInformation}
+ * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class Bug15662Test extends AppointmentTest {
+class FreeBusyInformation {
 
-    private Appointment appointment;
-    private Date now;
-    private Date inAnHour;
-    
-    public Bug15662Test(String name) {
-        super(name);
+    public int type;
+
+    public Date start, end;
+
+    public FreeBusyInformation(int type, Date start, Date end) {
+        this.type = type;
+        this.start = start;
+        this.end = end;
     }
 
-    
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        appointment = new Appointment();
-        now = new Date();
-        inAnHour = new Date( now.getTime() + 1000 * 60 * 60);
-        appointment.setStartDate( now );
-        appointment.setEndDate( inAnHour );
-        appointment.setParentFolderID(appointmentFolderId);
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-        if(appointment != null)
-            deleteAppointment(getWebConversation(), appointment.getObjectID(), appointment.getParentFolderID(), getHostName(), getLogin(), getPassword());
-            
-    }
-
-
-    
-    
-    public void testReserved() throws Exception{
-        checkFreeBusy(appointment, Appointment.RESERVED);        
-    }
-
-
-    public void testTemporary() throws Exception{
-        checkFreeBusy(appointment, Appointment.TEMPORARY);   
-    }
-
-    public void testAbsentOnBusiness() throws Exception{
-        checkFreeBusy(appointment, Appointment.ABSENT);
-    }
-    
-    public void testFree() throws Exception{
-        checkFreeBusy(appointment, Appointment.FREE);
-    }
-
-
-    private void checkFreeBusy(Appointment app, int expectedState) throws OXException, Exception{
-        app.setShownAs( expectedState );
-        insertAppointment();
-        int actualState = getFreeBusyState(app);
-        assertEquals("Wrong free/busy state", expectedState, actualState);
-    }
-    
-    private void insertAppointment() throws OXException, Exception {
-        int objectId = insertAppointment(getWebConversation(), appointment , PROTOCOL + getHostName(), getLogin(), getPassword());
-        appointment.setObjectID(objectId);
-    }
-    
-    private int getFreeBusyState(Appointment app) throws IOException, SAXException {
-        Date start = new Date(now.getTime() - 10);
-        Date end = new Date(inAnHour.getTime() + 10);
-        return getFreeBusyState(secondWebCon, "1337", getLogin(), "devel-mail.netline.de", start, end);
+    public FreeBusyInformation(String type, String start, String end) throws ParseException {
+        if (type.equals("FREE"))
+            this.type = Appointment.FREE;
+        if (type.equals("BUSY"))
+            this.type = Appointment.TENTATIVE;
+        if (type.equals("BUSY-UNAVAILABLE"))
+            this.type = Appointment.TEMPORARY;
+        if (type.equals("BUSY-TENTATIVE"))
+            this.type = Appointment.RESERVED;
+        SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd'T'hhmmss'Z'");
+        format.setTimeZone(TimeZone.getTimeZone("UTC"));
+        this.start = format.parse(start);
+        this.end = format.parse(end);
     }
 }
