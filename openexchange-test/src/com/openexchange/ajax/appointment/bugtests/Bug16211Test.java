@@ -1,7 +1,56 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
 
 package com.openexchange.ajax.appointment.bugtests;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -22,9 +71,13 @@ import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.ajax.reminder.ReminderTools;
+import com.openexchange.ajax.reminder.actions.RangeRequest;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.servlet.AjaxException;
 
@@ -41,6 +94,8 @@ public class Bug16211Test extends AbstractAJAXSession {
 
     private AJAXClient client2;
 
+    private AJAXClient client3;
+
     private Calendar calendar;
 
     private TimeZone tz;
@@ -54,6 +109,7 @@ public class Bug16211Test extends AbstractAJAXSession {
         super.setUp();
         client = getClient();
         client2 = new AJAXClient(User.User2);
+        client3 = new AJAXClient(User.User3);
         tz = client.getValues().getTimeZone();
         calendar = TimeTools.createCalendar(tz);
 
@@ -86,12 +142,15 @@ public class Bug16211Test extends AbstractAJAXSession {
     }
 
     public void testMoveToPersonalFolder() throws Exception {
-//        Use this to test if reminder of the moving user also has been updated. See Bug 16358
-//        appointment.setAlarm(15);
-//        final UpdateRequest reminderAppointmentReq = new UpdateRequest(appointment, tz, false);
-//        final UpdateResponse reminderAppointmentResp = client.execute(reminderAppointmentReq);
-//        reminderAppointmentResp.fillObject(appointment);
+        // Use this to test if reminder of the moving user also has been updated. See Bug 16358
+        // -------------
+        appointment.setAlarm(15);
+        final UpdateRequest reminderAppointmentReq = new UpdateRequest(appointment, tz, false);
+        final UpdateResponse reminderAppointmentResp = client3.execute(reminderAppointmentReq);
+        reminderAppointmentResp.fillObject(appointment);
+        // -------------
 
+        // Perform move and check if appointment appears in the right folder
         appointment.setParentFolderID(personalAppointmentFolder.getObjectID());
         final UpdateRequest moveAppointmentReq = new UpdateRequest(sharedAppointmentFolder.getObjectID(), appointment, tz, false);
         final UpdateResponse moveAppointmentResp = client.execute(moveAppointmentReq);
@@ -104,6 +163,28 @@ public class Bug16211Test extends AbstractAJAXSession {
 
         if (respObj == null) {
             fail("Appointment wasn't found in folder");
+        }
+
+        // Check if reminders folders are set correctly after move
+
+        final RangeRequest reminderReq = new RangeRequest(appointment.getEndDate());
+        final ArrayList<ReminderObject> reminderList = new ArrayList<ReminderObject>();
+        reminderList.add(ReminderTools.get(client2, reminderReq).getReminderByTarget(tz, appointment.getObjectID()));
+        reminderList.add(ReminderTools.get(client3, reminderReq).getReminderByTarget(tz, appointment.getObjectID()));
+
+        for (final ReminderObject rem : reminderList) {
+            if (rem.getTargetId() == appointment.getObjectID()) {
+                final int uid = rem.getUser();
+                if (uid == client2.getValues().getUserId()) {
+                    assertTrue(
+                        "Reminder is incorrect after move for User " + uid + ".",
+                        rem.getFolder() == client2.getValues().getPrivateAppointmentFolder());
+                } else if (uid == client3.getValues().getUserId()) {
+                    assertTrue(
+                        "Reminder is incorrect after move for User " + uid + ".",
+                        rem.getFolder() == client3.getValues().getPrivateAppointmentFolder());
+                }
+            }
         }
     }
 
@@ -137,10 +218,20 @@ public class Bug16211Test extends AbstractAJAXSession {
 
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(sharedAppointmentFolder.getObjectID());
-        appointmentObj.setRecurrenceType(Appointment.NO_RECURRENCE);
         appointmentObj.setIgnoreConflicts(true);
+        appointmentObj.setNote("");
+        appointmentObj.setNotification(true);
+        appointmentObj.setPrivateFlag(false);
+        appointmentObj.setFullTime(false);
 
-        final AppointmentInsertResponse insResp = client2.execute(new InsertRequest(appointmentObj, tz, false));
+        final UserParticipant newParticipant = new UserParticipant(client2.getValues().getUserId());
+        appointmentObj.addParticipant(newParticipant);
+
+        final UserParticipant secondParticipant = new UserParticipant(client3.getValues().getUserId());
+        appointmentObj.addParticipant(secondParticipant);
+
+        final InsertRequest insReq = new InsertRequest(appointmentObj, tz, false);
+        final AppointmentInsertResponse insResp = client2.execute(insReq);
         insResp.fillAppointment(appointmentObj);
 
         return appointmentObj;
