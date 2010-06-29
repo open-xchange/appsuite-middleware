@@ -672,6 +672,17 @@ public final class OutlookFolderStorage implements FolderStorage {
         //
         if (!presentInTable) {
             doModifications(outlookFolder);
+            if (PREPARED_FULLNAME_INBOX.equals(folderId)) {
+                /*
+                 * Special treatment for INBOX
+                 */
+                final SortableId[] inboxSubfolders = getINBOXSubfolders(treeId, PRIVATE_ID, storageParameters, user, user.getLocale(), contextId, tree);
+                final String[] subs = new String[inboxSubfolders.length];
+                for (int i = 0; i < subs.length; i++) {
+                    subs[i] = inboxSubfolders[i].getId();
+                }
+                outlookFolder.setSubfolderIDs(subs);
+            }
         }
         return outlookFolder;
     }
@@ -1679,10 +1690,11 @@ public final class OutlookFolderStorage implements FolderStorage {
         return null;
     }
 
-    static void doModifications(final OutlookFolder folder) {
-        if (FolderStorage.PUBLIC_ID.equals(folder.getID())) {
+    private static void doModifications(final OutlookFolder folder) {
+        final String id = folder.getID();
+        if (FolderStorage.PUBLIC_ID.equals(id)) {
             doPublicRootModifications(folder);
-        } else if (FolderStorage.SHARED_ID.equals(folder.getID())) {
+        } else if (FolderStorage.SHARED_ID.equals(id)) {
             doSharedRootModifications(folder);
         } else if (isDefaultMailFolder(folder)) {
             folder.setParentID(FolderStorage.PRIVATE_ID);
@@ -1696,7 +1708,7 @@ public final class OutlookFolderStorage implements FolderStorage {
     }
 
     private static boolean isNonPrimaryMailAccountFolder(final OutlookFolder folder) {
-        String id = folder.getID();
+        final String id = folder.getID();
         if (!id.startsWith(MailFolder.DEFAULT_FOLDER_ID)) {
             return false;
         }

@@ -3,6 +3,7 @@
  - Bugfix #16357: Proper registration of new folder tree's delete listener (for user deletion)
  - Bugfix #16007: Throwing appropriate error on invalid entered email addresses
  - Bugfix #16321: Management bundle deals with IPv6 addresses
+ - Bugfix #16231: Deep check if INBOX has user-visible subfolders in new folder tree
 
 * 2010-06-28 - thorben.betten@open-xchange.com
 
