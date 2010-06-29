@@ -249,7 +249,6 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
                     mails.put(mail, icalP);
                 }
             }
-
         }
 
         List<User> users;
