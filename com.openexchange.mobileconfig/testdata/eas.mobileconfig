@@ -6,9 +6,9 @@
    <array>
        <dict>
            <key>EmailAddress</key>
-           <string>carsten.hoeger@open-xchange.com</string>
+           <string>testuser@test.com</string>
            <key>Host</key>
-           <string>ox6-dev.open-xchange.com</string>
+           <string>example.com</string>
            <key>PayloadDisplayName</key>
            <string>OX EAS</string>
            <key>PayloadIdentifier</key>
@@ -22,7 +22,7 @@
            <key>SSL</key>
            <true/>
            <key>UserName</key>
-           <string>carsten.hoeger</string>
+           <string>testuser</string>
        </dict>
        <dict>
            <key>URL</key>

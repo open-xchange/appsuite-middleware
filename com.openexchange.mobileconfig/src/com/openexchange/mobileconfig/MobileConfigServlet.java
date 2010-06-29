@@ -36,19 +36,16 @@ import com.openexchange.templating.TemplateService;
 public class MobileConfigServlet extends HttpServlet {
 
     
-    private static final ErrorMessage MSG_NO_SUPPORTED_DEVICE_FOUND = new ErrorMessage("Kein unterstütztes Gerät im Header gefunden", "No supported device found from header");
+    private enum Device {
+        iPhone,
+        winMob;
+    }
 
-    private static final ErrorMessage MSG_PARAMETER_LOGIN_IS_MISSING = new ErrorMessage("Der Parameter \"login\" fehlt", "Parameter \"login\" is missing");
-
-    private static final ErrorMessage MSG_UNSECURE_ACCESS = new ErrorMessage("Unsicherer Zugriff mit http ist nicht erlaubt. Bitte https benutzen.", "Unsecure access with http is not allowed. Use https instead.");
-
-    private static final ErrorMessage MSG_INTERNAL_ERROR = new ErrorMessage("Ein interner Fehler ist aufgetreten, bitte versuchen Sie es später noch einmal...", "An internal error occurred, please try again later...");
-
-    public static class ErrorMessage {
-        
-        private final String german;
+    private static class ErrorMessage {
         
         private final String english;
+        
+        private final String german;
 
         public ErrorMessage(String german, String english) {
             super();
@@ -57,24 +54,27 @@ public class MobileConfigServlet extends HttpServlet {
         }
 
         
-        public String getGerman() {
-            return german;
-        }
-
-        
         public String getEnglish() {
             return english;
         }
+
+        
+        public String getGerman() {
+            return german;
+        }
         
         
     }
 
-    private enum Device {
-        iPhone,
-        winMob;
-    }
-    
     private static final transient Log LOG = LogFactory.getLog(MobileConfigServlet.class);
+
+    private static final ErrorMessage MSG_INTERNAL_ERROR = new ErrorMessage("Ein interner Fehler ist aufgetreten, bitte versuchen Sie es später noch einmal...", "An internal error occurred, please try again later...");
+
+    private static final ErrorMessage MSG_NO_SUPPORTED_DEVICE_FOUND = new ErrorMessage("Kein unterstütztes Gerät im Header gefunden", "No supported device found from header");
+
+    private static final ErrorMessage MSG_PARAMETER_LOGIN_IS_MISSING = new ErrorMessage("Der Parameter \"login\" fehlt", "Parameter \"login\" is missing");
+    
+    private static final ErrorMessage MSG_UNSECURE_ACCESS = new ErrorMessage("Unsicherer Zugriff mit http ist nicht erlaubt. Bitte https benutzen.", "Unsecure access with http is not allowed. Use https instead.");
 
     /**
      * 
@@ -108,6 +108,15 @@ public class MobileConfigServlet extends HttpServlet {
             // change position in array...
             return new String[]{split[1], split[0]};
         }
+    }
+
+    private static HashMap<String, String> generateHashMap(final String email, final String host, final String username, final String domain) {
+        final HashMap<String, String> hashMap = new HashMap<String, String>();
+        hashMap.put("email", email);
+        hashMap.put("host", host);
+        hashMap.put("username", username);
+        hashMap.put("domain", domain);
+        return hashMap;
     }
 
     private static void writeMobileConfigWinMob(final OutputStream out, final String email, final String host, final String username, final String domain) throws IOException, ConfigurationException, TemplateException {
@@ -200,6 +209,24 @@ public class MobileConfigServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Reads the language from the header, returns either ENGLISH or GERMAN. No other value can be returned
+     * @param req
+     * @return
+     */
+    private Locale detectLanguage(HttpServletRequest req) {
+        final String parameter = req.getHeader("Accept-Language");
+        if (null == parameter) {
+            return Locale.ENGLISH;
+        } else {
+            if (parameter.startsWith("de")) {
+                return Locale.GERMAN;
+            } else {
+                return Locale.ENGLISH;
+            }
+        }
+    }
+
     private void generateConfig(HttpServletRequest req, HttpServletResponse resp, final String login, final Device device) throws IOException, ConfigurationException, TemplateException {
         String mail = login;
         final String parameter = req.getParameter("mail");
@@ -218,15 +245,6 @@ public class MobileConfigServlet extends HttpServlet {
             writeMobileConfigWinMob(outputStream, mail, getHostname(req), usernameAndDomain[0], usernameAndDomain[1]);
             outputStream.close();
         }
-    }
-
-    private static HashMap<String, String> generateHashMap(final String email, final String host, final String username, final String domain) {
-        final HashMap<String, String> hashMap = new HashMap<String, String>();
-        hashMap.put("email", email);
-        hashMap.put("host", host);
-        hashMap.put("username", username);
-        hashMap.put("domain", domain);
-        return hashMap;
     }
 
     private String getHostname(final HttpServletRequest req) {
@@ -271,24 +289,6 @@ public class MobileConfigServlet extends HttpServlet {
         writer.println("</table>");
         writer.println("</body></html>");
         writer.close();
-    }
-
-    /**
-     * Reads the language from the header, returns either ENGLISH or GERMAN. No other value can be returned
-     * @param req
-     * @return
-     */
-    private Locale detectLanguage(HttpServletRequest req) {
-        final String parameter = req.getHeader("Accept-Language");
-        if (null == parameter) {
-            return Locale.ENGLISH;
-        } else {
-            if (parameter.startsWith("de")) {
-                return Locale.GERMAN;
-            } else {
-                return Locale.ENGLISH;
-            }
-        }
     }
 
     private void writeMobileConfig(final PrintWriter printWriter, OutputStream outStream, final String email, final String host, final String username, final String domain) throws IOException, TemplateException, ConfigurationException {
