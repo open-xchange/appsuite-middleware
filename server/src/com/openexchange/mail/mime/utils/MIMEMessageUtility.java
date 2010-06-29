@@ -89,7 +89,6 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.HeaderName;
-import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.PlainTextAddress;
@@ -855,7 +854,7 @@ public final class MIMEMessageUtility {
     public static InternetAddress[] parseAddressList(final String addresslist, final boolean strict) {
         try {
             return parseAddressList(addresslist, strict, false);
-        } catch (final MIMEMailException e) {
+        } catch (final AddressException e) {
             /*
              * Cannot occur
              */
@@ -879,9 +878,9 @@ public final class MIMEMessageUtility {
      * @param strict - <code>true</code> to enforce RFC822 syntax; otherwise <code>false</code>
      * @param failOnError - <code>true</code> to fail if parsing fails; otherwise <code>false</code> to get a plain-text representation
      * @return An array of <code>InternetAddress</code> objects
-     * @throws MIMEMailException If parsing fails and <code>failOnError</code> is <code>true</code>
+     * @throws AddressException If parsing fails and <code>failOnError</code> is <code>true</code>
      */
-    public static InternetAddress[] parseAddressList(final String addresslist, final boolean strict, final boolean failOnError) throws MIMEMailException {
+    public static InternetAddress[] parseAddressList(final String addresslist, final boolean strict, final boolean failOnError) throws AddressException {
         if (null == addresslist) {
             return new InternetAddress[0];
         }
@@ -891,7 +890,7 @@ public final class MIMEMessageUtility {
             addrs = QuotedInternetAddress.parse(al, strict);
         } catch (final AddressException e) {
             if (failOnError) {
-                throw MIMEMailException.handleMessagingException(e);
+                throw e;
             }
             if (LOG.isDebugEnabled()) {
                 LOG.debug(new StringBuilder(128).append("Internet addresses could not be properly parsed, ").append(
