@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 9
+%define		ox_release 10
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -537,6 +537,37 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed Jun 30 2010 - tobias.prinz@open-xchange.com
+ - Bugfix #16287: Error message made easier to understand.
+* Wed Jun 30 2010 - thorben.betten@open-xchange.com
+ - Bugfix #16041: Added header "Importance" when dealing with a mail's priority level
+* Tue Jun 29 2010 - thorben.betten@open-xchange.com
+ - Bugfix #16357: Proper registration of new folder tree's delete listener (for user deletion)
+ - Bugfix #16007: Throwing appropriate error on invalid entered email addresses
+ - Bugfix #16321: Management bundle deals with IPv6 addresses
+ - Bugfix #16231: Deep check if INBOX has user-visible subfolders in new folder tree
+ - Bugfix #15477: Default database folders made locale-sensitive
+ - Bugfix #15620: Purging all listener data on bundle stop
+ - Bugfix #15708: Fixed java.lang.StringIndexOutOfBoundsException in AJP module
+ - Bugfix #15709: Added POP3 timeout
+* Tue Jun 29 2010 - steffen.templin@open-xchange.com
+ - Bugfix #16358: Defect folder ids in reminders after moving appointments from public to private
+* Tue Jun 29 2010 - tobias.prinz@open-xchange.com
+ - Bugfix #15662: As per RFC 2445, checking free/busy on an appointment marked as "FREE" returns "FREE" and not nothing at all.
+* Mon Jun 28 2010 - thorben.betten@open-xchange.com
+ - Bugfix #16284: Primary mail account's root folder does not exist in Outlook folder tree
+ - Bugfix #16311: Proper parent identifier for shared database folders
+ - Bugfix #16378: Checking empty list prior to generating IMAP number argument
+ - Bugfix #16346: Added appropriate error message when authentication to SMTP server fails
+ - Bugfix #16385: i18n for global address book folder
+ - Bugfix #15874: Showing available content on invalid credentials to access a mail system
+* Mon Jun 28 2010 - karsten.will@open-xchange.com
+ - Bugfix #16334: Crawler for gmx.com does not work (again)
+* Fri Jun 25 2010 - thorben.betten@open-xchange.com
+ - Bugfix #16360: No parsing of TNEF attachments when writing as structured JSON object
+ - Bugfix #16273: No parsing of UUEncoded attachments (by default) when writing as structured JSON object
+* Fri Jun 25 2010 - steffen.templin@open-xchange.com
+ - Bugfix #16141: On importing mails the whole import stops if one mail is corrupt.
 * Tue Jun 22 2010 - martin.herfurth@open-xchange.com
  - Bugfix #16297: Fixed attachment tracking in calendar.
 * Tue Jun 22 2010 - steffen.templin@open-xchange.com

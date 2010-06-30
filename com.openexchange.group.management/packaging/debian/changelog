@@ -1,3 +1,9 @@
+open-xchange-group-managerequest (6.17.0.0-10) unstable; urgency=low
+
+  * first build for 6.17-rev10
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 30 Jun 2010 15:18:11 +0200
+
 open-xchange-group-managerequest (6.17.0.0-9) unstable; urgency=low
 
   * first build for 6.17-rev9
