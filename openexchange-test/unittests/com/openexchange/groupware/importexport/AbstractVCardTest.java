@@ -83,7 +83,7 @@ public class AbstractVCardTest extends AbstractContactTest {
 		String[] loginParts = AjaxInit.getAJAXProperty("login").split("@");;
 		String name = loginParts[0];
 		String context = null;
-		if(loginParts.length > 0)
+		if(loginParts.length == 1)
 		    context = loginParts[1];
 		else 
 		    context = "defaultcontext";
