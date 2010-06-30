@@ -63,12 +63,12 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.activation.DataHandler;
 import javax.mail.Address;
+import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.NoSuchProviderException;
 import javax.mail.Part;
 import javax.mail.Transport;
-import javax.mail.Message.RecipientType;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeBodyPart;
@@ -358,6 +358,7 @@ public final class SMTPTransport extends MailTransport {
              * Set header
              */
             smtpMessage.setHeader(MessageHeaders.HDR_X_PRIORITY, "3 (normal)");
+            smtpMessage.setHeader(MessageHeaders.HDR_IMPORTANCE, "Medium");
             /*
              * Subject
              */
