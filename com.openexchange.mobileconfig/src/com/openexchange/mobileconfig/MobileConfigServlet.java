@@ -8,12 +8,12 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URLEncoder;
-import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.regex.Pattern;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.mobileconfig.configuration.ConfigurationException;
 import com.openexchange.mobileconfig.configuration.MobileConfigProperties;
+import com.openexchange.mobileconfig.configuration.Property;
 import com.openexchange.mobileconfig.osgi.Activator;
 import com.openexchange.mobileconfig.services.MobileConfigServiceRegistry;
 import com.openexchange.templating.OXTemplate;
@@ -34,12 +35,46 @@ import com.openexchange.templating.TemplateService;
 
 public class MobileConfigServlet extends HttpServlet {
 
+    
     private enum Device {
         iPhone,
         winMob;
     }
-    
+
+    private static class ErrorMessage {
+        
+        private final String english;
+        
+        private final String german;
+
+        public ErrorMessage(String german, String english) {
+            super();
+            this.german = german;
+            this.english = english;
+        }
+
+        
+        public String getEnglish() {
+            return english;
+        }
+
+        
+        public String getGerman() {
+            return german;
+        }
+        
+        
+    }
+
     private static final transient Log LOG = LogFactory.getLog(MobileConfigServlet.class);
+
+    private static final ErrorMessage MSG_INTERNAL_ERROR = new ErrorMessage("Ein interner Fehler ist aufgetreten, bitte versuchen Sie es später noch einmal...", "An internal error occurred, please try again later...");
+
+    private static final ErrorMessage MSG_NO_SUPPORTED_DEVICE_FOUND = new ErrorMessage("Kein unterstütztes Gerät im Header gefunden", "No supported device found from header");
+
+    private static final ErrorMessage MSG_PARAMETER_LOGIN_IS_MISSING = new ErrorMessage("Der Parameter \"login\" fehlt", "Parameter \"login\" is missing");
+    
+    private static final ErrorMessage MSG_UNSECURE_ACCESS = new ErrorMessage("Unsicherer Zugriff mit http ist nicht erlaubt. Bitte https benutzen.", "Unsecure access with http is not allowed. Use https instead.");
 
     /**
      * 
@@ -61,7 +96,7 @@ public class MobileConfigServlet extends HttpServlet {
      * @throws ConfigurationException
      */
     protected static String[] splitUsernameAndDomain(String username) throws ConfigurationException {
-        final String domain_user = MobileConfigProperties.getProperty(MobileConfigServiceRegistry.getServiceRegistry().getService(ConfigurationService.class), MobileConfigProperties.Property.DomainUser);
+        final String domain_user = MobileConfigProperties.getProperty(MobileConfigServiceRegistry.getServiceRegistry(), Property.DomainUser);
         final String separator = domain_user.replaceAll("\\$USER|\\$DOMAIN", "");
         final String[] split = username.split(Pattern.quote(separator));
         if (split.length != 2) {
@@ -75,6 +110,15 @@ public class MobileConfigServlet extends HttpServlet {
         }
     }
 
+    private static HashMap<String, String> generateHashMap(final String email, final String host, final String username, final String domain) {
+        final HashMap<String, String> hashMap = new HashMap<String, String>();
+        hashMap.put("email", email);
+        hashMap.put("host", host);
+        hashMap.put("username", username);
+        hashMap.put("domain", domain);
+        return hashMap;
+    }
+
     private static void writeMobileConfigWinMob(final OutputStream out, final String email, final String host, final String username, final String domain) throws IOException, ConfigurationException, TemplateException {
         CabUtil.writeCabFile(new DataOutputStream(new BufferedOutputStream(out)), write(email, host, username, domain));
     }
@@ -82,22 +126,27 @@ public class MobileConfigServlet extends HttpServlet {
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         final ConfigurationService service = MobileConfigServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
-        
+        if (null == service) {
+            LOG.error("A configuration exception occurred, which should not happen: No configuration service found");
+            printError(req, resp, MSG_INTERNAL_ERROR);
+            return;
+        }
+
         final String iphoneRegEx;
         final String winMobRegEx;
         try {
-            iphoneRegEx = MobileConfigProperties.getProperty(service, MobileConfigProperties.Property.iPhoneRegex);
-            winMobRegEx = MobileConfigProperties.getProperty(service, MobileConfigProperties.Property.WinMobRegex);
-            final Boolean secureConnect = MobileConfigProperties.getProperty(service, MobileConfigProperties.Property.OnlySecureConnect);
+            iphoneRegEx = MobileConfigProperties.getProperty(service, Property.iPhoneRegex);
+            winMobRegEx = MobileConfigProperties.getProperty(service, Property.WinMobRegex);
+            final Boolean secureConnect = MobileConfigProperties.getProperty(service, Property.OnlySecureConnect);
             if (secureConnect) {
                 if (!req.isSecure()) {
-                    printError(resp, "Unsecure access with http is not allowed. Use https instead.");
+                    printError(req, resp, MSG_UNSECURE_ACCESS);
                     return;
                 }
             }
         } catch (final ConfigurationException e) {
             LOG.error("A configuration exception occurred, which should not happen: " + e.getMessage(), e);
-            printError(resp, "An internal error occurred, please try again later...");
+            printError(req, resp, MSG_INTERNAL_ERROR);
             return;
         }
         
@@ -105,7 +154,7 @@ public class MobileConfigServlet extends HttpServlet {
         final String login = req.getParameter("login");
         if (null == device) {
             if (null == login) {
-                printError(resp, "Parameter login is missing");
+                printError(req, resp, MSG_PARAMETER_LOGIN_IS_MISSING);
                 return;
             }
             String mailpart = "";
@@ -125,7 +174,7 @@ public class MobileConfigServlet extends HttpServlet {
                     resp.sendRedirect(Activator.ALIAS + "/ms.cab?login=" + URLEncoder.encode(req.getParameter("login"),"UTF-8") + mailpart);
                     return;
                 } else {
-                    printError(resp, "No supported device found from header");
+                    printError(req, resp, MSG_NO_SUPPORTED_DEVICE_FOUND);
                     LOG.info("Unsupported device header: \"" + header + "\"");
                     return;
                 }
@@ -135,11 +184,15 @@ public class MobileConfigServlet extends HttpServlet {
                 generateConfig(req, resp, login, device);
             } catch (final ConfigurationException e) {
                 LOG.error("A configuration exception occurred, which should not happen: " + e.getMessage(), e);
-                printError(resp, "An internal error occurred, please try again later...");
+                printError(req, resp, MSG_INTERNAL_ERROR);
                 return;
             } catch (final TemplateException e) {
                 LOG.error("A template exception occurred, which should not happen: " + e.getMessage(), e);
-                printError(resp, "An internal error occurred, please try again later...");
+                printError(req, resp, MSG_INTERNAL_ERROR);
+                return;
+            } catch (final IOException e) {
+                LOG.error("A template exception occurred, which should not happen: " + e.getMessage(), e);
+                printError(req, resp, MSG_INTERNAL_ERROR);
                 return;
             }
         }
@@ -156,7 +209,25 @@ public class MobileConfigServlet extends HttpServlet {
         }
     }
 
-    private void generateConfig(HttpServletRequest req, HttpServletResponse resp, final String login, final Device device) throws UnknownHostException, IOException, ConfigurationException, TemplateException {
+    /**
+     * Reads the language from the header, returns either ENGLISH or GERMAN. No other value can be returned
+     * @param req
+     * @return
+     */
+    private Locale detectLanguage(HttpServletRequest req) {
+        final String parameter = req.getHeader("Accept-Language");
+        if (null == parameter) {
+            return Locale.ENGLISH;
+        } else {
+            if (parameter.startsWith("de")) {
+                return Locale.GERMAN;
+            } else {
+                return Locale.ENGLISH;
+            }
+        }
+    }
+
+    private void generateConfig(HttpServletRequest req, HttpServletResponse resp, final String login, final Device device) throws IOException, ConfigurationException, TemplateException {
         String mail = login;
         final String parameter = req.getParameter("mail");
         if (null != parameter) {
@@ -165,8 +236,9 @@ public class MobileConfigServlet extends HttpServlet {
         final String[] usernameAndDomain = splitUsernameAndDomain(login);
         if (Device.iPhone.equals(device)) {
             resp.setContentType("application/x-apple-aspen-config");
-            final PrintWriter writer = getWriterFromOutputStream(resp.getOutputStream());
-            writeMobileConfig(writer, mail, getHostname(req), usernameAndDomain[0], usernameAndDomain[1]);
+            final ServletOutputStream outputStream = resp.getOutputStream();
+            final PrintWriter writer = getWriterFromOutputStream(outputStream);
+            writeMobileConfig(writer, outputStream, mail, getHostname(req), usernameAndDomain[0], usernameAndDomain[1]);
             writer.close();
         } else if (Device.winMob.equals(device)) {
             final ServletOutputStream outputStream = resp.getOutputStream();
@@ -175,16 +247,7 @@ public class MobileConfigServlet extends HttpServlet {
         }
     }
 
-    private static HashMap<String, String> generateHashMap(final String email, final String host, final String username, final String domain) {
-        final HashMap<String, String> hashMap = new HashMap<String, String>();
-        hashMap.put("email", email);
-        hashMap.put("host", host);
-        hashMap.put("username", username);
-        hashMap.put("domain", domain);
-        return hashMap;
-    }
-
-    private String getHostname(final HttpServletRequest req) throws UnknownHostException {
+    private String getHostname(final HttpServletRequest req) {
         final String canonicalHostName = req.getServerName();
         return canonicalHostName;
     }
@@ -201,7 +264,8 @@ public class MobileConfigServlet extends HttpServlet {
         }
     }
 
-    private void printError(final HttpServletResponse resp, final String string) throws IOException {
+    private void printError(HttpServletRequest req, final HttpServletResponse resp, final ErrorMessage string) throws IOException {
+        Locale locale = detectLanguage(req);
         resp.setContentType("text/html");
         final PrintWriter writer = getWriterFromOutputStream(resp.getOutputStream());
         writer.println("<html><head>");
@@ -216,18 +280,32 @@ public class MobileConfigServlet extends HttpServlet {
         writer.println("<body>");
         writer.println("<table>");
         writer.println("<tr>");
-        writer.println("<td><h1>" + string + "</h1></td>");
+        if (Locale.ENGLISH.equals(locale)) {
+            writer.println("<td><h1>" + string.getEnglish() + "</h1></td>");
+        } else if (Locale.GERMAN.equals(locale)) {
+            writer.println("<td><h1>" + string.getGerman() + "</h1></td>");
+        }
         writer.println("</tr>");
         writer.println("</table>");
         writer.println("</body></html>");
         writer.close();
     }
 
-    private void writeMobileConfig(final PrintWriter printWriter, final String email, final String host, final String username, final String domain) throws IOException, TemplateException {
+    private void writeMobileConfig(final PrintWriter printWriter, OutputStream outStream, final String email, final String host, final String username, final String domain) throws IOException, TemplateException, ConfigurationException {
         try {
             final TemplateService service = MobileConfigServiceRegistry.getServiceRegistry().getService(TemplateService.class);
             final OXTemplate loadTemplate = service.loadTemplate("iPhoneTemplate.tmpl");
-            loadTemplate.process(generateHashMap(email, host, username, domain), printWriter);
+            final Boolean property = MobileConfigProperties.getProperty(MobileConfigServiceRegistry.getServiceRegistry().getService(ConfigurationService.class), Property.SignConfig);
+            if (property) {
+                final MobileConfigSigner writer = new MobileConfigSigner(outStream);
+                try {
+                    loadTemplate.process(generateHashMap(email, host, username, domain), writer);
+                } finally {
+                    writer.close();
+                }
+            } else {
+                loadTemplate.process(generateHashMap(email, host, username, domain), printWriter);
+            }
         } finally {
             printWriter.close();
         }

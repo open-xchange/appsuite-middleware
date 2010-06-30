@@ -6,9 +6,9 @@
    <array>
        <dict>
            <key>EmailAddress</key>
-           <string>${email}</string>
+           <string>testuser@test.com</string>
            <key>Host</key>
-           <string>${host}</string>
+           <string>example.com</string>
            <key>PayloadDisplayName</key>
            <string>OX EAS</string>
            <key>PayloadIdentifier</key>
@@ -16,31 +16,29 @@
            <key>PayloadType</key>
            <string>com.apple.eas.account</string>
            <key>PayloadUUID</key>
-           <string>077E36E4-9579-47F0-BACF-62A55FEA11E8</string>
+           <string>077E36E4-9579-47F0-BACF-62A55FEA11E9</string>
            <key>PayloadVersion</key>
            <integer>1</integer>
            <key>SSL</key>
            <true/>
            <key>UserName</key>
-           <string>${username}</string>
+           <string>testuser</string>
        </dict>
        <dict>
            <key>URL</key>
-           <string>https://www.open-xchange.com</string>
-           <key>Label</key>
-           <string>Open-Xchange Web Page</string>
-           <key>PayloadIdentifier</key>
-           <string>eas.profile.webclip</string>
-           <key>PayloadType</key>
-           <string>com.apple.webClip.managed</string>
+	   <string>https://m.open-xchange.com</string>
+	   <key>Label</key>
+	   <string>Open-Xchange Web Page</string>
+	   <key>PayloadIdentifier</key>
+	   <string>eas.profile.webclip</string>
+	   <key>PayloadType</key>
+	   <string>com.apple.webClip.managed</string>
            <key>PayloadDisplayName</key>
            <string>OX WebClip</string>
            <key>PayloadUUID</key>
            <string>077E36E4-9579-47F0-BACF-62A55FEA11E2</string>
            <key>PayloadVersion</key>
            <integer>1</integer>
-	   <key>IsRemovable</key>
-	   <false/>
 	   <key>Icon</key>
 	   <data>
 	   iVBORw0KGgoAAAANSUhEUgAAADsAAAA7CAYAAADFJfKzAAAXUmlD
@@ -303,7 +301,7 @@
    <key>PayloadType</key>
    <string>Configuration</string>
    <key>PayloadUUID</key>
-   <string>E4DB69E7-EC59-418E-A883-14944D5BC48F</string>
+   <string>E4DB69E7-EC59-418E-A883-14944D5BC48A</string>
    <key>PayloadVersion</key>
    <integer>1</integer>
 </dict>

@@ -6,6 +6,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.SimConfigurationService;
 import com.openexchange.mobileconfig.MobileConfigServlet;
 import com.openexchange.mobileconfig.configuration.ConfigurationException;
+import com.openexchange.mobileconfig.configuration.Property;
 import com.openexchange.mobileconfig.services.MobileConfigServiceRegistry;
 
 
@@ -15,7 +16,7 @@ public class MobileConfigServletTest extends MobileConfigServlet  {
     @Test
     public void testSplitUsernameAndDomain() throws ConfigurationException {
         final SimConfigurationService service = new SimConfigurationService();
-        service.stringProperties.put("com.openexchange.usm.eas.login_pattern.domain_user", "$USER@$DOMAIN");
+        service.stringProperties.put(Property.DomainUser.getName(), "$USER@$DOMAIN");
         MobileConfigServiceRegistry.getServiceRegistry().addService(ConfigurationService.class, service);
         
         final String[] splitUsernameAndDomain = splitUsernameAndDomain("seppel@ox.de");
@@ -26,7 +27,7 @@ public class MobileConfigServletTest extends MobileConfigServlet  {
     @Test
     public void testSplitUsernameAndDomain2() throws ConfigurationException {
         final SimConfigurationService service = new SimConfigurationService();
-        service.stringProperties.put("com.openexchange.usm.eas.login_pattern.domain_user", "$DOMAIN@$USER");
+        service.stringProperties.put(Property.DomainUser.getName(), "$DOMAIN@$USER");
         MobileConfigServiceRegistry.getServiceRegistry().addService(ConfigurationService.class, service);
         
         final String[] splitUsernameAndDomain = splitUsernameAndDomain("seppel@ox.de");
@@ -37,7 +38,7 @@ public class MobileConfigServletTest extends MobileConfigServlet  {
     @Test
     public void testSplitUsernameAndDomain3() throws ConfigurationException {
         final SimConfigurationService service = new SimConfigurationService();
-        service.stringProperties.put("com.openexchange.usm.eas.login_pattern.domain_user", "$DOMAIN|$USER");
+        service.stringProperties.put(Property.DomainUser.getName(), "$DOMAIN|$USER");
         MobileConfigServiceRegistry.getServiceRegistry().addService(ConfigurationService.class, service);
         
         try {
@@ -52,7 +53,7 @@ public class MobileConfigServletTest extends MobileConfigServlet  {
     @Test
     public void testSplitUsernameAndDomain4() throws ConfigurationException {
         final SimConfigurationService service = new SimConfigurationService();
-        service.stringProperties.put("com.openexchange.usm.eas.login_pattern.domain_user", "$DOMAIN|$USER");
+        service.stringProperties.put(Property.DomainUser.getName(), "$DOMAIN|$USER");
         MobileConfigServiceRegistry.getServiceRegistry().addService(ConfigurationService.class, service);
         
         final String[] splitUsernameAndDomain = splitUsernameAndDomain("seppel|ox.de");
