@@ -60,8 +60,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import javax.mail.MessagingException;
 import javax.mail.Part;
 import javax.mail.internet.InternetAddress;
@@ -352,23 +352,26 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
                      * This special header is handled through handleDispositionNotification()
                      */
                     continue;
-                } else if (MessageHeaders.HDR_X_PRIORITY.equalsIgnoreCase(headerName)) {
+                } else if (MessageHeaders.HDR_IMPORTANCE.equalsIgnoreCase(headerName)) {
                     /*
                      * Priority
                      */
                     int priority = MailMessage.PRIORITY_NORMAL;
                     if (null != entry.getValue()) {
-                        final String[] tmp = entry.getValue().split(" +");
-                        try {
-                            priority = Integer.parseInt(tmp[0]);
-                        } catch (final NumberFormatException nfe) {
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug("Strange X-Priority header: " + tmp[0]);
-                            }
-                            priority = MailMessage.PRIORITY_NORMAL;
-                        }
+                        priority = MIMEMessageConverter.parseImportance(entry.getValue());
+                        jsonObject.put(MailJSONField.PRIORITY.getKey(), priority);
                     }
-                    jsonObject.put(MailJSONField.PRIORITY.getKey(), priority);
+                } else if (MessageHeaders.HDR_X_PRIORITY.equalsIgnoreCase(headerName)) {
+                    if (!jsonObject.has(MailJSONField.PRIORITY.getKey())) {
+                        /*
+                         * Priority
+                         */
+                        int priority = MailMessage.PRIORITY_NORMAL;
+                        if (null != entry.getValue()) {
+                            priority = MIMEMessageConverter.parsePriority(entry.getValue());
+                        }
+                        jsonObject.put(MailJSONField.PRIORITY.getKey(), priority);
+                    }
                 } else if (MessageHeaders.HDR_X_MAILER.equalsIgnoreCase(headerName)) {
                     hdrObject.put(headerName, entry.getValue());
                 } else if (MessageHeaders.HDR_X_OX_VCARD.equalsIgnoreCase(headerName)) {

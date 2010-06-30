@@ -59,8 +59,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.mail.FetchProfile;
-import javax.mail.UIDFolder;
 import javax.mail.FetchProfile.Item;
+import javax.mail.UIDFolder;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.mime.HeaderName;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -233,6 +233,9 @@ public final class MIMEStorageUtility {
             }
             if (fetchProfile.contains(MessageHeaders.HDR_DISP_NOT_TO)) {
                 set.add(MailField.DISPOSITION_NOTIFICATION_TO);
+            }
+            if (fetchProfile.contains(MessageHeaders.HDR_IMPORTANCE)) {
+                set.add(MailField.PRIORITY);
             }
             if (fetchProfile.contains(MessageHeaders.HDR_X_PRIORITY)) {
                 set.add(MailField.PRIORITY);
@@ -459,7 +462,7 @@ public final class MIMEStorageUtility {
 
     private static final EnumMap<MailField, FetchProfile.Item> FIELD2ITEM;
 
-    private static final EnumMap<MailField, String> FIELD2STRING;
+    private static final EnumMap<MailField, List<String>> FIELD2STRING;
 
     static {
         /*
@@ -474,15 +477,15 @@ public final class MIMEStorageUtility {
         /*
          * String map
          */
-        FIELD2STRING = new EnumMap<MailField, String>(MailField.class);
-        FIELD2STRING.put(MailField.FROM, MessageHeaders.HDR_FROM);
-        FIELD2STRING.put(MailField.TO, MessageHeaders.HDR_TO);
-        FIELD2STRING.put(MailField.CC, MessageHeaders.HDR_CC);
-        FIELD2STRING.put(MailField.BCC, MessageHeaders.HDR_BCC);
-        FIELD2STRING.put(MailField.SUBJECT, MessageHeaders.HDR_SUBJECT);
-        FIELD2STRING.put(MailField.SENT_DATE, MessageHeaders.HDR_DATE);
-        FIELD2STRING.put(MailField.DISPOSITION_NOTIFICATION_TO, MessageHeaders.HDR_DISP_NOT_TO);
-        FIELD2STRING.put(MailField.PRIORITY, MessageHeaders.HDR_X_PRIORITY);
+        FIELD2STRING = new EnumMap<MailField, List<String>>(MailField.class);
+        FIELD2STRING.put(MailField.FROM, Collections.singletonList(MessageHeaders.HDR_FROM));
+        FIELD2STRING.put(MailField.TO, Collections.singletonList(MessageHeaders.HDR_TO));
+        FIELD2STRING.put(MailField.CC, Collections.singletonList(MessageHeaders.HDR_CC));
+        FIELD2STRING.put(MailField.BCC, Collections.singletonList(MessageHeaders.HDR_BCC));
+        FIELD2STRING.put(MailField.SUBJECT, Collections.singletonList(MessageHeaders.HDR_SUBJECT));
+        FIELD2STRING.put(MailField.SENT_DATE, Collections.singletonList(MessageHeaders.HDR_DATE));
+        FIELD2STRING.put(MailField.DISPOSITION_NOTIFICATION_TO, Collections.singletonList(MessageHeaders.HDR_DISP_NOT_TO));
+        FIELD2STRING.put(MailField.PRIORITY, Arrays.asList(MessageHeaders.HDR_IMPORTANCE, MessageHeaders.HDR_X_PRIORITY));
     }
 
     private static void addFetchItem(final FetchProfile fp, final MailField field) {
@@ -497,9 +500,11 @@ public final class MIMEStorageUtility {
             fp.add(item);
             return;
         }
-        final String string = FIELD2STRING.get(field);
-        if (null != string) {
-            fp.add(string);
+        final List<String> strings = FIELD2STRING.get(field);
+        if (null != strings) {
+            for (final String string : strings) {
+                fp.add(string);
+            }
         }
     }
 

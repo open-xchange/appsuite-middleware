@@ -116,8 +116,10 @@ public final class MIMEMessageConverter {
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
-    private static final EnumSet<MailField> ENUM_SET_FULL =
-        EnumSet.complementOf(EnumSet.of(MailField.BODY, MailField.FULL, MailField.ACCOUNT_NAME));
+    private static final EnumSet<MailField> ENUM_SET_FULL = EnumSet.complementOf(EnumSet.of(
+        MailField.BODY,
+        MailField.FULL,
+        MailField.ACCOUNT_NAME));
 
     /**
      * {@link ExistenceChecker} - A checker to ensure existence of a certain field.
@@ -144,15 +146,14 @@ public final class MIMEMessageConverter {
 
     private static interface MailMessageFieldFiller {
 
-        public static final String[] NON_MATCHING_HEADERS =
-            {
-                MessageHeaders.HDR_FROM, MessageHeaders.HDR_TO, MessageHeaders.HDR_CC, MessageHeaders.HDR_BCC,
-                MessageHeaders.HDR_DISP_NOT_TO, MessageHeaders.HDR_REPLY_TO, MessageHeaders.HDR_SUBJECT, MessageHeaders.HDR_DATE,
-                MessageHeaders.HDR_X_PRIORITY, MessageHeaders.HDR_MESSAGE_ID, MessageHeaders.HDR_IN_REPLY_TO,
-                MessageHeaders.HDR_REFERENCES, MessageHeaders.HDR_X_OX_VCARD, MessageHeaders.HDR_X_OX_NOTIFICATION };
+        public static final String[] NON_MATCHING_HEADERS = {
+            MessageHeaders.HDR_FROM, MessageHeaders.HDR_TO, MessageHeaders.HDR_CC, MessageHeaders.HDR_BCC, MessageHeaders.HDR_DISP_NOT_TO,
+            MessageHeaders.HDR_REPLY_TO, MessageHeaders.HDR_SUBJECT, MessageHeaders.HDR_DATE, MessageHeaders.HDR_IMPORTANCE, MessageHeaders.HDR_X_PRIORITY,
+            MessageHeaders.HDR_MESSAGE_ID, MessageHeaders.HDR_IN_REPLY_TO, MessageHeaders.HDR_REFERENCES, MessageHeaders.HDR_X_OX_VCARD,
+            MessageHeaders.HDR_X_OX_NOTIFICATION };
 
-        public static final String[] ALREADY_INSERTED_HEADERS =
-            { MessageHeaders.HDR_MESSAGE_ID, MessageHeaders.HDR_REPLY_TO, MessageHeaders.HDR_REFERENCES };
+        public static final String[] ALREADY_INSERTED_HEADERS = {
+            MessageHeaders.HDR_MESSAGE_ID, MessageHeaders.HDR_REPLY_TO, MessageHeaders.HDR_REFERENCES };
 
         public static final org.apache.commons.logging.Log LOG1 =
             org.apache.commons.logging.LogFactory.getLog(MailMessageFieldFiller.class);
@@ -535,8 +536,8 @@ public final class MIMEMessageConverter {
         }
     }
 
-    private static final EnumMap<MailField, MailMessageFieldFiller> FILLER_MAP_EXT =
-        new EnumMap<MailField, MailMessageFieldFiller>(MailField.class);
+    private static final EnumMap<MailField, MailMessageFieldFiller> FILLER_MAP_EXT = new EnumMap<MailField, MailMessageFieldFiller>(
+        MailField.class);
 
     private static final EnumMap<MailField, ExistenceChecker> CHECKER_MAP;
 
@@ -928,11 +929,16 @@ public final class MIMEMessageConverter {
         FILLER_MAP_EXT.put(MailField.PRIORITY, new MailMessageFieldFiller() {
 
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-                final String[] val = ((ExtendedMimeMessage) msg).getHeader(MessageHeaders.HDR_X_PRIORITY);
-                if ((val != null) && (val.length > 0)) {
-                    parsePriority(val[0], mailMessage);
+                String[] val = ((ExtendedMimeMessage) msg).getHeader(MessageHeaders.HDR_IMPORTANCE);
+                if (val != null && (val.length > 0)) {
+                    parseImportance(val[0], mailMessage);
                 } else {
-                    mailMessage.setPriority(MailMessage.PRIORITY_NORMAL);
+                    val = ((ExtendedMimeMessage) msg).getHeader(MessageHeaders.HDR_X_PRIORITY);
+                    if ((val != null) && (val.length > 0)) {
+                        parsePriority(val[0], mailMessage);
+                    } else {
+                        mailMessage.setPriority(MailMessage.PRIORITY_NORMAL);
+                    }
                 }
             }
         });
@@ -985,8 +991,8 @@ public final class MIMEMessageConverter {
         return fillers;
     }
 
-    private static final EnumMap<MailField, MailMessageFieldFiller> FILLER_MAP =
-        new EnumMap<MailField, MailMessageFieldFiller>(MailField.class);
+    private static final EnumMap<MailField, MailMessageFieldFiller> FILLER_MAP = new EnumMap<MailField, MailMessageFieldFiller>(
+        MailField.class);
 
     static {
         final org.apache.commons.logging.Log logger = LOG;
@@ -1054,9 +1060,18 @@ public final class MIMEMessageConverter {
                  */
                 mailMessage.setSentDate(msg.getSentDate());
                 /*
-                 * X-Priority
+                 * Importance
                  */
                 {
+                    final String[] importance = msg.getHeader(MessageHeaders.HDR_IMPORTANCE);
+                    if (null != importance) {
+                        parseImportance(importance[0], mailMessage);
+                    }
+                }
+                /*
+                 * X-Priority
+                 */
+                if (!mailMessage.containsPriority()) {
                     final String[] xPriority = msg.getHeader(MessageHeaders.HDR_X_PRIORITY);
                     if (null == xPriority) {
                         mailMessage.setPriority(MailMessage.PRIORITY_NORMAL);
@@ -1249,11 +1264,16 @@ public final class MIMEMessageConverter {
         FILLER_MAP.put(MailField.PRIORITY, new MailMessageFieldFiller() {
 
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-                final String[] val = msg.getHeader(MessageHeaders.HDR_X_PRIORITY);
-                if ((val != null) && (val.length > 0)) {
-                    parsePriority(val[0], mailMessage);
+                String[] val = ((ExtendedMimeMessage) msg).getHeader(MessageHeaders.HDR_IMPORTANCE);
+                if (val != null && (val.length > 0)) {
+                    parseImportance(val[0], mailMessage);
                 } else {
-                    mailMessage.setPriority(MailMessage.PRIORITY_NORMAL);
+                    val = ((ExtendedMimeMessage) msg).getHeader(MessageHeaders.HDR_X_PRIORITY);
+                    if ((val != null) && (val.length > 0)) {
+                        parsePriority(val[0], mailMessage);
+                    } else {
+                        mailMessage.setPriority(MailMessage.PRIORITY_NORMAL);
+                    }
                 }
             }
         });
@@ -1492,7 +1512,12 @@ public final class MIMEMessageConverter {
                 }
             }
             mail.setFileName(getFileName(mail));
-            parsePriority(mail.getFirstHeader(MessageHeaders.HDR_X_PRIORITY), mail);
+            final String importance = mail.getFirstHeader(MessageHeaders.HDR_IMPORTANCE);
+            if (null != importance) {
+                parseImportance(importance, mail);
+            } else {
+                parsePriority(mail.getFirstHeader(MessageHeaders.HDR_X_PRIORITY), mail);
+            }
             if (msg.getReceivedDate() == null) {
                 /*
                  * Check for "Received" header
@@ -1695,8 +1720,9 @@ public final class MIMEMessageConverter {
                         } else if (part instanceof MimeMessage) {
                             size = estimateSize(((MimeMessage) part).getRawInputStream(), tansferEnc);
                         } else {
-                            LOG.warn(new StringBuilder(256).append(part.getClass().getCanonicalName()).append(
-                                "'s size cannot be determined").toString(), e);
+                            LOG.warn(
+                                new StringBuilder(256).append(part.getClass().getCanonicalName()).append("'s size cannot be determined").toString(),
+                                e);
                         }
                     } catch (final IOException e1) {
                         LOG.warn(
@@ -2115,6 +2141,16 @@ public final class MIMEMessageConverter {
     }
 
     /**
+     * Parses the value of header <code>Importance</code>.
+     * 
+     * @param importance The header value
+     * @param mailMessage The mail message to fill
+     */
+    public static void parseImportance(final String importance, final MailMessage mailMessage) {
+        mailMessage.setPriority(parseImportance(importance));
+    }
+
+    /**
      * Parses the value of header <code>X-Priority</code>.
      * 
      * @param priorityStr The header value
@@ -2134,4 +2170,30 @@ public final class MIMEMessageConverter {
         }
         return priority;
     }
+
+    /**
+     * Parses the value of header <code>Importance</code>.
+     * 
+     * @param importance The header value
+     */
+    public static int parseImportance(final String importance) {
+        int priority = MailMessage.PRIORITY_NORMAL;
+        if (null != importance) {
+            final String imp = importance.trim();
+            if ("Low".equalsIgnoreCase(imp)) {
+                priority = MailMessage.PRIORITY_LOWEST;
+            } else if ("Medium".equalsIgnoreCase(imp)) {
+                priority = MailMessage.PRIORITY_NORMAL;
+            } else if ("High".equalsIgnoreCase(imp)) {
+                priority = MailMessage.PRIORITY_HIGHEST;
+            } else {
+                if (DEBUG) {
+                    LOG.debug("Assuming priority NORMAL due to strange Importance header: " + importance);
+                }
+                priority = MailMessage.PRIORITY_NORMAL;
+            }
+        }
+        return priority;
+    }
+
 }

@@ -1,3 +1,7 @@
+* 2010-06-30 - thorben.betten@open-xchange.com
+
+ - Bugfix #16041: Added header "Importance" when dealing with a mail's priority level
+
 * 2010-06-30 - tobias.prinz@open-xchange.com
 
  - Bugfix #16287: Error message made easier to understand.

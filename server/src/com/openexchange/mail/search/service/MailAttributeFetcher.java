@@ -66,6 +66,7 @@ import com.openexchange.mail.search.ComparisonType;
 import com.openexchange.mail.search.FlagTerm;
 import com.openexchange.mail.search.FromTerm;
 import com.openexchange.mail.search.HeaderTerm;
+import com.openexchange.mail.search.ORTerm;
 import com.openexchange.mail.search.ReceivedDateTerm;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.search.SentDateTerm;
@@ -216,7 +217,28 @@ public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMe
                 if (SingleOperation.EQUALS != operation) {
                     throw new IllegalArgumentException("Unsupported operation for header search: " + operation);
                 }
-                return new HeaderTerm(MessageHeaders.HDR_X_PRIORITY, constant.toString());
+                int parsedPrio;
+                final String string = constant.toString();
+                try {
+                    parsedPrio = Integer.parseInt(string);
+                } catch (NumberFormatException e) {
+                    parsedPrio = -1;
+                }
+                final String importance;
+                if (parsedPrio >= 0) {
+                    if (MailMessage.PRIORITY_NORMAL == parsedPrio) {
+                        importance = "Medium";
+                    } else if (parsedPrio > MailMessage.PRIORITY_NORMAL) {
+                        importance = "Low";
+                    } else {
+                        importance = "High";
+                    }
+                } else {
+                    importance = "Medium";
+                }
+                return new ORTerm(new HeaderTerm(MessageHeaders.HDR_IMPORTANCE, importance), new HeaderTerm(
+                    MessageHeaders.HDR_X_PRIORITY,
+                    string));
             }
 
         });
@@ -422,8 +444,7 @@ public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMe
             }
             return null;
         }
-        @SuppressWarnings("unchecked")
-        final T retval = (T) getter.getObject(candidate);
+        @SuppressWarnings("unchecked") final T retval = (T) getter.getObject(candidate);
         return retval;
     }
 

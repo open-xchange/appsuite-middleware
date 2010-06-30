@@ -1130,9 +1130,14 @@ public abstract class MailMessage extends MailPart {
      */
     public int getPriority() {
         if (!b_priority) {
-            final String prioStr = getFirstHeader(MessageHeaders.HDR_X_PRIORITY);
-            if (prioStr != null) {
-                setPriority(MIMEMessageConverter.parsePriority(prioStr));
+            final String imp = getFirstHeader(MessageHeaders.HDR_IMPORTANCE);
+            if (imp != null) {
+                setPriority(MIMEMessageConverter.parseImportance(imp));
+            } else {
+                final String prioStr = getFirstHeader(MessageHeaders.HDR_X_PRIORITY);
+                if (prioStr != null) {
+                    setPriority(MIMEMessageConverter.parsePriority(prioStr));
+                }
             }
         }
         return priority;
@@ -1142,7 +1147,7 @@ public abstract class MailMessage extends MailPart {
      * @return <code>true</code> if priority is set; otherwise <code>false</code>
      */
     public boolean containsPriority() {
-        return b_priority || containsHeader(MessageHeaders.HDR_X_PRIORITY);
+        return b_priority || containsHeader(MessageHeaders.HDR_IMPORTANCE) || containsHeader(MessageHeaders.HDR_X_PRIORITY);
     }
 
     /**
@@ -1150,6 +1155,7 @@ public abstract class MailMessage extends MailPart {
      */
     public void removePriority() {
         priority = PRIORITY_NORMAL;
+        removeHeader(MessageHeaders.HDR_IMPORTANCE);
         removeHeader(MessageHeaders.HDR_X_PRIORITY);
         b_priority = false;
     }

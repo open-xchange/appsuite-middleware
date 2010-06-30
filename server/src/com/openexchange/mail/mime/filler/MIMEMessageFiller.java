@@ -70,10 +70,10 @@ import javax.activation.DataSource;
 import javax.activation.FileDataSource;
 import javax.mail.BodyPart;
 import javax.mail.Flags;
+import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
-import javax.mail.Message.RecipientType;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.InternetHeaders;
@@ -112,8 +112,8 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposedMailPart;
-import com.openexchange.mail.dataobjects.compose.ReferencedMailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailPart.ComposedPartType;
+import com.openexchange.mail.dataobjects.compose.ReferencedMailPart;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEMailException;
@@ -307,7 +307,7 @@ public class MIMEMessageFiller {
     private static final String[] SUPPRESS_HEADERS =
         {
             MessageHeaders.HDR_X_OX_VCARD, MessageHeaders.HDR_X_OXMSGREF, MessageHeaders.HDR_X_OX_MARKER,
-            MessageHeaders.HDR_X_OX_NOTIFICATION, MessageHeaders.HDR_X_PRIORITY, MessageHeaders.HDR_X_MAILER };
+            MessageHeaders.HDR_X_OX_NOTIFICATION, MessageHeaders.HDR_IMPORTANCE, MessageHeaders.HDR_X_PRIORITY, MessageHeaders.HDR_X_MAILER };
 
     /**
      * Sets necessary headers in specified MIME message: <code>From</code>/ <code>Sender</code>, <code>To</code>, <code>Cc</code>,
@@ -499,7 +499,15 @@ public class MIMEMessageFiller {
         /*
          * Set priority
          */
-        mimeMessage.setHeader(MessageHeaders.HDR_X_PRIORITY, String.valueOf(mail.getPriority()));
+        final int priority = mail.getPriority();
+        mimeMessage.setHeader(MessageHeaders.HDR_X_PRIORITY, String.valueOf(priority));
+        if (MailMessage.PRIORITY_NORMAL == priority) {
+            mimeMessage.setHeader(MessageHeaders.HDR_IMPORTANCE, "Medium");
+        } else if (priority > MailMessage.PRIORITY_NORMAL) {
+            mimeMessage.setHeader(MessageHeaders.HDR_IMPORTANCE, "Low");
+        } else {
+            mimeMessage.setHeader(MessageHeaders.HDR_IMPORTANCE, "High");
+        }
         /*
          * Headers
          */
