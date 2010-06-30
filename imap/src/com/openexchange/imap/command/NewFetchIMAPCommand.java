@@ -726,10 +726,21 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
                         }
                     }
                 });
+                put(MessageHeaders.HDR_IMPORTANCE, new HeaderHandler() {
+
+                    public void handle(final Header hdr, final IDMailMessage mailMessage) throws MailException {
+                        final String value = hdr.getValue();
+                        if (null != value) {
+                            mailMessage.setPriority(MIMEMessageConverter.parseImportance(value));
+                        }
+                    }
+                });
                 put(MessageHeaders.HDR_X_PRIORITY, new HeaderHandler() {
 
                     public void handle(final Header hdr, final IDMailMessage mailMessage) throws MailException {
-                        mailMessage.setPriority(MIMEMessageConverter.parsePriority(hdr.getValue()));
+                        if (!mailMessage.containsPriority()) {
+                            mailMessage.setPriority(MIMEMessageConverter.parsePriority(hdr.getValue()));
+                        }
                     }
                 });
             }
