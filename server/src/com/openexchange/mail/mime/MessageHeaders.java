@@ -107,6 +107,10 @@ public final class MessageHeaders {
 
     public static final HeaderName X_PRIORITY = HeaderName.valueOf(HDR_X_PRIORITY);
 
+    public static final String HDR_IMPORTANCE = "Importance";
+
+    public static final HeaderName IMPORTANCE = HeaderName.valueOf(HDR_IMPORTANCE);
+
     public static final String HDR_DISP_NOT_TO = "Disposition-Notification-To";
 
     public static final HeaderName DISP_NOT_TO = HeaderName.valueOf(HDR_DISP_NOT_TO);
