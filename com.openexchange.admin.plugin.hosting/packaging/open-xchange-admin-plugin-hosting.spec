@@ -38,7 +38,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 9
+%define		ox_release 10
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -145,6 +145,8 @@ mv doc javadoc
 %changelog
 * Thu Jun 24 2010 - choeger@open-xchange.com
  - Bugfix #13441 - Installation fails if not 'root'
+* Wed Jun 23 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16353: Listing contexts now works with multiple threads to improve performance.
 * Fri Mar 05 2010 - choeger@open-xchange.com
  - Bugfix #15554 -[L3] unable to create new contexts even if max unit is not reached
 * Fri Dec 18 2009 - marcus.klein@open-xchange.com
