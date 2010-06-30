@@ -111,7 +111,7 @@ public class OXCalendarException extends OXException {
         END_DATE_BEFORE_START_DATE("End date is before start date", 20, AbstractOXException.Category.USER_INPUT),
         UNSUPPORTED_LABEL("ERROR: Unsupported label value %d", 21, AbstractOXException.Category.USER_INPUT),
         PRIVATE_FLAG_IN_PRIVATE_FOLDER("ERROR: Private flag is only allowed inside of a private folder.", 22, AbstractOXException.Category.USER_INPUT),
-        PRIVATE_FLAG_AND_PARTICIPANTS("ERROR: Private flag and participants are not supported.", 23, AbstractOXException.Category.USER_INPUT),
+        PRIVATE_FLAG_AND_PARTICIPANTS("Error: Appointments marked as 'Private' can only be scheduled for the respective user (or owner of the calendar). Please remove additional participants or remove the \"Private\" mark.", 23, AbstractOXException.Category.USER_INPUT),
         UNSUPPORTED_PRIVATE_FLAG("ERROR: Unsupported private flag value %d", 24, AbstractOXException.Category.USER_INPUT),
         UNSUPPORTED_SHOWN_AS("ERROR:: Unsupported \"shown as\"  value %d", 25, AbstractOXException.Category.USER_INPUT),
         MANDATORY_FIELD_START_DATE("Required  value \"Start Date\" was not supplied.", 26, AbstractOXException.Category.USER_INPUT),

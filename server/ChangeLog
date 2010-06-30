@@ -1,3 +1,7 @@
+* 2010-06-30 - tobias.prinz@open-xchange.com
+
+ - Bugfix #16287: Error message made easier to understand.
+ 
 * 2010-06-29 - tobias.prinz@open-xchange.com
 
  - Bugfix #15662: As per RFC 2445, checking free/busy on an appointment marked as "FREE" returns "FREE" and not nothing at all.
