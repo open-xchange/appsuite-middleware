@@ -125,6 +125,7 @@ public class MobileConfigServlet extends HttpServlet {
 
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        resp.setCharacterEncoding("UTF-8");
         final ConfigurationService service = MobileConfigServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
         if (null == service) {
             LOG.error("A configuration exception occurred, which should not happen: No configuration service found");
@@ -132,6 +133,12 @@ public class MobileConfigServlet extends HttpServlet {
             return;
         }
 
+        final String parameter = req.getParameter("error");
+        if (null != parameter && parameter.length() != 0) {
+            // Error output
+            errorOutput(req, resp, parameter);
+            return;
+        }
         final String iphoneRegEx;
         final String winMobRegEx;
         try {
@@ -227,6 +234,35 @@ public class MobileConfigServlet extends HttpServlet {
         }
     }
 
+    private void errorOutput(final HttpServletRequest req, final HttpServletResponse resp, final String string) {
+        resp.setContentType("text/html");
+        PrintWriter writer;
+        try {
+            writer = getWriterFromOutputStream(resp.getOutputStream());
+        } catch (final IOException e) {
+            LOG.error("Unable to get output stream to write error message: " + e.getMessage(), e);
+            return;
+        }
+        writer.println("<html><head>");
+        writer.println("<meta name=\"viewport\" content=\"width=320\" />");
+        writer.println("<meta name=\"mobileoptimized\" content=\"0\" />");
+        writer.println("<title>Error</title>");
+        writer.println("<style type=\"text/css\">");
+        writer.println("table { height: 100%; width:100% }");
+        writer.println("td { text-align:center; vertical-align:middle; }");
+        writer.println("</style>");
+        writer.println("</head>");
+        writer.println("<body>");
+        writer.println("<table>");
+        writer.println("<tr>");
+        writer.println("<td><h1>" + string + "</h1></td>");
+        writer.println("</tr>");
+        writer.println("</table>");
+        writer.println("</body></html>");
+        writer.close();
+        
+    }
+
     private void generateConfig(HttpServletRequest req, HttpServletResponse resp, final String login, final Device device) throws IOException, ConfigurationException, TemplateException {
         String mail = login;
         final String parameter = req.getParameter("mail");
@@ -266,29 +302,11 @@ public class MobileConfigServlet extends HttpServlet {
 
     private void printError(HttpServletRequest req, final HttpServletResponse resp, final ErrorMessage string) throws IOException {
         Locale locale = detectLanguage(req);
-        resp.setContentType("text/html");
-        final PrintWriter writer = getWriterFromOutputStream(resp.getOutputStream());
-        writer.println("<html><head>");
-        writer.println("<meta name=\"viewport\" content=\"width=320\" />");
-        writer.println("<meta name=\"mobileoptimized\" content=\"0\" />");
-        writer.println("<title>Error</title>");
-        writer.println("<style type=\"text/css\">");
-        writer.println("table { height: 100%; width:100% }");
-        writer.println("td { text-align:center; vertical-align:middle; }");
-        writer.println("</style>");
-        writer.println("</head>");
-        writer.println("<body>");
-        writer.println("<table>");
-        writer.println("<tr>");
         if (Locale.ENGLISH.equals(locale)) {
-            writer.println("<td><h1>" + string.getEnglish() + "</h1></td>");
+            resp.sendRedirect(Activator.ALIAS + "?error=" + URLEncoder.encode(string.getEnglish(),"UTF-8"));
         } else if (Locale.GERMAN.equals(locale)) {
-            writer.println("<td><h1>" + string.getGerman() + "</h1></td>");
+            resp.sendRedirect(Activator.ALIAS + "?error=" + URLEncoder.encode(string.getGerman(),"UTF-8"));
         }
-        writer.println("</tr>");
-        writer.println("</table>");
-        writer.println("</body></html>");
-        writer.close();
     }
 
     private void writeMobileConfig(final PrintWriter printWriter, OutputStream outStream, final String email, final String host, final String username, final String domain) throws IOException, TemplateException, ConfigurationException {
