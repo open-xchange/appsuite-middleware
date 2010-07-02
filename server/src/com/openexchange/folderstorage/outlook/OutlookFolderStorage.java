@@ -654,6 +654,10 @@ public final class OutlookFolderStorage implements FolderStorage {
                     outlookFolder.setSubfolderIDs(realSubfolderIDs); // Zero-length array => No subfolders
                 }
             } else {
+                /*
+                 * Subfolders available; set to null to indicate this condition since AbstractUserizedFolderPerformer#getUserizedFolder()
+                 * interprets null as if subfolders are present.
+                 */
                 outlookFolder.setSubfolderIDs(null);
             }
         }
@@ -676,7 +680,8 @@ public final class OutlookFolderStorage implements FolderStorage {
                 /*
                  * Special treatment for INBOX
                  */
-                final SortableId[] inboxSubfolders = getINBOXSubfolders(treeId, folderId, storageParameters, user, user.getLocale(), contextId, tree);
+                final SortableId[] inboxSubfolders =
+                    getINBOXSubfolders(treeId, folderId, storageParameters, user, user.getLocale(), contextId, tree);
                 final String[] subs = new String[inboxSubfolders.length];
                 for (int i = 0; i < subs.length; i++) {
                     subs[i] = inboxSubfolders[i].getId();
