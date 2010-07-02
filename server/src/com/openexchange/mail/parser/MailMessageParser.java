@@ -361,16 +361,18 @@ public final class MailMessageParser {
                      * Now handle uuencoded attachments
                      */
                     final int count = uuencodedMP.getCount();
-                    for (int a = 0; a < count; a++) {
-                        /*
-                         * Increment part count by 1
-                         */
-                        partCount++;
-                        if (!handler.handleInlineUUEncodedAttachment(
-                            uuencodedMP.getBodyPart(a),
-                            MailMessageParser.getSequenceId(prefix, partCount))) {
-                            stop = true;
-                            return;
+                    if (count > 0) {
+                        for (int a = 0; a < count; a++) {
+                            /*
+                             * Increment part count by 1
+                             */
+                            partCount++;
+                            if (!handler.handleInlineUUEncodedAttachment(
+                                uuencodedMP.getBodyPart(a),
+                                MailMessageParser.getSequenceId(prefix, partCount))) {
+                                stop = true;
+                                return;
+                            }
                         }
                     }
                 } else {
