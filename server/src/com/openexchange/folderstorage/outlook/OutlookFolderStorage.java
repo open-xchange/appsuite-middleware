@@ -676,7 +676,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                 /*
                  * Special treatment for INBOX
                  */
-                final SortableId[] inboxSubfolders = getINBOXSubfolders(treeId, PRIVATE_ID, storageParameters, user, user.getLocale(), contextId, tree);
+                final SortableId[] inboxSubfolders = getINBOXSubfolders(treeId, folderId, storageParameters, user, user.getLocale(), contextId, tree);
                 final String[] subs = new String[inboxSubfolders.length];
                 for (int i = 0; i < subs.length; i++) {
                     subs[i] = inboxSubfolders[i].getId();
