@@ -51,7 +51,9 @@ package com.openexchange.mail.json.writer;
 
 import static com.openexchange.mail.mime.QuotedInternetAddress.toIDN;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
+import java.util.Collection;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.TimeZone;
 import javax.mail.internet.InternetAddress;
 import org.json.JSONArray;
@@ -60,6 +62,7 @@ import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -131,10 +134,28 @@ public final class MessageWriter {
      * @param session The session
      * @param settings The user's mail settings used for writing message; if <code>null</code> the settings are going to be fetched from
      *            storage, thus no request-specific preparations will take place.
+     * @param warnings A container for possible warnings
      * @return The written JSON object
      * @throws MailException If writing message fails
      */
     public static JSONObject writeMailMessage(final int accountId, final MailMessage mail, final DisplayMode displayMode, final Session session, final UserSettingMail settings) throws MailException {
+        return writeMailMessage(accountId, mail, displayMode, session, settings, null);
+    }
+
+    /**
+     * Writes whole mail as a JSON object.
+     * 
+     * @param accountId The account ID
+     * @param mail The mail to write
+     * @param displayMode The display mode
+     * @param session The session
+     * @param settings The user's mail settings used for writing message; if <code>null</code> the settings are going to be fetched from
+     *            storage, thus no request-specific preparations will take place.
+     * @param warnings A container for possible warnings
+     * @return The written JSON object
+     * @throws MailException If writing message fails
+     */
+    public static JSONObject writeMailMessage(final int accountId, final MailMessage mail, final DisplayMode displayMode, final Session session, final UserSettingMail settings, final Collection<AbstractOXException> warnings) throws MailException {
         final MailPath mailPath;
         if (mail.getFolder() != null && mail.getMailId() != null) {
             mailPath = new MailPath(accountId, mail.getFolder(), mail.getMailId());
@@ -151,7 +172,14 @@ public final class MessageWriter {
             throw new MailException(e);
         }
         final JSONMessageHandler handler = new JSONMessageHandler(accountId, mailPath, mail, displayMode, session, usm);
-        new MailMessageParser().parseMailMessage(mail, handler);
+        final MailMessageParser parser = new MailMessageParser();
+        parser.parseMailMessage(mail, handler);
+        if (null != warnings) {
+            final List<AbstractOXException> list = parser.getWarnings();
+            if (!list.isEmpty()) {
+                warnings.addAll(list);
+            }
+        }
         return handler.getJSONObject();
     }
 
