@@ -57,6 +57,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import com.openexchange.folderstorage.outlook.OutlookFolderDeleteListener;
 import com.openexchange.groupware.attach.impl.AttachmentContextDelete;
 import com.openexchange.groupware.attach.impl.AttachmentDelDelete;
 import com.openexchange.groupware.calendar.CalendarAdministrationService;
@@ -192,6 +193,7 @@ public final class DeleteRegistry {
             /*
              * Remove other stuff
              */
+            new OutlookFolderDeleteListener(),
             new UserSettingServerDeleteListener(),
             new POP3DeleteListener(),
             new MailAccountDeleteListener()
