@@ -1956,12 +1956,12 @@ public class ContactMySql implements ContactSql {
 
                     final String field = Contacts.mapping[Contact.DISPLAY_NAME].getDBFieldName();
 
-                    String value = StringCollection.prepareForSearch(cso.getDisplayName());
+                    String value = StringCollection.prepareForSearch(cso.getDisplayName(), false);
 
                     if (STR_PERCENT.equals(value)) {
                         sb.append(' ');
                     } else {
-                        sb.append('(').append("co.").append(field).append(" LIKE ?) ");
+                        sb.append('(').append("co.").append(field).append(" = ?) ");
                         if (isSingleSelect) {
                             sb.append(searchHabit).append(' ');
                             injectors.add(new StringSQLInjector(value));
