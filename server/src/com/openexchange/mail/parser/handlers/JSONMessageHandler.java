@@ -736,6 +736,23 @@ public final class JSONMessageHandler implements MailMessageHandler {
              */
             asRawContent(plainText.id, plainText.contentType, plainText.content);
         }
+        try {
+            final String attachKey = MailJSONField.ATTACHMENTS.getKey();
+            final String dispKey = MailJSONField.DISPOSITION.getKey();
+            if (jsonObject.hasAndNotNull(attachKey)) {
+                final JSONArray attachments = jsonObject.getJSONArray(attachKey);
+                final int len = attachments.length();
+                for (int i = 0; i < len; i++) {
+                    final JSONObject attachment = attachments.getJSONObject(i);
+                    if (attachment.hasAndNotNull(dispKey) && Part.ATTACHMENT.equalsIgnoreCase(attachment.getString(dispKey))) {
+                        jsonObject.put(MailJSONField.HAS_ATTACHMENTS.getKey(), true);
+                        i = len;
+                    }
+                }
+            }
+        } catch (final JSONException e) {
+            LOG.error(e.getMessage(), e);
+        }
         /*-
          *
         if (!textAppended) {
