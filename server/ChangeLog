@@ -1,3 +1,7 @@
+* 2010-07-02 - thorben.betten@open-xchange.com
+
+ - Bugfix #16407: Added warning if parsing of multipart mail failed on mail display
+
 * 2010-06-30 - thorben.betten@open-xchange.com
 
  - Bugfix #16041: Added header "Importance" when dealing with a mail's priority level

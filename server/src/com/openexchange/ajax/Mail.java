@@ -100,8 +100,8 @@ import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.helper.BrowserDetector;
 import com.openexchange.ajax.helper.DownloadUtility;
-import com.openexchange.ajax.helper.ParamContainer;
 import com.openexchange.ajax.helper.DownloadUtility.CheckedDownload;
+import com.openexchange.ajax.helper.ParamContainer;
 import com.openexchange.ajax.parser.InfostoreParser;
 import com.openexchange.ajax.parser.SearchTermParser;
 import com.openexchange.ajax.writer.ResponseWriter;
@@ -112,8 +112,8 @@ import com.openexchange.cache.OXCachingException;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -790,6 +790,7 @@ public class Mail extends PermissionServlet implements UploadListener {
          */
         final Response response = new Response();
         Object data = JSONObject.NULL;
+        final List<AbstractOXException> warnings = new ArrayList<AbstractOXException>(2);
         /*
          * Start response
          */
@@ -824,7 +825,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         folderPath,
                         uid,
                         reply2all,
-                        usmNoSave), displayMode, session, usmNoSave);
+                        usmNoSave), displayMode, session, usmNoSave, warnings);
             } finally {
                 if (closeMailInterface && mailInterface != null) {
                     mailInterface.close(true);
@@ -846,6 +847,9 @@ public class Mail extends PermissionServlet implements UploadListener {
          */
         response.setData(data);
         response.setTimestamp(null);
+        if (!warnings.isEmpty()) {
+            response.setWarning(warnings.get(0));
+        }
         return response;
     }
 
@@ -878,6 +882,7 @@ public class Mail extends PermissionServlet implements UploadListener {
          */
         final Response response = new Response();
         Object data = JSONObject.NULL;
+        final List<AbstractOXException> warnings = new ArrayList<AbstractOXException>(2);
         /*
          * Start response
          */
@@ -911,7 +916,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     MessageWriter.writeMailMessage(mailInterface.getAccountID(), mailInterface.getForwardMessageForDisplay(
                         new String[] { folderPath },
                         new String[] { uid },
-                        usmNoSave), displayMode, session, usmNoSave);
+                        usmNoSave), displayMode, session, usmNoSave, warnings);
             } finally {
                 if (closeMailInterface && mailInterface != null) {
                     mailInterface.close(true);
@@ -933,6 +938,9 @@ public class Mail extends PermissionServlet implements UploadListener {
          */
         response.setData(data);
         response.setTimestamp(null);
+        if (!warnings.isEmpty()) {
+            response.setWarning(warnings.get(0));
+        }
         return response;
     }
 
@@ -1120,6 +1128,7 @@ public class Mail extends PermissionServlet implements UploadListener {
          */
         final Response response = new Response();
         Object data = JSONObject.NULL;
+        final List<AbstractOXException> warnings = new ArrayList<AbstractOXException>(2);
         /*
          * Start response
          */
@@ -1389,7 +1398,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                             final int unreadMsgs = mail.getUnreadMessages();
                             mail.setUnreadMessages(unreadMsgs < 0 ? 0 : unreadMsgs + 1);
                         }
-                        data = MessageWriter.writeMailMessage(mailInterface.getAccountID(), mail, displayMode, session, usmNoSave);
+                        data = MessageWriter.writeMailMessage(mailInterface.getAccountID(), mail, displayMode, session, usmNoSave, warnings);
                         if (doUnseen) {
                             /*
                              * Leave mail as unseen
@@ -1437,6 +1446,9 @@ public class Mail extends PermissionServlet implements UploadListener {
          */
         response.setData(data);
         response.setTimestamp(null);
+        if (!warnings.isEmpty()) {
+            response.setWarning(warnings.get(0));
+        }
         return response;
     }
 
@@ -2132,6 +2144,7 @@ public class Mail extends PermissionServlet implements UploadListener {
          */
         final Response response = new Response();
         Object data = JSONObject.NULL;
+        final List<AbstractOXException> warnings = new ArrayList<AbstractOXException>(2);
         /*
          * Start response
          */
@@ -2184,7 +2197,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     MessageWriter.writeMailMessage(mailInterface.getAccountID(), mailInterface.getForwardMessageForDisplay(
                         folders,
                         ids,
-                        usmNoSave), DisplayMode.MODIFYABLE, session, usmNoSave);
+                        usmNoSave), DisplayMode.MODIFYABLE, session, usmNoSave, warnings);
             } finally {
                 if (closeMailInterface && mailInterface != null) {
                     mailInterface.close(true);
@@ -2203,6 +2216,9 @@ public class Mail extends PermissionServlet implements UploadListener {
          */
         response.setData(data);
         response.setTimestamp(null);
+        if (!warnings.isEmpty()) {
+            response.setWarning(warnings.get(0));
+        }
         return response;
     }
 

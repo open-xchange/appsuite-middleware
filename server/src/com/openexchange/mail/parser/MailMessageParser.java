@@ -52,11 +52,13 @@ package com.openexchange.mail.parser;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.NoSuchElementException;
 import java.util.Map.Entry;
+import java.util.NoSuchElementException;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.mail.MessagingException;
@@ -74,6 +76,7 @@ import net.freeutils.tnef.mime.ContactHandler;
 import net.freeutils.tnef.mime.RawDataSource;
 import net.freeutils.tnef.mime.ReadReceiptHandler;
 import net.freeutils.tnef.mime.TNEFMime;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailConfig;
@@ -178,12 +181,15 @@ public final class MailMessageParser {
 
     private InlineDetector inlineDetector;
 
+    private final List<AbstractOXException> warnings;
+
     /**
      * Constructor
      */
     public MailMessageParser() {
         super();
         inlineDetector = LENIENT_DETECTOR;
+        warnings = new ArrayList<AbstractOXException>(2);
     }
 
     /**
@@ -195,6 +201,15 @@ public final class MailMessageParser {
     public MailMessageParser setInlineDetectorBehavior(final boolean strict) {
         inlineDetector = strict ? STRICT_DETECTOR : LENIENT_DETECTOR;
         return this;
+    }
+
+    /**
+     * Gets possible warnings occurred during parsing.
+     * 
+     * @return The warnings
+     */
+    public List<AbstractOXException> getWarnings() {
+        return Collections.unmodifiableList(warnings);
     }
 
     /**
@@ -247,7 +262,11 @@ public final class MailMessageParser {
         } catch (final IOException e) {
             final String mailId = mail.getMailId();
             final String folder = mail.getFolder();
-            throw new MailException(MailException.Code.UNREADBALE_PART_CONTENT, e, null == mailId ? "" : mailId, null == folder ? "" : folder);
+            throw new MailException(
+                MailException.Code.UNREADBALE_PART_CONTENT,
+                e,
+                null == mailId ? "" : mailId,
+                null == folder ? "" : folder);
         }
         handler.handleMessageEnd(mail);
     }
@@ -281,28 +300,45 @@ public final class MailMessageParser {
          *     || disposition.equalsIgnoreCase(Part.INLINE)) && mailPart.getFileName() == null);
          */
         if (isMultipart(lcct)) {
-            final int count = mailPart.getEnclosedCount();
-            if (count == -1) {
-                throw new MailException(MailException.Code.INVALID_MULTIPART_CONTENT);
-            }
-            final String mpId = null == prefix && !multipartDetected ? "" : getSequenceId(prefix, partCount);
-            if (!mailPart.containsSequenceId()) {
-                mailPart.setSequenceId(mpId);
-            }
-            if (!handler.handleMultipart(mailPart, count, mpId)) {
-                stop = true;
-                return;
-            }
-            final String mpPrefix;
-            if (multipartDetected) {
-                mpPrefix = mpId;
-            } else {
-                mpPrefix = prefix;
-                multipartDetected = true;
-            }
-            for (int i = 0; i < count; i++) {
-                final MailPart enclosedContent = mailPart.getEnclosedMailPart(i);
-                parseMailContent(enclosedContent, handler, mpPrefix, i + 1);
+            try {
+                final int count = mailPart.getEnclosedCount();
+                if (count == -1) {
+                    throw new MailException(MailException.Code.INVALID_MULTIPART_CONTENT);
+                }
+                final String mpId = null == prefix && !multipartDetected ? "" : getSequenceId(prefix, partCount);
+                if (!mailPart.containsSequenceId()) {
+                    mailPart.setSequenceId(mpId);
+                }
+                if (!handler.handleMultipart(mailPart, count, mpId)) {
+                    stop = true;
+                    return;
+                }
+                final String mpPrefix;
+                if (multipartDetected) {
+                    mpPrefix = mpId;
+                } else {
+                    mpPrefix = prefix;
+                    multipartDetected = true;
+                }
+                for (int i = 0; i < count; i++) {
+                    final MailPart enclosedContent = mailPart.getEnclosedMailPart(i);
+                    parseMailContent(enclosedContent, handler, mpPrefix, i + 1);
+                }
+            } catch (final RuntimeException rte) {
+                /*
+                 * Parsing of multipart mail failed fatally; treat as empty plain-text mail
+                 */
+                LOG.error("Multipart mail could not be parsed", rte);
+                warnings.add(new MailException(MailException.Code.UNPARSEABLE_MESSAGE, rte, new Object[0]));
+                if (!handler.handleInlinePlainText(
+                    "",
+                    ContentType.DEFAULT_CONTENT_TYPE,
+                    0,
+                    filename,
+                    MailMessageParser.getSequenceId(prefix, partCount))) {
+                    stop = true;
+                    return;
+                }
             }
         } else if (isText(lcct)) {
             if (isInline) {
@@ -330,9 +366,9 @@ public final class MailMessageParser {
                          * Increment part count by 1
                          */
                         partCount++;
-                        if (!handler.handleInlineUUEncodedAttachment(uuencodedMP.getBodyPart(a), MailMessageParser.getSequenceId(
-                            prefix,
-                            partCount))) {
+                        if (!handler.handleInlineUUEncodedAttachment(
+                            uuencodedMP.getBodyPart(a),
+                            MailMessageParser.getSequenceId(prefix, partCount))) {
                             stop = true;
                             return;
                         }
@@ -341,9 +377,12 @@ public final class MailMessageParser {
                     /*
                      * Just non-encoded plain text
                      */
-                    if (!handler.handleInlinePlainText(content, contentType, size, filename, MailMessageParser.getSequenceId(
-                        prefix,
-                        partCount))) {
+                    if (!handler.handleInlinePlainText(
+                        content,
+                        contentType,
+                        size,
+                        filename,
+                        MailMessageParser.getSequenceId(prefix, partCount))) {
                         stop = true;
                         return;
                     }
@@ -531,9 +570,9 @@ public final class MailMessageParser {
                             }
                             final DataSource ds = new RawDataSource(attachment.getRawData(), contentTypeStr);
                             bodyPart.setDataHandler(new DataHandler(ds));
-                            bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, ContentType.prepareContentTypeString(
-                                contentTypeStr,
-                                attachFilename));
+                            bodyPart.setHeader(
+                                MessageHeaders.HDR_CONTENT_TYPE,
+                                ContentType.prepareContentTypeString(contentTypeStr, attachFilename));
                             if (attachFilename != null) {
                                 final ContentDisposition cd = new ContentDisposition(Part.ATTACHMENT);
                                 cd.setFilenameParameter(attachFilename);
@@ -580,9 +619,9 @@ public final class MailMessageParser {
                         final String attachFilename = filename;
                         final DataSource ds = new RawDataSource(messageClass.getRawData(), MIMETypes.MIME_APPL_OCTET);
                         bodyPart.setDataHandler(new DataHandler(ds));
-                        bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, ContentType.prepareContentTypeString(
-                            MIMETypes.MIME_APPL_OCTET,
-                            attachFilename));
+                        bodyPart.setHeader(
+                            MessageHeaders.HDR_CONTENT_TYPE,
+                            ContentType.prepareContentTypeString(MIMETypes.MIME_APPL_OCTET, attachFilename));
                         if (attachFilename != null) {
                             final ContentDisposition cd = new ContentDisposition(Part.ATTACHMENT);
                             cd.setFilenameParameter(attachFilename);
@@ -779,8 +818,10 @@ public final class MailMessageParser {
             // Obviously charset was wrong or bogus implementation of character conversion
             final String fallback = "US-ASCII";
             if (WARN_ENABLED) {
-                LOG.warn(new StringBuilder("Character conversion exception while reading content with charset \"").append(charset).append(
-                    "\". Using fallback charset \"").append(fallback).append("\" instead."), e);
+                LOG.warn(
+                    new StringBuilder("Character conversion exception while reading content with charset \"").append(charset).append(
+                        "\". Using fallback charset \"").append(fallback).append("\" instead."),
+                    e);
             }
             return MessageUtility.readMailPart(mailPart, fallback);
         }
