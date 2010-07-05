@@ -64,6 +64,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DBPoolingExceptionCodes;
+import com.openexchange.pooling.ExhaustedActions;
 import com.openexchange.pooling.PoolableLifecycle;
 import com.openexchange.pooling.PooledData;
 import com.openexchange.pooling.PoolingException;
@@ -75,10 +76,7 @@ import com.openexchange.pooling.ReentrantLockPool;
  */
 public class ConnectionPool extends ReentrantLockPool<Connection> implements ConnectionPoolMBean {
 
-    /**
-     * Logger.
-     */
-    private static final Log LOG = LogFactory.getLog(ConnectionPool.class);
+    static final Log LOG = LogFactory.getLog(ConnectionPool.class);
 
     /**
      * Default time between checks if a connection still works.
@@ -293,8 +291,7 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements Con
         DEFAULT_CONFIG.maxActive = -1;
         DEFAULT_CONFIG.maxWait = 10000;
         DEFAULT_CONFIG.maxLifeTime = -1;
-        DEFAULT_CONFIG.exhaustedAction = ReentrantLockPool.ExhaustedActions
-            .BLOCK;
+        DEFAULT_CONFIG.exhaustedAction = ExhaustedActions.BLOCK;
         DEFAULT_CONFIG.testOnActivate = false;
         DEFAULT_CONFIG.testOnDeactivate = true;
         DEFAULT_CONFIG.testOnIdle = false;

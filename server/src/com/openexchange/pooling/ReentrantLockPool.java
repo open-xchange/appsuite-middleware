@@ -67,34 +67,6 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
 
     static final Log LOG = LogFactory.getLog(ReentrantLockPool.class);
 
-    /* --- Constants --- */
-
-    /**
-     * Possible actions if the pool is exhausted.
-     */
-    public static enum ExhaustedActions {
-        /**
-         * An error will be thrown if a maximum number of active objects is
-         * defined and the pool has no more idle objects.
-         */
-        FAIL,
-
-        /**
-         * The thread will have to wait if a maximum number of active objects is
-         * defined and the pool has no more idle objects. A maximum wait time
-         * can be defined.
-         */
-        BLOCK,
-
-        /**
-         * Allthough a maximum number of active objects is defined the pool will
-         * enlarge the number of pooled objects if they are needed.
-         */
-        GROW
-    }
-
-    /* --- Settings --- */
-
     private final int minIdle;
 
     private final int maxIdle;
@@ -680,7 +652,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
             maxActive = -1;
             maxWait = 10000;
             maxLifeTime = -1;
-            exhaustedAction = ReentrantLockPool.ExhaustedActions.GROW;
+            exhaustedAction = ExhaustedActions.GROW;
             testOnActivate = true;
             testOnDeactivate = true;
             testOnIdle = false;

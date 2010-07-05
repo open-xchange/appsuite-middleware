@@ -65,6 +65,7 @@ import java.util.regex.Pattern;
 import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DBPoolingExceptionCodes;
+import com.openexchange.pooling.ExhaustedActions;
 
 /**
  * Handles the life cycle of database connection pools for contexts databases.
@@ -125,9 +126,9 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
         retval.maxActive = data.max;
         retval.minIdle = data.min;
         if (data.block) {
-            retval.exhaustedAction = ConnectionPool.ExhaustedActions.BLOCK;
+            retval.exhaustedAction = ExhaustedActions.BLOCK;
         } else {
-            retval.exhaustedAction = ConnectionPool.ExhaustedActions.GROW;
+            retval.exhaustedAction = ExhaustedActions.GROW;
         }
         return retval;
     }

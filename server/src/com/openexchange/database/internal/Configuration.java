@@ -55,6 +55,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DBPoolingExceptionCodes;
+import com.openexchange.pooling.ExhaustedActions;
 
 /**
  * Contains the settings to connect to the configuration database.
@@ -108,8 +109,8 @@ public final class Configuration {
 
     private <T> T getUniversal(Property property, T def, Convert<T> converter) {
         final T retval;
-        if (props != null && props.containsKey(property.propertyName)) {
-            retval = converter.convert(props.getProperty(property.propertyName));
+        if (props != null && props.containsKey(property.getPropertyName())) {
+            retval = converter.convert(props.getProperty(property.getPropertyName()));
         } else {
             retval = def;
         }
@@ -187,7 +188,7 @@ public final class Configuration {
     private void loadDrivers() throws DBPoolingException {
         final String readDriverClass = getProperty(Property.READ_DRIVER_CLASS);
         if (null == readDriverClass) {
-            throw DBPoolingExceptionCodes.PROPERTY_MISSING.create(Property.READ_DRIVER_CLASS.propertyName);
+            throw DBPoolingExceptionCodes.PROPERTY_MISSING.create(Property.READ_DRIVER_CLASS.getPropertyName());
         }
         try {
             Class.forName(readDriverClass);
@@ -199,7 +200,7 @@ public final class Configuration {
         }
         final String writeDriverClass = getProperty(Property.WRITE_DRIVER_CLASS);
         if (null == writeDriverClass) {
-            throw DBPoolingExceptionCodes.PROPERTY_MISSING.create(Property.WRITE_DRIVER_CLASS.propertyName);
+            throw DBPoolingExceptionCodes.PROPERTY_MISSING.create(Property.WRITE_DRIVER_CLASS.getPropertyName());
         }
         try {
             Class.forName(writeDriverClass);
@@ -227,9 +228,7 @@ public final class Configuration {
         poolConfig.maxActive = getInt(Property.MAX_ACTIVE, poolConfig.maxActive);
         poolConfig.maxWait = getLong(Property.MAX_WAIT, poolConfig.maxWait);
         poolConfig.maxLifeTime = getLong(Property.MAX_LIFE_TIME, poolConfig.maxLifeTime);
-        poolConfig.exhaustedAction = ConnectionPool.ExhaustedActions.valueOf(getProperty(
-            Property.EXHAUSTED_ACTION,
-            poolConfig.exhaustedAction.name()));
+        poolConfig.exhaustedAction = ExhaustedActions.valueOf(getProperty(Property.EXHAUSTED_ACTION, poolConfig.exhaustedAction.name()));
         poolConfig.testOnActivate = getBoolean(Property.TEST_ON_ACTIVATE, poolConfig.testOnActivate);
         poolConfig.testOnDeactivate = getBoolean(Property.TEST_ON_DEACTIVATE, poolConfig.testOnDeactivate);
         poolConfig.testOnIdle = getBoolean(Property.TEST_ON_IDLE, poolConfig.testOnIdle);
@@ -246,92 +245,51 @@ public final class Configuration {
      * Enumeration of all properties in the configdb.properties file.
      */
     public static enum Property {
-        /**
-         * URL for configdb read.
-         */
+        /** URL for configdb read. */
         READ_URL("readUrl"),
-        /**
-         * URL for configdb write.
-         */
+        /** URL for configdb write. */
         WRITE_URL("writeUrl"),
-        /**
-         * Class name of driver for configdb read.
-         */
+        /** Class name of driver for configdb read. */
         READ_DRIVER_CLASS("readDriverClass"),
-        /**
-         * Class name of driver for configdb write.
-         */
+        /** Class name of driver for configdb write. */
         WRITE_DRIVER_CLASS("writeDriverClass"),
-        /**
-         * Use a seperate pool for write connections.
-         */
+        /** Use a seperate pool for write connections. */
         SEPERATE_WRITE("useSeparateWrite"),
-        /**
-         * Interval of the cleaner threads.
-         */
+        /** Interval of the cleaner threads. */
         CLEANER_INTERVAL("cleanerInterval"),
-        /**
-         * Minimum of idle connections.
-         */
+        /** Minimum of idle connections. */
         MIN_IDLE("minIdle"),
-        /**
-         * Maximum of idle connections.
-         */
+        /** Maximum of idle connections. */
         MAX_IDLE("maxIdle"),
-        /**
-         * Maximum idle time.
-         */
+        /** Maximum idle time. */
         MAX_IDLE_TIME("maxIdleTime"),
-        /**
-         * Maximum of active connections.
-         */
+        /** Maximum of active connections. */
         MAX_ACTIVE("maxActive"),
-        /**
-         * Maximum time to wait for a connection.
-         */
+        /** Maximum time to wait for a connection. */
         MAX_WAIT("maxWait"),
-        /**
-         * Maximum life time of a connection.
-         */
+        /** Maximum life time of a connection. */
         MAX_LIFE_TIME("maxLifeTime"),
-        /**
-         * Action if the maximum is reached.
-         */
+        /** Action if the maximum is reached. */
         EXHAUSTED_ACTION("exhaustedAction"),
-        /**
-         * Validate connections if they are activated.
-         */
+        /** Validate connections if they are activated. */
         TEST_ON_ACTIVATE("testOnActivate"),
-        /**
-         * Validate connections if they are deactivated.
-         */
+        /** Validate connections if they are deactivated. */
         TEST_ON_DEACTIVATE("testOnDeactivate"),
-        /**
-         * Validate connections on a pool clean run.
-         */
+        /** Validate connections on a pool clean run. */
         TEST_ON_IDLE("testOnIdle"),
-        /**
-         * Test threads if they use connections correctly.
-         */
+        /** Test threads if they use connections correctly. */
         TEST_THREADS("testThreads"),
-
-        /**
-         * Forces the use of the write db on all requests
-         */
+        /** Forces the use of the write db on all requests */
         WRITE_ONLY("writeOnly");
 
-        /**
-         * Name of the property in the server.properties file.
-         */
         private String propertyName;
 
-        /**
-         * Default constructor.
-         * @param propertyName Name of the property in the server.properties
-         * file.
-         */
         private Property(String propertyName) {
             this.propertyName = propertyName;
+        }
+
+        public String getPropertyName() {
+            return propertyName;
         }
     }
 }
