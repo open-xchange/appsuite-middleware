@@ -296,8 +296,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                 }
                 retval = data.popIdle();
                 if (null == retval && maxActive > 0 && data.numActive() >= maxActive) {
-                    // now we are getting in trouble. no more idle objects, a
-                    // maximum number of active is defined and we reached this
+                    // now we are getting in trouble. no more idle objects, a maximum number of active is defined and we reached this
                     // border.
                     switch (exhaustedAction) {
                     case GROW:
@@ -305,7 +304,9 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                     case FAIL:
                         throw new PoolingException("Pool exhausted.");
                     case BLOCK:
-                        boolean timedOut = true;
+                        PoolingException warn = new PoolingException("A thread is sent to sleep until an object in the exhausted pool is available.");
+                        LOG.warn(warn.getMessage(), warn);
+                        boolean timedOut = false;
                         try {
                             if (maxWait > 0) {
                                 timedOut = !idleAvailable.await(maxWait - getWaitTime(startTime), TimeUnit.MILLISECONDS);
