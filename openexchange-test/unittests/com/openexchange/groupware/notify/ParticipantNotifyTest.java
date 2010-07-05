@@ -51,7 +51,6 @@ package com.openexchange.groupware.notify;
 
 import java.io.File;
 import java.io.InputStream;
-import java.sql.SQLException;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -64,7 +63,6 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.TimeZone;
 import junit.framework.TestCase;
-import com.openexchange.api2.OXException;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ical4j.ICal4JParser;
@@ -97,7 +95,6 @@ import com.openexchange.i18n.tools.StringTemplate;
 import com.openexchange.i18n.tools.Template;
 import com.openexchange.i18n.tools.TemplateListResourceBundle;
 import com.openexchange.i18n.tools.TemplateReplacement;
-import com.openexchange.mail.MailException;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.resource.Resource;
@@ -106,10 +103,6 @@ import com.openexchange.test.TestInit;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.tools.versit.ICalendar;
-import com.openexchange.tools.versit.VersitDefinition;
-import com.openexchange.tools.versit.VersitObject;
-import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 public class ParticipantNotifyTest extends TestCase {
 
@@ -468,7 +461,7 @@ public class ParticipantNotifyTest extends TestCase {
         }
 
         @Override
-        protected Resource[] resolveResources(final Context ctx, final int...ids) throws LdapException{
+        protected Resource[] resolveResources(final Context ctx, final int...ids){
             return R(ids);
         }
 
@@ -482,12 +475,12 @@ public class ParticipantNotifyTest extends TestCase {
         }
 
         @Override
-        protected UserConfiguration getUserConfiguration(final int id, final int[] groups, final Context context) throws SQLException {
+        protected UserConfiguration getUserConfiguration(final int id, final int[] groups, final Context context) {
             return USER_CONFIGS.getConfiguration(id);
         }
 
         @Override
-        protected UserSettingMail getUserSettingMail(final int id, final Context context) throws OXException {
+        protected UserSettingMail getUserSettingMail(final int id, final Context context) {
             return USER_CONFIGS.getSetting(id);
         }
 
@@ -498,15 +491,7 @@ public class ParticipantNotifyTest extends TestCase {
             String fromAddr;
             String senderSource = NotificationConfig.getProperty(NotificationProperty.FROM_SOURCE, "primaryMail");
             if (senderSource.equals("defaultSenderAddress")) {
-                try {
-                    fromAddr = getUserSettingMail(session.getUserId(), session.getContext()).getSendAddr();
-                } catch (OXException e) {
-                    try {
-                        fromAddr = USER_STORAGE.getUser(session.getUserId()).getMail();
-                    } catch (UserException e1) {
-                        fromAddr = "User not found";
-                    }
-                }
+                fromAddr = getUserSettingMail(session.getUserId(), session.getContext()).getSendAddr();
             } else {
                 try {
                     fromAddr = USER_STORAGE.getUser(session.getUserId()).getMail();
@@ -547,7 +532,7 @@ public class ParticipantNotifyTest extends TestCase {
         }
 
         public void modifyInternal(final MailObject mail, final CalendarObject obj, final ServerSession sess) {
-
+            //NOT IMPLEMENTED YET
         }
 
         public void modifyExternal(final MailObject mail, final CalendarObject obj, final ServerSession sess) {
@@ -561,6 +546,7 @@ public class ParticipantNotifyTest extends TestCase {
 
         @Override
         public void loadTemplate() {
+            //NOT IMPLEMENTED YET
         }
 
         public void setTemplateString(final String template) {
@@ -604,7 +590,7 @@ public class ParticipantNotifyTest extends TestCase {
 
 
         @Override
-        public void addFileAttachment(final ContentType contentType, final String fileName, final InputStream inputStream) throws MailException {
+        public void addFileAttachment(final ContentType contentType, final String fileName, final InputStream inputStream) {
             this.theContentType = contentType;
             this.theFilename = fileName;
             this.theInputStream = inputStream;
