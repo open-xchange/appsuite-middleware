@@ -287,24 +287,19 @@ public class DistributionListEntryObject {
 
             if (emailaddress.equals(distributionlistentry.getEmailaddress())) {
                 return true;
-            } else {
-                return false;
             }
-        } else {
-            return false;
         }
+        return false;
+
     }
 
     public boolean searchDlistObject(final DistributionListEntryObject dleo) {
         if (dleo.getEntryID() > 0) { // this one is not an independent
             if ((getEntryID() == dleo.getEntryID()) && (getEmailfield() == dleo.getEmailfield())) {
                 return true;
-            } else {
-                return false;
             }
-        } else { // this one is an independent and needs to get deleted
-            return false;
         }
+        return false;
     }
 
     public boolean compareDlistObject(final DistributionListEntryObject dleo) {
