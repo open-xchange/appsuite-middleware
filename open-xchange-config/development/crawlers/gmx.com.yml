@@ -3,7 +3,7 @@ crawlerApiVersion: 618
 displayName: gmx.com
 id: com.openexchange.subscribe.crawler.gmx.com
 javascriptEnabled: true
-priority: 3
+priority: 4
 workflowString: |
   --- !com.openexchange.subscribe.crawler.Workflow
   steps: 
@@ -32,7 +32,7 @@ workflowString: |
           name: format
           value: csv_Outlook2003_eng
       specialParameterName: accountId
-      url: "https://www.gmx.com/callgate-6.11.2.0/coms8/ImportExportService/exportContacts"
+      url: "https://www.gmx.com/callgate-6.12.7.0/coms8/ImportExportService/exportContacts"
     - !com.openexchange.subscribe.crawler.ContactsByCsvFileStep
       description: Map csv fields to Contact-Fields
       fields: 
