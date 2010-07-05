@@ -247,7 +247,12 @@ public enum ContactField{
 
 
 	public static ContactField getByDBFieldName(final String dbFieldName){
-		for(final ContactField field: values()){
+        if( null == dbFieldName)
+            return null;
+        if( "".equals(dbFieldName))
+            return null;
+        
+        for(final ContactField field: values()){
 			if(dbFieldName.equals( field.getDBName() )){
 				return field;
 			}
@@ -256,6 +261,11 @@ public enum ContactField{
 	}
 
 	public static ContactField getByDisplayName(final String displayName){
+	    if( null == displayName)
+	        return null;
+	    if( "".equals(displayName))
+	        return null;
+	    
 		for(final ContactField field : values()){
 			if(displayName.equals( field.getReadableName() ) ){
 				return field;
@@ -265,6 +275,11 @@ public enum ContactField{
 	}
 	
 	public static ContactField getByFieldName(final String fieldName){
+	       if( null == fieldName)
+	            return null;
+	        if( "".equals(fieldName))
+	            return null;
+	        
 		for(final ContactField field : values()){
 			if(fieldName.equals( field.getFieldName() ) ){
 				return field;
