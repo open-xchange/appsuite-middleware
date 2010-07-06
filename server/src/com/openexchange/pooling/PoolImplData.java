@@ -80,6 +80,8 @@ class PoolImplData<T> {
      */
     private final Map<Thread, PooledData<T>> activeByThread;
 
+    private int creating = 0;
+
     /**
      * Default constructor.
      */
@@ -139,15 +141,23 @@ class PoolImplData<T> {
         return toRemove.equals(active.remove(toRemove.getPooled()));
     }
 
+    void addCreating() {
+        creating++;
+    }
+
+    void removeCreating() {
+        creating--;
+    }
+
     /**
      * @return the number of active objects.
      */
     int numActive() {
-        return active.size();
+        return active.size() + creating;
     }
 
     boolean isActiveEmpty() {
-        return active.isEmpty();
+        return active.isEmpty() && creating == 0;
     }
 
     void addIdle(final PooledData<T> newIdle) {

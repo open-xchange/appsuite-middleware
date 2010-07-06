@@ -1,6 +1,8 @@
 * 2010-07-06 - steffen.templin@open-xchange.com
 
  - Bugfix #14111: Missing reminders for appointment series and change exceptions.
+ - Bugfix #16291: Creating pooled objects is now done outside the lock for the internal pool structures. This prevents a lot of waiting
+   threads if creating object takes some time.
 
 * 2010-07-06 - marcus.klein@open-xchange.com
 

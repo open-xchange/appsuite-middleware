@@ -333,22 +333,37 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                         throw new IllegalStateException("Unknown exhausted action: " + exhaustedAction);
                     }
                 }
-                // create
                 if (null == retval) {
-                    LOG.trace("Creating object.");
-                    final T pooled;
-                    try {
-                        pooled = lifecycle.create();
-                    } catch (Exception e) {
-                        idleAvailable.signal();
-                        throw new PoolingException("Cannot create pooled object.", e);
-                    }
-                    retval = new PooledData<T>(pooled);
-                    data.addActive(retval);
-                    created = true;
+                    data.addCreating();
                 }
             } finally {
                 lock.unlock();
+            }
+            // create
+            if (null == retval) {
+                LOG.trace("Creating object.");
+                final T pooled;
+                try {
+                    pooled = lifecycle.create();
+                } catch (Exception e) {
+                    lock.lock();
+                    try {
+                        data.removeCreating();
+                        idleAvailable.signal();
+                    } finally {
+                        lock.unlock();
+                    }
+                    throw new PoolingException("Cannot create pooled object.", e);
+                }
+                retval = new PooledData<T>(pooled);
+                lock.lock();
+                try {
+                    data.addActive(retval);
+                    data.removeCreating();
+                } finally {
+                    lock.unlock();
+                }
+                created = true;
             }
             // LifeCycle
             if (!lifecycle.activate(retval) || (testOnActivate && !lifecycle.validate(retval))) {
