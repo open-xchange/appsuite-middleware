@@ -1,3 +1,7 @@
+* 2010-07-06 - steffen.templin@open-xchange.com
+
+ - Bugfix #14111: Missing reminders for appointment series and change exceptions.
+
 * 2010-07-06 - marcus.klein@open-xchange.com
 
  - Bugfix #16342: A background update task adds an initial filestore usage for every context.

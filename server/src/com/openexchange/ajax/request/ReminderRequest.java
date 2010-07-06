@@ -73,6 +73,7 @@ import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
+import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
@@ -333,6 +334,9 @@ public final class ReminderRequest {
                 reminder.setRecurrencePosition(recurringResult.getPosition());
                 retval = true;
             }
+        } else if (calendarDataObject.getRecurrenceID() != calendarDataObject.getObjectID()) {
+            // If the appointment is an exception return true as a reminder exists
+            retval = true;
         }
         return retval;
     }
@@ -348,10 +352,14 @@ public final class ReminderRequest {
         }
         final RecurringResultsInterface recurringResults;
         try {
+            // Calculate until date
+            long mod = calendarDataObject.getEndDate().getTime() % Constants.MILLI_DAY;
+            Date until = new Date(calendarDataObject.getUntil().getTime() + mod);
+            
             recurringResults = recColl.calculateRecurring(
                 calendarDataObject,
                 reminder.getDate().getTime(),
-                calendarDataObject.getUntil().getTime(),
+                until.getTime(),
                 0);
         } catch (final OXException e) {
             LOG.error(
