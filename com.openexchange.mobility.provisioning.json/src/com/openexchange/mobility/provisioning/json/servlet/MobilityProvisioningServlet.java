@@ -191,11 +191,12 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 						User user = UserStorage.getInstance().getUser(session.getUserId(), ctx);
 
 						String url = MobilityProvisioningServletConfiguration.getProvisioningURL();
+						url = url.replace("%h", URLEncoder.encode(request.getServerName(), MobilityProvisioningServletConfiguration.getProvisioningURLEncoding()));
 						url = url.replace("%l", URLEncoder.encode(session.getLogin(), MobilityProvisioningServletConfiguration.getProvisioningURLEncoding()));
 						url = url.replace("%c", URLEncoder.encode(String.valueOf(session.getContextId()), MobilityProvisioningServletConfiguration.getProvisioningURLEncoding()));
 						url = url.replace("%u", URLEncoder.encode(session.getUserlogin(), MobilityProvisioningServletConfiguration.getProvisioningURLEncoding()));
 						url = url.replace("%p", URLEncoder.encode(user.getMail(), MobilityProvisioningServletConfiguration.getProvisioningURLEncoding()));
-			    		
+			    								
 						ProvisioningInformation provisioningInformation = new com.openexchange.mobility.provisioning.json.container.ProvisioningInformation(
 								JSONUtility.checkStringParameter(request, "target"),
 								url,
