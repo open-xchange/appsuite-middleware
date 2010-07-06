@@ -109,20 +109,14 @@ public class PooledData<T> {
         this.trace = trace;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean equals(final Object obj) {
-        if (!(obj instanceof PooledData)) {
+        if (!(obj instanceof PooledData<?>)) {
             return false;
         }
         return pooled.equals(((PooledData<?>) obj).pooled);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int hashCode() {
         return pooled.hashCode();
