@@ -68,13 +68,13 @@ public class MobileConfigServlet extends HttpServlet {
 
     private static final transient Log LOG = LogFactory.getLog(MobileConfigServlet.class);
 
-    private static final ErrorMessage MSG_INTERNAL_ERROR = new ErrorMessage("Ein interner Fehler ist aufgetreten, bitte versuchen Sie es später noch einmal...", "An internal error occurred, please try again later...");
+    private static final ErrorMessage MSG_INTERNAL_ERROR = new ErrorMessage("Ein interner Fehler ist aufgetreten, bitte versuchen Sie es später noch einmal.", "An internal error occurred. Please try again later.");
 
-    private static final ErrorMessage MSG_NO_SUPPORTED_DEVICE_FOUND = new ErrorMessage("Kein unterstütztes Gerät im Header gefunden", "No supported device found from header");
+    private static final ErrorMessage MSG_NO_SUPPORTED_DEVICE_FOUND = new ErrorMessage("Ihr Gerät wird nicht unterstützt", "Your device is not supported.");
 
-    private static final ErrorMessage MSG_PARAMETER_LOGIN_IS_MISSING = new ErrorMessage("Der Parameter \"login\" fehlt", "Parameter \"login\" is missing");
+    private static final ErrorMessage MSG_PARAMETER_LOGIN_IS_MISSING = new ErrorMessage("Der Parameter \"l\" fehlt", "The \"l\" parameter is missing");
     
-    private static final ErrorMessage MSG_UNSECURE_ACCESS = new ErrorMessage("Unsicherer Zugriff mit http ist nicht erlaubt. Bitte https benutzen.", "Unsecure access with http is not allowed. Use https instead.");
+    private static final ErrorMessage MSG_UNSECURE_ACCESS = new ErrorMessage("Unsicherer Zugriff mit http ist nicht erlaubt. Bitte https benutzen.", "Unsecured http access is not allowed. Use https instead.");
 
     /**
      * 
@@ -158,27 +158,27 @@ public class MobileConfigServlet extends HttpServlet {
         }
         
         final Device device = detectDevice(req);
-        final String login = req.getParameter("login");
+        final String login = req.getParameter("l");
         if (null == device) {
             if (null == login) {
                 printError(req, resp, MSG_PARAMETER_LOGIN_IS_MISSING);
                 return;
             }
             String mailpart = "";
-            final String mail = req.getParameter("mail");
+            final String mail = req.getParameter("m");
             if (null != mail) {
-                mailpart = "&mail=" + URLEncoder.encode(mail, "UTF-8");
+                mailpart = "&m=" + URLEncoder.encode(mail, "UTF-8");
             }
 
             final String header = req.getHeader("user-agent");
             if (null != header) {
                 if (header.matches(iphoneRegEx)) {
                     // iPhone part
-                    resp.sendRedirect(Activator.ALIAS + "/eas.mobileconfig?login=" + URLEncoder.encode(req.getParameter("login"),"UTF-8") + mailpart);
+                    resp.sendRedirect(Activator.ALIAS + "/eas.mobileconfig?l=" + URLEncoder.encode(login,"UTF-8") + mailpart);
                     return;
                 } else if (header.matches(winMobRegEx)) {
                     // WinMob part
-                    resp.sendRedirect(Activator.ALIAS + "/ms.cab?login=" + URLEncoder.encode(req.getParameter("login"),"UTF-8") + mailpart);
+                    resp.sendRedirect(Activator.ALIAS + "/ms.cab?l=" + URLEncoder.encode(login,"UTF-8") + mailpart);
                     return;
                 } else {
                     printError(req, resp, MSG_NO_SUPPORTED_DEVICE_FOUND);
@@ -265,7 +265,7 @@ public class MobileConfigServlet extends HttpServlet {
 
     private void generateConfig(HttpServletRequest req, HttpServletResponse resp, final String login, final Device device) throws IOException, ConfigurationException, TemplateException {
         String mail = login;
-        final String parameter = req.getParameter("mail");
+        final String parameter = req.getParameter("m");
         if (null != parameter) {
             mail = parameter;
         }
