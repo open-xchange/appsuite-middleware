@@ -82,10 +82,10 @@ public class AttachmentCountUpdateTask extends UpdateTaskAdapter {
      * Finds all appointments, where the field numberOfAttachments does not match the real amount of attachments.
      */
     private static final String SELECT = "SELECT pd.cid, pd.intfield01 AS id, pd.intfield08 AS count, COUNT(pa.id) AS realCount " +
-    		"FROM prg_dates pd LEFT JOIN prg_attachment pa " +
-    		"ON pd.cid = pa.cid AND pd.intfield01 = pa.attached AND pa.module=1 " +
-    		"GROUP BY pd.cid,pd.intfield01 " +
-    		"HAVING count!=realCount";
+            "FROM prg_dates pd LEFT JOIN prg_attachment pa " +
+            "ON pd.cid = pa.cid AND pd.intfield01 = pa.attached AND pa.module=1 " +
+            "GROUP BY pd.cid,pd.intfield01 " +
+            "HAVING count!=realCount";
     
     private static final String REPAIR = "UPDATE prg_dates SET intfield08 = ? WHERE cid = ? AND intfield01 = ?";
 
