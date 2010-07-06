@@ -304,8 +304,12 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                     case FAIL:
                         throw new PoolingException("Pool exhausted.");
                     case BLOCK:
-                        PoolingException warn = new PoolingException("A thread is sent to sleep until an object in the exhausted pool is available.");
+                        final String threadName = Thread.currentThread().getName();
+                        PoolingException warn = new PoolingException("Thread " + threadName
+                            + " is sent to sleep until an object in the pool is available. " + data.numActive()
+                            + " objects are already in use.");
                         LOG.warn(warn.getMessage(), warn);
+                        final long sleepStartTime = System.currentTimeMillis();
                         boolean timedOut = false;
                         try {
                             if (maxWait > 0) {
@@ -314,8 +318,11 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                                 idleAvailable.await();
                             }
                         } catch (InterruptedException e) {
-                            LOG.error("Thread was interrupted.", e);
+                            LOG.error("Thread " + threadName + " was interrupted.", e);
                         }
+                        warn = new PoolingException("Thread " + threadName + " slept for " + (System.currentTimeMillis() - sleepStartTime)
+                            + "ms.");
+                        LOG.warn(warn.getMessage(), warn);
                         if (timedOut) {
                             idleAvailable.signal();
                             throw new PoolingException("Wait time exceeded. Active: " + data.numActive() + ", Idle: " + data.numIdle()
