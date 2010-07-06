@@ -68,39 +68,23 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
     static final Log LOG = LogFactory.getLog(ReentrantLockPool.class);
 
     private final int minIdle;
-
     private final int maxIdle;
-
     private final long maxIdleTime;
-
     private final int maxActive;
-
     private final long maxWait;
-
     private final long maxLifeTime;
-
-    private ExhaustedActions exhaustedAction;
-
+    private final ExhaustedActions exhaustedAction;
     private final boolean testOnActivate;
-
     private final boolean testOnDeactivate;
-
     private final boolean testOnIdle;
-
     private final boolean testThreads;
-
-    private boolean running = true;
-
     private final PoolImplData<T> data = new PoolImplData<T>();
-
     private final PoolableLifecycle<T> lifecycle;
-
     private final ReentrantLock lock = new ReentrantLock(true);
-
     private final Condition idleAvailable = lock.newCondition();
-
     private final long[] useTimes = new long[1000];
 
+    private boolean running = true;
     private int useTimePointer;
 
     /**
@@ -114,21 +98,17 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
     private long minUseTime = Long.MAX_VALUE;
 
     /**
-     * Number of broken objects. An object is broken if
-     * {@link PoolableLifecycle#activate(PooledData)},
-     * {@link PoolableLifecycle#deactivate(PooledData)} or
-     * {@link PoolableLifecycle#validate(PooledData)} return <code>false</code>.
+     * Number of broken objects. An object is broken if one of {@link PoolableLifecycle#activate(PooledData)},
+     * {@link PoolableLifecycle#deactivate(PooledData)} or {@link PoolableLifecycle#validate(PooledData)} returns <code>false</code>.
      */
     private int numBroken;
 
     /**
      * Default constructor.
-     * @param lifecycle Implementation of the interface for handling the life
-     * cycle of pooled objects.
+     * @param lifecycle Implementation of the interface for handling the life cycle of pooled objects.
      * @param config Configuration of the pool parameters.
      */
-    public ReentrantLockPool(final PoolableLifecycle<T> lifecycle,
-        final Config config) {
+    public ReentrantLockPool(PoolableLifecycle<T> lifecycle, Config config) {
         super();
         minIdle = Math.max(0, config.minIdle);
         maxIdle = config.maxIdle;
@@ -144,46 +124,18 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         this.lifecycle = lifecycle;
         try {
             ensureMinIdle();
-        } catch (final PoolingException e) {
+        } catch (PoolingException e) {
             LOG.error("Problem while creating initial objects.", e);
         }
     }
 
-    /**
-     * @return the exhaustedAction
-     */
-    public ExhaustedActions getExhaustedAction() {
-        return exhaustedAction;
-    }
-
-    /**
-     * @param exhaustedAction the exhaustedAction to set
-     */
-    public void setExhaustedAction(final ExhaustedActions exhaustedAction) {
-        this.exhaustedAction = exhaustedAction;
-    }
-
-    /**
-     * @return the lifecycle
-     */
     protected final PoolableLifecycle<T> getLifecycle() {
         return lifecycle;
     }
 
-    /**
-     * @return the testThreads
-     */
-    public boolean isTestThreads() {
-        return testThreads;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void back(final T pooled) throws PoolingException {
+    public void back(T pooled) throws PoolingException {
         if (null == pooled) {
-            throw new PoolingException(
-                "A null reference was returned to pool.");
+            throw new PoolingException("A null reference was returned to pool.");
         }
         back(pooled, true);
     }
@@ -195,8 +147,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
      * @return if the object has been put to pool.
      * @throws PoolingException if the object does not belong to this pool.
      */
-    private boolean back(final T pooled, final boolean decrementActive)
-        throws PoolingException {
+    private boolean back(T pooled, boolean decrementActive) throws PoolingException {
         final long startTime = System.currentTimeMillis();
         // checks
         final PooledData <T> metaData;
@@ -212,8 +163,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         }
         // object of this pool?
         if (null == metaData) {
-            throw new PoolingException("Object \"" + pooled
-                + "\" does not belong to this pool.");
+            throw new PoolingException("Object \"" + pooled + "\" does not belong to this pool.");
         }
         // reuseable?
         boolean poolable;
@@ -226,8 +176,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
             if (!poolable) {
                 numBroken++;
             }
-            poolable &= (maxLifeTime <= 0
-                || metaData.getLiveTime() < maxLifeTime);
+            poolable &= (maxLifeTime <= 0 || metaData.getLiveTime() < maxLifeTime);
         } else {
             poolable = false;
         }
@@ -267,9 +216,6 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         return !destroy;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public T get() throws PoolingException {
         final long startTime = System.currentTimeMillis();
         while (running) {
@@ -405,16 +351,10 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         return System.currentTimeMillis() - startTime;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void destroy() {
         running = false;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public boolean isEmpty() {
         lock.lock();
         try {
@@ -424,9 +364,6 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public int getNumIdle() {
         lock.lock();
         try {
@@ -436,9 +373,6 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public int getNumActive() {
         lock.lock();
         try {
@@ -448,9 +382,6 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public int getPoolSize() {
         lock.lock();
         try {
@@ -460,9 +391,6 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         }
     }
 
-    /**
-     * @return the number of threads waiting for an object.
-     */
     public int getNumWaiting() {
         lock.lock();
         try {
@@ -472,37 +400,22 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public long getMaxUseTime() {
         return maxUseTime;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public long getMinUseTime() {
         return minUseTime;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public int getNumBroken() {
         return numBroken;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void resetMaxUseTime() {
         maxUseTime = 0;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void resetMinUseTime() {
         minUseTime = Long.MAX_VALUE;
     }
@@ -553,10 +466,8 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
     }
 
     /**
-     * Fills the pool that it provides the minimum count of idle object without
-     * exceeding the maximum number objects.
-     * @throws PoolingException if creating an object or putting it to the pool
-     * fails.
+     * Fills the pool that it provides the minimum count of idle object without exceeding the maximum number objects.
+     * @throws PoolingException if creating an object or putting it to the pool fails.
      */
     private void ensureMinIdle() throws PoolingException {
         boolean successfullyAdded = true;
@@ -580,9 +491,6 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         return back(pooled, false);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void run() {
         final long startTime = System.currentTimeMillis();
         if (LOG.isTraceEnabled()) {
@@ -664,9 +572,6 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         public boolean testThreads;
         public boolean forceWriteOnly;
 
-        /**
-         * Default constructor.
-         */
         public Config() {
             super();
             minIdle = 0;
@@ -682,9 +587,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
             testThreads = false;
             forceWriteOnly = false;
         }
-        /**
-         * {@inheritDoc}
-         */
+
         @Override
         public Config clone() {
             try {
@@ -694,6 +597,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                 throw new Error("Assertion failed!", e);
             }
         }
+
         @Override
         public String toString() {
             final StringBuilder sb = new StringBuilder();
