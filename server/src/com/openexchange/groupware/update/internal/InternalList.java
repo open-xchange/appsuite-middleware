@@ -329,7 +329,10 @@ public final class InternalList {
         new com.openexchange.groupware.update.tasks.FolderTreeSelectionTask(),
         
         // Repairs appointments where the number of attachments does not match the real amount of attachments.
-        new com.openexchange.groupware.update.tasks.AttachmentCountUpdateTask()
+        new com.openexchange.groupware.update.tasks.AttachmentCountUpdateTask(),
+
+        // Creates an initial empty filestore usage entry for every context that currently did not uploaded anything.
+        new com.openexchange.groupware.update.tasks.AddInitialFilestoreUsage()
 
         // TODO: Enable virtual folder tree update task when needed
         // Migrates existing folder data to new outlook-like folder tree structure

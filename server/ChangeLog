@@ -1,3 +1,7 @@
+* 2010-07-06 - marcus.klein@open-xchange.com
+
+ - Bugfix #16342: A background update task adds an initial filestore usage for every context.
+
 * 2010-07-05 - marcus.klein@open-xchange.com
 
  - Bugfix #16105: Writing a warn message to the log file is some thread has to wait for a database connection because all are exhausted.
