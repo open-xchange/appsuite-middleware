@@ -8,5 +8,5 @@ Standards-Version: 3.6.1
 
 Package: open-xchange-mobileconfig
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre|sun-java6-jre, open-xchange-common (>= @OXVERSION@), open-xchange-global (>= @OXVERSION@), open-xchange-push (>= @OXVERSION@), open-xchange-threadpool (>= @OXVERSION@), open-xchange-server (>= @OXVERSION@), open-xchange-configread (>= @OXVERSION@), , open-xchange-templating (>= @OXVERSION@)
+Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre|sun-java6-jre, open-xchange-common (>= @OXVERSION@), open-xchange-global (>= @OXVERSION@), open-xchange-push (>= @OXVERSION@), open-xchange-threadpool (>= @OXVERSION@), open-xchange-server (>= @OXVERSION@), open-xchange-configread (>= @OXVERSION@), open-xchange-templating (>= @OXVERSION@), open-xchange-usm (>= @OXVERSION@)
 Description: The Open-Xchange Mobileconfig
