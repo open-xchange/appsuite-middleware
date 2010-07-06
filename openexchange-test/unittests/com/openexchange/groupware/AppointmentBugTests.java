@@ -2619,10 +2619,12 @@ public class AppointmentBugTests extends TestCase {
         oclp1.setEntity(userid);
         oclp1.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         oclp1.setFolderAdmin(true);
-        final OCLPermission oclp2 = new OCLPermission();
 
+        final OCLPermission oclp2 = new OCLPermission();
         oclp2.setEntity(uid2);
         oclp2.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+        oclp2.setFolderAdmin(false);
+
         fo.setFolderName("testSharedFolder8495 - "+System.currentTimeMillis());
         fo.setParentFolderID(fid);
         fo.setModule(FolderObject.CALENDAR);
@@ -2653,13 +2655,9 @@ public class AppointmentBugTests extends TestCase {
             move.setObjectID(object_id);
             move.setParentFolderID(fid2);
 
-            try {
-                csql2.updateAppointmentObject(move, shared_folder_id, new Date(shared_folder_id));
-                fail("Move without error message, this should not happen!");
-            } catch(final OXCalendarException oxca) {
-                final int x = 0;
-                // this is what we expect !
-            }
+            csql2.updateAppointmentObject(move, shared_folder_id, new Date());
+            CalendarDataObject moved = csql2.getObjectById(object_id, shared_folder_id);
+            assertNotNull("Should find the newly moved appointment", moved);
 
         } finally {
             try {
