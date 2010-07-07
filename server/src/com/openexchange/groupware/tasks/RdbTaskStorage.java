@@ -50,6 +50,7 @@
 package com.openexchange.groupware.tasks;
 
 import static com.openexchange.groupware.tasks.StorageType.ACTIVE;
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.DataTruncation;
@@ -81,10 +82,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class RdbTaskStorage extends TaskStorage {
 
-    /**
-     * Logger.
-     */
-    private static final Log LOG = LogFactory.getLog(RdbTaskStorage.class);
+    static final Log LOG = LogFactory.getLog(RdbTaskStorage.class);
 
     /**
      * This SQL statement counts the tasks in a folder. TODO Move to {@link SQL} class.
@@ -418,7 +416,7 @@ public class RdbTaskStorage extends TaskStorage {
             closeSQLStuff(result, stmt);
         }
         if (null == task) {
-            throw new TaskException(Code.TASK_NOT_FOUND, Integer.valueOf(taskId), Integer.valueOf(ctx.getContextId()));
+            throw new TaskException(Code.TASK_NOT_FOUND, I(taskId), I(ctx.getContextId()));
         }
         return task;
     }
