@@ -1,3 +1,9 @@
+open-xchange-mobility-provisioning-json (6.17.0.0-3) unstable; urgency=low
+
+  * first build for 6.17-rev11
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed,  7 Jul 2010 14:17:46 +0200
+
 open-xchange-mobility-provisioning-json (6.17.0.0-2) unstable; urgency=low
 
   * first build for 6.17-rev10

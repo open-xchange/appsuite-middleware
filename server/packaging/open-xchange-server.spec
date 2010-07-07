@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 10
+%define		ox_release 11
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -537,6 +537,20 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed Jul 07 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16421: If a database socket is once broken it should be kept broken to not compromise ResultSets from that connection.
+* Tue Jul 06 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16342: A background update task adds an initial filestore usage for every context.
+ - Bugfix #16291: Creating pooled objects is now done outside the lock for the internal pool structures. This prevents a lot of waiting
+   threads if creating object takes some time.
+* Tue Jul 06 2010 - steffen.templin@open-xchange.com
+ - Bugfix #14111: Missing reminders for appointment series and change exceptions.
+* Mon Jul 05 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16105: Writing a warn message to the log file is some thread has to wait for a database connection because all are exhausted.
+* Fri Jul 02 2010 - thorben.betten@open-xchange.com
+ - Bugfix #16407: Added warning if parsing of multipart mail failed on mail display
+* Fri Jul 02 2010 - tobias.prinz@open-xchange.com
+ - Bugfix #15662: A display name now can be part of another display, it just is not allowed to be the same. 
 * Wed Jun 30 2010 - tobias.prinz@open-xchange.com
  - Bugfix #16287: Error message made easier to understand.
 * Wed Jun 30 2010 - thorben.betten@open-xchange.com
