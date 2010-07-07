@@ -90,7 +90,7 @@ import com.openexchange.groupware.tasks.Task;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
- * @author Tobias Prinz <tobias.prinz@open-xchange.com> ( hacks to fix bug 11958, which is ical4j ignoring timezone information if given after event data )
+ * @author Tobias Prinz <tobias.prinz@open-xchange.com> (bug 11958, 16367)
  */
 public class ICal4JParser implements ICalParser {
 
@@ -227,7 +227,7 @@ public class ICal4JParser implements ICalParser {
 
 
     private static final TimeZone determineTimeZone(final CalendarComponent component,
-        final TimeZone defaultTZ) throws ConversionError {
+        final TimeZone defaultTZ){
         for (final String name : new String[] { DtStart.DTSTART, DtEnd.DTEND, Due.DUE, Completed.COMPLETED }) {
             final DateProperty dateProp = (DateProperty) component.getProperty(name);
             if (dateProp != null) {
@@ -310,7 +310,9 @@ public class ICal4JParser implements ICalParser {
             		}
             	}
             }
-            return builder.build(new StringReader(chunk.toString())); // FIXME: Encoding!
+            StringReader chunkedReader = new StringReader(
+                workaroundFor16367(chunk.toString())); // FIXME: Encoding!
+            return builder.build(chunkedReader); 
         } catch (final IOException e) {
             //IGNORE
         } catch (final ParserException e) {
@@ -318,6 +320,11 @@ public class ICal4JParser implements ICalParser {
             throw new ConversionError(-1, ConversionWarning.Code.PARSE_EXCEPTION, e.getMessage());
         }
         return null;
+    }
+
+   
+    private String workaroundFor16367(String input) {
+        return input.replaceAll("CN=:", "CN=\"\":");
     }
 
 }
