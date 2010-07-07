@@ -53,6 +53,7 @@ import static com.openexchange.groupware.tasks.StorageType.ACTIVE;
 import static com.openexchange.groupware.tasks.StorageType.DELETED;
 import static com.openexchange.groupware.tasks.StorageType.REMOVED;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -687,11 +688,7 @@ class UpdateData {
             rollback(con);
             throw e;
         } finally {
-            try {
-                con.setAutoCommit(true);
-            } catch (final SQLException e) {
-                LOG.error("Problem setting auto commit to true.", e);
-            }
+            autocommit(con);
             DBPool.closeWriterSilent(ctx, con);
         }
     }
