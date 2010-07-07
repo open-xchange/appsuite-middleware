@@ -118,16 +118,10 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements Con
         lifecycle.destroy(con);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public int getNumBrokenConnections() {
         return getNumBroken();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public int getNumberOfDBConnections() {
         return getPoolSize();
     }
@@ -164,9 +158,6 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements Con
             this.info = info;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         public boolean activate(final PooledData<Connection> data) {
             final Connection con = data.getPooled();
             boolean retval;
@@ -190,28 +181,24 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements Con
             }
             return retval;
         }
-        /**
-         * {@inheritDoc}
-         */
+
         public Connection create() throws SQLException {
             return DriverManager.getConnection(url, info);
         }
+
         public Connection createWithoutTimeout() throws SQLException {
             final Properties withoutTimeout = new Properties();
             withoutTimeout.putAll(info);
             final Iterator<Object> iter = withoutTimeout.keySet().iterator();
             while (iter.hasNext()) {
                 final Object test = iter.next();
-                if (String.class.isAssignableFrom(test.getClass())
-                    && ((String) test).toLowerCase().endsWith("timeout")) {
+                if (String.class.isAssignableFrom(test.getClass()) && ((String) test).toLowerCase().endsWith("timeout")) {
                     iter.remove();
                 }
             }
             return DriverManager.getConnection(url, withoutTimeout);
         }
-        /**
-         * {@inheritDoc}
-         */
+
         public boolean deactivate(final PooledData<Connection> data) {
             boolean retval = true;
             try {
@@ -221,9 +208,7 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements Con
             }
             return retval;
         }
-        /**
-         * {@inheritDoc}
-         */
+
         public void destroy(final Connection obj) {
             try {
                 obj.close();
@@ -237,9 +222,7 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements Con
                 dbe.setStackTrace(data.getTrace());
             }
         }
-        /**
-         * {@inheritDoc}
-         */
+
         public boolean validate(final PooledData<Connection> data) {
             final Connection con = data.getPooled();
             boolean retval = true;
@@ -254,6 +237,7 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements Con
                     con.rollback();
                     con.setAutoCommit(true);
                 }
+                // Getting number of open statements.
                 final Class< ? extends Connection> connectionClass = con.getClass();
                 try {
                     final Method method = connectionClass.getMethod("getActiveStatementCount");
@@ -267,6 +251,7 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements Con
                 } catch (final Exception e) {
                     LOG.error(e.getMessage(), e);
                 }
+                // Write warning if using this connection was longer than 2 seconds.
                 if (data.getTimeDiff() > 2000) {
                     final DBPoolingException dbe = DBPoolingExceptionCodes.TOO_LONG.create(L(data.getTimeDiff()));
                     addTrace(dbe, data);
