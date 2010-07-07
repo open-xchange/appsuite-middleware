@@ -1170,14 +1170,43 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    
+    
+    
     private int toInt(Object candidate) {
         if (candidate instanceof Integer) {
             return (Integer) candidate;
         }
         return Integer.valueOf(candidate.toString());
     }
+    
+    private boolean isMatching(String needle, ContactField haystack){
+        return(
+            needle.matches(haystack.getAjaxName()) 
+         || needle.matches(haystack.getDBName()) 
+         || needle.matches(haystack.getFieldName()) 
+         || needle.matches(String.valueOf(haystack.getNumber()))
+        );
+    }
 
+    private boolean markasdistributionlist(Contact contact, Object value2) throws ContactException {
+        Boolean value;
+        try {
+            value = (Boolean) value2;
+        } catch (ClassCastException c) {
+            value = Boolean.parseBoolean((String) value2);
+        }
+        contact.setMarkAsDistributionlist( value );
+        return true;
+    }
+    
     public boolean _unknownfield(Contact contact, String fieldname, Object value, Object... additionalObjects) throws ContactException {
+        if(fieldname == null || fieldname.equals(""))
+            return false;
+        
+        if(isMatching(fieldname, ContactField.MARK_AS_DISTRIBUTIONLIST))
+            return markasdistributionlist(contact, value);
+        
         return false;
     }
 
