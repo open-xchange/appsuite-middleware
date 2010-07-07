@@ -58,6 +58,8 @@ import java.util.Date;
 import java.util.Properties;
 import java.util.TimeZone;
 import junit.framework.TestCase;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbFolderSQLInterface;
@@ -94,6 +96,7 @@ import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.setuptools.TestConfig;
 import com.openexchange.test.AjaxInit;
+import com.openexchange.test.CalendarTestManager;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -2741,97 +2744,6 @@ public class AppointmentBugTests extends TestCase {
 
         assertEquals("Check correct Alarm", check_alarm_update, check_date_update);
 
-    }
-
-    /*
-    1) Create an appointment and invite user B
-    2) b accept the appointment
-    3) Change appointment from today to tomorrow
-
-    result: Status is still accepted although it should be waiting.
-
-    Status should always be reset when date, time, location change.
-    */
-    public void testBug7273() throws Throwable {
-        final String user2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");
-        final int userid2 = resolveUser(user2);
-        final int fid = AppointmentBugTests.getPrivateFolder(userid);
-        final int fid2 = AppointmentBugTests.getPrivateFolder(userid2);
-        final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestIdentifier");
-        final SessionObject so2 = SessionObjectWrapper.createSessionObject(userid2, getContext().getContextId(), "myTestIdentifier");
-
-        final CalendarDataObject cdao = new CalendarDataObject();
-        cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
-        cdao.setParentFolderID(fid);
-        cdao.setTitle("testBug7273");
-        cdao.setIgnoreConflicts(true);
-        CalendarTest.fillDatesInDao(cdao);
-
-        final UserParticipant userA = new UserParticipant(userid);
-        final UserParticipant userB = new UserParticipant(userid2);
-
-        cdao.setUsers(new UserParticipant[] { userA, userB });
-
-        final CalendarSql csql = new CalendarSql(so);
-        final CalendarSql csql2 = new CalendarSql(so2);
-
-        csql.insertAppointmentObject(cdao);
-        final int object_id = cdao.getObjectID();
-        assertTrue("Got object_id", object_id > 0);
-
-        final CalendarDataObject temp = csql2.getObjectById(object_id, fid2);
-        final UserParticipant up[] = temp.getUsers();
-
-        for (int a = 0; a < up.length; a++) {
-            if (up[a].getIdentifier() == userid) {
-                assertEquals("Check confirm state for user "+up[a].getIdentifier(), Appointment.ACCEPT, up[a].getConfirm());
-            }
-        }
-
-        final CalendarDataObject update = new CalendarDataObject();
-        update.setObjectID(object_id);
-        update.setContext(ContextStorage.getInstance().getContext(so2.getContextId()));
-        update.setTimezone(TIMEZONE);
-        update.setLocation("UPDATE");
-        for (int a = 0; a < up.length; a++) {
-            if (up[a].getIdentifier() == userid2) {
-                up[a].setConfirm(Appointment.ACCEPT);
-            }
-        }
-        update.setUsers(up);
-        update.setIgnoreConflicts(true);
-        csql2.updateAppointmentObject(update, fid2, new Date());
-
-        final CalendarDataObject temp2 = csql.getObjectById(object_id, fid);
-        final UserParticipant up_check2[] = temp2.getUsers();
-        for (int a = 0; a < up_check2.length; a++) {
-            if (up_check2[a].getIdentifier() == userid2) {
-                assertEquals("Check confirm state for user "+up_check2[a].getIdentifier(), Appointment.NONE, up_check2[a].getConfirm());
-            } else if (up_check2[a].getIdentifier() == userid) {
-                assertEquals("Check confirm state for user "+up_check2[a].getIdentifier(), Appointment.ACCEPT, up_check2[a].getConfirm());
-            }
-        }
-
-        final CalendarDataObject update_with_time_change = new CalendarDataObject();
-        update_with_time_change.setObjectID(object_id);
-        update_with_time_change.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
-        update_with_time_change.setTimezone(TIMEZONE);
-        update_with_time_change.setNote("UPDATE WITH TIME CHANGE");
-        update_with_time_change.setStartDate(new Date(cdao.getStartDate().getTime() - 3600000L));
-        update_with_time_change.setEndDate(new Date(cdao.getEndDate().getTime() - 3600000L));
-        update_with_time_change.setIgnoreConflicts(true);
-
-        csql.updateAppointmentObject(update_with_time_change, fid, new Date());
-
-        final CalendarDataObject temp3 = csql.getObjectById(object_id, fid);
-        final UserParticipant up_check3[] = temp3.getUsers();
-        for (int a = 0; a < up_check3.length; a++) {
-            if (up_check3[a].getIdentifier() == userid2) {
-                assertEquals("Check confirm state for user "+up_check3[a].getIdentifier(), Appointment.NONE, up_check3[a].getConfirm());
-            } else if (up_check3[a].getIdentifier() == userid) {
-                assertEquals("Check confirm state for user "+up_check3[a].getIdentifier(), Appointment.ACCEPT, up_check3[a].getConfirm());
-            }
-        }
     }
 
     /*
