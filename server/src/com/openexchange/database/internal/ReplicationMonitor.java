@@ -71,7 +71,7 @@ import com.openexchange.pooling.PoolingException;
  */
 public final class ReplicationMonitor {
 
-    private static final Log LOG = LogFactory.getLog(ReplicationMonitor.class);
+    static final Log LOG = LogFactory.getLog(ReplicationMonitor.class);
 
     private static long masterConnectionsFetched;
 
@@ -245,6 +245,15 @@ public final class ReplicationMonitor {
     private static long lastLogged = 0;
 
     static void increaseTransactionCounter(Assignment assign, Connection con) {
+        try {
+            if (con.isClosed()) {
+                return;
+            }
+        } catch (SQLException e) {
+            DBPoolingException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            LOG.error(e1.getMessage(), e1);
+            return;
+        }
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {

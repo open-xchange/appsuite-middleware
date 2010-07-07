@@ -214,7 +214,9 @@ public final class DBUtils {
             return;
         }
         try {
-            con.rollback();
+            if (!con.isClosed()) {
+                con.rollback();
+            }
         } catch (final SQLException e) {
             LOG.error(e.getMessage(), e);
         }
@@ -230,7 +232,9 @@ public final class DBUtils {
             return;
         }
         try {
-            con.setAutoCommit(true);
+            if (!con.isClosed()) {
+                con.setAutoCommit(true);
+            }
         } catch (final SQLException e) {
             LOG.error(e.getMessage(), e);
         }
