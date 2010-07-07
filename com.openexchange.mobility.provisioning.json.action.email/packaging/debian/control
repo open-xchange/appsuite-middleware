@@ -8,7 +8,7 @@ Standards-Version: 3.6.1
 
 Package: open-xchange-mobility-provisioning-json-action-email
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre, open-xchange-common (>= @OXVERSION@), open-xchange-global (>= @OXVERSION@), open-xchange-server (>= @OXVERSION@), open-xchange-mobility-provisioning-json (>= @OXVERSION@)
+Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre|sun-java6-jre, open-xchange-common (>= @OXVERSION@), open-xchange-global (>= @OXVERSION@), open-xchange-server (>= @OXVERSION@), open-xchange-mobility-provisioning-json (>= @OXVERSION@)
 Provides: 
 Description: Mobility Provisioning eMail transport.
 Conflicts: 
