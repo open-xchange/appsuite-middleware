@@ -1251,4 +1251,10 @@ public class AppointmentTest extends AbstractAJAXTest {
                 new AJAXSession(getWebConversation(), getSessionId())
         );
     }
+    
+    protected void link(Appointment base, Appointment update){
+        update.setLastModified(base.getLastModified());
+        update.setParentFolderID(base.getParentFolderID());
+        update.setObjectID(base.getObjectID());
+    }
 }
