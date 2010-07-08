@@ -1252,9 +1252,10 @@ public class AppointmentTest extends AbstractAJAXTest {
         );
     }
     
-    protected void link(Appointment base, Appointment update){
+    protected Appointment link(Appointment base, Appointment update){
         update.setLastModified(base.getLastModified());
         update.setParentFolderID(base.getParentFolderID());
         update.setObjectID(base.getObjectID());
+        return update;
     }
 }
