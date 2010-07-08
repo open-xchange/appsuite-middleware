@@ -51,6 +51,7 @@ package com.openexchange.test;
 
 import java.lang.reflect.Field;
 import java.util.Locale;
+import java.util.TimeZone;
 import com.openexchange.i18n.Bug14154Test;
 import com.openexchange.i18n.TranslatedSingleTest;
 import junit.framework.Test;
@@ -91,6 +92,9 @@ public final class I18nTests {
                          tests.addTest(new TranslatedSingleTest("testTranslation", locale, (String) field.get(instance)));
                     }
                 }
+            }
+            for (String timeZoneID : TimeZone.getAvailableIDs()) {
+                tests.addTest(new TranslatedSingleTest("testTranslation", locale, timeZoneID));
             }
             tests.addTest(new Bug14154Test("testContainingPattern", locale));
         }
