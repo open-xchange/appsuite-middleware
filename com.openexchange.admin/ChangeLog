@@ -1,3 +1,7 @@
+* 2010-07-08 - karsten.will@open-xchange.com
+
+ - Bugfix #15200 - [L3] After changing contextadmin password in the GUI pw not in sync with CLT
+
 * 2010-06-29 - karsten.will@open-xchange.com
 
  - Bugfix #15762 - Enabled/Disabled features are ignored on user creation
