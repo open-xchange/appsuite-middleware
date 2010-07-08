@@ -2,6 +2,7 @@
 
  - Bugfix #16199: Adding correct content-type to attachments servlet GET requests.
  - Bugfix #16420: Allowing zero size collections for SearchIteratorDelegator.
+ - Bugfix #16397: Backend transfers all available time zones to the UI.
 
 * 2010-07-07 - tobias.prinz@open-xchange.com
 
