@@ -214,6 +214,7 @@ public class Attachment extends PermissionServlet {
             if (!attRequest.action(action, new ServletRequestAdapter(req, res))) {
                 unknownAction("GET", action, res, false);
             }
+            res.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT);
             try {
                 ((JSONObject) writer.getObject()).write(res.getWriter());
             } catch (final JSONException e) {
@@ -263,6 +264,7 @@ public class Attachment extends PermissionServlet {
         if (!attRequest.action(action, new ServletRequestAdapter(req, res))) {
             unknownAction("PUT", action, res, false);
         }
+        res.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT);
         try {
             ((JSONObject) writer.getObject()).write(res.getWriter());
         } catch (final JSONException e) {

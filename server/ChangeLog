@@ -1,3 +1,7 @@
+* 2010-07-08 - marcus.klein@open-xchange.com
+
+ - Bugfix #16199: Adding correct content-type to attachments servlet GET requests.
+
 * 2010-07-07 - tobias.prinz@open-xchange.com
 
  - Bugfix #16367: MS Exchange 2007 tends to send broken iCal CN data. We ignore that now. 
