@@ -95,7 +95,8 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
         if (authdata != null && authdata.getLogin() != null && authdata.getPassword() != null) {
 
             final Credentials cachedAdminCredentials = ClientAdminThread.cache.getAdminCredentials(ctx);
-            if(cachedAdminCredentials == null ) {
+            //disabling caching for admin-password as fix for bug 15200
+            //if(cachedAdminCredentials == null ) {
                 final OXToolStorageInterface instance = OXToolStorageInterface.getInstance();
                 final int uid = instance.getUserIDByUsername(ctx, authdata.getLogin());
                 if (instance.isContextAdmin(ctx, uid)) {
@@ -165,30 +166,31 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
                 } else {
                     return false;
                 }
-            } else {
-                try {
-                    if ( authdata.getLogin().equals(cachedAdminCredentials.getLogin())) {
-                        if ( GenericChecks.authByMech(cachedAdminCredentials.getPassword(),
-                                authdata.getPassword(), ClientAdminThread.cache.getAdminAuthMech(ctx) ) ) {
-                            return true;
-                        } else {
-                            if (log.isDebugEnabled()) {
-                                log.debug("Password for admin user \"" + authdata.getLogin() + "\" did not match!");
-                            }
-                            return false;
-                        }
-                    } else {
-                        return false;
-                    }
-                } catch (NoSuchAlgorithmException e) {
-                    log.error(e.getMessage(), e);
-                    throw new StorageException(e);
-                } catch (UnsupportedEncodingException e) {
-                    log.error(e.getMessage(), e);
-                    throw new StorageException(e);
-                }
-                
-            }
+                //disabling caching for admin-password as fix for bug 15200
+//            } else {
+//                try {
+//                    if ( authdata.getLogin().equals(cachedAdminCredentials.getLogin())) {
+//                        if ( GenericChecks.authByMech(cachedAdminCredentials.getPassword(),
+//                                authdata.getPassword(), ClientAdminThread.cache.getAdminAuthMech(ctx) ) ) {
+//                            return true;
+//                        } else {
+//                            if (log.isDebugEnabled()) {
+//                                log.debug("Password for admin user \"" + authdata.getLogin() + "\" did not match!");
+//                            }
+//                            return false;
+//                        }
+//                    } else {
+//                        return false;
+//                    }
+//                } catch (NoSuchAlgorithmException e) {
+//                    log.error(e.getMessage(), e);
+//                    throw new StorageException(e);
+//                } catch (UnsupportedEncodingException e) {
+//                    log.error(e.getMessage(), e);
+//                    throw new StorageException(e);
+//                }
+//                
+//            }
         } else {
             return false;
         }
