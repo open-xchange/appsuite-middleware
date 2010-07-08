@@ -90,7 +90,7 @@ public class SearchIteratorDelegator<T> implements SearchIterator<T> {
      */
     public SearchIteratorDelegator(final Iterator<T> iter, final int size) {
         super();
-        if (size <= 0) {
+        if (size < 0) {
             throw new IllegalArgumentException("invalid size: " + size);
         }
         delegate = iter;
@@ -111,7 +111,7 @@ public class SearchIteratorDelegator<T> implements SearchIterator<T> {
         return delegate.hasNext();
     }
 
-    public T next() throws SearchIteratorException {
+    public T next() {
         return delegate.next();
     }
 
@@ -141,5 +141,4 @@ public class SearchIteratorDelegator<T> implements SearchIterator<T> {
     public boolean hasWarnings() {
         return !warnings.isEmpty();
     }
-
 }

@@ -47,25 +47,38 @@
  *
  */
 
-package com.openexchange.ajax.parser;
+package com.openexchange.tools.iterator;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.NoSuchElementException;
+import junit.framework.TestCase;
 
 /**
- * {@link UnitTests}
+ * {@link SearchIteratorDelegatorTest}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class UnitTests {
+public class SearchIteratorDelegatorTest extends TestCase {
 
-    private UnitTests() {
-        super();
+    public SearchIteratorDelegatorTest(String name) {
+        super(name);
     }
 
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(TaskLastModifiedTest.class);
-        return tests;
+    /**
+     * Tests if bug 16420 appears again.
+     */
+    public void testZeroSizeCollection() throws Throwable {
+        List<Object> list = new ArrayList<Object>();
+        SearchIteratorDelegator<Object> delegator = new SearchIteratorDelegator<Object>(list);
+        assertTrue("Collection do have a determined size.", delegator.hasSize());
+        assertEquals("Size should be zero.", 0, delegator.size());
+        assertFalse("There should be no available element.", delegator.hasNext());
+        try {
+            delegator.next();
+            fail("An exception must be given.");
+        } catch (NoSuchElementException e) {
+            // Everythign is fine.
+        }
     }
 }
