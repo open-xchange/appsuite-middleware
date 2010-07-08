@@ -72,42 +72,42 @@ import com.openexchange.session.Session;
  */
 public class PhishingHeaders implements PreferencesItemService {
 
-	/**
-	 * Default constructor.
-	 */
-	public PhishingHeaders() {
-		super();
-	}
+    /**
+     * Default constructor.
+     */
+    public PhishingHeaders() {
+        super();
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public String[] getPath() {
-		return new String[] { "modules", "mail", "phishingheaders" };
-	}
+    /**
+     * {@inheritDoc}
+     */
+    public String[] getPath() {
+        return new String[] { "modules", "mail", "phishingheaders" };
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public IValueHandler getSharedValue() {
-		return new ReadOnlyValue() {
-			public boolean isAvailable(final UserConfiguration userConfig) {
-				return userConfig.hasWebMail();
-			}
+    /**
+     * {@inheritDoc}
+     */
+    public IValueHandler getSharedValue() {
+        return new ReadOnlyValue() {
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return userConfig.hasWebMail();
+            }
 
-			public void getValue(final Session session, final Context ctx, final User user,
-					final UserConfiguration userConfig, final Setting setting) throws SettingException {
-				final String[] phishingHeaders = MailProperties.getInstance().getPhishingHeaders();
-				if (null == phishingHeaders || phishingHeaders.length == 0) {
-					setting.setSingleValue("null");
-				} else {
-					final JSONArray jArray = new JSONArray();
-					for (final String phishingHeader : phishingHeaders) {
-						jArray.put(phishingHeader);
-					}
-					setting.setSingleValue(jArray);
-				}
-			}
-		};
-	}
+            public void getValue(final Session session, final Context ctx, final User user,
+                    final UserConfiguration userConfig, final Setting setting) throws SettingException {
+                final String[] phishingHeaders = MailProperties.getInstance().getPhishingHeaders();
+                if (null == phishingHeaders || phishingHeaders.length == 0) {
+                    setting.setSingleValue("null");
+                } else {
+                    final JSONArray jArray = new JSONArray();
+                    for (final String phishingHeader : phishingHeaders) {
+                        jArray.put(phishingHeader);
+                    }
+                    setting.setSingleValue(jArray);
+                }
+            }
+        };
+    }
 }
