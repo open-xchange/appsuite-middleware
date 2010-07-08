@@ -53,7 +53,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
@@ -81,9 +80,6 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public class ConfigMenu extends SessionServlet {
 
-    /**
-     * Logger.
-     */
     private static final Log LOG = LogFactory.getLog(ConfigMenu.class);
     
     /**
@@ -91,17 +87,10 @@ public class ConfigMenu extends SessionServlet {
      */
     private static final int BUFFER_SIZE = 512;
 
-    /**
-     * For serialization.
-     */
     private static final long serialVersionUID = -7113587607566553771L;
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    protected void doGet(final HttpServletRequest req,
-        final HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String path = getServletSpecificURI(req);
         if (path.length() > 0 && path.charAt(0) == '/') {
             path = path.substring(1);
@@ -110,7 +99,6 @@ public class ConfigMenu extends SessionServlet {
             path = path.substring(0, path.length() - 1);
         }
         final Session sessionObj = getSessionObject(req);
-
         final SettingStorage stor = SettingStorage.getInstance(sessionObj);
         Setting setting;
         final Response response = new Response();
@@ -118,11 +106,10 @@ public class ConfigMenu extends SessionServlet {
             setting = ConfigTree.getSettingByPath(path);
             stor.readValues(setting);
             response.setData(convert2JS(setting));
-        } catch (final AbstractOXException e) {
+        } catch (AbstractOXException e) {
             response.setException(e);
-        } catch (final JSONException e) {
-            final OXJSONException oje = new OXJSONException(OXJSONException.Code
-                .JSON_WRITE_ERROR, e);
+        } catch (JSONException e) {
+            final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
             LOG.error(oje.getMessage(), oje);
             response.setException(oje);
         }
@@ -130,7 +117,7 @@ public class ConfigMenu extends SessionServlet {
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
         try {
             ResponseWriter.write(response, resp.getWriter());
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             log(RESPONSE_ERROR, e);
             sendError(resp);
         }
@@ -142,8 +129,7 @@ public class ConfigMenu extends SessionServlet {
      * @return java script object representing the setting tree.
      * @throws JSONException if the conversion to java script objects fails.
      */
-    private static Object convert2JS(final Setting setting)
-        throws JSONException {
+    private static Object convert2JS(Setting setting) throws JSONException {
         Object retval = null;
         if (setting.isLeaf()) {
             final Object[] multiValue = setting.getMultiValue();
@@ -151,10 +137,12 @@ public class ConfigMenu extends SessionServlet {
                 final Object singleValue = setting.getSingleValue();
                 if (null == singleValue) {
                     retval = JSONObject.NULL;
+                } else if (singleValue instanceof JSONObject) {
+                    retval = singleValue;
                 } else {
                     try {
                         retval = new JSONObject(singleValue.toString());
-                    } catch (final JSONException e) {
+                    } catch (JSONException e) {
                         retval = singleValue;
                     }
                 }
@@ -175,16 +163,11 @@ public class ConfigMenu extends SessionServlet {
         return retval;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    protected void doPut(final HttpServletRequest req,
-        final HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         final Session session = getSessionObject(req);
         final InputStream input = req.getInputStream();
-        final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream(
-            input.available());
+        final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream(input.available());
         final byte[] buf = new byte[BUFFER_SIZE];
         int length = input.read(buf);
         while (length != -1) {
@@ -194,7 +177,7 @@ public class ConfigMenu extends SessionServlet {
         String encoding = req.getCharacterEncoding();
         if (null == encoding) {
             log("Client did not specify the character encoding.");
-            encoding = ServerConfig.getProperty(Property.DefaultEncoding);//"UTF-8";
+            encoding = ServerConfig.getProperty(Property.DefaultEncoding);
         }
         String value = new String(baos.toByteArray(), encoding);
         if (value.length() > 0 && value.charAt(0) == '"') {
@@ -216,12 +199,11 @@ public class ConfigMenu extends SessionServlet {
             final Setting setting = ConfigTree.getSettingByPath(path);
             setting.setSingleValue(value);
             saveSettingWithSubs(stor, setting);
-        } catch (final AbstractOXException e) {
+        } catch (AbstractOXException e) {
             log(e.getMessage(), e);
             response.setException(e);
-        } catch (final JSONException e) {
-            final OXJSONException oje = new OXJSONException(OXJSONException.Code
-                .JSON_WRITE_ERROR, e);
+        } catch (JSONException e) {
+            final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
             LOG.error(oje.getMessage(), oje);
             response.setException(oje);
         }
@@ -231,23 +213,20 @@ public class ConfigMenu extends SessionServlet {
             if (response.hasError()) {
                 ResponseWriter.write(response, resp.getWriter());
             }
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             log(RESPONSE_ERROR, e);
             sendError(resp);
         }
     }
 
     /**
-     * Splits a value for a not leaf setting into its subsettings and stores
-     * them.
+     * Splits a value for a not leaf setting into its subsettings and stores them.
      * @param storage setting storage.
      * @param setting actual setting.
      * @throws SettingException if an error occurs.
      * @throws JSONException if the json object can't be parsed.
      */
-    private void saveSettingWithSubs(final SettingStorage storage,
-        final Setting setting) throws SettingException,
-        JSONException {
+    private void saveSettingWithSubs(SettingStorage storage, Setting setting) throws SettingException, JSONException {
         if (setting.isLeaf()) {
             final String value = (String) setting.getSingleValue();
             if (null != value && value.length() > 0 && '[' == value.charAt(0)) {
@@ -259,20 +238,17 @@ public class ConfigMenu extends SessionServlet {
             }
             storage.save(setting);
         } else {
-            final JSONObject json = new JSONObject(setting.getSingleValue()
-                .toString());
+            final JSONObject json = new JSONObject(setting.getSingleValue().toString());
             final Iterator<String> iter = json.keys();
             SettingException exc = null;
             while (iter.hasNext()) {
                 final String key = iter.next();
-                final Setting sub = ConfigTree.getSettingByPath(setting,
-                    new String[] { key });
+                final Setting sub = ConfigTree.getSettingByPath(setting, new String[] { key });
                 sub.setSingleValue(json.getString(key));
                 try {
-                    // Catch single exceptions if GUI writes not writable
-                    // fields.
+                    // Catch single exceptions if GUI writes not writable fields.
                     saveSettingWithSubs(storage, sub);
-                } catch (final SettingException e) {
+                } catch (SettingException e) {
                     exc = e;
                 }
             }
