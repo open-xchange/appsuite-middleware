@@ -264,6 +264,9 @@ public enum Tree {
     /** the configured timezone of the user. */
     TimeZone("/timezone"),
 
+    /** all available time zones of the Java virtual machine and their localizations according to users language setting */
+    AvailableTimeZones("/availableTimeZones"),
+
     /** the configured beta feature enablement of the user. */
     Beta("/beta"),
 

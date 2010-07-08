@@ -52,8 +52,10 @@ package com.openexchange.ajax.config;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Date;
 import java.util.Random;
+import java.util.Map.Entry;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONObject;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.GetResponse;
 import com.openexchange.ajax.config.actions.SetRequest;
@@ -236,6 +238,14 @@ public class FunctionTests extends AbstractAJAXSession {
         assertEquals("Selecting new Outlook folder tree did not work.", 1, client.execute(new GetRequest(Tree.FolderTree)).getInteger());
         // Restore default
         client.execute(new SetRequest(Tree.FolderTree, I(defaultValue)));
+    }
+
+    public void testAvailableTimeZones() throws Throwable {
+        final GetResponse response = client.execute(new GetRequest(Tree.AvailableTimeZones));
+        JSONObject json = response.getJSON();
+        for (Entry<String, Object> entry : json.entrySet()) {
+            LOG.info("Time zone: " + entry.getKey() + ", localized name: " + entry.getValue());
+        }
     }
 
     private void testBoolean(final Tree param, final boolean testWrite) throws Throwable {
