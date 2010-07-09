@@ -97,6 +97,7 @@ public class Bug15590Test extends AbstractAJAXSession {
 
     public void testBug15590() throws Exception {
         Appointment moveAppointment = new Appointment();
+        moveAppointment.setIgnoreConflicts(true);
         moveAppointment.setObjectID(testAppointment.getObjectID());
         moveAppointment.setParentFolderID(testFolder.getObjectID());
         moveAppointment.setLastModified(testAppointment.getLastModified());
