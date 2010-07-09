@@ -51,7 +51,9 @@ package com.openexchange.groupware.update.tasks;
 
 import static com.openexchange.groupware.update.UpdateConcurrency.BACKGROUND;
 import static com.openexchange.groupware.update.WorkingLevel.SCHEMA;
+import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -95,6 +97,7 @@ public class AddInitialFilestoreUsage extends UpdateTaskAdapter {
         final Connection con = dbService.getForUpdateTask(contextId);
         int[] contextIDs = dbService.getContextsInSameSchema(contextId);
         try {
+            con.setAutoCommit(false);
             state.setTotal(contextIDs.length);
             for (int i = 0; i < contextIDs.length; i++) {
                 if (isFilestoreUsageMissing(con, contextIDs[i])) {
@@ -102,9 +105,12 @@ public class AddInitialFilestoreUsage extends UpdateTaskAdapter {
                 }
                 state.setState(i);
             }
+            con.commit();
         } catch (final SQLException e) {
+            rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
+            autocommit(con);
             dbService.backForUpdateTask(contextId, con);
         }
     }
