@@ -96,6 +96,10 @@ public class I18nServices {
     }
 
     public String translate(final Locale locale, final String toTranslate) {
+        return translate(locale, toTranslate, true);
+    }
+
+    public String translate(final Locale locale, final String toTranslate, boolean warn) {
         final I18nService service = services.get(locale);
         if (null == service) {
             if (!"en".equalsIgnoreCase(locale.getLanguage())) {
@@ -103,7 +107,7 @@ public class I18nServices {
             }
             return toTranslate;
         }
-        if (!service.hasKey(toTranslate)) {
+        if (!service.hasKey(toTranslate) && warn) {
             LOG.warn("I18n service for locale " + locale + " has no translation for \"" + toTranslate + "\".");
             return toTranslate;
         }
