@@ -1,3 +1,7 @@
+* 2010-07-09 - marcus.klein@open-xchange.com
+
+ - Bugfix #16112: Administration daemon now writes the users display name into the fileAs attribute used by some clients.
+
 * 2010-07-08 - karsten.will@open-xchange.com
 
  - Bugfix #15200 - [L3] After changing contextadmin password in the GUI pw not in sync with CLT
