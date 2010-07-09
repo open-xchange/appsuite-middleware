@@ -46,14 +46,13 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.console.user;
 
 import java.net.MalformedURLException;
 import java.rmi.ConnectException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.util.Map;
-
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -92,7 +91,6 @@ public abstract class CreateCore extends UserAbstraction {
 
         setExtendedOptions(parser);
 
-        Integer ctxid = null;
         // parse the command line
         try {
             parser.ownparse(args);
