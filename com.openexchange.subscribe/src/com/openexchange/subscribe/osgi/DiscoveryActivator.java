@@ -63,6 +63,7 @@ import com.openexchange.datatypes.genericonf.storage.osgi.tools.WhiteboardGeneri
 import com.openexchange.exceptions.osgi.ComponentRegistration;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.server.osgiservice.Whiteboard;
@@ -71,6 +72,7 @@ import com.openexchange.subscribe.FolderUpdaterService;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionExecutionService;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
+import com.openexchange.subscribe.database.SubscriptionUserDeleteListener;
 import com.openexchange.subscribe.helpers.DocumentMetadataHolder;
 import com.openexchange.subscribe.internal.CalendarFolderUpdaterStrategy;
 import com.openexchange.subscribe.internal.ContactFolderUpdaterStrategy;
@@ -140,6 +142,12 @@ public class DiscoveryActivator implements BundleActivator {
         AbstractSubscribeService.STORAGE = storage;
 
         AbstractSubscribeService.CRYPTO = whiteboard.getService(CryptoService.class);
+        
+        SubscriptionUserDeleteListener listener = new SubscriptionUserDeleteListener();
+        listener.setStorageService(genconfStorage);
+        listener.setDiscoveryService(discoveryCollector);
+        
+        context.registerService(DeleteListener.class.getName(), listener, null);        
     }
 
     public void stop(final BundleContext context) throws Exception {

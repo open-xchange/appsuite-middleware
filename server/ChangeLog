@@ -1,3 +1,7 @@
+* 2010-07-09 - francisco.laguna@open-xchange.com
+ 
+ - Bugfix #16447: Have Publication and Subscription User Delete listeners take part in Admins transaction.
+ 
 * 2010-07-09 - steffen.templin@open-xchange.com
  
  - Bugfix #15776: Setting a reminder for a sequence with first occurrence in the past and next occurrence in the future works now.

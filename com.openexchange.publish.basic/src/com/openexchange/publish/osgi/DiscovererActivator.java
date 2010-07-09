@@ -56,9 +56,11 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.exceptions.osgi.ComponentRegistration;
+import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.publish.PublicationErrorMessage;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
+import com.openexchange.publish.database.PublicationUserDeleteListener;
 import com.openexchange.publish.helpers.AbstractPublicationService;
 import com.openexchange.publish.helpers.FolderSecurityStrategy;
 import com.openexchange.publish.sql.PublicationSQLStorage;
@@ -108,6 +110,12 @@ public class DiscovererActivator implements BundleActivator {
         AbstractPublicationService.FOLDER_ADMIN_ONLY = new FolderSecurityStrategy(whiteboard.getService(UserConfigurationService.class));
 
         componentRegistration = new ComponentRegistration(context, "PUB", "com.openexchange.publish", PublicationErrorMessage.EXCEPTIONS);
+        
+        PublicationUserDeleteListener listener = new PublicationUserDeleteListener();
+        listener.setDiscoveryService(compositeDiscovererCollector);
+        listener.setGenConfStorage(confStorage);
+        
+        context.registerService(DeleteListener.class.getName(), listener, null);
     }
 
     public void stop(final BundleContext context) throws Exception {

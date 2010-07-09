@@ -70,6 +70,7 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.tx.DBProvider;
+import com.openexchange.groupware.tx.DBTransactionPolicy;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.sql.builder.StatementBuilder;
 import com.openexchange.sql.grammar.DELETE;
@@ -89,13 +90,18 @@ import com.openexchange.subscribe.SubscriptionStorage;
 public class SubscriptionSQLStorage implements SubscriptionStorage {
 
     private DBProvider dbProvider;
+    private DBTransactionPolicy txPolicy;
 
     private GenericConfigurationStorageService storageService;
 
     private SubscriptionSourceDiscoveryService discoveryService;
 
     public SubscriptionSQLStorage(DBProvider dbProvider, GenericConfigurationStorageService storageService, SubscriptionSourceDiscoveryService discoveryService) {
+        this(dbProvider, DBTransactionPolicy.NORMAL_TRANSACTIONS, storageService, discoveryService);
+    }   
+    public SubscriptionSQLStorage(DBProvider dbProvider, DBTransactionPolicy txPolicy, GenericConfigurationStorageService storageService, SubscriptionSourceDiscoveryService discoveryService) {
         this.dbProvider = dbProvider;
+        this.txPolicy = txPolicy;
         this.storageService = storageService;
         this.discoveryService = discoveryService;
     }
@@ -108,9 +114,9 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         Connection writeConnection = null;
         try {
             writeConnection = dbProvider.getWriteConnection(subscription.getContext());
-            writeConnection.setAutoCommit(false);
+            txPolicy.setAutoCommit(writeConnection, false);
             delete(subscription, writeConnection);
-            writeConnection.commit();
+            txPolicy.commit(writeConnection);
         } catch (SQLException e) {
             throw SQLException.create(e);
         } catch (AbstractOXException e) {
@@ -118,8 +124,8 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         } finally {
             if (writeConnection != null) {
                 try {
-                    writeConnection.rollback();
-                    writeConnection.setAutoCommit(true);
+                    txPolicy.rollback(writeConnection);
+                    txPolicy.setAutoCommit(writeConnection, true);
                 } catch (SQLException e) {
                     throw SQLException.create(e);
                 } finally {
@@ -258,10 +264,10 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         Connection writeConnection = null;
         try {
             writeConnection = dbProvider.getWriteConnection(subscription.getContext());
-            writeConnection.setAutoCommit(false);
+            txPolicy.setAutoCommit(writeConnection, false);
             int id = save(subscription, writeConnection);
             subscription.setId(id);
-            writeConnection.commit();
+            txPolicy.commit(writeConnection);
         } catch (SQLException e) {
             throw SQLException.create(e);
         } catch (AbstractOXException e) {
@@ -269,8 +275,8 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         } finally {
             if (writeConnection != null) {
                 try {
-                    writeConnection.rollback();
-                    writeConnection.setAutoCommit(true);
+                    txPolicy.rollback(writeConnection);
+                    txPolicy.setAutoCommit(writeConnection, true);
                 } catch (SQLException e) {
                     throw SQLException.create(e);
                 } finally {
@@ -288,9 +294,9 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         Connection writeConnection = null;
         try {
             writeConnection = dbProvider.getWriteConnection(subscription.getContext());
-            writeConnection.setAutoCommit(false);
+            txPolicy.setAutoCommit(writeConnection, false);
             update(subscription, writeConnection);
-            writeConnection.commit();
+            txPolicy.commit(writeConnection);
         } catch (SQLException e) {
             throw SQLException.create(e);
         } catch (AbstractOXException e) {
@@ -298,8 +304,8 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         } finally {
             if (writeConnection != null) {
                 try {
-                    writeConnection.rollback();
-                    writeConnection.setAutoCommit(true);
+                    txPolicy.rollback(writeConnection);
+                    txPolicy.setAutoCommit(writeConnection, true);
                 } catch (SQLException e) {
                     throw SQLException.create(e);
                 } finally {
@@ -485,13 +491,13 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         Connection writeConnection = null;
         try {
             writeConnection = dbProvider.getWriteConnection(ctx);
-            writeConnection.setAutoCommit(false);
+            txPolicy.setAutoCommit(writeConnection, false);
 
             List<Subscription> subs = getSubscriptionsOfUser(ctx, ctx.getContextId(), userId);
             for(Subscription sub: subs){
                 delete(sub, writeConnection);
             }
-            writeConnection.commit();
+            txPolicy.commit(writeConnection);
         } catch (GenericConfigStorageException e) {
             throw SQLException.create(e);
         } catch (SQLException e) {
@@ -501,8 +507,8 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         } finally {
             try {
                 if(writeConnection != null) {
-                    writeConnection.rollback();
-                    writeConnection.setAutoCommit(true);
+                    txPolicy.rollback(writeConnection);
+                    txPolicy.setAutoCommit(writeConnection, true);
                 }
             } catch (SQLException e) {
                 throw SQLException.create(e);
@@ -515,7 +521,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         Connection writeConnection = null;
         try {
             writeConnection = dbProvider.getWriteConnection(ctx);
-            writeConnection.setAutoCommit(false);
+            txPolicy.setAutoCommit(writeConnection, false);
             DELETE delete = new 
                 DELETE()
                 .FROM(subscriptions)
@@ -526,7 +532,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
 
             new StatementBuilder().executeStatement(writeConnection, delete, values);
             storageService.delete(writeConnection, ctx);
-            writeConnection.commit();
+            txPolicy.commit(writeConnection);
         } catch (TransactionException e) {
             throw new SubscriptionException(e);
         } catch (SQLException e) {
@@ -536,8 +542,8 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         } finally {
             try {
                 if(writeConnection != null) {
-                    writeConnection.rollback();
-                    writeConnection.setAutoCommit(true);
+                    txPolicy.rollback(writeConnection);
+                    txPolicy.setAutoCommit(writeConnection, true);
                 }
             } catch (SQLException e) {
                 throw SQLException.create(e);

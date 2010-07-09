@@ -62,6 +62,7 @@ import com.openexchange.sql.builder.StatementBuilder;
 import com.openexchange.sql.grammar.EQUALS;
 import com.openexchange.sql.grammar.SELECT;
 import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.subscribe.SubscriptionStorage;
 import com.openexchange.subscribe.sql.AbstractSubscriptionSQLStorageTest;
 
 /**
@@ -74,8 +75,12 @@ public class SubscriptionUserDeleteListenerTest extends AbstractSubscriptionSQLS
     public void testShouldDeleteSubscriptionOnDeletionOfUser() throws SubscriptionException, TransactionException, DeleteFailedException, SQLException {
         Connection writeConnection = getDBProvider().getWriteConnection(ctx);
 
-        SubscriptionUserDeleteListener listener = new SubscriptionUserDeleteListener();
-        listener.setStorage(storage);
+        SubscriptionUserDeleteListener listener = new SubscriptionUserDeleteListener() {
+            @Override
+            protected SubscriptionStorage getStorage(Connection writeCon) {
+                return storage;
+            }
+        };
 
         MockUser user = new MockUser(userId);
 

@@ -64,7 +64,6 @@ public class Activator extends CompositeBundleActivator {
         new LoaderActivator(), 
         new CleanUpActivator(), 
         new CreateTableActivator(),
-        new DeleteEventListenerActivator(),
         new FolderFieldActivator()
     };
 

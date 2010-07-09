@@ -47,38 +47,58 @@
  *
  */
 
-package com.openexchange.publish.osgi;
+package com.openexchange.groupware.tx;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.publish.PublicationStorage;
-import com.openexchange.publish.database.PublicationUserDeleteListener;
-import com.openexchange.publish.helpers.AbstractPublicationService;
+import java.sql.Connection;
+import java.sql.SQLException;
+
 
 /**
- * {@link DeleteEventListenerActivator}
- * 
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * A {@link DBTransactionPolicy} governs how transaction handling is done. Note: This swallows and logs exceptions.
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class DeleteEventListenerActivator implements BundleActivator {
+public interface DBTransactionPolicy {
 
-    private ServiceRegistration serviceRegistration;
+    /**
+     * Do not partake in transaction handling, presumably to let something higher up in the call chain handle transactions.
+     */
+    public static final DBTransactionPolicy NO_TRANSACTIONS = new DBTransactionPolicy() {
 
-    public void start(final BundleContext context) throws Exception {
-        final PublicationStorage storage = AbstractPublicationService.getDefaultStorage();
-        final PublicationUserDeleteListener listener = new PublicationUserDeleteListener();
-        listener.setStorage(storage);
-        serviceRegistration = context.registerService(DeleteListener.class.getName(), listener, null);
-    }
-
-    public void stop(final BundleContext context) throws Exception {
-        if (serviceRegistration == null) {
-            return;
+        public void commit(Connection con) {
+            // Don't do a thing
         }
-        serviceRegistration.unregister();
-        serviceRegistration = null;
-    }
 
+        public void rollback(Connection con) {
+            // Don't do a thing
+        }
+
+        public void setAutoCommit(Connection con, boolean autoCommit) {
+            // Don't do a thing
+        }
+        
+    };
+    
+    /**
+     * Partake in transaction handling normally. Just delegates to the corresponding methods on the connection.
+     */
+    public static final DBTransactionPolicy NORMAL_TRANSACTIONS = new DBTransactionPolicy() {
+
+        public void commit(Connection con) throws SQLException {
+            con.commit();
+        }
+
+        public void rollback(Connection con) throws SQLException {
+            con.rollback();
+        }
+
+        public void setAutoCommit(Connection con, boolean autoCommit) throws SQLException {
+            con.setAutoCommit(autoCommit);
+        }
+        
+    };
+    
+    public void setAutoCommit(Connection con, boolean autoCommit) throws SQLException;
+    public void commit(Connection con) throws SQLException;
+    public void rollback(Connection con) throws SQLException;
 }

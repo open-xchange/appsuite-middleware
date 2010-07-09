@@ -65,7 +65,6 @@ public class Activator extends CompositeBundleActivator {
         new DiscoveryActivator(), 
         new CleanUpActivator(), 
         new CreateTableActivator(),
-        new DeleteEventListenerActivator(),
         new FolderFieldActivator(),
         new TrackerActivator()};
     

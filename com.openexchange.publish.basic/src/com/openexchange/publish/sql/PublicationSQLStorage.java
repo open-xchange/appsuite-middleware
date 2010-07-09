@@ -71,6 +71,7 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.tx.DBProvider;
+import com.openexchange.groupware.tx.DBTransactionPolicy;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationException;
@@ -93,14 +94,22 @@ public class PublicationSQLStorage implements PublicationStorage {
 
     private DBProvider dbProvider;
 
+    private DBTransactionPolicy txPolicy;
+    
     private PublicationTargetDiscoveryService discoveryService;
 
     private GenericConfigurationStorageService storageService;
-
+    
     public PublicationSQLStorage(DBProvider provider, GenericConfigurationStorageService simConfigurationStorageService, PublicationTargetDiscoveryService discoveryService) {
+        this(provider, DBTransactionPolicy.NORMAL_TRANSACTIONS, simConfigurationStorageService, discoveryService);
+    }
+    
+
+    public PublicationSQLStorage(DBProvider provider, DBTransactionPolicy txPolicy, GenericConfigurationStorageService simConfigurationStorageService, PublicationTargetDiscoveryService discoveryService) {
         this.dbProvider = provider;
         this.storageService = simConfigurationStorageService;
         this.discoveryService = discoveryService;
+        this.txPolicy = txPolicy;
     }
 
     public void forgetPublication(Publication publication) throws PublicationException {
@@ -111,9 +120,9 @@ public class PublicationSQLStorage implements PublicationStorage {
         Connection writeConnection = null;
         try {
             writeConnection = dbProvider.getWriteConnection(publication.getContext());
-            writeConnection.setAutoCommit(false);
+            txPolicy.setAutoCommit(writeConnection, false);
             delete(publication, writeConnection);
-            writeConnection.commit();
+            txPolicy.commit(writeConnection);
         } catch (SQLException e) {
             throw SQLException.create(e);
         } catch (AbstractOXException e) {
@@ -285,10 +294,10 @@ public class PublicationSQLStorage implements PublicationStorage {
 
         try {
             writeConnection = dbProvider.getWriteConnection(publication.getContext());
-            writeConnection.setAutoCommit(false);
+            txPolicy.setAutoCommit(writeConnection, false);
             int id = save(publication, writeConnection);
             publication.setId(id);
-            writeConnection.commit();
+            txPolicy.commit(writeConnection);
         } catch (SQLException e) {
             throw SQLException.create(e);
         } catch (AbstractOXException e) {
@@ -306,9 +315,9 @@ public class PublicationSQLStorage implements PublicationStorage {
         Connection writeConnection = null;
         try {
             writeConnection = dbProvider.getWriteConnection(publication.getContext());
-            writeConnection.setAutoCommit(false);
+            txPolicy.setAutoCommit(writeConnection, false);
             update(publication, writeConnection);
-            writeConnection.commit();
+            txPolicy.commit(writeConnection);
         } catch (SQLException e) {
             throw SQLException.create(e);
         } catch (AbstractOXException e) {
@@ -366,9 +375,9 @@ public class PublicationSQLStorage implements PublicationStorage {
         Connection writeConnection = null;
         try {
             writeConnection = dbProvider.getWriteConnection(context);
-            writeConnection.setAutoCommit(false);
+            txPolicy.setAutoCommit(writeConnection, false);
             deleteWhereUserID(userID, context, writeConnection);
-            writeConnection.commit();
+            txPolicy.commit(writeConnection);
         } catch (GenericConfigStorageException e) {
             throw new PublicationException(e);
         } catch (PublicationException e){
@@ -402,9 +411,9 @@ public class PublicationSQLStorage implements PublicationStorage {
         if (writeConnection != null) {
             try {
                 if (!writeConnection.getAutoCommit()) {
-                    writeConnection.rollback();
+                    txPolicy.rollback(writeConnection);
                 }
-                writeConnection.setAutoCommit(true);
+                txPolicy.setAutoCommit(writeConnection, true);
             } catch (SQLException e) {
                 throw SQLException.create(e);
             } finally {

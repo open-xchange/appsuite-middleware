@@ -59,6 +59,7 @@ import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.ldap.MockUser;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.publish.PublicationException;
+import com.openexchange.publish.PublicationStorage;
 import com.openexchange.publish.sql.AbstractPublicationSQLStorageTest;
 import com.openexchange.sql.builder.StatementBuilder;
 import com.openexchange.sql.grammar.EQUALS;
@@ -85,8 +86,12 @@ public class PublicationUserDeleteListenerTest extends AbstractPublicationSQLSto
 
         this.user = new MockUser(userId);
         
-        this.listener = new PublicationUserDeleteListener();
-        this.listener.setStorage(storage);
+        this.listener = new PublicationUserDeleteListener() {
+            @Override
+            protected PublicationStorage getStorage(Connection writeCon) {
+                return storage;
+            }
+        };
         
         this.writeCon = getDBProvider().getWriteConnection(ctx);
         this.readCon = getDBProvider().getReadConnection(ctx);

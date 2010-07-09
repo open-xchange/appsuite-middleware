@@ -50,12 +50,17 @@
 package com.openexchange.publish.database;
 
 import java.sql.Connection;
+import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.groupware.tx.DBTransactionPolicy;
+import com.openexchange.groupware.tx.SimpleDBProvider;
 import com.openexchange.publish.PublicationException;
 import com.openexchange.publish.PublicationStorage;
+import com.openexchange.publish.PublicationTargetDiscoveryService;
+import com.openexchange.publish.sql.PublicationSQLStorage;
 
 
 /**
@@ -65,15 +70,9 @@ import com.openexchange.publish.PublicationStorage;
  */
 public class PublicationUserDeleteListener implements DeleteListener {
 
-    private PublicationStorage storage;
-    
-    public void setStorage(final PublicationStorage storage) {
-        this.storage = storage;
-    }
 
-    public PublicationStorage getStorage() {
-        return storage;
-    }
+    private PublicationTargetDiscoveryService discoveryService;
+    private GenericConfigurationStorageService genConfStorage;
 
     public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws DeleteFailedException {
         if(event.getType() != DeleteEvent.TYPE_USER) {
@@ -82,11 +81,23 @@ public class PublicationUserDeleteListener implements DeleteListener {
         final int userID = event.getId();
         final Context context = event.getContext();
         try {
-            final PublicationStorage store = getStorage();
+            final PublicationStorage store = getStorage(writeCon);
             store.deletePublicationsOfUser(userID, context);
         } catch (final PublicationException e) {
             throw new DeleteFailedException(e);
         }
+    }
+
+    protected PublicationStorage getStorage(Connection writeCon) {
+        return new PublicationSQLStorage(new SimpleDBProvider(writeCon, writeCon), DBTransactionPolicy.NO_TRANSACTIONS, genConfStorage, discoveryService);
+    }
+    
+    public void setDiscoveryService(PublicationTargetDiscoveryService discoveryService) {
+        this.discoveryService = discoveryService;
+    }
+    
+    public void setGenConfStorage(GenericConfigurationStorageService genConfStorage) {
+        this.genConfStorage = genConfStorage;
     }
 
 

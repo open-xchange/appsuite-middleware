@@ -50,11 +50,16 @@
 package com.openexchange.subscribe.database;
 
 import java.sql.Connection;
+import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.groupware.tx.DBTransactionPolicy;
+import com.openexchange.groupware.tx.SimpleDBProvider;
 import com.openexchange.subscribe.SubscriptionException;
+import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.SubscriptionStorage;
+import com.openexchange.subscribe.sql.SubscriptionSQLStorage;
 
 
 /**
@@ -64,24 +69,29 @@ import com.openexchange.subscribe.SubscriptionStorage;
  */
 public class SubscriptionUserDeleteListener implements DeleteListener {
 
-    private SubscriptionStorage storage;
+
+    private GenericConfigurationStorageService storageService;
+    private SubscriptionSourceDiscoveryService discoveryService;
 
     public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws DeleteFailedException {
         if(event.getType() != DeleteEvent.TYPE_USER)
             return;
         try {
-            getStorage().deleteAllSubscriptionsForUser(event.getId(), event.getContext());
+            getStorage(writeCon).deleteAllSubscriptionsForUser(event.getId(), event.getContext());
         } catch (SubscriptionException e) {
             throw new DeleteFailedException(e);
         }
     }
 
-    public void setStorage(SubscriptionStorage storage) {
-        this.storage = storage;
+    protected SubscriptionStorage getStorage(Connection writeCon) {
+        return new SubscriptionSQLStorage(new SimpleDBProvider(writeCon, writeCon), DBTransactionPolicy.NO_TRANSACTIONS, storageService, discoveryService);
+    }
+    public void setStorageService(GenericConfigurationStorageService storageService) {
+        this.storageService = storageService;
     }
     
-    public SubscriptionStorage getStorage(){
-        return this.storage;
+    public void setDiscoveryService(SubscriptionSourceDiscoveryService discoveryService) {
+        this.discoveryService = discoveryService;
     }
 
 }
