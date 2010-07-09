@@ -52,6 +52,7 @@ package com.openexchange.groupware.tasks;
 import static com.openexchange.groupware.tasks.StorageType.ACTIVE;
 import static com.openexchange.groupware.tasks.StorageType.DELETED;
 import static com.openexchange.groupware.tasks.StorageType.REMOVED;
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.f;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
@@ -89,6 +90,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.groupware.tasks.TaskParticipant.Type;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.server.ServiceException;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -284,10 +286,7 @@ public final class TaskLogic {
             // 100.
             break;
         case Task.DONE:
-            // TODO Disabled because GUI has problems with this.
-            if (false && Task.PERCENT_MAXVALUE != progress) {
-                throw new TaskException(Code.PERCENTAGE_NOT_FULL, Integer.valueOf(progress));
-            }
+            // Status DONE should not require a 100% progress.
             break;
         default:
             throw new TaskException(Code.INVALID_TASK_STATE, Integer.valueOf(task.getStatus()));
@@ -354,6 +353,9 @@ public final class TaskLogic {
      * @throws TaskException if a necessary recurrence attribute is missing.
      */
     private static void checkRecurrence(final Task task, final Task oldTask) throws TaskException {
+        if (Task.NO_RECURRENCE == task.getRecurrenceType() && oldTask != null && Task.NO_RECURRENCE == oldTask.getRecurrenceType()) {
+            return;
+        }
         // First simple checks on start and end date.
         if (Task.NO_RECURRENCE != task.getRecurrenceType()) {
             if (null == oldTask) {
@@ -388,9 +390,11 @@ public final class TaskLogic {
             occurrenceRemoved = true;
         }
         try {
-            final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
+            final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class, true);
             recColl.checkRecurring(task);
         } catch (final OXException e) {
+            throw new TaskException(e);
+        } catch (ServiceException e) {
             throw new TaskException(e);
         }
         if (daysRemoved) {
@@ -399,6 +403,8 @@ public final class TaskLogic {
         if (occurrenceRemoved) {
             task.setOccurrence(0);
         }
+        // Move first due date to first occurrence like appointments do.
+        moveToFirstOccurrence(task);
     }
 
     /**
@@ -412,7 +418,10 @@ public final class TaskLogic {
         if (null == oldTask) {
             return;
         }
-        if (task.containsRecurrenceType() && Task.NO_RECURRENCE != task.getRecurrenceType()) {
+        if ((task.containsRecurrenceType() && Task.NO_RECURRENCE != task.getRecurrenceType()) || (!task.containsRecurrenceType() && oldTask.containsRecurrenceType())) {
+            if (!task.containsRecurrenceType()) {
+                task.setRecurrenceType(oldTask.getRecurrenceType());
+            }
             if (Task.DAILY == task.getRecurrenceType() || Task.WEEKLY == task.getRecurrenceType() || Task.MONTHLY == task.getRecurrenceType()) {
                 if (!task.containsInterval() && oldTask.containsInterval()) {
                     task.setInterval(oldTask.getInterval());
@@ -433,6 +442,29 @@ public final class TaskLogic {
                     task.setMonth(oldTask.getMonth());
                 }
             }
+        }
+    }
+
+    private static void moveToFirstOccurrence(Task task) throws TaskException {
+        if (!task.containsStartDate() || !task.containsEndDate()) {
+            return;
+        }
+        try {
+            task.setRecurrenceCalculator((int) ((task.getEndDate().getTime() - task.getStartDate().getTime()) / (Constants.MILLI_DAY)));
+            final CalendarCollectionService service = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
+            final RecurringResultsInterface results = service.calculateRecurring(task, 0, 0, 1);
+            if (0 == results.size()) {
+                return;
+            }
+            RecurringResultInterface result = results.getRecurringResult(0);
+            if (!new Date(result.getStart()).equals(task.getStartDate())) {
+                task.setStartDate(new Date(result.getStart()));
+            }
+            if (!new Date(result.getEnd()).equals(task.getEndDate())) {
+                task.setEndDate(new Date(result.getEnd()));
+            }
+        } catch (OXException e) {
+            throw new TaskException(e);
         }
     }
 
@@ -475,18 +507,15 @@ public final class TaskLogic {
                     final int[] member = GroupStorage.getInstance().getGroup(group.getIdentifier(), ctx).getMember();
                     if (member.length == 0) {
                         throw new TaskException(Code.GROUP_IS_EMPTY, group.getDisplayName());
-                    } else {
-                        for (final int userId : member) {
-                            final InternalParticipant tParticipant = new InternalParticipant(
-                                new UserParticipant(userId),
-                                Integer.valueOf(group.getIdentifier()));
-                            foundGroupParticipants.add(tParticipant);
-                            if (!retval.contains(tParticipant)) {
-                                retval.add(tParticipant);
-                            }
+                    }
+                    for (final int userId : member) {
+                        InternalParticipant tParticipant = new InternalParticipant(new UserParticipant(userId), I(group.getIdentifier()));
+                        foundGroupParticipants.add(tParticipant);
+                        if (!retval.contains(tParticipant)) {
+                            retval.add(tParticipant);
                         }
                     }
-                } catch (final LdapException e) {
+                } catch (LdapException e) {
                     throw new TaskException(e);
                 }
                 break;
