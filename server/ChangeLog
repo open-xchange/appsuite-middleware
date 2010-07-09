@@ -1,6 +1,7 @@
 * 2010-07-09 - francisco.laguna@open-xchange.com
  
  - Bugfix #16447: Have Publication and Subscription User Delete listeners take part in Admins transaction.
+ - Bugfix #16099: Moving first task of a series to day where first occurrence of series should be as described in the series pattern. 
  
 * 2010-07-09 - steffen.templin@open-xchange.com
  
