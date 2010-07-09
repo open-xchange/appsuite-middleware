@@ -60,6 +60,7 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -3002,19 +3003,50 @@ public class CalendarMySQL implements CalendarSqlImp {
                         } else {
                             calc_date = edao.getStartDate();
                         }
+                        
+                        Date end = null;
                         if (cdao.containsEndDate()) {
-                            end_date = cdao.getEndDate();
+                            end = cdao.getEndDate();
                         } else {
-                            end_date = edao.getEndDate();
+                            end = edao.getEndDate();
                         }
+                        
+                        // If appointment is a sequence with start in the past get correct dates for the next occurrence
+                        if (cdao.isSequence() && collection.isInThePast(end)) {
+                            Date normalized_until = null;                            
+                            if (cdao.containsUntil()) {
+                                normalized_until = cdao.getUntil();
+                            } else {
+                                normalized_until = edao.getUntil();
+                            }
+                            
+                            long end_mod = end.getTime() % Constants.MILLI_DAY;
+                            Date until = new Date(normalized_until.getTime() + end_mod);
+                            
+                            RecurringResultsInterface recurringResults = collection.calculateRecurring(cdao, calc_date.getTime(), until.getTime(), 0);
+                            for (int i = 0; i < recurringResults.size(); i++) {
+                                final RecurringResultInterface recurringResult = recurringResults.getRecurringResult(i);
+                                if (recurringResult.getStart() > new Date().getTime()) {
+                                    end_date = new Date(recurringResult.getEnd());
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        if (end_date == null) {
+                            end_date = end;
+                        }
+                        
                         int folder_id = modified_userparticipants[a].getPersonalFolderId();
                         if (folder_id <= 0) {
                             folder_id = cdao.getEffectiveFolderId();
                         }
                         final long la = modified_userparticipants[a].getAlarmMinutes() * 60000L;
-                        final java.util.Date reminder = new java.util.Date(calc_date.getTime() - la);
+                        java.util.Date reminder = new java.util.Date(calc_date.getTime() - la);
                         final boolean isSequence = cdao.isSequence(true);
+
                         changeReminder(cdao.getObjectID(), modified_userparticipants[a].getIdentifier(), folder_id, cdao.getContext(), isSequence, end_date, reminder, CalendarOperation.UPDATE, isSequence ? checkRecurrenceChange(cdao, edao) : false);
+                        
                     } else {
                         pu.setNull(4, java.sql.Types.INTEGER);
                         deleteReminder(cdao.getObjectID(), modified_userparticipants[a].getIdentifier(), cdao.getContext());
@@ -3836,6 +3868,8 @@ public class CalendarMySQL implements CalendarSqlImp {
     private static final void deleteReminder(final int oid, final int uid, final Context c, Connection con) throws OXMandatoryFieldException, OXConflictException, OXException {
         changeReminder(oid, uid, -1, c, false, null, null, CalendarOperation.DELETE, false, con);
     }
+    
+//    private static final void changeReminder(final CalendarObject obj, final int uid, final int fid, final Context c)
     
     private static final void changeReminder(final int oid, final int uid, final int fid, final Context c, final boolean sequence, final java.util.Date end_date, final java.util.Date reminder_date, final int action, final boolean recurrenceChange) throws OXMandatoryFieldException, OXConflictException, OXException {
         changeReminder(oid, uid, fid, c, sequence, end_date, reminder_date, action, recurrenceChange, null);
