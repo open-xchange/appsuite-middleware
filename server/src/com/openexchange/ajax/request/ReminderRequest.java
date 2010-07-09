@@ -352,13 +352,14 @@ public final class ReminderRequest {
         }
         final RecurringResultsInterface recurringResults;
         try {
-            // Calculate until date
-            long mod = calendarDataObject.getEndDate().getTime() % Constants.MILLI_DAY;
-            Date until = new Date(calendarDataObject.getUntil().getTime() + mod);
+            // Until is always set to 00:00:00 UTC so we have to recalculate it to get the last occurrence too.
+            long end_mod = calendarDataObject.getEndDate().getTime() % Constants.MILLI_DAY;
+            Date until = null;
+            until = new Date(calendarDataObject.getUntil().getTime() + end_mod);
             
             recurringResults = recColl.calculateRecurring(
                 calendarDataObject,
-                reminder.getDate().getTime(),
+                calendarDataObject.getStartDate().getTime(),
                 until.getTime(),
                 0);
         } catch (final OXException e) {
