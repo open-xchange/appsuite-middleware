@@ -113,6 +113,15 @@ public final class Autoboxing {
     }
 
     /**
+     * Short method name for {@link Boolean#booleanValue()}.
+     * @param b {@link Boolean} object to be converted to a boolean value.
+     * @return boolean value.
+     */
+    public static boolean b(Boolean b) {
+        return b.booleanValue();
+    }
+
+    /**
      * Short method name for {@link Float#valueOf(float)} that uses cached instances.
      * @param f float value to be converted to a Float object.
      * @return Float object.
