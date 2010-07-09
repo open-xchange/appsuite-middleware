@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.storage.mysqlStorage;
 
+import static com.openexchange.java.Autoboxing.b;
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.io.UnsupportedEncodingException;
@@ -60,12 +61,14 @@ import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -88,6 +91,7 @@ import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -815,7 +819,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public int create(final Context ctx, final User usrdata, final UserModuleAccess moduleAccess, final Connection con, final int internal_user_id, final int contact_id, final int uid_number) throws StorageException {
+    public int create(final Context ctx, final User usrdata, final UserModuleAccess moduleAccess, final Connection con, final int userId, final int contactId, final int uid_number) throws StorageException {
         PreparedStatement ps = null;
         final String LOGINSHELL = "/bin/bash";
 
@@ -828,7 +832,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             if (rs.next()) {
                 admin_id = rs.getInt("user");
             } else {
-                admin_id = internal_user_id;
+                admin_id = userId;
                 mustMapAdmin = true;
             }
             rs.close();
@@ -839,7 +843,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             try {
                 stmt = con.prepareStatement("INSERT INTO user (cid,id,userPassword,passwordMech,shadowLastChange,mail,timeZone,preferredLanguage,mailEnabled,imapserver,smtpserver,contactId,homeDirectory,uidNumber,gidNumber,loginShell,imapLogin) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
                 stmt.setInt(1, ctx.getId().intValue());
-                stmt.setInt(2, internal_user_id);
+                stmt.setInt(2, userId);
                 stmt.setString(3, passwd);
                 stmt.setString(4, usrdata.getPasswordMech());
 
@@ -884,7 +888,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     stmt.setString(11, DEFAULT_SMTP_SERVER_CREATE);
                 }
 
-                stmt.setInt(12, contact_id);
+                stmt.setInt(12, contactId);
 
                 String homedir = prop.getUserProp(AdminProperties.User.HOME_DIR_ROOT, "/home");
                 homedir += "/" + usrdata.getName();
@@ -946,110 +950,90 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
                 final ArrayList<MethodAndNames> methodlist = getGetters(theMethods);
 
-                final StringBuilder contact_query = new StringBuilder("INSERT INTO prg_contacts (cid, userid, creating_date, created_from, changing_date, changed_from, fid, ");
-                for (int i = 1; i < 9; i++) {
-                    contact_query.append("intfield0");
-                    contact_query.append(i);
-                    contact_query.append(", ");
-                }
-
-                final StringBuilder questionmarks = new StringBuilder();
-
-                final ArrayList<Method> methodlist2 = new ArrayList<Method>();
-
-                for (final MethodAndNames methodandname : methodlist) {
-                    // First we have to check which return value we have. We
-                    // have to
-                    // distinguish four types
-                    final Method method = methodandname.getMethod();
-                    final String methodname = methodandname.getName();
-                    final String returntype = method.getReturnType().getName();
-                    if (returntype.equalsIgnoreCase("java.lang.String")) {
-                        final String result = (java.lang.String) method.invoke(usrdata, (Object[]) null);
+                StringBuilder contactInsert = new StringBuilder("INSERT INTO prg_contacts (cid,userid,creating_date,created_from,changing_date,changed_from,fid,intfield01,field90,");
+                StringBuilder placeHolders = new StringBuilder();
+                List<Method> methodlist2 = new ArrayList<Method>();
+                for (MethodAndNames methodandname : methodlist) {
+                    // First we have to check which return value we have. We have to distinguish four types.
+                    Method method = methodandname.getMethod();
+                    String methodName = methodandname.getName();
+                    Class<?> returnType = method.getReturnType();
+                    if (String.class.equals(returnType)) {
+                        String result = (String) method.invoke(usrdata, (Object[]) null);
                         if (null != result) {
-                            contact_query.append(Mapper.method2field.get(methodname));
-                            contact_query.append(", ");
-                            questionmarks.append("?, ");
+                            contactInsert.append(Mapper.method2field.get(methodName));
+                            contactInsert.append(",");
+                            placeHolders.append("?,");
                             methodlist2.add(method);
                         }
-                    } else if (returntype.equalsIgnoreCase("java.lang.Integer")) {
-                        final int result = (Integer) method.invoke(usrdata, (Object[]) null);
+                    } else if (Integer.class.equals(returnType)) {
+                        int result = i((Integer) method.invoke(usrdata, (Object[]) null));
                         if (-1 != result) {
-                            contact_query.append(Mapper.method2field.get(methodname));
-                            contact_query.append(", ");
-                            questionmarks.append("?, ");
+                            contactInsert.append(Mapper.method2field.get(methodName));
+                            contactInsert.append(",");
+                            placeHolders.append("?,");
                             methodlist2.add(method);
                         }
-                    } else if (returntype.equalsIgnoreCase("java.lang.Boolean")) {
-                        contact_query.append(Mapper.method2field.get(methodname));
-                        contact_query.append(", ");
-                        questionmarks.append("?, ");
+                    } else if (Boolean.class.equals(returnType)) {
+                        contactInsert.append(Mapper.method2field.get(methodName));
+                        contactInsert.append(",");
+                        placeHolders.append("?,");
                         methodlist2.add(method);
-                    } else if (returntype.equalsIgnoreCase("java.util.Date")) {
-                        final Date result = (Date) method.invoke(usrdata, (Object[]) null);
+                    } else if (Date.class.equals(returnType)) {
+                        Date result = (Date) method.invoke(usrdata, (Object[]) null);
                         if (null != result) {
-                            contact_query.append(Mapper.method2field.get(methodname));
-                            contact_query.append(", ");
-                            questionmarks.append("?, ");
+                            contactInsert.append(Mapper.method2field.get(methodName));
+                            contactInsert.append(",");
+                            placeHolders.append("?,");
                             methodlist2.add(method);
                         }
                     }
                 }
-                questionmarks.deleteCharAt(questionmarks.length() - 2);
-                contact_query.deleteCharAt(contact_query.length() - 2);
-                contact_query.append(") VALUES (?,?,?,?,?,?,?,");
-                for (int i = 1; i < 9; i++) {
-                    contact_query.append("?,");
-                }
-                contact_query.append(questionmarks);
-                contact_query.append(")");
+                placeHolders.deleteCharAt(placeHolders.length() - 1);
+                contactInsert.deleteCharAt(contactInsert.length() - 1);
+                contactInsert.append(") VALUES (?,?,?,?,?,?,?,?,?,");
+                contactInsert.append(placeHolders);
+                contactInsert.append(")");
+                stmt = con.prepareStatement(contactInsert.toString());
+                int pos = 1;
+                stmt.setInt(pos++, i(ctx.getId()));
+                stmt.setInt(pos++, userId);
+                stmt.setLong(pos++, System.currentTimeMillis());
+                stmt.setInt(pos++, userId);
+                stmt.setLong(pos++, System.currentTimeMillis());
+                stmt.setLong(pos++, userId);
+                stmt.setLong(pos++, FolderObject.SYSTEM_LDAP_FOLDER_ID);
+                stmt.setInt(pos++, contactId);
+                stmt.setString(pos++, usrdata.getDisplay_name());
 
-                stmt = con.prepareStatement(contact_query.toString());
-
-                stmt.setInt(1, ctx.getId());
-                stmt.setInt(2, internal_user_id);
-                stmt.setLong(3, System.currentTimeMillis());
-                stmt.setInt(4, internal_user_id);
-                stmt.setLong(5, System.currentTimeMillis());
-                stmt.setLong(6, internal_user_id);
-                stmt.setLong(7, 6); // fid = 6 cause internal user
-
-                stmt.setInt(8, contact_id);
-                for (int i = 9; i < 16; i++) {
-                    stmt.setNull(i, java.sql.Types.INTEGER);
-                }
-                for (int i = 0; i < methodlist2.size(); i++) {
-                    final int overhead = 16; // How much the index goes ahead
-                    final int index = overhead + i;
-                    final Method method = methodlist2.get(i);
-                    final String returntype = method.getReturnType().getName();
-                    if (returntype.equalsIgnoreCase("java.lang.String")) {
-                        final String result = (java.lang.String) method.invoke(usrdata, (Object[]) null);
+                for (Method method : methodlist2) {
+                    Class<?> returntype = method.getReturnType();
+                    if (String.class.equals(returntype)) {
+                        String result = (String) method.invoke(usrdata, (Object[]) null);
                         if (null != result) {
-                            stmt.setString(index, result);
+                            stmt.setString(pos++, result);
                         } else {
-                            stmt.setNull(index, java.sql.Types.VARCHAR);
+                            stmt.setNull(pos++, java.sql.Types.VARCHAR);
                         }
-                    } else if (returntype.equalsIgnoreCase("java.lang.Integer")) {
-                        final int result = (Integer) method.invoke(usrdata, (Object[]) null);
+                    } else if (Integer.class.equals(returntype)) {
+                        int result = i((Integer) method.invoke(usrdata, (Object[]) null));
                         if (-1 != result) {
-                            stmt.setInt(index, result);
+                            stmt.setInt(pos++, result);
                         } else {
-                            stmt.setNull(index, java.sql.Types.INTEGER);
+                            stmt.setNull(pos++, java.sql.Types.INTEGER);
                         }
-                    } else if (returntype.equalsIgnoreCase("java.lang.Boolean")) {
-                        final boolean result = (Boolean) method.invoke(usrdata, (Object[]) null);
-                        stmt.setBoolean(index, result);
-                    } else if (returntype.equalsIgnoreCase("java.util.Date")) {
-                        final Date result = (java.util.Date) method.invoke(usrdata, (Object[]) null);
+                    } else if (Boolean.class.equals(returntype)) {
+                        final boolean result = b((Boolean) method.invoke(usrdata, (Object[]) null));
+                        stmt.setBoolean(pos++, result);
+                    } else if (Date.class.equals(returntype)) {
+                        Date result = (Date) method.invoke(usrdata, (Object[]) null);
                         if (null != result) {
-                            stmt.setDate(index, new java.sql.Date(result.getTime()));
+                            stmt.setTimestamp(pos++, new Timestamp(result.getTime()));
                         } else {
-                            stmt.setNull(index, java.sql.Types.VARCHAR);
+                            stmt.setNull(pos++, java.sql.Types.VARCHAR);
                         }
                     }
                 }
-
                 stmt.executeUpdate();
                 stmt.close();
 
@@ -1093,7 +1077,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         if (tmp_mail.length() > 0) {
                             stmt = con.prepareStatement("INSERT INTO user_attribute (cid,id,name,value) VALUES (?,?,?,?)");
                             stmt.setInt(1, ctx.getId());
-                            stmt.setInt(2, internal_user_id);
+                            stmt.setInt(2, userId);
                             stmt.setString(3, "alias");
                             stmt.setString(4, tmp_mail);
                             stmt.executeUpdate();
@@ -1103,13 +1087,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 }
                 
                 // Fill in dynamic attributes
-                insertDynamicAttributes(con, ctx.getId(), internal_user_id, usrdata.getUserAttributes());
+                insertDynamicAttributes(con, ctx.getId(), userId, usrdata.getUserAttributes());
                 
 
                 // add user to login2user table with the internal id
                 stmt = con.prepareStatement("INSERT INTO login2user (cid,id,uid) VALUES (?,?,?)");
                 stmt.setInt(1, ctx.getId());
-                stmt.setInt(2, internal_user_id);
+                stmt.setInt(2, userId);
                 stmt.setString(3, usrdata.getName());
                 stmt.executeUpdate();
                 stmt.close();
@@ -1117,7 +1101,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt = con.prepareStatement("INSERT INTO groups_member (cid,id,member) VALUES (?,?,?)");
                 stmt.setInt(1, ctx.getId());
                 stmt.setInt(2, def_group_id);
-                stmt.setInt(3, internal_user_id);
+                stmt.setInt(3, userId);
                 stmt.executeUpdate();
                 stmt.close();
 
@@ -1130,9 +1114,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 }
 
                 // add the module access rights to the db
-                final int[] all_groups = getGroupsForUser(ctx, internal_user_id, con);
+                final int[] all_groups = getGroupsForUser(ctx, userId, con);
 
-                myChangeInsertModuleAccess(ctx, internal_user_id, moduleAccess, true, con, con, all_groups);
+                myChangeInsertModuleAccess(ctx, userId, moduleAccess, true, con, con, all_groups);
 
                 // add users standard mail settings
                 final StringBuffer sb = new StringBuffer("INSERT INTO user_setting_mail (cid,user,std_trash,std_sent,std_drafts,std_spam,send_addr,bits,confirmed_spam,confirmed_ham,");
@@ -1157,7 +1141,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 sb.append(')');
                 stmt = con.prepareStatement(sb.toString());
                 stmt.setInt(1, ctx.getId());
-                stmt.setInt(2, internal_user_id);
+                stmt.setInt(2, userId);
                 stmt.setString(3, std_mail_folder_trash);
                 stmt.setString(4, std_mail_folder_sent);
                 stmt.setString(5, std_mail_folder_drafts);
@@ -1188,23 +1172,23 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 // directly, else
                 // a context is currently in creation and we would get an error
                 // by the ox api
-                if (internal_user_id != admin_id) {
+                if (userId != admin_id) {
                     final OXFolderAdminHelper oxa = new OXFolderAdminHelper();
-                    oxa.addUserToOXFolders(internal_user_id, usrdata.getDisplay_name(), lang, ctx.getId(), con);
+                    oxa.addUserToOXFolders(userId, usrdata.getDisplay_name(), lang, ctx.getId(), con);
                 }
             } finally {
                 closePreparedStatement(stmt);
             }
             // Write primary mail account.
-            createPrimaryMailAccount(ctx, con, usrdata, internal_user_id);
+            createPrimaryMailAccount(ctx, con, usrdata, userId);
             // Write GUI configuration to database.
-            storeUISettings(ctx, con, usrdata, internal_user_id);
+            storeUISettings(ctx, con, usrdata, userId);
             // Set wanted folder tree.
-            storeFolderTree(ctx, con, usrdata, internal_user_id);
+            storeFolderTree(ctx, con, usrdata, userId);
             if (log.isInfoEnabled()) {
-                log.info("User " + internal_user_id + " created!");
+                log.info("User " + userId + " created!");
             }
-            return internal_user_id;
+            return userId;
         } catch (final ServiceException e) {
             log.error("Required service not found.", e);
             throw new StorageException(e.toString());
