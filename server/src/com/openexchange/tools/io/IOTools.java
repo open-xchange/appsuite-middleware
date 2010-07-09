@@ -49,8 +49,11 @@
 
 package com.openexchange.tools.io;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 public class IOTools {
 
@@ -67,4 +70,17 @@ public class IOTools {
             bytes -= skipped;
         }
     }
+    
+    public static final void copy(InputStream in, OutputStream out) throws IOException {
+        BufferedInputStream inputStream = new BufferedInputStream(in);
+        BufferedOutputStream outputStream = new BufferedOutputStream(out);
+        
+        int i = -1;
+        while((i = inputStream.read()) > 0) {
+            outputStream.write(i);
+        }
+        
+        outputStream.flush();
+    }
+ 
 }
