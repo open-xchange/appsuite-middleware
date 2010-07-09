@@ -332,7 +332,11 @@ public final class InternalList {
         new com.openexchange.groupware.update.tasks.AttachmentCountUpdateTask(),
 
         // Creates an initial empty filestore usage entry for every context that currently did not uploaded anything.
-        new com.openexchange.groupware.update.tasks.AddInitialFilestoreUsage()
+        new com.openexchange.groupware.update.tasks.AddInitialFilestoreUsage(),
+
+        // Currently users contacts are created with the display name attribute filed. Outlook primarily uses the fileAs attribute. This
+        // task copies the display name to fileAs if that is empty.
+        new com.openexchange.groupware.update.tasks.AddFileAsForUserContacts()
 
         // TODO: Enable virtual folder tree update task when needed
         // Migrates existing folder data to new outlook-like folder tree structure
