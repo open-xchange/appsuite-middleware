@@ -428,7 +428,7 @@ public final class MailMessageParser {
             if (!mailPart.containsSequenceId()) {
                 mailPart.setSequenceId(getSequenceId(prefix, partCount));
             }
-            if (isInline) {
+            if (true || isInline) { // Fix for bug #16461: Show every RFC822 part as a nested mail
                 if (!handler.handleNestedMessage(mailPart, getSequenceId(prefix, partCount))) {
                     stop = true;
                     return;
