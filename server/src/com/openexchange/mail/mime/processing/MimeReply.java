@@ -65,8 +65,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.mail.MessagingException;
 import javax.mail.Message.RecipientType;
+import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import com.openexchange.groupware.contexts.Context;
@@ -99,6 +99,7 @@ import com.openexchange.mail.parser.handlers.InlineContentHandler;
 import com.openexchange.mail.text.HTMLProcessing;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.session.Session;
@@ -388,7 +389,7 @@ public final class MimeReply {
                 }
                 {
                     final String cs = retvalContentType.getCharsetParameter();
-                    if (cs == null || "US-ASCII".equalsIgnoreCase(cs)) {
+                    if (cs == null || "US-ASCII".equalsIgnoreCase(cs) || !CharsetDetector.isValid(cs)) {
                         // Missing or non-unicode charset
                         retvalContentType.setCharsetParameter(MailProperties.getInstance().getDefaultMimeCharset());
                     }

@@ -161,6 +161,7 @@ import com.openexchange.mail.text.parser.HTMLParser;
 import com.openexchange.mail.text.parser.handler.HTMLFilterHandler;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MessageUtility;
@@ -1258,7 +1259,11 @@ public class Mail extends PermissionServlet implements UploadListener {
                         return null;
                     }
                     final ContentType ct = mail.getContentType();
-                    data = new String(baos.toByteArray(), ct.containsCharsetParameter() ? ct.getCharsetParameter() : STR_UTF8);
+                    if (ct.containsCharsetParameter() && CharsetDetector.isValid(ct.getCharsetParameter())) {
+                        data = new String(baos.toByteArray(), ct.getCharsetParameter());
+                    } else {
+                        data = new String(baos.toByteArray(), STR_UTF8);
+                    }
                 } else if (showMessageHeaders) {
                     /*
                      * Get message
