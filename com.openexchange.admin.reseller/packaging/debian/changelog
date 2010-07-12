@@ -1,11 +1,5 @@
-open-xchange-admin-plugin-reseller (6.9.0.0-0) unstable; urgency=low
+open-xchange-admin-plugin-reseller (6.17.0.0-0) unstable; urgency=low
 
-  * new unstable cycle
+  * initial package
 
  -- Dennis Sieben <dennis.sieben@open-xchange.com>  Mon, 16 Apr 2009 14:56:11 +0100
-
-open-xchange-admin-plugin-reseller (6.8.1-0) unstable; urgency=low
-
-  * initial
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 02 Feb 2009 15:38:31 +0100

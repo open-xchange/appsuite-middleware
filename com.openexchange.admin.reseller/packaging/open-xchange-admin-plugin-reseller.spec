@@ -4,7 +4,7 @@
 Name:           open-xchange-admin-plugin-reseller
 BuildArch:	noarch
 BuildRequires:  ant open-xchange-admin-plugin-hosting-lib >= @OXVERSION@ open-xchange-admin-soap
-%if 0%{?suse_version}
+%if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
 BuildRequires:  java-1_5_0-ibm >= 1.5.0_sr9
@@ -19,6 +19,11 @@ BuildRequires:  java-sdk-openjdk
 BuildRequires:  java-sdk-1.5.0-sun
 %endif
 %endif
+%if 0%{?sles_version} >= 11
+# SLES11 or higher
+BuildRequires:  java-1_6_0-ibm-devel
+%endif
+
 %if 0%{?rhel_version}
 # libgcj seems to be installed whether we want or not and libgcj needs cairo
 BuildRequires:  java-sdk-1.5.0-sun cairo
@@ -39,7 +44,7 @@ License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
-Summary:        Open Xchange Admin Context Restore Plugin
+Summary:        Open Xchange Admin Reseller Plugin
 Requires:       open-xchange-admin-client >= @OXVERSION@
 Requires:       open-xchange-admin-plugin-hosting >= @OXVERSION@
 #
@@ -72,7 +77,7 @@ Authors:
 %install
 %define adminbundle	com.openexchange.admin.jar
 %define oxprefix	/opt/open-xchange
-%define adminhostingbundle open_xchange_admin_plugin_hosting.jar
+%define adminhostingbundle com.openexchange.admin.plugin.hosting.jar
 
 ant -Dadmin.classpath=%{oxprefix}/bundles/%{adminbundle} \
     -Ddestdir=%{buildroot} -Dprefix=%{oxprefix} \
