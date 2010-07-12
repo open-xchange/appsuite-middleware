@@ -1555,6 +1555,8 @@ public final class HTMLProcessing {
         return handler.getHTML();
     }
 
+    private static final Pattern BACKGROUND_PATTERN =  Pattern.compile("(<[a-zA-Z]+[^>]*?)(?:(?:background=cid:([^\\s>]*))|(?:background=\"cid:([^\"]*)\"))([^>]*/?>)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
     private static final Pattern IMG_PATTERN = Pattern.compile("<img[^>]*>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     private static final Pattern CID_PATTERN =
@@ -1584,6 +1586,75 @@ public final class HTMLProcessing {
      * @return The HTML content with all inline images replaced with valid links
      */
     public static String filterInlineImages(final String content, final Session session, final MailPath msgUID) {
+        String ret = filterImgInlineImages(content, session, msgUID);
+        ret = filterBackgroundInlineImages(ret, session, msgUID);
+        return ret;
+    }
+
+    private static String filterBackgroundInlineImages(final String content, final Session session, final MailPath msgUID) {
+        String reval = content;
+        try {
+            final Matcher imgMatcher = BACKGROUND_PATTERN.matcher(reval);
+            final MatcherReplacer imgReplacer = new MatcherReplacer(imgMatcher, reval);
+            final StringBuilder sb = new StringBuilder(reval.length());
+            if (imgMatcher.find()) {
+                final StringBuilder linkBuilder = new StringBuilder(256);
+                /*
+                 * Replace inline images with Content-ID
+                 */
+                do {
+                    /*
+                     * Extract Content-ID
+                     */
+                    String cid = imgMatcher.group(2);
+                    if (cid == null) {
+                        cid = imgMatcher.group(3);
+                    }
+                    /*
+                     * Compose corresponding image data
+                     */
+                    final ImageService imageService = ServerServiceRegistry.getInstance().getService(ImageService.class);
+                    final String imageURL;
+                    if (null == imageService) {
+                        LOG.warn("Missing image service.", new Throwable());
+                        imageURL = "";
+                    } else {
+                        final InlineImageDataSource imgSource = new InlineImageDataSource();
+                        final DataArguments args = new DataArguments();
+                        final String[] argsNames = imgSource.getRequiredArguments();
+                        args.put(argsNames[0], prepareFullname(msgUID.getAccountId(), msgUID.getFolder()));
+                        args.put(argsNames[1], String.valueOf(msgUID.getMailID()));
+                        args.put(argsNames[2], cid);
+                        imageURL = imageService.addImageData(session, imgSource, args, 60000).getImageURL();
+                    }
+                    linkBuilder.setLength(0);
+                    linkBuilder.append(imgMatcher.group(1)).append("background=\"").append(imageURL).append('"').append(imgMatcher.group(4));
+                    imgReplacer.appendLiteralReplacement(sb, linkBuilder.toString());
+                } while (imgMatcher.find());
+            }
+            imgReplacer.appendTail(sb);
+            reval = sb.toString();
+        } catch (final Exception e) {
+            LOG.warn("Unable to filter cid background images: " + e.getMessage());
+        }
+        return reval;
+    }
+
+    /**
+     * Filters inline images occurring in HTML content of a message:
+     * <ul>
+     * <li>Inline images<br>
+     * The source of inline images is in the message itself. Thus loading the inline image is redirected to the appropriate message (image)
+     * attachment identified through header <code>Content-Id</code>; e.g.: <code>&lt;img
+     * src=&quot;cid:[cid-value]&quot; ... /&gt;</code>.</li>
+     * </ul>
+     * 
+     * @param content The HTML content possibly containing images
+     * @param session The session
+     * @param msgUID The message's unique path in mailbox
+     * @return The HTML content with all inline images replaced with valid links
+     */
+    private static String filterImgInlineImages(final String content, final Session session, final MailPath msgUID) {
         String reval = content;
         try {
             final Matcher imgMatcher = IMG_PATTERN.matcher(reval);
