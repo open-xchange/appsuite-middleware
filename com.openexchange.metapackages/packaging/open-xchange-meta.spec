@@ -232,6 +232,10 @@ Authors:
 %defattr(-,root,root)
 %doc README.TXT
 
+%files -n open-xchange-meta-mobility
+%defattr(-,root,root)
+%doc README.TXT
+
 %changelog
 * Thu Jun 24 2010 - choeger@open-xchange.com
  - Bugfix #16354 - strange package dependencies for open-xchange-meta-singleserver
