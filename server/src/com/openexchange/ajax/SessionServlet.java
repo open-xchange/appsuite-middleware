@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.UndeclaredThrowableException;
@@ -74,7 +75,9 @@ import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -152,8 +155,8 @@ public abstract class SessionServlet extends AJAXServlet {
                 log(RESPONSE_ERROR, e1);
                 sendError(resp);
             }
-        } catch (final ContextException e) {
-            LOG.debug(e.getMessage(), e);
+        } catch (final AbstractOXException e) {
+            LOG.error(e.getMessage(), e);
             final Response response = new Response();
             response.setException(e);
             resp.setContentType(CONTENTTYPE_JAVASCRIPT);
@@ -274,7 +277,7 @@ public abstract class SessionServlet extends AJAXServlet {
         exceptionId = 2,
         msg = "The cookie with the session identifier is missing."
     )
-    private static Session getSession(final HttpServletRequest req, final String sessionId, final SessiondService sessiondService) throws SessiondException {
+    private static Session getSession(final HttpServletRequest req, final String sessionId, final SessiondService sessiondService) throws SessiondException, ContextException, LdapException, UserException {
         // Look for a local session
         final String secret = getSecret(req, sessionId);
         if (null == secret) {
@@ -311,7 +314,7 @@ public abstract class SessionServlet extends AJAXServlet {
         exceptionId = { 3, 6 },
         msg = { "Your session %s expired. Please start a new browser session.", "Session secret is different. Given %1$s differs from %2$s in session." }
     )
-    private static Session getSession(String sessionId, String secret, SessiondService sessiondService) throws SessiondException {
+    private static Session getSession(String sessionId, String secret, SessiondService sessiondService) throws SessiondException, ContextException, LdapException, UserException {
         final Session session = sessiondService.getSession(sessionId);
         if (null == session) {
             throw EXCEPTION.create(3, sessionId);
@@ -326,9 +329,7 @@ public abstract class SessionServlet extends AJAXServlet {
                 throw EXCEPTION.create(3, session.getSessionID());
             }
         } catch (UndeclaredThrowableException e) {
-            throw EXCEPTION.create(3, e, session.getSessionID());
-        } catch (AbstractOXException e) {
-            throw EXCEPTION.create(3, e, session.getSessionID());
+            throw new UserException(UserException.Code.USER_NOT_FOUND, e, I(session.getUserId()), I(session.getContextId()));
         }
         return session;
     }
