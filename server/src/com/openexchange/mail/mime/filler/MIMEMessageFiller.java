@@ -1273,8 +1273,6 @@ public class MIMEMessageFiller {
         return html;
     }
 
-    private static final String IMG_PAT = "<img src=\"cid:#1#\">";
-
     /**
      * Processes referenced local images, inserts them as inlined html images and adds their binary data to parental instance of <code>
 	 * {@link Multipart}</code>.
@@ -1312,9 +1310,7 @@ public class MIMEMessageFiller {
                          * Anyway, replace image tag
                          */
                         tmp.setLength(0);
-                        mr.appendLiteralReplacement(sb, IMG_PAT.replaceFirst(
-                            "#1#",
-                            tmp.append(id).append('@').append("notfound").toString()));
+                        mr.appendLiteralReplacement(sb, m.group().replaceFirst("(?i)src=\"[^\"]*\"", "src=\"cid:" + tmp.append(id).append('@').append("notfound").toString() + "\""));
                         continue;
                     }
                 } else {
@@ -1331,9 +1327,7 @@ public class MIMEMessageFiller {
                          * Anyway, replace image tag
                          */
                         tmp.setLength(0);
-                        mr.appendLiteralReplacement(sb, IMG_PAT.replaceFirst(
-                            "#1#",
-                            tmp.append(id).append('@').append("notfound").toString()));
+                        mr.appendLiteralReplacement(sb, m.group().replaceFirst("(?i)src=\"[^\"]*\"", "src=\"cid:" + tmp.append(id).append('@').append("notfound").toString() + "\""));
                         continue;
                     }
                     try {
@@ -1341,9 +1335,7 @@ public class MIMEMessageFiller {
                     } catch (final MailException e) {
                         if (MailException.Code.IMAGE_ATTACHMENT_NOT_FOUND.getNumber() == e.getDetailNumber()) {
                             tmp.setLength(0);
-                            mr.appendLiteralReplacement(sb, IMG_PAT.replaceFirst(
-                                "#1#",
-                                tmp.append(id).append('@').append("notfound").toString()));
+                            mr.appendLiteralReplacement(sb, m.group().replaceFirst("(?i)src=\"[^\"]*\"", "src=\"cid:" + tmp.append(id).append('@').append("notfound").toString() + "\""));
                             continue;
                         }
                         throw e;
@@ -1359,10 +1351,8 @@ public class MIMEMessageFiller {
                     msgFiller.uploadFileIDs.add(id);
                     appendBodyPart = true;
                 }
-                /*
-                 * Replace image tag
-                 */
-                mr.appendLiteralReplacement(sb, IMG_PAT.replaceFirst("#1#", processLocalImage(imageProvider, id, appendBodyPart, tmp, mp)));
+                mr.appendLiteralReplacement(sb, m.group().replaceFirst("(?i)src=\"[^\"]*\"", "src=\"cid:" + processLocalImage(imageProvider, id, appendBodyPart, tmp, mp) + "\""));
+                //mr.appendLiteralReplacement(sb, IMG_PAT.replaceFirst("#1#", processLocalImage(imageProvider, id, appendBodyPart, tmp, mp)));
             } while (m.find());
         }
         mr.appendTail(sb);

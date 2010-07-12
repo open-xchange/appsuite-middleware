@@ -1,3 +1,7 @@
+* 2010-07-12 - thorben.betten@open-xchange.com
+
+ - Bugfix #16472: Keeping other attributes when replacing HTML "img" tags
+
 * 2010-07-09 - francisco.laguna@open-xchange.com
  
  - Bugfix #16447: Have Publication and Subscription User Delete listeners take part in Admins transaction.
