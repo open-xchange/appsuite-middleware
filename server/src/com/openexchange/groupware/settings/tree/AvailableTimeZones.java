@@ -93,7 +93,7 @@ public class AvailableTimeZones implements PreferencesItemService {
                 I18nServices i18nServices = I18nServices.getInstance();
                 for (String timeZoneID : TimeZone.getAvailableIDs()) {
                     try {
-                        json.put(timeZoneID, i18nServices.translate(user.getLocale(), timeZoneID, false));
+                        json.put(timeZoneID, i18nServices.translate(user.getLocale(), timeZoneID.replace('_', ' '), false));
                     } catch (JSONException e) {
                         OXJSONException e1 = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
                         throw new SettingException(e1);
