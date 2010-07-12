@@ -453,7 +453,7 @@ public final class TaskLogic {
             task.setRecurrenceCalculator((int) ((task.getEndDate().getTime() - task.getStartDate().getTime()) / (Constants.MILLI_DAY)));
             final CalendarCollectionService service = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
             final RecurringResultsInterface results = service.calculateRecurring(task, 0, 0, 1);
-            if (0 == results.size()) {
+            if (null == results || 0 == results.size()) {
                 return;
             }
             RecurringResultInterface result = results.getRecurringResult(0);
