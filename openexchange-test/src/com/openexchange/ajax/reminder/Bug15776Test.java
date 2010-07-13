@@ -57,6 +57,7 @@ import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
+import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
@@ -75,6 +76,7 @@ import com.openexchange.tools.servlet.AjaxException;
 public class Bug15776Test extends AbstractAJAXSession {
     AJAXClient client;
     Appointment appointment;
+    Appointment pastAppointment;
     TimeZone timezone;
     Calendar calendar;
 
@@ -89,6 +91,7 @@ public class Bug15776Test extends AbstractAJAXSession {
         timezone = client.getValues().getTimeZone();
         calendar = Calendar.getInstance(timezone);
         appointment = createAppointment();
+        pastAppointment = createSeriesInThePast();
     }
     
     public void testReminder() throws Exception {
@@ -120,9 +123,25 @@ public class Bug15776Test extends AbstractAJAXSession {
         rangeResp = client.execute(rangeReq);
         reminder = ReminderTools.searchByTarget(rangeResp.getReminder(timezone), appointment.getObjectID());
         
+        // Request Alarm for 
+        
         assertNotNull("No reminder was found.", reminder);
         
         
+    }
+    
+    public void testAlarmForReminderInThePast() throws Exception {
+        // Set the reminder
+        pastAppointment.setAlarm(15);
+        UpdateRequest updateReq = new UpdateRequest(pastAppointment, timezone, false);
+        UpdateResponse updateResp = client.execute(updateReq);
+        updateResp.fillObject(pastAppointment);
+        
+        GetRequest getApp = new GetRequest(pastAppointment);
+        GetResponse getAppResp = client.execute(getApp);
+        Appointment app = getAppResp.getAppointment(timezone);
+        
+        assertFalse("Series in the past contains alarm.", app.containsAlarm());
     }
 
     @Override
@@ -130,6 +149,41 @@ public class Bug15776Test extends AbstractAJAXSession {
         Appointment toDelete = client.execute(new GetRequest(appointment, false)).getAppointment(timezone);
         client.execute(new DeleteRequest(toDelete, false));
         super.tearDown();
+    }
+    
+    private Appointment createSeriesInThePast() throws Exception {
+        final Calendar cal = (Calendar) calendar.clone();
+        final Appointment appointmentObj = new Appointment();
+
+        appointmentObj.setTitle("testBug15776SeriesInThePast");
+        cal.add(Calendar.YEAR, -5);
+        cal.add(Calendar.MINUTE, 10);
+        appointmentObj.setStartDate(cal.getTime());
+        cal.add(Calendar.HOUR, 1);
+        appointmentObj.setEndDate(cal.getTime());
+
+        appointmentObj.setShownAs(Appointment.ABSENT);
+        appointmentObj.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        appointmentObj.setIgnoreConflicts(true);
+        appointmentObj.setNote("");
+        appointmentObj.setNotification(true);
+        appointmentObj.setPrivateFlag(false);
+        appointmentObj.setFullTime(false);
+        appointmentObj.setRecurrenceType(Appointment.YEARLY);
+        appointmentObj.setMonth(cal.get(Calendar.MONTH));
+        appointmentObj.setDayInMonth(cal.get(Calendar.DAY_OF_MONTH));
+        
+        appointmentObj.setInterval(1);
+        appointmentObj.setOccurrence(4);
+
+        final UserParticipant newParticipant = new UserParticipant(client.getValues().getUserId());
+        appointmentObj.addParticipant(newParticipant);
+
+        final InsertRequest insReq = new InsertRequest(appointmentObj, timezone, true);
+        final AppointmentInsertResponse insResp = client.execute(insReq);
+        insResp.fillAppointment(appointmentObj);
+
+        return appointmentObj;
     }
     
     private Appointment createAppointment() throws AjaxException, IOException, SAXException, JSONException {
