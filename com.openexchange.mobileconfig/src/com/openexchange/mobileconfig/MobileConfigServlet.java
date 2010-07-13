@@ -31,6 +31,7 @@ import com.openexchange.mobileconfig.services.MobileConfigServiceRegistry;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateException;
 import com.openexchange.templating.TemplateService;
+import com.openexchange.tools.servlet.http.Tools;
 
 
 public class MobileConfigServlet extends HttpServlet {
@@ -99,14 +100,19 @@ public class MobileConfigServlet extends HttpServlet {
         final String domain_user = MobileConfigProperties.getProperty(MobileConfigServiceRegistry.getServiceRegistry(), Property.DomainUser);
         final String separator = domain_user.replaceAll("\\$USER|\\$DOMAIN", "");
         final String[] split = username.split(Pattern.quote(separator));
-        if (split.length != 2) {
+        if (split.length > 2) {
             throw new ConfigurationException("Splitting of login returned wrong length. Array is " + Arrays.toString(split));
         }
-        if (domain_user.indexOf("$USER") < domain_user.indexOf("$DOMAIN")) {
-            return split;
+        
+        if (split.length == 1) {
+            return new String[]{split[0], "defaultcontext"};
         } else {
-            // change position in array...
-            return new String[]{split[1], split[0]};
+            if (domain_user.indexOf("$USER") < domain_user.indexOf("$DOMAIN")) {
+                return split;
+            } else {
+                // change position in array...
+                return new String[]{split[1], split[0]};
+            }
         }
     }
 
@@ -126,6 +132,7 @@ public class MobileConfigServlet extends HttpServlet {
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setCharacterEncoding("UTF-8");
+        Tools.disableCaching(resp);
         final ConfigurationService service = MobileConfigServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
         if (null == service) {
             LOG.error("A configuration exception occurred, which should not happen: No configuration service found");

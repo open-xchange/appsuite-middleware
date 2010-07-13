@@ -41,13 +41,9 @@ public class MobileConfigServletTest extends MobileConfigServlet  {
         service.stringProperties.put(Property.DomainUser.getName(), "$DOMAIN|$USER");
         MobileConfigServiceRegistry.getServiceRegistry().addService(ConfigurationService.class, service);
         
-        try {
-            splitUsernameAndDomain("seppel@ox.de");
-        } catch (final ConfigurationException e) {
-            Assert.assertTrue(e.getMessage().startsWith("Splitting of login"));
-            return;
-        }
-        Assert.fail("No exception occurred");
+        final String[] splitUsernameAndDomain = splitUsernameAndDomain("seppel@ox.de");
+        Assert.assertEquals("Value at index 0 wrong", "seppel@ox.de", splitUsernameAndDomain[0]);
+        Assert.assertEquals("Value at index 1 wrong", "defaultcontext", splitUsernameAndDomain[1]);
     }
 
     @Test
@@ -59,6 +55,17 @@ public class MobileConfigServletTest extends MobileConfigServlet  {
         final String[] splitUsernameAndDomain = splitUsernameAndDomain("seppel|ox.de");
         Assert.assertEquals("Value at index 0 wrong", "ox.de", splitUsernameAndDomain[0]);
         Assert.assertEquals("Value at index 1 wrong", "seppel", splitUsernameAndDomain[1]);
+    }
+    
+    @Test
+    public void testSplitUsernameAndDomain5() throws ConfigurationException {
+        final SimConfigurationService service = new SimConfigurationService();
+        service.stringProperties.put(Property.DomainUser.getName(), "$USER@$DOMAIN");
+        MobileConfigServiceRegistry.getServiceRegistry().addService(ConfigurationService.class, service);
+        
+        final String[] splitUsernameAndDomain = splitUsernameAndDomain("seppel");
+        Assert.assertEquals("Value at index 0 wrong", "seppel", splitUsernameAndDomain[0]);
+        Assert.assertEquals("Value at index 1 wrong", "defaultcontext", splitUsernameAndDomain[1]);
     }
     
 }
