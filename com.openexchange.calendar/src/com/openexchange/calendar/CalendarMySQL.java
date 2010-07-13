@@ -127,6 +127,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.tools.sql.SQLTestCase;
 
 /**
  * {@link CalendarMySQL} - The MySQL implementation of {@link CalendarSqlImp}.
@@ -2994,6 +2995,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                             throw new OXCalendarException(OXCalendarException.Code.FOLDER_TYPE_UNRESOLVEABLE);
                         }
                     }
+                    
                     if (modified_userparticipants[a].getAlarmMinutes() >= 0 && modified_userparticipants[a].containsAlarm()) {                        
                         java.util.Date calc_date = null;
                         java.util.Date end_date = null;
@@ -3003,56 +3005,48 @@ public class CalendarMySQL implements CalendarSqlImp {
                             calc_date = edao.getStartDate();
                         }
                         
-                        Date end = null;
                         if (cdao.containsEndDate()) {
-                            end = cdao.getEndDate();
+                            end_date = cdao.getEndDate();
                         } else {
-                            end = edao.getEndDate();
+                            end_date = edao.getEndDate();
                         }
                         
-                        // If appointment is a sequence with start in the past get correct dates for the next occurrence
-                        if (cdao.isSequence() && collection.isInThePast(end)) {                            
-                            Date normalized_until = null;                            
-                            if (cdao.containsUntil()) {
-                                normalized_until = cdao.getUntil();
+                        final long la = modified_userparticipants[a].getAlarmMinutes() * 60000L;
+                        java.util.Date reminder = null;
+                        
+                        // If the appointment is a collection that starts in the past and ends in the future
+                        // the reminder will be set to the next occurrence.
+                        if (cdao.isSequence() && collection.isInThePast(calc_date)) {
+                            if (collection.isInThePast(end_date)) {
+                                pu.setNull(4, java.sql.Types.INTEGER);
                             } else {
-                                normalized_until = edao.getUntil();
-                            }
-                            
-                            long end_mod = end.getTime() % Constants.MILLI_DAY;
-                            Date until = new Date(normalized_until.getTime() + end_mod);
-                            
-                            if (!collection.isInThePast(until)) {
                                 pu.setInt(4, modified_userparticipants[a].getAlarmMinutes());
                                 RecurringResultsInterface recurringResults = collection.calculateRecurring(
-                                    cdao,
+                                    edao,
                                     calc_date.getTime(),
-                                    until.getTime(),
+                                    end_date.getTime(),
                                     0);
                                 for (int i = 0; i < recurringResults.size(); i++) {
                                     final RecurringResultInterface recurringResult = recurringResults.getRecurringResult(i);
                                     if (recurringResult.getStart() > new Date().getTime()) {
-                                        end_date = new Date(recurringResult.getEnd());
+                                        reminder = new java.util.Date(recurringResult.getStart() - la);
                                         break;
                                     }
                                 }
-                            } else {
-                                pu.setNull(4, java.sql.Types.INTEGER);
                             }
-                        } else { 
+                        } else {
                             pu.setInt(4, modified_userparticipants[a].getAlarmMinutes());
                         }
                         
-                        if (end_date == null) {
-                            end_date = end;
+                        if (reminder == null) {
+                            reminder = new java.util.Date(calc_date.getTime() - la);
                         }
                         
                         int folder_id = modified_userparticipants[a].getPersonalFolderId();
                         if (folder_id <= 0) {
                             folder_id = cdao.getEffectiveFolderId();
                         }
-                        final long la = modified_userparticipants[a].getAlarmMinutes() * 60000L;
-                        java.util.Date reminder = new java.util.Date(calc_date.getTime() - la);
+                        
                         final boolean isSequence = cdao.isSequence(true);
 
                         changeReminder(cdao.getObjectID(), modified_userparticipants[a].getIdentifier(), folder_id, cdao.getContext(), isSequence, end_date, reminder, CalendarOperation.UPDATE, isSequence ? checkRecurrenceChange(cdao, edao) : false);
