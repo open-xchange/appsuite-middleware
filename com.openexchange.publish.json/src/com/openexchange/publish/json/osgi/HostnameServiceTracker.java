@@ -49,41 +49,39 @@
 
 package com.openexchange.publish.json.osgi;
 
-import java.util.Stack;
-import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Filter;
+import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.i18n.I18nService;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.publish.json.Hostname;
 
+
 /**
- * Starts the service tracker for the dynamic services like {@link I18nService}.
+ * {@link HostnameServiceTracker}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class TrackerActivator implements BundleActivator {
+public class HostnameServiceTracker extends ServiceTracker {
 
-    private Stack<ServiceTracker> trackers;
-
-    public TrackerActivator() {
-        super();
+    private Hostname hostname;
+    
+    public HostnameServiceTracker(BundleContext context, Hostname hostname) {
+        super(context, HostnameService.class.getName(), null);
+        this.hostname = hostname;
+    }
+    
+    @Override
+    public Object addingService(ServiceReference reference) {
+        Object service = super.addingService(reference);
+        hostname.setHostnameService((HostnameService) service);
+        return service;
+    }
+    
+    @Override
+    public void removedService(ServiceReference reference, Object service) {
+        hostname.setHostnameService(null);
     }
 
-    public void start(final BundleContext context) throws Exception {
-        trackers = new Stack<ServiceTracker>();
-        trackers.add(new ServiceTracker(context, I18nService.class.getName(), new I18nCustomizer(context)));
-        trackers.add(new HostnameServiceTracker(context, Hostname.getInstance()));
-        for (final ServiceTracker tracker : trackers) {
-            tracker.open();
-        }
-    }
-
-    public void stop(final BundleContext context) throws Exception {
-        if (null != trackers) {
-            while (!trackers.isEmpty()) {
-                trackers.pop().close();
-            }
-            trackers = null;
-        }
-    }
 }

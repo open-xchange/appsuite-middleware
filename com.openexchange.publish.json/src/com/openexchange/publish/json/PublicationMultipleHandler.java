@@ -255,7 +255,19 @@ public class PublicationMultipleHandler implements MultipleHandler {
         final String target = request.optString("target");
         final Context context = session.getContext();
         final Publication publication = loadPublication(id, context, target);
-        return createResponse(publication, request.optString("__serverURL"));
+        return createResponse(publication, getURLPrefix(request, publication));
+    }
+
+    private String getURLPrefix(JSONObject request, Publication publication) {
+        String hostname = Hostname.getInstance().getHostname(publication);
+        String serverURL = request.optString("__serverURL");
+        if(hostname != null) {
+            if(serverURL == null || serverURL.startsWith("https")) {
+                return "https://"+hostname;
+            }
+            return "http://"+hostname;
+        }
+        return serverURL;
     }
 
     private Publication loadPublication(final int id, final Context context, final String target) throws AbstractOXException {

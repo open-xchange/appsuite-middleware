@@ -47,43 +47,39 @@
  *
  */
 
-package com.openexchange.publish.json.osgi;
+package com.openexchange.publish.json;
 
-import java.util.Stack;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.i18n.I18nService;
-import com.openexchange.publish.json.Hostname;
+import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.publish.Publication;
+
 
 /**
- * Starts the service tracker for the dynamic services like {@link I18nService}.
+ * {@link Hostname}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class TrackerActivator implements BundleActivator {
-
-    private Stack<ServiceTracker> trackers;
-
-    public TrackerActivator() {
-        super();
-    }
-
-    public void start(final BundleContext context) throws Exception {
-        trackers = new Stack<ServiceTracker>();
-        trackers.add(new ServiceTracker(context, I18nService.class.getName(), new I18nCustomizer(context)));
-        trackers.add(new HostnameServiceTracker(context, Hostname.getInstance()));
-        for (final ServiceTracker tracker : trackers) {
-            tracker.open();
+public class Hostname {
+    private static final Hostname INSTANCE = new Hostname();
+    
+    private HostnameService hostnameService;
+    
+    public String getHostname(Publication pub) {
+        if(hostnameService == null) {
+            return null;
         }
+        return hostnameService.getHostname(pub.getUserId(), pub.getContext().getContextId());
     }
-
-    public void stop(final BundleContext context) throws Exception {
-        if (null != trackers) {
-            while (!trackers.isEmpty()) {
-                trackers.pop().close();
-            }
-            trackers = null;
-        }
+    
+    
+    public void setHostnameService(HostnameService hostnameService) {
+        this.hostnameService = hostnameService;
+    }
+    
+    private Hostname() {
+        
+    }
+    
+    public static Hostname getInstance() {
+        return INSTANCE;
     }
 }
