@@ -65,6 +65,7 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.reminder.actions.RangeRequest;
 import com.openexchange.ajax.reminder.actions.RangeResponse;
+import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.reminder.ReminderObject;
@@ -95,9 +96,20 @@ public class Bug15776Test extends AbstractAJAXSession {
     }
     
     public void testReminder() throws Exception {
+        
+//        ,"recurrence_position":0,
+//        "categories":"","sequence":0,
+//        ,"notification":true,
+//        "location":"""uid":"cafe3d1c-ab01-4e2f-aaf2-4a7fb2d877c9",
+//        "note":null,"modified_by":84,"recurrence_id":56274,"recurrence_start":"578620800000",
+//        "number_of_attachments":0,
+//       "timezone":"Europe/Berlin","users":[{"confirmation":1,"id":84}],"color_label":0,
+//        "created_by":84
+
         // Set the reminder
-        appointment.setAlarm(15);
-        UpdateRequest updateReq = new UpdateRequest(appointment, timezone, false);
+        Appointment toUpdate = appointment.clone();
+        toUpdate.setAlarm(15);
+        UpdateRequest updateReq = new UpdateRequest(toUpdate, timezone, true);
         UpdateResponse updateResp = client.execute(updateReq);
         updateResp.fillObject(appointment);
         
@@ -152,7 +164,7 @@ public class Bug15776Test extends AbstractAJAXSession {
     }
     
     private Appointment createSeriesInThePast() throws Exception {
-        final Calendar cal = (Calendar) calendar.clone();
+        Calendar cal = TimeTools.createCalendar(timezone);
         final Appointment appointmentObj = new Appointment();
 
         appointmentObj.setTitle("testBug15776SeriesInThePast");
@@ -187,12 +199,12 @@ public class Bug15776Test extends AbstractAJAXSession {
     }
     
     private Appointment createAppointment() throws AjaxException, IOException, SAXException, JSONException {
-        final Calendar cal = (Calendar) calendar.clone();
+        Calendar cal = TimeTools.createCalendar(timezone);
+        cal.add(Calendar.YEAR, -5);
+        cal.add(Calendar.HOUR_OF_DAY, 2);
         final Appointment appointmentObj = new Appointment();
 
         appointmentObj.setTitle("testBug15776");
-        cal.add(Calendar.YEAR, -5);
-        cal.add(Calendar.MINUTE, 10);
         appointmentObj.setStartDate(cal.getTime());
         cal.add(Calendar.HOUR, 1);
         appointmentObj.setEndDate(cal.getTime());
@@ -209,7 +221,7 @@ public class Bug15776Test extends AbstractAJAXSession {
         appointmentObj.setDayInMonth(cal.get(Calendar.DAY_OF_MONTH));
         
         appointmentObj.setInterval(1);
-        appointmentObj.setOccurrence(10);
+        appointmentObj.setOccurrence(25);
 
         final UserParticipant newParticipant = new UserParticipant(client.getValues().getUserId());
         appointmentObj.addParticipant(newParticipant);
