@@ -2994,8 +2994,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                             throw new OXCalendarException(OXCalendarException.Code.FOLDER_TYPE_UNRESOLVEABLE);
                         }
                     }
-                    if (modified_userparticipants[a].getAlarmMinutes() >= 0 && modified_userparticipants[a].containsAlarm()) {
-                        pu.setInt(4, modified_userparticipants[a].getAlarmMinutes());
+                    if (modified_userparticipants[a].getAlarmMinutes() >= 0 && modified_userparticipants[a].containsAlarm()) {                        
                         java.util.Date calc_date = null;
                         java.util.Date end_date = null;
                         if (cdao.containsStartDate()) {
@@ -3012,7 +3011,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                         }
                         
                         // If appointment is a sequence with start in the past get correct dates for the next occurrence
-                        if (cdao.isSequence() && collection.isInThePast(end)) {
+                        if (cdao.isSequence() && collection.isInThePast(end)) {                            
                             Date normalized_until = null;                            
                             if (cdao.containsUntil()) {
                                 normalized_until = cdao.getUntil();
@@ -3023,14 +3022,25 @@ public class CalendarMySQL implements CalendarSqlImp {
                             long end_mod = end.getTime() % Constants.MILLI_DAY;
                             Date until = new Date(normalized_until.getTime() + end_mod);
                             
-                            RecurringResultsInterface recurringResults = collection.calculateRecurring(cdao, calc_date.getTime(), until.getTime(), 0);
-                            for (int i = 0; i < recurringResults.size(); i++) {
-                                final RecurringResultInterface recurringResult = recurringResults.getRecurringResult(i);
-                                if (recurringResult.getStart() > new Date().getTime()) {
-                                    end_date = new Date(recurringResult.getEnd());
-                                    break;
+                            if (!collection.isInThePast(until)) {
+                                pu.setInt(4, modified_userparticipants[a].getAlarmMinutes());
+                                RecurringResultsInterface recurringResults = collection.calculateRecurring(
+                                    cdao,
+                                    calc_date.getTime(),
+                                    until.getTime(),
+                                    0);
+                                for (int i = 0; i < recurringResults.size(); i++) {
+                                    final RecurringResultInterface recurringResult = recurringResults.getRecurringResult(i);
+                                    if (recurringResult.getStart() > new Date().getTime()) {
+                                        end_date = new Date(recurringResult.getEnd());
+                                        break;
+                                    }
                                 }
+                            } else {
+                                pu.setNull(4, java.sql.Types.INTEGER);
                             }
+                        } else { 
+                            pu.setInt(4, modified_userparticipants[a].getAlarmMinutes());
                         }
                         
                         if (end_date == null) {
