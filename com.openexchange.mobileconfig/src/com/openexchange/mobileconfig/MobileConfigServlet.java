@@ -235,7 +235,7 @@ public class MobileConfigServlet extends HttpServlet {
     }
 
     private void errorOutput(final HttpServletRequest req, final HttpServletResponse resp, final String string) {
-        resp.setContentType("text/html");
+        resp.setContentType("text/html; charset=UTF-8");
         PrintWriter writer;
         try {
             writer = getWriterFromOutputStream(resp.getOutputStream());
