@@ -1915,6 +1915,13 @@ public final class CalendarCollection implements CalendarCollectionService {
         }
         for (final UserParticipant user : cdao.getUsers()) {
             if (user.getIdentifier() == uid) {
+                if (!user.containsConfirm()) {
+                    try {
+                        user.setConfirm(ServerUserSetting.getDefaultInstance().getDefaultStatusPublic(ctx.getContextId(), user.getIdentifier()));
+                    } catch (SettingException e) {
+                        throw new OXCalendarException(e);
+                    }
+                }
                 continue;
             }
             if (user.containsConfirm()) {
