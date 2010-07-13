@@ -79,8 +79,10 @@ public final class MessagingId implements SortableId {
     }
 
     public Priority getPriority() {
-        // Mail folders come first
-        return Priority.HIGH;
+        /*
+         * Mail folders at second position
+         */
+        return Priority.NORMAL;
     }
 
     public int compareTo(final SortableId o) {
@@ -89,7 +91,7 @@ public final class MessagingId implements SortableId {
             final int anotherVal = ((MessagingId) o).ordinal;
             return (thisVal < anotherVal ? -1 : (thisVal == anotherVal ? 0 : 1));
         }
-        final int thisPrio = Priority.HIGH.ordinal();
+        final int thisPrio = getPriority().ordinal();
         final int anotherPrio = (o).getPriority().ordinal();
         return (thisPrio < anotherPrio ? 1 : (thisPrio == anotherPrio ? 0 : -1));
     }

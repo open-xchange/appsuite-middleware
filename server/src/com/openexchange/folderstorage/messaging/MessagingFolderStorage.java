@@ -689,13 +689,19 @@ public final class MessagingFolderStorage implements FolderStorage {
                 if (accounts.isEmpty()) {
                     return new SortableId[0];
                 }
+                final int size = accounts.size();
+                if (size > 1) {
+                    /*
+                     * Sort by name
+                     */
+                    Collections.sort(accounts, new MessagingAccountComparator(session.getUser().getLocale()));
+                }
                 /*-
                  * TODO:
                  * 1. Check for messaging permission; e.g. session.getUserConfiguration().isMultipleMailAccounts()
                  *    Add primary only if not enabled
                  * 2. Strip Unified-Messaging account from obtained list
                  */
-                final int size = accounts.size();
                 final List<SortableId> list = new ArrayList<SortableId>(size);
                 for (int j = 0; j < size; j++) {
                     final MessagingAccount acc = accounts.get(j);
@@ -1127,8 +1133,6 @@ public final class MessagingFolderStorage implements FolderStorage {
             } else if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(o2.getMailProtocol())) {
                 return 1;
             }
-             * 
-             */
             if (0 == o1.getId()) {
                 if (0 == o2.getId()) {
                     return 0;
@@ -1137,6 +1141,7 @@ public final class MessagingFolderStorage implements FolderStorage {
             } else if (0 == o2.getId()) {
                 return 1;
             }
+            */
             return collator.compare(o1.getDisplayName(), o2.getDisplayName());
         }
 

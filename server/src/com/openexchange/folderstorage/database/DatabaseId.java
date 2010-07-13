@@ -91,7 +91,10 @@ public final class DatabaseId implements SortableId {
     }
 
     public Priority getPriority() {
-        return Priority.NORMAL;
+        /*
+         * At last the database folders
+         */
+        return Priority.LOW;
     }
 
     public int compareTo(final SortableId o) {
@@ -100,7 +103,7 @@ public final class DatabaseId implements SortableId {
             final int anotherVal = ((DatabaseId) o).ordinal;
             return (thisVal < anotherVal ? -1 : (thisVal == anotherVal ? 0 : 1));
         }
-        final int thisPrio = Priority.NORMAL.ordinal();
+        final int thisPrio = getPriority().ordinal();
         final int anotherPrio = (o).getPriority().ordinal();
         return (thisPrio < anotherPrio ? 1 : (thisPrio == anotherPrio ? 0 : -1));
     }
