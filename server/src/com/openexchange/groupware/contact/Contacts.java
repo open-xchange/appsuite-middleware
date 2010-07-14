@@ -87,6 +87,7 @@ import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.contact.database.PrivateFlag;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -145,7 +146,7 @@ public final class Contacts {
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
-    public static mapper[] mapping;
+    public static Mapper[] mapping;
 
     /**
      * Prevent instantiation
@@ -3030,7 +3031,7 @@ public final class Contacts {
 
     /** *************** MAPPER ***************** */
 
-    public static interface mapper {
+    public static interface Mapper {
 
         boolean containsElement(Contact co);
 
@@ -3042,22 +3043,16 @@ public final class Contacts {
 
         boolean compare(Contact co, Contact original);
 
-        void fillPreparedStatement(PreparedStatement ps, int position, Object ob) throws SQLException;
-
-        Object getData(ResultSet rs, int pos) throws SQLException;
-
         String getValueAsString(Contact co);
-
-        void setValueAsString(String s, Contact co);
 
         String getReadableTitle();
     }
 
     static {
-        mapping = new mapper[700];
+        mapping = new Mapper[700];
 
         /** ************** * field01 * * ************ */
-        mapping[Contact.DISPLAY_NAME] = new mapper() {
+        mapping[Contact.DISPLAY_NAME] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field01";
@@ -3114,7 +3109,7 @@ public final class Contacts {
             }
         };
         /** ************** * field02 * * ************ */
-        mapping[Contact.SUR_NAME] = new mapper() {
+        mapping[Contact.SUR_NAME] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field02";
@@ -3171,7 +3166,7 @@ public final class Contacts {
             }
         };
         /** ************** * field03 * * ************ */
-        mapping[Contact.GIVEN_NAME] = new mapper() {
+        mapping[Contact.GIVEN_NAME] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field03";
@@ -3228,7 +3223,7 @@ public final class Contacts {
             }
         };
         /** ************** * field04 * * ************ */
-        mapping[Contact.MIDDLE_NAME] = new mapper() {
+        mapping[Contact.MIDDLE_NAME] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field04";
@@ -3287,7 +3282,7 @@ public final class Contacts {
             }
         };
         /** ************** * field05 * * ************ */
-        mapping[Contact.SUFFIX] = new mapper() {
+        mapping[Contact.SUFFIX] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field05";
@@ -3344,7 +3339,7 @@ public final class Contacts {
             }
         };
         /** ************** * field06 * * ************ */
-        mapping[Contact.TITLE] = new mapper() {
+        mapping[Contact.TITLE] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field06";
@@ -3401,7 +3396,7 @@ public final class Contacts {
             }
         };
         /** ************** * field07 * * ************ */
-        mapping[Contact.STREET_HOME] = new mapper() {
+        mapping[Contact.STREET_HOME] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field07";
@@ -3458,7 +3453,7 @@ public final class Contacts {
             }
         };
         /** ************** * field08 * * ************ */
-        mapping[Contact.POSTAL_CODE_HOME] = new mapper() {
+        mapping[Contact.POSTAL_CODE_HOME] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field08";
@@ -3515,7 +3510,7 @@ public final class Contacts {
             }
         };
         /** ************** * field09 * * ************ */
-        mapping[Contact.CITY_HOME] = new mapper() {
+        mapping[Contact.CITY_HOME] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field09";
@@ -3572,7 +3567,7 @@ public final class Contacts {
             }
         };
         /** ************** * field10 * * ************ */
-        mapping[Contact.STATE_HOME] = new mapper() {
+        mapping[Contact.STATE_HOME] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field10";
@@ -3629,7 +3624,7 @@ public final class Contacts {
             }
         };
         /** ************** * field11 * * ************ */
-        mapping[Contact.COUNTRY_HOME] = new mapper() {
+        mapping[Contact.COUNTRY_HOME] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field11";
@@ -3687,7 +3682,7 @@ public final class Contacts {
         };
 
         /** ************** * field12 * * ************ */
-        mapping[Contact.MARITAL_STATUS] = new mapper() {
+        mapping[Contact.MARITAL_STATUS] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field12";
@@ -3744,7 +3739,7 @@ public final class Contacts {
             }
         };
         /** ************** * field13 * * ************ */
-        mapping[Contact.NUMBER_OF_CHILDREN] = new mapper() {
+        mapping[Contact.NUMBER_OF_CHILDREN] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field13";
@@ -3801,7 +3796,7 @@ public final class Contacts {
             }
         };
         /** ************** * field14 * * ************ */
-        mapping[Contact.PROFESSION] = new mapper() {
+        mapping[Contact.PROFESSION] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field14";
@@ -3858,7 +3853,7 @@ public final class Contacts {
             }
         };
         /** ************** * field15 * * ************ */
-        mapping[Contact.NICKNAME] = new mapper() {
+        mapping[Contact.NICKNAME] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field15";
@@ -3915,7 +3910,7 @@ public final class Contacts {
             }
         };
         /** ************** * field16 * * ************ */
-        mapping[Contact.SPOUSE_NAME] = new mapper() {
+        mapping[Contact.SPOUSE_NAME] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field16";
@@ -3972,7 +3967,7 @@ public final class Contacts {
             }
         };
         /** ************** * field17 * * ************ */
-        mapping[Contact.NOTE] = new mapper() {
+        mapping[Contact.NOTE] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field17";
@@ -4029,7 +4024,7 @@ public final class Contacts {
             }
         };
         /** ************** * field18 * * ************ */
-        mapping[Contact.COMPANY] = new mapper() {
+        mapping[Contact.COMPANY] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field18";
@@ -4086,7 +4081,7 @@ public final class Contacts {
             }
         };
         /** ************** * field19 * * ************ */
-        mapping[Contact.DEPARTMENT] = new mapper() {
+        mapping[Contact.DEPARTMENT] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field19";
@@ -4143,7 +4138,7 @@ public final class Contacts {
             }
         };
         /** ************** * field20 * * ************ */
-        mapping[Contact.POSITION] = new mapper() {
+        mapping[Contact.POSITION] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field20";
@@ -4200,7 +4195,7 @@ public final class Contacts {
             }
         };
         /** ************** * field21 * * ************ */
-        mapping[Contact.EMPLOYEE_TYPE] = new mapper() {
+        mapping[Contact.EMPLOYEE_TYPE] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field21";
@@ -4257,7 +4252,7 @@ public final class Contacts {
             }
         };
         /** ************** * field22 * * ************ */
-        mapping[Contact.ROOM_NUMBER] = new mapper() {
+        mapping[Contact.ROOM_NUMBER] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field22";
@@ -4314,7 +4309,7 @@ public final class Contacts {
             }
         };
         /** ************** * field23 * * ************ */
-        mapping[Contact.STREET_BUSINESS] = new mapper() {
+        mapping[Contact.STREET_BUSINESS] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field23";
@@ -4371,7 +4366,7 @@ public final class Contacts {
             }
         };
         /** ************** * field24 * * ************ */
-        mapping[Contact.POSTAL_CODE_BUSINESS] = new mapper() {
+        mapping[Contact.POSTAL_CODE_BUSINESS] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field24";
@@ -4428,7 +4423,7 @@ public final class Contacts {
             }
         };
         /** ************** * field25 * * ************ */
-        mapping[Contact.CITY_BUSINESS] = new mapper() {
+        mapping[Contact.CITY_BUSINESS] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field25";
@@ -4485,7 +4480,7 @@ public final class Contacts {
             }
         };
         /** ************** * field26 * * ************ */
-        mapping[Contact.STATE_BUSINESS] = new mapper() {
+        mapping[Contact.STATE_BUSINESS] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field26";
@@ -4542,7 +4537,7 @@ public final class Contacts {
             }
         };
         /** ************** * field27 * * ************ */
-        mapping[Contact.COUNTRY_BUSINESS] = new mapper() {
+        mapping[Contact.COUNTRY_BUSINESS] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field27";
@@ -4599,7 +4594,7 @@ public final class Contacts {
             }
         };
         /** ************** * field28 * * ************ */
-        mapping[Contact.NUMBER_OF_EMPLOYEE] = new mapper() {
+        mapping[Contact.NUMBER_OF_EMPLOYEE] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field28";
@@ -4656,7 +4651,7 @@ public final class Contacts {
             }
         };
         /** ************** * field29 * * ************ */
-        mapping[Contact.SALES_VOLUME] = new mapper() {
+        mapping[Contact.SALES_VOLUME] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field29";
@@ -4713,7 +4708,7 @@ public final class Contacts {
             }
         };
         /** ************** * field30 * * ************ */
-        mapping[Contact.TAX_ID] = new mapper() {
+        mapping[Contact.TAX_ID] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field30";
@@ -4770,7 +4765,7 @@ public final class Contacts {
             }
         };
         /** ************** * field31 * * ************ */
-        mapping[Contact.COMMERCIAL_REGISTER] = new mapper() {
+        mapping[Contact.COMMERCIAL_REGISTER] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field31";
@@ -4827,7 +4822,7 @@ public final class Contacts {
             }
         };
         /** ************** * field32 * * ************ */
-        mapping[Contact.BRANCHES] = new mapper() {
+        mapping[Contact.BRANCHES] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field32";
@@ -4884,7 +4879,7 @@ public final class Contacts {
             }
         };
         /** ************** * field33 * * ************ */
-        mapping[Contact.BUSINESS_CATEGORY] = new mapper() {
+        mapping[Contact.BUSINESS_CATEGORY] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field33";
@@ -4941,7 +4936,7 @@ public final class Contacts {
             }
         };
         /** ************** * field34 * * ************ */
-        mapping[Contact.INFO] = new mapper() {
+        mapping[Contact.INFO] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field34";
@@ -4998,7 +4993,7 @@ public final class Contacts {
             }
         };
         /** ************** * field35 * * ************ */
-        mapping[Contact.MANAGER_NAME] = new mapper() {
+        mapping[Contact.MANAGER_NAME] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field35";
@@ -5055,7 +5050,7 @@ public final class Contacts {
             }
         };
         /** ************** * field36 * * ************ */
-        mapping[Contact.ASSISTANT_NAME] = new mapper() {
+        mapping[Contact.ASSISTANT_NAME] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field36";
@@ -5112,7 +5107,7 @@ public final class Contacts {
             }
         };
         /** ************** * field37 * * ************ */
-        mapping[Contact.STREET_OTHER] = new mapper() {
+        mapping[Contact.STREET_OTHER] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field37";
@@ -5169,7 +5164,7 @@ public final class Contacts {
             }
         };
         /** ************** * field38 * * ************ */
-        mapping[Contact.POSTAL_CODE_OTHER] = new mapper() {
+        mapping[Contact.POSTAL_CODE_OTHER] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field38";
@@ -5226,7 +5221,7 @@ public final class Contacts {
             }
         };
         /** ************** * field39 * * ************ */
-        mapping[Contact.CITY_OTHER] = new mapper() {
+        mapping[Contact.CITY_OTHER] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field39";
@@ -5283,7 +5278,7 @@ public final class Contacts {
             }
         };
         /** ************** * field40 * * ************ */
-        mapping[Contact.STATE_OTHER] = new mapper() {
+        mapping[Contact.STATE_OTHER] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field40";
@@ -5340,7 +5335,7 @@ public final class Contacts {
             }
         };
         /** ************** * field41 * * ************ */
-        mapping[Contact.COUNTRY_OTHER] = new mapper() {
+        mapping[Contact.COUNTRY_OTHER] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field41";
@@ -5397,7 +5392,7 @@ public final class Contacts {
             }
         };
         /** ************** * field42 * * ************ */
-        mapping[Contact.TELEPHONE_ASSISTANT] = new mapper() {
+        mapping[Contact.TELEPHONE_ASSISTANT] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field42";
@@ -5454,7 +5449,7 @@ public final class Contacts {
             }
         };
         /** ************** * field43 * * ************ */
-        mapping[Contact.TELEPHONE_BUSINESS1] = new mapper() {
+        mapping[Contact.TELEPHONE_BUSINESS1] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field43";
@@ -5511,7 +5506,7 @@ public final class Contacts {
             }
         };
         /** ************** * field44 * * ************ */
-        mapping[Contact.TELEPHONE_BUSINESS2] = new mapper() {
+        mapping[Contact.TELEPHONE_BUSINESS2] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field44";
@@ -5568,7 +5563,7 @@ public final class Contacts {
             }
         };
         /** ************** * field45 * * ************ */
-        mapping[Contact.FAX_BUSINESS] = new mapper() {
+        mapping[Contact.FAX_BUSINESS] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field45";
@@ -5625,7 +5620,7 @@ public final class Contacts {
             }
         };
         /** ************** * field46 * * ************ */
-        mapping[Contact.TELEPHONE_CALLBACK] = new mapper() {
+        mapping[Contact.TELEPHONE_CALLBACK] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field46";
@@ -5682,7 +5677,7 @@ public final class Contacts {
             }
         };
         /** ************** * field47 * * ************ */
-        mapping[Contact.TELEPHONE_CAR] = new mapper() {
+        mapping[Contact.TELEPHONE_CAR] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field47";
@@ -5739,7 +5734,7 @@ public final class Contacts {
             }
         };
         /** ************** * field48 * * ************ */
-        mapping[Contact.TELEPHONE_COMPANY] = new mapper() {
+        mapping[Contact.TELEPHONE_COMPANY] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field48";
@@ -5796,7 +5791,7 @@ public final class Contacts {
             }
         };
         /** ************** * field49 * * ************ */
-        mapping[Contact.TELEPHONE_HOME1] = new mapper() {
+        mapping[Contact.TELEPHONE_HOME1] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field49";
@@ -5853,7 +5848,7 @@ public final class Contacts {
             }
         };
         /** ************** * field50 * * ************ */
-        mapping[Contact.TELEPHONE_HOME2] = new mapper() {
+        mapping[Contact.TELEPHONE_HOME2] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field50";
@@ -5910,7 +5905,7 @@ public final class Contacts {
             }
         };
         /** ************** * field51 * * ************ */
-        mapping[Contact.FAX_HOME] = new mapper() {
+        mapping[Contact.FAX_HOME] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field51";
@@ -5967,7 +5962,7 @@ public final class Contacts {
             }
         };
         /** ************** * field52 * * ************ */
-        mapping[Contact.TELEPHONE_ISDN] = new mapper() {
+        mapping[Contact.TELEPHONE_ISDN] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field52";
@@ -6024,7 +6019,7 @@ public final class Contacts {
             }
         };
         /** ************** * field53 * * ************ */
-        mapping[Contact.CELLULAR_TELEPHONE1] = new mapper() {
+        mapping[Contact.CELLULAR_TELEPHONE1] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field53";
@@ -6081,7 +6076,7 @@ public final class Contacts {
             }
         };
         /** ************** * field54 * * ************ */
-        mapping[Contact.CELLULAR_TELEPHONE2] = new mapper() {
+        mapping[Contact.CELLULAR_TELEPHONE2] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field54";
@@ -6138,7 +6133,7 @@ public final class Contacts {
             }
         };
         /** ************** * field55 * * ************ */
-        mapping[Contact.TELEPHONE_OTHER] = new mapper() {
+        mapping[Contact.TELEPHONE_OTHER] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field55";
@@ -6195,7 +6190,7 @@ public final class Contacts {
             }
         };
         /** ************** * field56 * * ************ */
-        mapping[Contact.FAX_OTHER] = new mapper() {
+        mapping[Contact.FAX_OTHER] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field56";
@@ -6252,7 +6247,7 @@ public final class Contacts {
             }
         };
         /** ************** * field57 * * ************ */
-        mapping[Contact.TELEPHONE_PAGER] = new mapper() {
+        mapping[Contact.TELEPHONE_PAGER] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field57";
@@ -6309,7 +6304,7 @@ public final class Contacts {
             }
         };
         /** ************** * field58 * * ************ */
-        mapping[Contact.TELEPHONE_PRIMARY] = new mapper() {
+        mapping[Contact.TELEPHONE_PRIMARY] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field58";
@@ -6366,7 +6361,7 @@ public final class Contacts {
             }
         };
         /** ************** * field59 * * ************ */
-        mapping[Contact.TELEPHONE_RADIO] = new mapper() {
+        mapping[Contact.TELEPHONE_RADIO] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field59";
@@ -6423,7 +6418,7 @@ public final class Contacts {
             }
         };
         /** ************** * field60 * * ************ */
-        mapping[Contact.TELEPHONE_TELEX] = new mapper() {
+        mapping[Contact.TELEPHONE_TELEX] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field60";
@@ -6480,7 +6475,7 @@ public final class Contacts {
             }
         };
         /** ************** * field61 * * ************ */
-        mapping[Contact.TELEPHONE_TTYTDD] = new mapper() {
+        mapping[Contact.TELEPHONE_TTYTDD] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field61";
@@ -6537,7 +6532,7 @@ public final class Contacts {
             }
         };
         /** ************** * field62 * * ************ */
-        mapping[Contact.INSTANT_MESSENGER1] = new mapper() {
+        mapping[Contact.INSTANT_MESSENGER1] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field62";
@@ -6595,7 +6590,7 @@ public final class Contacts {
         };
 
         /** ************** * field63 * * ************ */
-        mapping[Contact.INSTANT_MESSENGER2] = new mapper() {
+        mapping[Contact.INSTANT_MESSENGER2] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field63";
@@ -6653,7 +6648,7 @@ public final class Contacts {
         };
 
         /** ************** * field64 * * ************ */
-        mapping[Contact.TELEPHONE_IP] = new mapper() {
+        mapping[Contact.TELEPHONE_IP] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field64";
@@ -6710,7 +6705,7 @@ public final class Contacts {
             }
         };
         /** ************** * field65 * * ************ */
-        mapping[Contact.EMAIL1] = new mapper() {
+        mapping[Contact.EMAIL1] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field65";
@@ -6767,7 +6762,7 @@ public final class Contacts {
             }
         };
         /** ************** * field66 * * ************ */
-        mapping[Contact.EMAIL2] = new mapper() {
+        mapping[Contact.EMAIL2] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field66";
@@ -6824,7 +6819,7 @@ public final class Contacts {
             }
         };
         /** ************** * field67 * * ************ */
-        mapping[Contact.EMAIL3] = new mapper() {
+        mapping[Contact.EMAIL3] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field67";
@@ -6881,7 +6876,7 @@ public final class Contacts {
             }
         };
         /** ************** * field68 * * ************ */
-        mapping[Contact.URL] = new mapper() {
+        mapping[Contact.URL] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field68";
@@ -6938,7 +6933,7 @@ public final class Contacts {
             }
         };
         /** ************** * field69 * * ************ */
-        mapping[Contact.CATEGORIES] = new mapper() {
+        mapping[Contact.CATEGORIES] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field69";
@@ -6995,7 +6990,7 @@ public final class Contacts {
             }
         };
         /** ************** * field70 * * ************ */
-        mapping[Contact.USERFIELD01] = new mapper() {
+        mapping[Contact.USERFIELD01] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field70";
@@ -7052,7 +7047,7 @@ public final class Contacts {
             }
         };
         /** ************** * field71 * * ************ */
-        mapping[Contact.USERFIELD02] = new mapper() {
+        mapping[Contact.USERFIELD02] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field71";
@@ -7109,7 +7104,7 @@ public final class Contacts {
             }
         };
         /** ************** * field72 * * ************ */
-        mapping[Contact.USERFIELD03] = new mapper() {
+        mapping[Contact.USERFIELD03] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field72";
@@ -7166,7 +7161,7 @@ public final class Contacts {
             }
         };
         /** ************** * field73 * * ************ */
-        mapping[Contact.USERFIELD04] = new mapper() {
+        mapping[Contact.USERFIELD04] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field73";
@@ -7223,7 +7218,7 @@ public final class Contacts {
             }
         };
         /** ************** * field74 * * ************ */
-        mapping[Contact.USERFIELD05] = new mapper() {
+        mapping[Contact.USERFIELD05] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field74";
@@ -7280,7 +7275,7 @@ public final class Contacts {
             }
         };
         /** ************** * field75 * * ************ */
-        mapping[Contact.USERFIELD06] = new mapper() {
+        mapping[Contact.USERFIELD06] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field75";
@@ -7337,7 +7332,7 @@ public final class Contacts {
             }
         };
         /** ************** * field76 * * ************ */
-        mapping[Contact.USERFIELD07] = new mapper() {
+        mapping[Contact.USERFIELD07] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field76";
@@ -7394,7 +7389,7 @@ public final class Contacts {
             }
         };
         /** ************** * field77 * * ************ */
-        mapping[Contact.USERFIELD08] = new mapper() {
+        mapping[Contact.USERFIELD08] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field77";
@@ -7451,7 +7446,7 @@ public final class Contacts {
             }
         };
         /** ************** * field78 * * ************ */
-        mapping[Contact.USERFIELD09] = new mapper() {
+        mapping[Contact.USERFIELD09] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field78";
@@ -7508,7 +7503,7 @@ public final class Contacts {
             }
         };
         /** ************** * field79 * * ************ */
-        mapping[Contact.USERFIELD10] = new mapper() {
+        mapping[Contact.USERFIELD10] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field79";
@@ -7565,7 +7560,7 @@ public final class Contacts {
             }
         };
         /** ************** * field80 * * ************ */
-        mapping[Contact.USERFIELD11] = new mapper() {
+        mapping[Contact.USERFIELD11] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field80";
@@ -7622,7 +7617,7 @@ public final class Contacts {
             }
         };
         /** ************** * field81 * * ************ */
-        mapping[Contact.USERFIELD12] = new mapper() {
+        mapping[Contact.USERFIELD12] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field81";
@@ -7679,7 +7674,7 @@ public final class Contacts {
             }
         };
         /** ************** * field82 * * ************ */
-        mapping[Contact.USERFIELD13] = new mapper() {
+        mapping[Contact.USERFIELD13] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field82";
@@ -7736,7 +7731,7 @@ public final class Contacts {
             }
         };
         /** ************** * field83 * * ************ */
-        mapping[Contact.USERFIELD14] = new mapper() {
+        mapping[Contact.USERFIELD14] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field83";
@@ -7793,7 +7788,7 @@ public final class Contacts {
             }
         };
         /** ************** * field84 * * ************ */
-        mapping[Contact.USERFIELD15] = new mapper() {
+        mapping[Contact.USERFIELD15] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field84";
@@ -7850,7 +7845,7 @@ public final class Contacts {
             }
         };
         /** ************** * field85 * * ************ */
-        mapping[Contact.USERFIELD16] = new mapper() {
+        mapping[Contact.USERFIELD16] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field85";
@@ -7907,7 +7902,7 @@ public final class Contacts {
             }
         };
         /** ************** * field86 * * ************ */
-        mapping[Contact.USERFIELD17] = new mapper() {
+        mapping[Contact.USERFIELD17] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field86";
@@ -7964,7 +7959,7 @@ public final class Contacts {
             }
         };
         /** ************** * field87 * * ************ */
-        mapping[Contact.USERFIELD18] = new mapper() {
+        mapping[Contact.USERFIELD18] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field87";
@@ -8021,7 +8016,7 @@ public final class Contacts {
             }
         };
         /** ************** * field88 * * ************ */
-        mapping[Contact.USERFIELD19] = new mapper() {
+        mapping[Contact.USERFIELD19] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field88";
@@ -8078,7 +8073,7 @@ public final class Contacts {
             }
         };
         /** ************** * field89 * * ************ */
-        mapping[Contact.USERFIELD20] = new mapper() {
+        mapping[Contact.USERFIELD20] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field89";
@@ -8135,7 +8130,7 @@ public final class Contacts {
             }
         };
         /** ************** * intfield01 * * ************ */
-        mapping[Contact.OBJECT_ID] = new mapper() {
+        mapping[Contact.OBJECT_ID] = new Mapper() {
 
             public String getDBFieldName() {
                 return "intfield01";
@@ -8189,7 +8184,7 @@ public final class Contacts {
             }
         };
         /** ************** * intfield02 * * ************ */
-        mapping[Contact.NUMBER_OF_DISTRIBUTIONLIST] = new mapper() {
+        mapping[Contact.NUMBER_OF_DISTRIBUTIONLIST] = new Mapper() {
 
             public String getDBFieldName() {
                 return "intfield02";
@@ -8243,7 +8238,7 @@ public final class Contacts {
             }
         };
         /** ************** * intfield03 * * ************ */
-        mapping[Contact.NUMBER_OF_LINKS] = new mapper() {
+        mapping[Contact.NUMBER_OF_LINKS] = new Mapper() {
 
             public String getDBFieldName() {
                 return "intfield03";
@@ -8297,7 +8292,7 @@ public final class Contacts {
             }
         };
         /** ************** * intfield02 Part 2 * * ************ */
-        mapping[Contact.DISTRIBUTIONLIST] = new mapper() {
+        mapping[Contact.DISTRIBUTIONLIST] = new Mapper() {
 
             public String getDBFieldName() {
                 return "intfield02";
@@ -8347,7 +8342,7 @@ public final class Contacts {
             }
         };
         /** ************** * intfield03 Part 2 * * ************ */
-        mapping[Contact.LINKS] = new mapper() {
+        mapping[Contact.LINKS] = new Mapper() {
 
             public String getDBFieldName() {
                 return "intfield03";
@@ -8397,7 +8392,7 @@ public final class Contacts {
             }
         };
         /** ************** * fid * * ************ */
-        mapping[Contact.FOLDER_ID] = new mapper() {
+        mapping[Contact.FOLDER_ID] = new Mapper() {
 
             public String getDBFieldName() {
                 return "fid";
@@ -8451,7 +8446,7 @@ public final class Contacts {
             }
         };
         /** ************** * cid * * ************ */
-        mapping[Contact.CONTEXTID] = new mapper() {
+        mapping[Contact.CONTEXTID] = new Mapper() {
 
             public String getDBFieldName() {
                 return "cid";
@@ -8504,68 +8499,9 @@ public final class Contacts {
                 }
             }
         };
-        /** ************** * pflag * * ************ */
-        mapping[Contact.PRIVATE_FLAG] = new mapper() {
-
-            public String getDBFieldName() {
-                return "pflag";
-            }
-
-            public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
-                final int t = rs.getInt(pos);
-                if (!rs.wasNull()) {
-                    if (t == 1) {
-                        co.setPrivateFlag(true);
-                    } else {
-                        co.setPrivateFlag(false);
-                    }
-                }
-            }
-
-            public boolean containsElement(final Contact co) {
-                return co.containsPrivateFlag();
-            }
-
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
-                if (co.getPrivateFlag()) {
-                    ps.setInt(pos, 1);
-                } else {
-                    ps.setNull(pos, java.sql.Types.INTEGER);
-                }
-            }
-
-            public boolean compare(final Contact co, final Contact original) {
-                return (co.getPrivateFlag() == original.getPrivateFlag());
-            }
-
-            public void fillPreparedStatement(final PreparedStatement ps, final int position, final Object ob) throws SQLException {
-                if (ob == null) {
-                    ps.setNull(position, java.sql.Types.INTEGER);
-                } else {
-                    ps.setInt(position, Integer.parseInt((String) ob));
-                }
-            }
-
-            public Object getData(final ResultSet rs, final int pos) throws SQLException {
-                return String.valueOf(rs.getInt(pos));
-            }
-
-            public String getValueAsString(final Contact co) {
-                return null;
-            }
-
-            public String getReadableTitle() {
-                return null;
-            }
-
-            public void setValueAsString(final String s, final Contact co) {
-                if (null != s) {
-                    co.setPrivateFlag(true);
-                }
-            }
-        };
+        mapping[Contact.PRIVATE_FLAG] = new PrivateFlag();
         /** ************** * created_from * * ************ */
-        mapping[Contact.CREATED_BY] = new mapper() {
+        mapping[Contact.CREATED_BY] = new Mapper() {
 
             public String getDBFieldName() {
                 return "created_from";
@@ -8619,7 +8555,7 @@ public final class Contacts {
             }
         };
         /** ************** * changed_from * * ************ */
-        mapping[Contact.MODIFIED_BY] = new mapper() {
+        mapping[Contact.MODIFIED_BY] = new Mapper() {
 
             public String getDBFieldName() {
                 return "changed_from";
@@ -8673,7 +8609,7 @@ public final class Contacts {
             }
         };
         /** ************** * creating_date * * ************ */
-        mapping[Contact.CREATION_DATE] = new mapper() {
+        mapping[Contact.CREATION_DATE] = new Mapper() {
 
             public String getDBFieldName() {
                 return "creating_date";
@@ -8731,7 +8667,7 @@ public final class Contacts {
             }
         };
         /** ************** * changing_date * * ************ */
-        mapping[Contact.LAST_MODIFIED] = new mapper() {
+        mapping[Contact.LAST_MODIFIED] = new Mapper() {
 
             public String getDBFieldName() {
                 return "changing_date";
@@ -8789,7 +8725,7 @@ public final class Contacts {
             }
         };
         /** ************** * timestampfield01 * * ************ */
-        mapping[Contact.BIRTHDAY] = new mapper() {
+        mapping[Contact.BIRTHDAY] = new Mapper() {
 
             public String getDBFieldName() {
                 return "timestampfield01";
@@ -8864,7 +8800,7 @@ public final class Contacts {
             }
         };
         /** ************** * timestampfield02 * * ************ */
-        mapping[Contact.ANNIVERSARY] = new mapper() {
+        mapping[Contact.ANNIVERSARY] = new Mapper() {
 
             public String getDBFieldName() {
                 return "timestampfield02";
@@ -8940,7 +8876,7 @@ public final class Contacts {
         };
 
         /** ************** * image01 * * ************ */
-        mapping[Contact.IMAGE1] = new mapper() {
+        mapping[Contact.IMAGE1] = new Mapper() {
 
             public String getDBFieldName() {
                 return "intfield04";
@@ -9009,7 +8945,7 @@ public final class Contacts {
             }
         };
         /** ************** * intfield04 * * ************ */
-        mapping[Contact.IMAGE_LAST_MODIFIED] = new mapper() {
+        mapping[Contact.IMAGE_LAST_MODIFIED] = new Mapper() {
 
             public String getDBFieldName() {
                 return "intfield04";
@@ -9069,7 +9005,7 @@ public final class Contacts {
             }
         };
         /** ************** * intfield04 * * ************ */
-        mapping[Contact.IMAGE1_CONTENT_TYPE] = new mapper() {
+        mapping[Contact.IMAGE1_CONTENT_TYPE] = new Mapper() {
 
             public String getDBFieldName() {
                 return "intfield04";
@@ -9115,7 +9051,7 @@ public final class Contacts {
             }
         };
         /** ************** * intfield04 * * ************ */
-        mapping[Contact.NUMBER_OF_IMAGES] = new mapper() {
+        mapping[Contact.NUMBER_OF_IMAGES] = new Mapper() {
 
             public String getDBFieldName() {
                 return "intfield04";
@@ -9166,7 +9102,7 @@ public final class Contacts {
             }
         };
         /** ************** * userid * * ************ */
-        mapping[Contact.INTERNAL_USERID] = new mapper() {
+        mapping[Contact.INTERNAL_USERID] = new Mapper() {
 
             public String getDBFieldName() {
                 return "userid";
@@ -9224,7 +9160,7 @@ public final class Contacts {
             }
         };
         /** ************** * intfield05 * * ************ */
-        mapping[Contact.COLOR_LABEL] = new mapper() {
+        mapping[Contact.COLOR_LABEL] = new Mapper() {
 
             public String getDBFieldName() {
                 return "intfield05";
@@ -9286,7 +9222,7 @@ public final class Contacts {
             }
         };
         /** ************** * field90 * * ************ */
-        mapping[Contact.FILE_AS] = new mapper() {
+        mapping[Contact.FILE_AS] = new Mapper() {
 
             public String getDBFieldName() {
                 return "field90";
@@ -9343,7 +9279,7 @@ public final class Contacts {
             }
         };
         /** ************** * intfield06 * * ************ */
-        mapping[Contact.DEFAULT_ADDRESS] = new mapper() {
+        mapping[Contact.DEFAULT_ADDRESS] = new Mapper() {
 
             public String getDBFieldName() {
                 return "intfield06";
@@ -9405,7 +9341,7 @@ public final class Contacts {
             }
         };
         /** ************** * intfield07 * * ************ */
-        mapping[Contact.MARK_AS_DISTRIBUTIONLIST] = new mapper() {
+        mapping[Contact.MARK_AS_DISTRIBUTIONLIST] = new Mapper() {
 
             public String getDBFieldName() {
                 return "intfield07";
@@ -9473,7 +9409,7 @@ public final class Contacts {
             }
         };
         /** ************** * intfield08 * * ************ */
-        mapping[Contact.NUMBER_OF_ATTACHMENTS] = new mapper() {
+        mapping[Contact.NUMBER_OF_ATTACHMENTS] = new Mapper() {
 
             public String getDBFieldName() {
                 return "intfield08";
@@ -9531,7 +9467,7 @@ public final class Contacts {
             }
         };
         /** ************** * intfield08 * * ************ */
-        mapping[Contact.USE_COUNT] = new mapper() {
+        mapping[Contact.USE_COUNT] = new Mapper() {
 
             public String getDBFieldName() {
                 return "useCount";

@@ -65,7 +65,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.contact.Contacts.mapper;
+import com.openexchange.groupware.contact.Contacts.Mapper;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -897,7 +897,7 @@ public class ContactMySql implements ContactSql {
     public String buildContactSelectString(final int cols[]) {
         final StringBuilder sb = new StringBuilder();
         for (int a = 0; a < cols.length; a++) {
-            final mapper m = Contacts.mapping[cols[a]];
+            final Mapper m = Contacts.mapping[cols[a]];
             if (m == null) {
                 if (DEBUG) {
                     LOG.debug("UNKNOWN FIELD -> " + cols[a]);

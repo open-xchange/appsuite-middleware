@@ -1,3 +1,7 @@
+* 2010-07-14 - marcus.klein@open-xchange.com
+
+ - Bugfix #16484: A loaded contact object now always contains the private flag.
+
 * 2010-07-14 - thorben.betten@open-xchange.com
 
  - Bugfix #16496: Proper folder information on relogin through removal from folder cache

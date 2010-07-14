@@ -89,7 +89,7 @@ import com.openexchange.groupware.contact.ContactSql;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.contact.OverridingContactInterface;
 import com.openexchange.groupware.contact.Search;
-import com.openexchange.groupware.contact.Contacts.mapper;
+import com.openexchange.groupware.contact.Contacts.Mapper;
 import com.openexchange.groupware.contact.helpers.ContactComparator;
 import com.openexchange.groupware.contact.helpers.UseCountComparator;
 import com.openexchange.groupware.container.Contact;
@@ -1304,7 +1304,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, ContactInterface,
              */
             int cnt = 8;
             for (int a = 0; a < cols.length; a++) {
-                final mapper m = Contacts.mapping[cols[a]];
+                final Mapper m = Contacts.mapping[cols[a]];
                 if (m != null) {
                     m.addToContactObject(rs, cnt, co, con, userId, memberInGroups, ctx, userConfiguration);
                     cnt++;
