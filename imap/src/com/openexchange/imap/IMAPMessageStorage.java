@@ -1263,12 +1263,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
              * Remove non user-alterable system flags
              */
             int flags = flagsArg;
-            if (((flags & MailMessage.FLAG_RECENT) > 0)) {
-                flags = flags ^ MailMessage.FLAG_RECENT;
-            }
-            if (((flags & MailMessage.FLAG_USER) > 0)) {
-                flags = flags ^ MailMessage.FLAG_USER;
-            }
+            flags &= ~MailMessage.FLAG_RECENT;
+            flags &= ~MailMessage.FLAG_USER;
             /*
              * Set new flags...
              */
