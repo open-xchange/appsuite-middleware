@@ -106,7 +106,5 @@ public final class AddFileAsForUserContacts extends UpdateTaskAdapter {
             autocommit(con);
             dbService.backForUpdateTask(contextId, con);
         }
-
     }
-
 }
