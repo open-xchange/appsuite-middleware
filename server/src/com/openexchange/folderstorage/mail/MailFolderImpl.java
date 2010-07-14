@@ -255,7 +255,7 @@ public final class MailFolderImpl extends AbstractFolder {
         /*
          * Trash folder must not be cacheable
          */
-        this.cacheable = !mailFolder.isDefaultFolder() || !mailFolderType.equals(MailFolderType.TRASH);
+        this.cacheable = !mailFolder.isDefaultFolder(); // || !mailFolderType.equals(MailFolderType.TRASH);
     }
 
     private static final int[] mapping = { 0, -1, 1, -1, 2, -1, -1, -1, 4 };
