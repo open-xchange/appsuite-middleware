@@ -662,6 +662,22 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
     }
 
     /**
+     * Adds given permission to this folder object.
+     * 
+     * @param permission The permission to add
+     */
+    public void addPermission(final OCLPermission permission) {
+        if (null == permission) {
+            return;
+        }
+        if (this.permissions == null) {
+            this.permissions = new ArrayList<OCLPermission>(4);
+            b_permissions = true;
+        }
+        this.permissions.add(permission.deepClone());
+    }
+
+    /**
      * Removes the permissions from this folder
      */
     public void removePermissions() {
