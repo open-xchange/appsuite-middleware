@@ -461,16 +461,18 @@ public class LdapContactInterface implements ContactInterface {
     }
 
     private void addFilterFor(final String fieldname, final String searchString, final StringBuilder sb) {
-        if ("*".equals(searchString)) {
-            sb.append("(");
-            sb.append(fieldname);
-            sb.append("=*)");
-        } else {
-            sb.append("(");
-            sb.append(fieldname);
-            sb.append("=");
-            sb.append(escapeLDAPSearchFilter(searchString));
-            sb.append("*)");
+        if (null != searchString) {
+            if ("*".equals(searchString)) {
+                sb.append("(");
+                sb.append(fieldname);
+                sb.append("=*)");
+            } else {
+                sb.append("(");
+                sb.append(fieldname);
+                sb.append("=");
+                sb.append(escapeLDAPSearchFilter(searchString));
+                sb.append("*)");
+            }
         }
     }
 

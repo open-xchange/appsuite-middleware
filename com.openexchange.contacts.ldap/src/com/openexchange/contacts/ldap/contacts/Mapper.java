@@ -72,6 +72,7 @@ import com.openexchange.groupware.container.DistributionListEntryObject;
  */
 public class Mapper {
 
+    protected static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Mapper.class);
     
     public interface SetterDateClosure {
 
@@ -678,7 +679,8 @@ public class Mapper {
      * @param getter TODO
      * @throws LdapException 
      */
-    private static void commonParts(Set<Integer> cols, int folderid, int adminid, final Contact retval, Mappings mappings, LdapGetter getter) throws LdapException {
+    // protected to be able to test this
+    protected static void commonParts(Set<Integer> cols, int folderid, int adminid, final Contact retval, Mappings mappings, LdapGetter getter) throws LdapException {
         if (cols.contains(Contact.FOLDER_ID)) {
             retval.setParentFolderID(folderid);
         }
@@ -687,19 +689,54 @@ public class Mapper {
         }
         
         // Finally we add the timestamps here
-        if (cols.contains(DataObject.LAST_MODIFIED)) {
-            final String lastmodified = mappings.getLastmodified();
-            if (null != lastmodified && 0 != lastmodified.length()) {
-                retval.setLastModified(getter.getDateAttribute(lastmodified));
-            } else {
-                // A timestamp must be provided, so if it can be fetched from LDAP (due to configuration) this must be self-generated
-                retval.setLastModified(new Date());
+        if (cols.contains(DataObject.CREATION_DATE)) {
+            // A timestamp must be provided, so if it can be fetched from LDAP (due to configuration) this must be self-generated
+            final String creationdate = mappings.getCreationdate();
+            if (null != creationdate && 0 != creationdate.length()) {
+                final Date creationDateValue = getter.getDateAttribute(creationdate);
+                if (null != creationDateValue) {
+                    retval.setCreationDate(creationDateValue);
+                } else {
+                    retval.setCreationDate(new Date(1000));
+                    LOG.warn("Object: " + getter.getObjectFullName() + " has no value for creation date. Using self-defined fallback. This may lead to problems.");
+                }
             }
         }
-        if (cols.contains(DataObject.CREATION_DATE)) {
-            // TODO Fetch it through operational attributes
-            retval.setCreationDate(new Date());
+        if (cols.contains(DataObject.LAST_MODIFIED)) {
+            final String lastmodified = mappings.getLastmodified();
+            Date creationDate = creationDateFallback(retval, mappings, getter);
+            if (null != lastmodified && 0 != lastmodified.length()) {
+                final Date modifiedDateValue = getter.getDateAttribute(lastmodified);
+                if (null != modifiedDateValue) {
+                    if (null == creationDate || creationDate.before(modifiedDateValue)) {
+                        retval.setLastModified(modifiedDateValue);
+                    }
+                } else {
+                    LOG.warn("Object: " + getter.getObjectFullName() + " has no value for last modified date. Using self-defined fallback. This may lead to problems.");
+                }
+            }
         }
+    }
+
+    private static Date creationDateFallback(final Contact retval, Mappings mappings, LdapGetter getter) throws LdapException {
+        Date creationDate = retval.getCreationDate();
+        // A timestamp must be provided, so if it can be fetched from LDAP (due to configuration) this must be self-generated
+        if (null != creationDate) {
+            retval.setLastModified(creationDate);
+        } else {
+            final String creationdate = mappings.getCreationdate();
+            if (null != creationdate && 0 != creationdate.length()) {
+                final Date creationDateValue = getter.getDateAttribute(creationdate);
+                if (null != creationDateValue) {
+                    creationDate = creationDateValue;
+                    retval.setLastModified(creationDateValue);
+                } else {
+                    retval.setLastModified(new Date(1000));
+                    LOG.warn("Object: " + getter.getObjectFullName() + " has no value for creation date. Using self-defined fallback. This may lead to problems.");
+                }
+            }
+        }
+        return creationDate;
     }
 
     private static DistributionListEntryObject[] getDistributionlist(final LdapGetter getter, int folderid, final Mappings mappings, String[] attributes) throws LdapException {

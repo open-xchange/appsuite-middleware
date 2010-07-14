@@ -123,4 +123,4 @@ com.openexchange.contacts.ldap.mapping.ads.defaultaddress		=
 com.openexchange.contacts.ldap.mapping.ads.title				= title
 com.openexchange.contacts.ldap.mapping.ads.position				= 
 com.openexchange.contacts.ldap.mapping.ads.lastmodified				= whenChanged
-com.openexchange.contacts.ldap.mapping.ads.creationdate				= 
+com.openexchange.contacts.ldap.mapping.ads.creationdate				= whenCreated

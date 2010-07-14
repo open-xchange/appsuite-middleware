@@ -76,6 +76,7 @@ import com.openexchange.contacts.ldap.exceptions.LdapException;
 import com.openexchange.contacts.ldap.exceptions.LdapException.Code;
 import com.openexchange.contacts.ldap.property.FolderProperties;
 import com.openexchange.contacts.ldap.property.Mappings;
+import com.openexchange.contacts.ldap.property.FolderProperties.DerefAliases;
 import com.openexchange.contacts.ldap.property.FolderProperties.SearchScope;
 import com.openexchange.contacts.ldap.property.FolderProperties.Sorting;
 import com.openexchange.groupware.container.Contact;
@@ -612,6 +613,15 @@ public class LdapJNDIImpl implements LdapInterface {
         default:
             break;
         }
+        final DerefAliases derefAliases = folderprop.getDerefAliases();
+        if (null != derefAliases) {
+            env.put("java.naming.ldap.derefAliases", derefAliases.toString());
+        }
+        final int pooltimeout = folderprop.getPooltimeout();
+        if (-1 != pooltimeout) {
+            env.put("com.sun.jndi.ldap.connect.pool.timeout", String.valueOf(pooltimeout));
+        }
+        
         return env;
     }
 

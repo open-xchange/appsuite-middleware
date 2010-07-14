@@ -139,7 +139,17 @@ public class LdapConfigurationException extends OXException {
         /**
          * The given value for refreshinterval "%s" is no integer value
          */
-        INVALID_REFRESHINTERVAL("The given value for refreshinterval \"%s\" is no integer value", Category.SETUP_ERROR, 16);
+        INVALID_REFRESHINTERVAL("The given value for refreshinterval \"%s\" is no integer value", Category.SETUP_ERROR, 16),
+
+        /**
+         * The given value for pooltimeout "%s" in file "%s" is no integer value
+         */
+        INVALID_POOLTIMEOUT("The given value for pooltimeout \"%s\" in file \"%s\" is no integer value", Category.SETUP_ERROR, 17),
+
+        /**
+         * The given value for derefAliases "%s" in file "%s" is not a possible one
+         */
+        DEREF_ALIASES_WRONG("The given value for derefAliases \"%s\" in file \"%s\" is not a possible one", Category.SETUP_ERROR, 18);
 
 
         /**
