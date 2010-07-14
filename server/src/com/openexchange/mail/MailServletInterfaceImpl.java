@@ -69,8 +69,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import javax.mail.internet.AddressException;
@@ -2231,6 +2231,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         initConnection(accountId);
         final String fullname = argument.getFullname();
         mailAccess.getMessageStorage().updateMessageColorLabel(fullname, msgUID, newColorLabel);
+        postEvent(accountId, fullname, true, true);
         /*
          * Update caches
          */
@@ -2298,6 +2299,12 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         initConnection(accountId);
         final String fullname = argument.getFullname();
         mailAccess.getMessageStorage().updateMessageFlags(fullname, mailIDs, flagBits, flagVal);
+        postEvent(accountId, fullname, true, true);
+        final boolean spamAction = (usm.isSpamEnabled() && ((flagBits & MailMessage.FLAG_SPAM) > 0));
+        if (spamAction) {
+            final String spamFullname = mailAccess.getFolderStorage().getSpamFolder();
+            postEvent(accountId, spamFullname, true, true);
+        }
         /*
          * Update caches
          */
@@ -2329,7 +2336,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 }
             }
         }
-        if (usm.isSpamEnabled() && ((flagBits & MailMessage.FLAG_SPAM) > 0)) {
+        if (spamAction) {
             /*
              * Remove from caches
              */
@@ -2454,6 +2461,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     private void postEvent(final int accountId, final String fullname, final boolean contentRelated) {
+        postEvent(accountId, fullname, contentRelated, false);
+    }
+
+    private void postEvent(final int accountId, final String fullname, final boolean contentRelated, final boolean immediateDelivery) {
         if (MailAccount.DEFAULT_ID != accountId) {
             /*
              * TODO: No event for non-primary account?
@@ -2461,7 +2472,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             return;
         }
         EventPool.getInstance().put(
-            new PooledEvent(contextId, session.getUserId(), accountId, prepareFullname(accountId, fullname), contentRelated, session));
+            new PooledEvent(contextId, session.getUserId(), accountId, prepareFullname(accountId, fullname), contentRelated, immediateDelivery, session));
     }
 
 }

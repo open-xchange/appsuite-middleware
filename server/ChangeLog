@@ -1,3 +1,7 @@
+* 2010-07-14 - thorben.betten@open-xchange.com
+
+ - Bugfix #16496: Proper folder information on relogin through removal from folder cache
+
 * 2010-07-12 - steffen.templin@open-xchange.com
 
  - Bugfix #16089: Confirmation status of automatically added UserParticipant in public appointments without participants is set to user settings default.

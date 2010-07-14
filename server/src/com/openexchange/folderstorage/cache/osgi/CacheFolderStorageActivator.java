@@ -56,12 +56,16 @@ import java.util.Hashtable;
 import java.util.List;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.folderstorage.FolderException;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
+import com.openexchange.push.PushEventConstants;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -73,10 +77,12 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public final class CacheFolderStorageActivator extends DeferredActivator {
 
-    private static final org.apache.commons.logging.Log LOG =
+    static final org.apache.commons.logging.Log LOG =
         org.apache.commons.logging.LogFactory.getLog(CacheFolderStorageActivator.class);
 
     private ServiceRegistration folderStorageRegistration;
+
+    private ServiceRegistration eventHandlerRegistration;
 
     private CacheFolderStorage cacheFolderStorage;
 
@@ -196,9 +202,34 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
         final Dictionary<String, String> dictionary = new Hashtable<String, String>();
         dictionary.put("tree", FolderStorage.ALL_TREE_ID);
         folderStorageRegistration = context.registerService(FolderStorage.class.getName(), cacheFolderStorage, dictionary);
+        // Register event handler for content-related changes on a mail folder
+        final CacheFolderStorage tmp = cacheFolderStorage;
+        final EventHandler eventHandler = new EventHandler() {
+            
+            public void handleEvent(final Event event) {
+                if (Boolean.TRUE.equals(event.getProperty(PushEventConstants.PROPERTY_CONTENT_RELATED))) {
+                    final int userId = ((Integer) event.getProperty(PushEventConstants.PROPERTY_USER)).intValue();
+                    final int contextId = ((Integer) event.getProperty(PushEventConstants.PROPERTY_CONTEXT)).intValue();
+                    final String folderId = (String) event.getProperty(PushEventConstants.PROPERTY_FOLDER);
+                    try {
+                        tmp.removeFromCache(folderId, FolderStorage.REAL_TREE_ID, userId, contextId);
+                    } catch (FolderException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
+                }
+            }
+        };
+        final Dictionary<String, Object> dict = new Hashtable<String, Object>();
+        dict.put(EventConstants.EVENT_TOPIC, PushEventConstants.TOPIC);
+        eventHandlerRegistration = context.registerService(EventHandler.class.getName(), eventHandler, dict);
     }
 
     private void unregisterCacheFolderStorage() {
+        // Unregister event handler
+        if (null != eventHandlerRegistration) {
+            eventHandlerRegistration.unregister();
+            eventHandlerRegistration = null;
+        }
         // Unregister folder storage
         if (null != folderStorageRegistration) {
             folderStorageRegistration.unregister();

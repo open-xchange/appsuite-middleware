@@ -74,6 +74,8 @@ public final class PooledEvent implements Delayed {
 
     private final boolean contentRelated;
 
+    private final boolean immediateDelivery;
+
     private final int hash;
 
     /**
@@ -83,10 +85,11 @@ public final class PooledEvent implements Delayed {
      * @param userId The user ID
      * @param accountId The account ID
      * @param fullname The folder fullname
-     * @param contentRelated <code>true</code> for a content-related event; otherwsie <code>false</code>
+     * @param contentRelated <code>true</code> for a content-related event; otherwise <code>false</code>
+     * @param immediateDelivery <code>true</code> for immediate delivery; otherwise <code>false</code>
      * @param session The session
      */
-    public PooledEvent(final int contextId, final int userId, final int accountId, final String fullname, final boolean contentRelated, final Session session) {
+    public PooledEvent(final int contextId, final int userId, final int accountId, final String fullname, final boolean contentRelated, final boolean immediateDelivery, final Session session) {
         super();
         stamp = System.currentTimeMillis();
         this.contextId = contextId;
@@ -94,6 +97,7 @@ public final class PooledEvent implements Delayed {
         this.accountId = accountId;
         this.fullname = fullname;
         this.contentRelated = contentRelated;
+        this.immediateDelivery = immediateDelivery;
         this.session = session;
         // Hash code
         final int prime = 31;
@@ -107,7 +111,7 @@ public final class PooledEvent implements Delayed {
     }
 
     public long getDelay(final TimeUnit unit) {
-        return unit.convert(EventPool.MSEC_DELAY - (System.currentTimeMillis() - stamp), TimeUnit.MILLISECONDS);
+        return immediateDelivery ? 0L : unit.convert(EventPool.MSEC_DELAY - (System.currentTimeMillis() - stamp), TimeUnit.MILLISECONDS);
     }
 
     public int compareTo(final Delayed o) {
