@@ -64,7 +64,7 @@ public class FolderProperties {
 
     
     private static final int DEFAULT_REFRESH_INTERVAL = 10000;
-
+    
     public interface SetterFallbackClosure {
         public void set(String property);
         
@@ -119,6 +119,13 @@ public class FolderProperties {
         ignore,
         standard
     }
+    
+    public enum DerefAliases {
+        always,
+        never,
+        finding,
+        searching
+    }
 
     
     private enum Parameters {
@@ -149,7 +156,9 @@ public class FolderProperties {
         outlook_support("outlook_support"),
         ADS_deletion_support("ADS_deletion_support"),
         referrals("referrals"),
-        refreshinterval("refreshinterval");
+        refreshinterval("refreshinterval"),
+        pooltimeout("pooltimeout"),
+        derefAliases("derefAliases");
         
         private final String name;
         
@@ -224,7 +233,9 @@ public class FolderProperties {
     
     private int refreshinterval;
     
+    private int pooltimeout;
     
+    private DerefAliases derefAliases;
     
     public static FolderProperties getFolderPropertiesFromProperties(final ConfigurationService configuration, final String name, final String folder, final String contextnr, final StringBuilder logBuilder) throws LdapConfigurationException {
         final String prefix = PropertyHandler.bundlename + "context" + contextnr + "." + folder + ".";
@@ -445,6 +456,27 @@ public class FolderProperties {
             throw new LdapConfigurationException(Code.INVALID_REFRESHINTERVAL, refreshintervalstring);
         }
 
+        final String pooltimeoutString = checkStringProperty(parameterObject, Parameters.pooltimeout);
+        try {
+            if (null != pooltimeoutString) {
+                retval.setPooltimeout(Integer.parseInt(pooltimeoutString));
+            } else {
+                retval.setPooltimeout(-1);
+            }
+            logBuilder.append("\tpooltimeout (-1 for not set): ").append(retval.getPooltimeout()).append('\n');
+        } catch (final NumberFormatException e) {
+            throw new LdapConfigurationException(Code.INVALID_POOLTIMEOUT, pooltimeoutString, parameterObject.getFilename());
+        }
+        
+        final String derefAliasesString = checkStringProperty(parameterObject, Parameters.derefAliases);
+        if (null != derefAliasesString) {
+            try {
+                retval.setDerefAliases(DerefAliases.valueOf(derefAliasesString));
+            } catch (final IllegalArgumentException e) {
+                throw new LdapConfigurationException(Code.DEREF_ALIASES_WRONG, derefAliasesString, parameterObject.getFilename());
+            }
+        }
+        logBuilder.append("\tderefAliases (null for not set): ").append(retval.getDerefAliases()).append('\n');
 
         final String memoryMappingString = checkStringProperty(parameterObject, Parameters.memorymapping);
         
@@ -507,6 +539,11 @@ public class FolderProperties {
     }
 
 
+    public DerefAliases getDerefAliases() {
+        return derefAliases;
+    }
+
+
     public String getFoldername() {
         return foldername;
     }
@@ -529,6 +566,10 @@ public class FolderProperties {
         return pagesize;
     }
     
+    public int getPooltimeout() {
+        return pooltimeout;
+    }
+
     public String getSearchfilter() {
         return searchfilter;
     }
@@ -654,6 +695,10 @@ public class FolderProperties {
         this.contacttypes = contacttypes;
     }
 
+    private void setDerefAliases(DerefAliases derefAliases) {
+        this.derefAliases = derefAliases;
+    }
+
     private void setFoldername(final String foldername) {
         this.foldername = foldername;
     }
@@ -674,6 +719,10 @@ public class FolderProperties {
         this.pagesize = pagesize;
     }
     
+    private void setPooltimeout(int pooltimeout) {
+        this.pooltimeout = pooltimeout;
+    }
+
     private void setReferrals(ReferralTypes referrals) {
         this.referrals = referrals;
     }

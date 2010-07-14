@@ -1,3 +1,10 @@
+* 2010-07-14 - dennis.sieben@open-xchange.com
+
+ - Bugfix #16049 - [L3] Distribution list not available after update
+   - Added fallback to creation date if modified date is not available
+   - Added missing mapping for creation date in ADS
+   - Added two more properties: pooltimeout and derefAliases
+
 * 2010-04-20 - dennis.sieben@open-xchange.com
 
  - Bugfix #15899 - Global addressbook doesn't return results via EAS once contacts-ldap is installed
