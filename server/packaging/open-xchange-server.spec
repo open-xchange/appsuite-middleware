@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 11
+%define		ox_release 12
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -537,8 +537,31 @@ fi
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*
 %changelog
+* Wed Jul 14 2010 - thorben.betten@open-xchange.com
+ - Bugfix #16496: Proper folder information on relogin through removal from folder cache
+* Wed Jul 14 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16484: A loaded contact object now always contains the private flag.
+* Tue Jul 13 2010 - thorben.betten@open-xchange.com
+ - Bugfix #16384: Fixed order of folders below user's private folder
+* Tue Jul 13 2010 - steffen.templin@open-xchange.com
+ - Bugfix #16089: Confirmation status of automatically added UserParticipant in public appointments without participants is set to user settings default.
+* Mon Jul 12 2010 - thorben.betten@open-xchange.com
+ - Bugfix #16472: Keeping other attributes when replacing "src" attribute in HTML "img" tags
+ - Bugfix #16461: Show every RFC822 part as a nested mail regardless of Content-Disposition header
+ - Bugfix #16467: Processing embedded images nested in "background=" attribute
+* Fri Jul 09 2010 - steffen.templin@open-xchange.com
+ - Bugfix #15776: Setting a reminder for a sequence with first occurrence in the past and next occurrence in the future works now.
+* Fri Jul 09 2010 - francisco.laguna@open-xchange.com
+ - Bugfix #16447: Have Publication and Subscription User Delete listeners take part in Admins transaction.
+ - Bugfix #16099: Moving first task of a series to day where first occurrence of series should be as described in the series pattern.
+* Thu Jul 08 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16199: Adding correct content-type to attachments servlet GET requests.
+ - Bugfix #16420: Allowing zero size collections for SearchIteratorDelegator.
+ - Bugfix #16397: Backend transfers all available time zones to the UI.
 * Wed Jul 07 2010 - marcus.klein@open-xchange.com
  - Bugfix #16421: If a database socket is once broken it should be kept broken to not compromise ResultSets from that connection.
+* Wed Jul 07 2010 - tobias.prinz@open-xchange.com
+ - Bugfix #16367: MS Exchange 2007 tends to send broken iCal CN data. We ignore that now. 
 * Tue Jul 06 2010 - marcus.klein@open-xchange.com
  - Bugfix #16342: A background update task adds an initial filestore usage for every context.
  - Bugfix #16291: Creating pooled objects is now done outside the lock for the internal pool structures. This prevents a lot of waiting

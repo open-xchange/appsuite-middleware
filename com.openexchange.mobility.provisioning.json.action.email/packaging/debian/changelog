@@ -1,3 +1,9 @@
+open-xchange-mobility-provisioning-json-action-email (6.17.0.0-3) unstable; urgency=low
+
+  * first build for 6.17-rev12
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 14 Jul 2010 15:19:36 +0200
+
 open-xchange-mobility-provisioning-json-action-email (6.17.0.0-2) unstable; urgency=low
 
   * first build for 6.17-rev11
