@@ -2182,7 +2182,7 @@ public final class MIMEMessageConverter {
             final String imp = importance.trim();
             if ("Low".equalsIgnoreCase(imp)) {
                 priority = MailMessage.PRIORITY_LOWEST;
-            } else if ("Medium".equalsIgnoreCase(imp)) {
+            } else if ("Medium".equalsIgnoreCase(imp) || "Normal".equalsIgnoreCase(imp)) {
                 priority = MailMessage.PRIORITY_NORMAL;
             } else if ("High".equalsIgnoreCase(imp)) {
                 priority = MailMessage.PRIORITY_HIGHEST;
