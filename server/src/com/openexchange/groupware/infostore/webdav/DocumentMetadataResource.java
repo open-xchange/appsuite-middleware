@@ -77,6 +77,8 @@ import com.openexchange.groupware.infostore.database.impl.InfostoreSecurity;
 import com.openexchange.groupware.infostore.database.impl.SetSwitch;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.webdav.URLCache.Type;
+import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
@@ -312,11 +314,40 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
     }
 
     public WebdavLock getOwnLock(final String token) throws WebdavProtocolException {
-        return lockHelper.getLock(token);
+        return injectOwner(lockHelper.getLock(token));
     }
 
     public List<WebdavLock> getOwnLocks() throws WebdavProtocolException {
-        return lockHelper.getAllLocks();
+        return injectOwner(lockHelper.getAllLocks());
+    }
+
+    private WebdavLock injectOwner(WebdavLock lock) throws WebdavProtocolException {
+        if(lock.getOwner() == null || "".equals(lock.getOwner())) {
+            loadMetadata();
+            int userId = metadata.getModifiedBy();
+            try {
+                User user = UserStorage.getInstance().getUser(userId, getSession().getContext());
+                String displayName = user.getDisplayName();
+                if(displayName == null) {
+                    displayName = user.getMail();
+                }
+                if(displayName == null) {
+                    displayName = String.valueOf(userId);
+                }
+                lock.setOwner(displayName);
+                
+            } catch (LdapException e) {
+                // Ignore, if lookup fails set no owner.
+            }
+        }
+        return lock;
+    }
+
+    private List<WebdavLock> injectOwner(List<WebdavLock> allLocks) throws WebdavProtocolException {
+        for (WebdavLock webdavLock : allLocks) {
+            injectOwner(webdavLock);
+        }
+        return allLocks;
     }
 
     public String getSource() throws WebdavProtocolException {
