@@ -39,7 +39,7 @@ BuildRequires:  java-devel-icedtea saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 11
+%define		ox_release 12
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -354,6 +354,10 @@ fi
 %defattr(-,root,root)
 %doc javadoc
 %changelog
+* Fri Jul 09 2010 - marcus.klein@open-xchange.com
+ - Bugfix #16112: Administration daemon now writes the users display name into the fileAs attribute used by some clients.
+* Thu Jul 08 2010 - karsten.will@open-xchange.com
+ - Bugfix #15200 - [L3] After changing contextadmin password in the GUI pw not in sync with CLT
 * Tue Jun 29 2010 - karsten.will@open-xchange.com
  - Bugfix #15762 - Enabled/Disabled features are ignored on user creation
 * Wed Jun 23 2010 - marcus.klein@open-xchange.com
