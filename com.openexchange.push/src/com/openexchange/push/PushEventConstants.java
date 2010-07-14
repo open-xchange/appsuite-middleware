@@ -94,4 +94,9 @@ public final class PushEventConstants {
      */
     public static final String PROPERTY_SESSION = "com.openexchange.push.session";
 
+    /**
+     * Force an immediate delivery of the associated event.
+     */
+    public static final String PROPERTY_IMMEDIATELY = "com.openexchange.push.immediately";
+
 }
