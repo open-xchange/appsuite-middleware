@@ -33,13 +33,9 @@ setUCRVars() {
 
     for repo in oxoutlook oxmobility; do
 	# fix all descriptions
-	if [ "$(ucr get repository/online/component/${repo}/description)" != "${descrarr[$cnt]}" ]; then
-	   ucr set repository/online/component/${repo}/description="${descrarr[$cnt]}"
-	fi
+	ucr set repository/online/component/${repo}/description="${descrarr[$cnt]}"
 	# add required packages
-	if [ "$(ucr get repository/online/component/${repo}/defaultpackage)" != "${pkgarr[$cnt]}" ]; then
-	   ucr set repository/online/component/${repo}/defaultpackage="${pkgarr[$cnt]}"
-	fi
+	ucr set repository/online/component/${repo}/defaultpackage="${pkgarr[$cnt]}"
 
 	if echo $components | grep $repo >/dev/null; then
 	   cnt=$(( $cnt + 1 ))
