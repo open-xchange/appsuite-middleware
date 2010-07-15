@@ -294,7 +294,7 @@ if ( $end > 0 ) {
 	test -n "$val" && val="$(echo $val | sed 's/\&/\\\&/g')"
 	if grep -E "^$prop" $propfile >/dev/null; then
 	    cat<<EOF | sed -f - $propfile > $tmp
-s;\(^$prop *[:=]\).*$;\1${val};
+s;\(^$prop[[:space:]]*[:=]\).*$;\1${val};
 EOF
 	else
 	    echo "${prop}=$val" >> $tmp
