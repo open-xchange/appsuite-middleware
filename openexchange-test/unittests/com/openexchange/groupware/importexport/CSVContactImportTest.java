@@ -64,8 +64,6 @@ import org.junit.Test;
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLImpl;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -144,6 +142,28 @@ public class CSVContactImportTest extends AbstractContactTest {
         //cleaning up
         contactSql.deleteContactObject(Integer.parseInt(res.getObjectId()), Integer.parseInt(res.getFolder()), res.getDate());
     }
+    
+    @Test public void importOneDistributionList() throws Exception{
+        final List<ImportResult> results = importStuff(ContactField.DISPLAY_NAME.getReadableName() + "," + ContactField.MARK_AS_DISTRIBUTIONLIST.getAjaxName() + "\n" + "my list,true");
+        assertTrue("One result?" , results.size() == 1);
+        final ImportResult res = results.get(0);
+        if(res.hasError()){
+            res.getException().printStackTrace();
+        }
+        assertTrue( res.isCorrect() );
+
+        //basic check: 1 entry in folder
+        final ContactSQLInterface contactSql = new RdbContactSQLImpl(sessObj);
+        assertTrue("One contact in folder?", 1 == contactSql.getNumberOfContacts(folderId));
+
+        //detailed check:
+        final Contact co = new RdbContactSQLImpl(sessObj).getObjectById(Integer.parseInt(res.getObjectId()), folderId);
+        
+        assertTrue("Should be a distribution list", co.getMarkAsDistribtuionlist());
+        
+        //cleaning up
+        contactSql.deleteContactObject(Integer.parseInt(res.getObjectId()), Integer.parseInt(res.getFolder()), res.getDate());  
+    }
 
     @Test public void importEmpty() throws NumberFormatException, Exception{
         final List<ImportResult> results = importStuff(IMPORT_EMPTY);
@@ -170,7 +190,7 @@ public class CSVContactImportTest extends AbstractContactTest {
 
         //basic check
         final ContactSQLInterface contactSql = new RdbContactSQLImpl(sessObj);
-        assertTrue("Two contacts in folder?", 2 == contactSql.getNumberOfContacts(folderId));
+        assertEquals("Two contacts in folder?", 2 , contactSql.getNumberOfContacts(folderId));
 
         //cleaning up
         for(final ImportResult res : results){
@@ -218,7 +238,7 @@ public class CSVContactImportTest extends AbstractContactTest {
         }
 
         final ContactSQLInterface contactSql = new RdbContactSQLImpl(sessObj);
-        assertTrue("Three contacts in folder?", 3 == contactSql.getNumberOfContacts(folderId));
+        assertEquals("Three contacts in folder?", 3 , contactSql.getNumberOfContacts(folderId));
 
         //cleaning up
         for(final ImportResult res : results){

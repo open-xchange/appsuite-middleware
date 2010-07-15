@@ -69,6 +69,8 @@ import com.openexchange.ajax.appointment.action.ConfirmResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
+import com.openexchange.ajax.appointment.action.HasRequest;
+import com.openexchange.ajax.appointment.action.HasResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.ListRequest;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
@@ -370,6 +372,40 @@ public class CalendarTestManager implements TestManager {
         return I2i(cols);
     }
 
+    public Appointment[] all(int parentFolderID, Date start, Date end, int[] columns) {
+        AllRequest request = new AllRequest(parentFolderID, columns, start, end, timezone);
+        CommonAllResponse response = execute(request);
+        extractInfo(response);
+        List<Appointment> appointments = new ArrayList<Appointment>();
+
+        int[] actualColumns = response.getColumns();
+        for (Object[] row : response.getArray()) {
+            Appointment app = new Appointment();
+            appointments.add(app);
+            for (int i = 0; i < row.length; i++) {
+                if (row[i] == null) {
+                    continue;
+                }
+                if (actualColumns[i] == Appointment.LAST_MODIFIED_UTC) {
+                    continue;
+                }
+                try {
+                    app.set(actualColumns[i], row[i]);
+                } catch (ClassCastException x) {
+                    if (x.getMessage().equals("java.lang.Long")) {
+                        if (!tryDate(app, actualColumns[i], (Long) row[i])) {
+                            tryInteger(app, actualColumns[i], (Long) row[i]);
+                        }
+                    }
+                }
+            }
+        }
+
+        return appointments.toArray(new Appointment[appointments.size()]);
+
+    }
+        
+        
     public Appointment[] all(int parentFolderID, Date start, Date end) {
         AllRequest request = new AllRequest(parentFolderID, Appointment.ALL_COLUMNS, start, end, timezone);
         CommonAllResponse response = execute(request);
@@ -435,6 +471,17 @@ public class CalendarTestManager implements TestManager {
     public void createDeleteException(Appointment master, int recurrencePos) {
         createDeleteException(master.getParentFolderID(), master.getObjectID(), recurrencePos);
         master.setLastModified(getLastModification());
+    }
+    
+    public boolean[] has(Date startInclusive, Date endExclusive){
+        HasResponse response = execute( new HasRequest(startInclusive, endExclusive, getTimezone()));
+        lastResponse = response;
+        try {
+            return response.getValues();
+        } catch (JSONException e) {
+            lastException = e;
+            return null;
+        }
     }
 
     /*

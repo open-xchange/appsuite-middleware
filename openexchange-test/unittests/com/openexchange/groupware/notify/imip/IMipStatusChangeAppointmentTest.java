@@ -49,9 +49,13 @@
 
 package com.openexchange.groupware.notify.imip;
 
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.data.conversion.ical.ITipMethod;
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.ExternalUserParticipant;
+import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.session.Session;
 
@@ -61,6 +65,12 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class IMipStatusChangeAppointmentTest extends IMipTest {
+
+    /**
+     * 
+     */
+    private String external = "externalparticipant@example.com";
+    private String organizer = "123@example.invalid";
 
     private Session so2;
 
@@ -74,6 +84,9 @@ public class IMipStatusChangeAppointmentTest extends IMipTest {
         so2 = contextTools.getSessionForUser(secondUser, ctx);
         appointment = appointments.buildAppointmentWithUserParticipants(user, secondUser, thirdUser);
         appointment.setOrganizer("123@example.invalid");
+        List<Participant> participants = new LinkedList<Participant>(Arrays.asList(appointment.getParticipants()));
+        participants.add(new ExternalUserParticipant(external));
+        appointment.setParticipants(participants);
     }
 
     /*
@@ -104,29 +117,28 @@ public class IMipStatusChangeAppointmentTest extends IMipTest {
         notify.appointmentAccepted(appointment, so2);
         List<Message> messages = notify.getMessages();
         
-        boolean foundFirst = false, ownerMsg = false, senderMsg = false, otherParticipantMsg = false;
+        boolean organizerMsg = false, ownerMsg = false, senderMsg = false, otherParticipantMsg = false, externalMsg = false;
         
         for (Message message : messages) {
-            if (message.addresses.contains("123@example.invalid")) {
+            if (message.addresses.contains(organizer)) {
                 checkState(message.message, ITipMethod.REPLY);
-                foundFirst = true;
+                organizerMsg = true;
             } else if (message.addresses.contains(userMail)) {
                 ownerMsg = true;
             } else if (message.addresses.contains(secondUserMail)) {
                 senderMsg = true;
             } else if (message.addresses.contains(thirdUserMail)) {
                 otherParticipantMsg = true;
-            }
+             } else if (message.addresses.contains(external)) {
+                 externalMsg = true;
+             }
         }
         
-        if(! ownerMsg)
-            fail("Owner (not organizer) should get a mail");
-        if( senderMsg)
-            fail("Sender should not get a mail");
-        if( ! otherParticipantMsg)
-            fail("Other participants should not get reply mails.");
-        
-        assertTrue("missing user", foundFirst);
+        assertTrue("Owner (not organizer) should get a mail", ownerMsg);
+        assertFalse("Sender should not get a mail", senderMsg);
+        assertTrue("Other participants should get mails.", otherParticipantMsg);
+        assertFalse("OMG, someone fixed Bug 15664! Change the expectation of this test, because: External participants should get mails.", externalMsg);
+        assertTrue("Organizer should get mail", organizerMsg);
         notify.clearMessages();
     }
 }

@@ -481,7 +481,7 @@ public class FolderTestManager implements TestManager{
     /**
      * Generates a folder with admin permissions for all given userIDs.
      * @param name Name of the folder
-     * @param moduleID moduleID of the folder (is it task, appointment, contact...?)
+     * @param moduleID moduleID of the folder (calendar, task, etc... from FolderObject, not from any other class)
      * @param parentID the parent folder's ID
      * @param userIDs the IDs of the users that have admin permission on this one
      * @return a fodler object according to the input parameters

@@ -336,5 +336,33 @@ public class VCardImportBugTests extends AbstractVCardImportTest {
         assertEquals("Checking surname:", "B\u00f6rnig", myImport.getSurName());
     }
 
+    // related to bug15400
+    public void testForDataTruncation() throws TestException, IOException, SAXException, JSONException, Exception {
+        final String name = "Hadschi Halef Omar Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd al Gossarah Hadschi Halef Omar Ben Hadschi Abul Abbas Ibn Hadschi D...as War Knapp Und Wird Hier Abgeschnitten";
+        final String truncatedName = "Hadschi Halef Omar Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd al Gossarah Hadschi Halef Omar Ben Hadschi Abul Abbas Ibn Hadschi D";
+        final String vcard = "BEGIN:VCARD\n" +
+                "VERSION:2.1\n" +
+                "N;CHARSET=Windows-1252:"+name+";;;\n" +
+                "END:VCARD";
+        final ImportResult[] importResult = importVCard(
+            getWebConversation(),
+            new ByteArrayInputStream(vcard.getBytes("Cp1252")),
+            contactFolderId,
+            timeZone,
+            emailaddress,
+            getHostName(),
+            getSessionId());
+
+        assertFalse("Worked?", importResult[0].hasError());
+        final int contactId = Integer.parseInt(importResult[0].getObjectId());
+        final Contact myImport = ContactTest.loadContact(
+            getWebConversation(),
+            contactId,
+            contactFolderId,
+            getHostName(),
+            getLogin(),
+            getPassword());
+        assertEquals("Checking surname:", truncatedName, myImport.getSurName());
+    }
 
 }

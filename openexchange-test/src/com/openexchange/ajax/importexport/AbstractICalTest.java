@@ -58,12 +58,10 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
-
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
@@ -104,124 +102,119 @@ import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 public class AbstractICalTest extends AbstractAJAXTest {
-	
-	protected static final String IMPORT_URL = "/ajax/import";
-	
-	protected static final String EXPORT_URL = "/ajax/export";
-	
-	protected Date startTime = null;
-	
-	protected Date endTime = null;
-	
-	protected int appointmentFolderId = -1;
-	
-	protected int taskFolderId = -1;
-	
-	protected int userId = -1;
-	
-	protected String emailaddress = null;
-	
-	protected TimeZone timeZone = null;
+
+    protected static final String IMPORT_URL = "/ajax/import";
+
+    protected static final String EXPORT_URL = "/ajax/export";
+
+    protected Date startTime = null;
+
+    protected Date endTime = null;
+
+    protected int appointmentFolderId = -1;
+
+    protected int taskFolderId = -1;
+
+    protected int userId = -1;
+
+    protected String emailaddress = null;
+
+    protected TimeZone timeZone = null;
 
     private static final Log LOG = LogFactory.getLog(AbstractICalTest.class);
-	
-	public AbstractICalTest(final String name) {
-		super(name);
-	}
-	
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-		
-		final FolderObject appointmentFolderObj = FolderTest
-				.getStandardCalendarFolder(getWebConversation(),
-				getHostName(), getSessionId());
-		appointmentFolderId = appointmentFolderObj.getObjectID();
-		
-		final FolderObject taskFolderObj = FolderTest
-				.getStandardTaskFolder(getWebConversation(),
-				getHostName(), getSessionId());
-		taskFolderId = taskFolderObj.getObjectID();
-		
-		userId = appointmentFolderObj.getCreatedBy();
-		
-		timeZone = ConfigTools.getTimeZone(getWebConversation(),
-				getHostName(), getSessionId());
-		
-		LOG.debug(new StringBuilder().append("use timezone: ").append(
-				timeZone).toString());
-		
-		final Contact contactObj = ContactTest.loadUser(getWebConversation(), userId, FolderObject.SYSTEM_LDAP_FOLDER_ID, getHostName(), getSessionId());
-		emailaddress = contactObj.getEmail1();
-		
-		final Calendar c = Calendar.getInstance();
-		c.setTimeZone(timeZone);
-		c.set(Calendar.HOUR_OF_DAY, 8);
-		c.set(Calendar.MINUTE, 0);
-		c.set(Calendar.SECOND, 0);
-		c.set(Calendar.MILLISECOND, 0);
-		
-		startTime = c.getTime();
-		// startTime.setTime(sta + timeZone.getOffset(startTime.getTime()));
-		endTime = new Date(startTime.getTime() + 3600000);
 
-		// Remove somewhere ugly injected instances.
-		Participants.userResolver = new UserResolver() {
-	        public List<User> findUsers(final List<String> mails, final Context ctx) {
-	            return new ArrayList<User>();
-	        }
-	        public User loadUser(final int userId, final Context ctx) {
-	            return null;
-	        }
-	    };
+    public AbstractICalTest(final String name) {
+        super(name);
     }
-	
-	public static ImportResult[] importICal(final WebConversation webCon,
-	    final Appointment[] appointments, final int folderId, final String host,
-	    final String session) throws ConversionError, AjaxException, IOException,
-	    SAXException, JSONException {
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+
+        final FolderObject appointmentFolderObj = FolderTest.getStandardCalendarFolder(getWebConversation(), getHostName(), getSessionId());
+        appointmentFolderId = appointmentFolderObj.getObjectID();
+
+        final FolderObject taskFolderObj = FolderTest.getStandardTaskFolder(getWebConversation(), getHostName(), getSessionId());
+        taskFolderId = taskFolderObj.getObjectID();
+
+        userId = appointmentFolderObj.getCreatedBy();
+
+        timeZone = ConfigTools.getTimeZone(getWebConversation(), getHostName(), getSessionId());
+
+        LOG.debug(new StringBuilder().append("use timezone: ").append(timeZone).toString());
+
+        final Contact contactObj = ContactTest.loadUser(
+            getWebConversation(),
+            userId,
+            FolderObject.SYSTEM_LDAP_FOLDER_ID,
+            getHostName(),
+            getSessionId());
+        emailaddress = contactObj.getEmail1();
+
+        final Calendar c = Calendar.getInstance();
+        c.setTimeZone(timeZone);
+        c.set(Calendar.HOUR_OF_DAY, 8);
+        c.set(Calendar.MINUTE, 0);
+        c.set(Calendar.SECOND, 0);
+        c.set(Calendar.MILLISECOND, 0);
+
+        startTime = c.getTime();
+        // startTime.setTime(sta + timeZone.getOffset(startTime.getTime()));
+        endTime = new Date(startTime.getTime() + 3600000);
+
+        // Remove somewhere ugly injected instances.
+        Participants.userResolver = new UserResolver() {
+
+            public List<User> findUsers(final List<String> mails, final Context ctx) {
+                return new ArrayList<User>();
+            }
+
+            public User loadUser(final int userId, final Context ctx) {
+                return null;
+            }
+        };
+    }
+
+    public static ImportResult[] importICal(final WebConversation webCon, final Appointment[] appointments, final int folderId, final String host, final String session) throws ConversionError, AjaxException, IOException, SAXException, JSONException {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         final ICalEmitter emitter = new ICal4JEmitter();
         final ICalSession icalSession = emitter.createSession();
         for (int a = 0; a < appointments.length; a++) {
-            emitter.writeAppointment(icalSession, appointments[a], null,
-                new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
+            emitter.writeAppointment(
+                icalSession,
+                appointments[a],
+                null,
+                new ArrayList<ConversionError>(),
+                new ArrayList<ConversionWarning>());
         }
         emitter.writeSession(icalSession, baos);
         final ByteArrayInputStream input = new ByteArrayInputStream(baos.toByteArray());
         return importICal(webCon, input, folderId, host, session);
-	}
-	
-	public static ImportResult[] importICal(final WebConversation webCon,
-	    final Task[] tasks, final int folderId, final String host,
-	    final String session) throws AjaxException, IOException, SAXException,
-	    JSONException, ConversionError {
+    }
+
+    public static ImportResult[] importICal(final WebConversation webCon, final Task[] tasks, final int folderId, final String host, final String session) throws AjaxException, IOException, SAXException, JSONException, ConversionError {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         final ICalEmitter emitter = new ICal4JEmitter();
         final ICalSession icalSession = emitter.createSession();
         for (int a = 0; a < tasks.length; a++) {
-            emitter.writeTask(icalSession, tasks[a], null,
-                new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
+            emitter.writeTask(icalSession, tasks[a], null, new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
         }
         emitter.writeSession(icalSession, baos);
         final ByteArrayInputStream input = new ByteArrayInputStream(baos.toByteArray());
         return importICal(webCon, input, folderId, host, session);
-	}
-		
-	public static ImportResult[] importICal(final WebConversation webCon,
-        final InputStream input, final int folderId, final String host,
-        final String session) throws AjaxException, IOException, SAXException,
-        JSONException {
-	    final AJAXSession aSession = new AJAXSession(webCon, session);
-	    final ICalImportRequest request = new ICalImportRequest(folderId, input);
-	    final ICalImportResponse iResponse = Executor.execute(aSession, request, host);
-		return iResponse.getImports();
-	}
+    }
 
-	public Appointment[] exportAppointment(final WebConversation webCon, final int folderId, final TimeZone timeZone, final String session, final Context ctx) throws IOException, SAXException, ConversionWarning, AjaxException, JSONException {
+    public static ImportResult[] importICal(final WebConversation webCon, final InputStream input, final int folderId, final String host, final String session) throws AjaxException, IOException, SAXException, JSONException {
         final AJAXSession aSession = new AJAXSession(webCon, session);
-	    final ICalExportRequest request = new ICalExportRequest(folderId);
-	    final ICalExportResponse response = Executor.execute(aSession, request);
+        final ICalImportRequest request = new ICalImportRequest(folderId, input);
+        final ICalImportResponse iResponse = Executor.execute(aSession, request, host);
+        return iResponse.getImports();
+    }
+
+    public Appointment[] exportAppointment(final WebConversation webCon, final int folderId, final TimeZone timeZone, final String session, final Context ctx) throws IOException, SAXException, ConversionWarning, AjaxException, JSONException {
+        final AJAXSession aSession = new AJAXSession(webCon, session);
+        final ICalExportRequest request = new ICalExportRequest(folderId);
+        final ICalExportResponse response = Executor.execute(aSession, request);
 
         final ICalParser parser = new ICal4JParser();
         final List<ConversionError> errors = new ArrayList<ConversionError>();
@@ -233,32 +226,32 @@ public class AbstractICalTest extends AbstractAJAXTest {
         if (!warnings.isEmpty()) {
             throw warnings.get(0);
         }
-		return exportData.toArray(new Appointment[exportData.size()]);
-	}
+        return exportData.toArray(new Appointment[exportData.size()]);
+    }
 
-	public Task[] exportTask(final WebConversation webCon, final int inFolder, final String mailaddress, final TimeZone timeZone, String host, final String session, final Context ctx) throws Exception, TestException {
-		host = appendPrefix(host);
-		
-		final String contentType = "text/calendar";
-		
-		final URLParameter parameter = new URLParameter(true);
-		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
-		parameter.setParameter("action", Format.ICAL.getConstantName());
-		parameter.setParameter("folder", taskFolderId);
-		parameter.setParameter("type", Types.TASK);
-		
-		final WebRequest req = new GetMethodWebRequest(host + EXPORT_URL + parameter.getURLParameters());
-		final WebResponse resp = webCon.getResponse(req);
-		
-		assertEquals(200, resp.getResponseCode());
-		
-		List<Task> exportData = new ArrayList<Task>();
-		
-		final ICalParser parser = new ICal4JParser();
+    public Task[] exportTask(final WebConversation webCon, final int inFolder, final String mailaddress, final TimeZone timeZone, String host, final String session, final Context ctx) throws Exception, TestException {
+        host = appendPrefix(host);
+
+        final String contentType = "text/calendar";
+
+        final URLParameter parameter = new URLParameter(true);
+        parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
+        parameter.setParameter("action", Format.ICAL.getConstantName());
+        parameter.setParameter("folder", taskFolderId);
+        parameter.setParameter("type", Types.TASK);
+
+        final WebRequest req = new GetMethodWebRequest(host + EXPORT_URL + parameter.getURLParameters());
+        final WebResponse resp = webCon.getResponse(req);
+
+        assertEquals(200, resp.getResponseCode());
+
+        List<Task> exportData = new ArrayList<Task>();
+
+        final ICalParser parser = new ICal4JParser();
         final List<ConversionError> errors = new ArrayList<ConversionError>();
         final List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
         exportData = parser.parseTasks(resp.getInputStream(), timeZone, ctx, errors, warnings);
-		
-		return exportData.toArray(new Task[exportData.size()]);
-	}
+
+        return exportData.toArray(new Task[exportData.size()]);
+    }
 }
