@@ -49,9 +49,10 @@
 
 package com.openexchange.groupware;
 
-import gnu.trove.TIntObjectHashMap;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.AbstractOXException.Category;
@@ -64,7 +65,7 @@ public abstract class AbstractOXExceptionFactory<T> {
 
     private static final Log LOG = LogFactory.getLog(AbstractOXExceptionFactory.class);
 
-    private final TIntObjectHashMap<ExceptionInfo> throwsMap = new TIntObjectHashMap<ExceptionInfo>();
+    private final Map<Integer, ExceptionInfo> throwsMap = new HashMap<Integer, ExceptionInfo>();
 
     private static final class ExceptionInfo {
 

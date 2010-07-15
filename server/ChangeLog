@@ -1,6 +1,7 @@
 * 2010-07-15 - thorben.betten@open-xchange.com
 
  - Bugfix #16422: Changed log level to WARN if collecting an invalid address fails
+ - Bugfix #16483: Removed unknown import
 
 * 2010-07-14 - tobias.prinz@open-xchange.com
 
