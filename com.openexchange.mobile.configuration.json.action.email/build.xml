@@ -29,7 +29,7 @@
 	<property name="jsonjar" value="json.jar" />
 	<property name="servletjar" value="javax.servlet_2.4.0.v200706111738.jar" />
 	<property name="configjar" value="com.openexchange.configread.jar" />
-	<property name="mobilityconfigurationjsonjar" value="com.openexchange.mobile.configuration.json.jar" />
+	<property name="mobileconfigurationjsonjar" value="com.openexchange.mobile.configuration.json.jar" />
 
 	<!-- Classpath -->
 	<path id="project.classpath">
@@ -43,7 +43,7 @@
 		<pathelement location="${commonlibdir}/${jsonjar}" />
 		<pathelement location="${bundlesdir}/${servletjar}" />
 		<pathelement location="${bundlesdir}/${configjar}" />
-		<pathelement location="${bundlesdir}/${mobilityconfigurationjsonjar}" />
+		<pathelement location="${bundlesdir}/${mobileconfigurationjsonjar}" />
 	</path>
 
 	<!-- Compile -->
