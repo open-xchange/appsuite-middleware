@@ -73,6 +73,15 @@ if [ ${1:-0} -eq 2 ]; then
    # prevent bash from expanding, see bug 13316
    GLOBIGNORE='*'
 
+   # SoftwareChange_Request-325
+   # -----------------------------------------------------------------------
+   for i in $(find /opt/open-xchange/etc/groupware/contacts-ldap/ -maxdepth 1 -name "mapping*.properties"); do
+      oval=$(ox_read_property com.openexchange.contacts.ldap.mapping.ads.creationdate $i)
+      if [ -z "$oval" ]; then
+	  ox_set_property com.openexchange.contacts.ldap.mapping.ads.creationdate "whenCreated" $i
+      fi
+   done
+
    # SoftwareChange_Request-145
    # -----------------------------------------------------------------------
    for i in $(find /opt/open-xchange/etc/groupware/contacts-ldap/ -name "[0-9]*" -type d); do
