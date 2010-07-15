@@ -50,8 +50,12 @@
 package com.openexchange.test;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.regex.Pattern;
 import com.openexchange.i18n.Bug14154Test;
 import com.openexchange.i18n.TranslatedSingleTest;
 import junit.framework.Test;
@@ -93,11 +97,44 @@ public final class I18nTests {
                     }
                 }
             }
+            List<String> timeZoneIDs = new ArrayList<String>();
             for (String timeZoneID : TimeZone.getAvailableIDs()) {
-                tests.addTest(new TranslatedSingleTest("testTranslation", locale, timeZoneID));
+                timeZoneIDs.add(timeZoneID);
+            }
+            removeUnwantedZones(timeZoneIDs);
+            for (String timeZoneID : timeZoneIDs) {
+                tests.addTest(new TranslatedSingleTest("testTranslation", locale, timeZoneID.replace('_', ' ')));
             }
             tests.addTest(new Bug14154Test("testContainingPattern", locale));
         }
         return tests;
     }
+
+    private static void removeUnwantedZones(List<String> timeZoneIDs) {
+        Pattern[] patterns = new Pattern[whiteRegex.length];
+        int i = 0;
+        for (String regex : whiteRegex) {
+            patterns[i++] = Pattern.compile(regex);
+        }
+        Iterator<String> iter = timeZoneIDs.iterator();
+        while (iter.hasNext()) {
+            String timeZoneID = iter.next();
+            boolean isWhiteListed = false;
+            for (Pattern pattern : patterns) {
+                isWhiteListed = pattern.matcher(timeZoneID).matches();
+                if (isWhiteListed) {
+                    break;
+                }
+            }
+            if (!isWhiteListed) {
+                iter.remove();
+            }
+        }
+    }
+
+    private static final String[] whiteRegex = {
+        "Africa/.*", "America/.*", "Antarctica/.*", "Arctic/.*", "Asia/.*", "Atlantic/.*", "Australia/.*", "Brazil/.*", "Canada/.*",
+        "Chile/.*", "Cuba", "Egypt", "Eire", "Europe/.*", "Greenwich", "Hongkong", "Iceland", "Indian/.*", "Iran", "Israel", "Jamaica",
+        "Japan", "Kwajalein", "Libya", "Mexico/.*", "Mideast/.*", "Navajo", "Pacific/.*", "Poland", "Portugal", "Singapore", "Turkey",
+        "US/.*", "UTC", "Zulu" };
 }
