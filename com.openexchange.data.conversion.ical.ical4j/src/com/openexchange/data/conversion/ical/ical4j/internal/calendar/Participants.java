@@ -69,7 +69,6 @@ import net.fortuna.ical4j.model.parameter.PartStat;
 import net.fortuna.ical4j.model.parameter.Role;
 import net.fortuna.ical4j.model.parameter.Rsvp;
 import net.fortuna.ical4j.model.property.Attendee;
-import net.fortuna.ical4j.model.property.Comment;
 import net.fortuna.ical4j.model.property.Resources;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -269,9 +268,11 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
                 icalP = mails.get(alias);
                 if (icalP != null) {
                     mails.remove(alias);
-                    continue;
+                    break;
                 }
             }
+            if (icalP == null)
+                throw new IllegalStateException("Should not be possible to find a user by it's alias and then be unable to remove that alias from list");
             if (icalP.message != null)
                 up.setConfirmMessage(icalP.message);
             if (icalP.status != -1)
