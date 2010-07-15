@@ -133,20 +133,6 @@ public class CalendarDataObject extends Appointment {
         return action_folder;
     }
 
-    public final int getFulltime() {
-        if (!super.getFullTime()) {
-            return 0;
-        }
-        return 1;
-    }
-
-    public final int getPrivateflag() {
-        if (!super.getPrivateFlag()) {
-            return 0;
-        }
-        return 1;
-    }
-
     public final void setGlobalFolderID(final int fid) {
         super.setParentFolderID(fid);
     }

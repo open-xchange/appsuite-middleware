@@ -1,3 +1,7 @@
+* 2010-07-14 - tobias.prinz@open-xchange.com
+
+ - Bugfix #16107: Changing a series that stretches more than one week/month/year from "full time" to normal does not break the view in the second week/month/year
+ 
 * 2010-07-14 - marcus.klein@open-xchange.com
 
  - Bugfix #16484: A loaded contact object now always contains the private flag.

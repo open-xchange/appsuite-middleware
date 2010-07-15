@@ -60,6 +60,7 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -246,7 +247,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         });
         STATEMENT_FILLERS.put(Integer.valueOf(Appointment.FULL_TIME), new StatementFiller() {
             public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao) throws SQLException {
-                stmt.setInt(pos, cdao.getFulltime());
+                stmt.setInt(pos, I(cdao.getFullTime()));
             }
         });
         STATEMENT_FILLERS.put(Integer.valueOf(Appointment.COLOR_LABEL), new StatementFiller() {
@@ -277,7 +278,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         });
         STATEMENT_FILLERS.put(Integer.valueOf(Appointment.PRIVATE_FLAG), new StatementFiller() {
             public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao) throws SQLException {
-                stmt.setInt(pos, cdao.getPrivateflag());
+                stmt.setInt(pos, I(cdao.getPrivateFlag()));
             }
         });
         STATEMENT_FILLERS.put(Integer.valueOf(Appointment.FOLDER_ID), new StatementFiller() {
@@ -1247,6 +1248,10 @@ public class CalendarMySQL implements CalendarSqlImp {
     	return insertAppointment0(cdao, writecon, so, true);
     }
 
+    public static final int I(boolean b){
+        return b ? 1 : 0;
+    }
+    
     private final CalendarDataObject[] insertAppointment0(final CalendarDataObject cdao, final Connection writecon, final Session so, final boolean notify) throws DataTruncation, SQLException, LdapException, OXException {
         int i = 1;
         PreparedStatement pst = null;
@@ -1270,7 +1275,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             } else {
                 throw new OXCalendarException(OXCalendarException.Code.NOT_YET_SUPPORTED);
             }
-            pst.setInt(i++, cdao.getPrivateflag());
+            pst.setInt(i++, I(cdao.getPrivateFlag()));
             pst.setInt(i++, cdao.getContextID());
             pst.setTimestamp(i++, new Timestamp(cdao.getStartDate().getTime()));
             pst.setTimestamp(i++, new Timestamp(cdao.getEndDate().getTime()));
@@ -1278,7 +1283,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             pst.setInt(i++, cdao.getObjectID());
             pst.setInt(i++, cdao.getLabel());
             pst.setInt(i++, cdao.getShownAs());
-            pst.setInt(i++, cdao.getFulltime());
+            pst.setInt(i++, I(cdao.getFullTime()));
             pst.setInt(i++, cdao.getNumberOfAttachments());
             pst.setString(i++, cdao.getTitle());
             if (cdao.containsLocation()) {
@@ -1999,7 +2004,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             if (cdao.getFolderMove()) {
                 throw new OXCalendarException(OXCalendarException.Code.RECURRING_EXCEPTION_MOVE_EXCEPTION);
             }
-            if (edao.containsPrivateFlag() && cdao.containsPrivateFlag() && edao.getPrivateflag() != cdao.getPrivateflag()) {
+            if (edao.containsPrivateFlag() && cdao.containsPrivateFlag() && edao.getPrivateFlag() != cdao.getPrivateFlag()) {
                 throw new OXCalendarException(OXCalendarException.Code.RECURRING_EXCEPTION_PRIVATE_FLAG);
             }
             if (cdao.containsRecurrencePosition() && cdao.getRecurrencePosition() > 0) {
@@ -2009,21 +2014,6 @@ public class CalendarMySQL implements CalendarSqlImp {
             } else {
                 cdao.setRecurrencePosition(edao.getRecurrencePosition());
             }
-            /*-
-             * TODO: Uncomment?
-             * 
-             * Check if the change exception to create is moved to a date which is already covered by one of recurrence's occurrences. This
-             * is needed since MS Outlook is not able to display two occurrences on one day
-            if (CalendarRecurringCollection.isOccurrenceDate(
-                cdao.getStartDate().getTime(),
-                edao.getStartDate().getTime(),
-                collection.getAppointmentByID(edao.getRecurrenceID(), so),
-                collection.getChangeExceptionDatesByRecurrence(edao.getRecurrenceID(), so))) {
-                LOG.warn(new StringBuilder("There is another appointment of series \"").append(
-                    Tools.getAppointmentTitle(edao.getRecurrenceID(), ctx)).append("\" on day ").append(
-                    Tools.getUTCDateFormat(CalendarRecurringCollection.normalizeLong(cdao.getStartDate().getTime()))).toString());
-            }
-            */
         }
 
         CalendarDataObject clone = null;
@@ -2109,26 +2099,13 @@ public class CalendarMySQL implements CalendarSqlImp {
             // Because the GUI only sends changed fields, we have to create a
             // merged object
             // from cdao and edao and then we force an insert!
-            if (edao.containsPrivateFlag() && cdao.containsPrivateFlag() && edao.getPrivateflag() != cdao.getPrivateflag()) {
+            if (edao.containsPrivateFlag() && cdao.containsPrivateFlag() && edao.getPrivateFlag() != cdao.getPrivateFlag()) {
                 throw new OXCalendarException(OXCalendarException.Code.RECURRING_EXCEPTION_PRIVATE_FLAG);
             }
             /*
              * Create a clone for the "new" change exception
              */
             clone = collection.cloneObjectForRecurringException(cdao, edao, so.getUserId());
-            /*-
-             * TODO: Uncomment?
-             * Check if the change exception to create is moved to a date which is already covered by one of recurrence's occurrences. This
-             * is needed since MS Outlook is not able to display two occurrences on one day
-            if (CalendarRecurringCollection.isOccurrenceDate(
-                clone.getStartDate().getTime(),
-                clone.getRecurrenceDatePosition().getTime(),
-                edao,
-                collection.getChangeExceptionDatesByRecurrence(edao.getRecurrenceID(), so))) {
-                LOG.warn(new StringBuilder("There is another appointment of series \"").append(edao.getTitle()).append("\" on day ").append(
-                    Tools.getUTCDateFormat(CalendarRecurringCollection.normalizeLong(clone.getStartDate().getTime()))).toString());
-            }
-            */
             try {
                 cdao.setRecurrenceCalculator(edao.getRecurrenceCalculator());
                 if (cdao.containsAlarm()) {
@@ -3008,8 +2985,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                         } else {
                             end_date = edao.getEndDate();
                         }
-                        
-                        final long la = modified_userparticipants[a].getAlarmMinutes() * 60000L;
+                         final long la = modified_userparticipants[a].getAlarmMinutes() * 60000L;
                         java.util.Date reminder = null;
                         
                         // If the appointment is a collection that starts in the past and ends in the future
@@ -3044,7 +3020,6 @@ public class CalendarMySQL implements CalendarSqlImp {
                         if (folder_id <= 0) {
                             folder_id = cdao.getEffectiveFolderId();
                         }
-                        
                         final boolean isSequence = cdao.isSequence(true);
 
                         changeReminder(cdao.getObjectID(), modified_userparticipants[a].getIdentifier(), folder_id, cdao.getContext(), isSequence, end_date, reminder, CalendarOperation.UPDATE, isSequence ? checkRecurrenceChange(cdao, edao) : false);
@@ -3121,7 +3096,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                     pidm.setInt(5, cdao.getGlobalFolderID());
                     pidm.setInt(6, cdao.getObjectID());
                     pidm.setInt(7, cid);
-                    pidm.setInt(8, cdao.getPrivateflag());
+                    pidm.setInt(8, I(cdao.getPrivateFlag()));
                     pidm.addBatch();
                     pidm.executeBatch();
                 } finally {
@@ -4867,64 +4842,4 @@ public class CalendarMySQL implements CalendarSqlImp {
         }
         return 0;
     }
-
-//    private final void deleteAllReminderEntries(CalendarDataObject edao, final int oid, final int inFolder, final Session so, final Context ctx, Connection readcon) throws SQLException, OXMandatoryFieldException, OXConflictException, OXException {
-//        UserParticipant up[] = null;
-//        boolean close_read = false;
-//        if (edao == null) {
-//            PreparedStatement prep = null;
-//            ResultSet rs = null;
-//            try {
-//                if (readcon == null) {
-//                    readcon = DBPool.pickup(ctx);
-//                    close_read = true;
-//                }
-//                final CalendarOperation co = new CalendarOperation();
-//                prep = getPreparedStatement(readcon, loadAppointment(oid, ctx));
-//                rs = getResultSet(prep);
-//                edao = co.loadAppointment(rs, oid, inFolder, this, readcon, so, ctx, CalendarOperation.DELETE, inFolder, false); // No
-//                // permission
-//                // checks
-//                // at
-//                // all!
-//            } catch (final SQLException sqle) {
-//                throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
-//            } catch (final OXPermissionException oxpe) {
-//                throw oxpe;
-//            } catch (final OXException oxe) {
-//                throw oxe;
-//            } catch (final DBPoolingException dbpe) {
-//                throw new OXException(dbpe);
-//            } finally {
-//                collection.closeResultSet(rs);
-//                collection.closePreparedStatement(prep);
-//                if (close_read && readcon != null) {
-//                    try {
-//                        DBPool.push(ctx, readcon);
-//                    } catch (final DBPoolingException dbpe) {
-//                        LOG.error("DBPoolingException:deleteAppointment (push)", dbpe);
-//                    }
-//                }
-//            }
-//        }
-//        up = edao.getUsers();
-//        for (int a = 0; a < up.length; a++) {
-//            final int uid = up[a].getIdentifier();
-//            int fid = 0;
-//            if (up[a].getPersonalFolderId() > 0) {
-//                fid = up[a].getPersonalFolderId();
-//            } else {
-//                fid = edao.getEffectiveFolderId();
-//            }
-//            if (uid > 0 && fid > 0) {
-//                changeReminder(oid, uid, fid, ctx, edao.isSequence(), null, null, CalendarOperation.DELETE);
-//            } else {
-//                if (LOG.isDebugEnabled()) {
-//                    LOG.debug(StringCollection.convertArraytoString(new Object[] { "Reminder object will neither be checked nor deleted -> oid:uid:fid ", oid, ":", uid, ":", fid }));
-//                }
-//            }
-//        }
-//    }
-
-
 }

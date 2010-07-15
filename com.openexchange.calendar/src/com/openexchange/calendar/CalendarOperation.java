@@ -58,6 +58,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -589,9 +590,19 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                             .getStartDate().getTime()) / Constants.MILLI_DAY) * Constants.MILLI_DAY))));
                 }
             }
-        }
+        } 
     }
 
+    /* This fixes bug 16107 */
+    protected static void handleChangeFromFullTimeToNormal(CalendarDataObject newApp, CalendarDataObject oldApp) {
+        if (oldApp == null || newApp == null 
+            || !oldApp.getFullTime()
+            || newApp.getFullTime() 
+            || newApp.getUntil() == null)
+            return;
+        newApp.setEndDate(calculateRealRecurringEndDate(newApp));
+    }
+    
     private static final Date calculateRealRecurringEndDate(final CalendarDataObject cdao) {
         final Date until = cdao.getUntil();
         return calculateRealRecurringEndDate(
@@ -1167,11 +1178,11 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             throw new OXCalendarException(OXCalendarException.Code.UNSUPPORTED_LABEL, cdao.getLabel());
         }
         if (cdao.containsPrivateFlag()) {
-            if (cdao.getPrivateflag() == 1) {
+            if (cdao.getPrivateFlag()) {
                 if (cdao.getFolderType() != recColl.PRIVATE) {
                     throw new OXCalendarException(OXCalendarException.Code.PIVATE_FLAG_ONLY_IN_PRIVATE_FOLDER);
                 }
-                if (edao == null || (edao != null && edao.containsPrivateFlag() && edao.getPrivateflag() == 1)) {
+                if (edao == null || (edao.containsPrivateFlag() && edao.getPrivateFlag())) {
                     if (cdao.containsObjectID() && cdao.getSharedFolderOwner() != 0 && cdao.getSharedFolderOwner() != uid) {
                         throw new OXCalendarException(OXCalendarException.Code.MOVE_TO_SHARED_FOLDER_NOT_SUPPORTED);
                     }
@@ -1182,10 +1193,10 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                         throw new OXCalendarException(OXCalendarException.Code.PRIVATE_FLAG_AND_PARTICIPANTS);
                     }
                 }
-            } else if (cdao.getPrivateflag() != 0) {
-                throw new OXCalendarException(OXCalendarException.Code.UNSUPPORTED_PRIVATE_FLAG, cdao.getPrivateflag());
+            } else if (cdao.getPrivateFlag()) {
+                throw new OXCalendarException(OXCalendarException.Code.UNSUPPORTED_PRIVATE_FLAG, cdao.getPrivateFlag());
             }
-        } else if (edao != null && edao.containsPrivateFlag() && edao.getPrivateflag() == 1) {
+        } else if (edao != null && edao.containsPrivateFlag() && edao.getPrivateFlag()) {
             if (cdao.getSharedFolderOwner() != uid) {
                 if (cdao.getFolderType() != recColl.PRIVATE) {
                     throw new OXCalendarException(OXCalendarException.Code.MOVE_TO_SHARED_FOLDER_NOT_SUPPORTED);
@@ -1337,6 +1348,9 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         boolean completenessChecked = false;
         boolean changeStartDate = false;
 
+        if (! cdao.getFullTime() && edao.getFullTime()) { //case of Bug 16107
+            handleChangeFromFullTimeToNormal(cdao, edao);
+        }
         if (cdao.containsInterval() && cdao.getInterval() != edao.getInterval()) {
             recColl.checkRecurringCompleteness(cdao, !edao.containsUntil() && !edao.containsOccurrence());
             completenessChecked = true;
