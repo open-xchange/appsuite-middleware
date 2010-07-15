@@ -213,4 +213,8 @@ Authors:
 %defattr(-,root,root)
 %doc README.TXT
 
+%files -n open-xchange-meta-mobility
+%defattr(-,root,root)
+%doc README.TXT
+
 %changelog
