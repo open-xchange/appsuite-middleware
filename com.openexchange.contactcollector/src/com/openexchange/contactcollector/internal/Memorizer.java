@@ -190,7 +190,7 @@ public class Memorizer implements Runnable {
                 try {
                     memorizeContact(address, ctx, userConfig);
                 } catch (final AbstractOXException e) {
-                    LOG.error("Contact collector run aborted for address: " + address.toUnicodeString(), e);
+                    LOG.warn("Contact collector run aborted for address: " + address.toUnicodeString(), e);
                 }
             }
         }
@@ -202,11 +202,11 @@ public class Memorizer implements Runnable {
             contact = transformInternetAddress(address);
         } catch (final ParseException e) {
             // Decoding failed; ignore contact
-            LOG.error(e.getMessage(), e);
+            LOG.warn(e.getMessage(), e);
             return -1;
         } catch (final UnsupportedEncodingException e) {
             // Decoding failed; ignore contact
-            LOG.error(e.getMessage(), e);
+            LOG.warn(e.getMessage(), e);
             return -1;
         }
         final ContactInterface contactInterface =
