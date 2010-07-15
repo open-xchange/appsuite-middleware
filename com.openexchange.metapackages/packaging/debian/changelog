@@ -1,3 +1,9 @@
+open-xchange-meta (6.16.1.0-5) unstable; urgency=low
+
+  * build for public ptf 2010-07-15
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 15 Jul 2010 15:25:54 +0200
+
 open-xchange-meta (6.16.1.0-4) unstable; urgency=low
 
   * build for public ptf 2010-06-11
