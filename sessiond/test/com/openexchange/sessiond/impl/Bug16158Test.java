@@ -78,7 +78,7 @@ public class Bug16158Test extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        sessionData = new SessionData(20, 1);
+        sessionData = new SessionData(100, 1);
         threadPoolService = new SimThreadPoolService();
         sessionData.addThreadPoolService(threadPoolService);
         SessionIdGenerator idGenerator = new UUIDSessionIdGenerator();
@@ -124,11 +124,30 @@ public class Bug16158Test extends TestCase {
         for (Thread finderThread : finderThreads) {
             finderThread.join();
         }
-        for (SessionFinder finder : finders) {
-            assertFalse("A thread did not find the session.", finder.hasNotFound());
-        }
+        /* testing for a proper result of this is is tricky. it may happen - due to scheduling of threads in front of the lock - that the
+         * session times out - is removed from last session container by rotator thread.
+         * - on timeout:
+         *   + all finders must have notFound true.
+         *   + exactly one rotator found the timeout.
+         * - no timeout:
+         *   + all finders must always have found the session.
+         *   + no rotator has a timeout.
+         */
+        boolean wasTimeout = false;
         for (SessionRotator rotator : rotators) {
-            assertFalse("Session timed out.", rotator.hasTimeout());
+            wasTimeout |= rotator.hasTimeout();
+        }
+        for (SessionFinder finder : finders) {
+            assertEquals("Expected shows timeout. Actual represents not found session.", wasTimeout, finder.hasNotFound());
+        }
+        if (wasTimeout) {
+            int foundTimeouts = 0;
+            for (SessionRotator rotator : rotators) {
+                if (rotator.hasTimeout()) {
+                    foundTimeouts++;
+                }
+            }
+            assertEquals("Only a single rotator should have a timeout.", 1, foundTimeouts);
         }
     }
 
