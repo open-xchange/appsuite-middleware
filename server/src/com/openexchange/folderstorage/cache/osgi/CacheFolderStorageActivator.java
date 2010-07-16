@@ -207,20 +207,18 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
         final EventHandler eventHandler = new EventHandler() {
             
             public void handleEvent(final Event event) {
-                if (Boolean.TRUE.equals(event.getProperty(PushEventConstants.PROPERTY_CONTENT_RELATED))) {
-                    final int userId = ((Integer) event.getProperty(PushEventConstants.PROPERTY_USER)).intValue();
-                    final int contextId = ((Integer) event.getProperty(PushEventConstants.PROPERTY_CONTEXT)).intValue();
-                    final String folderId = (String) event.getProperty(PushEventConstants.PROPERTY_FOLDER);
-                    try {
-                        tmp.removeFromCache(folderId, FolderStorage.REAL_TREE_ID, userId, contextId);
-                    } catch (FolderException e) {
-                        LOG.error(e.getMessage(), e);
-                    }
+                final int userId = ((Integer) event.getProperty(PushEventConstants.PROPERTY_USER)).intValue();
+                final int contextId = ((Integer) event.getProperty(PushEventConstants.PROPERTY_CONTEXT)).intValue();
+                final String folderId = (String) event.getProperty(PushEventConstants.PROPERTY_FOLDER);
+                try {
+                    tmp.removeFromCache(folderId, FolderStorage.REAL_TREE_ID, userId, contextId);
+                } catch (FolderException e) {
+                    LOG.error(e.getMessage(), e);
                 }
             }
         };
         final Dictionary<String, Object> dict = new Hashtable<String, Object>();
-        dict.put(EventConstants.EVENT_TOPIC, PushEventConstants.TOPIC);
+        dict.put(EventConstants.EVENT_TOPIC, PushEventConstants.TOPIC_ATTR);
         eventHandlerRegistration = context.registerService(EventHandler.class.getName(), eventHandler, dict);
     }
 

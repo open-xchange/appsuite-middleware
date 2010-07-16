@@ -282,7 +282,8 @@ public final class EventPool implements Runnable {
         /*
          * Create event with push topic
          */
-        final Event event = new Event(PushEventConstants.TOPIC, properties);
+        final String topic = pooledEvent.getTopic();
+        final Event event = new Event(null == topic ? PushEventConstants.TOPIC : topic, properties);
         /*
          * Finally post it
          */

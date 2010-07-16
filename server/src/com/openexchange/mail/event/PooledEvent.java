@@ -51,6 +51,7 @@ package com.openexchange.mail.event;
 
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
+import com.openexchange.push.PushEventConstants;
 import com.openexchange.session.Session;
 
 /**
@@ -68,6 +69,8 @@ public final class PooledEvent implements Delayed {
 
     private final int accountId;
 
+    private final String topic;
+
     private final String fullname;
 
     private final Session session;
@@ -77,6 +80,21 @@ public final class PooledEvent implements Delayed {
     private final boolean immediateDelivery;
 
     private final int hash;
+
+    /**
+     * Initializes a new {@link PooledEvent} with {@link PushEventConstants#TOPIC default topic}.
+     * 
+     * @param contextId The context ID
+     * @param userId The user ID
+     * @param accountId The account ID
+     * @param fullname The folder fullname
+     * @param contentRelated <code>true</code> for a content-related event; otherwise <code>false</code>
+     * @param immediateDelivery <code>true</code> for immediate delivery; otherwise <code>false</code>
+     * @param session The session
+     */
+    public PooledEvent(final int contextId, final int userId, final int accountId, final String fullname, final boolean contentRelated, final boolean immediateDelivery, final Session session) {
+        this(PushEventConstants.TOPIC, contextId, userId, accountId, fullname, contentRelated, immediateDelivery, session);
+    }
 
     /**
      * Initializes a new {@link PooledEvent}.
@@ -89,8 +107,9 @@ public final class PooledEvent implements Delayed {
      * @param immediateDelivery <code>true</code> for immediate delivery; otherwise <code>false</code>
      * @param session The session
      */
-    public PooledEvent(final int contextId, final int userId, final int accountId, final String fullname, final boolean contentRelated, final boolean immediateDelivery, final Session session) {
+    public PooledEvent(final String topic, final int contextId, final int userId, final int accountId, final String fullname, final boolean contentRelated, final boolean immediateDelivery, final Session session) {
         super();
+        this.topic = topic;
         stamp = System.currentTimeMillis();
         this.contextId = contextId;
         this.userId = userId;
@@ -102,6 +121,7 @@ public final class PooledEvent implements Delayed {
         // Hash code
         final int prime = 31;
         int result = 1;
+        result = prime * result + ((topic == null) ? 0 : topic.hashCode());
         result = prime * result + accountId;
         result = prime * result + contextId;
         result = prime * result + ((fullname == null) ? 0 : fullname.hashCode());
@@ -119,6 +139,15 @@ public final class PooledEvent implements Delayed {
         final long thisStamp = this.stamp;
         final long otherStamp = ((PooledEvent) o).stamp;
         return (thisStamp < otherStamp ? -1 : (thisStamp == otherStamp ? 0 : 1));
+    }
+
+    /**
+     * Gets the topic for this event.
+     * 
+     * @return The topic
+     */
+    public String getTopic() {
+        return topic;
     }
 
     /**
@@ -162,6 +191,13 @@ public final class PooledEvent implements Delayed {
             return false;
         }
         final PooledEvent other = (PooledEvent) obj;
+        if (topic == null) {
+            if (other.topic != null) {
+                return false;
+            }
+        } else if (!topic.equals(other.topic)) {
+            return false;
+        }
         if (accountId != other.accountId) {
             return false;
         }

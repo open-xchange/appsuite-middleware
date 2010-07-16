@@ -130,6 +130,7 @@ import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.push.PushEventConstants;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -813,6 +814,12 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         final String fullname = argument.getFullname();
         final MailMessage mail = mailAccess.getMessageStorage().getMessage(fullname, msgUID, true);
         if (mail != null) {
+            /*
+             * Post event for possibly switched \Seen flag
+             */
+            if (mail.containsPrevSeen() && !mail.isPrevSeen()) {
+                postEvent(PushEventConstants.TOPIC_ATTR, accountId, fullname, true, true);
+            }
             /*
              * Update cache since \Seen flag is possibly changed
              */
@@ -2250,7 +2257,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         initConnection(accountId);
         final String fullname = argument.getFullname();
         mailAccess.getMessageStorage().updateMessageColorLabel(fullname, msgUID, newColorLabel);
-        postEvent(accountId, fullname, true, true);
+        postEvent(PushEventConstants.TOPIC_ATTR, accountId, fullname, true, true);
         /*
          * Update caches
          */
@@ -2318,11 +2325,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         initConnection(accountId);
         final String fullname = argument.getFullname();
         mailAccess.getMessageStorage().updateMessageFlags(fullname, mailIDs, flagBits, flagVal);
-        postEvent(accountId, fullname, true, true);
+        postEvent(PushEventConstants.TOPIC_ATTR, accountId, fullname, true, true);
         final boolean spamAction = (usm.isSpamEnabled() && ((flagBits & MailMessage.FLAG_SPAM) > 0));
         if (spamAction) {
             final String spamFullname = mailAccess.getFolderStorage().getSpamFolder();
-            postEvent(accountId, spamFullname, true, true);
+            postEvent(PushEventConstants.TOPIC_ATTR, accountId, spamFullname, true, true);
         }
         /*
          * Update caches
@@ -2492,6 +2499,16 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
         EventPool.getInstance().put(
             new PooledEvent(contextId, session.getUserId(), accountId, prepareFullname(accountId, fullname), contentRelated, immediateDelivery, session));
+    }
+
+    private void postEvent(final String topic, final int accountId, final String fullname, final boolean contentRelated, final boolean immediateDelivery) {
+        if (MailAccount.DEFAULT_ID != accountId) {
+            /*
+             * TODO: No event for non-primary account?
+             */
+            return;
+        }
+        EventPool.getInstance().put(new PooledEvent(topic, contextId, session.getUserId(), accountId, prepareFullname(accountId, fullname), contentRelated, immediateDelivery, session));
     }
 
     @Override
