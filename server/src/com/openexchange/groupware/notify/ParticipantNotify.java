@@ -170,6 +170,8 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
     private final static LoggingLogic LL = LoggingLogic.getLoggingLogic(ParticipantNotify.class);
 
     public static ParticipantNotify messageSender = new ParticipantNotify();
+    
+    private static final String debug = "Magic debug: ";
 
     /**
      * Initializes a new {@link ParticipantNotify}
@@ -226,8 +228,10 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         mail.setSubject(msg.title);
         
         if (Multipart.class.isInstance(msg.message)) {
+            LOG.warn(debug + "Multipart mail for: " + Arrays.asList(mail.getToAddrs()));
             mail.setContentType("multipart/alternative");
         } else {
+            LOG.warn(debug + "plain mail for: " + Arrays.asList(mail.getToAddrs()));
             mail.setContentType("text/plain; charset=UTF-8");
         }
 
@@ -845,8 +849,10 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                     textMessage = createTemplate.render(p.getLocale(), renderMap);
                 }
                 if (p.type == Participant.USER && !NotificationConfig.getPropertyAsBoolean(NotificationProperty.INTERNAL_IMIP, false)) {
+                    LOG.warn(debug + "No imip for internal user: " + p.email);
                     msg.message = textMessage;
                 } else {
+                    LOG.warn(debug + "Imip for internal/external user: " + p.email);
                     msg.message = generateMessageMultipart(session, cal, textMessage, state.getModule(), state.getType(), ITipMethod.REQUEST, p, strings, b);
                 }
             } else if (EnumSet.of(State.Type.ACCEPTED, State.Type.DECLINED, State.Type.TENTATIVELY_ACCEPTED).contains(state.getType())) {
@@ -906,6 +912,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
      */
     private static Object generateMessageMultipart(ServerSession session, CalendarObject cal, String text, int module, State.Type type, ITipMethod method, EmailableParticipant p, final StringHelper strings, final StringBuilder b) {
         if (module == Types.TASK) {
+            LOG.warn(debug + "No task imip for user: " + p.email);
             return text;
         }
         /*
@@ -974,6 +981,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
              * Add the parts to parental multipart & return
              */
             mp.addBodyPart(textPart);
+            LOG.warn(debug + "Adding imip for user: " + p.email);
             mp.addBodyPart(iCalPart);
             return mp;
         } catch (final MessagingException e) {
@@ -988,6 +996,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         /*
          * Failed to create multipart
          */
+        LOG.warn(debug + "Failed to create multipart for user: " + p.email);
         return text;
     }
 
