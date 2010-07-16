@@ -1,3 +1,7 @@
+* 2010-07-16 - steffen.templin@open-xchange.com
+
+ - Bugfix #16141: On importing mails the whole import stops if one mail is corrupt.
+
 * 2010-07-16 - thorben.betten@open-xchange.com
 
  - Bugfix #16168: Requesting folder including permission information from database
@@ -117,10 +121,6 @@
  - Bugfix #16346: Added appropriate error message when authentication to SMTP server fails
  - Bugfix #16385: i18n for global address book folder
  - Bugfix #15874: Showing available content on invalid credentials to access a mail system
-
-* 2010-06-25 - steffen.templin@open-xchange.com
-
- - Bugfix #16141: On importing mails the whole import stops if one mail is corrupt.
 
 * 2010-06-25 - thorben.betten@open-xchange.com
 

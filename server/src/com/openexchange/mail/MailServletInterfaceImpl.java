@@ -87,6 +87,7 @@ import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.importexport.MailImportResult;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
@@ -191,6 +192,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     private User user;
 
     private final Collection<MailException> warnings;
+    
+    private final ArrayList<MailImportResult> mailImportResults;
 
     /**
      * Initializes a new {@link MailServletInterfaceImpl}.
@@ -200,6 +203,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     MailServletInterfaceImpl(final Session session) throws MailException {
         super();
         warnings = new ArrayList<MailException>(2);
+        mailImportResults = new ArrayList<MailImportResult>();
         try {
             if (session instanceof ServerSession) {
                 final ServerSession serverSession = (ServerSession) session;
@@ -1209,9 +1213,18 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
         return (i == 3);
     }
-
+    
     @Override
     public String[] appendMessages(final String destFolder, final MailMessage[] mails, final boolean force) throws MailException {
+        return appendMessages(destFolder, mails, force, false);
+    }
+
+    @Override
+    public String[] importMessages(final String destFolder, final MailMessage[] mails, final boolean force) throws MailException {
+        return appendMessages(destFolder, mails, force, true);
+    }
+    
+    public String[] appendMessages(final String destFolder, final MailMessage[] mails, final boolean force, boolean isImport) throws MailException {
         if ((mails == null) || (mails.length == 0)) {
             return new String[0];
         }
@@ -1257,24 +1270,30 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
         
         IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-        ArrayList<String> idList = new ArrayList<String>();
-        for (MailMessage mail : mails) {
-            try {
-                String[] idStr = messageStorage.appendMessages(fullname, new MailMessage[] {mail});
-                idList.add(idStr[0]);
-            } catch (MailException e) {
-                LOG.error(e.getMessage(), e);
+        if (isImport) {
+            ArrayList<String> idList = new ArrayList<String>();
+            for (MailMessage mail : mails) {
+                MailImportResult mir = new MailImportResult();
+                mir.setMail(mail);
+                try {
+                    String[] idStr = messageStorage.appendMessages(fullname, new MailMessage[] {mail});
+                    mir.setId(idStr[0]);
+                    idList.add(idStr[0]);
+                } catch (MailException e) {
+                    mir.setException(e);                
+                }
+                mailImportResults.add(mir);
             }
-        }
-        
-        String[] ids = new String[idList.size()];
-        for (int i = 0; i < idList.size(); i++) {
-            ids[i] = idList.get(i);
-        }
-        
-        return ids;
-        
-//        return mailAccess.getMessageStorage().appendMessages(fullname, mails);
+            
+            String[] ids = new String[idList.size()];
+            for (int i = 0; i < idList.size(); i++) {
+                ids[i] = idList.get(i);
+            }
+            
+            return ids;
+        } else {
+            return mailAccess.getMessageStorage().appendMessages(fullname, mails);
+        }        
     }
 
     @Override
@@ -2473,6 +2492,16 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
         EventPool.getInstance().put(
             new PooledEvent(contextId, session.getUserId(), accountId, prepareFullname(accountId, fullname), contentRelated, immediateDelivery, session));
+    }
+
+    @Override
+    public MailImportResult[] getMailImportResults() {
+        MailImportResult[] mars = new MailImportResult[mailImportResults.size()];
+        for (int i = 0; i < mars.length; i++) {
+            mars[i] = mailImportResults.get(i);
+        }
+        
+        return mars;
     }
 
 }

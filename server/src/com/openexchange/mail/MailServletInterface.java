@@ -52,6 +52,7 @@ package com.openexchange.mail;
 import java.util.Collection;
 import com.openexchange.api2.MailInterfaceMonitor;
 import com.openexchange.filemanagement.ManagedFile;
+import com.openexchange.groupware.importexport.MailImportResult;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
@@ -274,6 +275,19 @@ public abstract class MailServletInterface {
      * @throws MailException If messages cannot be appended.
      */
     public abstract String[] appendMessages(String destFolder, MailMessage[] msgs, boolean force) throws MailException;
+    
+    /**
+     * Overwrite this to implement a different append behaviour for mail imports.
+     * 
+     * @param destFolder The destination folder
+     * @param msgs - The messages to append (<b>must</b> be completely pre-filled incl. content references)
+     * @param force <code>true</code> to enforce append and to omit checks; otherwise <code>false</code>
+     * @return The corresponding mail IDs in destination folder
+     * @throws MailException If messages cannot be appended.
+     */
+    public String[] importMessages(String destFolder, MailMessage[] msgs, boolean force) throws MailException {
+        return appendMessages(destFolder, msgs, force);
+    }
 
     /**
      * Creates an instance of <code>JSONMessageObject</code> which contains the initial reply content of the message identifed through
@@ -427,5 +441,14 @@ public abstract class MailServletInterface {
      * @return Possible warnings
      */
     public abstract Collection<MailException> getWarnings();
+    
+    /**
+     * Get results of imported mails.
+     * Implement this if you want to return detailed informations for mail imports.
+     * @return The results.
+     */
+    public MailImportResult[] getMailImportResults() {
+        return new MailImportResult[0];
+    }
 
 }

@@ -118,6 +118,7 @@ import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.importexport.MailImportResult;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.utils.Metadata;
@@ -3310,13 +3311,14 @@ public class Mail extends PermissionServlet implements UploadListener {
         return response;
     }
 
-    private static final class AppenderTask extends AbstractTask<String[]> {
+    private static final class AppenderTask extends AbstractTask<MailImportResult[]> {
         private boolean finished = false;
         private final MailServletInterface mailInterface;
         private final String folder;
         private final boolean force;
         private final int flags;
         private final BlockingQueue<MimeMessage> queue;
+        
         AppenderTask(MailServletInterface mailInterface, String folder, boolean force, int flags, BlockingQueue<MimeMessage> queue) {
             super();
             this.mailInterface = mailInterface;
@@ -3328,7 +3330,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         void finished() {
             finished = true;
         }
-        public String[] call() throws Exception {
+        public MailImportResult[] call() throws Exception {
             List<String> idList = new ArrayList<String>();
             try {
                 List<MimeMessage> messages = new ArrayList<MimeMessage>();
@@ -3339,11 +3341,13 @@ public class Mail extends PermissionServlet implements UploadListener {
                         messages.add(queue.take());
                     }
                     queue.drainTo(messages);
-                    for (MimeMessage message : messages) {
-                        mails.add(MIMEMessageConverter.convertMessage(message));
+                    for (MimeMessage message : messages) {                        
+                        String s = message.getHeader("Date", null);
+                        MailMessage mm = MIMEMessageConverter.convertMessage(message);
+                        mails.add(mm);
                     }
                     messages.clear();
-                    String[] ids = mailInterface.appendMessages(folder, mails.toArray(new MailMessage[mails.size()]), force);
+                    String[] ids = mailInterface.importMessages(folder, mails.toArray(new MailMessage[mails.size()]), force);
                     mails.clear();
                     idList.addAll(Arrays.asList(ids));
                     if (flags > 0) {
@@ -3353,8 +3357,9 @@ public class Mail extends PermissionServlet implements UploadListener {
             } finally {
                 mailInterface.close(true);
             }
-            return idList.toArray(new String[idList.size()]);
+            return mailInterface.getMailImportResults();
         }
+        
         @Override
         public void setThreadName(ThreadRenamer threadRenamer) {
             threadRenamer.rename("Mail Import Thread");
@@ -3364,6 +3369,7 @@ public class Mail extends PermissionServlet implements UploadListener {
     private final Response actionPostImportMail(ServerSession session, HttpServletRequest req, ParamContainer paramContainer) {
         final Response response = new Response();
         JSONValue responseData = null;
+        AppenderTask task;
         try {
             final String folder = paramContainer.checkStringParam(PARAMETER_FOLDERID);
             final int flags;
@@ -3382,18 +3388,19 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
             }
             final QuotedInternetAddress defaultSendAddr = new QuotedInternetAddress(getDefaultSendAddress(session), true);
-            final Future<String[]> future;
+            final Future<MailImportResult []> future;
             {
                 ServletFileUpload servletFileUpload = new ServletFileUpload();
                 if (ServletFileUpload.isMultipartContent(req)) {
                     final ThreadPoolService service = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
                     final BlockingQueue<MimeMessage> queue = new ArrayBlockingQueue<MimeMessage>(100);
-                    AppenderTask task = new AppenderTask(MailServletInterface.getInstance(session), folder, force, flags, queue);
+                    task = new AppenderTask(MailServletInterface.getInstance(session), folder, force, flags, queue);                    
                     future = service.submit(task);
                     try {
                         FileItemIterator iter = servletFileUpload.getItemIterator(req);
                         while (iter.hasNext()) {
                             FileItemStream item = iter.next();
+                            String filename = item.getName();
                             final InputStream is = item.openStream();
                             MimeMessage message = new MimeMessage(MIMEDefaultSession.getDefaultSession(), is);
                             final String fromAddr = message.getHeader(MessageHeaders.HDR_FROM, null);
@@ -3401,6 +3408,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                                 // Add from address
                                 message.setFrom(defaultSendAddr);
                             }
+                            message.setFileName(filename);
                             queue.put(message);
                         }
                     } finally {
@@ -3410,22 +3418,26 @@ public class Mail extends PermissionServlet implements UploadListener {
                     throw new MailException(MailException.Code.UNSUPPORTED_MIME_TYPE, req.getContentType());
                 }
             }
-            final String[] ids = future.get();
-            if (1 == ids.length) {
-                final JSONObject responseObj = new JSONObject();
-                responseObj.put(FolderChildFields.FOLDER_ID, folder);
-                responseObj.put(DataFields.ID, ids[0]);
-                responseData = responseObj;
-            } else {
-                final JSONArray respArray = new JSONArray();
-                for (int i = 0; i < ids.length; i++) {
+            
+            
+            final MailImportResult[] mirs = future.get();            
+            final JSONArray respArray = new JSONArray();
+            for (MailImportResult m : mirs) {
+                if (m.hasError()) {
                     final JSONObject responseObj = new JSONObject();
                     responseObj.put(FolderChildFields.FOLDER_ID, folder);
-                    responseObj.put(DataFields.ID, ids[i]);
+                    responseObj.put(MailImportResult.FILENAME, m.getMail().getFileName());
+                    responseObj.put(MailImportResult.ERROR, m.getException().getMessage());
+                    respArray.put(responseObj);
+                } else {
+                    final JSONObject responseObj = new JSONObject();
+                    responseObj.put(FolderChildFields.FOLDER_ID, folder);
+                    responseObj.put(DataFields.ID, m.getId());
                     respArray.put(responseObj);
                 }
-                responseData = respArray;
             }
+            responseData = respArray;
+
         } catch (final MailException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
